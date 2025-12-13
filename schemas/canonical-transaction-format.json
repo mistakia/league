@@ -1,0 +1,400 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/canonical-transaction-format.json",
+  "title": "Canonical Transaction Format",
+  "description": "Universal transaction data format that all external fantasy platforms transform into",
+  "type": "object",
+  "required": [
+    "external_transaction_id",
+    "platform",
+    "league_external_id",
+    "transaction_type",
+    "transaction_date",
+    "year"
+  ],
+  "properties": {
+    "external_transaction_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for this transaction"
+    },
+    "platform": {
+      "$ref": "#/definitions/platform_enum"
+    },
+    "league_external_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for the league"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "TRADE",
+        "WAIVER_CLAIM",
+        "FREE_AGENT_PICKUP",
+        "DROP",
+        "ADD_DROP",
+        "DRAFT_PICK",
+        "KEEPER_SELECTION",
+        "COMMISSIONER_ACTION",
+        "EXTENSION",
+        "FRANCHISE_TAG",
+        "ROSTER_MOVE"
+      ],
+      "description": "Type of transaction"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the transaction occurred"
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2100,
+      "description": "NFL season year for this transaction"
+    },
+    "week": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 18,
+      "description": "NFL week when transaction occurred (0 for offseason)"
+    },
+    "transaction_status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "PROCESSING",
+        "COMPLETED",
+        "CANCELLED",
+        "FAILED",
+        "VETOED"
+      ],
+      "default": "COMPLETED",
+      "description": "Current status of the transaction"
+    },
+    "effective_date": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When the transaction takes effect (for delayed transactions)"
+    },
+    "processing_date": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When the transaction was processed/approved"
+    },
+    "involved_teams": {
+      "type": "array",
+      "description": "Teams involved in this transaction",
+      "items": {
+        "type": "object",
+        "required": ["team_external_id"],
+        "properties": {
+          "team_external_id": {
+            "type": "string",
+            "description": "Platform-specific unique identifier for the team (must match external_team_id from league teams array)"
+          },
+          "team_role": {
+            "type": "string",
+            "enum": ["SENDER", "RECEIVER", "BIDDER", "INITIATOR", "TARGET"],
+            "description": "Role of this team in the transaction"
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "player_moves": {
+      "type": "array",
+      "description": "Player movements in this transaction",
+      "items": {
+        "$ref": "#/definitions/player_move"
+      }
+    },
+    "draft_pick_moves": {
+      "type": "array",
+      "description": "Draft pick movements in this transaction",
+      "items": {
+        "$ref": "#/definitions/draft_pick_move"
+      }
+    },
+    "waiver_details": {
+      "type": ["object", "null"],
+      "description": "Details specific to waiver transactions",
+      "properties": {
+        "waiver_priority": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Waiver priority when claim was made"
+        },
+        "bid_amount": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "FAAB bid amount"
+        },
+        "claim_date": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When the waiver claim was submitted"
+        },
+        "process_date": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When waivers processed"
+        }
+      }
+    },
+    "trade_details": {
+      "type": ["object", "null"],
+      "description": "Details specific to trade transactions",
+      "properties": {
+        "trade_deadline_eligible": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether trade was made before deadline"
+        },
+        "trade_review_period": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Review period in days before trade processes"
+        },
+        "votes_for": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Number of votes in favor of trade"
+        },
+        "votes_against": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Number of votes against trade"
+        },
+        "veto_threshold": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Number of votes needed to veto"
+        }
+      }
+    },
+    "commissioner_details": {
+      "type": ["object", "null"],
+      "description": "Details for commissioner actions",
+      "properties": {
+        "commissioner_user_id": {
+          "type": ["string", "null"],
+          "description": "Platform-specific ID of commissioner who made the action"
+        },
+        "reason": {
+          "type": ["string", "null"],
+          "description": "Reason provided for commissioner action"
+        },
+        "original_transaction_id": {
+          "type": ["string", "null"],
+          "description": "ID of original transaction being overridden"
+        }
+      }
+    },
+    "salary_details": {
+      "type": ["object", "null"],
+      "description": "Salary cap related transaction details",
+      "properties": {
+        "total_salary_impact": {
+          "type": ["number", "null"],
+          "description": "Net salary cap impact of this transaction"
+        },
+        "extension_details": {
+          "type": ["object", "null"],
+          "description": "Details for contract extensions",
+          "properties": {
+            "extension_years": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "Number of years in extension"
+            },
+            "extension_amount": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "description": "Additional salary from extension"
+            },
+            "extension_type": {
+              "type": ["string", "null"],
+              "enum": [
+                "STANDARD",
+                "FRANCHISE_TAG",
+                "ROOKIE_EXTENSION",
+                "VETERAN_EXTENSION"
+              ],
+              "description": "Type of contract extension"
+            }
+          }
+        }
+      }
+    },
+    "transaction_notes": {
+      "type": ["string", "null"],
+      "description": "Additional notes or comments about the transaction"
+    },
+    "platform_data": {
+      "type": "object",
+      "description": "Original platform-specific data preserved for reference",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "player_move": {
+      "type": "object",
+      "required": [
+        "player_ids",
+        "from_team_external_id",
+        "to_team_external_id"
+      ],
+      "properties": {
+        "player_ids": {
+          "$ref": "#/definitions/player_ids"
+        },
+        "from_team_external_id": {
+          "type": ["string", "null"],
+          "description": "Platform-specific unique identifier for the team the player is leaving (null for free agent pickups, must match external_team_id from league teams array)"
+        },
+        "to_team_external_id": {
+          "type": ["string", "null"],
+          "description": "Platform-specific unique identifier for the team the player is joining (null for drops, must match external_team_id from league teams array)"
+        },
+        "roster_slot": {
+          "type": ["string", "null"],
+          "enum": [
+            "QB",
+            "RB",
+            "WR",
+            "TE",
+            "RB_WR_FLEX",
+            "RB_WR_TE_FLEX",
+            "WR_TE_FLEX",
+            "SUPERFLEX",
+            "K",
+            "DST",
+            "IDP_FLEX",
+            "DE",
+            "DT",
+            "OLB",
+            "MLB",
+            "CB",
+            "FS",
+            "SS",
+            "DL",
+            "LB",
+            "DB",
+            "BENCH",
+            "IR",
+            "PRACTICE_SQUAD",
+            null
+          ],
+          "description": "Roster slot assignment for the player after this transaction completes (null indicates bench/unassigned, must match one of the roster_slots defined in league format)"
+        },
+        "salary_impact": {
+          "type": ["number", "null"],
+          "description": "Salary cap impact for this player move"
+        }
+      }
+    },
+    "draft_pick_move": {
+      "type": "object",
+      "required": [
+        "from_team_external_id",
+        "to_team_external_id",
+        "pick_year",
+        "pick_round"
+      ],
+      "properties": {
+        "from_team_external_id": {
+          "type": "string",
+          "description": "Platform-specific unique identifier for the team trading away the pick (must match external_team_id from league teams array)"
+        },
+        "to_team_external_id": {
+          "type": "string",
+          "description": "Platform-specific unique identifier for the team receiving the pick (must match external_team_id from league teams array)"
+        },
+        "pick_year": {
+          "type": "integer",
+          "minimum": 2000,
+          "maximum": 2100,
+          "description": "Year of the draft pick"
+        },
+        "pick_round": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Round of the draft pick"
+        },
+        "pick_number": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Specific pick number if known"
+        },
+        "original_owner_team_external_id": {
+          "type": ["string", "null"],
+          "description": "Platform-specific unique identifier for the original owner of the pick before any trades (for tracking pick trades, must match external_team_id from league teams array)"
+        }
+      }
+    },
+    "platform_enum": {
+      "type": "string",
+      "enum": [
+        "SLEEPER",
+        "ESPN",
+        "YAHOO",
+        "MFL",
+        "CBS",
+        "FFPC",
+        "NFFC",
+        "FANTRAX",
+        "FLEAFLICKER",
+        "NFL",
+        "RTSPORTS"
+      ],
+      "description": "Fantasy platform identifier"
+    },
+    "player_ids": {
+      "type": "object",
+      "description": "Platform-specific player identifiers across multiple systems",
+      "properties": {
+        "sleeper_id": {
+          "type": ["string", "null"],
+          "description": "Sleeper platform player ID"
+        },
+        "espn_id": {
+          "type": ["integer", "null"],
+          "description": "ESPN platform player ID"
+        },
+        "yahoo_id": {
+          "type": ["integer", "null"],
+          "description": "Yahoo platform player ID"
+        },
+        "mfl_id": {
+          "type": ["integer", "null"],
+          "description": "MyFantasyLeague platform player ID"
+        },
+        "cbs_id": {
+          "type": ["integer", "null"],
+          "description": "CBS Sports platform player ID"
+        },
+        "fleaflicker_id": {
+          "type": ["integer", "null"],
+          "description": "Fleaflicker platform player ID"
+        },
+        "nfl_id": {
+          "type": ["integer", "null"],
+          "description": "NFL.com platform player ID"
+        },
+        "rts_id": {
+          "type": ["integer", "null"],
+          "description": "RT Sports platform player ID"
+        },
+        "fantasy_data_id": {
+          "type": ["integer", "null"],
+          "description": "FantasyData platform player ID"
+        },
+        "rotowire_id": {
+          "type": ["integer", "null"],
+          "description": "RotoWire platform player ID"
+        }
+      }
+    }
+  }
+}

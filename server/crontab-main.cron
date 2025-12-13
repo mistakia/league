@@ -22,98 +22,98 @@
 # m h  dom mon dow   command
 
 ## draft notifications
-1 4 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/notifications-draft.mjs &>> /var/log/league/notifications-draft.log
+1 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/notifications-draft.mjs &>> /var/log/league/notifications-draft.log
 
 
 # PROJECTIONS
 
 ## import weekly projections
-0 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs &>> /var/log/league/import-fftoday.log
-15 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs &>> /var/log/league/import-nfl.log
-# 0 3 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs &>> /var/log/league/import-cbs.log
-30 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs &>> /var/log/league/import-espn.log
-45 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs &>> /var/log/league/import-fantasysharks.log
-0 2 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fbg-projections.mjs &>> /var/log/league/import-fbg.log
-# 0 0 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-ffn-projections.mjs &>> /var/log/league/import-ffn.log
-15 2 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-numberfire-projections.mjs &>> /var/log/league/import-numberfire.log
-30 2 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-4for4-projections.mjs &>> /var/log/league/import-4for4.log
-# 45 2 * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasylife-projections.mjs --table_id 9c614131-8f01-47e1-b802-d02cd18b8a14 &>> /var/log/league/import-fantasylife.log
+0 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fftoday-projections.mjs &>> /var/log/league/import-fftoday.log
+15 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-projections.mjs &>> /var/log/league/import-nfl.log
+# 0 3 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-cbs-projections.mjs &>> /var/log/league/import-cbs.log
+30 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-espn-projections.mjs &>> /var/log/league/import-espn.log
+45 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasysharks-projections.mjs &>> /var/log/league/import-fantasysharks.log
+0 2 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fbg-projections.mjs &>> /var/log/league/import-fbg.log
+# 0 0 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-ffn-projections.mjs &>> /var/log/league/import-ffn.log
+15 2 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-numberfire-projections.mjs &>> /var/log/league/import-numberfire.log
+30 2 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-4for4-projections.mjs &>> /var/log/league/import-4for4.log
+# 45 2 * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasylife-projections.mjs --table_id 9c614131-8f01-47e1-b802-d02cd18b8a14 &>> /var/log/league/import-fantasylife.log
 
 ## import season projections
-0 0 * 5-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-cbs-projections.mjs --season &>> /var/log/league/import-cbs-season.log
-0 0 * 5-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-projections.mjs --season &>> /var/log/league/import-espn-season.log
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs --season &>> /var/log/league/import-fantasysharks-season.log
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-4for4-projections.mjs --season &>> /var/log/league/import-4for4-season.log
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-sleeper-adp-and-projections.mjs --ignore_cache &>> /var/log/league/import-sleeper-adp-and-projections.log
+0 0 * 5-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-cbs-projections.mjs --season &>> /var/log/league/import-cbs-season.log
+0 0 * 5-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-espn-projections.mjs --season &>> /var/log/league/import-espn-season.log
+0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasysharks-projections.mjs --season &>> /var/log/league/import-fantasysharks-season.log
+0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
+0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
+0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-4for4-projections.mjs --season &>> /var/log/league/import-4for4-season.log
+0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-adp-and-projections.mjs --ignore_cache &>> /var/log/league/import-sleeper-adp-and-projections.log
 
 ## process projections & calculate projected points added, market salary
-30 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-projections.mjs &>> /var/log/league/process-projections.log
+30 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-projections.mjs &>> /var/log/league/process-projections.log
 
 
 
 # PLAYERS
 
 ## At 03:30AM Everyday
-30 3 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+30 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 12:15PM Everyday during the NFL Season
-15 12 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+15 12 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 5:10PM Everyday during the NFL Season
-10 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+10 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 8PM Everyday during the NFL Season
-0 20 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+0 20 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 7:15PM on Monday and Thursday during the NFL Season
-15 19 * 1,2,9-12 1,4 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+15 19 * 1,2,9-12 1,4 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 10:00 AM on Sunday during the NFL Season
-0 10 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+0 10 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 11:00 AM on Sunday during the NFL Season
-0 11 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+0 11 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 12:00 AM on Sunday during the NFL Season
-0 12 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
+0 12 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs &>> /var/log/league/import-players-sleeper.log
 
 ## At 3AM every day
-0 3 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-player-contracts-nflverse.mjs --force_download &>> /var/log/league/import-player-contracts-nflverse.log
+0 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-player-contracts-nflverse.mjs --force_download &>> /var/log/league/import-player-contracts-nflverse.log
 
 ## At 5:00 AM on Tuesday during the NFL Season - Update ruled out in game status for prior week
-0 5 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/update-player-gamelog-ruled-out-status.mjs &>> /var/log/league/update-player-gamelog-ruled-out-status.log
+0 5 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/update-player-gamelog-ruled-out-status.mjs &>> /var/log/league/update-player-gamelog-ruled-out-status.log
 
 
 
 # KEEP TRADE CUT
 
 ## At 4:30AM Everyday
-30 4 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-keeptradecut.mjs &>> /var/log/league/import-keeptradecut.log
+30 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut.mjs &>> /var/log/league/import-keeptradecut.log
 
 ################################### PRACTICE ########################################
 
 ## 10pm everynight
-0 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
-0 18 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
-0 19 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
-0 22 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
+0 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
+0 18 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
+0 19 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
+0 22 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs &>> /var/log/league/import-practice-report.log
 
 ################################### FOOTBALL OUTSIDERS ########################################
 
 ## Import football outsiders dvoa at 12:00 from Thursday to Saturday.
-# 0 12 * 1,2,9-12 4-6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-football-outsiders.mjs &>> /var/log/league/import-football-outsiders.log
+# 0 12 * 1,2,9-12 4-6 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-football-outsiders.mjs &>> /var/log/league/import-football-outsiders.log
 
 
 
 # RANKINGS
 
 ## At 03:00 on Wednesday and Saturday — dynasty rankings
-0 3 * * 3,6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasypros-dynasty.mjs --ignore_cache &>> /var/log/league/import-fantasypros-dynasty.log
+0 3 * * 3,6 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasypros-dynasty.mjs --ignore_cache &>> /var/log/league/import-fantasypros-dynasty.log
 
 ## Daily from June through August
-0 5 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasypros-draft.mjs --ignore_cache &>> /var/log/league/import-fantasypros-draft.log
+0 5 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasypros-draft.mjs --ignore_cache &>> /var/log/league/import-fantasypros-draft.log
 
 ## Import weekly rankings
 ## TODO
@@ -123,30 +123,30 @@
 # Waivers - Poaching
 
 ## Process Poaching Waivers Every 15 Minutes (except at 15:00)
-*/15 0-14,16-23 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-poaching-waivers.mjs &>> /var/log/league/league-process-poaching-waivers.log
+*/15 0-14,16-23 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs &>> /var/log/league/league-process-poaching-waivers.log
 
 ## Process Poaching Waivers Daily at 15:15
-15 15 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-poaching-waivers.mjs --daily &>> /var/log/league/league-process-poaching-waivers-daily.log
+15 15 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs --daily &>> /var/log/league/league-process-poaching-waivers-daily.log
 
 
 
 # Waivers
 
 ## At 15:00 every day in January, February, and every month from August through December
-0 15 * 1,2,8-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-waivers-free-agency.mjs --daily &>> /var/log/league/league-waivers-free-agency.log
+0 15 * 1,2,8-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs --daily &>> /var/log/league/league-waivers-free-agency.log
 
 ## At every 5th minute past every hour from 15 through 23 on Wednesday.
-5-59/5 15-23 * * 3 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-waivers-free-agency.mjs &>> /var/log/league/league-waivers-free-agency.log
+5-59/5 15-23 * * 3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs &>> /var/log/league/league-waivers-free-agency.log
 
 ## At every 5th minute from 5 through 59 on Monday and every day-of-week from Thursday through Sunday.
-5-59/5 * * * 1,4-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-waivers-free-agency.mjs &>> /var/log/league/league-waivers-free-agency.log
+5-59/5 * * * 1,4-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs &>> /var/log/league/league-waivers-free-agency.log
 
 
 
 # Poaching Claims
 
 ## Process Poaching Claims Every Hour
-0 */1 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-poaching-claims.mjs &>> /var/log/league/league-process-poaching-claims.log
+0 */1 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-claims.mjs &>> /var/log/league/league-process-poaching-claims.log
 
 
 
@@ -203,23 +203,23 @@
 # nflfastR
 
 ## At 03:00 in January, February, and every month from September through December.
-0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-plays-nflfastr.mjs -d &>> /var/log/league/league-import-plays-nflfastr.log
+0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nflfastr.mjs -d &>> /var/log/league/league-import-plays-nflfastr.log
 
 ## At 04:00 in January, February and every month from September through December.
-0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-games-nflverse-nfldata.mjs -d &>> /var/log/league/league-import-nfl-games-nflverse-nfldata.log
+0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nflverse-nfldata.mjs -d &>> /var/log/league/league-import-nfl-games-nflverse-nfldata.log
 
 
 
 # League
 
 ## Every day at 4:00AM
-0 4 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs &>> /var/log/league/league-calculate-team-daily-ktc-value.log
+0 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs &>> /var/log/league/league-calculate-team-daily-ktc-value.log
 
 ## Announce restricted free agent at 9pm
-0 21 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/announce-restricted-free-agent.mjs &>> /var/log/league/announce-restricted-free-agent.log
+0 21 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs &>> /var/log/league/announce-restricted-free-agent.log
 
 ## Process restricted free agency bids at 6pm
-0 18 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs &>> /var/log/league/process-restricted-free-agency-bids.log
+0 18 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs &>> /var/log/league/process-restricted-free-agency-bids.log
 
 ## Announce free agency period start (check every 30 minutes in August and September)
 */30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/announce-free-agency-period-start.mjs &>> /var/log/league/announce-free-agency-period-start.log
@@ -229,61 +229,61 @@
 # League Each Season Week
 
 ## At 23:55 on Monday during the NFL Season
-55 23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/generate-rosters.mjs &>> /var/log/league/league-generate-rosters.log
+55 23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-rosters.mjs &>> /var/log/league/league-generate-rosters.log
 
 
 
 # Maintenance
 
 ## Create database partitions for upcoming season (At 00:00 on the 1st in May and July)
-0 0 1 5,7 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/create-season-partitions.mjs &>> /var/log/league/create-season-partitions.log
+0 0 1 5,7 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/create-season-partitions.mjs &>> /var/log/league/create-season-partitions.log
 
 ## Every day at 0:00
 0 0 * * * find /tmp/puppeteer* -mtime +2 -exec rm -rf {} \; &>> /var/log/league/league-cleanup-puppeteer.log
 
 ## Check disk space every hour
-0 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/check-disk-space-main-server.mjs &>> /var/log/league/league-check-disk-space-main-server.log
+0 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs &>> /var/log/league/league-check-disk-space-main-server.log
 
 
 
 # Betting Markets
 
 ## Every 20 minutes - Hit rates calculation
-*/20 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/calculate-historical-hit-rates.mjs --current_week_only &>> /var/log/league/league-calculate-hit-rates.log
+*/20 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-historical-hit-rates.mjs --current_week_only &>> /var/log/league/league-calculate-hit-rates.log
 
 
 
 # ESPN
 
 ## Every Tuesday at 2:20PM
-20 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-line-win-rates.mjs &>> /var/log/league/league-import-espn-line-win-rates.log
+20 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-espn-line-win-rates.mjs &>> /var/log/league/league-import-espn-line-win-rates.log
 
 ## Every Tuesday at 2:40PM
-40 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-receiving-tracking-metrics.mjs --force_download &>> /var/log/league/league-import-espn-receiving-tracking-metrics.log
+40 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-espn-receiving-tracking-metrics.mjs --force_download &>> /var/log/league/league-import-espn-receiving-tracking-metrics.log
 
 ## Every Tuesday at 9:20PM
-20 21 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-line-win-rates.mjs &>> /var/log/league/league-import-espn-line-win-rates.log
+20 21 * * 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-espn-line-win-rates.mjs &>> /var/log/league/league-import-espn-line-win-rates.log
 
 ## Every Tuesday at 9:40PM
-40 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-receiving-tracking-metrics.mjs --force_download &>> /var/log/league/league-import-espn-receiving-tracking-metrics.log
+40 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-espn-receiving-tracking-metrics.mjs --force_download &>> /var/log/league/league-import-espn-receiving-tracking-metrics.log
 
 
 
 # PlayerProfiler
 
 ## At 02:20 on Wednesday, Thursday, and Friday in January, February, and every month from September through December.
-20 2 * 1,2,9-12 3-5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/private/scripts/import-plays-playerprofiler.mjs &>> /var/log/league/league-import-plays-playerprofiler.log
+20 2 * 1,2,9-12 3-5 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/private/scripts/import-plays-playerprofiler.mjs &>> /var/log/league/league-import-plays-playerprofiler.log
 
 
 
 # DVOA Sheets
 
 ## At 12:40 on Monday and Tuesday in January, February, and every month from September through December.
-40 12 * 1,2,9-12 1,2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-dvoa-sheets.mjs &>> /var/log/league/league-import-dvoa-sheets.log
+40 12 * 1,2,9-12 1,2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-dvoa-sheets.mjs &>> /var/log/league/league-import-dvoa-sheets.log
 
 
 ## At 6:40 on Monday, Tuesday, and Wednesday in January, February, and every month from September through December.
-40 6 * 1,2,9-12 1,2,3 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-dvoa-sheets.mjs &>> /var/log/league/league-import-dvoa-sheets.log
+40 6 * 1,2,9-12 1,2,3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-dvoa-sheets.mjs &>> /var/log/league/league-import-dvoa-sheets.log
 
 
 

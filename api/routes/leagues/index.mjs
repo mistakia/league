@@ -2,6 +2,12 @@ import express from 'express'
 
 import { getLeague, validators } from '#libs-server'
 import {
+  require_auth,
+  validate_and_get_league,
+  require_commissioner,
+  handle_error
+} from './middleware.mjs'
+import {
   generate_league_format_hash,
   generate_scoring_format_hash
 } from '#libs-shared'
@@ -23,7 +29,6 @@ import settings from './settings.mjs'
 import trades from './trades.mjs'
 import waivers from './waivers/index.mjs'
 import poaches from './poaches.mjs'
-import sync from './sync.mjs'
 import teams from './teams.mjs'
 import rosters from './rosters.mjs'
 import baselines from './baselines.mjs'
@@ -33,6 +38,7 @@ import matchups from './matchups.mjs'
 import draft_pick_value from './draft-pick-value.mjs'
 import team_daily_values from './team-daily-values.mjs'
 import careerlogs from './careerlogs.mjs'
+import external from './external.mjs'
 
 const router = express.Router()
 
@@ -128,21 +134,23 @@ router.put('/:leagueId', async (req, res) => {
     const { field } = req.body
     let { value } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
+    if (!require_auth(req, res)) return
+
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
+
+    if (
+      !require_commissioner(
+        league,
+        req.auth.userId,
+        res,
+        'update league settings'
+      )
+    ) {
+      return
     }
 
-    // verify leagueId
     const lid = Number(leagueId)
-    const league = await getLeague({ lid })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
-
-    // verify user is commish
-    if (league.commishid !== req.auth.userId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
 
     if (!field) {
       return res.status(400).send({ error: 'missing field' })
@@ -210,8 +218,7 @@ router.put('/:leagueId', async (req, res) => {
 
     res.send({ value })
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 
@@ -273,17 +280,14 @@ router.get('/:leagueId/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const league = await getLeague({ lid: leagueId })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     const seasons = await db('seasons').where('lid', leagueId)
     league.years = seasons.map((s) => s.year)
     res.send(league)
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 
@@ -347,25 +351,22 @@ router.get('/:leagueId/seasons/:year', async (req, res) => {
   try {
     const { leagueId, year } = req.params
 
-    const league_id_check = validators.league_id_validator(Number(leagueId))
-    if (league_id_check !== true) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     const year_check = validators.year_validator(Number(year))
     if (year_check !== true) {
       return res.status(400).send({ error: 'invalid year' })
     }
 
-    const league = await getLeague({ lid: leagueId, year })
-    if (!league) {
-      return res.status(400).send({ error: 'league not found' })
+    const league_with_year = await getLeague({ lid: leagueId, year })
+    if (!league_with_year) {
+      return res.status(400).send({ error: 'league not found for this year' })
     }
 
-    res.send(league)
+    res.send(league_with_year)
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 
@@ -377,7 +378,6 @@ router.use('/:leagueId/settings', settings)
 router.use('/:leagueId/trades', trades)
 router.use('/:leagueId/waivers', waivers)
 router.use('/:leagueId/poaches', poaches)
-router.use('/:leagueId/sync', sync)
 router.use('/:leagueId/teams', teams)
 router.use('/:leagueId/rosters', rosters)
 router.use('/:leagueId/baselines', baselines)
@@ -386,5 +386,6 @@ router.use('/:leagueId/team-daily-values', team_daily_values)
 router.use('/:leagueId/players', players)
 router.use('/:leagueId/matchups', matchups)
 router.use('/:leagueId/careerlogs', careerlogs)
+router.use('/:leagueId/external', external)
 
 export default router

@@ -1,0 +1,157 @@
+{
+  "platform": "espn",
+  "response_type": "rosters",
+  "collected_at": "2025-08-03T15:21:27.854Z",
+  "anonymized": true,
+  "season_year": 2024,
+  "fixture_note": "Reduced fixture with roster metadata for canonical format testing. Matchups/schedule data removed (not used in tests).",
+  "data": {
+    "rosters": {
+      "gameId": 1,
+      "id": 21575912,
+      "members": [
+        {
+          "displayName": "EspnUser1",
+          "id": "{083EC1C6-922C-4DEB-9B54-7A8E44DC47E1}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Tjpell21",
+          "id": "{12636CF0-C4F7-4F02-A36C-F0C4F79F0267}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Fake28",
+          "id": "{26FDD188-6CB1-48A4-BDD1-886CB128A41A}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Tico 2",
+          "id": "{2C7536F9-C276-4D92-B536-F9C2766D923C}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "jrspencer11",
+          "id": "{310C46A7-CC41-4A06-8155-F5CC7BF87AEF}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Maxxito35",
+          "id": "{4E116C88-AE2F-47D0-81EF-2C6499702356}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "espn63066155",
+          "id": "{4ED011CC-09EB-4524-BA44-D9D36FFCB337}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "7Julian7",
+          "id": "{5F7B4588-86FA-44AB-BB45-8886FAE4AB98}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Postitnote",
+          "id": "{69B760CA-6A37-49E8-8041-A6DACE489E20}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "joergerbomb13",
+          "id": "{88E869A4-F9CC-467A-A869-A4F9CCD67AC0}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Rapha.Siordia",
+          "id": "{90F68553-FFF6-445D-9384-28A6B7F16FD0}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Vornado11",
+          "id": "{92A10E5F-AF11-46E3-A10E-5FAF11F6E326}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "ESPNFAN4350810428",
+          "id": "{F4D724E4-255B-47FE-A02F-6BEE810C308D}",
+          "isLeagueManager": false
+        }
+      ],
+      "scoringPeriodId": 19,
+      "seasonId": 2024,
+      "segmentId": 0,
+      "settings": {
+        "name": "Ryan Tannehill’s Fan Club"
+      },
+      "status": {
+        "currentMatchupPeriod": 14,
+        "isActive": true,
+        "latestScoringPeriod": 19
+      },
+      "teams": [
+        {
+          "abbrev": "XX",
+          "id": 1,
+          "owners": ["{4E116C88-AE2F-47D0-81EF-2C6499702356}"]
+        },
+        {
+          "abbrev": "CHNK",
+          "id": 3,
+          "owners": ["{90F68553-FFF6-445D-9384-28A6B7F16FD0}"]
+        },
+        {
+          "abbrev": "TJ",
+          "id": 4,
+          "owners": ["{12636CF0-C4F7-4F02-A36C-F0C4F79F0267}"]
+        },
+        {
+          "abbrev": "GALF",
+          "id": 5,
+          "owners": ["{5F7B4588-86FA-44AB-BB45-8886FAE4AB98}"]
+        },
+        {
+          "abbrev": "POST",
+          "id": 6,
+          "owners": ["{69B760CA-6A37-49E8-8041-A6DACE489E20}"]
+        },
+        {
+          "abbrev": "DONJ",
+          "id": 8,
+          "owners": ["{083EC1C6-922C-4DEB-9B54-7A8E44DC47E1}"]
+        },
+        {
+          "abbrev": "JACk",
+          "id": 9,
+          "owners": ["{310C46A7-CC41-4A06-8155-F5CC7BF87AEF}"]
+        },
+        {
+          "abbrev": "8==D",
+          "id": 10,
+          "owners": ["{4ED011CC-09EB-4524-BA44-D9D36FFCB337}"]
+        },
+        {
+          "abbrev": "FFT",
+          "id": 11,
+          "owners": ["{26FDD188-6CB1-48A4-BDD1-886CB128A41A}"]
+        },
+        {
+          "abbrev": "Chig",
+          "id": 12,
+          "owners": ["{92A10E5F-AF11-46E3-A10E-5FAF11F6E326}"]
+        },
+        {
+          "abbrev": "HALF",
+          "id": 13,
+          "owners": [
+            "{2C7536F9-C276-4D92-B536-F9C2766D923C}",
+            "{F4D724E4-255B-47FE-A02F-6BEE810C308D}"
+          ]
+        },
+        {
+          "abbrev": "JDOG",
+          "id": 14,
+          "owners": ["{88E869A4-F9CC-467A-A869-A4F9CCD67AC0}"]
+        }
+      ]
+    }
+  }
+}

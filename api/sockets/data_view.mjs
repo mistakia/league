@@ -1,6 +1,7 @@
 import { get_data_view_results, redis_cache } from '#libs-server'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 import debug from 'debug'
+import { generate_client_id, send_websocket_message } from './utils.mjs'
 
 const log = debug('data-view-socket')
 
@@ -87,12 +88,12 @@ class DataViewQueue {
   }
 
   send_cached_result({ ws, request_id, result, metadata, append_results }) {
-    ws.send(
-      JSON.stringify({
-        type: 'DATA_VIEW_RESULT',
-        payload: { request_id, result, metadata, append_results }
-      })
-    )
+    send_websocket_message(ws, 'DATA_VIEW_RESULT', {
+      request_id,
+      result,
+      metadata,
+      append_results
+    })
   }
 
   remove_request(client_id) {
@@ -105,12 +106,10 @@ class DataViewQueue {
   }
 
   send_position_update({ ws, request_id, position }) {
-    ws.send(
-      JSON.stringify({
-        type: 'DATA_VIEW_POSITION',
-        payload: { request_id, position }
-      })
-    )
+    send_websocket_message(ws, 'DATA_VIEW_POSITION', {
+      request_id,
+      position
+    })
   }
 
   update_queue_positions() {
@@ -201,7 +200,7 @@ class DataViewQueue {
   }
 
   send_message_to_client({ ws, type, payload }) {
-    ws.send(JSON.stringify({ type, payload }))
+    send_websocket_message(ws, type, payload)
   }
 }
 
@@ -210,7 +209,7 @@ const data_view_queue = new DataViewQueue()
 export default function handle_data_view_socket(wss) {
   wss.on('connection', function (ws, request) {
     const user_id = request.auth ? request.auth.userId : null
-    ws.client_id = Math.random().toString(36).substr(2, 9) // Generate a unique client ID
+    ws.client_id = generate_client_id()
     log('New WebSocket connection', { client_id: ws.client_id, user_id })
 
     ws.on('message', async (msg) => {

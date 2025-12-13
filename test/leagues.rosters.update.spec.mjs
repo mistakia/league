@@ -20,7 +20,8 @@ import {
   missing,
   invalid,
   error,
-  notLoggedIn
+  notLoggedIn,
+  forbidden
 } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -197,7 +198,7 @@ describe('API /leagues/rosters - update', function () {
           leagueId: 1
         })
 
-      await invalid(request, 'leagueId')
+      await forbidden(request, 'Only league commissioner can')
     })
 
     it('exceeds roster limit', async () => {

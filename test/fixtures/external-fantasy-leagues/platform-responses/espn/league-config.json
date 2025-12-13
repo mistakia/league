@@ -1,0 +1,1987 @@
+{
+  "platform": "espn",
+  "response_type": "league-config",
+  "collected_at": "2025-08-03T15:21:27.267Z",
+  "anonymized": true,
+  "season_year": 2024,
+  "data": {
+    "league": {
+      "gameId": 1,
+      "id": 21575912,
+      "members": [
+        {
+          "displayName": "EspnUser1",
+          "id": "{083EC1C6-922C-4DEB-9B54-7A8E44DC47E1}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Tjpell21",
+          "id": "{12636CF0-C4F7-4F02-A36C-F0C4F79F0267}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Fake28",
+          "id": "{26FDD188-6CB1-48A4-BDD1-886CB128A41A}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Tico 2",
+          "id": "{2C7536F9-C276-4D92-B536-F9C2766D923C}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "jrspencer11",
+          "id": "{310C46A7-CC41-4A06-8155-F5CC7BF87AEF}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Maxxito35",
+          "id": "{4E116C88-AE2F-47D0-81EF-2C6499702356}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "espn63066155",
+          "id": "{4ED011CC-09EB-4524-BA44-D9D36FFCB337}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "7Julian7",
+          "id": "{5F7B4588-86FA-44AB-BB45-8886FAE4AB98}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Postitnote",
+          "id": "{69B760CA-6A37-49E8-8041-A6DACE489E20}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "joergerbomb13",
+          "id": "{88E869A4-F9CC-467A-A869-A4F9CCD67AC0}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Rapha.Siordia",
+          "id": "{90F68553-FFF6-445D-9384-28A6B7F16FD0}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "Vornado11",
+          "id": "{92A10E5F-AF11-46E3-A10E-5FAF11F6E326}",
+          "isLeagueManager": false
+        },
+        {
+          "displayName": "ESPNFAN4350810428",
+          "id": "{F4D724E4-255B-47FE-A02F-6BEE810C308D}",
+          "isLeagueManager": false
+        }
+      ],
+      "scoringPeriodId": 19,
+      "seasonId": 2024,
+      "segmentId": 0,
+      "settings": {
+        "name": "Ryan Tannehill’s Fan Club"
+      },
+      "status": {
+        "currentMatchupPeriod": 14,
+        "isActive": true,
+        "latestScoringPeriod": 19
+      },
+      "teams": [
+        {
+          "abbrev": "XX",
+          "id": 1,
+          "owners": ["{4E116C88-AE2F-47D0-81EF-2C6499702356}"]
+        },
+        {
+          "abbrev": "CHNK",
+          "id": 3,
+          "owners": ["{90F68553-FFF6-445D-9384-28A6B7F16FD0}"]
+        },
+        {
+          "abbrev": "TJ",
+          "id": 4,
+          "owners": ["{12636CF0-C4F7-4F02-A36C-F0C4F79F0267}"]
+        },
+        {
+          "abbrev": "GALF",
+          "id": 5,
+          "owners": ["{5F7B4588-86FA-44AB-BB45-8886FAE4AB98}"]
+        },
+        {
+          "abbrev": "POST",
+          "id": 6,
+          "owners": ["{69B760CA-6A37-49E8-8041-A6DACE489E20}"]
+        },
+        {
+          "abbrev": "DONJ",
+          "id": 8,
+          "owners": ["{083EC1C6-922C-4DEB-9B54-7A8E44DC47E1}"]
+        },
+        {
+          "abbrev": "JACk",
+          "id": 9,
+          "owners": ["{310C46A7-CC41-4A06-8155-F5CC7BF87AEF}"]
+        },
+        {
+          "abbrev": "8==D",
+          "id": 10,
+          "owners": ["{4ED011CC-09EB-4524-BA44-D9D36FFCB337}"]
+        },
+        {
+          "abbrev": "FFT",
+          "id": 11,
+          "owners": ["{26FDD188-6CB1-48A4-BDD1-886CB128A41A}"]
+        },
+        {
+          "abbrev": "Chig",
+          "id": 12,
+          "owners": ["{92A10E5F-AF11-46E3-A10E-5FAF11F6E326}"]
+        },
+        {
+          "abbrev": "HALF",
+          "id": 13,
+          "owners": [
+            "{2C7536F9-C276-4D92-B536-F9C2766D923C}",
+            "{F4D724E4-255B-47FE-A02F-6BEE810C308D}"
+          ]
+        },
+        {
+          "abbrev": "JDOG",
+          "id": 14,
+          "owners": ["{88E869A4-F9CC-467A-A869-A4F9CCD67AC0}"]
+        }
+      ]
+    },
+    "scoring_settings": {
+      "players": [
+        {
+          "draftAuctionValue": 0,
+          "id": 4429202,
+          "keeperValue": 0,
+          "keeperValueFuture": 0,
+          "lineupLocked": true,
+          "onTeamId": 0,
+          "player": {
+            "active": true,
+            "defaultPositionId": 2,
+            "draftRanksByRankType": {
+              "STANDARD": {
+                "auctionValue": 0,
+                "published": false,
+                "rank": 459,
+                "rankSourceId": 0,
+                "rankType": "STANDARD",
+                "slotId": 0
+              },
+              "PPR": {
+                "auctionValue": 0,
+                "published": false,
+                "rank": 2520,
+                "rankSourceId": 0,
+                "rankType": "PPR",
+                "slotId": 0
+              }
+            },
+            "droppable": true,
+            "eligibleSlots": [2, 3, 23, 7, 20, 21],
+            "firstName": "Israel",
+            "fullName": "Israel Abanikanda",
+            "id": 4429202,
+            "injured": false,
+            "injuryStatus": "ACTIVE",
+            "jersey": "47",
+            "lastName": "Abanikanda",
+            "ownership": {
+              "activityLevel": null,
+              "auctionValueAverage": 0,
+              "auctionValueAverageChange": 0,
+              "averageDraftPosition": 169.9640657084189,
+              "averageDraftPositionPercentChange": 0,
+              "date": null,
+              "leagueType": 0,
+              "percentChange": -0.1412906100965582,
+              "percentOwned": 0.8412276598075344,
+              "percentStarted": 0.033709626367827095
+            },
+            "proTeamId": 25,
+            "stats": [
+              {
+                "appliedAverage": 0,
+                "appliedTotal": 0,
+                "externalId": "2024",
+                "id": "002024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 0,
+                "statSplitTypeId": 0,
+                "stats": {}
+              },
+              {
+                "appliedAverage": 0,
+                "appliedTotal": 0,
+                "externalId": "2024",
+                "id": "122024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 2,
+                "stats": {}
+              },
+              {
+                "appliedAverage": 1.632484280769231,
+                "appliedTotal": 21.22229565,
+                "externalId": "2024",
+                "id": "102024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "23": 24.99812993,
+                  "24": 107.2001311,
+                  "25": 0.820131671,
+                  "26": 0.045181691,
+                  "27": 21,
+                  "28": 10,
+                  "29": 5,
+                  "30": 4,
+                  "31": 2,
+                  "33": 4,
+                  "34": 2,
+                  "35": 0.046508125,
+                  "36": 0.032555687,
+                  "37": 0.03091512,
+                  "38": 0.001055014,
+                  "39": 4.288326022,
+                  "40": 8.135724235,
+                  "42": 29.12288398,
+                  "43": 0.167862842,
+                  "44": 0.00840308,
+                  "45": 0.03914549,
+                  "46": 0.025581578,
+                  "47": 5,
+                  "48": 2,
+                  "49": 1,
+                  "50": 1,
+                  "53": 4.101085912,
+                  "56": 0.015862633,
+                  "57": 0.000490597,
+                  "58": 5.285354223,
+                  "60": 7.101261617,
+                  "61": 2.210218873,
+                  "62": 0.053584771,
+                  "63": 0.001090508,
+                  "66": 0.212913106,
+                  "67": 0.03492961,
+                  "68": 0.247842717,
+                  "70": 0.097940029,
+                  "71": 0.019560582,
+                  "72": 0.117500611,
+                  "73": 0.117500611,
+                  "210": 13.17647059,
+                  "212": 7.699880522,
+                  "213": 0.72442919
+                }
+              }
+            ]
+          },
+          "ratings": {
+            "0": {
+              "positionalRanking": 0,
+              "totalRanking": 0,
+              "totalRating": 0
+            }
+          },
+          "rosterLocked": true,
+          "status": "FREEAGENT",
+          "tradeLocked": false
+        },
+        {
+          "draftAuctionValue": 0,
+          "id": 2576336,
+          "keeperValue": 0,
+          "keeperValueFuture": 0,
+          "lineupLocked": true,
+          "onTeamId": 6,
+          "player": {
+            "active": true,
+            "defaultPositionId": 2,
+            "draftRanksByRankType": {
+              "STANDARD": {
+                "auctionValue": 0,
+                "published": false,
+                "rank": 400,
+                "rankSourceId": 0,
+                "rankType": "STANDARD",
+                "slotId": 0
+              },
+              "PPR": {
+                "auctionValue": 0,
+                "published": false,
+                "rank": 335,
+                "rankSourceId": 0,
+                "rankType": "PPR",
+                "slotId": 0
+              }
+            },
+            "droppable": true,
+            "eligibleSlots": [2, 3, 23, 7, 20, 21],
+            "firstName": "Ameer",
+            "fullName": "Ameer Abdullah",
+            "id": 2576336,
+            "injured": false,
+            "injuryStatus": "QUESTIONABLE",
+            "jersey": "8",
+            "lastName": "Abdullah",
+            "ownership": {
+              "activityLevel": null,
+              "auctionValueAverage": 0.005263157894736842,
+              "auctionValueAverageChange": 0,
+              "averageDraftPosition": 169.38542094455852,
+              "averageDraftPositionPercentChange": 0,
+              "date": null,
+              "leagueType": 0,
+              "percentChange": -1.7211217213403103,
+              "percentOwned": 31.57486695906521,
+              "percentStarted": 9.851232606936588
+            },
+            "proTeamId": 13,
+            "stats": [
+              {
+                "appliedAverage": 6.45,
+                "appliedTotal": 103.2,
+                "externalId": "2024",
+                "id": "002024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 0,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "23": 66,
+                  "24": 311,
+                  "25": 2,
+                  "27": 57,
+                  "28": 26,
+                  "29": 11,
+                  "30": 8,
+                  "31": 2,
+                  "32": 1,
+                  "33": 9,
+                  "34": 3,
+                  "37": 1,
+                  "39": 4.71212121,
+                  "40": 19.4375,
+                  "41": 40,
+                  "42": 261,
+                  "43": 3,
+                  "47": 46,
+                  "48": 20,
+                  "49": 6,
+                  "50": 5,
+                  "51": 1,
+                  "53": 40,
+                  "54": 3,
+                  "58": 47,
+                  "59": 252,
+                  "60": 6.525,
+                  "61": 16.3125,
+                  "66": 1,
+                  "68": 2,
+                  "70": 1,
+                  "72": 1,
+                  "73": 1,
+                  "107": 2,
+                  "108": 2,
+                  "109": 4,
+                  "110": 1,
+                  "114": 296,
+                  "115": 91,
+                  "116": 26,
+                  "117": 9,
+                  "118": 8,
+                  "119": 3,
+                  "155": 4,
+                  "156": 12,
+                  "158": 30,
+                  "179": 2,
+                  "183": 2,
+                  "184": 1,
+                  "210": 16,
+                  "212": 14,
+                  "213": 16
+                }
+              },
+              {
+                "appliedAverage": 11.586296989500001,
+                "appliedTotal": 11.58629699,
+                "externalId": "2024",
+                "id": "122024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 2,
+                "stats": {
+                  "23": 12.24619884,
+                  "24": 56.11249885,
+                  "25": 0.315927816,
+                  "26": 0.026892922,
+                  "27": 11,
+                  "28": 5,
+                  "29": 2,
+                  "30": 2,
+                  "31": 1,
+                  "33": 2,
+                  "34": 1,
+                  "35": 0.025002162,
+                  "36": 0.017501513,
+                  "37": 0.137707907,
+                  "38": 0.004699443,
+                  "39": 4.582033952,
+                  "40": 56.11249885,
+                  "42": 19.72057738,
+                  "43": 0.128672627,
+                  "44": 0.013073536,
+                  "45": 0.002043211,
+                  "46": 0.001335239,
+                  "47": 3,
+                  "48": 1,
+                  "53": 2.947528337,
+                  "56": 0.009001998,
+                  "57": 0.000278412,
+                  "58": 3.832396409,
+                  "60": 6.690547172,
+                  "61": 19.72057738,
+                  "62": 0.039966458,
+                  "63": 0.000680849,
+                  "66": 0.124719742,
+                  "67": 0.0300187,
+                  "68": 0.154738442,
+                  "70": 0.057371081,
+                  "71": 0.016810472,
+                  "72": 0.074181553,
+                  "73": 0.074181553,
+                  "101": 0.006141477,
+                  "102": 0.009052941,
+                  "114": 28.31081851,
+                  "115": 14.61176471,
+                  "116": 2,
+                  "117": 1,
+                  "118": 1,
+                  "210": 1,
+                  "212": 2.996058636,
+                  "213": 1.200641315
+                }
+              },
+              {
+                "appliedAverage": 2.3635659361428574,
+                "appliedTotal": 33.08992311,
+                "externalId": "2024",
+                "id": "102024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "23": 23.99652702,
+                  "24": 103.0760394,
+                  "25": 0.621476866,
+                  "26": 0.029884538,
+                  "27": 20,
+                  "28": 10,
+                  "29": 5,
+                  "30": 4,
+                  "31": 2,
+                  "33": 4,
+                  "34": 2,
+                  "35": 0.044584626,
+                  "36": 0.031209238,
+                  "37": 0.026913644,
+                  "38": 0.000918459,
+                  "39": 4.295456559,
+                  "40": 7.27092394,
+                  "42": 94.21315556,
+                  "43": 0.419105036,
+                  "44": 0.023644662,
+                  "45": 0.042509932,
+                  "46": 0.02778024,
+                  "47": 18,
+                  "48": 9,
+                  "49": 4,
+                  "50": 3,
+                  "51": 1,
+                  "53": 13.02422668,
+                  "56": 0.041511603,
+                  "57": 0.001283864,
+                  "58": 16.96675016,
+                  "60": 7.233685186,
+                  "61": 6.645741264,
+                  "62": 0.053529199,
+                  "63": 0.0012061,
+                  "66": 0.177677981,
+                  "67": 0.096435551,
+                  "68": 0.274113531,
+                  "70": 0.081731871,
+                  "71": 0.054003908,
+                  "72": 0.135735779,
+                  "73": 0.135735779,
+                  "101": 0.17442792,
+                  "114": 787.8627598,
+                  "116": 78,
+                  "117": 31,
+                  "210": 14.17647059,
+                  "212": 7.473562904,
+                  "213": 4.588348457
+                }
+              }
+            ]
+          },
+          "ratings": {
+            "0": {
+              "positionalRanking": 40,
+              "totalRanking": 147,
+              "totalRating": 103.2
+            }
+          },
+          "rosterLocked": true,
+          "status": "ONTEAM",
+          "tradeLocked": false
+        },
+        {
+          "draftAuctionValue": 0,
+          "id": 4429160,
+          "keeperValue": 45,
+          "keeperValueFuture": 22,
+          "lineupLocked": true,
+          "onTeamId": 3,
+          "player": {
+            "active": true,
+            "defaultPositionId": 2,
+            "draftRanksByRankType": {
+              "STANDARD": {
+                "auctionValue": 19,
+                "published": false,
+                "rank": 43,
+                "rankSourceId": 0,
+                "rankType": "STANDARD",
+                "slotId": 0
+              },
+              "PPR": {
+                "auctionValue": 38,
+                "published": false,
+                "rank": 16,
+                "rankSourceId": 0,
+                "rankType": "PPR",
+                "slotId": 0
+              }
+            },
+            "droppable": true,
+            "eligibleSlots": [2, 3, 23, 7, 20, 21],
+            "firstName": "De'Von",
+            "fullName": "De'Von Achane",
+            "id": 4429160,
+            "injured": false,
+            "injuryStatus": "ACTIVE",
+            "jersey": "28",
+            "lastName": "Achane",
+            "ownership": {
+              "activityLevel": null,
+              "auctionValueAverage": 32.863157894736844,
+              "auctionValueAverageChange": 0,
+              "averageDraftPosition": 23.18151950718686,
+              "averageDraftPositionPercentChange": 0,
+              "date": null,
+              "leagueType": 0,
+              "percentChange": -0.23807628375357126,
+              "percentOwned": 99.29111494008703,
+              "percentStarted": 91.37052120270191
+            },
+            "proTeamId": 15,
+            "stats": [
+              {
+                "appliedAverage": 15.229411764705882,
+                "appliedTotal": 258.9,
+                "externalId": "2024",
+                "id": "002024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 0,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "23": 203,
+                  "24": 907,
+                  "25": 6,
+                  "27": 175,
+                  "28": 84,
+                  "29": 37,
+                  "30": 26,
+                  "31": 9,
+                  "32": 2,
+                  "33": 36,
+                  "34": 16,
+                  "35": 1,
+                  "36": 1,
+                  "37": 2,
+                  "39": 4.4679803,
+                  "40": 53.35294118,
+                  "41": 78,
+                  "42": 592,
+                  "43": 6,
+                  "47": 113,
+                  "48": 52,
+                  "49": 21,
+                  "50": 17,
+                  "51": 6,
+                  "53": 78,
+                  "54": 9,
+                  "58": 87,
+                  "59": 665,
+                  "60": 7.58974359,
+                  "61": 34.82352941,
+                  "67": 1,
+                  "68": 1,
+                  "108": 1,
+                  "109": 1,
+                  "114": 32,
+                  "116": 3,
+                  "117": 1,
+                  "155": 8,
+                  "156": 9,
+                  "158": 72,
+                  "179": 4,
+                  "180": 1,
+                  "183": 2,
+                  "184": 4,
+                  "210": 17,
+                  "212": 37,
+                  "213": 30
+                }
+              },
+              {
+                "appliedAverage": 16.1409777185,
+                "appliedTotal": 16.14097772,
+                "externalId": "2024",
+                "id": "122024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 2,
+                "stats": {
+                  "23": 13.8670956,
+                  "24": 55.31339842,
+                  "25": 0.568940572,
+                  "26": 0.047532068,
+                  "27": 11,
+                  "28": 5,
+                  "29": 2,
+                  "30": 2,
+                  "31": 1,
+                  "33": 2,
+                  "34": 1,
+                  "35": 0.028692686,
+                  "36": 0.02008488,
+                  "37": 0.133807802,
+                  "38": 0.004566347,
+                  "39": 3.988823615,
+                  "40": 55.31339842,
+                  "42": 34.3159373,
+                  "43": 0.265585499,
+                  "44": 0.021143143,
+                  "45": 0.003956324,
+                  "46": 0.002585458,
+                  "47": 6,
+                  "48": 3,
+                  "49": 1,
+                  "50": 1,
+                  "53": 4.540152133,
+                  "56": 0.034216739,
+                  "57": 0.00105825,
+                  "58": 5.43422012,
+                  "60": 7.558323224,
+                  "61": 34.3159373,
+                  "62": 0.068675211,
+                  "63": 0.000520385,
+                  "66": 0.089098212,
+                  "67": 0.029171172,
+                  "68": 0.118269384,
+                  "70": 0.040985177,
+                  "71": 0.016335857,
+                  "72": 0.057321034,
+                  "73": 0.057321034,
+                  "210": 1,
+                  "212": 3.256172874,
+                  "213": 2.022121387
+                }
+              },
+              {
+                "appliedAverage": 13.290301946357143,
+                "appliedTotal": 186.06422725,
+                "externalId": "2024",
+                "id": "102024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "23": 162.2122986,
+                  "24": 749.2292484,
+                  "25": 5.9373272,
+                  "26": 0.265093932,
+                  "27": 149,
+                  "28": 74,
+                  "29": 37,
+                  "30": 29,
+                  "31": 14,
+                  "33": 32,
+                  "34": 16,
+                  "35": 0.323878624,
+                  "36": 0.226715037,
+                  "37": 1.457247609,
+                  "38": 0.04973027,
+                  "39": 4.61881901,
+                  "40": 52.85019595,
+                  "42": 391.2898704,
+                  "43": 2.536959907,
+                  "44": 0.132861395,
+                  "45": 0.062676788,
+                  "46": 0.040959281,
+                  "47": 78,
+                  "48": 39,
+                  "49": 19,
+                  "50": 15,
+                  "51": 7,
+                  "53": 46.54365795,
+                  "56": 0.212614705,
+                  "57": 0.006575713,
+                  "58": 63.37586091,
+                  "60": 8.406942808,
+                  "61": 27.60136015,
+                  "62": 0.397955327,
+                  "63": 0.007192069,
+                  "66": 1.270123799,
+                  "67": 0.364437272,
+                  "68": 1.634561072,
+                  "70": 0.584256948,
+                  "71": 0.204084873,
+                  "72": 0.78834182,
+                  "73": 0.78834182,
+                  "101": 0.061329207,
+                  "114": 201.2364594,
+                  "116": 20,
+                  "117": 8,
+                  "210": 14.17647059,
+                  "212": 41.65115791,
+                  "213": 21.28676669
+                }
+              }
+            ]
+          },
+          "ratings": {
+            "0": {
+              "positionalRanking": 6,
+              "totalRanking": 20,
+              "totalRating": 258.9
+            }
+          },
+          "rosterLocked": true,
+          "status": "ONTEAM",
+          "tradeLocked": false
+        },
+        {
+          "draftAuctionValue": 0,
+          "id": 16800,
+          "keeperValue": 50,
+          "keeperValueFuture": 29,
+          "lineupLocked": true,
+          "onTeamId": 13,
+          "player": {
+            "active": true,
+            "defaultPositionId": 3,
+            "draftRanksByRankType": {
+              "STANDARD": {
+                "auctionValue": 30,
+                "published": false,
+                "rank": 27,
+                "rankSourceId": 0,
+                "rankType": "STANDARD",
+                "slotId": 0
+              },
+              "PPR": {
+                "auctionValue": 22,
+                "published": false,
+                "rank": 37,
+                "rankSourceId": 0,
+                "rankType": "PPR",
+                "slotId": 0
+              }
+            },
+            "droppable": true,
+            "eligibleSlots": [3, 4, 5, 23, 7, 20, 21],
+            "firstName": "Davante",
+            "fullName": "Davante Adams",
+            "id": 16800,
+            "injured": false,
+            "injuryStatus": "ACTIVE",
+            "jersey": "17",
+            "lastName": "Adams",
+            "ownership": {
+              "activityLevel": null,
+              "auctionValueAverage": 17.657894736842106,
+              "auctionValueAverageChange": 0,
+              "averageDraftPosition": 52.29219712525667,
+              "averageDraftPositionPercentChange": 0,
+              "date": null,
+              "leagueType": 0,
+              "percentChange": -0.2773851505165368,
+              "percentOwned": 98.6771932797521,
+              "percentStarted": 85.88699525515638
+            },
+            "proTeamId": 14,
+            "stats": [
+              {
+                "appliedAverage": 14.200000000000001,
+                "appliedTotal": 198.8,
+                "externalId": "2024",
+                "id": "002024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 0,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "41": 85,
+                  "42": 1063,
+                  "43": 8,
+                  "44": 1,
+                  "45": 1,
+                  "46": 1,
+                  "47": 207,
+                  "48": 100,
+                  "49": 46,
+                  "50": 35,
+                  "51": 14,
+                  "52": 3,
+                  "53": 85,
+                  "54": 11,
+                  "56": 3,
+                  "58": 141,
+                  "59": 473,
+                  "60": 12.50588235,
+                  "61": 75.92857143,
+                  "108": 2,
+                  "109": 2,
+                  "155": 4,
+                  "156": 10,
+                  "158": 50,
+                  "183": 5,
+                  "186": 1,
+                  "210": 14,
+                  "213": 49
+                }
+              },
+              {
+                "appliedAverage": 13.853088762,
+                "appliedTotal": 13.85308876,
+                "externalId": "2024",
+                "id": "122024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 2,
+                "stats": {
+                  "42": 79.37768317,
+                  "43": 0.470915501,
+                  "44": 0.045902199,
+                  "45": 0.009072661,
+                  "46": 0.005928984,
+                  "47": 15,
+                  "48": 7,
+                  "49": 3,
+                  "50": 3,
+                  "51": 1,
+                  "53": 6.276289678,
+                  "56": 0.295865894,
+                  "57": 0.009150492,
+                  "58": 10.37595395,
+                  "60": 12.64723065,
+                  "61": 79.37768317,
+                  "62": 0.045902199,
+                  "63": 0.000308268,
+                  "67": 0.070060899,
+                  "68": 0.070060899,
+                  "71": 0.039234103,
+                  "72": 0.039234103,
+                  "73": 0.039234103,
+                  "210": 1,
+                  "213": 3.744433241
+                }
+              },
+              {
+                "appliedAverage": 12.5633133508,
+                "appliedTotal": 188.44970026,
+                "externalId": "2024",
+                "id": "102024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "42": 1148.312657,
+                  "43": 5.106554273,
+                  "44": 0.287871114,
+                  "45": 0.191299642,
+                  "46": 0.125014316,
+                  "47": 229,
+                  "48": 114,
+                  "49": 57,
+                  "50": 45,
+                  "51": 22,
+                  "53": 89.13657982,
+                  "56": 3.534697354,
+                  "57": 0.109320537,
+                  "58": 142.7011148,
+                  "60": 12.88261967,
+                  "61": 75.95842477,
+                  "62": 0.287871114,
+                  "63": 0.004762831,
+                  "67": 1.082461607,
+                  "68": 1.082461607,
+                  "71": 0.6061785,
+                  "72": 0.6061785,
+                  "73": 0.6061785,
+                  "210": 15.11764706,
+                  "213": 52.9215647
+                }
+              }
+            ]
+          },
+          "ratings": {
+            "0": {
+              "positionalRanking": 13,
+              "totalRanking": 51,
+              "totalRating": 198.8
+            }
+          },
+          "rosterLocked": true,
+          "status": "ONTEAM",
+          "tradeLocked": false
+        },
+        {
+          "draftAuctionValue": 0,
+          "id": 4429205,
+          "keeperValue": 5,
+          "keeperValueFuture": 3,
+          "lineupLocked": true,
+          "onTeamId": 10,
+          "player": {
+            "active": true,
+            "defaultPositionId": 3,
+            "draftRanksByRankType": {
+              "STANDARD": {
+                "auctionValue": 4,
+                "published": false,
+                "rank": 98,
+                "rankSourceId": 0,
+                "rankType": "STANDARD",
+                "slotId": 0
+              },
+              "PPR": {
+                "auctionValue": 2,
+                "published": false,
+                "rank": 117,
+                "rankSourceId": 0,
+                "rankType": "PPR",
+                "slotId": 0
+              }
+            },
+            "droppable": true,
+            "eligibleSlots": [3, 4, 5, 23, 7, 20, 21],
+            "firstName": "Jordan",
+            "fullName": "Jordan Addison",
+            "id": 4429205,
+            "injured": false,
+            "injuryStatus": "ACTIVE",
+            "jersey": "3",
+            "lastName": "Addison",
+            "ownership": {
+              "activityLevel": null,
+              "auctionValueAverage": 0.9421052631578948,
+              "auctionValueAverageChange": 0,
+              "averageDraftPosition": 124.9523613963039,
+              "averageDraftPositionPercentChange": 0,
+              "date": null,
+              "leagueType": 0,
+              "percentChange": 1.965668421264155,
+              "percentOwned": 91.99770505336114,
+              "percentStarted": 63.1201712010826
+            },
+            "proTeamId": 16,
+            "stats": [
+              {
+                "appliedAverage": 12.066666666666666,
+                "appliedTotal": 181,
+                "externalId": "2024",
+                "id": "002024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 0,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "23": 3,
+                  "24": 20,
+                  "25": 1,
+                  "27": 2,
+                  "39": 6.66666667,
+                  "40": 1.33333333,
+                  "41": 63,
+                  "42": 875,
+                  "43": 9,
+                  "45": 2,
+                  "47": 170,
+                  "48": 82,
+                  "49": 38,
+                  "50": 28,
+                  "51": 11,
+                  "52": 2,
+                  "53": 63,
+                  "54": 6,
+                  "56": 2,
+                  "58": 99,
+                  "59": 213,
+                  "60": 13.88888889,
+                  "61": 58.33333333,
+                  "108": 2,
+                  "109": 2,
+                  "155": 12,
+                  "156": 3,
+                  "158": 60,
+                  "179": 1,
+                  "183": 4,
+                  "184": 2,
+                  "185": 1,
+                  "210": 15,
+                  "212": 2,
+                  "213": 39
+                }
+              },
+              {
+                "appliedAverage": 13.592131937400001,
+                "appliedTotal": 13.59213194,
+                "externalId": "2024",
+                "id": "122024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 2,
+                "stats": {
+                  "23": 0.193906231,
+                  "24": 1.191520824,
+                  "25": 0.012514969,
+                  "26": 0.000265197,
+                  "35": 0.000356243,
+                  "36": 0.00024937,
+                  "37": 0.0000534682,
+                  "38": 0.00000182467,
+                  "39": 6.14483,
+                  "40": 1.191520824,
+                  "42": 78.49180053,
+                  "43": 0.502163828,
+                  "44": 0.006871923,
+                  "45": 0.024142731,
+                  "46": 0.015777275,
+                  "47": 15,
+                  "48": 7,
+                  "49": 3,
+                  "50": 3,
+                  "51": 1,
+                  "53": 5.262785348,
+                  "56": 0.289226558,
+                  "57": 0.008945151,
+                  "58": 7.984685311,
+                  "60": 14.91449781,
+                  "61": 78.49180053,
+                  "62": 0.007137121,
+                  "63": 0.000241868,
+                  "66": 0.001953384,
+                  "67": 0.053016563,
+                  "68": 0.054969947,
+                  "70": 0.000898557,
+                  "71": 0.029689275,
+                  "72": 0.030587832,
+                  "73": 0.030587832,
+                  "210": 1,
+                  "212": 0.183224186,
+                  "213": 3.501770943
+                }
+              },
+              {
+                "appliedAverage": 10.158988438866666,
+                "appliedTotal": 152.38482658,
+                "externalId": "2024",
+                "id": "102024",
+                "proTeamId": 0,
+                "scoringPeriodId": 0,
+                "seasonId": 2024,
+                "statSourceId": 1,
+                "statSplitTypeId": 0,
+                "stats": {
+                  "42": 878.0247886,
+                  "43": 5.181463688,
+                  "44": 0.267729656,
+                  "45": 0.158255734,
+                  "46": 0.103420122,
+                  "47": 175,
+                  "48": 87,
+                  "49": 43,
+                  "50": 35,
+                  "51": 17,
+                  "53": 70.44543803,
+                  "56": 1.798953413,
+                  "57": 0.055637734,
+                  "58": 114.2719511,
+                  "60": 12.46389849,
+                  "61": 58.07946072,
+                  "62": 0.267729656,
+                  "63": 0.004982148,
+                  "67": 1.132306366,
+                  "68": 1.132306366,
+                  "71": 0.634091565,
+                  "72": 0.634091565,
+                  "73": 0.634091565,
+                  "210": 15.11764706,
+                  "213": 41.23838943
+                }
+              }
+            ]
+          },
+          "ratings": {
+            "0": {
+              "positionalRanking": 20,
+              "totalRanking": 63,
+              "totalRating": 181
+            }
+          },
+          "rosterLocked": true,
+          "status": "ONTEAM",
+          "tradeLocked": false
+        }
+      ],
+      "positionAgainstOpponent": {
+        "positionalRatings": {
+          "1": {
+            "average": 15.656722068786621,
+            "ratingsByOpponent": {
+              "1": {
+                "average": 19.37529411764706,
+                "rank": 29
+              },
+              "2": {
+                "average": 14.841176470588236,
+                "rank": 7
+              },
+              "3": {
+                "average": 12.71529411764706,
+                "rank": 1
+              },
+              "4": {
+                "average": 18.425882352941176,
+                "rank": 27
+              },
+              "5": {
+                "average": 16.947058823529414,
+                "rank": 23
+              },
+              "6": {
+                "average": 20.18235294117647,
+                "rank": 32
+              },
+              "7": {
+                "average": 15.001176470588236,
+                "rank": 10
+              },
+              "8": {
+                "average": 16.56235294117647,
+                "rank": 20
+              },
+              "9": {
+                "average": 13.480000000000002,
+                "rank": 3
+              },
+              "10": {
+                "average": 16.118823529411763,
+                "rank": 18
+              },
+              "11": {
+                "average": 16.88235294117647,
+                "rank": 22
+              },
+              "12": {
+                "average": 16.011764705882356,
+                "rank": 17
+              },
+              "13": {
+                "average": 17.050588235294118,
+                "rank": 24
+              },
+              "14": {
+                "average": 17.172941176470587,
+                "rank": 26
+              },
+              "15": {
+                "average": 13.221176470588235,
+                "rank": 2
+              },
+              "16": {
+                "average": 13.990588235294117,
+                "rank": 5
+              },
+              "17": {
+                "average": 15.591764705882353,
+                "rank": 15
+              },
+              "18": {
+                "average": 15.364705882352943,
+                "rank": 11
+              },
+              "19": {
+                "average": 16.76823529411765,
+                "rank": 21
+              },
+              "20": {
+                "average": 15.412941176470587,
+                "rank": 14
+              },
+              "21": {
+                "average": 13.525882352941178,
+                "rank": 4
+              },
+              "22": {
+                "average": 15.617647058823529,
+                "rank": 16
+              },
+              "23": {
+                "average": 14.172941176470587,
+                "rank": 6
+              },
+              "24": {
+                "average": 15.385882352941177,
+                "rank": 13
+              },
+              "25": {
+                "average": 14.902352941176469,
+                "rank": 9
+              },
+              "26": {
+                "average": 15.365882352941178,
+                "rank": 12
+              },
+              "27": {
+                "average": 18.663529411764703,
+                "rank": 28
+              },
+              "28": {
+                "average": 14.872941176470588,
+                "rank": 8
+              },
+              "29": {
+                "average": 19.87529411764706,
+                "rank": 31
+              },
+              "30": {
+                "average": 19.831764705882353,
+                "rank": 30
+              },
+              "33": {
+                "average": 17.13764705882353,
+                "rank": 25
+              },
+              "34": {
+                "average": 16.20352941176471,
+                "rank": 19
+              }
+            }
+          },
+          "2": {
+            "average": 19.08256721496582,
+            "ratingsByOpponent": {
+              "1": {
+                "average": 18.429411764705883,
+                "rank": 13
+              },
+              "2": {
+                "average": 22.22941176470588,
+                "rank": 26
+              },
+              "3": {
+                "average": 23.02352941176471,
+                "rank": 29
+              },
+              "4": {
+                "average": 19.84705882352941,
+                "rank": 19
+              },
+              "5": {
+                "average": 17.488235294117647,
+                "rank": 9
+              },
+              "6": {
+                "average": 20.72941176470588,
+                "rank": 21
+              },
+              "7": {
+                "average": 18.41176470588235,
+                "rank": 12
+              },
+              "8": {
+                "average": 16.96470588235294,
+                "rank": 6
+              },
+              "9": {
+                "average": 19.529411764705884,
+                "rank": 16
+              },
+              "10": {
+                "average": 22.224705882352943,
+                "rank": 25
+              },
+              "11": {
+                "average": 21.229411764705883,
+                "rank": 22
+              },
+              "12": {
+                "average": 14.323529411764707,
+                "rank": 2
+              },
+              "13": {
+                "average": 19.764705882352946,
+                "rank": 18
+              },
+              "14": {
+                "average": 18.923529411764704,
+                "rank": 14
+              },
+              "15": {
+                "average": 19.68823529411765,
+                "rank": 17
+              },
+              "16": {
+                "average": 17.470588235294116,
+                "rank": 8
+              },
+              "17": {
+                "average": 22.400000000000006,
+                "rank": 27
+              },
+              "18": {
+                "average": 22.405882352941177,
+                "rank": 28
+              },
+              "19": {
+                "average": 22.13529411764706,
+                "rank": 24
+              },
+              "20": {
+                "average": 18.235294117647058,
+                "rank": 11
+              },
+              "21": {
+                "average": 13.73529411764706,
+                "rank": 1
+              },
+              "22": {
+                "average": 21.864705882352943,
+                "rank": 23
+              },
+              "23": {
+                "average": 17.658823529411762,
+                "rank": 10
+              },
+              "24": {
+                "average": 16.482352941176472,
+                "rank": 4
+              },
+              "25": {
+                "average": 23.135294117647057,
+                "rank": 30
+              },
+              "26": {
+                "average": 19.264705882352942,
+                "rank": 15
+              },
+              "27": {
+                "average": 17.082352941176474,
+                "rank": 7
+              },
+              "28": {
+                "average": 20.129411764705882,
+                "rank": 20
+              },
+              "29": {
+                "average": 27.976470588235294,
+                "rank": 32
+              },
+              "30": {
+                "average": 23.758823529411764,
+                "rank": 31
+              },
+              "33": {
+                "average": 16.7,
+                "rank": 5
+              },
+              "34": {
+                "average": 16.48235294117647,
+                "rank": 3
+              }
+            }
+          },
+          "3": {
+            "average": 26.40470314025879,
+            "ratingsByOpponent": {
+              "1": {
+                "average": 29.956470588235295,
+                "rank": 29
+              },
+              "2": {
+                "average": 26.811764705882354,
+                "rank": 16
+              },
+              "3": {
+                "average": 23.65294117647059,
+                "rank": 1
+              },
+              "4": {
+                "average": 25.61176470588235,
+                "rank": 9
+              },
+              "5": {
+                "average": 30.205882352941178,
+                "rank": 30
+              },
+              "6": {
+                "average": 29.49411764705882,
+                "rank": 25
+              },
+              "7": {
+                "average": 25.429411764705886,
+                "rank": 8
+              },
+              "8": {
+                "average": 29.647058823529417,
+                "rank": 26
+              },
+              "9": {
+                "average": 24.41176470588235,
+                "rank": 3
+              },
+              "10": {
+                "average": 24.105882352941176,
+                "rank": 2
+              },
+              "11": {
+                "average": 27.52235294117647,
+                "rank": 20
+              },
+              "12": {
+                "average": 26.776470588235295,
+                "rank": 15
+              },
+              "13": {
+                "average": 25.741176470588236,
+                "rank": 10
+              },
+              "14": {
+                "average": 27.476470588235294,
+                "rank": 19
+              },
+              "15": {
+                "average": 24.45294117647059,
+                "rank": 4
+              },
+              "16": {
+                "average": 32.318823529411766,
+                "rank": 32
+              },
+              "17": {
+                "average": 26.38235294117647,
+                "rank": 14
+              },
+              "18": {
+                "average": 29.941176470588236,
+                "rank": 28
+              },
+              "19": {
+                "average": 27.288235294117648,
+                "rank": 18
+              },
+              "20": {
+                "average": 24.758823529411764,
+                "rank": 5
+              },
+              "21": {
+                "average": 24.77058823529412,
+                "rank": 6
+              },
+              "22": {
+                "average": 26.029411764705884,
+                "rank": 11
+              },
+              "23": {
+                "average": 26.223529411764705,
+                "rank": 12
+              },
+              "24": {
+                "average": 27.129411764705885,
+                "rank": 17
+              },
+              "25": {
+                "average": 25.17058823529412,
+                "rank": 7
+              },
+              "26": {
+                "average": 28.01058823529412,
+                "rank": 21
+              },
+              "27": {
+                "average": 28.952941176470592,
+                "rank": 24
+              },
+              "28": {
+                "average": 26.278823529411767,
+                "rank": 13
+              },
+              "29": {
+                "average": 28.36,
+                "rank": 23
+              },
+              "30": {
+                "average": 30.262352941176474,
+                "rank": 31
+              },
+              "33": {
+                "average": 29.822352941176472,
+                "rank": 27
+              },
+              "34": {
+                "average": 28.358823529411765,
+                "rank": 22
+              }
+            }
+          },
+          "4": {
+            "average": 9.341782569885254,
+            "ratingsByOpponent": {
+              "1": {
+                "average": 10.064705882352943,
+                "rank": 21
+              },
+              "2": {
+                "average": 9.394117647058822,
+                "rank": 17
+              },
+              "3": {
+                "average": 9.811764705882354,
+                "rank": 19
+              },
+              "4": {
+                "average": 13.24705882352941,
+                "rank": 32
+              },
+              "5": {
+                "average": 11.207058823529412,
+                "rank": 25
+              },
+              "6": {
+                "average": 8.305882352941175,
+                "rank": 8
+              },
+              "7": {
+                "average": 9.117647058823529,
+                "rank": 14
+              },
+              "8": {
+                "average": 6.841176470588235,
+                "rank": 1
+              },
+              "9": {
+                "average": 9.735294117647058,
+                "rank": 18
+              },
+              "10": {
+                "average": 7.094117647058823,
+                "rank": 4
+              },
+              "11": {
+                "average": 11.835294117647058,
+                "rank": 28
+              },
+              "12": {
+                "average": 11.664705882352942,
+                "rank": 27
+              },
+              "13": {
+                "average": 12.276470588235293,
+                "rank": 30
+              },
+              "14": {
+                "average": 12.123529411764707,
+                "rank": 29
+              },
+              "15": {
+                "average": 10.217647058823529,
+                "rank": 22
+              },
+              "16": {
+                "average": 8.823529411764707,
+                "rank": 12
+              },
+              "17": {
+                "average": 9.223529411764707,
+                "rank": 16
+              },
+              "18": {
+                "average": 8.782352941176471,
+                "rank": 10
+              },
+              "19": {
+                "average": 7.088235294117647,
+                "rank": 3
+              },
+              "20": {
+                "average": 8.4,
+                "rank": 9
+              },
+              "21": {
+                "average": 7.01764705882353,
+                "rank": 2
+              },
+              "22": {
+                "average": 7.182352941176471,
+                "rank": 5
+              },
+              "23": {
+                "average": 11.117647058823529,
+                "rank": 24
+              },
+              "24": {
+                "average": 8.054117647058822,
+                "rank": 7
+              },
+              "25": {
+                "average": 7.929411764705883,
+                "rank": 6
+              },
+              "26": {
+                "average": 9.064705882352943,
+                "rank": 13
+              },
+              "27": {
+                "average": 11.276470588235293,
+                "rank": 26
+              },
+              "28": {
+                "average": 8.811764705882354,
+                "rank": 11
+              },
+              "29": {
+                "average": 12.405882352941177,
+                "rank": 31
+              },
+              "30": {
+                "average": 10.970588235294118,
+                "rank": 23
+              },
+              "33": {
+                "average": 10.052941176470588,
+                "rank": 20
+              },
+              "34": {
+                "average": 9.141176470588235,
+                "rank": 15
+              }
+            }
+          },
+          "5": {
+            "average": 0.003565062303096056,
+            "ratingsByOpponent": {
+              "1": {
+                "average": 0.11764705882352941,
+                "rank": 32
+              },
+              "2": {
+                "average": 0,
+                "rank": 1
+              },
+              "3": {
+                "average": 0,
+                "rank": 1
+              },
+              "4": {
+                "average": 0,
+                "rank": 1
+              },
+              "5": {
+                "average": 0,
+                "rank": 1
+              },
+              "6": {
+                "average": 0,
+                "rank": 1
+              },
+              "7": {
+                "average": 0,
+                "rank": 1
+              },
+              "8": {
+                "average": 0,
+                "rank": 1
+              },
+              "9": {
+                "average": 0,
+                "rank": 1
+              },
+              "10": {
+                "average": 0,
+                "rank": 1
+              },
+              "11": {
+                "average": 0,
+                "rank": 1
+              },
+              "12": {
+                "average": 0,
+                "rank": 1
+              },
+              "13": {
+                "average": 0,
+                "rank": 1
+              },
+              "14": {
+                "average": 0,
+                "rank": 1
+              },
+              "15": {
+                "average": 0,
+                "rank": 1
+              },
+              "16": {
+                "average": 0,
+                "rank": 1
+              },
+              "17": {
+                "average": 0,
+                "rank": 1
+              },
+              "18": {
+                "average": 0,
+                "rank": 1
+              },
+              "19": {
+                "average": 0,
+                "rank": 1
+              },
+              "20": {
+                "average": 0,
+                "rank": 1
+              },
+              "21": {
+                "average": 0,
+                "rank": 1
+              },
+              "22": {
+                "average": 0,
+                "rank": 1
+              },
+              "23": {
+                "average": 0,
+                "rank": 1
+              },
+              "24": {
+                "average": 0,
+                "rank": 1
+              },
+              "25": {
+                "average": 0,
+                "rank": 1
+              },
+              "26": {
+                "average": 0,
+                "rank": 1
+              },
+              "27": {
+                "average": 0,
+                "rank": 1
+              },
+              "28": {
+                "average": 0,
+                "rank": 1
+              },
+              "29": {
+                "average": 0,
+                "rank": 1
+              },
+              "30": {
+                "average": 0,
+                "rank": 1
+              },
+              "33": {
+                "average": 0,
+                "rank": 1
+              },
+              "34": {
+                "average": 0,
+                "rank": 1
+              }
+            }
+          },
+          "16": {
+            "average": 0,
+            "ratingsByOpponent": {
+              "1": {
+                "average": 0,
+                "rank": 1
+              },
+              "2": {
+                "average": 0,
+                "rank": 1
+              },
+              "3": {
+                "average": 0,
+                "rank": 1
+              },
+              "4": {
+                "average": 0,
+                "rank": 1
+              },
+              "5": {
+                "average": 0,
+                "rank": 1
+              },
+              "6": {
+                "average": 0,
+                "rank": 1
+              },
+              "7": {
+                "average": 0,
+                "rank": 1
+              },
+              "8": {
+                "average": 0,
+                "rank": 1
+              },
+              "9": {
+                "average": 0,
+                "rank": 1
+              },
+              "10": {
+                "average": 0,
+                "rank": 1
+              },
+              "11": {
+                "average": 0,
+                "rank": 1
+              },
+              "12": {
+                "average": 0,
+                "rank": 1
+              },
+              "13": {
+                "average": 0,
+                "rank": 1
+              },
+              "14": {
+                "average": 0,
+                "rank": 1
+              },
+              "15": {
+                "average": 0,
+                "rank": 1
+              },
+              "16": {
+                "average": 0,
+                "rank": 1
+              },
+              "17": {
+                "average": 0,
+                "rank": 1
+              },
+              "18": {
+                "average": 0,
+                "rank": 1
+              },
+              "19": {
+                "average": 0,
+                "rank": 1
+              },
+              "20": {
+                "average": 0,
+                "rank": 1
+              },
+              "21": {
+                "average": 0,
+                "rank": 1
+              },
+              "22": {
+                "average": 0,
+                "rank": 1
+              },
+              "23": {
+                "average": 0,
+                "rank": 1
+              },
+              "24": {
+                "average": 0,
+                "rank": 1
+              },
+              "25": {
+                "average": 0,
+                "rank": 1
+              },
+              "26": {
+                "average": 0,
+                "rank": 1
+              },
+              "27": {
+                "average": 0,
+                "rank": 1
+              },
+              "28": {
+                "average": 0,
+                "rank": 1
+              },
+              "29": {
+                "average": 0,
+                "rank": 1
+              },
+              "30": {
+                "average": 0,
+                "rank": 1
+              },
+              "33": {
+                "average": 0,
+                "rank": 1
+              },
+              "34": {
+                "average": 0,
+                "rank": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "season_year": 2024
+  },
+  "fixture_note": "Reduced fixture with sample player data (5 of 50 original players) for testing"
+}

@@ -3622,7 +3622,7 @@ const options = {
                 $ref: '#/components/schemas/Error'
               },
               example: {
-                error: 'invalid token'
+                error: 'Authentication required'
               }
             }
           }

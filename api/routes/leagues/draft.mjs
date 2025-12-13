@@ -16,9 +16,13 @@ import {
   getRoster,
   sendNotifications,
   verifyUserTeam,
-  verifyReserveStatus,
-  getLeague
+  verifyReserveStatus
 } from '#libs-server'
+import {
+  require_auth,
+  validate_and_get_league,
+  handle_error
+} from './middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -263,8 +267,7 @@ router.get('/?', async (req, res) => {
 
     res.send({ picks: picks_with_trade_counts })
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 
@@ -352,8 +355,7 @@ router.get('/picks/:pickId', async (req, res) => {
       historical_picks
     })
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 
@@ -501,9 +503,7 @@ router.post('/?', async (req, res) => {
     const { leagueId } = req.params
     const { teamId, pid, pickId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!teamId) {
       return res.status(400).send({ error: 'missing teamId' })
@@ -530,10 +530,8 @@ router.post('/?', async (req, res) => {
     const lid = Number(leagueId)
 
     // make sure draft has started
-    const league = await getLeague({ lid })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     const draft_start = dayjs.unix(league.draft_start)
     if (current_season.now.isBefore(draft_start)) {
@@ -755,8 +753,7 @@ router.post('/?', async (req, res) => {
       message
     })
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 

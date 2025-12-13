@@ -1,7 +1,12 @@
 import express from 'express'
 
 import { current_season } from '#constants'
-import { getLeague } from '#libs-server'
+import {
+  require_auth,
+  validate_and_get_league,
+  require_commissioner,
+  handle_error
+} from './middleware.mjs'
 
 const router = express.Router({
   mergeParams: true
@@ -415,8 +420,7 @@ router.get('/?', async (req, res) => {
 
     res.send({ teams })
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 
@@ -529,22 +533,18 @@ router.post('/?', async (req, res) => {
   try {
     const { leagueId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!leagueId) {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const league = await getLeague({ lid: leagueId })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     // make sure user is commish
-    if (league.commishid !== req.auth.userId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
+    if (!require_commissioner(league, req.auth.userId, res, 'add teams')) {
+      return
     }
 
     // make sure league has space for another team
@@ -582,8 +582,7 @@ router.post('/?', async (req, res) => {
     roster.uid = rosterRows[0].uid
     res.send({ roster, team })
   } catch (error) {
-    logger(error)
-    res.status(500).send({ error: error.toString() })
+    handle_error(error, logger, res)
   }
 })
 
@@ -694,6 +693,8 @@ router.post('/?', async (req, res) => {
 router.delete('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
+    if (!require_auth(req, res)) return
+
     const { teamId, leagueId } = req.body
     if (!teamId) {
       return res.status(400).send({ error: 'missing teamId' })
@@ -703,14 +704,12 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const league = await getLeague({ lid: leagueId })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     // make sure user is commish
-    if (league.commishid !== req.auth.userId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
+    if (!require_commissioner(league, req.auth.userId, res, 'delete teams')) {
+      return
     }
 
     // make sure it's not user team
@@ -754,8 +753,7 @@ router.delete('/?', async (req, res) => {
 
     res.send({ rosters, teams, transactions })
   } catch (error) {
-    logger(error)
-    res.status(500).send({ error: error.toString() })
+    handle_error(error, logger, res)
   }
 })
 

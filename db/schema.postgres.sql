@@ -1734,6 +1734,10 @@ DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
 DROP INDEX IF EXISTS public.idx_matchups_lid;
 DROP INDEX IF EXISTS public.idx_leagues_commishid;
 DROP INDEX IF EXISTS public.idx_league_player_projection_values_pid;
+DROP INDEX IF EXISTS public.idx_league_notifications_type;
+DROP INDEX IF EXISTS public.idx_league_notifications_sent_timestamp;
+DROP INDEX IF EXISTS public.idx_league_notifications_lid_year;
+DROP INDEX IF EXISTS public.idx_league_notifications_event_timestamp;
 DROP INDEX IF EXISTS public.idx_league_format_player_projection_values_pid;
 DROP INDEX IF EXISTS public.idx_league_cutlist_tid;
 DROP INDEX IF EXISTS public.idx_league_cutlist_pid;
@@ -1934,6 +1938,8 @@ ALTER TABLE IF EXISTS ONLY public.nfl_plays_passer DROP CONSTRAINT IF EXISTS nfl
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_notifications DROP CONSTRAINT IF EXISTS league_notifications_unique;
+ALTER TABLE IF EXISTS ONLY public.league_notifications DROP CONSTRAINT IF EXISTS league_notifications_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_divisions DROP CONSTRAINT IF EXISTS league_divisions_pkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
@@ -1986,6 +1992,7 @@ ALTER TABLE IF EXISTS public.player_changelog ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.placed_wagers ALTER COLUMN wager_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.matchups ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.leagues ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.league_notifications ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
@@ -2209,6 +2216,8 @@ DROP TABLE IF EXISTS public.league_team_careerlogs;
 DROP TABLE IF EXISTS public.league_scoring_formats;
 DROP TABLE IF EXISTS public.league_player_seasonlogs;
 DROP TABLE IF EXISTS public.league_player_projection_values;
+DROP SEQUENCE IF EXISTS public.league_notifications_uid_seq;
+DROP TABLE IF EXISTS public.league_notifications;
 DROP TABLE IF EXISTS public.league_nfl_team_seasonlogs;
 DROP SEQUENCE IF EXISTS public.league_migrations_lock_index_seq;
 DROP TABLE IF EXISTS public.league_migrations_lock;
@@ -4492,6 +4501,43 @@ CREATE TABLE public.league_nfl_team_seasonlogs (
     pts numeric(5,1),
     rnk smallint
 );
+
+
+--
+-- Name: league_notifications; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_notifications (
+    uid integer NOT NULL,
+    lid integer NOT NULL,
+    year smallint NOT NULL,
+    notification_type character varying(100) NOT NULL,
+    event_timestamp integer NOT NULL,
+    sent_timestamp integer NOT NULL,
+    message text,
+    metadata jsonb,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: league_notifications_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.league_notifications_uid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: league_notifications_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.league_notifications_uid_seq OWNED BY public.league_notifications.uid;
 
 
 --
@@ -24999,6 +25045,13 @@ ALTER TABLE ONLY public.league_migrations_lock ALTER COLUMN index SET DEFAULT ne
 
 
 --
+-- Name: league_notifications uid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_notifications ALTER COLUMN uid SET DEFAULT nextval('public.league_notifications_uid_seq'::regclass);
+
+
+--
 -- Name: leagues uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -25394,6 +25447,22 @@ ALTER TABLE ONLY public.invite_codes
 
 ALTER TABLE ONLY public.league_divisions
     ADD CONSTRAINT league_divisions_pkey PRIMARY KEY (lid, year, division_id);
+
+
+--
+-- Name: league_notifications league_notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_notifications
+    ADD CONSTRAINT league_notifications_pkey PRIMARY KEY (uid);
+
+
+--
+-- Name: league_notifications league_notifications_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_notifications
+    ADD CONSTRAINT league_notifications_unique UNIQUE (lid, year, notification_type, event_timestamp);
 
 
 --
@@ -26885,6 +26954,34 @@ CREATE INDEX idx_league_cutlist_tid ON public.league_cutlist USING btree (tid);
 --
 
 CREATE INDEX idx_league_format_player_projection_values_pid ON public.league_format_player_projection_values USING btree (pid);
+
+
+--
+-- Name: idx_league_notifications_event_timestamp; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_league_notifications_event_timestamp ON public.league_notifications USING btree (event_timestamp);
+
+
+--
+-- Name: idx_league_notifications_lid_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_league_notifications_lid_year ON public.league_notifications USING btree (lid, year);
+
+
+--
+-- Name: idx_league_notifications_sent_timestamp; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_league_notifications_sent_timestamp ON public.league_notifications USING btree (sent_timestamp);
+
+
+--
+-- Name: idx_league_notifications_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_league_notifications_type ON public.league_notifications USING btree (notification_type);
 
 
 --

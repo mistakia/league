@@ -9,7 +9,13 @@ import knex from '#db'
 import user from '#db/seeds/user.mjs'
 import { current_season } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
-import { missing, invalid, error, notLoggedIn } from './utils/index.mjs'
+import {
+  missing,
+  invalid,
+  error,
+  notLoggedIn,
+  forbidden
+} from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.should()
@@ -133,7 +139,7 @@ describe('API /leagues/teams - delete', function () {
           leagueId: 1
         })
 
-      await invalid(request, 'leagueId')
+      await forbidden(request, 'Only league commissioner can')
     })
 
     it('can not remove user team', async () => {

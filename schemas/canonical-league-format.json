@@ -1,0 +1,565 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/canonical-league-format.json",
+  "title": "Canonical League Format",
+  "description": "Universal league data format that all external fantasy platforms transform into",
+  "type": "object",
+  "required": [
+    "external_id",
+    "platform",
+    "name",
+    "year",
+    "settings",
+    "scoring_settings",
+    "roster_slots",
+    "teams"
+  ],
+  "properties": {
+    "external_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for the league"
+    },
+    "platform": {
+      "$ref": "#/definitions/platform_enum"
+    },
+    "name": {
+      "type": "string",
+      "description": "League name as displayed on the platform"
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2100,
+      "description": "NFL season year for this league"
+    },
+    "settings": {
+      "type": "object",
+      "description": "League configuration settings",
+      "required": [
+        "num_teams",
+        "season_type",
+        "playoff_teams",
+        "playoff_week_start",
+        "regular_season_waiver_type",
+        "trade_deadline"
+      ],
+      "properties": {
+        "num_teams": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 32,
+          "description": "Number of teams in the league"
+        },
+        "season_type": {
+          "type": "string",
+          "enum": [
+            "REDRAFT",
+            "KEEPER",
+            "DYNASTY",
+            "BEST_BALL",
+            "GUILLOTINE",
+            "VAMPIRE",
+            "SURVIVOR"
+          ],
+          "description": "Type of league season"
+        },
+        "playoff_teams": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32,
+          "description": "Number of teams that make playoffs"
+        },
+        "playoff_week_start": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18,
+          "description": "Week number when playoffs begin"
+        },
+        "playoff_bracket_type": {
+          "type": "string",
+          "enum": ["SINGLE_ELIMINATION", "DOUBLE_ELIMINATION", "ROUND_ROBIN"],
+          "default": "SINGLE_ELIMINATION",
+          "description": "Type of playoff bracket structure"
+        },
+        "playoff_reseeding_enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether playoff seeding is recalculated after each round"
+        },
+        "consolation_bracket_enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether non-playoff teams play in consolation bracket"
+        },
+        "divisions_enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the league is divided into divisions"
+        },
+        "number_of_divisions": {
+          "type": ["integer", "null"],
+          "minimum": 2,
+          "description": "Number of divisions if divisions are enabled (must be null if divisions_enabled is false)"
+        },
+        "regular_season_waiver_type": {
+          "type": "string",
+          "enum": ["FAAB", "PRIORITY", "NONE"],
+          "description": "Waiver system type for regular season"
+        },
+        "waiver_budget": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "FAAB budget amount if using FAAB waivers"
+        },
+        "trade_deadline": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 18,
+          "description": "Week of trade deadline, null if no deadline"
+        },
+        "best_ball": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this is a best ball league"
+        },
+        "practice_squad_slots": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "description": "Number of practice squad slots"
+        },
+        "short_term_reserve_slots": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "description": "Number of short-term reserve slots"
+        },
+        "keeper_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Maximum number of keepers allowed"
+        },
+        "free_agent_draft_type": {
+          "type": "string",
+          "enum": ["SNAKE_DRAFT", "LINEAR_DRAFT", "AUCTION"],
+          "default": "SNAKE_DRAFT",
+          "description": "Type of free agent draft"
+        },
+        "draft_rounds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of draft rounds"
+        },
+        "salary_cap_enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the league uses a salary cap system"
+        },
+        "salary_cap_total": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Total salary cap amount per team if salary cap is enabled"
+        },
+        "minimum_player_salary": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Minimum salary per player if salary cap is enabled"
+        },
+        "maximum_player_salary": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Maximum salary per player if salary cap is enabled"
+        },
+        "free_agent_auction_budget": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Budget for free agent auction bidding (FAAB or auction draft budget)"
+        },
+        "rookie_draft_auction_budget": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Separate budget for rookie draft auction bidding"
+        },
+        "contract_years_enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether players have multi-year contracts"
+        },
+        "maximum_contract_years": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Maximum number of years for player contracts"
+        },
+        "salary_escalation_enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether player salaries escalate annually"
+        },
+        "salary_escalation_type": {
+          "type": ["string", "null"],
+          "enum": ["PERCENTAGE_INCREASE", "XO_FOOTBALL_EXTENSION_FORMAT", null],
+          "description": "Type of salary escalation if enabled"
+        }
+      }
+    },
+    "scoring_settings": {
+      "type": "object",
+      "description": "Fantasy scoring configuration",
+      "properties": {
+        "passing_attempts": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per passing attempt"
+        },
+        "passing_completions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per passing completion"
+        },
+        "passing_yards": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per passing yard"
+        },
+        "passing_interceptions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per interception thrown (usually negative)"
+        },
+        "passing_touchdowns": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per passing touchdown"
+        },
+        "rushing_attempts": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per rushing attempt"
+        },
+        "rushing_yards": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per rushing yard"
+        },
+        "rushing_touchdowns": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per rushing touchdown"
+        },
+        "rushing_first_downs": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per rushing first down"
+        },
+        "receptions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per reception (PPR)"
+        },
+        "running_back_receptions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per reception by running backs"
+        },
+        "wide_receiver_receptions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per reception by wide receivers"
+        },
+        "tight_end_receptions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per reception by tight ends"
+        },
+        "receiving_yards": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per receiving yard"
+        },
+        "receiving_first_downs": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per receiving first down"
+        },
+        "two_point_conversions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points for two-point conversions"
+        },
+        "receiving_touchdowns": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per receiving touchdown"
+        },
+        "fumbles_lost": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per fumble lost (usually negative)"
+        },
+        "punt_return_touchdowns": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per punt return touchdown"
+        },
+        "kick_return_touchdowns": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per kick return touchdown"
+        },
+        "targets": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per target"
+        },
+        "exclude_quarterback_kneels": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to exclude QB kneels from rushing stats"
+        },
+        "idp_tackles_solo": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per solo tackle (IDP)"
+        },
+        "idp_tackles_assisted": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per assisted tackle (IDP)"
+        },
+        "idp_tackles_for_loss": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per tackle for loss (IDP)"
+        },
+        "idp_sacks": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per sack (IDP)"
+        },
+        "idp_quarterback_hits": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per quarterback hit (IDP)"
+        },
+        "idp_passes_defended": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per pass defended (IDP)"
+        },
+        "idp_interceptions": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per interception (IDP)"
+        },
+        "idp_fumbles_forced": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per fumble forced (IDP)"
+        },
+        "idp_fumbles_recovered": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per fumble recovered (IDP)"
+        },
+        "idp_defensive_touchdowns": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per defensive touchdown (IDP)"
+        },
+        "idp_safeties": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per safety (IDP)"
+        },
+        "idp_blocked_kicks": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per blocked kick (IDP)"
+        },
+        "idp_interception_return_yards": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per interception return yard (IDP)"
+        },
+        "idp_fumble_return_yards": {
+          "type": "number",
+          "default": 0,
+          "description": "Points per fumble return yard (IDP)"
+        }
+      }
+    },
+    "roster_slots": {
+      "type": "array",
+      "description": "Array of roster slot positions in order, defining the league's roster structure (e.g., [\"QB\", \"RB\", \"RB\", \"WR\", \"WR\", \"TE\", \"RB_WR_TE_FLEX\", \"BENCH\", \"BENCH\", \"IR\"])",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "QB",
+          "RB",
+          "WR",
+          "TE",
+          "RB_WR_FLEX",
+          "RB_WR_TE_FLEX",
+          "WR_TE_FLEX",
+          "SUPERFLEX",
+          "K",
+          "DST",
+          "IDP_FLEX",
+          "DE",
+          "DT",
+          "OLB",
+          "MLB",
+          "CB",
+          "FS",
+          "SS",
+          "DL",
+          "LB",
+          "DB",
+          "BENCH",
+          "IR",
+          "PRACTICE_SQUAD"
+        ]
+      }
+    },
+    "teams": {
+      "type": "array",
+      "description": "Array of teams in the league",
+      "items": {
+        "$ref": "#/definitions/team"
+      }
+    },
+    "platform_data": {
+      "type": "object",
+      "description": "Original platform-specific data preserved for reference",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "platform_enum": {
+      "type": "string",
+      "enum": [
+        "SLEEPER",
+        "ESPN",
+        "YAHOO",
+        "MFL",
+        "CBS",
+        "FFPC",
+        "NFFC",
+        "FANTRAX",
+        "FLEAFLICKER",
+        "NFL",
+        "RTSPORTS"
+      ],
+      "description": "Fantasy platform identifier"
+    },
+    "player_ids": {
+      "type": "object",
+      "description": "Platform-specific player identifiers across multiple systems",
+      "properties": {
+        "sleeper_id": {
+          "type": ["string", "null"],
+          "description": "Sleeper platform player ID"
+        },
+        "espn_id": {
+          "type": ["integer", "null"],
+          "description": "ESPN platform player ID"
+        },
+        "yahoo_id": {
+          "type": ["integer", "null"],
+          "description": "Yahoo platform player ID"
+        },
+        "mfl_id": {
+          "type": ["integer", "null"],
+          "description": "MyFantasyLeague platform player ID"
+        },
+        "cbs_id": {
+          "type": ["integer", "null"],
+          "description": "CBS Sports platform player ID"
+        },
+        "fleaflicker_id": {
+          "type": ["integer", "null"],
+          "description": "Fleaflicker platform player ID"
+        },
+        "nfl_id": {
+          "type": ["integer", "null"],
+          "description": "NFL.com platform player ID"
+        },
+        "rts_id": {
+          "type": ["integer", "null"],
+          "description": "RT Sports platform player ID"
+        },
+        "fantasy_data_id": {
+          "type": ["integer", "null"],
+          "description": "FantasyData platform player ID"
+        },
+        "rotowire_id": {
+          "type": ["integer", "null"],
+          "description": "RotoWire platform player ID"
+        }
+      }
+    },
+    "salary_escalation_types": {
+      "PERCENTAGE_INCREASE": {
+        "description": "Player salaries increase by a fixed percentage each extension",
+        "example": "5% increase per year"
+      },
+      "XO_FOOTBALL_EXTENSION_FORMAT": {
+        "description": "xo.football platform extension format: 1st extension +$5, 2nd extension +$10, 3rd extension +$20, 4th+ extension +$35 (based on $200 salary cap)",
+        "escalation_schedule": {
+          "first_extension": 5,
+          "second_extension": 10,
+          "third_extension": 20,
+          "fourth_plus_extension": 35
+        }
+      }
+    },
+    "team": {
+      "type": "object",
+      "description": "Simplified team representation within league context (for full team details, see canonical-team-format.json)",
+      "required": ["external_team_id", "owner_id", "name"],
+      "properties": {
+        "external_team_id": {
+          "type": "string",
+          "description": "Platform-specific unique identifier for the team within the league"
+        },
+        "owner_id": {
+          "type": "string",
+          "description": "Platform user ID of the team owner"
+        },
+        "name": {
+          "type": "string",
+          "description": "Team name as displayed on the platform"
+        },
+        "avatar": {
+          "type": ["string", "null"],
+          "description": "URL or identifier for team avatar/logo"
+        },
+        "is_commissioner": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this team owner is a commissioner"
+        },
+        "division": {
+          "type": ["string", "null"],
+          "description": "Division name if league has divisions"
+        },
+        "draft_position": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Draft position for this team"
+        },
+        "waiver_priority": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Current waiver priority if using priority waivers"
+        },
+        "faab_balance": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Remaining FAAB budget if using FAAB waivers"
+        }
+      }
+    }
+  }
+}

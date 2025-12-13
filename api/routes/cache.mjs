@@ -228,7 +228,7 @@ router.get('/:cache_key(*)', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *             example:
- *               error: "invalid token"
+ *               error: "Authentication required"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -238,7 +238,7 @@ router.post('/:cache_key(*)', async (req, res) => {
   const { body } = req
   try {
     if (!req.auth || req.auth.userId !== 1) {
-      return res.status(401).send({ error: 'invalid token' })
+      return res.status(401).send({ error: 'Authentication required' })
     }
 
     if (!body || typeof body !== 'object') {

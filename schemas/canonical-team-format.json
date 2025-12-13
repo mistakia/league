@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/canonical-team-format.json",
+  "title": "Canonical Team Format",
+  "description": "Universal team data format that all external fantasy platforms transform into",
+  "type": "object",
+  "required": [
+    "external_team_id",
+    "platform",
+    "league_external_id",
+    "team_name"
+  ],
+  "properties": {
+    "external_team_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for the team within the league"
+    },
+    "platform": {
+      "$ref": "#/definitions/platform_enum"
+    },
+    "league_external_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for the league this team belongs to"
+    },
+    "team_owner_ids": {
+      "type": "array",
+      "description": "Array of platform-specific owner IDs (supports co-ownership)",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "team_name": {
+      "type": "string",
+      "description": "Team name as displayed on the platform"
+    },
+    "team_avatar_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "URL to team's avatar/logo image"
+    },
+    "division_name": {
+      "type": ["string", "null"],
+      "description": "Division name if league has divisions"
+    },
+    "division_external_id": {
+      "type": ["string", "null"],
+      "description": "Platform-specific division identifier"
+    },
+    "draft_position": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Draft position/pick order for this team"
+    },
+    "current_waiver_priority": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Current waiver priority if using priority-based waivers"
+    },
+    "current_faab_balance": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Remaining FAAB budget if using FAAB waivers"
+    },
+    "current_salary_cap_used": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Currently used salary cap amount if salary cap is enabled"
+    },
+    "current_salary_cap_available": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Remaining salary cap space if salary cap is enabled"
+    },
+    "total_roster_spots": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Total number of roster spots for this team"
+    },
+    "filled_roster_spots": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Number of currently filled roster spots"
+    },
+    "team_status": {
+      "type": "string",
+      "enum": ["ACTIVE", "INACTIVE", "ARCHIVED", "SUSPENDED"],
+      "default": "ACTIVE",
+      "description": "Current status of the team"
+    },
+    "join_date": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When the team/owner joined the league"
+    },
+    "last_activity_date": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Last recorded activity by the team owner"
+    },
+    "platform_data": {
+      "type": "object",
+      "description": "Original platform-specific data preserved for reference",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "platform_enum": {
+      "type": "string",
+      "enum": [
+        "SLEEPER",
+        "ESPN",
+        "YAHOO",
+        "MFL",
+        "CBS",
+        "FFPC",
+        "NFFC",
+        "FANTRAX",
+        "FLEAFLICKER",
+        "NFL",
+        "RTSPORTS"
+      ],
+      "description": "Fantasy platform identifier"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "description": "Test data for PlayerIdMapper tests",
+  "test_players": [
+    {
+      "pid": "TEST-SLEEPER-1",
+      "fname": "Josh",
+      "lname": "Allen",
+      "pname": "J.Allen",
+      "formatted": "josh_allen",
+      "pos": "QB",
+      "pos1": "QB",
+      "dob": "1996-05-21",
+      "nfl_draft_year": 2018,
+      "current_nfl_team": "BUF",
+      "sleeper_id": "12345",
+      "espn_id": 2330
+    },
+    {
+      "pid": "TEST-SLEEPER-2",
+      "fname": "Christian",
+      "lname": "McCaffrey",
+      "pname": "C.McCaffrey",
+      "formatted": "christian_mccaffrey",
+      "pos": "RB",
+      "pos1": "RB",
+      "dob": "1996-06-07",
+      "nfl_draft_year": 2017,
+      "current_nfl_team": "SF",
+      "sleeper_id": "67890",
+      "espn_id": 2977186
+    },
+    {
+      "pid": "TEST-ESPN-1",
+      "fname": "Travis",
+      "lname": "Kelce",
+      "pname": "T.Kelce",
+      "formatted": "travis_kelce",
+      "pos": "TE",
+      "pos1": "TE",
+      "dob": "1989-10-05",
+      "nfl_draft_year": 2013,
+      "current_nfl_team": "KC",
+      "espn_id": 14183
+    },
+    {
+      "pid": "TEST-ESPN-2",
+      "fname": "Tyreek",
+      "lname": "Hill",
+      "pname": "T.Hill",
+      "formatted": "tyreek_hill",
+      "pos": "WR",
+      "pos1": "WR",
+      "dob": "1994-03-01",
+      "nfl_draft_year": 2016,
+      "current_nfl_team": "MIA",
+      "espn_id": 2977187
+    },
+    {
+      "pid": "TEST-FALLBACK-1",
+      "fname": "Patrick",
+      "lname": "Mahomes",
+      "pname": "P.Mahomes",
+      "formatted": "patrick_mahomes",
+      "pos": "QB",
+      "pos1": "QB",
+      "dob": "1995-09-17",
+      "nfl_draft_year": 2017,
+      "current_nfl_team": "KC"
+    }
+  ],
+  "test_scenarios": {
+    "direct_id_mapping": {
+      "sleeper": {
+        "external_id": "12345",
+        "expected_pid": "TEST-SLEEPER-1"
+      },
+      "espn": {
+        "external_id": 14183,
+        "expected_pid": "TEST-ESPN-1"
+      }
+    },
+    "fallback_matching": {
+      "external_id": "99999",
+      "fallback_data": {
+        "name": "Patrick Mahomes",
+        "position": "QB",
+        "team": "KC"
+      },
+      "expected_pid": "TEST-FALLBACK-1"
+    },
+    "not_found": {
+      "external_id": "99999",
+      "expected_result": null
+    },
+    "unsupported_platform": {
+      "platform": "unsupported",
+      "external_id": "123",
+      "expected_result": null
+    }
+  }
+}

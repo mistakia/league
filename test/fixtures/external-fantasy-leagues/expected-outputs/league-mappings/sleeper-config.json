@@ -1,0 +1,208 @@
+{
+  "mapper_type": "LeagueConfigMapper",
+  "platform": "sleeper",
+  "test_scenarios": [
+    {
+      "scenario_name": "standard_sleeper_league",
+      "description": "Standard 12-team PPR Sleeper league configuration",
+      "input": {
+        "platform": "sleeper",
+        "league_config": {
+          "num_teams": 12,
+          "total_rosters": 12
+        },
+        "scoring_config": {
+          "pass_yd": 0.04,
+          "pass_td": 6,
+          "pass_int": -2,
+          "rush_yd": 0.1,
+          "rush_td": 6,
+          "rec": 1,
+          "rec_yd": 0.1,
+          "rec_td": 6,
+          "fumble_lost": -2,
+          "def_td": 6,
+          "def_int": 2,
+          "def_fumble_rec": 2,
+          "def_sack": 1,
+          "def_safety": 2,
+          "def_block_kick": 2,
+          "def_ret_td": 6
+        },
+        "roster_config": [
+          "QB",
+          "RB",
+          "RB",
+          "WR",
+          "WR",
+          "WR",
+          "TE",
+          "FLEX",
+          "K",
+          "DEF",
+          "BENCH",
+          "BENCH",
+          "BENCH",
+          "BENCH",
+          "BENCH",
+          "BENCH"
+        ]
+      },
+      "expected_output": {
+        "league_format": {
+          "num_teams": 12,
+          "sqb": 1,
+          "srb": 2,
+          "swr": 3,
+          "ste": 1,
+          "srbwr": 1,
+          "srbwrte": 0,
+          "sqbrbwrte": 0,
+          "swrte": 0,
+          "sdst": 1,
+          "sk": 1,
+          "bench": 6,
+          "ps": 0,
+          "reserve_short_term_limit": 0,
+          "cap": 0,
+          "min_bid": 0
+        },
+        "scoring_format": {
+          "pa": 0,
+          "pc": 0,
+          "py": 4,
+          "ints": -2,
+          "tdp": 6,
+          "ra": 0,
+          "ry": 10,
+          "tdr": 6,
+          "rush_first_down": 0,
+          "rec": 1,
+          "rbrec": 0,
+          "wrrec": 0,
+          "terec": 0,
+          "recy": 10,
+          "rec_first_down": 0,
+          "twoptc": 0,
+          "tdrec": 6,
+          "fuml": 0,
+          "prtd": 0,
+          "krtd": 0,
+          "trg": 0,
+          "exclude_qb_kneels": false
+        }
+      }
+    },
+    {
+      "scenario_name": "minimal_sleeper_config",
+      "description": "Minimal configuration with defaults",
+      "input": {
+        "platform": "sleeper",
+        "league_config": {},
+        "scoring_config": {},
+        "roster_config": []
+      },
+      "expected_output": {
+        "league_format": {
+          "num_teams": 12,
+          "sqb": 0,
+          "srb": 0,
+          "swr": 0,
+          "ste": 0,
+          "srbwr": 0,
+          "srbwrte": 0,
+          "sqbrbwrte": 0,
+          "swrte": 0,
+          "sdst": 0,
+          "sk": 0,
+          "bench": 0,
+          "ps": 0,
+          "reserve_short_term_limit": 0,
+          "cap": 0,
+          "min_bid": 0
+        },
+        "scoring_format": {
+          "pa": 0,
+          "pc": 0,
+          "py": 0,
+          "ints": 0,
+          "tdp": 0,
+          "ra": 0,
+          "ry": 0,
+          "tdr": 0,
+          "rush_first_down": 0,
+          "rec": 0,
+          "rbrec": 0,
+          "wrrec": 0,
+          "terec": 0,
+          "recy": 0,
+          "rec_first_down": 0,
+          "twoptc": 0,
+          "tdrec": 0,
+          "fuml": 0,
+          "prtd": 0,
+          "krtd": 0,
+          "trg": 0,
+          "exclude_qb_kneels": false
+        }
+      }
+    }
+  ],
+  "validation_scenarios": [
+    {
+      "scenario_name": "valid_complete_config",
+      "description": "Complete valid configuration with hashes",
+      "input": {
+        "league_format": {
+          "league_format_hash": "abc123",
+          "sqb": 1,
+          "srb": 2,
+          "swr": 2
+        },
+        "scoring_format": {
+          "scoring_format_hash": "def456",
+          "py": 4,
+          "tdp": 6
+        }
+      },
+      "expected_result": true
+    },
+    {
+      "scenario_name": "missing_league_hash",
+      "description": "Invalid configuration missing league format hash",
+      "input": {
+        "league_format": {
+          "sqb": 1,
+          "srb": 2
+        },
+        "scoring_format": {
+          "scoring_format_hash": "def456"
+        }
+      },
+      "expected_result": false
+    },
+    {
+      "scenario_name": "no_starting_positions",
+      "description": "Invalid configuration with no starting positions",
+      "input": {
+        "league_format": {
+          "league_format_hash": "abc123",
+          "sqb": 0,
+          "srb": 0,
+          "swr": 0,
+          "ste": 0,
+          "srbwr": 0,
+          "srbwrte": 0,
+          "sqbrbwrte": 0,
+          "swrte": 0,
+          "sdst": 0,
+          "sk": 0
+        },
+        "scoring_format": {
+          "scoring_format_hash": "def456"
+        }
+      },
+      "expected_result": false
+    }
+  ]
+}
