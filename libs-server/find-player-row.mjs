@@ -10,49 +10,53 @@ import db from '#db'
 const log = debug('get-player')
 debug.enable('get-player')
 
-const format_position = (pos) => {
-  switch (pos.toUpperCase()) {
-    case 'HB':
-      return 'RB'
-
-    case 'C':
-      return 'OL'
-
-    case 'CB':
-      return 'DB'
-
-    case 'DE':
-      return 'DL'
-
-    case 'DT':
-      return 'DL'
-
-    case 'OG':
-      return 'OL'
-
-    case 'OT':
-      return 'OL'
-
-    case 'S':
-      return 'DB'
-
-    case 'SAF':
-      return 'DB'
-
-    case 'G':
-      return 'OL'
-
-    case 'T':
-      return 'OL'
-
-    default:
-      return pos.toUpperCase()
-  }
-}
-
 // Expand positions to include all equivalent positions for matching
+// Also normalizes positions (e.g., HB -> RB, C -> OL) before expanding
 const expand_position = (pos) => {
-  switch (pos.toUpperCase()) {
+  const normalized_pos = pos.toUpperCase()
+
+  // First normalize the position
+  let normalized
+  switch (normalized_pos) {
+    case 'HB':
+      normalized = 'RB'
+      break
+    case 'C':
+      normalized = 'OL'
+      break
+    case 'CB':
+      normalized = 'DB'
+      break
+    case 'DE':
+      normalized = 'DL'
+      break
+    case 'DT':
+      normalized = 'DL'
+      break
+    case 'OG':
+      normalized = 'OL'
+      break
+    case 'OT':
+      normalized = 'OL'
+      break
+    case 'S':
+      normalized = 'DB'
+      break
+    case 'SAF':
+      normalized = 'DB'
+      break
+    case 'G':
+      normalized = 'OL'
+      break
+    case 'T':
+      normalized = 'OL'
+      break
+    default:
+      normalized = normalized_pos
+  }
+
+  // Then expand the normalized position
+  switch (normalized) {
     // Defensive backs - all safety and corner variants
     case 'DB':
     case 'CB':
@@ -84,6 +88,10 @@ const expand_position = (pos) => {
     case 'FB':
       return ['FB', 'RB']
 
+    // Running back (includes normalized HB)
+    case 'RB':
+      return ['RB', 'HB']
+
     // Linebackers - all LB variants including edge rushers (often classified as DE/DL)
     case 'LB':
     case 'OLB':
@@ -92,7 +100,7 @@ const expand_position = (pos) => {
       return ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL']
 
     default:
-      return [pos.toUpperCase()]
+      return [normalized]
   }
 }
 
