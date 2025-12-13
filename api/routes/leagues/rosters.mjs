@@ -6,11 +6,13 @@ import {
   roster_slot_types,
   transaction_types
 } from '#constants'
+import { getRoster, get_laegue_rosters_from_database } from '#libs-server'
 import {
-  getLeague,
-  getRoster,
-  get_laegue_rosters_from_database
-} from '#libs-server'
+  require_auth,
+  validate_and_get_league,
+  require_commissioner,
+  handle_error
+} from './middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -238,8 +240,7 @@ router.get('/?', async (req, res) => {
     })
     res.send(rosters)
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 
@@ -391,9 +392,7 @@ router.post('/?', async (req, res) => {
     const { pid, teamId, leagueId } = req.body
     const value = req.body.value || 0
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
@@ -415,14 +414,19 @@ router.post('/?', async (req, res) => {
     }
 
     // verify leagueId
-    const league = await getLeague({ lid: leagueId })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     // verify user is commish
-    if (league.commishid !== req.auth.userId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
+    if (
+      !require_commissioner(
+        league,
+        req.auth.userId,
+        res,
+        'add players to rosters'
+      )
+    ) {
+      return
     }
 
     // verify value
@@ -477,8 +481,7 @@ router.post('/?', async (req, res) => {
       transaction
     })
   } catch (error) {
-    logger(error)
-    res.status(500).send({ error: error.toString() })
+    handle_error(error, logger, res)
   }
 })
 
@@ -612,9 +615,7 @@ router.put('/?', async (req, res) => {
   try {
     const { pid, teamId, leagueId, value } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (typeof value === 'undefined') {
       return res.status(400).send({ error: 'missing value' })
@@ -640,14 +641,19 @@ router.put('/?', async (req, res) => {
     }
 
     // verify leagueId
-    const league = await getLeague({ lid: leagueId })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     // verify user is commish
-    if (league.commishid !== req.auth.userId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
+    if (
+      !require_commissioner(
+        league,
+        req.auth.userId,
+        res,
+        'update player values'
+      )
+    ) {
+      return
     }
 
     // verify value
@@ -801,9 +807,7 @@ router.delete('/?', async (req, res) => {
     // verify user is commish
     const { pid, teamId, leagueId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
@@ -825,14 +829,19 @@ router.delete('/?', async (req, res) => {
     }
 
     // verify leagueId
-    const league = await getLeague({ lid: leagueId })
-    if (!league) {
-      return res.status(400).send({ error: 'invalid leagueId' })
-    }
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
 
     // verify user is commish
-    if (league.commishid !== req.auth.userId) {
-      return res.status(400).send({ error: 'invalid leagueId' })
+    if (
+      !require_commissioner(
+        league,
+        req.auth.userId,
+        res,
+        'remove players from rosters'
+      )
+    ) {
+      return
     }
 
     const rosters = await db('rosters').where({

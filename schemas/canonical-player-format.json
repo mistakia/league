@@ -1,0 +1,385 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/canonical-player-format.json",
+  "title": "Canonical Player Format",
+  "description": "Universal player data format that all external fantasy platforms transform into",
+  "type": "object",
+  "required": ["player_ids", "platform", "player_name"],
+  "properties": {
+    "player_ids": {
+      "$ref": "#/definitions/player_ids"
+    },
+    "platform": {
+      "$ref": "#/definitions/platform_enum"
+    },
+    "player_name": {
+      "type": "string",
+      "description": "Player's full name as displayed on the platform"
+    },
+    "first_name": {
+      "type": ["string", "null"],
+      "description": "Player's first name"
+    },
+    "last_name": {
+      "type": ["string", "null"],
+      "description": "Player's last name"
+    },
+    "position": {
+      "type": ["string", "null"],
+      "enum": [
+        "QB",
+        "RB",
+        "WR",
+        "TE",
+        "K",
+        "DST",
+        "DE",
+        "DT",
+        "OLB",
+        "MLB",
+        "CB",
+        "FS",
+        "SS",
+        "DL",
+        "LB",
+        "DB",
+        null
+      ],
+      "description": "Player's primary position"
+    },
+    "positions": {
+      "type": "array",
+      "description": "All positions player is eligible for",
+      "items": {
+        "type": "string",
+        "enum": [
+          "QB",
+          "RB",
+          "WR",
+          "TE",
+          "K",
+          "DST",
+          "DE",
+          "DT",
+          "OLB",
+          "MLB",
+          "CB",
+          "FS",
+          "SS",
+          "DL",
+          "LB",
+          "DB"
+        ]
+      }
+    },
+    "team_abbreviation": {
+      "type": ["string", "null"],
+      "description": "Current NFL team abbreviation (e.g., 'TB', 'KC', 'BUF', null for free agents)"
+    },
+    "jersey_number": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 99,
+      "description": "Player's jersey number"
+    },
+    "age": {
+      "type": ["integer", "null"],
+      "minimum": 18,
+      "maximum": 50,
+      "description": "Player's age"
+    },
+    "height": {
+      "type": ["string", "null"],
+      "description": "Player's height (e.g., '6-2', '5-11')"
+    },
+    "weight": {
+      "type": ["integer", "null"],
+      "minimum": 100,
+      "maximum": 400,
+      "description": "Player's weight in pounds"
+    },
+    "college": {
+      "type": ["string", "null"],
+      "description": "Player's college"
+    },
+    "years_experience": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Years of NFL experience"
+    },
+    "rookie_year": {
+      "type": ["integer", "null"],
+      "minimum": 1970,
+      "maximum": 2100,
+      "description": "Year player entered the NFL"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "INACTIVE",
+        "INJURED_RESERVE",
+        "PRACTICE_SQUAD",
+        "SUSPENDED",
+        "RETIRED",
+        "FREE_AGENT"
+      ],
+      "default": "ACTIVE",
+      "description": "Player's current NFL status"
+    },
+    "injury_status": {
+      "type": ["string", "null"],
+      "enum": [
+        "HEALTHY",
+        "QUESTIONABLE",
+        "DOUBTFUL",
+        "OUT",
+        "IR",
+        "PUP",
+        "SUSPENDED",
+        null
+      ],
+      "description": "Current injury/availability status"
+    },
+    "injury_notes": {
+      "type": ["string", "null"],
+      "description": "Details about player's injury"
+    },
+    "bye_week": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 18,
+      "description": "Player's bye week for current season"
+    },
+    "fantasy_positions": {
+      "type": "array",
+      "description": "Positions eligible in fantasy football",
+      "items": {
+        "type": "string",
+        "enum": ["QB", "RB", "WR", "TE", "K", "DST", "IDP", "DL", "LB", "DB"]
+      }
+    },
+    "search_rank": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Platform's internal search ranking"
+    },
+    "auction_value_average": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Average auction value across the platform"
+    },
+    "ownership_percentage": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percentage of teams that own this player"
+    },
+    "add_percentage": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percentage of recent adds involving this player"
+    },
+    "drop_percentage": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percentage of recent drops involving this player"
+    },
+    "season_projections": {
+      "type": ["object", "null"],
+      "description": "Season-long fantasy projections",
+      "properties": {
+        "fantasy_points": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected fantasy points for the season"
+        },
+        "passing_yards": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected passing yards"
+        },
+        "passing_touchdowns": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected passing touchdowns"
+        },
+        "rushing_yards": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected rushing yards"
+        },
+        "rushing_touchdowns": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected rushing touchdowns"
+        },
+        "receiving_yards": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected receiving yards"
+        },
+        "receiving_touchdowns": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected receiving touchdowns"
+        },
+        "receptions": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Projected receptions"
+        }
+      }
+    },
+    "season_stats": {
+      "type": ["object", "null"],
+      "description": "Current season statistics",
+      "properties": {
+        "fantasy_points": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Fantasy points scored this season"
+        },
+        "games_played": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Games played this season"
+        },
+        "passing_yards": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Passing yards this season"
+        },
+        "passing_touchdowns": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Passing touchdowns this season"
+        },
+        "rushing_yards": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Rushing yards this season"
+        },
+        "rushing_touchdowns": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Rushing touchdowns this season"
+        },
+        "receiving_yards": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Receiving yards this season"
+        },
+        "receiving_touchdowns": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Receiving touchdowns this season"
+        },
+        "receptions": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Receptions this season"
+        }
+      }
+    },
+    "news": {
+      "type": "array",
+      "description": "Recent player news and updates",
+      "items": {
+        "type": "object",
+        "properties": {
+          "headline": {
+            "type": "string",
+            "description": "News headline"
+          },
+          "summary": {
+            "type": ["string", "null"],
+            "description": "News summary or details"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the news was published"
+          },
+          "source": {
+            "type": ["string", "null"],
+            "description": "News source"
+          }
+        },
+        "required": ["headline", "timestamp"]
+      }
+    },
+    "platform_data": {
+      "type": "object",
+      "description": "Original platform-specific data preserved for reference",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "platform_enum": {
+      "type": "string",
+      "enum": [
+        "SLEEPER",
+        "ESPN",
+        "YAHOO",
+        "MFL",
+        "CBS",
+        "FFPC",
+        "NFFC",
+        "FANTRAX",
+        "FLEAFLICKER",
+        "NFL",
+        "RTSPORTS"
+      ],
+      "description": "Fantasy platform identifier"
+    },
+    "player_ids": {
+      "type": "object",
+      "description": "Platform-specific player identifiers across multiple systems",
+      "properties": {
+        "sleeper_id": {
+          "type": ["string", "null"],
+          "description": "Sleeper platform player ID"
+        },
+        "espn_id": {
+          "type": ["integer", "null"],
+          "description": "ESPN platform player ID"
+        },
+        "yahoo_id": {
+          "type": ["integer", "null"],
+          "description": "Yahoo platform player ID"
+        },
+        "mfl_id": {
+          "type": ["integer", "null"],
+          "description": "MyFantasyLeague platform player ID"
+        },
+        "cbs_id": {
+          "type": ["integer", "null"],
+          "description": "CBS Sports platform player ID"
+        },
+        "fleaflicker_id": {
+          "type": ["integer", "null"],
+          "description": "Fleaflicker platform player ID"
+        },
+        "nfl_id": {
+          "type": ["integer", "null"],
+          "description": "NFL.com platform player ID"
+        },
+        "rts_id": {
+          "type": ["integer", "null"],
+          "description": "RT Sports platform player ID"
+        },
+        "fantasy_data_id": {
+          "type": ["integer", "null"],
+          "description": "FantasyData platform player ID"
+        },
+        "rotowire_id": {
+          "type": ["integer", "null"],
+          "description": "RotoWire platform player ID"
+        }
+      }
+    }
+  }
+}

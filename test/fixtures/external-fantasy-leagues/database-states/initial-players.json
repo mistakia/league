@@ -1,0 +1,91 @@
+{
+  "state_type": "initial-players",
+  "tables": {
+    "player": [
+      {
+        "pid": "internal-joe-flacco-cle-qb",
+        "name": "Joe Flacco",
+        "fname": "Joe",
+        "lname": "Flacco",
+        "pos": "QB",
+        "team": "CLE",
+        "height": 78,
+        "weight": 245,
+        "dob": "1985-01-16",
+        "start": 2008,
+        "sleeper_id": "19",
+        "espn_id": 11252,
+        "yahoo_id": null,
+        "rotoworld_id": null,
+        "rotowire_id": null,
+        "fantasy_data_id": null,
+        "sportradar_id": null,
+        "formatted": "joe_flacco",
+        "college": "Delaware"
+      },
+      {
+        "pid": "internal-robert-woods-pit-wr",
+        "name": "Robert Woods",
+        "fname": "Robert",
+        "lname": "Woods",
+        "pos": "WR",
+        "team": "PIT",
+        "height": 72,
+        "weight": 195,
+        "dob": "1992-04-10",
+        "start": 2013,
+        "sleeper_id": "1352",
+        "espn_id": 15880,
+        "yahoo_id": null,
+        "rotoworld_id": null,
+        "rotowire_id": null,
+        "fantasy_data_id": null,
+        "sportradar_id": null,
+        "formatted": "robert_woods",
+        "college": "USC"
+      },
+      {
+        "pid": "internal-leveon-bell-tb-rb",
+        "name": "Le'Veon Bell",
+        "fname": "Le'Veon",
+        "lname": "Bell",
+        "pos": "RB",
+        "team": "TB",
+        "height": 73,
+        "weight": 225,
+        "dob": "1992-02-18",
+        "start": 2013,
+        "sleeper_id": "1408",
+        "espn_id": 15825,
+        "yahoo_id": null,
+        "rotoworld_id": null,
+        "rotowire_id": null,
+        "fantasy_data_id": null,
+        "sportradar_id": null,
+        "formatted": "leveon_bell",
+        "college": "Michigan State"
+      },
+      {
+        "pid": "internal-player-without-sleeper-id",
+        "name": "Test Player No Sleeper ID",
+        "fname": "Test",
+        "lname": "Player",
+        "pos": "RB",
+        "team": "FA",
+        "sleeper_id": null,
+        "espn_id": null,
+        "formatted": "test_player"
+      }
+    ]
+  },
+  "metadata": {
+    "created_at": "2024-12-15T10:30:00.000Z",
+    "description": "Initial player database state for external fantasy leagues testing",
+    "record_count": 4,
+    "notes": [
+      "Includes players with existing external IDs for mapping tests",
+      "Includes player without Sleeper ID for fallback matching tests",
+      "Players match IDs in reduced platform-responses/sleeper/players.json fixture"
+    ]
+  }
+}

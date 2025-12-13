@@ -1,0 +1,279 @@
+{
+  "mapper_type": "TransactionMapper",
+  "test_scenarios": [
+    {
+      "scenario_name": "sleeper_add_transaction",
+      "description": "Standard Sleeper add transaction with waiver budget",
+      "input": {
+        "platform": "sleeper",
+        "external_transaction": {
+          "type": "add",
+          "player_id": "sleeper-123",
+          "roster_id": 5,
+          "waiver_budget": 50,
+          "creator": "user-456",
+          "created": 1640995200000
+        },
+        "context": {
+          "league_id": "league-789",
+          "year": 2023,
+          "week": 1,
+          "player_mappings": { "sleeper-123": "internal-pid-123" },
+          "team_mappings": { "5": "team-5" },
+          "user_mappings": { "user-456": "internal-user-456" }
+        }
+      },
+      "expected_output": {
+        "type": 14,
+        "pid": "internal-pid-123",
+        "tid": "team-5",
+        "lid": "league-789",
+        "value": 50,
+        "userid": "internal-user-456",
+        "year": 2023,
+        "week": 1,
+        "timestamp": 1640995200
+      }
+    },
+    {
+      "scenario_name": "espn_trade_transaction",
+      "description": "ESPN trade transaction",
+      "input": {
+        "platform": "espn",
+        "external_transaction": {
+          "type": "TRADE",
+          "playerId": 789,
+          "teamId": 3,
+          "transactionDate": "2023-01-15T10:30:00Z"
+        },
+        "context": {
+          "league_id": "league-abc",
+          "year": 2023,
+          "week": 2,
+          "player_mappings": { "789": "internal-pid-789" },
+          "team_mappings": { "3": "team-3" }
+        }
+      },
+      "expected_output": {
+        "type": 4,
+        "pid": "internal-pid-789",
+        "tid": "team-3",
+        "lid": "league-abc",
+        "year": 2023,
+        "week": 2,
+        "timestamp": 1673778600
+      }
+    },
+    {
+      "scenario_name": "unmapped_player",
+      "description": "Transaction with unmapped player ID",
+      "input": {
+        "platform": "sleeper",
+        "external_transaction": {
+          "type": "add",
+          "player_id": "unmapped-player",
+          "roster_id": 5,
+          "created": 1640995200000
+        },
+        "context": {
+          "league_id": "league-789",
+          "player_mappings": {},
+          "team_mappings": { "5": "team-5" }
+        }
+      },
+      "expected_output": {
+        "type": 14,
+        "pid": "unmapped-player",
+        "tid": "team-5",
+        "lid": "league-789"
+      }
+    }
+  ],
+  "null_scenarios": [
+    {
+      "scenario_name": "unsupported_platform",
+      "description": "Should return null for unsupported platform",
+      "input": {
+        "platform": "unsupported",
+        "external_transaction": { "type": "add" },
+        "context": { "league_id": "test" }
+      },
+      "expected_output": null
+    },
+    {
+      "scenario_name": "unsupported_transaction_type",
+      "description": "Should return null for unsupported transaction type",
+      "input": {
+        "platform": "sleeper",
+        "external_transaction": {
+          "type": "unknown_type",
+          "player_id": "sleeper-123",
+          "roster_id": 5
+        },
+        "context": { "league_id": "league-789" }
+      },
+      "expected_output": null
+    },
+    {
+      "scenario_name": "espn_lineup_change",
+      "description": "Should skip ESPN lineup changes",
+      "input": {
+        "platform": "espn",
+        "external_transaction": {
+          "type": "LINEUP",
+          "playerId": 789
+        },
+        "context": { "league_id": "league-abc" }
+      },
+      "expected_output": null
+    }
+  ],
+  "bulk_scenarios": [
+    {
+      "scenario_name": "multiple_sleeper_transactions",
+      "description": "Bulk mapping of multiple Sleeper transactions",
+      "input": {
+        "platform": "sleeper",
+        "external_transactions": [
+          {
+            "type": "add",
+            "player_id": "sleeper-1",
+            "roster_id": 1,
+            "created": 1640995200000
+          },
+          {
+            "type": "drop",
+            "player_id": "sleeper-2",
+            "roster_id": 1,
+            "created": 1640995300000
+          },
+          {
+            "type": "unknown_type",
+            "player_id": "sleeper-3",
+            "roster_id": 1
+          }
+        ],
+        "context": {
+          "league_id": "league-test",
+          "player_mappings": {
+            "sleeper-1": "pid-1",
+            "sleeper-2": "pid-2"
+          },
+          "team_mappings": { "1": "team-1" }
+        }
+      },
+      "expected_output_count": 2,
+      "expected_types": [14, 1]
+    }
+  ],
+  "validation_scenarios": [
+    {
+      "scenario_name": "valid_transaction",
+      "description": "Valid transaction with all required fields",
+      "input": {
+        "pid": "player-123",
+        "type": 1,
+        "timestamp": 1640995200,
+        "tid": "team-1",
+        "lid": "league-1"
+      },
+      "expected_result": true
+    },
+    {
+      "scenario_name": "missing_fields",
+      "description": "Invalid transaction missing required fields",
+      "input": {
+        "pid": "player-123",
+        "type": 1
+      },
+      "expected_result": false
+    },
+    {
+      "scenario_name": "invalid_timestamp",
+      "description": "Invalid transaction with timestamp too old",
+      "input": {
+        "pid": "player-123",
+        "type": 1,
+        "timestamp": 999999,
+        "tid": "team-1",
+        "lid": "league-1"
+      },
+      "expected_result": false
+    },
+    {
+      "scenario_name": "invalid_type",
+      "description": "Invalid transaction with invalid type",
+      "input": {
+        "pid": "player-123",
+        "type": 999,
+        "timestamp": 1640995200,
+        "tid": "team-1",
+        "lid": "league-1"
+      },
+      "expected_result": false
+    }
+  ],
+  "timestamp_conversion_scenarios": [
+    {
+      "scenario_name": "milliseconds_to_seconds",
+      "description": "Convert milliseconds timestamp to seconds",
+      "input": 1640995200000,
+      "expected_output": 1640995200
+    },
+    {
+      "scenario_name": "already_seconds",
+      "description": "Timestamp already in seconds",
+      "input": 1640995200,
+      "expected_output": 1640995200
+    },
+    {
+      "scenario_name": "iso_string",
+      "description": "ISO date string conversion",
+      "input": "2023-01-01T00:00:00Z",
+      "expected_output": 1672531200
+    }
+  ],
+  "platform_support_scenarios": [
+    {
+      "scenario_name": "supported_platforms",
+      "description": "List of supported platforms",
+      "expected_platforms": ["sleeper", "espn", "yahoo", "mfl"]
+    },
+    {
+      "scenario_name": "platform_check",
+      "description": "Platform support verification",
+      "test_cases": [
+        { "platform": "sleeper", "expected": true },
+        { "platform": "unsupported", "expected": false }
+      ]
+    }
+  ],
+  "transaction_type_extraction": [
+    {
+      "scenario_name": "different_field_names",
+      "description": "Extract transaction type from different field names",
+      "test_cases": [
+        {
+          "platform": "sleeper",
+          "transaction": { "type": "add" },
+          "expected": "add"
+        },
+        {
+          "platform": "sleeper",
+          "transaction": { "transaction_type": "add" },
+          "expected": "add"
+        },
+        {
+          "platform": "espn",
+          "transaction": { "transactionType": "TRADE" },
+          "expected": "TRADE"
+        },
+        {
+          "platform": "mfl",
+          "transaction": { "transaction": "FREE_AGENT" },
+          "expected": "FREE_AGENT"
+        }
+      ]
+    }
+  ]
+}

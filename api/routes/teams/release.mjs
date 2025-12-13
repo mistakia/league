@@ -9,6 +9,7 @@ import {
   getLeague,
   getRoster
 } from '#libs-server'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -99,9 +100,7 @@ router.post('/?', async (req, res) => {
   try {
     const { pid, teamId, leagueId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (current_season.week > current_season.finalWeek) {
       return res.status(400).send({ error: 'player locked' })

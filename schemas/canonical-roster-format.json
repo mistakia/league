@@ -1,0 +1,312 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/canonical-roster-format.json",
+  "title": "Canonical Roster Format",
+  "description": "Universal roster data format that all external fantasy platforms transform into",
+  "type": "object",
+  "required": [
+    "external_roster_id",
+    "platform",
+    "league_external_id",
+    "team_external_id",
+    "week",
+    "year"
+  ],
+  "properties": {
+    "external_roster_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for this roster snapshot"
+    },
+    "platform": {
+      "$ref": "#/definitions/platform_enum"
+    },
+    "league_external_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for the league"
+    },
+    "team_external_id": {
+      "type": "string",
+      "description": "Platform-specific unique identifier for the team (must match external_team_id from league teams array)"
+    },
+    "week": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18,
+      "description": "NFL week number (0 for offseason/preseason rosters)"
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2100,
+      "description": "NFL season year"
+    },
+    "roster_snapshot_date": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When this roster snapshot was taken"
+    },
+    "players": {
+      "type": "array",
+      "description": "All players on the roster with their assignments and properties",
+      "items": {
+        "$ref": "#/definitions/roster_player"
+      }
+    },
+    "keeper_designations": {
+      "type": "array",
+      "description": "Players designated as keepers for next season",
+      "items": {
+        "type": "object",
+        "required": ["player_ids", "keeper_round"],
+        "properties": {
+          "player_ids": {
+            "$ref": "#/definitions/player_ids"
+          },
+          "keeper_round": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "description": "Draft round cost for keeping this player"
+          },
+          "keeper_salary": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "description": "Salary cost for keeping this player if salary cap league"
+          }
+        }
+      }
+    },
+    "roster_moves_remaining": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Number of roster moves/acquisitions remaining for the season"
+    },
+    "trades_remaining": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Number of trades remaining for the season"
+    },
+    "total_salary_committed": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Total salary committed to all players if salary cap league"
+    },
+    "available_salary_cap_space": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Remaining salary cap space if salary cap league"
+    },
+    "roster_lock_status": {
+      "type": "string",
+      "enum": ["UNLOCKED", "LOCKED"],
+      "default": "UNLOCKED",
+      "description": "Whether roster changes are currently locked"
+    },
+    "auto_start_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether auto-start optimal lineup is enabled"
+    },
+    "platform_data": {
+      "type": "object",
+      "description": "Original platform-specific data preserved for reference",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "platform_enum": {
+      "type": "string",
+      "enum": [
+        "SLEEPER",
+        "ESPN",
+        "YAHOO",
+        "MFL",
+        "CBS",
+        "FFPC",
+        "NFFC",
+        "FANTRAX",
+        "FLEAFLICKER",
+        "NFL",
+        "RTSPORTS"
+      ],
+      "description": "Fantasy platform identifier"
+    },
+    "player_ids": {
+      "type": "object",
+      "description": "Platform-specific player identifiers across multiple systems",
+      "properties": {
+        "sleeper_id": {
+          "type": ["string", "null"],
+          "description": "Sleeper platform player ID"
+        },
+        "espn_id": {
+          "type": ["integer", "null"],
+          "description": "ESPN platform player ID"
+        },
+        "yahoo_id": {
+          "type": ["integer", "null"],
+          "description": "Yahoo platform player ID"
+        },
+        "mfl_id": {
+          "type": ["integer", "null"],
+          "description": "MyFantasyLeague platform player ID"
+        },
+        "cbs_id": {
+          "type": ["integer", "null"],
+          "description": "CBS Sports platform player ID"
+        },
+        "fleaflicker_id": {
+          "type": ["integer", "null"],
+          "description": "Fleaflicker platform player ID"
+        },
+        "nfl_id": {
+          "type": ["integer", "null"],
+          "description": "NFL.com platform player ID"
+        },
+        "rts_id": {
+          "type": ["integer", "null"],
+          "description": "RT Sports platform player ID"
+        },
+        "fantasy_data_id": {
+          "type": ["integer", "null"],
+          "description": "FantasyData platform player ID"
+        },
+        "rotowire_id": {
+          "type": ["integer", "null"],
+          "description": "RotoWire platform player ID"
+        }
+      }
+    },
+    "roster_player": {
+      "type": "object",
+      "required": ["player_ids"],
+      "properties": {
+        "player_ids": {
+          "$ref": "#/definitions/player_ids"
+        },
+        "roster_slot": {
+          "type": ["string", "null"],
+          "enum": [
+            "QB",
+            "RB",
+            "WR",
+            "TE",
+            "RB_WR_FLEX",
+            "RB_WR_TE_FLEX",
+            "WR_TE_FLEX",
+            "SUPERFLEX",
+            "K",
+            "DST",
+            "IDP_FLEX",
+            "DE",
+            "DT",
+            "OLB",
+            "MLB",
+            "CB",
+            "FS",
+            "SS",
+            "DL",
+            "LB",
+            "DB",
+            "BENCH",
+            "IR",
+            "PRACTICE_SQUAD",
+            null
+          ],
+          "description": "Roster slot assignment for this player (null indicates bench/unassigned, must match one of the roster_slots defined in league format)"
+        },
+        "roster_slot_category": {
+          "type": "string",
+          "enum": ["STARTING", "BENCH", "INJURED_RESERVE", "PRACTICE_SQUAD"],
+          "description": "Category of roster slot (starting lineup, bench, etc.)"
+        },
+        "acquisition_date": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When this player was acquired by the team"
+        },
+        "acquisition_type": {
+          "type": ["string", "null"],
+          "enum": ["DRAFT", "WAIVER", "FREE_AGENT", "TRADE", "KEEPER", null],
+          "description": "How this player was acquired"
+        },
+        "acquisition_cost": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Cost to acquire player (FAAB, draft pick value, etc.)"
+        },
+        "current_salary": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Current salary if salary cap league"
+        },
+        "contract_years_remaining": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Years remaining on contract if multi-year contracts"
+        },
+        "is_locked": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this player is locked and cannot be moved"
+        },
+        "keeper_eligible": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether player is eligible to be kept for next season"
+        },
+        "protection_status": {
+          "type": ["string", "null"],
+          "enum": ["PROTECTED", "UNPROTECTED", "FRANCHISE_TAGGED", null],
+          "description": "Protection status for keeper/dynasty leagues"
+        },
+        "extension_count": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Number of times this player has been extended/re-signed"
+        },
+        "tag_type": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "FRANCHISE",
+            "ROOKIE",
+            "RESTRICTED_FREE_AGENT",
+            "KEEPER"
+          ],
+          "default": "NONE",
+          "description": "Type of tag/designation applied to this player"
+        },
+        "tag_details": {
+          "type": "object",
+          "description": "Additional details for player tags",
+          "properties": {
+            "tag_cost": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "description": "Cost associated with the tag (salary cap hit, draft pick cost, etc.)"
+            },
+            "tag_duration": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "Number of years/seasons the tag applies"
+            },
+            "tag_restrictions": {
+              "type": "array",
+              "description": "Any restrictions that apply with this tag",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "trade_block_status": {
+          "type": "string",
+          "enum": ["AVAILABLE", "ON_BLOCK", "UNTRADEABLE"],
+          "default": "AVAILABLE",
+          "description": "Whether player is available for trades"
+        }
+      }
+    }
+  }
+}

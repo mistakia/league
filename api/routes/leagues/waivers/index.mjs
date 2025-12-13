@@ -24,6 +24,7 @@ import {
   verifyReserveStatus,
   get_super_priority_status
 } from '#libs-server'
+import { require_auth } from '../middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -78,9 +79,7 @@ router.get('/super-priority/:pid', async (req, res) => {
     const { leagueId } = req.params
     const { pid } = req.params
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     const super_priority_status = await get_super_priority_status({
       pid,
@@ -275,9 +274,7 @@ router.post('/?', async (req, res) => {
     let { release } = req.body
     let bid = Number(req.body.bid || 0)
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!Array.isArray(release)) {
       release = release ? [release] : []
@@ -819,9 +816,7 @@ router.put('/:waiverId', async (req, res) => {
     let { release } = req.body
     const bid = Number(req.body.bid || 0)
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!Array.isArray(release)) {
       release = release ? [release] : []
@@ -986,9 +981,7 @@ router.put('/:waiverId', async (req, res) => {
 router.post('/:waiverId/cancel', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (isNaN(req.params.waiverId)) {
       return res.status(400).send({ error: 'invalid waiverId' })

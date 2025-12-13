@@ -4,5 +4,5 @@ export default async function (request) {
   res.should.have.status(401)
 
   res.should.be.json
-  res.body.error.should.equal('invalid token')
+  res.body.error.should.equal('Authentication required')
 }

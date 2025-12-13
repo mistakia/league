@@ -1,7 +1,13 @@
 import express from 'express'
 
 import { current_season } from '#constants'
-import { getLeague, generateSchedule } from '#libs-server'
+import { generateSchedule } from '#libs-server'
+import {
+  require_auth,
+  validate_and_get_league,
+  require_commissioner,
+  handle_error
+} from './middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -205,16 +211,21 @@ router.post('/?', async (req, res) => {
   try {
     const { leagueId } = req.params
 
-    const league = await getLeague({ lid: leagueId })
-    if (league.commishid !== req.auth.userId) {
-      return res.status(401).send({ error: 'user is not commish' })
+    if (!require_auth(req, res)) return
+
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
+
+    if (
+      !require_commissioner(league, req.auth.userId, res, 'generate schedule')
+    ) {
+      return
     }
 
     const data = await generateSchedule({ leagueId })
     res.send(data)
   } catch (error) {
-    logger(error)
-    res.status(500).send({ error: error.toString() })
+    handle_error(error, logger, res)
   }
 })
 
@@ -336,8 +347,7 @@ router.get('/?', async (req, res) => {
 
     res.send({ matchups, playoffs })
   } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
+    handle_error(err, logger, res)
   }
 })
 

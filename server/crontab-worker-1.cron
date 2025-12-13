@@ -1,22 +1,22 @@
 ################################### GAMES ########################################
 
 ## Update NFL Schedule At 03:00 every day (Regular Season)
-0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v18.20.4/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
-0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v18.20.4/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
+0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
+0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## Update NFL Schedule At 03:00 every day (Off Season)
-0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/v18.20.4/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
+0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-ngs.mjs &>> /var/log/league/import-nfl-games-ngs.log
 
 ## At every 15th minute past every hour from 19 through 20 on Monday in January, February, and every month from September through December.
-# */15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/v18.20.4/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
+# */15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every 15th minute past every hour from 19 through 20 on Thursday in January, February, and every month from September through December.
-# */15 19-20 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/v18.20.4/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
+# */15 19-20 * 1,2,9-12 4 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
 
 ## At every 15th minute on Sunday in January, February, and every month from September through December.
-# */15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/v18.20.4/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
+# */15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force &>> /var/log/league/league-import-nfl-games-nfl.log
 
 # DFS Salaries
 
 ## Every Wednesday at 1:20PM
-20 13 * * 3 NODE_ENV=production /root/.nvm/versions/node/v18.20.4/bin/node /root/league/scripts/import-draftkings-salaries.mjs &>> /var/log/league/league-import-draftkings-salaries.log
+20 13 * * 3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-draftkings-salaries.mjs &>> /var/log/league/league-import-draftkings-salaries.log

@@ -1,0 +1,93 @@
+{
+  "mapper_type": "LeagueConfigMapper",
+  "platform": "espn",
+  "test_scenarios": [
+    {
+      "scenario_name": "standard_espn_league",
+      "description": "Standard 10-team half-PPR ESPN league configuration",
+      "input": {
+        "platform": "espn",
+        "league_config": {
+          "num_teams": 10
+        },
+        "scoring_config": {
+          "passing_yards": 0.04,
+          "passing_touchdowns": 4,
+          "passing_interceptions": -1,
+          "rushing_yards": 0.1,
+          "rushing_touchdowns": 6,
+          "receiving_receptions": 0.5,
+          "receiving_yards": 0.1,
+          "receiving_touchdowns": 6
+        },
+        "roster_config": {
+          "QB": 1,
+          "RB": 2,
+          "WR": 2,
+          "TE": 1,
+          "RB/WR": 1,
+          "D/ST": 1,
+          "K": 1,
+          "BE": 7
+        }
+      },
+      "expected_output": {
+        "league_format": {
+          "num_teams": 10,
+          "sqb": 1,
+          "srb": 2,
+          "swr": 2,
+          "ste": 1,
+          "srbwr": 1,
+          "srbwrte": 0,
+          "sqbrbwrte": 0,
+          "swrte": 0,
+          "sdst": 1,
+          "sk": 1,
+          "bench": 7,
+          "ps": 0,
+          "reserve_short_term_limit": 0,
+          "cap": 0,
+          "min_bid": 0
+        },
+        "scoring_format": {
+          "pa": 0,
+          "pc": 0,
+          "py": 4,
+          "ints": -1,
+          "tdp": 4,
+          "ra": 0,
+          "ry": 10,
+          "tdr": 6,
+          "rush_first_down": 0,
+          "rec": 0.5,
+          "rbrec": 0,
+          "wrrec": 0,
+          "terec": 0,
+          "recy": 10,
+          "rec_first_down": 0,
+          "twoptc": 0,
+          "tdrec": 6,
+          "fuml": 0,
+          "prtd": 0,
+          "krtd": 0,
+          "trg": 0,
+          "exclude_qb_kneels": false
+        }
+      }
+    }
+  ],
+  "error_scenarios": [
+    {
+      "scenario_name": "unsupported_platform",
+      "description": "Should throw error for unsupported platform",
+      "input": {
+        "platform": "unsupported",
+        "league_config": {},
+        "scoring_config": {},
+        "roster_config": {}
+      },
+      "expected_error": "Unsupported platform: unsupported"
+    }
+  ]
+}

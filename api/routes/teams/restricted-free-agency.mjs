@@ -9,6 +9,7 @@ import {
   verifyUserTeam,
   verifyReserveStatus
 } from '#libs-server'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -82,9 +83,7 @@ router.get('/?', async (req, res) => {
   try {
     const { teamId } = req.params
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     // verify teamId belongs to userId
     try {
@@ -252,9 +251,7 @@ router.post('/?', async (req, res) => {
       release = release ? [release] : []
     }
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
@@ -587,9 +584,7 @@ router.delete('/?', async (req, res) => {
     const { teamId } = req.params
     const { pid, leagueId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
@@ -777,9 +772,7 @@ router.put('/?', async (req, res) => {
       release = release ? [release] : []
     }
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
@@ -1030,9 +1023,7 @@ router.post('/nominate/?', async (req, res) => {
     const { teamId } = req.params
     const { pid, leagueId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
@@ -1169,9 +1160,7 @@ router.delete('/nominate/?', async (req, res) => {
     const { teamId } = req.params
     const { pid, leagueId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })

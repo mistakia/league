@@ -1,6 +1,7 @@
 import express from 'express'
 
 import { verifyUserTeam } from '#libs-server'
+import { require_auth } from '../leagues/middleware.mjs'
 import activate from './activate.mjs'
 import cutlist from './cutlist.mjs'
 import deactivate from './deactivate.mjs'
@@ -94,9 +95,7 @@ router.put('/:teamId', async (req, res) => {
     const { teamId } = req.params
     const { value, field } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     // verify teamId
     try {

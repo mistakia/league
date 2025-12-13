@@ -7,7 +7,7 @@ import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
-import { notLoggedIn, missing, invalid } from './utils/index.mjs'
+import { notLoggedIn, missing, invalid, forbidden } from './utils/index.mjs'
 import { getLeague } from '#libs-server'
 
 process.env.NODE_ENV = 'test'
@@ -143,7 +143,7 @@ describe('API /leagues - update', function () {
           field: 'name',
           value: 'test'
         })
-      await invalid(request, 'leagueId')
+      await forbidden(request, 'Only league commissioner can')
     })
 
     it('not an integer value', async () => {

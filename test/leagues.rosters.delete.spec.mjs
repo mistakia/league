@@ -15,7 +15,8 @@ import {
   selectPlayer,
   missing,
   invalid,
-  notLoggedIn
+  notLoggedIn,
+  forbidden
 } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -163,7 +164,7 @@ describe('API /leagues/rosters - delete', function () {
           leagueId: 1
         })
 
-      await invalid(request, 'leagueId')
+      await forbidden(request, 'Only league commissioner can')
     })
 
     it('exceeds roster limit', async () => {

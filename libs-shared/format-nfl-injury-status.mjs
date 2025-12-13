@@ -26,6 +26,20 @@ export default (status_string) => {
     case 'O':
       return player_nfl_injury_status.OUT
 
+    // Values that indicate no injury status (return null)
+    case 'NA': // Not Applicable/Available (Sleeper uses this for healthy players)
+      return null
+
+    // Roster/NFL statuses that some platforms incorrectly put in injury_status field
+    // These are not game-day injury designations, so return null
+    case 'IR': // Injured Reserve (roster status, not injury designation)
+    case 'PUP': // Physically Unable to Perform (roster status)
+    case 'SUS': // Suspended (roster status)
+    case 'COV': // COVID IR (roster status)
+    case 'DNR': // Did Not Report (roster status)
+    case 'NFI': // Non-Football Injury (roster status)
+      return null
+
     default:
       throw new Error(`Invalid injury status: ${status_string}`)
   }

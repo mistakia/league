@@ -2,6 +2,7 @@ import express from 'express'
 
 import { current_season, roster_slot_types } from '#constants'
 import { verifyUserTeam, getTransactionsSinceFreeAgent } from '#libs-server'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -85,9 +86,7 @@ router.get('/reserve', async (req, res) => {
     const { teamId } = req.params
     const { leagueId } = req.query
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     // verify teamId
     try {

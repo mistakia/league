@@ -3,6 +3,7 @@ import express from 'express'
 import { Roster } from '#libs-shared'
 import { player_tag_types } from '#constants'
 import { getRoster, verifyUserTeam, getLeague } from '#libs-server'
+import { require_auth } from '../leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -44,9 +45,7 @@ router.get('/?', async (req, res) => {
   try {
     const { teamId } = req.params
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     // verify teamId belongs to userId
     try {
@@ -135,9 +134,7 @@ router.post('/?', async (req, res) => {
     const { leagueId } = req.body
     let { pids } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     if (!pids) {
       return res.status(400).send({ error: 'missing pids' })

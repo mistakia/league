@@ -1,0 +1,261 @@
+{
+  "platform": "sleeper",
+  "response_type": "users",
+  "collected_at": "2025-08-02T02:57:37.840Z",
+  "anonymized": true,
+  "data": {
+    "users": [
+      {
+        "avatar": "7ba12b1c115a97efbfb15be635ff34d7",
+        "display_name": "mwiggins",
+        "is_bot": null,
+        "is_owner": false,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "avatar": "https://sleepercdn.com/uploads/ec0d8131788ac87700f6b1867d2b0e13.jpg",
+          "join_voice_pn": "on",
+          "league_report_pn": "off",
+          "mascot_message": "on",
+          "mention_pn": "on",
+          "player_like_pn": "on",
+          "player_nickname_update": "on",
+          "team_name": "The Laughing Lizards",
+          "team_name_update": "on",
+          "trade_block_pn": "on",
+          "transaction_commissioner": "on",
+          "transaction_free_agent": "on",
+          "transaction_trade": "on",
+          "transaction_waiver": "on",
+          "user_message_pn": "on"
+        },
+        "settings": null,
+        "user_id": "76475943417692160"
+      },
+      {
+        "avatar": "210592eb4e13a7f124d4d3f9baf813b9",
+        "display_name": "ZachRodgers814",
+        "is_bot": false,
+        "is_owner": true,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "avatar": "https://sleepercdn.com/uploads/db5e71ff2f26ccfa44a9c8200b3b7723.jpg",
+          "join_voice_pn": "on",
+          "mascot_message": "on",
+          "mention_pn": "on",
+          "player_like_pn": "on",
+          "player_nickname_update": "on",
+          "team_name": "The Final Boss",
+          "team_name_update": "on",
+          "trade_block_pn": "on",
+          "transaction_commissioner": "on",
+          "transaction_free_agent": "on",
+          "transaction_trade": "on",
+          "transaction_waiver": "on",
+          "user_message_pn": "on"
+        },
+        "settings": null,
+        "user_id": "203318845597818880"
+      },
+      {
+        "avatar": "c9398f4c6595580e977d55d77dd7d0fc",
+        "display_name": "CPLANT1",
+        "is_bot": false,
+        "is_owner": true,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "allow_sms": "on",
+          "archived": "off",
+          "avatar": "https://sleepercdn.com/uploads/fce403191aef5b4453203d59d21bb43d.jpg",
+          "mention_pn": "on",
+          "team_name": "Nico Collins or Bust"
+        },
+        "settings": null,
+        "user_id": "205120533207977984"
+      },
+      {
+        "avatar": "44a4e2e8cd9b40c7bd857f787032a537",
+        "display_name": "mattpleach",
+        "is_bot": false,
+        "is_owner": false,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "mention_pn": "on",
+          "team_name": "Mayfield of Dreams ‘25💰"
+        },
+        "settings": null,
+        "user_id": "331237191147610112"
+      },
+      {
+        "avatar": "f4154d6bd38240b55d70556770573c08",
+        "display_name": "Corb1998",
+        "is_bot": false,
+        "is_owner": false,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "mention_pn": "on",
+          "team_name": "Honey Funchess of Oats"
+        },
+        "settings": null,
+        "user_id": "456597014419861504"
+      },
+      {
+        "avatar": "375556aed368b12a3683ded0a3079d64",
+        "display_name": "_mockdrafts",
+        "is_bot": false,
+        "is_owner": true,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "off",
+          "archived": "off",
+          "league_report_pn": "on",
+          "mascot_message": "on",
+          "mention_pn": "on",
+          "player_like_pn": "on",
+          "player_nickname_update": "on",
+          "team_name": "",
+          "team_name_update": "on",
+          "trade_block_pn": "on",
+          "transaction_commissioner": "on",
+          "transaction_free_agent": "on",
+          "transaction_trade": "on",
+          "transaction_waiver": "on",
+          "user_message_pn": "on"
+        },
+        "settings": null,
+        "user_id": "457972047369203712"
+      },
+      {
+        "avatar": "1d5722b1429bebb7a3f905e1ee2d3782",
+        "display_name": "cyermac",
+        "is_bot": false,
+        "is_owner": false,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "allow_sms": "on",
+          "archived": "off",
+          "mention_pn": "on",
+          "team_name": "Is it May 2027 yet?"
+        },
+        "settings": null,
+        "user_id": "461230402724425728"
+      },
+      {
+        "avatar": "9cf0ba07b858634478ff0edec78d0412",
+        "display_name": "DrillinWithChubb",
+        "is_bot": false,
+        "is_owner": false,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "mascot_message": "off",
+          "mention_pn": "on",
+          "player_like_pn": "on",
+          "player_nickname_update": "off",
+          "team_name": "Puka’s Port",
+          "team_name_update": "off",
+          "trade_block_pn": "on",
+          "transaction_commissioner": "on",
+          "transaction_free_agent": "on",
+          "transaction_trade": "on",
+          "transaction_waiver": "on",
+          "user_message_pn": "on"
+        },
+        "settings": null,
+        "user_id": "462773356081442816"
+      },
+      {
+        "avatar": "936dac5503ee9487153676fb30670413",
+        "display_name": "Karemel",
+        "is_bot": false,
+        "is_owner": false,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "mascot_message": "on",
+          "mention_pn": "on",
+          "player_like_pn": "on",
+          "player_nickname_update": "on",
+          "team_name_update": "on",
+          "trade_block_pn": "on",
+          "transaction_commissioner": "on",
+          "transaction_free_agent": "on",
+          "transaction_trade": "on",
+          "transaction_waiver": "on",
+          "user_message_pn": "on"
+        },
+        "settings": null,
+        "user_id": "503754685199413248"
+      },
+      {
+        "avatar": "cd5afe758c9d96aa60ab32f325790753",
+        "display_name": "Maharg",
+        "is_bot": false,
+        "is_owner": true,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "avatar": "https://sleepercdn.com/uploads/e1a2957b4f6c63bd15dd8fbbae38b7a0",
+          "league_report_pn": "off",
+          "mascot_message": "off",
+          "mention_pn": "on",
+          "player_like_pn": "on",
+          "player_nickname_update": "off",
+          "team_name": "Kwame (Earth)",
+          "team_name_update": "off",
+          "trade_block_pn": "off",
+          "transaction_commissioner": "off",
+          "transaction_free_agent": "off",
+          "transaction_trade": "on",
+          "transaction_waiver": "off",
+          "user_message_pn": "on"
+        },
+        "settings": null,
+        "user_id": "535894381345058816"
+      },
+      {
+        "avatar": "b04e0900513428814db26fa9524e8e71",
+        "display_name": "sammystacks",
+        "is_bot": false,
+        "is_owner": false,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "mention_pn": "on",
+          "team_name": "Relapse Raiders "
+        },
+        "settings": null,
+        "user_id": "732419902845243392"
+      },
+      {
+        "avatar": "3ddc9a981cb51f1a38b3af97df869caf",
+        "display_name": "LazyWhale",
+        "is_bot": false,
+        "is_owner": true,
+        "league_id": "1182953443152855040",
+        "metadata": {
+          "allow_pn": "on",
+          "archived": "off",
+          "avatar": "https://sleepercdn.com/uploads/0c7bd5c222da64f44d66a8caf52b88ee",
+          "mention_pn": "on",
+          "team_name": "Lazywhale XT 25Mx2 ☠️"
+        },
+        "settings": null,
+        "user_id": "837532500317302784"
+      }
+    ],
+    "user_count": 12
+  }
+}

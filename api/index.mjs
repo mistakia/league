@@ -114,7 +114,7 @@ api.use('/api/selection-combinations', routes.selection_combinations)
 
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {
-    return res.status(401).send({ error: 'invalid token' })
+    return res.status(401).send({ error: 'Authentication required' })
   }
   next()
 })

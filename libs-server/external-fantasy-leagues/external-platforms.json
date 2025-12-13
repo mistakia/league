@@ -1,0 +1,389 @@
+{
+  "$schema": "./platform-config-schema.json",
+  "version": "2.0.0",
+  "last_updated": "2024-08-04T00:00:00.000Z",
+  "schema_validation": {
+    "enabled": true,
+    "strict_mode": false,
+    "cache_duration_ms": 300000,
+    "validation_timeout_ms": 5000,
+    "sample_validation_threshold": 100
+  },
+  "canonical_format": {
+    "version": "1.0.0",
+    "schemas_path": "../../schemas/",
+    "required_schemas": [
+      "canonical-league-format.json",
+      "canonical-team-format.json",
+      "canonical-roster-format.json",
+      "canonical-transaction-format.json",
+      "canonical-player-format.json"
+    ],
+    "terminology": {
+      "practice_squad_field": "practice_squad",
+      "deprecated_fields": ["taxi_squad"]
+    }
+  },
+  "platforms": {
+    "sleeper": {
+      "display_name": "Sleeper Fantasy Football",
+      "platform_code": "SLEEPER",
+      "status": "active",
+      "canonical_format_support": true,
+      "authentication": {
+        "type": "none",
+        "public_leagues": true,
+        "private_leagues": true,
+        "required_credentials": []
+      },
+      "api_config": {
+        "base_url": "https://api.sleeper.app/v1",
+        "timeout_ms": 30000,
+        "retry_attempts": 3,
+        "retry_delay_ms": 1000
+      },
+      "rate_limiting": {
+        "requests_per_minute": 1000,
+        "requests_per_second": 30,
+        "burst_limit": 100,
+        "window_ms": 2000
+      },
+      "endpoints": {
+        "league": "/league/{league_id}",
+        "users": "/league/{league_id}/users",
+        "rosters": "/league/{league_id}/rosters",
+        "rosters_week": "/league/{league_id}/rosters/{week}",
+        "transactions": "/league/{league_id}/transactions/{week}",
+        "players": "/players/nfl",
+        "user": "/user/{username}",
+        "user_leagues": "/user/{user_id}/leagues/nfl/{season}"
+      },
+      "data_types": {
+        "league": {
+          "endpoint": "league",
+          "schema": "canonical-league-format.json",
+          "required": true,
+          "depends_on": ["users"]
+        },
+        "users": {
+          "endpoint": "users",
+          "schema": "canonical-team-format.json",
+          "required": true,
+          "transform_to": "teams"
+        },
+        "rosters": {
+          "endpoint": "rosters",
+          "schema": "canonical-roster-format.json",
+          "required": true,
+          "historical_support": true
+        },
+        "transactions": {
+          "endpoint": "transactions",
+          "schema": "canonical-transaction-format.json",
+          "required": false,
+          "historical_support": true
+        },
+        "players": {
+          "endpoint": "players",
+          "schema": "canonical-player-format.json",
+          "required": false,
+          "global_endpoint": true
+        }
+      },
+      "transformation_config": {
+        "position_mapping": {
+          "QB": "QB",
+          "RB": "RB",
+          "WR": "WR",
+          "TE": "TE",
+          "K": "K",
+          "DEF": "DST"
+        },
+        "status_mapping": {
+          "Active": "ACTIVE",
+          "Injured Reserve": "IR",
+          "Out": "OUT",
+          "Questionable": "QUESTIONABLE",
+          "Doubtful": "DOUBTFUL"
+        },
+        "transaction_types": {
+          "add": "FREE_AGENT_PICKUP",
+          "drop": "ROSTER_MOVE",
+          "trade": "TRADE",
+          "waiver": "WAIVER_CLAIM",
+          "free_agent": "FREE_AGENT_PICKUP"
+        }
+      },
+      "fixture_collection": {
+        "test_league_id": "1182953443152855040",
+        "collection_enabled": true,
+        "anonymization_enabled": true,
+        "last_collected": "2024-08-04T00:00:00.000Z"
+      }
+    },
+    "espn": {
+      "display_name": "ESPN Fantasy Football",
+      "platform_code": "ESPN",
+      "status": "active",
+      "canonical_format_support": true,
+      "authentication": {
+        "type": "cookie_based",
+        "public_leagues": true,
+        "private_leagues": true,
+        "required_credentials": ["espn_s2", "swid"],
+        "cookie_format": "s2={espn_s2}; SWID={swid}"
+      },
+      "api_config": {
+        "base_url": "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl",
+        "timeout_ms": 30000,
+        "retry_attempts": 3,
+        "retry_delay_ms": 1000
+      },
+      "rate_limiting": {
+        "requests_per_minute": 100,
+        "requests_per_second": 30,
+        "burst_limit": 50,
+        "window_ms": 2000
+      },
+      "endpoints": {
+        "league": "/seasons/{year}/segments/0/leagues/{league_id}",
+        "rosters": "/seasons/{year}/segments/0/leagues/{league_id}",
+        "players": "/seasons/{year}/segments/0/leagues/{league_id}",
+        "transactions": "/seasons/{year}/segments/0/leagues/{league_id}",
+        "draft": "/seasons/{year}/segments/0/leagues/{league_id}",
+        "matchups": "/seasons/{year}/segments/0/leagues/{league_id}"
+      },
+      "view_parameters": {
+        "league": ["mSettings", "mTeam", "mRoster"],
+        "rosters": ["mRoster", "mTeam"],
+        "players": ["kona_player_info"],
+        "transactions": ["mTransactions2"],
+        "draft": ["mDraftDetail"],
+        "matchups": ["mMatchup"]
+      },
+      "data_types": {
+        "league": {
+          "endpoint": "league",
+          "schema": "canonical-league-format.json",
+          "required": true,
+          "view_params": ["mSettings", "mTeam"]
+        },
+        "teams": {
+          "endpoint": "league",
+          "schema": "canonical-team-format.json",
+          "required": true,
+          "extract_from": "teams"
+        },
+        "rosters": {
+          "endpoint": "rosters",
+          "schema": "canonical-roster-format.json",
+          "required": true,
+          "view_params": ["mRoster", "mTeam"],
+          "historical_support": true
+        },
+        "transactions": {
+          "endpoint": "transactions",
+          "schema": "canonical-transaction-format.json",
+          "required": false,
+          "view_params": ["mTransactions2"],
+          "historical_support": true
+        },
+        "players": {
+          "endpoint": "players",
+          "schema": "canonical-player-format.json",
+          "required": false,
+          "view_params": ["kona_player_info"],
+          "note": "Limited player data available through roster calls"
+        },
+        "draft": {
+          "endpoint": "draft",
+          "schema": null,
+          "required": false,
+          "view_params": ["mDraftDetail"]
+        }
+      },
+      "transformation_config": {
+        "position_mapping": {
+          "1": "QB",
+          "2": "RB",
+          "3": "WR",
+          "4": "TE",
+          "5": "K",
+          "16": "DST"
+        },
+        "lineup_slot_mapping": {
+          "0": "QB",
+          "2": "RB",
+          "4": "WR",
+          "6": "TE",
+          "16": "DST",
+          "17": "K",
+          "20": "BENCH",
+          "21": "IR",
+          "23": "FLEX"
+        },
+        "status_mapping": {
+          "INJURY_RESERVE": "IR",
+          "OUT": "OUT",
+          "DOUBTFUL": "DOUBTFUL",
+          "QUESTIONABLE": "QUESTIONABLE",
+          "PROBABLE": "QUESTIONABLE",
+          "ACTIVE": "ACTIVE",
+          "HEALTHY": "ACTIVE"
+        },
+        "transaction_types": {
+          "WAIVER": "WAIVER_CLAIM",
+          "FREEAGENT": "FREE_AGENT_PICKUP",
+          "TRADE": "TRADE",
+          "DRAFT": "DRAFT_PICK",
+          "ROSTER": "ROSTER_MOVE"
+        },
+        "nfl_team_mapping": {
+          "1": "ATL",
+          "2": "BUF",
+          "3": "CHI",
+          "4": "CIN",
+          "5": "CLE",
+          "6": "DAL",
+          "7": "DEN",
+          "8": "DET",
+          "9": "GB",
+          "10": "TEN",
+          "11": "IND",
+          "12": "KC",
+          "13": "LV",
+          "14": "LAR",
+          "15": "MIA",
+          "16": "MIN",
+          "17": "NE",
+          "18": "NO",
+          "19": "NYG",
+          "20": "NYJ",
+          "21": "PHI",
+          "22": "ARI",
+          "23": "PIT",
+          "24": "LAC",
+          "25": "SF",
+          "26": "SEA",
+          "27": "TB",
+          "28": "WSH",
+          "29": "CAR",
+          "30": "JAX",
+          "33": "BAL",
+          "34": "HOU"
+        }
+      },
+      "fixture_collection": {
+        "test_league_id": "21575912",
+        "collection_enabled": true,
+        "anonymization_enabled": true,
+        "last_collected": "2024-08-04T00:00:00.000Z"
+      }
+    },
+    "yahoo": {
+      "display_name": "Yahoo Fantasy Football",
+      "platform_code": "YAHOO",
+      "status": "planned",
+      "canonical_format_support": false,
+      "authentication": {
+        "type": "oauth2",
+        "public_leagues": false,
+        "private_leagues": true,
+        "required_credentials": [
+          "client_id",
+          "client_secret",
+          "access_token",
+          "refresh_token"
+        ]
+      },
+      "api_config": {
+        "base_url": "https://fantasysports.yahooapis.com/fantasy/v2",
+        "timeout_ms": 30000,
+        "retry_attempts": 3,
+        "retry_delay_ms": 1000
+      },
+      "rate_limiting": {
+        "requests_per_minute": 100,
+        "requests_per_second": 30,
+        "burst_limit": 50,
+        "window_ms": 2000
+      },
+      "transformation_config": {
+        "note": "Configuration to be added when Yahoo adapter is implemented"
+      }
+    },
+    "mfl": {
+      "display_name": "MyFantasyLeague",
+      "platform_code": "MFL",
+      "status": "planned",
+      "canonical_format_support": false,
+      "authentication": {
+        "type": "api_key",
+        "public_leagues": true,
+        "private_leagues": true,
+        "required_credentials": ["api_key"]
+      },
+      "api_config": {
+        "base_url": "https://api.myfantasyleague.com/{year}/export",
+        "timeout_ms": 30000,
+        "retry_attempts": 3,
+        "retry_delay_ms": 3000
+      },
+      "rate_limiting": {
+        "requests_per_minute": 40,
+        "requests_per_second": 2,
+        "burst_limit": 10,
+        "window_ms": 3000,
+        "note": "MFL has the most restrictive rate limits"
+      },
+      "transformation_config": {
+        "note": "Configuration to be added when MFL adapter is implemented"
+      }
+    },
+    "fleaflicker": {
+      "display_name": "Fleaflicker Fantasy Football",
+      "platform_code": "FLEAFLICKER",
+      "status": "planned",
+      "canonical_format_support": false,
+      "authentication": {
+        "type": "none",
+        "public_leagues": true,
+        "private_leagues": false,
+        "required_credentials": []
+      },
+      "api_config": {
+        "base_url": "https://www.fleaflicker.com/api",
+        "timeout_ms": 30000,
+        "retry_attempts": 3,
+        "retry_delay_ms": 1000
+      },
+      "rate_limiting": {
+        "requests_per_minute": 100,
+        "requests_per_second": 30,
+        "burst_limit": 50,
+        "window_ms": 2000
+      },
+      "transformation_config": {
+        "note": "Configuration to be added when Fleaflicker adapter is implemented"
+      }
+    }
+  },
+  "global_settings": {
+    "default_timeout_ms": 30000,
+    "default_retry_attempts": 3,
+    "default_retry_delay_ms": 1000,
+    "max_concurrent_requests": 10,
+    "request_logging": {
+      "enabled": true,
+      "log_level": "info",
+      "include_headers": false,
+      "include_body": false
+    },
+    "error_handling": {
+      "max_consecutive_failures": 5,
+      "circuit_breaker_timeout_ms": 60000,
+      "exponential_backoff": true,
+      "max_backoff_delay_ms": 30000
+    }
+  }
+}

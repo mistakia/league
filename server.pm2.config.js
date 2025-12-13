@@ -25,7 +25,7 @@ module.exports = {
       'post-deploy': [
         'source /root/.bash_profile',
         'git submodule update --init private',
-        '/root/.nvm/versions/node/v17.4.0/bin/yarn install',
+        '/root/.nvm/versions/node/current/bin/yarn install',
         'pm2 reload server.pm2.config.js --env production'
       ].join(' && '),
       'pre-setup': ''

@@ -12,6 +12,7 @@ import {
   roster_slot_types,
   transaction_types
 } from '#constants'
+import { require_auth } from '../leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -51,9 +52,7 @@ router.get('/?', async (req, res) => {
     const week = req.query.week || current_season.week
     const year = req.query.year || current_season.year
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     const tid = Number(teamId)
 
@@ -184,9 +183,7 @@ router.put('/?', async (req, res) => {
     const year = req.body.year || current_season.year
     const { players, leagueId } = req.body
 
-    if (!req.auth) {
-      return res.status(401).send({ error: 'invalid token' })
-    }
+    if (!require_auth(req, res)) return
 
     // verify teamId
     try {

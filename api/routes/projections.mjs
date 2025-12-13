@@ -348,7 +348,7 @@ router.put(
   '/:pid/?',
   (err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
-      return res.status(401).send({ error: 'invalid token' })
+      return res.status(401).send({ error: 'Authentication required' })
     }
     next()
   },
@@ -540,7 +540,7 @@ router.delete(
   '/:pid/?',
   (err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
-      return res.status(401).send({ error: 'invalid token' })
+      return res.status(401).send({ error: 'Authentication required' })
     }
     next()
   },

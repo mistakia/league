@@ -1,0 +1,109 @@
+{
+  "input_source": "platform-responses/sleeper/players.json",
+  "mapper_type": "PlayerIdMapper",
+  "expected_results": {
+    "platform_mappings": {
+      "19": "internal-joe-flacco-cle-qb",
+      "1352": "internal-robert-woods-pit-wr",
+      "1408": "internal-leveon-bell-tb-rb"
+    },
+    "reverse_mappings": {
+      "internal-joe-flacco-cle-qb": "19",
+      "internal-robert-woods-pit-wr": "1352",
+      "internal-leveon-bell-tb-rb": "1408"
+    },
+    "successful_mappings": 3,
+    "failed_mappings": 0,
+    "cache_entries": 3
+  },
+  "test_scenarios": [
+    {
+      "description": "Map valid Sleeper player ID to internal PID",
+      "input": {
+        "platform": "sleeper",
+        "external_player_id": "19"
+      },
+      "expected_output": "internal-joe-flacco-cle-qb"
+    },
+    {
+      "description": "Map invalid Sleeper player ID returns null",
+      "input": {
+        "platform": "sleeper",
+        "external_player_id": "999999"
+      },
+      "expected_output": null
+    },
+    {
+      "description": "Map with fallback data when direct lookup fails",
+      "input": {
+        "platform": "sleeper",
+        "external_player_id": "new_player_id",
+        "fallback_data": {
+          "name": "Joe Flacco",
+          "position": "QB",
+          "team": "CLE"
+        }
+      },
+      "expected_output": "internal-joe-flacco-cle-qb"
+    },
+    {
+      "description": "Bulk mapping multiple players",
+      "input": {
+        "platform": "sleeper",
+        "players": [
+          { "external_id": "19", "fallback_data": {} },
+          { "external_id": "1352", "fallback_data": {} },
+          { "external_id": "999999", "fallback_data": {} }
+        ]
+      },
+      "expected_output": {
+        "19": "internal-joe-flacco-cle-qb",
+        "1352": "internal-robert-woods-pit-wr",
+        "999999": null
+      }
+    },
+    {
+      "description": "Cache hit on repeated mapping",
+      "input": {
+        "platform": "sleeper",
+        "external_player_id": "19"
+      },
+      "expected_output": "internal-joe-flacco-cle-qb",
+      "expected_behavior": {
+        "database_calls": 0,
+        "cache_hit": true
+      }
+    }
+  ],
+  "database_expectations": {
+    "find_player_calls": [
+      { "sleeper_id": "19" },
+      { "sleeper_id": "1352" },
+      { "sleeper_id": "1408" }
+    ],
+    "update_player_calls": [],
+    "expected_player_records": [
+      {
+        "pid": "internal-joe-flacco-cle-qb",
+        "sleeper_id": "19",
+        "name": "Joe Flacco",
+        "pos": "QB",
+        "team": "CLE"
+      },
+      {
+        "pid": "internal-robert-woods-pit-wr",
+        "sleeper_id": "1352",
+        "name": "Robert Woods",
+        "pos": "WR",
+        "team": "PIT"
+      },
+      {
+        "pid": "internal-leveon-bell-tb-rb",
+        "sleeper_id": "1408",
+        "name": "Le'Veon Bell",
+        "pos": "RB",
+        "team": "TB"
+      }
+    ]
+  }
+}

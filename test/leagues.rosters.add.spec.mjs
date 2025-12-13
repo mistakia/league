@@ -13,7 +13,13 @@ import {
 } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import { getRoster } from '#libs-server'
-import { selectPlayer, missing, invalid, notLoggedIn } from './utils/index.mjs'
+import {
+  selectPlayer,
+  missing,
+  invalid,
+  notLoggedIn,
+  forbidden
+} from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.should()
@@ -187,7 +193,7 @@ describe('API /leagues/rosters - add', function () {
           leagueId: 1
         })
 
-      await invalid(request, 'leagueId')
+      await forbidden(request, 'Only league commissioner can')
     })
 
     it('exceeds roster limit', async () => {
