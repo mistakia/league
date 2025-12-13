@@ -7,6 +7,9 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 import './selected-player-gamelogs.styl'
 
+// Fantasy stats to show in gamelogs (only total points and points added)
+const GAMELOGS_FANTASY_STATS_FILTER = ['points', 'points_added']
+
 const get_snaps_config = (pos) => {
   switch (pos) {
     case 'DST':
@@ -75,7 +78,6 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           <div className='table__cell metric'>
             {game.points_added ? game.points_added.toFixed(1) : '-'}
           </div>
-          <div className='table__cell metric'>{game.pos_rnk || '-'}</div>
           <div className='table__cell metric'>
             {snaps_off_pct != null
               ? `${(snaps_off_pct * 100).toFixed(0)}%`
@@ -96,6 +98,7 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           stats={game}
           lead={lead}
           pos={position}
+          fantasy_stats_filter={GAMELOGS_FANTASY_STATS_FILTER}
         />
       )
     })
@@ -117,7 +120,6 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           <div className='row__group-body'>
             <div className='table__cell'>Pts</div>
             <div className='table__cell'>Pts+</div>
-            <div className='table__cell'>Rnk</div>
           </div>
         </div>
         <div className='row__group'>
@@ -131,7 +133,10 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
             ))}
           </div>
         </div>
-        <PlayerSelectedRowHeader pos={position} />
+        <PlayerSelectedRowHeader
+          pos={position}
+          fantasy_stats_filter={GAMELOGS_FANTASY_STATS_FILTER}
+        />
       </div>
       {rows}
     </div>

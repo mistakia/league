@@ -17,6 +17,46 @@ const create_row_group = (key, head, cells) => (
 const snaps_header = (snaps_types) =>
   create_row_group('snaps', 'Snaps', snaps_types)
 
+// Map fantasy stat fields to their header labels
+const FANTASY_STAT_HEADER_MAP = {
+  points: 'FP',
+  points_pos_rnk: 'Rnk',
+  points_per_game: 'FP/G',
+  points_per_game_pos_rnk: 'Rnk',
+  points_added: 'Pts+',
+  points_added_rnk: 'Ovr',
+  points_added_pos_rnk: 'Rnk',
+  points_added_per_game: 'Pts+/G',
+  points_added_per_game_rnk: 'Ovr',
+  points_added_per_game_pos_rnk: 'Rnk'
+}
+
+// Order of fantasy stats (must match FANTASY_STATS in player-selected-row.js)
+const FANTASY_STATS_ORDER = [
+  'points',
+  'points_pos_rnk',
+  'points_per_game',
+  'points_per_game_pos_rnk',
+  'points_added',
+  'points_added_rnk',
+  'points_added_pos_rnk',
+  'points_added_per_game',
+  'points_added_per_game_rnk',
+  'points_added_per_game_pos_rnk'
+]
+
+const get_fantasy_stats_headers = (fantasy_stats_filter = null) => {
+  if (!fantasy_stats_filter) {
+    // Return all headers in the original order
+    return FANTASY_STATS_ORDER.map((stat) => FANTASY_STAT_HEADER_MAP[stat])
+  }
+
+  // Return headers for filtered stats, preserving order
+  return FANTASY_STATS_ORDER.filter((stat) =>
+    fantasy_stats_filter.includes(stat)
+  ).map((stat) => FANTASY_STAT_HEADER_MAP[stat])
+}
+
 const categories = {
   fantasy_stats: [
     'FP',
@@ -144,23 +184,34 @@ const position_config = {
   ]
 }
 
-const create_position_group = (config, snaps) => {
+const create_position_group = (config, snaps, fantasy_stats_filter = null) => {
   return config
     .map((item, index) => {
       if (item.key === 'snaps') {
         return Boolean(snaps) && snaps_header(item.types)
+      }
+      if (item.key === 'fantasy_stats' && fantasy_stats_filter) {
+        const headers = get_fantasy_stats_headers(fantasy_stats_filter)
+        return create_row_group(index, item.head, headers)
       }
       return create_row_group(index, item.head, categories[item.key])
     })
     .filter(Boolean)
 }
 
-export default function PlayerSelectedRowHeader({ pos, snaps }) {
+export default function PlayerSelectedRowHeader({
+  pos,
+  snaps,
+  fantasy_stats_filter
+}) {
   const config = position_config[pos]
-  return config ? create_position_group(config, snaps) : null
+  return config
+    ? create_position_group(config, snaps, fantasy_stats_filter)
+    : null
 }
 
 PlayerSelectedRowHeader.propTypes = {
   pos: PropTypes.string,
-  snaps: PropTypes.bool
+  snaps: PropTypes.bool,
+  fantasy_stats_filter: PropTypes.array
 }

@@ -199,12 +199,17 @@ const FIELD_FIXED_VALUES = {
 }
 
 // Position-based stat field configuration
-const get_stat_fields = (pos) => {
+const get_stat_fields = (pos, fantasy_stats_filter = null) => {
+  // Filter fantasy stats if a filter is provided
+  const fantasy_stats_to_use = fantasy_stats_filter
+    ? FANTASY_STATS.filter((stat) => fantasy_stats_filter.includes(stat))
+    : FANTASY_STATS
+
   const position_configs = {
-    DST: [FANTASY_STATS, DEFENSE_STATS],
-    K: [FANTASY_STATS, KICKER_STATS],
+    DST: [fantasy_stats_to_use, DEFENSE_STATS],
+    K: [fantasy_stats_to_use, KICKER_STATS],
     QB: [
-      FANTASY_STATS,
+      fantasy_stats_to_use,
       PASSING_PRODUCTION,
       PASSING_EFFICIENCY,
       PASSING_USAGE,
@@ -214,7 +219,7 @@ const get_stat_fields = (pos) => {
       RUSHING_REDZONE
     ],
     RB: [
-      FANTASY_STATS,
+      fantasy_stats_to_use,
       RUSHING_PRODUCTION,
       RUSHING_OPPORTUNITIES,
       RUSHING_EFFICIENCY,
@@ -227,7 +232,7 @@ const get_stat_fields = (pos) => {
       RECEIVING_REDZONE
     ],
     WR: [
-      FANTASY_STATS,
+      fantasy_stats_to_use,
       RECEIVING_PRODUCTION,
       RECEIVING_OPPORTUNITIES,
       RECEIVING_EFFICIENCY,
@@ -236,7 +241,7 @@ const get_stat_fields = (pos) => {
       RECEIVING_REDZONE
     ],
     TE: [
-      FANTASY_STATS,
+      fantasy_stats_to_use,
       RECEIVING_PRODUCTION,
       RECEIVING_OPPORTUNITIES,
       RECEIVING_EFFICIENCY,
@@ -368,7 +373,8 @@ export default function PlayerSelectedRow({
   percentiles = {},
   header,
   fixed = 0,
-  snaps
+  snaps,
+  fantasy_stats_filter
 }) {
   useEffect(() => {
     if (percentile_key && load_percentiles) {
@@ -381,7 +387,7 @@ export default function PlayerSelectedRow({
     header && 'header'
   ])
 
-  const stat_fields = get_stat_fields(pos)
+  const stat_fields = get_stat_fields(pos, fantasy_stats_filter)
   const render_params = {
     pos,
     percentile_key,
@@ -426,5 +432,6 @@ PlayerSelectedRow.propTypes = {
   percentile_key: PropTypes.string,
   header: PropTypes.bool,
   fixed: PropTypes.number,
-  snaps: PropTypes.bool
+  snaps: PropTypes.bool,
+  fantasy_stats_filter: PropTypes.array
 }
