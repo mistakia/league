@@ -54,8 +54,8 @@ export default class ActivateConfirmation extends React.Component {
 
       if (
         isReserveEligible({
-          nfl_status: activePlayerMap.get('nfl_status'),
-          injury_status: activePlayerMap.get('injury_status'),
+          roster_status: activePlayerMap.get('roster_status'),
+          game_designation: activePlayerMap.get('game_designation'),
           prior_week_inactive: activePlayerMap.get('prior_week_inactive'),
           prior_week_ruled_out: activePlayerMap.get('prior_week_ruled_out'),
           week: current_season.week,

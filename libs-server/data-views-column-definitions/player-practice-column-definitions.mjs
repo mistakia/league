@@ -52,7 +52,8 @@ const add_player_practice_with_statement = ({
   const with_query = db('practice')
     .select(
       'pid',
-      'formatted_status',
+      'game_designation',
+      'roster_status',
       'inj',
       'm',
       'tu',
@@ -108,9 +109,13 @@ const create_player_practice_designation_field = (practice_day) => ({
 })
 
 export default {
-  player_practice_status: create_player_practice_field(
-    'formatted_status',
-    'practice_status'
+  player_practice_game_designation: create_player_practice_field(
+    'game_designation',
+    'practice_game_designation'
+  ),
+  player_practice_roster_status: create_player_practice_field(
+    'roster_status',
+    'practice_roster_status'
   ),
   player_practice_injury: create_player_practice_field(
     'inj',

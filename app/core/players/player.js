@@ -23,9 +23,12 @@ export function createPlayer({
   f,
   s,
   su,
-  status,
-  formatted_status,
+  source_status,
+  game_designation,
+  roster_status,
   practice_week,
+  practice_game_designation,
+  practice_roster_status,
   ...data
 }) {
   const params = {
@@ -50,8 +53,17 @@ export function createPlayer({
       f,
       s,
       su,
-      status,
-      formatted_status
+      source_status,
+      // Use practice table values for practice_week sub-map if available,
+      // otherwise fall back to top-level values
+      game_designation:
+        practice_game_designation !== undefined
+          ? practice_game_designation
+          : game_designation,
+      roster_status:
+        practice_roster_status !== undefined
+          ? practice_roster_status
+          : roster_status
     })
   } else if (practice_week) {
     // If practice_week is passed directly (e.g., from data.toJS() spreading),
@@ -70,6 +82,19 @@ export function createPlayer({
     params.lname = lname
     params.name = `${fname} ${lname}`
     params.pname = pname || `${fname[0]}. ${lname}`
+  }
+
+  // Add status fields to top-level player object for direct access
+  if (source_status !== undefined) {
+    params.source_status = source_status
+  }
+
+  if (game_designation !== undefined) {
+    params.game_designation = game_designation
+  }
+
+  if (roster_status !== undefined) {
+    params.roster_status = roster_status
   }
 
   if (projection) {

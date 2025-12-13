@@ -180,8 +180,8 @@ export default async function ({
       'player.gsisid',
       'player.gsispid',
       'player.espn_id',
-      'player.nfl_status',
-      'player.injury_status'
+      'player.roster_status',
+      'player.game_designation'
     ]
 
     selects.push(...default_columns)
@@ -189,8 +189,10 @@ export default async function ({
     query.select(db.raw(selects.join(',')))
     query.groupBy(db.raw(selects.join(',')))
 
-    query.select('practice.formatted_status as game_status')
-    query.groupBy('game_status')
+    // Alias practice table columns to avoid overwriting player table values
+    // These will be used in the practice_week sub-map, while player values remain at top level
+    query.select('practice.game_designation as practice_game_designation')
+    query.groupBy('practice.game_designation')
 
     // Include practice day columns for reserve eligibility checking
     query.select(
@@ -201,8 +203,8 @@ export default async function ({
       'practice.f',
       'practice.s',
       'practice.su',
-      'practice.status',
-      'practice.formatted_status'
+      'practice.source_status',
+      'practice.roster_status as practice_roster_status'
     )
     query.groupBy(
       'practice.m',
@@ -212,8 +214,8 @@ export default async function ({
       'practice.f',
       'practice.s',
       'practice.su',
-      'practice.status',
-      'practice.formatted_status'
+      'practice.source_status',
+      'practice.roster_status'
     )
 
     query.select('nfl_games.day as game_day')
@@ -252,9 +254,9 @@ export default async function ({
       this.whereIn('player.pos', fantasy_positions)
         .whereNot('player.current_nfl_team', 'INA')
         .where(function () {
-          this.whereNotIn('player.nfl_status', [
+          this.whereNotIn('player.roster_status', [
             player_nfl_status.RETIRED
-          ]).orWhereNull('player.nfl_status')
+          ]).orWhereNull('player.roster_status')
         })
     })
 

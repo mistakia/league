@@ -74,7 +74,9 @@ export default async function ({ teamId, leagueId }) {
     })
     player_query.select(
       'player.*',
-      'practice.formatted_status as game_status',
+      db.raw(
+        'COALESCE(practice.game_designation, player.game_designation) as game_designation'
+      ),
       'practice.m',
       'practice.tu',
       'practice.w',
@@ -93,7 +95,9 @@ export default async function ({ teamId, leagueId }) {
   } else {
     player_query.select(
       'player.*',
-      'practice.formatted_status as game_status',
+      db.raw(
+        'COALESCE(practice.game_designation, player.game_designation) as game_designation'
+      ),
       'practice.m',
       'practice.tu',
       'practice.w',
@@ -114,8 +118,8 @@ export default async function ({ teamId, leagueId }) {
     }
 
     const {
-      nfl_status,
-      injury_status,
+      roster_status,
+      game_designation,
       prior_week_inactive,
       prior_week_ruled_out,
       game_day,
@@ -143,8 +147,8 @@ export default async function ({ teamId, leagueId }) {
       (roster_player.slot === roster_slot_types.RESERVE_SHORT_TERM ||
         roster_player.slot === roster_slot_types.RESERVE_LONG_TERM) &&
       !isReserveEligible({
-        nfl_status,
-        injury_status,
+        roster_status,
+        game_designation,
         prior_week_inactive,
         prior_week_ruled_out,
         week: current_season.week,
@@ -156,7 +160,7 @@ export default async function ({ teamId, leagueId }) {
       throw new Error('Reserve player violation')
     } else if (
       roster_player.slot === roster_slot_types.COV &&
-      !isReserveCovEligible({ nfl_status })
+      !isReserveCovEligible({ roster_status })
     ) {
       throw new Error('Reserve player violation')
     }

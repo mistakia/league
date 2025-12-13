@@ -18221,7 +18221,9 @@ CREATE TABLE public.player (
     ffpc_id integer,
     nffc_id integer,
     fantrax_id character varying(50),
-    rtsports_id integer
+    rtsports_id integer,
+    roster_status character varying(100),
+    game_designation character varying(100)
 );
 
 
@@ -22564,7 +22566,11 @@ CREATE TABLE public.players_status (
     status character varying(255),
     formatted_status character varying(100),
     search_rank integer,
-    "timestamp" integer NOT NULL
+    "timestamp" integer NOT NULL,
+    roster_status character varying(100),
+    game_designation character varying(100),
+    source_status character varying(100),
+    source_injury_status character varying(100)
 );
 
 
@@ -22648,7 +22654,10 @@ CREATE TABLE public.practice (
     th character varying(20),
     f character varying(20),
     s character varying(20),
-    su character varying(20)
+    su character varying(20),
+    roster_status character varying(100),
+    game_designation character varying(100),
+    source_status character varying(100)
 );
 
 

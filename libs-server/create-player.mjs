@@ -99,7 +99,7 @@ const createPlayer = async (playerData) => {
   playerData.pos = formatPosition(playerData.pos)
   playerData.pos1 = formatPosition(playerData.pos1)
   playerData.posd = formatPosition(playerData.posd)
-  playerData.nfl_status = format_nfl_status(playerData.nfl_status)
+  playerData.roster_status = format_nfl_status(playerData.roster_status)
 
   try {
     await db('player').insert({

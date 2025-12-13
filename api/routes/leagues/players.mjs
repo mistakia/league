@@ -87,9 +87,8 @@ if (process.env.NODE_ENV !== 'test') {
  *                     nfl_draft_year: 2017
  *                     round: 1
  *                     col: 'Texas Tech'
- *                     status: 'Active'
- *                     nfl_status: 'ACTIVE'
- *                     injury_status: null
+ *                     roster_status: 'ACTIVE'
+ *                     game_designation: null
  *                     dob: '1995-09-17'
  *               authenticated_with_bids:
  *                 summary: Response for authenticated user with restricted free agency bids
@@ -109,9 +108,8 @@ if (process.env.NODE_ENV !== 'test') {
  *                     nfl_draft_year: 2017
  *                     round: 1
  *                     col: 'Texas Tech'
- *                     status: 'Active'
- *                     nfl_status: 'ACTIVE'
- *                     injury_status: null
+ *                     roster_status: 'ACTIVE'
+ *                     game_designation: null
  *                     dob: '1995-09-17'
  *                     bid: 45
  *                     restricted_free_agency_conditional_releases:

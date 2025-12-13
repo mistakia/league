@@ -229,7 +229,7 @@ export function getFilteredPlayers(state) {
     selected_player_nfl_statuses.size !== Object.keys(player_nfl_status).length
   ) {
     filtered = filtered.filter((player_map) =>
-      selected_player_nfl_statuses.includes(player_map.get('nfl_status'))
+      selected_player_nfl_statuses.includes(player_map.get('roster_status'))
     )
   }
 

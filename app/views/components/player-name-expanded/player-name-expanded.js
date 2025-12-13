@@ -112,22 +112,22 @@ class PlayerNameExpanded extends Player {
         ? player_map.get('pname')
         : `${player_map.get('fname', '')} ${player_map.get('lname', '')}`
 
-    const player_nfl_status_value = player_map.get('nfl_status')
-    const player_game_status = player_map.get('game_status')
+    const player_roster_status = player_map.get('roster_status')
+    const player_game_designation = player_map.get('game_designation')
     const slot = player_map.get('slot')
 
-    // game status should supersede nfl status
+    // game designation should supersede roster status
     const player_status_label =
-      nfl_player_status_abbreviations[player_game_status] ||
-      nfl_player_status_abbreviations[player_nfl_status_value]
+      nfl_player_status_abbreviations[player_game_designation] ||
+      nfl_player_status_abbreviations[player_roster_status]
     const player_status_description =
-      nfl_player_status_descriptions[player_game_status] ||
-      nfl_player_status_descriptions[player_nfl_status_value]
+      nfl_player_status_descriptions[player_game_designation] ||
+      nfl_player_status_descriptions[player_roster_status]
     const player_has_non_active_status = Boolean(
-      (nfl_player_status_abbreviations[player_nfl_status_value] &&
-        player_nfl_status_value !== player_nfl_status.ACTIVE) ||
-        (nfl_player_status_abbreviations[player_game_status] &&
-          player_game_status !== player_nfl_status.ACTIVE)
+      (nfl_player_status_abbreviations[player_roster_status] &&
+        player_roster_status !== player_nfl_status.ACTIVE) ||
+        (nfl_player_status_abbreviations[player_game_designation] &&
+          player_game_designation !== player_nfl_status.ACTIVE)
     )
 
     return (

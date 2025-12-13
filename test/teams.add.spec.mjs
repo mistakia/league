@@ -493,7 +493,7 @@ describe('API /teams - add', function () {
 
     it('reserve player violation', async () => {
       const reservePlayer = await selectPlayer({
-        nfl_status: player_nfl_status.ACTIVE
+        roster_status: player_nfl_status.ACTIVE
       })
       const teamId = 1
       const leagueId = 1

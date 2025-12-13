@@ -11,7 +11,7 @@ import isReserveEligible from './is-reserve-eligible.mjs'
  * 4. All others → BENCH (active roster)
  *
  * @param {Object} params - The parameters object
- * @param {Object} params.player - Player object with nfl_status, injury_status, etc.
+ * @param {Object} params.player - Player object with roster_status, game_designation, etc.
  * @param {number} params.current_slot - Player's current slot
  * @param {Object} params.roster - Roster object for space validation
  * @param {number} params.week - Current week number
@@ -37,8 +37,8 @@ export default function get_default_trade_slot({
   // Priority 2: Reserve-eligible players default to short-term IR (if space available)
   // Check if player is eligible for reserve based on injury/NFL status
   const player_is_reserve_eligible = isReserveEligible({
-    nfl_status: player.nfl_status,
-    injury_status: player.injury_status,
+    roster_status: player.roster_status,
+    game_designation: player.game_designation,
     practice: player.practice,
     week,
     is_regular_season,

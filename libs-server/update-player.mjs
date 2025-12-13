@@ -38,7 +38,7 @@ const protected_props = [
   'cfbref_id'
 ]
 
-const nullable_props = ['injury_status']
+const nullable_props = ['game_designation']
 
 /*
    player can be a string identifier or player db entry
@@ -67,13 +67,13 @@ const updatePlayer = async ({
     ...update
   }
 
-  if (update.nfl_status) {
-    formatted_update.nfl_status = format_nfl_status(update.nfl_status)
+  if (update.roster_status) {
+    formatted_update.roster_status = format_nfl_status(update.roster_status)
   }
 
-  if (update.injury_status) {
-    formatted_update.injury_status = format_nfl_injury_status(
-      update.injury_status
+  if (update.game_designation) {
+    formatted_update.game_designation = format_nfl_injury_status(
+      update.game_designation
     )
   }
 

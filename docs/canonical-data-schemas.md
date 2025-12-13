@@ -361,8 +361,8 @@ These definitions are defined in each schema's `definitions` section and ensure 
   "college": "string|null", // Player's college
   "years_experience": "number|null", // Years of NFL experience
   "rookie_year": "number|null", // Year player entered the NFL
-  "status": "ACTIVE|INACTIVE|INJURED_RESERVE|PRACTICE_SQUAD|SUSPENDED|RETIRED|FREE_AGENT",
-  "injury_status": "HEALTHY|QUESTIONABLE|DOUBTFUL|OUT|IR|PUP|SUSPENDED|null",
+  "roster_status": "ACTIVE|INACTIVE|INJURED_RESERVE|PRACTICE_SQUAD|SUSPENDED|RETIRED|FREE_AGENT",
+  "game_designation": "OUT|QUESTIONABLE|DOUBTFUL|PROBABLE|null",
   "injury_notes": "string|null", // Details about player's injury
   "bye_week": "number|null", // Player's bye week for current season (1-18)
   "fantasy_positions": [

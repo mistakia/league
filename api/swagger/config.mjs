@@ -259,12 +259,7 @@ const options = {
               description: 'College',
               example: 'Texas Tech'
             },
-            status: {
-              type: 'string',
-              description: 'Player status',
-              example: 'Active'
-            },
-            nfl_status: {
+            roster_status: {
               type: 'string',
               enum: [
                 'ACTIVE',
@@ -276,11 +271,11 @@ const options = {
               description: 'NFL roster status',
               example: 'ACTIVE'
             },
-            injury_status: {
+            game_designation: {
               type: 'string',
               nullable: true,
-              enum: ['QUESTIONABLE', 'DOUBTFUL', 'OUT', null],
-              description: 'Current injury status',
+              enum: ['OUT', 'QUESTIONABLE', 'DOUBTFUL', 'PROBABLE', null],
+              description: 'Weekly game-week injury designation',
               example: null
             },
             dob: {
