@@ -43,12 +43,6 @@ export const add_player_stats_play_by_play_with_statement = ({
     }
   }
 
-  // Add year column when year param exists (needed for joins)
-  if (params.year && !splits.includes('year')) {
-    with_query.select('nfl_plays.year')
-    with_query.groupBy('nfl_plays.year')
-  }
-
   const unique_select_strings = new Set(select_strings)
 
   for (const select_string of unique_select_strings) {
