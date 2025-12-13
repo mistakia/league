@@ -74,6 +74,19 @@ export function createPlayer({
     params.pname = pname || `${fname[0]}. ${lname}`
   }
 
+  // Add status fields to top-level player object for direct access
+  if (source_status !== undefined) {
+    params.source_status = source_status
+  }
+
+  if (game_designation !== undefined) {
+    params.game_designation = game_designation
+  }
+
+  if (roster_status !== undefined) {
+    params.roster_status = roster_status
+  }
+
   if (projection) {
     params.projection = new Map(projection)
   }
