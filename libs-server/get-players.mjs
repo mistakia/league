@@ -189,7 +189,9 @@ export default async function ({
     query.select(db.raw(selects.join(',')))
     query.groupBy(db.raw(selects.join(',')))
 
-    query.select('practice.game_designation')
+    // Alias practice table columns to avoid overwriting player table values
+    // These will be used in the practice_week sub-map, while player values remain at top level
+    query.select('practice.game_designation as practice_game_designation')
     query.groupBy('practice.game_designation')
 
     // Include practice day columns for reserve eligibility checking
@@ -202,7 +204,7 @@ export default async function ({
       'practice.s',
       'practice.su',
       'practice.source_status',
-      'practice.roster_status'
+      'practice.roster_status as practice_roster_status'
     )
     query.groupBy(
       'practice.m',

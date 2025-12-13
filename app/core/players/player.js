@@ -27,6 +27,8 @@ export function createPlayer({
   game_designation,
   roster_status,
   practice_week,
+  practice_game_designation,
+  practice_roster_status,
   ...data
 }) {
   const params = {
@@ -52,8 +54,16 @@ export function createPlayer({
       s,
       su,
       source_status,
-      game_designation,
-      roster_status
+      // Use practice table values for practice_week sub-map if available,
+      // otherwise fall back to top-level values
+      game_designation:
+        practice_game_designation !== undefined
+          ? practice_game_designation
+          : game_designation,
+      roster_status:
+        practice_roster_status !== undefined
+          ? practice_roster_status
+          : roster_status
     })
   } else if (practice_week) {
     // If practice_week is passed directly (e.g., from data.toJS() spreading),
