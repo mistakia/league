@@ -416,11 +416,12 @@ export default class EspnAdapter extends BaseAdapter {
         nfl_team: player.proTeamId
           ? this.map_nfl_team_to_canonical(player.proTeamId)
           : null,
-        status: player.injuryStatus
+        roster_status: player_nfl_status.ACTIVE,
+        game_designation: player.injuryStatus
           ? format_nfl_injury_status(
               this.map_injury_status_to_canonical(player.injuryStatus)
             )
-          : player_nfl_status.ACTIVE,
+          : null,
 
         // Physical attributes
         height: null,

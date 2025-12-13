@@ -6,8 +6,8 @@ export default async function ({
   rookie = false,
   exclude_pids = [],
   excludePS = false,
-  nfl_status = undefined,
-  injury_status = undefined,
+  roster_status = undefined,
+  game_designation = undefined,
   exclude_rostered_players = false,
   lid = 1,
   random = true // New option for backward compatibility - defaults to true
@@ -50,15 +50,15 @@ export default async function ({
     query.whereNot('posd', 'PS')
   }
 
-  if (nfl_status) {
-    query.where('nfl_status', nfl_status)
+  if (roster_status) {
+    query.where('roster_status', roster_status)
   }
 
-  if (injury_status !== undefined) {
-    if (injury_status === null) {
-      query.whereNull('injury_status')
+  if (game_designation !== undefined) {
+    if (game_designation === null) {
+      query.whereNull('game_designation')
     } else {
-      query.where('injury_status', injury_status)
+      query.where('game_designation', game_designation)
     }
   }
 

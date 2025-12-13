@@ -5,7 +5,7 @@ import isReserveEligible from './is-reserve-eligible.mjs'
  * Validate that a player can be assigned to a specific slot
  *
  * @param {Object} params - The parameters object
- * @param {Object} params.player - Player object with nfl_status, injury_status, pos, etc.
+ * @param {Object} params.player - Player object with roster_status, game_designation, pos, etc.
  * @param {number} params.slot - Target slot constant
  * @param {Object} params.roster - Roster object for space validation
  * @param {number} params.week - Current week number
@@ -57,8 +57,8 @@ export default function validate_trade_slot_assignment({
   if (slot === roster_slot_types.RESERVE_SHORT_TERM) {
     // First check if player is reserve eligible
     const player_is_reserve_eligible = isReserveEligible({
-      nfl_status: player.nfl_status,
-      injury_status: player.injury_status,
+      roster_status: player.roster_status,
+      game_designation: player.game_designation,
       practice: player.practice,
       week,
       is_regular_season,

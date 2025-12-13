@@ -113,7 +113,7 @@
       "maximum": 2100,
       "description": "Year player entered the NFL"
     },
-    "status": {
+    "roster_status": {
       "type": "string",
       "enum": [
         "ACTIVE",
@@ -125,21 +125,12 @@
         "FREE_AGENT"
       ],
       "default": "ACTIVE",
-      "description": "Player's current NFL status"
+      "description": "Player's current NFL roster status"
     },
-    "injury_status": {
+    "game_designation": {
       "type": ["string", "null"],
-      "enum": [
-        "HEALTHY",
-        "QUESTIONABLE",
-        "DOUBTFUL",
-        "OUT",
-        "IR",
-        "PUP",
-        "SUSPENDED",
-        null
-      ],
-      "description": "Current injury/availability status"
+      "enum": ["OUT", "QUESTIONABLE", "DOUBTFUL", "PROBABLE", null],
+      "description": "Weekly game-week injury designation from practice reports"
     },
     "injury_notes": {
       "type": ["string", "null"],

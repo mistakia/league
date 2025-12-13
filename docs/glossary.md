@@ -536,30 +536,29 @@
 
 ### General
 
-| column           | name                 | description                                       | coverage |
-| ---------------- | -------------------- | ------------------------------------------------- | -------- |
-| pid              | Player ID            | Unique identifier for the player                  | 100.00%  |
-| fname            | First Name           | First name                                        | 100.00%  |
-| lname            | Last Name            | Last name                                         | 100.00%  |
-| pname            | Player Name          | Name in "F. Last" format                          | 100.00%  |
-| formatted        | Formatted Name       | Name in a formatted display version               | 100.00%  |
-| pos              | Primary Position     | Primary position                                  | 100.00%  |
-| pos1             | Secondary Position   | Secondary position                                | 100.00%  |
-| pos2             | Tertiary Position    | Tertiary position                                 | 50.43%   |
-| dob              | Date of Birth        | Date of birth                                     | 100.00%  |
-| col              | College              | College                                           | 99.02%   |
-| dv               | College Division     | College division                                  | 46.67%   |
-| start            | NFL Start Year       | Year started in the NFL                           | 100.00%  |
-| current_nfl_team | Current NFL Team     | Current NFL team (default 'INA' if not on a team) | 100.00%  |
-| posd             | Position Depth       | Position depth                                    | 100.00%  |
-| jnum             | Jersey Number        | Jersey number                                     | 99.99%   |
-| status           | Player Status        | Current status                                    | 33.03%   |
-| nfl_status       | NFL Status           | Current NFL status                                | 75.30%   |
-| injury_status    | Injury Status        | Current injury status                             | 1.89%    |
-| high_school      | High School          | High school                                       | 84.32%   |
-| dpos             | Draft Position       | Draft position                                    | 41.06%   |
-| round            | Draft Round          | Draft round                                       | 99.35%   |
-| dcp              | Draft Capital Points | Draft capital points                              | 99.23%   |
+| column           | name                 | description                                                     | coverage |
+| ---------------- | -------------------- | --------------------------------------------------------------- | -------- |
+| pid              | Player ID            | Unique identifier for the player                                | 100.00%  |
+| fname            | First Name           | First name                                                      | 100.00%  |
+| lname            | Last Name            | Last name                                                       | 100.00%  |
+| pname            | Player Name          | Name in "F. Last" format                                        | 100.00%  |
+| formatted        | Formatted Name       | Name in a formatted display version                             | 100.00%  |
+| pos              | Primary Position     | Primary position                                                | 100.00%  |
+| pos1             | Secondary Position   | Secondary position                                              | 100.00%  |
+| pos2             | Tertiary Position    | Tertiary position                                               | 50.43%   |
+| dob              | Date of Birth        | Date of birth                                                   | 100.00%  |
+| col              | College              | College                                                         | 99.02%   |
+| dv               | College Division     | College division                                                | 46.67%   |
+| start            | NFL Start Year       | Year started in the NFL                                         | 100.00%  |
+| current_nfl_team | Current NFL Team     | Current NFL team (default 'INA' if not on a team)               | 100.00%  |
+| posd             | Position Depth       | Position depth                                                  | 100.00%  |
+| jnum             | Jersey Number        | Jersey number                                                   | 99.99%   |
+| roster_status    | Roster Status        | Current NFL roster status (ACTIVE, INJURED_RESERVE, etc.)       | 75.30%   |
+| game_designation | Game Designation     | Weekly game designation (OUT, QUESTIONABLE, DOUBTFUL, PROBABLE) | 1.89%    |
+| high_school      | High School          | High school                                                     | 84.32%   |
+| dpos             | Draft Position       | Draft position                                                  | 41.06%   |
+| round            | Draft Round          | Draft round                                                     | 99.35%   |
+| dcp              | Draft Capital Points | Draft capital points                                            | 99.23%   |
 
 ### Measurables
 

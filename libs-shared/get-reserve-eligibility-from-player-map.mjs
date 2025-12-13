@@ -11,8 +11,8 @@ export default function get_reserve_eligibility_from_player_map({
 
   if (!player_map) return result
 
-  const nfl_status = player_map.get('nfl_status')
-  const injury_status = player_map.get('injury_status')
+  const roster_status = player_map.get('roster_status')
+  const game_designation = player_map.get('game_designation')
   const prior_week_inactive = player_map.get('prior_week_inactive')
   const prior_week_ruled_out = player_map.get('prior_week_ruled_out')
   const game_day = player_map.get('game_day')
@@ -21,8 +21,8 @@ export default function get_reserve_eligibility_from_player_map({
 
   if (
     isReserveEligible({
-      nfl_status,
-      injury_status,
+      roster_status,
+      game_designation,
       prior_week_inactive,
       prior_week_ruled_out,
       week: current_season.week,
@@ -34,7 +34,7 @@ export default function get_reserve_eligibility_from_player_map({
     result.reserve_short_term_eligible = true
   }
 
-  if (isReserveCovEligible({ nfl_status })) {
+  if (isReserveCovEligible({ roster_status })) {
     result.cov = true
   }
 

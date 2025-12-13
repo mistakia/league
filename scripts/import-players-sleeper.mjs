@@ -107,24 +107,24 @@ const run = async () => {
       current_nfl_team: team
     }
 
-    // check to see if status matches injury status first
+    // check to see if status matches game designation first (OUT, QUESTIONABLE, DOUBTFUL, PROBABLE)
     try {
-      data.injury_status = format_nfl_injury_status(injury_status)
+      data.game_designation = format_nfl_injury_status(injury_status)
     } catch (err) {
       log(err)
       log(item)
     }
 
-    // injury status could be PUP which is an nfl status
-    if (injury_status && !data.injury_status) {
+    // injury status could be PUP which is a roster status
+    if (injury_status && !data.game_designation) {
       try {
-        data.nfl_status = format_nfl_status(injury_status)
+        data.roster_status = format_nfl_status(injury_status)
       } catch (err) {
         log(err)
         log(item)
       }
-    } else if (!data.injury_status) {
-      data.nfl_status = format_nfl_status(status)
+    } else if (!data.game_designation) {
+      data.roster_status = format_nfl_status(status)
     }
 
     if (!player_row) {
@@ -173,26 +173,28 @@ const run = async () => {
       depth_chart_position,
       injury_body_part,
       injury_start_date,
-      injury_status,
+      source_injury_status: injury_status,
       injury_notes,
       practice_participation,
       practice_description,
-      status,
+      source_status: status,
       search_rank,
 
       timestamp
     }
 
+    // Try to parse as game designation first (OUT, QUESTIONABLE, DOUBTFUL, PROBABLE)
     try {
-      status_insert.formatted_status = format_nfl_injury_status(injury_status)
+      status_insert.game_designation = format_nfl_injury_status(injury_status)
     } catch (err) {
       log(err)
       log(item)
     }
 
-    if (!status_insert.formatted_status) {
+    // If not a game designation, try parsing as roster status
+    if (!status_insert.game_designation) {
       try {
-        status_insert.formatted_status = format_nfl_status(status)
+        status_insert.roster_status = format_nfl_status(status)
       } catch (err) {
         log(err)
         log(item)

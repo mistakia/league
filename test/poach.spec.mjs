@@ -39,7 +39,7 @@ describe('API /poaches', function () {
     it('reserve player violation', async () => {
       MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const reservePlayer = await selectPlayer({
-        nfl_status: player_nfl_status.ACTIVE
+        roster_status: player_nfl_status.ACTIVE
       })
       const teamId = 1
       const leagueId = 1

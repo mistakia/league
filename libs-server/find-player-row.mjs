@@ -228,8 +228,8 @@ const find_player_row = async ({
     if (ignore_retired) {
       query.where(function () {
         this.whereNot({
-          nfl_status: player_nfl_status.RETIRED
-        }).orWhereNull('nfl_status')
+          roster_status: player_nfl_status.RETIRED
+        }).orWhereNull('roster_status')
       })
     }
 

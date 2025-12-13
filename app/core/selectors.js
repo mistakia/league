@@ -1133,7 +1133,7 @@ export function isPlayerLocked(state, { player_map = new Map(), pid }) {
     return false
   }
 
-  if (player_map.get('nfl_status') === player_nfl_status.INACTIVE) {
+  if (player_map.get('roster_status') === player_nfl_status.INACTIVE) {
     return false
   }
 
@@ -2826,8 +2826,8 @@ export function get_trade_is_valid(state) {
       const player = {
         pid: player_map.get('pid'),
         pos: player_map.get('pos'),
-        nfl_status: player_map.get('nfl_status'),
-        injury_status: player_map.get('injury_status'),
+        roster_status: player_map.get('roster_status'),
+        game_designation: player_map.get('game_designation'),
         practice: player_map.get('practice'),
         game_day: player_map.get('game_day'),
         prior_week_inactive: player_map.get('prior_week_inactive'),
@@ -2939,8 +2939,8 @@ export function get_trade_validation_details(state) {
       const player = {
         pid: player_map.get('pid'),
         pos: player_map.get('pos'),
-        nfl_status: player_map.get('nfl_status'),
-        injury_status: player_map.get('injury_status'),
+        roster_status: player_map.get('roster_status'),
+        game_designation: player_map.get('game_designation'),
         practice: player_map.get('practice'),
         game_day: player_map.get('game_day'),
         prior_week_inactive: player_map.get('prior_week_inactive'),

@@ -18,7 +18,7 @@ const url = 'https://www.rotowire.com/football/tables/practice-report.php?team='
 const { week, year } = current_season
 const getReport = (item) => {
   const data = {
-    status: item.status,
+    source_status: item.status,
     inj: item.injtype,
     m: item.monday === '-' ? null : item.monday,
     tu: item.tuesday === '-' ? null : item.tuesday,
@@ -29,16 +29,18 @@ const getReport = (item) => {
     su: item.sunday === '-' ? null : item.sunday
   }
 
+  // Try to parse as game designation first (OUT, QUESTIONABLE, DOUBTFUL, PROBABLE)
   try {
-    data.formatted_status = format_nfl_injury_status(item.status)
+    data.game_designation = format_nfl_injury_status(item.status)
   } catch (err) {
     log(err)
     log(item)
   }
 
-  if (!data.formatted_status) {
+  // If not a game designation, try parsing as roster status
+  if (!data.game_designation) {
     try {
-      data.formatted_status = format_nfl_status(item.status)
+      data.roster_status = format_nfl_status(item.status)
     } catch (err) {
       log(err)
       log(item)

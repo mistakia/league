@@ -1133,7 +1133,7 @@ describe('API /teams - restricted free agency', function () {
      *   const bid = 10
      *   const player = await selectPlayer()
      *   const reservePlayer = await selectPlayer({
-     *     nfl_status: player_nfl_status.ACTIVE
+     *     roster_status: player_nfl_status.ACTIVE
      *   })
 
      *   await addPlayer({

@@ -78,7 +78,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -306,8 +306,8 @@ describe('API /teams - reserve', function () {
     it('player not on reserve/short term reserve', async () => {
       MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
       const player = await select_player_with_tracking({
-        injury_status: null,
-        nfl_status: player_nfl_status.ACTIVE
+        game_designation: null,
+        roster_status: player_nfl_status.ACTIVE
       })
       const teamId = 1
       const leagueId = 1
@@ -381,7 +381,7 @@ describe('API /teams - reserve', function () {
       })
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -420,7 +420,7 @@ describe('API /teams - reserve', function () {
       const pid = players[0].pid
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid
@@ -453,7 +453,7 @@ describe('API /teams - reserve', function () {
       })
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -490,7 +490,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -520,7 +520,7 @@ describe('API /teams - reserve', function () {
       })
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -553,7 +553,7 @@ describe('API /teams - reserve', function () {
       })
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -611,8 +611,8 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: null
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: null
         })
         .where({ pid: player.pid })
 
@@ -731,8 +731,8 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: null
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: null
         })
         .where({ pid: player.pid })
 
@@ -822,8 +822,8 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with QUESTIONABLE injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: player_nfl_injury_status.QUESTIONABLE
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: player_nfl_injury_status.QUESTIONABLE
         })
         .where({ pid: player.pid })
 
@@ -911,8 +911,8 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: null
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: null
         })
         .where({ pid: player.pid })
 
@@ -1027,7 +1027,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -1082,7 +1082,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.INJURED_RESERVE
+          roster_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -1132,8 +1132,8 @@ describe('API /teams - reserve', function () {
       // Set player as ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: null
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: null
         })
         .where({
           pid: player.pid
@@ -1184,8 +1184,8 @@ describe('API /teams - reserve', function () {
       // Set player as ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: null
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: null
         })
         .where({
           pid: player.pid
@@ -1236,8 +1236,8 @@ describe('API /teams - reserve', function () {
       // Set player as ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: null
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: null
         })
         .where({
           pid: player.pid
@@ -1286,8 +1286,8 @@ describe('API /teams - reserve', function () {
       // Set player as ACTIVE with OUT injury status
       await knex('player')
         .update({
-          nfl_status: player_nfl_status.ACTIVE,
-          injury_status: player_nfl_injury_status.OUT
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: player_nfl_injury_status.OUT
         })
         .where({
           pid: player.pid

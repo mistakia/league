@@ -363,8 +363,10 @@ export default class SleeperAdapter extends BaseAdapter {
           jersey_number: player_data.number || null,
 
           // Status information
-          status: this.map_player_status_to_canonical(player_data.status),
-          injury_status: this.map_injury_status_to_canonical(
+          roster_status: this.map_player_status_to_canonical(
+            player_data.status
+          ),
+          game_designation: this.map_injury_status_to_canonical(
             player_data.injury_status
           ),
 

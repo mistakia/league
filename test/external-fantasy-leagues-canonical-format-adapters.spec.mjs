@@ -364,7 +364,7 @@ describe('External Fantasy Leagues - Canonical Format Adapters (Fixture-Based)',
           player.should.have.property('player_name')
           player.should.have.property('position')
           player.should.have.property('team_abbreviation')
-          player.should.have.property('status')
+          player.should.have.property('roster_status')
         }
       })
 

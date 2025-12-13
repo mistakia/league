@@ -256,7 +256,8 @@ class PlayerCache {
    */
   _is_active_player(player) {
     const not_retired =
-      player.nfl_status !== player_nfl_status.RETIRED || !player.nfl_status
+      player.roster_status !== player_nfl_status.RETIRED ||
+      !player.roster_status
     const not_free_agent =
       player.current_nfl_team !== 'INA' || !player.current_nfl_team
 
@@ -392,7 +393,7 @@ class PlayerCache {
     // Apply additional filters (double-check preload filters)
     if (ignore_retired) {
       filtered_players = filtered_players.filter(
-        (player) => player.nfl_status !== player_nfl_status.RETIRED
+        (player) => player.roster_status !== player_nfl_status.RETIRED
       )
     }
 

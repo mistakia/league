@@ -96,7 +96,9 @@ export default async function ({
     })
     player_query.select(
       'player.*',
-      'practice.formatted_status as game_status',
+      db.raw(
+        'COALESCE(practice.game_designation, player.game_designation) as game_designation'
+      ),
       'practice.m',
       'practice.tu',
       'practice.w',
@@ -115,7 +117,9 @@ export default async function ({
   } else {
     player_query.select(
       'player.*',
-      'practice.formatted_status as game_status',
+      db.raw(
+        'COALESCE(practice.game_designation, player.game_designation) as game_designation'
+      ),
       'practice.m',
       'practice.tu',
       'practice.w',
@@ -183,14 +187,14 @@ export default async function ({
       )
     }
 
-    const { nfl_status } = player_row
-    if (!isReserveCovEligible({ nfl_status })) {
+    const { roster_status } = player_row
+    if (!isReserveCovEligible({ roster_status })) {
       throw new Error('player not eligible for Reserve/COV')
     }
   } else {
     const {
-      nfl_status,
-      injury_status,
+      roster_status,
+      game_designation,
       prior_week_inactive,
       prior_week_ruled_out,
       game_day,
@@ -216,8 +220,8 @@ export default async function ({
 
     if (
       !isReserveEligible({
-        nfl_status,
-        injury_status,
+        roster_status,
+        game_designation,
         prior_week_inactive,
         prior_week_ruled_out,
         week: current_season.week,

@@ -172,8 +172,8 @@ export default function LeagueHomePage({
 
     if (
       !isReserveEligible({
-        nfl_status: player_map.get('nfl_status'),
-        injury_status: player_map.get('injury_status'),
+        roster_status: player_map.get('roster_status'),
+        game_designation: player_map.get('game_designation'),
         prior_week_inactive: player_map.get('prior_week_inactive'),
         prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
         week: current_season.week,
@@ -199,7 +199,7 @@ export default function LeagueHomePage({
 
     if (
       !isReserveCovEligible({
-        nfl_status: player_map.get('nfl_status')
+        roster_status: player_map.get('roster_status')
       })
     ) {
       notice_items.push(

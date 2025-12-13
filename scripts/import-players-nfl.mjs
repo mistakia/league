@@ -79,7 +79,7 @@ const importPlayersNFL = async ({
       : null
     const jnum = node.jerseyNumber
     const height = formatHeight(node.height)
-    const nfl_status = format_nfl_status(node.person.status)
+    const roster_status = format_nfl_status(node.person.status)
 
     if (!start && node.nflExperience === 0) {
       start = year
@@ -100,7 +100,7 @@ const importPlayersNFL = async ({
           start,
           weight,
           height,
-          nfl_status
+          roster_status
         }
       })
     } else if (
@@ -132,7 +132,7 @@ const importPlayersNFL = async ({
         col,
         high_school,
         dob,
-        nfl_status
+        roster_status
       })
       if (player_row) pids.push(player_row.pid)
     } else {

@@ -20,8 +20,8 @@ function has_final_practice_report({ practice, game_day, current_date }) {
     return false
   }
 
-  // Check if official report exists (status or formatted_status field is set)
-  if (practice.status || practice.formatted_status) {
+  // Check if official report exists (source_status or game_designation field is set)
+  if (practice.source_status || practice.game_designation) {
     return true
   }
 
@@ -67,8 +67,8 @@ function has_final_practice_report({ practice, game_day, current_date }) {
 }
 
 export default function isReserveEligible({
-  nfl_status,
-  injury_status,
+  roster_status,
+  game_designation,
   prior_week_inactive = false,
   prior_week_ruled_out = false,
   week = null,
@@ -125,9 +125,9 @@ export default function isReserveEligible({
 
   // Original eligibility logic (backward compatible)
   return Boolean(
-    (nfl_status && nfl_status !== player_nfl_status.ACTIVE) ||
-      injury_status === player_nfl_injury_status.OUT ||
-      injury_status === player_nfl_injury_status.DOUBTFUL ||
-      (injury_status && current_season.week === 0)
+    (roster_status && roster_status !== player_nfl_status.ACTIVE) ||
+      game_designation === player_nfl_injury_status.OUT ||
+      game_designation === player_nfl_injury_status.DOUBTFUL ||
+      (game_designation && current_season.week === 0)
   )
 }

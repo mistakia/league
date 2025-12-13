@@ -12,7 +12,7 @@
  *
  * Detection Logic:
  * - Player must have active=true (suited up for the game)
- * - Player must have formatted_status='OUT' in players_status
+ * - Player must have game_designation='OUT' in players_status
  * - Status timestamp must be within 24 hours after game time
  * - This catches players who left games early due to injury
  * - Note: 24-hour window prevents false positives from new injuries days later
@@ -165,9 +165,9 @@ const find_out_status_records = async ({
   const one_day_after_game = start_timestamp + 86400 // 24 hours in seconds
 
   const status_records = await db('players_status')
-    .select('pid', 'timestamp', 'formatted_status', 'injury_body_part')
+    .select('pid', 'timestamp', 'game_designation', 'injury_body_part')
     .whereIn('pid', pids)
-    .where('formatted_status', 'OUT')
+    .where('game_designation', 'OUT')
     .where('timestamp', '>=', start_timestamp)
     .where('timestamp', '<=', one_day_after_game) // Changed from end_timestamp
     .orderBy('timestamp', 'asc')

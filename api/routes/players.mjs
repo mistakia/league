@@ -121,8 +121,8 @@ if (process.env.NODE_ENV !== 'test') {
  *                     nfl_draft_year: 2017
  *                     round: 1
  *                     col: "Texas Tech"
- *                     status: "Active"
- *                     nfl_status: "ACTIVE"
+ *                     roster_status: "ACTIVE"
+ *                     game_designation: null
  *                     bid: 200
  *                     restricted_free_agency_conditional_releases: []
  *               specific_player:
@@ -141,8 +141,8 @@ if (process.env.NODE_ENV !== 'test') {
  *                     nfl_draft_year: 2018
  *                     round: 1
  *                     col: "Wyoming"
- *                     status: "Active"
- *                     nfl_status: "ACTIVE"
+ *                     roster_status: "ACTIVE"
+ *                     game_designation: null
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       500:
@@ -279,9 +279,8 @@ router.post('/?', async (req, res) => {
  *                   nfl_draft_year: 2017
  *                   round: 1
  *                   col: "Texas Tech"
- *                   status: "Active"
- *                   nfl_status: "ACTIVE"
- *                   injury_status: null
+ *                   roster_status: "ACTIVE"
+ *                   game_designation: null
  *                   dob: "1995-09-17"
  *               running_back:
  *                 summary: NFL Running Back example
@@ -301,9 +300,8 @@ router.post('/?', async (req, res) => {
  *                   nfl_draft_year: 2017
  *                   round: 1
  *                   col: "Stanford"
- *                   status: "Active"
- *                   nfl_status: "ACTIVE"
- *                   injury_status: null
+ *                   roster_status: "ACTIVE"
+ *                   game_designation: null
  *                   dob: "1996-06-07"
  *       400:
  *         $ref: '#/components/responses/BadRequestError'

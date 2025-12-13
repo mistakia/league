@@ -10,9 +10,7 @@ import {
 
 export default function PlayerStatus({ player_map }) {
   const status =
-    player_map.get('injury_status') ||
-    player_map.get('game_status') ||
-    player_map.get('nfl_status')
+    player_map.get('game_designation') || player_map.get('roster_status')
 
   if (!status) {
     return null

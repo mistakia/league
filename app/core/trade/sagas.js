@@ -59,8 +59,8 @@ function ensure_complete_slot_assignments({
     const player = {
       pid: player_map.get('pid'),
       pos: player_map.get('pos'),
-      nfl_status: player_map.get('nfl_status'),
-      injury_status: player_map.get('injury_status'),
+      roster_status: player_map.get('roster_status'),
+      game_designation: player_map.get('game_designation'),
       practice: player_map.get('practice'),
       game_day: player_map.get('game_day'),
       prior_week_inactive: player_map.get('prior_week_inactive'),

@@ -23,8 +23,9 @@ export function createPlayer({
   f,
   s,
   su,
-  status,
-  formatted_status,
+  source_status,
+  game_designation,
+  roster_status,
   practice_week,
   ...data
 }) {
@@ -50,8 +51,9 @@ export function createPlayer({
       f,
       s,
       su,
-      status,
-      formatted_status
+      source_status,
+      game_designation,
+      roster_status
     })
   } else if (practice_week) {
     // If practice_week is passed directly (e.g., from data.toJS() spreading),
