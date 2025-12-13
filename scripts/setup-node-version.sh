@@ -11,7 +11,7 @@ echo ""
 # Remote servers (Linux)
 for host in league league-worker-1; do
   echo "Setting up $host..."
-  ssh $host "source ~/.nvm/nvm.sh && nvm install $NODE_VERSION && npm install -g yarn && ln -sfn ~/.nvm/versions/node/v$NODE_VERSION ~/.nvm/versions/node/current && echo 'Done: current -> v$NODE_VERSION (with yarn)'"
+  ssh $host "source ~/.nvm/nvm.sh && nvm install $NODE_VERSION && npm install -g yarn pm2 && ln -sfn ~/.nvm/versions/node/v$NODE_VERSION ~/.nvm/versions/node/current && echo 'Done: current -> v$NODE_VERSION (with yarn, pm2)'"
   echo ""
 done
 
