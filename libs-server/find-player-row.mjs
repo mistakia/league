@@ -36,8 +36,63 @@ const format_position = (pos) => {
     case 'S':
       return 'DB'
 
+    case 'SAF':
+      return 'DB'
+
+    case 'G':
+      return 'OL'
+
+    case 'T':
+      return 'OL'
+
     default:
       return pos.toUpperCase()
+  }
+}
+
+// Expand positions to include all equivalent positions for matching
+const expand_position = (pos) => {
+  switch (pos.toUpperCase()) {
+    // Defensive backs - all safety and corner variants
+    case 'DB':
+    case 'CB':
+    case 'S':
+    case 'SAF':
+    case 'FS':
+    case 'SS':
+      return ['DB', 'CB', 'S', 'SAF', 'FS', 'SS']
+
+    // Defensive line - all DL variants including edge rushers and OLBs (often cross-classified)
+    case 'DL':
+    case 'DE':
+    case 'DT':
+    case 'NT':
+    case 'EDGE':
+      return ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB']
+
+    // Offensive line - all OL variants including long snappers (often listed as C)
+    case 'OL':
+    case 'OG':
+    case 'OT':
+    case 'C':
+    case 'G':
+    case 'T':
+    case 'LS':
+      return ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS']
+
+    // Fullback can match RB
+    case 'FB':
+      return ['FB', 'RB']
+
+    // Linebackers - all LB variants including edge rushers (often classified as DE/DL)
+    case 'LB':
+    case 'OLB':
+    case 'ILB':
+    case 'MLB':
+      return ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL']
+
+    default:
+      return [pos.toUpperCase()]
   }
 }
 
@@ -130,16 +185,18 @@ const find_player_row = async ({
 
     if (pos) {
       if (typeof pos === 'string') {
-        const p = format_position(pos)
+        const expanded = expand_position(pos)
         query.where(function () {
-          this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
+          this.whereIn('pos', expanded)
+            .orWhereIn('pos1', expanded)
+            .orWhereIn('pos2', expanded)
         })
       } else if (Array.isArray(pos)) {
-        const formatted_positions = pos.map(format_position)
+        const expanded_positions = pos.flatMap(expand_position)
         query.where(function () {
-          this.whereIn('pos', formatted_positions)
-            .orWhereIn('pos1', formatted_positions)
-            .orWhereIn('pos2', formatted_positions)
+          this.whereIn('pos', expanded_positions)
+            .orWhereIn('pos1', expanded_positions)
+            .orWhereIn('pos2', expanded_positions)
         })
       }
     }
