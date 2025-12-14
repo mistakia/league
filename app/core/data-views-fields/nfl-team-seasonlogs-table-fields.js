@@ -8,6 +8,78 @@ import {
 const { single_year, single_position } = common_column_params
 const { matchup_opponent_type } = nfl_plays_team_column_params
 
+const stat_type_param = {
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  default_value: 'TOTAL',
+  values: [
+    {
+      label: 'Offense Total',
+      value: 'TOTAL'
+    },
+    {
+      label: 'Defense Total',
+      value: 'AGAINST_TOTAL'
+    },
+    {
+      label: 'Offense Average',
+      value: 'AVG'
+    },
+    {
+      label: 'Defense Average',
+      value: 'AGAINST_AVG'
+    },
+    {
+      label: 'Defense Allowed Over Average',
+      value: 'AGAINST_ADJ'
+    }
+  ]
+}
+
+const defense_only_stat_type_param = {
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  default_value: 'AGAINST_AVG',
+  values: [
+    {
+      label: 'Defense Average',
+      value: 'AGAINST_AVG'
+    },
+    {
+      label: 'Defense Total',
+      value: 'AGAINST_TOTAL'
+    },
+    {
+      label: 'Defense Allowed Over Average',
+      value: 'AGAINST_ADJ'
+    }
+  ]
+}
+
+const time_type_param = {
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  default_value: 'SEASON',
+  values: [
+    {
+      label: 'Season',
+      value: 'SEASON'
+    },
+    {
+      label: 'Last 3 Weeks',
+      value: 'LAST_THREE'
+    },
+    {
+      label: 'Last 4 Weeks',
+      value: 'LAST_FOUR'
+    },
+    {
+      label: 'Last 8 Weeks',
+      value: 'LAST_EIGHT'
+    }
+  ]
+}
+
 const create_seasonlog_field = ({
   column_title,
   header_label,
@@ -25,68 +97,44 @@ const create_seasonlog_field = ({
     year: single_year,
     matchup_opponent_type,
     single_position,
-    stat_type: {
-      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      single: true,
-      default_value: 'TOTAL',
-      values: [
-        {
-          label: 'Offense Total',
-          value: 'TOTAL'
-        },
-        {
-          label: 'Defense Total',
-          value: 'AGAINST_TOTAL'
-        },
-        {
-          label: 'Offense Average',
-          value: 'AVG'
-        },
-        {
-          label: 'Defense Average',
-          value: 'AGAINST_AVG'
-        },
-        {
-          label: 'Defense Allowed Over Average',
-          value: 'AGAINST_ADJ'
-        }
-      ]
-    },
-    time_type: {
-      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      single: true,
-      default_value: 'SEASON',
-      values: [
-        {
-          label: 'Season',
-          value: 'SEASON'
-        },
-        {
-          label: 'Last 3 Weeks',
-          value: 'LAST_THREE'
-        },
-        {
-          label: 'Last 4 Weeks',
-          value: 'LAST_FOUR'
-        },
-        {
-          label: 'Last 8 Weeks',
-          value: 'LAST_EIGHT'
-        }
-      ]
-    }
+    stat_type: stat_type_param,
+    time_type: time_type_param
+  },
+  splits: ['year']
+})
+
+// league_nfl_team_seasonlogs only contains defense/against stats (fantasy points allowed)
+const create_league_seasonlog_field = ({
+  column_title,
+  header_label,
+  player_value_path,
+  size = 70,
+  column_groups = [COLUMN_GROUPS.NFL_TEAM_SEASON_STATS]
+}) => ({
+  column_title,
+  column_groups,
+  header_label,
+  player_value_path,
+  size,
+  data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+  column_params: {
+    year: single_year,
+    matchup_opponent_type,
+    single_position,
+    stat_type: defense_only_stat_type_param,
+    time_type: time_type_param
   },
   splits: ['year']
 })
 
 export default {
-  league_nfl_team_seasonlogs_rank: create_seasonlog_field({
-    column_title: 'Fantasy Points Rank Generated/Allowed By Position',
+  league_nfl_team_seasonlogs_rank: create_league_seasonlog_field({
+    column_title: 'Fantasy Points Rank Allowed By Position',
     header_label: 'Rank',
     player_value_path: 'league_nfl_team_seasonlogs_rnk'
   }),
-  league_nfl_team_seasonlogs_points: create_seasonlog_field({
-    column_title: 'Fantasy Points Generated/Allowed By Position',
+  league_nfl_team_seasonlogs_points: create_league_seasonlog_field({
+    column_title: 'Fantasy Points Allowed By Position',
     header_label: 'Pts',
     player_value_path: 'league_nfl_team_seasonlogs_pts'
   }),
