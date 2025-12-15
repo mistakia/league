@@ -18,7 +18,7 @@ Divider.propTypes = {
   title: PropTypes.string
 }
 
-function StandingsTeam({ team, year, is_current_year }) {
+function StandingsTeam({ team, year, is_current_year, is_regular_season }) {
   return (
     <div className='table__row'>
       <div className='table__cell text lead-cell sticky__column'>
@@ -36,10 +36,10 @@ function StandingsTeam({ team, year, is_current_year }) {
       <div className='table__cell metric wide_cell'>
         {team.getIn(['stats', 'pf'], 0).toFixed(1)}
       </div>
-      {is_current_year && (
+      {is_current_year && is_regular_season && (
         <div className='table__cell metric'>{toPercent(team.playoff_odds)}</div>
       )}
-      {is_current_year && (
+      {is_current_year && is_regular_season && (
         <div className='table__cell metric'>{toPercent(team.bye_odds)}</div>
       )}
       {is_current_year && (
@@ -56,11 +56,12 @@ function StandingsTeam({ team, year, is_current_year }) {
 
 StandingsTeam.propTypes = {
   is_current_year: PropTypes.bool,
+  is_regular_season: PropTypes.bool,
   team: ImmutablePropTypes.record,
   year: PropTypes.number
 }
 
-function Standings({ teams, title, year, is_current_year }) {
+function Standings({ teams, title, year, is_current_year, is_regular_season }) {
   const sorted = teams.sort(
     (a, b) =>
       b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
@@ -70,7 +71,9 @@ function Standings({ teams, title, year, is_current_year }) {
   const overallRows = []
   sorted.forEach((team, key) => {
     overallRows.push(
-      <StandingsTeam {...{ key, team, year, is_current_year }} />
+      <StandingsTeam
+        {...{ key, team, year, is_current_year, is_regular_season }}
+      />
     )
   })
 
@@ -85,10 +88,10 @@ function Standings({ teams, title, year, is_current_year }) {
           <div className='table__cell metric wide_cell'>Record</div>
           <div className='table__cell metric wide_cell'>All Play</div>
           <div className='table__cell metric wide_cell'>Points</div>
-          {is_current_year && (
+          {is_current_year && is_regular_season && (
             <div className='table__cell metric'>Playoff Odds</div>
           )}
-          {is_current_year && (
+          {is_current_year && is_regular_season && (
             <div className='table__cell metric'>Bye Odds</div>
           )}
           {is_current_year && (
@@ -104,17 +107,20 @@ function Standings({ teams, title, year, is_current_year }) {
 
 Standings.propTypes = {
   is_current_year: PropTypes.bool,
+  is_regular_season: PropTypes.bool,
   teams: ImmutablePropTypes.map,
   title: PropTypes.string,
   year: PropTypes.number
 }
 
-function Overall({ standings, year, is_current_year }) {
+function Overall({ standings, year, is_current_year, is_regular_season }) {
   const overallRows = []
   let key = 0
   for (const team of standings.divisionLeaders.values()) {
     overallRows.push(
-      <StandingsTeam {...{ key, team, year, is_current_year }} />
+      <StandingsTeam
+        {...{ key, team, year, is_current_year, is_regular_season }}
+      />
     )
     key++
     if (key === 2) {
@@ -128,7 +134,9 @@ function Overall({ standings, year, is_current_year }) {
 
   for (const team of standings.wildcardTeams.values()) {
     overallRows.push(
-      <StandingsTeam {...{ key, team, year, is_current_year }} />
+      <StandingsTeam
+        {...{ key, team, year, is_current_year, is_regular_season }}
+      />
     )
     key++
     if (key === 8) {
@@ -148,10 +156,10 @@ function Overall({ standings, year, is_current_year }) {
           <div className='table__cell metric wide_cell'>Record</div>
           <div className='table__cell metric wide_cell'>All Play</div>
           <div className='table__cell metric wide_cell'>Points</div>
-          {is_current_year && (
+          {is_current_year && is_regular_season && (
             <div className='table__cell metric'>Playoff Odds</div>
           )}
-          {is_current_year && (
+          {is_current_year && is_regular_season && (
             <div className='table__cell metric'>Bye Odds</div>
           )}
           {is_current_year && (
@@ -167,6 +175,7 @@ function Overall({ standings, year, is_current_year }) {
 
 Overall.propTypes = {
   is_current_year: PropTypes.bool,
+  is_regular_season: PropTypes.bool,
   standings: PropTypes.object,
   year: PropTypes.number
 }
@@ -192,6 +201,9 @@ export default function StandingsPage({
   }, [year, lid, load_league_team_stats])
 
   const is_current_year = year === current_season.year
+  // Hide playoff/bye odds once playoffs begin (week > regularSeasonFinalWeek)
+  const is_regular_season =
+    current_season.week <= current_season.regularSeasonFinalWeek
 
   const divisions = []
   for (const [div, teams] of division_teams_sorted.entries()) {
@@ -202,7 +214,7 @@ export default function StandingsPage({
       <Standings
         key={div}
         title={division_name}
-        {...{ is_current_year, teams, year }}
+        {...{ is_current_year, is_regular_season, teams, year }}
       />
     )
   }
@@ -210,7 +222,7 @@ export default function StandingsPage({
   const body = (
     <div className='league-container'>
       <SelectYear />
-      <Overall {...{ standings, year, is_current_year }} />
+      <Overall {...{ standings, year, is_current_year, is_regular_season }} />
       {divisions}
       {is_current_year && (
         <ProbabilityLeverageChart teams={standings.teams.toList()} />

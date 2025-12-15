@@ -13,20 +13,17 @@ import DashboardTeamSummaryFranchiseTags from '@components/dashboard-team-summar
 import { current_season } from '@constants'
 
 export default function DashboardTeamSummary({ tid }) {
+  const is_regular_season =
+    current_season.week <= current_season.regularSeasonFinalWeek
+
   return (
     <div className='league-team-section-side'>
       {current_season.isRegularSeason && (
         <DashboardTeamSummaryRecord tid={tid} />
       )}
-      {current_season.isRegularSeason && (
-        <DashboardTeamSummaryPlayoffOdds tid={tid} />
-      )}
-      {current_season.isRegularSeason && (
-        <DashboardTeamSummaryDivisionOdds tid={tid} />
-      )}
-      {current_season.isRegularSeason && (
-        <DashboardTeamSummaryByeOdds tid={tid} />
-      )}
+      {is_regular_season && <DashboardTeamSummaryPlayoffOdds tid={tid} />}
+      {is_regular_season && <DashboardTeamSummaryDivisionOdds tid={tid} />}
+      {is_regular_season && <DashboardTeamSummaryByeOdds tid={tid} />}
       {current_season.isRegularSeason && (
         <DashboardTeamSummaryChampionshipOdds tid={tid} />
       )}

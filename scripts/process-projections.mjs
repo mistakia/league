@@ -30,13 +30,15 @@ import {
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import simulate_season from './simulate-season.mjs'
+import simulate_wildcard_round_for_league from './simulate-wildcard-round.mjs'
+import simulate_championship_round_for_league from './simulate-championship-round.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process-projections')
 debug.enable(
-  'process-projections,project-lineups,simulate-season,calculate-matchup-projection'
+  'process-projections,project-lineups,simulate-season,simulate-wildcard-round,simulate-championship-round,calculate-matchup-projection'
 )
 
 const timestamp = Math.round(Date.now() / 1000)
@@ -525,6 +527,13 @@ const process_league = async ({ year, lid }) => {
 
   if (current_season.week <= current_season.regularSeasonFinalWeek) {
     await simulate_season(lid)
+  } else if (current_season.week === 15) {
+    await simulate_wildcard_round_for_league(lid)
+  } else if (
+    current_season.week >= 16 &&
+    current_season.week <= current_season.finalWeek
+  ) {
+    await simulate_championship_round_for_league(lid)
   }
 
   if (lid) {
