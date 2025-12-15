@@ -86,3 +86,32 @@ export const DEBUG_MODULES = [
   'insert-prop-markets',
   'insert-prop-market-selections'
 ]
+
+/**
+ * Alternate line marketTypeIds for DraftKings
+ *
+ * DraftKings uses different marketTypeIds to distinguish between primary (single line)
+ * and alternate (multiple lines with extreme odds) markets within the same subcategory.
+ *
+ * Primary markets: Balanced Over/Under odds around -110, single line near expected value
+ * Alternate markets: Multiple lines with extreme odds (heavy favorites/longshots)
+ *
+ * This mapping identifies alternate marketTypeIds that should be classified as ALT types
+ * even when the subcategoryId would normally indicate a primary market type.
+ */
+export const ALTERNATE_MARKET_TYPE_IDS = {
+  // Receiving props - subcategoryId 14114 (primary: 13674)
+  6818: 'GAME_ALT_RECEIVING_YARDS',
+
+  // Receptions - subcategoryId 14115 (primary: 13676)
+  6825: 'GAME_ALT_RECEPTIONS',
+
+  // Passing yards - subcategoryId 9524 (primary: 13552)
+  6835: 'GAME_ALT_PASSING_YARDS',
+
+  // Rushing + Receiving yards - subcategoryId 9523 (primary: 13680)
+  6829: 'GAME_ALT_RUSHING_RECEIVING_YARDS',
+
+  // Rushing yards - subcategoryId 9514 (primary: 13675)
+  6820: 'GAME_ALT_RUSHING_YARDS'
+}

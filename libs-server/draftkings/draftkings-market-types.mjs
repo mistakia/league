@@ -10,6 +10,8 @@ import {
   division_specials_types
 } from '#libs-shared/bookmaker-constants.mjs'
 
+import { ALTERNATE_MARKET_TYPE_IDS } from './draftkings-constants.mjs'
+
 const log = debug('draft-kings:market-types')
 
 export const get_market_type_offer_634 = (subcategoryId) => {
@@ -599,6 +601,12 @@ export const get_market_type = ({
   subcategoryId = Number(subcategoryId) || null
   betOfferTypeId = Number(betOfferTypeId) || null
   marketTypeId = Number(marketTypeId) || null
+
+  // Check for alternate marketTypeIds first - these override subcategory classification
+  const alternate_type = ALTERNATE_MARKET_TYPE_IDS[marketTypeId]
+  if (alternate_type) {
+    return player_prop_types[alternate_type]
+  }
 
   switch (offerCategoryId) {
     case 492:
