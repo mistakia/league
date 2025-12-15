@@ -58,6 +58,12 @@ export const create_wager_summary_table = (
     `${((wager_summary.open_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
   )
   add_row(
+    'Open Potential Cash ROI',
+    wager_summary.cash_risk > 0
+      ? `${((wager_summary.open_potential_win / wager_summary.cash_risk - 1) * 100).toFixed(0)}%`
+      : 'N/A'
+  )
+  add_row(
     'Max Potential ROI',
     `${((wager_summary.max_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
   )
