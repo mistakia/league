@@ -73,9 +73,16 @@ const get_default_params = ({
     career_game = [career_game]
   }
 
-  let selection_type = params.selection_type || []
-  if (!Array.isArray(selection_type)) {
-    selection_type = [selection_type]
+  // Use explicit selection_type if provided, otherwise default to OVER
+  let selection_type
+  if (params.selection_type !== undefined && params.selection_type !== null) {
+    selection_type = params.selection_type
+    if (!Array.isArray(selection_type)) {
+      selection_type = [selection_type]
+    }
+  } else {
+    // Default to OVER to prevent duplicate rows
+    selection_type = [bookmaker_constants.selection_type.OVER]
   }
 
   return {

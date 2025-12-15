@@ -30,7 +30,8 @@ const create_base_column_params = () => ({
   selection_type: {
     label: 'Selection Type',
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: ['OVER', 'UNDER', 'YES', 'NO']
+    values: ['OVER', 'UNDER', 'YES', 'NO'],
+    default_value: 'OVER'
   },
   time_type: {
     label: 'Time Type',
