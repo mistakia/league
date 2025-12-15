@@ -96,9 +96,6 @@ export default async function ({
     })
     player_query.select(
       'player.*',
-      db.raw(
-        'COALESCE(practice.game_designation, player.game_designation) as game_designation'
-      ),
       'practice.m',
       'practice.tu',
       'practice.w',
@@ -117,9 +114,6 @@ export default async function ({
   } else {
     player_query.select(
       'player.*',
-      db.raw(
-        'COALESCE(practice.game_designation, player.game_designation) as game_designation'
-      ),
       'practice.m',
       'practice.tu',
       'practice.w',
