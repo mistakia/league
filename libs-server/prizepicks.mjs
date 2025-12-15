@@ -7,7 +7,13 @@ import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 const log = debug('prizepicks')
 // debug.enable('prizepicks')
 
-export const get_market_type = (stat_type) => {
+// Touchdown market types that should use YES/NO selection types instead of OVER/UNDER
+export const touchdown_market_types = new Set([
+  player_prop_types.ANYTIME_TOUCHDOWN,
+  player_prop_types.GAME_TWO_PLUS_TOUCHDOWNS
+])
+
+export const get_market_type = (stat_type, { selection_metric_line } = {}) => {
   if (!stat_type) return null
 
   switch (stat_type) {
@@ -74,7 +80,17 @@ export const get_market_type = (stat_type) => {
       return player_prop_types.GAME_PASSING_RUSHING_RECEIVING_TOUCHDOWNS
 
     case 'Rush+Rec TDs':
-      return player_prop_types.ANYTIME_TOUCHDOWN
+      // Route based on line value:
+      // 0.5 line = ANYTIME_TOUCHDOWN (1+ TDs)
+      // 1.5 line = GAME_TWO_PLUS_TOUCHDOWNS (2+ TDs)
+      // 2.5+ line = skip (return null until GAME_THREE_PLUS_TOUCHDOWNS is added)
+      if (selection_metric_line === 0.5) {
+        return player_prop_types.ANYTIME_TOUCHDOWN
+      } else if (selection_metric_line === 1.5) {
+        return player_prop_types.GAME_TWO_PLUS_TOUCHDOWNS
+      }
+      // Skip 2.5+ lines for now
+      return null
 
     case 'Sacks':
       return player_prop_types.GAME_DEFENSE_SACKS

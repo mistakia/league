@@ -13,6 +13,7 @@ import {
   report_job
 } from '#libs-server'
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
+import { touchdown_market_types } from '#libs-server/prizepicks.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -60,14 +61,25 @@ const format_market = async ({
     selection_name: prizepicks_market.attributes?.stat_type || ''
   })
 
+  // Get market type with line context for proper routing
+  const market_type = prizepicks.get_market_type(
+    prizepicks_market.attributes?.stat_type,
+    { selection_metric_line: normalized_line }
+  )
+
+  // Normalize selection types for touchdown markets (OVER/UNDER -> YES/NO)
+  const is_touchdown_market = touchdown_market_types.has(market_type)
+  const over_selection_type = is_touchdown_market ? 'YES' : 'OVER'
+  const under_selection_type = is_touchdown_market ? 'NO' : 'UNDER'
+
   selections.push({
     source_id: 'PRIZEPICKS',
     source_market_id: prizepicks_market.id,
     source_selection_id: `${prizepicks_market.id}-over`,
-    selection_type: 'OVER',
+    selection_type: over_selection_type,
 
     selection_pid: player_row?.pid || null,
-    selection_name: 'over',
+    selection_name: is_touchdown_market ? 'yes' : 'over',
     selection_metric_line: normalized_line,
     odds_decimal: null,
     odds_american: null
@@ -77,19 +89,17 @@ const format_market = async ({
     source_id: 'PRIZEPICKS',
     source_market_id: prizepicks_market.id,
     source_selection_id: `${prizepicks_market.id}-under`,
-    selection_type: 'UNDER',
+    selection_type: under_selection_type,
 
     selection_pid: player_row?.pid || null,
-    selection_name: 'under',
+    selection_name: is_touchdown_market ? 'no' : 'under',
     selection_metric_line: normalized_line,
     odds_decimal: null,
     odds_american: null
   })
 
   return {
-    market_type: prizepicks.get_market_type(
-      prizepicks_market.attributes?.stat_type
-    ),
+    market_type,
 
     source_id: 'PRIZEPICKS',
     source_market_id: prizepicks_market.id,
