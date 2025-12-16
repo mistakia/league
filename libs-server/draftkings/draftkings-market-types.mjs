@@ -212,14 +212,16 @@ export const get_market_type_offer_1003 = ({ subcategoryId, marketTypeId }) => {
       return player_prop_types.ANYTIME_TOUCHDOWN
 
     case 12438:
-      // subcategoryId 12438 is used for both Anytime TD and 2+ TDs
+      // subcategoryId 12438 is used for Anytime TD, First TD, and 2+ TDs
       // Differentiate based on marketTypeId
       if (marketTypeId === 11020) {
         return player_prop_types.GAME_TWO_PLUS_TOUCHDOWNS
       } else if (marketTypeId === 11019) {
         return player_prop_types.ANYTIME_TOUCHDOWN
+      } else if (marketTypeId === 11018) {
+        return player_prop_types.GAME_FIRST_TOUCHDOWN_SCORER
       }
-      // Fallback to ANYTIME_TOUCHDOWN if marketTypeId is not provided
+      // Fallback to ANYTIME_TOUCHDOWN if marketTypeId is not recognized
       return player_prop_types.ANYTIME_TOUCHDOWN
 
     case 11820:
