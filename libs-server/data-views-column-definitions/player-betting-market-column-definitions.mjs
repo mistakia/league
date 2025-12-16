@@ -81,7 +81,6 @@ const get_default_params = ({
       selection_type = [selection_type]
     }
   } else {
-    // Default to OVER to prevent duplicate rows
     selection_type = [bookmaker_constants.selection_type.OVER]
   }
 

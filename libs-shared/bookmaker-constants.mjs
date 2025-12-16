@@ -23,6 +23,15 @@ export const selection_type = {
   NO: 'NO'
 }
 
+// Market types that use YES/NO selection types instead of OVER/UNDER
+export const yes_no_market_types = new Set([
+  'ANYTIME_TOUCHDOWN',
+  'GAME_FIRST_TOUCHDOWN_SCORER',
+  'GAME_LAST_TOUCHDOWN_SCORER',
+  'GAME_FIRST_TEAM_TOUCHDOWN_SCORER',
+  'GAME_TWO_PLUS_TOUCHDOWNS'
+])
+
 export const team_game_market_types = {
   GAME_SPREAD: 'GAME_SPREAD',
   GAME_TOTAL: 'GAME_TOTAL',

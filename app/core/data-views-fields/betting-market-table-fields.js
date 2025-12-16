@@ -31,7 +31,17 @@ const create_base_column_params = () => ({
     label: 'Selection Type',
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     values: ['OVER', 'UNDER', 'YES', 'NO'],
-    default_value: 'OVER'
+    default_value: 'OVER',
+    // Dynamic default based on market_type - YES/NO markets use YES, stat markets use OVER
+    get_default_value: (params) => {
+      const market_type = Array.isArray(params.market_type)
+        ? params.market_type[0]
+        : params.market_type
+      if (bookmaker_constants.yes_no_market_types.has(market_type)) {
+        return 'YES'
+      }
+      return 'OVER'
+    }
   },
   time_type: {
     label: 'Time Type',
