@@ -460,6 +460,8 @@ describe('LIB - get_super_priority_status', function () {
     let player, poach_timestamp
 
     beforeEach(async () => {
+      await knex('super_priority').del()
+
       player = await selectPlayer({ rookie: false })
       poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
 
