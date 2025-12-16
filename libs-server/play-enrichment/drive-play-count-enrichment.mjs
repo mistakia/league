@@ -8,8 +8,14 @@ const log = debug('drive-play-count-enrichment')
  * Counts scrimmage plays only, excluding:
  * - Administrative plays (GAME_START, END_QUARTER, END_GAME, timeouts)
  * - Kickoffs (these start drives but aren't offensive plays)
+ * - Punts (drive-ending plays, excluded to match nflfastr methodology)
  * - Plays marked as deleted
  * - Nullified plays (penalty with no play)
+ *
+ * Note: nflfastr's drive_play_count excludes punts, so a traditional
+ * "three and out" (3 offensive plays followed by a punt) results in
+ * drive_play_count = 3. This matches the DST scoring logic in
+ * calculate-dst-stats-from-plays.mjs which checks drive_play_count === 3.
  *
  * @param {Object} play - Play object to evaluate
  * @returns {boolean} True if play should be counted
@@ -28,6 +34,12 @@ const should_count_play = (play) => {
 
   // Exclude kickoffs - they start drives but aren't offensive plays
   if (play.play_type === 'KOFF') {
+    return false
+  }
+
+  // Exclude punts - drive-ending plays not counted in nflfastr's drive_play_count
+  // This ensures a "three and out" (3 plays + punt) has drive_play_count = 3
+  if (play.play_type === 'PUNT') {
     return false
   }
 
