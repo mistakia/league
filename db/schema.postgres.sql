@@ -17,6 +17,7 @@ SET client_min_messages = warning;
 SET search_path = public;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_scoring_format_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
@@ -1641,6 +1642,7 @@ DROP INDEX IF EXISTS public.idx_poaches_lid;
 DROP INDEX IF EXISTS public.idx_poach_releases_poachid;
 DROP INDEX IF EXISTS public.idx_playoffs_lid;
 DROP INDEX IF EXISTS public.idx_players_status_pid;
+DROP INDEX IF EXISTS public.idx_player_variance_pid;
 DROP INDEX IF EXISTS public.idx_player_sis_id;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
@@ -1649,6 +1651,8 @@ DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pid_incl_pos_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
+DROP INDEX IF EXISTS public.idx_player_pair_correlations_year_pid_b;
+DROP INDEX IF EXISTS public.idx_player_pair_correlations_year_pid_a;
 DROP INDEX IF EXISTS public.idx_player_nffc_id;
 DROP INDEX IF EXISTS public.idx_player_lname;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_year_esbid_pid;
@@ -1865,6 +1869,7 @@ ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
 ALTER TABLE IF EXISTS ONLY public.playoffs DROP CONSTRAINT IF EXISTS playoffs_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
 ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_year_unique;
@@ -1876,6 +1881,7 @@ ALTER TABLE IF EXISTS ONLY public.player_prospect_profile DROP CONSTRAINT IF EXI
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_passing_gamelogs DROP CONSTRAINT IF EXISTS player_passing_gamelogs_esbid_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_pair_correlations DROP CONSTRAINT IF EXISTS player_pair_correlations_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_otc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_nffc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_mfl_id_unique;
@@ -1920,6 +1926,7 @@ ALTER TABLE IF EXISTS ONLY public.player_college_seasonlogs DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.player_college_careerlogs DROP CONSTRAINT IF EXISTS player_college_careerlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_archetypes DROP CONSTRAINT IF EXISTS player_archetypes_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_adp_index DROP CONSTRAINT IF EXISTS player_adp_index_unique;
 ALTER TABLE IF EXISTS ONLY public.pff_team_seasonlogs DROP CONSTRAINT IF EXISTS pff_team_seasonlogs_pkey;
@@ -2068,6 +2075,7 @@ DROP TABLE IF EXISTS public.poaches;
 DROP TABLE IF EXISTS public.poach_releases;
 DROP TABLE IF EXISTS public.playoffs;
 DROP TABLE IF EXISTS public.players_status;
+DROP TABLE IF EXISTS public.player_variance;
 DROP TABLE IF EXISTS public.player_seasonlogs;
 DROP TABLE IF EXISTS public.player_salaries;
 DROP TABLE IF EXISTS public.player_rushing_gamelogs;
@@ -2076,6 +2084,7 @@ DROP TABLE IF EXISTS public.player_rankings_index;
 DROP TABLE IF EXISTS public.player_rankings_history;
 DROP TABLE IF EXISTS public.player_prospect_profile;
 DROP TABLE IF EXISTS public.player_passing_gamelogs;
+DROP TABLE IF EXISTS public.player_pair_correlations;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2026;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2025;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2024;
@@ -2111,6 +2120,7 @@ DROP TABLE IF EXISTS public.player_college_seasonlogs;
 DROP TABLE IF EXISTS public.player_college_careerlogs;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
 DROP TABLE IF EXISTS public.player_changelog;
+DROP TABLE IF EXISTS public.player_archetypes;
 DROP TABLE IF EXISTS public.player_aliases;
 DROP TABLE IF EXISTS public.player_adp_index;
 DROP TABLE IF EXISTS public.player_adp_history;
@@ -4598,7 +4608,8 @@ CREATE TABLE public.league_scoring_formats (
     trg numeric(2,1) DEFAULT 0 NOT NULL,
     rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    exclude_qb_kneels boolean DEFAULT false NOT NULL
+    exclude_qb_kneels boolean DEFAULT false NOT NULL,
+    fum_ret_td numeric DEFAULT 0
 );
 
 
@@ -18617,6 +18628,65 @@ CREATE TABLE public.player_aliases (
 
 
 --
+-- Name: player_archetypes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_archetypes (
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    pos character varying(3),
+    archetype character varying(20) NOT NULL,
+    rushing_rate numeric(4,2),
+    target_share numeric(4,3),
+    opportunity_share numeric(4,3),
+    calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    confidence numeric(3,2)
+);
+
+
+--
+-- Name: TABLE player_archetypes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_archetypes IS 'Player archetypes for correlation defaults when player-specific data unavailable';
+
+
+--
+-- Name: COLUMN player_archetypes.archetype; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_archetypes.archetype IS 'QB: rushing_qb/mobile_qb/pocket_passer, WR: target_hog_wr/wr1_level/wr2_level/wr3_level, RB: pass_catching_rb/hybrid_rb/traditional_rb';
+
+
+--
+-- Name: COLUMN player_archetypes.rushing_rate; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_archetypes.rushing_rate IS 'QB rush attempts per game';
+
+
+--
+-- Name: COLUMN player_archetypes.target_share; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_archetypes.target_share IS 'WR/TE/RB target share as decimal (0.0-1.0)';
+
+
+--
+-- Name: COLUMN player_archetypes.opportunity_share; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_archetypes.opportunity_share IS 'RB opportunity share (carries + targets) as decimal';
+
+
+--
+-- Name: COLUMN player_archetypes.confidence; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_archetypes.confidence IS 'Confidence score (0.0-1.0) for the archetype classification';
+
+
+--
 -- Name: player_changelog; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -19345,7 +19415,8 @@ CREATE TABLE public.player_gamelogs (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 )
 PARTITION BY RANGE (year);
 
@@ -19450,7 +19521,8 @@ CREATE TABLE public.player_gamelogs_default (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -19547,7 +19619,8 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -19644,7 +19717,8 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -19741,7 +19815,8 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -19838,7 +19913,8 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -19935,7 +20011,8 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20032,7 +20109,8 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20129,7 +20207,8 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20226,7 +20305,8 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20323,7 +20403,8 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20420,7 +20501,8 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20517,7 +20599,8 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20614,7 +20697,8 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20711,7 +20795,8 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20808,7 +20893,8 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -20905,7 +20991,8 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21002,7 +21089,8 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21099,7 +21187,8 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21196,7 +21285,8 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21293,7 +21383,8 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21390,7 +21481,8 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21487,7 +21579,8 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21584,7 +21677,8 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21681,7 +21775,8 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21778,7 +21873,8 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21875,7 +21971,8 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -21972,7 +22069,8 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
 
 
@@ -22069,8 +22167,70 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false
+    ruled_out_in_game boolean DEFAULT false,
+    fum_ret_td smallint DEFAULT 0
 );
+
+
+--
+-- Name: player_pair_correlations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_pair_correlations (
+    pid_a character varying(25) NOT NULL,
+    pid_b character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    team_a character varying(3),
+    team_b character varying(3),
+    games_together smallint NOT NULL,
+    correlation numeric(5,4),
+    relationship_type character varying(20) NOT NULL,
+    calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT player_pair_correlations_pid_order CHECK (((pid_a)::text < (pid_b)::text)),
+    CONSTRAINT player_pair_correlations_relationship_type CHECK (((relationship_type)::text = ANY ((ARRAY['same_team'::character varying, 'cross_team_same_game'::character varying])::text[])))
+);
+
+
+--
+-- Name: TABLE player_pair_correlations; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_pair_correlations IS 'Pre-calculated fantasy point correlations between player pairs';
+
+
+--
+-- Name: COLUMN player_pair_correlations.pid_a; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_pair_correlations.pid_a IS 'First player ID (alphabetically smaller to enforce ordering)';
+
+
+--
+-- Name: COLUMN player_pair_correlations.pid_b; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_pair_correlations.pid_b IS 'Second player ID (alphabetically larger to enforce ordering)';
+
+
+--
+-- Name: COLUMN player_pair_correlations.team_a; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_pair_correlations.team_a IS 'NFL team of pid_a when correlation was calculated (for team change detection)';
+
+
+--
+-- Name: COLUMN player_pair_correlations.team_b; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_pair_correlations.team_b IS 'NFL team of pid_b when correlation was calculated (for team change detection)';
+
+
+--
+-- Name: COLUMN player_pair_correlations.relationship_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_pair_correlations.relationship_type IS 'same_team = teammates, cross_team_same_game = opponents in same NFL game';
 
 
 --
@@ -22537,8 +22697,62 @@ CREATE TABLE public.player_seasonlogs (
     pfr_season_value smallint,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    fum_ret_td smallint DEFAULT 0
 );
+
+
+--
+-- Name: player_variance; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_variance (
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    scoring_format_hash character varying(64) NOT NULL,
+    games_played smallint NOT NULL,
+    mean_points numeric(6,3),
+    standard_deviation numeric(6,3),
+    min_points numeric(6,3),
+    max_points numeric(6,3),
+    calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    coefficient_of_variation numeric(5,4)
+);
+
+
+--
+-- Name: TABLE player_variance; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_variance IS 'Historical player variance per scoring format for distribution fitting';
+
+
+--
+-- Name: COLUMN player_variance.scoring_format_hash; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_variance.scoring_format_hash IS 'Variance is scoring-format-specific since fantasy points depend on scoring rules';
+
+
+--
+-- Name: COLUMN player_variance.mean_points; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_variance.mean_points IS 'Average fantasy points per game for the player in this scoring format';
+
+
+--
+-- Name: COLUMN player_variance.standard_deviation; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_variance.standard_deviation IS 'Standard deviation of fantasy points per game';
+
+
+--
+-- Name: COLUMN player_variance.coefficient_of_variation; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_variance.coefficient_of_variation IS 'Coefficient of variation (std_dev / mean) - measures relative variability';
 
 
 --
@@ -25611,6 +25825,14 @@ ALTER TABLE ONLY public.player_aliases
 
 
 --
+-- Name: player_archetypes player_archetypes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_archetypes
+    ADD CONSTRAINT player_archetypes_pkey PRIMARY KEY (pid, year, archetype);
+
+
+--
 -- Name: player player_cbs_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -25963,6 +26185,14 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: player_pair_correlations player_pair_correlations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_pair_correlations
+    ADD CONSTRAINT player_pair_correlations_pkey PRIMARY KEY (pid_a, pid_b, year);
+
+
+--
 -- Name: player_passing_gamelogs player_passing_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -26048,6 +26278,14 @@ ALTER TABLE ONLY public.player_salaries
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_swish_id_unique UNIQUE (swish_id);
+
+
+--
+-- Name: player_variance player_variance_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_variance
+    ADD CONSTRAINT player_variance_pkey PRIMARY KEY (pid, year, scoring_format_hash);
 
 
 --
@@ -27581,6 +27819,20 @@ CREATE INDEX idx_player_nffc_id ON public.player USING btree (nffc_id);
 
 
 --
+-- Name: idx_player_pair_correlations_year_pid_a; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_pair_correlations_year_pid_a ON public.player_pair_correlations USING btree (year, pid_a);
+
+
+--
+-- Name: idx_player_pair_correlations_year_pid_b; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_pair_correlations_year_pid_b ON public.player_pair_correlations USING btree (year, pid_b);
+
+
+--
 -- Name: idx_player_pff_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -27634,6 +27886,13 @@ CREATE INDEX idx_player_seasonlogs_year_seas_type_career_year_pid ON public.play
 --
 
 CREATE INDEX idx_player_sis_id ON public.player USING btree (sis_id);
+
+
+--
+-- Name: idx_player_variance_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_variance_pid ON public.player_variance USING btree (pid);
 
 
 --
@@ -49960,6 +50219,14 @@ ALTER TABLE ONLY public.ngs_prospect_scores_history
 
 ALTER TABLE ONLY public.ngs_prospect_scores_index
     ADD CONSTRAINT ngs_prospect_scores_index_pid_fkey FOREIGN KEY (pid) REFERENCES public.player(pid);
+
+
+--
+-- Name: player_variance player_variance_scoring_format_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_variance
+    ADD CONSTRAINT player_variance_scoring_format_fkey FOREIGN KEY (scoring_format_hash) REFERENCES public.league_scoring_formats(scoring_format_hash);
 
 
 --

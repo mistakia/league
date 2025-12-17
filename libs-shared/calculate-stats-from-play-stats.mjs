@@ -319,6 +319,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 56:
         // fumble return for touchdown
+        stats.fum_ret_td += 1
         break
 
       case 57:
@@ -327,6 +328,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 58:
         // fumble return touchdown (lateral)
+        stats.fum_ret_td += 1
         break
 
       case 59:
@@ -335,6 +337,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 60:
         // fumble return for touchdown
+        stats.fum_ret_td += 1
         break
 
       case 61:
@@ -343,6 +346,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 62:
         // fumble recovery touchdown (lateral)
+        stats.fum_ret_td += 1
         break
 
       case 63:

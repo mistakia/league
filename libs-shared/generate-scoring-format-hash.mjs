@@ -21,6 +21,7 @@ export default function ({
   fuml = 0,
   prtd = 0,
   krtd = 0,
+  fum_ret_td = 0,
   trg = 0,
   exclude_qb_kneels = false
 }) {
@@ -41,6 +42,10 @@ export default function ({
 
   if (rec_first_down !== 0) {
     extended_key += `_rec_first_down${rec_first_down}`
+  }
+
+  if (fum_ret_td !== 0) {
+    extended_key += `_fum_ret_td${fum_ret_td}`
   }
 
   if (exclude_qb_kneels === true) {
@@ -74,6 +79,7 @@ export default function ({
     fuml,
     prtd,
     krtd,
+    fum_ret_td,
     trg,
     exclude_qb_kneels
   }

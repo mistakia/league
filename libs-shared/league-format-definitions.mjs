@@ -24,6 +24,7 @@ export const scoring_formats = {
       fuml: -2, // fumbles lost
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
@@ -52,6 +53,7 @@ export const scoring_formats = {
       fuml: -2, // fumbles lost
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
@@ -81,6 +83,7 @@ export const scoring_formats = {
       fuml: -2, // fumbles lost
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
@@ -110,6 +113,7 @@ export const scoring_formats = {
       fuml: 0, // fumbles lost (0 points in SFB)
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 1, // targets (1 point per target in SFB)
       rush_first_down: 1, // rushing first downs (1 point in SFB)
       rec_first_down: 1 // receiving first downs (1 point in SFB)
@@ -139,6 +143,7 @@ export const scoring_formats = {
       fuml: 0, // fumbles lost (0 points in SFB)
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in SFB Sleeper)
       rush_first_down: 1, // rushing first downs (1 point in SFB)
       rec_first_down: 1 // receiving first downs (1 point in SFB)
@@ -168,6 +173,7 @@ export const scoring_formats = {
       fuml: -2, // fumbles lost (-2 points)
       prtd: 6, // punt return touchdowns (6 points)
       krtd: 6, // kick return touchdowns (6 points)
+      fum_ret_td: 6, // fumble return touchdowns (6 points)
       trg: 0, // targets (no points in FanDuel)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
@@ -206,6 +212,7 @@ export const scoring_formats = {
       fuml: -1, // fumbles lost (-1 points, less punitive than standard)
       prtd: 6, // punt return touchdowns (6 points)
       krtd: 6, // kick return touchdowns (6 points)
+      fum_ret_td: 6, // fumble return touchdowns (6 points)
       trg: 0, // targets (no points in DraftKings)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
@@ -240,6 +247,7 @@ export const scoring_formats = {
       fuml: -1, // fumbles lost (-1 point, less punitive)
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
@@ -269,6 +277,7 @@ export const scoring_formats = {
       fuml: -1, // fumbles lost (-1 point, less punitive)
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
@@ -298,6 +307,7 @@ export const scoring_formats = {
       fuml: -1, // fumbles lost (-1 point)
       prtd: 6, // punt return touchdowns
       krtd: 6, // kick return touchdowns
+      fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in Genesis)
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0, // receiving first downs

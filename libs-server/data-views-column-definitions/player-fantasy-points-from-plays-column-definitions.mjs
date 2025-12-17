@@ -483,6 +483,11 @@ const generate_receiving_scoring_sql = async (
 }
 
 // Generate fumble scoring SQL
+// NOTE: This currently only handles fumble lost penalties (fuml).
+// Fumble return TDs (fum_ret_td) are credited to a different player (the recoverer)
+// and would require joining with nfl_play_stats to identify statId 56/58/60/62.
+// For now, fum_ret_td scoring is handled via gamelogs (calculate-stats-from-play-stats.mjs).
+// TODO: Add fumble return TD support by joining with play_stats for statId 56/58/60/62
 const generate_fumble_scoring_sql = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
@@ -493,6 +498,8 @@ const generate_fumble_scoring_sql = async (scoring_format) => {
   }
 
   const fuml = scoring_format.fuml || 0
+  // fum_ret_td scoring requires play_stats join - not yet implemented for data views
+  // const fum_ret_td = scoring_format.fum_ret_td || 0
   return `ROUND(SUM(${fuml}), 2)`
 }
 

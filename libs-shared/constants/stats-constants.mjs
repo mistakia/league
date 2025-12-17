@@ -27,7 +27,8 @@ export const base_fantasy_stats = [
   'twoptc',
 
   'prtd', // punt return touchdown
-  'krtd' // kickoff return touchdown
+  'krtd', // kickoff return touchdown
+  'fum_ret_td' // fumble return touchdown
 ]
 
 export const kicker_fantasy_stats = [
@@ -85,7 +86,8 @@ export const projected_base_stats = [
   'twoptc',
 
   'prtd', // punt return touchdown
-  'krtd' // kickoff return touchdown
+  'krtd', // kickoff return touchdown
+  'fum_ret_td' // fumble return touchdown
 ]
 
 export const all_projected_fantasy_stats = [
@@ -118,7 +120,10 @@ export const fantasy_stat_display_names = {
   rec_first_down: 'Receiving First Downs',
   tdrec: 'Receiving TDs',
   snp: 'Snaps',
-  twoptc: 'Two Point Conversions'
+  twoptc: 'Two Point Conversions',
+  prtd: 'Punt Return Touchdowns',
+  krtd: 'Kickoff Return Touchdowns',
+  fum_ret_td: 'Fumble Return Touchdowns'
 }
 
 export const extended_player_stats = [

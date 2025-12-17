@@ -49,6 +49,107 @@ const initialize_cli = () => {
 const log = debug('generate-player-gamelogs')
 debug.enable('generate-player-gamelogs')
 
+// Database field constraints
+const DB_CONSTRAINTS = {
+  TEAM_TARGET_SHARE_MAX: 9.9999, // numeric(5,4)
+  TEAM_AIR_YARD_SHARE_MAX: 9.9999, // numeric(5,4)
+  ROUTE_SHARE_MAX: 999.99, // numeric(5,2)
+  WEIGHTED_OPPORTUNITY_RATING_MAX: 999.99 // numeric(5,2)
+}
+
+/**
+ * Calculate opponent team for a given team and game
+ */
+const calculate_opponent = ({ team, home_team, away_team }) => {
+  return fixTeam(team) === fixTeam(home_team)
+    ? fixTeam(away_team)
+    : fixTeam(home_team)
+}
+
+/**
+ * Find team gamelog from inserts array
+ */
+const find_team_gamelog = ({ team_gamelog_inserts, team, esbid }) => {
+  return team_gamelog_inserts.find(
+    (t) => t.tm === fixTeam(team) && t.esbid === esbid
+  )
+}
+
+/**
+ * Create lookup map from array of objects with key fields
+ */
+const create_lookup_map = ({ items, key_fields, value_field }) => {
+  return items.reduce((acc, row) => {
+    const key = key_fields.map((field) => row[field]).join('_')
+    acc[key] = row[value_field]
+    return acc
+  }, {})
+}
+
+/**
+ * Clamp numeric value to maximum constraint
+ */
+const clamp_value = ({ value, max, field_name, item_info, dry_run }) => {
+  if (value != null && value > max) {
+    if (dry_run) {
+      log(`Would clamp ${field_name} from ${value} to ${max} for ${item_info}`)
+    }
+    return max
+  }
+  return value
+}
+
+/**
+ * Validate and clamp receiving gamelog values to prevent database overflow
+ */
+const clamp_receiving_gamelog_values = ({ item, dry_run }) => {
+  const item_info = `pid=${item.pid}, esbid=${item.esbid}`
+  let modified = false
+
+  const original_team_target_share = item.team_target_share
+  item.team_target_share = clamp_value({
+    value: item.team_target_share,
+    max: DB_CONSTRAINTS.TEAM_TARGET_SHARE_MAX,
+    field_name: 'team_target_share',
+    item_info,
+    dry_run
+  })
+  if (item.team_target_share !== original_team_target_share) modified = true
+
+  const original_team_air_yard_share = item.team_air_yard_share
+  item.team_air_yard_share = clamp_value({
+    value: item.team_air_yard_share,
+    max: DB_CONSTRAINTS.TEAM_AIR_YARD_SHARE_MAX,
+    field_name: 'team_air_yard_share',
+    item_info,
+    dry_run
+  })
+  if (item.team_air_yard_share !== original_team_air_yard_share) modified = true
+
+  const original_route_share = item.route_share
+  item.route_share = clamp_value({
+    value: item.route_share,
+    max: DB_CONSTRAINTS.ROUTE_SHARE_MAX,
+    field_name: 'route_share',
+    item_info,
+    dry_run
+  })
+  if (item.route_share !== original_route_share) modified = true
+
+  const original_weighted_opportunity_rating = item.weighted_opportunity_rating
+  item.weighted_opportunity_rating = clamp_value({
+    value: item.weighted_opportunity_rating,
+    max: DB_CONSTRAINTS.WEIGHTED_OPPORTUNITY_RATING_MAX,
+    field_name: 'weighted_opportunity_rating',
+    item_info,
+    dry_run
+  })
+  if (item.weighted_opportunity_rating !== original_weighted_opportunity_rating)
+    modified = true
+
+  return modified
+}
+
 const format_base_gamelog = ({ esbid, stats, opp, tm, year }) => {
   const cleaned_stats = Object.keys(stats)
     .filter((key) => all_fantasy_stats.includes(key))
@@ -82,18 +183,39 @@ const format_receiving_gamelog = ({
   year,
   team_stats,
   player_routes,
-  team_dropbacks
+  team_dropbacks,
+  validate = false
 }) => {
   const team_target_share = team_stats.trg ? stats.trg / team_stats.trg : 0
   const team_air_yard_share = team_stats.passing_air_yards
     ? stats.targeted_air_yards / team_stats.passing_air_yards
     : 0
-  const route_share =
-    player_routes && team_dropbacks
-      ? (player_routes / team_dropbacks) * 100
-      : null
 
-  return {
+  // Calculate route_share, but handle cases where team_dropbacks data is missing/incomplete
+  // If team_dropbacks is too low (less than player_routes), the data is likely incorrect
+  // In such cases, set route_share to null to avoid overflow
+  let route_share = null
+  if (player_routes && team_dropbacks) {
+    // Validate: if team_dropbacks < player_routes, the dropback data is likely incorrect
+    // This can happen when qb_dropback field is not properly populated in nfl_plays
+    if (team_dropbacks >= player_routes) {
+      route_share = (player_routes / team_dropbacks) * 100
+      // Clamp to max 999.99 to prevent database overflow (numeric(5,2) constraint)
+      if (route_share > DB_CONSTRAINTS.ROUTE_SHARE_MAX) {
+        route_share = DB_CONSTRAINTS.ROUTE_SHARE_MAX
+      }
+    } else {
+      // Dropback data appears incorrect - log warning and set to null
+      if (validate) {
+        log(
+          `WARNING: team_dropbacks (${team_dropbacks}) < player_routes (${player_routes}) for pid=${pid}, esbid=${esbid}, year=${year} - setting route_share to null`
+        )
+      }
+      route_share = null
+    }
+  }
+
+  const receiving_gamelog = {
     esbid,
     pid,
     year,
@@ -106,6 +228,54 @@ const format_receiving_gamelog = ({
     weighted_opportunity_rating:
       1.5 * team_target_share + 0.7 * team_air_yard_share
   }
+
+  if (validate) {
+    // Validate numeric field constraints (for dry-run logging)
+    if (
+      receiving_gamelog.team_target_share != null &&
+      receiving_gamelog.team_target_share > DB_CONSTRAINTS.TEAM_TARGET_SHARE_MAX
+    ) {
+      log(
+        `OVERFLOW: team_target_share = ${receiving_gamelog.team_target_share} (max ${DB_CONSTRAINTS.TEAM_TARGET_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+      )
+      log(`  stats.trg=${stats.trg}, team_stats.trg=${team_stats.trg}`)
+    }
+    if (
+      receiving_gamelog.team_air_yard_share != null &&
+      receiving_gamelog.team_air_yard_share >
+        DB_CONSTRAINTS.TEAM_AIR_YARD_SHARE_MAX
+    ) {
+      log(
+        `OVERFLOW: team_air_yard_share = ${receiving_gamelog.team_air_yard_share} (max ${DB_CONSTRAINTS.TEAM_AIR_YARD_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+      )
+      log(
+        `  stats.targeted_air_yards=${stats.targeted_air_yards}, team_stats.passing_air_yards=${team_stats.passing_air_yards}`
+      )
+    }
+    if (
+      receiving_gamelog.route_share != null &&
+      receiving_gamelog.route_share > DB_CONSTRAINTS.ROUTE_SHARE_MAX
+    ) {
+      log(
+        `OVERFLOW: route_share = ${receiving_gamelog.route_share} (max ${DB_CONSTRAINTS.ROUTE_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+      )
+      log(`  player_routes=${player_routes}, team_dropbacks=${team_dropbacks}`)
+    }
+    if (
+      receiving_gamelog.weighted_opportunity_rating != null &&
+      receiving_gamelog.weighted_opportunity_rating >
+        DB_CONSTRAINTS.WEIGHTED_OPPORTUNITY_RATING_MAX
+    ) {
+      log(
+        `OVERFLOW: weighted_opportunity_rating = ${receiving_gamelog.weighted_opportunity_rating} (max ${DB_CONSTRAINTS.WEIGHTED_OPPORTUNITY_RATING_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
+      )
+      log(
+        `  team_target_share=${team_target_share}, team_air_yard_share=${team_air_yard_share}`
+      )
+    }
+  }
+
+  return receiving_gamelog
 }
 
 const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
@@ -136,7 +306,8 @@ const generate_receiving_gamelog = ({
   team_gamelog_inserts,
   player_receiving_gamelog_inserts,
   player_routes_by_game,
-  team_dropbacks_by_game
+  team_dropbacks_by_game,
+  dry_run = false
 }) => {
   const player_routes =
     player_routes_by_game[`${player_gamelog.pid}_${player_gamelog.esbid}`] ||
@@ -148,10 +319,11 @@ const generate_receiving_gamelog = ({
     player_gamelog.trg > 0 ||
     player_routes > 0
   ) {
-    const team_gamelog = team_gamelog_inserts.find(
-      (t) =>
-        t.tm === fixTeam(player_gamelog.tm) && t.esbid === player_gamelog.esbid
-    )
+    const team_gamelog = find_team_gamelog({
+      team_gamelog_inserts,
+      team: player_gamelog.tm,
+      esbid: player_gamelog.esbid
+    })
     const team_dropbacks =
       team_dropbacks_by_game[
         `${fixTeam(player_gamelog.tm)}_${player_gamelog.esbid}`
@@ -163,7 +335,8 @@ const generate_receiving_gamelog = ({
       stats,
       team_stats: team_gamelog,
       player_routes,
-      team_dropbacks
+      team_dropbacks,
+      validate: dry_run
     })
     player_receiving_gamelog_inserts.push(receiving_gamelog)
   }
@@ -176,10 +349,11 @@ const generate_rushing_gamelog = ({
   player_rushing_gamelog_inserts
 }) => {
   if (player_gamelog.ra > 0) {
-    const team_gamelog = team_gamelog_inserts.find(
-      (t) =>
-        t.tm === fixTeam(player_gamelog.tm) && t.esbid === player_gamelog.esbid
-    )
+    const team_gamelog = find_team_gamelog({
+      team_gamelog_inserts,
+      team: player_gamelog.tm,
+      esbid: player_gamelog.esbid
+    })
     const rushing_gamelog = format_rushing_gamelog({
       pid: player_gamelog.pid,
       esbid: player_gamelog.esbid,
@@ -194,11 +368,6 @@ const generate_rushing_gamelog = ({
 /**
  * Generate gamelogs for players who played snaps but didn't record any counting stats
  * This ensures all active players have gamelogs, even if they had 0 targets, 0 carries, etc.
- *
- * @param {Array<number>} unique_esbids - Array of game IDs to process
- * @param {number} year - Season year
- * @param {Array<Object>} player_gamelog_inserts - Existing gamelogs (will be modified)
- * @returns {Promise<number>} Number of snap-based gamelogs added
  */
 const generate_snap_based_gamelogs = async ({
   unique_esbids,
@@ -207,7 +376,6 @@ const generate_snap_based_gamelogs = async ({
 }) => {
   log('Checking for players with snaps but no stats...')
 
-  // Query players who played snaps in these games
   const players_with_snaps = await db('nfl_snaps')
     .select(
       'player.pid',
@@ -228,7 +396,6 @@ const generate_snap_based_gamelogs = async ({
 
   log(`Found ${players_with_snaps.length} players with snap data`)
 
-  // Build game lookup for opponent determination
   const games_by_esbid = await db('nfl_games')
     .whereIn('esbid', unique_esbids)
     .then((games) =>
@@ -238,7 +405,6 @@ const generate_snap_based_gamelogs = async ({
       }, {})
     )
 
-  // Add gamelogs for players with snaps but no existing gamelog
   let added_count = 0
   for (const snap_player of players_with_snaps) {
     const already_has_gamelog = player_gamelog_inserts.some(
@@ -254,8 +420,11 @@ const generate_snap_based_gamelogs = async ({
       }
 
       const team = fixTeam(snap_player.current_nfl_team)
-      const opponent =
-        fixTeam(game.h) === team ? fixTeam(game.v) : fixTeam(game.h)
+      const opponent = calculate_opponent({
+        team,
+        home_team: game.h,
+        away_team: game.v
+      })
 
       player_gamelog_inserts.push({
         esbid: snap_player.esbid,
@@ -279,50 +448,31 @@ const generate_snap_based_gamelogs = async ({
 }
 
 /**
- * Generate player gamelogs from play-by-play data
- *
- * This script processes NFL play data to create comprehensive player gamelogs including:
- * - Basic player stats (passing, rushing, receiving)
- * - Advanced receiving metrics (routes, target share, etc.)
- * - Advanced rushing metrics (rush share, opportunity, etc.)
- * - Team aggregates
- * - Defense/special teams stats
- * - Snap-based gamelogs for players without counting stats
- *
- * @param {number} week - Week number to process
- * @param {number} year - Season year
- * @param {string} seas_type - Season type (REG, PRE, POST)
- * @param {boolean} dry_run - If true, shows what would be generated without saving
+ * Load player routes data for given games
  */
-const generate_player_gamelogs = async ({
-  week = current_season.last_week_with_stats,
-  year = current_season.year,
-  seas_type = current_season.nfl_seas_type,
-  dry_run = false
-}) => {
-  log(`loading plays for ${year} week ${week}`)
-
-  const playStats = await get_play_stats({ year, week, seas_type })
-
-  const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
-  log(`loaded play stats for ${unique_esbids.length} games`)
-  log(unique_esbids.join(', '))
-
-  // Load player routes data from existing gamelogs
+const load_player_routes = async ({ unique_esbids, year }) => {
   const player_routes_query = await db('player_receiving_gamelogs')
     .select('pid', 'esbid', 'routes')
     .whereIn('esbid', unique_esbids)
     .where({ year })
     .whereNotNull('routes')
+
   log(`loaded routes data for ${player_routes_query.length} players`)
 
-  // Create player routes lookup structure
-  const player_routes_by_game = player_routes_query.reduce((acc, row) => {
-    acc[`${row.pid}_${row.esbid}`] = row.routes
-    return acc
-  }, {})
+  return create_lookup_map({
+    items: player_routes_query,
+    key_fields: ['pid', 'esbid'],
+    value_field: 'routes'
+  })
+}
 
-  // Load team dropbacks from nfl_plays
+/**
+ * Load team dropbacks data for given games
+ * Note: qb_dropback field is populated by scripts/import-plays-nflfastr.mjs
+ * If qb_dropback data is missing/incomplete for some games, route_share will be
+ * set to null when team_dropbacks < player_routes (see format_receiving_gamelog)
+ */
+const load_team_dropbacks = async ({ unique_esbids }) => {
   const team_dropbacks_query = await db('nfl_plays')
     .select('pos_team as tm', 'esbid')
     .count('* as dropbacks')
@@ -330,32 +480,111 @@ const generate_player_gamelogs = async ({
     .where({ qb_dropback: true })
     .whereNot({ play_type: 'NOPL' })
     .groupBy('pos_team', 'esbid')
+
   log(`loaded dropback counts for ${team_dropbacks_query.length} team-games`)
 
-  // Create team dropbacks lookup structure
-  const team_dropbacks_by_game = team_dropbacks_query.reduce((acc, row) => {
+  return team_dropbacks_query.reduce((acc, row) => {
     acc[`${fixTeam(row.tm)}_${row.esbid}`] = parseInt(row.dropbacks, 10)
     return acc
   }, {})
+}
 
-  const player_gamelog_inserts = []
-  const player_receiving_gamelog_inserts = []
-  const player_rushing_gamelog_inserts = []
-  const team_gamelog_inserts = []
-  const missing = []
+/**
+ * Process player gamelogs from play stats grouped by player identifier
+ */
+const process_player_gamelogs = ({
+  play_stats_by_player,
+  player_rows,
+  player_identifier_field,
+  team_gamelog_inserts,
+  player_gamelog_inserts,
+  player_receiving_gamelog_inserts,
+  player_rushing_gamelog_inserts,
+  player_routes_by_game,
+  team_dropbacks_by_game,
+  processed_player_ids,
+  dry_run
+}) => {
+  for (const player_id of Object.keys(play_stats_by_player)) {
+    if (player_id === 'null') continue
 
-  // Group play stats by team
+    const player_row = player_rows.find(
+      (p) => p[player_identifier_field] === player_id
+    )
+    if (!player_row) {
+      log(`missing player for ${player_identifier_field}: ${player_id}`)
+      continue
+    }
+
+    // Skip if already processed via gsispid
+    if (
+      player_identifier_field === 'gsisid' &&
+      player_row.gsispid &&
+      processed_player_ids.includes(player_row.gsispid)
+    ) {
+      continue
+    }
+
+    const play_stat = play_stats_by_player[player_id].find((p) => p.clubCode)
+    if (!play_stat) continue
+
+    const opp = calculate_opponent({
+      team: play_stat.clubCode,
+      home_team: play_stat.h,
+      away_team: play_stat.v
+    })
+
+    const stats = calculateStatsFromPlayStats(play_stats_by_player[player_id])
+
+    if (player_identifier_field === 'gsispid') {
+      processed_player_ids.push(player_id)
+    }
+
+    const player_gamelog = format_player_gamelog({
+      pid: player_row.pid,
+      pos: player_row.pos,
+      tm: fixTeam(play_stat.clubCode),
+      opp,
+      esbid: play_stat.esbid,
+      year: play_stat.year,
+      stats
+    })
+    player_gamelog_inserts.push(player_gamelog)
+
+    generate_receiving_gamelog({
+      player_gamelog,
+      stats,
+      team_gamelog_inserts,
+      player_receiving_gamelog_inserts,
+      player_routes_by_game,
+      team_dropbacks_by_game,
+      dry_run
+    })
+
+    generate_rushing_gamelog({
+      player_gamelog,
+      stats,
+      team_gamelog_inserts,
+      player_rushing_gamelog_inserts
+    })
+  }
+}
+
+/**
+ * Generate team gamelogs from play stats
+ */
+const generate_team_gamelogs = ({ playStats, team_gamelog_inserts }) => {
   const play_stats_by_team = groupBy(playStats, 'clubCode')
 
-  // Generate team gamelogs
   for (const team of Object.keys(play_stats_by_team)) {
     const team_play_stats = play_stats_by_team[team]
     const team_stats = calculateStatsFromPlayStats(team_play_stats)
     const play_stat = team_play_stats[0]
-    const opp =
-      fixTeam(play_stat.h) === fixTeam(team)
-        ? fixTeam(play_stat.v)
-        : fixTeam(play_stat.h)
+    const opp = calculate_opponent({
+      team,
+      home_team: play_stat.h,
+      away_team: play_stat.v
+    })
 
     // TODO format to match table schema
     const team_gamelog = {
@@ -367,124 +596,12 @@ const generate_player_gamelogs = async ({
     }
     team_gamelog_inserts.push(team_gamelog)
   }
+}
 
-  const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
-  const gsispids = Object.keys(play_stats_by_gsispid)
-  const player_gsispid_rows = await db('player').whereIn('gsispid', gsispids)
-
-  log(
-    `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} gsispid players`
-  )
-
-  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
-  const gsisids = Object.keys(play_stats_by_gsisid)
-  const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
-
-  log(
-    `loaded play stats for ${Object.keys(play_stats_by_gsisid).length} gsisid players`
-  )
-
-  // track generated gamelogs by gsispids
-  const gamelog_gsispids = []
-
-  // generate player gamelogs
-  for (const gsispid of Object.keys(play_stats_by_gsispid)) {
-    if (gsispid === 'null') continue
-
-    const player_row = player_gsispid_rows.find((p) => p.gsispid === gsispid)
-    if (!player_row) {
-      log(`missing player for gsispid: ${gsispid}`)
-      continue
-    }
-
-    const playStat = play_stats_by_gsispid[gsispid].find((p) => p.clubCode)
-    if (!playStat) continue
-    const opp =
-      fixTeam(playStat.clubCode) === fixTeam(playStat.h)
-        ? fixTeam(playStat.v)
-        : fixTeam(playStat.h)
-    const stats = calculateStatsFromPlayStats(play_stats_by_gsispid[gsispid])
-
-    gamelog_gsispids.push(gsispid)
-    const player_gamelog = format_player_gamelog({
-      pid: player_row.pid,
-      pos: player_row.pos,
-      tm: fixTeam(playStat.clubCode),
-      opp,
-      esbid: playStat.esbid,
-      year: playStat.year,
-      stats
-    })
-    player_gamelog_inserts.push(player_gamelog)
-
-    generate_receiving_gamelog({
-      player_gamelog,
-      stats,
-      team_gamelog_inserts,
-      player_receiving_gamelog_inserts,
-      player_routes_by_game,
-      team_dropbacks_by_game
-    })
-
-    generate_rushing_gamelog({
-      player_gamelog,
-      stats,
-      team_gamelog_inserts,
-      player_rushing_gamelog_inserts
-    })
-  }
-
-  for (const gsisid of Object.keys(play_stats_by_gsisid)) {
-    if (gsisid === 'null') continue
-
-    const player_row = player_gsisid_rows.find((p) => p.gsisid === gsisid)
-    if (!player_row) {
-      log(`missing player for gsisid: ${gsisid}`)
-      continue
-    }
-
-    // check to see if gamelog was already generated using gsispid
-    if (player_row.gsispid && gamelog_gsispids.includes(player_row.gsispid))
-      continue
-
-    const playStat = play_stats_by_gsisid[gsisid].find((p) => p.clubCode)
-    if (!playStat) continue
-    const opp =
-      fixTeam(playStat.clubCode) === fixTeam(playStat.h)
-        ? fixTeam(playStat.v)
-        : fixTeam(playStat.h)
-
-    const stats = calculateStatsFromPlayStats(play_stats_by_gsisid[gsisid])
-
-    const player_gamelog = format_player_gamelog({
-      pid: player_row.pid,
-      pos: player_row.pos,
-      tm: fixTeam(playStat.clubCode),
-      opp,
-      esbid: playStat.esbid,
-      year: playStat.year,
-      stats
-    })
-    player_gamelog_inserts.push(player_gamelog)
-
-    generate_receiving_gamelog({
-      player_gamelog,
-      stats,
-      team_gamelog_inserts,
-      player_receiving_gamelog_inserts,
-      player_routes_by_game,
-      team_dropbacks_by_game
-    })
-
-    generate_rushing_gamelog({
-      player_gamelog,
-      stats,
-      team_gamelog_inserts,
-      player_rushing_gamelog_inserts
-    })
-  }
-
-  // generate defense gamelogs
+/**
+ * Generate defense/special teams gamelogs
+ */
+const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
   for (const team of nfl_team_abbreviations) {
     const opponentPlays = playStats.filter((p) => {
       if (fixTeam(p.h) !== team && fixTeam(p.v) !== team) {
@@ -499,6 +616,7 @@ const generate_player_gamelogs = async ({
       )
     })
     if (!opponentPlays.length) continue
+
     const play = opponentPlays[0]
     const opp = fixTeam(play.h) === team ? play.v : play.h
     const groupedPlays = groupBy(opponentPlays, 'playId')
@@ -525,31 +643,17 @@ const generate_player_gamelogs = async ({
     })
     player_gamelog_inserts.push(player_gamelog)
   }
+}
 
-  log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) =>
-    log(`could not find player: ${m.pname} / ${m.current_nfl_team}`)
-  )
-
-  // Generate gamelogs for players who played snaps but didn't record any counting stats
-  // This ensures complete coverage (e.g., WR with 0 targets still gets a gamelog)
-  await generate_snap_based_gamelogs({
-    unique_esbids,
-    year,
-    player_gamelog_inserts
-  })
-
-  if (dry_run) {
-    log(player_gamelog_inserts[0])
-    log(player_receiving_gamelog_inserts[0])
-    log(player_rushing_gamelog_inserts[0])
-    log(team_gamelog_inserts[0])
-    log(
-      `Generated ${player_gamelog_inserts.length} player gamelogs, ${player_receiving_gamelog_inserts.length} receiving gamelogs, ${player_rushing_gamelog_inserts.length} rushing gamelogs, and ${team_gamelog_inserts.length} team gamelogs for ${year} week ${week}`
-    )
-    return
-  }
-
+/**
+ * Save gamelogs to database
+ */
+const save_gamelogs = async ({
+  player_gamelog_inserts,
+  player_receiving_gamelog_inserts,
+  player_rushing_gamelog_inserts,
+  dry_run
+}) => {
   if (player_gamelog_inserts.length) {
     await batch_insert({
       items: player_gamelog_inserts,
@@ -565,6 +669,20 @@ const generate_player_gamelogs = async ({
   }
 
   if (player_receiving_gamelog_inserts.length) {
+    // Clamp values to prevent database overflow
+    let clamped_count = 0
+    for (const item of player_receiving_gamelog_inserts) {
+      if (clamp_receiving_gamelog_values({ item, dry_run })) {
+        clamped_count++
+      }
+    }
+
+    if (clamped_count > 0 && !dry_run) {
+      log(
+        `Clamped ${clamped_count} receiving gamelog items to prevent database overflow`
+      )
+    }
+
     await batch_insert({
       items: player_receiving_gamelog_inserts,
       save: async (batch) => {
@@ -607,6 +725,125 @@ const generate_player_gamelogs = async ({
   //   })
   //   log(`Updated ${team_gamelog_inserts.length} team gamelogs`)
   // }
+}
+
+/**
+ * Generate player gamelogs from play-by-play data
+ *
+ * This script processes NFL play data to create comprehensive player gamelogs including:
+ * - Basic player stats (passing, rushing, receiving)
+ * - Advanced receiving metrics (routes, target share, etc.)
+ * - Advanced rushing metrics (rush share, opportunity, etc.)
+ * - Team aggregates
+ * - Defense/special teams stats
+ * - Snap-based gamelogs for players without counting stats
+ *
+ * @param {number} week - Week number to process
+ * @param {number} year - Season year
+ * @param {string} seas_type - Season type (REG, PRE, POST)
+ * @param {boolean} dry_run - If true, shows what would be generated without saving
+ */
+const generate_player_gamelogs = async ({
+  week = current_season.last_week_with_stats,
+  year = current_season.year,
+  seas_type = current_season.nfl_seas_type,
+  dry_run = false
+}) => {
+  log(`loading plays for ${year} week ${week}`)
+
+  const playStats = await get_play_stats({ year, week, seas_type })
+  const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
+  log(`loaded play stats for ${unique_esbids.length} games`)
+  log(unique_esbids.join(', '))
+
+  // Load supporting data
+  const player_routes_by_game = await load_player_routes({
+    unique_esbids,
+    year
+  })
+  const team_dropbacks_by_game = await load_team_dropbacks({ unique_esbids })
+
+  // Initialize collections
+  const player_gamelog_inserts = []
+  const player_receiving_gamelog_inserts = []
+  const player_rushing_gamelog_inserts = []
+  const team_gamelog_inserts = []
+
+  // Generate team gamelogs
+  generate_team_gamelogs({ playStats, team_gamelog_inserts })
+
+  // Load player data
+  const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
+  const gsispids = Object.keys(play_stats_by_gsispid)
+  const player_gsispid_rows = await db('player').whereIn('gsispid', gsispids)
+  log(
+    `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} gsispid players`
+  )
+
+  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
+  const gsisids = Object.keys(play_stats_by_gsisid)
+  const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
+  log(
+    `loaded play stats for ${Object.keys(play_stats_by_gsisid).length} gsisid players`
+  )
+
+  // Process player gamelogs (gsispid first, then gsisid for players not found via gsispid)
+  const processed_gsispids = []
+  process_player_gamelogs({
+    play_stats_by_player: play_stats_by_gsispid,
+    player_rows: player_gsispid_rows,
+    player_identifier_field: 'gsispid',
+    team_gamelog_inserts,
+    player_gamelog_inserts,
+    player_receiving_gamelog_inserts,
+    player_rushing_gamelog_inserts,
+    player_routes_by_game,
+    team_dropbacks_by_game,
+    processed_player_ids: processed_gsispids,
+    dry_run
+  })
+
+  process_player_gamelogs({
+    play_stats_by_player: play_stats_by_gsisid,
+    player_rows: player_gsisid_rows,
+    player_identifier_field: 'gsisid',
+    team_gamelog_inserts,
+    player_gamelog_inserts,
+    player_receiving_gamelog_inserts,
+    player_rushing_gamelog_inserts,
+    player_routes_by_game,
+    team_dropbacks_by_game,
+    processed_player_ids: processed_gsispids,
+    dry_run
+  })
+
+  // Generate defense/special teams gamelogs
+  generate_defense_gamelogs({ playStats, player_gamelog_inserts })
+
+  // Generate gamelogs for players who played snaps but didn't record any counting stats
+  await generate_snap_based_gamelogs({
+    unique_esbids,
+    year,
+    player_gamelog_inserts
+  })
+
+  if (dry_run) {
+    log(player_gamelog_inserts[0])
+    log(player_receiving_gamelog_inserts[0])
+    log(player_rushing_gamelog_inserts[0])
+    log(team_gamelog_inserts[0])
+    log(
+      `Generated ${player_gamelog_inserts.length} player gamelogs, ${player_receiving_gamelog_inserts.length} receiving gamelogs, ${player_rushing_gamelog_inserts.length} rushing gamelogs, and ${team_gamelog_inserts.length} team gamelogs for ${year} week ${week}`
+    )
+    return
+  }
+
+  await save_gamelogs({
+    player_gamelog_inserts,
+    player_receiving_gamelog_inserts,
+    player_rushing_gamelog_inserts,
+    dry_run
+  })
 }
 
 const main = async () => {
