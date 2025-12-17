@@ -1084,22 +1084,43 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
         throw new Error(`base URL failed: ${response.statusText}`)
       }
     } else {
-      // Week 3+: try versioned URL first as it has the latest data
-      const versioned_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${version_number}.xlsx`
-      log(`downloading ${versioned_dvoa_url}`)
-      response = await fetch(versioned_dvoa_url)
+      // Week 3+: try each version down from the predicted version
+      let found_version = false
+      const errors = []
 
-      if (!response.ok) {
-        log(`versioned URL failed (${response.statusText}), trying base URL`)
-        const base_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0.xlsx`
-        log(`downloading ${base_dvoa_url}`)
-        response = await fetch(base_dvoa_url)
+      for (
+        let version_to_try = version_number;
+        version_to_try >= 0;
+        version_to_try--
+      ) {
+        let url_to_try
+        if (version_to_try === 0) {
+          url_to_try = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0.xlsx`
+        } else {
+          url_to_try = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${version_to_try}.xlsx`
+        }
 
-        if (!response.ok) {
-          throw new Error(
-            `both URLs failed - versioned: ${response.statusText}, base: ${response.statusText}`
+        log(`downloading ${url_to_try}`)
+        response = await fetch(url_to_try)
+
+        if (response.ok) {
+          found_version = true
+          log(
+            `successfully downloaded version ${version_to_try === 0 ? 'base' : version_to_try}`
+          )
+          break
+        } else {
+          errors.push(
+            `version ${version_to_try === 0 ? 'base' : version_to_try}: ${response.statusText}`
+          )
+          log(
+            `version ${version_to_try === 0 ? 'base' : version_to_try} failed (${response.statusText}), trying next version`
           )
         }
+      }
+
+      if (!found_version) {
+        throw new Error(`all versions failed - ${errors.join(', ')}`)
       }
     }
 
