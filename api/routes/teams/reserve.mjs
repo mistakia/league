@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { current_season } from '#constants'
-import { verifyUserTeam, submitReserve } from '#libs-server'
+import { verifyUserTeam, submit_reserve } from '#libs-server'
 import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
@@ -171,12 +171,12 @@ router.post('/?', async (req, res) => {
     const tid = Number(teamId)
     let data
     try {
-      data = await submitReserve({
+      data = await submit_reserve({
         slot,
         tid,
         reserve_pid,
-        leagueId,
-        userId: req.auth.userId,
+        league_id: leagueId,
+        user_id: req.auth.userId,
         activate_pid
       })
     } catch (error) {

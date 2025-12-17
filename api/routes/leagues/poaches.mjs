@@ -3,7 +3,7 @@ import express from 'express'
 
 import {
   submitPoach,
-  verifyReserveStatus,
+  verify_reserve_status,
   verifyUserTeam,
   getRoster,
   getLeague,
@@ -106,7 +106,7 @@ router.post('/?', async (req, res) => {
 
     // check team reserve status
     try {
-      await verifyReserveStatus({ teamId, leagueId })
+      await verify_reserve_status({ team_id: teamId, league_id: leagueId })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }

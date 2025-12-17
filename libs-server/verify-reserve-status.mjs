@@ -4,9 +4,9 @@ import getLeague from './get-league.mjs'
 import { Roster, isReserveEligible, isReserveCovEligible } from '#libs-shared'
 import { current_season, roster_slot_types } from '#constants'
 
-export default async function ({ teamId, leagueId }) {
-  const league = await getLeague({ lid: leagueId })
-  const rosterRow = await getRoster({ tid: teamId })
+export default async function ({ team_id, league_id }) {
+  const league = await getLeague({ lid: league_id })
+  const rosterRow = await getRoster({ tid: team_id })
   const roster = new Roster({ roster: rosterRow, league })
   const reserve_pids = roster.reserve.map((p) => p.pid)
 

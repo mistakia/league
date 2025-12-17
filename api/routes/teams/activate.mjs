@@ -2,7 +2,7 @@ import express from 'express'
 
 import { current_season } from '#constants'
 import {
-  submitReserve,
+  submit_reserve,
   submitActivate,
   submitDeactivate,
   processRelease,
@@ -192,12 +192,12 @@ router.post('/?', async (req, res) => {
     } else if (reserve_pid) {
       let reserveData
       try {
-        reserveData = await submitReserve({
+        reserveData = await submit_reserve({
           slot,
           tid,
           reserve_pid,
-          leagueId,
-          userId: req.auth.userId,
+          league_id: leagueId,
+          user_id: req.auth.userId,
           activate_pid
         })
       } catch (error) {

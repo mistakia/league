@@ -17,8 +17,8 @@ export default async function ({
   slot,
   tid,
   reserve_pid,
-  leagueId,
-  userId,
+  league_id,
+  user_id,
   activate_pid
 }) {
   const data = []
@@ -134,9 +134,9 @@ export default async function ({
   }
 
   // make sure player is on active roster
-  const league = await getLeague({ lid: leagueId })
+  const league = await getLeague({ lid: league_id })
   if (!league) {
-    throw new Error('invalid leagueId')
+    throw new Error('invalid league_id')
   }
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
@@ -236,7 +236,7 @@ export default async function ({
   })
   const prevRoster = new Roster({ roster: prevRosterRow, league })
   const acquisitionTransaction = await getAcquisitionTransaction({
-    lid: leagueId,
+    lid: league_id,
     pid: reserve_pid,
     tid
   })
@@ -296,13 +296,13 @@ export default async function ({
 
     const { value } = await getLastTransaction({
       pid: activate_pid,
-      lid: leagueId,
+      lid: league_id,
       tid
     })
     const transaction = {
-      userid: userId,
+      userid: user_id,
       tid,
-      lid: leagueId,
+      lid: league_id,
       pid: activate_pid,
       type: transaction_types.ROSTER_ACTIVATE,
       value,
@@ -346,13 +346,13 @@ export default async function ({
 
   const { value } = await getLastTransaction({
     pid: reserve_pid,
-    lid: leagueId,
+    lid: league_id,
     tid
   })
   const transaction = {
-    userid: userId,
+    userid: user_id,
     tid,
-    lid: leagueId,
+    lid: league_id,
     pid: reserve_pid,
     type,
     value,

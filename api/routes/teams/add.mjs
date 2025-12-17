@@ -4,7 +4,7 @@ import { current_season, roster_slot_types } from '#constants'
 import {
   submitAcquisition,
   verifyUserTeam,
-  verifyReserveStatus
+  verify_reserve_status
 } from '#libs-server'
 import { require_auth } from '../leagues/middleware.mjs'
 
@@ -220,7 +220,7 @@ router.post('/?', async (req, res) => {
     }
 
     try {
-      await verifyReserveStatus({ teamId, leagueId })
+      await verify_reserve_status({ team_id: teamId, league_id: leagueId })
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
