@@ -20,6 +20,7 @@ class PlayerCache {
     this.players_by_gsisid = new Map()
     this.players_by_otc_id = new Map()
     this.players_by_sportradar_id = new Map()
+    this.players_by_espn_id = new Map()
     this.players_by_name_draft_year = new Map()
     this.is_initialized = false
   }
@@ -56,6 +57,7 @@ class PlayerCache {
       this._build_alias_indexes(player_aliases)
       this._build_gsisid_index(players)
       this._build_sportradar_id_index(players)
+      this._build_espn_id_index(players)
 
       if (include_otc_id_index) {
         this._build_otc_id_index(players)
@@ -80,6 +82,7 @@ class PlayerCache {
    * @param {string} params.name - Player name to search for
    * @param {string} params.gsisid - GSIS ID to search for
    * @param {string} params.sportradar_id - Sportradar ID to search for
+   * @param {number} params.espn_id - ESPN ID to search for
    * @param {number} params.otc_id - Over The Cap ID to search for
    * @param {number} params.nfl_draft_year - NFL draft year (used with name for composite lookup)
    * @param {string[]} params.teams - Optional team abbreviations to filter by
@@ -92,6 +95,7 @@ class PlayerCache {
     name,
     gsisid,
     sportradar_id,
+    espn_id,
     otc_id,
     nfl_draft_year,
     teams = [],
@@ -103,6 +107,20 @@ class PlayerCache {
     // Fast lookup by Sportradar ID if provided
     if (sportradar_id) {
       const player = this.players_by_sportradar_id.get(sportradar_id)
+      if (player) {
+        const filtered_players = this._apply_filters([player], {
+          teams,
+          ignore_free_agent,
+          ignore_retired
+        })
+        return filtered_players.length > 0 ? filtered_players[0] : null
+      }
+      return null
+    }
+
+    // Fast lookup by ESPN ID if provided
+    if (espn_id) {
+      const player = this.players_by_espn_id.get(Number(espn_id))
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -190,6 +208,7 @@ class PlayerCache {
       formatted_name_entries: this.players_by_formatted_name.size,
       gsisid_entries: this.players_by_gsisid.size,
       sportradar_id_entries: this.players_by_sportradar_id.size,
+      espn_id_entries: this.players_by_espn_id.size,
       otc_id_entries: this.players_by_otc_id.size,
       name_draft_year_entries: this.players_by_name_draft_year.size
     }
@@ -274,6 +293,7 @@ class PlayerCache {
     this.players_by_gsisid.clear()
     this.players_by_otc_id.clear()
     this.players_by_sportradar_id.clear()
+    this.players_by_espn_id.clear()
     this.players_by_name_draft_year.clear()
   }
 
@@ -326,6 +346,19 @@ class PlayerCache {
     for (const player of players) {
       if (player.sportradar_id) {
         this.players_by_sportradar_id.set(player.sportradar_id, player)
+      }
+    }
+  }
+
+  /**
+   * Builds ESPN ID index from player data
+   * @param {Array} players - Array of player objects
+   * @private
+   */
+  _build_espn_id_index(players) {
+    for (const player of players) {
+      if (player.espn_id) {
+        this.players_by_espn_id.set(Number(player.espn_id), player)
       }
     }
   }

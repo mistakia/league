@@ -5,7 +5,11 @@ import { fetch as fetch_http2 } from 'fetch-h2'
 import * as cheerio from 'cheerio'
 
 import db from '#db'
-import { is_main, report_job, espn, find_player_row } from '#libs-server'
+import { is_main, report_job, espn } from '#libs-server'
+import {
+  preload_active_players,
+  find_player
+} from '#libs-server/player-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
@@ -16,6 +20,12 @@ debug.enable('import-espn-line-win-rates,get-player')
 
 const import_espn_line_win_rates = async () => {
   const timestamp = Math.floor(Date.now() / 1000)
+
+  // Preload player cache for fast lookups
+  log('Preloading player cache...')
+  await preload_active_players()
+  log('Player cache initialized')
+
   const espn_config = await espn.get_espn_config()
   const { espn_line_win_rates_url } = espn_config
 
@@ -50,30 +60,30 @@ const import_espn_line_win_rates = async () => {
         double_team_pct: parseFloat($(cells[6]).text()) / 100
       }
 
-      let player_row
+      // Try espn_id lookup first, then fallback to name+team lookup
+      let player_row = null
       if (player_data.espn_id) {
-        try {
-          player_row = await find_player_row({ espn_id: player_data.espn_id })
-        } catch (err) {
-          log(`Error getting player by espn_id: ${err}`)
-        }
+        player_row = find_player({
+          espn_id: player_data.espn_id
+        })
       }
 
+      // Fallback to name+team lookup if espn_id lookup failed
       if (!player_row) {
-        try {
-          player_row = await find_player_row({
-            name: player_data.player_name,
-            team: player_data.team
-          })
-        } catch (err) {
-          log(`Error getting player by name and team: ${err}`)
-          log(player_data)
-          continue
-        }
+        player_row = find_player({
+          name: player_data.player_name,
+          teams: player_data.team ? [player_data.team] : []
+        })
       }
 
       if (player_row) {
         player_data.pid = player_row.pid
+      } else {
+        log(
+          `Player not found: ${player_data.player_name}, team: ${player_data.team}, espn_id: ${player_data.espn_id}`
+        )
+        log(player_data)
+        continue
       }
 
       players.push(player_data)
