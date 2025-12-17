@@ -4,13 +4,11 @@ import { hideBin } from 'yargs/helpers'
 import dayjs from 'dayjs'
 
 import db from '#db'
+import { is_main, report_job, draftkings, updatePlayer } from '#libs-server'
 import {
-  is_main,
-  report_job,
-  draftkings,
-  find_player_row,
-  updatePlayer
-} from '#libs-server'
+  preload_active_players,
+  find_player
+} from '#libs-server/player-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
@@ -23,6 +21,12 @@ const log = debug('import-draftkings-salaries')
 debug.enable('import-draftkings-salaries,draft-kings,update-player')
 
 const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
+  await preload_active_players({
+    all_players: false,
+    include_otc_id_index: false,
+    include_name_draft_index: false
+  })
+
   const draft_groups = await draftkings.get_draftkings_nfl_draft_groups()
 
   log(`importing ${draft_groups.length} draft groups`)
@@ -45,8 +49,10 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
       let player_row
 
       try {
-        player_row = await find_player_row({
-          draftkings_id: draftable.playerDkId
+        player_row = find_player({
+          draftkings_id: draftable.playerDkId,
+          ignore_free_agent: false,
+          ignore_retired: false
         })
       } catch (err) {
         log(err)
@@ -76,10 +82,11 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
       let player_row
 
       try {
-        player_row = await find_player_row({
+        player_row = find_player({
           name: `${draftable.firstName} ${draftable.lastName}`,
-          pos: draftable.position,
-          team: draftable.teamAbbreviation
+          teams: draftable.teamAbbreviation ? [draftable.teamAbbreviation] : [],
+          ignore_free_agent: false,
+          ignore_retired: false
         })
       } catch (err) {
         log(err)
