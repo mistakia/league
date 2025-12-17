@@ -19,6 +19,7 @@ import {
 import {
   preload_plays,
   find_play,
+  reset_cache,
   MultiplePlayMatchError
 } from '#libs-server/play-cache.mjs'
 import {
@@ -874,6 +875,8 @@ const main = async () => {
         import_year <= current_season.stats_season_year;
         import_year++
       ) {
+        // Reset cache between years to ensure each year's plays are loaded
+        reset_cache()
         await run({
           year: import_year,
           ignore_conflicts,

@@ -43,6 +43,7 @@ class PlayCache {
    * @param {number[]} options.esbids - Load specific games by esbid (optional)
    * @param {boolean} options.all_plays - Load all plays from all years (default: false)
    * @param {boolean} options.include_context_index - Build game context index (default: true)
+   * @param {boolean} options.force_reload - Force reload even if cache is already initialized (default: false)
    * @throws {Error} If database query fails
    */
   async preload_plays({
@@ -50,9 +51,10 @@ class PlayCache {
     weeks = [],
     esbids = [],
     all_plays = false,
-    include_context_index = true
+    include_context_index = true,
+    force_reload = false
   } = {}) {
-    if (this.is_initialized) {
+    if (this.is_initialized && !force_reload) {
       log('Play cache already initialized')
       return
     }
@@ -164,6 +166,15 @@ class PlayCache {
     }
 
     return null
+  }
+
+  /**
+   * Resets the cache, clearing all data and allowing it to be reinitialized
+   */
+  reset_cache() {
+    this._clear_cache()
+    this.is_initialized = false
+    log('Play cache reset')
   }
 
   /**
@@ -622,5 +633,6 @@ const play_cache = new PlayCache()
 export const preload_plays = (options) => play_cache.preload_plays(options)
 export const find_play = (params) => play_cache.find_play(params)
 export const get_cache_stats = () => play_cache.get_cache_stats()
+export const reset_cache = () => play_cache.reset_cache()
 
 export default play_cache
