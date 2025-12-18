@@ -83,6 +83,7 @@ const SLOW_PLAY_THRESHOLD_MS = 1000
  * --ignore_conflicts: Overwrite all existing field values
  * --ignore_sportradar_field_conflicts: Overwrite only Sportradar-exclusive fields
  *   (automatically converted to overwrite_fields parameter internally)
+ * --ignore-cache: Bypass cache and fetch fresh data from API
  */
 
 const log = debug('import-plays-sportradar')
@@ -1240,7 +1241,8 @@ const process_game = async ({
   stats,
   dry,
   ignore_conflicts,
-  ignore_sportradar_field_conflicts
+  ignore_sportradar_field_conflicts,
+  ignore_cache
 }) => {
   const game_start_time = Date.now()
   let game_plays_processed = 0
@@ -1254,7 +1256,8 @@ const process_game = async ({
   try {
     // Fetch play-by-play data
     const pbp_data = await get_game_play_by_play({
-      sportradar_game_id: game.sportradar_game_id
+      sportradar_game_id: game.sportradar_game_id,
+      ignore_cache
     })
 
     if (!pbp_data || !pbp_data.periods) {
@@ -1356,7 +1359,8 @@ const import_plays_sportradar = async ({
   all = false,
   dry = false,
   ignore_conflicts = false,
-  ignore_sportradar_field_conflicts = false
+  ignore_sportradar_field_conflicts = false,
+  ignore_cache = false
 } = {}) => {
   console.time('import-plays-sportradar-total')
 
@@ -1401,7 +1405,8 @@ const import_plays_sportradar = async ({
       stats,
       dry,
       ignore_conflicts,
-      ignore_sportradar_field_conflicts
+      ignore_sportradar_field_conflicts,
+      ignore_cache
     })
   }
 
@@ -1452,6 +1457,7 @@ const main = async () => {
     const ignore_conflicts = argv['ignore-conflicts'] || false
     const ignore_sportradar_field_conflicts =
       argv['ignore-sportradar-field-conflicts'] || false
+    const ignore_cache = argv['ignore-cache'] || false
 
     await import_plays_sportradar({
       year,
@@ -1460,7 +1466,8 @@ const main = async () => {
       all,
       dry,
       ignore_conflicts,
-      ignore_sportradar_field_conflicts
+      ignore_sportradar_field_conflicts,
+      ignore_cache
     })
   } catch (err) {
     error = err

@@ -122,7 +122,23 @@ export const get_games_schedule = ({ year, season_type = 'REG' }) =>
     return data
   })
 
-export const get_game_play_by_play = ({ sportradar_game_id }) => {
+// Helper function to check if response has actual plays
+const has_plays = (pbp_data) => {
+  if (!pbp_data?.periods?.length) return false
+
+  return pbp_data.periods.some((period) =>
+    period.pbp?.some(
+      (pbp_item) =>
+        pbp_item.type === 'drive' &&
+        pbp_item.events?.some((event) => event.type === 'play')
+    )
+  )
+}
+
+export const get_game_play_by_play = ({
+  sportradar_game_id,
+  ignore_cache = false
+}) => {
   const enqueue_time = Date.now()
   const queue_size_before = queue.size
   const queue_pending_before = queue.pending
@@ -150,30 +166,44 @@ export const get_game_play_by_play = ({ sportradar_game_id }) => {
 
       const cache_key = `/sportradar/pbp/${sportradar_game_id}`
 
-      // Time cache operation
-      const cache_start_time = Date.now()
-      const cache_value = await cache.get({ key: cache_key })
-      const cache_time = Date.now() - cache_start_time
+      // Try to get from cache unless bypassed
+      if (!ignore_cache) {
+        const cache_start_time = Date.now()
+        const cache_value = await cache.get({ key: cache_key })
+        const cache_time = Date.now() - cache_start_time
 
-      if (cache_time > 1000) {
+        if (cache_time > 1000) {
+          log(
+            `Cache get took ${(cache_time / 1000).toFixed(2)}s for play-by-play ${sportradar_game_id}`
+          )
+        }
+
+        // Return cached value if it exists and has plays
+        if (cache_value && has_plays(cache_value)) {
+          const total_time = Date.now() - task_start_time
+          const queue_size_after = queue.size
+          const queue_pending_after = queue.pending
+          log(
+            `Cache hit for play-by-play ${sportradar_game_id} (cache: ${cache_time}ms, total: ${total_time}ms, queue_wait: ${(queue_wait_time / 1000).toFixed(2)}s, queue: ${queue_pending_after} running, ${queue_size_after} pending)`
+          )
+          return cache_value
+        }
+
+        // Log reason for cache miss or invalid cache
+        if (cache_value) {
+          log(
+            `Cached response for play-by-play ${sportradar_game_id} has no plays - refetching`
+          )
+        } else {
+          log(
+            `Cache miss for play-by-play ${sportradar_game_id}, fetching from API`
+          )
+        }
+      } else {
         log(
-          `Cache get took ${(cache_time / 1000).toFixed(2)}s for play-by-play ${sportradar_game_id}`
+          `Cache bypassed for play-by-play ${sportradar_game_id} (--ignore-cache flag)`
         )
       }
-
-      if (cache_value) {
-        const total_time = Date.now() - task_start_time
-        const queue_size_after = queue.size
-        const queue_pending_after = queue.pending
-        log(
-          `Cache hit for play-by-play ${sportradar_game_id} (cache: ${cache_time}ms, total: ${total_time}ms, queue_wait: ${(queue_wait_time / 1000).toFixed(2)}s, queue: ${queue_pending_after} running, ${queue_size_after} pending)`
-        )
-        return cache_value
-      }
-
-      log(
-        `Cache miss for play-by-play ${sportradar_game_id}, fetching from API`
-      )
 
       // Rate limiting check
       const current_time = process.hrtime.bigint()
@@ -215,13 +245,24 @@ export const get_game_play_by_play = ({ sportradar_game_id }) => {
 
       const data = await res.json()
 
-      // Time cache set
-      const cache_set_start_time = Date.now()
-      await cache.set({ key: cache_key, value: data })
-      const cache_set_time = Date.now() - cache_set_start_time
-      if (cache_set_time > 1000) {
+      // Cache response only if it has plays
+      let cache_set_time = 0
+      if (has_plays(data)) {
+        const cache_set_start_time = Date.now()
+        await cache.set({ key: cache_key, value: data })
+        cache_set_time = Date.now() - cache_set_start_time
+
+        if (cache_set_time > 1000) {
+          log(
+            `Cache set took ${(cache_set_time / 1000).toFixed(2)}s for play-by-play ${sportradar_game_id}`
+          )
+        }
         log(
-          `Cache set took ${(cache_set_time / 1000).toFixed(2)}s for play-by-play ${sportradar_game_id}`
+          `Cached play-by-play response with plays for game ${sportradar_game_id}`
+        )
+      } else {
+        log(
+          `Skipping cache for play-by-play ${sportradar_game_id} - response has no plays`
         )
       }
 
