@@ -25829,7 +25829,7 @@ ALTER TABLE ONLY public.player_aliases
 --
 
 ALTER TABLE ONLY public.player_archetypes
-    ADD CONSTRAINT player_archetypes_pkey PRIMARY KEY (pid, year, archetype);
+    ADD CONSTRAINT player_archetypes_pkey PRIMARY KEY (pid, year);
 
 
 --
