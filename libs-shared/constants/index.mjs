@@ -72,13 +72,16 @@ export {
 export {
   roster_slot_types,
   starting_lineup_slots,
+  active_roster_slots,
   practice_squad_slots,
   practice_squad_protected_slots,
   practice_squad_unprotected_slots,
   practice_squad_signed_slots,
   practice_squad_drafted_slots,
   roster_slot_display_names,
-  player_availability_statuses
+  player_availability_statuses,
+  slot_to_name,
+  is_position_eligible_for_slot
 } from './roster-constants.mjs'
 
 // Transaction constants

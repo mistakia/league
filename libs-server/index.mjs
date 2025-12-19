@@ -1,3 +1,4 @@
+export * as simulation from './simulation/index.mjs'
 export { default as readCSV } from './read-csv.mjs'
 export { default as sendNotifications } from './send-notifications.mjs'
 export { default as sendEmail } from './send-email.mjs'
