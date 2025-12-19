@@ -32,6 +32,12 @@ export const starting_lineup_slots = [
   roster_slot_types.DST
 ]
 
+// Active roster slots: starting lineup + bench (excludes practice squad and reserves)
+export const active_roster_slots = [
+  ...starting_lineup_slots,
+  roster_slot_types.BENCH
+]
+
 export const practice_squad_slots = [
   roster_slot_types.PS,
   roster_slot_types.PSP,
@@ -86,3 +92,31 @@ export const player_availability_statuses = [
   'RESTRICTED FREE AGENT',
   'POTENTIAL FREE AGENT'
 ]
+
+// Reverse lookup: slot number -> slot name
+export const slot_to_name = Object.fromEntries(
+  Object.entries(roster_slot_types).map(([name, value]) => [value, name])
+)
+
+/**
+ * Check if a player position is eligible for a specific slot.
+ * @param {string} position - Player position (QB, RB, WR, TE, K, DST)
+ * @param {number} slot - Slot type number from roster_slot_types
+ * @returns {boolean} True if position can fill the slot
+ */
+export function is_position_eligible_for_slot(position, slot) {
+  // Bench can hold any position
+  if (slot === roster_slot_types.BENCH) {
+    return true
+  }
+
+  const slot_name = slot_to_name[slot]
+  if (!slot_name) {
+    return false
+  }
+
+  // Starting lineup slots: position must be in the slot name
+  // e.g., WR can fill WR, WRTE, RBWR, RBWRTE, QBRBWRTE
+  // DST only fills DST slot, K only fills K slot
+  return slot_name.includes(position)
+}
