@@ -13,9 +13,12 @@ export default class ScoreboardPlay extends React.Component {
     const { play, style } = this.props
 
     const players = []
+    // Create a unique key for each player that includes the play identifier
+    // to prevent React from reusing PlayerName components incorrectly
+    const play_key = play.play?.playId || play.time || 'unknown'
     for (const [pid, points] of Object.entries(play.points)) {
       players.push(
-        <div key={pid} className='scoreboard__play-player'>
+        <div key={`${play_key}-${pid}`} className='scoreboard__play-player'>
           <div className='scoreboard__play-player-name'>
             <PlayerName pid={pid} />
           </div>
