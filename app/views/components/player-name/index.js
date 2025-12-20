@@ -7,7 +7,7 @@ import { player_actions } from '@core/players'
 import PlayerName from './player-name'
 
 const map_state_to_props = createSelector(
-  getPlayerById,
+  (state, props) => getPlayerById(state, { pid: props.pid }),
   get_players_state,
   (player_map, players) => ({
     player_map,

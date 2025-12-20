@@ -17,10 +17,11 @@ export default class ScoreboardPlay extends React.Component {
     // to prevent React from reusing PlayerName components incorrectly
     const play_key = play.play?.playId || play.time || 'unknown'
     for (const [pid, points] of Object.entries(play.points)) {
+      const unique_key = `${play_key}-${pid}`
       players.push(
-        <div key={`${play_key}-${pid}`} className='scoreboard__play-player'>
+        <div key={unique_key} className='scoreboard__play-player'>
           <div className='scoreboard__play-player-name'>
-            <PlayerName pid={pid} />
+            <PlayerName key={unique_key} pid={pid} />
           </div>
           <div className='scoreboard__play-player-points metric'>
             {points.total.toFixed(1)}
