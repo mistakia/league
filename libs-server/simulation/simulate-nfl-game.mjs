@@ -126,8 +126,11 @@ export function simulate_nfl_game({
  * Simulate a single NFL game and return per-player raw scores.
  * This version returns actual per-simulation scores for aggregation.
  *
- * @param {Object} params - Same as simulate_nfl_game
- * @returns {Object} { player_scores: Map<pid, number[]>, elapsed_ms }
+ * @param {Object} params - Same as simulate_nfl_game plus extended matrix params
+ * @param {Map} [params.game_environment] - Map of esbid -> { game_total, home_spread, ... }
+ * @param {Map} [params.game_outcome_correlations] - Map of pid -> { correlation, confidence }
+ * @param {Map} [params.position_defaults] - Map of 'pos' or 'pos:archetype' -> { default_correlation }
+ * @returns {Object} { player_scores: Map<pid, number[]>, elapsed_ms, extended_matrix_used }
  */
 export function simulate_nfl_game_with_raw_scores({
   game_players,
@@ -138,7 +141,10 @@ export function simulate_nfl_game_with_raw_scores({
   game_schedule,
   n_simulations,
   seed,
-  locked_scores = new Map()
+  locked_scores = new Map(),
+  game_environment,
+  game_outcome_correlations,
+  position_defaults
 }) {
   const start_time = Date.now()
 
@@ -188,15 +194,37 @@ export function simulate_nfl_game_with_raw_scores({
     `Simulating ${active_players.length} players (${locked_players.length} locked)`
   )
 
-  // Build correlation matrix for active players
-  const { matrix: correlation_matrix } = simulation.build_correlation_matrix({
-    players: active_players,
-    schedule: game_schedule,
-    correlation_cache,
-    archetypes
-  })
+  // Determine if we should use extended matrix with game outcomes
+  const use_extended_matrix =
+    game_outcome_correlations &&
+    game_outcome_correlations.size > 0 &&
+    active_players.some((p) => p.esbid)
 
-  // Fit distributions for each player
+  // Build correlation matrix for active players (standard or extended)
+  let correlation_matrix
+
+  if (use_extended_matrix) {
+    log('Building extended correlation matrix for NFL game')
+    const extended_result = simulation.build_extended_correlation_matrix({
+      players: active_players,
+      schedule: game_schedule,
+      correlation_cache,
+      archetypes,
+      game_outcome_correlations,
+      position_defaults
+    })
+    correlation_matrix = extended_result.matrix
+  } else {
+    const standard_result = simulation.build_correlation_matrix({
+      players: active_players,
+      schedule: game_schedule,
+      correlation_cache,
+      archetypes
+    })
+    correlation_matrix = standard_result.matrix
+  }
+
+  // Fit distributions for each player (with optional variance scaling)
   const distribution_params = active_players.map((player) => {
     const projected_points = projections.get(player.pid) || 0
     const variance_data = variance_cache.get(player.pid)
@@ -209,6 +237,17 @@ export function simulate_nfl_game_with_raw_scores({
         position: player.position
       })
       std_points = projected_points * default_cv
+    }
+
+    // Apply variance scaling from game environment
+    if (game_environment && player.esbid) {
+      const game_env = game_environment.get(player.esbid)
+      if (game_env && game_env.game_total) {
+        const variance_scale = simulation.calculate_variance_scale({
+          game_total: game_env.game_total
+        })
+        std_points = std_points * variance_scale
+      }
     }
 
     return simulation.get_player_distribution_params({
@@ -251,6 +290,7 @@ export function simulate_nfl_game_with_raw_scores({
 
   return {
     player_scores,
-    elapsed_ms
+    elapsed_ms,
+    extended_matrix_used: use_extended_matrix
   }
 }

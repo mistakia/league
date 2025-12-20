@@ -15,7 +15,8 @@ import {
   load_player_variance,
   load_player_archetypes,
   load_player_info,
-  load_actual_player_points
+  load_actual_player_points,
+  load_scoring_format
 } from './load-simulation-data.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import {
@@ -32,6 +33,10 @@ import {
   categorize_players_by_game_status,
   build_simulation_players
 } from './simulation-helpers.mjs'
+import { load_market_projections } from './load-market-projections.mjs'
+import { load_game_environment } from './load-game-environment.mjs'
+import { load_player_game_outcome_correlations } from './load-player-game-outcome-correlations.mjs'
+import { load_position_game_outcome_defaults } from './load-position-game-outcome-defaults.mjs'
 
 const log = debug('simulation:simulate-matchup')
 
@@ -127,14 +132,21 @@ export async function simulate_matchup({
     `Players: ${locked_player_ids.length} locked (actual), ${pending_player_ids.length} pending (simulate)`
   )
 
-  // Load remaining data in parallel
+  // Load scoring format for market projection calculation
+  const league_settings = await load_scoring_format({ scoring_format_hash })
+
+  // Load remaining data in parallel (including market data)
   const [
     actual_points,
     projections_result,
+    market_projections,
+    game_environment,
     variance_cache,
     position_ranks,
     correlation_cache,
-    archetypes
+    archetypes,
+    game_outcome_correlations,
+    position_game_defaults
   ] = await Promise.all([
     load_actual_player_points({
       player_ids: locked_player_ids,
@@ -147,6 +159,16 @@ export async function simulate_matchup({
       year,
       scoring_format_hash,
       fallback_week
+    }),
+    load_market_projections({
+      player_ids: pending_player_ids,
+      week,
+      year,
+      league: league_settings
+    }),
+    load_game_environment({
+      week,
+      year
     }),
     load_player_variance({
       player_ids: pending_player_ids,
@@ -165,16 +187,60 @@ export async function simulate_matchup({
     load_player_archetypes({
       player_ids: pending_player_ids,
       year: year - 1
+    }),
+    // NOTE: Game outcome correlation loaders use current year (not year - 1) because
+    // they have built-in fallback logic that queries both current and prior year,
+    // preferring current year data when available. This differs from other historical
+    // loaders (variance, correlations, archetypes) which only query the exact year passed.
+    load_player_game_outcome_correlations({
+      player_ids: pending_player_ids,
+      year // Loader queries both year and year-1, prefers current year when available
+    }),
+    load_position_game_outcome_defaults({
+      year // Loader queries both year and year-1, prefers current year when available
     })
   ])
 
-  const { projections } = projections_result
+  const { projections: traditional_projections } = projections_result
 
-  // Build player objects for simulation
+  // Merge projections: market projections take precedence over traditional
+  const projections = new Map(traditional_projections)
+  let market_projection_count = 0
+  let market_replaced_count = 0
+  let market_only_count = 0
+
+  for (const [pid, market_data] of market_projections) {
+    const had_traditional = traditional_projections.has(pid)
+    const traditional_value = had_traditional
+      ? traditional_projections.get(pid)
+      : null
+
+    projections.set(pid, market_data.projection)
+    market_projection_count++
+
+    if (had_traditional) {
+      market_replaced_count++
+      log(
+        `Market override: ${pid} traditional=${traditional_value?.toFixed(2)} -> market=${market_data.projection?.toFixed(2)} (stats: ${JSON.stringify(market_data.stats)}, source: ${market_data.source})`
+      )
+    } else {
+      market_only_count++
+      log(
+        `Market only: ${pid} market=${market_data.projection?.toFixed(2)} (no traditional projection)`
+      )
+    }
+  }
+
+  log(
+    `Projections merged: ${traditional_projections.size} traditional, ${market_projections.size} market total, ${market_replaced_count} replaced traditional, ${market_only_count} market-only`
+  )
+
+  // Build player objects for simulation (include schedule for esbid)
   const players = build_simulation_players({
     rosters,
     player_info,
-    position_ranks
+    position_ranks,
+    schedule
   })
 
   // Build teams array
@@ -183,7 +249,7 @@ export async function simulate_matchup({
     name: `Team ${team_id}`
   }))
 
-  // Run simulation using pure function
+  // Run simulation using pure function with extended correlation matrix
   const results = simulation.run_simulation({
     players,
     projections,
@@ -194,11 +260,14 @@ export async function simulate_matchup({
     teams,
     n_simulations,
     seed,
-    locked_scores: actual_points
+    locked_scores: actual_points,
+    game_environment,
+    game_outcome_correlations,
+    position_defaults: position_game_defaults
   })
 
   log(
-    `Simulation complete: ${results.n_simulations} iterations in ${results.elapsed_ms}ms, locked=${results.locked_player_count}, correlation_fallback=${results.correlation_fallback}`
+    `Simulation complete: ${results.n_simulations} iterations in ${results.elapsed_ms}ms, locked=${results.locked_player_count}, correlation_fallback=${results.correlation_fallback}, extended_matrix=${results.extended_matrix_used}`
   )
 
   // Format results
@@ -218,7 +287,19 @@ export async function simulate_matchup({
     elapsed_ms: results.elapsed_ms,
     correlation_fallback: results.correlation_fallback,
     correlations_loaded: correlation_cache.size,
-    locked_player_count: results.locked_player_count
+    locked_player_count: results.locked_player_count,
+    // Market data stats
+    market_projections_used: market_projection_count,
+    market_replaced_traditional: market_replaced_count,
+    market_only: market_only_count,
+    traditional_projections_used:
+      traditional_projections.size - market_replaced_count,
+    game_environment_loaded: game_environment.size,
+    game_outcome_correlations_loaded: game_outcome_correlations.size,
+    position_defaults_loaded: position_game_defaults.size,
+    // Extended matrix stats
+    extended_matrix_used: results.extended_matrix_used,
+    n_games_correlated: results.n_games_correlated
   }
 }
 
@@ -274,6 +355,9 @@ export async function simulate_championship({
     year
   })
 
+  // Load scoring format for market projection calculation
+  const league_settings = await load_scoring_format({ scoring_format_hash })
+
   // Load schedules for all weeks
   const schedules = await load_nfl_schedules_for_weeks({
     year,
@@ -304,24 +388,41 @@ export async function simulate_championship({
 
   const all_player_ids = [...all_player_ids_set]
 
-  // Load shared data
-  const [player_info, correlation_cache, archetypes, variance_cache] =
-    await Promise.all([
-      load_player_info({ player_ids: all_player_ids }),
-      load_correlations_for_players({
-        player_ids: all_player_ids,
-        year: year - 1
-      }),
-      load_player_archetypes({
-        player_ids: all_player_ids,
-        year: year - 1
-      }),
-      load_player_variance({
-        player_ids: all_player_ids,
-        year: year - 1,
-        scoring_format_hash
-      })
-    ])
+  // Load shared data (including game outcome correlations)
+  const [
+    player_info,
+    correlation_cache,
+    archetypes,
+    variance_cache,
+    game_outcome_correlations,
+    position_game_defaults
+  ] = await Promise.all([
+    load_player_info({ player_ids: all_player_ids }),
+    load_correlations_for_players({
+      player_ids: all_player_ids,
+      year: year - 1
+    }),
+    load_player_archetypes({
+      player_ids: all_player_ids,
+      year: year - 1
+    }),
+    load_player_variance({
+      player_ids: all_player_ids,
+      year: year - 1,
+      scoring_format_hash
+    }),
+    // NOTE: Game outcome correlation loaders use current year (not year - 1) because
+    // they have built-in fallback logic that queries both current and prior year,
+    // preferring current year data when available. This differs from other historical
+    // loaders (variance, correlations, archetypes) which only query the exact year passed.
+    load_player_game_outcome_correlations({
+      player_ids: all_player_ids,
+      year // Loader queries both year and year-1, prefers current year when available
+    }),
+    load_position_game_outcome_defaults({
+      year // Loader queries both year and year-1, prefers current year when available
+    })
+  ])
 
   // Initialize per-simulation championship totals
   const championship_totals = new Map()
@@ -345,35 +446,57 @@ export async function simulate_championship({
         use_actual_results
       })
 
-    // Load week-specific data using consolidated fallback
-    const [actual_points, projections_result, position_ranks] =
-      await Promise.all([
-        load_actual_player_points({
-          player_ids: locked_player_ids,
-          esbids: [...completed_esbids],
-          scoring_format_hash
-        }),
-        load_projections_with_fallback({
-          player_ids: pending_player_ids,
-          week,
-          year,
-          scoring_format_hash,
-          fallback_week: week !== base_week ? base_week : undefined
-        }),
-        load_position_ranks({
-          player_ids: pending_player_ids,
-          year,
-          week: Math.max(1, week - 1)
-        })
-      ])
+    // Load week-specific data using consolidated fallback (including market projections)
+    const [
+      actual_points,
+      projections_result,
+      market_projections,
+      game_environment,
+      position_ranks
+    ] = await Promise.all([
+      load_actual_player_points({
+        player_ids: locked_player_ids,
+        esbids: [...completed_esbids],
+        scoring_format_hash
+      }),
+      load_projections_with_fallback({
+        player_ids: pending_player_ids,
+        week,
+        year,
+        scoring_format_hash,
+        fallback_week: week !== base_week ? base_week : undefined
+      }),
+      load_market_projections({
+        player_ids: pending_player_ids,
+        week,
+        year,
+        league: league_settings
+      }),
+      load_game_environment({
+        week,
+        year
+      }),
+      load_position_ranks({
+        player_ids: pending_player_ids,
+        year,
+        week: Math.max(1, week - 1)
+      })
+    ])
 
-    const { projections } = projections_result
+    const { projections: traditional_projections } = projections_result
 
-    // Build players for this week
+    // Merge projections: market projections take precedence
+    const projections = new Map(traditional_projections)
+    for (const [pid, market_data] of market_projections) {
+      projections.set(pid, market_data.projection)
+    }
+
+    // Build players for this week (include schedule for esbid)
     const players = build_simulation_players({
       rosters,
       player_info,
-      position_ranks
+      position_ranks,
+      schedule
     })
 
     const teams = team_ids.map((team_id) => ({
@@ -381,7 +504,7 @@ export async function simulate_championship({
       name: `Team ${team_id}`
     }))
 
-    // Run week simulation with raw scores for aggregation
+    // Run week simulation with raw scores for aggregation and extended matrix
     const week_result = simulation.run_simulation({
       players,
       projections,
@@ -393,7 +516,10 @@ export async function simulate_championship({
       n_simulations,
       seed: seed ? seed + week : undefined,
       return_raw_scores: true,
-      locked_scores: actual_points
+      locked_scores: actual_points,
+      game_environment,
+      game_outcome_correlations,
+      position_defaults: position_game_defaults
     })
 
     // Aggregate per-simulation scores across weeks
@@ -409,7 +535,11 @@ export async function simulate_championship({
       week,
       win_probabilities: Object.fromEntries(week_result.win_probabilities),
       score_distributions: Object.fromEntries(week_result.score_distributions),
-      locked_player_count: week_result.locked_player_count
+      locked_player_count: week_result.locked_player_count,
+      market_projections_used: market_projections.size,
+      game_environment_loaded: game_environment.size,
+      extended_matrix_used: week_result.extended_matrix_used,
+      n_games_correlated: week_result.n_games_correlated
     })
   }
 
@@ -453,6 +583,9 @@ export async function simulate_championship({
       total_expected_points: total_expected_points.get(team_id),
       championship_odds: championship_odds.get(team_id)
     })),
-    n_simulations
+    n_simulations,
+    // Market data stats (shared across weeks)
+    game_outcome_correlations_loaded: game_outcome_correlations.size,
+    position_defaults_loaded: position_game_defaults.size
   }
 }

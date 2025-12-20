@@ -6,6 +6,10 @@
 import debug from 'debug'
 
 import { build_correlation_matrix } from './build-correlation-matrix.mjs'
+import {
+  build_extended_correlation_matrix,
+  extract_game_outcome_samples
+} from './build-extended-correlation-matrix.mjs'
 import { SIMULATION_DEFAULTS } from './correlation-constants.mjs'
 import {
   find_winners,
@@ -19,6 +23,7 @@ import {
   get_rookie_default_cv
 } from './fit-player-distribution.mjs'
 import { generate_correlated_uniforms } from './generate-correlated-samples.mjs'
+import { calculate_variance_scale } from './apply-game-environment-adjustments.mjs'
 
 const log = debug('simulation:run-simulation')
 
@@ -26,8 +31,8 @@ const log = debug('simulation:run-simulation')
  * Run Monte Carlo simulation for fantasy matchup.
  *
  * @param {Object} params
- * @param {Object[]} params.players - Array of players with { pid, nfl_team, position, position_rank, team_id }
- *   team_id = fantasy team ID for grouping
+ * @param {Object[]} params.players - Array of players with { pid, nfl_team, position, position_rank, team_id, esbid }
+ *   team_id = fantasy team ID for grouping, esbid = NFL game ID for game correlations
  * @param {Map} params.projections - Map of pid -> projected_points (mean projection)
  * @param {Map} params.variance_cache - Map of pid -> { mean_points, std_points, coefficient_of_variation, games_played }
  * @param {Map} params.correlation_cache - Pre-loaded correlations from database
@@ -38,7 +43,11 @@ const log = debug('simulation:run-simulation')
  * @param {number} [params.seed] - Optional seed for reproducibility
  * @param {boolean} [params.return_raw_scores=false] - If true, include raw per-simulation scores in results
  * @param {Map} [params.locked_scores=new Map()] - Map of pid -> actual_points for players with completed games
- * @returns {Object} { win_probabilities, score_distributions, player_score_distributions, n_simulations, elapsed_ms, correlation_fallback, locked_player_count, raw_team_scores? }
+ * @param {Map} [params.game_environment] - Map of esbid -> { game_total, home_spread, away_spread, home_team, away_team }
+ * @param {Map} [params.game_outcome_correlations] - Map of pid -> { correlation, confidence } for game script correlations
+ * @param {Map} [params.position_defaults] - Map of 'pos' or 'pos:archetype' -> { default_correlation } for blending
+ * @param {boolean} [params.return_game_outcomes=false] - If true, include game outcome samples in results
+ * @returns {Object} { win_probabilities, score_distributions, player_score_distributions, n_simulations, elapsed_ms, correlation_fallback, locked_player_count, raw_team_scores?, game_outcome_samples?, extended_matrix_used }
  */
 export function run_simulation({
   players,
@@ -51,7 +60,11 @@ export function run_simulation({
   n_simulations = SIMULATION_DEFAULTS.N_SIMULATIONS,
   seed,
   return_raw_scores = false,
-  locked_scores = new Map()
+  locked_scores = new Map(),
+  game_environment,
+  game_outcome_correlations,
+  position_defaults,
+  return_game_outcomes = false
 }) {
   const start_time = Date.now()
   log(
@@ -115,20 +128,54 @@ export function run_simulation({
     player_index_map.set(player.pid, index)
   })
 
-  // Build correlation matrix
-  const { matrix: correlation_matrix, used_fallback: correlation_fallback } =
-    build_correlation_matrix({
+  // Determine if we should use extended matrix with game outcomes
+  const use_extended_matrix =
+    game_outcome_correlations &&
+    game_outcome_correlations.size > 0 &&
+    active_players.some((p) => p.esbid)
+
+  // Build correlation matrix (standard or extended)
+  let correlation_matrix
+  let correlation_fallback
+  let game_indices = null
+  let n_players_in_matrix = active_players.length
+  let n_games_in_matrix = 0
+
+  if (use_extended_matrix) {
+    log('Building extended correlation matrix with game outcome variables')
+    const extended_result = build_extended_correlation_matrix({
+      players: active_players,
+      schedule,
+      correlation_cache,
+      archetypes,
+      game_outcome_correlations,
+      position_defaults
+    })
+    correlation_matrix = extended_result.matrix
+    correlation_fallback = extended_result.used_fallback
+    game_indices = extended_result.game_indices
+    n_players_in_matrix = extended_result.n_players
+    n_games_in_matrix = extended_result.n_games
+
+    log(
+      `Extended matrix size: ${correlation_matrix.length}x${correlation_matrix.length} (${n_players_in_matrix} players + ${n_games_in_matrix} games)`
+    )
+  } else {
+    const standard_result = build_correlation_matrix({
       players: active_players,
       schedule,
       correlation_cache,
       archetypes
     })
+    correlation_matrix = standard_result.matrix
+    correlation_fallback = standard_result.used_fallback
 
-  log(
-    `Correlation matrix size: ${correlation_matrix.length}x${correlation_matrix.length}`
-  )
+    log(
+      `Correlation matrix size: ${correlation_matrix.length}x${correlation_matrix.length}`
+    )
+  }
 
-  // Fit distributions for each player
+  // Fit distributions for each player (with optional variance scaling from game environment)
   const distribution_params = active_players.map((player) => {
     const projected_points = projections.get(player.pid) || 0
     const variance_data = variance_cache.get(player.pid)
@@ -140,6 +187,17 @@ export function run_simulation({
     } else {
       const default_cv = get_rookie_default_cv({ position: player.position })
       std_points = projected_points * default_cv
+    }
+
+    // Apply variance scaling from game environment (game total affects variance)
+    if (game_environment && player.esbid) {
+      const game_env = game_environment.get(player.esbid)
+      if (game_env && game_env.game_total) {
+        const variance_scale = calculate_variance_scale({
+          game_total: game_env.game_total
+        })
+        std_points = std_points * variance_scale
+      }
     }
 
     return get_player_distribution_params({
@@ -173,6 +231,10 @@ export function run_simulation({
   const team_scores = new Map()
   const player_scores = new Map()
 
+  // Storage for game outcome samples if requested
+  const game_outcome_samples =
+    return_game_outcomes && use_extended_matrix ? [] : null
+
   teams.forEach((team) => {
     team_wins.set(team.team_id, 0)
     team_scores.set(team.team_id, [])
@@ -184,7 +246,8 @@ export function run_simulation({
   for (let sim = 0; sim < n_simulations; sim++) {
     const uniforms = correlated_uniforms[sim]
 
-    // Sample player scores
+    // Sample player scores (only first n_players elements of uniforms when using extended matrix)
+    // The remaining elements are game outcome latent variables
     const sampled_scores = distribution_params.map((params, index) =>
       sample_from_distribution({
         uniform_sample: uniforms[index],
@@ -192,6 +255,16 @@ export function run_simulation({
         distribution_params: params.distribution_params
       })
     )
+
+    // Extract game outcome samples if requested
+    if (game_outcome_samples && game_indices) {
+      const sim_game_outcomes = extract_game_outcome_samples({
+        samples: uniforms,
+        game_indices,
+        n_players: n_players_in_matrix
+      })
+      game_outcome_samples.push(sim_game_outcomes)
+    }
 
     // Track player scores
     sampled_scores.forEach((score, index) => {
@@ -264,12 +337,19 @@ export function run_simulation({
     n_simulations,
     elapsed_ms,
     correlation_fallback,
-    locked_player_count: locked_players.length
+    locked_player_count: locked_players.length,
+    extended_matrix_used: use_extended_matrix,
+    n_games_correlated: n_games_in_matrix
   }
 
   // Include raw scores if requested (for multi-week aggregation)
   if (return_raw_scores) {
     result.raw_team_scores = team_scores
+  }
+
+  // Include game outcome samples if requested and available
+  if (game_outcome_samples) {
+    result.game_outcome_samples = game_outcome_samples
   }
 
   return result
