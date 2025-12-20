@@ -86,8 +86,7 @@ export const projected_base_stats = [
   'twoptc',
 
   'prtd', // punt return touchdown
-  'krtd', // kickoff return touchdown
-  'fum_ret_td' // fumble return touchdown
+  'krtd' // kickoff return touchdown
 ]
 
 export const all_projected_fantasy_stats = [
