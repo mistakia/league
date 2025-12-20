@@ -119,7 +119,8 @@ export const job_types = {
   COMBINATION_ODDS: 94,
   CALCULATE_PLAYER_CORRELATIONS: 96,
   CALCULATE_PLAYER_VARIANCE: 97,
-  CALCULATE_PLAYER_ARCHETYPES: 98
+  CALCULATE_PLAYER_ARCHETYPES: 98,
+  SIMULATE_LEAGUE_MATCHUPS: 99
 }
 
 export const job_title_by_id = {
@@ -220,5 +221,6 @@ export const job_title_by_id = {
   94: 'Collect Combination Odds',
   96: 'Calculate Player Correlations',
   97: 'Calculate Player Variance',
-  98: 'Calculate Player Archetypes'
+  98: 'Calculate Player Archetypes',
+  99: 'Simulate League Matchups'
 }

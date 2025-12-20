@@ -1,4 +1,6 @@
 import debug from 'debug'
+import dayjs from 'dayjs'
+import dayOfYear from 'dayjs/plugin/dayOfYear.js'
 
 import db from '#db'
 import {
@@ -26,22 +28,109 @@ import {
   get_player_transactions,
   is_main,
   batch_insert,
-  report_job
+  report_job,
+  simulation
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
-import simulate_season from './simulate-season.mjs'
-import simulate_wildcard_round_for_league from './simulate-wildcard-round.mjs'
-import simulate_championship_round_for_league from './simulate-championship-round.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
+dayjs.extend(dayOfYear)
+
 const log = debug('process-projections')
 debug.enable(
-  'process-projections,project-lineups,simulate-season,simulate-wildcard-round,simulate-championship-round,calculate-matchup-projection'
+  'process-projections,project-lineups,simulation:*,calculate-matchup-projection'
 )
 
 const timestamp = Math.round(Date.now() / 1000)
+
+/**
+ * Run season forecast simulation and save results.
+ * Uses the new player-level correlation simulation system.
+ */
+const run_season_forecast = async (lid) => {
+  if (isNaN(lid)) {
+    log('Skipping season forecast - invalid lid')
+    return
+  }
+
+  const year = current_season.year
+  let forecast_result
+
+  try {
+    // Get league to access wildcard_round and championship_round from seasons table
+    const league = await getLeague({ lid, year })
+    if (!league) {
+      log(`League ${lid} not found, skipping forecast`)
+      return
+    }
+
+    const wildcard_round = league.wildcard_round
+    const championship_round = league.championship_round || []
+    const championship_start_week =
+      championship_round.length > 0 ? championship_round[0] : null
+
+    if (current_season.week <= current_season.regularSeasonFinalWeek) {
+      log(`Running season forecast for league ${lid}`)
+      forecast_result = await simulation.simulate_season_forecast({
+        league_id: lid,
+        year
+      })
+    } else if (wildcard_round && current_season.week === wildcard_round) {
+      log(
+        `Running wildcard forecast for league ${lid} (week ${wildcard_round})`
+      )
+      forecast_result = await simulation.simulate_wildcard_forecast({
+        league_id: lid,
+        year
+      })
+    } else if (
+      championship_start_week &&
+      current_season.week >= championship_start_week &&
+      current_season.week <= current_season.finalWeek
+    ) {
+      log(
+        `Running championship forecast for league ${lid} (starting week ${championship_start_week})`
+      )
+      forecast_result = await simulation.simulate_championship_forecast({
+        league_id: lid,
+        year
+      })
+    } else {
+      log('No forecast to run - season complete')
+      return
+    }
+
+    // Save forecast results to database
+    const forecastInserts = []
+    for (const [tid, forecast] of Object.entries(forecast_result)) {
+      forecastInserts.push({
+        tid: Number(tid),
+        lid,
+        week: current_season.week,
+        year,
+        day: dayjs().dayOfYear(),
+        playoff_odds: forecast.playoff_odds,
+        division_odds: forecast.division_odds,
+        bye_odds: forecast.bye_odds,
+        championship_odds: forecast.championship_odds,
+        timestamp
+      })
+    }
+
+    if (forecastInserts.length) {
+      await db('league_team_forecast')
+        .insert(forecastInserts)
+        .onConflict(['tid', 'year', 'week', 'day'])
+        .merge()
+      log(`Saved ${forecastInserts.length} team forecasts`)
+    }
+  } catch (err) {
+    log(`Error running season forecast: ${err.message}`)
+    console.error(err)
+  }
+}
 
 const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   log(`processing projections for year ${year} and seas_type ${seas_type}`)
@@ -525,16 +614,8 @@ const process_league = async ({ year, lid }) => {
     await calculatePlayoffMatchupProjection({ lid })
   }
 
-  if (current_season.week <= current_season.regularSeasonFinalWeek) {
-    await simulate_season(lid)
-  } else if (current_season.week === 15) {
-    await simulate_wildcard_round_for_league(lid)
-  } else if (
-    current_season.week >= 16 &&
-    current_season.week <= current_season.finalWeek
-  ) {
-    await simulate_championship_round_for_league(lid)
-  }
+  // Run season/playoff forecast simulation
+  await run_season_forecast(lid)
 
   if (lid) {
     await db('leagues').update({ processed_at: timestamp }).where({ uid: lid })
@@ -587,7 +668,7 @@ const run = async ({ year = current_season.year } = {}) => {
 }
 
 const main = async () => {
-  debug.enable('process-projections,project-lineups,simulate-season')
+  debug.enable('process-projections,project-lineups,simulation:*')
   let error
   try {
     await run()
