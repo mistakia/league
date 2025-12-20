@@ -5,6 +5,21 @@
 
 // Simulation orchestrators
 export { simulate_matchup, simulate_championship } from './simulate-matchup.mjs'
+export {
+  simulate_league_week,
+  save_matchup_probabilities
+} from './simulate-league-week.mjs'
+export {
+  simulate_nfl_game,
+  simulate_nfl_game_with_raw_scores
+} from './simulate-nfl-game.mjs'
+
+// Season forecasting
+export {
+  simulate_season_forecast,
+  simulate_wildcard_forecast,
+  simulate_championship_forecast
+} from './simulate-season-forecast.mjs'
 
 // Lineup analysis
 export {
@@ -54,3 +69,16 @@ export {
   load_projections_with_fallback,
   load_bench_players_with_fallback
 } from './load-data-with-fallback.mjs'
+
+// Shared simulation helpers
+export {
+  load_simulation_context,
+  categorize_players_by_game_status,
+  build_simulation_players,
+  map_players_to_nfl_games,
+  build_game_schedule,
+  load_all_league_rosters,
+  load_league_matchups,
+  calculate_matchup_outcomes,
+  calculate_score_stats
+} from './simulation-helpers.mjs'

@@ -5,13 +5,11 @@
 
 import debug from 'debug'
 
-import db from '#db'
 import { simulation } from '#libs-shared'
 import {
   find_winners,
   distribute_win_credit
 } from '#libs-shared/simulation/simulation-utils.mjs'
-import { getLeague } from '#libs-server'
 
 import {
   load_player_variance,
@@ -29,74 +27,13 @@ import {
   load_rosters_with_fallback,
   load_projections_with_fallback
 } from './load-data-with-fallback.mjs'
+import {
+  load_simulation_context,
+  categorize_players_by_game_status,
+  build_simulation_players
+} from './simulation-helpers.mjs'
 
 const log = debug('simulation:simulate-matchup')
-
-/**
- * Categorize players into locked (completed games) vs pending (to simulate).
- *
- * @param {Object} params
- * @param {string[]} params.player_ids - Array of player IDs
- * @param {Map} params.player_info - Map of pid -> { position, nfl_team }
- * @param {Object} params.schedule - NFL schedule with game status
- * @param {boolean} params.use_actual_results - Whether to use actual results for completed games
- * @returns {Object} { locked_player_ids, pending_player_ids, completed_esbids }
- */
-function categorize_players_by_game_status({
-  player_ids,
-  player_info,
-  schedule,
-  use_actual_results
-}) {
-  const locked_player_ids = []
-  const pending_player_ids = []
-  const completed_esbids = new Set()
-
-  for (const pid of player_ids) {
-    const info = player_info.get(pid)
-    const game = schedule[info?.nfl_team]
-
-    if (use_actual_results && game?.is_final) {
-      locked_player_ids.push(pid)
-      completed_esbids.add(game.esbid)
-    } else {
-      pending_player_ids.push(pid)
-    }
-  }
-
-  return { locked_player_ids, pending_player_ids, completed_esbids }
-}
-
-/**
- * Build player objects for simulation from rosters and player info.
- *
- * @param {Object} params
- * @param {Object[]} params.rosters - Array of { team_id, player_ids }
- * @param {Map} params.player_info - Map of pid -> { position, nfl_team }
- * @param {Map} params.position_ranks - Map of pid -> position_rank
- * @returns {Object[]} Array of player objects for simulation
- */
-function build_simulation_players({ rosters, player_info, position_ranks }) {
-  const players = []
-  for (const roster of rosters) {
-    for (const pid of roster.player_ids) {
-      const info = player_info.get(pid)
-      if (!info) {
-        log(`No player info for ${pid}, skipping`)
-        continue
-      }
-
-      players.push({
-        pid,
-        nfl_team: info.nfl_team,
-        position: info.position,
-        position_rank: position_ranks.get(pid) || info.position,
-        team_id: roster.team_id
-      })
-    }
-  }
-  return players
-}
 
 /**
  * Simulate a fantasy matchup between teams.
@@ -135,20 +72,11 @@ export async function simulate_matchup({
     `Starting matchup simulation: league ${league_id}, teams ${team_ids.join(',')}, week ${week}`
   )
 
-  // Load league to get scoring format
-  const league = await getLeague({ lid: league_id })
-  if (!league) {
-    throw new Error(`League not found: ${league_id}`)
-  }
-
-  // Get scoring format hash from seasons table
-  const season = await db('seasons').where({ lid: league_id, year }).first()
-
-  if (!season) {
-    throw new Error(`Season not found for league ${league_id}, year ${year}`)
-  }
-
-  const { scoring_format_hash } = season
+  // Load league and scoring format
+  const { scoring_format_hash } = await load_simulation_context({
+    league_id,
+    year
+  })
 
   // Load rosters with fallback support
   const { rosters: loaded_rosters } = await load_rosters_with_fallback({
@@ -341,14 +269,10 @@ export async function simulate_championship({
   log(`Starting championship simulation: ${sorted_weeks.length} weeks`)
 
   // Load league and scoring format
-  const league = await getLeague({ lid: league_id })
-  if (!league) {
-    throw new Error(`League not found: ${league_id}`)
-  }
-
-  const season = await db('seasons').where({ lid: league_id, year }).first()
-
-  const { scoring_format_hash } = season
+  const { scoring_format_hash } = await load_simulation_context({
+    league_id,
+    year
+  })
 
   // Load schedules for all weeks
   const schedules = await load_nfl_schedules_for_weeks({
