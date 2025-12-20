@@ -72,22 +72,30 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
             {game.week}
           </div>
           <div className='table__cell metric'>{game.opp}</div>
-          <div className='table__cell metric'>
-            {(game.points || 0).toFixed(1)}
-          </div>
-          <div className='table__cell metric'>
-            {game.points_added ? game.points_added.toFixed(1) : '-'}
-          </div>
-          <div className='table__cell metric'>
-            {snaps_off_pct != null
-              ? `${(snaps_off_pct * 100).toFixed(0)}%`
-              : '-'}
-          </div>
-          {snaps_config.fields.map((field) => (
-            <div key={field} className='table__cell metric'>
-              {game[field] ?? '-'}
+          <div className='row__group'>
+            <div className='row__group-body'>
+              <div className='table__cell metric'>
+                {(game.points || 0).toFixed(1)}
+              </div>
+              <div className='table__cell metric'>
+                {game.points_added ? game.points_added.toFixed(1) : '-'}
+              </div>
             </div>
-          ))}
+          </div>
+          <div className='row__group'>
+            <div className='row__group-body'>
+              <div className='table__cell metric'>
+                {snaps_off_pct != null
+                  ? `${(snaps_off_pct * 100).toFixed(0)}%`
+                  : '-'}
+              </div>
+              {snaps_config.fields.map((field) => (
+                <div key={field} className='table__cell metric'>
+                  {game[field] ?? '-'}
+                </div>
+              ))}
+            </div>
+          </div>
         </>
       )
 

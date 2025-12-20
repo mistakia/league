@@ -77,6 +77,7 @@ export default function SelectedPlayerMatchupTable({
         lead={lead}
         pos={position}
         header
+        fantasy_stats_filter={[]}
       />
     )
   })
@@ -107,6 +108,7 @@ export default function SelectedPlayerMatchupTable({
         stats={gamelog}
         lead={lead}
         pos={position}
+        fantasy_stats_filter={[]}
       />
     )
   })
@@ -132,7 +134,7 @@ export default function SelectedPlayerMatchupTable({
             <div className='table__cell metric'>Rnk</div>
           </div>
         </div>
-        <PlayerSelectedRowHeader pos={position} />
+        <PlayerSelectedRowHeader pos={position} fantasy_stats_filter={[]} />
       </div>
       {rows}
     </>

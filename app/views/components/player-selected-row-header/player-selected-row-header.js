@@ -192,6 +192,9 @@ const create_position_group = (config, snaps, fantasy_stats_filter = null) => {
       }
       if (item.key === 'fantasy_stats' && fantasy_stats_filter) {
         const headers = get_fantasy_stats_headers(fantasy_stats_filter)
+        if (headers.length === 0) {
+          return null
+        }
         return create_row_group(index, item.head, headers)
       }
       return create_row_group(index, item.head, categories[item.key])
