@@ -152,11 +152,21 @@ export function api_reducer(state = initialState, { payload, type }) {
         `GET_SEASON_LEAGUE_${payload.opts.leagueId}_${payload.opts.year}`
       ])
 
-    case play_actions.GET_PLAYS_PENDING:
-      return state.setIn(['request_history', 'GET_PLAYS'], true)
+    case play_actions.GET_PLAYS_PENDING: {
+      const week = payload?.opts?.week
+      const year = payload?.opts?.year
+      const request_key =
+        week && year ? `GET_PLAYS_${year}_${week}` : 'GET_PLAYS'
+      return state.setIn(['request_history', request_key], true)
+    }
 
-    case play_actions.GET_PLAYS_FAILED:
-      return state.deleteIn(['request_history', 'GET_PLAYS'])
+    case play_actions.GET_PLAYS_FAILED: {
+      const week = payload?.opts?.week
+      const year = payload?.opts?.year
+      const request_key =
+        week && year ? `GET_PLAYS_${year}_${week}` : 'GET_PLAYS'
+      return state.deleteIn(['request_history', request_key])
+    }
 
     case stat_actions.GET_CHARTED_PLAYS_PENDING:
       return state.setIn(

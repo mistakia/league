@@ -2402,45 +2402,56 @@ export function getScoreboardGamelogByPlayerId(state, { pid }) {
 
 export function getPlaysByMatchupId(state, { mid }) {
   const matchup = get_selected_matchup(state)
-  if (!matchup) return new List()
+
+  if (!matchup) {
+    return new List()
+  }
 
   const playerMaps = matchup.tids.reduce((arr, tid) => {
     const starters = getStartersByTeamId(state, { tid, week: matchup.week })
     return arr.concat(starters)
   }, [])
+
   const gsisids = playerMaps.map((pMap) => pMap.get('gsisid')).filter(Boolean)
-  if (!gsisids.length) return new List()
+  if (!gsisids.length) {
+    return new List()
+  }
 
   const gsispids = playerMaps.map((pMap) => pMap.get('gsispid')).filter(Boolean)
 
   const plays = get_plays(state, { week: matchup.week })
+
   // TODO - match/filter dst plays
-  const filteredPlays = plays
-    .valueSeq()
-    .toList()
-    .filter((p) => {
-      if (!p.playStats) return false
+  const all_plays_list = plays.valueSeq().toList()
 
-      const matchSingleGsis = p.playStats.find((p) =>
-        gsisids.includes(p.gsisId)
-      )
-      if (matchSingleGsis) return true
+  const filteredPlays = all_plays_list.filter((play) => {
+    if (!play.playStats || play.playStats.length === 0) {
+      return false
+    }
 
-      const matchSingleGsisPid = p.playStats.find((p) =>
-        gsispids.includes(p.gsispid)
-      )
-      return Boolean(matchSingleGsisPid)
-    })
+    const matchSingleGsis = play.playStats.find((playStat) =>
+      gsisids.includes(playStat.gsisId)
+    )
+    if (matchSingleGsis) return true
+
+    const matchSingleGsisPid = play.playStats.find((playStat) =>
+      gsispids.includes(playStat.gsispid)
+    )
+    return Boolean(matchSingleGsisPid)
+  })
 
   const league = get_current_league(state)
   let result = new List()
+
   for (const play of filteredPlays) {
     const game = get_game_by_team(state, {
       nfl_team: fixTeam(play.pos_team),
       week: matchup.week
     })
 
-    if (!game) continue
+    if (!game) {
+      continue
+    }
 
     // TODO - calculate dst stats and points
     const playStats = play.playStats.filter((p) => p.gsispid || p.gsisId)
@@ -2493,7 +2504,8 @@ export function getPlaysByMatchupId(state, { mid }) {
     })
   }
 
-  return result.sort((a, b) => b.time - a.time)
+  const sorted_result = result.sort((a, b) => b.time - a.time)
+  return sorted_result
 }
 
 function getYardline(str, pos_team) {
