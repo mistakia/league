@@ -82,3 +82,14 @@ export {
   calculate_matchup_outcomes,
   calculate_score_stats
 } from './simulation-helpers.mjs'
+
+// Market and game environment loaders
+export { load_market_projections } from './load-market-projections.mjs'
+export { load_game_environment } from './load-game-environment.mjs'
+
+// Game outcome correlation loaders
+export { load_player_game_outcome_correlations } from './load-player-game-outcome-correlations.mjs'
+export {
+  load_position_game_outcome_defaults,
+  get_position_default_correlation
+} from './load-position-game-outcome-defaults.mjs'

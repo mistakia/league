@@ -340,6 +340,46 @@ export const SIMULATION_DEFAULTS = {
 }
 
 /**
+ * Game outcome correlation thresholds.
+ */
+export const GAME_OUTCOME_THRESHOLDS = {
+  MIN_GAMES_FOR_CORRELATION: 8,
+  MIN_GAMES_PER_STATE: 3,
+  MIN_GAMES_FOR_FULL_CONFIDENCE: 14,
+  MIN_GAMES_PER_STATE_FULL_CONFIDENCE: 5,
+  MIN_CONFIDENCE_FOR_PLAYER_SPECIFIC: 0.8,
+  MIN_CONFIDENCE_FOR_BLENDING: 0.3
+}
+
+/**
+ * Game environment constants for variance scaling and spread adjustments.
+ */
+export const GAME_ENVIRONMENT_CONSTANTS = {
+  BASELINE_GAME_TOTAL: 46,
+  VARIANCE_SCALE_COEFFICIENT: 0.003,
+  MIN_VARIANCE_SCALE: 0.85,
+  MAX_VARIANCE_SCALE: 1.15
+}
+
+/**
+ * Position-specific spread adjustment coefficients.
+ * Positive = favored team boost, Negative = underdog boost.
+ */
+export const SPREAD_ADJUSTMENT_COEFFICIENTS = {
+  QB: 0.002,
+  RB: 0.005,
+  WR: -0.003,
+  TE: 0.0,
+  K: 0.003,
+  DST: 0.004
+}
+
+/**
+ * Market source preference order for loading projections.
+ */
+export const MARKET_SOURCE_PREFERENCE = ['FANDUEL', 'DRAFTKINGS']
+
+/**
  * Map bare positions to default position ranks for correlation lookup.
  * Used when position_rank is not available (e.g., rookies without gamelogs).
  * Conservative defaults: WR->WR3, RB->RB2 (lower correlation impact).

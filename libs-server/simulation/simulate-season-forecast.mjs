@@ -20,11 +20,16 @@ import {
   load_player_variance,
   load_player_info,
   load_actual_player_points,
-  load_player_archetypes
+  load_player_archetypes,
+  load_scoring_format
 } from './load-simulation-data.mjs'
 import { load_nfl_schedules_for_weeks } from './load-nfl-schedule.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import { load_position_ranks } from './calculate-position-ranks.mjs'
+import { load_market_projections } from './load-market-projections.mjs'
+import { load_game_environment } from './load-game-environment.mjs'
+import { load_player_game_outcome_correlations } from './load-player-game-outcome-correlations.mjs'
+import { load_position_game_outcome_defaults } from './load-position-game-outcome-defaults.mjs'
 
 const log = debug('simulation:season-forecast')
 
@@ -412,6 +417,9 @@ async function simulate_playoff_weeks_correlated({
     year
   })
 
+  // Load scoring format settings for market projection calculation
+  const league_settings = await load_scoring_format({ scoring_format_hash })
+
   // Load schedules for all weeks
   const schedules = await load_nfl_schedules_for_weeks({ year, weeks })
 
@@ -439,24 +447,41 @@ async function simulate_playoff_weeks_correlated({
 
   const all_player_ids = [...all_player_ids_set]
 
-  // Load shared data across all weeks
-  const [player_info, correlation_cache, archetypes, variance_cache] =
-    await Promise.all([
-      load_player_info({ player_ids: all_player_ids }),
-      load_correlations_for_players({
-        player_ids: all_player_ids,
-        year: year - 1
-      }),
-      load_player_archetypes({
-        player_ids: all_player_ids,
-        year: year - 1
-      }),
-      load_player_variance({
-        player_ids: all_player_ids,
-        year: year - 1,
-        scoring_format_hash
-      })
-    ])
+  // Load shared data across all weeks (including game outcome correlations)
+  const [
+    player_info,
+    correlation_cache,
+    archetypes,
+    variance_cache,
+    game_outcome_correlations,
+    position_game_defaults
+  ] = await Promise.all([
+    load_player_info({ player_ids: all_player_ids }),
+    load_correlations_for_players({
+      player_ids: all_player_ids,
+      year: year - 1
+    }),
+    load_player_archetypes({
+      player_ids: all_player_ids,
+      year: year - 1
+    }),
+    load_player_variance({
+      player_ids: all_player_ids,
+      year: year - 1,
+      scoring_format_hash
+    }),
+    // NOTE: Game outcome correlation loaders use current year (not year - 1) because
+    // they have built-in fallback logic that queries both current and prior year,
+    // preferring current year data when available. This differs from other historical
+    // loaders (variance, correlations, archetypes) which only query the exact year passed.
+    load_player_game_outcome_correlations({
+      player_ids: all_player_ids,
+      year // Loader queries both year and year-1, prefers current year when available
+    }),
+    load_position_game_outcome_defaults({
+      year // Loader queries both year and year-1, prefers current year when available
+    })
+  ])
 
   // Initialize per-simulation totals
   const raw_team_scores = new Map()
@@ -501,8 +526,14 @@ async function simulate_playoff_weeks_correlated({
       }
     }
 
-    // Load week-specific data
-    const [actual_points, projections, position_ranks] = await Promise.all([
+    // Load week-specific data (including market projections)
+    const [
+      actual_points,
+      traditional_projections,
+      market_projections,
+      game_environment,
+      position_ranks
+    ] = await Promise.all([
       load_actual_player_points({
         player_ids: locked_player_ids,
         esbids: [...completed_esbids],
@@ -514,6 +545,16 @@ async function simulate_playoff_weeks_correlated({
         year,
         scoring_format_hash
       }),
+      load_market_projections({
+        player_ids: pending_player_ids,
+        week,
+        year,
+        league: league_settings
+      }),
+      load_game_environment({
+        week,
+        year
+      }),
       load_position_ranks({
         player_ids: pending_player_ids,
         year,
@@ -521,15 +562,22 @@ async function simulate_playoff_weeks_correlated({
       })
     ])
 
+    // Merge projections: market projections take precedence
+    const projections = new Map(traditional_projections)
+    for (const [pid, market_data] of market_projections) {
+      projections.set(pid, market_data.projection)
+    }
+
     log(
       `Week ${week}: ${locked_player_ids.length} locked, ${pending_player_ids.length} pending`
     )
 
-    // Build players array for simulation
+    // Build players array for simulation (include schedule for esbid)
     const players = build_simulation_players({
       rosters,
       player_info,
-      position_ranks
+      position_ranks,
+      schedule
     })
 
     // Build teams array
@@ -538,7 +586,7 @@ async function simulate_playoff_weeks_correlated({
       name: `Team ${team_id}`
     }))
 
-    // Run simulation for this week
+    // Run simulation for this week with extended correlation matrix
     const week_result = simulation.run_simulation({
       players,
       projections,
@@ -549,7 +597,10 @@ async function simulate_playoff_weeks_correlated({
       teams,
       n_simulations,
       return_raw_scores: true,
-      locked_scores: actual_points
+      locked_scores: actual_points,
+      game_environment,
+      game_outcome_correlations,
+      position_defaults: position_game_defaults
     })
 
     // Aggregate per-simulation scores across weeks
@@ -566,7 +617,11 @@ async function simulate_playoff_weeks_correlated({
     week_results.push({
       week,
       locked_player_count: week_result.locked_player_count,
-      correlation_fallback: week_result.correlation_fallback
+      correlation_fallback: week_result.correlation_fallback,
+      market_projections_used: market_projections.size,
+      game_environment_loaded: game_environment.size,
+      extended_matrix_used: week_result.extended_matrix_used,
+      n_games_correlated: week_result.n_games_correlated
     })
   }
 

@@ -66,10 +66,29 @@ export {
   SIMULATION_DEFAULTS,
   POSITION_RANKS,
   POSITION_TO_DEFAULT_RANK,
+  GAME_OUTCOME_THRESHOLDS,
+  GAME_ENVIRONMENT_CONSTANTS,
+  SPREAD_ADJUSTMENT_COEFFICIENTS,
+  MARKET_SOURCE_PREFERENCE,
   get_default_correlation,
   apply_archetype_adjustment,
   normalize_position_rank
 } from './correlation-constants.mjs'
+
+// Extended correlation matrix with game outcomes
+export {
+  build_extended_correlation_matrix,
+  get_effective_game_outcome_correlation,
+  extract_game_outcome_samples
+} from './build-extended-correlation-matrix.mjs'
+
+// Game environment adjustments
+export {
+  apply_game_environment_adjustments,
+  calculate_variance_scale,
+  calculate_spread_adjustment,
+  GAME_ENVIRONMENT_DEFAULTS
+} from './apply-game-environment-adjustments.mjs'
 
 // Simulation utilities
 export {

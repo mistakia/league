@@ -12,7 +12,8 @@ import {
   load_player_archetypes,
   load_player_info,
   load_player_projections,
-  load_actual_player_points
+  load_actual_player_points,
+  load_scoring_format
 } from './load-simulation-data.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import { load_nfl_schedule } from './load-nfl-schedule.mjs'
@@ -27,6 +28,10 @@ import {
   calculate_matchup_outcomes,
   calculate_score_stats
 } from './simulation-helpers.mjs'
+import { load_market_projections } from './load-market-projections.mjs'
+import { load_game_environment } from './load-game-environment.mjs'
+import { load_player_game_outcome_correlations } from './load-player-game-outcome-correlations.mjs'
+import { load_position_game_outcome_defaults } from './load-position-game-outcome-defaults.mjs'
 
 const log = debug('simulation:simulate-league-week')
 
@@ -61,6 +66,9 @@ export async function simulate_league_week({
     year
   })
 
+  // Load scoring format settings for market projection calculation
+  const league_settings = await load_scoring_format({ scoring_format_hash })
+
   // Load matchups and rosters in parallel
   const [matchups, rosters, schedule] = await Promise.all([
     load_league_matchups({ league_id, week, year }),
@@ -83,14 +91,18 @@ export async function simulate_league_week({
   const player_ids_array = [...all_player_ids]
   log(`Total unique players: ${player_ids_array.length}`)
 
-  // Load all player data in parallel
+  // Load all player data in parallel (including market projections and game data)
   const [
     player_info,
-    projections,
+    traditional_projections,
+    market_projections,
+    game_environment,
     variance_cache,
     position_ranks,
     correlation_cache,
-    archetypes
+    archetypes,
+    game_outcome_correlations,
+    position_game_defaults
   ] = await Promise.all([
     load_player_info({ player_ids: player_ids_array }),
     load_player_projections({
@@ -98,6 +110,16 @@ export async function simulate_league_week({
       week,
       year,
       scoring_format_hash
+    }),
+    load_market_projections({
+      player_ids: player_ids_array,
+      week,
+      year,
+      league: league_settings
+    }),
+    load_game_environment({
+      week,
+      year
     }),
     load_player_variance({
       player_ids: player_ids_array,
@@ -116,8 +138,31 @@ export async function simulate_league_week({
     load_player_archetypes({
       player_ids: player_ids_array,
       year: year - 1
+    }),
+    // NOTE: Game outcome correlation loaders use current year (not year - 1) because
+    // they have built-in fallback logic that queries both current and prior year,
+    // preferring current year data when available. This differs from other historical
+    // loaders (variance, correlations, archetypes) which only query the exact year passed.
+    load_player_game_outcome_correlations({
+      player_ids: player_ids_array,
+      year // Loader queries both year and year-1, prefers current year when available
+    }),
+    load_position_game_outcome_defaults({
+      year // Loader queries both year and year-1, prefers current year when available
     })
   ])
+
+  // Merge projections: market projections take precedence
+  const projections = new Map(traditional_projections)
+  let market_projection_count = 0
+  for (const [pid, market_data] of market_projections) {
+    projections.set(pid, market_data.projection)
+    market_projection_count++
+  }
+
+  log(
+    `Projections: ${traditional_projections.size} traditional, ${market_projections.size} market, ${market_projection_count} merged`
+  )
 
   // Map players to NFL games
   const { games_map, bye_player_ids } = map_players_to_nfl_games({
@@ -177,7 +222,10 @@ export async function simulate_league_week({
       game_schedule,
       n_simulations,
       seed: game_seed,
-      locked_scores: actual_points
+      locked_scores: actual_points,
+      game_environment,
+      game_outcome_correlations,
+      position_defaults: position_game_defaults
     })
 
     // Merge player scores
@@ -264,7 +312,14 @@ export async function simulate_league_week({
     player_count: player_ids_array.length,
     nfl_games_simulated: games_map.size,
     locked_games: completed_esbids.length,
-    bye_players: bye_player_ids.length
+    bye_players: bye_player_ids.length,
+    // Market data stats
+    market_projections_used: market_projection_count,
+    traditional_projections_used:
+      traditional_projections.size - market_projection_count,
+    game_environment_loaded: game_environment.size,
+    game_outcome_correlations_loaded: game_outcome_correlations.size,
+    position_defaults_loaded: position_game_defaults.size
   }
 }
 

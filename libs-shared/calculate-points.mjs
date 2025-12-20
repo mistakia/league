@@ -97,6 +97,15 @@ const calculatePoints = ({
 
   result.total += dstTotal
 
+  // Handle anytime_td (simulation-specific stat from ANYTIME_TOUCHDOWN market odds)
+  // This is a combined rushing+receiving TD expectation, scored at TD value
+  // Only used when specific tdr/tdrec props are not available
+  if (stats.anytime_td !== undefined && stats.anytime_td !== null) {
+    const td_factor = league.tdr || 6 // Use rushing TD value, default 6 points
+    result.anytime_td = stats.anytime_td * td_factor
+    result.total += result.anytime_td
+  }
+
   return result
 }
 

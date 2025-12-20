@@ -1638,6 +1638,7 @@ DROP INDEX IF EXISTS public.idx_projections_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_archive_pid;
+DROP INDEX IF EXISTS public.idx_position_game_outcome_defaults_year;
 DROP INDEX IF EXISTS public.idx_poaches_lid;
 DROP INDEX IF EXISTS public.idx_poach_releases_poachid;
 DROP INDEX IF EXISTS public.idx_playoffs_lid;
@@ -1662,6 +1663,7 @@ DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_active_pid_year;
+DROP INDEX IF EXISTS public.idx_player_game_outcome_correlations_year;
 DROP INDEX IF EXISTS public.idx_player_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_fname;
 DROP INDEX IF EXISTS public.idx_player_ffpc_id;
@@ -1869,6 +1871,7 @@ ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRA
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
+ALTER TABLE IF EXISTS ONLY public.position_game_outcome_defaults DROP CONSTRAINT IF EXISTS position_game_outcome_defaults_pkey;
 ALTER TABLE IF EXISTS ONLY public.playoffs DROP CONSTRAINT IF EXISTS playoffs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
@@ -1915,6 +1918,7 @@ ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2001 DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2000 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2000_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_default DROP CONSTRAINT IF EXISTS player_gamelogs_default_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs DROP CONSTRAINT IF EXISTS player_gamelogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_game_outcome_correlations DROP CONSTRAINT IF EXISTS player_game_outcome_correlations_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_ffpc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fantrax_id_unique;
@@ -2071,6 +2075,7 @@ DROP TABLE IF EXISTS public.projections_index;
 DROP TABLE IF EXISTS public.projections_archive;
 DROP TABLE IF EXISTS public.projections;
 DROP TABLE IF EXISTS public.practice;
+DROP TABLE IF EXISTS public.position_game_outcome_defaults;
 DROP SEQUENCE IF EXISTS public.poaches_uid_seq;
 DROP TABLE IF EXISTS public.poaches;
 DROP TABLE IF EXISTS public.poach_releases;
@@ -2115,6 +2120,7 @@ DROP TABLE IF EXISTS public.player_gamelogs_year_2001;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
 DROP TABLE IF EXISTS public.player_gamelogs_default;
 DROP TABLE IF EXISTS public.player_gamelogs;
+DROP TABLE IF EXISTS public.player_game_outcome_correlations;
 DROP TABLE IF EXISTS public.player_defender_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
 DROP TABLE IF EXISTS public.player_college_seasonlogs;
@@ -19327,6 +19333,62 @@ CREATE TABLE public.player_defender_gamelogs (
 
 
 --
+-- Name: player_game_outcome_correlations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_game_outcome_correlations (
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    outcome_type character varying(20) NOT NULL,
+    correlation numeric(5,4),
+    games_sample smallint NOT NULL,
+    leading_games smallint,
+    trailing_games smallint,
+    leading_fpg numeric(5,2),
+    trailing_fpg numeric(5,2),
+    overall_fpg numeric(5,2),
+    confidence numeric(4,3),
+    calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT player_game_outcome_correlations_outcome_type CHECK (((outcome_type)::text = 'game_script'::text))
+);
+
+
+--
+-- Name: TABLE player_game_outcome_correlations; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_game_outcome_correlations IS 'Player-specific correlations with game outcomes (e.g., game script)';
+
+
+--
+-- Name: COLUMN player_game_outcome_correlations.pid; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_game_outcome_correlations.pid IS 'Player ID';
+
+
+--
+-- Name: COLUMN player_game_outcome_correlations.outcome_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_game_outcome_correlations.outcome_type IS 'Type of game outcome correlation (e.g., game_script)';
+
+
+--
+-- Name: COLUMN player_game_outcome_correlations.correlation; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_game_outcome_correlations.correlation IS 'Pearson correlation between fantasy deviation and outcome';
+
+
+--
+-- Name: COLUMN player_game_outcome_correlations.confidence; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_game_outcome_correlations.confidence IS 'Confidence weight for blending (0-1 based on sample size)';
+
+
+--
 -- Name: player_gamelogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -22850,6 +22912,51 @@ ALTER SEQUENCE public.poaches_uid_seq OWNED BY public.poaches.uid;
 
 
 --
+-- Name: position_game_outcome_defaults; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.position_game_outcome_defaults (
+    pos character varying(4) NOT NULL,
+    archetype character varying(30),
+    archetype_key character varying(30) GENERATED ALWAYS AS (COALESCE(archetype, ''::character varying)) STORED NOT NULL,
+    year smallint NOT NULL,
+    outcome_type character varying(20) NOT NULL,
+    default_correlation numeric(5,4) NOT NULL,
+    sample_size integer,
+    calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT position_game_outcome_defaults_outcome_type CHECK (((outcome_type)::text = 'game_script'::text))
+);
+
+
+--
+-- Name: TABLE position_game_outcome_defaults; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.position_game_outcome_defaults IS 'Position/archetype default correlations for game outcomes';
+
+
+--
+-- Name: COLUMN position_game_outcome_defaults.pos; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.position_game_outcome_defaults.pos IS 'Position (QB, RB, WR, TE, K, DST)';
+
+
+--
+-- Name: COLUMN position_game_outcome_defaults.archetype; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.position_game_outcome_defaults.archetype IS 'Player archetype (nullable for position-only defaults)';
+
+
+--
+-- Name: COLUMN position_game_outcome_defaults.default_correlation; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.position_game_outcome_defaults.default_correlation IS 'Default correlation for blending';
+
+
+--
 -- Name: practice; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -25933,6 +26040,14 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: player_game_outcome_correlations player_game_outcome_correlations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_game_outcome_correlations
+    ADD CONSTRAINT player_game_outcome_correlations_pkey PRIMARY KEY (pid, year, outcome_type);
+
+
+--
 -- Name: player_gamelogs player_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -26298,6 +26413,14 @@ ALTER TABLE ONLY public.player_variance
 
 ALTER TABLE ONLY public.playoffs
     ADD CONSTRAINT playoffs_pkey PRIMARY KEY (uid, tid, year, week);
+
+
+--
+-- Name: position_game_outcome_defaults position_game_outcome_defaults_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.position_game_outcome_defaults
+    ADD CONSTRAINT position_game_outcome_defaults_pkey PRIMARY KEY (pos, archetype_key, year, outcome_type);
 
 
 --
@@ -27767,6 +27890,13 @@ CREATE INDEX idx_player_fname_lname ON public.player USING btree (fname, lname);
 
 
 --
+-- Name: idx_player_game_outcome_correlations_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_game_outcome_correlations_year ON public.player_game_outcome_correlations USING btree (year);
+
+
+--
 -- Name: idx_player_gamelogs_active_pid_year; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -27932,6 +28062,13 @@ CREATE INDEX idx_poach_releases_poachid ON public.poach_releases USING btree (po
 --
 
 CREATE INDEX idx_poaches_lid ON public.poaches USING btree (lid);
+
+
+--
+-- Name: idx_position_game_outcome_defaults_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_position_game_outcome_defaults_year ON public.position_game_outcome_defaults USING btree (year);
 
 
 --

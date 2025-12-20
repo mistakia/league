@@ -81,12 +81,14 @@ export function categorize_players_by_game_status({
  * @param {Object[]} params.rosters - Array of { team_id, player_ids }
  * @param {Map} params.player_info - Map of pid -> { position, nfl_team }
  * @param {Map} params.position_ranks - Map of pid -> position_rank
+ * @param {Object} [params.schedule] - NFL schedule object (optional, for setting esbid)
  * @returns {Object[]} Array of player objects for simulation
  */
 export function build_simulation_players({
   rosters,
   player_info,
-  position_ranks
+  position_ranks,
+  schedule
 }) {
   const players = []
   for (const roster of rosters) {
@@ -97,12 +99,22 @@ export function build_simulation_players({
         continue
       }
 
+      // Get esbid from schedule if provided
+      let esbid = null
+      if (schedule && info.nfl_team) {
+        const game = schedule[info.nfl_team]
+        if (game) {
+          esbid = game.esbid
+        }
+      }
+
       players.push({
         pid,
         nfl_team: info.nfl_team,
         position: info.position,
         position_rank: position_ranks.get(pid) || info.position,
-        team_id: roster.team_id
+        team_id: roster.team_id,
+        esbid
       })
     }
   }

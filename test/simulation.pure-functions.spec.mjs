@@ -815,4 +815,333 @@ describe('LIBS-SHARED simulation', function () {
       expect(result).to.equal(0.15)
     })
   })
+
+  describe('build_extended_correlation_matrix', function () {
+    it('should build extended matrix with correct dimensions', () => {
+      const players = [
+        { pid: 'p1', nfl_team: 'KC', position: 'QB', esbid: 'game1' },
+        { pid: 'p2', nfl_team: 'KC', position: 'RB', esbid: 'game1' },
+        { pid: 'p3', nfl_team: 'BUF', position: 'QB', esbid: 'game2' }
+      ]
+      const schedule = {
+        KC: { opponent: 'DEN', esbid: 'game1', is_home: true, is_final: false },
+        BUF: { opponent: 'MIA', esbid: 'game2', is_home: true, is_final: false }
+      }
+      const correlation_cache = new Map()
+      const archetypes = new Map()
+      const game_outcome_correlations = new Map([
+        ['p1', { correlation: 0.3, confidence: 0.9 }],
+        ['p2', { correlation: 0.4, confidence: 0.85 }],
+        ['p3', { correlation: 0.25, confidence: 0.8 }]
+      ])
+      const position_defaults = new Map()
+
+      const result = simulation.build_extended_correlation_matrix({
+        players,
+        schedule,
+        correlation_cache,
+        archetypes,
+        game_outcome_correlations,
+        position_defaults
+      })
+
+      // 3 players + 2 games = 5x5 matrix
+      expect(result.matrix.length).to.equal(5)
+      expect(result.matrix[0].length).to.equal(5)
+      expect(result.n_players).to.equal(3)
+      expect(result.n_games).to.equal(2)
+      expect(result.game_indices.size).to.equal(2)
+    })
+
+    it('should set player-game correlations correctly', () => {
+      const players = [
+        { pid: 'p1', nfl_team: 'KC', position: 'RB', esbid: 'game1' }
+      ]
+      const schedule = {
+        KC: { opponent: 'DEN', esbid: 'game1', is_home: true, is_final: false }
+      }
+      const correlation_cache = new Map()
+      const archetypes = new Map()
+      const game_outcome_correlations = new Map([
+        ['p1', { correlation: 0.45, confidence: 0.95 }]
+      ])
+      const position_defaults = new Map()
+
+      const result = simulation.build_extended_correlation_matrix({
+        players,
+        schedule,
+        correlation_cache,
+        archetypes,
+        game_outcome_correlations,
+        position_defaults
+      })
+
+      // Player-game correlation should be set (index 0 for player, index 1 for game)
+      // Note: positive definiteness adjustment can modify values slightly
+      expect(result.matrix[0][1]).to.be.closeTo(0.45, 0.05)
+      expect(result.matrix[1][0]).to.be.closeTo(0.45, 0.05)
+    })
+
+    it('should have zero cross-game correlations', () => {
+      const players = [
+        { pid: 'p1', nfl_team: 'KC', position: 'QB', esbid: 'game1' },
+        { pid: 'p2', nfl_team: 'BUF', position: 'QB', esbid: 'game2' }
+      ]
+      const schedule = {
+        KC: { opponent: 'DEN', esbid: 'game1', is_home: true, is_final: false },
+        BUF: { opponent: 'MIA', esbid: 'game2', is_home: true, is_final: false }
+      }
+      const correlation_cache = new Map()
+      const archetypes = new Map()
+      const game_outcome_correlations = new Map([
+        ['p1', { correlation: 0.3, confidence: 0.9 }],
+        ['p2', { correlation: 0.3, confidence: 0.9 }]
+      ])
+      const position_defaults = new Map()
+
+      const result = simulation.build_extended_correlation_matrix({
+        players,
+        schedule,
+        correlation_cache,
+        archetypes,
+        game_outcome_correlations,
+        position_defaults
+      })
+
+      // Game indices are at n_players + offset
+      const game1_idx = result.game_indices.get('game1')
+      const game2_idx = result.game_indices.get('game2')
+
+      // Cross-game correlation should be 0
+      expect(result.matrix[game1_idx][game2_idx]).to.equal(0)
+      expect(result.matrix[game2_idx][game1_idx]).to.equal(0)
+    })
+
+    it('should blend with position defaults when confidence is low', () => {
+      const players = [
+        { pid: 'p1', nfl_team: 'KC', position: 'RB', esbid: 'game1' }
+      ]
+      const schedule = {
+        KC: { opponent: 'DEN', esbid: 'game1', is_home: true, is_final: false }
+      }
+      const correlation_cache = new Map()
+      const archetypes = new Map()
+      // Low confidence triggers blending
+      const game_outcome_correlations = new Map([
+        ['p1', { correlation: 0.5, confidence: 0.5 }]
+      ])
+      const position_defaults = new Map([['RB', { default_correlation: 0.35 }]])
+
+      const result = simulation.build_extended_correlation_matrix({
+        players,
+        schedule,
+        correlation_cache,
+        archetypes,
+        game_outcome_correlations,
+        position_defaults
+      })
+
+      // Blended correlation should be between player (0.5) and default (0.35)
+      expect(result.matrix[0][1]).to.be.greaterThan(0.35)
+      expect(result.matrix[0][1]).to.be.lessThan(0.5)
+    })
+
+    it('should produce positive definite matrix', () => {
+      const players = [
+        { pid: 'p1', nfl_team: 'KC', position: 'QB', esbid: 'game1' },
+        { pid: 'p2', nfl_team: 'KC', position: 'RB', esbid: 'game1' },
+        { pid: 'p3', nfl_team: 'KC', position: 'WR', esbid: 'game1' }
+      ]
+      const schedule = {
+        KC: { opponent: 'DEN', esbid: 'game1', is_home: true, is_final: false }
+      }
+      const correlation_cache = new Map()
+      const archetypes = new Map()
+      const game_outcome_correlations = new Map([
+        ['p1', { correlation: 0.2, confidence: 0.9 }],
+        ['p2', { correlation: 0.4, confidence: 0.9 }],
+        ['p3', { correlation: 0.1, confidence: 0.9 }]
+      ])
+      const position_defaults = new Map()
+
+      const result = simulation.build_extended_correlation_matrix({
+        players,
+        schedule,
+        correlation_cache,
+        archetypes,
+        game_outcome_correlations,
+        position_defaults
+      })
+
+      // Matrix should be positive definite (can generate samples without error)
+      expect(() => {
+        simulation.generate_correlated_uniforms({
+          correlation_matrix: result.matrix,
+          n_simulations: 10
+        })
+      }).to.not.throw()
+    })
+  })
+
+  describe('get_effective_game_outcome_correlation', function () {
+    it('should return player correlation when confidence is high', () => {
+      const player_correlations = new Map([
+        ['p1', { correlation: 0.45, confidence: 0.9 }]
+      ])
+      const position_defaults = new Map([['RB', { default_correlation: 0.35 }]])
+
+      const result = simulation.get_effective_game_outcome_correlation({
+        pid: 'p1',
+        pos: 'RB',
+        archetype: null,
+        player_correlations,
+        position_defaults
+      })
+
+      expect(result).to.equal(0.45)
+    })
+
+    it('should return position default when no player data', () => {
+      const player_correlations = new Map()
+      const position_defaults = new Map([['RB', { default_correlation: 0.35 }]])
+
+      const result = simulation.get_effective_game_outcome_correlation({
+        pid: 'p1',
+        pos: 'RB',
+        archetype: null,
+        player_correlations,
+        position_defaults
+      })
+
+      expect(result).to.equal(0.35)
+    })
+
+    it('should prefer archetype-specific default over position default', () => {
+      const player_correlations = new Map()
+      const position_defaults = new Map([
+        ['RB', { default_correlation: 0.35 }],
+        ['RB:power', { default_correlation: 0.42 }]
+      ])
+
+      const result = simulation.get_effective_game_outcome_correlation({
+        pid: 'p1',
+        pos: 'RB',
+        archetype: 'power',
+        player_correlations,
+        position_defaults
+      })
+
+      expect(result).to.equal(0.42)
+    })
+  })
+
+  describe('calculate_variance_scale', function () {
+    it('should return 1.0 for baseline game total', () => {
+      const result = simulation.calculate_variance_scale({
+        game_total: 46 // BASELINE_GAME_TOTAL
+      })
+      expect(result).to.equal(1.0)
+    })
+
+    it('should increase variance for high-scoring games', () => {
+      const result = simulation.calculate_variance_scale({
+        game_total: 56 // 10 points above baseline
+      })
+      // 1.0 + 10 * 0.003 = 1.03
+      expect(result).to.be.greaterThan(1.0)
+      expect(result).to.be.closeTo(1.03, 0.01)
+    })
+
+    it('should decrease variance for low-scoring games', () => {
+      const result = simulation.calculate_variance_scale({
+        game_total: 36 // 10 points below baseline
+      })
+      // 1.0 - 10 * 0.003 = 0.97
+      expect(result).to.be.lessThan(1.0)
+      expect(result).to.be.closeTo(0.97, 0.01)
+    })
+
+    it('should clamp to minimum bound', () => {
+      const result = simulation.calculate_variance_scale({
+        game_total: 0 // Extremely low
+      })
+      expect(result).to.be.greaterThanOrEqual(0.85)
+    })
+
+    it('should clamp to maximum bound', () => {
+      const result = simulation.calculate_variance_scale({
+        game_total: 100 // Extremely high
+      })
+      expect(result).to.be.lessThanOrEqual(1.15)
+    })
+
+    it('should return 1.0 for null game_total', () => {
+      const result = simulation.calculate_variance_scale({
+        game_total: null
+      })
+      expect(result).to.equal(1.0)
+    })
+  })
+
+  describe('calculate_spread_adjustment', function () {
+    it('should return 1.0 for null spread', () => {
+      const result = simulation.calculate_spread_adjustment({
+        position: 'RB',
+        team_spread: null,
+        base_projection: 15
+      })
+      expect(result).to.equal(1.0)
+    })
+
+    it('should boost RB projection when team is favored', () => {
+      const result = simulation.calculate_spread_adjustment({
+        position: 'RB',
+        team_spread: -7, // 7 point favorite
+        base_projection: 15
+      })
+      // RB coefficient is 0.005, -(-7) * 0.005 = 0.035
+      expect(result).to.be.greaterThan(1.0)
+      expect(result).to.be.closeTo(1.035, 0.01)
+    })
+
+    it('should slightly reduce WR projection when team is favored', () => {
+      const result = simulation.calculate_spread_adjustment({
+        position: 'WR',
+        team_spread: -7, // 7 point favorite
+        base_projection: 12
+      })
+      // WR coefficient is -0.003, -(-7) * -0.003 = -0.021
+      expect(result).to.be.lessThan(1.0)
+    })
+
+    it('should clamp adjustment to reasonable bounds', () => {
+      const result = simulation.calculate_spread_adjustment({
+        position: 'RB',
+        team_spread: -30, // Extreme favorite
+        base_projection: 15
+      })
+      expect(result).to.be.lessThanOrEqual(1.1)
+      expect(result).to.be.greaterThanOrEqual(0.9)
+    })
+  })
+
+  describe('extract_game_outcome_samples', function () {
+    it('should extract game outcome values from extended samples', () => {
+      const samples = [0.1, 0.2, 0.3, 0.6, 0.7] // 3 players, 2 games
+      const game_indices = new Map([
+        ['game1', 3],
+        ['game2', 4]
+      ])
+      const n_players = 3
+
+      const result = simulation.extract_game_outcome_samples({
+        samples,
+        game_indices,
+        n_players
+      })
+
+      expect(result.get('game1')).to.equal(0.6)
+      expect(result.get('game2')).to.equal(0.7)
+    })
+  })
 })
