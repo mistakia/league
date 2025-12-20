@@ -1735,6 +1735,7 @@ DROP INDEX IF EXISTS public.idx_nfl_play_stats_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_current_week_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
+DROP INDEX IF EXISTS public.idx_matchups_simulation_timestamp;
 DROP INDEX IF EXISTS public.idx_matchups_lid;
 DROP INDEX IF EXISTS public.idx_leagues_commishid;
 DROP INDEX IF EXISTS public.idx_league_player_projection_values_pid;
@@ -4924,7 +4925,10 @@ CREATE TABLE public.matchups (
     app numeric(5,2) DEFAULT 0.00 NOT NULL,
     hpp numeric(5,2) DEFAULT 0.00 NOT NULL,
     home_projection numeric(5,2),
-    away_projection numeric(5,2)
+    away_projection numeric(5,2),
+    home_win_probability numeric(5,4),
+    away_win_probability numeric(5,4),
+    simulation_timestamp timestamp without time zone
 );
 
 
@@ -27242,6 +27246,13 @@ CREATE INDEX idx_leagues_commishid ON public.leagues USING btree (commishid);
 --
 
 CREATE INDEX idx_matchups_lid ON public.matchups USING btree (lid);
+
+
+--
+-- Name: idx_matchups_simulation_timestamp; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_matchups_simulation_timestamp ON public.matchups USING btree (simulation_timestamp) WHERE (simulation_timestamp IS NOT NULL);
 
 
 --
