@@ -106,7 +106,7 @@ export async function load_nfl_schedules_for_weeks({
     const schedule = schedules.get(game.week)
 
     // Game is final if status indicates final
-    const is_final = game.status?.toUpperCase().startsWith('FINAL') || false
+    const is_final = game.status?.toUpperCase()?.startsWith('FINAL') ?? false
 
     // Game has started if current time is past the game timestamp
     const has_started = game.timestamp && now >= game.timestamp

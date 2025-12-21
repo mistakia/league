@@ -13,6 +13,7 @@ import {
   getExtensionAmount,
   calculateStatsFromPlayStats,
   calculateDstStatsFromPlays,
+  calculate_dst_delta_from_play,
   getYardlineInfoFromString,
   isSantuaryPeriod,
   getDraftDates,
@@ -2413,18 +2414,27 @@ export function getPlaysByMatchupId(state, { mid }) {
   }, [])
 
   const gsisids = playerMaps.map((pMap) => pMap.get('gsisid')).filter(Boolean)
-  if (!gsisids.length) {
+  const gsispids = playerMaps.map((pMap) => pMap.get('gsispid')).filter(Boolean)
+
+  // Identify DST starters and their teams
+  const dst_player_maps = playerMaps.filter((pMap) => pMap.get('pos') === 'DST')
+  const dst_teams = dst_player_maps.map((pMap) => fixTeam(pMap.get('team')))
+
+  // Need either individual players or DST starters to proceed
+  if (!gsisids.length && !dst_teams.length) {
     return new List()
   }
 
-  const gsispids = playerMaps.map((pMap) => pMap.get('gsispid')).filter(Boolean)
-
   const plays = get_plays(state, { week: matchup.week })
-
-  // TODO - match/filter dst plays
   const all_plays_list = plays.valueSeq().toList()
 
   const filteredPlays = all_plays_list.filter((play) => {
+    // Check if DST team is on defense for this play
+    const play_def_team = fixTeam(play.def)
+    const is_dst_defensive_play = dst_teams.includes(play_def_team)
+    if (is_dst_defensive_play) return true
+
+    // Check for individual player stats
     if (!play.playStats || play.playStats.length === 0) {
       return false
     }
@@ -2441,11 +2451,25 @@ export function getPlaysByMatchupId(state, { mid }) {
   })
 
   const league = get_current_league(state)
+
+  // Sort plays chronologically (ascending) for DST running total calculation
+  const chronological_plays = filteredPlays.sort((a, b) => {
+    // Sort by esbid first (game), then by sequence within game
+    if (a.esbid !== b.esbid) return a.esbid - b.esbid
+    return (a.sequence || 0) - (b.sequence || 0)
+  })
+
+  // Initialize DST running totals per team
+  const dst_running_totals = {}
+  for (const dst_team of dst_teams) {
+    dst_running_totals[dst_team] = { dya: 0, dpa: 0 }
+  }
+
   let result = new List()
 
-  for (const play of filteredPlays) {
+  for (const play of chronological_plays) {
     const game = get_game_by_team(state, {
-      nfl_team: fixTeam(play.pos_team),
+      nfl_team: play.pos_team ? fixTeam(play.pos_team) : fixTeam(play.def),
       week: matchup.week
     })
 
@@ -2453,10 +2477,12 @@ export function getPlaysByMatchupId(state, { mid }) {
       continue
     }
 
-    // TODO - calculate dst stats and points
-    const playStats = play.playStats.filter((p) => p.gsispid || p.gsisId)
-    const grouped = {}
-    for (const playStat of playStats) {
+    // Calculate individual player stats and points
+    const play_stats_with_ids = (play.playStats || []).filter(
+      (p) => p.gsispid || p.gsisId
+    )
+    const grouped_play_stats = {}
+    for (const playStat of play_stats_with_ids) {
       const player_map = playerMaps.find((pMap) => {
         if (playStat.gsispid && pMap.get('gsispid', false) === playStat.gsispid)
           return true
@@ -2466,21 +2492,54 @@ export function getPlaysByMatchupId(state, { mid }) {
       })
       if (!player_map) continue
       const pid = player_map.get('pid')
-      if (!grouped[pid]) grouped[pid] = []
-      grouped[pid].push(playStat)
+      if (!grouped_play_stats[pid]) grouped_play_stats[pid] = []
+      grouped_play_stats[pid].push(playStat)
     }
+
     const points = {}
     const stats = {}
-    for (const pid in grouped) {
+    for (const pid in grouped_play_stats) {
       const player_map = playerMaps.find((pMap) => pMap.get('pid') === pid)
-      const playStats = grouped[pid]
-      stats[pid] = calculateStatsFromPlayStats(playStats)
+      const player_play_stats = grouped_play_stats[pid]
+      stats[pid] = calculateStatsFromPlayStats(player_play_stats)
       points[pid] = calculatePoints({
         stats: stats[pid],
         position: player_map.get('pos'),
         league
       })
     }
+
+    // Calculate DST points delta for this play
+    const play_def_team = fixTeam(play.def)
+    if (dst_teams.includes(play_def_team)) {
+      const dst_player_map = dst_player_maps.find(
+        (pMap) => fixTeam(pMap.get('team')) === play_def_team
+      )
+      if (dst_player_map) {
+        const dst_pid = dst_player_map.get('pid')
+        const { delta_stats, updated_running_totals } =
+          calculate_dst_delta_from_play({
+            play,
+            dst_team: play_def_team,
+            dst_running_totals: dst_running_totals[play_def_team]
+          })
+
+        // Update running totals for next play
+        dst_running_totals[play_def_team] = updated_running_totals
+
+        // Only add DST to points if there was a non-zero delta
+        if (delta_stats.total !== 0) {
+          points[dst_pid] = delta_stats
+          stats[dst_pid] = delta_stats
+        }
+      }
+    }
+
+    // Skip plays with no fantasy points impact
+    if (Object.keys(points).length === 0) {
+      continue
+    }
+
     let time
     try {
       time = dayjs.tz(
@@ -2493,8 +2552,9 @@ export function getPlaysByMatchupId(state, { mid }) {
         `Invalid or missing date for playId: ${play.playId}, esbid: ${play.esbid}`,
         error
       )
-      time = dayjs() // default to current time if date is invalid or missing
+      time = dayjs()
     }
+
     result = result.push({
       time: time.unix(),
       play,
@@ -2504,6 +2564,7 @@ export function getPlaysByMatchupId(state, { mid }) {
     })
   }
 
+  // Sort result descending (most recent first) for display
   const sorted_result = result.sort((a, b) => b.time - a.time)
   return sorted_result
 }
