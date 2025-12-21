@@ -7,6 +7,8 @@ import db from '#db'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, wait, nfl, report_job, clean_string } from '#libs-server'
+import import_nfl_games_nfl from '#scripts/import-nfl-games-nfl.mjs'
+import import_nfl_games_ngs from '#scripts/import-nfl-games-ngs.mjs'
 import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
@@ -502,6 +504,25 @@ const importPlaysForWeek = async ({
             .insert(play_inserts)
             .onConflict(['esbid', 'playId', 'year'])
             .merge()
+        }
+
+        // Trigger NFL games import to update status and scores when END_GAME detected
+        log(
+          `END_GAME detected for esbid: ${game.esbid}, triggering games import`
+        )
+        try {
+          await Promise.all([
+            import_nfl_games_nfl({
+              year,
+              week,
+              seas_type,
+              ignore_cache: true
+            }),
+            import_nfl_games_ngs({ year })
+          ])
+          log(`Games import completed for esbid: ${game.esbid}`)
+        } catch (import_err) {
+          log(`Error importing games after END_GAME: ${import_err.message}`)
         }
       }
 
