@@ -167,6 +167,8 @@ const fields = [
   'nfl_plays_current_week.dwn',
   'nfl_plays_current_week.desc',
   'nfl_plays_current_week.pos_team',
+  'nfl_plays_current_week.off',
+  'nfl_plays_current_week.def',
   'nfl_plays_current_week.year',
   'nfl_plays_current_week.week',
   'nfl_plays_current_week.qtr',
