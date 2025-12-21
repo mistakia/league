@@ -30,6 +30,8 @@ const HISTORICAL_PLAYS_FIELDS = [
   'nfl_plays.dwn',
   'nfl_plays.desc',
   'nfl_plays.pos_team',
+  'nfl_plays.off',
+  'nfl_plays.def',
   'nfl_plays.year',
   'nfl_plays.week',
   'nfl_plays.qtr',
