@@ -85,22 +85,40 @@ export async function load_nfl_schedules_for_weeks({
     .where({ year })
     .whereIn('week', weeks)
     .whereIn('seas_type', seas_type === 'POST' ? ['POST'] : ['REG', 'POST'])
-    .select('v', 'h', 'esbid', 'week', 'home_score', 'away_score')
+    .select(
+      'v',
+      'h',
+      'esbid',
+      'week',
+      'home_score',
+      'away_score',
+      'status',
+      'timestamp'
+    )
 
   // Group games by week
   const schedules = new Map()
   weeks.forEach((week) => schedules.set(week, {}))
 
+  const now = Math.floor(Date.now() / 1000)
+
   for (const game of games) {
     const schedule = schedules.get(game.week)
-    const is_final = game.home_score > 0 || game.away_score > 0
+
+    // Game is final if status indicates final
+    const is_final = game.status?.toUpperCase().startsWith('FINAL') || false
+
+    // Game has started if current time is past the game timestamp
+    const has_started = game.timestamp && now >= game.timestamp
 
     // Home team entry
     schedule[game.h] = {
       opponent: game.v,
       esbid: game.esbid,
       is_home: true,
-      is_final
+      is_final,
+      has_started,
+      timestamp: game.timestamp
     }
 
     // Visitor/away team entry
@@ -108,7 +126,9 @@ export async function load_nfl_schedules_for_weeks({
       opponent: game.h,
       esbid: game.esbid,
       is_home: false,
-      is_final
+      is_final,
+      has_started,
+      timestamp: game.timestamp
     }
   }
 

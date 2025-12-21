@@ -41,6 +41,13 @@ export async function load_simulation_context({ league_id, year }) {
 
 /**
  * Categorize players into locked (completed games) vs pending (to simulate).
+ * Note: For simulation purposes, we only lock players whose games are truly final
+ * (is_final = true), so we can use actual scores. Games that have merely started
+ * (has_started = true but is_final = false) are still simulated since we don't
+ * have final scores yet.
+ *
+ * For lineup decisions (analyze-lineup-decisions.mjs), we use a stricter lock
+ * that includes has_started to prevent lineup changes once a game kicks off.
  *
  * @param {Object} params
  * @param {string[]} params.player_ids - Array of player IDs
@@ -63,6 +70,8 @@ export function categorize_players_by_game_status({
     const info = player_info.get(pid)
     const game = schedule[info?.nfl_team]
 
+    // Only use actual results for games that are truly final
+    // (have FINAL status or scores recorded)
     if (use_actual_results && game?.is_final) {
       locked_player_ids.push(pid)
       completed_esbids.add(game.esbid)

@@ -119,17 +119,19 @@ export async function analyze_lineup_decisions({
   ]
   const player_info = await load_player_info({ player_ids: all_player_ids })
 
-  // Identify locked players (games already completed)
+  // Identify locked players (games already started or completed)
+  // For lineup decisions, lock players as soon as their game has started
   const locked_pids = new Set()
   for (const pid of all_player_ids) {
     const info = player_info.get(pid)
     const game = schedule[info?.nfl_team]
-    if (game?.is_final) {
+    // Lock if game is final OR if game has started (time-based)
+    if (game?.is_final || game?.has_started) {
       locked_pids.add(pid)
     }
   }
 
-  log(`Locked players (game already played): ${locked_pids.size}`)
+  log(`Locked players (game started or completed): ${locked_pids.size}`)
 
   // Filter bench players to exclude locked ones
   const available_bench_players = bench_players.filter(
