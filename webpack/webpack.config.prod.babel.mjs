@@ -25,7 +25,8 @@ export default merge(baseConfig, {
 
   output: {
     path: path.join(__dirname, '..', 'dist'),
-    publicPath: '/dist/',
+    // Use '/' for webpack serve, '/dist/' for builds (can be overridden via --public-path)
+    publicPath: process.env.WEBPACK_SERVE ? '/' : '/dist/',
     filename: '[name].[contenthash:8].js',
     chunkFilename: '[name].[contenthash:8].chunk.js'
   },
@@ -117,5 +118,22 @@ export default merge(baseConfig, {
      *   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
      *   appVersion: VERSION
      * }) */
-  ]
+  ],
+
+  // Add devServer config for serving production builds locally
+  devServer: {
+    port: 8083,
+    compress: true,
+    open: true,
+    hot: false, // Disable HMR for production
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    historyApiFallback: {
+      verbose: true,
+      disableDotRule: false
+    },
+    static: {
+      directory: path.join(__dirname, '..', 'static'),
+      publicPath: '/static'
+    }
+  }
 })

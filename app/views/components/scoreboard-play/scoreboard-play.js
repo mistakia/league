@@ -4,31 +4,60 @@ import dayjs from 'dayjs'
 
 import { nth } from '@libs-shared'
 
-import PlayerName from '@components/player-name'
+import Position from '@components/position'
+import NFLTeam from '@components/nfl-team'
 
 import './scoreboard-play.styl'
 
+// Minimal player display for scoreboard context
+// Uses inline rendering to avoid:
+// 1. Redux connect() overhead per player in virtualized list
+// 2. Production build closure issues with connected components in loops
+function PlayerNameDisplay({ player_map }) {
+  if (!player_map) {
+    return null
+  }
+  return (
+    <div className='player__name'>
+      <div className='player__name-position'>
+        <Position pos={player_map.get('pos')} />
+      </div>
+      <div className='player__name-main'>
+        <div className='player__name-top'>
+          <span>{player_map.get('pname')}</span>
+        </div>
+        <NFLTeam team={player_map.get('team')} />
+      </div>
+    </div>
+  )
+}
+
+PlayerNameDisplay.propTypes = {
+  player_map: PropTypes.object
+}
+
 export default class ScoreboardPlay extends React.Component {
   render = () => {
-    const { play, style } = this.props
+    const { play, style, playerMaps } = this.props
 
-    const players = []
-    // Create a unique key for each player that includes the play identifier
-    // to prevent React from reusing PlayerName components incorrectly
-    const play_key = play.play?.playId || play.time || 'unknown'
-    for (const [pid, points] of Object.entries(play.points)) {
-      const unique_key = `${play_key}-${pid}`
-      players.push(
-        <div key={unique_key} className='scoreboard__play-player'>
+    // IMPORTANT: Use .map() instead of for...of + push() to avoid production build
+    // optimization issues that cause props to be passed incorrectly
+    const players = Object.entries(play.points).map(([pid, points]) => {
+      const player_map = playerMaps.get(pid)
+      return (
+        <div
+          key={`${play.play?.playId}-${pid}`}
+          className='scoreboard__play-player'
+        >
           <div className='scoreboard__play-player-name'>
-            <PlayerName key={unique_key} pid={pid} />
+            <PlayerNameDisplay player_map={player_map} />
           </div>
           <div className='scoreboard__play-player-points metric'>
             {points.total.toFixed(1)}
           </div>
         </div>
       )
-    }
+    })
 
     const classNames = ['scoreboard__play']
     if (play.play.score_type === 'TD') classNames.push('td')
@@ -54,5 +83,6 @@ export default class ScoreboardPlay extends React.Component {
 
 ScoreboardPlay.propTypes = {
   style: PropTypes.object,
-  play: PropTypes.object
+  play: PropTypes.object,
+  playerMaps: PropTypes.object
 }

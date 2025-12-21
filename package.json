@@ -3,6 +3,7 @@
     "dev": "concurrently \"yarn start\" \"yarn start:api\"",
     "dev:live": "NC_DEV_LIVE=true yarn start",
     "dev:prod": "concurrently \"yarn start\" \"yarn start:api:prod\"",
+    "prod:live": "cross-env NODE_ENV=production WEBPACK_SERVE=true webpack serve --mode=production --config webpack/webpack.config.prod.babel.mjs",
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs --static-directory ./static --static-public-path /static",
     "lint": "eslint .",
     "prettier": "prettier --write .",
