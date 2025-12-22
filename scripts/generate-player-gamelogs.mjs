@@ -43,7 +43,12 @@ import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv))
+    .option('esbid', {
+      type: 'string',
+      describe: 'Generate gamelogs for a specific game ID only'
+    })
+    .parse()
 }
 
 const log = debug('generate-player-gamelogs')
@@ -747,12 +752,21 @@ const generate_player_gamelogs = async ({
   week = current_season.last_week_with_stats,
   year = current_season.year,
   seas_type = current_season.nfl_seas_type,
+  esbid = null,
   dry_run = false
 }) => {
-  log(`loading plays for ${year} week ${week}`)
+  log(
+    `loading plays for ${year} week ${week}${esbid ? ` (esbid: ${esbid})` : ''}`
+  )
 
   const playStats = await get_play_stats({ year, week, seas_type })
-  const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
+  let unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
+
+  // Filter to specific game if esbid provided
+  if (esbid) {
+    unique_esbids = unique_esbids.filter((id) => id === esbid)
+  }
+
   log(`loaded play stats for ${unique_esbids.length} games`)
   log(unique_esbids.join(', '))
 
@@ -867,7 +881,8 @@ const main = async () => {
           .groupBy('week')
           .orderBy('week', 'asc'),
       script_args: {
-        dry_run: argv.dry
+        dry_run: argv.dry,
+        esbid: argv.esbid
       },
       seas_type: argv.seas_type
     })

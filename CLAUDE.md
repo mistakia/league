@@ -100,9 +100,9 @@ Preferred approach for database schema changes:
 
 **Background jobs in `/jobs/`:**
 
-- `finalize-week.mjs` - End-of-week processing
-- `import-live-odds.mjs` - Real-time odds importing
-- `import-live-plays.mjs` - Live game data
+- `finalize-week.mjs` - End-of-week processing (scheduled via crontab-worker-1.cron)
+- `import-live-odds-worker.mjs` - Continuous odds import with per-bookmaker throttling (PM2)
+- `import-live-plays-worker.mjs` - Continuous live play import with per-game finalization (PM2)
 
 **Cron schedules in `/server/crontab-*.cron`** for different server roles
 
