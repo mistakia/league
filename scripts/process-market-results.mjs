@@ -81,6 +81,10 @@ const initialize_cli = () => {
       default: 10,
       describe: 'Number of error examples to show per error type'
     })
+    .option('esbids', {
+      type: 'string',
+      describe: 'Comma-separated game IDs to process (overrides week/year)'
+    })
     .example('$0 --week 5 --dry_run', 'Preview week 5 processing')
     .example('$0 --workers 8 --verbose', 'Use 8 workers with verbose output')
     .example('$0 --seas_type POST --week 1', 'Process playoff week 1')
@@ -89,6 +93,7 @@ const initialize_cli = () => {
       '$0 --error_report errors.json --error_sample_size 20',
       'Export detailed error report'
     )
+    .example('$0 --esbids 401547417,401547418', 'Process specific games by ID')
     .help()
     .parse()
 }
@@ -347,20 +352,28 @@ const main = async () => {
     // Determine week: use provided week or default to most relevant week
     const week = argv.week || get_target_week()
 
-    log(
-      `Starting market results processing for year ${argv.year} week ${week} ${seas_type}`
-    )
+    let esbids
 
-    // Get games to process
-    const query = db('nfl_games')
-      .select('esbid')
-      .where('year', argv.year)
-      .andWhere('seas_type', seas_type)
-      .andWhere('week', week)
-    log(`Query: ${query.toString()}`)
-    const games = await query
-    log(`Raw games result: ${games.length} games`)
-    const esbids = games.map((g) => g.esbid)
+    // If esbids provided directly, use those; otherwise query by week/year
+    if (argv.esbids) {
+      esbids = argv.esbids.split(',').map((id) => id.trim())
+      log(`Processing specific games: ${esbids.join(', ')}`)
+    } else {
+      log(
+        `Starting market results processing for year ${argv.year} week ${week} ${seas_type}`
+      )
+
+      // Get games to process
+      const query = db('nfl_games')
+        .select('esbid')
+        .where('year', argv.year)
+        .andWhere('seas_type', seas_type)
+        .andWhere('week', week)
+      log(`Query: ${query.toString()}`)
+      const games = await query
+      log(`Raw games result: ${games.length} games`)
+      esbids = games.map((g) => g.esbid)
+    }
 
     if (esbids.length === 0) {
       log('No games found to process')
@@ -537,6 +550,162 @@ const main = async () => {
     throw error
   } finally {
     await db.destroy()
+  }
+}
+
+/**
+ * Process market results for specified games
+ * Wrapper function for programmatic use (e.g., from finalize_game)
+ *
+ * @param {Object} params
+ * @param {number} params.year - Season year
+ * @param {number} params.week - Week number (optional if esbids provided)
+ * @param {string} params.seas_type - Season type (PRE, REG, POST)
+ * @param {Array<string>} params.esbids - Array of game IDs to process
+ * @param {boolean} params.dry_run - Preview mode
+ * @param {boolean} params.verbose - Verbose logging
+ * @returns {Promise<void>}
+ */
+export const process_market_results = async ({
+  year,
+  week,
+  seas_type,
+  esbids,
+  dry_run = false,
+  verbose = false
+} = {}) => {
+  // Set up argv-like object for the main processing logic
+  const saved_argv = argv
+  argv = {
+    year: year || current_season.year,
+    week,
+    seas_type,
+    esbids: Array.isArray(esbids) ? esbids.join(',') : esbids,
+    dry_run,
+    verbose,
+    batch_size: 250,
+    workers: undefined,
+    missing_only: false,
+    error_report: undefined,
+    error_sample_size: 10
+  }
+
+  debug.enable('process-market-results,selection-result-writer')
+
+  const start_time = Date.now()
+
+  try {
+    const process_seas_type = argv.seas_type || current_season.nfl_seas_type
+    const process_week = argv.week || get_target_week()
+
+    let process_esbids
+
+    if (argv.esbids) {
+      process_esbids = argv.esbids.split(',').map((id) => id.trim())
+      log(`Processing specific games: ${process_esbids.join(', ')}`)
+    } else {
+      log(
+        `Starting market results processing for year ${argv.year} week ${process_week} ${process_seas_type}`
+      )
+
+      const query = db('nfl_games')
+        .select('esbid')
+        .where('year', argv.year)
+        .andWhere('seas_type', process_seas_type)
+        .andWhere('week', process_week)
+      const games = await query
+      process_esbids = games.map((g) => g.esbid)
+    }
+
+    if (process_esbids.length === 0) {
+      log('No games found to process')
+      return
+    }
+
+    log(`Found ${process_esbids.length} games to process`)
+
+    const valid_esbids = await validate_games_with_data(process_esbids)
+    if (valid_esbids.length === 0) {
+      log('No games with complete score data')
+      return
+    }
+
+    log(`${valid_esbids.length} games have complete data`)
+
+    const supported_market_types = get_supported_market_types()
+
+    const markets = await fetch_markets_for_games({
+      esbids: valid_esbids,
+      year: argv.year,
+      missing_only: argv.missing_only,
+      supported_market_types
+    })
+
+    if (markets.length === 0) {
+      log('No markets to process')
+      return
+    }
+
+    log(`Found ${markets.length} markets to process`)
+
+    log('Preloading game data...')
+    const preloaded_data = await preload_game_data(valid_esbids)
+    log(
+      `Loaded ${preloaded_data.player_gamelogs.length} gamelogs, ${preloaded_data.nfl_plays.length} plays, ${preloaded_data.nfl_games.length} games`
+    )
+
+    const market_batches = chunk_array({
+      items: markets,
+      chunk_size: argv.batch_size
+    })
+    log(`Created ${market_batches.length} batches of size ${argv.batch_size}`)
+
+    log(`Starting parallel processing...`)
+    const processing_start = Date.now()
+    const results = await process_markets_with_workers({
+      market_batches,
+      preloaded_data
+    })
+    const processing_duration = Date.now() - processing_start
+
+    log(`Processing completed in ${format_duration(processing_duration)}`)
+    log(
+      `Processed ${results.length} market results (${markets.length} markets x 2 time_types)`
+    )
+
+    const successful_results = results.filter(
+      (r) => !r.error && r.selection_result !== null
+    )
+    const updates = successful_results.map((r) => ({
+      source_id: r.source_id,
+      source_market_id: r.source_market_id,
+      source_selection_id: r.source_selection_id,
+      time_type: r.time_type,
+      selection_result: r.selection_result,
+      metric_value: r.metric_value
+    }))
+
+    const error_count = results.length - successful_results.length
+    log(
+      `${successful_results.length} successful results, ${error_count} errors`
+    )
+
+    if (updates.length > 0 && !argv.dry_run) {
+      log(`Writing ${updates.length} results to database...`)
+      const { selection_count, market_count } =
+        await write_selection_results_to_db({
+          updates,
+          dry_run: argv.dry_run
+        })
+      log(
+        `Written ${selection_count} selection results and ${market_count} market metric values`
+      )
+    }
+
+    const total_duration = Date.now() - start_time
+    log(`Total execution time: ${format_duration(total_duration)}`)
+  } finally {
+    argv = saved_argv
   }
 }
 

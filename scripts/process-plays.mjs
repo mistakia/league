@@ -23,6 +23,7 @@ const process_plays = async ({
   week = current_season.last_week_with_stats,
   year = current_season.year,
   seas_type = current_season.nfl_seas_type,
+  esbid = null,
   ignore_conflicts = false,
   dry_run = false
 } = {}) => {
@@ -30,13 +31,19 @@ const process_plays = async ({
   let play_field_update_count = 0
 
   // Get completed games first
-  const completed_game_esbids = await get_completed_games({
+  let completed_game_esbids = await get_completed_games({
     year,
     week,
     seas_type
   })
+
+  // Filter to specific game if esbid provided
+  if (esbid) {
+    completed_game_esbids = completed_game_esbids.filter((id) => id === esbid)
+  }
+
   log(
-    `Found ${completed_game_esbids.length} completed games for ${year} week ${week}`
+    `Found ${completed_game_esbids.length} completed games for ${year} week ${week}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`
   )
 
   if (completed_game_esbids.length === 0) {
@@ -243,7 +250,12 @@ const process_plays = async ({
 }
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv))
+    .option('esbid', {
+      type: 'string',
+      describe: 'Process plays for a specific game ID only'
+    })
+    .parse()
 }
 
 const main = async () => {
@@ -313,6 +325,7 @@ const main = async () => {
         year: argv.year,
         week: argv.week,
         seas_type: argv.seas_type,
+        esbid: argv.esbid,
         dry_run,
         ignore_conflicts
       })

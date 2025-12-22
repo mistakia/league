@@ -7,8 +7,7 @@ import db from '#db'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, wait, nfl, report_job, clean_string } from '#libs-server'
-import import_nfl_games_nfl from '#scripts/import-nfl-games-nfl.mjs'
-import import_nfl_games_ngs from '#scripts/import-nfl-games-ngs.mjs'
+import { finalize_game } from '#libs-server/finalize-game.mjs'
 import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
@@ -23,7 +22,13 @@ import {
 const log = debug('import-plays-nfl-v1')
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv))
+    .option('skip_finalization', {
+      type: 'boolean',
+      default: false,
+      describe: 'Skip per-game finalization after END_GAME detection'
+    })
+    .parse()
 }
 
 /**
@@ -248,6 +253,7 @@ const importPlaysForWeek = async ({
   seas_type = current_season.nfl_seas_type,
   ignore_cache = false,
   force_update = false,
+  skip_finalization = false,
   token,
   dry_run = false
 } = {}) => {
@@ -506,23 +512,26 @@ const importPlaysForWeek = async ({
             .merge()
         }
 
-        // Trigger NFL games import to update status and scores when END_GAME detected
-        log(
-          `END_GAME detected for esbid: ${game.esbid}, triggering games import`
-        )
-        try {
-          await Promise.all([
-            import_nfl_games_nfl({
+        // Trigger game finalization when END_GAME detected
+        if (!skip_finalization) {
+          log(
+            `END_GAME detected for esbid: ${game.esbid}, triggering game finalization`
+          )
+          try {
+            await finalize_game({
+              esbid: game.esbid,
               year,
               week,
-              seas_type,
-              ignore_cache: true
-            }),
-            import_nfl_games_ngs({ year })
-          ])
-          log(`Games import completed for esbid: ${game.esbid}`)
-        } catch (import_err) {
-          log(`Error importing games after END_GAME: ${import_err.message}`)
+              seas_type
+            })
+            log(`Game finalization completed for esbid: ${game.esbid}`)
+          } catch (finalize_err) {
+            log(`Error finalizing game after END_GAME: ${finalize_err.message}`)
+          }
+        } else {
+          log(
+            `END_GAME detected for esbid: ${game.esbid}, skipping finalization (backfill mode)`
+          )
         }
       }
 
@@ -570,6 +579,7 @@ const importPlaysForYear = async ({
   seas_type = 'REG',
   force_update = false,
   ignore_cache = false,
+  skip_finalization = true,
   token,
   dry_run = false
 } = {}) => {
@@ -592,6 +602,7 @@ const importPlaysForYear = async ({
       seas_type,
       force_update,
       ignore_cache,
+      skip_finalization,
       token,
       dry_run
     })
@@ -605,6 +616,7 @@ const importAllPlays = async ({
   seas_type = 'ALL',
   force_update,
   ignore_cache = false,
+  skip_finalization = true,
   dry_run = false
 } = {}) => {
   const nfl_games_result = await db('nfl_games')
@@ -631,6 +643,7 @@ const importAllPlays = async ({
         seas_type: 'PRE',
         force_update,
         ignore_cache,
+        skip_finalization,
         token,
         dry_run
       })
@@ -643,6 +656,7 @@ const importAllPlays = async ({
         seas_type: 'REG',
         force_update,
         ignore_cache,
+        skip_finalization,
         token,
         dry_run
       })
@@ -655,6 +669,7 @@ const importAllPlays = async ({
         seas_type: 'POST',
         force_update,
         ignore_cache,
+        skip_finalization,
         token,
         dry_run
       })
@@ -671,34 +686,41 @@ const main = async () => {
     const dry_run = argv.dry
 
     if (argv.all) {
+      // Backfill mode: skip finalization by default
       await importAllPlays({
         start: argv.start,
         end: argv.end,
         seas_type: argv.seas_type,
         ignore_cache: argv.ignore_cache,
         force_update: argv.final,
+        skip_finalization: true,
         dry_run
       })
     } else if (argv.year) {
       if (argv.week) {
+        // Specific week: allow CLI control
         await importPlaysForWeek({
           year: argv.year,
           week: argv.week,
           seas_type: argv.seas_type,
           ignore_cache: argv.ignore_cache,
           force_update: argv.final,
+          skip_finalization: argv.skip_finalization,
           dry_run
         })
       } else {
+        // Year backfill: skip finalization by default
         await importPlaysForYear({
           year: argv.year,
           seas_type: argv.seas_type,
           ignore_cache: argv.ignore_cache,
           force_update: argv.final,
+          skip_finalization: true,
           dry_run
         })
       }
     } else if (argv.live) {
+      // Live mode: enable finalization (unless explicitly skipped)
       let all_games_skipped = false
       let loop_count = 0
       while (!all_games_skipped) {
@@ -709,16 +731,19 @@ const main = async () => {
           seas_type: argv.seas_type,
           ignore_cache: true,
           force_update: argv.final,
+          skip_finalization: argv.skip_finalization,
           dry_run
         })
       }
     } else {
+      // Default: current week, enable finalization (unless explicitly skipped)
       log('start')
       await importPlaysForWeek({
         week: argv.week,
         seas_type: argv.seas_type,
         ignore_cache: true,
         force_update: argv.final,
+        skip_finalization: argv.skip_finalization,
         dry_run
       })
       log('end')

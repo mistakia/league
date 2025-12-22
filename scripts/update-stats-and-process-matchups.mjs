@@ -23,7 +23,7 @@ import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 import { get_target_week } from '#libs-shared'
 
-import update_stats_weekly from './update-stats-weekly.mjs'
+import process_stats_for_week from './process-stats-for-week.mjs'
 import process_matchups from './process-matchups.mjs'
 
 const initialize_cli = () => {
@@ -63,7 +63,7 @@ const process_all_weeks_stats = async ({ target_week, year }) => {
     log(`\nProcessing week ${week}/${target_week}...`)
 
     try {
-      await update_stats_weekly({ week })
+      await process_stats_for_week({ week })
       const duration = ((Date.now() - week_start_time) / 1000).toFixed(1)
       log(`✓ Completed week ${week} in ${duration}s`)
     } catch (err) {
