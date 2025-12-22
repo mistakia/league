@@ -18,19 +18,19 @@ const BOOKMAKER_CONFIG = {
   draftkings: {
     name: 'DraftKings',
     import_fn: import_draftkings_odds,
-    interval_ms: 4 * 60 * 1000, // 4 minutes
+    interval_ms: 4 * 60 * 60 * 1000, // 4 hours
     enabled: true
   },
   pinnacle: {
     name: 'Pinnacle',
     import_fn: () => import_pinnacle_odds({ ignore_cache: true }),
-    interval_ms: 4 * 60 * 1000, // 4 minutes
+    interval_ms: 4 * 60 * 60 * 1000, // 4 hours
     enabled: true
   },
   prizepicks: {
     name: 'PrizePicks',
     import_fn: import_prizepicks_odds,
-    interval_ms: 10 * 60 * 1000, // 10 minutes
+    interval_ms: 4 * 60 * 60 * 1000, // 4 hours
     enabled: true
   }
 }
