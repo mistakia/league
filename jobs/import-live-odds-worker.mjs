@@ -1,7 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { wait } from '#libs-server'
+import { wait, report_job } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 import { job as import_draftkings_odds } from '#scripts/import-draftkings-odds.mjs'
 import { job as import_pinnacle_odds } from '#scripts/import-pinnacle-odds.mjs'
 import { job as import_prizepicks_odds } from '#scripts/import-prizepicks-odds.mjs'
@@ -18,18 +19,21 @@ const BOOKMAKER_CONFIG = {
   draftkings: {
     name: 'DraftKings',
     import_fn: import_draftkings_odds,
+    job_type: job_types.DRAFTKINGS_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
     enabled: true
   },
   pinnacle: {
     name: 'Pinnacle',
     import_fn: () => import_pinnacle_odds({ ignore_cache: true }),
+    job_type: job_types.IMPORT_PINNACLE_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
     enabled: true
   },
   prizepicks: {
     name: 'PrizePicks',
     import_fn: import_prizepicks_odds,
+    job_type: job_types.PRIZEPICKS_PROJECTIONS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
     enabled: true
   }
@@ -129,6 +133,15 @@ const import_bookmaker = async (bookmaker_key) => {
   } catch (error) {
     const duration = Date.now() - start_time
     log(`${config.name} import failed after ${duration}ms: ${error.message}`)
+
+    // Report job error
+    await report_job({
+      job_type: config.job_type,
+      error,
+      succ: false,
+      reason: `${config.name} import failed: ${error.message}`
+    })
+
     // Still update last import time to prevent hammering on repeated failures
     last_import_times[bookmaker_key] = Date.now()
     return false
