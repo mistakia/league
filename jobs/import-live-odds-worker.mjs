@@ -39,7 +39,7 @@ const BOOKMAKER_CONFIG = {
 const LOOP_INTERVAL_MS = 30000 // 30 seconds
 
 // Timeout for individual import operations
-const IMPORT_TIMEOUT_MS = 180000 // 3 minutes
+const IMPORT_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
 
 // State tracking
 const state = { should_exit: false }
