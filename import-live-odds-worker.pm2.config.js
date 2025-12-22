@@ -7,8 +7,10 @@ module.exports = {
       watch: '.',
       autorestart: true,
       max_memory_restart: '1G',
+      merge_logs: true,
       env_production: {
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        DEBUG: 'import-live-odds-worker,draftkings,pinnacle,prizepicks'
       }
     }
   ]
