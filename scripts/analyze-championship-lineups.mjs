@@ -324,7 +324,8 @@ const format_championship_odds = ({
 const format_lineup_analysis = async ({
   analysis,
   week,
-  player_name_cache
+  player_name_cache,
+  player_points_map
 }) => {
   console.log(`\n--- Week ${week} ---\n`)
 
@@ -333,10 +334,48 @@ const format_lineup_analysis = async ({
   )
   console.log(`\nCurrent Starters:`)
 
+  let total_actual = 0
+  let total_projected = 0
+  let actual_count = 0
+  let projected_count = 0
+
   for (const pid of analysis.current_starters) {
     const name = await player_name_cache.get({ pid })
-    console.log(`  - ${name}`)
+    const points_data = player_points_map?.get(pid)
+    if (points_data) {
+      let points_str
+      if (points_data.is_actual) {
+        points_str = `${points_data.points.toFixed(1)} actual`
+      } else if (points_data.source === 'market') {
+        points_str = `${points_data.points.toFixed(1)} market`
+      } else {
+        points_str = `${points_data.points.toFixed(1)} proj`
+      }
+      console.log(`  - ${name}: ${points_str}`)
+
+      if (points_data.is_actual) {
+        total_actual += points_data.points
+        actual_count++
+      } else {
+        total_projected += points_data.points
+        projected_count++
+      }
+    } else {
+      console.log(`  - ${name}: no data`)
+    }
   }
+
+  // Show totals summary
+  const total_points = total_actual + total_projected
+  let total_summary = `\n  Total: ${total_points.toFixed(1)} pts`
+  if (actual_count > 0 && projected_count > 0) {
+    total_summary += ` (${total_actual.toFixed(1)} actual + ${total_projected.toFixed(1)} projected)`
+  } else if (actual_count > 0) {
+    total_summary += ` (all actual)`
+  } else {
+    total_summary += ` (all projected)`
+  }
+  console.log(total_summary)
 
   if (analysis.recommendations && analysis.recommendations.length > 0) {
     console.log(`\nPotential Lineup Changes:`)
@@ -698,7 +737,8 @@ const generate_formatted_output = async ({
   week_expected_points,
   week_actual_scores,
   optimal_weeks,
-  optimal_lineups_by_week
+  optimal_lineups_by_week,
+  scoring_format_hash
 }) => {
   const player_name_cache = create_player_name_cache()
 
@@ -735,10 +775,20 @@ const generate_formatted_output = async ({
     })
 
     for (const { week, analysis } of lineup_analyses) {
+      // Load player points data for this week using simulation module
+      const player_points_map =
+        await simulation.load_player_points_with_game_status({
+          player_ids: analysis.current_starters,
+          week,
+          year,
+          scoring_format_hash
+        })
+
       await format_lineup_analysis({
         analysis,
         week,
-        player_name_cache
+        player_name_cache,
+        player_points_map
       })
     }
   }
@@ -869,7 +919,8 @@ const main = async () => {
         week_expected_points,
         week_actual_scores,
         optimal_weeks,
-        optimal_lineups_by_week
+        optimal_lineups_by_week,
+        scoring_format_hash
       })
     }
   } catch (err) {

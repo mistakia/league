@@ -16,7 +16,9 @@ import {
   load_player_archetypes,
   load_player_info,
   load_actual_player_points,
-  load_scoring_format
+  load_scoring_format,
+  load_player_projection_stats,
+  merge_market_stats_with_traditional
 } from './load-simulation-data.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import {
@@ -140,6 +142,7 @@ export async function simulate_matchup({
     actual_points,
     projections_result,
     market_projections,
+    traditional_stats,
     game_environment,
     variance_cache,
     position_ranks,
@@ -165,6 +168,11 @@ export async function simulate_matchup({
       week,
       year,
       league: league_settings
+    }),
+    load_player_projection_stats({
+      player_ids: pending_player_ids,
+      week,
+      year
     }),
     load_game_environment({
       week,
@@ -203,36 +211,48 @@ export async function simulate_matchup({
 
   const { projections: traditional_projections } = projections_result
 
-  // Merge projections: market projections take precedence over traditional
-  const projections = new Map(traditional_projections)
-  let market_projection_count = 0
-  let market_replaced_count = 0
-  let market_only_count = 0
+  // Merge projections at stat level: market stats override traditional stats
+  // This ensures incomplete market data (e.g., only TD odds) is supplemented
+  // with traditional projection stats (e.g., yards, receptions)
+  const projections = new Map()
+  let market_merged_count = 0
+  let traditional_only_count = 0
 
-  for (const [pid, market_data] of market_projections) {
-    const had_traditional = traditional_projections.has(pid)
-    const traditional_value = had_traditional
-      ? traditional_projections.get(pid)
-      : null
+  for (const pid of pending_player_ids) {
+    const trad_stats = traditional_stats.get(pid)
+    const market_data = market_projections.get(pid)
+    const info = player_info.get(pid)
+    const position = info?.position || ''
 
-    projections.set(pid, market_data.projection)
-    market_projection_count++
+    const merge_result = merge_market_stats_with_traditional({
+      traditional_stats: trad_stats,
+      market_data,
+      position,
+      league_settings
+    })
 
-    if (had_traditional) {
-      market_replaced_count++
-      log(
-        `Market override: ${pid} traditional=${traditional_value?.toFixed(2)} -> market=${market_data.projection?.toFixed(2)} (stats: ${JSON.stringify(market_data.stats)}, source: ${market_data.source})`
-      )
+    if (merge_result) {
+      projections.set(pid, merge_result.points)
+      if (merge_result.source === 'merged') {
+        market_merged_count++
+        log(
+          `Market merge: ${pid} (${position}) -> ${merge_result.points?.toFixed(2)} pts`
+        )
+      } else {
+        traditional_only_count++
+      }
     } else {
-      market_only_count++
-      log(
-        `Market only: ${pid} market=${market_data.projection?.toFixed(2)} (no traditional projection)`
-      )
+      // Fall back to pre-calculated traditional projection if available
+      const trad_points = traditional_projections.get(pid)
+      if (trad_points !== undefined) {
+        projections.set(pid, trad_points)
+        traditional_only_count++
+      }
     }
   }
 
   log(
-    `Projections merged: ${traditional_projections.size} traditional, ${market_projections.size} market total, ${market_replaced_count} replaced traditional, ${market_only_count} market-only`
+    `Projections merged: ${market_merged_count} market-merged, ${traditional_only_count} traditional-only`
   )
 
   // Build player objects for simulation (include schedule for esbid)
@@ -289,11 +309,8 @@ export async function simulate_matchup({
     correlations_loaded: correlation_cache.size,
     locked_player_count: results.locked_player_count,
     // Market data stats
-    market_projections_used: market_projection_count,
-    market_replaced_traditional: market_replaced_count,
-    market_only: market_only_count,
-    traditional_projections_used:
-      traditional_projections.size - market_replaced_count,
+    market_merged_count,
+    traditional_only_count,
     game_environment_loaded: game_environment.size,
     game_outcome_correlations_loaded: game_outcome_correlations.size,
     position_defaults_loaded: position_game_defaults.size,
@@ -478,6 +495,7 @@ export async function simulate_championship({
       actual_points,
       projections_result,
       market_projections,
+      traditional_stats,
       game_environment,
       position_ranks
     ] = await Promise.all([
@@ -499,6 +517,11 @@ export async function simulate_championship({
         year,
         league: league_settings
       }),
+      load_player_projection_stats({
+        player_ids: pending_player_ids,
+        week,
+        year
+      }),
       load_game_environment({
         week,
         year
@@ -512,10 +535,30 @@ export async function simulate_championship({
 
     const { projections: traditional_projections } = projections_result
 
-    // Merge projections: market projections take precedence
-    const projections = new Map(traditional_projections)
-    for (const [pid, market_data] of market_projections) {
-      projections.set(pid, market_data.projection)
+    // Merge projections at stat level: market stats override traditional stats
+    const projections = new Map()
+    for (const pid of pending_player_ids) {
+      const trad_stats = traditional_stats.get(pid)
+      const market_data = market_projections.get(pid)
+      const info = player_info.get(pid)
+      const position = info?.position || ''
+
+      const merge_result = merge_market_stats_with_traditional({
+        traditional_stats: trad_stats,
+        market_data,
+        position,
+        league_settings
+      })
+
+      if (merge_result) {
+        projections.set(pid, merge_result.points)
+      } else {
+        // Fall back to pre-calculated traditional projection if available
+        const trad_points = traditional_projections.get(pid)
+        if (trad_points !== undefined) {
+          projections.set(pid, trad_points)
+        }
+      }
     }
 
     // Build players for this week (include schedule for esbid)

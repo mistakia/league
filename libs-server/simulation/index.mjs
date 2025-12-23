@@ -44,7 +44,8 @@ export {
   load_simulation_rosters,
   load_player_info,
   load_scoring_format,
-  load_actual_player_points
+  load_actual_player_points,
+  load_player_points_with_game_status
 } from './load-simulation-data.mjs'
 
 // Correlation loaders (consolidated)
