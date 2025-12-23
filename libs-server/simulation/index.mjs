@@ -29,6 +29,13 @@ export {
   get_same_team_correlations
 } from './analyze-lineup-decisions.mjs'
 
+// Optimal lineup calculation
+export {
+  calculate_optimal_lineup,
+  calculate_optimal_lineups_for_teams,
+  load_full_team_roster
+} from './calculate-optimal-lineup.mjs'
+
 // Data loaders
 export {
   load_player_projections,

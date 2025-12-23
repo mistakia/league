@@ -314,6 +314,7 @@ export async function simulate_matchup({
  * @param {number} [params.n_simulations=10000] - Number of simulations
  * @param {number} [params.seed] - Optional seed for reproducibility
  * @param {boolean} [params.use_actual_results=true] - Use actual points for completed games
+ * @param {Map} [params.roster_overrides_by_week] - Optional Map of week -> Map of team_id -> player_ids[] to override rosters per week
  * @returns {Promise<Object>} Championship simulation results
  */
 export async function simulate_championship({
@@ -323,7 +324,8 @@ export async function simulate_championship({
   year,
   n_simulations = 10000,
   seed,
-  use_actual_results = true
+  use_actual_results = true,
+  roster_overrides_by_week
 }) {
   // Validate team_ids
   if (!Array.isArray(team_ids) || team_ids.length < 2) {
@@ -386,6 +388,15 @@ export async function simulate_championship({
     )
   }
 
+  // Also collect player IDs from roster overrides if provided
+  if (roster_overrides_by_week) {
+    for (const week_overrides of roster_overrides_by_week.values()) {
+      for (const player_ids of week_overrides.values()) {
+        player_ids.forEach((pid) => all_player_ids_set.add(pid))
+      }
+    }
+  }
+
   const all_player_ids = [...all_player_ids_set]
 
   // Load shared data (including game outcome correlations)
@@ -433,8 +444,24 @@ export async function simulate_championship({
   const week_results = []
 
   for (const week of sorted_weeks) {
-    const rosters = all_rosters_by_week.get(week)
+    let rosters = all_rosters_by_week.get(week)
     const schedule = schedules.get(week)
+
+    // Apply per-week roster overrides if provided
+    if (roster_overrides_by_week && roster_overrides_by_week.has(week)) {
+      const week_overrides = roster_overrides_by_week.get(week)
+      rosters = rosters.map((roster) => {
+        const override_pids = week_overrides.get(roster.team_id)
+        if (override_pids) {
+          return { ...roster, player_ids: override_pids }
+        }
+        return roster
+      })
+      log(
+        `Applied roster overrides for week ${week}: ${week_overrides.size} teams`
+      )
+    }
+
     const week_player_ids = [...new Set(rosters.flatMap((r) => r.player_ids))]
 
     // Categorize players for this week

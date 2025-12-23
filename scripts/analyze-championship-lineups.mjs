@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main, simulation } from '#libs-server'
-import { active_roster_slots } from '#constants'
+import { active_roster_slots, current_season } from '#constants'
 
 const argv = yargs(hideBin(process.argv))
   .option('lid', {
@@ -256,12 +256,22 @@ const format_championship_odds = ({
   weeks,
   year,
   week_expected_points,
-  week_actual_scores
+  week_actual_scores,
+  optimal_weeks = new Set()
 }) => {
   console.log(`Weeks: ${weeks.join(', ')}, ${year}`)
   console.log(
-    `Simulations: ${championship_results.n_simulations.toLocaleString()}\n`
+    `Simulations: ${championship_results.n_simulations.toLocaleString()}`
   )
+  if (optimal_weeks.size > 0) {
+    console.log(
+      `Optimal lineups used for: ${[...optimal_weeks]
+        .sort((a, b) => a - b)
+        .map((w) => `Wk${w}`)
+        .join(', ')}`
+    )
+  }
+  console.log('')
 
   console.log('Championship Odds:')
   console.log('-'.repeat(60))
@@ -278,11 +288,12 @@ const format_championship_odds = ({
     const marker = is_my_team ? ' <-- YOUR TEAM' : ''
     const odds_pct = format_percentage(team_result.championship_odds)
 
-    // Build per-week breakdown
+    // Build per-week breakdown with optimal indicator
     const week_parts = weeks.map((w) => {
       const expected =
         week_expected_points.get(w)?.get(team_result.team_id) || 0
-      return `Wk${w}: ${expected.toFixed(1)}`
+      const optimal_suffix = optimal_weeks.has(w) ? ' (optimal)' : ''
+      return `Wk${w}: ${expected.toFixed(1)}${optimal_suffix}`
     })
 
     console.log(
@@ -290,16 +301,17 @@ const format_championship_odds = ({
     )
     console.log(`    ${week_parts.join(' | ')}`)
 
-    // Show actual vs remaining for each week
+    // Show actual vs remaining for each week with optimal indicator
     const breakdown_parts = weeks.map((w) => {
       const actual = week_actual_scores.get(w)?.get(team_result.team_id) || 0
       const expected =
         week_expected_points.get(w)?.get(team_result.team_id) || 0
       const remaining = Math.max(0, expected - actual)
+      const optimal_suffix = optimal_weeks.has(w) ? ' (optimal)' : ''
       if (actual > 0) {
-        return `Wk${w}: ${actual.toFixed(1)} actual + ${remaining.toFixed(1)} proj`
+        return `Wk${w}: ${actual.toFixed(1)} actual + ${remaining.toFixed(1)} proj${optimal_suffix}`
       }
-      return `Wk${w}: ${expected.toFixed(1)} proj`
+      return `Wk${w}: ${expected.toFixed(1)} proj${optimal_suffix}`
     })
     console.log(`    ${breakdown_parts.join(' | ')}`)
     console.log('')
@@ -343,6 +355,25 @@ const format_lineup_analysis = async ({
     }
   } else {
     console.log(`\nNo significant lineup changes recommended.`)
+  }
+
+  console.log('')
+}
+
+/**
+ * Format optimal lineup output for a future week
+ */
+const format_optimal_lineup = async ({
+  week,
+  optimal_pids,
+  player_name_cache
+}) => {
+  console.log(`\n--- Week ${week} (Optimal Lineup) ---\n`)
+  console.log(`Projected Optimal Starters:`)
+
+  for (const pid of optimal_pids) {
+    const name = await player_name_cache.get({ pid })
+    console.log(`  - ${name}`)
   }
 
   console.log('')
@@ -442,7 +473,8 @@ const format_bench_correlation_opportunities = async ({
 // ============================================================================
 
 /**
- * Run championship simulation and return results
+ * Run championship simulation and return results.
+ * Uses optimal lineups for future weeks (week > current_season.week).
  */
 const run_championship_simulation = async ({
   league_id,
@@ -453,15 +485,57 @@ const run_championship_simulation = async ({
 }) => {
   console.log('\n=== CHAMPIONSHIP SIMULATION ===\n')
 
+  // Determine which weeks are future (need optimal lineups)
+  const current_week = current_season.week
+  const future_weeks = weeks.filter((w) => w > current_week)
+  const optimal_weeks = new Set()
+
+  log(`Current week: ${current_week}`)
+  log(
+    `Future weeks attempting optimal lineups: ${future_weeks.length > 0 ? future_weeks.join(', ') : 'none'}`
+  )
+
+  // Build roster overrides for future weeks using optimal lineups
+  let roster_overrides_by_week = null
+
+  if (future_weeks.length > 0) {
+    roster_overrides_by_week = new Map()
+
+    for (const week of future_weeks) {
+      const optimal_lineups =
+        await simulation.calculate_optimal_lineups_for_teams({
+          league_id,
+          team_ids,
+          week,
+          year
+        })
+
+      if (optimal_lineups.size > 0) {
+        roster_overrides_by_week.set(week, optimal_lineups)
+        optimal_weeks.add(week)
+        log(
+          `Calculated optimal lineups for week ${week}: ${optimal_lineups.size} teams`
+        )
+      } else {
+        log(`No optimal lineups calculated for week ${week}`)
+      }
+    }
+  }
+
   const championship_results = await simulation.simulate_championship({
     league_id,
     team_ids,
     weeks,
     year,
-    n_simulations
+    n_simulations,
+    roster_overrides_by_week
   })
 
-  return championship_results
+  return {
+    championship_results,
+    optimal_weeks,
+    optimal_lineups_by_week: roster_overrides_by_week
+  }
 }
 
 /**
@@ -622,7 +696,9 @@ const generate_formatted_output = async ({
   championship_results,
   team_name_map,
   week_expected_points,
-  week_actual_scores
+  week_actual_scores,
+  optimal_weeks,
+  optimal_lineups_by_week
 }) => {
   const player_name_cache = create_player_name_cache()
 
@@ -634,7 +710,8 @@ const generate_formatted_output = async ({
     weeks,
     year,
     week_expected_points,
-    week_actual_scores
+    week_actual_scores,
+    optimal_weeks
   })
 
   // Format lineup analysis
@@ -642,21 +719,45 @@ const generate_formatted_output = async ({
   console.log('=== LINEUP ANALYSIS BY WEEK ===')
   console.log('='.repeat(60))
 
-  const lineup_analyses = await analyze_lineup_decisions({
-    league_id,
-    team_id,
-    opponent_team_ids,
-    weeks,
-    year,
-    n_simulations
-  })
+  // Split weeks into current/past (need lineup analysis) and future (show optimal)
+  const current_weeks = weeks.filter((w) => !optimal_weeks.has(w))
+  const future_weeks = weeks.filter((w) => optimal_weeks.has(w))
 
-  for (const { week, analysis } of lineup_analyses) {
-    await format_lineup_analysis({
-      analysis,
-      week,
-      player_name_cache
+  // Run lineup analysis only for current/past weeks
+  if (current_weeks.length > 0) {
+    const lineup_analyses = await analyze_lineup_decisions({
+      league_id,
+      team_id,
+      opponent_team_ids,
+      weeks: current_weeks,
+      year,
+      n_simulations
     })
+
+    for (const { week, analysis } of lineup_analyses) {
+      await format_lineup_analysis({
+        analysis,
+        week,
+        player_name_cache
+      })
+    }
+  }
+
+  // Show optimal lineups for future weeks
+  if (future_weeks.length > 0 && optimal_lineups_by_week) {
+    for (const week of future_weeks.sort((a, b) => a - b)) {
+      const week_lineups = optimal_lineups_by_week.get(week)
+      if (week_lineups) {
+        const optimal_pids = week_lineups.get(team_id)
+        if (optimal_pids) {
+          await format_optimal_lineup({
+            week,
+            optimal_pids,
+            player_name_cache
+          })
+        }
+      }
+    }
   }
 
   // Format correlation insights
@@ -723,13 +824,14 @@ const main = async () => {
     const scoring_format_hash = await load_scoring_format({ league_id, year })
 
     // Run championship simulation
-    const championship_results = await run_championship_simulation({
-      league_id,
-      team_ids: all_team_ids,
-      weeks,
-      year,
-      n_simulations
-    })
+    const { championship_results, optimal_weeks, optimal_lineups_by_week } =
+      await run_championship_simulation({
+        league_id,
+        team_ids: all_team_ids,
+        weeks,
+        year,
+        n_simulations
+      })
 
     // Build data structures for output
     const week_expected_points = build_week_expected_points({
@@ -765,7 +867,9 @@ const main = async () => {
         championship_results,
         team_name_map,
         week_expected_points,
-        week_actual_scores
+        week_actual_scores,
+        optimal_weeks,
+        optimal_lineups_by_week
       })
     }
   } catch (err) {
