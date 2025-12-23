@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { wait } from '#libs-server'
+import { wait, is_main } from '#libs-server'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 
 const log = debug('import-live-plays-worker')
@@ -116,8 +116,8 @@ const import_live_plays_worker = async () => {
 // Export for PM2
 export default import_live_plays_worker
 
-// Run if executed directly
-if (process.argv[1].includes('import-live-plays-worker')) {
+// Run if executed directly OR via PM2
+if (is_main(import.meta.url) || process.env.PM2_HOME) {
   import_live_plays_worker()
     .then(() => {
       log('Worker finished')

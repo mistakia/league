@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { wait, report_job } from '#libs-server'
+import { wait, report_job, is_main } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { job as import_draftkings_odds } from '#scripts/import-draftkings-odds.mjs'
 import { job as import_pinnacle_odds } from '#scripts/import-pinnacle-odds.mjs'
@@ -232,7 +232,8 @@ const import_live_odds_worker = async () => {
 
 export default import_live_odds_worker
 
-if (process.argv[1].includes('import-live-odds-worker')) {
+// Run if executed directly OR via PM2
+if (is_main(import.meta.url) || process.env.PM2_HOME) {
   import_live_odds_worker()
     .then(() => {
       log('Worker finished')
