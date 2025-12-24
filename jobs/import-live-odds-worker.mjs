@@ -21,6 +21,7 @@ const BOOKMAKER_CONFIG = {
     import_fn: import_draftkings_odds,
     job_type: job_types.DRAFTKINGS_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
+    timeout_ms: 90 * 60 * 1000, // 90 minutes (DraftKings can take longer)
     enabled: true
   },
   pinnacle: {
@@ -28,6 +29,7 @@ const BOOKMAKER_CONFIG = {
     import_fn: () => import_pinnacle_odds({ ignore_cache: true }),
     job_type: job_types.IMPORT_PINNACLE_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
+    timeout_ms: 30 * 60 * 1000, // 30 minutes
     enabled: true
   },
   prizepicks: {
@@ -35,6 +37,7 @@ const BOOKMAKER_CONFIG = {
     import_fn: import_prizepicks_odds,
     job_type: job_types.PRIZEPICKS_PROJECTIONS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
+    timeout_ms: 30 * 60 * 1000, // 30 minutes
     enabled: true
   }
 }
@@ -42,8 +45,8 @@ const BOOKMAKER_CONFIG = {
 // Main loop interval - determines how often we check if imports should run
 const LOOP_INTERVAL_MS = 30000 // 30 seconds
 
-// Timeout for individual import operations
-const IMPORT_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
+// Default timeout for individual import operations (fallback if not specified per bookmaker)
+const DEFAULT_IMPORT_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
 
 // State tracking
 const state = { should_exit: false }
@@ -122,10 +125,11 @@ const import_bookmaker = async (bookmaker_key) => {
   }
 
   const start_time = Date.now()
-  log(`Starting ${config.name} import...`)
+  const timeout_ms = config.timeout_ms || DEFAULT_IMPORT_TIMEOUT_MS
+  log(`Starting ${config.name} import (timeout: ${timeout_ms / 1000 / 60} minutes)...`)
 
   try {
-    await with_timeout(config.import_fn(), IMPORT_TIMEOUT_MS)
+    await with_timeout(config.import_fn(), timeout_ms)
     last_import_times[bookmaker_key] = Date.now()
     const duration = Date.now() - start_time
     log(`${config.name} import completed in ${duration}ms`)
@@ -192,7 +196,7 @@ const import_live_odds_worker = async () => {
       .filter((k) => BOOKMAKER_CONFIG[k].enabled)
       .map(
         (k) =>
-          `${BOOKMAKER_CONFIG[k].name} (${BOOKMAKER_CONFIG[k].interval_ms / 1000}s)`
+          `${BOOKMAKER_CONFIG[k].name} (interval: ${BOOKMAKER_CONFIG[k].interval_ms / 1000 / 60}min, timeout: ${(BOOKMAKER_CONFIG[k].timeout_ms || DEFAULT_IMPORT_TIMEOUT_MS) / 1000 / 60}min)`
       )
       .join(', ')}`
   )
