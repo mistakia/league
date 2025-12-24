@@ -15,11 +15,14 @@ export {
 } from './simulate-nfl-game.mjs'
 
 // Season forecasting
+export { simulate_season_forecast } from './simulate-season-forecast.mjs'
 export {
-  simulate_season_forecast,
   simulate_wildcard_forecast,
   simulate_championship_forecast
-} from './simulate-season-forecast.mjs'
+} from './simulate-playoff-forecast.mjs'
+
+// Projection merging
+export { merge_player_projections } from './merge-player-projections.mjs'
 
 // Lineup analysis
 export {
@@ -45,7 +48,8 @@ export {
   load_player_info,
   load_scoring_format,
   load_actual_player_points,
-  load_player_points_with_game_status
+  load_player_points_with_game_status,
+  load_actual_playoff_points
 } from './load-simulation-data.mjs'
 
 // Correlation loaders (consolidated)

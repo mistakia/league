@@ -2,36 +2,70 @@
 
 Monte Carlo simulation with correlated player sampling for fantasy football matchups.
 
-## Architecture
+## Architecture Overview
 
-### libs-shared/simulation/ (Pure Functions)
+The simulation system is split across two module directories:
 
-No database access. Math operations only.
+- **libs-shared/simulation/** - Pure functions with no database access (math operations only)
+- **libs-server/simulation/** - Database loaders and orchestration
 
-| Module                            | Purpose                                                |
-| --------------------------------- | ------------------------------------------------------ |
-| `correlation-constants.mjs`       | Default correlations, CV bounds, archetype adjustments |
-| `fit-player-distribution.mjs`     | Distribution parameter fitting                         |
-| `generate-correlated-samples.mjs` | Cholesky-based correlated sampling                     |
-| `build-correlation-matrix.mjs`    | Correlation matrix construction                        |
-| `run-simulation.mjs`              | Monte Carlo engine                                     |
-| `get-player-relationship.mjs`     | Player relationship detection and game grouping        |
-| `simulation-utils.mjs`            | Win calculation, distribution stats                    |
+Total: ~8,800 lines across 30 files.
 
-### libs-server/simulation/ (Database + Orchestration)
+### libs-shared/simulation/ (2,719 lines)
 
-| Module                         | Purpose                                      |
-| ------------------------------ | -------------------------------------------- |
-| `simulate-league-week.mjs`     | League-wide simulation (all matchups)        |
-| `simulate-nfl-game.mjs`        | Per-game simulation with correlations        |
-| `simulate-matchup.mjs`         | Single matchup and multi-week championship   |
-| `simulation-helpers.mjs`       | Shared utilities for orchestrators           |
-| `load-simulation-data.mjs`     | Load projections, variance, player info      |
-| `load-correlations.mjs`        | Load player correlations                     |
-| `load-nfl-schedule.mjs`        | NFL schedule and bye weeks                   |
-| `load-data-with-fallback.mjs`  | Roster/projection loading with week fallback |
-| `calculate-position-ranks.mjs` | WR1/WR2/WR3, RB1/RB2 ranking                 |
-| `analyze-lineup-decisions.mjs` | Start/sit analysis                           |
+Pure math functions that can run in any JavaScript environment.
+
+| Module                                   | Lines | Purpose                                           |
+| ---------------------------------------- | ----- | ------------------------------------------------- |
+| `run-simulation.mjs`                     | 475   | Core Monte Carlo engine                           |
+| `correlation-constants.mjs`              | 519   | Default correlations, CV bounds, archetype config |
+| `build-correlation-matrix.mjs`           | 284   | Correlation matrix construction                   |
+| `build-extended-correlation-matrix.mjs`  | 249   | Extended matrix with game outcome correlations    |
+| `fit-player-distribution.mjs`            | 232   | Distribution parameter fitting (Gamma/LogNormal)  |
+| `generate-correlated-samples.mjs`        | 198   | Cholesky-based correlated sampling                |
+| `ensure-positive-definite.mjs`           | 186   | Matrix regularization for Cholesky                |
+| `simulation-utils.mjs`                   | 160   | Win calculation, distribution stats               |
+| `apply-game-environment-adjustments.mjs` | 156   | Vegas total/spread adjustments                    |
+| `get-player-relationship.mjs`            | 155   | Player relationship detection and game grouping   |
+| `index.mjs`                              | 105   | Module exports                                    |
+
+### libs-server/simulation/ (6,102 lines)
+
+Database-backed loaders and simulation orchestrators.
+
+#### Orchestrators
+
+| Module                          | Lines | Purpose                                    |
+| ------------------------------- | ----- | ------------------------------------------ |
+| `simulate-playoff-forecast.mjs` | 685   | Wildcard and championship round forecasts  |
+| `simulate-matchup.mjs`          | 616   | Single matchup and multi-week championship |
+| `simulate-season-forecast.mjs`  | 399   | Season-long Monte Carlo forecasting        |
+| `simulate-league-week.mjs`      | 357   | League-wide simulation (all matchups)      |
+| `simulate-nfl-game.mjs`         | 296   | Per-game simulation with correlations      |
+
+#### Data Loaders
+
+| Module                                      | Lines | Purpose                                      |
+| ------------------------------------------- | ----- | -------------------------------------------- |
+| `load-simulation-data.mjs`                  | 741   | Projections, variance, player info           |
+| `load-market-projections.mjs`               | 502   | Prop market lines to fantasy projections     |
+| `load-correlations.mjs`                     | 273   | Player pair correlations                     |
+| `load-data-with-fallback.mjs`               | 275   | Roster/projection loading with week fallback |
+| `calculate-position-ranks.mjs`              | 237   | WR1/WR2/WR3, RB1/RB2 ranking                 |
+| `calculate-optimal-lineup.mjs`              | 191   | Optimal lineup calculation                   |
+| `load-game-environment.mjs`                 | 190   | Vegas totals, spreads, weather               |
+| `load-nfl-schedule.mjs`                     | 151   | NFL schedule and bye weeks                   |
+| `load-position-game-outcome-defaults.mjs`   | 84    | Position-level game outcome defaults         |
+| `load-player-game-outcome-correlations.mjs` | 76    | Player game outcome correlations             |
+
+#### Analysis and Helpers
+
+| Module                         | Lines | Purpose                             |
+| ------------------------------ | ----- | ----------------------------------- |
+| `analyze-lineup-decisions.mjs` | 486   | Start/sit analysis                  |
+| `simulation-helpers.mjs`       | 367   | Shared utilities for orchestrators  |
+| `merge-player-projections.mjs` | 69    | Market/traditional projection merge |
+| `index.mjs`                    | 107   | Module exports                      |
 
 ## Simulation Modes
 
@@ -64,6 +98,64 @@ Simulates a specific matchup between 2+ teams. Uses the full correlation matrix 
 
 Multi-week simulation that aggregates scores across weeks to determine championship odds.
 
+### Season Forecast
+
+Monte Carlo simulation of remaining regular season weeks to calculate playoff odds, division odds, and championship odds.
+
+### Playoff Forecast
+
+Wildcard and championship round forecasting with player-level correlations and actual score incorporation for completed weeks.
+
+## Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         ORCHESTRATOR                                │
+│  (simulate_matchup, simulate_league_week, simulate_*_forecast)      │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      DATA LOADING (parallel)                        │
+├──────────────────┬──────────────────┬───────────────────────────────┤
+│ load_player_     │ load_player_     │ load_correlations_for_players │
+│ projections      │ variance         │                               │
+├──────────────────┼──────────────────┼───────────────────────────────┤
+│ load_market_     │ load_player_     │ load_game_environment         │
+│ projections      │ archetypes       │ (Vegas lines)                 │
+├──────────────────┼──────────────────┼───────────────────────────────┤
+│ load_nfl_        │ load_position_   │ load_player_game_outcome_     │
+│ schedule         │ ranks            │ correlations                  │
+└──────────────────┴──────────────────┴───────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    PROJECTION MERGING                               │
+│  merge_player_projections() - market stats override traditional     │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                 PURE SIMULATION (libs-shared)                       │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. fit_player_distribution() - Gamma/LogNormal/Constant            │
+│  2. build_correlation_matrix() - player pair correlations           │
+│  3. build_extended_correlation_matrix() - add game outcome factors  │
+│  4. apply_game_environment_adjustments() - Vegas line adjustments   │
+│  5. ensure_positive_definite() - matrix regularization              │
+│  6. generate_correlated_samples() - Cholesky decomposition          │
+│  7. run_simulation() - Monte Carlo iterations                       │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      RESULTS                                        │
+│  - Win probabilities                                                │
+│  - Score distributions (mean, std, percentiles)                     │
+│  - Raw per-simulation scores (for multi-week aggregation)           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
 ## Database Tables
 
 ```sql
@@ -83,6 +175,20 @@ player_variance (
 player_archetypes (
   pid, year, archetype,
   rushing_rate, target_share, opportunity_share
+)
+
+-- Game outcome correlations per player
+player_game_outcome_correlations (
+  pid, year, position,
+  home_win_correlation, home_loss_correlation,
+  away_win_correlation, away_loss_correlation
+)
+
+-- Position-level game outcome defaults
+position_game_outcome_defaults (
+  position, year,
+  home_win_correlation, home_loss_correlation,
+  away_win_correlation, away_loss_correlation
 )
 
 -- Matchup simulation results
@@ -116,6 +222,17 @@ matchups (
 | QB-QB      | 0.30        |
 | QB-opp DST | -0.48       |
 | DST-DST    | 0.20        |
+
+### Game Outcome Correlations
+
+Players correlate with their team's game outcome (win/loss). The extended correlation matrix adds factors for:
+
+- Home team win correlation
+- Home team loss correlation
+- Away team win correlation
+- Away team loss correlation
+
+These are derived from historical performance data and applied via the game spread.
 
 ### Lookup Hierarchy
 
@@ -159,6 +276,24 @@ matchups (
 ### Rookie Defaults
 
 Players without history use higher CV: QB 1.05, RB 1.00, WR 1.05, TE 0.95, K 0.95, DST 1.10.
+
+## Market Projection Integration
+
+The system integrates betting market prop lines to improve projection accuracy:
+
+1. **Stat-level props** (passing yards, receptions, etc.) override traditional projections
+2. **Anytime TD** converted to expected TDs using: `E[TD] = P(1+) + P(2+)`
+3. **Alt passing TDs** for QBs: `E[TD] = P(1+) + P(2+) + P(3+) + P(4+)`
+4. Source preference: FanDuel > DraftKings
+5. `CLOSE` time type used for final pre-game lines
+
+## Vegas Environment Adjustments
+
+Game environment factors (from `load_game_environment`):
+
+- **Total**: Implied combined score adjusts projections up/down
+- **Spread**: Game outcome correlations weighted by spread probability
+- **Weather**: (Future) Wind, precipitation effects on passing
 
 ## Scripts
 
@@ -213,6 +348,24 @@ const championship = await simulation.simulate_championship({
   year: 2024
 })
 
+// Season forecast (playoff/division/bye odds)
+const forecast = await simulation.simulate_season_forecast({
+  league_id: 1,
+  year: 2024,
+  n_simulations: 10000
+})
+
+// Playoff forecasts
+const wildcard = await simulation.simulate_wildcard_forecast({
+  league_id: 1,
+  year: 2024
+})
+
+const championship_forecast = await simulation.simulate_championship_forecast({
+  league_id: 1,
+  year: 2024
+})
+
 // Lineup analysis (start/sit decisions)
 const analysis = await simulation.analyze_lineup_decisions({
   league_id: 1,
@@ -252,10 +405,12 @@ yarn test --reporter min test/simulation*.spec.mjs
 
 **Bye week handling**: Players on bye contribute zero points. No error raised.
 
-**Projection source**: Uses `scoring_format_player_projection_points` aggregated from multiple sources.
+**Projection source**: Uses `scoring_format_player_projection_points` aggregated from multiple sources, overridden by market projections where available.
 
 **Matrix regularization**: Diagonal shrinkage plus eigenvalue clipping ensures positive-definiteness for Cholesky decomposition. Falls back to identity matrix if regularization fails.
 
 **Completed games**: When `use_actual_results=true` (default), players in completed NFL games use actual scores instead of simulated distributions.
 
 **Game-scoped simulation**: League-wide simulation groups players by NFL game to preserve correlations naturally. Players in different NFL games are independent.
+
+**Game outcome correlation loaders**: Use current year (not year - 1) because they have built-in fallback logic that queries both current and prior year, preferring current year data when available.

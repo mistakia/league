@@ -14,9 +14,9 @@ import {
   load_player_projections,
   load_player_projection_stats,
   load_actual_player_points,
-  load_scoring_format,
-  merge_market_stats_with_traditional
+  load_scoring_format
 } from './load-simulation-data.mjs'
+import { merge_player_projections } from './merge-player-projections.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import { load_nfl_schedule } from './load-nfl-schedule.mjs'
 import { load_position_ranks } from './calculate-position-ranks.mjs'
@@ -160,36 +160,15 @@ export async function simulate_league_week({
     })
   ])
 
-  // Merge projections at stat level: market stats override traditional stats
-  const projections = new Map()
-  let market_merged_count = 0
-
-  for (const pid of player_ids_array) {
-    const trad_stats = traditional_stats.get(pid)
-    const market_data = market_projections.get(pid)
-    const info = player_info.get(pid)
-    const position = info?.position || ''
-
-    const merge_result = merge_market_stats_with_traditional({
-      traditional_stats: trad_stats,
-      market_data,
-      position,
-      league_settings
-    })
-
-    if (merge_result) {
-      projections.set(pid, merge_result.points)
-      if (merge_result.source === 'merged') {
-        market_merged_count++
-      }
-    } else {
-      // Fall back to pre-calculated traditional projection if available
-      const trad_points = traditional_projections.get(pid)
-      if (trad_points !== undefined) {
-        projections.set(pid, trad_points)
-      }
-    }
-  }
+  // Merge projections: market stats override traditional stats where available
+  const { projections, market_merged_count } = merge_player_projections({
+    player_ids: player_ids_array,
+    traditional_projections,
+    traditional_stats,
+    market_projections,
+    player_info,
+    league_settings
+  })
 
   log(
     `Projections: ${traditional_projections.size} traditional, ${market_projections.size} market, ${market_merged_count} merged`
