@@ -15,6 +15,8 @@ export { default as calculateDstStatsFromPlays } from './calculate-dst-stats-fro
 export { default as calculate_dst_delta_from_play } from './calculate-dst-delta-from-play.mjs'
 export { default as calculateStatsFromPlayStats } from './calculate-stats-from-play-stats.mjs'
 export { default as calculateStatsFromPlays } from './calculate-stats-from-plays.mjs'
+export { default as get_game_progress } from './get-game-progress.mjs'
+export { default as calculate_live_projection } from './calculate-live-projection.mjs'
 export { default as calculatePrices } from './calculate-prices.mjs'
 export { default as getRosterSize } from './get-roster-size.mjs'
 export { default as getProjectedSnapsRemaining } from './get-projected-snaps-remaining.mjs'

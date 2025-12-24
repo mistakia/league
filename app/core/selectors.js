@@ -25,7 +25,9 @@ import {
   get_last_consecutive_pick,
   league_has_starting_position,
   get_reserve_eligibility_from_player_map,
-  get_default_trade_slot
+  get_default_trade_slot,
+  get_game_progress,
+  calculate_live_projection
 } from '@libs-shared'
 import {
   current_season,
@@ -2623,6 +2625,126 @@ export function getGameStatusByPlayerId(
     yardline,
     isRedzone,
     hasPossession
+  }
+}
+
+/**
+ * Determine the game state for a player: 'pending', 'live', or 'completed'
+ */
+export function get_player_game_state(
+  state,
+  { pid, week = current_season.week }
+) {
+  const game_status = getGameStatusByPlayerId(state, { pid, week })
+
+  if (!game_status || !game_status.game) {
+    return 'pending'
+  }
+
+  const { game, lastPlay } = game_status
+
+  // Check if game is final
+  if (game.status && game.status.toUpperCase().startsWith('FINAL')) {
+    return 'completed'
+  }
+
+  // Check if game has started (has plays)
+  if (lastPlay) {
+    return 'live'
+  }
+
+  // Game exists but no plays yet
+  const now = Date.now()
+  if (game.timestamp && now >= game.timestamp) {
+    return 'live'
+  }
+
+  return 'pending'
+}
+
+/**
+ * Get game progress percentage for a player's current game
+ */
+export function get_player_game_progress(
+  state,
+  { pid, week = current_season.week }
+) {
+  const game_status = getGameStatusByPlayerId(state, { pid, week })
+
+  if (!game_status || !game_status.game) {
+    return 0
+  }
+
+  const { game, lastPlay } = game_status
+
+  // Check if game is final
+  const is_final = game.status && game.status.toUpperCase().startsWith('FINAL')
+
+  if (!lastPlay) {
+    return is_final ? 1 : 0
+  }
+
+  return get_game_progress({
+    quarter: lastPlay.qtr,
+    game_clock: lastPlay.game_clock_start,
+    is_final
+  })
+}
+
+/**
+ * Calculate live projection for a player combining accumulated points with remaining projection
+ */
+export function get_player_live_projection(
+  state,
+  { player_map, week = current_season.week }
+) {
+  if (!player_map || !player_map.get('pid')) {
+    return null
+  }
+
+  const pid = player_map.get('pid')
+  const game_state = get_player_game_state(state, { pid, week })
+
+  // For pending games, return full projection
+  if (game_state === 'pending') {
+    const full_projection = player_map.getIn(['points', `${week}`, 'total'], 0)
+    return {
+      projected_total: Number(full_projection.toFixed(2)),
+      remaining_projection: Number(full_projection.toFixed(2)),
+      accumulated_points: 0,
+      game_progress: 0,
+      game_state
+    }
+  }
+
+  // Get accumulated points from play-by-play
+  const gamelog = get_gamelog_for_player(state, { player_map, week })
+  const accumulated_points = gamelog ? gamelog.total : 0
+
+  // For completed games, return actual points
+  if (game_state === 'completed') {
+    return {
+      projected_total: Number(accumulated_points.toFixed(2)),
+      remaining_projection: 0,
+      accumulated_points: Number(accumulated_points.toFixed(2)),
+      game_progress: 1,
+      game_state
+    }
+  }
+
+  // For live games, combine accumulated + remaining projection
+  const full_projection = player_map.getIn(['points', `${week}`, 'total'], 0)
+  const game_progress = get_player_game_progress(state, { pid, week })
+
+  const result = calculate_live_projection({
+    accumulated_points,
+    full_game_projection: full_projection,
+    game_progress
+  })
+
+  return {
+    ...result,
+    game_state
   }
 }
 
