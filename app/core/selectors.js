@@ -2341,16 +2341,21 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
       minutes += 60
     }
 
-    // Use live projection for projected total (includes remaining projection for live games)
+    // Team projected = sum of individual projected_totals (expected final score)
     const live_projection = get_player_live_projection(state, {
       player_map,
       week: matchup.week
     })
-    const add = live_projection
-      ? live_projection.projected_total
-      : player_map.getIn(['points', `${matchup.week}`, 'total'], 0)
 
-    projected += add
+    if (live_projection) {
+      // For all game states, use projected_total (expected final points for player)
+      // - pending: full projection
+      // - live: accumulated + remaining
+      // - completed: actual points (since remaining ≈ 0)
+      projected += live_projection.projected_total
+    } else {
+      projected += player_map.getIn(['points', `${matchup.week}`, 'total'], 0)
+    }
   }
 
   return create_scoreboard({
