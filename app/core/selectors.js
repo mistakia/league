@@ -2271,11 +2271,14 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
     current_season.finalWeek - 1
   const is_championship_round = matchup.week === championship_round_final_week
 
-  // TODO - set flag for processed matchup
-  // check matchup points to see if it has any truthy values (means it has been processed)
-  // check if matchup tids includes tid, tid might belong to a team not in the matchup (wildcard round and championship round)
+  // For past matchups (before current week), use stored values
+  // For current/future weeks, calculate live projections dynamically
+  const is_past_matchup =
+    matchup.year < current_season.year ||
+    (matchup.year === current_season.year && matchup.week < current_season.week)
+
   const team_index = matchup.tids.indexOf(tid)
-  if (matchup.points.some((p) => Boolean(p)) && team_index >= 0) {
+  if (is_past_matchup && matchup.points.some((p) => Boolean(p)) && team_index >= 0) {
     let points =
       matchup.points_manual.get(team_index) || matchup.points.get(team_index)
     let projected_points = matchup.projections.get(team_index)
