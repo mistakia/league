@@ -34,6 +34,8 @@ const parse_proxy_string = (proxy_str) => {
 class ProxyManager {
   constructor() {
     this.proxies = new Map()
+    this.proxy_keys = [] // Ordered list of proxy keys for round-robin
+    this.round_robin_index = 0 // Current position in round-robin rotation
     this.retry_count = 0
     this.base_delay = 60000 // 1 minute base delay
     this.initialized = false
@@ -58,6 +60,7 @@ class ProxyManager {
             failed: false,
             last_used: 0
           })
+          this.proxy_keys.push(key)
         }
         log(`Initialized ${this.proxies.size} proxies from database`)
       } else {
@@ -102,25 +105,26 @@ class ProxyManager {
       this.reset_failed_proxies()
     }
 
-    // Find the least recently used non-failed proxy
-    let selected_proxy = null
-    let oldest_time = Infinity
+    // Round-robin selection: try each proxy in order, skipping failed ones
+    const proxy_count = this.proxy_keys.length
+    let attempts = 0
 
-    for (const [key, proxy] of this.proxies.entries()) {
-      if (!proxy.failed && proxy.last_used < oldest_time) {
-        selected_proxy = { key, ...proxy }
-        oldest_time = proxy.last_used
+    while (attempts < proxy_count) {
+      const key = this.proxy_keys[this.round_robin_index]
+      // Advance index for next call (atomic increment before returning)
+      this.round_robin_index = (this.round_robin_index + 1) % proxy_count
+
+      const proxy = this.proxies.get(key)
+      if (proxy && !proxy.failed) {
+        proxy.last_used = Date.now()
+        log(`Selected proxy (round-robin): ${key}`)
+        return { key, ...proxy }
       }
+
+      attempts++
     }
 
-    if (selected_proxy) {
-      // Update last used time
-      this.proxies.get(selected_proxy.key).last_used = Date.now()
-      log(`Selected proxy: ${selected_proxy.key}`)
-      return selected_proxy
-    }
-
-    return null // Should never reach here due to reset above
+    return null // All proxies failed (should be handled by reset above)
   }
 
   mark_proxy_failed(proxy_config) {

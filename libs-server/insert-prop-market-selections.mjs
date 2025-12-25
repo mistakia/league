@@ -1,70 +1,73 @@
 import diff from 'deep-diff'
 import debug from 'debug'
 
-import db from '#db'
 import { get_cached_selection_latest } from './betting-market-cache.mjs'
 
 const log = debug('insert-prop-market-selections')
 
-const process_market_selection = async ({
+// Fields that trigger a history insert when changed
+const SELECTION_UPDATE_FIELDS = [
+  'selection_name',
+  'selection_metric_line',
+  'odds_american'
+]
+
+// Extract fields needed for selection history inserts
+const get_selection_history_record = (selection, timestamp) => ({
+  source_id: selection.source_id,
+  source_market_id: selection.source_market_id,
+  source_selection_id: selection.source_selection_id,
+  selection_name: selection.selection_name,
+  selection_metric_line: selection.selection_metric_line,
+  odds_decimal: selection.odds_decimal,
+  odds_american: selection.odds_american,
+  timestamp
+})
+
+// Validate required selection fields
+const validate_selection = (selection, timestamp) => {
+  if (!selection.source_id) {
+    throw new Error('source_id is required')
+  }
+  if (!selection.source_market_id) {
+    throw new Error('source_market_id is required')
+  }
+  if (!selection.source_selection_id) {
+    throw new Error('source_selection_id is required')
+  }
+  if (!selection.odds_american) {
+    throw new Error('odds_american is required')
+  }
+  if (!selection.odds_decimal) {
+    throw new Error('odds_decimal is required')
+  }
+  if (!timestamp) {
+    throw new Error('timestamp is required')
+  }
+}
+
+const process_market_selection = ({
   timestamp,
   selection,
   existing_market,
-  market,
-  use_cache = false
+  market
 }) => {
   const selection_history_inserts = []
   const selection_index_inserts = []
+
   const save_new_selection = () => {
-    const {
-      source_id,
-      source_market_id,
-      source_selection_id,
-      selection_name,
-      selection_metric_line,
-      odds_decimal,
-      odds_american
-    } = selection
-    selection_history_inserts.push({
-      source_id,
-      source_market_id,
-      source_selection_id,
-      selection_name,
-      selection_metric_line,
-      odds_decimal,
-      odds_american,
-      timestamp
-    })
+    validate_selection(selection, timestamp)
 
-    if (!source_id) {
-      throw new Error('source_id is required')
-    }
-
-    if (!source_market_id) {
-      throw new Error('source_market_id is required')
-    }
-
-    if (!source_selection_id) {
-      throw new Error('source_selection_id is required')
-    }
-
-    if (!odds_american) {
-      throw new Error('odds_american is required')
-    }
-
-    if (!odds_decimal) {
-      throw new Error('odds_decimal is required')
-    }
-
-    if (!timestamp) {
-      throw new Error('timestamp is required')
-    }
+    selection_history_inserts.push(
+      get_selection_history_record(selection, timestamp)
+    )
 
     selection_index_inserts.push({
       ...selection,
       timestamp,
       time_type: 'OPEN'
     })
+
     if (!market.live) {
       selection_index_inserts.push({
         ...selection,
@@ -74,7 +77,7 @@ const process_market_selection = async ({
     }
 
     return {
-      source_selection_id,
+      source_selection_id: selection.source_selection_id,
       new_selection: true,
       metric_line_changed: false,
       selection_name_changed: false,
@@ -88,75 +91,43 @@ const process_market_selection = async ({
     return save_new_selection()
   }
 
-  let existing_selection = null
-  if (use_cache) {
-    existing_selection = get_cached_selection_latest({
-      source_id: existing_market.source_id,
-      source_market_id: existing_market.source_market_id,
-      source_selection_id: selection.source_selection_id
-    })
-  } else {
-    existing_selection = await db('prop_market_selections_history')
-      .where({
-        source_id: existing_market.source_id,
-        source_market_id: existing_market.source_market_id,
-        source_selection_id: selection.source_selection_id
-      })
-      .orderBy('timestamp', 'desc')
-      .first()
-  }
+  const existing_selection = get_cached_selection_latest({
+    source_id: existing_market.source_id,
+    source_market_id: existing_market.source_market_id,
+    source_selection_id: selection.source_selection_id
+  })
 
   if (!existing_selection) {
     return save_new_selection()
   }
 
-  delete existing_selection.timestamp
-  const differences = diff(existing_selection, selection)
+  // Create a copy to avoid mutating cached object
+  const { timestamp: _, ...existing_without_timestamp } = existing_selection
+  const differences = diff(existing_without_timestamp, selection)
 
   let odds_change_amount = 0
   let selection_name_changed = false
   let metric_line_changed = false
 
   if (differences && differences.length) {
-    const update_on_change = [
-      'selection_name',
-      'selection_metric_line',
-      'odds_american'
-    ]
-    const should_update = differences.some((difference) =>
-      update_on_change.includes(difference.path[0])
+    const should_update = differences.some((d) =>
+      SELECTION_UPDATE_FIELDS.includes(d.path[0])
     )
 
     if (should_update) {
-      const {
-        source_id,
-        source_market_id,
-        source_selection_id,
-        selection_name,
-        selection_metric_line,
-        odds_decimal,
-        odds_american
-      } = selection
-      selection_history_inserts.push({
-        timestamp,
-        source_id,
-        source_market_id,
-        source_selection_id,
-        selection_name,
-        selection_metric_line,
-        odds_decimal,
-        odds_american
-      })
+      selection_history_inserts.push(
+        get_selection_history_record(selection, timestamp)
+      )
 
-      differences.forEach((difference) => {
-        if (difference.path[0] === 'selection_name') {
+      for (const d of differences) {
+        if (d.path[0] === 'selection_name') {
           selection_name_changed = true
-        } else if (difference.path[0] === 'selection_metric_line') {
+        } else if (d.path[0] === 'selection_metric_line') {
           metric_line_changed = true
-        } else if (difference.path[0] === 'odds_american') {
-          odds_change_amount = difference.rhs - difference.lhs
+        } else if (d.path[0] === 'odds_american') {
+          odds_change_amount = d.rhs - d.lhs
         }
-      })
+      }
     }
   }
 
@@ -183,95 +154,81 @@ export default async function ({
   timestamp,
   selections,
   existing_market,
-  market,
-  use_cache = false
+  market
 }) {
   const results = []
   const all_selection_history_inserts = []
   const all_selection_index_inserts = []
   const cleanup_operations = []
 
-  // Process all selections
-  for (const selection of selections) {
-    try {
-      const result = await process_market_selection({
-        timestamp,
-        selection,
-        existing_market,
-        market,
-        use_cache
-      })
-      results.push(result)
-
-      if (result.selection_history_inserts) {
-        all_selection_history_inserts.push(...result.selection_history_inserts)
-      }
-      if (result.selection_index_inserts) {
-        all_selection_index_inserts.push(...result.selection_index_inserts)
-      }
-    } catch (err) {
-      log(selection)
-      console.log(err)
-      log(err)
-    }
-  }
-
-  // Handle cleanup of missing selections (moved outside loop)
-  if (!market.live && existing_market && existing_market.source_market_id) {
-    if (use_cache) {
-      // For batch mode, just collect the cleanup operation
-      const new_selection_ids = selections.map((selection) =>
-        selection.source_selection_id.toString()
-      )
-      cleanup_operations.push({
-        source_market_id: existing_market.source_market_id,
-        new_selection_ids,
-        missing_selection_ids: [] // Will be determined during batch execution
-      })
-    } else {
-      // Legacy mode - execute immediately
-      const execute_cleanup = async () => {
-        const existing_selections = await db('prop_market_selections_index')
-          .where({
-            source_market_id: existing_market.source_market_id,
-            time_type: 'CLOSE'
-          })
-          .select('source_selection_id')
-
-        const existing_selection_ids = existing_selections.map(
-          (selection) => selection.source_selection_id
-        )
-        const new_selection_ids = selections.map((selection) =>
-          selection.source_selection_id.toString()
-        )
-        const missing_selection_ids = existing_selection_ids.filter(
-          (id) => !new_selection_ids.includes(id)
-        )
-        if (missing_selection_ids.length) {
-          await db('prop_market_selections_index')
-            .where({
-              source_market_id: existing_market.source_market_id,
-              time_type: 'CLOSE'
-            })
-            .whereIn('source_selection_id', missing_selection_ids)
-            .del()
-        }
-      }
-      // Note: This will need to be awaited when called in non-batch mode
-      cleanup_operations.push({ execute: execute_cleanup })
-    }
-  }
-
-  // Return operations for batch mode or results for legacy mode
-  if (use_cache) {
+  // Guard against truly missing selections (null/undefined)
+  // Empty arrays are valid - they indicate all selections were removed
+  if (!selections) {
     return {
       selection_history_inserts: all_selection_history_inserts,
       selection_index_inserts: all_selection_index_inserts,
       cleanup_operations,
       results
     }
-  } else {
-    // Legacy mode - need to handle async cleanup
-    return { results, cleanup_operations }
+  }
+
+  // Process all selections (skip if empty array)
+  if (selections.length > 0) {
+    const selection_results = await Promise.allSettled(
+      selections.map((selection) =>
+        process_market_selection({
+          timestamp,
+          selection,
+          existing_market,
+          market
+        })
+      )
+    )
+
+    for (let i = 0; i < selection_results.length; i++) {
+      const settled = selection_results[i]
+      if (settled.status === 'fulfilled') {
+        const result = settled.value
+        results.push(result)
+
+        if (result.selection_history_inserts) {
+          all_selection_history_inserts.push(
+            ...result.selection_history_inserts
+          )
+        }
+        if (result.selection_index_inserts) {
+          all_selection_index_inserts.push(...result.selection_index_inserts)
+        }
+      } else {
+        log(selections[i])
+        log(settled.reason)
+      }
+    }
+  }
+
+  // Handle cleanup of missing selections for non-live markets
+  // Only run cleanup when we have selections to compare against - empty arrays
+  // would incorrectly mark all existing selections for deletion
+  if (
+    !market.live &&
+    existing_market &&
+    existing_market.source_market_id &&
+    selections.length > 0
+  ) {
+    const new_selection_ids = selections.map((selection) =>
+      selection.source_selection_id.toString()
+    )
+    cleanup_operations.push({
+      source_market_id: existing_market.source_market_id,
+      new_selection_ids,
+      missing_selection_ids: [] // Determined during batch execution in insert-prop-markets
+    })
+  }
+
+  return {
+    selection_history_inserts: all_selection_history_inserts,
+    selection_index_inserts: all_selection_index_inserts,
+    cleanup_operations,
+    results
   }
 }

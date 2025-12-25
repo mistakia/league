@@ -557,6 +557,7 @@ const process_matchup_batches = async ({
 }) => {
   const formatted_markets = []
   const all_matchups_with_markets = []
+  const batch_start_time = Date.now()
 
   const process_batch = async (matchup_batch) => {
     const batch_promises = matchup_batch.map(async (pinnacle_matchup) => {
@@ -596,13 +597,18 @@ const process_matchup_batches = async ({
   for (const [batch_index, batch] of matchup_batches.entries()) {
     await process_batch(batch)
 
+    // Log progress with timing
+    const current_batch = batch_index + 1
+    const total_batches = matchup_batches.length
+    const elapsed_seconds = ((Date.now() - batch_start_time) / 1000).toFixed(1)
+    const markets_so_far = formatted_markets.length
+    log(
+      `Batch ${current_batch}/${total_batches} complete (${markets_so_far} markets, ${elapsed_seconds}s elapsed)`
+    )
+
     // Add delay between batches if not ignoring wait
     if (!ignore_wait && batch_index + 1 < matchup_batches.length) {
-      const current_batch = batch_index + 1
-      const total_batches = matchup_batches.length
-      log(
-        `Batch ${current_batch}/${total_batches} complete, waiting ${BATCH_WAIT_TIME / 1000} seconds...`
-      )
+      log(`Waiting ${BATCH_WAIT_TIME / 1000} seconds before next batch...`)
       await wait(BATCH_WAIT_TIME)
     }
   }
@@ -746,14 +752,42 @@ const import_pinnacle_odds = async ({
   // Log summary information
   log_summary({ unique_values, unmatched_markets, unmatched_combinations })
 
-  if (dry_run) {
-    log(formatted_markets.slice(0, 10))
-    return
-  }
-
   if (formatted_markets.length) {
-    log(`Inserting ${formatted_markets.length} markets into database`)
-    await insert_prop_markets(formatted_markets)
+    // Show market stats
+    const markets_with_type = formatted_markets.filter((m) => m.market_type)
+    const markets_without_type = formatted_markets.filter((m) => !m.market_type)
+    const total_selections = formatted_markets.reduce(
+      (sum, m) => sum + (m.selections?.length || 0),
+      0
+    )
+
+    log('\n=== MARKET SUMMARY ===')
+    log(`Total markets: ${formatted_markets.length}`)
+    log(`  - With market_type: ${markets_with_type.length}`)
+    log(`  - Without market_type (unmatched): ${markets_without_type.length}`)
+    log(`Total selections: ${total_selections}`)
+
+    if (dry_run) {
+      log(`\nSample markets (first 5):`)
+      log(
+        formatted_markets.slice(0, 5).map((m) => ({
+          market_type: m.market_type,
+          source_market_id: m.source_market_id,
+          esbid: m.esbid,
+          selection_count: m.selections?.length
+        }))
+      )
+    }
+
+    const insert_start = Date.now()
+    log(
+      `\n${dry_run ? '[DRY RUN] Processing' : 'Inserting'} ${formatted_markets.length} markets...`
+    )
+    await insert_prop_markets(formatted_markets, { dry_run })
+    const insert_duration = ((Date.now() - insert_start) / 1000).toFixed(1)
+    log(
+      `${dry_run ? 'Processing' : 'Database insertion'} completed in ${insert_duration}s`
+    )
   }
 
   console.timeEnd('import-pinnacle-odds')

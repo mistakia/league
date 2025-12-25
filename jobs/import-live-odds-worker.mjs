@@ -21,7 +21,7 @@ const BOOKMAKER_CONFIG = {
     import_fn: import_draftkings_odds,
     job_type: job_types.DRAFTKINGS_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
-    timeout_ms: 90 * 60 * 1000, // 90 minutes (DraftKings can take longer)
+    timeout_ms: 45 * 60 * 1000, // 45 minutes (typical: ~21 min)
     enabled: true
   },
   pinnacle: {
@@ -29,7 +29,7 @@ const BOOKMAKER_CONFIG = {
     import_fn: () => import_pinnacle_odds({ ignore_cache: true }),
     job_type: job_types.IMPORT_PINNACLE_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
-    timeout_ms: 30 * 60 * 1000, // 30 minutes
+    timeout_ms: 15 * 60 * 1000, // 15 minutes (typical: ~2.5 min)
     enabled: true
   },
   prizepicks: {
@@ -126,7 +126,9 @@ const import_bookmaker = async (bookmaker_key) => {
 
   const start_time = Date.now()
   const timeout_ms = config.timeout_ms || DEFAULT_IMPORT_TIMEOUT_MS
-  log(`Starting ${config.name} import (timeout: ${timeout_ms / 1000 / 60} minutes)...`)
+  log(
+    `Starting ${config.name} import (timeout: ${timeout_ms / 1000 / 60} minutes)...`
+  )
 
   try {
     await with_timeout(config.import_fn(), timeout_ms)
