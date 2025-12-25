@@ -2340,8 +2340,14 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
     } else {
       minutes += 60
     }
-    const add = gamelog
-      ? gamelog.total
+
+    // Use live projection for projected total (includes remaining projection for live games)
+    const live_projection = get_player_live_projection(state, {
+      player_map,
+      week: matchup.week
+    })
+    const add = live_projection
+      ? live_projection.projected_total
       : player_map.getIn(['points', `${matchup.week}`, 'total'], 0)
 
     projected += add

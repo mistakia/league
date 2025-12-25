@@ -13,26 +13,30 @@ class ScoreboardPlayer extends Player {
     const classNames = ['scoreboard__player']
 
     // Determine points to display based on game state
-    let points
+    let main_points
+    let secondary_points = null
+
     if (live_projection) {
-      const { game_state, projected_total } = live_projection
+      const { game_state, projected_total, accumulated_points } =
+        live_projection
 
       if (game_state === 'completed') {
-        // Completed game - show actual points
-        points = (gamelog?.total || projected_total || 0).toFixed(1)
+        // Completed game - show actual points only
+        main_points = (gamelog?.total || projected_total || 0).toFixed(1)
       } else if (game_state === 'live') {
-        // Live game - show live projection (accumulated + remaining)
+        // Live game - show accumulated as main, projected total as secondary
         classNames.push('live')
-        points = (projected_total || 0).toFixed(1)
+        main_points = (accumulated_points || 0).toFixed(1)
+        secondary_points = (projected_total || 0).toFixed(1)
       } else {
         // Pending game - show full projection
         classNames.push('projection')
-        points = (projected_total || 0).toFixed(1)
+        main_points = (projected_total || 0).toFixed(1)
       }
     } else {
       // Fallback to original behavior
       if (!gamelog) classNames.push('projection')
-      points = gamelog
+      main_points = gamelog
         ? (gamelog.total || 0).toFixed(1)
         : player_map.getIn(['points', `${week}`, 'total'], 0).toFixed(1)
     }
@@ -44,7 +48,14 @@ class ScoreboardPlayer extends Player {
           <PlayerNameExpanded pid={pid} week={week} hideActions minimize />
           <ScoreboardPlayerGameStatus pid={pid} week={week} />
         </div>
-        <div className='scoreboard__player-score metric'>{points}</div>
+        <div className='scoreboard__player-score metric'>
+          {main_points}
+          {secondary_points !== null && (
+            <span className='scoreboard__player-projected'>
+              {secondary_points}
+            </span>
+          )}
+        </div>
       </div>
     )
   }

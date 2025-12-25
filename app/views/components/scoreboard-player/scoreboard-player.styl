@@ -10,10 +10,6 @@
     color rgba(0,0,0,0.3)
     font-weight 300
 
-  &.live .scoreboard__player-score
-    color #f5a623
-    font-weight 700
-
 .scoreboard__player-slot
   flex 0 0 60px
   font-size 12px
@@ -23,10 +19,23 @@
 
 .scoreboard__player-score.metric
   font-size 1em
-  flex 0 0 40px
+  flex 0 0 56px
   display flex
+  flex-direction column
+  align-items center
+  justify-content center
   color #2ea3dd
   font-weight 900
+
+.scoreboard__player-projected
+  font-size 0.6em
+  font-weight 500
+  color rgba(0,0,0,0.4)
+  margin-top 2px
+  padding 2px 5px
+  background rgba(0,0,0,0.06)
+  border-radius 3px
+  line-height 1
 
 .scoreboard__player-body
   flex 1
@@ -44,7 +53,7 @@
     order 2
   .scoreboard__player-score
     order 3
-    justify-content flex-end
+    align-items flex-end
 
 .home
   .scoreboard__player
