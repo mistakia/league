@@ -2333,7 +2333,7 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
         const quarterMinutes =
           lp.desc === 'END GAME'
             ? 0
-            : Number((lp.game_clock_start || '').split(':').pop()) // TODO - double check
+            : Number((lp.game_clock_start || '0:00').split(':')[0])
         const quartersRemaining = lp.qtr === 5 ? 0 : 4 - lp.qtr
         minutes += quartersRemaining * 15 + quarterMinutes
       }
