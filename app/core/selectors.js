@@ -27,8 +27,7 @@ import {
   get_reserve_eligibility_from_player_map,
   get_default_trade_slot,
   get_game_progress,
-  calculate_live_projection,
-  optimizeStandingsLineup
+  calculate_live_projection
 } from '@libs-shared'
 import {
   current_season,
@@ -2236,33 +2235,6 @@ export function getPointsByTeamId(state, { tid, week }) {
   return points
 }
 
-export function getOptimalPointsByTeamId(state, { tid, week }) {
-  const league = get_current_league(state)
-  const roster = getRosterByTeamId(state, { tid, week })
-
-  // Get all active roster players (not just starters)
-  const players = []
-  for (const { pid } of roster.active) {
-    const player_map = getPlayerById(state, { pid })
-    if (!player_map || !player_map.get('pid')) continue
-
-    const pos = player_map.get('pos')
-    if (!pos) continue
-
-    const gamelog = get_gamelog_for_player(state, { player_map, week })
-    const points = gamelog ? gamelog.total : 0
-
-    players.push({ pid, pos, points })
-  }
-
-  if (players.length === 0) {
-    return 0
-  }
-
-  const result = optimizeStandingsLineup({ players, league })
-  return result.total || 0
-}
-
 export function getScoreboardByMatchupId(state, { matchupId }) {
   const matchup = get_matchup_by_id(state, { matchupId })
   if (!matchup) {
@@ -2306,13 +2278,14 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
     (matchup.year === current_season.year && matchup.week < current_season.week)
 
   const team_index = matchup.tids.indexOf(tid)
-  if (is_past_matchup && matchup.points.some((p) => Boolean(p)) && team_index >= 0) {
+  if (
+    is_past_matchup &&
+    matchup.points.some((p) => Boolean(p)) &&
+    team_index >= 0
+  ) {
     let points =
       matchup.points_manual.get(team_index) || matchup.points.get(team_index)
     let projected_points = matchup.projections.get(team_index)
-
-    // Calculate optimal points for past matchups
-    let optimal = getOptimalPointsByTeamId(state, { tid, week: matchup.week })
 
     if (is_championship_round) {
       const previous_matchup = get_matchup_by_team_id(state, {
@@ -2328,18 +2301,12 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
         projected_points +=
           previous_matchup.projections.get(previous_team_index)
       }
-      // Add optimal from the previous week of championship round
-      optimal += getOptimalPointsByTeamId(state, {
-        tid,
-        week: championship_round_first_week
-      })
     }
 
     return create_scoreboard({
       tid,
       points,
       projected: projected_points,
-      optimal: Number(optimal.toFixed(2)),
       minutes,
       matchup
     })
@@ -2398,21 +2365,10 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
     }
   }
 
-  // Calculate optimal points for current/live matchups
-  let optimal = getOptimalPointsByTeamId(state, { tid, week: matchup.week })
-  if (is_championship_round) {
-    // Add optimal from the previous week of championship round
-    optimal += getOptimalPointsByTeamId(state, {
-      tid,
-      week: championship_round_first_week
-    })
-  }
-
   return create_scoreboard({
     tid,
     points: Number(points.toFixed(2)),
     projected: Number((projected + previousWeek).toFixed(2)),
-    optimal: Number(optimal.toFixed(2)),
     minutes,
     matchup
   })
@@ -2705,7 +2661,13 @@ export function get_player_game_state(
 
   const { game, lastPlay } = game_status
 
-  // Check if game is final
+  // Check if game is final - prefer play data (real-time) over schedule status (cached)
+  // "END GAME" play is pushed via WebSocket, so this detects completion immediately
+  if (lastPlay && lastPlay.desc === 'END GAME') {
+    return 'completed'
+  }
+
+  // Fall back to cached schedule status (for past weeks or if play data unavailable)
   if (game.status && game.status.toUpperCase().startsWith('FINAL')) {
     return 'completed'
   }
@@ -2739,8 +2701,10 @@ export function get_player_game_progress(
 
   const { game, lastPlay } = game_status
 
-  // Check if game is final
-  const is_final = game.status && game.status.toUpperCase().startsWith('FINAL')
+  // Check if game is final - prefer play data (real-time) over schedule status (cached)
+  const is_final =
+    (lastPlay && lastPlay.desc === 'END GAME') ||
+    (game.status && game.status.toUpperCase().startsWith('FINAL'))
 
   if (!lastPlay) {
     return is_final ? 1 : 0
