@@ -37,7 +37,7 @@ const BOOKMAKER_CONFIG = {
     import_fn: import_prizepicks_odds,
     job_type: job_types.PRIZEPICKS_PROJECTIONS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
-    timeout_ms: 30 * 60 * 1000, // 30 minutes
+    timeout_ms: 20 * 60 * 1000, // 20 minutes (typical: ~9 min)
     enabled: true
   }
 }
