@@ -6,6 +6,7 @@ export const Scoreboard = new Record({
   tid: null,
   points: null,
   projected: null,
+  optimal: null,
   minutes: null,
   matchup: new Matchup()
 })
@@ -14,6 +15,7 @@ export const create_scoreboard = ({
   tid,
   points,
   projected,
+  optimal,
   minutes,
   matchup
 } = {}) => {
@@ -21,6 +23,7 @@ export const create_scoreboard = ({
     tid,
     points,
     projected,
+    optimal,
     minutes,
     matchup: create_matchup(matchup)
   })

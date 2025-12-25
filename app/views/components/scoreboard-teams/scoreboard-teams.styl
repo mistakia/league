@@ -1,12 +1,54 @@
+.scoreboard__teams-header
+  display flex
+  align-items center
+  padding 4px 8px
+  font-size 10px
+  font-weight 500
+  color rgba(0,0,0,0.4)
+  border-radius 3px 3px 0 0
+  margin 16px 0 0
+  border 1px solid $borderColor
+  border-bottom none
+  background #fafafa
+
+  .scoreboard__header-team
+    flex 1
+
+  .scoreboard__header-score
+    flex 0 0 40px
+    text-align right
+    padding 0 4px
+
+  .scoreboard__header-proj
+    flex 0 0 36px
+    text-align center
+    padding 0 2px
+
+  .scoreboard__header-optimal
+    flex 0 0 36px
+    text-align center
+    padding 0 2px
+
+  .scoreboard__header-diff
+    flex 0 0 76px
+    text-align right
+    padding 0 4px
+
+  .scoreboard__header-minutes
+    flex 0 0 60px
+    text-align right
+    padding 0 4px
+
 .scoreboard__teams
   display flex
   flex-direction column
-  margin 16px 0 16px
+  margin 0 0 16px
   overflow hidden
   overflow-x scroll
-  border-radius 3px
+  border-radius 0 0 3px 3px
   background white
   border 1px solid $borderColor
+  border-top none
 
 .scoreboard__teams-team
   flex 1

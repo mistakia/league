@@ -42,6 +42,16 @@ export default function ScoreboardScoreTeam({
     }
   }, [type, scoreboard.minutes])
 
+  const render_optimal = useCallback(() => {
+    if (type === matchup_types.TOURNAMENT) {
+      return (
+        <div className='scoreboard__score-optimal metric'>
+          {scoreboard.optimal ? scoreboard.optimal.toFixed(0) : ''}
+        </div>
+      )
+    }
+  }, [type, scoreboard.optimal])
+
   return (
     <div className='scoreboard__score-team'>
       <TeamName tid={tid} year={scoreboard.matchup.year} />
@@ -51,6 +61,7 @@ export default function ScoreboardScoreTeam({
       <div className='scoreboard__score-proj metric'>
         {scoreboard.projected ? scoreboard.projected.toFixed(0) : ''}
       </div>
+      {render_optimal()}
       {render_score_diff()}
       {render_score_minutes()}
     </div>

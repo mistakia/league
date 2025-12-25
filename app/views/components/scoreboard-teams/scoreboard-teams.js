@@ -8,6 +8,19 @@ import { Scoreboard } from '@core/scoreboard'
 import './scoreboard-teams.styl'
 import { current_season, matchup_types } from '@constants'
 
+function ScoreboardHeader() {
+  return (
+    <div className='scoreboard__teams-header'>
+      <div className='scoreboard__header-team' />
+      <div className='scoreboard__header-score'>Score</div>
+      <div className='scoreboard__header-proj'>Proj</div>
+      <div className='scoreboard__header-optimal'>Max</div>
+      <div className='scoreboard__header-diff' />
+      <div className='scoreboard__header-minutes' />
+    </div>
+  )
+}
+
 function Team({ tid, onClick, selected_tid, cutoff, challenger }) {
   const classNames = ['scoreboard__teams-team', 'cursor']
   if (tid === selected_tid) classNames.push('selected')
@@ -79,6 +92,7 @@ export default function ScoreboardTeams({
 
   return (
     <div className='scoreboard__teams-container'>
+      <ScoreboardHeader />
       <div className='scoreboard__teams'>{items}</div>
       <div className='scoreboard__other-teams-container'>
         <div
