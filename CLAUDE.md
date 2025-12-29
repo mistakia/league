@@ -40,19 +40,44 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 - Domain-driven modules in `/app/core/` (players, leagues, teams, auction, etc.)
 - Each module contains: `actions.js`, `reducer.js`, `sagas.js`, `index.js`
+- Centralized selectors in `/app/core/selectors.js` using reselect
 - Redux-Saga for async operations and WebSocket handling
 - Components in `/app/views/components/` with co-located styles (`.styl`)
 - React Router v6 with nested league routes: `/leagues/:lid/...`
+
+**Frontend Import Aliases** (configured in webpack):
+
+- `@core` → `app/core`
+- `@libs-shared` → `libs-shared`
+- `@constants` → `libs-shared/constants`
+- `@components` → `app/views/components`
 
 ### Backend (`/api/`)
 
 **Express.js with PostgreSQL:**
 
-- Modular routing with domain-specific route files
+- Modular routing: `/api/routes/` with domain-specific files
+- Route index exports all route modules from `/api/routes/index.mjs`
 - JWT authentication with `express-jwt`
-- WebSocket support for real-time auction and live updates
+- WebSocket support via `/api/sockets/` (auction, scoreboard, data_view, external-league-import)
 - Node-cache for performance optimization (10-min TTL)
 - Database access via Knex.js ORM at `req.app.locals.db`
+
+### Shared Libraries
+
+**`libs-shared/`** - Isomorphic code (runs on both client and server):
+
+- Business logic: `roster.mjs`, `calculate-points.mjs`, `calculate-values.mjs`
+- Constants: `constants/` subdirectory with season, roster, transaction constants
+- Data view field definitions: `data-view-fields-index.mjs`
+- League format utilities: `generate-league-format-hash.mjs`, `generate-scoring-format-hash.mjs`
+
+**`libs-server/`** - Server-only code:
+
+- Data source integrations: `espn.mjs`, `sleeper.mjs`, `draftkings/`, `fanduel/`
+- Roster operations: `process-poach.mjs`, `process-release.mjs`, `submit-acquisition.mjs`
+- Database helpers: `batch-insert.mjs`, `get-data-view-results.mjs`
+- External APIs: `sportradar/`, `prizepicks.mjs`, `fantasypros.mjs`
 
 ### Database
 
@@ -65,12 +90,10 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 **Schema Change Workflow:**
 
-Preferred approach for database schema changes:
-
 1. Run SQL ALTER commands directly on the production database
 2. Export the updated schema using `yarn export:schema`
 3. Do NOT commit migration files or SQL commands to the repository
-4. The exported schema file (`db/schema.sql`) becomes the source of truth
+4. The exported schema file (`db/schema.postgres.sql`) becomes the source of truth
 
 ## Key Development Patterns
 
@@ -82,6 +105,12 @@ Preferred approach for database schema changes:
   - `#db` → `./db/index.mjs`
   - `#libs-server` → `./libs-server/index.mjs`
   - `#libs-shared` → `./libs-shared/index.mjs`
+  - `#constants` → `./libs-shared/constants/index.mjs`
+
+### Configuration
+
+- Environment-based config: `config.js` loads `config.{NODE_ENV}.js`
+- Separate configs for development, production, test environments
 
 ### Code Style
 
@@ -91,7 +120,7 @@ Preferred approach for database schema changes:
 
 ### Scripts & Jobs
 
-**Located in `/scripts/` (161 total):**
+**Located in `/scripts/`:**
 
 - Data imports: projections, odds, player data, NFL games/plays
 - League processing: waivers, matchups, trades, roster operations
@@ -110,8 +139,7 @@ Preferred approach for database schema changes:
 
 - Mocha with Chai assertions
 - Test files: `test/*.spec.mjs`
-- Global setup in `test/global.mjs`
-- Database seeding before tests
+- Global setup in `test/global.mjs` drops all tables, loads schema, runs seeds
 - MockDate for time-dependent tests
 - Environment: `NODE_ENV=test`, timezone: `America/New_York`
 
@@ -148,11 +176,12 @@ This preserves transaction history and gives original teams first rights to recl
 
 ### Real-time Features
 
-WebSocket endpoints for:
+WebSocket endpoints in `/api/sockets/`:
 
-- Live auction bidding (`/sockets/auction.mjs`)
-- Scoreboard updates (`/sockets/scoreboard.mjs`)
-- Data view synchronization (`/sockets/data_view.mjs`)
+- `auction.mjs` - Live auction bidding
+- `scoreboard.mjs` - Scoreboard updates
+- `data_view.mjs` - Data view synchronization
+- `external-league-import.mjs` - External league import progress
 
 ## Data Flow Patterns
 
@@ -171,6 +200,7 @@ Dynamic table configurations in `/app/core/data-views/` allow users to create cu
 - Real-time data updates via WebSocket
 - Export capabilities (CSV)
 - Saved view preferences
+- Field definitions in `libs-shared/data-view-fields-index.mjs`
 
 ### Script Execution
 
@@ -187,3 +217,11 @@ if (is_main(import.meta.url)) {
 ```
 
 Use `handle_season_args_for_script()` for year/week parameters.
+
+### Season Constants
+
+Current season info from `libs-shared/constants/season-constants.mjs`:
+
+- `current_season.year`, `current_season.week`
+- `is_offseason`, `is_regular_season`
+- `fantasy_weeks`, `nfl_weeks`
