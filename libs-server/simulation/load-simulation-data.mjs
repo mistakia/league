@@ -6,11 +6,6 @@
 import debug from 'debug'
 
 import db from '#db'
-import {
-  roster_slot_types,
-  starting_lineup_slots
-} from '#libs-shared/constants/roster-constants.mjs'
-import get_league_rosters_from_database from '#libs-server/get-league-rosters-from-database.mjs'
 
 const log = debug('simulation:load-simulation-data')
 
@@ -25,91 +20,6 @@ export {
   load_player_projections,
   load_player_projection_stats
 } from './load-projection-data.mjs'
-
-/**
- * Load rosters for simulation with starter player IDs.
- *
- * @param {Object} params
- * @param {number} params.league_id - League ID
- * @param {number[]} params.team_ids - Array of fantasy team IDs
- * @param {number} params.week - NFL week
- * @param {number} params.year - NFL year
- * @returns {Promise<Object[]>} Array of { team_id, player_ids, baseline_total }
- */
-export async function load_simulation_rosters({
-  league_id,
-  team_ids,
-  week,
-  year
-}) {
-  log(`Loading rosters for league ${league_id}, teams ${team_ids.join(',')}`)
-
-  // First try the existing roster loader for lineup data
-  const rosters = await get_league_rosters_from_database({
-    lid: league_id,
-    year
-  })
-
-  const result = []
-
-  for (const team_id of team_ids) {
-    const roster = rosters[team_id]
-
-    // Check if we have lineup data
-    const lineup = roster?.lineups?.[week]
-    if (lineup && lineup.starter_pids?.length > 0) {
-      result.push({
-        team_id,
-        player_ids: lineup.starter_pids,
-        baseline_total: lineup.baseline_total || 0
-      })
-      continue
-    }
-
-    // Fallback: load active roster players from database
-    // Get players on active roster (not on practice squad or IR)
-    const inactive_slots = [
-      roster_slot_types.PS,
-      roster_slot_types.PSP,
-      roster_slot_types.PSD,
-      roster_slot_types.PSDP,
-      roster_slot_types.RESERVE_SHORT_TERM,
-      roster_slot_types.RESERVE_LONG_TERM,
-      roster_slot_types.COV
-    ]
-    const roster_players = await db('rosters_players')
-      .where({
-        lid: league_id,
-        tid: team_id,
-        week,
-        year
-      })
-      .whereNotIn('slot', inactive_slots)
-      .select('pid', 'slot')
-
-    if (roster_players.length > 0) {
-      // Prioritize starters (non-bench slots)
-      const starters = roster_players.filter((p) =>
-        starting_lineup_slots.includes(p.slot)
-      )
-      const player_ids =
-        starters.length > 0
-          ? starters.map((p) => p.pid)
-          : roster_players.map((p) => p.pid)
-
-      result.push({
-        team_id,
-        player_ids,
-        baseline_total: 0
-      })
-    } else {
-      log(`No roster players found for team ${team_id}, week ${week}`)
-    }
-  }
-
-  log(`Loaded ${result.length} team rosters`)
-  return result
-}
 
 /**
  * Load player info (position, current team) for a set of player IDs.

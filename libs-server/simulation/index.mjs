@@ -44,7 +44,6 @@ export {
   load_player_projections,
   load_player_variance,
   load_player_archetypes,
-  load_simulation_rosters,
   load_player_info,
   load_scoring_format,
   load_actual_player_points,
@@ -75,11 +74,19 @@ export {
   get_position_rank
 } from './calculate-position-ranks.mjs'
 
+// Team roster loaders (unified)
+export {
+  load_team_starters,
+  load_teams_starters,
+  load_all_teams_starters,
+  load_teams_starters_by_week
+} from './load-team-rosters.mjs'
+
 // Data loaders with fallback support
 export {
-  load_rosters_with_fallback,
   load_projections_with_fallback,
-  load_bench_players_with_fallback
+  load_bench_players_with_fallback,
+  load_bench_player_ids
 } from './load-data-with-fallback.mjs'
 
 // Shared simulation helpers
@@ -89,7 +96,6 @@ export {
   build_simulation_players,
   map_players_to_nfl_games,
   build_game_schedule,
-  load_all_league_rosters,
   load_league_matchups,
   calculate_matchup_outcomes,
   calculate_score_stats

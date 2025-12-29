@@ -6,6 +6,7 @@
 import debug from 'debug'
 
 import { simulation } from '#libs-shared'
+import { current_season } from '#constants'
 
 import {
   load_player_variance,
@@ -19,10 +20,8 @@ import { merge_player_projections } from './merge-player-projections.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import { load_nfl_schedule } from './load-nfl-schedule.mjs'
 import { load_position_ranks } from './calculate-position-ranks.mjs'
-import {
-  load_rosters_with_fallback,
-  load_projections_with_fallback
-} from './load-data-with-fallback.mjs'
+import { load_projections_with_fallback } from './load-data-with-fallback.mjs'
+import { load_teams_starters } from './load-team-rosters.mjs'
 import {
   load_simulation_context,
   categorize_players_by_game_status,
@@ -50,7 +49,6 @@ export { simulate_championship } from './simulate-championship.mjs'
  * @param {number} [params.seed] - Optional seed for reproducibility
  * @param {Map} [params.roster_overrides] - Optional Map of team_id -> player_ids[] to override loaded rosters
  * @param {boolean} [params.use_actual_results=true] - Use actual points for completed games
- * @param {number} [params.fallback_week] - Week to use for roster/projections if current week has no data
  * @returns {Promise<Object>} Simulation results
  */
 export async function simulate_matchup({
@@ -61,8 +59,7 @@ export async function simulate_matchup({
   n_simulations = 10000,
   seed,
   roster_overrides,
-  use_actual_results = true,
-  fallback_week
+  use_actual_results = true
 }) {
   // Validate team_ids
   if (!Array.isArray(team_ids) || team_ids.length < 2) {
@@ -81,13 +78,15 @@ export async function simulate_matchup({
     year
   })
 
-  // Load rosters with fallback support
-  const { rosters: loaded_rosters } = await load_rosters_with_fallback({
+  // Load rosters using unified loader
+  // For current/past weeks: uses actual roster slots
+  // For future weeks: computes optimal lineup from current roster pool
+  const loaded_rosters = await load_teams_starters({
     league_id,
     team_ids,
     week,
     year,
-    fallback_week
+    current_week: current_season.week
   })
 
   if (loaded_rosters.length === 0) {
@@ -157,7 +156,9 @@ export async function simulate_matchup({
       week,
       year,
       scoring_format_hash,
-      fallback_week
+      // For future weeks, fall back to current week's projections if unavailable
+      fallback_week:
+        week > current_season.week ? current_season.week : undefined
     }),
     load_market_projections({
       player_ids: pending_player_ids,

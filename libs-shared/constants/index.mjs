@@ -78,6 +78,8 @@ export {
   practice_squad_unprotected_slots,
   practice_squad_signed_slots,
   practice_squad_drafted_slots,
+  reserve_slots,
+  reserve_short_term_slots,
   roster_slot_display_names,
   player_availability_statuses,
   slot_to_name,

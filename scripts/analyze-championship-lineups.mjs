@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main, simulation } from '#libs-server'
-import { active_roster_slots, current_season } from '#constants'
+import { current_season } from '#constants'
 
 const argv = yargs(hideBin(process.argv))
   .option('lid', {
@@ -44,6 +44,18 @@ const argv = yargs(hideBin(process.argv))
   })
   .option('json', {
     description: 'Output raw JSON',
+    type: 'boolean',
+    default: false
+  })
+  .option('include_practice_squad', {
+    alias: 'p',
+    description: 'Include practice squad players as swap candidates',
+    type: 'boolean',
+    default: false
+  })
+  .option('include_reserve', {
+    alias: 'i',
+    description: 'Include short-term reserve (IR) players as swap candidates',
     type: 'boolean',
     default: false
   })
@@ -153,11 +165,12 @@ const load_week_actual_scores = async ({
   const week_actual_scores = new Map() // Map<week, Map<team_id, actual_points>>
 
   for (const week of weeks) {
-    const rosters = await simulation.load_simulation_rosters({
+    const rosters = await simulation.load_teams_starters({
       league_id,
       team_ids,
       week,
-      year
+      year,
+      current_week: current_season.week
     })
 
     // Load actual points for all starters
@@ -202,46 +215,6 @@ const load_week_actual_scores = async ({
   return week_actual_scores
 }
 
-/**
- * Load bench player IDs for a team in a given week
- */
-const load_bench_player_ids = async ({
-  league_id,
-  team_id,
-  week,
-  year,
-  starter_pids
-}) => {
-  const bench_result = await db('rosters_players')
-    .leftJoin('scoring_format_player_projection_points', function () {
-      this.on(
-        'rosters_players.pid',
-        'scoring_format_player_projection_points.pid'
-      )
-        .andOn(
-          db.raw('scoring_format_player_projection_points.week = ?', [
-            String(week)
-          ])
-        )
-        .andOn(
-          db.raw('scoring_format_player_projection_points.year = ?', [year])
-        )
-    })
-    .where({
-      'rosters_players.lid': league_id,
-      'rosters_players.tid': team_id,
-      'rosters_players.week': week,
-      'rosters_players.year': year
-    })
-    .whereNotIn('rosters_players.pid', starter_pids)
-    .whereIn('rosters_players.slot', active_roster_slots)
-    .whereNotNull('scoring_format_player_projection_points.total')
-    .where('scoring_format_player_projection_points.total', '>', 0)
-    .select('rosters_players.pid')
-
-  return bench_result.map((r) => r.pid)
-}
-
 // ============================================================================
 // Output Formatting Functions
 // ============================================================================
@@ -284,8 +257,6 @@ const format_championship_odds = ({
   for (const team_result of sorted_teams) {
     const team_name =
       team_name_map.get(team_result.team_id) || `Team ${team_result.team_id}`
-    const is_my_team = team_result.team_id === team_id
-    const marker = is_my_team ? ' <-- YOUR TEAM' : ''
     const odds_pct = format_percentage(team_result.championship_odds)
 
     // Build per-week breakdown with optimal indicator
@@ -297,7 +268,7 @@ const format_championship_odds = ({
     })
 
     console.log(
-      `  ${team_name}: ${odds_pct} (${team_result.total_expected_points.toFixed(1)} pts expected)${marker}`
+      `  ${team_name}: ${odds_pct} (${team_result.total_expected_points.toFixed(1)} pts expected)`
     )
     console.log(`    ${week_parts.join(' | ')}`)
 
@@ -586,9 +557,10 @@ const analyze_lineup_decisions = async ({
   opponent_team_ids,
   weeks,
   year,
-  n_simulations
+  n_simulations,
+  include_practice_squad,
+  include_reserve
 }) => {
-  const base_week = weeks[0]
   const analyses = []
 
   for (const week of weeks) {
@@ -599,7 +571,8 @@ const analyze_lineup_decisions = async ({
       week,
       year,
       n_simulations,
-      fallback_week: week !== base_week ? base_week : undefined
+      include_practice_squad,
+      include_reserve
     })
     analyses.push({ week, analysis })
   }
@@ -615,18 +588,25 @@ const analyze_correlation_insights = async ({
   team_id,
   team_ids,
   weeks,
-  year
+  year,
+  include_practice_squad = false,
+  include_reserve = false
 }) => {
   const insights_by_week = []
 
   for (const week of weeks) {
     // Load rosters to get player IDs
-    const rosters = await simulation.load_simulation_rosters({
+    const rosters = await simulation.load_teams_starters({
       league_id,
       team_ids,
       week,
-      year
+      year,
+      current_week: current_season.week
     })
+
+    // Determine which week the roster data comes from
+    // For future weeks, rosters are computed from current week's roster pool
+    const roster_week = Math.min(week, current_season.week)
 
     const my_roster = rosters.find((r) => r.team_id === team_id)
     const opponent_player_ids = rosters
@@ -650,13 +630,17 @@ const analyze_correlation_insights = async ({
       year
     })
 
-    // Get bench correlation opportunities
-    const bench_pids = await load_bench_player_ids({
+    // Get bench correlation opportunities (include PS/IR if flags set)
+    // Use roster_week to match how starters are loaded for future weeks
+    const bench_pids = await simulation.load_bench_player_ids({
       league_id,
       team_id,
       week,
       year,
-      starter_pids: my_roster.player_ids
+      starter_pids: my_roster.player_ids,
+      roster_week,
+      include_practice_squad,
+      include_reserve
     })
 
     let bench_opportunities = []
@@ -738,7 +722,9 @@ const generate_formatted_output = async ({
   week_actual_scores,
   optimal_weeks,
   optimal_lineups_by_week,
-  scoring_format_hash
+  scoring_format_hash,
+  include_practice_squad,
+  include_reserve
 }) => {
   const player_name_cache = create_player_name_cache()
 
@@ -771,7 +757,9 @@ const generate_formatted_output = async ({
       opponent_team_ids,
       weeks: current_weeks,
       year,
-      n_simulations
+      n_simulations,
+      include_practice_squad,
+      include_reserve
     })
 
     for (const { week, analysis } of lineup_analyses) {
@@ -821,7 +809,9 @@ const generate_formatted_output = async ({
     team_id,
     team_ids: all_team_ids,
     weeks,
-    year
+    year,
+    include_practice_squad,
+    include_reserve
   })
 
   for (const insight of correlation_insights) {
@@ -860,6 +850,8 @@ const main = async () => {
     const weeks = argv.weeks.split(',').map((w) => parseInt(w.trim(), 10))
     const year = argv.year || new Date().getFullYear()
     const n_simulations = argv.n_simulations
+    const include_practice_squad = argv.include_practice_squad
+    const include_reserve = argv.include_reserve
     const all_team_ids = [team_id, ...opponent_team_ids]
 
     log(`Analyzing championship lineups:`)
@@ -868,6 +860,8 @@ const main = async () => {
     log(`  Opponents: ${opponent_team_ids.join(', ')}`)
     log(`  Weeks: ${weeks.join(', ')}`)
     log(`  Year: ${year}`)
+    log(`  Include practice squad: ${include_practice_squad}`)
+    log(`  Include reserve (IR): ${include_reserve}`)
 
     // Load data
     const team_name_map = await load_team_names({ team_ids: all_team_ids })
@@ -920,7 +914,9 @@ const main = async () => {
         week_actual_scores,
         optimal_weeks,
         optimal_lineups_by_week,
-        scoring_format_hash
+        scoring_format_hash,
+        include_practice_squad,
+        include_reserve
       })
     }
   } catch (err) {

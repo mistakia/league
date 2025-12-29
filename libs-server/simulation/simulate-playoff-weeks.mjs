@@ -6,13 +6,14 @@
 import debug from 'debug'
 
 import { simulation } from '#libs-shared'
+import { current_season } from '#constants'
 
 import {
   load_simulation_context,
-  load_all_league_rosters,
   build_simulation_players,
   categorize_players_by_game_status
 } from './simulation-helpers.mjs'
+import { load_teams_starters_by_week } from './load-team-rosters.mjs'
 import {
   load_player_projections,
   load_player_projection_stats,
@@ -69,26 +70,23 @@ export async function simulate_playoff_weeks_correlated({
   // Load schedules for all weeks
   const schedules = await load_nfl_schedules_for_weeks({ year, weeks })
 
-  // Load rosters for all teams across all weeks
-  const all_rosters_by_week = new Map()
+  // Load rosters for all teams across all weeks using unified loader
+  // For current/past weeks: uses actual roster slots
+  // For future weeks: computes optimal lineup from current roster pool
+  const all_rosters_by_week = await load_teams_starters_by_week({
+    league_id,
+    team_ids,
+    weeks,
+    year,
+    current_week: current_season.week
+  })
+
+  // Collect all player IDs across all weeks
   const all_player_ids_set = new Set()
-
-  for (const week of weeks) {
-    const rosters = await load_all_league_rosters({ league_id, week, year })
-
-    // Filter to only the teams we're simulating
-    const filtered_rosters = []
-    for (const [tid, roster_data] of rosters) {
-      if (team_ids.includes(tid)) {
-        filtered_rosters.push({
-          team_id: tid,
-          player_ids: roster_data.player_ids
-        })
-        roster_data.player_ids.forEach((pid) => all_player_ids_set.add(pid))
-      }
+  for (const rosters of all_rosters_by_week.values()) {
+    for (const roster of rosters) {
+      roster.player_ids.forEach((pid) => all_player_ids_set.add(pid))
     }
-
-    all_rosters_by_week.set(week, filtered_rosters)
   }
 
   const all_player_ids = [...all_player_ids_set]

@@ -6,6 +6,7 @@
 import debug from 'debug'
 
 import db from '#db'
+import { current_season } from '#constants'
 
 import {
   load_player_variance,
@@ -21,11 +22,11 @@ import { load_correlations_for_players } from './load-correlations.mjs'
 import { load_nfl_schedule } from './load-nfl-schedule.mjs'
 import { load_position_ranks } from './calculate-position-ranks.mjs'
 import { simulate_nfl_game_with_raw_scores } from './simulate-nfl-game.mjs'
+import { load_all_teams_starters } from './load-team-rosters.mjs'
 import {
   load_simulation_context,
   map_players_to_nfl_games,
   build_game_schedule,
-  load_all_league_rosters,
   load_league_matchups,
   calculate_matchup_outcomes,
   calculate_score_stats
@@ -72,9 +73,16 @@ export async function simulate_league_week({
   const league_settings = await load_scoring_format({ scoring_format_hash })
 
   // Load matchups and rosters in parallel
+  // Rosters use unified loader: actual starters for current/past weeks,
+  // optimal lineup for future weeks
   const [matchups, rosters, schedule] = await Promise.all([
     load_league_matchups({ league_id, week, year }),
-    load_all_league_rosters({ league_id, week, year }),
+    load_all_teams_starters({
+      league_id,
+      week,
+      year,
+      current_week: current_season.week
+    }),
     load_nfl_schedule({ year, week })
   ])
 

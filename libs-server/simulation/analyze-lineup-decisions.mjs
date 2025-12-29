@@ -10,16 +10,15 @@ import { getLeague } from '#libs-server'
 import {
   starting_lineup_slots,
   roster_slot_display_names,
-  is_position_eligible_for_slot
+  is_position_eligible_for_slot,
+  current_season
 } from '#constants'
 
 import { simulate_matchup } from './simulate-matchup.mjs'
 import { load_player_info } from './load-simulation-data.mjs'
 import { load_nfl_schedule } from './load-nfl-schedule.mjs'
-import {
-  load_rosters_with_fallback,
-  load_bench_players_with_fallback
-} from './load-data-with-fallback.mjs'
+import { load_teams_starters } from './load-team-rosters.mjs'
+import { load_bench_players_with_fallback } from './load-data-with-fallback.mjs'
 
 const log = debug('simulation:analyze-lineup-decisions')
 
@@ -35,7 +34,8 @@ const log = debug('simulation:analyze-lineup-decisions')
  * @param {Object[]} [params.alternatives] - Optional specific swaps to evaluate
  *   Each: { starter_pid, bench_pid, slot }
  * @param {number} [params.n_simulations=5000] - Simulations per lineup evaluation
- * @param {number} [params.fallback_week] - Week to use for roster if current week has no data
+ * @param {boolean} [params.include_practice_squad=false] - Include practice squad players as swap candidates
+ * @param {boolean} [params.include_reserve=false] - Include short-term reserve (IR) players as swap candidates
  * @returns {Promise<Object>} Lineup analysis results
  */
 export async function analyze_lineup_decisions({
@@ -46,7 +46,8 @@ export async function analyze_lineup_decisions({
   year,
   alternatives = [],
   n_simulations = 5000,
-  fallback_week
+  include_practice_squad = false,
+  include_reserve = false
 }) {
   log(`Analyzing lineup decisions for team ${team_id}, week ${week}`)
 
@@ -56,23 +57,27 @@ export async function analyze_lineup_decisions({
     throw new Error(`League not found: ${league_id}`)
   }
 
-  // Load rosters with fallback support
+  // Load rosters using unified loader
+  // For current/past weeks: uses actual roster slots
+  // For future weeks: computes optimal lineup from current roster pool
   const all_team_ids = [team_id, ...opponent_team_ids]
-  const { rosters, used_fallback } = await load_rosters_with_fallback({
+  const current_week = current_season.week
+  const rosters = await load_teams_starters({
     league_id,
     team_ids: all_team_ids,
     week,
     year,
-    fallback_week
+    current_week
   })
+
+  // Determine which week the roster data actually comes from
+  // For future weeks, rosters are computed from current week's roster pool
+  const roster_week = Math.min(week, current_week)
 
   const my_roster = rosters.find((r) => r.team_id === team_id)
   if (!my_roster) {
     throw new Error(`Roster not found for team ${team_id}`)
   }
-
-  // Track which week was used for roster data
-  const roster_week_used = used_fallback ? fallback_week : week
 
   // Load schedule to identify locked players (games already completed)
   const schedule = await load_nfl_schedule({ year, week })
@@ -83,8 +88,7 @@ export async function analyze_lineup_decisions({
     team_ids: all_team_ids,
     week,
     year,
-    n_simulations,
-    fallback_week
+    n_simulations
   })
 
   const base_win_probability = base_result.teams.find(
@@ -98,6 +102,7 @@ export async function analyze_lineup_decisions({
   const scoring_format_hash = season?.scoring_format_hash
 
   // Load bench players for potential swaps (only those with valid projections)
+  // Use roster_week as fallback to match how starters are loaded for future weeks
   const bench_players = await load_bench_players_with_fallback({
     league_id,
     team_id,
@@ -105,7 +110,9 @@ export async function analyze_lineup_decisions({
     year,
     starter_pids: my_roster.player_ids,
     scoring_format_hash,
-    fallback_week
+    fallback_week: roster_week,
+    include_practice_squad,
+    include_reserve
   })
 
   // Load player info for all players
@@ -139,12 +146,12 @@ export async function analyze_lineup_decisions({
   )
 
   // Load starter slot info from rosters_players to know which slot each starter is in
-  // Use roster_week_used since we may be using fallback roster data
+  // Use roster_week since for future weeks, rosters are computed from current week's data
   const starter_slots = await db('rosters_players')
     .where({
       lid: league_id,
       tid: team_id,
-      week: roster_week_used,
+      week: roster_week,
       year
     })
     .whereIn('pid', my_roster.player_ids)
@@ -200,8 +207,7 @@ export async function analyze_lineup_decisions({
       week,
       year,
       n_simulations,
-      roster_overrides,
-      fallback_week
+      roster_overrides
     })
 
     const swap_win_probability = swap_result.teams.find(

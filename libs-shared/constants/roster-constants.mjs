@@ -44,6 +44,14 @@ export const practice_squad_slots = [
   roster_slot_types.PSD,
   roster_slot_types.PSDP
 ]
+
+export const reserve_slots = [
+  roster_slot_types.RESERVE_SHORT_TERM,
+  roster_slot_types.RESERVE_LONG_TERM,
+  roster_slot_types.COV
+]
+
+export const reserve_short_term_slots = [roster_slot_types.RESERVE_SHORT_TERM]
 export const practice_squad_protected_slots = [
   roster_slot_types.PSP,
   roster_slot_types.PSDP

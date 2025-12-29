@@ -6,6 +6,7 @@
 import debug from 'debug'
 
 import { simulation } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   find_winners,
   distribute_win_credit
@@ -24,10 +25,8 @@ import { merge_player_projections } from './merge-player-projections.mjs'
 import { load_correlations_for_players } from './load-correlations.mjs'
 import { load_nfl_schedules_for_weeks } from './load-nfl-schedule.mjs'
 import { load_position_ranks } from './calculate-position-ranks.mjs'
-import {
-  load_rosters_with_fallback,
-  load_projections_with_fallback
-} from './load-data-with-fallback.mjs'
+import { load_projections_with_fallback } from './load-data-with-fallback.mjs'
+import { load_teams_starters_by_week } from './load-team-rosters.mjs'
 import {
   load_simulation_context,
   categorize_players_by_game_status,
@@ -120,23 +119,20 @@ export async function simulate_championship({
     )
   }
 
-  // Use the first week as base for fallback
-  const base_week = sorted_weeks[0]
+  // Load rosters for all weeks using unified loader
+  // For current/past weeks: uses actual roster slots
+  // For future weeks: computes optimal lineup from current roster pool
+  const all_rosters_by_week = await load_teams_starters_by_week({
+    league_id,
+    team_ids,
+    weeks: sorted_weeks,
+    year,
+    current_week: current_season.week
+  })
 
-  // Collect all players across all weeks using consolidated fallback loading
-  const all_rosters_by_week = new Map()
+  // Collect all player IDs across all weeks
   const all_player_ids_set = new Set()
-
-  for (const week of sorted_weeks) {
-    const { rosters } = await load_rosters_with_fallback({
-      league_id,
-      team_ids,
-      week,
-      year,
-      fallback_week: week !== base_week ? base_week : undefined
-    })
-
-    all_rosters_by_week.set(week, rosters)
+  for (const rosters of all_rosters_by_week.values()) {
     rosters.forEach((r) =>
       r.player_ids.forEach((pid) => all_player_ids_set.add(pid))
     )
@@ -317,7 +313,8 @@ export async function simulate_championship({
         week,
         year,
         scoring_format_hash,
-        fallback_week: week !== base_week ? base_week : undefined
+        // For weeks after the first, fall back to first week's projections if unavailable
+        fallback_week: week !== sorted_weeks[0] ? sorted_weeks[0] : undefined
       }),
       load_market_projections({
         player_ids: pending_player_ids,

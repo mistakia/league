@@ -7,10 +7,6 @@ import debug from 'debug'
 
 import db from '#db'
 import { getLeague } from '#libs-server'
-import {
-  roster_slot_types,
-  starting_lineup_slots
-} from '#libs-shared/constants/roster-constants.mjs'
 
 const log = debug('simulation:helpers')
 
@@ -195,105 +191,6 @@ export function build_game_schedule(players, schedule) {
   }
 
   return game_schedule
-}
-
-/**
- * Load all fantasy team rosters for a league in a given week.
- *
- * @param {Object} params
- * @param {number} params.league_id - League ID
- * @param {number} params.week - NFL week
- * @param {number} params.year - NFL year
- * @returns {Promise<Map>} Map of team_id -> { player_ids: string[], baseline_total: number }
- */
-export async function load_all_league_rosters({ league_id, week, year }) {
-  log(`Loading all rosters for league ${league_id}, week ${week}`)
-
-  // Load lineup totals
-  const lineups = await db('league_team_lineups')
-    .where({ lid: league_id, week, year })
-    .select('tid', 'baseline_total')
-
-  // Load starter pids from league_team_lineup_starters
-  const starters = await db('league_team_lineup_starters')
-    .where({ lid: league_id, week, year })
-    .select('tid', 'pid')
-
-  // Group starters by team
-  const starters_by_team = new Map()
-  for (const row of starters) {
-    if (!starters_by_team.has(row.tid)) {
-      starters_by_team.set(row.tid, [])
-    }
-    starters_by_team.get(row.tid).push(row.pid)
-  }
-
-  // Combine lineups with starters
-  const rosters = new Map()
-  const teams_needing_fallback = []
-
-  for (const row of lineups) {
-    const player_ids = starters_by_team.get(row.tid) || []
-    if (player_ids.length > 0) {
-      rosters.set(row.tid, {
-        player_ids,
-        baseline_total: parseFloat(row.baseline_total) || 0
-      })
-    } else {
-      teams_needing_fallback.push(row.tid)
-    }
-  }
-
-  // Fallback: load from rosters_players for teams without lineup starters
-  if (teams_needing_fallback.length > 0) {
-    log(
-      `Loading fallback rosters for ${teams_needing_fallback.length} teams from rosters_players`
-    )
-
-    const inactive_slots = [
-      roster_slot_types.PS,
-      roster_slot_types.PSP,
-      roster_slot_types.PSD,
-      roster_slot_types.PSDP,
-      roster_slot_types.RESERVE_SHORT_TERM,
-      roster_slot_types.RESERVE_LONG_TERM,
-      roster_slot_types.COV
-    ]
-
-    const roster_players = await db('rosters_players')
-      .where({ lid: league_id, week, year })
-      .whereIn('tid', teams_needing_fallback)
-      .whereNotIn('slot', inactive_slots)
-      .select('tid', 'pid', 'slot')
-
-    // Group by team and prioritize starters
-    const players_by_team = new Map()
-    for (const row of roster_players) {
-      if (!players_by_team.has(row.tid)) {
-        players_by_team.set(row.tid, [])
-      }
-      players_by_team.get(row.tid).push(row)
-    }
-
-    for (const tid of teams_needing_fallback) {
-      const team_players = players_by_team.get(tid) || []
-      const starters = team_players.filter((p) =>
-        starting_lineup_slots.includes(p.slot)
-      )
-      const player_ids =
-        starters.length > 0
-          ? starters.map((p) => p.pid)
-          : team_players.map((p) => p.pid)
-
-      rosters.set(tid, {
-        player_ids,
-        baseline_total: 0
-      })
-    }
-  }
-
-  log(`Loaded rosters for ${rosters.size} teams`)
-  return rosters
 }
 
 /**
