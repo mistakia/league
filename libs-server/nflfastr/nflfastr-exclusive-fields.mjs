@@ -7,7 +7,7 @@
  */
 export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   // Play Characteristics
-  'incomp',
+  // Note: 'incomp' is shared with Sportradar - both pipelines report physical outcome
   'fg_att',
   'oob',
   'drive_yds_penalized',

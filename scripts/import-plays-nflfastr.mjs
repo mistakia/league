@@ -297,21 +297,32 @@ const format_game_clock = (play) => ({
   sec_rem_gm: format_number(play.game_seconds_remaining)
 })
 
-const format_play_events = (play) => ({
-  fum: format_boolean(play.fumble),
-  incomp: format_boolean(play.incomplete_pass),
-  touchback: format_boolean(play.touchback),
-  safety: format_boolean(play.safety),
-  special: format_boolean(play.special),
-  oob: format_boolean(play.out_of_bounds),
-  tfl: format_boolean(play.tackled_for_loss),
-  rush: format_boolean(play.rush_attempt),
-  pass: format_boolean(play.pass_attempt),
-  solo_tk: format_boolean(play.solo_tackle),
-  assist_tk: format_boolean(play.assist_tackle),
-  pen_team: play.penalty_team ? fixTeam(play.penalty_team) : null,
-  pen_yds: format_number(play.penalty_yards)
-})
+const format_play_events = (play) => {
+  // For incomp, use physical outcome: true if pass was attempted but not completed
+  // This handles NOPL plays where nflfastr sets incomplete_pass=0 but the pass
+  // was physically incomplete (e.g., DPI penalties on incomplete passes)
+  const pass_attempted = format_boolean(play.pass_attempt)
+  const pass_completed = format_boolean(play.complete_pass)
+  const incomp =
+    format_boolean(play.incomplete_pass) ||
+    (play.play_type === 'no_play' && pass_attempted && !pass_completed)
+
+  return {
+    fum: format_boolean(play.fumble),
+    incomp: incomp || null,
+    touchback: format_boolean(play.touchback),
+    safety: format_boolean(play.safety),
+    special: format_boolean(play.special),
+    oob: format_boolean(play.out_of_bounds),
+    tfl: format_boolean(play.tackled_for_loss),
+    rush: format_boolean(play.rush_attempt),
+    pass: pass_attempted,
+    solo_tk: format_boolean(play.solo_tackle),
+    assist_tk: format_boolean(play.assist_tackle),
+    pen_team: play.penalty_team ? fixTeam(play.penalty_team) : null,
+    pen_yds: format_number(play.penalty_yards)
+  }
+}
 
 const format_scoring_yards = (play) => ({
   pass_td: format_boolean(play.pass_touchdown),
