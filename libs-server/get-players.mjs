@@ -280,7 +280,9 @@ export default async function ({
       'league_format_player_seasonlogs.points_added',
       'league_format_player_seasonlogs.points_added_per_game',
       'league_format_player_seasonlogs.points_added_rnk',
-      'league_format_player_seasonlogs.points_added_pos_rnk'
+      'league_format_player_seasonlogs.points_added_pos_rnk',
+      'league_format_player_seasonlogs.points_added_per_game_rnk',
+      'league_format_player_seasonlogs.points_added_per_game_pos_rnk'
     ]
     query
       .leftJoin('league_format_player_seasonlogs', function () {
@@ -301,7 +303,9 @@ export default async function ({
       'scoring_format_player_seasonlogs.points',
       'scoring_format_player_seasonlogs.points_per_game',
       'scoring_format_player_seasonlogs.points_rnk',
-      'scoring_format_player_seasonlogs.points_pos_rnk'
+      'scoring_format_player_seasonlogs.points_pos_rnk',
+      'scoring_format_player_seasonlogs.points_per_game_rnk',
+      'scoring_format_player_seasonlogs.points_per_game_pos_rnk'
     ]
 
     query
