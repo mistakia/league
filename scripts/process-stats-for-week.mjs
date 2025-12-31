@@ -34,14 +34,21 @@ const initialize_cli = () => {
  *
  * @param {Object} params
  * @param {number} params.week - Week number (defaults to target week)
+ * @param {boolean} [params.skip_aggregates=false] - Skip aggregate processing (seasonlogs/careerlogs).
+ *   Use when processing multiple weeks - run aggregates once at the end instead.
  * @returns {Promise<void>}
  */
-const process_stats_for_week = async ({ week } = {}) => {
+const process_stats_for_week = async ({
+  week,
+  skip_aggregates = false
+} = {}) => {
   if (!week) {
     week = get_target_week()
   }
 
-  log(`updating stats for week ${week}`)
+  log(
+    `updating stats for week ${week}${skip_aggregates ? ' (skipping aggregates)' : ''}`
+  )
 
   // Step 1: Process plays (enrich with player data)
   await process_plays({ week })
@@ -52,11 +59,13 @@ const process_stats_for_week = async ({ week } = {}) => {
   // Step 3: Generate format-specific gamelogs (scoring + league)
   await process_all_format_gamelogs({ week })
 
-  // Step 4: Generate format-specific aggregates (seasonlogs + careerlogs)
-  await process_all_format_aggregates()
+  if (!skip_aggregates) {
+    // Step 4: Generate format-specific aggregates (seasonlogs + careerlogs)
+    await process_all_format_aggregates()
 
-  // Step 5: Generate global aggregates (team seasonlogs, player seasonlogs, career counts)
-  await process_global_aggregates()
+    // Step 5: Generate global aggregates (team seasonlogs, player seasonlogs, career counts)
+    await process_global_aggregates()
+  }
 
   // Step 6: Generate player snaps
   await generate_player_snaps_for_week({ week })

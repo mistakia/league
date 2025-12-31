@@ -111,6 +111,7 @@ export {
   proxy_manager
 } from './proxy-manager.mjs'
 export { default as handle_season_args_for_script } from './handle-season-args-for-script.mjs'
+export { default as get_season_playoff_weeks } from './get-season-playoff-weeks.mjs'
 export {
   load_data_view_test_queries,
   load_data_view_test_queries_sync

@@ -14,9 +14,27 @@ const initialize_cli = () => {
 const log = debug('generate-league-season-teams')
 debug.enable('generate-league-season-teams')
 
+/**
+ * Generate team records for a new season with draft order based on previous year standings
+ *
+ * Creates teams for `year` using:
+ * - Team roster from previous year (year - 1)
+ * - League settings (cap, faab) from league_settings_year or previous year
+ * - Draft order determined by previous year's final standings
+ *
+ * @param {Object} params
+ * @param {number} params.lid - League ID
+ * @param {number} [params.year] - Target year to create teams for (defaults to current season)
+ * @param {number} [params.league_settings_year] - Year to read league settings from (cap, faab).
+ *   When called from finalize-season, this is the championship year (not next year).
+ *   Defaults to year - 1 if not provided.
+ * @param {boolean} [params.overwrite] - Overwrite existing teams if present (default: false)
+ * @returns {Promise<void>}
+ */
 const generate_league_season_teams = async ({
   lid,
   year = current_season.year,
+  league_settings_year,
   overwrite = false
 }) => {
   const teams_exist = await db('teams').where({ lid, year }).first()
@@ -25,9 +43,10 @@ const generate_league_season_teams = async ({
     return
   }
 
-  const league = await getLeague({ lid, year })
-
   const previous_year = year - 1
+  // Use explicit league_settings_year if provided, otherwise fall back to previous_year
+  const settings_year = league_settings_year ?? previous_year
+  const league = await getLeague({ lid, year: settings_year })
   const teams = await db('teams').where({ lid, year: previous_year })
   const league_team_seasonlogs = await db('league_team_seasonlogs').where({
     lid,

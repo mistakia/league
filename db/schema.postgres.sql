@@ -17832,7 +17832,8 @@ CREATE TABLE public.nfl_team_seasonlogs (
     recv_yards_15_plus_rate numeric(5,4) DEFAULT NULL::numeric,
     rec_first_down numeric(5,2) DEFAULT 0.00,
     rush_first_down numeric(5,2) DEFAULT 0.00,
-    ry_excluding_kneels numeric(6,2) DEFAULT 0.00
+    ry_excluding_kneels numeric(6,2) DEFAULT 0.00,
+    fum_ret_td numeric(4,2) DEFAULT 0.00
 );
 
 
@@ -22630,12 +22631,12 @@ CREATE TABLE public.player_receiving_gamelogs (
     recv_epa_per_route numeric(5,2),
     recv_drops smallint,
     recv_drop_rate numeric(5,2),
-    recv_yards_after_catch smallint,
+    recv_yards_after_catch numeric(6,2),
     expected_recv_yards_after_catch numeric(5,2),
     recv_yards_after_catch_over_expected numeric(5,2),
     recv_yards_after_catch_per_reception numeric(5,2),
     recv_avg_target_separation numeric(5,2),
-    recv_air_yards numeric(5,2),
+    recv_air_yards numeric(6,2),
     recv_air_yards_per_target numeric(5,2),
     target_rate numeric(5,2),
     avg_route_depth numeric(5,2),
@@ -24175,7 +24176,8 @@ CREATE TABLE public.seasons (
     restricted_free_agency_announcement_hour smallint DEFAULT 24 NOT NULL,
     restricted_free_agency_processing_hour smallint DEFAULT 0 NOT NULL,
     rookie_draft_completed_at bigint,
-    free_agency_auction_slow_mode boolean DEFAULT false NOT NULL
+    free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
+    season_finalized_at bigint
 );
 
 

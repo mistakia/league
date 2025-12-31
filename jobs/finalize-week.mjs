@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season, get_target_week } from '#libs-shared'
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, get_season_playoff_weeks } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   run_step,
@@ -16,6 +16,7 @@ import process_playoffs from '#scripts/process-playoffs.mjs'
 import calculate_league_careerlogs from '#scripts/calculate-league-careerlogs.mjs'
 import { process_market_results } from '#scripts/process-market-results.mjs'
 import { update_market_settlement_status } from '#scripts/update-market-settlement-status.mjs'
+import finalize_season from '#scripts/finalize-season.mjs'
 
 const log = debug('finalize-week')
 
@@ -30,15 +31,19 @@ const clear_live_plays = async () => {
 /**
  * Finalize a completed NFL week
  *
- * Orchestrates end-of-week processing:
- * 1. Final play import with force update
- * 2. Weekly stats update (gamelogs, seasonlogs, careerlogs)
- * 3. League matchup processing (all hosted leagues)
- * 4. Playoff processing (all hosted leagues)
- * 5. League careerlog calculation (all hosted leagues)
- * 6. Market results processing
- * 7. Market settlement status update
- * 8. Clear temporary live play data
+ * Scheduled via cron (crontab-worker-1.cron) to run Tuesday/Wednesday after each NFL week.
+ * Uses get_target_week() to determine which week to finalize.
+ *
+ * Pipeline:
+ * 1. Final play import (force update for stat corrections, skip_finalization=true)
+ * 2. Process stats for week (gamelogs, seasonlogs, careerlogs)
+ * 3. Process matchups for all hosted leagues
+ * 4. Process playoffs for all hosted leagues
+ * 5. Calculate league careerlogs for all hosted leagues
+ * 6. Process market results (betting settlement)
+ * 7. Update market settlement status
+ * 8. Clear temporary live play tables
+ * 9. Trigger season finalization (if week after final championship week)
  */
 const finalize_week = async () => {
   const week = get_target_week()
@@ -134,6 +139,25 @@ const finalize_week = async () => {
     logger: log,
     fn: () => clear_live_plays()
   })
+
+  // Step 9: Trigger season finalization when championship has concluded
+  // This runs when finalize-week processes the week AFTER the final championship week.
+  // Example: If championship is week 17, this triggers when week 18 is finalized.
+  // skip_play_import=true because playoff week plays were already imported in step 1.
+  for (const lid of league_ids) {
+    const playoff_config = await get_season_playoff_weeks({ lid, year })
+    if (playoff_config.final_week && week === playoff_config.final_week + 1) {
+      log(
+        `Week ${week} follows final championship week ${playoff_config.final_week} for league ${lid}, triggering season finalization`
+      )
+      await run_step({
+        name: `finalize_season_${lid}`,
+        results,
+        logger: log,
+        fn: () => finalize_season({ lid, year, skip_play_import: true })
+      })
+    }
+  }
 
   const total_duration = Date.now() - start_time
   const success = results.steps_failed.length === 0
