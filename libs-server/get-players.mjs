@@ -331,6 +331,9 @@ export default async function ({
 
   const players_by_pid = {}
   for (const player_row of player_rows) {
+    // Preserve seasonlog points before overwriting with projection points object
+    // The SQL query returns 'points' from scoring_format_player_seasonlogs which would be overwritten
+    player_row.seasonlog_points = player_row.points
     player_row.value = null
     player_row.points = {}
     player_row.pts_added = {}
