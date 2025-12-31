@@ -1,7 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { current_season, get_target_week } from '#libs-shared'
+import { current_season } from '#constants'
+import { get_target_week } from '#libs-shared'
 import { is_main, report_job, get_season_playoff_weeks } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {

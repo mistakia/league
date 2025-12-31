@@ -62,6 +62,93 @@ const should_overwrite_field = (
 }
 
 /**
+ * Compute changes for a play without executing database operations.
+ * Returns collections for batch processing.
+ *
+ * @param {Object} params
+ * @param {Object} params.play_row - Current play state from database
+ * @param {Object} params.update - Fields to update
+ * @param {boolean} params.ignore_conflicts - Overwrite all existing values
+ * @param {Array<string>} params.overwrite_fields - Specific fields to overwrite
+ * @returns {Object} { changelog_entries, field_updates, changes_count }
+ */
+export const compute_play_changes = ({
+  play_row,
+  update,
+  ignore_conflicts = false,
+  overwrite_fields = []
+}) => {
+  const changelog_entries = []
+  const field_updates = {}
+  let changes_count = 0
+
+  if (!play_row) {
+    return { changelog_entries, field_updates, changes_count }
+  }
+
+  // Normalize game clock fields in both objects before comparison
+  const normalized_play_row = normalize_clock_fields(play_row)
+  const normalized_update = normalize_clock_fields(update)
+
+  const differences = diff(normalized_play_row, normalized_update)
+
+  if (!differences) {
+    return { changelog_entries, field_updates, changes_count }
+  }
+
+  const edits = differences.filter((d) => d.kind === 'E')
+  if (!edits.length) {
+    return { changelog_entries, field_updates, changes_count }
+  }
+
+  const timestamp = Math.round(Date.now() / 1000)
+
+  for (const edit of edits) {
+    const prop = edit.path[0]
+
+    // Skip null, undefined, or empty string values
+    if (edit.rhs === null || edit.rhs === undefined || edit.rhs === '') {
+      continue
+    }
+
+    // Skip protected properties
+    if (excluded_props.includes(prop)) {
+      continue
+    }
+
+    // Handle conflicts - when there's already a value in the database
+    if (edit.lhs) {
+      const can_overwrite = should_overwrite_field(
+        prop,
+        ignore_conflicts,
+        overwrite_fields
+      )
+
+      if (!can_overwrite) {
+        continue
+      }
+    }
+
+    changes_count += 1
+    field_updates[prop] = edit.rhs
+
+    // Collect changelog entry if there was a previous value
+    if (edit.lhs) {
+      changelog_entries.push({
+        esbid: play_row.esbid,
+        playId: play_row.playId,
+        prop,
+        prev: edit.lhs,
+        new: edit.rhs,
+        timestamp
+      })
+    }
+  }
+
+  return { changelog_entries, field_updates, changes_count }
+}
+
+/**
  * Update play data in the database with conflict resolution
  *
  * Conflict Resolution Priority:
@@ -94,94 +181,37 @@ const update_play = async ({
     return 0
   }
 
-  // Normalize game clock fields in both objects before comparison
-  const normalized_play_row = normalize_clock_fields(play_row)
-  const normalized_update = normalize_clock_fields(update)
+  const { changelog_entries, field_updates, changes_count } =
+    compute_play_changes({
+      play_row,
+      update,
+      ignore_conflicts,
+      overwrite_fields
+    })
 
-  const differences = diff(normalized_play_row, normalized_update)
-
-  if (!differences) {
+  if (changes_count === 0) {
     return 0
   }
 
-  const edits = differences.filter((d) => d.kind === 'E')
-  if (!edits.length) {
-    return 0
-  }
-
-  let changes = 0
-  for (const edit of edits) {
-    const prop = edit.path[0]
-
-    // Skip null, undefined, or empty string values
-    if (edit.rhs === null || edit.rhs === undefined || edit.rhs === '') {
-      continue
-    }
-
-    // Skip protected properties
-    if (excluded_props.includes(prop)) {
-      log(`not allowed to update ${prop}`)
-      continue
-    }
-
-    // Handle conflicts - when there's already a value in the database
-    if (edit.lhs) {
-      const can_overwrite = should_overwrite_field(
-        prop,
-        ignore_conflicts,
-        overwrite_fields
-      )
-
-      if (!can_overwrite) {
-        log(
-          `conflict: skipping ${prop}, esbid: ${play_row.esbid}, playId: ${play_row.playId}, existing: ${edit.lhs}, new: ${edit.rhs}`
-        )
-        continue
-      }
-
-      // Log why we're overwriting
-      if (ignore_conflicts) {
-        log(
-          `overwriting ${prop} (ignore_conflicts), esbid: ${play_row.esbid}, playId: ${play_row.playId}, ${edit.lhs} → ${edit.rhs}`
-        )
-      } else if (overwrite_fields.includes(prop)) {
-        log(
-          `overwriting ${prop} (in overwrite_fields), esbid: ${play_row.esbid}, playId: ${play_row.playId}, ${edit.lhs} → ${edit.rhs}`
-        )
-      }
-    }
-
-    changes += 1
+  // Execute changelog inserts
+  for (const entry of changelog_entries) {
     log(
-      `Updating play: ${play_row.esbid} - ${play_row.playId}, Field: ${prop}, Value: ${edit.rhs}`
+      `Updating play: ${entry.esbid} - ${entry.playId}, Field: ${entry.prop}, Value: ${entry.new}`
     )
-
-    const prev = edit.lhs
-    if (prev) {
-      await db('play_changelog')
-        .insert({
-          esbid: play_row.esbid,
-          playId: play_row.playId,
-          prop,
-          prev,
-          new: edit.rhs,
-          timestamp: Math.round(Date.now() / 1000)
-        })
-        .onConflict(['esbid', 'playId', 'prop', 'timestamp'])
-        .ignore()
-    }
-
-    await db('nfl_plays')
-      .update({
-        [prop]: edit.rhs
-      })
-      .where({
-        esbid: play_row.esbid,
-        playId: play_row.playId
-      })
+    await db('play_changelog')
+      .insert(entry)
+      .onConflict(['esbid', 'playId', 'prop', 'timestamp'])
+      .ignore()
   }
 
-  return changes
+  // Execute play updates
+  for (const [prop, value] of Object.entries(field_updates)) {
+    await db('nfl_plays')
+      .update({ [prop]: value })
+      .where({ esbid: play_row.esbid, playId: play_row.playId })
+  }
+
+  return changes_count
 }
 
 export default update_play

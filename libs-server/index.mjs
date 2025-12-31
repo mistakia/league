@@ -80,7 +80,7 @@ export {
   default as get_data_view_results,
   get_data_view_results_query
 } from './get-data-view-results.mjs'
-export { default as update_play } from './update-play.mjs'
+export { default as update_play, compute_play_changes } from './update-play.mjs'
 export { default as update_nfl_game } from './update-nfl-game.mjs'
 export * as betonline from './betonline.mjs'
 export { default as format_starting_hash } from './format-starting-hash.mjs'
