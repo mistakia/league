@@ -6,6 +6,7 @@ import { Player, connect } from '@components/player'
 import PlayerHeadshotGroup from '@components/player-headshot-group'
 import TeamName from '@components/team-name'
 import PercentileMetric from '@components/percentile-metric'
+import StackedMetric from '@components/stacked-metric'
 import NFLTeamBye from '@components/nfl-team-bye'
 import { current_season, player_tag_types } from '@constants'
 
@@ -86,9 +87,23 @@ class PlayerRoster extends Player {
     const projected_starts = player_map.getIn(['lineups', 'starts'], 0)
     const startPoints = player_map.getIn(['lineups', 'sp'], 0)
     const benchPoints = player_map.getIn(['lineups', 'bp'], 0)
-    const points_added = player_map.get('points_added', 0)
-    const points_added_rnk = player_map.get('points_added_rnk', null)
+
+    // Seasonlog data for results display
+    // Note: seasonlog_points is used because 'points' is overwritten by projection points object
+    const seasonlog_points = player_map.get('seasonlog_points', null)
+    const points_per_game = player_map.get('points_per_game', null)
+    const points_pos_rnk = player_map.get('points_pos_rnk', null)
+    const points_per_game_pos_rnk = player_map.get(
+      'points_per_game_pos_rnk',
+      null
+    )
+    const points_added = player_map.get('points_added', null)
+    const points_added_per_game = player_map.get('points_added_per_game', null)
     const points_added_pos_rnk = player_map.get('points_added_pos_rnk', null)
+    const points_added_per_game_pos_rnk = player_map.get(
+      'points_added_per_game_pos_rnk',
+      null
+    )
 
     const classNames = ['player__item', 'table__row']
     if (selected === player_map.get('pid')) classNames.push('selected')
@@ -244,29 +259,44 @@ class PlayerRoster extends Player {
           </>
         )}
         {!isOffseason && (
-          <div className='row__group'>
-            <div className='row__group-body'>
-              <PercentileMetric
-                scaled
-                value={points_added}
-                percentile={percentiles.points_added}
-                decimals={1}
-              />
-              <PercentileMetric
-                scaled
-                value={points_added_rnk}
-                percentile={percentiles.points_added_rnk}
-                invert_order
-              />
-              <PercentileMetric
-                scaled
-                value={points_added_pos_rnk}
-                percentile={percentiles.points_added_pos_rnk}
-                prefix={points_added_pos_rnk ? pos : ''}
-                invert_order
-              />
+          <>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <StackedMetric
+                  value={seasonlog_points}
+                  position_rank={points_pos_rnk}
+                  position={pos}
+                  percentile={percentiles.seasonlog_points}
+                  fixed={1}
+                />
+                <StackedMetric
+                  value={points_per_game}
+                  position_rank={points_per_game_pos_rnk}
+                  position={pos}
+                  percentile={percentiles.points_per_game}
+                  fixed={1}
+                />
+              </div>
             </div>
-          </div>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <StackedMetric
+                  value={points_added}
+                  position_rank={points_added_pos_rnk}
+                  position={pos}
+                  percentile={percentiles.points_added}
+                  fixed={1}
+                />
+                <StackedMetric
+                  value={points_added_per_game}
+                  position_rank={points_added_per_game_pos_rnk}
+                  position={pos}
+                  percentile={percentiles.points_added_per_game}
+                  fixed={1}
+                />
+              </div>
+            </div>
+          </>
         )}
         <div className='row__group'>
           <div className='row__group-body'>

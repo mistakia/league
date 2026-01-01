@@ -6,15 +6,16 @@
   display flex
   align-items stretch
   label
-    font-size 10px
+    font-size 9px
     font-family "Inter", "Helvetica", "Arial", sans-serif;
     font-weight 300
     text-transform uppercase
     display block
-    padding-bottom 4px
+    padding-bottom 2px
     display flex
     justify-content center
     text-align center
+    color rgba(0, 0, 0, 0.6)
 
   .player__watchlist-action
     margin 0 16px 0 8px
@@ -23,19 +24,93 @@
     flex 0 0 auto
 
 .selected__player-header-item
-  flex 0 1 10%
-  font-weight 800
-  font-size 16px
+  flex 0 0 auto
+  font-weight 700
+  font-size 18px
   display flex
   flex-direction column
   justify-content center
   align-items center
-  min-width 80px
-  max-width 100px
+  min-width 56px
+  padding 4px 12px
+
+  span
+    white-space nowrap
+
+  .selected__player-draft-round
+    font-size 12px
+    font-weight 400
+    color rgba(0, 0, 0, 0.5)
+    margin-left 2px
 
 @media (max-width 400px)
   .selected__player-header-item
     flex 1 1 10%
+
+.selected__player-season-stats
+  display flex
+  gap 12px
+  align-items center
+  margin 0 8px
+
+.selected__player-season-stats-group
+  display flex
+  flex-direction column
+  align-items center
+  justify-content center
+  background rgba(0, 0, 0, 0.03)
+  border-radius 8px
+  padding 6px 10px
+
+.selected__player-season-stats-label
+  font-size 9px
+  font-family "Inter", "Helvetica", "Arial", sans-serif
+  font-weight 500
+  text-transform uppercase
+  color rgba(0, 0, 0, 0.5)
+  text-align center
+  padding-bottom 4px
+  letter-spacing 0.5px
+
+.selected__player-season-stats-cells
+  display flex
+  gap 4px
+
+.selected__player-season-stat
+  display flex
+  flex-direction column
+  align-items center
+  justify-content center
+  padding 2px 6px
+
+  label
+    font-size 8px
+    font-weight 400
+    text-transform uppercase
+    padding-bottom 2px
+    color rgba(0, 0, 0, 0.4)
+
+  .stacked-metric
+    border-radius 6px
+    min-width auto
+    flex 0 0 auto
+    width auto
+    padding 4px 8px
+
+  .stacked-metric__value
+    font-size 16px
+    font-weight 700
+
+  .stacked-metric__ranks
+    font-size 9px
+
+@media (max-width 600px)
+  .selected__player-season-stats
+    flex-wrap wrap
+    gap 6px
+
+  .selected__player-season-stats-group
+    flex 1 1 45%
 
 .selected__player-header-secondary
   flex 1
@@ -46,6 +121,7 @@
   row-gap 8px
   padding 8px 0
   align-items center
+  justify-content center
 
 .selected__player-header-section
   flex 1
@@ -53,9 +129,10 @@
   flex-wrap wrap
   justify-content flex-start
   align-items center
-  row-gap 12px
+  row-gap 10px
+  column-gap 4px
   height fit-content
-  max-width 600px
+  padding 0 8px
 
 .selected__player-main
   overflow hidden

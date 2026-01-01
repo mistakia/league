@@ -271,29 +271,42 @@ export default function DashboardPlayersTable({
             </div>
           )}
           {!isOffseason && (
-            <div className='row__group'>
-              <div className='row__group-head'>Results</div>
-              <div className='row__group-body'>
-                <div className='table__cell'>
-                  <PlayerRosterHeader
-                    tooltip='Points produced above baseline starter'
-                    title='Pts+'
-                  />
-                </div>
-                <div className='table__cell'>
-                  <PlayerRosterHeader
-                    tooltip='Rank among all players in points produced above baseline starter'
-                    title='Ovr Rank'
-                  />
-                </div>
-                <div className='table__cell'>
-                  <PlayerRosterHeader
-                    tooltip='Rank among position players in points produced above baseline starter'
-                    title='Pos Rank'
-                  />
+            <>
+              <div className='row__group'>
+                <div className='row__group-head'>Points</div>
+                <div className='row__group-body'>
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Total fantasy points scored this season'
+                      title='Total'
+                    />
+                  </div>
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Fantasy points per game this season'
+                      title='Per Game'
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+              <div className='row__group'>
+                <div className='row__group-head'>Points Added</div>
+                <div className='row__group-body'>
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Total points produced above baseline starter'
+                      title='Total'
+                    />
+                  </div>
+                  <div className='table__cell'>
+                    <PlayerRosterHeader
+                      tooltip='Points added per game above baseline starter'
+                      title='Per Game'
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
           )}
           {is_before_extension_deadline && (
             <>

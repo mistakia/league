@@ -11,7 +11,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import IconButton from '@mui/material/IconButton'
-import { Map } from 'immutable'
+import { Map, List } from 'immutable'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
 import PlayerName from '@components/player-name'
@@ -20,6 +20,7 @@ import TeamName from '@components/team-name'
 import PlayerAge from '@components/player-age'
 import SelectedPlayerSeasonStats from '@components/selected-player-season-stats'
 import SelectedPlayerProjections from '@components/selected-player-projections'
+import StackedMetric from '@components/stacked-metric'
 import { current_season, nfl_player_status_display_names } from '@constants'
 /* import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
  * import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
@@ -51,11 +52,13 @@ const showCollapse = () => window.innerWidth < 750
 
 export default function SelectedPlayer({
   player_map,
+  player_seasonlogs = new List(),
   is_logged_in,
   market_salary_adjusted,
   is_before_live_auction_end,
   deselect,
   load_all_players,
+  load_player_seasonlogs,
   is_hosted_league
 }) {
   const projectionView = 0
@@ -90,6 +93,20 @@ export default function SelectedPlayer({
     }
   }, [is_before_live_auction_end, load_all_players])
 
+  // Load player seasonlogs when player is selected
+  const pid = player_map.get('pid')
+  useEffect(() => {
+    if (pid && load_player_seasonlogs) {
+      load_player_seasonlogs({ pid })
+    }
+  }, [pid, load_player_seasonlogs])
+
+  // Get the latest seasonlog (most recent year with data)
+  const latest_seasonlog =
+    player_seasonlogs.size > 0
+      ? player_seasonlogs.sortBy((s) => -s.year).first()
+      : null
+
   const handleChange = (event, value) => setValue(value)
   const handleToggleExpand = (event) => setCollapsed(!collapsed)
   const handleClose = () => deselect()
@@ -107,7 +124,6 @@ export default function SelectedPlayer({
     .filter((week) => !blacklist.includes(week)).length
 
   const pos = player_map.get('pos')
-  const pid = player_map.get('pid')
   const tid = player_map.get('tid', false)
   const player_roster_status = player_map.get('roster_status')
   const draftNum = player_map.get('dpos')
@@ -214,12 +230,7 @@ export default function SelectedPlayer({
         <PlayerWatchlistAction pid={pid} />
         <div className='selected__player-header-secondary'>
           <div className='selected__player-header-section'>
-            {is_logged_in && Boolean(tid) && (
-              <div className='selected__player-header-item'>
-                <label>Manager</label>
-                <TeamName abbrv tid={tid} />
-              </div>
-            )}
+            {/* Always visible: Status */}
             <div className='selected__player-header-item'>
               <label>Status</label>
               {player_map.get('game_designation')
@@ -230,79 +241,135 @@ export default function SelectedPlayer({
                   ? nfl_player_status_display_names[player_roster_status]
                   : 'Active'}
             </div>
-            {is_logged_in && Boolean(tid) && (
-              <div className='selected__player-header-item'>
-                <label>Salary</label>
-                {playerValue ? `$${playerValue}` : '-'}
-              </div>
-            )}
-            {current_season.isOffseason && (
-              <div className='selected__player-header-item'>
-                <label>Market</label>$
-                {player_map.getIn(['market_salary', '0'], 0)}
-              </div>
-            )}
-            {is_logged_in && is_hosted_league && is_before_live_auction_end && (
-              <div className='selected__player-header-item'>
-                <label>Adjusted</label>${market_salary_adjusted}
+
+            {/* Season Stats - above collapse, only during regular season */}
+            {!current_season.isOffseason && latest_seasonlog && (
+              <div className='selected__player-season-stats'>
+                <div className='selected__player-season-stats-group'>
+                  <div className='selected__player-season-stats-label'>
+                    Points
+                  </div>
+                  <div className='selected__player-season-stats-cells'>
+                    <div className='selected__player-season-stat'>
+                      <label>Total</label>
+                      <StackedMetric
+                        value={latest_seasonlog.points}
+                        position_rank={latest_seasonlog.points_pos_rnk}
+                        position={pos}
+                        fixed={1}
+                        use_rank_color
+                      />
+                    </div>
+                    <div className='selected__player-season-stat'>
+                      <label>Per Game</label>
+                      <StackedMetric
+                        value={latest_seasonlog.points_per_game}
+                        position_rank={latest_seasonlog.points_per_game_pos_rnk}
+                        position={pos}
+                        fixed={1}
+                        use_rank_color
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className='selected__player-season-stats-group'>
+                  <div className='selected__player-season-stats-label'>
+                    Points Added
+                  </div>
+                  <div className='selected__player-season-stats-cells'>
+                    <div className='selected__player-season-stat'>
+                      <label>Total</label>
+                      <StackedMetric
+                        value={latest_seasonlog.points_added}
+                        position_rank={latest_seasonlog.points_added_pos_rnk}
+                        position={pos}
+                        fixed={1}
+                        use_rank_color
+                      />
+                    </div>
+                    <div className='selected__player-season-stat'>
+                      <label>Per Game</label>
+                      <StackedMetric
+                        value={latest_seasonlog.points_added_per_game}
+                        position_rank={
+                          latest_seasonlog.points_added_per_game_pos_rnk
+                        }
+                        position={pos}
+                        fixed={1}
+                        use_rank_color
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
-            {is_logged_in &&
-              is_hosted_league &&
-              (show_collapse ? !collapsed : true) && (
-                <>
-                  <div className='selected__player-header-item'>
-                    <label>Projected Starts</label>
-                    {player_map.getIn(['lineups', 'starts'], '-')}
-                  </div>
-                  <div className='selected__player-header-item'>
-                    <label>Projected Points+</label>
-                    {player_map.getIn(['lineups', 'sp'], 0).toFixed(1)}
-                  </div>
-                  <div className='selected__player-header-item'>
-                    <label>Projected Bench+</label>
-                    {player_map.getIn(['lineups', 'bp'], 0).toFixed(1)}
-                  </div>
-                </>
-              )}
+            {/* Always visible: Age */}
+            <div className='selected__player-header-item'>
+              <label>Age</label>
+              <PlayerAge date={player_map.get('dob')} />
+            </div>
+
+            {/* Collapsible section */}
             {(show_collapse ? !collapsed : true) && (
               <>
+                {is_logged_in && Boolean(tid) && (
+                  <div className='selected__player-header-item'>
+                    <label>Manager</label>
+                    <TeamName abbrv tid={tid} />
+                  </div>
+                )}
+                {is_logged_in && Boolean(tid) && (
+                  <div className='selected__player-header-item'>
+                    <label>Salary</label>
+                    {playerValue ? `$${playerValue}` : '-'}
+                  </div>
+                )}
+                {current_season.isOffseason && (
+                  <div className='selected__player-header-item'>
+                    <label>Market</label>$
+                    {player_map.getIn(['market_salary', '0'], 0)}
+                  </div>
+                )}
+                {is_logged_in &&
+                  is_hosted_league &&
+                  is_before_live_auction_end && (
+                    <div className='selected__player-header-item'>
+                      <label>Adjusted</label>${market_salary_adjusted}
+                    </div>
+                  )}
                 <div className='selected__player-header-item'>
                   <label>Proj/G</label>
                   {rosPoints && projWks
                     ? (rosPoints / projWks).toFixed(1)
                     : '-'}
                 </div>
+                {draftNum != null && draftNum !== undefined && (
+                  <>
+                    <div className='selected__player-header-item'>
+                      <label>Draft</label>
+                      {draftNum ? (
+                        <span>
+                          #{draftNum}
+                          {'\u00A0'}
+                          <small className='selected__player-draft-round'>
+                            {draftRound}
+                            {nth(draftRound)}
+                          </small>
+                        </span>
+                      ) : (
+                        'UDFA'
+                      )}
+                    </div>
+                    <div className='selected__player-header-item'>
+                      <label>Exp.</label>
+                      {current_season.year - draftYear || 'Rookie'}
+                    </div>
+                  </>
+                )}
               </>
             )}
-            <div className='selected__player-header-item'>
-              <label>Age</label>
-              <PlayerAge date={player_map.get('dob')} />
-            </div>
-            {draftNum != null && draftNum !== undefined && (
-              <>
-                <div className='selected__player-header-item'>
-                  <label>Draft</label>
-                  {draftNum ? (
-                    <>
-                      {draftRound}
-                      {nth(draftRound)}{' '}
-                      <small>
-                        (#
-                        {draftNum})
-                      </small>
-                    </>
-                  ) : (
-                    'UDFA'
-                  )}
-                </div>
-                <div className='selected__player-header-item'>
-                  <label>Exp.</label>
-                  {current_season.year - draftYear || 'Rookie'}
-                </div>
-              </>
-            )}
+
             {show_collapse && (
               <IconButton onClick={handleToggleExpand}>
                 {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
@@ -402,9 +469,11 @@ export default function SelectedPlayer({
 SelectedPlayer.propTypes = {
   deselect: PropTypes.func,
   player_map: ImmutablePropTypes.map,
+  player_seasonlogs: ImmutablePropTypes.list,
   is_logged_in: PropTypes.bool,
   market_salary_adjusted: PropTypes.number,
   is_before_live_auction_end: PropTypes.bool,
   load_all_players: PropTypes.func,
+  load_player_seasonlogs: PropTypes.func,
   is_hosted_league: PropTypes.bool
 }

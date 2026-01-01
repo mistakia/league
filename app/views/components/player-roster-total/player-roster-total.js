@@ -27,7 +27,8 @@ export default class PlayerRosterTotal extends React.Component {
     let valueTotal = 0
     let valueAdjTotal = 0
     let weekPointsTotal = 0
-    let points_added = 0
+    let seasonlog_points_total = 0
+    let points_added_total = 0
 
     players.forEach((player_map) => {
       const extensions = player_map.get('extensions', 0)
@@ -77,7 +78,17 @@ export default class PlayerRosterTotal extends React.Component {
         player_map.getIn(['salary_adj_pts_added', projectionType], 0)
       weekPointsTotal =
         weekPointsTotal + player_map.getIn(['points', `${week}`, 'total'], 0)
-      points_added = points_added + player_map.get('points_added', 0)
+      // Use seasonlog_points to avoid collision with projection points object
+      const player_seasonlog_points = player_map.get('seasonlog_points')
+      seasonlog_points_total =
+        seasonlog_points_total +
+        (typeof player_seasonlog_points === 'number'
+          ? player_seasonlog_points
+          : 0)
+      const player_points_added = player_map.get('points_added')
+      points_added_total =
+        points_added_total +
+        (typeof player_points_added === 'number' ? player_points_added : 0)
     })
 
     return (
@@ -119,15 +130,26 @@ export default class PlayerRosterTotal extends React.Component {
           </>
         )}
         {!isOffseason && (
-          <div className='row__group'>
-            <div className='row__group-body'>
-              <div className='metric table__cell'>
-                {points_added ? `${points_added.toFixed(1)}` : '-'}
+          <>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <div className='metric table__cell'>
+                  {seasonlog_points_total
+                    ? seasonlog_points_total.toFixed(1)
+                    : '-'}
+                </div>
+                <div className='metric table__cell'>-</div>
               </div>
-              <div className='metric table__cell'>-</div>
-              <div className='metric table__cell'>-</div>
             </div>
-          </div>
+            <div className='row__group'>
+              <div className='row__group-body'>
+                <div className='metric table__cell'>
+                  {points_added_total ? points_added_total.toFixed(1) : '-'}
+                </div>
+                <div className='metric table__cell'>-</div>
+              </div>
+            </div>
+          </>
         )}
         <div className='row__group'>
           <div className='row__group-body'>

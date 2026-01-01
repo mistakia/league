@@ -8,7 +8,8 @@ import {
   get_app,
   getAvailableSalarySpaceForCurrentLeague,
   get_auction_info_for_position,
-  get_current_league
+  get_current_league,
+  get_player_seasonlogs_for_selected_player
 } from '@core/selectors'
 import { get_free_agent_period } from '@libs-shared'
 
@@ -20,7 +21,15 @@ const map_state_to_props = createSelector(
   getAvailableSalarySpaceForCurrentLeague,
   get_auction_info_for_position,
   get_current_league,
-  (player_map, app, league_available_salary_space, auction_info, league) => {
+  get_player_seasonlogs_for_selected_player,
+  (
+    player_map,
+    app,
+    league_available_salary_space,
+    auction_info,
+    league,
+    player_seasonlogs
+  ) => {
     const remaining_pts_added =
       auction_info.pts_added.total - auction_info.pts_added.rostered
     const rate = league_available_salary_space / remaining_pts_added
@@ -41,6 +50,7 @@ const map_state_to_props = createSelector(
 
     return {
       player_map,
+      player_seasonlogs,
       market_salary_adjusted,
       is_logged_in: Boolean(app.userId),
       is_hosted_league: Boolean(league.hosted),
@@ -51,7 +61,8 @@ const map_state_to_props = createSelector(
 
 const map_dispatch_to_props = {
   deselect: player_actions.deselect_player,
-  load_all_players: player_actions.load_all_players
+  load_all_players: player_actions.load_all_players,
+  load_player_seasonlogs: player_actions.load_player_seasonlogs
 }
 
 export default connect(

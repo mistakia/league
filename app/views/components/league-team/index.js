@@ -115,7 +115,11 @@ const map_state_to_props = createSelector(
         extendedSalary,
         points_added: p.get('points_added', 0),
         points_added_rnk: p.get('points_added_rnk'),
-        points_added_pos_rnk: p.get('points_added_pos_rnk')
+        points_added_pos_rnk: p.get('points_added_pos_rnk'),
+        // Seasonlog fields for percentile calculation
+        seasonlog_points: p.get('seasonlog_points', 0),
+        points_per_game: p.get('points_per_game', 0),
+        points_added_per_game: p.get('points_added_per_game', 0)
       })
     })
 
@@ -135,7 +139,10 @@ const map_state_to_props = createSelector(
         'extended_salary',
         'points_added',
         'points_added_rnk',
-        'points_added_pos_rnk'
+        'points_added_pos_rnk',
+        'seasonlog_points',
+        'points_per_game',
+        'points_added_per_game'
       ]
     })
 
