@@ -70,7 +70,8 @@ const process_plays = async ({
   ignore_conflicts = false,
   dry_run = false,
   skip_changelog = false,
-  batch_size = 500
+  batch_size = 500,
+  all_players = false
 } = {}) => {
   // Get completed games first
   let completed_game_esbids = await get_completed_games({
@@ -94,7 +95,7 @@ const process_plays = async ({
   }
 
   // Preload player cache once for this processing session
-  await preload_active_players()
+  await preload_active_players({ all_players })
 
   // Fetch play_stats for enrichment
   const play_stats = await get_play_stats({ year, week, seas_type })
@@ -257,6 +258,11 @@ const initialize_cli = () => {
       default: 500,
       describe: 'Batch size for database operations'
     })
+    .option('all-players', {
+      type: 'boolean',
+      default: false,
+      describe: 'Include all players (retired/free agents) in cache'
+    })
     .parse()
 }
 
@@ -271,6 +277,7 @@ const main = async () => {
     const ignore_conflicts = argv.ignore_conflicts || argv.force
     const skip_changelog = argv.skipChangelog
     const batch_size = argv.batchSize
+    const all_players = argv.allPlayers
 
     if (argv.all) {
       log('processing all plays')
@@ -305,7 +312,8 @@ const main = async () => {
               dry_run,
               ignore_conflicts,
               skip_changelog,
-              batch_size
+              batch_size,
+              all_players
             })
           }
         }
@@ -325,7 +333,8 @@ const main = async () => {
           dry_run,
           ignore_conflicts,
           skip_changelog,
-          batch_size
+          batch_size,
+          all_players
         })
       }
     } else {
@@ -337,7 +346,8 @@ const main = async () => {
         dry_run,
         ignore_conflicts,
         skip_changelog,
-        batch_size
+        batch_size,
+        all_players
       })
     }
 

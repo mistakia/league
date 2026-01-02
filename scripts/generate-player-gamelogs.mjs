@@ -386,6 +386,7 @@ const generate_snap_based_gamelogs = async ({
       'player.pid',
       'player.pos',
       'player.current_nfl_team',
+      'player.gsispid',
       'nfl_snaps.esbid'
     )
     .join('player', 'player.gsis_it_id', 'nfl_snaps.gsis_it_id')
@@ -395,11 +396,46 @@ const generate_snap_based_gamelogs = async ({
       'player.pid',
       'player.pos',
       'player.current_nfl_team',
+      'player.gsispid',
       'nfl_snaps.esbid'
     )
     .havingRaw('COUNT(*) > 0')
 
   log(`Found ${players_with_snaps.length} players with snap data`)
+
+  // Query existing gamelogs to get correct historical team data
+  const existing_gamelogs = await db('player_gamelogs')
+    .select('pid', 'esbid', 'tm')
+    .whereIn('esbid', unique_esbids)
+    .whereNotNull('tm')
+    .whereNot('tm', '')
+
+  const existing_gamelog_team_map = existing_gamelogs.reduce((acc, gl) => {
+    acc[`${gl.pid}_${gl.esbid}`] = gl.tm
+    return acc
+  }, {})
+
+  log(
+    `Found ${existing_gamelogs.length} existing gamelogs with team data for historical lookup`
+  )
+
+  // Query nfl_play_stats for historical team data as fallback
+  const play_stats_teams = await db('nfl_play_stats')
+    .select('gsispid', 'esbid')
+    .max('clubCode as team')
+    .whereIn('esbid', unique_esbids)
+    .whereNotNull('clubCode')
+    .whereNot('clubCode', '')
+    .groupBy('gsispid', 'esbid')
+
+  const play_stats_team_map = play_stats_teams.reduce((acc, ps) => {
+    acc[`${ps.gsispid}_${ps.esbid}`] = ps.team
+    return acc
+  }, {})
+
+  log(
+    `Found ${play_stats_teams.length} play_stats records with team data for historical lookup`
+  )
 
   const games_by_esbid = await db('nfl_games')
     .whereIn('esbid', unique_esbids)
@@ -424,7 +460,15 @@ const generate_snap_based_gamelogs = async ({
         continue
       }
 
-      const team = fixTeam(snap_player.current_nfl_team)
+      // Priority: 1) existing gamelog tm, 2) play_stats clubCode, 3) current_nfl_team (fallback)
+      const gamelog_lookup_key = `${snap_player.pid}_${snap_player.esbid}`
+      const play_stats_lookup_key = `${snap_player.gsispid}_${snap_player.esbid}`
+      const existing_team = existing_gamelog_team_map[gamelog_lookup_key]
+      const play_stats_team = play_stats_team_map[play_stats_lookup_key]
+
+      const team = fixTeam(
+        existing_team || play_stats_team || snap_player.current_nfl_team
+      )
       const opponent = calculate_opponent({
         team,
         home_team: game.h,
