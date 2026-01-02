@@ -3,7 +3,7 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { current_season } from '@constants'
 
-const { single_year } = common_column_params
+const { single_year, career_year } = common_column_params
 
 const pff_seasonlog_field = (props) => ({
   ...props,
@@ -16,7 +16,8 @@ const pff_seasonlog_field = (props) => ({
       values: [...Array(current_season.year - 2006).keys()].map(
         (i) => current_season.year - i
       )
-    }
+    },
+    career_year
   }
 })
 

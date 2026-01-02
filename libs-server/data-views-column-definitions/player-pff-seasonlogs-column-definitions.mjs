@@ -1,39 +1,78 @@
+import db from '#db'
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import { career_year, year } from '#libs-shared/common-column-params.mjs'
 
-// TODO career_year
+const get_pff_params = ({ params = {} }) => {
+  let year_param = params.year || [current_season.stats_season_year]
+  if (!Array.isArray(year_param)) {
+    year_param = [year_param]
+  }
+
+  if (!year_param.length) {
+    year_param = [current_season.stats_season_year]
+  }
+
+  let career_year_param = params.career_year || []
+  if (!Array.isArray(career_year_param)) {
+    career_year_param = [career_year_param]
+  }
+
+  return {
+    year: year_param,
+    career_year: career_year_param
+  }
+}
 
 const get_cache_info = create_season_cache_info({
   get_params: ({ params = {} } = {}) => {
-    const year = Array.isArray(params.year)
-      ? params.year[0]
-      : params.year || current_season.stats_season_year
-    return { year: [year] }
+    const { year: year_param } = get_pff_params({ params })
+    return { year: year_param }
   }
 })
 
 const pff_player_seasonlogs_table_alias = ({ params = {} }) => {
-  let year = params.year || [current_season.stats_season_year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
+  const { year: year_param, career_year: career_year_param } = get_pff_params({
+    params
+  })
 
-  if (!year.length) {
-    year = [current_season.stats_season_year]
-  }
+  const career_year_key = career_year_param.length
+    ? `_career_year_${career_year_param.join('_')}`
+    : ''
 
-  return get_table_hash(`pff_player_seasonlogs_${year.join('_')}`)
+  return get_table_hash(
+    `pff_player_seasonlogs_${year_param.join('_')}${career_year_key}`
+  )
 }
 
 const pff_player_seasonlogs_join = (join_arguments) => {
+  const { query, table_name, params = {} } = join_arguments
+  const { career_year: career_year_param } = get_pff_params({ params })
+
+  // First, do the normal PFF join
   data_view_join_function({
     ...join_arguments,
     join_year: true,
     default_year: current_season.stats_season_year,
-    join_table_clause: `pff_player_seasonlogs as ${join_arguments.table_name}`
+    join_table_clause: `pff_player_seasonlogs as ${table_name}`
   })
+
+  // If career_year is specified, add a secondary join to player_seasonlogs for filtering
+  if (career_year_param.length) {
+    const career_year_alias = `${table_name}_career_year`
+    query
+      .join(`player_seasonlogs as ${career_year_alias}`, function () {
+        this.on(`${career_year_alias}.pid`, '=', `${table_name}.pid`)
+          .andOn(`${career_year_alias}.year`, '=', `${table_name}.year`)
+          .andOn(`${career_year_alias}.seas_type`, '=', db.raw('?', ['REG']))
+      })
+      .whereBetween(`${career_year_alias}.career_year`, [
+        Math.min(career_year_param[0], career_year_param[1]),
+        Math.max(career_year_param[0], career_year_param[1])
+      ])
+  }
 }
 
 const create_field_from_pff_player_seasonlogs = (column_name) => ({
@@ -43,6 +82,10 @@ const create_field_from_pff_player_seasonlogs = (column_name) => ({
   table_alias: pff_player_seasonlogs_table_alias,
   join: pff_player_seasonlogs_join,
   supported_splits: ['year'],
+  column_params: {
+    year,
+    career_year
+  },
   get_cache_info
 })
 
