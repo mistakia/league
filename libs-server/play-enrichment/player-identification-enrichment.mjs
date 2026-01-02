@@ -46,7 +46,12 @@ export const enrich_player_identifications = (
   ) => {
     if (!play_data[gsis_field]) return false
 
-    const player = player_cache.find_player({ gsisid: play_data[gsis_field] })
+    // Include all players regardless of current status for historical play attribution
+    const player = player_cache.find_player({
+      gsisid: play_data[gsis_field],
+      ignore_free_agent: false,
+      ignore_retired: false
+    })
     if (player) {
       enriched_play[pid_field] = player.pid
       return true
@@ -68,7 +73,12 @@ export const enrich_player_identifications = (
     const pids = gsis_array
       .slice(0, max_count)
       .map((gsisid) => {
-        const player = player_cache.find_player({ gsisid })
+        // Include all players regardless of current status for historical play attribution
+        const player = player_cache.find_player({
+          gsisid,
+          ignore_free_agent: false,
+          ignore_retired: false
+        })
         if (!player) missing_gsis_ids.add(gsisid)
         return player?.pid || null
       })
