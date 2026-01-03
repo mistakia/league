@@ -9,7 +9,8 @@ export const tabs = [
   'receiving-props',
   'rushing-props',
   'defensive-props',
-  'td-scorer-props'
+  'td-scorer-props',
+  'team-yards'
 ]
 
 export const leader_market_names = {

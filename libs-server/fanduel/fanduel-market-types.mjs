@@ -130,17 +130,105 @@ const player_game_markets = [
   ...quarter_markets
 ]
 
-// Team game market mappings (non-player markets)
+// Team game market mappings (spreads, totals)
 const team_game_markets = [
   [/^ALTERNATE_HANDICAP$/, team_game_market_types.GAME_ALT_SPREAD],
   [/^ALTERNATE_TOTAL$/, team_game_market_types.GAME_ALT_TOTAL]
+]
+
+// Helper to create team yardage regex patterns
+// FanDuel format: (HOME|AWAY)_[PERIOD_]STAT_TYPE[_-_O/U]
+// - Standard markets have _-_O/U suffix, alt markets don't
+// - Uses 1ST_QUARTER and 1ST_HALF (not 1ST_QTR)
+const create_team_yards_regex = (pattern) =>
+  new RegExp(`^(HOME|AWAY)_${pattern}$`)
+
+// Team yardage market mappings organized by time period
+const team_yardage_markets = [
+  // === Full Game ===
+  // Total yards (rushing + receiving combined)
+  [
+    create_team_yards_regex('TOTAL_YARDS_-_O\\/U'),
+    team_game_market_types.GAME_TEAM_TOTAL_YARDS
+  ],
+  [
+    create_team_yards_regex('ALT_TOTAL_YARDS'),
+    team_game_market_types.GAME_TEAM_ALT_TOTAL_YARDS
+  ],
+  // Rushing yards
+  [
+    create_team_yards_regex('ALT_TOTAL_RUSHING_YARDS'),
+    team_game_market_types.GAME_TEAM_ALT_RUSHING_YARDS
+  ],
+  // Receiving yards
+  [
+    create_team_yards_regex('ALT_TOTAL_RECEIVING_YARDS'),
+    team_game_market_types.GAME_TEAM_ALT_RECEIVING_YARDS
+  ],
+  // Legacy format (playoffs)
+  [/^TEAM_RUSHING_YARDS$/, team_game_market_types.GAME_TEAM_RUSHING_YARDS],
+
+  // === First Half ===
+  // Total yards
+  [
+    create_team_yards_regex('1ST_HALF_TOTAL_YARDS_-_O\\/U'),
+    team_game_market_types.GAME_TEAM_FIRST_HALF_TOTAL_YARDS
+  ],
+  [
+    create_team_yards_regex('1ST_HALF_ALT_TOTAL_YARDS'),
+    team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_TOTAL_YARDS
+  ],
+  // Rushing yards
+  [
+    create_team_yards_regex('1ST_HALF_TOTAL_RUSHING_YARDS_-_O\\/U'),
+    team_game_market_types.GAME_TEAM_FIRST_HALF_RUSHING_YARDS
+  ],
+  [
+    create_team_yards_regex('1ST_HALF_ALT_TOTAL_RUSHING_YARDS'),
+    team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_RUSHING_YARDS
+  ],
+  // Receiving yards
+  [
+    create_team_yards_regex('1ST_HALF_TOTAL_RECEIVING_YARDS_-_O\\/U'),
+    team_game_market_types.GAME_TEAM_FIRST_HALF_RECEIVING_YARDS
+  ],
+  [
+    create_team_yards_regex('1ST_HALF_ALT_TOTAL_RECEIVING_YARDS'),
+    team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_RECEIVING_YARDS
+  ],
+
+  // === First Quarter ===
+  // Rushing yards
+  [
+    create_team_yards_regex('1ST_QUARTER_TOTAL_RUSHING_YARDS_-_O\\/U'),
+    team_game_market_types.GAME_TEAM_FIRST_QUARTER_RUSHING_YARDS
+  ],
+  [
+    create_team_yards_regex('1ST_QUARTER_ALT_TOTAL_RUSHING_YARDS'),
+    team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_RUSHING_YARDS
+  ],
+  // Receiving yards
+  [
+    create_team_yards_regex('1ST_QUARTER_TOTAL_RECEIVING_YARDS_-_O\\/U'),
+    team_game_market_types.GAME_TEAM_FIRST_QUARTER_RECEIVING_YARDS
+  ],
+  [
+    create_team_yards_regex('1ST_QUARTER_ALT_TOTAL_RECEIVING_YARDS'),
+    team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_RECEIVING_YARDS
+  ],
+  // Total yards (alt only)
+  [
+    create_team_yards_regex('1ST_QUARTER_ALT_TOTAL_YARDS'),
+    team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_TOTAL_YARDS
+  ]
 ]
 
 // Combine alt_line_markets and markets
 const combined_markets = [
   ...player_game_alt_line_markets,
   ...player_game_markets,
-  ...team_game_markets
+  ...team_game_markets,
+  ...team_yardage_markets
 ]
 
 export const get_market_type_for_quarterback_season_props = ({
