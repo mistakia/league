@@ -190,7 +190,6 @@ export const standardize_score_type = (value) => {
  * - import-plays-sportradar.mjs (Sportradar API clock values)
  * - import-plays-nfl-v1.mjs (NFL API clock values)
  * - import-plays-nflfastr.mjs (nflfastR CSV clock values)
- * - import-plays-ngs-detailed.mjs (NGS API clock values)
  * - update-play.mjs (comparison normalization)
  *
  * @param {string} clock_string - Clock time in format M:SS or MM:SS
