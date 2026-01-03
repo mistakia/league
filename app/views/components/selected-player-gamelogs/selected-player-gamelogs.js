@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
@@ -9,6 +9,8 @@ import './selected-player-gamelogs.styl'
 
 // Fantasy stats to show in gamelogs (only total points and points added)
 const GAMELOGS_FANTASY_STATS_FILTER = ['points', 'points_added']
+
+const QUARTER_LABELS = ['Q1', 'Q2', 'Q3', 'Q4']
 
 const get_snaps_config = (pos) => {
   switch (pos) {
@@ -39,15 +41,32 @@ const get_snaps_config = (pos) => {
   }
 }
 
+// Get quarter snap fields based on position (offensive vs defensive)
+const get_quarter_snap_type = (pos) => {
+  const defensive_positions = ['DST', 'LB', 'DL', 'DB']
+  return defensive_positions.includes(pos) ? 'def' : 'off'
+}
+
 export default function SelectedPlayerGamelogs({ player_map, load, years }) {
   const pid = player_map.get('pid')
   const position = player_map.get('pos')
+  const [show_quarter_snaps, set_show_quarter_snaps] = useState(false)
+  const [show_quarter_pct, set_show_quarter_pct] = useState(false)
 
   useEffect(() => {
     load({ pid, position })
   }, [pid, position, load])
 
+  const handle_toggle_quarter_snaps = () => {
+    set_show_quarter_snaps(!show_quarter_snaps)
+  }
+
+  const handle_toggle_quarter_pct = () => {
+    set_show_quarter_pct(!show_quarter_pct)
+  }
+
   const snaps_config = get_snaps_config(position)
+  const quarter_snap_type = get_quarter_snap_type(position)
 
   const rows = []
   const sorted_years = Object.keys(years).sort((a, b) => b - a)
@@ -94,6 +113,36 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
                   {game[field] ?? '-'}
                 </div>
               ))}
+              {show_quarter_snaps &&
+                QUARTER_LABELS.map((label, index) => {
+                  const quarter_num = index + 1
+                  const snap_count_field = `q${quarter_num}_snaps_${quarter_snap_type}`
+                  const snap_pct_field = `q${quarter_num}_snaps_${quarter_snap_type}_pct`
+                  const snap_count = game[snap_count_field]
+                  const snap_pct = game[snap_pct_field]
+                  const pct_value =
+                    snap_pct != null ? (snap_pct * 100).toFixed(0) : null
+                  const background_opacity =
+                    snap_pct != null ? Math.min(snap_pct * 0.6, 0.6) : 0
+
+                  const display_value = show_quarter_pct
+                    ? pct_value != null
+                      ? `${pct_value}%`
+                      : '-'
+                    : (snap_count ?? '-')
+
+                  return (
+                    <div
+                      key={label}
+                      className='table__cell metric'
+                      style={{
+                        backgroundColor: `rgba(46, 163, 221, ${background_opacity})`
+                      }}
+                    >
+                      {display_value}
+                    </div>
+                  )
+                })}
             </div>
           </div>
         </>
@@ -131,7 +180,28 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           </div>
         </div>
         <div className='row__group'>
-          <div className='row__group-head'>Snaps</div>
+          <div className='row__group-head snaps-header'>
+            <span>Snaps</span>
+            <div className='snaps-header-controls'>
+              {show_quarter_snaps && (
+                <>
+                  <span
+                    className='snaps-toggle-button'
+                    onClick={handle_toggle_quarter_pct}
+                  >
+                    {show_quarter_pct ? '%' : '#'}
+                  </span>
+                  <span className='snaps-toggle-separator'>|</span>
+                </>
+              )}
+              <span
+                className='snaps-toggle-button'
+                onClick={handle_toggle_quarter_snaps}
+              >
+                {show_quarter_snaps ? '<<' : '>>'}
+              </span>
+            </div>
+          </div>
           <div className='row__group-body'>
             <div className='table__cell'>OFF%</div>
             {snaps_config.types.map((type) => (
@@ -139,6 +209,12 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
                 {type}
               </div>
             ))}
+            {show_quarter_snaps &&
+              QUARTER_LABELS.map((label) => (
+                <div key={label} className='table__cell'>
+                  {label}
+                </div>
+              ))}
           </div>
         </div>
         <PlayerSelectedRowHeader
