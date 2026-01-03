@@ -96,19 +96,36 @@ const format = (item) => {
   }
 }
 
-const run = async ({ year = current_season.year }) => {
+const run = async ({ year = current_season.year, collector = null } = {}) => {
   log(`Importing games for ${year}`)
+
+  const result = {
+    games_processed: 0,
+    games_updated: 0
+  }
+
   const url = `${config.ngs_api_url}/league/schedule?season=${year}`
-  const data = await fetch(url, {
-    headers: {
-      referer: 'https://nextgenstats.nfl.com/'
+
+  let data
+  try {
+    data = await fetch(url, {
+      headers: {
+        referer: 'https://nextgenstats.nfl.com/'
+      }
+    }).then((res) => res.json())
+  } catch (error) {
+    if (collector) {
+      collector.add_error(error, { year, context: 'fetch_schedule' })
     }
-  }).then((res) => res.json())
+    throw error
+  }
 
   const inserts = []
   for (const item of data) {
     inserts.push(format(item))
   }
+
+  result.games_processed = inserts.length
 
   if (inserts.length) {
     await db('nfl_games')
@@ -116,7 +133,17 @@ const run = async ({ year = current_season.year }) => {
       .onConflict(['v', 'h', 'week', 'year', 'seas_type'])
       .merge()
     log(`saved data for ${inserts.length} games`)
+    result.games_updated = inserts.length
   }
+
+  if (collector) {
+    collector.set_stats({
+      games_processed: result.games_processed,
+      games_updated: result.games_updated
+    })
+  }
+
+  return result
 }
 
 const main = async () => {

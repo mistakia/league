@@ -632,11 +632,20 @@ const run = async ({
   force_download = false,
   dry_mode = false,
   esbid = null,
-  overwrite_fields = []
+  overwrite_fields = [],
+  collector = null
 } = {}) => {
+  const result = {
+    plays_processed: 0,
+    plays_matched: 0,
+    plays_updated: 0,
+    plays_not_matched: 0,
+    plays_multiple_matches: 0
+  }
+
   // Check if data is available for this year
   if (!is_data_available(year)) {
-    return
+    return result
   }
 
   log(
@@ -836,6 +845,55 @@ const run = async ({
   } else {
     log('  No conflicts detected')
   }
+
+  // Set result values
+  result.plays_processed = data.length
+  result.plays_matched = plays_matched.length
+  result.plays_updated = total_updates_applied
+  result.plays_not_matched = plays_not_matched.length
+  result.plays_multiple_matches = plays_multiple_matches.length
+
+  // Pipe issues to collector if provided
+  if (collector) {
+    for (const play of plays_not_matched) {
+      collector.add_unmatched_play({
+        esbid: play.match_criteria.esbid,
+        playId: play.item.play_id,
+        description: play.item.desc,
+        criteria: play.match_criteria,
+        source: 'nflfastr'
+      })
+    }
+
+    for (const play of plays_multiple_matches) {
+      collector.add_multiple_match({
+        esbid: play.match_criteria.esbid,
+        playId: play.item.play_id,
+        match_count: play.match_count,
+        criteria: play.match_criteria,
+        source: 'nflfastr'
+      })
+    }
+
+    // Add field conflicts to collector
+    for (const [field, count] of sorted_conflicts) {
+      collector.add_collision({
+        field,
+        existing: `${count} conflicts`,
+        new_value: 'nflfastr values',
+        play_info: { year },
+        source: 'nflfastr'
+      })
+    }
+
+    collector.set_stats({
+      plays_processed: result.plays_processed,
+      plays_matched: result.plays_matched,
+      plays_updated: result.plays_updated
+    })
+  }
+
+  return result
 }
 
 // ============================================================================

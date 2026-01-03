@@ -19,8 +19,13 @@ debug.enable('import-espn-receiving-tracking-metrics')
 const import_espn_receiving_tracking_metrics = async ({
   force_download = false,
   dry = false,
-  file_path = null
+  file_path = null,
+  collector = null
 } = {}) => {
+  const result = {
+    players_updated: 0,
+    players_not_matched: 0
+  }
   const url = 'https://nfl-player-metrics.s3.amazonaws.com/rtm/rtm_data.json'
   const filename = 'rtm_data.json'
   const path = file_path || `${os.tmpdir()}/${filename}`
@@ -53,6 +58,16 @@ const import_espn_receiving_tracking_metrics = async ({
     if (!player) {
       log(`player not found: ${item.gsis_id}`)
       log(item)
+      result.players_not_matched++
+      if (collector) {
+        collector.add_player_issue({
+          type: 'gsisid_not_found',
+          player_name: null,
+          team: null,
+          identifier: item.gsis_id,
+          source: 'espn_rtm'
+        })
+      }
       continue
     }
 
@@ -75,7 +90,8 @@ const import_espn_receiving_tracking_metrics = async ({
 
   if (dry) {
     log(player_seasonlogs_inserts[0])
-    return
+    result.players_updated = player_seasonlogs_inserts.length
+    return result
   }
 
   if (player_seasonlogs_inserts.length) {
@@ -92,8 +108,17 @@ const import_espn_receiving_tracking_metrics = async ({
       .onConflict(['pid', 'year', 'seas_type', 'timestamp'])
       .merge()
 
+    result.players_updated = player_seasonlogs_inserts.length
     log('completed')
   }
+
+  if (collector) {
+    collector.set_stats({
+      players_updated: result.players_updated
+    })
+  }
+
+  return result
 }
 
 const main = async () => {

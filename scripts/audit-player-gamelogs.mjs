@@ -61,8 +61,14 @@ const format_gamelog = ({
 
 const audit_player_gamelogs = async ({
   year = current_season.year,
-  ignore_cache = false
+  ignore_cache = false,
+  collector = null
 } = {}) => {
+  const result = {
+    gamelogs_checked: 0,
+    missing_gamelogs: 0,
+    discrepancies: []
+  }
   // create any missing gamelogs
   const pfr_player_gamelogs_for_season =
     await pfr.get_player_gamelogs_for_season({ year, ignore_cache })
@@ -92,11 +98,24 @@ const audit_player_gamelogs = async ({
     )
 
     if (!player_gamelog) {
+      result.missing_gamelogs++
       log(
         `missing gamelog for ${pfr_player_gamelog.pfr_id} week ${pfr_player_gamelog.week} ${pfr_player_gamelog.seas_type}`
       )
+      if (collector) {
+        collector.add_warning(
+          `Missing gamelog for ${pfr_player_gamelog.pfr_id} week ${pfr_player_gamelog.week}`,
+          {
+            pfr_id: pfr_player_gamelog.pfr_id,
+            week: pfr_player_gamelog.week,
+            seas_type: pfr_player_gamelog.seas_type
+          }
+        )
+      }
       continue
     }
+
+    result.gamelogs_checked++
 
     const formated_pfr_gamelog = format_gamelog(pfr_player_gamelog)
     const formated_db_gamelog = format_gamelog(player_gamelog)
@@ -106,8 +125,38 @@ const audit_player_gamelogs = async ({
         `differences for ${player_gamelog.pid} week ${player_gamelog.week} ${player_gamelog.seas_type} pfr_game_id ${pfr_player_gamelog.pfr_game_id}`
       )
       log(differences)
+      result.discrepancies.push({
+        pid: player_gamelog.pid,
+        pfr_id: pfr_player_gamelog.pfr_id,
+        week: player_gamelog.week,
+        seas_type: player_gamelog.seas_type,
+        differences
+      })
+
+      if (collector) {
+        collector.add_warning(
+          `Discrepancy for ${player_gamelog.pid} week ${player_gamelog.week}`,
+          {
+            pid: player_gamelog.pid,
+            pfr_id: pfr_player_gamelog.pfr_id,
+            week: player_gamelog.week,
+            seas_type: player_gamelog.seas_type,
+            differences_count: differences.length
+          }
+        )
+      }
     }
   }
+
+  if (collector) {
+    collector.set_stats({
+      gamelogs_checked: result.gamelogs_checked,
+      missing_gamelogs: result.missing_gamelogs,
+      discrepancies_found: result.discrepancies.length
+    })
+  }
+
+  return result
 }
 
 const main = async () => {

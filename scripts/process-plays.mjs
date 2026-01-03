@@ -71,8 +71,14 @@ const process_plays = async ({
   dry_run = false,
   skip_changelog = false,
   batch_size = 500,
-  all_players = false
+  all_players = false,
+  collector = null
 } = {}) => {
+  const result = {
+    plays_processed: 0,
+    plays_updated: 0,
+    games_processed: 0
+  }
   // Get completed games first
   let completed_game_esbids = await get_completed_games({
     year,
@@ -89,9 +95,11 @@ const process_plays = async ({
     `Found ${completed_game_esbids.length} completed games for ${year} week ${week}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`
   )
 
+  result.games_processed = completed_game_esbids.length
+
   if (completed_game_esbids.length === 0) {
     log('No completed games found, skipping processing')
-    return
+    return result
   }
 
   // Preload player cache once for this processing session
@@ -194,7 +202,9 @@ const process_plays = async ({
     log(
       `Total plays that would be updated: ${all_play_updates.length} out of ${enriched_plays.length}`
     )
-    return
+    result.plays_processed = enriched_plays.length
+    result.plays_updated = all_play_updates.length
+    return result
   }
 
   // Batch persist within transaction
@@ -240,6 +250,19 @@ const process_plays = async ({
   log(
     `Completed: ${all_play_updates.length} plays updated from ${completed_game_esbids.length} games`
   )
+
+  result.plays_processed = enriched_plays.length
+  result.plays_updated = all_play_updates.length
+
+  if (collector) {
+    collector.set_stats({
+      plays_processed: result.plays_processed,
+      plays_updated: result.plays_updated,
+      games_processed: result.games_processed
+    })
+  }
+
+  return result
 }
 
 const initialize_cli = () => {

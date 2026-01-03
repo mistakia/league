@@ -83,9 +83,16 @@ const format_game = (game) => ({
 
 const import_nfl_games_nflverse_nfldata = async ({
   ignore_conflicts = false,
-  force_download = false
+  force_download = false,
+  collector = null
 } = {}) => {
   console.time('import-nfl-games-nflverse-total')
+
+  const result = {
+    games_processed: 0,
+    games_updated: 0,
+    games_not_matched: 0
+  }
 
   log('Preloading player cache for QB lookups...')
   console.time('player-cache-preload-time')
@@ -150,6 +157,8 @@ const import_nfl_games_nflverse_nfldata = async ({
       continue
     }
 
+    result.games_processed++
+
     const game_params = {
       year: item.season,
       week: item.week,
@@ -189,6 +198,16 @@ const import_nfl_games_nflverse_nfldata = async ({
           game.away_qb_pid = away_qb_player.pid
         } else {
           log(`away_qb_player not found: ${item.away_qb_id}`)
+          if (collector) {
+            collector.add_player_issue({
+              type: 'qb_not_found',
+              player_name: null,
+              team: item.away_team,
+              identifier: item.away_qb_id,
+              source: 'nflverse',
+              details: { game_id: item.game_id, role: 'away_qb' }
+            })
+          }
         }
       }
 
@@ -201,6 +220,16 @@ const import_nfl_games_nflverse_nfldata = async ({
           game.home_qb_pid = home_qb_player.pid
         } else {
           log(`home_qb_player not found: ${item.home_qb_id}`)
+          if (collector) {
+            collector.add_player_issue({
+              type: 'qb_not_found',
+              player_name: null,
+              team: item.home_team,
+              identifier: item.home_qb_id,
+              source: 'nflverse',
+              details: { game_id: item.game_id, role: 'home_qb' }
+            })
+          }
         }
       }
 
@@ -209,14 +238,37 @@ const import_nfl_games_nflverse_nfldata = async ({
         update: game,
         ignore_conflicts
       })
+      result.games_updated++
     } else {
       log(`game not matched: ${item.old_game_id} - ${item.game_id}`)
       game_not_matched.push(item)
+      if (collector) {
+        collector.add_warning(
+          `Game not matched: ${item.old_game_id} - ${item.game_id}`,
+          {
+            old_game_id: item.old_game_id,
+            game_id: item.game_id,
+            season: item.season,
+            week: item.week
+          }
+        )
+      }
     }
   }
 
+  result.games_not_matched = game_not_matched.length
   log(`${game_not_matched.length} games not matched`)
+
+  if (collector) {
+    collector.set_stats({
+      games_processed: result.games_processed,
+      games_updated: result.games_updated
+    })
+  }
+
   console.timeEnd('import-nfl-games-nflverse-total')
+
+  return result
 }
 
 const main = async () => {

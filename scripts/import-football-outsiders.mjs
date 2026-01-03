@@ -215,10 +215,14 @@ const runOne = async ({ type, url }) => {
   })
 }
 
-const run = async () => {
+const run = async ({ collector = null } = {}) => {
+  const result = {
+    teams_updated: 0
+  }
+
   // do not fetch outside of the NFL regular season
   if (current_season.week > current_season.nflFinalWeek) {
-    return
+    return result
   }
 
   for (const item of urls) {
@@ -237,7 +241,16 @@ const run = async () => {
       })
       .onConflict(['team', 'week', 'year'])
       .merge()
+    result.teams_updated++
   }
+
+  if (collector) {
+    collector.set_stats({
+      teams_updated: result.teams_updated
+    })
+  }
+
+  return result
 }
 
 const main = async () => {

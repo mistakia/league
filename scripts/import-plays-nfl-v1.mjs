@@ -255,7 +255,8 @@ const importPlaysForWeek = async ({
   force_update = false,
   skip_finalization = false,
   token,
-  dry_run = false
+  dry_run = false,
+  collector = null
 } = {}) => {
   week = week || current_season.last_week_with_stats
   const is_current_week =
@@ -266,6 +267,13 @@ const importPlaysForWeek = async ({
   log(
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week}, dry_run: ${dry_run})`
   )
+
+  const result = {
+    plays_processed: 0,
+    plays_updated: 0,
+    games_processed: 0,
+    missing_gsisids: 0
+  }
 
   // Preload player cache once per week import
   await preload_active_players()
@@ -338,6 +346,7 @@ const importPlaysForWeek = async ({
     }
 
     log(`loading plays for esbid: ${game.esbid}`)
+    result.games_processed++
 
     const data = await nfl.get_plays_v1({
       id: game.detailid_v1,
@@ -353,6 +362,7 @@ const importPlaysForWeek = async ({
     let play_stat_inserts = []
 
     for (const play of data.data.viewer.gameDetail.plays) {
+      result.plays_processed++
       const { playId } = play
       const playData = getPlayData({ play, year, week, seas_type, game })
 
@@ -510,6 +520,7 @@ const importPlaysForWeek = async ({
             .insert(play_inserts)
             .onConflict(['esbid', 'playId', 'year'])
             .merge()
+          result.plays_updated += play_inserts.length
         }
 
         // Trigger game finalization when END_GAME detected
@@ -567,11 +578,32 @@ const importPlaysForWeek = async ({
     log(
       `missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`
     )
+    if (collector) {
+      collector.add_player_issue({
+        type: 'missing_gsisid',
+        player_name: playerName,
+        team: clubCode,
+        identifier: esbid,
+        source: 'nfl_v1'
+      })
+    }
   }
 
+  result.missing_gsisids = missing_esbids.size
   log(`missing_esbids: ${missing_esbids.size}`)
 
-  return skip_count === games.length
+  if (collector) {
+    collector.set_stats({
+      plays_processed: result.plays_processed,
+      plays_updated: result.plays_updated,
+      games_processed: result.games_processed
+    })
+  }
+
+  return {
+    all_games_skipped: skip_count === games.length,
+    ...result
+  }
 }
 
 const importPlaysForYear = async ({

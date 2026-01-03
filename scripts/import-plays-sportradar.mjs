@@ -1360,7 +1360,8 @@ const import_plays_sportradar = async ({
   dry = false,
   ignore_conflicts = false,
   ignore_sportradar_field_conflicts = false,
-  ignore_cache = false
+  ignore_cache = false,
+  collector = null
 } = {}) => {
   console.time('import-plays-sportradar-total')
 
@@ -1437,7 +1438,64 @@ const import_plays_sportradar = async ({
     sportradar_players_not_found
   })
 
+  // Pipe issues to collector if provided
+  if (collector) {
+    for (const play of stats.unmatched_plays) {
+      collector.add_unmatched_play({
+        esbid: play.esbid,
+        playId: play.sportradar_play_id,
+        description: play.description,
+        criteria: { qtr: play.qtr, clock: play.clock },
+        source: 'sportradar'
+      })
+    }
+
+    for (const play of stats.multiple_match_plays) {
+      collector.add_multiple_match({
+        esbid: play.esbid,
+        playId: play.sportradar_play_id,
+        match_count: null,
+        criteria: { qtr: play.qtr, clock: play.clock },
+        source: 'sportradar'
+      })
+    }
+
+    for (const collision of stats.all_collisions) {
+      collector.add_collision({
+        field: collision.field,
+        existing: collision.existing,
+        new_value: collision.new,
+        play_info: collision.play_info,
+        source: 'sportradar'
+      })
+    }
+
+    for (const player of sportradar_players_not_found.values()) {
+      collector.add_player_issue({
+        type: 'player_not_found',
+        player_name: player.name,
+        team: player.team,
+        identifier: player.sportradar_id,
+        source: 'sportradar'
+      })
+    }
+
+    collector.set_stats({
+      plays_processed: stats.total_plays_processed,
+      plays_matched: stats.total_plays_matched,
+      plays_updated: stats.total_plays_updated
+    })
+  }
+
   console.timeEnd('import-plays-sportradar-total')
+
+  return {
+    plays_processed: stats.total_plays_processed,
+    plays_matched: stats.total_plays_matched,
+    plays_updated: stats.total_plays_updated,
+    plays_multiple_matches: stats.total_plays_multiple_matches,
+    plays_not_matched: stats.unmatched_plays.length
+  }
 }
 
 // ============================================================================

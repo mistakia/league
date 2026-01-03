@@ -223,7 +223,8 @@ const import_games_sportradar = async ({
   week,
   all = false,
   dry = false,
-  ignore_cache = false
+  ignore_cache = false,
+  collector = null
 } = {}) => {
   console.time('import-games-sportradar-total')
 
@@ -249,6 +250,7 @@ const import_games_sportradar = async ({
   let total_games_updated = 0
   let total_games_skipped = 0
   const all_team_mappings = new Map()
+  const unmatched_games = []
 
   // Process each year
   for (const process_year of years) {
@@ -258,14 +260,30 @@ const import_games_sportradar = async ({
     const games_map = await preload_games({ year: process_year, week })
 
     // Fetch schedule from Sportradar
-    const schedule_data = await get_games_schedule({
-      year: process_year,
-      season_type: 'REG',
-      ignore_cache
-    })
+    let schedule_data
+    try {
+      schedule_data = await get_games_schedule({
+        year: process_year,
+        season_type: 'REG',
+        ignore_cache
+      })
+    } catch (error) {
+      if (collector) {
+        collector.add_error(error, {
+          year: process_year,
+          context: 'get_games_schedule'
+        })
+      }
+      throw error
+    }
 
     if (!schedule_data || !schedule_data.weeks) {
       log(`No schedule data returned for ${process_year}`)
+      if (collector) {
+        collector.add_warning(`No schedule data returned for ${process_year}`, {
+          year: process_year
+        })
+      }
       continue
     }
 
@@ -332,6 +350,22 @@ const import_games_sportradar = async ({
         }
 
         total_games_updated++
+      } else {
+        unmatched_games.push({
+          sportradar_game_id: game.id,
+          home: game.home?.alias,
+          away: game.away?.alias,
+          scheduled: game.scheduled
+        })
+
+        if (collector) {
+          collector.add_warning(`Sportradar game not matched: ${game.id}`, {
+            sportradar_game_id: game.id,
+            home: game.home?.alias,
+            away: game.away?.alias,
+            scheduled: game.scheduled
+          })
+        }
       }
     }
   }
@@ -354,7 +388,24 @@ const import_games_sportradar = async ({
   log(`Games not matched: ${total_games_processed - total_games_matched}`)
   log(`Team mappings extracted: ${all_team_mappings.size}`)
 
+  const result = {
+    games_processed: total_games_processed,
+    games_matched: total_games_matched,
+    games_updated: total_games_updated,
+    games_skipped: total_games_skipped,
+    games_not_matched: unmatched_games.length
+  }
+
+  if (collector) {
+    collector.set_stats({
+      games_processed: result.games_processed,
+      games_updated: result.games_updated
+    })
+  }
+
   console.timeEnd('import-games-sportradar-total')
+
+  return result
 }
 
 const main = async () => {

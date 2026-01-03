@@ -73,9 +73,17 @@ const run = async ({
   week = current_season.nfl_seas_week,
   seas_type = current_season.nfl_seas_type,
   token,
-  ignore_cache = false
+  ignore_cache = false,
+  collector = null
 } = {}) => {
   log(`processing ${seas_type} season games for week ${week} in ${year}`)
+
+  const result = {
+    games_processed: 0,
+    games_updated: 0,
+    games_skipped: 0
+  }
+
   const games = await db('nfl_games').where({
     year,
     week,
@@ -86,35 +94,72 @@ const run = async ({
 
   if (!ignore_cache && games.length && !game_missing_detailid_v1) {
     log('found no games with missing ids')
-    return
+    result.games_skipped = games.length
+    return result
   }
 
   if (!token) {
-    token = await nfl.get_session_token_v3()
+    try {
+      token = await nfl.get_session_token_v3()
+    } catch (error) {
+      if (collector) {
+        collector.add_error(error, {
+          year,
+          week,
+          seas_type,
+          context: 'get_session_token'
+        })
+      }
+      throw error
+    }
   }
 
   if (!token) {
-    throw new Error('missing access token')
+    const error = new Error('missing access token')
+    if (collector) {
+      collector.add_error(error, { year, week, seas_type })
+    }
+    throw error
   }
 
-  const data = await nfl.getGames({
-    year,
-    week,
-    seas_type,
-    token,
-    ignore_cache
-  })
+  let data
+  try {
+    data = await nfl.getGames({
+      year,
+      week,
+      seas_type,
+      token,
+      ignore_cache
+    })
+  } catch (error) {
+    if (collector) {
+      collector.add_error(error, { year, week, seas_type, context: 'getGames' })
+    }
+    throw error
+  }
 
   const inserts = []
   for (const game of data.games) {
     inserts.push(format(game))
   }
 
+  result.games_processed = inserts.length
+
   if (inserts.length) {
     // TODO not sure which unique key should be used here
     await db('nfl_games').insert(inserts).onConflict('esbid').merge()
     log(`saved data for ${inserts.length} games`)
+    result.games_updated = inserts.length
   }
+
+  if (collector) {
+    collector.set_stats({
+      games_processed: result.games_processed,
+      games_updated: result.games_updated
+    })
+  }
+
+  return result
 }
 
 const main = async () => {

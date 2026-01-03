@@ -114,8 +114,15 @@ const format_play = (play) => ({
 const run = async ({
   year = current_season.year,
   ignore_conflicts = false,
-  force_download = false
+  force_download = false,
+  collector = null
 } = {}) => {
+  const result = {
+    plays_processed: 0,
+    plays_matched: 0,
+    plays_not_matched: 0
+  }
+
   if (year < 2022) {
     throw new Error('FTN Charting data is only available from 2022 onwards')
   }
@@ -165,6 +172,7 @@ const run = async ({
       continue
     }
 
+    result.plays_processed++
     const opts = {
       esbid: game.esbid,
       playId: Number(item.nflverse_play_id)
@@ -172,6 +180,7 @@ const run = async ({
     const db_play = await getPlay(opts)
 
     if (db_play) {
+      result.plays_matched++
       const play = format_play(item)
       await update_play({
         play_row: db_play,
@@ -182,10 +191,29 @@ const run = async ({
       log(`${item.nflverse_game_id} - ${item.nflverse_play_id}`)
       log(opts)
       play_not_matched.push(item)
+      if (collector) {
+        collector.add_unmatched_play({
+          esbid: opts.esbid,
+          playId: opts.playId,
+          description: null,
+          criteria: opts,
+          source: 'ftn_charting'
+        })
+      }
     }
   }
 
+  result.plays_not_matched = play_not_matched.length
   log(`${play_not_matched.length} plays not matched`)
+
+  if (collector) {
+    collector.set_stats({
+      plays_processed: result.plays_processed,
+      plays_matched: result.plays_matched
+    })
+  }
+
+  return result
 }
 
 const main = async () => {
