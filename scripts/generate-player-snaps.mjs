@@ -16,6 +16,17 @@ const initialize_cli = () => {
 const log = debug('generate-player-snaps')
 debug.enable('generate-player-snaps')
 
+const create_quarter_snap_sets = () => ({
+  q1_off: new Set(),
+  q2_off: new Set(),
+  q3_off: new Set(),
+  q4_off: new Set(),
+  q1_def: new Set(),
+  q2_def: new Set(),
+  q3_def: new Set(),
+  q4_def: new Set()
+})
+
 const generate_player_snaps_for_week = async ({
   year = current_season.year,
   week = current_season.nfl_seas_week,
@@ -61,7 +72,8 @@ const generate_player_snaps_for_week = async ({
       'nfl_plays.no_huddle',
       'nfl_plays.sec_rem_half',
       'nfl_plays.yards_to_go',
-      'nfl_plays.dwn'
+      'nfl_plays.dwn',
+      'nfl_plays.qtr'
     )
     .leftJoin('nfl_plays', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid').andOn(
@@ -99,7 +111,8 @@ const generate_player_snaps_for_week = async ({
       no_huddle,
       sec_rem_half,
       yards_to_go,
-      dwn
+      dwn,
+      qtr
     } = snap
 
     // Initialize team totals for both offense and defense if not already present
@@ -123,10 +136,15 @@ const generate_player_snaps_for_week = async ({
             snaps_neutral_short: new Set(),
             snaps_neutral_long: new Set(),
             snaps_neutral_early_down: new Set(),
-            snaps_neutral_late_down: new Set()
+            snaps_neutral_late_down: new Set(),
+            ...create_quarter_snap_sets()
           },
           def: {
-            snaps: new Set()
+            snaps: new Set(),
+            q1_def: new Set(),
+            q2_def: new Set(),
+            q3_def: new Set(),
+            q4_def: new Set()
           },
           st: {
             snaps: new Set()
@@ -168,6 +186,12 @@ const generate_player_snaps_for_week = async ({
         team_totals[off].off.snaps_neutral_early_down.add(play_key)
       if (wp > 0.2 && wp < 0.8 && dwn > 2)
         team_totals[off].off.snaps_neutral_late_down.add(play_key)
+
+      // Track quarter-specific snaps (exclude overtime - qtr 5)
+      if (qtr >= 1 && qtr <= 4) {
+        team_totals[off].off[`q${qtr}_off`].add(play_key)
+        team_totals[def].def[`q${qtr}_def`].add(play_key)
+      }
     }
 
     // Update special teams stats
@@ -223,7 +247,15 @@ const generate_player_snaps_for_week = async ({
       neutral_short: new Set(),
       neutral_long: new Set(),
       neutral_early_down: new Set(),
-      neutral_late_down: new Set()
+      neutral_late_down: new Set(),
+      q1_off: new Set(),
+      q2_off: new Set(),
+      q3_off: new Set(),
+      q4_off: new Set(),
+      q1_def: new Set(),
+      q2_def: new Set(),
+      q3_def: new Set(),
+      q4_def: new Set()
     }
 
     for (const play of player_snap_rows) {
@@ -258,8 +290,18 @@ const generate_player_snaps_for_week = async ({
             player_snaps.neutral_early_down.add(play_key)
           if (play.wp > 0.2 && play.wp < 0.8 && play.dwn > 2)
             player_snaps.neutral_late_down.add(play_key)
+
+          // Track quarter-specific offensive snaps (exclude overtime)
+          if (play.qtr >= 1 && play.qtr <= 4) {
+            player_snaps[`q${play.qtr}_off`].add(play_key)
+          }
         } else if (play.def === player_gamelog.tm) {
           player_snaps.def.add(play_key)
+
+          // Track quarter-specific defensive snaps (exclude overtime)
+          if (play.qtr >= 1 && play.qtr <= 4) {
+            player_snaps[`q${play.qtr}_def`].add(play_key)
+          }
         }
       }
       if (['PUNT', 'FGXP', 'KOFF', 'ONSD'].includes(play.play_type)) {
@@ -370,6 +412,42 @@ const generate_player_snaps_for_week = async ({
       snaps_neutral_late_down_pct: team_total.off.snaps_neutral_late_down
         ? player_snaps.neutral_late_down.size /
             team_total.off.snaps_neutral_late_down || 0
+        : null,
+
+      // Quarter-specific offensive snaps
+      q1_snaps_off: player_snaps.q1_off.size,
+      q1_snaps_off_pct: team_total.off.q1_off
+        ? player_snaps.q1_off.size / team_total.off.q1_off || 0
+        : null,
+      q2_snaps_off: player_snaps.q2_off.size,
+      q2_snaps_off_pct: team_total.off.q2_off
+        ? player_snaps.q2_off.size / team_total.off.q2_off || 0
+        : null,
+      q3_snaps_off: player_snaps.q3_off.size,
+      q3_snaps_off_pct: team_total.off.q3_off
+        ? player_snaps.q3_off.size / team_total.off.q3_off || 0
+        : null,
+      q4_snaps_off: player_snaps.q4_off.size,
+      q4_snaps_off_pct: team_total.off.q4_off
+        ? player_snaps.q4_off.size / team_total.off.q4_off || 0
+        : null,
+
+      // Quarter-specific defensive snaps
+      q1_snaps_def: player_snaps.q1_def.size,
+      q1_snaps_def_pct: team_total.def.q1_def
+        ? player_snaps.q1_def.size / team_total.def.q1_def || 0
+        : null,
+      q2_snaps_def: player_snaps.q2_def.size,
+      q2_snaps_def_pct: team_total.def.q2_def
+        ? player_snaps.q2_def.size / team_total.def.q2_def || 0
+        : null,
+      q3_snaps_def: player_snaps.q3_def.size,
+      q3_snaps_def_pct: team_total.def.q3_def
+        ? player_snaps.q3_def.size / team_total.def.q3_def || 0
+        : null,
+      q4_snaps_def: player_snaps.q4_def.size,
+      q4_snaps_def_pct: team_total.def.q4_def
+        ? player_snaps.q4_def.size / team_total.def.q4_def || 0
         : null
     })
   }

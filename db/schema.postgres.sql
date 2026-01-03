@@ -19483,7 +19483,23 @@ CREATE TABLE public.player_gamelogs (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 )
 PARTITION BY RANGE (year);
 
@@ -19589,7 +19605,23 @@ CREATE TABLE public.player_gamelogs_default (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -19687,7 +19719,23 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -19785,7 +19833,23 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -19883,7 +19947,23 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -19981,7 +20061,23 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20079,7 +20175,23 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20177,7 +20289,23 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20275,7 +20403,23 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20373,7 +20517,23 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20471,7 +20631,23 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20569,7 +20745,23 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20667,7 +20859,23 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20765,7 +20973,23 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20863,7 +21087,23 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -20961,7 +21201,23 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21059,7 +21315,23 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21157,7 +21429,23 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21255,7 +21543,23 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21353,7 +21657,23 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21451,7 +21771,23 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21549,7 +21885,23 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21647,7 +21999,23 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21745,7 +22113,23 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21843,7 +22227,23 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -21941,7 +22341,23 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -22039,7 +22455,23 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -22137,7 +22569,23 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
@@ -22235,7 +22683,23 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     rec_first_down smallint DEFAULT 0 NOT NULL,
     ry_excluding_kneels integer DEFAULT 0 NOT NULL,
     ruled_out_in_game boolean DEFAULT false,
-    fum_ret_td smallint DEFAULT 0
+    fum_ret_td smallint DEFAULT 0,
+    q1_snaps_off smallint,
+    q1_snaps_off_pct numeric(5,2),
+    q2_snaps_off smallint,
+    q2_snaps_off_pct numeric(5,2),
+    q3_snaps_off smallint,
+    q3_snaps_off_pct numeric(5,2),
+    q4_snaps_off smallint,
+    q4_snaps_off_pct numeric(5,2),
+    q1_snaps_def smallint,
+    q1_snaps_def_pct numeric(5,2),
+    q2_snaps_def smallint,
+    q2_snaps_def_pct numeric(5,2),
+    q3_snaps_def smallint,
+    q3_snaps_def_pct numeric(5,2),
+    q4_snaps_def smallint,
+    q4_snaps_def_pct numeric(5,2)
 );
 
 
