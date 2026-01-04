@@ -102,12 +102,15 @@ export const format_selection_type = ({ market_type, selection_name }) => {
     return null
   }
 
+  // ALT markets with N+ format (e.g., "250+ Yards") are OVER selections
   const player_alt_game_market_types = Object.values(player_game_alt_prop_types)
-  if (
+  const is_alt_market_with_plus =
     market_type &&
-    player_alt_game_market_types.includes(market_type) &&
-    selection_name.includes('+')
-  ) {
+    selection_name.includes('+') &&
+    (player_alt_game_market_types.includes(market_type) ||
+      TEAM_ALT_YARDAGE_MARKET_TYPES.has(market_type))
+
+  if (is_alt_market_with_plus) {
     return 'OVER'
   }
 
@@ -180,6 +183,39 @@ const TEAM_SPREAD_MARKET_TYPES = new Set([
 ])
 
 /**
+ * Team ALT yardage market types that use N+ format (e.g., "250+ Yards" means OVER)
+ * These markets don't have explicit OVER/UNDER in selection name
+ */
+const TEAM_ALT_YARDAGE_MARKET_TYPES = new Set([
+  team_game_market_types.GAME_TEAM_ALT_TOTAL_YARDS,
+  team_game_market_types.GAME_TEAM_ALT_RUSHING_YARDS,
+  team_game_market_types.GAME_TEAM_ALT_RECEIVING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_TOTAL_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_RUSHING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_RECEIVING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_TOTAL_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_RUSHING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_RECEIVING_YARDS
+])
+
+/**
+ * Team yardage market types that require team resolution from market type
+ * Includes both standard O/U markets and ALT markets
+ */
+const TEAM_YARDAGE_MARKET_TYPES = new Set([
+  team_game_market_types.GAME_TEAM_TOTAL_YARDS,
+  team_game_market_types.GAME_TEAM_RUSHING_YARDS,
+  team_game_market_types.GAME_TEAM_RECEIVING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_HALF_TOTAL_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_HALF_RUSHING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_HALF_RECEIVING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_QUARTER_RUSHING_YARDS,
+  team_game_market_types.GAME_TEAM_FIRST_QUARTER_RECEIVING_YARDS,
+  // Include all ALT types
+  ...TEAM_ALT_YARDAGE_MARKET_TYPES
+])
+
+/**
  * Checks if a market type is a team spread market
  * @param {string} market_type - The market type
  * @returns {boolean} - Whether the market type is a team spread market
@@ -214,4 +250,35 @@ export const parse_team_spread_selection = (selection_name) => {
     // For spreads, use the team name as the selection type identifier
     selection_type: team_name
   }
+}
+
+/**
+ * Checks if a market type is a team yardage market
+ * @param {string} market_type - The normalized market type
+ * @returns {boolean} - Whether the market type is a team yardage market
+ */
+export const is_team_yardage_market = (market_type) => {
+  return TEAM_YARDAGE_MARKET_TYPES.has(market_type)
+}
+
+/**
+ * Parses a FanDuel source market type to extract HOME/AWAY designation
+ * FanDuel market types for team yardage use format: (HOME|AWAY)_...
+ * @param {string} source_market_type - The FanDuel marketType field
+ * @returns {string|null} - 'HOME' or 'AWAY', or null if not a team yardage format
+ */
+export const parse_team_yardage_source_market_type = (source_market_type) => {
+  if (!source_market_type) {
+    return null
+  }
+
+  if (source_market_type.startsWith('HOME_')) {
+    return 'HOME'
+  }
+
+  if (source_market_type.startsWith('AWAY_')) {
+    return 'AWAY'
+  }
+
+  return null
 }

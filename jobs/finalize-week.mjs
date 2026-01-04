@@ -17,6 +17,7 @@ import process_playoffs from '#scripts/process-playoffs.mjs'
 import calculate_league_careerlogs from '#scripts/calculate-league-careerlogs.mjs'
 import { process_market_results } from '#scripts/process-market-results.mjs'
 import { update_market_settlement_status } from '#scripts/update-market-settlement-status.mjs'
+import calculate_team_historical_hit_rates from '#scripts/calculate-team-historical-hit-rates.mjs'
 import finalize_season from '#scripts/finalize-season.mjs'
 
 const log = debug('finalize-week')
@@ -43,8 +44,9 @@ const clear_live_plays = async () => {
  * 5. Calculate league careerlogs for all hosted leagues
  * 6. Process market results (betting settlement)
  * 7. Update market settlement status
- * 8. Clear temporary live play tables
- * 9. Trigger season finalization (if week after final championship week)
+ * 8. Calculate team historical hit rates
+ * 9. Clear temporary live play tables
+ * 10. Trigger season finalization (if week after final championship week)
  */
 const finalize_week = async () => {
   const week = get_target_week()
@@ -133,7 +135,19 @@ const finalize_week = async () => {
       })
   })
 
-  // Step 8: Clear temporary live play tables
+  // Step 8: Calculate team historical hit rates
+  await run_step({
+    name: 'calculate_team_hit_rates',
+    results,
+    logger: log,
+    fn: () =>
+      calculate_team_historical_hit_rates({
+        year,
+        current_week_only: true
+      })
+  })
+
+  // Step 9: Clear temporary live play tables
   await run_step({
     name: 'clear_live_plays',
     results,
@@ -141,7 +155,7 @@ const finalize_week = async () => {
     fn: () => clear_live_plays()
   })
 
-  // Step 9: Trigger season finalization when championship has concluded
+  // Step 10: Trigger season finalization when championship has concluded
   // This runs when finalize-week processes the week AFTER the final championship week.
   // Example: If championship is week 17, this triggers when week 18 is finalized.
   // skip_play_import=true because playoff week plays were already imported in step 1.

@@ -230,15 +230,52 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
   }
 
   /**
-   * Filter plays based on market requirements (player, quarter, etc.)
+   * Filter plays based on market requirements (player, team, quarter, etc.)
    * @param {Array<Object>} game_plays - All plays for a specific game
    * @param {Object} market - Market object containing selection criteria
    * @param {Object} mapping - Market mapping configuration
    * @returns {Array<Object>} Filtered plays relevant to the market
    */
   _filter_plays_for_market(game_plays, market, mapping) {
-    if (!game_plays || !mapping.player_column) {
-      return game_plays || []
+    if (!game_plays) {
+      return []
+    }
+
+    // For team aggregate markets, filter by offensive team
+    if (mapping.team_aggregate) {
+      if (!market.selection_pid) {
+        return []
+      }
+      let filtered_plays = game_plays.filter(
+        (play) => play.off === market.selection_pid
+      )
+
+      // Apply quarter filter if specified
+      if (mapping.quarter_filter) {
+        filtered_plays = filtered_plays.filter(
+          (play) => play.qtr === mapping.quarter_filter
+        )
+      }
+
+      // Apply half filter if specified
+      if (mapping.half_filter) {
+        if (mapping.half_filter === 1) {
+          filtered_plays = filtered_plays.filter(
+            (play) => play.qtr === 1 || play.qtr === 2
+          )
+        } else if (mapping.half_filter === 2) {
+          filtered_plays = filtered_plays.filter(
+            (play) => play.qtr === 3 || play.qtr === 4
+          )
+        }
+      }
+
+      return filtered_plays
+    }
+
+    // For player markets, require player_column
+    if (!mapping.player_column) {
+      return game_plays
     }
 
     let filtered_plays = game_plays

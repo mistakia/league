@@ -281,6 +281,129 @@ export const market_type_mappings = {
     selection_types: ['OVER', 'UNDER']
   },
 
+  // Team yardage markets - full game (use NFL plays data)
+  [team_game_market_types.GAME_TEAM_TOTAL_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds', 'recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true
+  },
+  [team_game_market_types.GAME_TEAM_ALT_TOTAL_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds', 'recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    is_alt_line: true
+  },
+  [team_game_market_types.GAME_TEAM_ALT_RUSHING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    is_alt_line: true
+  },
+  [team_game_market_types.GAME_TEAM_ALT_RECEIVING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    is_alt_line: true
+  },
+
+  // Team yardage markets - first half (use NFL plays data)
+  [team_game_market_types.GAME_TEAM_FIRST_HALF_TOTAL_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds', 'recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    half_filter: 1
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_TOTAL_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds', 'recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    half_filter: 1,
+    is_alt_line: true
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_HALF_RUSHING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    half_filter: 1
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_RUSHING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    half_filter: 1,
+    is_alt_line: true
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_RECEIVING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    half_filter: 1,
+    is_alt_line: true
+  },
+
+  // Team yardage markets - first quarter (use NFL plays data)
+  [team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_TOTAL_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds', 'recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    quarter_filter: 1,
+    is_alt_line: true
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_QUARTER_RUSHING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    quarter_filter: 1
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_RUSHING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['rush_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    quarter_filter: 1,
+    is_alt_line: true
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_QUARTER_RECEIVING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    quarter_filter: 1
+  },
+  [team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_RECEIVING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    team_aggregate: true,
+    quarter_filter: 1,
+    is_alt_line: true
+  },
+
   // Game outcome markets - use NFL games data
   [team_game_market_types.GAME_MONEYLINE]: {
     handler: HANDLER_TYPES.NFL_GAMES,

@@ -248,8 +248,11 @@
 
 # Betting Markets
 
-## Every 20 minutes - Hit rates calculation
+## Every 20 minutes - Player hit rates calculation
 */20 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-historical-hit-rates.mjs --current_week_only &>> /var/log/league/league-calculate-hit-rates.log
+
+## Every 20 minutes - Team yardage hit rates calculation
+*/20 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-historical-hit-rates.mjs --current_week_only &>> /var/log/league/league-calculate-team-hit-rates.log
 
 
 
