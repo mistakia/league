@@ -7,7 +7,7 @@ import fetch from 'node-fetch'
 
 import db from '#db'
 import { is_main, report_job } from '#libs-server'
-import { job_types } from '#libs-shared/job-.mjs'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
