@@ -124,7 +124,8 @@ export const job_types = {
   CALCULATE_PLAYER_GAME_OUTCOME_CORRELATIONS: 100,
   CALCULATE_POSITION_GAME_OUTCOME_DEFAULTS: 101,
   FINALIZE_GAME: 102,
-  FINALIZE_SEASON: 103
+  FINALIZE_SEASON: 103,
+  BACKFILL_PENALTY_TYPE: 104
 }
 
 export const job_title_by_id = {
@@ -230,5 +231,6 @@ export const job_title_by_id = {
   100: 'Calculate Player Game Outcome Correlations',
   101: 'Calculate Position Game Outcome Defaults',
   102: 'Finalize Game',
-  103: 'Finalize Season'
+  103: 'Finalize Season',
+  104: 'Backfill Penalty Type'
 }

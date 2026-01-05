@@ -7,6 +7,7 @@ import {
   transform_to_enum_value,
   map_play_direction
 } from './sportradar-transforms.mjs'
+import { normalize_penalty_type } from '#libs-shared/penalty-utils.mjs'
 
 /**
  * Map passing statistics to play fields
@@ -366,7 +367,8 @@ export const map_play_details = async ({
   details,
   resolve_player,
   get_team_abbrev,
-  def_team
+  def_team,
+  off_team
 }) => {
   const mapped = {}
 
@@ -375,10 +377,17 @@ export const map_play_details = async ({
   // Penalty details
   const penalty_detail = details.find((d) => d.category === 'penalty')
   if (penalty_detail?.penalty) {
-    mapped.penalty_type = penalty_detail.penalty.description
-    mapped.pen_team = get_team_abbrev({
+    const pen_team = get_team_abbrev({
       sportradar_team_id: penalty_detail.penalty.team?.id,
       sportradar_alias: penalty_detail.penalty.team?.alias
+    })
+    mapped.pen_team = pen_team
+
+    // Normalize penalty type to canonical format
+    mapped.penalty_type = normalize_penalty_type({
+      raw_penalty_type: penalty_detail.penalty.description,
+      pen_team,
+      off_team
     })
 
     if (penalty_detail.penalty.result) {

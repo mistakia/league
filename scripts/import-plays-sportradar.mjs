@@ -448,7 +448,8 @@ const map_statistics = async ({
       details: play.details || [],
       resolve_player,
       get_team_abbrev,
-      def_team: mapped_play.def
+      def_team: mapped_play.def,
+      off_team: mapped_play.off
     })
   ]
 
