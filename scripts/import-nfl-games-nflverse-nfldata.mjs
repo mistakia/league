@@ -82,6 +82,8 @@ const format_game = (game) => ({
 })
 
 const import_nfl_games_nflverse_nfldata = async ({
+  year = null,
+  seas_type = null,
   ignore_conflicts = false,
   force_download = false,
   collector = null
@@ -117,9 +119,27 @@ const import_nfl_games_nflverse_nfldata = async ({
   }
 
   const game_not_matched = []
-  const data = await readCSV(path, {
+  let data = await readCSV(path, {
     mapValues: ({ header, index, value }) => (value === 'NA' ? null : value)
   })
+
+  // Filter by year if specified
+  if (year) {
+    const original_count = data.length
+    data = data.filter((item) => Number(item.season) === year)
+    log(
+      `Filtered to year ${year}: ${data.length} games (from ${original_count} total)`
+    )
+  }
+
+  // Filter by seas_type if specified
+  if (seas_type) {
+    const before_filter = data.length
+    data = data.filter((item) => item.game_type === seas_type)
+    log(
+      `Filtered to seas_type ${seas_type}: ${data.length} games (from ${before_filter})`
+    )
+  }
 
   for (const item of data) {
     if (!item.season) {
