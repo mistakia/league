@@ -126,7 +126,8 @@ const import_nfl_games_nflverse_nfldata = async ({
   // Filter by year if specified
   if (year) {
     const original_count = data.length
-    data = data.filter((item) => Number(item.season) === year)
+    const year_num = Number(year)
+    data = data.filter((item) => Number(item.season) === year_num)
     log(
       `Filtered to year ${year}: ${data.length} games (from ${original_count} total)`
     )

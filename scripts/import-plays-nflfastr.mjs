@@ -8,6 +8,7 @@ import { hideBin } from 'yargs/helpers'
 import dayjs from 'dayjs'
 
 import { fixTeam } from '#libs-shared'
+import { normalize_penalty_type } from '#libs-shared/penalty-utils.mjs'
 import { current_season } from '#constants'
 import {
   is_main,
@@ -47,6 +48,14 @@ import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclus
  */
 
 const log = debug('import-nflfastr-plays')
+
+// Helper to get offensive team, handling kickoff convention swap
+// nflfastr uses receiving team as posteam for kickoffs, but database uses kicking team
+const get_offensive_team = (play) => {
+  if (!play.posteam) return null
+  const is_kickoff = play.play_type === 'kickoff'
+  return fixTeam(is_kickoff ? play.defteam : play.posteam)
+}
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -227,12 +236,7 @@ const format_play_context = (play) => {
   // nflfastr uses receiving team as posteam for kickoffs,
   // but database convention uses kicking team, so swap them
   const is_kickoff = play.play_type === 'kickoff'
-
-  // For kickoffs: use defteam (kicking team) for off/pos_team, use posteam (receiving team) for def
-  // For all other plays: use posteam for off/pos_team, use defteam for def
-  const off_team = play.posteam
-    ? fixTeam(is_kickoff ? play.defteam : play.posteam)
-    : null
+  const off_team = get_offensive_team(play)
   const def_team = play.defteam
     ? fixTeam(is_kickoff ? play.posteam : play.defteam)
     : null
@@ -307,6 +311,10 @@ const format_play_events = (play) => {
     format_boolean(play.incomplete_pass) ||
     (play.play_type === 'no_play' && pass_attempted && !pass_completed)
 
+  // Calculate pen_team and off_team for penalty normalization
+  const pen_team = play.penalty_team ? fixTeam(play.penalty_team) : null
+  const off_team = get_offensive_team(play)
+
   return {
     fum: format_boolean(play.fumble),
     incomp: incomp || null,
@@ -319,8 +327,14 @@ const format_play_events = (play) => {
     pass: pass_attempted,
     solo_tk: format_boolean(play.solo_tackle),
     assist_tk: format_boolean(play.assist_tackle),
-    pen_team: play.penalty_team ? fixTeam(play.penalty_team) : null,
-    pen_yds: format_number(play.penalty_yards)
+    pen_team,
+    pen_yds: format_number(play.penalty_yards),
+    penalty_type: normalize_penalty_type({
+      raw_penalty_type: play.penalty_type,
+      pen_team,
+      off_team
+    }),
+    penalty_player_gsis: play.penalty_player_id || null
   }
 }
 
@@ -471,6 +485,7 @@ const format_probability_data = (play) => ({
 })
 
 const format_play = (play) => ({
+  desc: play.desc || null,
   ...format_play_context(play),
   ...format_drive_data(play),
   ...format_series_data(play),
@@ -623,6 +638,23 @@ const process_play = async ({
 }
 
 // ============================================================================
+// Logging Helpers
+// ============================================================================
+
+const log_match_criteria = (match_criteria) => {
+  log(`  Match Criteria:`)
+  log(`    esbid: ${match_criteria.esbid}`)
+  log(`    qtr: ${match_criteria.qtr}`)
+  log(`    dwn: ${match_criteria.dwn}`)
+  log(`    yards_to_go: ${match_criteria.yards_to_go}`)
+  log(`    off: ${match_criteria.off}`)
+  log(`    def: ${match_criteria.def}`)
+  log(`    play_type: ${match_criteria.play_type}`)
+  log(`    ydl_100: ${match_criteria.ydl_100}`)
+  log(`    sec_rem_qtr: ${match_criteria.sec_rem_qtr}`)
+}
+
+// ============================================================================
 // Main Import Function
 // ============================================================================
 
@@ -690,7 +722,7 @@ const run = async ({
   const conflicts_by_field = {}
 
   for (const item of data) {
-    const result = await process_play({
+    const play_result = await process_play({
       item,
       year,
       ignore_conflicts,
@@ -703,12 +735,12 @@ const run = async ({
       log(`Processed ${processed_count}/${data.length} plays...`)
     }
 
-    if (result.matched) {
-      plays_matched.push(result)
+    if (play_result.matched) {
+      plays_matched.push(play_result)
       // Evaluate field-level differences for summary stats
       const excluded_fields = new Set(['esbid', 'playId', 'updated'])
-      const db_play = result.db_play
-      const formatted_play = result.formatted_play
+      const db_play = play_result.db_play
+      const formatted_play = play_result.formatted_play
 
       for (const [field, new_value] of Object.entries(formatted_play)) {
         if (excluded_fields.has(field)) continue
@@ -727,10 +759,10 @@ const run = async ({
           updates_by_field[field] = (updates_by_field[field] || 0) + 1
         }
       }
-    } else if (result.multiple_match_error) {
-      plays_multiple_matches.push(result)
+    } else if (play_result.multiple_match_error) {
+      plays_multiple_matches.push(play_result)
     } else {
-      plays_not_matched.push(result)
+      plays_not_matched.push(play_result)
     }
   }
 
@@ -782,16 +814,7 @@ const run = async ({
       log(
         `  Matched ${play.match_count} plays - requires more specific criteria`
       )
-      log(`  Match Criteria:`)
-      log(`    esbid: ${play.match_criteria.esbid}`)
-      log(`    qtr: ${play.match_criteria.qtr}`)
-      log(`    dwn: ${play.match_criteria.dwn}`)
-      log(`    yards_to_go: ${play.match_criteria.yards_to_go}`)
-      log(`    off: ${play.match_criteria.off}`)
-      log(`    def: ${play.match_criteria.def}`)
-      log(`    play_type: ${play.match_criteria.play_type}`)
-      log(`    ydl_100: ${play.match_criteria.ydl_100}`)
-      log(`    sec_rem_qtr: ${play.match_criteria.sec_rem_qtr}`)
+      log_match_criteria(play.match_criteria)
       log('---')
     }
   }
@@ -804,16 +827,7 @@ const run = async ({
     for (const play of plays_not_matched) {
       log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
       log(`  ${play.item.desc}`)
-      log(`  Match Criteria:`)
-      log(`    esbid: ${play.match_criteria.esbid}`)
-      log(`    qtr: ${play.match_criteria.qtr}`)
-      log(`    dwn: ${play.match_criteria.dwn}`)
-      log(`    yards_to_go: ${play.match_criteria.yards_to_go}`)
-      log(`    off: ${play.match_criteria.off}`)
-      log(`    def: ${play.match_criteria.def}`)
-      log(`    play_type: ${play.match_criteria.play_type}`)
-      log(`    ydl_100: ${play.match_criteria.ydl_100}`)
-      log(`    sec_rem_qtr: ${play.match_criteria.sec_rem_qtr}`)
+      log_match_criteria(play.match_criteria)
       log('---')
     }
   }
