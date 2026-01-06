@@ -98,7 +98,7 @@ const import_nfl_games_nflverse_nfldata = async ({
 
   log('Preloading player cache for QB lookups...')
   console.time('player-cache-preload-time')
-  await preload_active_players()
+  await preload_active_players({ all_players: true })
   console.timeEnd('player-cache-preload-time')
 
   const current_date = new Date().toISOString().split('T')[0]
