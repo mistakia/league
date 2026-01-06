@@ -47,13 +47,13 @@ const format_number = (num) => {
 }
 
 const format_game = (game) => ({
-  nflverse_game_id: game.game_id,
+  nflverse_game_id: game.game_id?.trim() || null,
   // esbid: game.old_game_id,
   gsisid: format_number(game.gsis),
-  pfr_game_id: game.pfr,
-  pff_game_id: game.pff,
-  espn_game_id: game.espn,
-  ftn_game_id: game.ftn,
+  pfr_game_id: game.pfr?.trim() || null,
+  pff_game_id: game.pff?.trim() || null,
+  espn_game_id: game.espn?.trim() || null,
+  ftn_game_id: game.ftn?.trim() || null,
 
   // total: game.total,
   // year: game.season,
@@ -68,17 +68,17 @@ const format_game = (game) => ({
   spread_line: format_number(game.spread_line),
   total_line: format_number(game.total_line),
 
-  roof: game.roof || null,
-  surf: game.surface || null,
+  roof: game.roof?.trim() || null,
+  surf: game.surface?.trim() || null,
   temp: format_number(game.temp),
   wind: format_number(game.wind),
 
-  stad: game.stadium || null,
+  stad: game.stadium?.trim() || null,
 
-  away_coach: game.away_coach || null,
-  home_coach: game.home_coach || null,
+  away_coach: game.away_coach?.trim() || null,
+  home_coach: game.home_coach?.trim() || null,
 
-  referee: game.referee || null
+  referee: game.referee?.trim() || null
 })
 
 const import_nfl_games_nflverse_nfldata = async ({
