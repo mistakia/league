@@ -212,7 +212,9 @@ const import_nfl_games_nflverse_nfldata = async ({
 
       if (item.away_qb_id) {
         const away_qb_player = find_player({
-          gsisid: item.away_qb_id
+          gsisid: item.away_qb_id,
+          ignore_free_agent: false,
+          ignore_retired: false
         })
 
         if (away_qb_player) {
@@ -234,7 +236,9 @@ const import_nfl_games_nflverse_nfldata = async ({
 
       if (item.home_qb_id) {
         const home_qb_player = find_player({
-          gsisid: item.home_qb_id
+          gsisid: item.home_qb_id,
+          ignore_free_agent: false,
+          ignore_retired: false
         })
 
         if (home_qb_player) {
