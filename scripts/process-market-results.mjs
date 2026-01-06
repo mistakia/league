@@ -514,9 +514,7 @@ const execute_processing = async ({
     }
 
     // Update market settlement status
-    log(
-      `Checking market settlement status for ${valid_esbids.length} games...`
-    )
+    log(`Checking market settlement status for ${valid_esbids.length} games...`)
     const markets_updated = await update_market_settlement_status({
       esbids: valid_esbids,
       dry_run: config.dry_run,
