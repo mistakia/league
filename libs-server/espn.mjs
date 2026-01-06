@@ -3,8 +3,8 @@ import debug from 'debug'
 import { fetch as fetch_http2 } from 'fetch-h2'
 
 import db from '#db'
-import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
+import { wait } from './wait.mjs'
 import { current_season } from '#constants'
 
 const log = debug('espn')
@@ -131,6 +131,72 @@ export const getPlayers = async ({ page = 1 }) => {
   const res = await fetch(url)
   const data = await res.json()
   return data
+}
+
+export const search_players = async ({
+  query,
+  limit = 10,
+  ignore_cache = false
+} = {}) => {
+  if (!query) {
+    throw new Error('query is required')
+  }
+
+  const cache_key = `/espn/search/${encodeURIComponent(query)}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for espn search: ${query}`)
+      return cache_value
+    }
+  }
+
+  const url = new URL('https://site.web.api.espn.com/apis/search/v2')
+  url.searchParams.set('region', 'us')
+  url.searchParams.set('lang', 'en')
+  url.searchParams.set('section', 'nfl')
+  url.searchParams.set('type', 'player')
+  url.searchParams.set('query', query)
+  url.searchParams.set('limit', limit)
+
+  log(`fetching espn search: ${url}`)
+  const res = await fetch(url)
+  const data = await res.json()
+
+  await wait(2000)
+
+  const results = []
+  // ESPN search API returns results in results[0].contents for player type
+  const player_results = data?.results?.find((r) => r.type === 'player')
+  const players = player_results?.contents || data?.athletes?.items || []
+  const espn_id_regex = /\/nfl\/player\/_\/id\/(\d+)/
+
+  for (const item of players) {
+    // Handle both link object format and string format
+    const link_url =
+      typeof item.link === 'object' ? item.link?.web : item.link || ''
+    const espn_id_match = link_url.match(espn_id_regex)
+    const espn_id = espn_id_match ? Number(espn_id_match[1]) : null
+
+    if (!espn_id) continue
+
+    // Extract team from subtitle (e.g., "Kansas City Chiefs")
+    const team_from_subtitle = item.subtitle || ''
+
+    results.push({
+      espn_id,
+      name: item.displayName || item.name || '',
+      position: item.position || '',
+      team: teamId[item.teamId] || team_from_subtitle || '',
+      link: link_url
+    })
+  }
+
+  if (results.length > 0) {
+    await cache.set({ key: cache_key, value: results })
+  }
+
+  return results
 }
 
 // format: PPR, STANDARD

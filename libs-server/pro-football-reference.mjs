@@ -1434,6 +1434,152 @@ const format_game_html = (html) => {
   return html
 }
 
+export const search_players = async ({
+  search_term,
+  ignore_cache = false
+} = {}) => {
+  if (!search_term) {
+    throw new Error('search_term is required')
+  }
+
+  if (!config.pro_football_reference_url) {
+    throw new Error('config.pro_football_reference_url is required')
+  }
+
+  const cache_key = `/pro-football-reference/search/${encodeURIComponent(search_term)}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for pfr search: ${search_term}`)
+      return cache_value
+    }
+  }
+
+  const url = `${config.pro_football_reference_url}/search/search.fcgi?search=${encodeURIComponent(search_term)}`
+  log(`fetching pfr search: ${url}`)
+
+  const response = await fetch_with_proxy({ url })
+  const text = await response.text()
+  const dom = new JSDOM(text)
+  const doc = dom.window.document
+
+  const results = []
+
+  // Check if we were redirected to a player page directly
+  // This happens when PFR finds a unique match - detect via canonical link or page structure
+  const canonical_link = doc.querySelector('link[rel="canonical"]')
+  const canonical_href = canonical_link?.getAttribute('href') || ''
+  const is_player_page =
+    canonical_href.includes('/players/') && canonical_href.endsWith('.htm')
+
+  // Also check for player page structure
+  const name_elem = doc.querySelector('#meta h1 span')
+
+  if (is_player_page && name_elem) {
+    // Redirected to a single player page - extract info from canonical URL
+    const pfr_id_match = canonical_href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
+
+    if (pfr_id_match) {
+      // Extract position from meta paragraphs
+      const meta_paragraphs = doc.querySelectorAll('#meta p')
+      let positions = []
+      for (const p of meta_paragraphs) {
+        const text_content = p.textContent || ''
+        if (text_content.includes('Position')) {
+          const pos_match = text_content.match(/Position[:\s]+([A-Z-]+)/)
+          if (pos_match) {
+            positions = pos_match[1].split('-')
+          }
+          break
+        }
+      }
+
+      results.push({
+        pfr_id: pfr_id_match[1],
+        name: name_elem.textContent.trim(),
+        positions,
+        start_year: null,
+        end_year: null,
+        is_active: true,
+        url: canonical_href
+      })
+    }
+  } else {
+    // Search results page - parse the results
+    const search_results = doc.querySelectorAll(
+      '.search-item-name, #players .search-item, div.search-results div[data-player]'
+    )
+
+    for (const result of search_results) {
+      const link = result.querySelector('a') || result
+      if (!link.href) continue
+
+      const href = link.href || ''
+      const pfr_id_match = href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
+      if (!pfr_id_match) continue
+
+      const name = link.textContent?.trim() || ''
+      const parent_text =
+        result.parentElement?.textContent || result.textContent || ''
+      const {
+        positions,
+        start: start_year,
+        end: end_year
+      } = extract_position_start_end(parent_text)
+
+      results.push({
+        pfr_id: pfr_id_match[1],
+        name,
+        positions,
+        start_year,
+        end_year,
+        is_active: parent_text.includes('</b>'),
+        url: `${config.pro_football_reference_url}${href}`
+      })
+    }
+
+    // Also check the player div format
+    const player_divs = doc.querySelectorAll(
+      '#div_players p, .search-results .search-item'
+    )
+    for (const div of player_divs) {
+      const link = div.querySelector('a')
+      if (!link) continue
+
+      const href = link.getAttribute('href') || ''
+      const pfr_id_match = href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
+      if (!pfr_id_match) continue
+
+      // Skip if already added
+      if (results.some((r) => r.pfr_id === pfr_id_match[1])) continue
+
+      const position_start_string = div.innerHTML.split('</a>')[1] || ''
+      const is_active = position_start_string.includes('</b>')
+      const {
+        positions,
+        start: start_year,
+        end: end_year
+      } = extract_position_start_end(position_start_string)
+
+      results.push({
+        pfr_id: pfr_id_match[1],
+        name: link.textContent?.trim() || '',
+        positions,
+        start_year,
+        end_year,
+        is_active,
+        url: `${config.pro_football_reference_url}${href}`
+      })
+    }
+  }
+
+  if (results.length > 0) {
+    await cache.set({ key: cache_key, value: results })
+  }
+
+  return results
+}
+
 export const get_players = async ({ ignore_cache = false } = {}) => {
   const cache_key = '/pro-football-reference/players.json'
   if (!ignore_cache) {

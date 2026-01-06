@@ -64,6 +64,13 @@ export { default as is_league_post_season_week } from './is-league-post-season-w
 export { default as get_string_from_object } from './get-string-from-object.mjs'
 export { default as format_nfl_status } from './format-nfl-status.mjs'
 export { default as format_nfl_injury_status } from './format-nfl-injury-status.mjs'
+export {
+  levenshtein_distance,
+  levenshtein_ratio,
+  jaccard_distance,
+  ngram_distance,
+  strings_are_similar
+} from './string-distance.mjs'
 export { default as format_standard_selection_id } from './format-standard-selection-id.mjs'
 export { default as parse_standard_selection_id } from './parse-standard-selection-id.mjs'
 export { default as nfl_plays_column_params } from './nfl-plays-column-params.mjs'

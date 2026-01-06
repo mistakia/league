@@ -95,6 +95,17 @@ This is **xo.football**, an open-source fantasy football league management platf
 3. Do NOT commit migration files or SQL commands to the repository
 4. The exported schema file (`db/schema.postgres.sql`) becomes the source of truth
 
+## Key Documentation
+
+| Document                                                                             | Description                                                  |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| [docs/player-management.md](docs/player-management.md)                               | Player lookup, creation, updates, and external ID management |
+| [docs/data-views-system.md](docs/data-views-system.md)                               | Dynamic table configuration and data view field definitions  |
+| [docs/api-documentation.md](docs/api-documentation.md)                               | API endpoints and authentication                             |
+| [docs/glossary.md](docs/glossary.md)                                                 | Fantasy football terminology and abbreviations               |
+| [docs/named-formats.md](docs/named-formats.md)                                       | League scoring format definitions                            |
+| [docs/fantasy-points-column-definition.md](docs/fantasy-points-column-definition.md) | Fantasy points calculation system                            |
+
 ## Key Development Patterns
 
 ### ES Modules
@@ -225,3 +236,27 @@ Current season info from `libs-shared/constants/season-constants.mjs`:
 - `current_season.year`, `current_season.week`
 - `is_offseason`, `is_regular_season`
 - `fantasy_weeks`, `nfl_weeks`
+
+## Player Management
+
+See [docs/player-management.md](docs/player-management.md) for comprehensive documentation.
+
+### Quick Reference
+
+```bash
+# Multi-source lookup (searches Sleeper, ESPN, NFL Pro, PFR in parallel)
+NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Player Name" --sources all
+
+# Lookup with filters
+NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Mahomes" --pos QB --team KC
+
+# Update player with external IDs
+NODE_ENV=production node scripts/resolve-player-match.mjs update --pid "PID" --gsisid "00-0012345"
+
+# Create player (use suggested command from lookup)
+NODE_ENV=production node scripts/resolve-player-match.mjs create --fname "First" --lname "Last" --pos QB
+```
+
+### Player ID Format
+
+Player IDs are generated as: `FNAM-LNAM-YEAR-DOB` (e.g., `PATR-MAHO-2017-1995-09-17`)

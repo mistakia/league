@@ -96,6 +96,7 @@ export {
 } from './redis_adapter.mjs'
 export * as auction_slow_mode_redis from './auction-slow-mode-redis.mjs'
 export * as sleeper from './sleeper.mjs'
+export * as player_name_utils from './player-name-utils.mjs'
 export * as fantasypros from './fantasypros.mjs'
 export * as four_for_four from './4for4.mjs'
 export * as yahoo from './yahoo.mjs'

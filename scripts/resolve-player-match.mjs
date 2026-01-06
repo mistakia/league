@@ -12,9 +12,23 @@ import {
   createPlayer,
   updatePlayer,
   mergePlayer,
-  find_player_row
+  find_player_row,
+  player_name_utils
 } from '#libs-server'
-import { format_player_name, fixTeam } from '#libs-shared'
+import { format_player_name, fixTeam, strings_are_similar } from '#libs-shared'
+import { search_players as espn_search_players } from '#libs-server/espn.mjs'
+import { search_players as pfr_search_players } from '#libs-server/pro-football-reference.mjs'
+
+// NFL Pro search is in private libs - dynamically import to handle missing module
+const get_nfl_pro_search = async () => {
+  try {
+    const module = await import('../private/libs-server/nfl-pro.mjs')
+    return module.search_players
+  } catch (err) {
+    log('NFL Pro module not available')
+    return null
+  }
+}
 
 const log = debug('resolve-player-match')
 debug.enable('resolve-player-match,create-player,update-player,merge-player')
@@ -376,13 +390,312 @@ const action_search = async (argv) => {
   return players
 }
 
+const ALL_SOURCES = ['sleeper', 'espn', 'nfl', 'pfr']
+const VALID_SOURCES = [...ALL_SOURCES, 'all']
+
+const parse_sources = (sources_string) => {
+  if (!sources_string || sources_string === 'all') {
+    return ALL_SOURCES
+  }
+  const sources = sources_string.split(',').map((s) => s.trim().toLowerCase())
+  for (const source of sources) {
+    if (!VALID_SOURCES.includes(source)) {
+      throw new Error(
+        `Invalid source: ${source}. Valid sources: ${VALID_SOURCES.join(', ')}`
+      )
+    }
+  }
+  // If 'all' is in the array, expand to all sources
+  if (sources.includes('all')) {
+    return ALL_SOURCES
+  }
+  return sources
+}
+
+const query_sources = async ({
+  name,
+  pos,
+  team,
+  sources,
+  ignore_cache = false
+}) => {
+  const results = {
+    sleeper: [],
+    espn: [],
+    nfl: [],
+    pfr: []
+  }
+
+  const queries = []
+
+  if (sources.includes('sleeper')) {
+    queries.push(
+      (async () => {
+        try {
+          const sleeper_players = await fetch_sleeper_players({ ignore_cache })
+          const formatted_name = format_player_name(name)
+          const search_team = team ? fixTeam(team) : null
+
+          const matches = []
+          for (const sleeper_id in sleeper_players) {
+            const player = sleeper_players[sleeper_id]
+            if (!player.full_name) continue
+
+            const sleeper_formatted = format_player_name(player.full_name)
+            const name_match =
+              sleeper_formatted.includes(formatted_name) ||
+              formatted_name.includes(sleeper_formatted)
+
+            if (!name_match) continue
+            if (
+              search_team &&
+              player.team &&
+              fixTeam(player.team) !== search_team
+            )
+              continue
+            if (pos && player.position !== pos.toUpperCase()) continue
+
+            matches.push({ sleeper_id, ...player })
+          }
+          results.sleeper = matches
+        } catch (err) {
+          log(`Sleeper search error: ${err.message}`)
+        }
+      })()
+    )
+  }
+
+  if (sources.includes('espn')) {
+    queries.push(
+      (async () => {
+        try {
+          results.espn = await espn_search_players({
+            query: name,
+            ignore_cache
+          })
+        } catch (err) {
+          log(`ESPN search error: ${err.message}`)
+        }
+      })()
+    )
+  }
+
+  if (sources.includes('nfl')) {
+    queries.push(
+      (async () => {
+        try {
+          const nfl_search = await get_nfl_pro_search()
+          if (nfl_search) {
+            results.nfl = await nfl_search({ term: name, ignore_cache })
+          }
+        } catch (err) {
+          log(`NFL Pro search error: ${err.message}`)
+        }
+      })()
+    )
+  }
+
+  if (sources.includes('pfr')) {
+    queries.push(
+      (async () => {
+        try {
+          results.pfr = await pfr_search_players({
+            search_term: name,
+            ignore_cache
+          })
+        } catch (err) {
+          log(`PFR search error: ${err.message}`)
+        }
+      })()
+    )
+  }
+
+  await Promise.allSettled(queries)
+  return results
+}
+
+const consolidate_results = async ({ results, pos, team }) => {
+  const search_team = team ? fixTeam(team) : null
+  const consolidated = []
+
+  // Pre-load nickname sets for synchronous name matching
+  const nickname_sets = await player_name_utils.load_nickname_sets()
+
+  // Synchronous helper to check if two names match using fuzzy matching and nicknames
+  const names_match_sync = (name1, name2) => {
+    const norm1 = format_player_name(name1 || '')
+    const norm2 = format_player_name(name2 || '')
+
+    // Exact match
+    if (norm1 === norm2) return true
+
+    // Substring match
+    if (norm1.includes(norm2) || norm2.includes(norm1)) return true
+
+    // Check if strings are similar using distance metrics
+    if (strings_are_similar(norm1, norm2)) return true
+
+    // Split into first/last name and check with nickname support
+    const parts1 = name1?.trim().split(/\s+/) || []
+    const parts2 = name2?.trim().split(/\s+/) || []
+
+    if (parts1.length >= 2 && parts2.length >= 2) {
+      const fname1 = format_player_name(parts1[0])
+      const fname2 = format_player_name(parts2[0])
+      const lname1 = format_player_name(parts1[parts1.length - 1])
+      const lname2 = format_player_name(parts2[parts2.length - 1])
+
+      // Last names must be similar
+      if (!strings_are_similar(lname1, lname2)) return false
+
+      // First names can match via nicknames
+      if (fname1 === fname2) return true
+      if (fname1.includes(fname2) || fname2.includes(fname1)) return true
+      if (player_name_utils.is_nicknames_sync(fname1, fname2, nickname_sets))
+        return true
+      if (strings_are_similar(fname1, fname2)) return true
+    }
+
+    return false
+  }
+
+  // Helper to find or create a consolidated entry
+  const find_or_create_entry = ({
+    source_name,
+    source_position,
+    source_team
+  }) => {
+    const norm_pos = source_position?.toUpperCase() || ''
+    const norm_team = source_team ? fixTeam(source_team) : ''
+
+    // Find existing entry with matching name using fuzzy matching
+    let entry = consolidated.find((e) => names_match_sync(e.name, source_name))
+
+    if (!entry) {
+      entry = {
+        name: source_name,
+        position: norm_pos,
+        team: norm_team,
+        sources: [],
+        external_ids: {}
+      }
+      consolidated.push(entry)
+    }
+
+    // Update position and team if we have better data
+    if (!entry.position && norm_pos) entry.position = norm_pos
+    if (!entry.team && norm_team) entry.team = norm_team
+
+    return entry
+  }
+
+  // Process Sleeper results
+  for (const player of results.sleeper) {
+    const entry = find_or_create_entry({
+      source_name:
+        player.full_name || `${player.first_name} ${player.last_name}`,
+      source_position: player.position,
+      source_team: player.team
+    })
+
+    entry.sources.push('sleeper')
+    entry.external_ids.sleeper_id = player.sleeper_id
+    if (player.espn_id) entry.external_ids.espn_id = player.espn_id
+    if (player.sportradar_id)
+      entry.external_ids.sportradar_id = player.sportradar_id
+    if (player.gsis_id) entry.external_ids.gsisid = player.gsis_id
+    if (player.rotowire_id) entry.external_ids.rotowire_id = player.rotowire_id
+    if (player.yahoo_id) entry.external_ids.yahoo_id = player.yahoo_id
+
+    // Store additional sleeper data
+    entry.sleeper_data = {
+      first_name: player.first_name,
+      last_name: player.last_name,
+      birth_date: player.birth_date,
+      height: player.height,
+      weight: player.weight,
+      college: player.college,
+      start_year: player.metadata?.start_year
+    }
+  }
+
+  // Process ESPN results
+  for (const player of results.espn) {
+    const entry = find_or_create_entry({
+      source_name: player.name,
+      source_position: player.position,
+      source_team: player.team
+    })
+
+    if (!entry.sources.includes('espn')) entry.sources.push('espn')
+    entry.external_ids.espn_id = player.espn_id
+  }
+
+  // Process NFL Pro results
+  for (const player of results.nfl) {
+    const entry = find_or_create_entry({
+      source_name: player.display_name,
+      source_position: player.position,
+      source_team: player.team
+    })
+
+    if (!entry.sources.includes('nfl')) entry.sources.push('nfl')
+    if (player.gsisid) entry.external_ids.gsisid = player.gsisid
+    if (player.esbid) entry.external_ids.esbid = player.esbid
+    if (player.gsis_it_id) entry.external_ids.gsis_it_id = player.gsis_it_id
+
+    // Store NFL Pro data
+    entry.nfl_data = {
+      first_name: player.first_name,
+      last_name: player.last_name,
+      birth_date: player.birth_date,
+      height: player.height,
+      weight: player.weight,
+      college: player.college,
+      draft_round: player.draft_round,
+      draft_pick: player.draft_pick,
+      rookie_year: player.rookie_year
+    }
+  }
+
+  // Process PFR results
+  for (const player of results.pfr) {
+    const entry = find_or_create_entry({
+      source_name: player.name,
+      source_position: player.positions?.[0],
+      source_team: null
+    })
+
+    if (!entry.sources.includes('pfr')) entry.sources.push('pfr')
+    entry.external_ids.pfr_id = player.pfr_id
+
+    // Store PFR data
+    entry.pfr_data = {
+      positions: player.positions,
+      start_year: player.start_year,
+      end_year: player.end_year,
+      is_active: player.is_active,
+      url: player.url
+    }
+  }
+
+  // Filter by position and team if specified
+  return consolidated.filter((entry) => {
+    if (pos && entry.position && entry.position !== pos.toUpperCase())
+      return false
+    if (search_team && entry.team && entry.team !== search_team) return false
+    return true
+  })
+}
+
 const action_lookup = async (argv) => {
-  const { name, team, pos, draftYear, ignoreCache } = argv
+  const { name, team, pos, draftYear, ignoreCache, sources: sources_arg } = argv
 
   if (!name) {
     throw new Error('--name is required')
   }
 
+  const sources = parse_sources(sources_arg)
   const formatted_name = format_player_name(name)
   const search_team = team ? fixTeam(team) : null
 
@@ -391,6 +704,7 @@ const action_lookup = async (argv) => {
   if (search_team) log(`  Team: ${search_team}`)
   if (pos) log(`  Position: ${pos}`)
   if (draftYear) log(`  Draft Year: ${draftYear}`)
+  log(`  Sources: ${sources.join(', ')}`)
 
   // Step 1: Search database for existing players
   log('\n=== Database Search ===')
@@ -406,7 +720,11 @@ const action_lookup = async (argv) => {
       'dob',
       'sleeper_id',
       'espn_id',
-      'sportradar_id'
+      'sportradar_id',
+      'gsisid',
+      'esbid',
+      'gsis_it_id',
+      'pfr_id'
     )
     .where(function () {
       this.where('formatted', 'like', `%${formatted_name}%`).orWhereIn(
@@ -427,7 +745,12 @@ const action_lookup = async (argv) => {
       log(
         `  ${player.pid} - ${player.fname} ${player.lname} (${player.pos}, ${player.current_nfl_team}, ${player.nfl_draft_year})`
       )
-      if (player.sleeper_id) log(`    sleeper_id: ${player.sleeper_id}`)
+      const ids = []
+      if (player.sleeper_id) ids.push(`sleeper:${player.sleeper_id}`)
+      if (player.espn_id) ids.push(`espn:${player.espn_id}`)
+      if (player.gsisid) ids.push(`gsis:${player.gsisid}`)
+      if (player.pfr_id) ids.push(`pfr:${player.pfr_id}`)
+      if (ids.length) log(`    IDs: ${ids.join(', ')}`)
     }
 
     // Check if any match the team/position criteria
@@ -441,141 +764,173 @@ const action_lookup = async (argv) => {
     if (exact_match) {
       log('\n[WARNING] POTENTIAL DUPLICATE FOUND:')
       log(`  ${exact_match.pid}`)
-      log('  Consider using update-id instead of create.')
+      log('  Consider using update command instead of create.')
     }
   } else {
     log('No matches found in database.')
   }
 
-  // Step 2: Fetch and search Sleeper data
-  log('\n=== Sleeper API Search ===')
-  const sleeper_players = await fetch_sleeper_players({
+  // Step 2: Query external sources in parallel
+  log('\n=== External Source Search ===')
+  const source_results = await query_sources({
+    name,
+    pos,
+    team,
+    sources,
     ignore_cache: ignoreCache
   })
 
-  // Search Sleeper data for matches
-  const sleeper_matches = []
-  for (const sleeper_id in sleeper_players) {
-    const player = sleeper_players[sleeper_id]
-    if (!player.full_name) continue
-
-    const sleeper_formatted = format_player_name(player.full_name)
-    const name_match =
-      sleeper_formatted.includes(formatted_name) ||
-      formatted_name.includes(sleeper_formatted)
-
-    if (!name_match) continue
-
-    // Additional filtering
-    if (search_team && player.team && fixTeam(player.team) !== search_team)
-      continue
-    if (pos && player.position !== pos.toUpperCase()) continue
-    if (draftYear && player.metadata?.start_year !== draftYear) continue
-
-    sleeper_matches.push({ sleeper_id, ...player })
+  // Log individual source results
+  for (const source of sources) {
+    const count = source_results[source]?.length || 0
+    log(`  ${source}: ${count} result(s)`)
   }
 
-  if (sleeper_matches.length === 0) {
-    log('No matches found in Sleeper.')
+  // Step 3: Consolidate results
+  log('\n=== Consolidated Results ===')
+  const consolidated = await consolidate_results({
+    results: source_results,
+    pos,
+    team
+  })
+
+  if (consolidated.length === 0) {
+    log('No matches found in external sources.')
     log('\n=== Summary ===')
-    log('Player not found in Sleeper API.')
+    log('Player not found in external sources.')
     log('If this is a new player, you may need to create manually.')
-    return { db_matches, sleeper_matches: [] }
+    return { db_matches, consolidated: [] }
   }
 
-  log(`Found ${sleeper_matches.length} match(es) in Sleeper:`)
-  for (const player of sleeper_matches) {
-    log(`\n  Sleeper ID: ${player.sleeper_id}`)
-    log(`  Name: ${player.first_name} ${player.last_name}`)
-    log(`  Position: ${player.position}`)
-    log(`  Team: ${player.team || 'FA'}`)
-    log(`  DOB: ${player.birth_date || 'unknown'}`)
-    log(`  Draft Year: ${player.metadata?.start_year || 'unknown'}`)
-    log(`  Height: ${player.height || 'unknown'}`)
-    log(`  Weight: ${player.weight || 'unknown'}`)
-    log(`  College: ${player.college || 'unknown'}`)
-    if (player.espn_id) log(`  ESPN ID: ${player.espn_id}`)
-    if (player.sportradar_id) log(`  Sportradar ID: ${player.sportradar_id}`)
-    if (player.gsis_id) log(`  GSIS ID: ${player.gsis_id}`)
-    if (player.rotowire_id) log(`  Rotowire ID: ${player.rotowire_id}`)
-  }
+  log(`Found ${consolidated.length} consolidated match(es):`)
+  for (const entry of consolidated) {
+    log(`\n  Name: ${entry.name}`)
+    log(`  Position: ${entry.position || 'unknown'}`)
+    log(`  Team: ${entry.team || 'FA'}`)
+    log(`  Sources: ${entry.sources.join(', ')}`)
 
-  // Step 3: Check if Sleeper player already exists in database by sleeper_id
-  log('\n=== Duplicate Check ===')
-  for (const sleeper_player of sleeper_matches) {
-    try {
-      const existing = await find_player_row({
-        sleeper_id: sleeper_player.sleeper_id
-      })
-      if (existing) {
-        log(
-          `[WARNING] Player with sleeper_id ${sleeper_player.sleeper_id} already exists: ${existing.pid}`
-        )
-        continue
-      }
-    } catch (err) {
-      // Not found, which is expected for new players
+    const id_strings = Object.entries(entry.external_ids)
+      .filter(([, v]) => v)
+      .map(([k, v]) => `${k}:${v}`)
+    if (id_strings.length) {
+      log(`  External IDs: ${id_strings.join(', ')}`)
     }
 
-    // Also check by ESPN ID if available
-    if (sleeper_player.espn_id) {
+    // Show additional data from sources
+    if (entry.sleeper_data) {
+      log(`  Birth Date: ${entry.sleeper_data.birth_date || 'unknown'}`)
+      log(`  Height: ${entry.sleeper_data.height || 'unknown'}`)
+      log(`  Weight: ${entry.sleeper_data.weight || 'unknown'}`)
+      log(`  College: ${entry.sleeper_data.college || 'unknown'}`)
+      log(`  Draft Year: ${entry.sleeper_data.start_year || 'unknown'}`)
+    } else if (entry.nfl_data) {
+      log(`  Birth Date: ${entry.nfl_data.birth_date || 'unknown'}`)
+      log(`  Height: ${entry.nfl_data.height || 'unknown'}`)
+      log(`  Weight: ${entry.nfl_data.weight || 'unknown'}`)
+      log(`  College: ${entry.nfl_data.college || 'unknown'}`)
+      log(`  Draft Year: ${entry.nfl_data.rookie_year || 'unknown'}`)
+    }
+
+    if (entry.pfr_data) {
+      log(`  PFR URL: ${entry.pfr_data.url}`)
+      log(
+        `  Years Active: ${entry.pfr_data.start_year || '?'}-${entry.pfr_data.end_year || 'present'}`
+      )
+    }
+  }
+
+  // Step 4: Check for duplicates in database
+  log('\n=== Duplicate Check ===')
+  for (const entry of consolidated) {
+    for (const [id_type, id_value] of Object.entries(entry.external_ids)) {
+      if (!id_value) continue
       try {
-        const existing = await find_player_row({
-          espn_id: sleeper_player.espn_id
-        })
+        const existing = await find_player_row({ [id_type]: id_value })
         if (existing) {
           log(
-            `[WARNING] Player with espn_id ${sleeper_player.espn_id} already exists: ${existing.pid}`
+            `[WARNING] Player with ${id_type}=${id_value} already exists: ${existing.pid}`
           )
-          continue
         }
       } catch (err) {
-        // Not found
+        // Not found, expected for new players
       }
     }
   }
 
-  // Step 4: Generate create command for the best Sleeper match
-  if (sleeper_matches.length > 0) {
-    const best = sleeper_matches[0]
-    log('\n=== Suggested Create Command ===')
+  // Step 5: Generate create/update command for the best match
+  if (consolidated.length > 0) {
+    const best = consolidated[0]
+    log('\n=== Suggested Command ===')
 
-    const cmd_parts = [
-      'NODE_ENV=production node scripts/resolve-player-match.mjs create',
-      `--fname "${best.first_name}"`,
-      `--lname "${best.last_name}"`,
-      `--pos "${best.position}"`,
-      `--team "${best.team || 'INA'}"`
-    ]
+    // Determine if this is an update or create
+    const matching_db_player = db_matches.find((p) => {
+      const name_match =
+        format_player_name(`${p.fname} ${p.lname}`) ===
+        format_player_name(best.name)
+      return name_match
+    })
 
-    if (best.birth_date) {
-      cmd_parts.push(`--dob "${best.birth_date}"`)
-    }
+    if (matching_db_player) {
+      // Generate update command
+      const cmd_parts = [
+        'NODE_ENV=production node scripts/resolve-player-match.mjs update',
+        `--pid "${matching_db_player.pid}"`
+      ]
 
-    if (best.metadata?.start_year) {
-      cmd_parts.push(`--draft-year ${best.metadata.start_year}`)
+      for (const [id_type, id_value] of Object.entries(best.external_ids)) {
+        if (id_value && !matching_db_player[id_type]) {
+          const arg_name = id_type.replace(/_/g, '-')
+          cmd_parts.push(`--${arg_name} "${id_value}"`)
+        }
+      }
+
+      log('Player exists in database. Suggested update command:')
+      log(cmd_parts.join(' \\\n  '))
     } else {
-      cmd_parts.push(`--draft-year ${new Date().getFullYear()}`)
+      // Generate create command
+      const data = best.sleeper_data || best.nfl_data || {}
+      const cmd_parts = [
+        'NODE_ENV=production node scripts/resolve-player-match.mjs create',
+        `--fname "${data.first_name || best.name.split(' ')[0]}"`,
+        `--lname "${data.last_name || best.name.split(' ').slice(1).join(' ')}"`,
+        `--pos "${best.position || 'UNK'}"`,
+        `--team "${best.team || 'INA'}"`
+      ]
+
+      if (data.birth_date) {
+        cmd_parts.push(`--dob "${data.birth_date}"`)
+      }
+
+      const draft_year =
+        data.start_year || data.rookie_year || best.pfr_data?.start_year
+      if (draft_year) {
+        cmd_parts.push(`--draft-year ${draft_year}`)
+      } else {
+        cmd_parts.push(`--draft-year ${new Date().getFullYear()}`)
+      }
+
+      if (data.height) {
+        cmd_parts.push(`--height ${data.height}`)
+      }
+
+      if (data.weight) {
+        cmd_parts.push(`--weight ${data.weight}`)
+      }
+
+      // Add all external IDs
+      for (const [id_type, id_value] of Object.entries(best.external_ids)) {
+        if (id_value) {
+          const arg_name = id_type.replace(/_/g, '-')
+          cmd_parts.push(`--${arg_name} "${id_value}"`)
+        }
+      }
+
+      log('Player not found in database. Suggested create command:')
+      log(cmd_parts.join(' \\\n  '))
     }
-
-    if (best.height) {
-      cmd_parts.push(`--height ${best.height}`)
-    }
-
-    if (best.weight) {
-      cmd_parts.push(`--weight ${best.weight}`)
-    }
-
-    cmd_parts.push(`--sleeper-id "${best.sleeper_id}"`)
-
-    if (best.espn_id) {
-      cmd_parts.push(`--espn-id ${best.espn_id}`)
-    }
-
-    log(cmd_parts.join(' \\\n  '))
   }
 
-  return { db_matches, sleeper_matches }
+  return { db_matches, consolidated }
 }
 
 const main = async () => {
@@ -656,7 +1011,7 @@ const main = async () => {
       })
       .command(
         'lookup',
-        'Lookup player in Sleeper API and check for duplicates',
+        'Lookup player across multiple data sources',
         (yargs) => {
           return yargs
             .option('name', {
@@ -673,9 +1028,16 @@ const main = async () => {
               type: 'number',
               description: 'Draft year to filter by'
             })
+            .option('sources', {
+              alias: 's',
+              type: 'string',
+              description:
+                'Data sources to query (sleeper,espn,nfl,pfr or all)',
+              default: 'all'
+            })
             .option('ignore-cache', {
               type: 'boolean',
-              description: 'Ignore cached Sleeper data',
+              description: 'Ignore cached data from all sources',
               default: false
             })
         }
