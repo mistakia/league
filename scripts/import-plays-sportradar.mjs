@@ -80,7 +80,7 @@ const SLOW_PLAY_THRESHOLD_MS = 1000
  * --week: Import all games for a specific week
  * --year: Year for week-based import (default: current season)
  * --dry: Preview changes without updating database
- * --ignore_conflicts: Overwrite all existing field values
+ * --overwrite_existing: Overwrite all existing field values
  * --ignore_sportradar_field_conflicts: Overwrite only Sportradar-exclusive fields
  *   (automatically converted to overwrite_fields parameter internally)
  * --ignore-cache: Bypass cache and fetch fresh data from API
@@ -1175,7 +1175,7 @@ const process_play = async ({
       const updates_made = await update_play({
         play_row: db_play,
         update: mapped_play,
-        ignore_conflicts: stats.ignore_conflicts,
+        overwrite_existing: stats.overwrite_existing,
         // Use modern overwrite_fields approach for Sportradar-exclusive fields
         overwrite_fields: stats.ignore_sportradar_field_conflicts
           ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
@@ -1241,7 +1241,7 @@ const process_game = async ({
   team_mappings_cache,
   stats,
   dry,
-  ignore_conflicts,
+  overwrite_existing,
   ignore_sportradar_field_conflicts,
   ignore_cache
 }) => {
@@ -1292,7 +1292,7 @@ const process_game = async ({
             team_mappings_cache,
             stats: {
               ...stats,
-              ignore_conflicts,
+              overwrite_existing,
               ignore_sportradar_field_conflicts
             },
             dry
@@ -1359,7 +1359,7 @@ const import_plays_sportradar = async ({
   game_id,
   all = false,
   dry = false,
-  ignore_conflicts = false,
+  overwrite_existing = false,
   ignore_sportradar_field_conflicts = false,
   ignore_cache = false,
   collector = null
@@ -1406,7 +1406,7 @@ const import_plays_sportradar = async ({
       team_mappings_cache,
       stats,
       dry,
-      ignore_conflicts,
+      overwrite_existing,
       ignore_sportradar_field_conflicts,
       ignore_cache
     })
@@ -1513,7 +1513,7 @@ const main = async () => {
     const game_id = argv['game-id'] || null
     const all = argv.all || false
     const dry = argv.dry || false
-    const ignore_conflicts = argv['ignore-conflicts'] || false
+    const overwrite_existing = argv.overwrite_existing || false
     const ignore_sportradar_field_conflicts =
       argv['ignore-sportradar-field-conflicts'] || false
     const ignore_cache = argv['ignore-cache'] || false
@@ -1524,7 +1524,7 @@ const main = async () => {
       game_id,
       all,
       dry,
-      ignore_conflicts,
+      overwrite_existing,
       ignore_sportradar_field_conflicts,
       ignore_cache
     })

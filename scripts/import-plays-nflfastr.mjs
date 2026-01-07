@@ -39,7 +39,7 @@ import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclus
  * --all: Import all years from 1999 to current season
  * --esbid: Filter to a specific game ID
  * --dry or --dry_mode: Run without making database changes
- * --ignore_conflicts: Overwrite all existing field values
+ * --overwrite_existing: Overwrite all existing field values
  * --ignore_nflfastr_field_conflicts: Overwrite only nflfastR-exclusive fields
  *   (automatically merged with --overwrite_fields if both are specified)
  * --overwrite_fields: Comma-separated list of specific fields to overwrite
@@ -574,7 +574,7 @@ const download_file = async ({ year, force_download }) => {
 const process_play = async ({
   item,
   year,
-  ignore_conflicts,
+  overwrite_existing,
   dry_mode,
   overwrite_fields
 }) => {
@@ -617,7 +617,7 @@ const process_play = async ({
       await update_play({
         play_row: db_play,
         update: formatted_play,
-        ignore_conflicts,
+        overwrite_existing,
         overwrite_fields
       })
     }
@@ -660,7 +660,7 @@ const log_match_criteria = (match_criteria) => {
 
 const run = async ({
   year = current_season.year,
-  ignore_conflicts = false,
+  overwrite_existing = false,
   force_download = false,
   dry_mode = false,
   esbid = null,
@@ -725,7 +725,7 @@ const run = async ({
     const play_result = await process_play({
       item,
       year,
-      ignore_conflicts,
+      overwrite_existing,
       dry_mode,
       overwrite_fields
     })
@@ -750,7 +750,7 @@ const run = async ({
         const existing_value = db_play[field]
         if (existing_value === new_value) continue
 
-        const is_conflict = !ignore_conflicts && Boolean(existing_value)
+        const is_conflict = !overwrite_existing && Boolean(existing_value)
         if (is_conflict) {
           total_conflicts_detected += 1
           conflicts_by_field[field] = (conflicts_by_field[field] || 0) + 1
@@ -922,7 +922,7 @@ const main = async () => {
       'import-nflfastr-plays,update-play,fetch,play-cache,play-enum-utils'
     )
     const year = argv.year || current_season.year
-    const ignore_conflicts = argv.ignore_conflicts
+    const overwrite_existing = argv.overwrite_existing
     const force_download = argv.d
     const dry_mode = argv.dry || argv.dry_mode
     const esbid = argv.esbid ? parseInt(argv.esbid, 10) : null
@@ -962,7 +962,7 @@ const main = async () => {
         reset_cache()
         await run({
           year: import_year,
-          ignore_conflicts,
+          overwrite_existing,
           force_download,
           dry_mode,
           esbid,
@@ -973,7 +973,7 @@ const main = async () => {
       // Import single year
       await run({
         year,
-        ignore_conflicts,
+        overwrite_existing,
         force_download,
         dry_mode,
         esbid,

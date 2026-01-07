@@ -15,7 +15,7 @@ const update_nfl_game = async ({
   game_row,
   esbid,
   update,
-  ignore_conflicts = false
+  overwrite_existing = false
 }) => {
   if (!game_row && esbid) {
     game_row = await db('nfl_games').where({ esbid }).first()
@@ -41,7 +41,7 @@ const update_nfl_game = async ({
       continue
     }
 
-    if (!ignore_conflicts && edit.lhs) {
+    if (!overwrite_existing && edit.lhs) {
       log(
         `conflict with existing value for ${column_name}, esbid: ${game_row.esbid}, existing: ${edit.lhs}, new: ${edit.rhs}`
       )

@@ -67,7 +67,7 @@ const process_plays = async ({
   year = current_season.year,
   seas_type = current_season.nfl_seas_type,
   esbid = null,
-  ignore_conflicts = false,
+  overwrite_existing = false,
   dry_run = false,
   skip_changelog = false,
   batch_size = 500,
@@ -170,7 +170,7 @@ const process_plays = async ({
       compute_play_changes({
         play_row: current_play,
         update,
-        ignore_conflicts
+        overwrite_existing
       })
 
     if (changes_count > 0) {
@@ -297,7 +297,7 @@ const main = async () => {
     const week = argv.week
     const seas_type = argv.seas_type || current_season.nfl_seas_type
     const dry_run = argv.dry
-    const ignore_conflicts = argv.ignore_conflicts || argv.force
+    const overwrite_existing = argv.overwrite_existing || argv.force
     const skip_changelog = argv.skipChangelog
     const batch_size = argv.batchSize
     const all_players = argv.allPlayers
@@ -333,7 +333,7 @@ const main = async () => {
               week,
               seas_type,
               dry_run,
-              ignore_conflicts,
+              overwrite_existing,
               skip_changelog,
               batch_size,
               all_players
@@ -354,7 +354,7 @@ const main = async () => {
           week,
           seas_type,
           dry_run,
-          ignore_conflicts,
+          overwrite_existing,
           skip_changelog,
           batch_size,
           all_players
@@ -367,7 +367,7 @@ const main = async () => {
         seas_type: argv.seas_type,
         esbid: argv.esbid,
         dry_run,
-        ignore_conflicts,
+        overwrite_existing,
         skip_changelog,
         batch_size,
         all_players

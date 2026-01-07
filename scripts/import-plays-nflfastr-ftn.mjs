@@ -113,7 +113,7 @@ const format_play = (play) => ({
 
 const run = async ({
   year = current_season.year,
-  ignore_conflicts = false,
+  overwrite_existing = false,
   force_download = false,
   collector = null
 } = {}) => {
@@ -185,7 +185,7 @@ const run = async ({
       await update_play({
         play_row: db_play,
         update: play,
-        ignore_conflicts
+        overwrite_existing
       })
     } else {
       log(`${item.nflverse_game_id} - ${item.nflverse_play_id}`)
@@ -221,9 +221,9 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const year = argv.year || current_season.year
-    const ignore_conflicts = argv.ignore_conflicts
+    const overwrite_existing = argv.overwrite_existing
     const force_download = argv.d
-    await run({ year, ignore_conflicts, force_download })
+    await run({ year, overwrite_existing, force_download })
   } catch (err) {
     error = err
     console.log(error)

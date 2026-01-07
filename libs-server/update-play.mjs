@@ -38,17 +38,17 @@ const normalize_clock_fields = (obj) => {
 /**
  * Determines if a field update should be allowed when there's an existing value
  * @param {string} field_name - The field being updated
- * @param {boolean} ignore_conflicts - If true, allow all updates
+ * @param {boolean} overwrite_existing - If true, allow all updates
  * @param {Array<string>} overwrite_fields - Specific fields to overwrite
  * @returns {boolean} True if update should proceed
  */
 const should_overwrite_field = (
   field_name,
-  ignore_conflicts,
+  overwrite_existing,
   overwrite_fields
 ) => {
-  // Priority 1: Global ignore_conflicts flag overwrites everything
-  if (ignore_conflicts) {
+  // Priority 1: Global overwrite_existing flag overwrites everything
+  if (overwrite_existing) {
     return true
   }
 
@@ -68,14 +68,14 @@ const should_overwrite_field = (
  * @param {Object} params
  * @param {Object} params.play_row - Current play state from database
  * @param {Object} params.update - Fields to update
- * @param {boolean} params.ignore_conflicts - Overwrite all existing values
+ * @param {boolean} params.overwrite_existing - Overwrite all existing values
  * @param {Array<string>} params.overwrite_fields - Specific fields to overwrite
  * @returns {Object} { changelog_entries, field_updates, changes_count }
  */
 export const compute_play_changes = ({
   play_row,
   update,
-  ignore_conflicts = false,
+  overwrite_existing = false,
   overwrite_fields = []
 }) => {
   const changelog_entries = []
@@ -120,7 +120,7 @@ export const compute_play_changes = ({
     if (edit.lhs) {
       const can_overwrite = should_overwrite_field(
         prop,
-        ignore_conflicts,
+        overwrite_existing,
         overwrite_fields
       )
 
@@ -152,7 +152,7 @@ export const compute_play_changes = ({
  * Update play data in the database with conflict resolution
  *
  * Conflict Resolution Priority:
- * 1. ignore_conflicts=true → Overwrites ALL fields
+ * 1. overwrite_existing=true → Overwrites ALL fields
  * 2. overwrite_fields=['field1', 'field2'] → Overwrites ONLY specified fields
  * 3. Default → Skip updates for fields with existing values
  *
@@ -160,7 +160,7 @@ export const compute_play_changes = ({
  * @param {number} esbid - Game ID (alternative to play_row)
  * @param {number} playId - Play ID (alternative to play_row)
  * @param {Object} update - Field updates to apply
- * @param {boolean} ignore_conflicts - If true, overwrite all existing values
+ * @param {boolean} overwrite_existing - If true, overwrite all existing values
  * @param {Array<string>} overwrite_fields - Specific fields to overwrite (e.g., ['game_clock_end', 'sec_rem_qtr'])
  * @returns {number} Number of fields changed
  */
@@ -169,7 +169,7 @@ const update_play = async ({
   esbid,
   playId,
   update,
-  ignore_conflicts = false,
+  overwrite_existing = false,
   overwrite_fields = []
 }) => {
   if (!play_row && esbid && playId) {
@@ -185,7 +185,7 @@ const update_play = async ({
     compute_play_changes({
       play_row,
       update,
-      ignore_conflicts,
+      overwrite_existing,
       overwrite_fields
     })
 

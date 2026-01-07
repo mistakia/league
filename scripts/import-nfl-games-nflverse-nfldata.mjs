@@ -84,7 +84,7 @@ const format_game = (game) => ({
 const import_nfl_games_nflverse_nfldata = async ({
   year = null,
   seas_type = null,
-  ignore_conflicts = false,
+  overwrite_existing = false,
   force_download = false,
   collector = null
 } = {}) => {
@@ -261,7 +261,7 @@ const import_nfl_games_nflverse_nfldata = async ({
       await update_nfl_game({
         game_row: db_game,
         update: game,
-        ignore_conflicts
+        overwrite_existing
       })
       result.games_updated++
     } else {
@@ -300,10 +300,10 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const ignore_conflicts = argv.ignore_conflicts
+    const overwrite_existing = argv.overwrite_existing
     const force_download = argv.d
     await import_nfl_games_nflverse_nfldata({
-      ignore_conflicts,
+      overwrite_existing,
       force_download
     })
   } catch (err) {
