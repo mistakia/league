@@ -6,7 +6,7 @@
  * - Play imports from all sources in correct order
  * - Play processing and enrichment
  * - Player gamelog generation
- * - Advanced stats imports (PFF, Football Outsiders, ESPN)
+ * - Advanced stats imports (PFF, ESPN)
  * - Validation against Pro Football Reference
  * - Data export to CSV files
  *
@@ -49,7 +49,6 @@ import generate_player_gamelogs from './generate-player-gamelogs.mjs'
 import process_player_seasonlogs from './process-player-seasonlogs.mjs'
 
 // Advanced stats scripts
-import import_football_outsiders from './import-football-outsiders.mjs'
 import import_espn_receiving_tracking_metrics from './import-espn-receiving-tracking-metrics.mjs'
 
 // Validation script
@@ -489,14 +488,6 @@ const run_aggregation = async ({ year, seas_types, dry, collector }) => {
  */
 const run_advanced_stats = async ({ year, ignore_cache, collector }) => {
   collector.start_stage('advanced_stats', { year })
-
-  // Football Outsiders (public)
-  try {
-    await import_football_outsiders({ collector })
-  } catch (error) {
-    collector.add_error(error, { script: 'import_football_outsiders', year })
-  }
-  await wait(DELAYS.BETWEEN_SCRIPTS)
 
   // ESPN Receiving Tracking Metrics (public)
   try {
