@@ -327,9 +327,9 @@ const importPlaysForWeek = async ({
       continue
     }
 
-    const currentPlays = await db('nfl_plays').where({ esbid: game.esbid })
-
-    const haveEndPlay = currentPlays.find((p) => p.play_type_nfl === 'END_GAME')
+    const haveEndPlay = await db('nfl_plays')
+      .where({ esbid: game.esbid, play_type_nfl: 'END_GAME' })
+      .first()
 
     if (!force_update && haveEndPlay) {
       log(`skipping esbid: ${game.esbid}, already have final play`)
