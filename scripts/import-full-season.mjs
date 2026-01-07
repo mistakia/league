@@ -122,7 +122,7 @@ try {
 
 const log = debug('import-full-season')
 debug.enable(
-  'import-full-season,import-reporting,import-nfl-games-nfl,import-nfl-games-ngs,import-nfl-games-nflverse,import-games-sportradar,import-plays-nfl-v1,import-plays-nflfastr,import-plays-nflfastr-ftn,import-plays-sportradar,process-plays,generate-player-gamelogs,audit-player-gamelogs'
+  'import-full-season,import-reporting,import-nfl-games-nfl,import-nfl-games-ngs,import-nfl-games-nflverse,import-games-sportradar,import-plays-nfl-v1,import-nflfastr-plays,import-ftn-charting-plays,import-plays-sportradar,process-plays,generate-player-gamelogs,audit-player-gamelogs'
 )
 
 const DELAYS = {
