@@ -11,6 +11,21 @@ debug.enable('update-nfl-game')
 
 const excluded_column_names = ['esbid', 'updated']
 
+const normalize_stadium_name = (name) => {
+  if (!name) return name
+  return name.replace(/®/g, '').replace(/\s+/g, ' ').trim()
+}
+
+const values_are_equivalent = (column_name, existing_value, new_value) => {
+  if (column_name === 'stad') {
+    return (
+      normalize_stadium_name(existing_value) ===
+      normalize_stadium_name(new_value)
+    )
+  }
+  return false
+}
+
 const update_nfl_game = async ({
   game_row,
   esbid,
@@ -42,6 +57,9 @@ const update_nfl_game = async ({
     }
 
     if (!overwrite_existing && edit.lhs) {
+      if (values_are_equivalent(column_name, edit.lhs, edit.rhs)) {
+        continue
+      }
       log(
         `conflict with existing value for ${column_name}, esbid: ${game_row.esbid}, existing: ${edit.lhs}, new: ${edit.rhs}`
       )
