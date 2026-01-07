@@ -61,7 +61,6 @@ import export_data_player_gamelogs from './export-data-player-gamelogs.mjs'
 
 // Private scripts - import with graceful fallback
 let import_plays_ngs = null
-let import_plays_playerprofiler = null
 let import_gamelogs_ngs = null
 let import_pff_grades = null
 let import_pff_seasonlogs = null
@@ -70,15 +69,6 @@ let import_pff_team_grades = null
 try {
   const ngs_module = await import('../private/scripts/import-plays-ngs.mjs')
   import_plays_ngs = ngs_module.default
-} catch {
-  // Private script not available
-}
-
-try {
-  const pp_module = await import(
-    '../private/scripts/import-plays-playerprofiler.mjs'
-  )
-  import_plays_playerprofiler = pp_module.default
 } catch {
   // Private script not available
 }
@@ -360,28 +350,6 @@ const import_plays_for_week = async ({
       seas_type
     })
   }
-  await wait(DELAYS.BETWEEN_SCRIPTS)
-
-  // 6. PlayerProfiler (if available)
-  if (import_plays_playerprofiler) {
-    try {
-      await import_plays_playerprofiler({
-        year,
-        week,
-        seas_type,
-        ignore_cache,
-        collector
-      })
-    } catch (error) {
-      collector.add_error(error, {
-        script: 'import_plays_playerprofiler',
-        year,
-        week,
-        seas_type
-      })
-    }
-  }
-
   collector.end_stage()
 }
 
