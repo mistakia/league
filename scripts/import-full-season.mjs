@@ -40,6 +40,9 @@
  *   node scripts/import-full-season.mjs --year 2024 --start-stage plays --skip plays.nflfastr
  */
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -130,6 +133,9 @@ try {
 } catch {
   // Private script not available
 }
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const REPORT_OUTPUT_DIR = path.resolve(__dirname, '..', 'tmp')
 
 const log = debug('import-full-season')
 debug.enable(
@@ -1045,7 +1051,7 @@ const import_full_season = async ({
   print_unified_report(collector)
 
   if (!dry) {
-    const report_path = await save_report_to_file(collector)
+    const report_path = await save_report_to_file(collector, REPORT_OUTPUT_DIR)
     log(`Report saved to: ${report_path}`)
   }
 
