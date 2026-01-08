@@ -13,11 +13,11 @@ import { current_season } from '#constants'
 import {
   is_main,
   readCSV,
-  getPlay,
   update_play,
   format_starting_hash,
   report_job
 } from '#libs-server'
+import { preload_plays, find_play } from '#libs-server/play-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -25,7 +25,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-ftn-charting-plays')
-debug.enable('import-ftn-charting-plays,update-play')
+debug.enable('import-ftn-charting-plays,update-play,play-cache')
 
 const format_number = (num) => {
   if (num === null || num === undefined || num === '') {
@@ -155,29 +155,54 @@ const run = async ({
     log(`file exists: ${path}`)
   }
 
+  // Pre-cache game ID mapping (nflverse_game_id -> esbid) for O(1) lookups
+  log(`Loading game ID mapping for year ${year}...`)
+  const games = await db('nfl_games')
+    .where({ year })
+    .whereNotNull('nflverse_game_id')
+    .select('esbid', 'nflverse_game_id')
+  const game_id_map = new Map()
+  for (const game of games) {
+    game_id_map.set(game.nflverse_game_id, game.esbid)
+  }
+  log(`Loaded ${game_id_map.size} games`)
+
+  // Preload plays into cache for efficient matching
+  log(`Preloading plays for year ${year}...`)
+  await preload_plays({ years: [year] })
+  log(`Plays preloaded`)
+
   const play_not_matched = []
+  const games_not_found = []
+
+  log(`Reading CSV file...`)
   const data = await readCSV(path, {
     mapValues: ({ header, index, value }) => (value === 'NA' ? null : value)
   })
+  log(`CSV loaded with ${data.length} rows`)
 
   for (const item of data) {
-    // Get the esbid from nfl_games table
-    const game = await db('nfl_games')
-      .where({ nflverse_game_id: item.nflverse_game_id })
-      .first('esbid')
+    if (result.plays_processed > 0 && result.plays_processed % 5000 === 0) {
+      log(
+        `Progress: ${result.plays_processed}/${data.length} plays processed, ${result.plays_matched} matched`
+      )
+    }
+    // Get the esbid from pre-cached game mapping
+    const esbid = game_id_map.get(item.nflverse_game_id)
 
-    if (!game) {
-      log(`Game not found for nflverse_game_id: ${item.nflverse_game_id}`)
+    if (!esbid) {
+      // Only log once per game, not per play
+      if (!games_not_found.includes(item.nflverse_game_id)) {
+        log(`Game not found for nflverse_game_id: ${item.nflverse_game_id}`)
+        games_not_found.push(item.nflverse_game_id)
+      }
       play_not_matched.push(item)
       continue
     }
 
     result.plays_processed++
-    const opts = {
-      esbid: game.esbid,
-      playId: Number(item.nflverse_play_id)
-    }
-    const db_play = await getPlay(opts)
+    const playId = Number(item.nflverse_play_id)
+    const db_play = find_play({ esbid, playId })
 
     if (db_play) {
       result.plays_matched++
@@ -188,15 +213,13 @@ const run = async ({
         overwrite_existing
       })
     } else {
-      log(`${item.nflverse_game_id} - ${item.nflverse_play_id}`)
-      log(opts)
       play_not_matched.push(item)
       if (collector) {
         collector.add_unmatched_play({
-          esbid: opts.esbid,
-          playId: opts.playId,
+          esbid,
+          playId,
           description: null,
-          criteria: opts,
+          criteria: { esbid, playId },
           source: 'ftn_charting'
         })
       }
