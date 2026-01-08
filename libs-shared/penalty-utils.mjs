@@ -38,8 +38,14 @@ export const SIDE_SPECIFIC_PENALTIES = new Set([
 ])
 
 // Regex patterns for extracting penalty type from play description
+// Standard format: PENALTY on TEAM-PLAYER, Type, X yards
 const PENALTY_REGEX_WITH_PLAYER = /PENALTY on [A-Z]{2,4}-[^,]+, ([^,]+),/
 const PENALTY_REGEX_TEAM_ONLY = /PENALTY on [A-Z]{2,4}, ([^,]+),/
+// nflfastR format with jersey number: PENALTY on TEAM-##-PLAYER, Type, placed at
+const PENALTY_REGEX_NFLFASTR = /PENALTY on [A-Z]{2,4}-\d+-[^,]+, ([^,]+),/
+// Kickoff penalties: Type, placed at (no yard value)
+const PENALTY_REGEX_PLACED_AT =
+  /PENALTY on [A-Z]{2,4}(?:-[^,]+)?, ([^,]+), placed at/
 
 // Invalid penalty names (parsing errors - yard values extracted instead of type)
 const INVALID_PENALTY_NAMES = new Set([
@@ -70,21 +76,21 @@ export const extract_penalty_from_desc = ({ desc, desc_nflfastr }) => {
     return null
   }
 
-  // Try pattern with player name first (most common)
-  let match = description.match(PENALTY_REGEX_WITH_PLAYER)
-  if (match && match[1]) {
-    const penalty_name = match[1].trim()
-    if (!INVALID_PENALTY_NAMES.has(penalty_name)) {
-      return penalty_name
-    }
-  }
+  // Try patterns in order of specificity
+  const patterns = [
+    PENALTY_REGEX_NFLFASTR, // nflfastR format with jersey number (most specific)
+    PENALTY_REGEX_WITH_PLAYER, // Standard format with player name
+    PENALTY_REGEX_PLACED_AT, // Kickoff penalties with "placed at"
+    PENALTY_REGEX_TEAM_ONLY // Team-only format (Delay of Game, etc.)
+  ]
 
-  // Fall back to team-only pattern (Delay of Game, etc.)
-  match = description.match(PENALTY_REGEX_TEAM_ONLY)
-  if (match && match[1]) {
-    const penalty_name = match[1].trim()
-    if (!INVALID_PENALTY_NAMES.has(penalty_name)) {
-      return penalty_name
+  for (const pattern of patterns) {
+    const match = description.match(pattern)
+    if (match && match[1]) {
+      const penalty_name = match[1].trim()
+      if (!INVALID_PENALTY_NAMES.has(penalty_name)) {
+        return penalty_name
+      }
     }
   }
 
