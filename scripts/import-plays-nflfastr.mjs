@@ -45,6 +45,7 @@ import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclus
  * --overwrite_fields: Comma-separated list of specific fields to overwrite
  *                     (e.g., --overwrite_fields="game_clock_end,sec_rem_qtr")
  * -d: Force download of CSV file even if cached
+ * --log_conflicts: Log detailed info for each field conflict (play ID, field, values)
  */
 
 const log = debug('import-nflfastr-plays')
@@ -485,7 +486,7 @@ const format_probability_data = (play) => ({
 })
 
 const format_play = (play) => ({
-  desc: play.desc || null,
+  desc_nflfastr: play.desc || null,
   ...format_play_context(play),
   ...format_drive_data(play),
   ...format_series_data(play),
@@ -665,6 +666,7 @@ const run = async ({
   dry_mode = false,
   esbid = null,
   overwrite_fields = [],
+  log_conflicts = false,
   collector = null
 } = {}) => {
   const result = {
@@ -754,6 +756,15 @@ const run = async ({
         if (is_conflict) {
           total_conflicts_detected += 1
           conflicts_by_field[field] = (conflicts_by_field[field] || 0) + 1
+
+          if (log_conflicts) {
+            const desc_preview = play_result.item.desc
+              ? play_result.item.desc.substring(0, 60)
+              : 'N/A'
+            log(
+              `CONFLICT: ${play_result.item.game_id} play_id=${play_result.item.play_id} | ${field}: db="${existing_value}" vs nflfastr="${new_value}" | ${desc_preview}`
+            )
+          }
         } else {
           total_updates_applied += 1
           updates_by_field[field] = (updates_by_field[field] || 0) + 1
@@ -928,6 +939,7 @@ const main = async () => {
     const esbid = argv.esbid ? parseInt(argv.esbid, 10) : null
     const all = argv.all
     const ignore_nflfastr_field_conflicts = argv.ignore_nflfastr_field_conflicts
+    const log_conflicts = argv.log_conflicts
 
     // Parse overwrite_fields argument (comma-separated field names)
     // Example: --overwrite_fields="game_clock_end,sec_rem_qtr"
@@ -966,7 +978,8 @@ const main = async () => {
           force_download,
           dry_mode,
           esbid,
-          overwrite_fields
+          overwrite_fields,
+          log_conflicts
         })
       }
     } else {
@@ -977,7 +990,8 @@ const main = async () => {
         force_download,
         dry_mode,
         esbid,
-        overwrite_fields
+        overwrite_fields,
+        log_conflicts
       })
     }
   } catch (err) {

@@ -6,6 +6,9 @@
  * without risking data quality from other sources.
  */
 export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
+  // Play Description
+  'desc_nflfastr', // nflfastr play description (complete, unlike NGS truncated desc)
+
   // Play Characteristics
   // Note: 'incomp' is shared with Sportradar - both pipelines report physical outcome
   'fg_att',

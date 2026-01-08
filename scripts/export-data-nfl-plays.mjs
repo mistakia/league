@@ -27,6 +27,7 @@ const nfl_play_fields = [
   'qtr',
 
   'desc',
+  'desc_nflfastr',
 
   'ydl_num',
   'ydl_side',

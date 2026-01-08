@@ -5493,7 +5493,8 @@ CREATE TABLE public.nfl_plays (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 )
 PARTITION BY RANGE (year);
 
@@ -6948,7 +6949,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -7345,7 +7347,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -7742,7 +7745,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -8139,7 +8143,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -8536,7 +8541,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -8933,7 +8939,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -9330,7 +9337,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -9727,7 +9735,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -10124,7 +10133,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -10521,7 +10531,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -10918,7 +10929,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -11315,7 +11327,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -11712,7 +11725,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -12109,7 +12123,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -12506,7 +12521,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -12903,7 +12919,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -13300,7 +13317,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -13697,7 +13715,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -14094,7 +14113,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -14491,7 +14511,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -14888,7 +14909,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -15285,7 +15307,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -15682,7 +15705,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -16079,7 +16103,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -16476,7 +16501,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -16873,7 +16899,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
@@ -17270,7 +17297,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    desc_nflfastr text
 );
 
 
