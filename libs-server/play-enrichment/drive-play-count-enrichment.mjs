@@ -9,6 +9,8 @@ const log = debug('drive-play-count-enrichment')
  * - Administrative plays (GAME_START, END_QUARTER, END_GAME, timeouts)
  * - Kickoffs (these start drives but aren't offensive plays)
  * - Punts (drive-ending plays, excluded to match nflfastr methodology)
+ * - Field goals and extra points (FGXP - special teams, not scrimmage plays)
+ * - Two-point conversions (CONV - conversion attempts, not scrimmage plays)
  * - Plays marked as deleted
  * - Nullified plays (penalty with no play)
  *
@@ -40,6 +42,16 @@ const should_count_play = (play) => {
   // Exclude punts - drive-ending plays not counted in nflfastr's drive_play_count
   // This ensures a "three and out" (3 plays + punt) has drive_play_count = 3
   if (play.play_type === 'PUNT') {
+    return false
+  }
+
+  // Exclude field goals and extra points - special teams plays, not scrimmage plays
+  if (play.play_type === 'FGXP') {
+    return false
+  }
+
+  // Exclude two-point conversions - conversion attempts, not scrimmage plays
+  if (play.play_type === 'CONV') {
     return false
   }
 
