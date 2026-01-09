@@ -489,9 +489,14 @@ class PlayerCache {
       return players[0]
     }
 
-    // Multiple matches found - log warning and return first match
-    log(`Multiple players found for ${formatted_name}, teams: ${teams}`)
-    return players[0]
+    // Multiple matches found - log warning and return null to avoid incorrect assignment
+    const player_details = players
+      .map((p) => `${p.pid} (${p.pos}, ${p.current_nfl_team})`)
+      .join(', ')
+    log(
+      `Multiple players found for ${formatted_name}, teams: ${teams}: ${player_details}`
+    )
+    return null
   }
 
   /**
