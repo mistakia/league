@@ -95,7 +95,8 @@ function build_current_week_play_stats_query({ db }) {
     .select(
       'nfl_play_stats_current_week.*',
       'nfl_plays_current_week.week',
-      'nfl_plays_current_week.qb_kneel'
+      'nfl_plays_current_week.qb_kneel',
+      'nfl_plays_current_week.first_down'
     )
     .leftJoin('nfl_plays_current_week', function () {
       this.on(
@@ -118,7 +119,12 @@ function build_current_week_play_stats_query({ db }) {
  */
 function build_historical_play_stats_query({ db, year, week }) {
   return db('nfl_play_stats')
-    .select('nfl_play_stats.*', 'nfl_plays.week', 'nfl_plays.qb_kneel')
+    .select(
+      'nfl_play_stats.*',
+      'nfl_plays.week',
+      'nfl_plays.qb_kneel',
+      'nfl_plays.first_down'
+    )
     .leftJoin('nfl_plays', function () {
       this.on('nfl_play_stats.esbid', '=', 'nfl_plays.esbid').andOn(
         'nfl_play_stats.playId',
