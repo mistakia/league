@@ -59,7 +59,59 @@ const get_offensive_team = (play) => {
 }
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv))
+    .option('year', {
+      alias: 'y',
+      type: 'number',
+      description: 'Year to import (default: current season)',
+      default: current_season.year
+    })
+    .option('all', {
+      type: 'boolean',
+      description: 'Import all years from 1999 to current season',
+      default: false
+    })
+    .option('esbid', {
+      type: 'number',
+      description: 'Filter to a specific game ID (ESBID)',
+      default: null
+    })
+    .option('dry', {
+      alias: 'dry_mode',
+      type: 'boolean',
+      description: 'Run without making database changes',
+      default: false
+    })
+    .option('overwrite_existing', {
+      type: 'boolean',
+      description: 'Overwrite all existing field values',
+      default: false
+    })
+    .option('ignore_nflfastr_field_conflicts', {
+      type: 'boolean',
+      description:
+        'Overwrite only nflfastR-exclusive fields (automatically merged with --overwrite_fields if both are specified)',
+      default: false
+    })
+    .option('overwrite_fields', {
+      type: 'string',
+      description:
+        'Comma-separated list of specific fields to overwrite (e.g., "game_clock_end,sec_rem_qtr")',
+      default: null
+    })
+    .option('d', {
+      type: 'boolean',
+      description: 'Force download of CSV file even if cached',
+      default: false
+    })
+    .option('log_conflicts', {
+      type: 'boolean',
+      description:
+        'Log detailed info for each field conflict (play ID, field, values)',
+      default: false
+    })
+    .help()
+    .alias('help', 'h').argv
 }
 
 // ============================================================================

@@ -1,5 +1,17 @@
 import { create_empty_fantasy_stats } from '#constants'
 
+/**
+ * Calculate player statistics from NFL GSIS play-by-play stat records.
+ *
+ * NFL GSIS Stat ID Documentation:
+ * - Official: http://www.nflgsis.com/gsis/Documentation/Partners/StatIDs.html
+ * - Reference: https://www.nflfastr.com/reference/stat_ids.html
+ * - Local: docs/nfl-gsis-stat-ids.md
+ *
+ * IMPORTANT: Some stat IDs are team-level stats without player associations:
+ * - Stat ID 3 (1st Down Rushing) - Team-level, use play.first_down + rushing stats for player attribution
+ * - Stat ID 4 (1st Down Passing) - Team-level, use play.first_down + receiving stats for player attribution
+ */
 const calculateStatsFromPlayStats = (playStats) => {
   const stats = create_empty_fantasy_stats()
 
@@ -22,47 +34,54 @@ const calculateStatsFromPlayStats = (playStats) => {
   for (const playStat of playStats) {
     switch (playStat.statId) {
       case 2:
-        // punt block
+        // Punt Blocked (Offense) - punt was blocked
         break
 
       case 3:
-        // rushing first down
-        stats.rush_first_down += 1
+        // 1st Down Rushing (TEAM STAT - no player association)
+        // First down or TD occurred due to a rush. Player attribution tracked via
+        // play-level first_down flag on rushing stats (10, 11) instead.
         break
 
       case 4:
-        // receiving first down (for targeted player)
-        stats.rec_first_down += 1
+        // 1st Down Passing (TEAM STAT - no player association)
+        // First down or TD occurred due to a pass. Player attribution tracked via
+        // play-level first_down flag on receiving stats (21, 22) instead.
         break
 
       case 5:
-        // first down penalty
+        // 1st Down Penalty - first down or TD occurred due to a penalty
         break
 
       case 6:
-        // third down converted
+        // 3rd Down Attempt Converted - 3rd down play resulted in first down or TD
         break
 
       case 7:
-        // third down failed
+        // 3rd Down Attempt Failed - 3rd down play did NOT result in first down
         break
 
       case 8:
-        // fourth down converted
+        // 4th Down Attempt Converted - 4th down play resulted in first down or TD
         break
 
       case 9:
-        // fourth down failed
+        // 4th Down Attempt Failed - 4th down play did NOT result in first down
         break
 
       case 10:
-        // rushing attempt w/ yards
+        // Rushing Yards - rushing yards with credit for rushing attempt
         stats.ra += 1
         stats.ry += playStat.yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.qb_kneel) {
           stats.ry_excluding_kneels += playStat.yards
+        }
+
+        // Track rushing first downs using play-level first_down flag
+        if (playStat.first_down) {
+          stats.rush_first_down += 1
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
@@ -75,13 +94,18 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 11:
-        // rushing touchdown
+        // Rushing Touchdown - rushing TD with yards and attempt credit
         stats.ra += 1
         stats.ry += playStat.yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.qb_kneel) {
           stats.ry_excluding_kneels += playStat.yards
+        }
+
+        // Track rushing first downs using play-level first_down flag
+        if (playStat.first_down) {
+          stats.rush_first_down += 1
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
@@ -95,8 +119,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 12:
-        // lateral rush
-        // stats.ra += 1
+        // Lateral Rushing - yards after lateral (no attempt credit)
         stats.ry += playStat.yards
 
         // Track rushing yards excluding QB kneels
@@ -108,8 +131,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 13:
-        // lateral rushing touchdown
-        // stats.ra += 1
+        // Lateral Rushing Touchdown - rushing TD after lateral (no attempt credit)
         stats.ry += playStat.yards
 
         // Track rushing yards excluding QB kneels
@@ -122,19 +144,19 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 14:
-        // incomplete pass
+        // Passing Incomplete - incomplete pass attempt
         stats.pa += 1
         break
 
       case 15:
-        // completed pass
+        // Passing Yards - completed pass with yards
         stats.pa += 1
         stats.pc += 1
         stats.py += playStat.yards
         break
 
       case 16:
-        // passing touchdown
+        // Passing Touchdown - passing TD with yards
         stats.pa += 1
         stats.pc += 1
         stats.py += playStat.yards
@@ -142,17 +164,17 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 19:
-        // interception
+        // Interception - pass intercepted
         stats.ints += 1
         stats.pa += 1
         break
 
       case 20:
-        // sack (team)
+        // Sack Yards (Team) - team sack yardage lost
         break
 
       case 21:
-        // receiving yards
+        // Receiving Yards - reception with yards
         stats.rec += 1
         stats.recy += playStat.yards
         stats.longest_reception = Math.max(
@@ -162,10 +184,14 @@ const calculateStatsFromPlayStats = (playStats) => {
         if (playStat.yards >= 15) {
           stats.recv_yards_15_plus_count += 1
         }
+        // Track receiving first downs using play-level first_down flag
+        if (playStat.first_down) {
+          stats.rec_first_down += 1
+        }
         break
 
       case 22:
-        // receiving touchdown
+        // Receiving Touchdown - receiving TD with yards
         stats.rec += 1
         stats.tdrec += 1
         stats.recy += playStat.yards
@@ -176,199 +202,203 @@ const calculateStatsFromPlayStats = (playStats) => {
         if (playStat.yards >= 15) {
           stats.recv_yards_15_plus_count += 1
         }
+        // Track receiving first downs using play-level first_down flag
+        if (playStat.first_down) {
+          stats.rec_first_down += 1
+        }
         break
 
       case 23:
-        // lateral receiving yards
+        // Lateral Receiving - yards after lateral (no reception credit)
         stats.recy += playStat.yards
         break
 
       case 24:
-        // lateral receving touchdown
+        // Lateral Receiving Touchdown - receiving TD after lateral (no reception credit)
         stats.recy += playStat.yards
         stats.tdrec += 1
         break
 
       case 25:
-        // interception return
+        // Interception Return - interception return with yards
         break
 
       case 26:
-        // interception return touchdown
+        // Interception Return Touchdown - interception returned for TD
         break
 
       case 27:
-        // interception return (lateral)
+        // Lateral Interception Return - INT return yards after lateral
         break
 
       case 28:
-        // interception return touchdown (lateral)
+        // Lateral Interception Return Touchdown - INT return TD after lateral
         break
 
       case 29:
-        // punt yards
+        // Punt Yards - punt with yards
         break
 
       case 30:
-        // punt inside 20
+        // Punt Inside 20 - punt downed inside opponent's 20
         break
 
       case 31:
-        // punt into endzone
+        // Punt Into Endzone - punt into endzone (touchback)
         break
 
       case 32:
-        // punt
+        // Punt (No Return) - punt with no return
         break
 
       case 33:
-        // punt return yards
+        // Punt Return Yards - punt return with yards
         break
 
       case 34:
-        // punt return touchdown
+        // Punt Return Touchdown - punt returned for TD
         stats.prtd += 1
         break
 
       case 35:
-        // punt return (lateral)
+        // Lateral Punt Return - punt return yards after lateral
         break
 
       case 36:
-        // punt return touchdown (lateral)
+        // Lateral Punt Return Touchdown - punt return TD after lateral
         stats.prtd += 1
         break
 
       case 37:
-        // punt out of bounds
+        // Punt Out of Bounds - punt went out of bounds
         break
 
       case 38:
-        // punt downed
+        // Punt Downed - punt downed by coverage
         break
 
       case 39:
-        // punt fair caught
+        // Punt Fair Catch - punt fair caught
         break
 
       case 40:
-        // punt attempt
+        // Punt (Attempt) - punt attempt
         break
 
       case 41:
-        // kickoff (yards)
+        // Kickoff Yards - kickoff with yards
         break
 
       case 42:
-        // kickoff inside 20
+        // Kickoff Inside 20 - kickoff resulted in possession inside 20
         break
 
       case 43:
-        // kickoff in endzone
+        // Kickoff Into Endzone - kickoff into endzone
         break
 
       case 44:
-        // kickoff attempt (no yards)
+        // Kickoff (No Yards) - kickoff attempt with no return
         break
 
       case 45:
-        // kickoff return
+        // Kickoff Return Yards - kickoff return with yards
         break
 
       case 46:
-        // kickoff return touchdown
+        // Kickoff Return Touchdown - kickoff returned for TD
         stats.krtd += 1
         break
 
       case 47:
-        // kickoff return (lateral)
+        // Lateral Kickoff Return - kickoff return yards after lateral
         break
 
       case 48:
-        // kickoff return touchdown (lateral)
+        // Lateral Kickoff Return Touchdown - kickoff return TD after lateral
         stats.krtd += 1
         break
 
       case 49:
-        // kickoff out of bounds
+        // Kickoff Out of Bounds - kickoff went out of bounds
         break
 
       case 50:
-        // kickoff fair caught
+        // Kickoff Fair Catch - kickoff fair caught
         break
 
       case 51:
-        // kickoff attempt
+        // Kickoff (Attempt) - kickoff attempt
         break
 
       case 52:
-        // forced fumble
+        // Forced Fumble - fumble forced by defender
         break
 
       case 53:
-        // fumble not forced
+        // Fumble Not Forced - fumble not forced
         break
 
       case 54:
-        // fumble out of bounsd
+        // Fumble Out of Bounds - fumble went out of bounds
         break
 
       case 55:
-        // fumble recovery and return
+        // Fumble Recovery (Own) - own fumble recovered with return yards
         break
 
       case 56:
-        // fumble return for touchdown
+        // Fumble Recovery Touchdown (Own) - own fumble recovered for TD
         stats.fum_ret_td += 1
         break
 
       case 57:
-        // fumble return lateral
+        // Lateral Fumble Recovery (Own) - own fumble recovery yards after lateral
         break
 
       case 58:
-        // fumble return touchdown (lateral)
+        // Lateral Fumble Recovery TD (Own) - own fumble recovery TD after lateral
         stats.fum_ret_td += 1
         break
 
       case 59:
-        // fumble recovery and return
+        // Fumble Recovery (Opponent) - opponent fumble recovered with return yards
         break
 
       case 60:
-        // fumble return for touchdown
+        // Fumble Recovery Touchdown (Opponent) - opponent fumble recovered for TD
         stats.fum_ret_td += 1
         break
 
       case 61:
-        // fumble recovery (lateral)
+        // Lateral Fumble Recovery (Opponent) - opponent fumble recovery yards after lateral
         break
 
       case 62:
-        // fumble recovery touchdown (lateral)
+        // Lateral Fumble Recovery TD (Opponent) - opponent fumble recovery TD after lateral
         stats.fum_ret_td += 1
         break
 
       case 63:
-        // unknown
+        // Misc Stat - miscellaneous statistic
         break
 
       case 64:
-        // touchdown (team)
+        // Touchdown (Team) - team touchdown
         break
 
       case 68:
-        // timeout
+        // Timeout - timeout called
         break
 
       case 69:
-        // missed field goal
+        // Field Goal Missed - missed field goal attempt
         stats.fga += 1
         stats._fga.push(playStat.yards)
         break
 
       case 70:
-        // made field goal
+        // Field Goal Made - made field goal with distance
         stats.fgm += 1
         stats.fga += 1
         stats.fgy += Math.max(playStat.yards, 30)
@@ -387,156 +417,156 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 71:
-        // blocked field goal
+        // Field Goal Blocked - field goal blocked
         break
 
       case 72:
-        // made extra point
+        // Extra Point Made - made extra point
         stats.xpa += 1
         stats.xpm += 1
         break
 
       case 73:
-        // missed extra point
+        // Extra Point Missed - missed extra point
         stats.xpa += 1
         break
 
       case 74:
-        // blocked extra point
+        // Extra Point Blocked - extra point blocked
         break
 
       case 75:
-        // two point rush good
+        // Two Point Rush Good - two point conversion rushing successful
         stats.twoptc += 1
         break
 
       case 76:
-        // two point rush failed
+        // Two Point Rush Failed - two point conversion rushing failed
         break
 
       case 77:
-        // two point pass good
+        // Two Point Pass Good - two point conversion passing successful
         stats.twoptc += 1
         break
 
       case 78:
-        // two point pass failed
+        // Two Point Pass Failed - two point conversion passing failed
         break
 
       case 79:
-        // solo tackle
+        // Solo Tackle - unassisted tackle
         break
 
       case 80:
-        // assist tackle
+        // Assisted Tackle - tackle with assist
         break
 
       case 82:
-        // assist tackle
+        // Tackle Assist - assist on a tackle
         break
 
       case 83:
-        // sack (individual palyer)
+        // Sack (Player) - individual player sack
         break
 
       case 84:
-        // assisted sack (individual player)
+        // Sack Assist - assisted sack
         break
 
       case 85:
-        // pass defense
+        // Pass Defended - pass deflected/defended
         break
 
       case 86:
-        // punt block player
+        // Punt Blocked (Player) - player who blocked punt
         break
 
       case 87:
-        // blocked kick player
+        // Extra Point Blocked (Player) - player who blocked extra point
         break
 
       case 88:
-        // blocked field goal player
+        // Blocked Field Goal (Player) - player who blocked field goal
         break
 
       case 89:
-        // safety
+        // Safety - safety scored
         break
 
       case 91:
-        // forced fumble player
+        // Forced Fumble (Player) - player who forced fumble
         break
 
       case 93:
-        // penalty player and yards
+        // Penalty (Player) - penalty with yards
         break
 
       case 95:
-        // tackle for a loss
+        // Tackle for Loss - tackle resulting in loss of yards
         break
 
       case 96:
-        // extra point safety
+        // Extra Point Safety - safety on extra point attempt
         break
 
       case 99:
-        // two point rush safety
+        // Two Point Rush Safety - safety on two point rush attempt
         break
 
       case 100:
-        // two point pass safety
+        // Two Point Pass Safety - safety on two point pass attempt
         break
 
       case 102:
-        // kickoff downed
+        // Kickoff Downed - kickoff downed
         break
 
       case 103:
-        // lateral sack player
+        // Lateral Sack - sack with lateral
         break
 
       case 104:
-        // two point pass reception good
+        // Two Point Reception Good - two point conversion reception successful
         stats.twoptc += 1
         break
 
       case 105:
-        // two point pass reception failed
+        // Two Point Reception Failed - two point conversion reception failed
         break
 
       case 106:
-        // fumble lost
+        // Fumble Lost - fumble lost to opponent
         stats.fuml += 1
         break
 
       case 107:
-        // own kickoff recovery
+        // Own Kickoff Recovery - own kickoff recovered
         break
 
       case 108:
-        // own kickoff recovery touchdown
+        // Own Kickoff Recovery Touchdown - own kickoff recovered for TD
         break
 
-      // qb hit player
       case 110:
+        // QB Hit - quarterback hit
         break
 
       case 111:
+        // Air Yards Complete - completed pass air yards (depth of target)
         stats.passing_air_yards += playStat.yards
-        // completed air yard passing
         break
 
       case 112:
+        // Air Yards Incomplete - incomplete pass air yards (depth of target)
         stats.passing_air_yards += playStat.yards
-        // incomplete air yard passing
         break
 
       case 113:
-        // yards after catch
+        // Yards After Catch - yards gained after the catch
         break
 
       case 115:
-        // target player
+        // Target - pass target (intended receiver)
         stats.trg += 1
         stats.targeted_air_yards += playStat.dot
         if (playStat.ydl_100 <= 20) {
@@ -545,39 +575,39 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 120:
-        // tackle for loss player
+        // Tackle for Loss (Player) - player who made tackle for loss
         break
 
       case 301:
-        // extra point aborted
+        // Extra Point Aborted - extra point attempt aborted
         break
 
       case 402:
-        // unknown
+        // Unknown - unknown statistic type
         break
 
       case 403:
-        // defensive two point attempt
+        // Defensive Two Point Attempt - defensive two point conversion attempt
         break
 
       case 404:
-        // defensive two point conv
+        // Defensive Two Point Conversion - defensive two point conversion successful
         break
 
       case 405:
-        // defensive extra point attempt
+        // Defensive Extra Point Attempt - defensive extra point attempt
         break
 
       case 406:
-        // defensive extra point conv
+        // Defensive Extra Point Conversion - defensive extra point successful
         break
 
       case 410:
-        // kickoff attempt player
+        // Kickoff (Player) - kickoff attempt (player credit)
         break
 
       case 420:
-        // two point return
+        // Two Point Return - defensive two point return
         break
 
       default:

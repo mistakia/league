@@ -314,4 +314,8 @@ The data view system automatically:
 
 Adding new fantasy statistics requires careful coordination across multiple system components. Following this guide ensures that new statistics are properly integrated into all aspects of the fantasy points calculation system while maintaining backward compatibility and performance.
 
-For questions or clarification, refer to the existing implementation of recent additions like `rush_first_down`, `rec_first_down`, and `ry_no_kneels` as reference examples.
+For questions or clarification, refer to the existing implementation of recent additions like `rush_first_down`, `rec_first_down`, and `ry_excluding_kneels` as reference examples.
+
+## Reference Documentation
+
+- [NFL GSIS Stat IDs Reference](nfl-gsis-stat-ids.md) - Complete reference for NFL GSIS stat IDs used in play-by-play processing
