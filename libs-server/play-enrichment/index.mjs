@@ -7,6 +7,7 @@ import { enrich_play_success } from './success-metric-enrichment.mjs'
 import { enrich_player_identifications } from './player-identification-enrichment.mjs'
 import { enrich_yardage_stats } from './yardage-stat-enrichment.mjs'
 import { enrich_drive_play_counts } from './drive-play-count-enrichment.mjs'
+import { enrich_fixed_drives } from './fixed-drive-enrichment.mjs'
 
 const log = debug('play-enrichment')
 
@@ -23,6 +24,7 @@ const log = debug('play-enrichment')
  * @param {boolean} params.options.play_types - Enable play type enrichment (default: true)
  * @param {boolean} params.options.success - Enable success metric enrichment (default: true)
  * @param {boolean} params.options.players - Enable player identification enrichment (default: true)
+ * @param {boolean} params.options.fixed_drives - Enable fixed drive sequence enrichment (default: true)
  * @param {boolean} params.options.drive_counts - Enable drive play count enrichment (default: true)
  * @returns {Promise<Array>} Enriched play objects (does NOT persist to database)
  */
@@ -40,6 +42,7 @@ export const enrich_plays = async ({
     qb_plays = true,
     success = true,
     players = true,
+    fixed_drives = true,
     drive_counts = true
   } = options
 
@@ -117,7 +120,18 @@ export const enrich_plays = async ({
       }
     }
 
-    // Phase 7: Drive play counts
+    // Phase 7: Fixed drive sequences
+    // Calculates drive sequence numbers matching nflfastr's fixed_drive methodology
+    // Must run BEFORE drive_play_counts since that depends on drive_seq
+    if (fixed_drives) {
+      try {
+        enriched_plays = enrich_fixed_drives(enriched_plays)
+      } catch (error) {
+        log(`Fixed drive enrichment failed: ${error.message}`)
+      }
+    }
+
+    // Phase 8: Drive play counts
     // This must run AFTER play type enrichment since it depends on play_type field
     if (drive_counts) {
       try {

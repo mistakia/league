@@ -5,19 +5,24 @@ const log = debug('drive-play-count-enrichment')
 /**
  * Determines if a play should be counted in drive_play_count
  *
+ * IMPORTANT: nflfastr's drive_play_count is passed through directly from
+ * NFL data and should be considered authoritative when available. This
+ * enrichment serves as a fallback for:
+ * - Live games before nflfastr data is available
+ * - Games imported from non-nflfastr sources (NFL V1, Sportradar)
+ *
  * Counts scrimmage plays only, excluding:
  * - Administrative plays (GAME_START, END_QUARTER, END_GAME, timeouts)
- * - Kickoffs (these start drives but aren't offensive plays)
- * - Punts (drive-ending plays, excluded to match nflfastr methodology)
+ * - Kickoffs (KOFF - these start drives but aren't offensive plays)
+ * - Punts (PUNT - drive-ending plays, not counted as scrimmage plays)
  * - Field goals and extra points (FGXP - special teams, not scrimmage plays)
  * - Two-point conversions (CONV - conversion attempts, not scrimmage plays)
  * - Plays marked as deleted
- * - Nullified plays (penalty with no play)
+ * - Nullified plays (NOPL without pass/rush - penalties with no actual play)
  *
- * Note: nflfastr's drive_play_count excludes punts, so a traditional
- * "three and out" (3 offensive plays followed by a punt) results in
- * drive_play_count = 3. This matches the DST scoring logic in
- * calculate-dst-stats-from-plays.mjs which checks drive_play_count === 3.
+ * This matches the observed nflfastr methodology where a "three and out"
+ * (3 offensive plays followed by a punt) results in drive_play_count = 3.
+ * This aligns with DST scoring logic in calculate-dst-stats-from-plays.mjs.
  *
  * @param {Object} play - Play object to evaluate
  * @returns {boolean} True if play should be counted
@@ -68,7 +73,11 @@ const should_count_play = (play) => {
  * Calculates drive_play_count for all plays
  *
  * This enrichment counts the number of scrimmage plays in each drive,
- * matching nflfastr's drive_play_count methodology.
+ * approximating nflfastr's drive_play_count methodology. Used as a fallback
+ * when nflfastr data is not yet available (live games, non-nflfastr sources).
+ *
+ * When nflfastr data is imported, its drive_play_count should overwrite
+ * this enrichment's values since nflfastr passes through the official NFL count.
  *
  * For incomplete drives (live games), only counts plays that have occurred so far.
  *
