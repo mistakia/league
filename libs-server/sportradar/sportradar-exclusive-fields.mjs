@@ -45,7 +45,8 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
   'fumble_recovered_team',
 
   // Penalty Details
-  'penalty_type', // Specific penalty description
+  // Note: penalty_type is NOT exclusive - nflfastr extracts from play descriptions
+  // which is more accurate than Sportradar's API (see sportradar errors on special teams)
   'penalty_declined', // Penalty was declined
   'penalty_offset', // Offsetting penalty
   'penalty_player_sportradar_id',

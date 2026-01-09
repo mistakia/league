@@ -1,5 +1,5 @@
-// Canonical penalty type mappings - normalizes historical and variant names
-// to Sportradar-style canonical names with offense/defense suffixes
+// Canonical penalty type mappings - normalizes historical, variant, and
+// source-specific names to a canonical format based on nflfastr/NFL standards
 
 export const PENALTY_TYPE_CANONICAL_MAP = {
   // Face Mask - preserve yard distinction
@@ -20,12 +20,60 @@ export const PENALTY_TYPE_CANONICAL_MAP = {
   'Horse Collar': 'Horse Collar Tackle',
   'Illegal Kick': 'Illegal Kick/Kicking Loose Ball',
   'Illegally Kicking Ball': 'Illegal Kick/Kicking Loose Ball',
+  'Player Out of Bounds on a Punt': 'Player Out of Bounds on Kick',
 
-  // Offensive facemask variant
-  'Offensive Facemask': 'Offensive Facemask'
+  // Sportradar-specific variants - strip prefix and normalize to base name
+  // Dynamic suffix will be added by SIDE_SPECIFIC_PENALTIES logic based on pen_team/off_team
+  // This ensures convergence with nflfastr and extraction pipelines
+  'Offensive Facemask': 'Face Mask (15 Yards)',
+  'Offensive Illegal Block Above the Waist': 'Illegal Block Above the Waist',
+  'Defensive Illegal Blindside Block': 'Illegal Blindside Block',
+  'Offensive Low Block': 'Low Block',
+  'Defensive Chop Block': 'Chop Block'
 }
 
-// Penalties that require offense/defense suffix based on penalized team
+// Penalties that are ALWAYS committed by the offense
+export const OFFENSE_ONLY_PENALTIES = new Set([
+  'False Start',
+  'Delay of Game', // Note: "Defensive Delay of Game" is separate
+  'Illegal Formation',
+  'Illegal Shift',
+  'Illegal Motion',
+  'Ineligible Downfield Pass',
+  'Ineligible Downfield Kick',
+  'Intentional Grounding',
+  'Illegal Forward Pass',
+  'Illegal Touch Pass',
+  'Illegal Touch Kick',
+  'Illegal Double-Team Block',
+  'Illegal Crackback',
+  'Illegal Peelback',
+  'Kickoff Out of Bounds',
+  'Kickoff Short of Landing Zone',
+  'Player Out of Bounds on Kick',
+  'Delay of Kickoff',
+  'Short Free Kick'
+])
+
+// Penalties that are ALWAYS committed by the defense
+export const DEFENSE_ONLY_PENALTIES = new Set([
+  'Neutral Zone Infraction',
+  'Encroachment',
+  'Roughing the Passer',
+  'Roughing the Kicker',
+  'Running Into the Kicker',
+  'Illegal Contact',
+  'Leverage',
+  'Leaping',
+  'Hip Drop Tackle',
+  'Fair Catch Interference',
+  'Kick Catch Interference',
+  'Offside on Free Kick',
+  'Invalid Fair Catch Signal',
+  'Illegal Wedge'
+])
+
+// Penalties that can be committed by EITHER side - require dynamic suffix
 export const SIDE_SPECIFIC_PENALTIES = new Set([
   'Unnecessary Roughness',
   'Unsportsmanlike Conduct',
@@ -34,7 +82,18 @@ export const SIDE_SPECIFIC_PENALTIES = new Set([
   'Illegal Use of Hands',
   'Illegal Bat',
   'Personal Foul',
-  'Disqualification'
+  'Disqualification',
+  'Face Mask (15 Yards)',
+  'Face Mask (5 Yards)',
+  'Illegal Block Above the Waist',
+  'Illegal Blindside Block',
+  'Horse Collar Tackle',
+  'Low Block',
+  'Lowering the Head to Make Forcible Contact',
+  'Illegal Substitution',
+  'Illegal Kick/Kicking Loose Ball',
+  'Chop Block',
+  'Clipping'
 ])
 
 // Regex patterns for extracting penalty type from play description
@@ -98,7 +157,21 @@ export const extract_penalty_from_desc = ({ desc, desc_nflfastr }) => {
 }
 
 /**
- * Normalize penalty type to canonical name
+ * Check if a penalty type already has a unit designation
+ * (Offensive/Defensive prefix or / Offense, / Defense suffix)
+ */
+const has_unit_designation = (penalty_type) => {
+  if (!penalty_type) return false
+  return (
+    penalty_type.startsWith('Offensive ') ||
+    penalty_type.startsWith('Defensive ') ||
+    penalty_type.endsWith(' / Offense') ||
+    penalty_type.endsWith(' / Defense')
+  )
+}
+
+/**
+ * Normalize penalty type to canonical name with unit designation
  * @param {Object} params
  * @param {string} params.raw_penalty_type - Raw penalty type name
  * @param {string} [params.pen_team] - Team that committed the penalty
@@ -127,9 +200,23 @@ export const normalize_penalty_type = ({
     normalized = raw_penalty_type
   }
 
-  // Check if this penalty needs side suffix
-  if (SIDE_SPECIFIC_PENALTIES.has(raw_penalty_type)) {
-    // Only add suffix if we can determine the side
+  // Skip if already has unit designation (Offensive/Defensive prefix or suffix)
+  if (has_unit_designation(normalized)) {
+    return normalized
+  }
+
+  // Offense-only penalties always get / Offense suffix
+  if (OFFENSE_ONLY_PENALTIES.has(normalized)) {
+    return normalized + ' / Offense'
+  }
+
+  // Defense-only penalties always get / Defense suffix
+  if (DEFENSE_ONLY_PENALTIES.has(normalized)) {
+    return normalized + ' / Defense'
+  }
+
+  // Side-specific penalties need dynamic suffix based on pen_team vs off_team
+  if (SIDE_SPECIFIC_PENALTIES.has(normalized)) {
     if (pen_team && off_team) {
       const is_offense_penalty =
         pen_team.toUpperCase() === off_team.toUpperCase()
