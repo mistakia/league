@@ -4,7 +4,6 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import config from '#config'
 import db from '#db'
 import { wait } from '#libs-server'
 import is_main from '../is-main.mjs'
@@ -43,19 +42,15 @@ const get_sportradar_config = async () => {
     .where({ key: 'sportradar_config' })
     .first()
 
-  if (config_row?.value) {
-    return {
-      api_key: config_row.value.api_key || config.sportradar_api,
-      base_url:
-        config_row.value.base_url ||
-        'https://api.sportradar.com/nfl/official/trial/v7/en'
-    }
+  if (!config_row?.value?.api_key) {
+    throw new Error('sportradar_config not found in database config table')
   }
 
-  // Fallback to config file
   return {
-    api_key: config.sportradar_api,
-    base_url: 'https://api.sportradar.com/nfl/official/trial/v7/en'
+    api_key: config_row.value.api_key,
+    base_url:
+      config_row.value.base_url ||
+      'https://api.sportradar.com/nfl/official/trial/v7/en'
   }
 }
 
@@ -74,7 +69,8 @@ export const getPlayer = ({ sportradar_id }) =>
     }
     last_request = process.hrtime.bigint()
 
-    const url = `https://api.sportradar.us/nfl/official/trial/v7/en/${api_path}?api_key=${config.sportradar_api}`
+    const { api_key, base_url } = await get_sportradar_config()
+    const url = `${base_url}/${api_path}?api_key=${api_key}`
     const res = await fetch(url)
     const data = await res.json()
 

@@ -20,7 +20,9 @@ yarn-error.log
 
 # App specific
 #
+# Legacy JS config files (migrated to config/ directory with secure-config)
 config.*.js
+# Note: config/*.json files ARE tracked (encrypted values are safe to commit)
 key.pem
 cert.pem
 drive-credentials.json

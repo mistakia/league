@@ -2,10 +2,10 @@ module.exports = {
   apps: [
     {
       script: 'server.mjs',
-      args: '--config /root/league/config.production.js',
       watch: '.',
       env_production: {
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        CONFIG_ENCRYPTION_KEY: process.env.CONFIG_ENCRYPTION_KEY
       },
       max_memory_restart: '3G',
       node_args: '--max-old-space-size=3072'

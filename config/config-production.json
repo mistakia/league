@@ -1,0 +1,83 @@
+{
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+  "ssl": false,
+  "port": 443,
+  "url": "https://xo.football",
+  "nominationTimer": 45000,
+  "bidTimer": 14000,
+  "clickSend": {
+    "auth": "ENCRYPTED|d1b436016a52d0b29871f3c7a14b497e|fb6433c854932957a975839fb6bd7f09e796529830a3337ff595f5e3f99b03d043a41d691326ee269000f52bbebda751194dfcd065354354be73f47b4094a575a1de03ec216f15d196287e3a2715515e",
+    "number": "+18335665277"
+  },
+  "email": {
+    "api": "ENCRYPTED|a312473c11775058e20a0e2b2f4c2330|ea7bf6cee1593cc3b09569c73ce17bcd7295ee66846818f8c30ec34dac8da66bf06486cc1ef39525891153f93bb58f6b5a252f17dfaa8dabb418295252d8b1ce7922d9820d7fb6a0d6a954254295bea4",
+    "admin": "teflonleague@gmail.com",
+    "from": "teflonleague@gmail.com"
+  },
+  "mflUserAgent": "TEFLONMFLCLIENT",
+  "pro_football_reference_url": "https://www.pro-football-reference.com",
+  "nfl_api_url": "https://api.nfl.com",
+  "nfl_combine_profiles_url": "https://api.nfl.com/football/v2/combine/profiles",
+  "ngs_api_url": "https://nextgenstats.nfl.com/api",
+  "prizepicks_api_url": "https://partner-api.prizepicks.com",
+  "gambet_api_url": "https://gambetdc.dclottery.com",
+  "betrivers_api_url": "https://md.betrivers.com/api",
+  "betrivers_market_groups_api_url": "https://eu-offering-api.kambicdn.com",
+  "fantasylife_api": "https://www.fantasylife.com/api",
+  "digital_sports_tech_api_url": "https://bv2.digitalsportstech.com/api",
+  "league_api_auth_token": "ENCRYPTED|8266a739037e72fff10c427e0cfcfae5|5e40700c0dc7e630dbc211e38f97c8c2566a25493f3519bb0032ac9076b4f256948dbfdb29d888b4052b94b658eba08744823f5734aac4ff35cdfefade6c98eab4560b4ed0e9d3eea2f92ece899e0de04fb9a73c08f47cac9734fac92d5c823348b45388c092c4357d682d43a8e95e71cc2bf1c4f8dedbee0958e48b69d8e2c7",
+  "jwt": {
+    "secret": "ENCRYPTED|ed2a3311603c57292e306419bfe616f7|ee2dc5729340077ee994d8dd030e2b1d8793818edc0310061bd0f142df094824",
+    "algorithms": ["HS256"],
+    "credentialsRequired": false
+  },
+  "postgres": {
+    "client": "postgres",
+    "connection": {
+      "host": "38.242.199.45",
+      "user": "league_user",
+      "password": "ENCRYPTED|09e7ce2470732a397531984903482de4|344c240c21b2355585ffbce2a5ae2f704d813822b6d9955de2e653d8a06a76e0",
+      "database": "league_production",
+      "decimalNumbers": true,
+      "port": "5432"
+    },
+    "pool": {
+      "min": 2,
+      "max": 20,
+      "acquireTimeoutMillis": 30000,
+      "createTimeoutMillis": 30000,
+      "idleTimeoutMillis": 30000,
+      "reapIntervalMillis": 1000
+    }
+  },
+  "filter_prop_pairings_options": {
+    "market_odds_max_threshold": null,
+    "historical_rate_min_threshold": 0.7,
+    "opponent_allowed_rate_min_threshold": 0,
+    "joint_historical_rate_min_threshold": 0,
+    "prop_hits_min_threshold": 0,
+    "pairing_size_max_threshold": 3,
+    "highest_payout_min_threshold": null,
+    "lowest_payout_min_threshold": 200,
+    "risk_total_max_threshold": null,
+    "edge_min_threshold": null,
+    "total_games_min_threshold": null,
+    "exclude_players": [],
+    "include_players": [],
+    "include_teams": [],
+    "exclude_props": [],
+    "include_props": [],
+    "exclude_nfl_team": [],
+    "opponent_allowed_py_min": -20,
+    "opponent_allowed_ry_min": -10,
+    "opponent_allowed_recy_min": -15,
+    "opponent_allowed_pc_min": null,
+    "opponent_allowed_tdp_min": null,
+    "opponent_allowed_rec_min": -1,
+    "opponent_allowed_ints_min": null,
+    "opponent_allowed_ra_min": null,
+    "opponent_allowed_tdrec_min": null,
+    "opponent_allowed_tdr_min": null,
+    "opponent_allowed_pa_min": null
+  }
+}

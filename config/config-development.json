@@ -1,0 +1,77 @@
+{
+  "user_agent": "",
+  "ssl": false,
+  "port": 443,
+  "url": "https://example.com",
+  "nominationTimer": 30000,
+  "bidTimer": 15000,
+  "clickSend": {
+    "auth": "",
+    "number": ""
+  },
+  "email": {
+    "api": "",
+    "admin": "",
+    "from": ""
+  },
+  "mflUserAgent": "",
+  "pro_football_reference_url": "",
+  "nfl_api_url": "",
+  "nfl_combine_profiles_url": "",
+  "ngs_api_url": "",
+  "prizepicks_api_url": "",
+  "gambet_api_url": "",
+  "betrivers_api_url": "",
+  "betrivers_market_groups_api_url": "",
+  "fantasylife_api": "",
+  "digital_sports_tech_api_url": "",
+  "league_api_auth_token": "",
+  "discord_sysadmin_alerts_channel_webhook_url": "",
+  "jwt": {
+    "secret": "ENCRYPTED|ed2a3311603c57292e306419bfe616f7|ee2dc5729340077ee994d8dd030e2b1d8793818edc0310061bd0f142df094824",
+    "algorithms": ["HS256"],
+    "credentialsRequired": false
+  },
+  "postgres": {
+    "client": "pg",
+    "connection": {
+      "host": "38.242.199.45",
+      "port": 5432,
+      "user": "league_user",
+      "password": "ENCRYPTED|09e7ce2470732a397531984903482de4|344c240c21b2355585ffbce2a5ae2f704d813822b6d9955de2e653d8a06a76e0",
+      "database": "league_production"
+    },
+    "pool": {
+      "min": 2,
+      "max": 10
+    }
+  },
+  "filter_prop_pairings_options": {
+    "market_odds_max_threshold": 1,
+    "historical_rate_min_threshold": 1,
+    "opponent_allowed_rate_min_threshold": 1,
+    "joint_historical_rate_min_threshold": 1,
+    "prop_hits_min_threshold": 1,
+    "highest_payout_min_threshold": 100,
+    "lowest_payout_min_threshold": 100,
+    "edge_min_threshold": 0,
+    "total_games_min_threshold": 3,
+    "exclude_players": [],
+    "include_players": [],
+    "include_teams": [],
+    "exclude_props": [],
+    "include_props": [],
+    "exclude_nfl_team": [],
+    "opponent_allowed_py_min": null,
+    "opponent_allowed_ry_min": null,
+    "opponent_allowed_recy_min": null,
+    "opponent_allowed_pc_min": null,
+    "opponent_allowed_tdp_min": null,
+    "opponent_allowed_rec_min": null,
+    "opponent_allowed_ints_min": null,
+    "opponent_allowed_ra_min": null,
+    "opponent_allowed_tdrec_min": null,
+    "opponent_allowed_tdr_min": null,
+    "opponent_allowed_pa_min": null
+  }
+}

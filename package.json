@@ -7,8 +7,8 @@
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs --static-directory ./static --static-public-path /static",
     "lint": "eslint .",
     "prettier": "prettier --write .",
-    "test": "TZ=America/New_York NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --exclude test/libs-server.get-players-table-view-results-debug.mjs --require test/global.mjs",
-    "test:data-view-queries": "TZ=America/New_York NODE_ENV=test TEST=all mocha --exit test/libs-server.data-view-queries.mjs --require test/global.mjs",
+    "test": "TZ=America/New_York NODE_ENV=test CONFIG_ENCRYPTION_KEY=cc0e93bb948088a5a35affafb6e4b47210a659f9e150f9a55a41222eaacf5520 TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --exclude test/libs-server.get-players-table-view-results-debug.mjs --require test/global.mjs",
+    "test:data-view-queries": "TZ=America/New_York NODE_ENV=test CONFIG_ENCRYPTION_KEY=cc0e93bb948088a5a35affafb6e4b47210a659f9e150f9a55a41222eaacf5520 TEST=all mocha --exit test/libs-server.data-view-queries.mjs --require test/global.mjs",
     "start:api": "NODE_ENV=development nodemon server.mjs",
     "start:api:prod": "NODE_ENV=production node server.mjs",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
@@ -32,7 +32,7 @@
     "debug:data-view": "NODE_ENV=production node scripts/debug-data-view.mjs"
   },
   "imports": {
-    "#config": "./config.js",
+    "#config": "./config/index.mjs",
     "#db": "./db/index.mjs",
     "#db/*": "./db/*",
     "#api": "./api/index.mjs",
@@ -54,6 +54,7 @@
     "@google-cloud/local-auth": "^3.0.1",
     "@sendgrid/mail": "^7.7.0",
     "@trashman/ed25519-blake2b": "0.0.8",
+    "@tsmx/secure-config": "^2.3.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "bcrypt": "^5.1.1",

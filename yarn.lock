@@ -4782,6 +4782,40 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tsmx/json-traverse@npm:^1.0.5, @tsmx/json-traverse@npm:^1.0.6":
+  version: 1.0.9
+  resolution: "@tsmx/json-traverse@npm:1.0.9"
+  checksum: 10/c1b34848e87a1d3c9abaa8f415f4c70fe92c6877f04cfb1c9cc45eb6ff9bb5e52f3aebb4d24800b9ab66f444b6bf754bd389382ac8eadc2d014c5b4b08032564
+  languageName: node
+  linkType: hard
+
+"@tsmx/object-hmac@npm:^1.1.1":
+  version: 1.1.6
+  resolution: "@tsmx/object-hmac@npm:1.1.6"
+  dependencies:
+    "@tsmx/json-traverse": "npm:^1.0.5"
+  checksum: 10/e25e7d783356471c451d8321db5217f6af6adffe3d251efbf9e1faa72e5edbdd86bdc51e1eaa27fe6aa8e2d09ab8fd24263b0d55c5fc4a85fcea58e465d18c1c
+  languageName: node
+  linkType: hard
+
+"@tsmx/secure-config@npm:^2.3.0":
+  version: 2.4.1
+  resolution: "@tsmx/secure-config@npm:2.4.1"
+  dependencies:
+    "@tsmx/json-traverse": "npm:^1.0.6"
+    "@tsmx/object-hmac": "npm:^1.1.1"
+    "@tsmx/string-crypto": "npm:^1.0.2"
+  checksum: 10/e7b4a16cda2bbf84bec667eb8ae98ea20354bafca41e3661d1dc5d6b02bcfa1ce151fa886edfc6484874bc8d79b2599b10021d82f575e90e468fa7d47868145c
+  languageName: node
+  linkType: hard
+
+"@tsmx/string-crypto@npm:^1.0.2":
+  version: 1.0.7
+  resolution: "@tsmx/string-crypto@npm:1.0.7"
+  checksum: 10/ce5f048c593a451a6ee0e087d9751069befbd02a68c6109ee4658a995a1786f4029959dc9f2dcac9c5620b8b5fe3782539e782f8814c2cb568f49a2977571b0c
+  languageName: node
+  linkType: hard
+
 "@types/body-parser@npm:*":
   version: 1.19.5
   resolution: "@types/body-parser@npm:1.19.5"
@@ -15074,6 +15108,7 @@ __metadata:
     "@sendgrid/mail": "npm:^7.7.0"
     "@simonwep/pickr": "npm:^1.9.1"
     "@trashman/ed25519-blake2b": "npm:0.0.8"
+    "@tsmx/secure-config": "npm:^2.3.0"
     ajv: "npm:^8.17.1"
     ajv-formats: "npm:^3.0.1"
     babel-loader: "npm:^9.2.1"

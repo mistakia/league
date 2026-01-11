@@ -1,0 +1,23 @@
+{
+  "ssl": false,
+  "jwt": {
+    "secret": "ENCRYPTED|695841abc9499bc5dc857d58e85a5e28|307f4a23f4aced3253341355cd9c91dde40f7e78f0d282b2966801a85d04c4bf",
+    "algorithms": ["HS256"]
+  },
+  "postgres": {
+    "client": "pg",
+    "connection": {
+      "host": "127.0.0.1",
+      "user": "league_test",
+      "database": "league_test",
+      "password": "league_test",
+      "port": 5432,
+      "decimalNumbers": true,
+      "multipleStatements": true
+    },
+    "seeds": {
+      "directory": "./db/seeds/test",
+      "loadExtensions": [".mjs"]
+    }
+  }
+}
