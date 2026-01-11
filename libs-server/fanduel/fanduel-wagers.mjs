@@ -18,6 +18,21 @@ export const get_market_details_from_wager = (wager_leg) => {
       return 'FIRST_HALF_TEAM_TOTAL_POINTS'
     }
 
+    // example `1st Qtr Alt Receiving Yds`
+    if (stat_type.match(/1st Qtr.* Receiving Yds/)) {
+      return 'FIRST_QUARTER_RECEIVING_YARDS'
+    }
+
+    // example `1st Qtr Alt Rushing Yds`
+    if (stat_type.match(/1st Qtr.* Rushing Yds/)) {
+      return 'FIRST_QUARTER_RUSHING_YARDS'
+    }
+
+    // example `1st Qtr Alt Passing Yds`
+    if (stat_type.match(/1st Qtr.* Passing Yds/)) {
+      return 'FIRST_QUARTER_PASSING_YARDS'
+    }
+
     switch (stat_type) {
       case 'Passing TDs':
       case 'Alt Passing TDs':
@@ -56,6 +71,9 @@ export const get_market_details_from_wager = (wager_leg) => {
 
       case 'Any Time Touchdown Scorer':
         return 'ANYTIME_TOUCHDOWN'
+
+      case 'To Score 2+ Touchdowns':
+        return 'TWO_PLUS_TOUCHDOWNS'
 
       case 'Moneyline':
         return 'MONEYLINE'
@@ -103,8 +121,15 @@ export const get_market_details_from_wager = (wager_leg) => {
       case 'RECEPTIONS':
       case 'TOTAL_POINTS':
       case 'FIRST_HALF_TEAM_TOTAL_POINTS':
-      case 'ANYTIME_TOUCHDOWN':
+      case 'FIRST_QUARTER_RECEIVING_YARDS':
+      case 'FIRST_QUARTER_RUSHING_YARDS':
+      case 'FIRST_QUARTER_PASSING_YARDS':
         return check_over_under(over_or_under)
+
+      case 'ANYTIME_TOUCHDOWN':
+      case 'TWO_PLUS_TOUCHDOWNS':
+        // These are yes/no markets, return OVER as the selection type
+        return 'OVER'
 
       default:
         throw new Error(`Invalid metric name: ${metric_name}`)
@@ -130,7 +155,10 @@ export const get_market_details_from_wager = (wager_leg) => {
     over_or_under: wager_leg.overOrUnder
   })
 
-  if (metric_name === 'ANYTIME_TOUCHDOWN') {
+  if (
+    metric_name === 'ANYTIME_TOUCHDOWN' ||
+    metric_name === 'TWO_PLUS_TOUCHDOWNS'
+  ) {
     player_name = wager_leg.selectionName
   }
 

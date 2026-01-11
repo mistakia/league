@@ -197,10 +197,25 @@ export const standardize_fanduel_wager = (wager) => {
       /(\d{4})(\d{4})(\d{4})(\d{4})/,
       '$1-$2-$3-$4'
     ),
-    parsed_odds: Number(wager.americanBetPrice),
+    parsed_odds: Number(wager.americanBetPrice) || 0,
     is_settled: wager.isSettled,
     is_won: wager.result === 'WON',
-    potential_win: wager.betPrice * wager.currentSize,
+    is_cashed_out: wager.result === 'CASHED_OUT',
+    // betPrice is decimal odds; if missing, calculate from pandl for settled wagers
+    potential_win:
+      typeof wager.betPrice === 'number' && !isNaN(wager.betPrice)
+        ? wager.betPrice * wager.currentSize
+        : wager.pandl !== undefined && wager.pandl !== null
+          ? wager.currentSize + wager.pandl
+          : 0,
+    actual_return:
+      wager.result === 'WON'
+        ? wager.currentSize + (wager.pandl || 0)
+        : wager.result === 'CASHED_OUT'
+          ? wager.currentSize + (wager.pandl || 0)
+          : wager.result === 'LOST'
+            ? 0
+            : null,
     stake: wager.currentSize,
     is_bonus_bet,
     bonus_bet_amount,

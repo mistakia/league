@@ -96,6 +96,12 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       const is_won = is_settled && lost_legs === 0
       const is_lost = is_settled && lost_legs > 0
 
+      // potentialReturns is total payout (stake + profit)
+      // total_won = profit only (potentialReturns - stake for won wagers)
+      // total_return = stake + profit (used for ROI)
+      const profit = is_won ? wager.potentialReturns - wager.stake : 0
+      const actual_return = is_won ? wager.potentialReturns : is_lost ? 0 : null
+
       return {
         wagers: accumulator.wagers + 1,
         wagers_won: is_won
@@ -106,9 +112,15 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
           : accumulator.wagers_loss,
 
         total_risk: accumulator.total_risk + wager.stake,
+        // total_won = profit only (for won wagers)
         total_won: is_won
-          ? accumulator.total_won + wager.potentialReturns
+          ? accumulator.total_won + profit
           : accumulator.total_won,
+        // total_return = stake + profit (for ROI calculation)
+        total_return:
+          actual_return !== null
+            ? accumulator.total_return + actual_return
+            : accumulator.total_return,
         total_potential_win:
           accumulator.total_potential_win + wager.potentialReturns,
 
@@ -126,6 +138,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       wagers_loss: 0,
       total_risk: 0,
       total_won: 0,
+      total_return: 0,
       total_potential_win: 0,
       lost_by_legs: {}
     }
@@ -174,9 +187,10 @@ const analyze_draftkings_wagers = async ({
   }
 
   const wager_summary = get_wagers_summary({ wagers: filtered })
-  wager_summary.roi = `${
-    (wager_summary.total_won / wager_summary.total_risk - 1) * 100
-  }%`
+  wager_summary.roi = `${(
+    (wager_summary.total_return / wager_summary.total_risk - 1) *
+    100
+  ).toFixed(2)}%`
   wager_summary.total_risk = Number(wager_summary.total_risk.toFixed(2))
   wager_summary.total_potential_win = Number(
     wager_summary.total_potential_win.toFixed(2)

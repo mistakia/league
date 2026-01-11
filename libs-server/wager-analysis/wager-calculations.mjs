@@ -100,9 +100,11 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       }).length
 
       const is_settled = wager.is_settled
+      const is_cashed_out = wager.is_cashed_out || false
 
-      const is_won = is_settled && lost_legs === 0
-      const is_lost = is_settled && lost_legs > 0
+      // Cashed out wagers are considered settled but neither won nor lost
+      const is_won = is_settled && !is_cashed_out && lost_legs === 0
+      const is_lost = is_settled && !is_cashed_out && lost_legs > 0
 
       // Track bonus bet amounts
       const bonus_bet_amount = wager.bonus_bet_amount || 0
@@ -153,9 +155,24 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
 
         total_risk: accumulator.total_risk + wager.stake,
         bonus_bet_risk: accumulator.bonus_bet_risk + bonus_bet_amount,
-        total_won: is_won
-          ? accumulator.total_won + wager.potential_win
-          : accumulator.total_won,
+        // total_won = profit only (pandl), not including stake returned
+        // This is the actual money won, not the gross return
+        total_won:
+          is_won || is_cashed_out
+            ? accumulator.total_won + (wager.pandl || 0)
+            : accumulator.total_won,
+        // total_return = stake + profit for settled wagers (used for ROI calculation)
+        total_return:
+          wager.actual_return !== null && wager.actual_return !== undefined
+            ? accumulator.total_return + wager.actual_return
+            : is_won
+              ? accumulator.total_return + (wager.potential_win || 0)
+              : is_lost
+                ? accumulator.total_return + 0
+                : accumulator.total_return,
+        wagers_cashed_out: is_cashed_out
+          ? accumulator.wagers_cashed_out + 1
+          : accumulator.wagers_cashed_out,
         max_potential_win: accumulator.max_potential_win + wager.potential_win,
         open_potential_win: is_settled
           ? accumulator.open_potential_win
@@ -218,10 +235,12 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       wagers: 0,
       wagers_won: 0,
       wagers_loss: 0,
+      wagers_cashed_out: 0,
       total_risk: 0,
       bonus_bet_risk: 0,
       wagers_open: 0,
       total_won: 0,
+      total_return: 0,
       max_potential_win: 0,
       open_potential_win: 0,
       wagers_odds_sum: 0,

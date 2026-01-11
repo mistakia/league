@@ -71,6 +71,9 @@ const format_wager_status = (settlement_status) => {
     case 'VOID':
       return 'CANCELLED'
 
+    case 'CASHED_OUT':
+      return 'CASHED_OUT'
+
     default:
       throw new Error(`unknown wager status ${settlement_status}`)
   }
@@ -138,8 +141,16 @@ const get_standard_market_type = ({ metric_name, market_type }) => {
       return 'GAME_RUSHING_RECEIVING_YARDS'
     case 'RECEPTIONS':
       return 'GAME_RECEPTIONS'
+    case 'FIRST_QUARTER_RECEIVING_YARDS':
+      return 'FIRST_QUARTER_RECEIVING_YARDS'
+    case 'FIRST_QUARTER_RUSHING_YARDS':
+      return 'FIRST_QUARTER_RUSHING_YARDS'
+    case 'FIRST_QUARTER_PASSING_YARDS':
+      return 'FIRST_QUARTER_PASSING_YARDS'
     case 'ANYTIME_TOUCHDOWN':
       return 'ANYTIME_TOUCHDOWN'
+    case 'TWO_PLUS_TOUCHDOWNS':
+      return 'TWO_PLUS_TOUCHDOWNS'
     default:
       return `GAME_${metric_name}`
   }
@@ -218,13 +229,14 @@ const import_fanduel_wagers = async ({
   const market_selection_index = {}
   const wager_legs = wagers.map((wager) => wager.legs).flat()
   const wager_parts = wager_legs.map((legs) => legs.parts).flat()
+  const seen_parts = new Set()
   const unique_parts = wager_parts.filter((part) => {
     const key = `${part.eventId}/${part.marketId}/${part.selectionId}`
-    if (market_selection_index[key]) {
+    if (seen_parts.has(key)) {
       return false
     }
 
-    market_selection_index[key] = true
+    seen_parts.add(key)
 
     return true
   })
@@ -259,9 +271,9 @@ const import_fanduel_wagers = async ({
 
   const nfl_games = await db('nfl_games')
     .where({
-      year: current_season.year,
-      seas_type: 'REG'
+      year: current_season.year
     })
+    .whereIn('seas_type', ['REG', 'POST'])
     .whereIn('week', weeks)
 
   for (const part of unique_parts) {
@@ -365,18 +377,17 @@ const import_fanduel_wagers = async ({
           market_type
         } = fanduel.get_market_details_from_wager(leg.parts[0])
 
-        if (
-          !market_selection_index[
-            `${leg.parts[0].eventId}/${leg.parts[0].marketId}/${leg.parts[0].selectionId}`
-          ]
-        ) {
-          throw new Error('selection not found in market selection index')
+        const selection_index_key = `${leg.parts[0].eventId}/${leg.parts[0].marketId}/${leg.parts[0].selectionId}`
+        const selection_index_entry =
+          market_selection_index[selection_index_key]
+
+        if (!selection_index_entry || !selection_index_entry.nfl_game) {
+          throw new Error(
+            `selection not found in market selection index: ${selection_index_key}`
+          )
         }
 
-        const { nfl_game, player_row } =
-          market_selection_index[
-            `${leg.parts[0].eventId}/${leg.parts[0].marketId}/${leg.parts[0].selectionId}`
-          ]
+        const { nfl_game, player_row } = selection_index_entry
 
         const standard_market_type = get_standard_market_type({
           metric_name,

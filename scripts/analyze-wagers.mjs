@@ -132,11 +132,11 @@ const analyze_wagers = async ({
   wager_summary.cash_risk =
     wager_summary.total_risk - wager_summary.bonus_bet_risk
 
-  // Calculate ROI based on total risk
+  // Calculate ROI based on total risk using total_return (stake + profit for settled wagers)
   wager_summary.total_roi =
     wager_summary.total_risk > 0
       ? `${(
-          (wager_summary.total_won / wager_summary.total_risk - 1) *
+          (wager_summary.total_return / wager_summary.total_risk - 1) *
           100
         ).toFixed(2)}%`
       : 'N/A'
@@ -145,7 +145,7 @@ const analyze_wagers = async ({
   wager_summary.current_roi =
     wager_summary.cash_risk > 0
       ? `${(
-          (wager_summary.total_won / wager_summary.cash_risk - 1) *
+          (wager_summary.total_return / wager_summary.cash_risk - 1) *
           100
         ).toFixed(2)}%`
       : 'N/A'

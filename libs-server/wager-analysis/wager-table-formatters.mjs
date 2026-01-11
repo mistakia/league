@@ -87,7 +87,9 @@ export const create_wager_summary_table = (
   if (show_counts) {
     add_row('Wagers', wager_summary.wagers)
     add_row('Total Won', wager_summary.total_won.toFixed(2))
+    add_row('Total Return', wager_summary.total_return.toFixed(2))
     add_row('Wagers Open', wager_summary.wagers_open)
+    add_row('Wagers Cashed Out', wager_summary.wagers_cashed_out || 0)
     add_row('Total Risk', wager_summary.total_risk)
   }
 

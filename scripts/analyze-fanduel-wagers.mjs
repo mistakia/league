@@ -78,11 +78,20 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
         return leg.result === 'LOST'
       }).length
 
-      const total_return = wager.betPrice
+      const potential_win = wager.betPrice
         ? Number(wager.betPrice * wager.currentSize)
         : Number(wager.potentialWin)
       const is_won = wager.isSettled && lost_legs === 0
       const is_lost = wager.isSettled && !is_won
+
+      // Calculate actual return for settled wagers
+      // total_won = profit only (pandl)
+      // total_return = stake + profit (used for ROI)
+      const actual_return = is_won
+        ? wager.currentSize + (wager.pandl || 0)
+        : is_lost
+          ? 0
+          : null
 
       return {
         wagers: accumulator.wagers + 1,
@@ -97,10 +106,18 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
           : accumulator.wagers_open + 1,
 
         total_risk: accumulator.total_risk + wager.currentSize,
+        // total_won = profit only (pandl sum for won wagers)
         total_won: is_won
-          ? accumulator.total_won + (wager.pandl || total_return)
+          ? accumulator.total_won + (wager.pandl || 0)
           : accumulator.total_won,
-        max_potential_win: accumulator.max_potential_win + total_return,
+        // total_return = stake + profit (for ROI calculation)
+        total_return:
+          actual_return !== null
+            ? accumulator.total_return + actual_return
+            : is_won
+              ? accumulator.total_return + potential_win
+              : accumulator.total_return,
+        max_potential_win: accumulator.max_potential_win + potential_win,
         open_potential_win:
           accumulator.open_potential_win + Number(wager.potentialWin),
 
@@ -119,6 +136,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       wagers_open: 0,
       total_risk: 0,
       total_won: 0,
+      total_return: 0,
       max_potential_win: 0,
       open_potential_win: 0,
       lost_by_legs: {}
@@ -284,7 +302,7 @@ const analyze_fanduel_wagers = async ({
   }
 
   wager_summary.current_roi = `${(
-    (wager_summary.total_won / wager_summary.total_risk - 1) *
+    (wager_summary.total_return / wager_summary.total_risk - 1) *
     100
   ).toFixed(2)}%`
   wager_summary.total_risk = Number(wager_summary.total_risk.toFixed(2))
