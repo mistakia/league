@@ -137,7 +137,8 @@ export const map_rushing_stats = async ({
   mapped.rush_td = rush_stats.touchdown === 1
   mapped.broken_tackles_rush = rush_stats.broken_tackles || 0
   mapped.qb_kneel = rush_stats.kneel_down === 1
-  mapped.qb_scramble = rush_stats.scramble === 1
+  // Note: qb_scramble intentionally not set here - nflfastR is authoritative
+  // (Sportradar over-reports scrambles, marking designed runs and sacks as scrambles)
   mapped.first_down_rush = rush_stats.firstdown === 1
 
   // Goal to go

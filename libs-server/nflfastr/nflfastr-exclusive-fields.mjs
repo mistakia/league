@@ -15,6 +15,7 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'oob',
   'drive_yds_penalized',
   'punt_att',
+  'qb_scramble', // nflfastR is authoritative - parses "scrambles" from play description; Sportradar over-reports (marks designed runs/sacks as scrambles)
 
   // Core EPA Metrics
   'ep', // Expected Points pre-play
