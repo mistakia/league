@@ -5,8 +5,9 @@ import debug from 'debug'
 
 import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
-import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
+
+const MFL_USER_AGENT = 'TEFLONMFLCLIENT'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:players:mfl')
@@ -19,7 +20,7 @@ const run = async () => {
   const URL = `https://api.myfantasyleague.com/${current_season.year}/export?TYPE=injuries&JSON=1`
   const result = await fetch(URL, {
     headers: {
-      'User-Agent': config.mflUserAgent
+      'User-Agent': MFL_USER_AGENT
     }
   }).then((res) => res.json())
 

@@ -1,10 +1,10 @@
 import fetch from 'node-fetch'
 import debug from 'debug'
 
-import config from '#config'
-
 const log = debug('betonline')
 debug.enable('betonline')
+
+const DIGITAL_SPORTS_TECH_API_URL = 'https://bv2.digitalsportstech.com/api'
 
 export const market_groups = [
   'Defense',
@@ -16,7 +16,7 @@ export const market_groups = [
 ]
 
 export const get_market_groups = async () => {
-  const url = `${config.digital_sports_tech_api_url}/grouped-markets/v2/map?sb=betonline&sgmOdds=true&league=nfl`
+  const url = `${DIGITAL_SPORTS_TECH_API_URL}/grouped-markets/v2/map?sb=betonline&sgmOdds=true&league=nfl`
   log(url)
   const res = await fetch(url)
   const data = await res.json()
@@ -25,7 +25,7 @@ export const get_market_groups = async () => {
 }
 
 export const get_events = async () => {
-  const url = `${config.digital_sports_tech_api_url}/gfm/gamesByGfm?sb=betonline&league=nfl&sgmOdds=true`
+  const url = `${DIGITAL_SPORTS_TECH_API_URL}/gfm/gamesByGfm?sb=betonline&league=nfl&sgmOdds=true`
   log(url)
   const res = await fetch(url)
   const data = await res.json()
@@ -34,7 +34,7 @@ export const get_events = async () => {
 }
 
 export const get_markets = async ({ statistic, gameId }) => {
-  const url = `${config.digital_sports_tech_api_url}/dfm/marketsBySs?sb=betonline&gameId=${gameId}&statistic=${statistic}`
+  const url = `${DIGITAL_SPORTS_TECH_API_URL}/dfm/marketsBySs?sb=betonline&gameId=${gameId}&statistic=${statistic}`
   log(url)
   const res = await fetch(url)
   const data = await res.json()

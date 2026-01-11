@@ -11,8 +11,8 @@ import {
 } from '#libs-server'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
-import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { NFL_API_URL } from '#libs-server/nfl.mjs'
 
 const log = debug('import:nfl:players')
 debug.enable('import:nfl:players,get-player,update-player')
@@ -24,7 +24,7 @@ const run = async () => {
   log('fetching team ids')
   // get team ids
   const data = await fetch(
-    `${config.nfl_api_url}/v1/teams?s=%7B%22%24query%22%3A%7B%22season%22%3A2020%7D,%22%24take%22%3A40%7D&fs=%7Bid,season,fullName,nickName,abbr,teamType,conference%7Babbr%7D,division%7Babbr%7D%7D`,
+    `${NFL_API_URL}/v1/teams?s=%7B%22%24query%22%3A%7B%22season%22%3A2020%7D,%22%24take%22%3A40%7D&fs=%7Bid,season,fullName,nickName,abbr,teamType,conference%7Babbr%7D,division%7Babbr%7D%7D`,
     {
       headers: {
         authorization: `Bearer ${token}`
@@ -43,7 +43,7 @@ const run = async () => {
     const fs = encodeURIComponent(
       '{id,season,fullName,nickName,abbr,teamType,roster{ week, id,firstName,lastName,displayName,birthDate,gsisId,esbId},depthChart{person{id,firstName,lastName},unit,depthOrder,positionAbbr},injuries{id,type,person{firstName,lastName,id},injury,injuryStatus,practice,practiceStatus,status}}'
     )
-    const url = `${config.nfl_api_url}/v1/teams/${id}?s=${s}&fs=${fs}`
+    const url = `${NFL_API_URL}/v1/teams/${id}?s=${s}&fs=${fs}`
     log(url)
     const rosterData = await fetch(url, {
       headers: {

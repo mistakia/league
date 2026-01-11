@@ -2,12 +2,15 @@ import fetch, { FormData } from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
-import config from '#config'
 import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
 
 const log = debug('nfl')
 debug.enable('nfl')
+
+export const NFL_API_URL = 'https://api.nfl.com'
+export const NFL_COMBINE_PROFILES_URL =
+  'https://api.nfl.com/football/v2/combine/profiles'
 
 export const generate_guid = () => {
   let e = new Date().getTime()
@@ -55,7 +58,7 @@ export const get_session_token_v3 = async () => {
 export const getToken = async () => {
   const form = new FormData()
   form.set('grant_type', 'client_credentials')
-  const data = await fetch(`${config.nfl_api_url}/v1/reroute`, {
+  const data = await fetch(`${NFL_API_URL}/v1/reroute`, {
     method: 'POST',
     body: form,
     headers: {
@@ -154,7 +157,7 @@ query {
   }
 }
 `
-    const url = `${config.nfl_api_url}/v3/shield/?query=${encodeURIComponent(
+    const url = `${NFL_API_URL}/v3/shield/?query=${encodeURIComponent(
       query
     )}&variables=null`
     log(`fetching nfl players for year: ${year}, after: ${after}`)
@@ -204,7 +207,7 @@ export const getGames = async ({
     token = await get_session_token_v3()
   }
 
-  const url = `${config.nfl_api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
+  const url = `${NFL_API_URL}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
   log(url)
   const res = await fetch(url, {
     headers: {
@@ -236,7 +239,7 @@ export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
     token = await get_session_token_v3()
   }
 
-  const url = `${config.nfl_api_url}/experience/v1/gamedetails/${id}?withExternalIds`
+  const url = `${NFL_API_URL}/experience/v1/gamedetails/${id}?withExternalIds`
   const res = await fetch(url, {
     headers: {
       authorization: `Bearer ${token}`
@@ -276,7 +279,7 @@ export const get_combine_profiles = async ({
     token = await get_session_token_v3()
   }
 
-  const url = `${config.nfl_combine_profiles_url}?year=${year}&limit=1000`
+  const url = `${NFL_COMBINE_PROFILES_URL}?year=${year}&limit=1000`
   log(url)
   const res = await fetch(url, {
     headers: {

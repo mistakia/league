@@ -2,9 +2,9 @@ import fetch from 'node-fetch'
 import queryString from 'query-string'
 import debug from 'debug'
 
-import config from '#config'
-
 const log = debug('fantasylife')
+
+const FANTASYLIFE_API_URL = 'https://www.fantasylife.com/api'
 
 export const get_projections = async ({ table_id, query_params = {} } = {}) => {
   if (!table_id) {
@@ -19,7 +19,7 @@ export const get_projections = async ({ table_id, query_params = {} } = {}) => {
 
   try {
     const url = `${
-      config.fantasylife_api
+      FANTASYLIFE_API_URL
     }/datatables/table-contents/${table_id}/ajax?${queryString.stringify(
       params
     )}`

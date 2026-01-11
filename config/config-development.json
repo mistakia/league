@@ -14,17 +14,6 @@
     "admin": "",
     "from": ""
   },
-  "mflUserAgent": "",
-  "pro_football_reference_url": "",
-  "nfl_api_url": "",
-  "nfl_combine_profiles_url": "",
-  "ngs_api_url": "",
-  "prizepicks_api_url": "",
-  "gambet_api_url": "",
-  "betrivers_api_url": "",
-  "betrivers_market_groups_api_url": "",
-  "fantasylife_api": "",
-  "digital_sports_tech_api_url": "",
   "league_api_auth_token": "",
   "discord_sysadmin_alerts_channel_webhook_url": "",
   "jwt": {

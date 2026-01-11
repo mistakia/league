@@ -1,10 +1,11 @@
 import fetch from 'node-fetch'
 import debug from 'debug'
 
-import config from '#config'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('prizepicks')
+
+const PRIZEPICKS_API_URL = 'https://partner-api.prizepicks.com'
 // debug.enable('prizepicks')
 
 // Touchdown market types that should use YES/NO selection types instead of OVER/UNDER
@@ -123,7 +124,7 @@ export const get_market_type = (stat_type, { selection_metric_line } = {}) => {
 }
 
 export const getPlayerProps = async ({ page = 1 }) => {
-  const url = `${config.prizepicks_api_url}/projections?league_id=9&per_page=250&single_stat=true&page=${page}`
+  const url = `${PRIZEPICKS_API_URL}/projections?league_id=9&per_page=250&single_stat=true&page=${page}`
 
   // log(`fetching ${url}`)
   const res = await fetch(url)

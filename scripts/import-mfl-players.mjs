@@ -6,8 +6,9 @@ import { hideBin } from 'yargs/helpers'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
-import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
+
+const MFL_USER_AGENT = 'TEFLONMFLCLIENT'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -22,7 +23,7 @@ const run = async ({ dry = false } = {}) => {
   const URL = `https://api.myfantasyleague.com/${current_season.year}/export?TYPE=players&DETAILS=1&JSON=1`
   const result = await fetch(URL, {
     headers: {
-      'User-Agent': config.mflUserAgent
+      'User-Agent': MFL_USER_AGENT
     }
   }).then((res) => res.json())
 

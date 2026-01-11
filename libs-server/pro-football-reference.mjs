@@ -5,11 +5,12 @@ import { getGameDayAbbreviation, fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { wait } from '#libs-server'
 import * as cache from './cache.mjs'
-import config from '#config'
 import db from '#db'
 import { fetch_with_proxy } from './proxy-manager.mjs'
 
 const log = debug('pro-football-reference')
+
+const PRO_FOOTBALL_REFERENCE_URL = 'https://www.pro-football-reference.com'
 
 export const active_nfl_teams = [
   'crd',
@@ -170,11 +171,7 @@ const get_players_from_page = async ({ url, ignore_cache = false }) => {
 }
 
 const get_players_page_links = async ({ ignore_cache = false } = {}) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const cache_key = '/pro-football-reference/players-links.json'
+    const cache_key = '/pro-football-reference/players-links.json'
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -182,14 +179,14 @@ const get_players_page_links = async ({ ignore_cache = false } = {}) => {
     }
   }
 
-  const url = `${config.pro_football_reference_url}/players/`
+  const url = `${PRO_FOOTBALL_REFERENCE_URL}/players/`
   const response = await fetch_with_proxy({ url })
   const text = await response.text()
   const dom = new JSDOM(text)
   const doc = dom.window.document
   const links = doc.querySelectorAll('ul.page_index li > a')
   const hrefs = Array.from(links).map(
-    (link) => `${config.pro_football_reference_url}${link.href}`
+    (link) => `${PRO_FOOTBALL_REFERENCE_URL}${link.href}`
   )
 
   if (hrefs.length) {
@@ -225,11 +222,7 @@ const get_starters = ({ doc, is_home }) => {
 }
 
 const get_roster = ({ doc, is_home, starters }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const roster = []
+    const roster = []
 
   const snap_rows = Array.from(
     doc.querySelectorAll(
@@ -266,7 +259,7 @@ const get_roster = ({ doc, is_home, starters }) => {
 
     roster.push({
       name: player_name,
-      url: `${config.pro_football_reference_url}${player_url}`,
+      url: `${PRO_FOOTBALL_REFERENCE_URL}${player_url}`,
       pfr_id,
       position,
       off_snap_count,
@@ -283,22 +276,18 @@ const get_roster = ({ doc, is_home, starters }) => {
 }
 
 const get_teams = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const home_team_link = doc.querySelector(
+    const home_team_link = doc.querySelector(
     '.scorebox div:nth-child(1) strong a'
   )
   const home_team_name = home_team_link.textContent
-  const home_team_url = `${config.pro_football_reference_url}${home_team_link.href}`
+  const home_team_url = `${PRO_FOOTBALL_REFERENCE_URL}${home_team_link.href}`
   const home_team_pfr_id = home_team_url.split('/').slice(-2)[0]
 
   const away_team_link = doc.querySelector(
     '.scorebox div:nth-child(2) strong a'
   )
   const away_team_name = away_team_link.textContent
-  const away_team_url = `${config.pro_football_reference_url}${away_team_link.href}`
+  const away_team_url = `${PRO_FOOTBALL_REFERENCE_URL}${away_team_link.href}`
   const away_team_pfr_id = away_team_url.split('/').slice(-2)[0]
 
   return {
@@ -315,11 +304,7 @@ const get_teams = ({ doc }) => {
 }
 
 const get_coach = ({ doc, is_home }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const coach = {}
+    const coach = {}
 
   const coach_element = doc.querySelector(
     `.scorebox div:nth-child(${is_home ? 1 : 2}) .datapoint a`
@@ -330,7 +315,7 @@ const get_coach = ({ doc, is_home }) => {
     const pfr_id = coach_url.split('/').slice(-1)[0].split('.')[0]
 
     coach.name = coach_name
-    coach.url = `${config.pro_football_reference_url}${coach_url}`
+    coach.url = `${PRO_FOOTBALL_REFERENCE_URL}${coach_url}`
     coach.pfr_id = pfr_id
   }
 
@@ -371,11 +356,7 @@ const get_scores = ({ doc }) => {
 }
 
 const get_scorebox_meta = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const scorebox_elem = doc.querySelector('.scorebox_meta')
+    const scorebox_elem = doc.querySelector('.scorebox_meta')
   const scorebox_divs = Array.from(scorebox_elem.querySelectorAll('div'))
   const game_date = scorebox_elem.querySelector('div:nth-child(1)').textContent
 
@@ -398,7 +379,7 @@ const get_scorebox_meta = ({ doc }) => {
   if (stadium_elem) {
     const stadium_link = stadium_elem.querySelector('a')
     stadium.name = stadium_link.textContent
-    stadium.url = `${config.pro_football_reference_url}${stadium_link.href}`
+    stadium.url = `${PRO_FOOTBALL_REFERENCE_URL}${stadium_link.href}`
     stadium.stadium_pfr_id = stadium_link.href
       .split('/')
       .slice(-1)[0]
@@ -900,18 +881,14 @@ const get_expected_points_summary = ({ doc }) => {
 // }
 
 const get_player_passing_rushing_receiving = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#player_offense tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -936,18 +913,14 @@ const get_player_passing_rushing_receiving = ({ doc }) => {
 }
 
 const get_player_defense = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#player_defense tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -972,18 +945,14 @@ const get_player_defense = ({ doc }) => {
 }
 
 const get_player_kick_punt_returns = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#returns tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -1008,18 +977,14 @@ const get_player_kick_punt_returns = ({ doc }) => {
 }
 
 const get_player_kicking_punting = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#kicking tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -1044,18 +1009,14 @@ const get_player_kicking_punting = ({ doc }) => {
 }
 
 const get_player_advanced_passing = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#passing_advanced tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -1080,18 +1041,14 @@ const get_player_advanced_passing = ({ doc }) => {
 }
 
 const get_player_advanced_rushing = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#rushing_advanced tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -1116,18 +1073,14 @@ const get_player_advanced_rushing = ({ doc }) => {
 }
 
 const get_player_advanced_receiving = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#receiving_advanced tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -1152,18 +1105,14 @@ const get_player_advanced_receiving = ({ doc }) => {
 }
 
 const get_player_advanced_defense = ({ doc }) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const rows = Array.from(
+    const rows = Array.from(
     doc.querySelectorAll('#defense_advanced tbody tr:not([class])')
   )
 
   return rows.map((row) => {
     const player_link = row.querySelector('th a')
     const player_name = player_link.textContent
-    const player_url = `${config.pro_football_reference_url}${player_link.href}`
+    const player_url = `${PRO_FOOTBALL_REFERENCE_URL}${player_link.href}`
     const pfr_id = player_url.match(/\/players\/[A-Z]+\/([^/.]+)/)[1]
 
     const tds = row.querySelectorAll('td[data-stat]')
@@ -1442,11 +1391,7 @@ export const search_players = async ({
     throw new Error('search_term is required')
   }
 
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const cache_key = `/pro-football-reference/search/${encodeURIComponent(search_term)}.json`
+    const cache_key = `/pro-football-reference/search/${encodeURIComponent(search_term)}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -1455,7 +1400,7 @@ export const search_players = async ({
     }
   }
 
-  const url = `${config.pro_football_reference_url}/search/search.fcgi?search=${encodeURIComponent(search_term)}`
+  const url = `${PRO_FOOTBALL_REFERENCE_URL}/search/search.fcgi?search=${encodeURIComponent(search_term)}`
   log(`fetching pfr search: ${url}`)
 
   const response = await fetch_with_proxy({ url })
@@ -1534,7 +1479,7 @@ export const search_players = async ({
         start_year,
         end_year,
         is_active: parent_text.includes('</b>'),
-        url: `${config.pro_football_reference_url}${href}`
+        url: `${PRO_FOOTBALL_REFERENCE_URL}${href}`
       })
     }
 
@@ -1568,7 +1513,7 @@ export const search_players = async ({
         start_year,
         end_year,
         is_active,
-        url: `${config.pro_football_reference_url}${href}`
+        url: `${PRO_FOOTBALL_REFERENCE_URL}${href}`
       })
     }
   }
@@ -1608,11 +1553,7 @@ export const get_games = async ({
   year = current_season.year,
   ignore_cache = false
 } = {}) => {
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const cache_key = `/pro-football-reference/games/${year}.json`
+    const cache_key = `/pro-football-reference/games/${year}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -1620,7 +1561,7 @@ export const get_games = async ({
     }
   }
 
-  const url = `${config.pro_football_reference_url}/years/${year}/games.htm`
+  const url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/games.htm`
   log(`fetching ${url}`)
 
   const response = await fetch_with_proxy({ url })
@@ -1649,7 +1590,7 @@ export const get_games = async ({
     )
     const day = getGameDayAbbreviation({ date, time_est, week_type, seas_type })
     const week = is_post_season ? get_post_season_week_from_day(day) : week_num
-    const game_link = `${config.pro_football_reference_url}${
+    const game_link = `${PRO_FOOTBALL_REFERENCE_URL}${
       row.querySelector('td[data-stat="boxscore_word"] a').href
     }`
     const pfr_game_id = game_link.split('/').slice(-1)[0].split('.')[0]
@@ -1681,11 +1622,7 @@ export const get_game = async ({
     throw new Error('pfr_game_id is required')
   }
 
-  if (!config.pro_football_reference_url) {
-    throw new Error('config.pro_football_reference_url is required')
-  }
-
-  const cache_key = `/pro-football-reference/games/${pfr_game_id}.json`
+    const cache_key = `/pro-football-reference/games/${pfr_game_id}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -1696,7 +1633,7 @@ export const get_game = async ({
     }
   }
 
-  const url = `${config.pro_football_reference_url}/boxscores/${pfr_game_id}.htm`
+  const url = `${PRO_FOOTBALL_REFERENCE_URL}/boxscores/${pfr_game_id}.htm`
   log(`fetching ${url}`)
   const response = await fetch_with_proxy({ url })
   const text = await response.text()
@@ -1734,7 +1671,7 @@ export const get_game = async ({
       role,
       name: referee_link ? referee_link.textContent : null,
       link: referee_link
-        ? `${config.pro_football_reference_url}${referee_link.href}`
+        ? `${PRO_FOOTBALL_REFERENCE_URL}${referee_link.href}`
         : null,
       referee_pfr_id: referee_link
         ? referee_link.href.split('/').slice(-1)[0].split('.')[0]
@@ -1877,7 +1814,7 @@ export const get_draft = async ({
     }
   }
 
-  const url = `${config.pro_football_reference_url}/years/${year}/draft.htm`
+  const url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/draft.htm`
   log(`fetching ${url}`)
 
   const response = await fetch_with_proxy({ url })
@@ -1965,7 +1902,7 @@ export const get_team_roster = async ({ team, year, ignore_cache = false }) => {
     }
   }
 
-  const url = `${config.pro_football_reference_url}/teams/${team}/${year}_roster.htm`
+  const url = `${PRO_FOOTBALL_REFERENCE_URL}/teams/${team}/${year}_roster.htm`
   log(`fetching roster from ${url}`)
 
   try {

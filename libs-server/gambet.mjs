@@ -2,12 +2,13 @@ import fetch from 'node-fetch'
 import dayjs from 'dayjs'
 // import debug from 'debug'
 
-import config from '#config'
 import { current_season } from '#constants'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 // const log = debug('gambet')
 // debug.enable('gambet')
+
+const GAMBET_API_URL = 'https://gambetdc.dclottery.com'
 
 export const markets = {
   // pass props
@@ -54,7 +55,7 @@ export const markets = {
 }
 
 export const get_events = async () => {
-  const url = `${config.gambet_api_url}/en/prematch/football/nfl`
+  const url = `${GAMBET_API_URL}/en/prematch/football/nfl`
 
   const res = await fetch(url, {
     method: 'POST',
@@ -82,7 +83,7 @@ export const get_events = async () => {
 }
 
 export const get_event_markets = async ({ event_url }) => {
-  const url = `${config.gambet_api_url}${event_url}`
+  const url = `${GAMBET_API_URL}${event_url}`
 
   const res = await fetch(url, {
     method: 'POST',

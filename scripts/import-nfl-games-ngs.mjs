@@ -9,8 +9,8 @@ import db from '#db'
 import { fixTeam, getGameDayAbbreviation } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
-import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { NGS_API_URL } from '#private/libs-server/ngs.mjs'
 
 dayjs.extend(timezone)
 
@@ -104,7 +104,7 @@ const run = async ({ year = current_season.year, collector = null } = {}) => {
     games_updated: 0
   }
 
-  const url = `${config.ngs_api_url}/league/schedule?season=${year}`
+  const url = `${NGS_API_URL}/league/schedule?season=${year}`
 
   let data
   try {
