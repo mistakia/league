@@ -118,6 +118,15 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
     }, 1)
     const potential_win = stake_per_combination * odds_product
 
+    const is_won = combination.every((leg) => leg.result === 'WON')
+    const is_lost = combination.some((leg) => leg.result === 'LOST')
+    // A combination is settled if: the overall wager is settled, all legs won, or any leg lost
+    const is_settled = wager.isSettled || is_won || is_lost
+
+    // Calculate actual_return for settled combinations
+    // potential_win = stake * odds_product (total return including stake)
+    const actual_return = is_won ? potential_win : is_lost ? 0 : null
+
     return {
       stake: stake_per_combination,
       potential_win,
@@ -144,10 +153,11 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
         is_lost: leg.result === 'LOST'
       })),
       bet_receipt_id: `${wager.betReceiptId}-${combination.map((leg) => leg.parts[0].selectionId).join('-')}`,
-      is_settled:
-        wager.isSettled || combination.some((leg) => leg.result === 'LOST'),
-      is_won: combination.every((leg) => leg.result === 'WON'),
-      is_lost: combination.some((leg) => leg.result === 'LOST'),
+      is_settled,
+      is_won,
+      is_lost,
+      is_cashed_out: false, // Round robin combinations cannot be individually cashed out
+      actual_return,
       source_id: 'FANDUEL'
     }
   })
@@ -201,13 +211,15 @@ export const standardize_fanduel_wager = (wager) => {
     is_settled: wager.isSettled,
     is_won: wager.result === 'WON',
     is_cashed_out: wager.result === 'CASHED_OUT',
-    // betPrice is decimal odds; if missing, calculate from pandl for settled wagers
+    // betPrice is decimal odds; if missing, use potentialWin from wager or calculate from pandl
     potential_win:
       typeof wager.betPrice === 'number' && !isNaN(wager.betPrice)
         ? wager.betPrice * wager.currentSize
-        : wager.pandl !== undefined && wager.pandl !== null
-          ? wager.currentSize + wager.pandl
-          : 0,
+        : wager.potentialWin !== undefined && wager.potentialWin !== null
+          ? Number(wager.potentialWin)
+          : wager.pandl !== undefined && wager.pandl !== null
+            ? wager.currentSize + wager.pandl
+            : 0,
     actual_return:
       wager.result === 'WON'
         ? wager.currentSize + (wager.pandl || 0)
