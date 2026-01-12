@@ -131,21 +131,6 @@ const router = express.Router({
  *               items:
  *                 $ref: '#/components/schemas/DraftPick'
  *               description: Unused draft picks owned by this team
- *             teamtext:
- *               type: string
- *               nullable: true
- *               description: Team text channel/communication setting (only for authenticated user's teams)
- *               example: 'dynasty-warriors'
- *             teamvoice:
- *               type: string
- *               nullable: true
- *               description: Team voice channel/communication setting (only for authenticated user's teams)
- *               example: 'dynasty-warriors-voice'
- *             leaguetext:
- *               type: string
- *               nullable: true
- *               description: League text channel/communication setting (only for authenticated user's teams)
- *               example: 'teflon-league'
  *
  *     CreateTeamRequest:
  *       type: object
@@ -312,9 +297,6 @@ const router = express.Router({
  *                           pick: 3
  *                           otid: null
  *                           pid: null
- *                       teamtext: dynasty-warriors
- *                       teamvoice: dynasty-warriors-voice
- *                       leaguetext: teflon-league
  *       400:
  *         description: Invalid year parameter
  *         content:
@@ -383,8 +365,6 @@ router.get('/?', async (req, res) => {
         })
       })
 
-    const teamIds = teams.map((t) => t.uid)
-
     for (const team of teams) {
       const forecast = forecasts.find((f) => f.tid === team.uid) || {}
       team.picks = picks.filter((p) => p.tid === team.uid)
@@ -400,22 +380,6 @@ router.get('/?', async (req, res) => {
       team.division_odds_with_loss = forecast.division_odds_with_loss
       team.bye_odds_with_loss = forecast.bye_odds_with_loss
       team.championship_odds_with_loss = forecast.championship_odds_with_loss
-    }
-
-    if (req.auth && req.auth.userId) {
-      const usersTeams = await db('users_teams')
-        .where({ userid: req.auth.userId, year: current_season.year })
-        .whereIn('tid', teamIds)
-
-      for (const usersTeam of usersTeams) {
-        const { tid, teamtext, teamvoice, leaguetext } = usersTeam
-        for (const [index, team] of teams.entries()) {
-          if (team.uid === tid) {
-            teams[index] = { teamtext, teamvoice, leaguetext, ...team }
-            break
-          }
-        }
-      }
     }
 
     res.send({ teams })

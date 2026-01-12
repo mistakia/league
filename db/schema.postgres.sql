@@ -2857,7 +2857,8 @@ CREATE TYPE public.wager_status AS ENUM (
     'WON',
     'LOST',
     'PUSH',
-    'CANCELLED'
+    'CANCELLED',
+    'CASHED_OUT'
 );
 
 
@@ -25050,9 +25051,6 @@ CREATE TABLE public.users (
     rbb character varying(7),
     wrb character varying(7),
     teb character varying(7),
-    phone character varying(12),
-    user_text_notifications boolean DEFAULT true NOT NULL,
-    user_voice_notifications boolean DEFAULT true NOT NULL,
     invite_code character varying(20)
 );
 
@@ -25094,9 +25092,6 @@ CREATE TABLE public.users_sources (
 CREATE TABLE public.users_teams (
     userid integer NOT NULL,
     tid integer NOT NULL,
-    teamtext boolean DEFAULT true NOT NULL,
-    teamvoice boolean DEFAULT true NOT NULL,
-    leaguetext boolean DEFAULT true NOT NULL,
     year smallint NOT NULL
 );
 

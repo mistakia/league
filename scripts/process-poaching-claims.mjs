@@ -4,13 +4,7 @@ import debug from 'debug'
 import db from '#db'
 import { Errors, should_block_poach_processing } from '#libs-shared'
 import { current_season } from '#constants'
-import {
-  processPoach,
-  sendNotifications,
-  getLeague,
-  report_job,
-  is_main
-} from '#libs-server'
+import { processPoach, report_job, is_main } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process:claims')
@@ -41,11 +35,7 @@ const run = async () => {
 
   for (const claim of claims) {
     let error
-    let player_row
     try {
-      const player_rows = await db('player').where({ pid: claim.pid }).limit(1)
-      player_row = player_rows[0]
-
       const release = await db('poach_releases')
         .select('pid')
         .where('poachid', claim.uid)
@@ -60,16 +50,6 @@ const run = async () => {
       log(
         `poaching claim unsuccessful by teamId: (${claim.tid}) because ${error.message}`
       )
-      const league = await getLeague({ lid: claim.lid })
-      await sendNotifications({
-        league,
-        teamIds: [claim.tid],
-        voice: false,
-        notifyLeague: false,
-        message: player_row
-          ? `Your poaching claim for ${player_row.fname} ${player_row.lname} (${player_row.pos}) was unsuccessful`
-          : 'Your poaching claim was unsuccessful.'
-      })
     }
 
     await db('poaches')

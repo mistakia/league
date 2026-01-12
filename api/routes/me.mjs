@@ -34,12 +34,6 @@ const router = express.Router()
  *                           type: string
  *                           format: date-time
  *                           description: 'Last visit timestamp'
- *                         user_text_notifications:
- *                           type: boolean
- *                           description: 'User preference for text notifications'
- *                         user_voice_notifications:
- *                           type: boolean
- *                           description: 'User preference for voice notifications'
  *                         watchlist:
  *                           type: array
  *                           items:
@@ -52,15 +46,6 @@ const router = express.Router()
  *                       - $ref: '#/components/schemas/Team'
  *                       - type: object
  *                         properties:
- *                           teamtext:
- *                             type: boolean
- *                             description: 'Team text notification preference'
- *                           teamvoice:
- *                             type: boolean
- *                             description: 'Team voice notification preference'
- *                           leaguetext:
- *                             type: boolean
- *                             description: 'League text notification preference'
  *                   description: 'Teams owned by the user in the current season'
  *                 leagues:
  *                   type: array
@@ -147,8 +132,6 @@ const router = express.Router()
  *                     username: 'fantasy_manager'
  *                     email: 'user@example.com'
  *                     lastvisit: '2024-01-15T10:30:00Z'
- *                     user_text_notifications: true
- *                     user_voice_notifications: false
  *                     watchlist: ['JALE-HURT-2020-1998-08-07', 'PATR-MAHO-2017-1995-09-17']
  *                   teams:
  *                     - uid: 13
@@ -156,9 +139,6 @@ const router = express.Router()
  *                       abbrv: 'DW'
  *                       lid: 2
  *                       year: 2024
- *                       teamtext: true
- *                       teamvoice: false
- *                       leaguetext: true
  *                   leagues:
  *                     - uid: 2
  *                       name: 'TEFLON LEAGUE'
@@ -201,11 +181,6 @@ router.get('/?', async (req, res) => {
 
     const teams = await db('teams')
       .select('teams.*')
-      .select(
-        'users_teams.teamtext',
-        'users_teams.teamvoice',
-        'users_teams.leaguetext'
-      )
       .where({
         'users_teams.userid': req.auth.userId,
         'users_teams.year': current_season.year
@@ -321,7 +296,7 @@ router.get('/?', async (req, res) => {
  * /me:
  *   put:
  *     summary: Update current user profile
- *     description: Updates specific fields of the authenticated user's profile. Supports updating email, password, username, watchlist, and notification preferences. Includes validation for email format, username requirements, and prevents duplicate usernames/emails.
+ *     description: Updates specific fields of the authenticated user's profile. Supports updating email, password, username, and watchlist. Includes validation for email format, username requirements, and prevents duplicate usernames/emails.
  *     tags:
  *       - Authentication
  *     security:
@@ -335,14 +310,12 @@ router.get('/?', async (req, res) => {
  *             properties:
  *               type:
  *                 type: string
- *                 enum: ['email', 'password', 'watchlist', 'user_text_notifications', 'user_voice_notifications', 'username']
+ *                 enum: ['email', 'password', 'watchlist', 'username']
  *                 description: 'Type of field to update'
  *               value:
  *                 oneOf:
  *                   - type: string
  *                     description: 'New value for string fields (email, password, username)'
- *                   - type: boolean
- *                     description: 'New value for boolean fields (user_text_notifications, user_voice_notifications)'
  *                   - type: array
  *                     items:
  *                       type: string
@@ -372,16 +345,6 @@ router.get('/?', async (req, res) => {
  *               value:
  *                 type: 'watchlist'
  *                 value: ['JALE-HURT-2020-1998-08-07', 'PATR-MAHO-2017-1995-09-17', 'JOSH-ALLE-2018-1996-05-21']
- *             update_text_notifications:
- *               summary: Enable text notifications
- *               value:
- *                 type: 'user_text_notifications'
- *                 value: true
- *             update_voice_notifications:
- *               summary: Disable voice notifications
- *               value:
- *                 type: 'user_voice_notifications'
- *                 value: false
  *     responses:
  *       200:
  *         description: User profile updated successfully
@@ -394,8 +357,6 @@ router.get('/?', async (req, res) => {
  *                   oneOf:
  *                     - type: string
  *                       description: 'Updated value for string fields (email, username)'
- *                     - type: boolean
- *                       description: 'Updated value for boolean fields (notifications)'
  *                     - type: array
  *                       items:
  *                         type: string
@@ -414,10 +375,6 @@ router.get('/?', async (req, res) => {
  *                 summary: Watchlist successfully updated
  *                 value:
  *                   value: ['JALE-HURT-2020-1998-08-07', 'PATR-MAHO-2017-1995-09-17']
- *               notifications_updated:
- *                 summary: Notification preference updated
- *                 value:
- *                   value: true
  *       400:
  *         description: Bad request - validation error or missing parameters
  *         content:
@@ -469,14 +426,7 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type param' })
     }
 
-    const valid_types = [
-      'email',
-      'password',
-      'watchlist',
-      'user_text_notifications',
-      'user_voice_notifications',
-      'username'
-    ]
+    const valid_types = ['email', 'password', 'watchlist', 'username']
     if (!valid_types.includes(type)) {
       return res.status(400).send({ error: 'invalid type param' })
     }

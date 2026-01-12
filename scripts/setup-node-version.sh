@@ -15,8 +15,8 @@ for host in league league-worker-1; do
   echo ""
 done
 
-# Local machine (worker-2 / Mac)
-echo "Setting up local (worker-2)..."
+# Local development machine (Mac)
+echo "Setting up local development machine..."
 source ~/.nvm/nvm.sh && nvm install $NODE_VERSION && npm install -g yarn && ln -sfn ~/.nvm/versions/node/v$NODE_VERSION ~/.nvm/versions/node/current
 echo "Done: current -> v$NODE_VERSION (with yarn)"
 echo ""

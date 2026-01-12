@@ -1114,18 +1114,16 @@ router.post(
  *     summary: Reject a trade proposal
  *     description: |
  *       Rejects a trade proposal. Only the accepting team owner can reject a trade.
- *       This action permanently closes the trade proposal and notifies the proposing team.
+ *       This action permanently closes the trade proposal.
  *
  *       **Key Features:**
  *       - Marks trade as rejected with timestamp
- *       - Sends notification to proposing team
  *       - Permanently closes the trade proposal
  *       - Returns updated trade details
  *
  *       **Fantasy Football Context:**
  *       - Only the accepting team owner can reject trades
  *       - Rejected trades cannot be reopened or modified
- *       - Proposing team receives notification of rejection
  *       - Trade status permanently updated to rejected
  *
  *       **Access Control:**
@@ -1216,13 +1214,6 @@ router.post(
         .where({ uid: tradeId })
         .update({ rejected: Math.round(Date.now() / 1000) })
 
-      const league = await getLeague({ lid: leagueId })
-      await sendNotifications({
-        league,
-        teamIds: [trade.propose_tid],
-        message: `${trade.name} (${trade.abbrv}) has rejected your trade offer.`
-      })
-
       next()
     } catch (error) {
       logger(error)
@@ -1239,18 +1230,16 @@ router.post(
  *     summary: Cancel a trade proposal
  *     description: |
  *       Cancels a trade proposal. Only the proposing team owner can cancel their own trade.
- *       This action permanently closes the trade proposal and notifies the accepting team.
+ *       This action permanently closes the trade proposal.
  *
  *       **Key Features:**
  *       - Marks trade as cancelled with timestamp
- *       - Sends notification to accepting team
  *       - Permanently closes the trade proposal
  *       - Returns updated trade details
  *
  *       **Fantasy Football Context:**
  *       - Only the proposing team owner can cancel their trades
  *       - Cancelled trades cannot be reopened or modified
- *       - Accepting team receives notification of cancellation
  *       - Trade status permanently updated to cancelled
  *
  *       **Access Control:**
@@ -1346,13 +1335,6 @@ router.post(
       await db('trades')
         .where({ uid: tradeId })
         .update({ cancelled: Math.round(Date.now() / 1000) })
-
-      const league = await getLeague({ lid: leagueId })
-      await sendNotifications({
-        league,
-        teamIds: [trade.accept_tid],
-        message: `${trade.name} (${trade.abbrv}) has cancelled their trade offer.`
-      })
 
       next()
     } catch (error) {
@@ -1466,8 +1448,6 @@ router.post(
           .send({ error: `no valid trade with tradeid: ${tradeId}` })
       }
 
-      const trade = trades[0]
-
       await db('trades')
         .where({ uid: tradeId, lid: leagueId })
         .update({ vetoed: Math.round(Date.now() / 1000) })
@@ -1477,7 +1457,6 @@ router.post(
       await sendNotifications({
         league,
         notifyLeague: true,
-        teamIds: [trade.accept_tid, trade.propose_tid],
         message
       })
 

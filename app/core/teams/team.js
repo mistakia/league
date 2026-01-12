@@ -14,9 +14,6 @@ export const Team = new Record({
   draft_order: null,
   pc: null,
   ac: null,
-  teamtext: 0,
-  teamvoice: 0,
-  leaguetext: 0,
   picks: new List(),
   stats: new Map(create_empty_fantasy_team_stats()),
 
@@ -47,9 +44,6 @@ export function createTeam({
   pc,
   ac,
 
-  teamtext,
-  teamvoice,
-  leaguetext,
   picks = [],
 
   playoff_odds,
@@ -82,9 +76,6 @@ export function createTeam({
     draft_order: params.draft_order,
     pc,
     ac,
-    teamtext,
-    teamvoice,
-    leaguetext,
     picks: new List(picks),
 
     stats: Map.isMap(stats) ? stats : stats ? new Map(stats) : undefined,

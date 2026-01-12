@@ -5,7 +5,6 @@ import { hideBin } from 'yargs/helpers'
 import { Errors, get_free_agent_period } from '#libs-shared'
 import { current_season, waiver_types } from '#constants'
 import {
-  sendNotifications,
   submitPoach,
   resetWaiverOrder,
   getTopPoachingWaiver,
@@ -102,15 +101,6 @@ const run = async ({ daily = false } = {}) => {
         log(
           `poaching waiver unsuccessful for ${waiver.name} (${waiver.tid}) because ${error.message}`
         )
-        const player_rows = await db('player').where('pid', waiver.pid).limit(1)
-        const player_row = player_rows[0]
-        await sendNotifications({
-          league,
-          teamIds: [waiver.tid],
-          voice: false,
-          notifyLeague: false,
-          message: `Your waiver claim to poach ${player_row.fname} ${player_row.lname} was unsuccessful.`
-        })
       }
 
       await db('waivers')

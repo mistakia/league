@@ -165,8 +165,6 @@ export default async function ({
   )} EST.`
   await sendNotifications({
     league,
-    teamIds: [],
-    voice: true,
     notifyLeague: true,
     message
   })

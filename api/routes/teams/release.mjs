@@ -185,8 +185,6 @@ router.post('/?', async (req, res) => {
 
     await sendNotifications({
       league,
-      teamIds: [],
-      voice: false,
       notifyLeague: true,
       message
     })

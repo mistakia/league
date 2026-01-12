@@ -5,10 +5,6 @@
   "url": "https://example.com",
   "nominationTimer": 45000,
   "bidTimer": 14000,
-  "clickSend": {
-    "auth": "ENCRYPTED|<iv>|<encrypted-value>",
-    "number": "+1..."
-  },
   "email": {
     "api": "ENCRYPTED|<iv>|<encrypted-value>",
     "admin": "admin@example.com",

@@ -7,8 +7,7 @@ import {
   verifyUserTeam,
   getRoster,
   getLeague,
-  processPoach,
-  sendNotifications
+  processPoach
 } from '#libs-server'
 import { Roster, get_free_agent_period } from '#libs-shared'
 import { current_season, transaction_types } from '#constants'
@@ -299,14 +298,8 @@ router.post('/:poachId/process', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    let player_row
     let error
     try {
-      const player_rows = await db('player')
-        .where({ pid: poaching_claim.pid })
-        .limit(1)
-      player_row = player_rows[0]
-
       const release = await db('poach_releases')
         .select('pid')
         .where('poachid', poaching_claim.uid)
@@ -323,16 +316,6 @@ router.post('/:poachId/process', async (req, res) => {
       logger(
         `poaching claim unsuccessful by teamId: (${poaching_claim.tid}) because ${error.message}`
       )
-      const league = await getLeague({ lid: poaching_claim.lid })
-      await sendNotifications({
-        league,
-        teamIds: [poaching_claim.tid],
-        voice: false,
-        notifyLeague: false,
-        message: player_row
-          ? `Your poaching claim for ${player_row.fname} ${player_row.lname} (${player_row.pos}) was unsuccessful`
-          : 'Your poaching claim was unsuccessful.'
-      })
     }
 
     const timestamp = Math.round(Date.now() / 1000)

@@ -735,16 +735,7 @@ const options = {
         },
         TeamFieldEnum: {
           type: 'string',
-          enum: [
-            'name',
-            'image',
-            'abbrv',
-            'pc',
-            'ac',
-            'teamtext',
-            'teamvoice',
-            'leaguetext'
-          ],
+          enum: ['name', 'image', 'abbrv', 'pc', 'ac'],
           description: 'Fantasy team field that can be updated',
           example: 'name'
         },
@@ -2389,27 +2380,6 @@ const options = {
                     $ref: '#/components/schemas/DraftPick'
                   },
                   description: 'Unused draft picks owned by this team'
-                },
-                teamtext: {
-                  type: 'string',
-                  nullable: true,
-                  description:
-                    "Team text channel/communication setting (only for authenticated user's teams)",
-                  example: 'dynasty-warriors'
-                },
-                teamvoice: {
-                  type: 'string',
-                  nullable: true,
-                  description:
-                    "Team voice channel/communication setting (only for authenticated user's teams)",
-                  example: 'dynasty-warriors-voice'
-                },
-                leaguetext: {
-                  type: 'string',
-                  nullable: true,
-                  description:
-                    "League text channel/communication setting (only for authenticated user's teams)",
-                  example: 'teflon-league'
                 }
               }
             }

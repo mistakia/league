@@ -24,56 +24,6 @@ describe('API /teams - update', function () {
   })
 
   describe('put', function () {
-    it('teamtext', async () => {
-      const value = false
-      const res = await chai_request
-        .execute(server)
-        .put('/api/teams/1')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          field: 'teamtext',
-          value
-        })
-
-      res.should.have.status(200)
-
-      res.should.be.json
-
-      // verify database change
-      res.body.value.should.equal(value)
-      const teams = await knex('users_teams')
-        .where({ tid: 1, userid: 1, year: current_season.year })
-        .limit(1)
-      const team = teams[0]
-
-      expect(team.teamtext).to.equal(value)
-    })
-
-    it('teamvoice', async () => {
-      const value = false
-      const res = await chai_request
-        .execute(server)
-        .put('/api/teams/1')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          field: 'teamvoice',
-          value
-        })
-
-      res.should.have.status(200)
-
-      res.should.be.json
-
-      // verify database change
-      res.body.value.should.equal(value)
-      const teams = await knex('users_teams')
-        .where({ tid: 1, userid: 1, year: current_season.year })
-        .limit(1)
-      const team = teams[0]
-
-      expect(team.teamvoice).to.equal(value)
-    })
-
     it('name', async () => {
       const value = 'TEST TEAM'
       const res = await chai_request
@@ -248,18 +198,6 @@ describe('API /teams - update', function () {
     })
 
     it('abbrv is too long', async () => {
-      // TODO
-    })
-
-    it('invalid teamtext', async () => {
-      // TODO
-    })
-
-    it('invalid teamvoice', async () => {
-      // TODO
-    })
-
-    it('invalid leaguetext', async () => {
       // TODO
     })
   })

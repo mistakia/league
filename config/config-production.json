@@ -7,10 +7,6 @@
   "url": "https://xo.football",
   "nominationTimer": 45000,
   "bidTimer": 14000,
-  "clickSend": {
-    "auth": "ENCRYPTED|d1b436016a52d0b29871f3c7a14b497e|fb6433c854932957a975839fb6bd7f09e796529830a3337ff595f5e3f99b03d043a41d691326ee269000f52bbebda751194dfcd065354354be73f47b4094a575a1de03ec216f15d196287e3a2715515e",
-    "number": "+18335665277"
-  },
   "email": {
     "api": "ENCRYPTED|a312473c11775058e20a0e2b2f4c2330|ea7bf6cee1593cc3b09569c73ce17bcd7295ee66846818f8c30ec34dac8da66bf06486cc1ef39525891153f93bb58f6b5a252f17dfaa8dabb418295252d8b1ce7922d9820d7fb6a0d6a954254295bea4",
     "admin": "teflonleague@gmail.com",

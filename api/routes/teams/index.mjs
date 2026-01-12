@@ -104,8 +104,7 @@ router.put('/:teamId', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const userTeamFields = ['teamtext', 'teamvoice', 'leaguetext']
-    const fields = ['name', 'image', 'abbrv', 'pc', 'ac', ...userTeamFields]
+    const fields = ['name', 'image', 'abbrv', 'pc', 'ac']
 
     if (!field) {
       return res.status(400).send({ error: 'missing field' })
@@ -129,19 +128,9 @@ router.put('/:teamId', async (req, res) => {
       }
     }
 
-    if (userTeamFields.indexOf(field) < 0) {
-      await db('teams')
-        .update({ [field]: value })
-        .where({ uid: teamId, year: current_season.year })
-    } else {
-      await db('users_teams')
-        .update({ [field]: value })
-        .where({
-          tid: teamId,
-          userid: req.auth.userId,
-          year: current_season.year
-        })
-    }
+    await db('teams')
+      .update({ [field]: value })
+      .where({ uid: teamId, year: current_season.year })
     res.send({ value })
   } catch (error) {
     logger(error)

@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid'
 
 import PageLayout from '@layouts/page'
 import EditableSettingField from '@components/editable-setting-field'
-import UserSettingsNotifications from '@components/user-settings-notifications'
 
 import './user-settings.styl'
 
@@ -60,7 +59,6 @@ export default function UserSettingsPage({ user, update }) {
           />
         </Grid>
       </div>
-      <UserSettingsNotifications />
     </div>
   )
 

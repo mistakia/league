@@ -250,8 +250,6 @@ export default async function ({
 
   await sendNotifications({
     league,
-    teamIds: [],
-    voice: false,
     notifyLeague: true,
     message
   })

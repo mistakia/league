@@ -5,10 +5,6 @@
   "url": "https://example.com",
   "nominationTimer": 30000,
   "bidTimer": 15000,
-  "clickSend": {
-    "auth": "",
-    "number": ""
-  },
   "email": {
     "api": "",
     "admin": "",

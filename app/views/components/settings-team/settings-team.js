@@ -6,7 +6,6 @@ import Grid from '@mui/material/Grid'
 
 import SettingsSection from '@components/settings-section'
 import EditableSettingField from '@components/editable-setting-field'
-import SettingsSwitch from '@components/settings-switch'
 import TeamImage from '@components/team-image'
 
 import './settings-team.styl'
@@ -80,35 +79,9 @@ export default class SettingsTeam extends React.Component {
   }
 
   render = () => {
-    const { team, is_hosted } = this.props
+    const { team } = this.props
 
     const props = { data: team, on_change: this.onchange }
-
-    let teamNotificationSection
-    if (is_hosted) {
-      teamNotificationSection = (
-        <Grid xs={12} item container className='settings__team-notifications'>
-          <SettingsSwitch
-            label='Team Text Notifications'
-            description='Poaching claims and trades'
-            field='teamtext'
-            {...props}
-          />
-          <SettingsSwitch
-            label='Team Voice Notifications'
-            description='Poaching claims'
-            field='teamvoice'
-            {...props}
-          />
-          <SettingsSwitch
-            label='League Text Notifications'
-            description='Poaching claims, trades, draft selections, released players and added players'
-            field='leaguetext'
-            {...props}
-          />
-        </Grid>
-      )
-    }
 
     const title = 'Team'
     const description = 'Edit Name / Abbreviation / Logo'
@@ -145,7 +118,6 @@ export default class SettingsTeam extends React.Component {
             </div>
           </div>
         </Grid>
-        {teamNotificationSection}
       </>
     )
 
@@ -155,6 +127,5 @@ export default class SettingsTeam extends React.Component {
 
 SettingsTeam.propTypes = {
   team: ImmutablePropTypes.record,
-  update: PropTypes.func,
-  is_hosted: PropTypes.bool
+  update: PropTypes.func
 }

@@ -100,9 +100,6 @@ const generate_league_season_teams = async ({
       users_teams_inserts.push({
         userid: user_team.userid,
         tid: team_id,
-        teamtext: user_team.teamtext,
-        teamvoice: user_team.teamvoice,
-        leaguetext: user_team.leaguetext,
         year
       })
     }
