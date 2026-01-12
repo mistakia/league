@@ -8,9 +8,22 @@ import * as cache from './cache.mjs'
 const log = debug('nfl')
 debug.enable('nfl')
 
-export const NFL_API_URL = 'https://api.nfl.com'
-export const NFL_COMBINE_PROFILES_URL =
-  'https://api.nfl.com/football/v2/combine/profiles'
+// Cached config from database
+let nfl_api_config_cache = null
+
+export const get_nfl_api_config = async () => {
+  if (nfl_api_config_cache) {
+    return nfl_api_config_cache
+  }
+
+  const config_row = await db('config').where({ key: 'nfl_api_config' }).first()
+  if (!config_row?.value) {
+    throw new Error('nfl_api_config not found in database config table')
+  }
+
+  nfl_api_config_cache = config_row.value
+  return nfl_api_config_cache
+}
 
 export const generate_guid = () => {
   let e = new Date().getTime()
@@ -25,10 +38,9 @@ export const get_session_token_v3 = async () => {
   const device_id = generate_guid()
   const refresh_token = generate_guid()
 
-  const config_row = await db('config').where({ key: 'nfl_api_config' }).first()
-  log(config_row)
-  const { client_key, client_secret, session_url, user_agent } =
-    config_row.value
+  const nfl_config = await get_nfl_api_config()
+  log(nfl_config)
+  const { client_key, client_secret, session_url, user_agent } = nfl_config
 
   const form = new FormData()
   form.set('clientKey', client_key)
@@ -56,9 +68,12 @@ export const get_session_token_v3 = async () => {
 }
 
 export const getToken = async () => {
+  const nfl_config = await get_nfl_api_config()
+  const api_url = nfl_config.api_url
+
   const form = new FormData()
   form.set('grant_type', 'client_credentials')
-  const data = await fetch(`${NFL_API_URL}/v1/reroute`, {
+  const data = await fetch(`${api_url}/v1/reroute`, {
     method: 'POST',
     body: form,
     headers: {
@@ -82,6 +97,9 @@ export const getPlayers = async ({ year, token, ignore_cache = false }) => {
       return cache_value
     }
   }
+
+  const nfl_config = await get_nfl_api_config()
+  const api_url = nfl_config.api_url
 
   if (!token) {
     token = await getToken()
@@ -157,7 +175,7 @@ query {
   }
 }
 `
-    const url = `${NFL_API_URL}/v3/shield/?query=${encodeURIComponent(
+    const url = `${api_url}/v3/shield/?query=${encodeURIComponent(
       query
     )}&variables=null`
     log(`fetching nfl players for year: ${year}, after: ${after}`)
@@ -203,11 +221,14 @@ export const getGames = async ({
     }
   }
 
+  const nfl_config = await get_nfl_api_config()
+  const api_url = nfl_config.api_url
+
   if (!token) {
     token = await get_session_token_v3()
   }
 
-  const url = `${NFL_API_URL}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
+  const url = `${api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
   log(url)
   const res = await fetch(url, {
     headers: {
@@ -234,12 +255,15 @@ export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
     }
   }
 
+  const nfl_config = await get_nfl_api_config()
+  const api_url = nfl_config.api_url
+
   log(`getting game details for ${id}`)
   if (!token) {
     token = await get_session_token_v3()
   }
 
-  const url = `${NFL_API_URL}/experience/v1/gamedetails/${id}?withExternalIds`
+  const url = `${api_url}/experience/v1/gamedetails/${id}?withExternalIds`
   const res = await fetch(url, {
     headers: {
       authorization: `Bearer ${token}`
@@ -275,11 +299,14 @@ export const get_combine_profiles = async ({
     }
   }
 
+  const nfl_config = await get_nfl_api_config()
+  const combine_profiles_url = nfl_config.combine_profiles_url
+
   if (!token) {
     token = await get_session_token_v3()
   }
 
-  const url = `${NFL_COMBINE_PROFILES_URL}?year=${year}&limit=1000`
+  const url = `${combine_profiles_url}?year=${year}&limit=1000`
   log(url)
   const res = await fetch(url, {
     headers: {

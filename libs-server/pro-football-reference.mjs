@@ -171,7 +171,7 @@ const get_players_from_page = async ({ url, ignore_cache = false }) => {
 }
 
 const get_players_page_links = async ({ ignore_cache = false } = {}) => {
-    const cache_key = '/pro-football-reference/players-links.json'
+  const cache_key = '/pro-football-reference/players-links.json'
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -222,7 +222,7 @@ const get_starters = ({ doc, is_home }) => {
 }
 
 const get_roster = ({ doc, is_home, starters }) => {
-    const roster = []
+  const roster = []
 
   const snap_rows = Array.from(
     doc.querySelectorAll(
@@ -276,7 +276,7 @@ const get_roster = ({ doc, is_home, starters }) => {
 }
 
 const get_teams = ({ doc }) => {
-    const home_team_link = doc.querySelector(
+  const home_team_link = doc.querySelector(
     '.scorebox div:nth-child(1) strong a'
   )
   const home_team_name = home_team_link.textContent
@@ -304,7 +304,7 @@ const get_teams = ({ doc }) => {
 }
 
 const get_coach = ({ doc, is_home }) => {
-    const coach = {}
+  const coach = {}
 
   const coach_element = doc.querySelector(
     `.scorebox div:nth-child(${is_home ? 1 : 2}) .datapoint a`
@@ -356,7 +356,7 @@ const get_scores = ({ doc }) => {
 }
 
 const get_scorebox_meta = ({ doc }) => {
-    const scorebox_elem = doc.querySelector('.scorebox_meta')
+  const scorebox_elem = doc.querySelector('.scorebox_meta')
   const scorebox_divs = Array.from(scorebox_elem.querySelectorAll('div'))
   const game_date = scorebox_elem.querySelector('div:nth-child(1)').textContent
 
@@ -881,7 +881,7 @@ const get_expected_points_summary = ({ doc }) => {
 // }
 
 const get_player_passing_rushing_receiving = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#player_offense tbody tr:not([class])')
   )
 
@@ -913,7 +913,7 @@ const get_player_passing_rushing_receiving = ({ doc }) => {
 }
 
 const get_player_defense = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#player_defense tbody tr:not([class])')
   )
 
@@ -945,7 +945,7 @@ const get_player_defense = ({ doc }) => {
 }
 
 const get_player_kick_punt_returns = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#returns tbody tr:not([class])')
   )
 
@@ -977,7 +977,7 @@ const get_player_kick_punt_returns = ({ doc }) => {
 }
 
 const get_player_kicking_punting = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#kicking tbody tr:not([class])')
   )
 
@@ -1009,7 +1009,7 @@ const get_player_kicking_punting = ({ doc }) => {
 }
 
 const get_player_advanced_passing = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#passing_advanced tbody tr:not([class])')
   )
 
@@ -1041,7 +1041,7 @@ const get_player_advanced_passing = ({ doc }) => {
 }
 
 const get_player_advanced_rushing = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#rushing_advanced tbody tr:not([class])')
   )
 
@@ -1073,7 +1073,7 @@ const get_player_advanced_rushing = ({ doc }) => {
 }
 
 const get_player_advanced_receiving = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#receiving_advanced tbody tr:not([class])')
   )
 
@@ -1105,7 +1105,7 @@ const get_player_advanced_receiving = ({ doc }) => {
 }
 
 const get_player_advanced_defense = ({ doc }) => {
-    const rows = Array.from(
+  const rows = Array.from(
     doc.querySelectorAll('#defense_advanced tbody tr:not([class])')
   )
 
@@ -1391,7 +1391,7 @@ export const search_players = async ({
     throw new Error('search_term is required')
   }
 
-    const cache_key = `/pro-football-reference/search/${encodeURIComponent(search_term)}.json`
+  const cache_key = `/pro-football-reference/search/${encodeURIComponent(search_term)}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -1553,7 +1553,7 @@ export const get_games = async ({
   year = current_season.year,
   ignore_cache = false
 } = {}) => {
-    const cache_key = `/pro-football-reference/games/${year}.json`
+  const cache_key = `/pro-football-reference/games/${year}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
@@ -1622,7 +1622,7 @@ export const get_game = async ({
     throw new Error('pfr_game_id is required')
   }
 
-    const cache_key = `/pro-football-reference/games/${pfr_game_id}.json`
+  const cache_key = `/pro-football-reference/games/${pfr_game_id}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
