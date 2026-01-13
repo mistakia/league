@@ -6,7 +6,11 @@ import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info
 import { single_year, seas_type } from '#libs-shared/common-column-params.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
-  const year = params.single_year || current_season.stats_season_year
+  let year_param = params.year || [current_season.stats_season_year]
+  if (!Array.isArray(year_param)) {
+    year_param = [year_param]
+  }
+  const year = year_param[0] || current_season.stats_season_year
   const seas_type_param = params.seas_type || 'REG'
   return { single_year: Number(year), seas_type: seas_type_param }
 }
@@ -57,7 +61,7 @@ export default {
     main_group_by: ({ table_name }) => [`${table_name}.career_year`],
     supported_splits: ['year', 'week'],
     column_params: {
-      single_year,
+      year: single_year,
       seas_type
     },
     get_cache_info: get_cache_info_for_player_seasonlogs
