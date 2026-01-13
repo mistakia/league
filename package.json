@@ -185,7 +185,7 @@
     "react-immutable-proptypes": "^2.2.0",
     "react-infinite-scroller": "^1.2.6",
     "react-redux": "^9.2.0",
-    "react-router": "^6.28.1",
+    "react-router": "^6.30.2",
     "react-router-dom": "^6.28.1",
     "react-table": "mistakia/react-table#4dff1bc1484d2b0ad928597a9b37d412d3455da2",
     "react-virtualized-compat": "^2.0.0",
