@@ -9,7 +9,7 @@
       {
         "column_id": "player_career_year",
         "params": {
-          "single_year": 2023,
+          "year": [2023],
           "seas_type": "REG"
         }
       },
