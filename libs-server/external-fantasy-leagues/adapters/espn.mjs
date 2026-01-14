@@ -238,7 +238,11 @@ export default class EspnAdapter extends BaseAdapter {
    * @returns {Promise<Array>} Array of roster objects in canonical format
    */
   async get_rosters({ league_id, week = null, year = null }) {
-    const scoring_period = week || current_season.week || 1
+    const scoring_period =
+      week ??
+      (current_season.week > current_season.nflFinalWeek
+        ? 0
+        : current_season.week)
     const target_year = year || current_season.year
     const url = `/seasons/${target_year}/segments/0/leagues/${league_id}`
     const params = {
@@ -273,7 +277,10 @@ export default class EspnAdapter extends BaseAdapter {
         platform: 'ESPN',
         league_external_id: league_id,
         team_external_id: team.id.toString(),
-        week: week || current_season.week || 1,
+        week:
+          week ?? (current_season.week > current_season.nflFinalWeek
+            ? 0
+            : current_season.week),
         year: current_season.year,
         roster_snapshot_date: new Date().toISOString(),
 

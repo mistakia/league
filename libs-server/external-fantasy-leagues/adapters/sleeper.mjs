@@ -230,7 +230,10 @@ export default class SleeperAdapter extends BaseAdapter {
         league_external_id: league_id,
         team_external_id:
           roster.owner_id?.toString() || roster.roster_id?.toString(),
-        week: week || current_season.week || 1,
+        week:
+          week ?? (current_season.week > current_season.nflFinalWeek
+            ? 0
+            : current_season.week),
         year: current_season.year,
         roster_snapshot_date: new Date().toISOString(),
 
@@ -440,7 +443,11 @@ export default class SleeperAdapter extends BaseAdapter {
   async get_transactions({ league_id, options = {}, year = null }) {
     // ffscrapr references:
     // - /league/{league_id}/transactions/{week} requires week (current week usually)
-    const week = options.week || current_season.week || 1
+    const week =
+      options.week ??
+      (current_season.week > current_season.nflFinalWeek
+        ? 0
+        : current_season.week)
     const transactions = await this.api_client.get(
       `/league/${league_id}/transactions/${week}`
     )
