@@ -18,7 +18,7 @@ import calculate_league_careerlogs from '#scripts/calculate-league-careerlogs.mj
 import { process_market_results } from '#scripts/process-market-results.mjs'
 import { update_market_settlement_status } from '#scripts/update-market-settlement-status.mjs'
 import calculate_team_historical_hit_rates from '#scripts/calculate-team-historical-hit-rates.mjs'
-import finalize_season from '#scripts/finalize-season.mjs'
+import finalize_season from '#private/scripts/finalize-season.mjs'
 
 const log = debug('finalize-week')
 

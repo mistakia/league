@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "prettier": "prettier --write .",
     "test": "TZ=America/New_York NODE_ENV=test CONFIG_ENCRYPTION_KEY=cc0e93bb948088a5a35affafb6e4b47210a659f9e150f9a55a41222eaacf5520 TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --exclude test/libs-server.get-players-table-view-results-debug.mjs --require test/global.mjs",
+    "test:private": "TZ=America/New_York NODE_ENV=test CONFIG_ENCRYPTION_KEY=cc0e93bb948088a5a35affafb6e4b47210a659f9e150f9a55a41222eaacf5520 TEST=all mocha --exit 'private/test/**/*.spec.mjs' --require test/global.mjs",
     "test:data-view-queries": "TZ=America/New_York NODE_ENV=test CONFIG_ENCRYPTION_KEY=cc0e93bb948088a5a35affafb6e4b47210a659f9e150f9a55a41222eaacf5520 TEST=all mocha --exit test/libs-server.data-view-queries.mjs --require test/global.mjs",
     "start:api": "NODE_ENV=development nodemon server.mjs",
     "start:api:prod": "NODE_ENV=production node server.mjs",
