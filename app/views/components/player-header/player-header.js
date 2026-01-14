@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Tooltip from '@mui/material/Tooltip'
 
 import Icon from '@components/icon'
 
@@ -11,7 +12,8 @@ export default function PlayerHeader({
   label,
   className,
   order,
-  orderBy
+  orderBy,
+  description
 }) {
   const handleClick = () => {
     toggle_players_page_order(value)
@@ -25,12 +27,22 @@ export default function PlayerHeader({
     classNames.push(order)
   }
 
-  return (
+  const header_content = (
     <div className={classNames.join(' ')} onClick={handleClick}>
       <Icon name='down' />
       {label}
     </div>
   )
+
+  if (description) {
+    return (
+      <Tooltip title={description} placement='bottom'>
+        {header_content}
+      </Tooltip>
+    )
+  }
+
+  return header_content
 }
 
 PlayerHeader.propTypes = {
@@ -39,5 +51,6 @@ PlayerHeader.propTypes = {
   label: PropTypes.string,
   className: PropTypes.string,
   order: PropTypes.string,
-  orderBy: PropTypes.string
+  orderBy: PropTypes.string,
+  description: PropTypes.string
 }

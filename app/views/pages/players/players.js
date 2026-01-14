@@ -193,6 +193,7 @@ export default function PlayersPage({
           className={field_info.header_className || 'table__cell metric'}
           label={field_info.column_header}
           value={field_info.key}
+          description={field_info.csv_header}
         />
       )
     })
