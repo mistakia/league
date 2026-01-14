@@ -231,7 +231,8 @@ export default class SleeperAdapter extends BaseAdapter {
         team_external_id:
           roster.owner_id?.toString() || roster.roster_id?.toString(),
         week:
-          week ?? (current_season.week > current_season.nflFinalWeek
+          week ??
+          (current_season.week > current_season.nflFinalWeek
             ? 0
             : current_season.week),
         year: current_season.year,

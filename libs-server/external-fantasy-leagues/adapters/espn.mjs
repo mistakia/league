@@ -278,7 +278,8 @@ export default class EspnAdapter extends BaseAdapter {
         league_external_id: league_id,
         team_external_id: team.id.toString(),
         week:
-          week ?? (current_season.week > current_season.nflFinalWeek
+          week ??
+          (current_season.week > current_season.nflFinalWeek
             ? 0
             : current_season.week),
         year: current_season.year,

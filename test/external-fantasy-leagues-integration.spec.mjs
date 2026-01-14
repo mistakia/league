@@ -222,7 +222,7 @@ describe('External Fantasy Leagues - Integration Tests', function () {
         sync_results.should.have.property('transactions')
         sync_results.should.have.property('players')
 
-        console.log(`✅ Complete Sleeper sync workflow validated:`)
+        console.log(`Complete Sleeper sync workflow validated:`)
         console.log(
           `   - League: ${league_data.name} (${league_data.teams.length} teams)`
         )
@@ -354,7 +354,7 @@ describe('External Fantasy Leagues - Integration Tests', function () {
 
         sync_results.players = players_data
 
-        console.log(`✅ Complete ESPN sync workflow validated:`)
+        console.log(`Complete ESPN sync workflow validated:`)
         console.log(
           `   - League: ${league_data.name} (${league_data.teams.length} teams)`
         )
@@ -658,9 +658,7 @@ describe('External Fantasy Leagues - Integration Tests', function () {
       validation.valid.should.be.true
       validation_time.should.be.lessThan(5000) // Should complete within 5 seconds
 
-      console.log(
-        `✅ Large dataset validation completed in ${validation_time}ms`
-      )
+      console.log(`Large dataset validation completed in ${validation_time}ms`)
     })
 
     it('should cache schema validation for performance', async function () {
@@ -694,7 +692,7 @@ describe('External Fantasy Leagues - Integration Tests', function () {
       validator_stats_after.compiled_validators.should.be.greaterThan(0)
 
       console.log(
-        `✅ Schema caching validated: ${validator_stats_after.cached_schemas} schemas cached`
+        `Schema caching validated: ${validator_stats_after.cached_schemas} schemas cached`
       )
     })
   })
