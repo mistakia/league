@@ -1,0 +1,28 @@
+{
+  "name": "should use scoring_format_player_seasonlogs as FROM table when sorting by fantasy points from seasonlogs",
+  "description": "Tests from-table optimization for scoring format columns - query should start from scoring_format_player_seasonlogs table with scoring_format_hash in WHERE clause",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_from_seasonlogs",
+        "params": {
+          "year": 2022
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_from_seasonlogs",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "select \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\", player.fname, player.lname, \"t7e2e75ff9aa5325620aefc4868e65270\".\"points\" AS \"points_from_seasonlogs_0\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"t7e2e75ff9aa5325620aefc4868e65270\" inner join \"player\" on \"player\".\"pid\" = \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\" where \"t7e2e75ff9aa5325620aefc4868e65270\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' and \"t7e2e75ff9aa5325620aefc4868e65270\".\"year\" = 2022 group by player.fname, player.lname, \"t7e2e75ff9aa5325620aefc4868e65270\".\"points\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\" asc limit 500",
+  "tags": ["from-table-optimization", "scoring-format"],
+  "timeout_ms": 40000,
+  "expected_metadata": {
+    "cache_ttl": "one_week",
+    "cache_expire_at": null
+  }
+}

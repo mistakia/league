@@ -1,0 +1,67 @@
+{
+  "name": "should use from-table optimization with 7 columns from multiple sources",
+  "description": "Tests from-table optimization with scoring format seasonlogs as FROM table, joining league format seasonlogs, weighted opportunity CTE, and player seasonlogs. Verifies scoring_format_hash and year conditions appear in WHERE clause.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_from_seasonlogs",
+        "params": {
+          "year": 2024
+        }
+      },
+      {
+        "column_id": "player_fantasy_points_per_game_from_seasonlogs",
+        "params": {
+          "year": 2024
+        }
+      },
+      {
+        "column_id": "player_fantasy_points_rank_from_seasonlogs",
+        "params": {
+          "year": 2024
+        }
+      },
+      {
+        "column_id": "player_points_added_from_seasonlogs",
+        "params": {
+          "year": 2024
+        }
+      },
+      {
+        "column_id": "player_points_added_per_game_from_seasonlogs",
+        "params": {
+          "year": 2024
+        }
+      },
+      "player_weighted_opportunity_rating_from_plays",
+      "player_espn_overall_score"
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["RB", "WR", "TE"]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_from_seasonlogs",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t921c4eef56c18545410ce1daa2b41466\" as (select \"pg\".\"pid\", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"pg\".\"pid\") select \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\", player.fname, player.lname, \"t363940a466a7e5e5b4624ffc010a5ebd\".\"points\" AS \"points_from_seasonlogs_0\", \"t363940a466a7e5e5b4624ffc010a5ebd\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", \"t363940a466a7e5e5b4624ffc010a5ebd\".\"points_rnk\" AS \"points_rnk_from_seasonlogs_0\", \"t94859e7d2e6814eb5ed62cc33ece2b74\".\"points_added\" AS \"points_added_from_seasonlogs_0\", \"t94859e7d2e6814eb5ed62cc33ece2b74\".\"points_added_per_game\" AS \"points_added_per_game_from_seasonlogs_0\", \"t921c4eef56c18545410ce1daa2b41466\".\"weighted_opp_rating_from_plays\" AS \"weighted_opp_rating_from_plays_0\", \"player_seasonlogs\".\"espn_overall_score\" AS \"espn_overall_score_0\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"t363940a466a7e5e5b4624ffc010a5ebd\" inner join \"player\" on \"player\".\"pid\" = \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\" left join \"league_format_player_seasonlogs\" as \"t94859e7d2e6814eb5ed62cc33ece2b74\" on \"t94859e7d2e6814eb5ed62cc33ece2b74\".\"pid\" = \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\" and t94859e7d2e6814eb5ed62cc33ece2b74.league_format_hash = 'a54416be9596b2a3dbdac2c5fd40d0bea908cd74b84e16416713bbaf45c6bfc5' and t94859e7d2e6814eb5ed62cc33ece2b74.year IN (2024) left join \"t921c4eef56c18545410ce1daa2b41466\" on \"t921c4eef56c18545410ce1daa2b41466\".\"pid\" = \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\" left join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\" and \"player_seasonlogs\".\"seas_type\" = 'REG' and \"player_seasonlogs\".\"year\" = 2025 where \"t363940a466a7e5e5b4624ffc010a5ebd\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' and \"t363940a466a7e5e5b4624ffc010a5ebd\".\"year\" = 2024 and player.pos IN ('RB', 'WR', 'TE') group by player.fname, player.lname, \"t363940a466a7e5e5b4624ffc010a5ebd\".\"points\", \"t363940a466a7e5e5b4624ffc010a5ebd\".\"points_per_game\", \"t363940a466a7e5e5b4624ffc010a5ebd\".\"points_rnk\", \"t94859e7d2e6814eb5ed62cc33ece2b74\".\"points_added\", \"t94859e7d2e6814eb5ed62cc33ece2b74\".\"points_added_per_game\", \"t921c4eef56c18545410ce1daa2b41466\".\"weighted_opp_rating_from_plays\", \"player_seasonlogs\".\"espn_overall_score\", \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\" asc limit 500",
+  "tags": [
+    "from-table-optimization",
+    "scoring-format",
+    "league-format",
+    "cte",
+    "multi-source"
+  ],
+  "timeout_ms": 40000,
+  "expected_metadata": {
+    "cache_ttl": "six_hours",
+    "cache_expire_at": null
+  }
+}

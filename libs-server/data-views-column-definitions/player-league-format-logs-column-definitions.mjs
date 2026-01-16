@@ -9,6 +9,7 @@ import {
   create_static_cache_info,
   CACHE_TTL
 } from '#libs-server/data-views/cache-info-utils.mjs'
+import { get_league_format_hash } from '#libs-server/data-views/index.mjs'
 
 // TODO career_year
 
@@ -71,6 +72,22 @@ const league_format_player_seasonlogs_join = (join_arguments) => {
   })
 }
 
+const league_format_seasonlogs_conditions = ({ params, splits = [] }) => {
+  const conditions = [
+    { column: 'league_format_hash', value: get_league_format_hash(params) }
+  ]
+
+  // Add year filter when no year splits are active
+  if (!splits.includes('year') && params.year) {
+    const year = Array.isArray(params.year) ? params.year[0] : params.year
+    if (year !== undefined && year !== null) {
+      conditions.push({ column: 'year', value: year })
+    }
+  }
+
+  return conditions
+}
+
 const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
@@ -79,7 +96,8 @@ const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   table_alias: league_format_player_seasonlogs_table_alias,
   join: league_format_player_seasonlogs_join,
   supported_splits: ['year'],
-  get_cache_info: get_cache_info_for_league_format_seasonlogs
+  get_cache_info: get_cache_info_for_league_format_seasonlogs,
+  get_table_conditions: league_format_seasonlogs_conditions
 })
 
 const league_format_player_careerlogs_table_alias = ({ params = {} }) => {

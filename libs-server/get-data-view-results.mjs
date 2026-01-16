@@ -490,7 +490,8 @@ const determine_from_table = ({
     return {
       from_table_name: table_name,
       from_table_type: 'cte',
-      column_id
+      column_id,
+      column_params
     }
   }
 
@@ -503,8 +504,29 @@ const determine_from_table = ({
   return {
     from_table_name: table_name,
     from_table_type: 'table',
-    column_id
+    column_id,
+    column_params
   }
+}
+
+/**
+ * Checks if a column can be used as a FROM table for optimization
+ * CTE-based columns (with `with` property) are eligible if they're whitelisted
+ * Table-based columns are eligible if they have `get_table_conditions`
+ * @param {Object} column_definition - Column definition object
+ * @param {string} column_id - Column identifier
+ * @returns {boolean} True if column can be used as FROM table
+ */
+const can_use_as_from_table = (column_definition, column_id) => {
+  // CTE-based columns - maintain whitelist for backward compatibility
+  if (column_definition.with) {
+    const cte_whitelisted_columns = new Set([
+      'player_fantasy_points_from_plays'
+    ])
+    return cte_whitelisted_columns.has(column_id)
+  }
+  // Table-based columns - require get_table_conditions for optimization
+  return Boolean(column_definition.get_table_conditions)
 }
 
 /**
@@ -532,32 +554,32 @@ const get_from_table_config = ({
     data_views_column_definitions
   })
 
-  // Whitelist of columns that are ready for the new from_table system
-  const whitelisted_columns = new Set(['player_fantasy_points_from_plays'])
-
-  // Only use sort-based from table for whitelisted columns
+  // Only use sort-based from table for columns that support optimization
   if (
     sort_based_from_table.from_table_name &&
-    sort_based_from_table.column_id &&
-    whitelisted_columns.has(sort_based_from_table.column_id)
+    sort_based_from_table.column_id
   ) {
-    // Use sort-based from table if available and no splits are configured
-    // or if it supports all required splits
-    if (splits.length === 0) {
-      return sort_based_from_table
-    }
-
-    // For tables with splits, check if they support the required splits
     const column_definition =
       data_views_column_definitions[sort_based_from_table.column_id]
 
-    // Check if the column definition supports all required splits
-    const supports_all_splits = splits.every((split) =>
-      column_definition?.supported_splits?.includes(split)
-    )
+    if (
+      column_definition &&
+      can_use_as_from_table(column_definition, sort_based_from_table.column_id)
+    ) {
+      // Use sort-based from table if available and no splits are configured
+      // or if it supports all required splits
+      if (splits.length === 0) {
+        return sort_based_from_table
+      }
 
-    if (supports_all_splits) {
-      return sort_based_from_table
+      // Check if the column definition supports all required splits
+      const supports_all_splits = splits.every((split) =>
+        column_definition?.supported_splits?.includes(split)
+      )
+
+      if (supports_all_splits) {
+        return sort_based_from_table
+      }
     }
   }
 
@@ -583,14 +605,16 @@ const setup_from_table_and_player_joins = ({
   data_views_column_definitions,
   splits = []
 }) => {
-  const { from_table_name, from_table_type, column_id } = from_table_config
+  const { from_table_name, from_table_type, column_id, column_params } =
+    from_table_config
 
   log(`Setting up from table: ${from_table_name} (type: ${from_table_type})`)
 
   // For 'table' type, get the actual table name and set up alias if needed
   let actual_table_name = from_table_name
+  let column_definition = null
   if (from_table_type === 'table' && column_id) {
-    const column_definition = data_views_column_definitions[column_id]
+    column_definition = data_views_column_definitions[column_id]
     actual_table_name = column_definition?.table_name || from_table_name
   }
 
@@ -606,6 +630,24 @@ const setup_from_table_and_player_joins = ({
   // Join to player table if the from table is not 'player'
   if (from_table_name !== 'player') {
     players_query.innerJoin('player', 'player.pid', `${from_table_name}.pid`)
+  }
+
+  // Apply get_table_conditions as WHERE clauses when table is used as FROM
+  if (column_definition && column_definition.get_table_conditions) {
+    const conditions = column_definition.get_table_conditions({
+      params: column_params || {},
+      splits
+    })
+    for (const condition of conditions) {
+      // Validate column name to prevent SQL injection
+      if (!/^[a-z_][a-z0-9_]*$/i.test(condition.column)) {
+        throw new Error(`Invalid column name: ${condition.column}`)
+      }
+      players_query.where(
+        `${from_table_name}.${condition.column}`,
+        condition.value
+      )
+    }
   }
 
   // Add inner joins for split tables only when from table is 'player' and splits are enabled
