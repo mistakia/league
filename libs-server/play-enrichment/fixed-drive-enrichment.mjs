@@ -228,10 +228,10 @@ const is_timeout_or_warning = (play) => {
 }
 
 /**
- * Calculates fixed_drive for all plays in a game
+ * Calculates drive_seq for all plays in a game using nflfastr's fixed_drive methodology
  *
  * @param {Array} plays - Array of play objects for a single game, sorted by playId
- * @returns {Array} Plays with fixed_drive added
+ * @returns {Array} Plays with drive_seq set (if not already present)
  */
 export const enrich_fixed_drives = (plays) => {
   log(`Starting fixed drive enrichment for ${plays.length} plays`)
@@ -272,16 +272,13 @@ export const enrich_fixed_drives = (plays) => {
         drive_number++
       }
 
-      // Build enriched play with fixed_drive
-      // Also populate drive_seq if not already present (for Sportradar/NFL V1 sources)
+      // Set drive_seq using the calculated fixed_drive value if not already present
+      // nflfastr and other sources may have their own drive_seq values
       // This is needed because enrich_drive_play_counts depends on drive_seq
       const enriched_play = {
-        ...play,
-        fixed_drive: drive_number
+        ...play
       }
 
-      // Only set drive_seq if not already populated from source data
-      // nflfastr and other sources may have their own drive_seq values
       if (play.drive_seq === null || play.drive_seq === undefined) {
         enriched_play.drive_seq = drive_number
       }
