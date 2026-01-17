@@ -7,6 +7,7 @@ const create_player_regex = (suffix) =>
   new RegExp(`^PLAYER_[A-Z](_-_|_)${suffix}$`)
 
 const alt_quarter_markets = [
+  // First quarter alt lines
   [
     create_player_regex('1ST_QTR_RUSHING_YDS'),
     player_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS
@@ -18,6 +19,80 @@ const alt_quarter_markets = [
   [
     create_player_regex('1ST_QTR_PASSING_YDS'),
     player_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_PASSING_\\+_RUSHING_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_RUSHING_\\+_RECEIVING_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_RECEIVING_YARDS
+  ],
+
+  // Second quarter alt lines
+  [
+    create_player_regex('2ND_QTR_RUSHING_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_ALT_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_RECEIVING_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_ALT_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_PASSING_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_ALT_PASSING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_PASSING_\\+_RUSHING_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_ALT_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_RUSHING_\\+_RECEIVING_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_ALT_RUSHING_RECEIVING_YARDS
+  ],
+
+  // Third quarter alt lines
+  [
+    create_player_regex('3RD_QTR_RUSHING_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_ALT_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_RECEIVING_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_ALT_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_PASSING_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_ALT_PASSING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_PASSING_\\+_RUSHING_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_ALT_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_RUSHING_\\+_RECEIVING_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_ALT_RUSHING_RECEIVING_YARDS
+  ],
+
+  // Fourth quarter alt lines
+  [
+    create_player_regex('4TH_QTR_RUSHING_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_ALT_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_RECEIVING_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_ALT_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_PASSING_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_ALT_PASSING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_PASSING_\\+_RUSHING_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_ALT_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_RUSHING_\\+_RECEIVING_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_ALT_RUSHING_RECEIVING_YARDS
   ]
 ]
 
@@ -54,6 +129,7 @@ const player_game_alt_line_markets = [
 ]
 
 const quarter_markets = [
+  // First quarter standard lines
   [
     create_player_regex('1ST_QTR_TOTAL_RUSH_YDS'),
     player_prop_types.GAME_FIRST_QUARTER_RUSHING_YARDS
@@ -65,6 +141,80 @@ const quarter_markets = [
   [
     create_player_regex('1ST_QTR_TOTAL_PASS_YDS'),
     player_prop_types.GAME_FIRST_QUARTER_PASSING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_TOTAL_PASS_\\+_RUSH_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_TOTAL_RUSH_\\+_REC_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_RUSHING_RECEIVING_YARDS
+  ],
+
+  // Second quarter standard lines
+  [
+    create_player_regex('2ND_QTR_TOTAL_RUSH_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_TOTAL_REC_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_TOTAL_PASS_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_PASSING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_TOTAL_PASS_\\+_RUSH_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('2ND_QTR_TOTAL_RUSH_\\+_REC_YDS'),
+    player_prop_types.GAME_SECOND_QUARTER_RUSHING_RECEIVING_YARDS
+  ],
+
+  // Third quarter standard lines
+  [
+    create_player_regex('3RD_QTR_TOTAL_RUSH_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_TOTAL_REC_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_TOTAL_PASS_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_PASSING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_TOTAL_PASS_\\+_RUSH_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('3RD_QTR_TOTAL_RUSH_\\+_REC_YDS'),
+    player_prop_types.GAME_THIRD_QUARTER_RUSHING_RECEIVING_YARDS
+  ],
+
+  // Fourth quarter standard lines
+  [
+    create_player_regex('4TH_QTR_TOTAL_RUSH_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_TOTAL_REC_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_TOTAL_PASS_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_PASSING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_TOTAL_PASS_\\+_RUSH_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('4TH_QTR_TOTAL_RUSH_\\+_REC_YDS'),
+    player_prop_types.GAME_FOURTH_QUARTER_RUSHING_RECEIVING_YARDS
   ]
 ]
 
