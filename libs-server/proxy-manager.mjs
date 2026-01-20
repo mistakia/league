@@ -1,12 +1,14 @@
+import { ProxyAgent, fetch as undiciFetch } from 'undici'
 import fetch from 'node-fetch'
 import debug from 'debug'
-import { HttpsProxyAgent } from 'https-proxy-agent'
 
 import db from '#db'
 
 const log = debug('proxy-manager')
 
 // Parse proxy strings into proxy URLs
+// Format: host:port or host:port:username:password
+// Uses http:// protocol for proxy connection (standard for HTTP proxies)
 const parse_proxy_string = (proxy_str) => {
   const parts = proxy_str.split(':')
 
@@ -17,68 +19,53 @@ const parse_proxy_string = (proxy_str) => {
       port,
       username,
       password,
-      protocol: 'https'
+      protocol: 'http'
     }
-    proxy_config.connection_string = `https://${username}:${password}@${host}:${port}`
+    proxy_config.connection_string = `http://${username}:${password}@${host}:${port}`
     return proxy_config
   }
   const proxy_config = {
     host,
     port,
-    protocol: 'https'
+    protocol: 'http'
   }
-  proxy_config.connection_string = `https://${host}:${port}`
+  proxy_config.connection_string = `http://${host}:${port}`
   return proxy_config
 }
 
-class ProxyManager {
-  constructor() {
+// ProxyPool manages a single pool of proxies with round-robin selection
+class ProxyPool {
+  constructor(name) {
+    this.name = name
     this.proxies = new Map()
-    this.proxy_keys = [] // Ordered list of proxy keys for round-robin
-    this.round_robin_index = 0 // Current position in round-robin rotation
+    this.proxy_keys = []
+    this.round_robin_index = 0
     this.retry_count = 0
     this.base_delay = 60000 // 1 minute base delay
-    this.initialized = false
   }
 
-  async initialize() {
-    if (this.initialized) return
-
-    try {
-      const proxy_config = await db('config')
-        .where({ key: 'proxy_config' })
-        .first()
-
-      if (proxy_config && proxy_config.value) {
-        const proxy_list = proxy_config.value
-
-        for (const proxy_str of proxy_list) {
-          const proxy_config = parse_proxy_string(proxy_str)
-          const key = proxy_str.split(':').slice(0, 3).join(':')
-          this.proxies.set(key, {
-            ...proxy_config,
-            failed: false,
-            last_used: 0
-          })
-          this.proxy_keys.push(key)
-        }
-        log(`Initialized ${this.proxies.size} proxies from database`)
-      } else {
-        log('No proxies found in database')
-      }
-
-      this.initialized = true
-    } catch (error) {
-      log(`Error initializing proxies: ${error.message}`)
-      throw error
-    }
+  add_proxy(proxy_str) {
+    const proxy_config = parse_proxy_string(proxy_str)
+    const key = proxy_str.split(':').slice(0, 3).join(':')
+    this.proxies.set(key, {
+      ...proxy_config,
+      failed: false,
+      last_used: 0
+    })
+    this.proxy_keys.push(key)
   }
 
   reset_failed_proxies() {
-    for (const proxy of this.proxies.values()) {
+    const failed_keys = []
+    for (const [key, proxy] of this.proxies.entries()) {
+      if (proxy.failed) {
+        failed_keys.push(key)
+      }
       proxy.failed = false
     }
-    log('Reset all failed proxies')
+    log(
+      `[${this.name}] Reset ${failed_keys.length} failed proxies: ${failed_keys.join(', ')}`
+    )
   }
 
   all_proxies_failed() {
@@ -86,11 +73,8 @@ class ProxyManager {
   }
 
   async get_working_proxy() {
-    await this.initialize()
-
-    // If no proxies are configured, return null
     if (this.proxies.size === 0) {
-      log('No proxies available')
+      log(`[${this.name}] No proxies available`)
       return null
     }
 
@@ -99,7 +83,7 @@ class ProxyManager {
       this.retry_count++
       const delay = this.base_delay * Math.pow(2, this.retry_count - 1)
       log(
-        `All proxies failed. Waiting ${delay}ms before retry #${this.retry_count}`
+        `[${this.name}] All proxies failed. Waiting ${delay}ms before retry #${this.retry_count}`
       )
       await new Promise((resolve) => setTimeout(resolve, delay))
       this.reset_failed_proxies()
@@ -111,31 +95,129 @@ class ProxyManager {
 
     while (attempts < proxy_count) {
       const key = this.proxy_keys[this.round_robin_index]
-      // Advance index for next call (atomic increment before returning)
       this.round_robin_index = (this.round_robin_index + 1) % proxy_count
 
       const proxy = this.proxies.get(key)
       if (proxy && !proxy.failed) {
         proxy.last_used = Date.now()
-        log(`Selected proxy (round-robin): ${key}`)
-        return { key, ...proxy }
+        log(`[${this.name}] Selected proxy (round-robin): ${key}`)
+        return { key, ...proxy, pool_name: this.name }
       }
 
       attempts++
     }
 
-    return null // All proxies failed (should be handled by reset above)
+    return null
   }
 
   mark_proxy_failed(proxy_config) {
     for (const [key, proxy] of this.proxies.entries()) {
-      // Compare the connection strings for equality
       if (proxy.connection_string === proxy_config.connection_string) {
-        log(`Marking proxy ${key} as failed`)
+        log(`[${this.name}] Marking proxy ${key} as failed`)
         proxy.failed = true
         return
       }
     }
+  }
+
+  get_stats() {
+    const total = this.proxies.size
+    const failed = Array.from(this.proxies.values()).filter(
+      (p) => p.failed
+    ).length
+    return { total, failed, working: total - failed }
+  }
+}
+
+// ProxyManager manages multiple proxy pools
+class ProxyManager {
+  constructor() {
+    this.pools = new Map()
+    this.initialized = false
+  }
+
+  async initialize() {
+    if (this.initialized) return
+
+    try {
+      // Load all proxy configs from database
+      const configs = await db('config')
+        .where('key', 'like', 'proxy_config%')
+        .select('key', 'value')
+
+      for (const config of configs) {
+        if (!config.value) continue
+
+        // Determine pool name from config key
+        // proxy_config -> default, proxy_config_pinnacle -> pinnacle
+        const pool_name =
+          config.key === 'proxy_config'
+            ? 'default'
+            : config.key.replace('proxy_config_', '')
+
+        const pool = new ProxyPool(pool_name)
+        const proxy_list = config.value
+
+        for (const proxy_str of proxy_list) {
+          pool.add_proxy(proxy_str)
+        }
+
+        this.pools.set(pool_name, pool)
+        log(`Initialized pool '${pool_name}' with ${pool.proxies.size} proxies`)
+      }
+
+      if (this.pools.size === 0) {
+        log('No proxy pools found in database')
+      }
+
+      this.initialized = true
+    } catch (error) {
+      log(`Error initializing proxies: ${error.message}`)
+      throw error
+    }
+  }
+
+  get_pool(pool_name = 'default') {
+    return this.pools.get(pool_name)
+  }
+
+  async get_working_proxy(pool_name = 'default') {
+    await this.initialize()
+
+    const pool = this.pools.get(pool_name)
+    if (!pool) {
+      log(`Pool '${pool_name}' not found, trying 'default'`)
+      const default_pool = this.pools.get('default')
+      if (!default_pool) {
+        log('No default pool available')
+        return null
+      }
+      return default_pool.get_working_proxy()
+    }
+
+    return pool.get_working_proxy()
+  }
+
+  mark_proxy_failed(proxy_config) {
+    // Find the pool this proxy belongs to and mark it failed
+    const pool_name = proxy_config.pool_name || 'default'
+    const pool = this.pools.get(pool_name)
+    if (pool) {
+      pool.mark_proxy_failed(proxy_config)
+    }
+  }
+
+  reset_retry_count(pool_name = 'default') {
+    const pool = this.pools.get(pool_name)
+    if (pool) {
+      pool.retry_count = 0
+    }
+  }
+
+  get_pool_stats(pool_name = 'default') {
+    const pool = this.pools.get(pool_name)
+    if (!pool) return null
+    return pool.get_stats()
   }
 }
 
@@ -170,19 +252,17 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
     try {
       log(`Fetching ${url} via proxy ${proxy_config.connection_string}`)
 
-      const agent = new HttpsProxyAgent(proxy_config.connection_string, {
-        rejectUnauthorized: false
-      })
+      const proxyAgent = new ProxyAgent(proxy_config.connection_string)
 
       const fetch_options = {
         ...options,
-        agent
+        dispatcher: proxyAgent
       }
 
-      const response = await fetch(url, fetch_options)
+      const response = await undiciFetch(url, fetch_options)
 
       // Reset retry count on success
-      proxy_manager.retry_count = 0
+      proxy_manager.reset_retry_count(proxy_config.pool_name)
 
       return response
     } catch (error) {
@@ -225,6 +305,7 @@ export async function fetch_with_retry({
   initial_delay = 1000,
   max_delay = 10000,
   use_proxy = false,
+  proxy_pool = 'default',
   response_type
 } = {}) {
   if (!url) {
@@ -240,28 +321,31 @@ export async function fetch_with_retry({
 
   let last_error
   let current_proxy = null
+  const proxies_tried = []
 
   for (let attempt = 0; attempt <= max_retries; attempt++) {
     try {
       let response
 
       if (use_proxy) {
-        // Get a working proxy (rotates on failure)
+        // Get a working proxy from the specified pool (rotates on failure)
         await proxy_manager.initialize()
-        current_proxy = await proxy_manager.get_working_proxy()
+        current_proxy = await proxy_manager.get_working_proxy(proxy_pool)
 
         if (current_proxy) {
           retry_log(
-            `Attempt ${attempt + 1}/${max_retries + 1} for ${url} via proxy ${current_proxy.key}`
+            `Attempt ${attempt + 1}/${max_retries + 1} for ${url} via proxy ${current_proxy.key} (pool: ${current_proxy.pool_name})`
           )
-          const agent = new HttpsProxyAgent(current_proxy.connection_string, {
-            rejectUnauthorized: false
+          proxies_tried.push(current_proxy.key)
+          const proxyAgent = new ProxyAgent(current_proxy.connection_string)
+          response = await undiciFetch(url, {
+            ...fetch_options,
+            dispatcher: proxyAgent
           })
-          response = await fetch(url, { ...fetch_options, agent })
         } else {
           // No proxy available, fall back to direct
           retry_log(
-            `Attempt ${attempt + 1}/${max_retries + 1} for ${url} (no proxy available, using direct)`
+            `Attempt ${attempt + 1}/${max_retries + 1} for ${url} (no proxy available in pool '${proxy_pool}', using direct)`
           )
           response = await fetch(url, fetch_options)
         }
@@ -271,12 +355,17 @@ export async function fetch_with_retry({
       }
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        const proxy_info = current_proxy
+          ? ` (proxy: ${current_proxy.key}, pool: ${current_proxy.pool_name})`
+          : ' (direct)'
+        throw new Error(
+          `HTTP ${response.status}: ${response.statusText}${proxy_info}`
+        )
       }
 
       // Reset proxy manager retry count on success
-      if (use_proxy) {
-        proxy_manager.retry_count = 0
+      if (use_proxy && current_proxy) {
+        proxy_manager.reset_retry_count(current_proxy.pool_name)
       }
 
       // Return parsed response if response_type specified
@@ -287,14 +376,32 @@ export async function fetch_with_retry({
       return response
     } catch (error) {
       last_error = error
-      retry_log(`Attempt ${attempt + 1} failed for ${url}: ${error.message}`)
+      const proxy_info = current_proxy
+        ? ` via proxy ${current_proxy.key} (pool: ${current_proxy.pool_name})`
+        : ' (direct)'
+      retry_log(
+        `Attempt ${attempt + 1} failed for ${url}${proxy_info}: ${error.message}`
+      )
 
       // Mark proxy as failed if we were using one
       if (use_proxy && current_proxy) {
+        retry_log(`Marking proxy ${current_proxy.key} as failed`)
         proxy_manager.mark_proxy_failed(current_proxy)
+        const stats = proxy_manager.get_pool_stats(current_proxy.pool_name)
+        if (stats) {
+          retry_log(
+            `Pool '${current_proxy.pool_name}' remaining: ${stats.working}/${stats.total}`
+          )
+        }
       }
 
       if (attempt === max_retries) {
+        if (proxies_tried.length > 0) {
+          const unique_proxies = [...new Set(proxies_tried)]
+          retry_log(
+            `All ${max_retries + 1} attempts failed. Proxies tried: ${unique_proxies.join(', ')}`
+          )
+        }
         throw error
       }
 

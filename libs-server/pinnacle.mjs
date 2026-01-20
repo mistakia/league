@@ -233,6 +233,7 @@ export const get_nfl_matchups = async ({ ignore_cache = false } = {}) => {
     headers: pinnacle_config.headers,
     max_retries: 3,
     use_proxy: true,
+    proxy_pool: 'pinnacle',
     initial_delay: 1000,
     max_delay: 10000,
     response_type: 'json'
@@ -272,6 +273,7 @@ export const get_market_odds = async ({
     headers: pinnacle_config.headers,
     max_retries: 3,
     use_proxy: true,
+    proxy_pool: 'pinnacle',
     initial_delay: 1000,
     max_delay: 10000,
     response_type: 'json'
