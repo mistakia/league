@@ -1,8 +1,8 @@
 import debug from 'debug'
+import dayjs from 'dayjs'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { get_target_week } from '#libs-shared'
 import { is_main, report_job, get_season_playoff_weeks } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
@@ -31,10 +31,42 @@ const clear_live_plays = async () => {
 }
 
 /**
+ * Calculate the target week to finalize based on current day
+ *
+ * Uses nfl_seas_week which correctly handles both regular season (1-18)
+ * and playoffs (1-4). On Tuesday/Wednesday, processes previous week
+ * since games typically finish by Monday.
+ *
+ * Exception: During Super Bowl week (playoff week 4), always returns week 4
+ * since it's the final week - there's no "next week" to be in, and subtracting
+ * would incorrectly re-process the Conference Championship.
+ *
+ * @returns {number} The target week number for the current seas_type
+ */
+const get_finalize_target_week = () => {
+  const day = dayjs().day()
+  const current_nfl_week = current_season.nfl_seas_week
+  const seas_type = current_season.nfl_seas_type
+
+  // Super Bowl (playoff week 4) is the final week - always finalize it directly
+  const is_super_bowl_week = seas_type === 'POST' && current_nfl_week === 4
+  if (is_super_bowl_week) {
+    return current_nfl_week
+  }
+
+  // On Tuesday (2) or Wednesday (3), process previous week
+  const should_process_previous = [2, 3].includes(day)
+  return Math.max(should_process_previous ? current_nfl_week - 1 : current_nfl_week, 1)
+}
+
+/**
  * Finalize a completed NFL week
  *
  * Scheduled via cron (crontab-worker-1.cron) to run Tuesday/Wednesday after each NFL week.
- * Uses get_target_week() to determine which week to finalize.
+ * Uses nfl_seas_week (not overall week) to correctly handle both regular season
+ * and playoff weeks. The week parameter matches nfl_games table conventions:
+ * - Regular season: week 1-18
+ * - Playoffs: week 1-4 (Wild Card, Divisional, Conference, Super Bowl)
  *
  * Pipeline:
  * 1. Final play import (force update for stat corrections, skip_finalization=true)
@@ -49,15 +81,17 @@ const clear_live_plays = async () => {
  * 10. Trigger season finalization (if week after final championship week)
  */
 const finalize_week = async () => {
-  const week = get_target_week()
+  const week = get_finalize_target_week()
   const year = current_season.year
+  const seas_type = current_season.nfl_seas_type
   const start_time = Date.now()
 
-  log(`Finalizing week ${week} for ${year}`)
+  log(`Finalizing ${seas_type} week ${week} for ${year}`)
 
   const results = {
     week,
     year,
+    seas_type,
     steps_completed: [],
     steps_failed: []
   }
@@ -70,6 +104,7 @@ const finalize_week = async () => {
     fn: () =>
       import_plays_nfl_v1({
         week,
+        seas_type,
         force_update: true,
         ignore_cache: true,
         skip_finalization: true // Per-game finalization already done during live import
@@ -118,7 +153,7 @@ const finalize_week = async () => {
       process_market_results({
         year,
         week,
-        seas_type: current_season.nfl_seas_type
+        seas_type
       })
   })
 
@@ -131,7 +166,7 @@ const finalize_week = async () => {
       update_market_settlement_status({
         year,
         week,
-        seas_type: current_season.nfl_seas_type
+        seas_type
       })
   })
 
