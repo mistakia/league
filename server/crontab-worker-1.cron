@@ -21,6 +21,23 @@
 ## Every Wednesday at 1:20PM
 20 13 * * 3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-draftkings-salaries.mjs &>> /var/log/league/league-import-draftkings-salaries.log
 
+################################### PLAYOFF PLAY IMPORTING ########################################
+## Import plays and finalize completed playoff games
+## Runs every 10 minutes during typical playoff game windows (Saturday/Sunday in January/February)
+## Games typically run 1pm-11:30pm ET, so we cover 13:00-23:59
+
+## Saturday playoff games (Wild Card, Divisional rounds) - January and early February
+## Every 10 minutes from 4pm-midnight ET (games start ~4:30pm on Saturdays)
+*/10 16-23 * 1 6 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache &>> /var/log/league/import-plays-playoffs.log
+
+## Sunday playoff games (all rounds including Super Bowl) - January and February
+## Every 10 minutes from 1pm-midnight ET
+*/10 13-23 * 1,2 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache &>> /var/log/league/import-plays-playoffs.log
+
+## Post-game finalization runs - catch any games that finished late
+## Run at 12:30am on days after playoff games (Sunday for Saturday games, Monday for Sunday games)
+30 0 * 1,2 0,1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --seas_type POST --ignore_cache --final &>> /var/log/league/import-plays-playoffs.log
+
 ################################### WEEK FINALIZATION ########################################
 
 ## Finalize previous week at midnight Tuesday (primary)
