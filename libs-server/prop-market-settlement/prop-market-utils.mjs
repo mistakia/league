@@ -9,12 +9,53 @@ import db from '#db'
 const log = debug('prop-market-utils')
 
 /**
- * Calculate metric value by summing specified columns
- * @param {Object} data_item - Data object containing metric columns
- * @param {Object} mapping - Market mapping with metric_columns
+ * Parse score value with validation
+ * @param {*} value - Score value to parse
+ * @returns {number} Parsed score
+ * @throws {Error} If score is not a valid number
+ */
+const parse_score = (value) => {
+  if (value === null || value === undefined) {
+    return null
+  }
+  const num = Number(value)
+  if (Number.isNaN(num)) {
+    throw new Error(`Invalid score value: ${value}`)
+  }
+  return num
+}
+
+/**
+ * Calculate metric value by summing specified columns or using calculation_type
+ * @param {Object} data_item - Data object containing metric columns or game data
+ * @param {Object} mapping - Market mapping with metric_columns or calculation_type
  * @returns {number} Total metric value
  */
 export const calculate_metric_value = (data_item, mapping) => {
+  // Handle calculation_type for NFL_GAMES handler
+  if (mapping.calculation_type) {
+    const home_score = parse_score(data_item.home_score)
+    const away_score = parse_score(data_item.away_score)
+
+    // Return null if scores are missing (game not finished)
+    if (home_score === null || away_score === null) {
+      return null
+    }
+
+    switch (mapping.calculation_type) {
+      case 'total_points':
+        return home_score + away_score
+      case 'point_differential_vs_spread':
+        // Returns from home team perspective (caller adjusts for team)
+        return home_score - away_score
+      case 'winner_determination':
+        // No metric value needed for moneyline
+        return null
+      default:
+        return null
+    }
+  }
+
   if (!mapping.metric_columns || mapping.metric_columns.length === 0) {
     return null
   }
@@ -34,10 +75,10 @@ export const calculate_metric_value = (data_item, mapping) => {
  * Determine selection result based on type and line
  * @param {Object} params - Parameters object
  * @param {number} params.metric_value - Calculated metric value
- * @param {string} params.selection_type - OVER/UNDER/YES/NO
+ * @param {string} params.selection_type - OVER/UNDER/YES/NO or team_id for spreads
  * @param {number} params.selection_metric_line - Line to compare against
  * @param {Object} params.mapping - Market mapping configuration
- * @returns {string} 'WON' or 'LOST'
+ * @returns {string} 'WON', 'LOST', or 'PUSH'
  */
 export const determine_selection_result = ({
   metric_value,
@@ -79,10 +120,28 @@ export const determine_selection_result = ({
     }
   }
 
+  // Handle spread markets (point_differential_vs_spread)
+  // metric_value is point differential from selected team's perspective
+  // line is the spread (negative means favorite, positive means underdog)
+  // Team covers if: point_differential + spread > 0
+  if (mapping.calculation_type === 'point_differential_vs_spread') {
+    const adjusted_margin = metric_value + line
+    if (adjusted_margin === 0) {
+      return 'PUSH'
+    }
+    return adjusted_margin > 0 ? 'WON' : 'LOST'
+  }
+
   // Standard over/under logic
-  if (type === 'over') {
-    return metric_value > line ? 'WON' : 'LOST'
-  } else if (type === 'under') {
+  // Note: NFL scores are integers and lines are stored as decimals (e.g., 44.0, 44.5)
+  // Integer comparison with decimal works correctly in JavaScript (44 === 44.0 is true)
+  if (type === 'over' || type === 'under') {
+    if (metric_value === line) {
+      return 'PUSH'
+    }
+    if (type === 'over') {
+      return metric_value > line ? 'WON' : 'LOST'
+    }
     return metric_value < line ? 'WON' : 'LOST'
   }
 

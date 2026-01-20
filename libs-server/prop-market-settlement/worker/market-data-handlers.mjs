@@ -405,6 +405,12 @@ export class NFLGamesMarketHandler {
       return this._create_error_results(market, error_message)
     }
 
+    // Handle calculation_type based markets (spread, total, moneyline)
+    if (mapping.calculation_type) {
+      return this._process_game_outcome_market({ market, game, mapping })
+    }
+
+    // Standard metric-based markets
     const metric_value = calculate_metric_value(game, mapping)
     const selection_result = determine_selection_result({
       metric_value,
@@ -414,6 +420,147 @@ export class NFLGamesMarketHandler {
     })
 
     return this._create_success_results(market, metric_value, selection_result)
+  }
+
+  /**
+   * Validate team selection against game participants
+   * @param {string} selection_pid - Selected team ID
+   * @param {Object} game - Game data with h (home) and v (visitor) team codes
+   * @returns {{ is_home_team: boolean }|null} Team info or null if not found
+   */
+  _validate_team_selection(selection_pid, game) {
+    if (selection_pid === game.h) {
+      return { is_home_team: true }
+    }
+    if (selection_pid === game.v) {
+      return { is_home_team: false }
+    }
+    return null
+  }
+
+  /**
+   * Process game outcome markets (spread, total, moneyline)
+   * @param {Object} params - Named parameters
+   * @param {Object} params.market - Market object
+   * @param {Object} params.game - Game data with h, v, home_score, away_score
+   * @param {Object} params.mapping - Market mapping configuration
+   * @returns {Array<Object>} Array with OPEN and CLOSE result objects
+   */
+  _process_game_outcome_market({ market, game, mapping }) {
+    const { calculation_type } = mapping
+
+    switch (calculation_type) {
+      case 'total_points': {
+        // Use centralized calculation which handles validation
+        const total_points = calculate_metric_value(game, mapping)
+        if (total_points === null) {
+          return this._create_error_results(market, 'Missing score data')
+        }
+        const selection_result = determine_selection_result({
+          metric_value: total_points,
+          selection_type: market.selection_type,
+          selection_metric_line: market.selection_metric_line,
+          mapping
+        })
+        return this._create_success_results(
+          market,
+          total_points,
+          selection_result
+        )
+      }
+
+      case 'point_differential_vs_spread': {
+        const team_info = this._validate_team_selection(
+          market.selection_pid,
+          game
+        )
+        if (!team_info) {
+          return this._create_error_results(
+            market,
+            `Selection ${market.selection_pid} not found in game (h: ${game.h}, v: ${game.v})`
+          )
+        }
+
+        // Get home perspective differential using centralized calculation
+        const home_diff = calculate_metric_value(game, mapping)
+        if (home_diff === null) {
+          return this._create_error_results(market, 'Missing score data')
+        }
+
+        // Adjust for selected team's perspective
+        const point_differential = team_info.is_home_team
+          ? home_diff
+          : -home_diff
+
+        const selection_result = determine_selection_result({
+          metric_value: point_differential,
+          selection_type: market.selection_type,
+          selection_metric_line: market.selection_metric_line,
+          mapping
+        })
+        return this._create_success_results(
+          market,
+          point_differential,
+          selection_result
+        )
+      }
+
+      case 'winner_determination': {
+        const team_info = this._validate_team_selection(
+          market.selection_pid,
+          game
+        )
+        if (!team_info) {
+          return this._create_error_results(
+            market,
+            `Selection ${market.selection_pid} not found in game (h: ${game.h}, v: ${game.v})`
+          )
+        }
+
+        // Validate scores - check null/undefined first, then convert
+        if (game.home_score === null || game.home_score === undefined) {
+          return this._create_error_results(market, 'Missing home score data')
+        }
+        if (game.away_score === null || game.away_score === undefined) {
+          return this._create_error_results(market, 'Missing away score data')
+        }
+
+        const home_score = Number(game.home_score)
+        const away_score = Number(game.away_score)
+
+        if (Number.isNaN(home_score) || Number.isNaN(away_score)) {
+          return this._create_error_results(market, 'Invalid score data')
+        }
+
+        let selection_result
+        if (home_score === away_score) {
+          selection_result = 'PUSH'
+        } else {
+          const home_won = home_score > away_score
+          const selected_team_won = team_info.is_home_team
+            ? home_won
+            : !home_won
+          selection_result = selected_team_won ? 'WON' : 'LOST'
+        }
+
+        // Score margin from selected team's perspective
+        const score_margin = team_info.is_home_team
+          ? home_score - away_score
+          : away_score - home_score
+
+        return this._create_success_results(
+          market,
+          score_margin,
+          selection_result
+        )
+      }
+
+      default:
+        return this._create_error_results(
+          market,
+          `Unknown calculation_type: ${calculation_type}`
+        )
+    }
   }
 
   /**

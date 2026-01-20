@@ -261,24 +261,26 @@ export const market_type_mappings = {
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 2
   },
-  [player_second_quarter_prop_types.GAME_SECOND_QUARTER_PASSING_RUSHING_YARDS]: {
-    handler: HANDLER_TYPES.NFL_PLAYS,
-    player_column: 'psr_pid',
-    metric_columns: ['pass_yds', 'rush_yds'],
-    has_metric_value: true,
-    selection_types: ['OVER', 'UNDER'],
-    quarter_filter: 2,
-    special_logic: 'combined_passing_rushing'
-  },
-  [player_second_quarter_prop_types.GAME_SECOND_QUARTER_RUSHING_RECEIVING_YARDS]: {
-    handler: HANDLER_TYPES.NFL_PLAYS,
-    player_column: 'bc_pid',
-    metric_columns: ['rush_yds', 'recv_yds'],
-    has_metric_value: true,
-    selection_types: ['OVER', 'UNDER'],
-    quarter_filter: 2,
-    special_logic: 'combined_rushing_receiving'
-  },
+  [player_second_quarter_prop_types.GAME_SECOND_QUARTER_PASSING_RUSHING_YARDS]:
+    {
+      handler: HANDLER_TYPES.NFL_PLAYS,
+      player_column: 'psr_pid',
+      metric_columns: ['pass_yds', 'rush_yds'],
+      has_metric_value: true,
+      selection_types: ['OVER', 'UNDER'],
+      quarter_filter: 2,
+      special_logic: 'combined_passing_rushing'
+    },
+  [player_second_quarter_prop_types.GAME_SECOND_QUARTER_RUSHING_RECEIVING_YARDS]:
+    {
+      handler: HANDLER_TYPES.NFL_PLAYS,
+      player_column: 'bc_pid',
+      metric_columns: ['rush_yds', 'recv_yds'],
+      has_metric_value: true,
+      selection_types: ['OVER', 'UNDER'],
+      quarter_filter: 2,
+      special_logic: 'combined_rushing_receiving'
+    },
 
   // Third quarter markets - use NFL plays data
   [player_third_quarter_prop_types.GAME_THIRD_QUARTER_PASSING_YARDS]: {
@@ -314,15 +316,16 @@ export const market_type_mappings = {
     quarter_filter: 3,
     special_logic: 'combined_passing_rushing'
   },
-  [player_third_quarter_prop_types.GAME_THIRD_QUARTER_RUSHING_RECEIVING_YARDS]: {
-    handler: HANDLER_TYPES.NFL_PLAYS,
-    player_column: 'bc_pid',
-    metric_columns: ['rush_yds', 'recv_yds'],
-    has_metric_value: true,
-    selection_types: ['OVER', 'UNDER'],
-    quarter_filter: 3,
-    special_logic: 'combined_rushing_receiving'
-  },
+  [player_third_quarter_prop_types.GAME_THIRD_QUARTER_RUSHING_RECEIVING_YARDS]:
+    {
+      handler: HANDLER_TYPES.NFL_PLAYS,
+      player_column: 'bc_pid',
+      metric_columns: ['rush_yds', 'recv_yds'],
+      has_metric_value: true,
+      selection_types: ['OVER', 'UNDER'],
+      quarter_filter: 3,
+      special_logic: 'combined_rushing_receiving'
+    },
 
   // Fourth quarter markets - use NFL plays data
   [player_fourth_quarter_prop_types.GAME_FOURTH_QUARTER_PASSING_YARDS]: {
@@ -349,24 +352,26 @@ export const market_type_mappings = {
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 4
   },
-  [player_fourth_quarter_prop_types.GAME_FOURTH_QUARTER_PASSING_RUSHING_YARDS]: {
-    handler: HANDLER_TYPES.NFL_PLAYS,
-    player_column: 'psr_pid',
-    metric_columns: ['pass_yds', 'rush_yds'],
-    has_metric_value: true,
-    selection_types: ['OVER', 'UNDER'],
-    quarter_filter: 4,
-    special_logic: 'combined_passing_rushing'
-  },
-  [player_fourth_quarter_prop_types.GAME_FOURTH_QUARTER_RUSHING_RECEIVING_YARDS]: {
-    handler: HANDLER_TYPES.NFL_PLAYS,
-    player_column: 'bc_pid',
-    metric_columns: ['rush_yds', 'recv_yds'],
-    has_metric_value: true,
-    selection_types: ['OVER', 'UNDER'],
-    quarter_filter: 4,
-    special_logic: 'combined_rushing_receiving'
-  },
+  [player_fourth_quarter_prop_types.GAME_FOURTH_QUARTER_PASSING_RUSHING_YARDS]:
+    {
+      handler: HANDLER_TYPES.NFL_PLAYS,
+      player_column: 'psr_pid',
+      metric_columns: ['pass_yds', 'rush_yds'],
+      has_metric_value: true,
+      selection_types: ['OVER', 'UNDER'],
+      quarter_filter: 4,
+      special_logic: 'combined_passing_rushing'
+    },
+  [player_fourth_quarter_prop_types.GAME_FOURTH_QUARTER_RUSHING_RECEIVING_YARDS]:
+    {
+      handler: HANDLER_TYPES.NFL_PLAYS,
+      player_column: 'bc_pid',
+      metric_columns: ['rush_yds', 'recv_yds'],
+      has_metric_value: true,
+      selection_types: ['OVER', 'UNDER'],
+      quarter_filter: 4,
+      special_logic: 'combined_rushing_receiving'
+    },
 
   // First half markets - use NFL plays data for quarters 1 and 2
   [player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_RUSHING_YARDS]: {
@@ -394,16 +399,20 @@ export const market_type_mappings = {
     half_filter: 1 // First half (quarters 1 and 2)
   },
 
-  // Longest play markets - use player gamelogs data
+  // Longest play markets - use NFL plays data with MAX aggregation
   [player_game_prop_types.GAME_LONGEST_RECEPTION]: {
-    handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['longest_reception'],
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'trg_pid',
+    metric_columns: ['recv_yds'],
+    aggregation_type: 'MAX',
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_LONGEST_RUSH]: {
-    handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['longest_rush'],
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'bc_pid',
+    metric_columns: ['rush_yds'],
+    aggregation_type: 'MAX',
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
@@ -552,11 +561,25 @@ export const market_type_mappings = {
     has_metric_value: true,
     selection_types: ['team_id']
   },
+  [team_game_market_types.GAME_ALT_SPREAD]: {
+    handler: HANDLER_TYPES.NFL_GAMES,
+    calculation_type: 'point_differential_vs_spread',
+    has_metric_value: true,
+    selection_types: ['team_id'],
+    is_alt_line: true
+  },
   [team_game_market_types.GAME_TOTAL]: {
     handler: HANDLER_TYPES.NFL_GAMES,
     calculation_type: 'total_points',
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
+  },
+  [team_game_market_types.GAME_ALT_TOTAL]: {
+    handler: HANDLER_TYPES.NFL_GAMES,
+    calculation_type: 'total_points',
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    is_alt_line: true
   },
 
   // Awards and season-long markets - unsupported (require external data)
@@ -626,7 +649,9 @@ Object.entries(player_quarter_alt_prop_types).forEach(([key, value]) => {
 
   // Determine which quarter constant to use based on the key
   let quarter_prop_types = null
-  for (const [quarter_key, prop_types] of Object.entries(quarter_prop_type_maps)) {
+  for (const [quarter_key, prop_types] of Object.entries(
+    quarter_prop_type_maps
+  )) {
     if (key.includes(quarter_key)) {
       quarter_prop_types = prop_types
       break
