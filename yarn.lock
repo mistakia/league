@@ -2516,6 +2516,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@remix-run/router@npm:1.23.2":
+  version: 1.23.2
+  resolution: "@remix-run/router@npm:1.23.2"
+  checksum: 10/50eb497854881bbd2e1016d4eb83c935ecd618e1c3888b74718851317e3b04edbaae9fe1baa49ec08c5c52cfe7118f4664e37144813d9500f45f922d6602a782
+  languageName: node
+  linkType: hard
+
 "@rtsao/scc@npm:^1.1.0":
   version: 1.1.0
   resolution: "@rtsao/scc@npm:1.1.0"
@@ -14536,7 +14543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:6.28.1, react-router@npm:^6.28.1":
+"react-router@npm:6.28.1":
   version: 6.28.1
   resolution: "react-router@npm:6.28.1"
   dependencies:
@@ -14544,6 +14551,17 @@ __metadata:
   peerDependencies:
     react: ">=16.8"
   checksum: 10/5bf02fe9f43c49580ee162824c4e3597accbed37df8e0b0705d90f56c647ae2c4c19695fcef39ed2ea7434c6865b93afbddcf4643a5e51d77299577474070c39
+  languageName: node
+  linkType: hard
+
+"react-router@npm:^6.30.2":
+  version: 6.30.3
+  resolution: "react-router@npm:6.30.3"
+  dependencies:
+    "@remix-run/router": "npm:1.23.2"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 10/1a51bdcc42b8d7979228dea8b5c44a28a4add9b681781f75b74f5f920d20058a92ffe5f1d0ba0621f03abe1384b36025b53b402515ecb35f27a6a2f2f25d6fbe
   languageName: node
   linkType: hard
 
@@ -15208,7 +15226,7 @@ __metadata:
     react-immutable-proptypes: "npm:^2.2.0"
     react-infinite-scroller: "npm:^1.2.6"
     react-redux: "npm:^9.2.0"
-    react-router: "npm:^6.28.1"
+    react-router: "npm:^6.30.2"
     react-router-dom: "npm:^6.28.1"
     react-table: "mistakia/react-table#4dff1bc1484d2b0ad928597a9b37d412d3455da2"
     react-virtualized-compat: "npm:^2.0.0"
