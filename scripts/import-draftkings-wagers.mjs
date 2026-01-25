@@ -25,6 +25,7 @@ const format_wager_type = (type) => {
       return 'ROUND_ROBIN'
 
     case 'Parlay':
+    case 'YourBet':
       return 'PARLAY'
 
     default:
@@ -141,7 +142,9 @@ const import_draftkings_wagers = async ({
 
         selections.push({
           id: selection_details_index[selection.selectionId],
-          odds: Number(selection.displayOdds.replace('−', '-')),
+          odds: selection.displayOdds
+            ? Number(selection.displayOdds.replace('−', '-'))
+            : null,
           status: selection.settlementStatus
             ? format_wager_status(selection.settlementStatus)
             : null
