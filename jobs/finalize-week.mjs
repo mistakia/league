@@ -56,7 +56,10 @@ const get_finalize_target_week = () => {
 
   // On Tuesday (2) or Wednesday (3), process previous week
   const should_process_previous = [2, 3].includes(day)
-  return Math.max(should_process_previous ? current_nfl_week - 1 : current_nfl_week, 1)
+  return Math.max(
+    should_process_previous ? current_nfl_week - 1 : current_nfl_week,
+    1
+  )
 }
 
 /**
