@@ -101,7 +101,8 @@ const importPlayersNFL = async ({
           weight,
           height,
           roster_status
-        }
+        },
+        source: 'nfl'
       })
     } else if (
       error instanceof Errors.MatchedMultiplePlayers === false &&
