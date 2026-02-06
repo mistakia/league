@@ -38,6 +38,8 @@ const protected_props = [
   'cfbref_id'
 ]
 
+const combine_protected_props = ['height', 'weight']
+
 const nullable_props = ['game_designation']
 
 /*
@@ -48,7 +50,8 @@ const updatePlayer = async ({
   player_row,
   pid,
   update,
-  allow_protected_props = false
+  allow_protected_props = false,
+  source = null
 }) => {
   if (!player_row && (typeof pid === 'string' || pid instanceof String)) {
     const player_rows = await db('player').where({ pid })
@@ -112,6 +115,19 @@ const updatePlayer = async ({
         )
         continue
       }
+    }
+
+    if (
+      combine_protected_props.includes(prop) &&
+      source !== 'combine' &&
+      player_row[prop] !== null &&
+      player_row[prop] !== undefined &&
+      player_row[prop] !== 0
+    ) {
+      log(
+        `Skipping ${prop} update for player ${player_row.pid}: combine value exists (${player_row[prop]})`
+      )
+      continue
     }
 
     changes += 1

@@ -93,6 +93,8 @@ const import_players_from_combine_profiles_for_year = async ({
 
     // Extract combine metrics
     const combine_data = {
+      height: profile.height ? Math.round(profile.height) : null,
+      weight: profile.weight || null,
       forty: profile.fortyYardDash?.seconds || null,
       bench: profile.benchPress?.repetitions || null,
       vertical: profile.verticalJump?.inches || null,
@@ -144,7 +146,8 @@ const import_players_from_combine_profiles_for_year = async ({
     } else {
       const changes = await updatePlayer({
         player_row,
-        update: combine_data
+        update: combine_data,
+        source: 'combine'
       })
       change_count += changes
 
