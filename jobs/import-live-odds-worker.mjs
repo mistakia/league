@@ -29,7 +29,7 @@ const BOOKMAKER_CONFIG = {
     import_fn: () => import_pinnacle_odds({ ignore_cache: true }),
     job_type: job_types.IMPORT_PINNACLE_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
-    timeout_ms: 15 * 60 * 1000, // 15 minutes (typical: ~2.5 min)
+    timeout_ms: 45 * 60 * 1000, // 45 minutes (Super Bowl week has 200+ matchups)
     enabled: true
   },
   prizepicks: {
