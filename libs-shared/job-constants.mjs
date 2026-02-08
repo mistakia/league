@@ -125,7 +125,9 @@ export const job_types = {
   CALCULATE_POSITION_GAME_OUTCOME_DEFAULTS: 101,
   FINALIZE_GAME: 102,
   FINALIZE_SEASON: 103,
-  BACKFILL_PENALTY_TYPE: 104
+  BACKFILL_PENALTY_TYPE: 104,
+  CALCULATE_TEAM_DAILY_KTC_VALUE: 105,
+  CHECK_DISK_SPACE: 106
 }
 
 export const job_title_by_id = {
@@ -232,5 +234,7 @@ export const job_title_by_id = {
   101: 'Calculate Position Game Outcome Defaults',
   102: 'Finalize Game',
   103: 'Finalize Season',
-  104: 'Backfill Penalty Type'
+  104: 'Backfill Penalty Type',
+  105: 'Calculate Team Daily KTC Value',
+  106: 'Check Disk Space'
 }

@@ -2,9 +2,9 @@ import { execSync } from 'child_process'
 import fetch from 'node-fetch'
 import debug from 'debug'
 
-import { is_main } from '#libs-server'
+import { is_main, report_job } from '#libs-server'
 import config from '#config'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('check-disk-space')
 debug.enable('check-disk-space')
@@ -65,6 +65,11 @@ const main = async () => {
     error = err
     log(error)
   }
+
+  await report_job({
+    job_type: job_types.CHECK_DISK_SPACE,
+    error
+  })
 
   process.exit()
 }

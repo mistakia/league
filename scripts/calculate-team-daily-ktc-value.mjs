@@ -13,9 +13,10 @@ import {
   is_main,
   get_trades,
   get_restricted_free_agency_signings,
-  batch_insert
+  batch_insert,
+  report_job
 } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -385,6 +386,11 @@ const main = async () => {
     error = err
     log(error)
   }
+
+  await report_job({
+    job_type: job_types.CALCULATE_TEAM_DAILY_KTC_VALUE,
+    error
+  })
 
   process.exit()
 }
