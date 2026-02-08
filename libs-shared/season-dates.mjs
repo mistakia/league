@@ -16,7 +16,11 @@ const season_dates = {
   finalWeek: 17,
   nflFinalWeek: 18,
   regularSeasonFinalWeek: 14,
-  wildcardWeek: 15
+  wildcardWeek: 15,
+
+  // Number of bye weeks between conference championship and super bowl
+  // (Pro Bowl week - no playoff games)
+  superBowlByeWeeks: 1
 }
 
 export default season_dates

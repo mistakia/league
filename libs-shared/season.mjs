@@ -28,6 +28,7 @@ export default class Season {
     nflFinalWeek,
     regularSeasonFinalWeek,
     wildcardWeek,
+    superBowlByeWeeks = 1,
     now
   }) {
     // Super Bowl
@@ -49,6 +50,7 @@ export default class Season {
     this.nflFinalWeek = nflFinalWeek
     this.regularSeasonFinalWeek = regularSeasonFinalWeek
     this.wildcardWeek = wildcardWeek
+    this.superBowlByeWeeks = superBowlByeWeeks
 
     if (now) {
       const d = dayjs.unix(now)
@@ -137,7 +139,7 @@ export default class Season {
       }
     } else if (diff > this.nflFinalWeek) {
       seas_type = 'POST'
-      week_number = Math.min(diff - this.nflFinalWeek, 4)
+      week_number = Math.min(diff - this.nflFinalWeek - this.superBowlByeWeeks, 4)
     } else {
       seas_type = 'REG'
       week_number = diff
@@ -184,7 +186,7 @@ export default class Season {
         return 3
       }
     } else if (week > this.nflFinalWeek) {
-      return week - this.nflFinalWeek
+      return week - this.nflFinalWeek - this.superBowlByeWeeks
     } else {
       return week
     }
