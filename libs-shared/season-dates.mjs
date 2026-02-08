@@ -7,8 +7,8 @@ const season_dates = {
   // Two Tuesdays before first game
   regular_season_start: 1756180800,
 
-  // super bowl
-  end: 1770526800,
+  // super bowl (end of day to include game day)
+  end: 1770613200,
 
   // first game
   openingDay: 1756958400,
