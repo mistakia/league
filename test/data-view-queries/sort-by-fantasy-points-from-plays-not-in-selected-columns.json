@@ -1,0 +1,32 @@
+{
+  "name": "should use default from table when sorting by fantasy points from plays that is not in selected columns",
+  "description": "Regression test: sorting by player_fantasy_points_from_plays without selecting it as a column should fall back to the default player FROM table instead of referencing an undefined CTE. Previously, the FROM table optimization would generate a CTE table alias but the CTE WITH clause was never added because the column was not in the selected columns.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_pass_attempts_from_plays",
+        "params": {
+          "rate_type": ["per_team_pass_play"],
+          "year": [2025]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["QB"]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t34a85301ab31b3447846ec8d43908764\" as (select \"nfl_plays\".\"off\", COUNT(*) as rate_type_total_count from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" = 'PASS' and \"nfl_plays\".\"year\" in (2025) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"off\"), \"t49c02ac946e4ed84963e5135fafc88e7\" as (select COALESCE(psr_pid) as pid, SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) as pass_atts_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2025) and \"nfl_plays\".\"seas_type\" in ('REG') group by COALESCE(psr_pid)) select \"player\".\"pid\", player.fname, player.lname, CAST(t49c02ac946e4ed84963e5135fafc88e7.pass_atts_from_plays AS DECIMAL) / NULLIF(CAST(t34a85301ab31b3447846ec8d43908764.rate_type_total_count AS DECIMAL), 0) AS \"pass_atts_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t34a85301ab31b3447846ec8d43908764\" on \"t34a85301ab31b3447846ec8d43908764\".\"off\" = \"player\".\"current_nfl_team\" left join \"t49c02ac946e4ed84963e5135fafc88e7\" on \"t49c02ac946e4ed84963e5135fafc88e7\".\"pid\" = \"player\".\"pid\" where player.pos IN ('QB') group by player.fname, player.lname, \"t49c02ac946e4ed84963e5135fafc88e7\".\"pass_atts_from_plays\", t34a85301ab31b3447846ec8d43908764.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": ["from-table-optimization", "sorting", "cte", "regression"],
+  "timeout_ms": 35000
+}

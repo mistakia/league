@@ -462,15 +462,22 @@ const determine_from_table = ({
     }
   }
 
+  // If sort column is not in the selected columns, use default from table.
+  // CTE-based columns require being selected to have their WITH clause generated,
+  // and the sort itself will be skipped later when find_sort_column returns null.
+  if (!sort_column) {
+    return {
+      from_table_name: null,
+      from_table_type: 'default'
+    }
+  }
+
   // Find the column definition for the sort column
-  const column_id = sort_column
-    ? typeof sort_column === 'string'
-      ? sort_column
-      : sort_column.column_id
-    : first_sort.column_id
+  const column_id =
+    typeof sort_column === 'string' ? sort_column : sort_column.column_id
 
   const column_params =
-    sort_column && typeof sort_column === 'object' ? sort_column.params : {}
+    typeof sort_column === 'object' ? sort_column.params : {}
   const column_definition = data_views_column_definitions[column_id]
 
   if (!column_definition) {
