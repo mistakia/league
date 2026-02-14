@@ -130,7 +130,7 @@ export default function data_view_join_function(join_arguments) {
             }
           }
         }
-      } else if (year) {
+      } else if (year && !join_year_on_year_split) {
         this.andOn(
           `${table_name}.year`,
           '=',

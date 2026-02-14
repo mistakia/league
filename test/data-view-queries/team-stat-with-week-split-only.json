@@ -1,0 +1,32 @@
+{
+  "name": "team stat with week split only",
+  "description": "Team stats from plays with week split but no year split. Verifies that team_stats CTE join does not reference a year column when year is not in splits, since the year filter is applied in the CTE WHERE clause.",
+  "request": {
+    "splits": ["week"],
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "year": [2023]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["WR"]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2023), \"t8d5090666fc7a21265e7ff5e55af6fed\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, \"nfl_plays\".\"week\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"off\", \"nfl_plays\".\"week\"), \"t8d5090666fc7a21265e7ff5e55af6fed_team_stats\" as (select \"t8d5090666fc7a21265e7ff5e55af6fed\".\"nfl_team\", sum(t8d5090666fc7a21265e7ff5e55af6fed.team_pass_yds_from_plays) as team_pass_yds_from_plays, \"t8d5090666fc7a21265e7ff5e55af6fed\".\"week\" from \"t8d5090666fc7a21265e7ff5e55af6fed\" group by \"t8d5090666fc7a21265e7ff5e55af6fed\".\"nfl_team\", \"t8d5090666fc7a21265e7ff5e55af6fed\".\"week\") select \"player\".\"pid\", player.fname, player.lname, \"t8d5090666fc7a21265e7ff5e55af6fed_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" left join \"t8d5090666fc7a21265e7ff5e55af6fed_team_stats\" on \"t8d5090666fc7a21265e7ff5e55af6fed_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" and \"t8d5090666fc7a21265e7ff5e55af6fed_team_stats\".\"week\" = \"player_years_weeks\".\"week\" and t8d5090666fc7a21265e7ff5e55af6fed_team_stats.week = player_years_weeks.week where player.pos IN ('WR') group by player.fname, player.lname, \"t8d5090666fc7a21265e7ff5e55af6fed_team_stats\".\"team_pass_yds_from_plays\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["team", "splits", "week", "plays", "cte", "joins"],
+  "timeout_ms": 40000
+}
