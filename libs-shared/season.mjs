@@ -139,7 +139,10 @@ export default class Season {
       }
     } else if (diff > this.nflFinalWeek) {
       seas_type = 'POST'
-      week_number = Math.min(diff - this.nflFinalWeek - this.superBowlByeWeeks, 4)
+      week_number = Math.min(
+        diff - this.nflFinalWeek - this.superBowlByeWeeks,
+        4
+      )
     } else {
       seas_type = 'REG'
       week_number = diff
