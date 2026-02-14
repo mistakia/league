@@ -1,17 +1,18 @@
 const season_dates = {
   // use unix timestamp, start of day, new york timezone
+  // 2026 season (opening Thu Sep 10 2026, Super Bowl LX Feb 8 2027)
 
-  // super bowl
-  offseason: 1739077200,
+  // super bowl (after 2025 season)
+  offseason: 1770526800,
 
-  // Two Tuesdays before first game
-  regular_season_start: 1756180800,
+  // Two Tuesdays before first game (Aug 25 2026)
+  regular_season_start: 1787630400,
 
-  // super bowl (end of day to include game day)
-  end: 1770613200,
+  // super bowl (end of day to include game day, Feb 9 2027)
+  end: 1802149200,
 
-  // first game
-  openingDay: 1756958400,
+  // first game (Sep 10 2026)
+  openingDay: 1789012800,
 
   finalWeek: 17,
   nflFinalWeek: 18,
