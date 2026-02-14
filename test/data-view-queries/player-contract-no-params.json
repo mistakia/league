@@ -14,7 +14,7 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", \"ttable_0\".\"base_salary\" AS \"base_salary_0\", \"player\".\"pos\" from \"player\" left join \"player_contracts\" as \"ttable_0\" on \"ttable_0\".\"pid\" = \"player\".\"pid\" and ttable_0.year = '2025' group by \"ttable_0\".\"base_salary\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", \"ttable_0\".\"base_salary\" AS \"base_salary_0\", \"player\".\"pos\" from \"player\" left join \"player_contracts\" as \"ttable_0\" on \"ttable_0\".\"pid\" = \"player\".\"pid\" and ttable_0.year = '${constants.current_season.year}' group by \"ttable_0\".\"base_salary\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "contract", "basic"],
   "timeout_ms": 40000,
   "expected_metadata": {
