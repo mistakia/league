@@ -24,7 +24,7 @@ const run = async ({ season = false, dry = false } = {}) => {
     ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
     : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
   const week = season ? 0 : Math.max(current_season.week, 1)
-  const year = new Date().getFullYear()
+  const year = current_season.year
   const timestamp = Math.round(Date.now() / 1000)
   // do not pull in any projections after the season has ended
   if (current_season.week > current_season.nflFinalWeek) {

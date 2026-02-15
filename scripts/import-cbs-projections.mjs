@@ -15,7 +15,7 @@ const initialize_cli = () => {
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
-const year = new Date().getFullYear()
+const year = current_season.year
 const timestamp = Math.round(Date.now() / 1000)
 const getUrl = (pos, type) =>
   `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
