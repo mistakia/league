@@ -31,11 +31,6 @@
     "splits": []
   },
   "expected_query": "select \"player\".\"pid\", \"t42df674622ef5cfff1da167b33bc8454\".\"offense_rank\" AS \"pff_offense_rank_0\", \"t42df674622ef5cfff1da167b33bc8454\".\"offense\" AS \"pff_offense_0\", \"t42df674622ef5cfff1da167b33bc8454\".\"offense_snaps\" AS \"pff_offense_snaps_0\", \"t42df674622ef5cfff1da167b33bc8454\".\"offense_ranked\" AS \"pff_offense_ranked_0\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"player\".\"pos\" from \"player\" inner join \"pff_player_seasonlogs\" as \"t42df674622ef5cfff1da167b33bc8454\" on \"t42df674622ef5cfff1da167b33bc8454\".\"pid\" = \"player\".\"pid\" and \"t42df674622ef5cfff1da167b33bc8454\".\"year\" = ${constants.current_season.stats_season_year} left join \"rosters_players\" on \"rosters_players\".\"pid\" = \"player\".\"pid\" and \"rosters_players\".\"year\" = ${constants.current_season.year} and \"rosters_players\".\"week\" = ${Math.min(constants.current_season.week, constants.current_season.finalWeek)} and \"rosters_players\".\"lid\" = 1 where t42df674622ef5cfff1da167b33bc8454.offense_snaps >= '200' group by \"t42df674622ef5cfff1da167b33bc8454\".\"offense_rank\", \"t42df674622ef5cfff1da167b33bc8454\".\"offense\", \"t42df674622ef5cfff1da167b33bc8454\".\"offense_snaps\", \"t42df674622ef5cfff1da167b33bc8454\".\"offense_ranked\", player.fname, player.lname, \"player\".\"pos\", rosters_players.slot, rosters_players.tid, rosters_players.tag, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 3 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "player",
-    "plays",
-    "filters",
-    "sorting"
-  ],
+  "tags": ["player", "plays", "filters", "sorting"],
   "timeout_ms": 40000
 }

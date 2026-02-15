@@ -46,12 +46,6 @@
     ]
   },
   "expected_query": "with \"t82719c1f701791ad84d39e9b023469e4\" as (select \"pid\", \"game_designation\", \"roster_status\", \"inj\", \"m\", \"tu\", \"w\", \"th\", \"f\", \"s\", \"su\" from \"practice\" where \"year\" in (${constants.current_season.stats_season_year}) and \"week\" in (${Math.max(constants.current_season.week, 1)})), \"t6d4224fa67539f98bffe847980676178\" as (select \"pid\", \"game_designation\", \"roster_status\", \"inj\", \"m\", \"tu\", \"w\", \"th\", \"f\", \"s\", \"su\" from \"practice\" where \"year\" in (${constants.current_season.stats_season_year}) and \"week\" in (${constants.current_season.week})) select \"player\".\"pid\", \"t82719c1f701791ad84d39e9b023469e4\".\"game_designation\" AS \"practice_game_designation_0\", \"t82719c1f701791ad84d39e9b023469e4\".\"inj\" AS \"practice_injury_0\", \"t82719c1f701791ad84d39e9b023469e4\".\"tu\" AS \"player_practice_designation_tu_0\", \"t82719c1f701791ad84d39e9b023469e4\".\"w\" AS \"player_practice_designation_w_0\", \"t82719c1f701791ad84d39e9b023469e4\".\"th\" AS \"player_practice_designation_th_0\", \"t82719c1f701791ad84d39e9b023469e4\".\"f\" AS \"player_practice_designation_f_0\", \"t82719c1f701791ad84d39e9b023469e4\".\"s\" AS \"player_practice_designation_s_0\", \"t82719c1f701791ad84d39e9b023469e4\".\"su\" AS \"player_practice_designation_su_0\", \"t6d4224fa67539f98bffe847980676178\".\"m\" AS \"player_practice_designation_m_0\", \"player\".\"pos\" from \"player\" left join \"t82719c1f701791ad84d39e9b023469e4\" on \"t82719c1f701791ad84d39e9b023469e4\".\"pid\" = \"player\".\"pid\" left join \"t6d4224fa67539f98bffe847980676178\" on \"t6d4224fa67539f98bffe847980676178\".\"pid\" = \"player\".\"pid\" group by \"t82719c1f701791ad84d39e9b023469e4\".\"game_designation\", \"t82719c1f701791ad84d39e9b023469e4\".\"inj\", \"t82719c1f701791ad84d39e9b023469e4\".\"tu\", \"t82719c1f701791ad84d39e9b023469e4\".\"w\", \"t82719c1f701791ad84d39e9b023469e4\".\"th\", \"t82719c1f701791ad84d39e9b023469e4\".\"f\", \"t82719c1f701791ad84d39e9b023469e4\".\"s\", \"t82719c1f701791ad84d39e9b023469e4\".\"su\", \"t6d4224fa67539f98bffe847980676178\".\"m\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "player",
-    "plays",
-    "parameters",
-    "sorting",
-    "cte"
-  ],
+  "tags": ["player", "plays", "parameters", "sorting", "cte"],
   "timeout_ms": 40000
 }

@@ -7,9 +7,7 @@
       {
         "column_id": "player_career_year",
         "params": {
-          "year": [
-            2023
-          ],
+          "year": [2023],
           "seas_type": "REG"
         }
       }
@@ -30,12 +28,6 @@
     "limit": 10
   },
   "expected_query": "select \"player\".\"pid\", player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"player\".\"pos\" from \"player\" inner join \"player_seasonlogs\" as \"t94ac00224f565e211ce527fca507baed\" on \"t94ac00224f565e211ce527fca507baed\".\"pid\" = \"player\".\"pid\" and t94ac00224f565e211ce527fca507baed.seas_type = 'REG' and t94ac00224f565e211ce527fca507baed.year = ${constants.current_season.stats_season_year} left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' and t209f3a217d72274fbedbe4d44e4a5095.year = 2023 where t94ac00224f565e211ce527fca507baed.career_year >= '1' group by player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 ASC NULLS LAST, \"player\".\"pid\" asc limit 10",
-  "tags": [
-    "player",
-    "career",
-    "seasonlogs",
-    "basic",
-    "parameters"
-  ],
+  "tags": ["player", "career", "seasonlogs", "basic", "parameters"],
   "timeout_ms": 30000
 }
