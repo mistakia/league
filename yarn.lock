@@ -14547,9 +14547,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-table@mistakia/react-table#4dff1bc1484d2b0ad928597a9b37d412d3455da2":
+"react-table@mistakia/react-table#e213fa4740699911bd083edf018a8878b9b28321":
   version: 0.0.1
-  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=4dff1bc1484d2b0ad928597a9b37d412d3455da2"
+  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=e213fa4740699911bd083edf018a8878b9b28321"
   dependencies:
     "@dnd-kit/core": "npm:^6.3.1"
     "@dnd-kit/modifiers": "npm:^9.0.0"
@@ -14558,7 +14558,7 @@ __metadata:
     "@tanstack/react-table": "npm:^8.20.6"
     "@tanstack/react-virtual": "npm:3.11.2"
     ajv: "npm:^8.12.0"
-    ajv-formats: "npm:^2.1.1"
+    ajv-formats: "npm:^3.0.1"
     timeago.js: "npm:^4.0.2"
   peerDependencies:
     "@emotion/react": ^11.14.0
@@ -14573,7 +14573,7 @@ __metadata:
     prop-types: ^15.8.1
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 10/659f2727e44dd4535c2cac206619931ef026edb9421d60e72c123769787bc8b3e97008afdb8b3ed64aff1dc3f704227a74f6f2266a1654549622dfd3b5ca81a4
+  checksum: 10/13dc37a6d8ab628fa125b180c4851e56d29bca1d1432c7dd16de3e8a73f3b3cda3cef2cff159f60e598397bf3dbd35b68a177a2cefccacfb7dc5a04a4ecc087c
   languageName: node
   linkType: hard
 
@@ -15210,7 +15210,7 @@ __metadata:
     react-redux: "npm:^9.2.0"
     react-router: "npm:^6.28.1"
     react-router-dom: "npm:^6.28.1"
-    react-table: "mistakia/react-table#4dff1bc1484d2b0ad928597a9b37d412d3455da2"
+    react-table: "mistakia/react-table#e213fa4740699911bd083edf018a8878b9b28321"
     react-virtualized-compat: "npm:^2.0.0"
     redux: "npm:^5.0.1"
     redux-first-history: "npm:^5.2.0"
