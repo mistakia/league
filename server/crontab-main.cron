@@ -228,6 +228,9 @@
 
 # Maintenance
 
+## Generate new season records (At 07:00 on the 1st, Feb through Aug - no-op until season-dates.mjs is updated)
+0 7 1 2-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-seasons.mjs &>> /var/log/league/generate-seasons.log
+
 ## Create database partitions for upcoming season (At 00:00 on the 1st in May and July)
 0 0 1 5,7 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/create-season-partitions.mjs &>> /var/log/league/create-season-partitions.log
 
