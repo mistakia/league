@@ -207,5 +207,15 @@ fi
 tar -vcf $gz_file $sql_file
 rm $sql_file
 
-/root/.google-drive-upload/bin/gupload -o $gz_file
+gdrive_backup_path="projects/League/Data/Backups"
+
+if [ "$filename" = "checkpoint" ]; then
+    # Delete existing checkpoint file(s) on GDrive first, then upload new one
+    # GDrive allows duplicate filenames, so rclone copyto alone creates duplicates
+    rclone delete "google_drive_tintmail:$gdrive_backup_path/" --include "$gz_file"
+    rclone copyto "$gz_file" "google_drive_tintmail:$gdrive_backup_path/$gz_file"
+else
+    # Use gupload for time-series (date-stamped) backups
+    /root/.google-drive-upload/bin/gupload -o $gz_file
+fi
 rm $gz_file

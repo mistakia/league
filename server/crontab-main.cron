@@ -148,8 +148,8 @@
 ## Backup User Data (At minute 0 in every month from June through August) (Checkpoint)
 0 * * 6-8 * /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint &>> /var/log/league/league-postgres-backup.log
 
-## Backup User Data (At every 15th minute in every month from September through December.) (Checkpoint)
-*/15 * * 9-12 * /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint &>> /var/log/league/league-postgres-backup.log
+## Backup User Data (At every 15th minute in Jan-Feb and Sep-Dec) (Checkpoint)
+*/15 * * 1,2,9-12 * /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint &>> /var/log/league/league-postgres-backup.log
 
 ## Backup Stat Data (Once a day) (Checkpoint)
 0 2 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -s -n checkpoint &>> /var/log/league/league-postgres-backup-stats.log
@@ -175,9 +175,6 @@
 
 ## Backup Stat Data (At 00:00 on Wednesday in every month from September through December) (Time-Series)
 0 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -s &>> /var/log/league/league-postgres-backup-stats.log
-
-## Backup All Data (At 04:00 on Wednesday in every month from September through December) (Time-Series)
-# 0 4 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -f &>> /var/log/league/league-postgres-backup-full.log
 
 ## Backup All Betting Data (At 06:00 on Wednesday in every month from September through December) (Time-Series)
 0 6 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -b &>> /var/log/league/league-postgres-backup-betting.log
