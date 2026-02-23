@@ -1126,10 +1126,7 @@ export const get_data_view_results_query = async ({
       return false
     }
 
-    if (
-      Array.isArray(where_clause.value) &&
-      where_clause.value.length === 0
-    ) {
+    if (Array.isArray(where_clause.value) && where_clause.value.length === 0) {
       return false
     }
 

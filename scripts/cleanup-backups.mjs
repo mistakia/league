@@ -293,10 +293,7 @@ const apply_retention_policy = async ({
 
         for (const file of remove) {
           if (dry_run) {
-            log(
-              '[DRY RUN] Would trash season-snapshot surplus: %s',
-              file.name
-            )
+            log('[DRY RUN] Would trash season-snapshot surplus: %s', file.name)
           } else {
             await trash_file({
               drive,
@@ -316,7 +313,9 @@ const apply_retention_policy = async ({
     // Time-series types (user): apply tiered retention
     if (RETENTION.time_series_types.has(type)) {
       const daily_cutoff = new Date(now)
-      daily_cutoff.setDate(daily_cutoff.getDate() - RETENTION.daily_retention_days)
+      daily_cutoff.setDate(
+        daily_cutoff.getDate() - RETENTION.daily_retention_days
+      )
 
       const weekly_cutoff = new Date(now)
       weekly_cutoff.setDate(
@@ -351,7 +350,12 @@ const apply_retention_policy = async ({
       // Keep all daily files
       results.files_kept += daily_files.length
       results.by_type[type].kept += daily_files.length
-      log('Type "%s": keeping %d daily files (within %d days)', type, daily_files.length, RETENTION.daily_retention_days)
+      log(
+        'Type "%s": keeping %d daily files (within %d days)',
+        type,
+        daily_files.length,
+        RETENTION.daily_retention_days
+      )
 
       // Weekly tier: keep newest per week
       for (const week_key in weekly_files) {
@@ -679,7 +683,11 @@ const run = async ({
   }
 
   if (apply_retention) {
-    log('Retention policy enabled: daily=%d days, weekly=%d days', RETENTION.daily_retention_days, RETENTION.weekly_retention_days)
+    log(
+      'Retention policy enabled: daily=%d days, weekly=%d days',
+      RETENTION.daily_retention_days,
+      RETENTION.weekly_retention_days
+    )
   }
 
   log('Rate limit set to %d requests per minute', rate_limit)

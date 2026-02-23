@@ -125,9 +125,7 @@ export default function data_view_join_function(join_arguments) {
               const year_array = Array.isArray(year) ? year : [year]
               if (year_array.length > 0) {
                 this.andOn(
-                  db.raw(
-                    `${table_name}.year IN (${year_array.join(',')})`
-                  )
+                  db.raw(`${table_name}.year IN (${year_array.join(',')})`)
                 )
               }
             }
@@ -226,7 +224,9 @@ export default function data_view_join_function(join_arguments) {
             ? week.map(String)
             : [String(week)]
           if (week_array.length > 0) {
-            this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
+            this.andOn(
+              db.raw(`${table_name}.week IN (${week_array.join(',')})`)
+            )
           }
         } else {
           this.andOn(
