@@ -110,7 +110,9 @@ const keeptradecut_join = ({
         const year_array = Array.isArray(params.year)
           ? params.year
           : [params.year]
-        this.andOn(db.raw(`opening_days.year IN (${year_array.join(', ')})`))
+        if (year_array.length > 0) {
+          this.andOn(db.raw(`opening_days.year IN (${year_array.join(', ')})`))
+        }
       }
     } else if (params.date) {
       this.andOn(

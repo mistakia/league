@@ -1109,15 +1109,31 @@ export const get_data_view_results_query = async ({
     throw new Error(error_messages.join('\n'))
   }
 
-  // filter where and remove any where clauses that have a value of null or undefined
+  // filter where and remove any where clauses that have a value of null, undefined, empty string, or empty array
   where = where.filter((where_clause) => {
-    return (
+    if (
       where_clause.operator === 'IS NULL' ||
-      where_clause.operator === 'IS NOT NULL' ||
-      (where_clause.value !== null &&
-        where_clause.value !== undefined &&
-        where_clause.value !== '')
-    )
+      where_clause.operator === 'IS NOT NULL'
+    ) {
+      return true
+    }
+
+    if (
+      where_clause.value === null ||
+      where_clause.value === undefined ||
+      where_clause.value === ''
+    ) {
+      return false
+    }
+
+    if (
+      Array.isArray(where_clause.value) &&
+      where_clause.value.length === 0
+    ) {
+      return false
+    }
+
+    return true
   })
 
   // backwards compatibility for rate_type, column params

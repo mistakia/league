@@ -60,7 +60,7 @@ const league_format_player_seasonlogs_join = (join_arguments) => {
       db.raw(`${table_name}.league_format_hash = '${league_format_hash}'`)
     )
 
-    if (!splits.includes('year')) {
+    if (!splits.includes('year') && year.length > 0) {
       this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     }
   }

@@ -122,11 +122,14 @@ export default function data_view_join_function(join_arguments) {
             )
 
             if (params.year) {
-              this.andOn(
-                db.raw(
-                  `${table_name}.year IN (${Array.isArray(year) ? year.join(',') : year})`
+              const year_array = Array.isArray(year) ? year : [year]
+              if (year_array.length > 0) {
+                this.andOn(
+                  db.raw(
+                    `${table_name}.year IN (${year_array.join(',')})`
+                  )
                 )
-              )
+              }
             }
           }
         }
@@ -152,9 +155,11 @@ export default function data_view_join_function(join_arguments) {
             const week_array = Array.isArray(week)
               ? week.map(String)
               : [String(week)]
-            this.andOn(
-              db.raw(`${table_name}.week IN (${week_array.join(',')})`)
-            )
+            if (week_array.length > 0) {
+              this.andOn(
+                db.raw(`${table_name}.week IN (${week_array.join(',')})`)
+              )
+            }
           }
         } else {
           this.andOn(
@@ -169,6 +174,35 @@ export default function data_view_join_function(join_arguments) {
       if (join_year && (params.year || !splits.includes('year'))) {
         if (splits.includes('year')) {
           const year_array = Array.isArray(year) ? year : [year]
+          if (year_array.length > 0) {
+            if (min_year_offset === max_year_offset) {
+              this.andOn(
+                db.raw(
+                  `${table_name}.year IN (${year_array.map((y) => y + min_year_offset).join(',')})`
+                )
+              )
+            } else {
+              this.andOn(
+                db.raw(`${table_name}.year BETWEEN ? AND ?`, [
+                  Math.min(...year_array) + min_year_offset,
+                  Math.max(...year_array) + max_year_offset
+                ])
+              )
+            }
+          }
+        } else {
+          this.andOn(
+            `${table_name}.year`,
+            '=',
+            db.raw('?', [Array.isArray(year) ? year[0] : year])
+          )
+        }
+      }
+
+      // TODO somewhat hacky way to deal with joins for player stats from plays
+      if (join_year_on_year_split && splits.includes('year') && params.year) {
+        const year_array = Array.isArray(year) ? year : [year]
+        if (year_array.length > 0) {
           if (min_year_offset === max_year_offset) {
             this.andOn(
               db.raw(
@@ -183,31 +217,6 @@ export default function data_view_join_function(join_arguments) {
               ])
             )
           }
-        } else {
-          this.andOn(
-            `${table_name}.year`,
-            '=',
-            db.raw('?', [Array.isArray(year) ? year[0] : year])
-          )
-        }
-      }
-
-      // TODO somewhat hacky way to deal with joins for player stats from plays
-      if (join_year_on_year_split && splits.includes('year') && params.year) {
-        const year_array = Array.isArray(year) ? year : [year]
-        if (min_year_offset === max_year_offset) {
-          this.andOn(
-            db.raw(
-              `${table_name}.year IN (${year_array.map((y) => y + min_year_offset).join(',')})`
-            )
-          )
-        } else {
-          this.andOn(
-            db.raw(`${table_name}.year BETWEEN ? AND ?`, [
-              Math.min(...year_array) + min_year_offset,
-              Math.max(...year_array) + max_year_offset
-            ])
-          )
         }
       }
 
@@ -216,7 +225,9 @@ export default function data_view_join_function(join_arguments) {
           const week_array = Array.isArray(week)
             ? week.map(String)
             : [String(week)]
-          this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
+          if (week_array.length > 0) {
+            this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
+          }
         } else {
           this.andOn(
             `${table_name}.week`,

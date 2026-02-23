@@ -48,12 +48,18 @@ export const get_where_string = ({
   } else if (where_clause.operator === 'IS NOT NULL') {
     where_string = `${where_column} IS NOT NULL`
   } else if (where_clause.operator === 'IN') {
+    if (Array.isArray(where_clause.value) && where_clause.value.length === 0) {
+      return ''
+    }
     if (is_where_column_array) {
       where_string = `${where_column}::text[] && ARRAY['${where_clause.value.join("', '")}']::text[]`
     } else {
       where_string = `${where_column} IN ('${where_clause.value.join("', '")}')`
     }
   } else if (where_clause.operator === 'NOT IN') {
+    if (Array.isArray(where_clause.value) && where_clause.value.length === 0) {
+      return ''
+    }
     if (is_where_column_array) {
       where_string = `NOT (${where_column}::text[] && ARRAY['${where_clause.value.join("', '")}']::text[])`
     } else {
