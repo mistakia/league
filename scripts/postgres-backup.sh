@@ -210,10 +210,12 @@ rm $sql_file
 gdrive_backup_path="projects/League/Data/Backups"
 
 if [ "$filename" = "checkpoint" ]; then
-    # Delete existing checkpoint file(s) on GDrive first, then upload new one
-    # GDrive allows duplicate filenames, so rclone copyto alone creates duplicates
-    rclone delete "google_drive_tintmail:$gdrive_backup_path/" --include "$gz_file"
+    # Upload new checkpoint first, then remove old copies.
+    # This avoids a window where no checkpoint file exists on GDrive
+    # (the old approach deleted first, creating a gap during pg_dump + upload).
+    # GDrive allows duplicate filenames, so we dedupe after upload.
     rclone copyto "$gz_file" "google_drive_tintmail:$gdrive_backup_path/$gz_file"
+    rclone dedupe newest "google_drive_tintmail:$gdrive_backup_path/" --include "$gz_file" 2>/dev/null || true
 else
     # Use gupload for time-series (date-stamped) backups
     /root/.google-drive-upload/bin/gupload -o $gz_file
