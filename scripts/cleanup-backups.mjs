@@ -362,7 +362,7 @@ const apply_retention_policy = async ({
         const week_group = weekly_files[week_key].sort(
           (a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime)
         )
-        const [keep, ...remove] = week_group
+        const remove = week_group.slice(1)
         results.files_kept++
         results.by_type[type].kept++
 
@@ -399,7 +399,7 @@ const apply_retention_policy = async ({
         const month_group = monthly_files[month_key].sort(
           (a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime)
         )
-        const [keep, ...remove] = month_group
+        const remove = month_group.slice(1)
         results.files_kept++
         results.by_type[type].kept++
 
