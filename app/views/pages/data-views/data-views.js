@@ -10,6 +10,7 @@ import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
 import { Team } from '@core/teams'
 import { get_string_from_object } from '@libs-shared'
+import { nfl_team_abbreviations } from '@constants'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
 
@@ -24,7 +25,10 @@ const get_scatter_point_label = (row) => {
 }
 
 const get_scatter_point_image = ({ row, total_rows }) => {
-  if (row.player_nfl_teams_0) {
+  if (
+    row.player_nfl_teams_0 &&
+    nfl_team_abbreviations.includes(row.player_nfl_teams_0)
+  ) {
     const size = total_rows < 50 ? 48 : 18
     return {
       url: `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${row.player_nfl_teams_0}.png&h=${size * 4}&w=${size * 4}`,
