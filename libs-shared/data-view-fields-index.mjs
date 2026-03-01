@@ -843,6 +843,20 @@ export default {
 
   // Player Physical Measurements & Combine
   player_forty_yard_dash: "The player's 40-yard dash time in seconds",
+  player_forty_yard_dash_designation:
+    'Whether the 40-yard dash time is from an official combine run or unofficial/pro day timing',
+  player_ten_yard_split:
+    "The player's 10-yard split time in seconds, measuring initial burst and acceleration",
+  player_ten_yard_split_designation:
+    'Whether the 10-yard split time is from an official combine run or unofficial/pro day timing',
+  player_pro_forty_yard_dash:
+    "The player's pro day 40-yard dash time in seconds",
+  player_pro_forty_yard_dash_designation:
+    'Whether the pro day 40-yard dash time is from an official or unofficial timing',
+  player_sixty_yard_shuttle:
+    "The player's 60-yard shuttle time in seconds",
+  player_sixty_yard_shuttle_designation:
+    'Whether the 60-yard shuttle time is from an official combine run or unofficial timing',
   player_bench_press: 'Number of bench press reps (225 lbs) at the NFL Combine',
   player_vertical_jump: "The player's vertical jump height in inches",
   player_broad_jump: "The player's broad jump distance in inches",
@@ -850,6 +864,9 @@ export default {
   player_three_cone_drill: "The player's 3-cone drill time in seconds",
   player_arm_length: "The player's arm length in inches",
   player_hand_size: "The player's hand size in inches",
+  player_combine_attendance:
+    'Whether the player attended the NFL Scouting Combine',
+  player_hometown: "The player's hometown",
   player_speed_score:
     'A metric combining weight and 40-yard dash time to measure speed relative to size. Formula: (weight * 200) / (40-time^4)',
   player_height_adjusted_speed_score:

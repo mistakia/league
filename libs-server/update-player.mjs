@@ -90,7 +90,7 @@ const updatePlayer = async ({
   let changes = 0
   for (const edit of edits) {
     const prop = edit.path[0]
-    const is_null = !edit.rhs
+    const is_null = edit.rhs == null
     const is_nullable = nullable_props.includes(prop)
 
     if (is_null && !is_nullable) {

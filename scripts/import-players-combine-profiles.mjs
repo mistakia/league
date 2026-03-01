@@ -96,6 +96,7 @@ const import_players_from_combine_profiles_for_year = async ({
       height: profile.height ? Math.round(profile.height) : null,
       weight: profile.weight || null,
       forty: profile.fortyYardDash?.seconds || null,
+      forty_designation: profile.fortyYardDash?.designation ?? null,
       bench: profile.benchPress?.repetitions || null,
       vertical: profile.verticalJump?.inches || null,
       broad: profile.broadJump?.inches || null,
@@ -103,8 +104,18 @@ const import_players_from_combine_profiles_for_year = async ({
       cone: profile.threeConeDrill?.seconds || null,
       arm: profile.armLength || null,
       hand: profile.handSize || null,
+      ten_yard_split: profile.tenYardSplit?.seconds || null,
+      ten_yard_split_designation: profile.tenYardSplit?.designation ?? null,
+      pro_forty: profile.proFortyYardDash?.seconds || null,
+      pro_forty_designation: profile.proFortyYardDash?.designation ?? null,
+      sixty_yard_shuttle: profile.sixtyYardShuttle?.seconds || null,
+      sixty_yard_shuttle_designation:
+        profile.sixtyYardShuttle?.designation ?? null,
+      combine_attendance: profile.combineAttendance ?? null,
       ...ngs_data
     }
+
+    const hometown = profile.person?.hometown ?? null
 
     const has_ngs_data = Object.values(ngs_data).some((value) => value !== null)
 
@@ -125,7 +136,8 @@ const import_players_from_combine_profiles_for_year = async ({
           esbid: profile.person.esbId,
           jnum: 0,
           dob: '0000-00-00', // TODO - ideally required
-          ...combine_data
+          ...combine_data,
+          hometown
         })
 
         if (player_row) {
@@ -146,7 +158,7 @@ const import_players_from_combine_profiles_for_year = async ({
     } else {
       const changes = await updatePlayer({
         player_row,
-        update: combine_data,
+        update: { ...combine_data, hometown },
         source: 'combine'
       })
       change_count += changes

@@ -18271,7 +18271,16 @@ CREATE TABLE public.player (
     fantrax_id character varying(50),
     rtsports_id integer,
     roster_status character varying(100),
-    game_designation character varying(100)
+    game_designation character varying(100),
+    forty_designation character varying(12),
+    ten_yard_split numeric(3,2),
+    ten_yard_split_designation character varying(12),
+    pro_forty numeric(3,2),
+    pro_forty_designation character varying(12),
+    sixty_yard_shuttle numeric(4,2),
+    sixty_yard_shuttle_designation character varying(12),
+    combine_attendance boolean,
+    hometown character varying(100)
 );
 
 

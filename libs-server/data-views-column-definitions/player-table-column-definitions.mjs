@@ -178,6 +178,51 @@ export default {
     column_name: 'forty',
     get_cache_info: player_table_get_cache_info
   },
+  player_forty_yard_dash_designation: {
+    table_name: 'player',
+    column_name: 'forty_designation',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_ten_yard_split: {
+    table_name: 'player',
+    column_name: 'ten_yard_split',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_ten_yard_split_designation: {
+    table_name: 'player',
+    column_name: 'ten_yard_split_designation',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_pro_forty_yard_dash: {
+    table_name: 'player',
+    column_name: 'pro_forty',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_pro_forty_yard_dash_designation: {
+    table_name: 'player',
+    column_name: 'pro_forty_designation',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_sixty_yard_shuttle: {
+    table_name: 'player',
+    column_name: 'sixty_yard_shuttle',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_sixty_yard_shuttle_designation: {
+    table_name: 'player',
+    column_name: 'sixty_yard_shuttle_designation',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_combine_attendance: {
+    table_name: 'player',
+    column_name: 'combine_attendance',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_hometown: {
+    table_name: 'player',
+    column_name: 'hometown',
+    get_cache_info: player_table_get_cache_info
+  },
   player_bench_press: {
     table_name: 'player',
     column_name: 'bench',
