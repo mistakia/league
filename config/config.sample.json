@@ -38,5 +38,9 @@
   "filter_prop_pairings_options": {
     "market_odds_max_threshold": null,
     "historical_rate_min_threshold": 0.7
+  },
+  "job_tracker": {
+    "api_url": "https://storage-server:8081",
+    "api_key": "ENCRYPTED|<iv>|<encrypted-value>"
   }
 }
