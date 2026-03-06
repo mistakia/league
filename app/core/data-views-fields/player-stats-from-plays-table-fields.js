@@ -513,7 +513,7 @@ export default {
       column_groups: [COLUMN_GROUPS.RECEIVING],
       header_label: 'RACR',
       player_value_path: 'rec_air_conv_ratio_from_plays',
-      fixed: 1
+      fixed: 2
     }),
   player_receiving_yards_per_reception_from_plays:
     offensive_player_from_play_field({

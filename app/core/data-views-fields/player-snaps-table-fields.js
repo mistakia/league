@@ -10,6 +10,7 @@ export default {
     size: 60,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_groups: [COLUMN_GROUPS.OPPORTUNITY],
+    fixed: 2,
     column_params: {
       rate_type: rate_type_column_param.offensive_rate_type_param,
       ...nfl_plays_column_params
