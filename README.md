@@ -1,3 +1,17 @@
+---
+title: xo.football
+type: text
+description: >-
+  Open-source fantasy football league management platform with analytics, betting market
+  integration, and custom data views
+base_uri: user:repository/active/league/README.md
+created_at: '2026-03-06T19:51:49.605Z'
+entity_id: 866ce48e-00d6-47e1-852d-b0e9c8d45c3a
+public_read: true
+updated_at: '2026-03-06T19:51:49.605Z'
+user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
+---
+
 <div class="body">
 
 # xo.football
