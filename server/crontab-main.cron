@@ -24,7 +24,7 @@
 JOB_PROJECT=league
 
 ## draft notifications
-1 4 * * * NODE_ENV=production job-wrapper.sh league-notifications-draft /root/.nvm/versions/node/current/bin/node /root/league/scripts/notifications-draft.mjs >> /var/log/league/notifications-draft.log 2>&1
+1 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/notifications-draft.mjs >> /var/log/league/notifications-draft.log 2>&1
 
 
 # PROJECTIONS
@@ -51,38 +51,38 @@ JOB_PROJECT=league
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-adp-and-projections.mjs --ignore_cache >> /var/log/league/import-sleeper-adp-and-projections.log 2>&1
 
 ## process projections & calculate projected points added, market salary
-30 * * * * NODE_ENV=production job-wrapper.sh league-process-projections /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-projections.mjs >> /var/log/league/process-projections.log 2>&1
+30 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-projections.mjs >> /var/log/league/process-projections.log 2>&1
 
 
 
 # PLAYERS
 
 ## At 03:30AM Everyday
-30 3 * * * NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+30 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 12:15PM Everyday during the NFL Season
-15 12 * 1,2,9-12 * NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+15 12 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 5:10PM Everyday during the NFL Season
-10 17 * 1,2,9-12 * NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+10 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 8PM Everyday during the NFL Season
-0 20 * 1,2,9-12 * NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+0 20 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 7:15PM on Monday and Thursday during the NFL Season
-15 19 * 1,2,9-12 1,4 NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+15 19 * 1,2,9-12 1,4 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 10:00 AM on Sunday during the NFL Season
-0 10 * 1,2,9-12 0 NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+0 10 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 11:00 AM on Sunday during the NFL Season
-0 11 * 1,2,9-12 0 NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+0 11 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 12:00 AM on Sunday during the NFL Season
-0 12 * 1,2,9-12 0 NODE_ENV=production job-wrapper.sh league-import-players-sleeper /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
+0 12 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 3AM every day
-0 3 * * * NODE_ENV=production job-wrapper.sh league-import-player-contracts /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-player-contracts-nflverse.mjs --force_download >> /var/log/league/import-player-contracts-nflverse.log 2>&1
+0 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-player-contracts-nflverse.mjs --force_download >> /var/log/league/import-player-contracts-nflverse.log 2>&1
 
 ## At 5:00 AM on Tuesday during the NFL Season - Update ruled out in game status for prior week
 0 5 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/update-player-gamelog-ruled-out-status.mjs >> /var/log/league/update-player-gamelog-ruled-out-status.log 2>&1
@@ -92,15 +92,15 @@ JOB_PROJECT=league
 # KEEP TRADE CUT
 
 ## At 4:30AM Everyday
-30 4 * * * NODE_ENV=production job-wrapper.sh league-import-keeptradecut /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut.mjs >> /var/log/league/import-keeptradecut.log 2>&1
+30 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut.mjs >> /var/log/league/import-keeptradecut.log 2>&1
 
 ################################### PRACTICE ########################################
 
 ## 10pm everynight
-0 17 * 1,2,9-12 * NODE_ENV=production job-wrapper.sh league-import-practice-report /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
-0 18 * 1,2,9-12 * NODE_ENV=production job-wrapper.sh league-import-practice-report /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
-0 19 * 1,2,9-12 * NODE_ENV=production job-wrapper.sh league-import-practice-report /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
-0 22 * 1,2,9-12 * NODE_ENV=production job-wrapper.sh league-import-practice-report /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
+0 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
+0 18 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
+0 19 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
+0 22 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rotowire-practice-report.mjs >> /var/log/league/import-practice-report.log 2>&1
 
 # RANKINGS
 
@@ -118,30 +118,30 @@ JOB_PROJECT=league
 # Waivers - Poaching
 
 ## Process Poaching Waivers Every 15 Minutes (except at 15:00)
-*/15 0-14,16-23 * * * NODE_ENV=production job-wrapper.sh league-process-poaching-waivers /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs >> /var/log/league/league-process-poaching-waivers.log 2>&1
+*/15 0-14,16-23 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs >> /var/log/league/league-process-poaching-waivers.log 2>&1
 
 ## Process Poaching Waivers Daily at 15:15
-15 15 * * * NODE_ENV=production job-wrapper.sh league-process-poaching-waivers /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs --daily >> /var/log/league/league-process-poaching-waivers-daily.log 2>&1
+15 15 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-waivers.mjs --daily >> /var/log/league/league-process-poaching-waivers-daily.log 2>&1
 
 
 
 # Waivers
 
 ## At 15:00 every day in January, February, and every month from August through December
-0 15 * 1,2,8-12 * NODE_ENV=production job-wrapper.sh league-process-waivers-free-agency /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs --daily >> /var/log/league/league-waivers-free-agency.log 2>&1
+0 15 * 1,2,8-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs --daily >> /var/log/league/league-waivers-free-agency.log 2>&1
 
 ## At every 5th minute past every hour from 15 through 23 on Wednesday.
-5-59/5 15-23 * * 3 NODE_ENV=production job-wrapper.sh league-process-waivers-free-agency /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs >> /var/log/league/league-waivers-free-agency.log 2>&1
+5-59/5 15-23 * * 3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs >> /var/log/league/league-waivers-free-agency.log 2>&1
 
 ## At every 5th minute from 5 through 59 on Monday and every day-of-week from Thursday through Sunday.
-5-59/5 * * * 1,4-7 NODE_ENV=production job-wrapper.sh league-process-waivers-free-agency /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs >> /var/log/league/league-waivers-free-agency.log 2>&1
+5-59/5 * * * 1,4-7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-waivers-free-agency.mjs >> /var/log/league/league-waivers-free-agency.log 2>&1
 
 
 
 # Poaching Claims
 
 ## Process Poaching Claims Every Hour
-0 */1 * * * NODE_ENV=production job-wrapper.sh league-process-poaching-claims /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-claims.mjs >> /var/log/league/league-process-poaching-claims.log 2>&1
+0 */1 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-poaching-claims.mjs >> /var/log/league/league-process-poaching-claims.log 2>&1
 
 
 
@@ -208,20 +208,20 @@ JOB_PROJECT=league
 0 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs >> /var/log/league/league-calculate-team-daily-ktc-value.log 2>&1
 
 ## Announce restricted free agent at 9pm
-0 21 * * * NODE_ENV=production job-wrapper.sh league-announce-rfa /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
+0 21 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
 
 ## Process restricted free agency bids at 6pm
-0 18 * * * NODE_ENV=production job-wrapper.sh league-process-rfa-bids /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
+0 18 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
 
 ## Announce free agency period start (check every 30 minutes in August and September)
-*/30 * * 8,9 * NODE_ENV=production job-wrapper.sh league-announce-fa-period-start /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-free-agency-period-start.mjs >> /var/log/league/announce-free-agency-period-start.log 2>&1
+*/30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-free-agency-period-start.mjs >> /var/log/league/announce-free-agency-period-start.log 2>&1
 
 
 
 # League Each Season Week
 
 ## At 23:55 on Monday during the NFL Season
-55 23 * 1,2,9-12 1 NODE_ENV=production job-wrapper.sh league-generate-rosters /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-rosters.mjs >> /var/log/league/league-generate-rosters.log 2>&1
+55 23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-rosters.mjs >> /var/log/league/league-generate-rosters.log 2>&1
 
 
 
@@ -237,7 +237,7 @@ JOB_PROJECT=league
 0 0 * * * job-wrapper.sh league-cleanup-puppeteer find /tmp/puppeteer* -mtime +2 -exec rm -rf {} \; >> /var/log/league/league-cleanup-puppeteer.log 2>&1
 
 ## Check disk space every hour
-0 * * * * NODE_ENV=production job-wrapper.sh league-check-disk-space /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs >> /var/log/league/league-check-disk-space-main-server.log 2>&1
+0 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs >> /var/log/league/league-check-disk-space-main-server.log 2>&1
 
 
 
@@ -288,4 +288,4 @@ JOB_PROJECT=league
 # Crontab Export
 
 ## Export crontab for backup sync (hourly)
-0 * * * * crontab -l > /tmp/league-crontab.txt 2>/dev/null
+0 * * * * crontab -l > /tmp/league-crontab.txt
