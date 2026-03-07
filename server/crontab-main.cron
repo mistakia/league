@@ -21,6 +21,8 @@
 #
 # m h  dom mon dow   command
 
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 JOB_PROJECT=league
 
 ## draft notifications
