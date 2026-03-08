@@ -15,7 +15,9 @@
   "league_api_auth_token": "ENCRYPTED|8266a739037e72fff10c427e0cfcfae5|5e40700c0dc7e630dbc211e38f97c8c2566a25493f3519bb0032ac9076b4f256948dbfdb29d888b4052b94b658eba08744823f5734aac4ff35cdfefade6c98eab4560b4ed0e9d3eea2f92ece899e0de04fb9a73c08f47cac9734fac92d5c823348b45388c092c4357d682d43a8e95e71cc2bf1c4f8dedbee0958e48b69d8e2c7",
   "jwt": {
     "secret": "ENCRYPTED|ed2a3311603c57292e306419bfe616f7|ee2dc5729340077ee994d8dd030e2b1d8793818edc0310061bd0f142df094824",
-    "algorithms": ["HS256"],
+    "algorithms": [
+      "HS256"
+    ],
     "credentialsRequired": false
   },
   "postgres": {
@@ -66,5 +68,9 @@
     "opponent_allowed_tdrec_min": null,
     "opponent_allowed_tdr_min": null,
     "opponent_allowed_pa_min": null
+  },
+  "job_tracker": {
+    "api_url": "https://base.tint.space",
+    "api_key": "ENCRYPTED|f74f1f4858d9cecfd84f211ecfb094ea|93cb356fc580a8287a12a293cc6bb103db3a7184b4df30a55382ae7e22754a958f3fde55b0eba17180453a45f6c7197c1d41b55fb418ebc69c46c212d561039dab3e73c68fd47eb381a8a69033e1cd3c"
   }
 }
