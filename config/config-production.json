@@ -15,9 +15,7 @@
   "league_api_auth_token": "ENCRYPTED|8266a739037e72fff10c427e0cfcfae5|5e40700c0dc7e630dbc211e38f97c8c2566a25493f3519bb0032ac9076b4f256948dbfdb29d888b4052b94b658eba08744823f5734aac4ff35cdfefade6c98eab4560b4ed0e9d3eea2f92ece899e0de04fb9a73c08f47cac9734fac92d5c823348b45388c092c4357d682d43a8e95e71cc2bf1c4f8dedbee0958e48b69d8e2c7",
   "jwt": {
     "secret": "ENCRYPTED|ed2a3311603c57292e306419bfe616f7|ee2dc5729340077ee994d8dd030e2b1d8793818edc0310061bd0f142df094824",
-    "algorithms": [
-      "HS256"
-    ],
+    "algorithms": ["HS256"],
     "credentialsRequired": false
   },
   "postgres": {

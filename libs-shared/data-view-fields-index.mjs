@@ -853,8 +853,7 @@ export default {
     "The player's pro day 40-yard dash time in seconds",
   player_pro_forty_yard_dash_designation:
     'Whether the pro day 40-yard dash time is from an official or unofficial timing',
-  player_sixty_yard_shuttle:
-    "The player's 60-yard shuttle time in seconds",
+  player_sixty_yard_shuttle: "The player's 60-yard shuttle time in seconds",
   player_sixty_yard_shuttle_designation:
     'Whether the 60-yard shuttle time is from an official combine run or unofficial timing',
   player_bench_press: 'Number of bench press reps (225 lbs) at the NFL Combine',
