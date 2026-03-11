@@ -19,6 +19,11 @@ const log = debug('import-espn-line-win-rates')
 debug.enable('import-espn-line-win-rates,get-player')
 
 const import_espn_line_win_rates = async () => {
+  if (current_season.week > current_season.nflFinalWeek) {
+    log('Skipping — outside regular season')
+    return
+  }
+
   const timestamp = Math.floor(Date.now() / 1000)
 
   // Preload player cache for fast lookups
