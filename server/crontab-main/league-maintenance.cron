@@ -1,0 +1,43 @@
+# League
+
+## Every day at 4:00AM
+0 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs >> /var/log/league/league-calculate-team-daily-ktc-value.log 2>&1
+
+## Announce restricted free agent at 9pm
+0 21 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
+
+## Process restricted free agency bids at 6pm
+0 18 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
+
+## Announce free agency period start (check every 30 minutes in August and September)
+*/30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-free-agency-period-start.mjs >> /var/log/league/announce-free-agency-period-start.log 2>&1
+
+
+
+# League Each Season Week
+
+## At 23:55 on Monday during the NFL Season
+55 23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-rosters.mjs >> /var/log/league/league-generate-rosters.log 2>&1
+
+
+
+# Maintenance
+
+## Generate new season records (At 07:00 on the 1st, Feb through Aug - no-op until season-dates.mjs is updated)
+0 7 1 2-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-seasons.mjs >> /var/log/league/generate-seasons.log 2>&1
+
+## Create database partitions for upcoming season (At 00:00 on the 1st in May and July)
+0 0 1 5,7 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/create-season-partitions.mjs >> /var/log/league/create-season-partitions.log 2>&1
+
+## Every day at 0:00
+0 0 * * * job-wrapper.sh league-cleanup-puppeteer find /tmp -maxdepth 1 -name 'puppeteer*' -mtime +2 -exec rm -rf {} \; >> /var/log/league/league-cleanup-puppeteer.log 2>&1
+
+## Check disk space every hour
+0 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs >> /var/log/league/league-check-disk-space-main-server.log 2>&1
+
+
+
+# Crontab Export
+
+## Export crontab for backup sync (hourly)
+0 * * * * crontab -l > /tmp/league-crontab.txt
