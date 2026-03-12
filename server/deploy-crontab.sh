@@ -28,6 +28,6 @@ for f in "$CRONTAB_DIR"/*.cron; do
 done
 
 scp -q "$TMPDIR"/*.cron "$SSH_HOST":~/crontab/
-ssh -A "$SSH_HOST" 'load_crontab_files'
+ssh -A "$SSH_HOST" '~/bin/load_crontab_files'
 
 echo "Deployed crontab files from $CRONTAB_DIR to $SSH_HOST"
