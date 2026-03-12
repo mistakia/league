@@ -5975,7 +5975,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.17.1, ajv@npm:^8.9.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.9.0":
   version: 8.17.1
   resolution: "ajv@npm:8.17.1"
   dependencies:
@@ -5987,7 +5987,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.12.0":
+"ajv@npm:^8.12.0, ajv@npm:^8.18.0":
   version: 8.18.0
   resolution: "ajv@npm:8.18.0"
   dependencies:
@@ -15569,7 +15569,7 @@ __metadata:
     "@simonwep/pickr": "npm:^1.9.1"
     "@trashman/ed25519-blake2b": "npm:0.0.8"
     "@tsmx/secure-config": "npm:^2.3.0"
-    ajv: "npm:^8.17.1"
+    ajv: "npm:^8.18.0"
     ajv-formats: "npm:^3.0.1"
     babel-loader: "npm:^9.2.1"
     babel-plugin-dev-expression: "npm:^0.2.3"
