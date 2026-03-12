@@ -5975,7 +5975,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.17.1, ajv@npm:^8.9.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.9.0":
   version: 8.17.1
   resolution: "ajv@npm:8.17.1"
   dependencies:
@@ -5987,7 +5987,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.12.0":
+"ajv@npm:^8.12.0, ajv@npm:^8.18.0":
   version: 8.18.0
   resolution: "ajv@npm:8.18.0"
   dependencies:
@@ -14981,9 +14981,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-table@mistakia/react-table#81177daabfe8312654d05233695211d5a1e1c93a":
+"react-table@mistakia/react-table#fec05506bf8666710440d07f14e26824f7cd8b11":
   version: 0.0.1
-  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=81177daabfe8312654d05233695211d5a1e1c93a"
+  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=fec05506bf8666710440d07f14e26824f7cd8b11"
   dependencies:
     "@dnd-kit/core": "npm:^6.3.1"
     "@dnd-kit/modifiers": "npm:^9.0.0"
@@ -15007,7 +15007,7 @@ __metadata:
     prop-types: ^15.8.1
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 10/cc42e3791d7d4b36555d22c634318e02a65774d46d373891d5b6dfa99464a3c80649ecb6c146e10377682f78cc930570ea33f85e3022e31d546841124317baa1
+  checksum: 10/5a5fd86f604b94cb3ec6231cc7ce44dc6fcdb2274b19656844a03f7bcf4e9b71928bfb21b51e97279eb57440bedead897d54be3923ad9b9bde5397c003ccf6cf
   languageName: node
   linkType: hard
 
@@ -15569,7 +15569,7 @@ __metadata:
     "@simonwep/pickr": "npm:^1.9.1"
     "@trashman/ed25519-blake2b": "npm:0.0.8"
     "@tsmx/secure-config": "npm:^2.3.0"
-    ajv: "npm:^8.17.1"
+    ajv: "npm:^8.18.0"
     ajv-formats: "npm:^3.0.1"
     babel-loader: "npm:^9.2.1"
     babel-plugin-dev-expression: "npm:^0.2.3"
@@ -15670,7 +15670,7 @@ __metadata:
     react-redux: "npm:^9.2.0"
     react-router: "npm:^6.28.1"
     react-router-dom: "npm:^6.28.1"
-    react-table: "mistakia/react-table#81177daabfe8312654d05233695211d5a1e1c93a"
+    react-table: "mistakia/react-table#fec05506bf8666710440d07f14e26824f7cd8b11"
     react-virtualized-compat: "npm:^2.0.0"
     redux: "npm:^5.0.1"
     redux-first-history: "npm:^5.2.0"
