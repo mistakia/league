@@ -2,6 +2,9 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import get_rate_type_denominator_params, {
+  get_play_level_params_hash_suffix
+} from '#libs-shared/get-rate-type-denominator-params.mjs'
 
 export const get_per_team_play_cte_table_name = ({
   params = {},
@@ -56,8 +59,10 @@ export const get_per_team_play_cte_table_name = ({
     ? `_${matchup_opponent_type}`
     : ''
 
+  const play_level_params_suffix = get_play_level_params_hash_suffix({ params })
+
   return get_table_hash(
-    `per_team_play${play_type_suffix}${group_by_suffix}${team_type_suffix}${matchup_opponent_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
+    `per_team_play${play_type_suffix}${group_by_suffix}${team_type_suffix}${matchup_opponent_suffix}${play_level_params_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
   )
 }
 
@@ -116,18 +121,11 @@ export const add_per_team_play_cte = ({
     }
   }
 
-  // TODO not sure if the column params should be applied to the the rate type as well
-
-  // Remove career_year and career_game from params before applying other filters
+  const denominator_params = get_rate_type_denominator_params({ params })
   const filtered_params = {
-    year: params.year,
-    week: params.week,
-    year_offset: params.year_offset,
-    week_offset: params.week_offset,
+    ...denominator_params,
     seas_type
   }
-  // delete filtered_params.career_year
-  // delete filtered_params.career_game
 
   apply_play_by_play_column_params_to_query({
     query: cte_query,
