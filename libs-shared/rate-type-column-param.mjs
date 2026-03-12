@@ -2,12 +2,6 @@ import * as table_constants from 'react-table/src/constants.mjs'
 
 export { default as is_play_level_rate_type } from './is-play-level-rate-type.mjs'
 
-export const rate_type_match_column_params_param = {
-  data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
-  default_value: true,
-  hidden: true
-}
-
 const base_rate_type_param = {
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
@@ -33,18 +27,49 @@ const player_rate_type_param_values = [
   { value: 'per_player_rush_play', label: 'Per Player Rush Play' }
 ]
 
+const param_override_config = {
+  label: 'Denominator Parameters',
+  toggle_param: 'rate_type_match_column_params',
+  override_param: 'rate_type_column_params',
+  disabled_values: [null, 'per_game', 'per_team_half', 'per_team_quarter'],
+  overridable_param_filter: {
+    exclude_groups: [
+      'Weather',
+      'Game',
+      'Betting Markets',
+      'Pace',
+      'Play Timeout'
+    ],
+    exclude_param_names: [
+      'year',
+      'week',
+      'year_offset',
+      'week_offset',
+      'seas_type',
+      'career_year',
+      'career_game',
+      'rate_type',
+      'rate_type_match_column_params',
+      'rate_type_column_params'
+    ]
+  }
+}
+
 export const offensive_rate_type_param = {
   ...base_rate_type_param,
+  param_override_config,
   values: base_rate_type_param_values
 }
 
 export const defensive_player_rate_type_param = {
   ...base_rate_type_param,
+  param_override_config,
   values: [...base_rate_type_param_values, ...player_rate_type_param_values]
 }
 
 export const offensive_player_rate_type_param = {
   ...base_rate_type_param,
+  param_override_config,
   values: [
     ...base_rate_type_param_values,
     ...player_rate_type_param_values,

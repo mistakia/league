@@ -51,22 +51,6 @@ export function get_play_level_params_hash_suffix({
     .join('')
 }
 
-// Resolve the boolean value of rate_type_match_column_params, handling
-// array-wrapped values from the request format (e.g., [true], [false])
-function resolve_match_column_params(value) {
-  if (value === undefined) {
-    return undefined
-  }
-  const resolved = Array.isArray(value) ? value[0] : value
-  if (resolved === true || resolved === 'true') {
-    return true
-  }
-  if (resolved === false || resolved === 'false') {
-    return false
-  }
-  return undefined
-}
-
 export default function get_rate_type_denominator_params({ params = {} } = {}) {
   const result = {}
 
@@ -77,26 +61,15 @@ export default function get_rate_type_denominator_params({ params = {} } = {}) {
     }
   }
 
-  const match_column_params = resolve_match_column_params(
-    params.rate_type_match_column_params
-  )
-
-  if (match_column_params === true) {
-    // Include numerator's play-level params
-    for (const key of play_level_param_keys) {
-      if (params[key] !== undefined) {
-        result[key] = params[key]
-      }
-    }
-  } else if (match_column_params === false && params.rate_type_column_params) {
-    // Use independent denominator param overrides
+  if (params.rate_type_column_params) {
+    // Use denominator-specific play-level param overrides
     for (const [key, value] of Object.entries(params.rate_type_column_params)) {
       if (play_level_param_keys.has(key)) {
         result[key] = value
       }
     }
   }
-  // When undefined (backwards compatible), no play-level params are included
+  // When rate_type_column_params is absent (backwards compatible), no play-level params are included
 
   return result
 }

@@ -8,7 +8,6 @@
         "params": {
           "rate_type": ["per_player_pass_attempt"],
           "year": [2023],
-          "rate_type_match_column_params": [false],
           "targeted_receiver_separation": ["OPEN", "WIDE_OPEN"],
           "rate_type_column_params": {
             "dwn": [1, 2]

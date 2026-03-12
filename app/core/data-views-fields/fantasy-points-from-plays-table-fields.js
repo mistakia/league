@@ -25,8 +25,6 @@ export default {
     column_params: {
       scoring_format_hash: scoring_format_hash_param,
       rate_type: rate_type_column_param.offensive_player_rate_type_param,
-      rate_type_match_column_params:
-        rate_type_column_param.rate_type_match_column_params_param,
       ...nfl_plays_column_params
     },
     size: 70,

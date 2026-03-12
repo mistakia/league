@@ -1,6 +1,6 @@
 {
   "name": "rate_type_with_matched_column_params",
-  "description": "Verify that play-level params are applied to denominator CTE when rate_type_match_column_params is true",
+  "description": "Verify that play-level params are applied to denominator CTE when rate_type_column_params is present",
   "request": {
     "columns": [
       {
@@ -8,7 +8,9 @@
         "params": {
           "rate_type": ["per_player_pass_attempt"],
           "year": [2023],
-          "rate_type_match_column_params": [true],
+          "rate_type_column_params": {
+            "targeted_receiver_separation": ["OPEN", "WIDE_OPEN"]
+          },
           "targeted_receiver_separation": ["OPEN", "WIDE_OPEN"]
         }
       }
@@ -27,7 +29,7 @@
     "parameters",
     "rate_type",
     "cte",
-    "rate_type_match_column_params"
+    "rate_type_column_params"
   ],
   "timeout_ms": 40000
 }
