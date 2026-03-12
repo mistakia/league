@@ -27,7 +27,8 @@ for f in "$CRONTAB_DIR"/*.cron; do
   base crontab build "$f" > "$TMPDIR/$(basename "$f")"
 done
 
+ssh -A "$SSH_HOST" 'mkdir -p ~/crontab'
 scp -q "$TMPDIR"/*.cron "$SSH_HOST":~/crontab/
-ssh -A "$SSH_HOST" '~/bin/load_crontab_files'
+ssh -A "$SSH_HOST" 'cat ~/crontab/*.cron | crontab -'
 
 echo "Deployed crontab files from $CRONTAB_DIR to $SSH_HOST"
