@@ -7,6 +7,8 @@ const offensive_player_from_play_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: {
     rate_type: rate_type_column_param.offensive_player_rate_type_param,
+    rate_type_match_column_params:
+      rate_type_column_param.rate_type_match_column_params_param,
     ...nfl_plays_column_params
   },
   size: 70,
@@ -19,6 +21,8 @@ const defensive_player_from_play_field = (field) => ({
   ...offensive_player_from_play_field(field),
   column_params: {
     rate_type: rate_type_column_param.defensive_player_rate_type_param,
+    rate_type_match_column_params:
+      rate_type_column_param.rate_type_match_column_params_param,
     ...nfl_plays_column_params
   }
 })

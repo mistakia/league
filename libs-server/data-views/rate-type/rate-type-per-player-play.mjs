@@ -3,6 +3,9 @@ import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import get_rate_type_denominator_params, {
+  get_play_level_params_hash_suffix
+} from '#libs-shared/get-rate-type-denominator-params.mjs'
 export const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || [current_season.stats_season_year]
   if (!Array.isArray(year)) {
@@ -57,8 +60,11 @@ export const get_per_player_play_cte_table_name = ({
 
   const play_type_suffix = play_type ? `_${play_type.toLowerCase()}` : ''
   const group_by_suffix = group_by ? `_${group_by}` : ''
+
+  const play_level_params_suffix = get_play_level_params_hash_suffix({ params })
+
   return get_table_hash(
-    `per_player_play${play_type_suffix}${group_by_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
+    `per_player_play${play_type_suffix}${group_by_suffix}${play_level_params_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
   )
 }
 
@@ -122,8 +128,8 @@ export const add_per_player_play_cte = ({
 
   const { year, week } = get_default_params({ params })
 
-  // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...params, year, week, seas_type }
+  const denominator_params = get_rate_type_denominator_params({ params })
+  const filtered_params = { ...denominator_params, year, week, seas_type }
   delete filtered_params.career_year
   delete filtered_params.career_game
 

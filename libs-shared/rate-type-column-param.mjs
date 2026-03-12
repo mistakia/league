@@ -1,5 +1,13 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
+export { default as is_play_level_rate_type } from './is-play-level-rate-type.mjs'
+
+export const rate_type_match_column_params_param = {
+  data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+  default_value: true,
+  hidden: true
+}
+
 const base_rate_type_param = {
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
