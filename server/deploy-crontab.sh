@@ -29,6 +29,6 @@ done
 
 ssh -A "$SSH_HOST" 'mkdir -p ~/crontab'
 scp -q "$TMPDIR"/*.cron "$SSH_HOST":~/crontab/
-ssh -A "$SSH_HOST" 'cat ~/crontab/*.cron | crontab -'
+ssh -A "$SSH_HOST" 'load_crontab_files'
 
 echo "Deployed crontab files from $CRONTAB_DIR to $SSH_HOST"
