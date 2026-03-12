@@ -1,0 +1,53 @@
+{
+  "name": "year offset range no duplicate base years",
+  "description": "Verifies that year_offset range columns do not expand base_years and do not produce a redundant LEFT JOIN when no WHERE filter exists on the offset column",
+  "request": {
+    "prefix_columns": [
+      "player_name"
+    ],
+    "columns": [
+      {
+        "column_id": "player_rush_attempts_from_plays",
+        "params": {
+          "year": [
+            2024
+          ]
+        }
+      },
+      {
+        "column_id": "player_rush_attempts_from_plays",
+        "params": {
+          "year": [
+            2024
+          ],
+          "year_offset": [
+            1,
+            30
+          ]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_rush_attempts_from_plays",
+        "column_index": 0,
+        "desc": true
+      }
+    ],
+    "splits": [
+      "year"
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "RB"
+        ]
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('RB')), \"tf43d33db80d44ffef7d19938f615ed8a\" as (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"year\", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"year\", COALESCE(bc_pid)), \"t546eb2449036356a99b8e19a6bc73561\" as (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"year\", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2024, 2025, 2026) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"year\", COALESCE(bc_pid)) select \"player\".\"pid\", player.fname, player.lname, \"tf43d33db80d44ffef7d19938f615ed8a\".\"rush_atts_from_plays\" AS \"rush_atts_from_plays_0\", (SELECT SUM(t546eb2449036356a99b8e19a6bc73561.rush_atts_from_plays) FROM t546eb2449036356a99b8e19a6bc73561 WHERE t546eb2449036356a99b8e19a6bc73561.pid = player.pid AND t546eb2449036356a99b8e19a6bc73561.year BETWEEN player_years.year + 1 AND player_years.year + 30) AS \"rush_atts_from_plays_1\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"tf43d33db80d44ffef7d19938f615ed8a\" on \"tf43d33db80d44ffef7d19938f615ed8a\".\"pid\" = \"player\".\"pid\" and \"tf43d33db80d44ffef7d19938f615ed8a\".\"year\" = 2024 where player.pos IN ('RB') group by player.fname, player.lname, \"tf43d33db80d44ffef7d19938f615ed8a\".\"rush_atts_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["year", "splits", "plays", "year_offset", "joins", "regression"],
+  "timeout_ms": 35000
+}

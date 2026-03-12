@@ -322,8 +322,6 @@ const process_item_params = (item) => {
 
 const get_year_range = (columns, where) => {
   const years = new Set()
-  let min_offset = 0
-  let max_offset = 0
 
   const check_params = (params) => {
     if (params.year) {
@@ -336,13 +334,6 @@ const get_year_range = (columns, where) => {
           years.add(parsed_year)
         }
       })
-    }
-    if (params.year_offset) {
-      const offset = Array.isArray(params.year_offset)
-        ? params.year_offset
-        : [params.year_offset]
-      min_offset = Math.min(min_offset, Math.min(...offset))
-      max_offset = Math.max(max_offset, Math.max(...offset))
     }
   }
 
@@ -365,18 +356,7 @@ const get_year_range = (columns, where) => {
     }
   }
 
-  // Add offset years
-  const all_years = new Set()
-  years.forEach((year) => {
-    for (let i = min_offset; i <= max_offset; i++) {
-      const offset_year = year + i
-      if (offset_year <= current_season.year) {
-        all_years.add(offset_year)
-      }
-    }
-  })
-
-  return Array.from(all_years).sort((a, b) => a - b)
+  return Array.from(years).sort((a, b) => a - b)
 }
 
 const get_column_index = ({ column_id, index, columns }) => {
@@ -679,6 +659,12 @@ const setup_from_table_and_player_joins = ({
   )
 }
 
+const is_year_offset_range = (params) =>
+  params.year_offset &&
+  Array.isArray(params.year_offset) &&
+  params.year_offset.length > 1 &&
+  params.year_offset[0] !== params.year_offset[1]
+
 const get_table_name = ({ column_definition, column_params, splits }) => {
   return column_definition.table_alias
     ? column_definition.table_alias({ params: column_params, splits })
@@ -935,8 +921,10 @@ const add_clauses_for_table = async ({
 
   // Enhanced join handling with adaptive system
   // Skip join entirely if this table is the same as the from table (prevents self-join)
+  const skip_join_for_offset_range =
+    is_year_offset_range(group_column_params) && !where_clauses.length
   if (table_name !== data_view_options.from_table_name) {
-    if (join_func) {
+    if (join_func && !skip_join_for_offset_range) {
       await join_func({
         query: players_query,
         table_name,
@@ -946,6 +934,7 @@ const add_clauses_for_table = async ({
         data_view_options
       })
     } else if (
+      !skip_join_for_offset_range &&
       table_name !== 'player' &&
       table_name !== 'nfl_plays' &&
       (select_strings.length ||
@@ -1510,13 +1499,7 @@ export const get_data_view_results_query = async ({
       })
 
       if (available_splits.includes('year')) {
-        const has_year_offset_range =
-          group_column_params.year_offset &&
-          Array.isArray(group_column_params.year_offset) &&
-          group_column_params.year_offset.length > 1 &&
-          group_column_params.year_offset[0] !==
-            group_column_params.year_offset[1]
-        if (select_columns.length && !has_year_offset_range) {
+        if (select_columns.length && !is_year_offset_range(group_column_params)) {
           const column_definition =
             data_views_column_definitions[select_columns[0].column_id]
           if (column_definition && column_definition.year_select) {
