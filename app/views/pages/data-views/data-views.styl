@@ -1,12 +1,7 @@
-.players__table
-  absolute left 0px top 0px right 0px bottom 0px
-  overflow scroll
-  overflow-y scroll
-  overflow-x scroll
+// page-table__container and view-request-status-container styles
+// are provided by app/styles/table.styl
 
-  .table
-    padding-left 0
-
+.page-table__container
   .row
     background $backgroundColor
     &.selected
@@ -78,7 +73,7 @@
       background lighten($maroon, 12%)
       color white
 
-.players__table-help
+.page-table__container-help
   font 500 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
   display flex
   align-items center
@@ -99,29 +94,3 @@
 
   .MuiSvgIcon-root
     color rgb(2, 136, 209)
-
-.data-view-request-status-container
-  position fixed
-  bottom 20px
-  left 50%
-  transform translateX(-50%)
-  max-width 300px
-  width 100%
-  text-align center
-  z-index 1000
-  background white
-  border 1px solid $borderColor
-  box-shadow $box_shadow
-  height 40px
-  display flex
-  align-items center
-  justify-content center
-  border-radius 4px
-  font-size 14px
-  font-weight 500
-  color $textColor
-  opacity 0.8
-
-  &.error
-    color red
-    border-color red

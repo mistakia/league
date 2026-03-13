@@ -278,7 +278,7 @@ export default function PlayersPage({
   const body = isPending ? (
     <Loading loading />
   ) : (
-    <div className='players__table'>
+    <div className='page-table__container'>
       <div className='players__header'>
         <div className='player__row-lead'>
           <div className='player__row-index' />

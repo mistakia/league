@@ -194,7 +194,7 @@ export default function DataViewsPage({
 
     if (status === 'pending' && position) {
       return (
-        <div className='data-view-request-status-container'>
+        <div className='view-request-status-container'>
           Request queued. Position: {position}
         </div>
       )
@@ -202,7 +202,7 @@ export default function DataViewsPage({
 
     if (status === 'processing') {
       return (
-        <div className='data-view-request-status-container'>
+        <div className='view-request-status-container'>
           Processing request...
         </div>
       )
@@ -210,7 +210,7 @@ export default function DataViewsPage({
 
     if (status === 'error') {
       return (
-        <div className='data-view-request-status-container error'>
+        <div className='view-request-status-container error'>
           Error occured while processing request
         </div>
       )
@@ -302,9 +302,9 @@ export default function DataViewsPage({
   const body = is_view_loading ? (
     <Loading loading />
   ) : (
-    <div className='players__table'>
+    <div className='page-table__container'>
       {render_request_status()}
-      <div className='players__table-help'>
+      <div className='page-table__container-help'>
         <InfoOutlinedIcon />
         <span>
           Visit the <NavLink to='/guides/data-views'>guide</NavLink> to learn

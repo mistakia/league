@@ -62,7 +62,7 @@ export default function PlaysPage({
 
     if (status === 'pending' && position) {
       return (
-        <div className='plays-view-request-status-container'>
+        <div className='view-request-status-container'>
           Request queued. Position: {position}
         </div>
       )
@@ -70,7 +70,7 @@ export default function PlaysPage({
 
     if (status === 'processing') {
       return (
-        <div className='plays-view-request-status-container'>
+        <div className='view-request-status-container'>
           Processing request...
         </div>
       )
@@ -78,7 +78,7 @@ export default function PlaysPage({
 
     if (status === 'error') {
       return (
-        <div className='plays-view-request-status-container error'>
+        <div className='view-request-status-container error'>
           Error occured while processing request
         </div>
       )
@@ -136,7 +136,7 @@ export default function PlaysPage({
   const body = is_view_loading ? (
     <Loading loading />
   ) : (
-    <div className='plays__table'>
+    <div className='page-table__container'>
       {render_request_status()}
       <Table
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
@@ -163,7 +163,6 @@ export default function PlaysPage({
         delete_view={delete_plays_view}
         disable_rank_aggregation
         disable_edit_view={!isLoggedIn}
-        enable_duplicate_column_ids
         shorten_url={shorten_url}
         table_username={user_username}
         reset_cache={reset_plays_view_cache}
