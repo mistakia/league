@@ -32,6 +32,11 @@ export const default_plays_views = {
           column_id: 'play_year',
           operator: '=',
           value: String(current_season.stats_season_year)
+        },
+        {
+          column_id: 'play_type',
+          operator: '!=',
+          value: 'NOPL'
         }
       ]
     }
