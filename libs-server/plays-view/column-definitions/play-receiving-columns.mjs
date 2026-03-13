@@ -38,9 +38,12 @@ export default {
   play_yards_after_catch: {
     column_name: 'yards_after_catch',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.yards_after_catch as play_yards_after_catch'],
+    main_select: () => [
+      'nfl_plays.yards_after_catch as play_yards_after_catch'
+    ],
     main_where: () => 'nfl_plays.yards_after_catch',
-    aggregate_select: () => db.raw('AVG(nfl_plays.yards_after_catch) as play_yards_after_catch'),
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.yards_after_catch) as play_yards_after_catch'),
     use_having: true
   },
   play_route: {
@@ -54,7 +57,10 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.contested_ball as play_contested_ball'],
     main_where: () => 'nfl_plays.contested_ball',
-    aggregate_select: () => db.raw('SUM(CASE WHEN nfl_plays.contested_ball = true THEN 1 ELSE 0 END) as play_contested_ball'),
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.contested_ball = true THEN 1 ELSE 0 END) as play_contested_ball'
+      ),
     use_having: true
   },
   play_catchable_ball: {
@@ -62,7 +68,10 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.catchable_ball as play_catchable_ball'],
     main_where: () => 'nfl_plays.catchable_ball',
-    aggregate_select: () => db.raw('SUM(CASE WHEN nfl_plays.catchable_ball = true THEN 1 ELSE 0 END) as play_catchable_ball'),
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.catchable_ball = true THEN 1 ELSE 0 END) as play_catchable_ball'
+      ),
     use_having: true
   },
   play_endzone_target: {
@@ -70,7 +79,10 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.endzone_target as play_endzone_target'],
     main_where: () => 'nfl_plays.endzone_target',
-    aggregate_select: () => db.raw('SUM(CASE WHEN nfl_plays.endzone_target = true THEN 1 ELSE 0 END) as play_endzone_target'),
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.endzone_target = true THEN 1 ELSE 0 END) as play_endzone_target'
+      ),
     use_having: true
   }
 }

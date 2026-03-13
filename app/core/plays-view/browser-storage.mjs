@@ -121,9 +121,7 @@ export const plays_view_browser_storage_save_snapshot = async ({
   }
 }
 
-const plays_view_browser_storage_load_view_history = async (
-  view_id
-) => {
+const plays_view_browser_storage_load_view_history = async (view_id) => {
   try {
     const storage_key = `${PLAYS_VIEW_BROWSER_STORAGE_CONFIG.STORAGE_KEY_PREFIX}${view_id}`
     const history = await local_storage_helper.getItem(storage_key)
@@ -147,8 +145,7 @@ export const plays_view_browser_storage_get_latest_snapshot = async (
   view_id
 ) => {
   try {
-    const history =
-      await plays_view_browser_storage_load_view_history(view_id)
+    const history = await plays_view_browser_storage_load_view_history(view_id)
     if (history.length === 0) {
       return null
     }
@@ -168,9 +165,7 @@ export const plays_view_browser_storage_cleanup_old_views = async () => {
 
     metadata.last_cleanup = Date.now()
 
-    if (
-      view_ids.length <= PLAYS_VIEW_BROWSER_STORAGE_CONFIG.MAX_VIEWS_CACHED
-    ) {
+    if (view_ids.length <= PLAYS_VIEW_BROWSER_STORAGE_CONFIG.MAX_VIEWS_CACHED) {
       local_storage_helper.setItem(
         PLAYS_VIEW_BROWSER_STORAGE_CONFIG.METADATA_KEY,
         metadata
@@ -271,9 +266,7 @@ export const plays_view_browser_storage_load_metadata = async () => {
   }
 }
 
-const plays_view_browser_storage_update_metadata_for_view = async (
-  view_id
-) => {
+const plays_view_browser_storage_update_metadata_for_view = async (view_id) => {
   try {
     const metadata = await plays_view_browser_storage_load_metadata()
     if (!metadata.view_access_times) {

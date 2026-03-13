@@ -165,8 +165,7 @@ class PlaysViewQueue {
         })
 
       if (plays_view_results && plays_view_results.length) {
-        const cache_ttl =
-          plays_view_metadata.cache_ttl || 12 * 60 * 60
+        const cache_ttl = plays_view_metadata.cache_ttl || 12 * 60 * 60
         await redis_cache.set(
           cache_key,
           { plays_view_results, plays_view_metadata },

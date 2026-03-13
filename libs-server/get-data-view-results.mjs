@@ -1499,7 +1499,10 @@ export const get_data_view_results_query = async ({
       })
 
       if (available_splits.includes('year')) {
-        if (select_columns.length && !is_year_offset_range(group_column_params)) {
+        if (
+          select_columns.length &&
+          !is_year_offset_range(group_column_params)
+        ) {
           const column_definition =
             data_views_column_definitions[select_columns[0].column_id]
           if (column_definition && column_definition.year_select) {

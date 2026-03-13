@@ -172,7 +172,10 @@ export async function get_plays_view_results_query({
     // Add select expressions
     if (group_by) {
       // In aggregate mode, check if this column should be included
-      if (column_def.player_group_by && column_def.player_group_by !== group_by) {
+      if (
+        column_def.player_group_by &&
+        column_def.player_group_by !== group_by
+      ) {
         // Skip player name columns when group_by doesn't match the player role
         continue
       }
@@ -233,7 +236,12 @@ export async function get_plays_view_results_query({
         'nfl_games.h',
         'nfl_games.v'
       )
-      query.groupBy('nfl_plays.esbid', 'nfl_games.week', 'nfl_games.h', 'nfl_games.v')
+      query.groupBy(
+        'nfl_plays.esbid',
+        'nfl_games.week',
+        'nfl_games.h',
+        'nfl_games.v'
+      )
     }
 
     // Add play count in aggregate mode
@@ -251,7 +259,10 @@ export async function get_plays_view_results_query({
   for (const sort_item of sort) {
     const column_def = plays_view_column_definitions[sort_item.column_id]
     if (column_def) {
-      const sort_column = column_def.sort_column_name || column_def.column_name || sort_item.column_id
+      const sort_column =
+        column_def.sort_column_name ||
+        column_def.column_name ||
+        sort_item.column_id
       query.orderBy(sort_column, sort_item.desc ? 'desc' : 'asc')
     }
   }
@@ -335,7 +346,13 @@ const SIMPLE_OPERATORS = new Set(['=', '!=', '>', '>=', '<', '<='])
 const LIKE_OPERATORS = new Set(['ILIKE', 'NOT ILIKE', 'LIKE', 'NOT LIKE'])
 const NULL_OPERATORS = new Set(['IS NULL', 'IS NOT NULL'])
 
-function apply_where_clause({ query, clause, where_expr, group_by, column_def }) {
+function apply_where_clause({
+  query,
+  clause,
+  where_expr,
+  group_by,
+  column_def
+}) {
   const { operator, value } = clause
   const use_having = group_by && column_def.use_having
   const apply_raw = use_having
@@ -358,7 +375,10 @@ function apply_where_clause({ query, clause, where_expr, group_by, column_def })
   } else if (operator === 'NOT IN') {
     const values = Array.isArray(value) ? value : [value]
     if (use_having) {
-      apply_raw(`${where_expr} NOT IN (${values.map(() => '?').join(',')})`, values)
+      apply_raw(
+        `${where_expr} NOT IN (${values.map(() => '?').join(',')})`,
+        values
+      )
     } else {
       query.whereNotIn(db.raw(where_expr), values)
     }

@@ -120,8 +120,7 @@ export default function PlaysPage({
     })
   }, [selected_plays_view, plays_view_request, plays_view_changed])
 
-  const is_view_loading =
-    view_id && selected_plays_view.view_id !== view_id
+  const is_view_loading = view_id && selected_plays_view.view_id !== view_id
 
   const is_fetching_more =
     plays_view_request.status === 'pending' ||

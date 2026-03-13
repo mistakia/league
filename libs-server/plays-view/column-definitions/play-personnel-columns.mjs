@@ -24,7 +24,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.box_defenders as play_box_defenders'],
     main_where: () => 'nfl_plays.box_defenders',
-    aggregate_select: () => db.raw('AVG(nfl_plays.box_defenders) as play_box_defenders'),
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.box_defenders) as play_box_defenders'),
     use_having: true
   },
   play_pass_rushers: {
@@ -32,7 +33,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.pass_rushers as play_pass_rushers'],
     main_where: () => 'nfl_plays.pass_rushers',
-    aggregate_select: () => db.raw('AVG(nfl_plays.pass_rushers) as play_pass_rushers'),
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.pass_rushers) as play_pass_rushers'),
     use_having: true
   },
   play_blitzers: {

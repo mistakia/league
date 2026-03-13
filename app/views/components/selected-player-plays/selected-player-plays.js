@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
@@ -55,12 +55,7 @@ const get_default_columns_for_position = (pos) => {
         'play_epa'
       ]
     default:
-      return [
-        'play_type',
-        'play_yds_gained',
-        'play_td',
-        'play_epa'
-      ]
+      return ['play_type', 'play_yds_gained', 'play_td', 'play_epa']
   }
 }
 
@@ -72,7 +67,10 @@ export default function SelectedPlayerPlays({
   const pid = player_map.get('pid')
   const pos = player_map.get('pos')
 
-  const columns = get_default_columns_for_position(pos)
+  const columns = useMemo(
+    () => get_default_columns_for_position(pos),
+    [pos]
+  )
   const table_state = {
     columns,
     prefix_columns: ['play_desc'],
@@ -98,7 +96,7 @@ export default function SelectedPlayerPlays({
       sort: [{ column_id: 'play_sequence', desc: true }],
       source: 'selected_player'
     })
-  }, [pid, pos, send_plays_request])
+  }, [pid, pos, send_plays_request, columns])
 
   const plays = selected_player_plays_request.get('result').toJS()
   const status = selected_player_plays_request.get('status')
@@ -117,9 +115,7 @@ export default function SelectedPlayerPlays({
 
     if (status === 'processing') {
       return (
-        <div className='selected-player-plays__status'>
-          Loading plays...
-        </div>
+        <div className='selected-player-plays__status'>Loading plays...</div>
       )
     }
 

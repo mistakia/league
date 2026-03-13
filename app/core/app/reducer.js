@@ -9,7 +9,10 @@ import { roster_actions } from '@core/rosters'
 import { team_actions } from '@core/teams'
 import { matchups_actions } from '@core/matchups'
 import { data_views_actions, default_data_view_view_id } from '@core/data-views'
-import { plays_views_actions, default_plays_view_view_id } from '@core/plays-view'
+import {
+  plays_views_actions,
+  default_plays_view_view_id
+} from '@core/plays-view'
 import { create_user_record, User } from './user'
 
 const initialState = new Record({

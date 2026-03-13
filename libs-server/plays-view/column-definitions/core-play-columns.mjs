@@ -39,7 +39,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.yards_to_go as play_yards_to_go'],
     main_where: () => 'nfl_plays.yards_to_go',
-    aggregate_select: () => db.raw('AVG(nfl_plays.yards_to_go) as play_yards_to_go'),
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.yards_to_go) as play_yards_to_go'),
     use_having: true
   },
   play_ydl_100: {

@@ -19,7 +19,8 @@ export default {
   play_yds_gained_avg: 'Average yards gained per play',
   play_first_down: 'Whether the play resulted in a first down',
   play_td: 'Whether the play resulted in a touchdown',
-  play_successful: 'Whether the play was successful (gained expected yards based on down and distance)',
+  play_successful:
+    'Whether the play was successful (gained expected yards based on down and distance)',
   play_epa: 'Expected Points Added - average EPA per play',
   play_epa_total: 'Expected Points Added - total EPA',
   play_wpa: 'Win Probability Added per play',
@@ -65,7 +66,8 @@ export default {
   play_endzone_target: 'Whether the target was in the end zone',
 
   // Context fields
-  play_score_diff: 'Score differential from the perspective of the possession team',
+  play_score_diff:
+    'Score differential from the perspective of the possession team',
   play_home_score: 'Home team score at the time of the play',
   play_away_score: 'Away team score at the time of the play',
   play_sec_rem_half: 'Seconds remaining in the half',

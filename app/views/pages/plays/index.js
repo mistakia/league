@@ -28,7 +28,13 @@ const map_state_to_props = createSelector(
   get_plays_views,
   (state) => state.getIn(['app', 'user', 'username']),
   (state) => state.get('plays_view_request'),
-  (userId, selected_plays_view, plays_views, user_username, plays_view_request) => ({
+  (
+    userId,
+    selected_plays_view,
+    plays_views,
+    user_username,
+    plays_view_request
+  ) => ({
     user_id: userId,
     plays: plays_view_request.get('result').toJS(),
     isLoggedIn: Boolean(userId),

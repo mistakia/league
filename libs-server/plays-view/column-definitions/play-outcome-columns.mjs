@@ -6,7 +6,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.yds_gained as play_yds_gained'],
     main_where: () => 'nfl_plays.yds_gained',
-    aggregate_select: () => db.raw('SUM(nfl_plays.yds_gained) as play_yds_gained'),
+    aggregate_select: () =>
+      db.raw('SUM(nfl_plays.yds_gained) as play_yds_gained'),
     use_having: true
   },
   play_yds_gained_avg: {
@@ -14,7 +15,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.yds_gained as play_yds_gained_avg'],
     main_where: () => 'nfl_plays.yds_gained',
-    aggregate_select: () => db.raw('AVG(nfl_plays.yds_gained) as play_yds_gained_avg'),
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.yds_gained) as play_yds_gained_avg'),
     use_having: true
   },
   play_first_down: {
@@ -22,7 +24,10 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.first_down as play_first_down'],
     main_where: () => 'nfl_plays.first_down',
-    aggregate_select: () => db.raw('SUM(CASE WHEN nfl_plays.first_down = true THEN 1 ELSE 0 END) as play_first_down'),
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.first_down = true THEN 1 ELSE 0 END) as play_first_down'
+      ),
     use_having: true
   },
   play_td: {
@@ -30,7 +35,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.td as play_td'],
     main_where: () => 'nfl_plays.td',
-    aggregate_select: () => db.raw('SUM(CASE WHEN nfl_plays.td = true THEN 1 ELSE 0 END) as play_td'),
+    aggregate_select: () =>
+      db.raw('SUM(CASE WHEN nfl_plays.td = true THEN 1 ELSE 0 END) as play_td'),
     use_having: true
   },
   play_successful: {
@@ -38,7 +44,10 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.successful_play as play_successful'],
     main_where: () => 'nfl_plays.successful_play',
-    aggregate_select: () => db.raw('SUM(CASE WHEN nfl_plays.successful_play = true THEN 1 ELSE 0 END) as play_successful'),
+    aggregate_select: () =>
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.successful_play = true THEN 1 ELSE 0 END) as play_successful'
+      ),
     use_having: true
   },
   play_epa: {
@@ -90,7 +99,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.xpass_prob as play_xpass_prob'],
     main_where: () => 'nfl_plays.xpass_prob',
-    aggregate_select: () => db.raw('AVG(nfl_plays.xpass_prob) as play_xpass_prob'),
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.xpass_prob) as play_xpass_prob'),
     use_having: true
   },
   play_pass_oe: {

@@ -2,28 +2,19 @@
   "name": "year offset range no duplicate base years",
   "description": "Verifies that year_offset range columns do not expand base_years and do not produce a redundant LEFT JOIN when no WHERE filter exists on the offset column",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_rush_attempts_from_plays",
         "params": {
-          "year": [
-            2024
-          ]
+          "year": [2024]
         }
       },
       {
         "column_id": "player_rush_attempts_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "year_offset": [
-            1,
-            30
-          ]
+          "year": [2024],
+          "year_offset": [1, 30]
         }
       }
     ],
@@ -34,16 +25,12 @@
         "desc": true
       }
     ],
-    "splits": [
-      "year"
-    ],
+    "splits": ["year"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ]
   },

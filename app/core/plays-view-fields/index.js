@@ -43,7 +43,17 @@ const plays_view_fields = {
     header_label: 'TYPE',
     size: 60,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['PASS', 'RUSH', 'PUNT', 'KICK', 'FGXP', 'NOPL', 'KOFF', 'ONSD', 'CONV']
+    column_values: [
+      'PASS',
+      'RUSH',
+      'PUNT',
+      'KICK',
+      'FGXP',
+      'NOPL',
+      'KOFF',
+      'ONSD',
+      'CONV'
+    ]
   }),
   play_off_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
@@ -351,7 +361,16 @@ const plays_view_fields = {
     header_label: 'FORM',
     size: 80,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    column_values: ['SHOTGUN', 'UNDER_CENTER', 'PISTOL', 'EMPTY', 'WILDCAT', 'JUMBO', 'I_FORM', 'SINGLEBACK']
+    column_values: [
+      'SHOTGUN',
+      'UNDER_CENTER',
+      'PISTOL',
+      'EMPTY',
+      'WILDCAT',
+      'JUMBO',
+      'I_FORM',
+      'SINGLEBACK'
+    ]
   }),
   play_off_personnel: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],

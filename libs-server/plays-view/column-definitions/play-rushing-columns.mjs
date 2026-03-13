@@ -38,9 +38,14 @@ export default {
   play_yards_after_contact: {
     column_name: 'yards_after_any_contact',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.yards_after_any_contact as play_yards_after_contact'],
+    main_select: () => [
+      'nfl_plays.yards_after_any_contact as play_yards_after_contact'
+    ],
     main_where: () => 'nfl_plays.yards_after_any_contact',
-    aggregate_select: () => db.raw('AVG(nfl_plays.yards_after_any_contact) as play_yards_after_contact'),
+    aggregate_select: () =>
+      db.raw(
+        'AVG(nfl_plays.yards_after_any_contact) as play_yards_after_contact'
+      ),
     use_having: true
   },
   play_broken_tackles: {
@@ -48,7 +53,8 @@ export default {
     table_name: 'nfl_plays',
     main_select: () => ['nfl_plays.broken_tackles_rush as play_broken_tackles'],
     main_where: () => 'nfl_plays.broken_tackles_rush',
-    aggregate_select: () => db.raw('SUM(nfl_plays.broken_tackles_rush) as play_broken_tackles'),
+    aggregate_select: () =>
+      db.raw('SUM(nfl_plays.broken_tackles_rush) as play_broken_tackles'),
     use_having: true
   },
   play_run_location: {

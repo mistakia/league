@@ -269,9 +269,7 @@ describe('Plays View', () => {
         })
         throw new Error('Expected an error to be thrown')
       } catch (error) {
-        expect(error.message).to.equal(
-          'Invalid group_by value: invalid_group'
-        )
+        expect(error.message).to.equal('Invalid group_by value: invalid_group')
       }
     })
 
