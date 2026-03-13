@@ -17,14 +17,14 @@ export default {
   play_timestamp: {
     column_name: 'timestamp',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays."timestamp" as play_timestamp'],
+    main_select: () => [db.raw('nfl_plays."timestamp" as play_timestamp')],
     main_where: () => 'nfl_plays."timestamp"'
   },
   play_game_timestamp: {
     column_name: 'timestamp',
     table_name: 'nfl_games',
     sort_column_name: 'nfl_games."timestamp"',
-    main_select: () => ['nfl_games."timestamp" as play_game_timestamp'],
+    main_select: () => [db.raw('nfl_games."timestamp" as play_game_timestamp')],
     main_where: () => 'nfl_games."timestamp"',
     join: join_nfl_games
   },
