@@ -15669,7 +15669,7 @@ __metadata:
     react-redux: "npm:^9.2.0"
     react-router: "npm:^6.28.1"
     react-router-dom: "npm:^6.28.1"
-    react-table: "mistakia/react-table#b25dd28236be4a06927831a5fa41d6ad777282c9"
+    react-table: "mistakia/react-table#d9941512b5f0b29c7eb5a94a155a508dd1722964"
     react-virtualized-compat: "npm:^2.0.0"
     redux: "npm:^5.0.1"
     redux-first-history: "npm:^5.2.0"
