@@ -25045,6 +25045,21 @@ CREATE TABLE public.user_data_views (
 
 
 --
+-- Name: user_plays_views; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_plays_views (
+    view_id character varying(36) NOT NULL,
+    view_name character varying(255) NOT NULL,
+    view_description text,
+    table_state json,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    user_id bigint
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -26239,6 +26254,14 @@ ALTER TABLE ONLY public.restricted_free_agency_bids
 
 ALTER TABLE ONLY public.user_data_views
     ADD CONSTRAINT "idx_25118_PRIMARY" PRIMARY KEY (view_id);
+
+
+--
+-- Name: user_plays_views user_plays_views_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_plays_views
+    ADD CONSTRAINT user_plays_views_pkey PRIMARY KEY (view_id);
 
 
 --

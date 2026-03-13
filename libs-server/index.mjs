@@ -80,6 +80,10 @@ export {
   default as get_data_view_results,
   get_data_view_results_query
 } from './get-data-view-results.mjs'
+export {
+  default as get_plays_view_results,
+  get_plays_view_results_query
+} from './plays-view/get-plays-view-results.mjs'
 export { default as update_play, compute_play_changes } from './update-play.mjs'
 export { default as update_nfl_game } from './update-nfl-game.mjs'
 export * as betonline from './betonline.mjs'

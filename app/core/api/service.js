@@ -383,6 +383,26 @@ export const api = {
     const url = `${API_URL}/data-views/${data_view_id}`
     return { url }
   },
+  post_plays_view(data) {
+    const url = `${API_URL}/plays/views`
+    return { url, ...POST(data) }
+  },
+  delete_plays_view({ view_id }) {
+    const url = `${API_URL}/plays/views/${view_id}`
+    return { url, method: 'DELETE' }
+  },
+  get_plays_views({ user_id, username }) {
+    let url = `${API_URL}/plays/views`
+    const params = new URLSearchParams()
+    if (user_id) params.append('user_id', user_id)
+    if (username) params.append('username', username)
+    if (params.toString()) url += `?${params.toString()}`
+    return { url }
+  },
+  get_plays_view({ data_view_id }) {
+    const url = `${API_URL}/plays/views/${data_view_id}`
+    return { url }
+  },
   post_restricted_free_agent_nomination({ teamId, ...data }) {
     const url = `${API_URL}/teams/${teamId}/tag/restricted-free-agency/nominate`
     return { url, ...POST(data) }
