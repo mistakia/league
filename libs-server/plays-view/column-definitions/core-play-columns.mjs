@@ -1,6 +1,33 @@
 import db from '#db'
 
+const join_nfl_games = ({ query, join_state }) => {
+  if (!join_state.nfl_games) {
+    query.leftJoin('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
+    join_state.nfl_games = true
+  }
+}
+
 export default {
+  play_esbid: {
+    column_name: 'esbid',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays.esbid as play_esbid'],
+    main_where: () => 'nfl_plays.esbid'
+  },
+  play_timestamp: {
+    column_name: 'timestamp',
+    table_name: 'nfl_plays',
+    main_select: () => ['nfl_plays."timestamp" as play_timestamp'],
+    main_where: () => 'nfl_plays."timestamp"'
+  },
+  play_game_timestamp: {
+    column_name: 'timestamp',
+    table_name: 'nfl_games',
+    sort_column_name: 'nfl_games."timestamp"',
+    main_select: () => ['nfl_games."timestamp" as play_game_timestamp'],
+    main_where: () => 'nfl_games."timestamp"',
+    join: join_nfl_games
+  },
   play_desc: {
     column_name: 'desc',
     table_name: 'nfl_plays',

@@ -204,6 +204,10 @@ export async function get_plays_view_results_query({
   // Apply WHERE clauses from column-specific filters
   for (const clause of where) {
     const column_def = plays_view_column_definitions[clause.column_id]
+    // Ensure joins are applied for where columns
+    if (column_def.join) {
+      column_def.join({ query, join_state, group_by })
+    }
     if (column_def.main_where) {
       const where_expr = column_def.main_where({
         query,
@@ -260,6 +264,10 @@ export async function get_plays_view_results_query({
   for (const sort_item of sort) {
     const column_def = plays_view_column_definitions[sort_item.column_id]
     if (column_def) {
+      // Ensure joins are applied for sort columns
+      if (column_def.join) {
+        column_def.join({ query, join_state, group_by })
+      }
       const sort_column =
         column_def.sort_column_name ||
         column_def.column_name ||

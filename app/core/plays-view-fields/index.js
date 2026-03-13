@@ -33,6 +33,21 @@ const play_boolean_field = (field) => ({
 
 const plays_view_fields = {
   // Core play fields
+  play_esbid: play_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
+    header_label: 'ESBID',
+    size: 90
+  }),
+  play_timestamp: play_text_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
+    header_label: 'TIME',
+    size: 70
+  }),
+  play_game_timestamp: play_field({
+    column_groups: [PLAYS_COLUMN_GROUPS.CORE],
+    header_label: 'GTIME',
+    size: 90
+  }),
   play_desc: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'DESC',

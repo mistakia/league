@@ -1,5 +1,8 @@
 export default {
   // Core play fields
+  play_esbid: 'The ESPN game identifier (ESBID)',
+  play_timestamp: 'The wall-clock time the play occurred (HH:MM:SS)',
+  play_game_timestamp: 'The game start time as a unix timestamp',
   play_desc: 'The text description of the play',
   play_type: 'The type of play (PASS, RUSH, etc.)',
   play_off_team: 'The offensive team on the play',

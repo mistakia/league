@@ -11,14 +11,32 @@ export const default_plays_views = {
     table_state: {
       sort: [
         {
-          column_id: 'play_sequence',
+          column_id: 'play_week',
           desc: true
+        },
+        {
+          column_id: 'play_game_timestamp',
+          desc: true
+        },
+        {
+          column_id: 'play_esbid',
+          desc: true
+        },
+        {
+          column_id: 'play_sequence',
+          desc: false
         }
       ],
-      prefix_columns: ['play_desc'],
+      prefix_columns: [
+        'play_year',
+        'play_week',
+        'play_off_team',
+        'play_def_team',
+        'play_quarter',
+        'play_game_clock'
+      ],
       columns: [
         'play_type',
-        'play_off_team',
         'play_down',
         'play_yards_to_go',
         'play_yds_gained',
@@ -49,11 +67,30 @@ export const default_plays_views = {
     table_state: {
       sort: [
         {
-          column_id: 'play_sequence',
+          column_id: 'play_week',
           desc: true
+        },
+        {
+          column_id: 'play_game_timestamp',
+          desc: true
+        },
+        {
+          column_id: 'play_esbid',
+          desc: true
+        },
+        {
+          column_id: 'play_sequence',
+          desc: false
         }
       ],
-      prefix_columns: ['play_desc'],
+      prefix_columns: [
+        'play_year',
+        'play_week',
+        'play_off_team',
+        'play_def_team',
+        'play_quarter',
+        'play_game_clock'
+      ],
       columns: [
         'play_passer',
         'play_target',
@@ -86,11 +123,30 @@ export const default_plays_views = {
     table_state: {
       sort: [
         {
-          column_id: 'play_sequence',
+          column_id: 'play_week',
           desc: true
+        },
+        {
+          column_id: 'play_game_timestamp',
+          desc: true
+        },
+        {
+          column_id: 'play_esbid',
+          desc: true
+        },
+        {
+          column_id: 'play_sequence',
+          desc: false
         }
       ],
-      prefix_columns: ['play_desc'],
+      prefix_columns: [
+        'play_year',
+        'play_week',
+        'play_off_team',
+        'play_def_team',
+        'play_quarter',
+        'play_game_clock'
+      ],
       columns: [
         'play_rusher',
         'play_rush_yds',
