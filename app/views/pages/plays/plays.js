@@ -1,7 +1,8 @@
 import React, { useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import Table from 'react-table/index.js'
+import generate_view_id from 'react-table/src/utils/generate-view-id.js'
 
 import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
@@ -31,6 +32,7 @@ export default function PlaysPage({
   reset_plays_view_cache,
   load_plays_view
 }) {
+  const location = useLocation()
   const navigate = useNavigate()
   const { view_id } = useParams()
 
@@ -40,6 +42,47 @@ export default function PlaysPage({
       load_plays_view(view_id)
     }
   }, [load_plays_views, load_plays_view, view_id])
+
+  useEffect(() => {
+    if (!view_id) {
+      const search_params = new URLSearchParams(location.search)
+      const columns = JSON.parse(search_params.get('columns') || 'null') || []
+      const sort = JSON.parse(search_params.get('sort') || 'null') || []
+      const where = JSON.parse(search_params.get('where') || 'null') || []
+      const prefix_columns =
+        JSON.parse(search_params.get('prefix_columns') || 'null') || []
+      const view_name = search_params.get('view_name') || ''
+      const view_description = search_params.get('view_description') || ''
+
+      const has_table_state =
+        columns.length || where.length || (prefix_columns.length && sort.length)
+
+      if (has_table_state) {
+        plays_view_changed(
+          {
+            view_id: generate_view_id(),
+            view_name,
+            view_description,
+            table_state: {
+              columns,
+              sort,
+              where,
+              prefix_columns
+            },
+            saved_table_state: {
+              columns,
+              sort,
+              where,
+              prefix_columns
+            }
+          },
+          {
+            view_state_changed: true
+          }
+        )
+      }
+    }
+  }, [location, plays_view_changed, view_id])
 
   const on_view_change = (data_view, view_change_params = {}) => {
     if (view_change_params.is_new_view) {
