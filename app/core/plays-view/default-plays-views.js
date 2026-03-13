@@ -31,7 +31,7 @@ export const default_plays_views = {
         {
           column_id: 'play_year',
           operator: '=',
-          value: String(current_season.year)
+          value: String(current_season.stats_season_year)
         }
       ]
     }
@@ -63,7 +63,7 @@ export const default_plays_views = {
         {
           column_id: 'play_year',
           operator: '=',
-          value: String(current_season.year)
+          value: String(current_season.stats_season_year)
         },
         {
           column_id: 'play_type',
@@ -100,7 +100,7 @@ export const default_plays_views = {
         {
           column_id: 'play_year',
           operator: '=',
-          value: String(current_season.year)
+          value: String(current_season.stats_season_year)
         },
         {
           column_id: 'play_type',

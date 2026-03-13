@@ -100,10 +100,11 @@ export async function get_plays_view_results_query({
     throw new Error(`Invalid group_by value: ${group_by}`)
   }
 
-  // Default year to current season
+  // Default year to current season, unless play_year is in WHERE clauses
   const query_params = { ...params }
-  if (!query_params.year) {
-    query_params.year = [current_season.year]
+  const has_year_in_where = where.some((c) => c.column_id === 'play_year')
+  if (!query_params.year && !has_year_in_where) {
+    query_params.year = [current_season.stats_season_year]
   }
 
   // Build base query

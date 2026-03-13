@@ -89,7 +89,7 @@ export default {
   },
 
   output: {
-    path: path.join(__dirname, '..', 'app'),
+    path: path.join(__dirname, '..', 'dist'),
     globalObject: 'this'
   },
 

@@ -87,5 +87,9 @@ export {
   api_get_league_careerlogs,
   api_get_data_views,
   api_get_data_view,
-  api_get_season
+  api_get_season,
+  api_post_plays_view,
+  api_delete_plays_view,
+  api_get_plays_views,
+  api_get_plays_view
 } from './sagas'
