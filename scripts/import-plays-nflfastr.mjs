@@ -347,7 +347,16 @@ const format_series_data = (play) => ({
   series_result: format_series_result(play.series_result)
 })
 
+const derive_game_clock_start = (sec_rem_qtr) => {
+  const seconds = format_number(sec_rem_qtr)
+  if (seconds == null) return null
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+}
+
 const format_game_clock = (play) => ({
+  game_clock_start: derive_game_clock_start(play.quarter_seconds_remaining),
   game_clock_end: normalize_game_clock(play.end_clock_time),
   sec_rem_qtr: format_number(play.quarter_seconds_remaining),
   sec_rem_half: format_number(play.half_seconds_remaining),
