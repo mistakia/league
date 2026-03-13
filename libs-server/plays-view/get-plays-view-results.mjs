@@ -264,7 +264,8 @@ export async function get_plays_view_results_query({
         column_def.sort_column_name ||
         column_def.column_name ||
         sort_item.column_id
-      query.orderBy(sort_column, sort_item.desc ? 'desc' : 'asc')
+      const sort_direction = sort_item.desc ? 'desc' : 'asc'
+      query.orderByRaw(`${sort_column} ${sort_direction} NULLS LAST`)
     }
   }
 

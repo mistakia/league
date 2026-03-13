@@ -67,10 +67,7 @@ export default function SelectedPlayerPlays({
   const pid = player_map.get('pid')
   const pos = player_map.get('pos')
 
-  const columns = useMemo(
-    () => get_default_columns_for_position(pos),
-    [pos]
-  )
+  const columns = useMemo(() => get_default_columns_for_position(pos), [pos])
   const table_state = {
     columns,
     prefix_columns: ['play_desc'],
