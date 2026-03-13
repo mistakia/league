@@ -109,6 +109,12 @@ import {
   get_data_views_actions,
   get_data_view_actions
 } from '@core/data-views/actions'
+import {
+  post_plays_view_actions,
+  delete_plays_view_actions,
+  get_plays_views_actions,
+  get_plays_view_actions
+} from '@core/plays-view/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 import { get_season_actions } from '@core/seasons/actions'
 
@@ -607,4 +613,28 @@ export const api_get_season = fetch.bind(
   null,
   api.get_season,
   get_season_actions
+)
+
+export const api_post_plays_view = fetch.bind(
+  null,
+  api.post_plays_view,
+  post_plays_view_actions
+)
+
+export const api_delete_plays_view = fetch.bind(
+  null,
+  api.delete_plays_view,
+  delete_plays_view_actions
+)
+
+export const api_get_plays_views = fetch.bind(
+  null,
+  api.get_plays_views,
+  get_plays_views_actions
+)
+
+export const api_get_plays_view = fetch.bind(
+  null,
+  api.get_plays_view,
+  get_plays_view_actions
 )

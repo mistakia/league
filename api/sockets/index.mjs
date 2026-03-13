@@ -1,6 +1,7 @@
 import Auction from './auction.mjs'
 import Scoreboard from './scoreboard.mjs'
 import handle_data_view_socket from './data_view.mjs'
+import handle_plays_view_socket from './plays_view.mjs'
 import handle_external_league_import_socket, {
   handle_client_disconnect,
   MESSAGE_TYPES
@@ -12,6 +13,7 @@ const auctions = new Map()
 export default function (wss) {
   const scoreboard = new Scoreboard(wss)
   handle_data_view_socket(wss)
+  handle_plays_view_socket(wss)
 
   wss.on('connection', function (ws, request) {
     const user_id = request.auth ? request.auth.userId : null

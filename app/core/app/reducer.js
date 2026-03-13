@@ -9,6 +9,7 @@ import { roster_actions } from '@core/rosters'
 import { team_actions } from '@core/teams'
 import { matchups_actions } from '@core/matchups'
 import { data_views_actions, default_data_view_view_id } from '@core/data-views'
+import { plays_views_actions, default_plays_view_view_id } from '@core/plays-view'
 import { create_user_record, User } from './user'
 
 const initialState = new Record({
@@ -25,6 +26,7 @@ const initialState = new Record({
   teamIds: new List(),
   leagueIds: new List([league_defaults.LEAGUE_ID]),
   selected_data_view_id: default_data_view_view_id,
+  selected_plays_view_id: default_plays_view_view_id,
 
   is_loading_rosters: null,
   is_loaded_rosters: null
@@ -159,6 +161,32 @@ export function app_reducer(state = initialState(), { payload, type }) {
       ) {
         return state.merge({
           selected_data_view_id: payload.data_view.view_id
+        })
+      }
+      return state
+
+    case plays_views_actions.SET_SELECTED_PLAYS_VIEW:
+      return state.merge({
+        selected_plays_view_id: payload.data_view_id
+      })
+
+    case plays_views_actions.POST_PLAYS_VIEW_FULFILLED:
+      if (
+        payload.opts.client_generated_view_id ===
+          state.get('selected_plays_view_id') &&
+        payload.data.view_id !== payload.opts.client_generated_view_id
+      ) {
+        return state.set('selected_plays_view_id', payload.data.view_id)
+      }
+      return state
+
+    case plays_views_actions.PLAYS_VIEW_CHANGED:
+      if (
+        payload.view_change_params &&
+        payload.view_change_params.view_state_changed
+      ) {
+        return state.merge({
+          selected_plays_view_id: payload.data_view.view_id
         })
       }
       return state

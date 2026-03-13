@@ -30,6 +30,9 @@ import { league_team_daily_values_reducer } from './league-team-daily-values'
 import { data_views_reducer } from './data-views'
 import { league_careerlogs_reducer } from './league-careerlogs'
 import { data_view_request_reducer } from './data-view-request/reducer'
+import { plays_views_reducer } from './plays-view'
+import { plays_view_request_reducer } from './plays-view-request/reducer'
+import { selected_player_plays_request_reducer } from './selected-player-plays-request/reducer'
 import { seasons_reducer } from './seasons'
 
 const rootReducer = (router) =>
@@ -65,6 +68,9 @@ const rootReducer = (router) =>
     data_views: data_views_reducer,
     league_careerlogs: league_careerlogs_reducer,
     data_view_request: data_view_request_reducer,
+    plays_views: plays_views_reducer,
+    plays_view_request: plays_view_request_reducer,
+    selected_player_plays_request: selected_player_plays_request_reducer,
     seasons: seasons_reducer
   })
 

@@ -1,10 +1,16 @@
 import express from 'express'
+import crypto from 'crypto'
 
 import {
   getChartedPlayByPlayQuery,
   getPlayByPlayQuery,
-  redis_cache
+  redis_cache,
+  validators
 } from '#libs-server'
+import get_plays_view_results, {
+  get_plays_view_hash
+} from '#libs-server/plays-view/get-plays-view-results.mjs'
+import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
 import { current_season } from '#constants'
 
 const router = express.Router()
@@ -580,6 +586,340 @@ router.get('/charted', async (req, res) => {
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
+  }
+})
+
+// ============================================================================
+// PLAYS VIEW ENDPOINTS
+// ============================================================================
+
+router.post('/views/search', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const {
+      columns,
+      prefix_columns,
+      where,
+      sort,
+      params,
+      group_by,
+      offset,
+      limit
+    } = req.body
+
+    const cache_key = `/plays-views/${get_plays_view_hash({
+      columns,
+      prefix_columns,
+      where,
+      sort,
+      params,
+      group_by,
+      offset,
+      limit
+    })}`
+    const cached_result = await redis_cache.get(cache_key)
+
+    if (cached_result) {
+      const result = Array.isArray(cached_result)
+        ? cached_result
+        : cached_result.plays_view_results
+      return res.send(result)
+    }
+
+    const { plays_view_results, plays_view_metadata } =
+      await get_plays_view_results({
+        columns,
+        prefix_columns,
+        where,
+        sort,
+        params,
+        group_by,
+        offset,
+        limit,
+        timeout: 30000
+      })
+
+    if (plays_view_results && plays_view_results.length) {
+      const cache_ttl = plays_view_metadata.cache_ttl || 12 * 60 * 60
+      await redis_cache.set(cache_key, { plays_view_results, plays_view_metadata }, cache_ttl)
+    }
+
+    res.send(plays_view_results)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/views', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { user_id, username } = req.query
+    const user_ids = []
+
+    if (username) {
+      const user = await db('users').where({ username }).first()
+      if (user) {
+        user_ids.push(user.id)
+      }
+    }
+
+    if (user_id) {
+      user_ids.push(user_id)
+    }
+
+    const query = db('user_plays_views')
+      .select('user_plays_views.*', 'users.username as view_username')
+      .leftJoin('users', 'user_plays_views.user_id', 'users.id')
+
+    if (user_ids.length) {
+      query.whereIn('user_plays_views.user_id', user_ids)
+    }
+
+    query.limit(100)
+
+    const views = await query
+    return res.status(200).send(views)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/views/export/:view_id/:export_format', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const { view_id, export_format } = req.params
+    const ignore_cache = req.query.ignore_cache === 'true'
+    const limit = req.query.limit ? Number(req.query.limit) || null : null
+
+    const view = await db('user_plays_views').where({ view_id }).first()
+
+    if (!view) {
+      return res.status(400).send({ error: 'invalid view_id' })
+    }
+
+    const valid_formats = ['csv', 'json']
+    if (!valid_formats.includes(export_format)) {
+      return res.status(400).send({ error: 'invalid export_format' })
+    }
+
+    const { table_state } = view
+
+    const cache_key = `/plays-views/${get_plays_view_hash({
+      columns: table_state.columns,
+      prefix_columns: table_state.prefix_columns,
+      where: table_state.where,
+      sort: table_state.sort,
+      params: table_state.params,
+      group_by: table_state.group_by,
+      offset: table_state.offset,
+      limit: limit || table_state.limit
+    })}`
+
+    let plays_view_results
+
+    if (!ignore_cache) {
+      const cache_value = await redis_cache.get(cache_key)
+      if (cache_value) {
+        plays_view_results = Array.isArray(cache_value)
+          ? cache_value
+          : cache_value.plays_view_results
+      }
+    }
+
+    if (!plays_view_results) {
+      const result = await get_plays_view_results({
+        columns: table_state.columns,
+        prefix_columns: table_state.prefix_columns,
+        where: table_state.where,
+        sort: table_state.sort,
+        params: table_state.params,
+        group_by: table_state.group_by,
+        offset: table_state.offset,
+        limit: limit || table_state.limit,
+        timeout: 30000
+      })
+      plays_view_results = result.plays_view_results
+    }
+
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/:/g, '-')
+      .replace(/\..+/, '')
+    const file_name = `${view.view_name}-${timestamp}`
+
+    if (export_format === 'json') {
+      res.setHeader('Content-Type', 'application/json')
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file_name}.json"`
+      )
+      return res.send(JSON.stringify(plays_view_results))
+    }
+
+    // CSV
+    if (!plays_view_results || !plays_view_results.length) {
+      res.setHeader('Content-Type', 'text/csv')
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${file_name}.csv"`
+      )
+      return res.send('')
+    }
+
+    const fields = []
+    const field_set = new Set()
+    for (const row of plays_view_results) {
+      for (const field of Object.keys(row)) {
+        if (!field_set.has(field)) {
+          field_set.add(field)
+          fields.push(field)
+        }
+      }
+    }
+
+    const header = {}
+    for (const field of fields) {
+      header[field] = field
+    }
+
+    const normalized_results = plays_view_results.map((row) => {
+      const normalized_row = {}
+      for (const field of fields) {
+        normalized_row[field] = row[field] !== undefined ? row[field] : ''
+      }
+      return normalized_row
+    })
+
+    const csv_data = [header, ...normalized_results]
+    const formatted_results = convert_to_csv(csv_data)
+    res.setHeader('Content-Type', 'text/csv')
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${file_name}.csv"`
+    )
+    res.send(formatted_results)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/views/:view_id', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const { view_id } = req.params
+    const view = await db('user_plays_views')
+      .select('user_plays_views.*', 'users.username as view_username')
+      .leftJoin('users', 'user_plays_views.user_id', 'users.id')
+      .where({ view_id })
+      .first()
+
+    if (!view) {
+      return res.status(400).send({ error: 'invalid view_id' })
+    }
+
+    res.status(200).send(view)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.post('/views', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const { view_id, view_name, table_state, view_description } = req.body
+
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+
+    const user_id = req.auth.userId
+
+    if (validators.view_name_validator(view_name) !== true) {
+      return res.status(400).send({ error: 'invalid view_name' })
+    }
+
+    if (validators.view_description_validator(view_description) !== true) {
+      return res.status(400).send({ error: 'invalid view_description' })
+    }
+
+    if (validators.table_state_validator(table_state) !== true) {
+      return res.status(400).send({ error: 'invalid table_state' })
+    }
+
+    let result_view_id
+    if (view_id) {
+      const view = await db('user_plays_views').where({ view_id }).first()
+
+      if (!view) {
+        return res.status(400).send({ error: 'invalid view_id' })
+      }
+
+      if (view.user_id !== user_id) {
+        return res.status(401).send({ error: 'invalid userId' })
+      }
+
+      await db('user_plays_views')
+        .where({ view_id, user_id })
+        .update({
+          view_name,
+          view_description,
+          table_state: JSON.stringify(table_state)
+        })
+      result_view_id = view_id
+    } else {
+      result_view_id = crypto.randomUUID()
+
+      await db('user_plays_views').insert({
+        view_id: result_view_id,
+        view_name,
+        view_description,
+        table_state: JSON.stringify(table_state),
+        user_id
+      })
+    }
+
+    const view = await db('user_plays_views')
+      .where({ view_id: result_view_id })
+      .first()
+
+    res.status(200).send(view)
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+router.delete('/views/:view_id', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const { view_id } = req.params
+
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+
+    const user_id = req.auth.userId
+
+    const view = await db('user_plays_views').where({ view_id }).first()
+
+    if (!view) {
+      return res.status(400).send({ error: 'invalid view_id' })
+    }
+
+    if (view.user_id !== user_id) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+
+    await db('user_plays_views').where({ view_id, user_id }).del()
+
+    res.status(200).send({ success: true })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
   }
 })
 

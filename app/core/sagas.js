@@ -27,6 +27,7 @@ import { seasonlog_sagas } from './seasonlogs'
 import { percentile_sagas } from './percentiles'
 import { league_team_daily_values_sagas } from './league-team-daily-values'
 import { data_views_sagas } from './data-views'
+import { plays_views_sagas } from './plays-view'
 import { league_careerlogs_sagas } from './league-careerlogs'
 import { seasons_sagas } from './seasons'
 
@@ -59,6 +60,7 @@ export default function* rootSaga() {
     ...percentile_sagas,
     ...league_team_daily_values_sagas,
     ...data_views_sagas,
+    ...plays_views_sagas,
     ...league_careerlogs_sagas,
     ...seasons_sagas
   ])

@@ -33,6 +33,7 @@ import SelectedPlayerPractice from '@components/selected-player-practice'
 import SelectedPlayerSchedule from '@components/selected-player-schedule'
 import SelectedPlayerTransactions from '@components/selected-player-transactions'
 import SelectedPlayerMarkets from '@components/selected-player-markets'
+import SelectedPlayerPlays from '@components/selected-player-plays'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerContextMenu from '@components/player-context-menu'
 
@@ -62,7 +63,7 @@ export default function SelectedPlayer({
   is_hosted_league
 }) {
   const projectionView = 0
-  const transactionsView = 8
+  const transactionsView = 9
   const [value, setValue] = useState(
     is_logged_in && is_hosted_league ? transactionsView : projectionView
   )
@@ -389,6 +390,7 @@ export default function SelectedPlayer({
         >
           <TabsList>
             <Tab>Games</Tab>
+            <Tab>Plays</Tab>
             <Tab>Seasons</Tab>
             <Tab>Schedule</Tab>
             <Tab>Projections</Tab>
@@ -408,37 +410,40 @@ export default function SelectedPlayer({
             <SelectedPlayerGamelogs />
           </TabPanel>
           <TabPanel value={1}>
-            <SelectedPlayerSeasonStats pos={pos} />
+            <SelectedPlayerPlays />
           </TabPanel>
           <TabPanel value={2}>
-            <SelectedPlayerSchedule />
+            <SelectedPlayerSeasonStats pos={pos} />
           </TabPanel>
           <TabPanel value={3}>
+            <SelectedPlayerSchedule />
+          </TabPanel>
+          <TabPanel value={4}>
             <SelectedPlayerProjections />
           </TabPanel>
-          {/* <TabPanel value={4}>
+          {/* <TabPanel value={5}>
               <SelectedPlayerTeamStats />
               <SelectedPlayerTeamSituationSplits />
               <SelectedPlayerTeamPositionSplits />
               </TabPanel> */}
-          {/* <TabPanel value={5}>
+          {/* <TabPanel value={6}>
               <SelectedPlayerEfficiencyStats />
               </TabPanel> */}
-          <TabPanel value={4}>
+          <TabPanel value={5}>
             <SelectedPlayerPractice />
           </TabPanel>
-          <TabPanel value={5}>
+          <TabPanel value={6}>
             <SelectedPlayerMarkets />
           </TabPanel>
           {is_logged_in && is_hosted_league && (
             <>
-              <TabPanel value={6}>
+              <TabPanel value={7}>
                 <SelectedPlayerLineupImpact />
               </TabPanel>
-              <TabPanel value={7}>
+              <TabPanel value={8}>
                 <SelectedPlayerValue />
               </TabPanel>
-              <TabPanel value={8}>
+              <TabPanel value={9}>
                 <SelectedPlayerTransactions />
               </TabPanel>
             </>
