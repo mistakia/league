@@ -27,7 +27,7 @@ const play_text_field = (field) => ({
 
 const play_boolean_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
-  size: 50,
+  size: 60,
   ...field
 })
 
@@ -113,7 +113,7 @@ const plays_view_fields = {
   play_year: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'YEAR',
-    size: 50,
+    size: 60,
     column_params: nfl_plays_column_params
   }),
   play_week: play_field({
@@ -282,14 +282,14 @@ const plays_view_fields = {
   play_run_location: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
     header_label: 'LOC',
-    size: 60,
+    size: 70,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     column_values: ['left', 'middle', 'right']
   }),
   play_run_gap: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.RUSHING],
     header_label: 'GAP',
-    size: 60,
+    size: 70,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     column_values: ['guard', 'tackle', 'end']
   }),
@@ -348,22 +348,22 @@ const plays_view_fields = {
   play_sec_rem_half: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'SRH',
-    size: 50
+    size: 60
   }),
   play_sec_rem_gm: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'SRG',
-    size: 50
+    size: 60
   }),
   play_home_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'HOME',
-    size: 50
+    size: 55
   }),
   play_away_team: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
     header_label: 'AWAY',
-    size: 50
+    size: 55
   }),
   play_goal_to_go: play_boolean_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CONTEXT],
@@ -374,7 +374,7 @@ const plays_view_fields = {
   play_off_formation: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
     header_label: 'FORM',
-    size: 80,
+    size: 130,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     column_values: [
       'SHOTGUN',
@@ -390,12 +390,12 @@ const plays_view_fields = {
   play_off_personnel: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
     header_label: 'O PERS',
-    size: 80
+    size: 100
   }),
   play_def_personnel: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
     header_label: 'D PERS',
-    size: 80
+    size: 100
   }),
   play_box_defenders: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.PERSONNEL],
