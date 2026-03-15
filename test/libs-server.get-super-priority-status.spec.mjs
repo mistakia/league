@@ -31,7 +31,7 @@ describe('LIB - get_super_priority_status', function () {
 
   describe('player not poached', function () {
     it('should return not eligible when player was never poached', async () => {
-      const player = await selectPlayer({ rookie: false })
+      const player = await selectPlayer({ rookie: false, random: false })
 
       const status = await get_super_priority_status({
         pid: player.pid,
@@ -46,7 +46,7 @@ describe('LIB - get_super_priority_status', function () {
 
   describe('player was poached but no original team', function () {
     it('should return not eligible when cannot determine original team', async () => {
-      const player = await selectPlayer({ rookie: false })
+      const player = await selectPlayer({ rookie: false, random: false })
 
       // Create a poached transaction without prior team transactions
       await knex('transactions').insert({
@@ -76,7 +76,7 @@ describe('LIB - get_super_priority_status', function () {
     let player, poach_timestamp
 
     beforeEach(async () => {
-      player = await selectPlayer({ rookie: false })
+      player = await selectPlayer({ rookie: false, random: false })
       poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
 
       // Create original team transaction (practice squad add)
@@ -157,7 +157,7 @@ describe('LIB - get_super_priority_status', function () {
     let player, poach_timestamp
 
     beforeEach(async () => {
-      player = await selectPlayer({ rookie: false })
+      player = await selectPlayer({ rookie: false, random: false })
       poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
 
       // Setup valid poach scenario
@@ -264,7 +264,7 @@ describe('LIB - get_super_priority_status', function () {
     let player, poach_timestamp
 
     beforeEach(async () => {
-      player = await selectPlayer({ rookie: false })
+      player = await selectPlayer({ rookie: false, random: false })
       poach_timestamp = Math.round(Date.now() / 1000) - 35 * 24 * 60 * 60 // 5 weeks ago
 
       // Setup valid poach scenario
@@ -374,9 +374,10 @@ describe('LIB - get_super_priority_status', function () {
     let player1, player2, poach_timestamp
 
     beforeEach(async () => {
-      player1 = await selectPlayer({ rookie: false })
+      player1 = await selectPlayer({ rookie: false, random: false })
       player2 = await selectPlayer({
         rookie: false,
+        random: false,
         exclude_pids: [player1.pid]
       })
       poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
@@ -462,7 +463,7 @@ describe('LIB - get_super_priority_status', function () {
     beforeEach(async () => {
       await knex('super_priority').del()
 
-      player = await selectPlayer({ rookie: false })
+      player = await selectPlayer({ rookie: false, random: false })
       poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
 
       // Setup valid poach scenario
