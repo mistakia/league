@@ -210,7 +210,10 @@ const import_nfl_games_nflverse_nfldata = async ({
       if (esbid_match) {
         const nflverse_away = fixTeam(item.away_team)
         const nflverse_home = fixTeam(item.home_team)
-        if (esbid_match.v === nflverse_away && esbid_match.h === nflverse_home) {
+        if (
+          esbid_match.v === nflverse_away &&
+          esbid_match.h === nflverse_home
+        ) {
           db_game = esbid_match
         } else {
           log(

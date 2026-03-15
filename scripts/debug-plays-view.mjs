@@ -55,22 +55,14 @@ const parse_url_to_table_state = (full_url) => {
     limit: 500
   }
 
-  const json_params = [
-    'columns',
-    'prefix_columns',
-    'where',
-    'sort',
-    'params'
-  ]
+  const json_params = ['columns', 'prefix_columns', 'where', 'sort', 'params']
 
   for (const param of json_params) {
     if (search_params.has(param)) {
       try {
         table_state[param] = JSON.parse(search_params.get(param))
       } catch (error) {
-        throw new Error(
-          `Failed to parse ${param} parameter: ${error.message}`
-        )
+        throw new Error(`Failed to parse ${param} parameter: ${error.message}`)
       }
     }
   }
