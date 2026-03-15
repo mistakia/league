@@ -57,7 +57,6 @@ export * as espn from './espn.mjs'
 export * as sportradar from './sportradar/index.mjs'
 export * as draftkings from './draftkings/index.mjs'
 export * as fanduel from './fanduel/index.mjs'
-export * as betmgm from './betmgm.mjs'
 export * as prizepicks from './prizepicks.mjs'
 export * as fantasylife from './fantasylife.mjs'
 export { default as getRestrictedFreeAgencyBids } from './get-restricted-free-agency-bids.mjs'
@@ -75,7 +74,6 @@ export { default as get_trades } from './get-trades.mjs'
 export { default as get_draft_data_with_history } from './get-draft-data-with-history.mjs'
 export { default as get_restricted_free_agency_signings } from './get-restricted-free-agency-signings.mjs'
 export { default as batch_insert } from './batch-insert.mjs'
-export * as puppeteer from './puppeteer.mjs'
 export {
   default as get_data_view_results,
   get_data_view_results_query
