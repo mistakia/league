@@ -204,7 +204,31 @@ const import_nfl_games_nflverse_nfldata = async ({
     }
 
     if (!db_game && item.old_game_id) {
-      db_game = await db('nfl_games').where({ esbid: item.old_game_id }).first()
+      const esbid_match = await db('nfl_games')
+        .where({ esbid: item.old_game_id })
+        .first()
+      if (esbid_match) {
+        const nflverse_away = fixTeam(item.away_team)
+        const nflverse_home = fixTeam(item.home_team)
+        if (esbid_match.v === nflverse_away && esbid_match.h === nflverse_home) {
+          db_game = esbid_match
+        } else {
+          log(
+            `esbid-only fallback team mismatch for ${item.old_game_id}: nflverse=${nflverse_away}@${nflverse_home} db=${esbid_match.v}@${esbid_match.h} — skipping update`
+          )
+          if (collector) {
+            collector.add_warning(
+              `Game team mismatch on esbid fallback: ${item.old_game_id}`,
+              {
+                old_game_id: item.old_game_id,
+                game_id: item.game_id,
+                nflverse_teams: `${nflverse_away}@${nflverse_home}`,
+                db_teams: `${esbid_match.v}@${esbid_match.h}`
+              }
+            )
+          }
+        }
+      }
     }
 
     if (db_game) {

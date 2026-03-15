@@ -331,7 +331,7 @@ const importPlaysForWeek = async ({
       .where({ esbid: game.esbid, play_type_nfl: 'END_GAME' })
       .first()
 
-    if (!force_update && haveEndPlay) {
+    if (!force_update && !ignore_cache && haveEndPlay) {
       log(`skipping esbid: ${game.esbid}, already have final play`)
       skip_count += 1
       continue

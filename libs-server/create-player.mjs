@@ -51,8 +51,6 @@ const required = [
 ]
 
 const createPlayer = async (playerData) => {
-  const playerId = await generate_player_id(playerData)
-
   if (!playerData.nfl_draft_year) {
     const { espn_id, sportradar_id } = playerData
     if (espn_id) {
@@ -78,6 +76,8 @@ const createPlayer = async (playerData) => {
       }
     }
   }
+
+  const playerId = generate_player_id(playerData)
 
   for (const field of required) {
     if (!playerData[field]) {

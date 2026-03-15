@@ -30,7 +30,7 @@ debug.enable('generate-player-id')
 // If the player is a DST (defense/special teams), the pid is the team abbreviation (e.g., "NE", "DAL").
 //
 // This format is used as the canonical player identifier throughout the system.
-const required_fields = ['fname', 'lname', 'nfl_draft_year', 'dob']
+const required_fields = ['fname', 'lname', 'dob']
 
 const generate_player_id = (player_data) => {
   // check if all required fields are present
@@ -38,6 +38,10 @@ const generate_player_id = (player_data) => {
     if (!player_data[field]) {
       throw new Error(`Missing field ${field}`)
     }
+  }
+
+  if (!player_data.nfl_draft_year) {
+    throw new Error('Missing field nfl_draft_year')
   }
 
   // if DST, get pid from team abbreviation
