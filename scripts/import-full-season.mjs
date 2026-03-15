@@ -56,6 +56,9 @@ import {
   save_report_to_file
 } from '#libs-server/import-reporting.mjs'
 
+// Player import scripts
+import import_players_sleeper from './import-players-sleeper.mjs'
+
 // Game import scripts
 import import_nfl_games_nfl from './import-nfl-games-nfl.mjs'
 import import_nfl_games_ngs from './import-nfl-games-ngs.mjs'
@@ -75,6 +78,7 @@ import process_player_seasonlogs from './process-player-seasonlogs.mjs'
 
 // Advanced stats scripts
 import import_espn_receiving_tracking_metrics from './import-espn-receiving-tracking-metrics.mjs'
+import import_dvoa_sheets from './import-dvoa-sheets.mjs'
 
 // Validation script
 import audit_player_gamelogs from './audit-player-gamelogs.mjs'
@@ -85,11 +89,31 @@ import export_data_nfl_games from './export-data-nfl-games.mjs'
 import export_data_player_gamelogs from './export-data-player-gamelogs.mjs'
 
 // Private scripts - import with graceful fallback
+let import_players_ngs = null
+let import_gameday_rosters = null
 let import_plays_ngs = null
 let import_gamelogs_ngs = null
 let import_pff_grades = null
 let import_pff_seasonlogs = null
 let import_pff_team_grades = null
+
+try {
+  const ngs_players_module = await import(
+    '../private/scripts/import-players-ngs.mjs'
+  )
+  import_players_ngs = ngs_players_module.default
+} catch {
+  // Private script not available
+}
+
+try {
+  const rosters_module = await import(
+    '../private/scripts/import-gameday-rosters.mjs'
+  )
+  import_gameday_rosters = rosters_module.default
+} catch {
+  // Private script not available
+}
 
 try {
   const ngs_module = await import('../private/scripts/import-plays-ngs.mjs')
@@ -161,7 +185,9 @@ const SEASON_WEEK_CONFIG = {
  * Stage execution order for the import pipeline
  */
 const STAGE_ORDER = [
+  'players',
   'games',
+  'rosters',
   'plays',
   'processing',
   'gamelogs',
@@ -185,7 +211,7 @@ const STAGE_SOURCES = {
   games: ['nfl', 'ngs', 'nflverse', 'sportradar'],
   plays: ['nfl', 'ngs', 'nflfastr', 'ftn', 'sportradar'],
   gamelogs: ['ngs'],
-  advanced: ['espn', 'pff']
+  advanced: ['espn', 'pff', 'dvoa']
 }
 
 /**
@@ -332,6 +358,55 @@ const validate_stage_config = ({
       )
     }
   }
+}
+
+/**
+ * Import player data from all sources
+ * Must run before games/plays to ensure current_nfl_team and external IDs are current
+ */
+const run_players = async ({ year, ignore_cache, collector }) => {
+  collector.start_stage('players', { year })
+
+  // Sleeper players (public)
+  try {
+    await import_players_sleeper()
+  } catch (error) {
+    collector.add_error(error, { script: 'import_players_sleeper', year })
+  }
+  await wait(DELAYS.BETWEEN_SCRIPTS)
+
+  // NGS players (private)
+  if (import_players_ngs) {
+    try {
+      await import_players_ngs({ season: year, ignore_cache })
+    } catch (error) {
+      collector.add_error(error, { script: 'import_players_ngs', year })
+    }
+  }
+
+  collector.end_stage()
+}
+
+/**
+ * Import gameday rosters for all weeks in a season type
+ * Must run after games (needs game schedule) and players (needs current IDs)
+ */
+const run_rosters = async ({ year, seas_type, collector }) => {
+  collector.start_stage('rosters', { year, seas_type })
+
+  if (import_gameday_rosters) {
+    try {
+      await import_gameday_rosters({ year, seas_type, collector })
+    } catch (error) {
+      collector.add_error(error, {
+        script: 'import_gameday_rosters',
+        year,
+        seas_type
+      })
+    }
+  }
+
+  collector.end_stage()
 }
 
 /**
@@ -682,7 +757,7 @@ const generate_gamelogs_for_week = async ({
   })
 
   try {
-    await generate_player_gamelogs({ year, week, seas_type, dry })
+    await generate_player_gamelogs({ year, week, seas_type, dry_run: dry, collector })
   } catch (error) {
     collector.add_error(error, {
       script: 'generate_player_gamelogs',
@@ -728,7 +803,7 @@ const run_aggregation = async ({ year, seas_types, dry, collector }) => {
   // Process player seasonlogs for each season type
   for (const seas_type of seas_types) {
     try {
-      await process_player_seasonlogs({ year, seas_type })
+      await process_player_seasonlogs({ year, seas_type, collector })
     } catch (error) {
       collector.add_error(error, {
         script: 'process_player_seasonlogs',
@@ -824,6 +899,24 @@ const run_advanced_stats = async ({
     } catch (error) {
       collector.add_error(error, { script: 'import_pff_team_grades', year })
     }
+    await wait(DELAYS.BETWEEN_SCRIPTS)
+  }
+
+  // DVOA Team Stats
+  if (
+    should_run_source({
+      stage_name: 'advanced',
+      source_name: 'dvoa',
+      skip_sources
+    })
+  ) {
+    try {
+      await import_dvoa_sheets({ year, seas_type: 'REG', collector })
+    } catch (error) {
+      collector.add_error(error, { script: 'import_dvoa_sheets', year })
+    }
+  } else {
+    log(`Skipping advanced.dvoa (in skip list)`)
   }
 
   collector.end_stage()
@@ -851,21 +944,21 @@ const run_exports = async ({ year, collector }) => {
   collector.start_stage('exports', { year })
 
   try {
-    await export_data_nfl_plays({ year })
+    await export_data_nfl_plays({ year, collector })
   } catch (error) {
     collector.add_error(error, { script: 'export_data_nfl_plays', year })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_nfl_games({ year })
+    await export_data_nfl_games({ year, collector })
   } catch (error) {
     collector.add_error(error, { script: 'export_data_nfl_games', year })
   }
   await wait(DELAYS.BETWEEN_SCRIPTS)
 
   try {
-    await export_data_player_gamelogs({ year })
+    await export_data_player_gamelogs({ year, collector })
   } catch (error) {
     collector.add_error(error, { script: 'export_data_player_gamelogs', year })
   }
@@ -917,9 +1010,18 @@ const import_full_season = async ({
   // Determine which season types to process
   const seas_types = seas_type ? [seas_type] : ['PRE', 'REG', 'POST']
 
-  // Stage 1: Game Imports
+  // Players stage: Import player data (IDs, teams) before games/plays
+  if (should_run_stage({ stage_name: 'players', ...stage_config })) {
+    log('=== Players: Player Imports ===')
+    await run_players({ year, ignore_cache, collector })
+    await wait(DELAYS.BETWEEN_STAGES)
+  } else {
+    log('=== Players: Player Imports (SKIPPED) ===')
+  }
+
+  // Games stage: Game/schedule imports
   if (should_run_stage({ stage_name: 'games', ...stage_config })) {
-    log('=== Stage 1: Game Imports ===')
+    log('=== Games: Game Imports ===')
     for (const st of seas_types) {
       await import_games_for_season({
         year,
@@ -932,10 +1034,21 @@ const import_full_season = async ({
       await wait(DELAYS.BETWEEN_STAGES)
     }
   } else {
-    log('=== Stage 1: Game Imports (SKIPPED) ===')
+    log('=== Games: Game Imports (SKIPPED) ===')
   }
 
-  // Stage 2-4: Play Imports, Processing, and Gamelogs (per week)
+  // Rosters stage: Gameday rosters (requires games and players)
+  if (should_run_stage({ stage_name: 'rosters', ...stage_config })) {
+    log('=== Rosters: Gameday Roster Imports ===')
+    for (const st of seas_types) {
+      await run_rosters({ year, seas_type: st, collector })
+      await wait(DELAYS.BETWEEN_STAGES)
+    }
+  } else {
+    log('=== Rosters: Gameday Roster Imports (SKIPPED) ===')
+  }
+
+  // Plays/Processing/Gamelogs: Per-week pipeline stages
   const run_plays = should_run_stage({ stage_name: 'plays', ...stage_config })
   const run_processing = should_run_stage({
     stage_name: 'processing',

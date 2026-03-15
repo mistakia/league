@@ -51,6 +51,12 @@ const expand_position = (pos) => {
     case 'T':
       normalized = 'OL'
       break
+    case 'DI':
+      normalized = 'DL'
+      break
+    case 'ED':
+      normalized = 'DL'
+      break
     default:
       normalized = normalized_pos
   }

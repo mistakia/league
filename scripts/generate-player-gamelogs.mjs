@@ -797,7 +797,8 @@ const generate_player_gamelogs = async ({
   year = current_season.year,
   seas_type = current_season.nfl_seas_type,
   esbid = null,
-  dry_run = false
+  dry_run = false,
+  collector = null
 }) => {
   log(
     `loading plays for ${year} week ${week}${esbid ? ` (esbid: ${esbid})` : ''}`

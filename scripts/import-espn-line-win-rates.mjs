@@ -88,6 +88,18 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
         })
       }
 
+      // Retry without team constraint if team-based lookup failed
+      if (!player_row && player_data.team) {
+        player_row = find_player({
+          name: player_data.player_name
+        })
+        if (player_row) {
+          log(
+            `Matched ${player_data.player_name} without team (stale team: ${player_data.team}, DB team: ${player_row.current_nfl_team})`
+          )
+        }
+      }
+
       if (player_row) {
         player_data.pid = player_row.pid
       } else {

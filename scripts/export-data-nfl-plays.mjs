@@ -332,7 +332,8 @@ const nfl_play_fields = [
 
 const export_data_nfl_plays = async ({
   year = current_season.year,
-  seas_type = 'REG'
+  seas_type = 'REG',
+  collector = null
 } = {}) => {
   log(`exporting plays for ${year}`)
   const data = await db('nfl_plays')

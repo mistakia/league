@@ -5,11 +5,16 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season, fantasy_positions } from '#constants'
-import { is_main, pfr } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { is_main, pfr, report_job } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv))
+    .option('year', { type: 'number', describe: 'NFL season year' })
+    .option('ignore_cache', {
+      type: 'boolean',
+      describe: 'Bypass cache and fetch fresh data'
+    }).argv
 }
 
 const log = debug('audit-player-gamelogs')
@@ -175,6 +180,11 @@ const main = async () => {
     error = err
     log(error)
   }
+
+  await report_job({
+    job_type: job_types.AUDIT_PLAYER_GAMELOGS,
+    error
+  })
 
   process.exit()
 }

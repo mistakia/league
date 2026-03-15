@@ -66,7 +66,8 @@ const format_gamelog = (gamelog) => ({
   career_game: gamelog.career_game
 })
 
-const export_data_player_gamelogs = async () => {
+const export_data_player_gamelogs = async ({ collector = null } = {}) => {
+  await db.raw('SET statement_timeout = 0')
   const data = await db('player_gamelogs')
     .select('player_gamelogs.*')
     .orderBy('esbid', 'asc')

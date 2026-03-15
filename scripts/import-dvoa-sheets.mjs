@@ -16,7 +16,14 @@ import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv))
+    .option('year', { type: 'number', describe: 'NFL season year' })
+    .option('seas_type', {
+      type: 'string',
+      describe: 'Season type (PRE, REG, POST)'
+    })
+    .option('filepath', { type: 'string', describe: 'Path to DVOA spreadsheet' })
+    .option('dry', { type: 'boolean', describe: 'Dry run mode' }).argv
 }
 
 const log = debug('import-dvoa-sheets')
@@ -998,11 +1005,18 @@ const get_dvoa_config = async () => {
   return config_row?.value
 }
 
-const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
+const import_dvoa_sheets = async ({
+  dry_run = false,
+  filepath,
+  year: cli_year,
+  seas_type,
+  collector = null
+} = {}) => {
   if (!filepath) {
-    if (current_season.nfl_seas_type !== 'REG') {
+    const effective_seas_type = seas_type || current_season.nfl_seas_type
+    if (effective_seas_type !== 'REG') {
       log(
-        `Skipping import of DVOA sheets for ${current_season.nfl_seas_type} season`
+        `Skipping import of DVOA sheets for ${effective_seas_type} season`
       )
       return
     }
@@ -1014,7 +1028,7 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     }
 
     const current_date = dayjs()
-    const year = current_date.year()
+    const download_year = cli_year || current_date.year()
     const month = current_date.format('MM')
 
     // Get NFL week to determine versioning logic
@@ -1076,7 +1090,7 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
 
     if (version_number === 0) {
       // Week 2: use base URL only (no version suffix)
-      const base_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0.xlsx`
+      const base_dvoa_url = `${dvoa_base_url}/${download_year}/${month}/${download_year}-Premium-Splits-v8.0.xlsx`
       log(`downloading ${base_dvoa_url}`)
       response = await fetch(base_dvoa_url)
 
@@ -1095,9 +1109,9 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
       ) {
         let url_to_try
         if (version_to_try === 0) {
-          url_to_try = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0.xlsx`
+          url_to_try = `${dvoa_base_url}/${download_year}/${month}/${download_year}-Premium-Splits-v8.0.xlsx`
         } else {
-          url_to_try = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${version_to_try}.xlsx`
+          url_to_try = `${dvoa_base_url}/${download_year}/${month}/${download_year}-Premium-Splits-v8.0-${version_to_try}.xlsx`
         }
 
         log(`downloading ${url_to_try}`)
@@ -1219,7 +1233,12 @@ const main = async () => {
   const argv = initialize_cli()
   let error
   try {
-    await import_dvoa_sheets({ filepath: argv.filepath, dry_run: argv.dry })
+    await import_dvoa_sheets({
+      filepath: argv.filepath,
+      dry_run: argv.dry,
+      year: argv.year,
+      seas_type: argv.seas_type
+    })
   } catch (err) {
     error = err
     log(error)

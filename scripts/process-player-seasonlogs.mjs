@@ -17,7 +17,8 @@ debug.enable('process-player-seasonlogs')
 
 const processPlayerSeasonlogs = async ({
   year = current_season.year,
-  seas_type = 'REG'
+  seas_type = 'REG',
+  collector = null
 } = {}) => {
   log(`Processing player seasonlogs for ${year}, ${seas_type}`)
 

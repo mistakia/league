@@ -193,21 +193,23 @@ const update_play = async ({
     return 0
   }
 
-  // Execute changelog inserts
-  for (const entry of changelog_entries) {
-    log(
-      `Updating play: ${entry.esbid} - ${entry.playId}, Field: ${entry.prop}, Value: ${entry.new}`
-    )
+  // Batch changelog inserts
+  if (changelog_entries.length > 0) {
+    for (const entry of changelog_entries) {
+      log(
+        `Updating play: ${entry.esbid} - ${entry.playId}, Field: ${entry.prop}, Value: ${entry.new}`
+      )
+    }
     await db('play_changelog')
-      .insert(entry)
+      .insert(changelog_entries)
       .onConflict(['esbid', 'playId', 'prop', 'timestamp'])
       .ignore()
   }
 
-  // Execute play updates
-  for (const [prop, value] of Object.entries(field_updates)) {
+  // Batch play update
+  if (Object.keys(field_updates).length > 0) {
     await db('nfl_plays')
-      .update({ [prop]: value })
+      .update(field_updates)
       .where({ esbid: play_row.esbid, playId: play_row.playId })
   }
 

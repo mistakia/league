@@ -17,7 +17,7 @@ const data_path = path.join(__dirname, '../data')
 const log = debug('export-data-nfl-games')
 debug.enable('export-data-nfl-games')
 
-const export_data_nfl_games = async () => {
+const export_data_nfl_games = async ({ collector = null } = {}) => {
   const data = await db('nfl_games').orderBy('esbid', 'asc')
 
   const header = {}

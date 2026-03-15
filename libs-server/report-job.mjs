@@ -81,7 +81,8 @@ export default async function report_job({
         server: os.hostname(),
         schedule,
         schedule_type
-      })
+      }),
+      signal: AbortSignal.timeout(3000)
     })
     if (!response.ok) {
       console.error(`job tracker report failed: HTTP ${response.status}`)
