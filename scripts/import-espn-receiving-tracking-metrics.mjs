@@ -17,6 +17,7 @@ const log = debug('import-espn-receiving-tracking-metrics')
 debug.enable('import-espn-receiving-tracking-metrics')
 
 const import_espn_receiving_tracking_metrics = async ({
+  year = null,
   force_download = false,
   dry = false,
   file_path = null,
@@ -43,9 +44,20 @@ const import_espn_receiving_tracking_metrics = async ({
     json_data = fs.readJsonSync(path)
   }
 
-  const single_season_data = json_data.filter(
+  let single_season_data = json_data.filter(
     (item) => item.min_season === item.max_season
   )
+
+  if (year) {
+    const year_num = Number(year)
+    const before_count = single_season_data.length
+    single_season_data = single_season_data.filter(
+      (item) => Number(item.min_season) === year_num
+    )
+    log(
+      `Filtered to year ${year}: ${single_season_data.length} records (from ${before_count} total)`
+    )
+  }
 
   log(`single_season_data length: ${single_season_data.length}`)
 
@@ -56,8 +68,6 @@ const import_espn_receiving_tracking_metrics = async ({
   for (const item of single_season_data) {
     const player = players.find((p) => p.gsisid === item.gsis_id)
     if (!player) {
-      log(`player not found: ${item.gsis_id}`)
-      log(item)
       result.players_not_matched++
       if (collector) {
         collector.add_player_issue({
@@ -125,11 +135,15 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await import_espn_receiving_tracking_metrics({
+    const result = await import_espn_receiving_tracking_metrics({
+      year: argv.year,
       force_download: argv.force_download,
       dry: argv.dry,
       file_path: argv.file_path
     })
+    console.log(
+      `=== SUMMARY === ${JSON.stringify({ script: 'import-espn-receiving-tracking-metrics', year: argv.year || 'all', ...result })}`
+    )
   } catch (err) {
     error = err
     log(error)

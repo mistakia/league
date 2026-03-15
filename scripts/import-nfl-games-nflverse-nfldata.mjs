@@ -302,13 +302,19 @@ const main = async () => {
     const argv = initialize_cli()
     const overwrite_existing = argv.overwrite_existing
     const force_download = argv.d
-    await import_nfl_games_nflverse_nfldata({
+    const result = await import_nfl_games_nflverse_nfldata({
+      year: argv.year,
       overwrite_existing,
       force_download
     })
+    console.log(
+      `=== SUMMARY === ${JSON.stringify({ script: 'import-nfl-games-nflverse-nfldata', year: argv.year || 'all', ...result })}`
+    )
   } catch (err) {
     error = err
-    console.log(error)
+    console.log(
+      `ERROR: ${err.severity || 'UNKNOWN'} [${err.code || 'N/A'}] ${err.message}`
+    )
   }
 
   await report_job({

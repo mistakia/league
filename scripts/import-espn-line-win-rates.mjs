@@ -18,10 +18,17 @@ import { current_season } from '#constants'
 const log = debug('import-espn-line-win-rates')
 debug.enable('import-espn-line-win-rates,get-player')
 
-const import_espn_line_win_rates = async () => {
+const import_espn_line_win_rates = async ({ collector = null } = {}) => {
+  const result = {
+    player_win_rates_inserted: 0,
+    team_win_rates_inserted: 0,
+    players_not_matched: 0,
+    unmatched_players: []
+  }
+
   if (current_season.week > current_season.nflFinalWeek) {
     log('Skipping — outside regular season')
-    return
+    return result
   }
 
   const timestamp = Math.floor(Date.now() / 1000)
@@ -84,10 +91,10 @@ const import_espn_line_win_rates = async () => {
       if (player_row) {
         player_data.pid = player_row.pid
       } else {
-        log(
-          `Player not found: ${player_data.player_name}, team: ${player_data.team}, espn_id: ${player_data.espn_id}`
+        result.players_not_matched++
+        result.unmatched_players.push(
+          `${player_data.player_name} (${player_data.team})`
         )
-        log(player_data)
         continue
       }
 
@@ -193,6 +200,7 @@ const import_espn_line_win_rates = async () => {
     .onConflict(['player_name', 'espn_id', 'espn_win_rate_type', 'year'])
     .merge()
 
+  result.player_win_rates_inserted = player_history_inserts.length
   log(`inserted ${player_history_inserts.length} player win rate rows`)
 
   const team_history_inserts = []
@@ -215,13 +223,35 @@ const import_espn_line_win_rates = async () => {
     .onConflict(['team', 'year'])
     .merge()
 
+  result.team_win_rates_inserted = team_history_inserts.length
   log(`inserted ${team_history_inserts.length} team win rate rows`)
+
+  if (result.unmatched_players.length > 0) {
+    log(
+      `${result.players_not_matched} unmatched players: ${result.unmatched_players.join(', ')}`
+    )
+  }
+
+  if (collector) {
+    collector.set_stats({
+      player_win_rates_inserted: result.player_win_rates_inserted,
+      team_win_rates_inserted: result.team_win_rates_inserted,
+      players_not_matched: result.players_not_matched
+    })
+  }
+
+  return result
 }
 
 const main = async () => {
   let error
   try {
-    await import_espn_line_win_rates()
+    const result = await import_espn_line_win_rates()
+    if (result) {
+      console.log(
+        `=== SUMMARY === ${JSON.stringify({ script: 'import-espn-line-win-rates', ...result, unmatched_players: undefined })}`
+      )
+    }
   } catch (err) {
     error = err
     log(error)

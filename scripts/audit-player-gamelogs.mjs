@@ -70,6 +70,7 @@ const audit_player_gamelogs = async ({
     discrepancies: []
   }
   // create any missing gamelogs
+  await db.raw('SET statement_timeout = 0')
   const pfr_player_gamelogs_for_season =
     await pfr.get_player_gamelogs_for_season({ year, ignore_cache })
   const player_gamelogs = await db('player_gamelogs')
@@ -163,10 +164,13 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await audit_player_gamelogs({
+    const result = await audit_player_gamelogs({
       year: argv.year,
       ignore_cache: argv.ignore_cache
     })
+    console.log(
+      `=== SUMMARY === ${JSON.stringify({ script: 'audit-player-gamelogs', year: argv.year || 'current', gamelogs_checked: result.gamelogs_checked, missing_gamelogs: result.missing_gamelogs, discrepancies: result.discrepancies.length })}`
+    )
   } catch (err) {
     error = err
     log(error)

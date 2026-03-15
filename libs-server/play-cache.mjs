@@ -199,6 +199,7 @@ class PlayCache {
    * @private
    */
   async _fetch_plays({ years, weeks, esbids, all_plays }) {
+    await db.raw('SET statement_timeout = 0')
     const query = db('nfl_plays').select('*')
 
     if (all_plays) {

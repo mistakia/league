@@ -717,6 +717,7 @@ const main = async () => {
     debug.enable('import-plays-nfl-v1,nfl,play-enum-utils')
     const dry_run = argv.dry
 
+    let result
     if (argv.all) {
       // Backfill mode: skip finalization by default
       await importAllPlays({
@@ -731,7 +732,7 @@ const main = async () => {
     } else if (argv.year) {
       if (argv.week) {
         // Specific week: allow CLI control
-        await importPlaysForWeek({
+        result = await importPlaysForWeek({
           year: argv.year,
           week: argv.week,
           seas_type: argv.seas_type,
@@ -758,7 +759,7 @@ const main = async () => {
       while (!all_games_skipped) {
         loop_count += 1
         log(`running import count: ${loop_count}`)
-        all_games_skipped = await importPlaysForWeek({
+        result = await importPlaysForWeek({
           week: argv.week,
           seas_type: argv.seas_type,
           ignore_cache: true,
@@ -766,11 +767,12 @@ const main = async () => {
           skip_finalization: argv.skip_finalization,
           dry_run
         })
+        all_games_skipped = result?.all_games_skipped
       }
     } else {
       // Default: current week, enable finalization (unless explicitly skipped)
       log('start')
-      await importPlaysForWeek({
+      result = await importPlaysForWeek({
         week: argv.week,
         seas_type: argv.seas_type,
         ignore_cache: true,
@@ -780,9 +782,16 @@ const main = async () => {
       })
       log('end')
     }
+    if (result) {
+      console.log(
+        `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nfl-v1', year: argv.year || 'current', week: argv.week || 'current', ...result })}`
+      )
+    }
   } catch (err) {
     error = err
-    console.log(error)
+    console.log(
+      `ERROR: ${err.severity || 'UNKNOWN'} [${err.code || 'N/A'}] ${err.message}`
+    )
   }
 
   await report_job({

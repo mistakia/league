@@ -241,6 +241,7 @@ class PlayerCache {
    * @private
    */
   async _fetch_all_players() {
+    await db.raw('SET statement_timeout = 0')
     const players = await db('player').select('*')
     // Clean formatted names to remove null bytes
     return players.map((player) => ({
@@ -255,6 +256,7 @@ class PlayerCache {
    * @private
    */
   async _fetch_active_players() {
+    await db.raw('SET statement_timeout = 0')
     const all_players = await db('player').select('*')
 
     // Clean formatted names and filter for active players

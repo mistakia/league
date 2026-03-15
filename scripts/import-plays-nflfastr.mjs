@@ -875,32 +875,34 @@ const run = async ({
     }
   }
 
-  // Output multiple match errors
+  // Output multiple match errors (details gated behind --log_conflicts)
   if (plays_multiple_matches.length > 0) {
-    log('\n--- Multiple Match Errors ---')
-    log(`Total plays with multiple matches: ${plays_multiple_matches.length}\n`)
+    log(`Multiple match errors: ${plays_multiple_matches.length}`)
 
-    for (const play of plays_multiple_matches) {
-      log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
-      log(`  ${play.item.desc}`)
-      log(
-        `  Matched ${play.match_count} plays - requires more specific criteria`
-      )
-      log_match_criteria(play.match_criteria)
-      log('---')
+    if (log_conflicts) {
+      for (const play of plays_multiple_matches) {
+        log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
+        log(`  ${play.item.desc}`)
+        log(
+          `  Matched ${play.match_count} plays - requires more specific criteria`
+        )
+        log_match_criteria(play.match_criteria)
+        log('---')
+      }
     }
   }
 
-  // Output unmatched plays details
+  // Output unmatched plays details (details gated behind --log_conflicts)
   if (plays_not_matched.length > 0) {
-    log('\n--- Unmatched Plays Details ---')
-    log(`Total unmatched: ${plays_not_matched.length}\n`)
+    log(`Unmatched plays: ${plays_not_matched.length}`)
 
-    for (const play of plays_not_matched) {
-      log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
-      log(`  ${play.item.desc}`)
-      log_match_criteria(play.match_criteria)
-      log('---')
+    if (log_conflicts) {
+      for (const play of plays_not_matched) {
+        log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
+        log(`  ${play.item.desc}`)
+        log_match_criteria(play.match_criteria)
+        log('---')
+      }
     }
   }
 
@@ -1024,6 +1026,7 @@ const main = async () => {
       }
     }
 
+    let result
     if (all) {
       // Import all years from 1999 to current season
       for (
@@ -1033,7 +1036,7 @@ const main = async () => {
       ) {
         // Reset cache between years to ensure each year's plays are loaded
         reset_cache()
-        await run({
+        result = await run({
           year: import_year,
           overwrite_existing,
           force_download,
@@ -1045,7 +1048,7 @@ const main = async () => {
       }
     } else {
       // Import single year
-      await run({
+      result = await run({
         year,
         overwrite_existing,
         force_download,
@@ -1055,9 +1058,16 @@ const main = async () => {
         log_conflicts
       })
     }
+    if (result) {
+      console.log(
+        `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nflfastr', year: all ? 'all' : year, ...result })}`
+      )
+    }
   } catch (err) {
     error = err
-    console.log(error)
+    console.log(
+      `ERROR: ${err.severity || 'UNKNOWN'} [${err.code || 'N/A'}] ${err.message}`
+    )
   }
 
   // Report job completion
