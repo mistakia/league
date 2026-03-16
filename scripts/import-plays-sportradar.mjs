@@ -20,7 +20,8 @@ import {
   preload_active_players,
   find_player
 } from '#libs-server/player-cache.mjs'
-import transform_play_route from '#libs-server/transform-play-route.mjs'
+// route mapping removed: NGS is authoritative
+// import transform_play_route from '#libs-server/transform-play-route.mjs'
 import {
   map_play_type,
   transform_qb_position,
@@ -341,11 +342,13 @@ const map_formation_data = ({ sportradar_play: play }) => {
   if (play.pocket_location) {
     mapped.pocket_location = transform_pocket_location(play.pocket_location)
   }
-  if (play.pass_route) {
-    mapped.route = transform_play_route(play.pass_route)
-  }
+  // route: NGS tracking data is authoritative
+  // if (play.pass_route) {
+  //   mapped.route = transform_play_route(play.pass_route)
+  // }
 
-  set_boolean_if_defined(mapped, play, 'play_action', 'play_action')
+  // play_action: FTN charting is authoritative (manual expert charting)
+  // set_boolean_if_defined(mapped, play, 'play_action', 'play_action')
   set_boolean_if_defined(mapped, play, 'screen_pass', 'screen_pass')
   set_boolean_if_defined(mapped, play, 'run_pass_option', 'run_play_option')
   set_boolean_if_defined(mapped, play, 'fake_punt', 'fake_punt')
@@ -357,8 +360,10 @@ const map_formation_data = ({ sportradar_play: play }) => {
     mapped.no_huddle = false
   }
 
-  set_if_defined(mapped, play, 'men_in_box', 'box_defenders')
-  set_if_defined(mapped, play, 'players_rushed', 'pass_rushers')
+  // box_defenders: NGS tracking data is authoritative
+  // set_if_defined(mapped, play, 'men_in_box', 'box_defenders')
+  // pass_rushers: NGS tracking data is authoritative
+  // set_if_defined(mapped, play, 'players_rushed', 'pass_rushers')
   set_if_defined(mapped, play, 'blitz')
   set_if_defined(mapped, play, 'left_tightends')
   set_if_defined(mapped, play, 'right_tightends')
@@ -1177,9 +1182,13 @@ const process_play = async ({
         update: mapped_play,
         overwrite_existing: stats.overwrite_existing,
         // Use modern overwrite_fields approach for Sportradar-exclusive fields
-        overwrite_fields: stats.ignore_sportradar_field_conflicts
-          ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
-          : []
+        // drive_yds: Sportradar provides accurate final drive total vs NFL v1 stale snapshots
+        overwrite_fields: [
+          'drive_yds',
+          ...(stats.ignore_sportradar_field_conflicts
+            ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
+            : [])
+        ]
       })
       const update_time = Date.now() - update_start_time
       if (update_time > PERFORMANCE_THRESHOLD_MS) {

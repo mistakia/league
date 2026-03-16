@@ -294,6 +294,17 @@ const format_play_context = (play) => {
     ? fixTeam(is_kickoff ? play.posteam : play.defteam)
     : null
 
+  // nflfastr yardline_100 is relative to posteam (receiving team on kickoffs).
+  // Since we swap pos_team to the kicking team, convert ydl_100 accordingly.
+  // Standard kickoff from own 35: nflfastr yardline_100=35 (from receiver's
+  // perspective) should become 65 (from kicker's perspective).
+  // Handle inconsistent raw data: if yardline_100 > 50 on a kickoff, it may
+  // already be from the kicker's perspective, so don't double-convert.
+  let ydl_100 = format_number(play.yardline_100)
+  if (is_kickoff && ydl_100 !== null && ydl_100 <= 50) {
+    ydl_100 = 100 - ydl_100
+  }
+
   return {
     qtr: format_number(play.qtr),
     dwn,
@@ -311,7 +322,7 @@ const format_play_context = (play) => {
       format_boolean(play.two_point_attempt),
       play.desc
     ),
-    ydl_100: format_number(play.yardline_100)
+    ydl_100
   }
 }
 

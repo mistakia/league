@@ -18,7 +18,7 @@ const log = debug('pro-football-reference')
 const PFR_PROFILE_DIR = path.join(os.homedir(), '.pfr-cloakbrowser-profile')
 
 const fetch_pfr_page = async ({ url, page }) => {
-  await page.goto(url, { waitUntil: 'load' })
+  await page.goto(url, { waitUntil: 'domcontentloaded' })
 
   // Wait for Cloudflare challenge to resolve if present
   const has_challenge = await page

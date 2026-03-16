@@ -12,6 +12,43 @@ debug.enable('update-play')
 
 const excluded_props = ['esbid', 'playId', 'updated']
 
+// EPA/WPA cumulative fields where floating-point drift is expected
+// Differences below the tolerance threshold are suppressed
+const FLOAT_TOLERANCE = 0.01
+const float_tolerance_fields = new Set([
+  'epa',
+  'qb_epa',
+  'yac_epa',
+  'comp_air_epa',
+  'comp_yac_epa',
+  'total_home_epa',
+  'total_away_epa',
+  'total_home_pass_epa',
+  'total_away_pass_epa',
+  'total_home_rush_epa',
+  'total_away_rush_epa',
+  'total_home_raw_air_epa',
+  'total_away_raw_air_epa',
+  'total_home_raw_yac_epa',
+  'total_away_raw_yac_epa',
+  'total_home_comp_air_epa',
+  'total_away_comp_air_epa',
+  'total_home_comp_yac_epa',
+  'total_away_comp_yac_epa',
+  'total_home_raw_air_wpa',
+  'total_away_raw_air_wpa',
+  'total_home_raw_yac_wpa',
+  'total_away_raw_yac_wpa',
+  'total_home_comp_air_wpa',
+  'total_away_comp_air_wpa',
+  'total_home_comp_yac_wpa',
+  'total_away_comp_yac_wpa',
+  'total_home_pass_wpa',
+  'total_away_pass_wpa',
+  'total_home_rush_wpa',
+  'total_away_rush_wpa'
+])
+
 // Fields that contain game clock values and should be normalized
 const game_clock_fields = [
   'game_clock_start',
@@ -113,6 +150,16 @@ export const compute_play_changes = ({
 
     // Skip protected properties
     if (excluded_props.includes(prop)) {
+      continue
+    }
+
+    // Skip EPA/WPA floating-point drift below tolerance
+    if (
+      float_tolerance_fields.has(prop) &&
+      typeof edit.lhs === 'number' &&
+      typeof edit.rhs === 'number' &&
+      Math.abs(edit.lhs - edit.rhs) < FLOAT_TOLERANCE
+    ) {
       continue
     }
 
