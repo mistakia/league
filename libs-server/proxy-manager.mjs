@@ -238,6 +238,11 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
     log('No proxy available, using direct connection')
     try {
       const response = await fetch(url, options)
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}: ${response.statusText} (direct)`
+        )
+      }
       return response
     } catch (error) {
       log(`Error with direct connection: ${error.message}`)
@@ -260,6 +265,12 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
       }
 
       const response = await undiciFetch(url, fetch_options)
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}: ${response.statusText} (proxy: ${proxy_config.key})`
+        )
+      }
 
       // Reset retry count on success
       proxy_manager.reset_retry_count(proxy_config.pool_name)

@@ -395,14 +395,19 @@ const run_rosters = async ({ year, seas_type, collector }) => {
   collector.start_stage('rosters', { year, seas_type })
 
   if (import_gameday_rosters) {
-    try {
-      await import_gameday_rosters({ year, seas_type, collector })
-    } catch (error) {
-      collector.add_error(error, {
-        script: 'import_gameday_rosters',
-        year,
-        seas_type
-      })
+    const weeks = get_season_weeks(seas_type)
+    for (const week of weeks) {
+      try {
+        await import_gameday_rosters({ year, week, seas_type })
+      } catch (error) {
+        collector.add_error(error, {
+          script: 'import_gameday_rosters',
+          year,
+          week,
+          seas_type
+        })
+      }
+      await wait(DELAYS.BETWEEN_SCRIPTS)
     }
   }
 

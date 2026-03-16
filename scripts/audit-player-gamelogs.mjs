@@ -76,8 +76,30 @@ const audit_player_gamelogs = async ({
   }
   // create any missing gamelogs
   await db.raw('SET statement_timeout = 0')
-  const pfr_player_gamelogs_for_season =
-    await pfr.get_player_gamelogs_for_season({ year, ignore_cache })
+  let pfr_player_gamelogs_for_season = []
+  try {
+    pfr_player_gamelogs_for_season =
+      await pfr.get_player_gamelogs_for_season({ year, ignore_cache })
+  } catch (error) {
+    log(`PFR fetch failed: ${error.message}`)
+    if (collector) {
+      collector.add_error(error, { script: 'pro-football-reference', year })
+    }
+  }
+
+  if (!pfr_player_gamelogs_for_season.length) {
+    log(
+      `WARNING: PFR returned 0 gamelogs for ${year} -- PFR may be blocked by Cloudflare or unreachable`
+    )
+    if (collector) {
+      collector.add_warning(
+        `PFR returned 0 gamelogs for ${year} -- validation skipped`,
+        { year }
+      )
+    }
+    return result
+  }
+
   const player_gamelogs = await db('player_gamelogs')
     .select(
       'player_gamelogs.*',

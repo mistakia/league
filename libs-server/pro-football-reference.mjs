@@ -1774,20 +1774,32 @@ export const get_player_gamelogs_for_season = async ({
   const games = await get_games({ year, ignore_cache })
   log(`fetching ${games.length} games for ${year}`)
 
+  let games_failed = 0
   for (const game of games) {
-    const pfr_game = await get_game({
-      pfr_game_id: game.pfr_game_id,
-      pfr_game_meta: game,
-      ignore_cache
-    })
+    try {
+      const pfr_game = await get_game({
+        pfr_game_id: game.pfr_game_id,
+        pfr_game_meta: game,
+        ignore_cache
+      })
 
-    const game_player_gamelogs = format_player_gamelogs({ pfr_game })
-    player_gamelogs = player_gamelogs.concat(game_player_gamelogs)
+      const game_player_gamelogs = format_player_gamelogs({ pfr_game })
+      player_gamelogs = player_gamelogs.concat(game_player_gamelogs)
 
-    // delay next request if previous request was not cached
-    if (!pfr_game.cached) {
-      await wait(8000)
+      // delay next request if previous request was not cached
+      if (!pfr_game.cached) {
+        await wait(8000)
+      }
+    } catch (error) {
+      games_failed++
+      log(
+        `error fetching game ${game.pfr_game_id}: ${error.message}`
+      )
     }
+  }
+
+  if (games_failed) {
+    log(`failed to fetch ${games_failed} of ${games.length} games`)
   }
 
   player_gamelogs = player_gamelogs.sort(
