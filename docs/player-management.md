@@ -182,13 +182,33 @@ NODE_ENV=production node scripts/resolve-player-match.mjs update \
 
 Scripts for bulk importing player data:
 
-| Script                                | Purpose                            |
-| ------------------------------------- | ---------------------------------- |
-| `scripts/import-players-sleeper.mjs`  | Import from Sleeper API            |
-| `scripts/import-players-espn.mjs`     | Import from ESPN                   |
-| `scripts/import-players-nfl.mjs`      | Import from NFL.com                |
-| `scripts/import-players-nflverse.mjs` | Import from nflverse data          |
-| `scripts/import-players-pfr.mjs`      | Import from Pro-Football-Reference |
+| Script                                    | Purpose                            |
+| ----------------------------------------- | ---------------------------------- |
+| `scripts/import-players-sleeper.mjs`      | Import from Sleeper API            |
+| `scripts/import-players-espn.mjs`         | Import from ESPN                   |
+| `scripts/import-players-nfl.mjs`          | Import from NFL.com                |
+| `scripts/import-players-nflverse.mjs`     | Import from nflverse data          |
+| `scripts/import-players-pfr.mjs`          | Import from Pro-Football-Reference |
+| `private/scripts/import-players-ngs.mjs`  | Import from NGS (NFL Pro API)      |
+
+## Audit and Gamelog Scripts
+
+| Script                                     | Purpose                                                    |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `scripts/audit-player-gamelogs.mjs`        | Compare DB gamelogs against PFR; requires pfr_id on player |
+| `scripts/generate-player-gamelogs.mjs`     | Aggregate play stats into player gamelogs                  |
+| `scripts/update-player-gsispid.mjs`        | Backfill gsispid on player table from nfl_play_stats       |
+
+### PFR Audit Workflow
+
+The PFR audit (`audit-player-gamelogs.mjs`) matches gamelogs by `pfr_id`, `week`, and `seas_type`. Players without `pfr_id` show as "missing gamelogs" even if their data exists.
+
+**PFR ID format**: First 4 letters of last name + first 2 of first name + numeric suffix (e.g., `MahoPa00`). Suffixes increment across all players sharing the prefix, not per position -- verify assignments by checking stat patterns (QB stats vs WR stats).
+
+**Common audit issues**:
+- Missing pfr_id: use `update --pid PID --pfr-id VALUE` to populate
+- Stale PFR cache: re-run with `--ignore_cache` to refresh
+- Gamelog zeros despite plays existing: check gsisid/gsispid linkage in `nfl_play_stats`
 
 ## Troubleshooting
 
@@ -196,11 +216,18 @@ Scripts for bulk importing player data:
 
 1. Use `lookup` command to identify duplicates
 2. Compare external IDs between records
-3. Use `merge` command to consolidate:
+3. Determine canonical record: keep the PID with more relational data (gamelogs, roster entries, transactions); use valid DOB as tiebreaker
+4. Use `merge` command to consolidate:
    ```bash
    NODE_ENV=production node scripts/resolve-player-match.mjs merge \
      --keep-pid "CORRECT-PID" \
      --remove-pid "DUPLICATE-PID"
+   ```
+5. After merge, add alias for the removed record's name variant to prevent re-creation:
+   ```bash
+   NODE_ENV=production node scripts/resolve-player-match.mjs add-alias \
+     --pid "CORRECT-PID" \
+     --alias "Removed Record Name"
    ```
 
 ### Name Matching Issues
