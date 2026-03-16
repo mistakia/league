@@ -1,14 +1,64 @@
 import { JSDOM } from 'jsdom'
 import debug from 'debug'
+import path from 'path'
+import os from 'os'
 
 import { getGameDayAbbreviation, fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { wait } from '#libs-server'
 import * as cache from './cache.mjs'
 import db from '#db'
-import { fetch_with_proxy } from './proxy-manager.mjs'
+import {
+  launch_persistent_context,
+  create_page
+} from '../private/libs-server/stealth-browser.mjs'
 
 const log = debug('pro-football-reference')
+
+const PFR_PROFILE_DIR = path.join(os.homedir(), '.pfr-cloakbrowser-profile')
+
+const fetch_pfr_page = async ({ url, page }) => {
+  await page.goto(url, { waitUntil: 'load' })
+
+  // Wait for Cloudflare challenge to resolve if present
+  const has_challenge = await page
+    .locator('.main-wrapper h2:has-text("security verification")')
+    .isVisible({ timeout: 1000 })
+    .catch(() => false)
+
+  if (has_challenge) {
+    log('Cloudflare challenge detected, waiting for resolution...')
+    await page.waitForFunction(
+      () => {
+        const h2 = document.querySelector('.main-wrapper h2')
+        return !h2 || !h2.textContent.includes('security verification')
+      },
+      { timeout: 30000 }
+    )
+  }
+
+  return page.content()
+}
+
+const use_page_or_browser = (page, fn) => {
+  if (page) {
+    return fn(page)
+  }
+  return with_pfr_browser((p) => fn(p))
+}
+
+const with_pfr_browser = async (fn) => {
+  const context = await launch_persistent_context({
+    user_data_dir: PFR_PROFILE_DIR,
+    headless: true
+  })
+  try {
+    const page = await create_page(context)
+    return await fn(page)
+  } finally {
+    await context.close()
+  }
+}
 
 const PRO_FOOTBALL_REFERENCE_URL = 'https://www.pro-football-reference.com'
 
@@ -127,7 +177,11 @@ const extract_position_start_end = (string) => {
   }
 }
 
-const get_players_from_page = async ({ url, ignore_cache = false }) => {
+const get_players_from_page = async ({
+  url,
+  ignore_cache = false,
+  page = null
+}) => {
   if (!url) {
     throw new Error('url is required')
   }
@@ -144,33 +198,39 @@ const get_players_from_page = async ({ url, ignore_cache = false }) => {
     }
   }
 
-  const response = await fetch_with_proxy({ url })
-  const text = await response.text()
-  const dom = new JSDOM(text)
-  const doc = dom.window.document
-  const player_paragraph_divs = doc.querySelectorAll('#div_players p')
-  const players = Array.from(player_paragraph_divs).map((div) => {
-    const link = div.querySelector('a')
-    const position_start_string = div.innerHTML.split('</a>')[1]
-    const is_active = position_start_string.includes('</b>')
+  const do_fetch = async (p) => {
+    const text = await fetch_pfr_page({ url, page: p })
+    const dom = new JSDOM(text)
+    const doc = dom.window.document
+    const player_paragraph_divs = doc.querySelectorAll('#div_players p')
+    const players = Array.from(player_paragraph_divs).map((div) => {
+      const link = div.querySelector('a')
+      const position_start_string = div.innerHTML.split('</a>')[1]
+      const is_active = position_start_string.includes('</b>')
 
-    return {
-      name: link.textContent,
-      url: link.href,
-      is_active,
-      pfr_id: link.href.split('/').slice(-1)[0].split('.')[0],
-      ...extract_position_start_end(position_start_string)
+      return {
+        name: link.textContent,
+        url: link.href,
+        is_active,
+        pfr_id: link.href.split('/').slice(-1)[0].split('.')[0],
+        ...extract_position_start_end(position_start_string)
+      }
+    })
+
+    if (players.length) {
+      await cache.set({ key: cache_key, value: players })
     }
-  })
 
-  if (players.length) {
-    await cache.set({ key: cache_key, value: players })
+    return players
   }
 
-  return players
+  return use_page_or_browser(page, do_fetch)
 }
 
-const get_players_page_links = async ({ ignore_cache = false } = {}) => {
+const get_players_page_links = async ({
+  ignore_cache = false,
+  page = null
+} = {}) => {
   const cache_key = '/pro-football-reference/players-links.json'
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
@@ -179,21 +239,24 @@ const get_players_page_links = async ({ ignore_cache = false } = {}) => {
     }
   }
 
-  const url = `${PRO_FOOTBALL_REFERENCE_URL}/players/`
-  const response = await fetch_with_proxy({ url })
-  const text = await response.text()
-  const dom = new JSDOM(text)
-  const doc = dom.window.document
-  const links = doc.querySelectorAll('ul.page_index li > a')
-  const hrefs = Array.from(links).map(
-    (link) => `${PRO_FOOTBALL_REFERENCE_URL}${link.href}`
-  )
+  const do_fetch = async (p) => {
+    const url = `${PRO_FOOTBALL_REFERENCE_URL}/players/`
+    const text = await fetch_pfr_page({ url, page: p })
+    const dom = new JSDOM(text)
+    const doc = dom.window.document
+    const links = doc.querySelectorAll('ul.page_index li > a')
+    const hrefs = Array.from(links).map(
+      (link) => `${PRO_FOOTBALL_REFERENCE_URL}${link.href}`
+    )
 
-  if (hrefs.length) {
-    await cache.set({ key: cache_key, value: hrefs })
+    if (hrefs.length) {
+      await cache.set({ key: cache_key, value: hrefs })
+    }
+
+    return hrefs
   }
 
-  return hrefs
+  return use_page_or_browser(page, do_fetch)
 }
 
 const get_starters = ({ doc, is_home }) => {
@@ -232,6 +295,7 @@ const get_roster = ({ doc, is_home, starters }) => {
 
   for (const row of snap_rows) {
     const player_link = row.querySelector('th[data-stat="player"] a')
+    if (!player_link) continue
     const player_name = player_link.textContent
     const player_url = player_link.href
     const pfr_id = player_url.split('/').slice(-1)[0].split('.')[0]
@@ -1385,7 +1449,8 @@ const format_game_html = (html) => {
 
 export const search_players = async ({
   search_term,
-  ignore_cache = false
+  ignore_cache = false,
+  page = null
 } = {}) => {
   if (!search_term) {
     throw new Error('search_term is required')
@@ -1400,129 +1465,134 @@ export const search_players = async ({
     }
   }
 
-  const url = `${PRO_FOOTBALL_REFERENCE_URL}/search/search.fcgi?search=${encodeURIComponent(search_term)}`
-  log(`fetching pfr search: ${url}`)
+  const do_fetch = async (p) => {
+    const url = `${PRO_FOOTBALL_REFERENCE_URL}/search/search.fcgi?search=${encodeURIComponent(search_term)}`
+    log(`fetching pfr search: ${url}`)
 
-  const response = await fetch_with_proxy({ url })
-  const text = await response.text()
-  const dom = new JSDOM(text)
-  const doc = dom.window.document
+    const text = await fetch_pfr_page({ url, page: p })
+    const dom = new JSDOM(text)
+    const doc = dom.window.document
 
-  const results = []
+    const results = []
 
-  // Check if we were redirected to a player page directly
-  // This happens when PFR finds a unique match - detect via canonical link or page structure
-  const canonical_link = doc.querySelector('link[rel="canonical"]')
-  const canonical_href = canonical_link?.getAttribute('href') || ''
-  const is_player_page =
-    canonical_href.includes('/players/') && canonical_href.endsWith('.htm')
+    // Check if we were redirected to a player page directly
+    // This happens when PFR finds a unique match - detect via canonical link or page structure
+    const canonical_link = doc.querySelector('link[rel="canonical"]')
+    const canonical_href = canonical_link?.getAttribute('href') || ''
+    const is_player_page =
+      canonical_href.includes('/players/') && canonical_href.endsWith('.htm')
 
-  // Also check for player page structure
-  const name_elem = doc.querySelector('#meta h1 span')
+    // Also check for player page structure
+    const name_elem = doc.querySelector('#meta h1 span')
 
-  if (is_player_page && name_elem) {
-    // Redirected to a single player page - extract info from canonical URL
-    const pfr_id_match = canonical_href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
+    if (is_player_page && name_elem) {
+      // Redirected to a single player page - extract info from canonical URL
+      const pfr_id_match = canonical_href.match(
+        /\/players\/[A-Z]\/([^/.]+)\.htm/
+      )
 
-    if (pfr_id_match) {
-      // Extract position from meta paragraphs
-      const meta_paragraphs = doc.querySelectorAll('#meta p')
-      let positions = []
-      for (const p of meta_paragraphs) {
-        const text_content = p.textContent || ''
-        if (text_content.includes('Position')) {
-          const pos_match = text_content.match(/Position[:\s]+([A-Z-]+)/)
-          if (pos_match) {
-            positions = pos_match[1].split('-')
+      if (pfr_id_match) {
+        // Extract position from meta paragraphs
+        const meta_paragraphs = doc.querySelectorAll('#meta p')
+        let positions = []
+        for (const p of meta_paragraphs) {
+          const text_content = p.textContent || ''
+          if (text_content.includes('Position')) {
+            const pos_match = text_content.match(/Position[:\s]+([A-Z-]+)/)
+            if (pos_match) {
+              positions = pos_match[1].split('-')
+            }
+            break
           }
-          break
         }
+
+        results.push({
+          pfr_id: pfr_id_match[1],
+          name: name_elem.textContent.trim(),
+          positions,
+          start_year: null,
+          end_year: null,
+          is_active: true,
+          url: canonical_href
+        })
+      }
+    } else {
+      // Search results page - parse the results
+      const search_results = doc.querySelectorAll(
+        '.search-item-name, #players .search-item, div.search-results div[data-player]'
+      )
+
+      for (const result of search_results) {
+        const link = result.querySelector('a') || result
+        if (!link.href) continue
+
+        const href = link.href || ''
+        const pfr_id_match = href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
+        if (!pfr_id_match) continue
+
+        const name = link.textContent?.trim() || ''
+        const parent_text =
+          result.parentElement?.textContent || result.textContent || ''
+        const {
+          positions,
+          start: start_year,
+          end: end_year
+        } = extract_position_start_end(parent_text)
+
+        results.push({
+          pfr_id: pfr_id_match[1],
+          name,
+          positions,
+          start_year,
+          end_year,
+          is_active: parent_text.includes('</b>'),
+          url: `${PRO_FOOTBALL_REFERENCE_URL}${href}`
+        })
       }
 
-      results.push({
-        pfr_id: pfr_id_match[1],
-        name: name_elem.textContent.trim(),
-        positions,
-        start_year: null,
-        end_year: null,
-        is_active: true,
-        url: canonical_href
-      })
-    }
-  } else {
-    // Search results page - parse the results
-    const search_results = doc.querySelectorAll(
-      '.search-item-name, #players .search-item, div.search-results div[data-player]'
-    )
+      // Also check the player div format
+      const player_divs = doc.querySelectorAll(
+        '#div_players p, .search-results .search-item'
+      )
+      for (const div of player_divs) {
+        const link = div.querySelector('a')
+        if (!link) continue
 
-    for (const result of search_results) {
-      const link = result.querySelector('a') || result
-      if (!link.href) continue
+        const href = link.getAttribute('href') || ''
+        const pfr_id_match = href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
+        if (!pfr_id_match) continue
 
-      const href = link.href || ''
-      const pfr_id_match = href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
-      if (!pfr_id_match) continue
+        // Skip if already added
+        if (results.some((r) => r.pfr_id === pfr_id_match[1])) continue
 
-      const name = link.textContent?.trim() || ''
-      const parent_text =
-        result.parentElement?.textContent || result.textContent || ''
-      const {
-        positions,
-        start: start_year,
-        end: end_year
-      } = extract_position_start_end(parent_text)
+        const position_start_string = div.innerHTML.split('</a>')[1] || ''
+        const is_active = position_start_string.includes('</b>')
+        const {
+          positions,
+          start: start_year,
+          end: end_year
+        } = extract_position_start_end(position_start_string)
 
-      results.push({
-        pfr_id: pfr_id_match[1],
-        name,
-        positions,
-        start_year,
-        end_year,
-        is_active: parent_text.includes('</b>'),
-        url: `${PRO_FOOTBALL_REFERENCE_URL}${href}`
-      })
+        results.push({
+          pfr_id: pfr_id_match[1],
+          name: link.textContent?.trim() || '',
+          positions,
+          start_year,
+          end_year,
+          is_active,
+          url: `${PRO_FOOTBALL_REFERENCE_URL}${href}`
+        })
+      }
     }
 
-    // Also check the player div format
-    const player_divs = doc.querySelectorAll(
-      '#div_players p, .search-results .search-item'
-    )
-    for (const div of player_divs) {
-      const link = div.querySelector('a')
-      if (!link) continue
-
-      const href = link.getAttribute('href') || ''
-      const pfr_id_match = href.match(/\/players\/[A-Z]\/([^/.]+)\.htm/)
-      if (!pfr_id_match) continue
-
-      // Skip if already added
-      if (results.some((r) => r.pfr_id === pfr_id_match[1])) continue
-
-      const position_start_string = div.innerHTML.split('</a>')[1] || ''
-      const is_active = position_start_string.includes('</b>')
-      const {
-        positions,
-        start: start_year,
-        end: end_year
-      } = extract_position_start_end(position_start_string)
-
-      results.push({
-        pfr_id: pfr_id_match[1],
-        name: link.textContent?.trim() || '',
-        positions,
-        start_year,
-        end_year,
-        is_active,
-        url: `${PRO_FOOTBALL_REFERENCE_URL}${href}`
-      })
+    if (results.length > 0) {
+      await cache.set({ key: cache_key, value: results })
     }
+
+    return results
   }
 
-  if (results.length > 0) {
-    await cache.set({ key: cache_key, value: results })
-  }
-
-  return results
+  return use_page_or_browser(page, do_fetch)
 }
 
 export const get_players = async ({ ignore_cache = false } = {}) => {
@@ -1534,24 +1604,31 @@ export const get_players = async ({ ignore_cache = false } = {}) => {
     }
   }
 
-  const links = await get_players_page_links({ ignore_cache })
+  return with_pfr_browser(async (page) => {
+    const links = await get_players_page_links({ ignore_cache, page })
 
-  const players = []
-  for (const url of links) {
-    const players_from_page = await get_players_from_page({ url, ignore_cache })
-    players.push(...players_from_page)
-  }
+    const players = []
+    for (const url of links) {
+      const players_from_page = await get_players_from_page({
+        url,
+        ignore_cache,
+        page
+      })
+      players.push(...players_from_page)
+    }
 
-  if (players.length) {
-    await cache.set({ key: cache_key, value: players })
-  }
+    if (players.length) {
+      await cache.set({ key: cache_key, value: players })
+    }
 
-  return players
+    return players
+  })
 }
 
 export const get_games = async ({
   year = current_season.year,
-  ignore_cache = false
+  ignore_cache = false,
+  page = null
 } = {}) => {
   const cache_key = `/pro-football-reference/games/${year}.json`
   if (!ignore_cache) {
@@ -1561,62 +1638,77 @@ export const get_games = async ({
     }
   }
 
-  const url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/games.htm`
-  log(`fetching ${url}`)
+  const do_fetch = async (p) => {
+    const url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/games.htm`
+    log(`fetching ${url}`)
 
-  const response = await fetch_with_proxy({ url })
-  const text = await response.text()
-  const dom = new JSDOM(text)
-  const doc = dom.window.document
-  const table_rows = doc.querySelectorAll('#games tbody tr:not([class])')
-  const game_rows = Array.from(table_rows).filter((row) => {
-    const week_text = row.querySelector('th[data-stat="week_num"]').textContent
-    return week_text
-  })
-  const games = game_rows.map((row) => {
-    const week_text = row.querySelector('th[data-stat="week_num"]').textContent
-    const week_num = Number(week_text)
-    const is_post_season = isNaN(week_num)
+    const text = await fetch_pfr_page({ url, page: p })
+    const dom = new JSDOM(text)
+    const doc = dom.window.document
+    const table_rows = doc.querySelectorAll('#games tbody tr:not([class])')
+    const game_rows = Array.from(table_rows).filter((row) => {
+      const week_text = row.querySelector(
+        'th[data-stat="week_num"]'
+      ).textContent
+      return week_text
+    })
+    const games = game_rows.map((row) => {
+      const week_text = row.querySelector(
+        'th[data-stat="week_num"]'
+      ).textContent
+      const week_num = Number(week_text)
+      const is_post_season = isNaN(week_num)
 
-    const seas_type = is_post_season ? 'POST' : 'REG'
-    const week_type = is_post_season
-      ? get_post_season_week_type(week_text)
-      : 'REG'
-    const date = row
-      .querySelector('td[data-stat="game_date"]')
-      .textContent.replace('-', '/')
-    const time_est = format_time(
-      row.querySelector('td[data-stat="gametime"]').textContent
-    )
-    const day = getGameDayAbbreviation({ date, time_est, week_type, seas_type })
-    const week = is_post_season ? get_post_season_week_from_day(day) : week_num
-    const game_link = `${PRO_FOOTBALL_REFERENCE_URL}${
-      row.querySelector('td[data-stat="boxscore_word"] a').href
-    }`
-    const pfr_game_id = game_link.split('/').slice(-1)[0].split('.')[0]
+      const seas_type = is_post_season ? 'POST' : 'REG'
+      const week_type = is_post_season
+        ? get_post_season_week_type(week_text)
+        : 'REG'
+      const date = row
+        .querySelector('td[data-stat="game_date"]')
+        .textContent.replace('-', '/')
+      const time_est = format_time(
+        row.querySelector('td[data-stat="gametime"]').textContent
+      )
+      const day = getGameDayAbbreviation({
+        date,
+        time_est,
+        week_type,
+        seas_type
+      })
+      const week = is_post_season
+        ? get_post_season_week_from_day(day)
+        : week_num
+      const game_link = `${PRO_FOOTBALL_REFERENCE_URL}${
+        row.querySelector('td[data-stat="boxscore_word"] a').href
+      }`
+      const pfr_game_id = game_link.split('/').slice(-1)[0].split('.')[0]
 
-    return {
-      week,
-      day,
-      date,
-      time_est,
-      game_link,
-      pfr_game_id,
-      seas_type
+      return {
+        week,
+        day,
+        date,
+        time_est,
+        game_link,
+        pfr_game_id,
+        seas_type
+      }
+    })
+
+    if (games.length) {
+      await cache.set({ key: cache_key, value: games })
     }
-  })
 
-  if (games.length) {
-    await cache.set({ key: cache_key, value: games })
+    return games
   }
 
-  return games
+  return use_page_or_browser(page, do_fetch)
 }
 
 export const get_game = async ({
   pfr_game_id,
   pfr_game_meta,
-  ignore_cache = false
+  ignore_cache = false,
+  page = null
 } = {}) => {
   if (!pfr_game_id) {
     throw new Error('pfr_game_id is required')
@@ -1633,128 +1725,131 @@ export const get_game = async ({
     }
   }
 
-  const url = `${PRO_FOOTBALL_REFERENCE_URL}/boxscores/${pfr_game_id}.htm`
-  log(`fetching ${url}`)
-  const response = await fetch_with_proxy({ url })
-  const text = await response.text()
-  const formatted_text = format_game_html(text)
-  const dom = new JSDOM(formatted_text)
-  const doc = dom.window.document
+  const do_fetch = async (p) => {
+    const url = `${PRO_FOOTBALL_REFERENCE_URL}/boxscores/${pfr_game_id}.htm`
+    log(`fetching ${url}`)
+    const text = await fetch_pfr_page({ url, page: p })
+    const formatted_text = format_game_html(text)
+    const dom = new JSDOM(formatted_text)
+    const doc = dom.window.document
 
-  const home_starters = get_starters({
-    doc,
-    is_home: true
-  })
-  const away_starters = get_starters({
-    doc,
-    is_home: false
-  })
+    const home_starters = get_starters({
+      doc,
+      is_home: true
+    })
+    const away_starters = get_starters({
+      doc,
+      is_home: false
+    })
 
-  const home_roster = get_roster({
-    doc,
-    is_home: true,
-    starters: home_starters
-  })
-  const away_roster = get_roster({
-    doc,
-    is_home: false,
-    starters: away_starters
-  })
+    const home_roster = get_roster({
+      doc,
+      is_home: true,
+      starters: home_starters
+    })
+    const away_roster = get_roster({
+      doc,
+      is_home: false,
+      starters: away_starters
+    })
 
-  const officials = Array.from(
-    doc.querySelectorAll('#officials tbody tr:not(.onecell)')
-  ).map((row) => {
-    const role = row.querySelector('th').textContent
-    const referee_link = row.querySelector('td a')
+    const officials = Array.from(
+      doc.querySelectorAll('#officials tbody tr:not(.onecell)')
+    ).map((row) => {
+      const role = row.querySelector('th').textContent
+      const referee_link = row.querySelector('td a')
 
-    return {
-      role,
-      name: referee_link ? referee_link.textContent : null,
-      link: referee_link
-        ? `${PRO_FOOTBALL_REFERENCE_URL}${referee_link.href}`
-        : null,
-      referee_pfr_id: referee_link
-        ? referee_link.href.split('/').slice(-1)[0].split('.')[0]
-        : null
+      return {
+        role,
+        name: referee_link ? referee_link.textContent : null,
+        link: referee_link
+          ? `${PRO_FOOTBALL_REFERENCE_URL}${referee_link.href}`
+          : null,
+        referee_pfr_id: referee_link
+          ? referee_link.href.split('/').slice(-1)[0].split('.')[0]
+          : null
+      }
+    })
+
+    const week_games_link = doc.querySelector('#div_other_scores h2 a')
+    const week_games_text = week_games_link.textContent
+    const is_playoffs = week_games_text.includes('Playoffs')
+    const seas_type = is_playoffs ? 'POST' : 'REG'
+    const year = Number(week_games_link.href.split('/')[2])
+
+    const regex = /\/years\/\d+\/week_(\d+)\.htm/
+    const match = week_games_link.href.match(regex)
+    const week_num = match ? Number(match[1]) : null
+    let week = null
+
+    if (week_num) {
+      if (!is_playoffs) {
+        week = week_num
+      } else {
+        const weeks_query = await db('nfl_games')
+          .select('week')
+          .where({ year, seas_type: 'REG' })
+          .groupBy('week')
+        const regular_season_weeks = weeks_query.length
+
+        week = week_num - regular_season_weeks
+      }
     }
-  })
 
-  const week_games_link = doc.querySelector('#div_other_scores h2 a')
-  const week_games_text = week_games_link.textContent
-  const is_playoffs = week_games_text.includes('Playoffs')
-  const seas_type = is_playoffs ? 'POST' : 'REG'
-  const year = Number(week_games_link.href.split('/')[2])
+    const game = {
+      ...pfr_game_meta,
 
-  const regex = /\/years\/\d+\/week_(\d+)\.htm/
-  const match = week_games_link.href.match(regex)
-  const week_num = match ? Number(match[1]) : null
-  let week = null
+      week,
+      year,
+      seas_type,
 
-  if (week_num) {
-    if (!is_playoffs) {
-      week = week_num
-    } else {
-      const weeks_query = await db('nfl_games')
-        .select('week')
-        .where({ year, seas_type: 'REG' })
-        .groupBy('week')
-      const regular_season_weeks = weeks_query.length
+      // TODO add day
+      // TODO add week_type
 
-      week = week_num - regular_season_weeks
+      pfr_game_id,
+
+      home_coach: get_coach({ doc, is_home: true }),
+      away_coach: get_coach({ doc, is_home: false }),
+
+      ...get_teams({ doc }),
+      ...get_scores({ doc }),
+      ...get_scorebox_meta({ doc }),
+      ...get_game_info({ doc }),
+
+      team_stats: get_team_stats({ doc }),
+
+      officials,
+
+      expected_points_summary: get_expected_points_summary({ doc }),
+      // team_stats: get_team_stats({ doc }),
+      player_passing_rushing_receiving: get_player_passing_rushing_receiving({
+        doc
+      }),
+      player_defense: get_player_defense({ doc }),
+
+      kick_punt_returns: get_player_kick_punt_returns({ doc }),
+      kicking_punting: get_player_kicking_punting({ doc }),
+
+      advanced_passing: get_player_advanced_passing({ doc }),
+      advanced_rushing: get_player_advanced_rushing({ doc }),
+      advanced_receiving: get_player_advanced_receiving({ doc }),
+      advanced_defense: get_player_advanced_defense({ doc }),
+
+      home_roster,
+      away_roster,
+      plays: get_plays({ doc }),
+      home_drives: get_drives({ doc, is_home: true }),
+      away_drives: get_drives({ doc, is_home: false })
     }
+
+    if (game.pfr_game_id && game.over_under) {
+      await cache.set({ key: cache_key, value: game })
+    }
+
+    return game
   }
 
-  const game = {
-    ...pfr_game_meta,
-
-    week,
-    year,
-    seas_type,
-
-    // TODO add day
-    // TODO add week_type
-
-    pfr_game_id,
-
-    home_coach: get_coach({ doc, is_home: true }),
-    away_coach: get_coach({ doc, is_home: false }),
-
-    ...get_teams({ doc }),
-    ...get_scores({ doc }),
-    ...get_scorebox_meta({ doc }),
-    ...get_game_info({ doc }),
-
-    team_stats: get_team_stats({ doc }),
-
-    officials,
-
-    expected_points_summary: get_expected_points_summary({ doc }),
-    // team_stats: get_team_stats({ doc }),
-    player_passing_rushing_receiving: get_player_passing_rushing_receiving({
-      doc
-    }),
-    player_defense: get_player_defense({ doc }),
-
-    kick_punt_returns: get_player_kick_punt_returns({ doc }),
-    kicking_punting: get_player_kicking_punting({ doc }),
-
-    advanced_passing: get_player_advanced_passing({ doc }),
-    advanced_rushing: get_player_advanced_rushing({ doc }),
-    advanced_receiving: get_player_advanced_receiving({ doc }),
-    advanced_defense: get_player_advanced_defense({ doc }),
-
-    home_roster,
-    away_roster,
-    plays: get_plays({ doc }),
-    home_drives: get_drives({ doc, is_home: true }),
-    away_drives: get_drives({ doc, is_home: false })
-  }
-
-  if (game.pfr_game_id && game.over_under) {
-    await cache.set({ key: cache_key, value: game })
-  }
-
-  return game
+  return use_page_or_browser(page, do_fetch)
 }
 
 export const get_player_gamelogs_for_season = async ({
@@ -1769,53 +1864,55 @@ export const get_player_gamelogs_for_season = async ({
     }
   }
 
-  let player_gamelogs = []
+  return with_pfr_browser(async (page) => {
+    let player_gamelogs = []
 
-  const games = await get_games({ year, ignore_cache })
-  log(`fetching ${games.length} games for ${year}`)
+    const games = await get_games({ year, ignore_cache, page })
+    log(`fetching ${games.length} games for ${year}`)
 
-  let games_failed = 0
-  for (const game of games) {
-    try {
-      const pfr_game = await get_game({
-        pfr_game_id: game.pfr_game_id,
-        pfr_game_meta: game,
-        ignore_cache
-      })
+    let games_failed = 0
+    for (const game of games) {
+      try {
+        const pfr_game = await get_game({
+          pfr_game_id: game.pfr_game_id,
+          pfr_game_meta: game,
+          ignore_cache,
+          page
+        })
 
-      const game_player_gamelogs = format_player_gamelogs({ pfr_game })
-      player_gamelogs = player_gamelogs.concat(game_player_gamelogs)
+        const game_player_gamelogs = format_player_gamelogs({ pfr_game })
+        player_gamelogs = player_gamelogs.concat(game_player_gamelogs)
 
-      // delay next request if previous request was not cached
-      if (!pfr_game.cached) {
-        await wait(8000)
+        // delay next request if previous request was not cached
+        if (!pfr_game.cached) {
+          await wait(8000)
+        }
+      } catch (error) {
+        games_failed++
+        log(`error fetching game ${game.pfr_game_id}: ${error.message}`)
       }
-    } catch (error) {
-      games_failed++
-      log(
-        `error fetching game ${game.pfr_game_id}: ${error.message}`
-      )
     }
-  }
 
-  if (games_failed) {
-    log(`failed to fetch ${games_failed} of ${games.length} games`)
-  }
+    if (games_failed) {
+      log(`failed to fetch ${games_failed} of ${games.length} games`)
+    }
 
-  player_gamelogs = player_gamelogs.sort(
-    (a, b) => a.seas_type - b.seas_type || a.week - b.week
-  )
+    player_gamelogs = player_gamelogs.sort(
+      (a, b) => a.seas_type - b.seas_type || a.week - b.week
+    )
 
-  if (player_gamelogs.length) {
-    await cache.set({ key: cache_key, value: player_gamelogs })
-  }
+    if (player_gamelogs.length) {
+      await cache.set({ key: cache_key, value: player_gamelogs })
+    }
 
-  return player_gamelogs
+    return player_gamelogs
+  })
 }
 
 export const get_draft = async ({
   year = current_season.year,
-  ignore_cache = false
+  ignore_cache = false,
+  page = null
 } = {}) => {
   const cache_key = `/pro-football-reference/draft/${year}.json`
   if (!ignore_cache) {
@@ -1826,77 +1923,91 @@ export const get_draft = async ({
     }
   }
 
-  const url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/draft.htm`
-  log(`fetching ${url}`)
+  const do_fetch = async (p) => {
+    const url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/draft.htm`
+    log(`fetching ${url}`)
 
-  const response = await fetch_with_proxy({ url })
-  const text = await response.text()
-  const dom = new JSDOM(text)
-  const doc = dom.window.document
+    const text = await fetch_pfr_page({ url, page: p })
+    const dom = new JSDOM(text)
+    const doc = dom.window.document
 
-  const draft_players = []
-  const rows = doc.querySelectorAll('#drafts tbody tr:not(.thead)')
+    const draft_players = []
+    const rows = doc.querySelectorAll('#drafts tbody tr:not(.thead)')
 
-  for (const row of rows) {
-    const round = Number(
-      row.querySelector('[data-stat="draft_round"]').textContent
-    )
-    const overall_pick = Number(
-      row.querySelector('[data-stat="draft_pick"]').textContent
-    )
-    const team = fixTeam(row.querySelector('[data-stat="team"] a').textContent)
-    const player_link = row.querySelector('[data-stat="player"] a')
-    const player_name = player_link
-      ? player_link.textContent
-      : row.querySelector('[data-stat="player"]').textContent
-    const pfr_id = player_link
-      ? player_link.getAttribute('href').split('/').pop().replace('.htm', '')
-      : null
-    const draft_position = row.querySelector('[data-stat="pos"]').textContent
-    const all_pro_first_team_selections = Number(
-      row.querySelector('[data-stat="all_pros_first_team"]')?.textContent || 0
-    )
-    const pro_bowl_selections = Number(
-      row.querySelector('[data-stat="pro_bowls"]')?.textContent || 0
-    )
-    const years_as_primary_starter = Number(
-      row.querySelector('[data-stat="years_as_primary_starter"]')
-        ?.textContent || 0
-    )
-    const pfr_weighted_career_approximate_value = Number(
-      row.querySelector('[data-stat="career_av"]')?.textContent || 0
-    )
-    const pfr_weighted_career_approximate_value_drafted_team = Number(
-      row.querySelector('[data-stat="draft_av"]')?.textContent || 0
-    )
+    for (const row of rows) {
+      const round = Number(
+        row.querySelector('[data-stat="draft_round"]').textContent
+      )
+      const overall_pick = Number(
+        row.querySelector('[data-stat="draft_pick"]').textContent
+      )
+      const team = fixTeam(
+        row.querySelector('[data-stat="team"] a').textContent
+      )
+      const player_link = row.querySelector('[data-stat="player"] a')
+      const player_name = player_link
+        ? player_link.textContent
+        : row.querySelector('[data-stat="player"]').textContent
+      const pfr_id = player_link
+        ? player_link
+            .getAttribute('href')
+            .split('/')
+            .pop()
+            .replace('.htm', '')
+        : null
+      const draft_position = row.querySelector('[data-stat="pos"]').textContent
+      const all_pro_first_team_selections = Number(
+        row.querySelector('[data-stat="all_pros_first_team"]')?.textContent || 0
+      )
+      const pro_bowl_selections = Number(
+        row.querySelector('[data-stat="pro_bowls"]')?.textContent || 0
+      )
+      const years_as_primary_starter = Number(
+        row.querySelector('[data-stat="years_as_primary_starter"]')
+          ?.textContent || 0
+      )
+      const pfr_weighted_career_approximate_value = Number(
+        row.querySelector('[data-stat="career_av"]')?.textContent || 0
+      )
+      const pfr_weighted_career_approximate_value_drafted_team = Number(
+        row.querySelector('[data-stat="draft_av"]')?.textContent || 0
+      )
 
-    const college_link = row.querySelector('[data-stat="college_id"] a')
-    const college_team = college_link ? college_link.textContent : null
+      const college_link = row.querySelector('[data-stat="college_id"] a')
+      const college_team = college_link ? college_link.textContent : null
 
-    draft_players.push({
-      round,
-      overall_pick,
-      team,
-      player_name,
-      pfr_id,
-      draft_position,
-      all_pro_first_team_selections,
-      pro_bowl_selections,
-      years_as_primary_starter,
-      pfr_weighted_career_approximate_value,
-      pfr_weighted_career_approximate_value_drafted_team,
-      college_team
-    })
+      draft_players.push({
+        round,
+        overall_pick,
+        team,
+        player_name,
+        pfr_id,
+        draft_position,
+        all_pro_first_team_selections,
+        pro_bowl_selections,
+        years_as_primary_starter,
+        pfr_weighted_career_approximate_value,
+        pfr_weighted_career_approximate_value_drafted_team,
+        college_team
+      })
+    }
+
+    if (draft_players.length) {
+      await cache.set({ key: cache_key, value: draft_players })
+    }
+
+    return draft_players
   }
 
-  if (draft_players.length) {
-    await cache.set({ key: cache_key, value: draft_players })
-  }
-
-  return draft_players
+  return use_page_or_browser(page, do_fetch)
 }
 
-export const get_team_roster = async ({ team, year, ignore_cache = false }) => {
+export const get_team_roster = async ({
+  team,
+  year,
+  ignore_cache = false,
+  page = null
+}) => {
   if (!team) {
     throw new Error('team is required')
   }
@@ -1914,40 +2025,36 @@ export const get_team_roster = async ({ team, year, ignore_cache = false }) => {
     }
   }
 
-  const url = `${PRO_FOOTBALL_REFERENCE_URL}/teams/${team}/${year}_roster.htm`
-  log(`fetching roster from ${url}`)
+  const do_fetch = async (p) => {
+    const url = `${PRO_FOOTBALL_REFERENCE_URL}/teams/${team}/${year}_roster.htm`
+    log(`fetching roster from ${url}`)
 
-  try {
-    const response = await fetch_with_proxy({ url })
+    try {
+      const text = await fetch_pfr_page({ url, page: p })
+      const formatted_text = format_game_html(text)
+      const dom = new JSDOM(formatted_text)
+      const doc = dom.window.document
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch roster: ${response.status} ${response.statusText}`
-      )
+      const roster_table = doc.querySelector('table#roster')
+      if (!roster_table) {
+        throw new Error(`No roster table found for ${team} ${year}`)
+      }
+
+      const players = parse_roster_table(roster_table)
+
+      if (players.length) {
+        await cache.set({ key: cache_key, value: players })
+        log(`cached ${players.length} players for ${team} ${year}`)
+      }
+
+      return { players, cache_hit: false }
+    } catch (error) {
+      log(`Error fetching roster for ${team} ${year}: ${error.message}`)
+      throw error
     }
-
-    const text = await response.text()
-    const formatted_text = format_game_html(text)
-    const dom = new JSDOM(formatted_text)
-    const doc = dom.window.document
-
-    const roster_table = doc.querySelector('table#roster')
-    if (!roster_table) {
-      throw new Error(`No roster table found for ${team} ${year}`)
-    }
-
-    const players = parse_roster_table(roster_table)
-
-    if (players.length) {
-      await cache.set({ key: cache_key, value: players })
-      log(`cached ${players.length} players for ${team} ${year}`)
-    }
-
-    return { players, cache_hit: false }
-  } catch (error) {
-    log(`Error fetching roster for ${team} ${year}: ${error.message}`)
-    throw error
   }
+
+  return use_page_or_browser(page, do_fetch)
 }
 
 // Helper function to parse player data from a roster table
