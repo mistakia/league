@@ -207,7 +207,7 @@ fi
 tar -vcf $gz_file $sql_file
 rm $sql_file
 
-gdrive_backup_path="projects/League/Data/Backups"
+gdrive_backup_path="personal/projects/League/Data/Backups"
 
 if [ "$filename" = "checkpoint" ]; then
     # Upload new checkpoint first, then remove old copies.
