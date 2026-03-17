@@ -224,7 +224,8 @@ const import_games_sportradar = async ({
   all = false,
   dry = false,
   ignore_cache = false,
-  collector = null
+  collector = null,
+  season_type = 'REG'
 } = {}) => {
   console.time('import-games-sportradar-total')
 
@@ -264,7 +265,7 @@ const import_games_sportradar = async ({
     try {
       schedule_data = await get_games_schedule({
         year: process_year,
-        season_type: 'REG',
+        season_type,
         ignore_cache
       })
     } catch (error) {
@@ -417,12 +418,20 @@ const main = async () => {
     const all = argv.all || false
     const dry = argv.dry || false
     const ignore_cache = argv.ignore_cache || false
+    const season_type = argv['seas-type'] === 'POST' ? 'PST' : 'REG'
 
     if (!year && !all) {
       log('Warning: No --year specified, defaulting to current year')
     }
 
-    await import_games_sportradar({ year, week, all, dry, ignore_cache })
+    await import_games_sportradar({
+      year,
+      week,
+      all,
+      dry,
+      ignore_cache,
+      season_type
+    })
   } catch (err) {
     error = err
     console.log(error)

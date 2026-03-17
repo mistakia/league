@@ -18,7 +18,10 @@ const log = debug('export-data-nfl-players')
 debug.enable('export-data-nfl-players')
 
 const export_data_nfl_players = async () => {
-  const data = await db('player').orderBy('pid', 'asc')
+  const data = await db.transaction(async (trx) => {
+    await trx.raw("SET LOCAL statement_timeout = '300s'")
+    return trx('player').orderBy('pid', 'asc')
+  })
 
   const header = {}
   for (const field of Object.keys(data[0])) {

@@ -335,14 +335,27 @@ const export_data_nfl_plays = async ({
   seas_type = 'REG',
   collector = null
 } = {}) => {
-  log(`exporting plays for ${year}`)
-  const data = await db('nfl_plays')
-    .select('nfl_plays.*')
-    .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', seas_type)
-    .orderBy('nfl_plays.esbid', 'asc')
-    .orderBy('nfl_plays.playId', 'asc')
+  log(`exporting plays for ${year} ${seas_type}`)
+  const plays_table = `nfl_plays_year_${year}`
+
+  // Get esbids for the target year/seas_type first (small query)
+  const games = await db('nfl_games')
+    .select('esbid')
+    .where({ year, seas_type })
+    .orderBy('esbid', 'asc')
+  const esbids = games.map((g) => g.esbid)
+  log(`found ${esbids.length} games for ${year} ${seas_type}`)
+
+  // Query plays in batches by game to avoid statement timeout
+  const data = []
+  for (const esbid of esbids) {
+    const plays = await db(plays_table)
+      .select('*')
+      .where({ esbid })
+      .orderBy('playId', 'asc')
+    data.push(...plays)
+  }
+  log(`loaded ${data.length} plays`)
 
   const header = {}
 
@@ -378,6 +391,11 @@ const export_data_nfl_plays = async ({
 const main = async () => {
   let error
   try {
+    const argv_year = process.argv.find(
+      (_, i, arr) => i > 0 && arr[i - 1] === '--year'
+    )
+    const target_year = argv_year ? parseInt(argv_year) : null
+
     const columns = await db('nfl_plays').columnInfo()
     const column_keys = Object.keys(columns)
 
@@ -388,12 +406,17 @@ const main = async () => {
       `Missing columns not included in nfl_play_fields: ${missing_columns.join(', ')}`
     )
 
-    const years_query_results = await db('nfl_plays')
-      .select('year')
-      .groupBy('year')
-      .orderBy('year', 'asc')
+    let years
+    if (target_year) {
+      years = [target_year]
+    } else {
+      const years_query_results = await db('nfl_plays')
+        .select('year')
+        .groupBy('year')
+        .orderBy('year', 'asc')
+      years = years_query_results.map((r) => r.year)
+    }
 
-    const years = years_query_results.map((r) => r.year)
     const seas_types = ['PRE', 'REG', 'POST']
 
     for (const year of years) {
