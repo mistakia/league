@@ -17,6 +17,49 @@ const data_path = path.join(__dirname, '../data')
 const log = debug('export-data-player-gamelogs')
 debug.enable('export-data-player-gamelogs')
 
+const stat_fields = [
+  'pa',
+  'pc',
+  'py',
+  'ints',
+  'tdp',
+  'ra',
+  'ry',
+  'tdr',
+  'fuml',
+  'trg',
+  'rec',
+  'recy',
+  'tdrec',
+  'twoptc',
+  'prtd',
+  'krtd',
+  'snp',
+  'fgm',
+  'fgy',
+  'fg19',
+  'fg29',
+  'fg39',
+  'fg49',
+  'fg50',
+  'xpm',
+  'dsk',
+  'dint',
+  'dff',
+  'drf',
+  'dtno',
+  'dfds',
+  'dpa',
+  'dya',
+  'dblk',
+  'dsf',
+  'dtpr',
+  'dtd'
+]
+
+const has_any_stat = (gamelog) =>
+  stat_fields.some((field) => gamelog[field] && gamelog[field] !== 0)
+
 const format_gamelog = (gamelog) => ({
   esbid: gamelog.esbid,
   pid: gamelog.pid,
@@ -83,6 +126,10 @@ const export_data_player_gamelogs = async ({ collector = null } = {}) => {
     const { year, ...gamelog } = item
     if (!gamelogs_by_year[year]) {
       gamelogs_by_year[year] = []
+    }
+
+    if (!has_any_stat(gamelog)) {
+      continue
     }
 
     const formatted_gamelog = format_gamelog(gamelog)
