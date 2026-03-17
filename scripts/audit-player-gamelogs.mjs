@@ -14,6 +14,11 @@ const initialize_cli = () => {
     .option('ignore_cache', {
       type: 'boolean',
       describe: 'Bypass cache and fetch fresh data'
+    })
+    .option('cache_max_age', {
+      type: 'string',
+      describe:
+        'Maximum cache age (e.g., 7d, 24h, 30m). Stale entries are re-fetched.'
     }).argv
 }
 
@@ -64,9 +69,22 @@ const format_gamelog = ({
   krtd
 })
 
+const parse_duration_to_ms = (duration) => {
+  if (!duration) return null
+  const match = duration.match(/^(\d+)(d|h|m)$/)
+  if (!match) return null
+  const value = parseInt(match[1])
+  const unit = match[2]
+  if (unit === 'd') return value * 86400000
+  if (unit === 'h') return value * 3600000
+  if (unit === 'm') return value * 60000
+  return null
+}
+
 const audit_player_gamelogs = async ({
   year = current_season.year,
   ignore_cache = false,
+  cache_max_age_ms = null,
   collector = null
 } = {}) => {
   const result = {
@@ -79,7 +97,7 @@ const audit_player_gamelogs = async ({
   let pfr_player_gamelogs_for_season = []
   try {
     pfr_player_gamelogs_for_season =
-      await pfr.get_player_gamelogs_for_season({ year, ignore_cache })
+      await pfr.get_player_gamelogs_for_season({ year, ignore_cache, cache_max_age_ms })
   } catch (error) {
     log(`PFR fetch failed: ${error.message}`)
     if (collector) {
@@ -191,9 +209,17 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
+    const cache_max_age_ms = parse_duration_to_ms(argv.cache_max_age)
+    if (argv.cache_max_age && !cache_max_age_ms) {
+      console.error(
+        `Invalid cache_max_age format: "${argv.cache_max_age}" (expected e.g., 7d, 24h, 30m)`
+      )
+      process.exit(1)
+    }
     const result = await audit_player_gamelogs({
       year: argv.year,
-      ignore_cache: argv.ignore_cache
+      ignore_cache: argv.ignore_cache,
+      cache_max_age_ms
     })
     console.log(
       `=== SUMMARY === ${JSON.stringify({ script: 'audit-player-gamelogs', year: argv.year || 'current', gamelogs_checked: result.gamelogs_checked, missing_gamelogs: result.missing_gamelogs, discrepancies: result.discrepancies.length })}`

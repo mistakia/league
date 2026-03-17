@@ -21,8 +21,11 @@ export const set = async ({ key, value }) => {
   return data.value
 }
 
-export const get = async ({ key }) => {
-  const url = `https://xo.football/api/cache${key}`
+export const get = async ({ key, max_age_ms = null }) => {
+  let url = `https://xo.football/api/cache${key}`
+  if (max_age_ms != null) {
+    url += `?max_age_ms=${max_age_ms}`
+  }
 
   const data = await fetch_with_retry({
     url,

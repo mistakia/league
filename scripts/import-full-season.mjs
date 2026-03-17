@@ -80,6 +80,9 @@ import process_player_seasonlogs from './process-player-seasonlogs.mjs'
 import import_espn_receiving_tracking_metrics from './import-espn-receiving-tracking-metrics.mjs'
 import import_dvoa_sheets from './import-dvoa-sheets.mjs'
 
+// Data quality scripts
+import backfill_play_stats_gsisid from './backfill-play-stats-gsisid.mjs'
+
 // Validation script
 import audit_player_gamelogs from './audit-player-gamelogs.mjs'
 
@@ -1124,6 +1127,13 @@ const import_full_season = async ({
         collector,
         skip_sources
       })
+      await wait(DELAYS.BETWEEN_STAGES)
+    }
+
+    // Backfill null gsisId on play_stats before aggregation
+    if (run_processing) {
+      log('=== gsisId Backfill ===')
+      await backfill_play_stats_gsisid({ year, dry_run: dry })
       await wait(DELAYS.BETWEEN_STAGES)
     }
   } else {

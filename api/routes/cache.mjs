@@ -101,6 +101,18 @@ router.get('/:cache_key(*)', async (req, res) => {
       !path.isAbsolute(relative_path)
 
     if (path_exists && is_subpath) {
+      // Check cache freshness if max_age_ms is provided
+      const max_age_ms = req.query.max_age_ms
+        ? parseInt(req.query.max_age_ms, 10)
+        : null
+      if (max_age_ms && max_age_ms > 0) {
+        const stat = await fs.stat(full_path)
+        const age_ms = Date.now() - stat.mtimeMs
+        if (age_ms > max_age_ms) {
+          return res.status(200).send({ key: cache_key, value: null })
+        }
+      }
+
       const value = await fs.readJson(full_path)
       return res.status(200).send({ key: cache_key, value })
     }

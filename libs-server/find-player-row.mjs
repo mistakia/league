@@ -135,6 +135,7 @@ const find_player_row = async ({
   nfl_id,
   mfl_id,
   sis_id,
+  sportradar_id,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -160,6 +161,8 @@ const find_player_row = async ({
     query.where({ gsisid })
   } else if (gsis_it_id) {
     query.where({ gsis_it_id })
+  } else if (sportradar_id) {
+    query.where({ sportradar_id })
   } else if (otc_id) {
     query.where({ otc_id })
   } else if (pff_id) {

@@ -1854,11 +1854,12 @@ export const get_game = async ({
 
 export const get_player_gamelogs_for_season = async ({
   year = current_season.year,
-  ignore_cache = false
+  ignore_cache = false,
+  cache_max_age_ms = null
 } = {}) => {
   const cache_key = `/pro-football-reference/player-gamelogs/${year}.json`
   if (!ignore_cache) {
-    const cache_value = await cache.get({ key: cache_key })
+    const cache_value = await cache.get({ key: cache_key, max_age_ms: cache_max_age_ms })
     if (cache_value) {
       return cache_value
     }

@@ -1322,7 +1322,7 @@ const process_game = async ({
   }
 }
 
-const build_games_query = ({ game_id, year, week, all }) => {
+const build_games_query = ({ game_id, year, week, all, seas_type }) => {
   let games_query = db('nfl_games')
     .whereNotNull('sportradar_game_id')
     .select(
@@ -1341,6 +1341,7 @@ const build_games_query = ({ game_id, year, week, all }) => {
   } else if (!all) {
     if (year) games_query = games_query.where({ year })
     if (week) games_query = games_query.where({ week })
+    if (seas_type) games_query = games_query.where({ seas_type })
   }
 
   return games_query
@@ -1371,6 +1372,7 @@ const import_plays_sportradar = async ({
   overwrite_existing = false,
   ignore_sportradar_field_conflicts = false,
   ignore_cache = false,
+  seas_type = null,
   collector = null
 } = {}) => {
   console.time('import-plays-sportradar-total')
@@ -1379,7 +1381,7 @@ const import_plays_sportradar = async ({
   const team_mappings_cache = await load_team_mappings()
 
   // Build and execute games query
-  const games_query = build_games_query({ game_id, year, week, all })
+  const games_query = build_games_query({ game_id, year, week, all, seas_type })
   const games = await games_query
   log(`Found ${games.length} games with Sportradar game IDs`)
 
@@ -1526,6 +1528,7 @@ const main = async () => {
     const ignore_sportradar_field_conflicts =
       argv['ignore-sportradar-field-conflicts'] || false
     const ignore_cache = argv['ignore-cache'] || false
+    const seas_type = argv['seas-type'] || null
 
     await import_plays_sportradar({
       year,
@@ -1535,7 +1538,8 @@ const main = async () => {
       dry,
       overwrite_existing,
       ignore_sportradar_field_conflicts,
-      ignore_cache
+      ignore_cache,
+      seas_type
     })
   } catch (err) {
     error = err
