@@ -16,11 +16,6 @@
 ## At every 15th minute on Sunday in January, February, and every month from September through December.
 # */15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force >> /var/log/league/league-import-nfl-games-nfl.log 2>&1
 
-# DFS Salaries
-
-## Every Wednesday at 1:20PM
-20 13 * * 3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-draftkings-salaries.mjs >> /var/log/league/league-import-draftkings-salaries.log 2>&1
-
 ################################### PLAYOFF PLAY IMPORTING ########################################
 ## Import plays and finalize completed playoff games
 ## Runs every 10 minutes during typical playoff game windows (Saturday/Sunday in January/February)

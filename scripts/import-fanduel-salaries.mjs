@@ -15,6 +15,7 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
+import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -25,7 +26,8 @@ debug.enable('import-fanduel-salaries,get-player,fanduel,update-player')
 
 const import_fanduel_salaries = async ({
   dry_run = false,
-  ignore_cache = false
+  ignore_cache = false,
+  year
 } = {}) => {
   // get slates
   const fanduel_slate_data = await fanduel.get_dfs_fixtures({ ignore_cache })
@@ -35,7 +37,8 @@ const import_fanduel_salaries = async ({
     !fanduel_slate_data.fixture_lists ||
     !fanduel_slate_data.fixture_lists.length
   ) {
-    throw new Error('No fanduel slates found')
+    log('No fanduel slates found')
+    return
   }
 
   const game_description_names = ['NFL Main', 'NFL Single Game']
@@ -48,12 +51,13 @@ const import_fanduel_salaries = async ({
   log(`Found ${filtered_fanduel_slates.length} fanduel slates of interest`)
 
   const nfl_games = await db('nfl_games').where({
-    year: current_season.year
+    year
   })
 
   await wait(10000)
 
   const salary_inserts = []
+  const unmatched_games = []
 
   // iterate through slates
   for (const fanduel_slate of filtered_fanduel_slates) {
@@ -107,7 +111,8 @@ const import_fanduel_salaries = async ({
           fanduel_game,
           nfl_games,
           salary_inserts,
-          teams_index
+          teams_index,
+          unmatched_games
         })
       } else {
         unmatched_players.push({ fanduel_player, fanduel_slate })
@@ -146,7 +151,8 @@ const import_fanduel_salaries = async ({
           fanduel_game,
           nfl_games,
           salary_inserts,
-          teams_index
+          teams_index,
+          unmatched_games
         })
       } else {
         log(
@@ -156,6 +162,12 @@ const import_fanduel_salaries = async ({
     }
 
     await wait(20000)
+  }
+
+  if (unmatched_games.length) {
+    log(
+      `${unmatched_games.length} unmatched games skipped: ${unmatched_games.join(', ')}`
+    )
   }
 
   if (dry_run) {
@@ -181,7 +193,8 @@ const process_matched_player = async ({
   fanduel_game,
   nfl_games,
   salary_inserts,
-  teams_index
+  teams_index,
+  unmatched_games
 }) => {
   if (!player_row.fanduel_id) {
     await updatePlayer({
@@ -209,9 +222,11 @@ const process_matched_player = async ({
   })
 
   if (!game) {
-    throw new Error(
-      `No game found for ${away_team_name} @ ${home_team_name} on ${fanduel_game.start_date}`
+    log(
+      `No game found for ${away_team_name} @ ${home_team_name} on ${fanduel_game.start_date} — skipping`
     )
+    unmatched_games.push(`${away_team_name} @ ${home_team_name}`)
+    return
   }
 
   const insert = {
@@ -231,9 +246,16 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await import_fanduel_salaries({
-      dry_run: argv.dry,
-      ignore_cache: argv.ignore_cache
+    const dry_run = argv.dry
+    const ignore_cache = argv.ignore_cache
+
+    await handle_season_args_for_script({
+      argv,
+      script_name: 'import-fanduel-salaries',
+      script_function: import_fanduel_salaries,
+      year_query: async () => [{ year: current_season.year }],
+      script_args: { dry_run, ignore_cache },
+      season_only: true
     })
   } catch (err) {
     error = err

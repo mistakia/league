@@ -4,7 +4,13 @@ import { hideBin } from 'yargs/helpers'
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { is_main, report_job, draftkings, updatePlayer } from '#libs-server'
+import {
+  is_main,
+  report_job,
+  draftkings,
+  updatePlayer
+} from '#libs-server'
+import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import {
   preload_active_players,
   find_player
@@ -20,7 +26,7 @@ const initialize_cli = () => {
 const log = debug('import-draftkings-salaries')
 debug.enable('import-draftkings-salaries,draft-kings,update-player')
 
-const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
+const import_draftkings_salaries = async ({ dry_run = false, year } = {}) => {
   await preload_active_players({
     all_players: false,
     include_otc_id_index: false,
@@ -32,10 +38,11 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
   log(`importing ${draft_groups.length} draft groups`)
 
   const nfl_games = await db('nfl_games').where({
-    year: current_season.year
+    year
   })
 
   const salary_inserts = []
+  const unmatched_games = []
 
   for (const draft_group of draft_groups) {
     const matched_draftkings_ids = new Set()
@@ -70,7 +77,8 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
           draftable,
           draft_group,
           nfl_games,
-          salary_inserts
+          salary_inserts,
+          unmatched_games
         })
       } else {
         unmatched_draftables.push({ draftable, draft_group })
@@ -104,7 +112,8 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
           draftable,
           draft_group,
           nfl_games,
-          salary_inserts
+          salary_inserts,
+          unmatched_games
         })
       } else {
         log(
@@ -112,6 +121,12 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
         )
       }
     }
+  }
+
+  if (unmatched_games.length) {
+    log(
+      `${unmatched_games.length} unmatched games skipped: ${unmatched_games.join(', ')}`
+    )
   }
 
   if (dry_run) {
@@ -136,7 +151,8 @@ const process_matched_player = async ({
   draftable,
   draft_group,
   nfl_games,
-  salary_inserts
+  salary_inserts,
+  unmatched_games
 }) => {
   if (!player_row.draftkings_id) {
     await updatePlayer({
@@ -164,7 +180,9 @@ const process_matched_player = async ({
   })
 
   if (!game) {
-    throw new Error(`no game found for ${draftable.competition.name}`)
+    log(`no game found for ${draftable.competition.name} — skipping`)
+    unmatched_games.push(draftable.competition.name)
+    return
   }
 
   const insert = {
@@ -184,7 +202,16 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await import_draftkings_salaries({ dry_run: argv.dry })
+    const dry_run = argv.dry
+
+    await handle_season_args_for_script({
+      argv,
+      script_name: 'import-draftkings-salaries',
+      script_function: import_draftkings_salaries,
+      year_query: async () => [{ year: current_season.year }],
+      script_args: { dry_run },
+      season_only: true
+    })
   } catch (err) {
     error = err
     log(error)

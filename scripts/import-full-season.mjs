@@ -90,6 +90,9 @@ import audit_player_gamelogs from './audit-player-gamelogs.mjs'
 import export_data_nfl_plays from './export-data-nfl-plays.mjs'
 import export_data_nfl_games from './export-data-nfl-games.mjs'
 import export_data_player_gamelogs from './export-data-player-gamelogs.mjs'
+import export_data_league_matchups from './export-data-league-matchups.mjs'
+import export_data_league_playoffs from './export-data-league-playoffs.mjs'
+import export_data_league_team_seasonlogs from './export-data-league-team-seasonlogs.mjs'
 
 // Private scripts - import with graceful fallback
 let import_players_ngs = null
@@ -969,6 +972,27 @@ const run_exports = async ({ year, collector }) => {
     await export_data_player_gamelogs({ year, collector })
   } catch (error) {
     collector.add_error(error, { script: 'export_data_player_gamelogs', year })
+  }
+  await wait(DELAYS.BETWEEN_SCRIPTS)
+
+  try {
+    await export_data_league_matchups({ year, collector })
+  } catch (error) {
+    collector.add_error(error, { script: 'export_data_league_matchups', year })
+  }
+  await wait(DELAYS.BETWEEN_SCRIPTS)
+
+  try {
+    await export_data_league_playoffs({ year, collector })
+  } catch (error) {
+    collector.add_error(error, { script: 'export_data_league_playoffs', year })
+  }
+  await wait(DELAYS.BETWEEN_SCRIPTS)
+
+  try {
+    await export_data_league_team_seasonlogs({ year, collector })
+  } catch (error) {
+    collector.add_error(error, { script: 'export_data_league_team_seasonlogs', year })
   }
 
   collector.end_stage()
