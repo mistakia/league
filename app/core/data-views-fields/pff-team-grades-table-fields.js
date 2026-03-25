@@ -103,7 +103,8 @@ export default {
   pff_team_losses: pff_team_field({
     column_title: 'PFF Team Losses',
     header_label: 'Losses',
-    player_value_path: 'pff_team_losses'
+    player_value_path: 'pff_team_losses',
+    reverse_percentiles: true
   }),
   pff_team_ties: pff_team_field({
     column_title: 'PFF Team Ties',
@@ -118,6 +119,7 @@ export default {
   pff_team_points_allowed: pff_team_field({
     column_title: 'PFF Team Points Allowed',
     header_label: 'Points Against',
-    player_value_path: 'pff_team_points_allowed'
+    player_value_path: 'pff_team_points_allowed',
+    reverse_percentiles: true
   })
 }

@@ -28,13 +28,16 @@ const get_players_percentiles = createSelector(
       column
     ] of selected_data_view.table_state.columns.entries()) {
       const column_id = typeof column === 'string' ? column : column.column_id
+      const column_params =
+        typeof column === 'string' ? {} : column.params || {}
       table_state_columns.push({
         index,
-        column_id
+        column_id,
+        column_params
       })
     }
 
-    for (const { index, column_id } of table_state_columns) {
+    for (const { index, column_id, column_params } of table_state_columns) {
       const field = data_views_fields[column_id]
 
       if (!field) {
@@ -62,7 +65,11 @@ const get_players_percentiles = createSelector(
       if (field.data_type === table_constants.TABLE_DATA_TYPES.NUMBER) {
         const stat_key = `${field.player_value_path}_${column_index}`
         percentile_stat_keys.push(stat_key)
-        if (field.reverse_percentiles) {
+        const is_reversed =
+          typeof field.reverse_percentiles === 'function'
+            ? field.reverse_percentiles(column_params)
+            : field.reverse_percentiles
+        if (is_reversed) {
           reverse_percentile_stats[stat_key] = true
         }
       }
