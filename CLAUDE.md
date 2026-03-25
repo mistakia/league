@@ -25,6 +25,12 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 - `yarn build` - Build production bundle
 - `yarn analyze` - Build with bundle analyzer
+- `yarn deploy` - Full deploy: pulls code on main server, installs deps, reloads PM2 (API + frontend)
+- `yarn deploy:dist` - Frontend-only deploy: rsyncs `dist/` to main server (no API restart)
+- `yarn load:main` - Update code and deps on main server without PM2 reload
+- `yarn load:worker1` - Update code and reload worker processes on worker server 1
+
+Deploy targets (SSH hosts): `league` (main: API + frontend), `league-worker-1` (odds/plays import workers)
 
 **Testing:**
 
