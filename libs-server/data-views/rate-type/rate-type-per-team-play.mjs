@@ -73,7 +73,8 @@ export const add_per_team_play_cte = ({
   splits,
   play_type = null,
   group_by = null,
-  team_unit = 'off'
+  team_unit = 'off',
+  data_view_options = {}
 }) => {
   team_unit = params.team_unit || team_unit
 
@@ -122,6 +123,10 @@ export const add_per_team_play_cte = ({
   }
 
   const denominator_params = get_rate_type_denominator_params({ params })
+  if (data_view_options.year_range && data_view_options.year_range.length) {
+    denominator_params.year = data_view_options.year_range
+    delete denominator_params.year_offset
+  }
   const filtered_params = {
     ...denominator_params,
     seas_type

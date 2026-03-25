@@ -22,7 +22,8 @@ export default async function ({
   columns = [],
   pids = [],
   include_all_active_players = false,
-  include_baseline_players = false
+  include_baseline_players = false,
+  year = current_season.year
 }) {
   const league_roster_player_ids = []
   const baseline_player_ids = []
@@ -287,7 +288,7 @@ export default async function ({
     query
       .leftJoin('league_format_player_seasonlogs', function () {
         this.on('league_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn('league_format_player_seasonlogs.year', current_season.year)
+        this.andOn('league_format_player_seasonlogs.year', year)
         this.andOn(
           db.raw(
             `league_format_player_seasonlogs.league_format_hash = '${league_format_hash}'`
@@ -311,7 +312,7 @@ export default async function ({
     query
       .leftJoin('scoring_format_player_seasonlogs', function () {
         this.on('scoring_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn('scoring_format_player_seasonlogs.year', current_season.year)
+        this.andOn('scoring_format_player_seasonlogs.year', year)
         this.andOn(
           db.raw(
             `scoring_format_player_seasonlogs.scoring_format_hash = '${scoring_format_hash}'`

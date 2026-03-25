@@ -68,7 +68,8 @@ export const add_per_player_cte = ({
   rate_type_table_name,
   splits,
   stat_type,
-  rate_type_params = {}
+  rate_type_params = {},
+  data_view_options = {}
 }) => {
   const { seas_type } = get_play_by_play_default_params({ params })
 
@@ -111,6 +112,10 @@ export const add_per_player_cte = ({
   }
 
   const denominator_params = get_rate_type_denominator_params({ params })
+  if (data_view_options.year_range && data_view_options.year_range.length) {
+    denominator_params.year = data_view_options.year_range
+    delete denominator_params.year_offset
+  }
   const filtered_params = {
     ...denominator_params,
     seas_type,

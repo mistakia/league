@@ -1152,7 +1152,8 @@ export const get_data_view_results_query = async ({
     from_table_column_id: from_table_config.column_id,
     year_coalesce_args: [],
     rate_type_tables: {},
-    matchup_opponent_types: new Set()
+    matchup_opponent_types: new Set(),
+    year_range: []
   }
   const data_view_metadata = {
     created_at: Date.now(),
@@ -1242,6 +1243,7 @@ export const get_data_view_results_query = async ({
 
   if (splits.includes('week') || splits.includes('year')) {
     const year_range = get_year_range([...prefix_columns, ...columns], where)
+    data_view_options.year_range = year_range
 
     // Create base_years CTE
     players_query.with(
@@ -1425,7 +1427,8 @@ export const get_data_view_results_query = async ({
       splits,
       rate_type,
       team_unit,
-      is_team
+      is_team,
+      data_view_options
     })
     join_rate_type_cte({
       players_query,

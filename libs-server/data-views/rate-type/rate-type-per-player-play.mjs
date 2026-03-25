@@ -74,7 +74,8 @@ export const add_per_player_play_cte = ({
   rate_type_table_name,
   splits,
   play_type = null,
-  group_by = null
+  group_by = null,
+  data_view_options = {}
 }) => {
   const { seas_type } = get_play_by_play_default_params({ params })
   const cte_query = db('nfl_plays')
@@ -126,9 +127,13 @@ export const add_per_player_play_cte = ({
     }
   }
 
-  const { year, week } = get_default_params({ params })
+  let { year, week } = get_default_params({ params })
 
   const denominator_params = get_rate_type_denominator_params({ params })
+  if (data_view_options.year_range && data_view_options.year_range.length) {
+    year = data_view_options.year_range
+    delete denominator_params.year_offset
+  }
   const filtered_params = { ...denominator_params, year, week, seas_type }
   delete filtered_params.career_year
   delete filtered_params.career_game

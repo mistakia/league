@@ -83,15 +83,17 @@ const add_player_per_game_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits = []
+  splits = [],
+  effective_years
 }) => {
-  const { week, career_year, career_game, all_years } = get_default_params({
+  const { week, career_year, career_game } = get_default_params({
     params
   })
   const { seas_type } = get_play_by_play_default_params({ params })
 
   // Use year-specific player_gamelogs table if a single year is specified
-  const single_year = all_years && all_years.length === 1 ? all_years[0] : null
+  const single_year =
+    effective_years && effective_years.length === 1 ? effective_years[0] : null
   const player_gamelogs_table = single_year
     ? `player_gamelogs_year_${single_year}`
     : 'player_gamelogs'
@@ -112,8 +114,8 @@ const add_player_per_game_cte = ({
     })
   }
 
-  if (all_years.length) {
-    cte_query.whereIn('nfl_games.year', all_years)
+  if (effective_years.length) {
+    cte_query.whereIn('nfl_games.year', effective_years)
   }
 
   if (week.length) {
@@ -159,9 +161,10 @@ const add_team_per_game_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits = []
+  splits = [],
+  effective_years
 }) => {
-  const { week, all_years } = get_default_params({
+  const { week } = get_default_params({
     params
   })
   const { seas_type } = get_play_by_play_default_params({ params })
@@ -171,8 +174,8 @@ const add_team_per_game_cte = ({
     .countDistinct('nfl_plays.esbid as rate_type_total_count')
     .whereIn('nfl_plays.seas_type', seas_type)
 
-  if (all_years.length) {
-    cte_query.whereIn('nfl_plays.year', all_years)
+  if (effective_years.length) {
+    cte_query.whereIn('nfl_plays.year', effective_years)
   }
 
   if (week.length) {
@@ -207,21 +210,32 @@ export const add_per_game_cte = ({
   params,
   rate_type_table_name,
   splits = [],
-  is_team = false
+  is_team = false,
+  data_view_options = {}
 }) => {
+  const { all_years } = get_default_params({ params })
+  const effective_years =
+    data_view_options.year_range && data_view_options.year_range.length
+      ? [...new Set([...data_view_options.year_range, ...all_years])].sort(
+          (a, b) => a - b
+        )
+      : all_years
+
   if (is_team) {
     add_team_per_game_cte({
       players_query,
       params,
       rate_type_table_name,
-      splits
+      splits,
+      effective_years
     })
   } else {
     add_player_per_game_cte({
       players_query,
       params,
       rate_type_table_name,
-      splits
+      splits,
+      effective_years
     })
   }
 }
