@@ -20,7 +20,10 @@ const create_dvoa_field = ({
   player_value_path,
   size: 70,
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-  reverse_percentiles: (params) => params?.team_unit === 'def',
+  reverse_percentiles: (params) => {
+    const val = params?.team_unit
+    return Array.isArray(val) ? val[0] === 'def' : val === 'def'
+  },
   column_params: {
     year: {
       ...single_year,

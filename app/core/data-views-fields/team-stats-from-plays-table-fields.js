@@ -9,7 +9,10 @@ import {
 
 const from_play_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-  reverse_percentiles: (params) => params?.team_unit === 'def',
+  reverse_percentiles: (params) => {
+    const val = params?.team_unit
+    return Array.isArray(val) ? val[0] === 'def' : val === 'def'
+  },
   column_params: {
     ...nfl_plays_team_column_params,
     rate_type: rate_type_column_param.offensive_rate_type_param,

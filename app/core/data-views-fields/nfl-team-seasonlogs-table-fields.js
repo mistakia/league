@@ -93,8 +93,12 @@ const create_seasonlog_field = ({
   player_value_path,
   size,
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-  reverse_percentiles: (params) =>
-    params?.stat_type?.startsWith('AGAINST') ?? false,
+  reverse_percentiles: (params) => {
+    const val = Array.isArray(params?.stat_type)
+      ? params.stat_type[0]
+      : params?.stat_type
+    return val?.startsWith('AGAINST') ?? false
+  },
   column_params: {
     year: single_year,
     matchup_opponent_type,
