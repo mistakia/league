@@ -350,6 +350,12 @@ export default {
       supported_rate_types: []
     }
   ),
+  player_expected_completion_percentage_from_plays: player_stat_from_plays({
+    pid_columns: ['psr_pid'],
+    with_select_string: `AVG(cp) * 100`,
+    stat_name: 'expected_pass_comp_pct_from_plays',
+    supported_rate_types: []
+  }),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
     with_select_string: `CASE WHEN SUM(CASE WHEN td = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN td = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END`,

@@ -617,6 +617,8 @@ export default {
     'Pass first downs by the player (calculated from play-by-play data)',
   player_completion_percentage_over_expected_from_plays:
     'Completion percentage over expected by the player (calculated from play-by-play data)',
+  player_expected_completion_percentage_from_plays:
+    'Expected completion percentage for the player based on factors like air yards, receiver separation, and pass location (calculated from play-by-play data)',
   player_receiving_yards_after_catch_from_plays:
     'Receiving yards after catch by the player (calculated from play-by-play data)',
   player_yards_created_from_plays:

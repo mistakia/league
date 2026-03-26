@@ -84,6 +84,14 @@ export default {
       header_label: 'CPOE',
       player_value_path: 'pass_comp_pct_over_expected_from_plays'
     }),
+  player_expected_completion_percentage_from_plays:
+    offensive_player_from_play_field({
+      column_title: 'Expected Completion Percentage (By Play)',
+      column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
+      header_label: 'xCMP%',
+      player_value_path: 'expected_pass_comp_pct_from_plays',
+      fixed: 1
+    }),
   player_pass_touchdown_percentage_from_plays: offensive_player_from_play_field(
     {
       column_title: 'Passing Touchdown Percentage (By Play)',
