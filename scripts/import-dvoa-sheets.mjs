@@ -22,7 +22,10 @@ const initialize_cli = () => {
       type: 'string',
       describe: 'Season type (PRE, REG, POST)'
     })
-    .option('filepath', { type: 'string', describe: 'Path to DVOA spreadsheet' })
+    .option('filepath', {
+      type: 'string',
+      describe: 'Path to DVOA spreadsheet'
+    })
     .option('dry', { type: 'boolean', describe: 'Dry run mode' }).argv
 }
 
@@ -1015,9 +1018,7 @@ const import_dvoa_sheets = async ({
   if (!filepath) {
     const effective_seas_type = seas_type || current_season.nfl_seas_type
     if (effective_seas_type !== 'REG') {
-      log(
-        `Skipping import of DVOA sheets for ${effective_seas_type} season`
-      )
+      log(`Skipping import of DVOA sheets for ${effective_seas_type} season`)
       return
     }
 

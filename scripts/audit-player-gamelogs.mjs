@@ -96,8 +96,11 @@ const audit_player_gamelogs = async ({
   await db.raw('SET statement_timeout = 0')
   let pfr_player_gamelogs_for_season = []
   try {
-    pfr_player_gamelogs_for_season =
-      await pfr.get_player_gamelogs_for_season({ year, ignore_cache, cache_max_age_ms })
+    pfr_player_gamelogs_for_season = await pfr.get_player_gamelogs_for_season({
+      year,
+      ignore_cache,
+      cache_max_age_ms
+    })
   } catch (error) {
     log(`PFR fetch failed: ${error.message}`)
     if (collector) {

@@ -1859,7 +1859,10 @@ export const get_player_gamelogs_for_season = async ({
 } = {}) => {
   const cache_key = `/pro-football-reference/player-gamelogs/${year}.json`
   if (!ignore_cache) {
-    const cache_value = await cache.get({ key: cache_key, max_age_ms: cache_max_age_ms })
+    const cache_value = await cache.get({
+      key: cache_key,
+      max_age_ms: cache_max_age_ms
+    })
     if (cache_value) {
       return cache_value
     }
@@ -1950,11 +1953,7 @@ export const get_draft = async ({
         ? player_link.textContent
         : row.querySelector('[data-stat="player"]').textContent
       const pfr_id = player_link
-        ? player_link
-            .getAttribute('href')
-            .split('/')
-            .pop()
-            .replace('.htm', '')
+        ? player_link.getAttribute('href').split('/').pop().replace('.htm', '')
         : null
       const draft_position = row.querySelector('[data-stat="pos"]').textContent
       const all_pro_first_team_selections = Number(

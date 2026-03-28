@@ -4,12 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import dayjs from 'dayjs'
 
 import db from '#db'
-import {
-  is_main,
-  report_job,
-  draftkings,
-  updatePlayer
-} from '#libs-server'
+import { is_main, report_job, draftkings, updatePlayer } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import {
   preload_active_players,

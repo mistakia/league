@@ -768,7 +768,13 @@ const generate_gamelogs_for_week = async ({
   })
 
   try {
-    await generate_player_gamelogs({ year, week, seas_type, dry_run: dry, collector })
+    await generate_player_gamelogs({
+      year,
+      week,
+      seas_type,
+      dry_run: dry,
+      collector
+    })
   } catch (error) {
     collector.add_error(error, {
       script: 'generate_player_gamelogs',
@@ -992,7 +998,10 @@ const run_exports = async ({ year, collector }) => {
   try {
     await export_data_league_team_seasonlogs({ year, collector })
   } catch (error) {
-    collector.add_error(error, { script: 'export_data_league_team_seasonlogs', year })
+    collector.add_error(error, {
+      script: 'export_data_league_team_seasonlogs',
+      year
+    })
   }
 
   collector.end_stage()

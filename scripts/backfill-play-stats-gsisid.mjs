@@ -43,7 +43,9 @@ const group_and_log = (rows, label) => {
     for (const [name, info] of Object.entries(by_player).sort(
       (a, b) => b[1].count - a[1].count
     )) {
-      log(`  ${name}: ${info.count} rows -> gsisId ${info.gsisid} (${info.pid})`)
+      log(
+        `  ${name}: ${info.count} rows -> gsisId ${info.gsisid} (${info.pid})`
+      )
     }
   }
 
@@ -136,9 +138,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
     )
 
     // Get unique playerNames from candidates
-    const player_names = [
-      ...new Set(pass2_candidates.map((r) => r.playerName))
-    ]
+    const player_names = [...new Set(pass2_candidates.map((r) => r.playerName))]
 
     // Find players matching by pname with exactly one match
     const player_matches = await db('player')
