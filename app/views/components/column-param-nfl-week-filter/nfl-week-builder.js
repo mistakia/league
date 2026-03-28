@@ -16,8 +16,23 @@ export default function NflWeekBuilder({ values, on_add }) {
   const [selected_types, set_selected_types] = useState([])
   const [selected_weeks, set_selected_weeks] = useState({})
   const drag_ref = useRef(null)
+  const last_year_index_ref = useRef(null)
+  const last_week_index_ref = useRef({})
 
-  const toggle_year = (year) => {
+  const toggle_year = (year, event) => {
+    if (event?.shiftKey && last_year_index_ref.current !== null) {
+      const last_idx = sorted_years.indexOf(last_year_index_ref.current)
+      const curr_idx = sorted_years.indexOf(year)
+      if (last_idx !== -1 && curr_idx !== -1) {
+        const start = Math.min(last_idx, curr_idx)
+        const end = Math.max(last_idx, curr_idx)
+        const range = sorted_years.slice(start, end + 1)
+        set_selected_years((prev) => [...new Set([...prev, ...range])])
+        last_year_index_ref.current = year
+        return
+      }
+    }
+    last_year_index_ref.current = year
     set_selected_years((prev) =>
       prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
     )
@@ -29,7 +44,26 @@ export default function NflWeekBuilder({ values, on_add }) {
     )
   }
 
-  const toggle_week = (seas_type, week) => {
+  const toggle_week = (seas_type, week, event) => {
+    if (event?.shiftKey && last_week_index_ref.current[seas_type] != null) {
+      const last = last_week_index_ref.current[seas_type]
+      const start = Math.min(last, week)
+      const end = Math.max(last, week)
+      const range = Array.from({ length: end - start + 1 }, (_, i) => start + i)
+      set_selected_weeks((prev) => {
+        const type_weeks = prev[seas_type] || []
+        return { ...prev, [seas_type]: [...new Set([...type_weeks, ...range])] }
+      })
+      last_week_index_ref.current = {
+        ...last_week_index_ref.current,
+        [seas_type]: week
+      }
+      return
+    }
+    last_week_index_ref.current = {
+      ...last_week_index_ref.current,
+      [seas_type]: week
+    }
     set_selected_weeks((prev) => {
       const type_weeks = prev[seas_type] || []
       const next = type_weeks.includes(week)
@@ -49,7 +83,11 @@ export default function NflWeekBuilder({ values, on_add }) {
     set_selected_weeks((prev) => ({ ...prev, [seas_type]: [] }))
   }
 
-  const handle_mouse_down = useCallback((seas_type, week, is_selected) => {
+  const handle_mouse_down = useCallback((seas_type, week, is_selected, event) => {
+    if (event?.shiftKey) {
+      toggle_week(seas_type, week, event)
+      return
+    }
     drag_ref.current = {
       seas_type,
       mode: is_selected ? 'deselect' : 'select'
@@ -99,15 +137,21 @@ export default function NflWeekBuilder({ values, on_add }) {
     }
   }
 
-  const has_selection =
-    selected_years.length > 0 &&
-    selected_types.length > 0 &&
-    selected_types.some((t) => (selected_weeks[t] || []).length > 0)
+  const has_years = selected_years.length > 0
+  const has_types = selected_types.length > 0
+  const has_weeks = selected_types.some(
+    (t) => (selected_weeks[t] || []).length > 0
+  )
+  const has_selection = has_years && has_types && has_weeks
+
+  const missing_parts = []
+  if (!has_years) missing_parts.push('year')
+  if (!has_types) missing_parts.push('type')
+  if (has_types && !has_weeks) missing_parts.push('weeks')
 
   return (
     <div className='nfl-week-filter-section' onMouseUp={handle_mouse_up}>
       <div className='nfl-week-filter-section-header'>Builder</div>
-      <div className='nfl-week-builder-hint'>Drag to select ranges</div>
 
       <div className='nfl-week-builder-row'>
         <div className='nfl-week-builder-label'>Year</div>
@@ -115,7 +159,7 @@ export default function NflWeekBuilder({ values, on_add }) {
           <div
             key={year}
             className={`nfl-week-toggle-btn${selected_years.includes(year) ? ' active' : ''}`}
-            onClick={() => toggle_year(year)}>
+            onClick={(e) => toggle_year(year, e)}>
             {year}
           </div>
         ))}
@@ -131,6 +175,10 @@ export default function NflWeekBuilder({ values, on_add }) {
             {type}
           </div>
         ))}
+      </div>
+
+      <div className='nfl-week-builder-hint'>
+        Shift+click to select range, drag weeks to select
       </div>
 
       {SEASON_TYPES.map((seas_type) => {
@@ -149,8 +197,8 @@ export default function NflWeekBuilder({ values, on_add }) {
                 <div
                   key={week}
                   className={`nfl-week-toggle-btn${is_selected ? ' active' : ''}`}
-                  onMouseDown={() =>
-                    handle_mouse_down(seas_type, week, is_selected)
+                  onMouseDown={(e) =>
+                    handle_mouse_down(seas_type, week, is_selected, e)
                   }
                   onMouseEnter={() => handle_mouse_enter(seas_type, week)}>
                   {btn_label}
@@ -177,6 +225,11 @@ export default function NflWeekBuilder({ values, on_add }) {
           onClick={has_selection ? handle_add : undefined}>
           Add to Selection
         </div>
+        {!has_selection && missing_parts.length > 0 && (
+          <div className='nfl-week-builder-missing'>
+            Select {missing_parts.join(', ')}
+          </div>
+        )}
       </div>
     </div>
   )

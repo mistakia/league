@@ -3,6 +3,8 @@
   flex-direction column
   min-width 280px
   max-width 400px
+  max-height calc(100vh - 200px)
+  overflow-y auto
 
 .nfl-week-filter-section
   padding 8px
@@ -23,55 +25,59 @@
   font-size 0.5625rem
   color lighten($textColor, 50%)
   font-style italic
-  margin-bottom 6px
+  margin-bottom 4px
+  margin-top 4px
 
 .nfl-week-builder-row
   display flex
   align-items center
   flex-wrap wrap
-  gap 4px
-  margin-bottom 6px
+  gap 3px
+  margin-bottom 8px
 
 .nfl-week-builder-label
-  font-size 0.6875rem
+  font-size 0.625rem
   font-weight 600
-  color lighten($textColor, 20%)
-  min-width 48px
+  color lighten($textColor, 30%)
+  text-transform uppercase
+  letter-spacing 0.02em
+  min-width 36px
 
 .nfl-week-toggle-btn
-  padding 2px 6px
-  font-size 0.6875rem
+  padding 2px 5px
+  font-size 0.625rem
   border-radius 3px
   cursor pointer
   user-select none
-  background #f0f0f0
-  border 1px solid #e0e0e0
-  color $textColor
-  min-width 28px
+  background #f5f5f5
+  border 1px solid #e8e8e8
+  color lighten($textColor, 10%)
+  min-width 26px
   text-align center
   line-height 1.4
 
   &:hover
-    background darken(#f0f0f0, 10%)
+    background #e8e8e8
+    border-color #d0d0d0
 
   &.active
     background rgba(25, 118, 210, 0.12)
     border-color rgba(25, 118, 210, 0.4)
     color #1976d2
-
-  &.dragging
-    opacity 0.8
+    font-weight 600
 
 .nfl-week-builder-add
   display flex
-  justify-content center
-  padding 4px 0
+  flex-direction column
+  align-items center
+  padding 6px 0 2px
+  gap 4px
 
   .controls-button
     background rgba(25, 118, 210, 0.08)
     border 1px solid rgba(25, 118, 210, 0.3)
     color #1976d2
-    font-size 0.6875rem
+    font-size 0.625rem
     font-weight 600
 
     &:hover
@@ -83,6 +89,11 @@
       &:hover
         background rgba(25, 118, 210, 0.08)
 
+.nfl-week-builder-missing
+  font-size 0.5625rem
+  color lighten($textColor, 50%)
+  font-style italic
+
 .nfl-week-week-row
   display flex
   align-items center
@@ -91,8 +102,11 @@
   margin-bottom 4px
 
 .nfl-week-week-row-label
-  font-size 0.625rem
-  color lighten($textColor, 30%)
+  font-size 0.5625rem
+  font-weight 600
+  color lighten($textColor, 35%)
+  text-transform uppercase
+  letter-spacing 0.02em
   min-width 36px
 
 .nfl-week-summary-group

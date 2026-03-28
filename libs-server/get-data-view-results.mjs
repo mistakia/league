@@ -370,7 +370,13 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
 }
 
 const resolve_nfl_week_params = (params) => {
-  if (!params.nfl_week_id) return
+  // Default to all REG weeks for current stats year when unset
+  if (!params.nfl_week_id) {
+    params.nfl_week_id = get_nfl_week_identifiers_for_year({
+      year: current_season.stats_season_year,
+      seas_type: 'REG'
+    })
+  }
 
   // Resolve dynamic nfl_week_id values
   params.nfl_week_id = process_dynamic_nfl_week_param(params.nfl_week_id)
