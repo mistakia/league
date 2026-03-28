@@ -60,8 +60,8 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
       if (column_values.length) {
         query.whereIn(`${param_table}.${column_name}`, column_values)
 
-        // Partition pruning for nfl_week on year-partitioned tables
-        if (column_param_key === 'nfl_week') {
+        // Partition pruning for nfl_week_id on year-partitioned tables
+        if (column_param_key === 'nfl_week_id') {
           const { years } = decompose_nfl_weeks({ nfl_weeks: column_values })
           if (years.length) {
             query.whereIn(`${param_table}.year`, years)

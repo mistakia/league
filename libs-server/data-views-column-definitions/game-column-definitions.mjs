@@ -6,10 +6,10 @@ import { current_season } from '#constants'
 import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 
 const get_params = ({ params = {} }) => {
-  if (params.nfl_week) {
-    const nfl_week = Array.isArray(params.nfl_week)
-      ? params.nfl_week
-      : [params.nfl_week]
+  if (params.nfl_week_id) {
+    const nfl_week = Array.isArray(params.nfl_week_id)
+      ? params.nfl_week_id
+      : [params.nfl_week_id]
     return { nfl_week }
   }
 

@@ -6,7 +6,7 @@ import {
   career_year,
   career_game,
   year_offset,
-  nfl_week
+  nfl_week_id
 } from './common-column-params.mjs'
 
 const score_diff_preset_values = [
@@ -242,7 +242,7 @@ export default {
   career_year,
   career_game,
 
-  nfl_week,
+  nfl_week_id,
   year_offset,
 
   ...nfl_games_params,

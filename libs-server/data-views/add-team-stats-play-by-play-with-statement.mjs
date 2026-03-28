@@ -155,10 +155,10 @@ function create_player_team_stats_query({
       this.andOn('nfl_games.week', '=', `${with_table_name}.week`)
     })
 
-  if (default_params.nfl_week) {
-    const nfl_week = Array.isArray(default_params.nfl_week)
-      ? default_params.nfl_week
-      : [default_params.nfl_week]
+  if (default_params.nfl_week_id) {
+    const nfl_week = Array.isArray(default_params.nfl_week_id)
+      ? default_params.nfl_week_id
+      : [default_params.nfl_week_id]
     player_team_stats_query.whereIn('nfl_games.nfl_week_id', nfl_week)
   } else {
     player_team_stats_query.whereIn(

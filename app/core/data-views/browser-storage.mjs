@@ -191,6 +191,24 @@ export const data_view_browser_storage_save_snapshot = async ({
 }
 
 /**
+ * Migrates param keys in a params object for backward compatibility.
+ * Renames deprecated param keys to their current names.
+ * @param {Object} params - Parameter object to migrate
+ * @returns {Object} Migrated parameter object
+ */
+const migrate_params = (params) => {
+  if (!params || typeof params !== 'object') return params
+
+  // Rename nfl_week -> nfl_week_id
+  if ('nfl_week' in params && !('nfl_week_id' in params)) {
+    params.nfl_week_id = params.nfl_week
+    delete params.nfl_week
+  }
+
+  return params
+}
+
+/**
  * Sanitizes a loaded snapshot to fix any corrupted data
  * @param {Object} snapshot - Snapshot to sanitize
  * @returns {Object} Sanitized snapshot
@@ -210,7 +228,7 @@ const sanitize_snapshot = (snapshot) => {
         }
         return {
           ...col,
-          params: sanitize_params(col.params)
+          params: sanitize_params(migrate_params(col.params))
         }
       }),
       prefix_columns: snapshot.table_state.prefix_columns?.map((col) => {
@@ -219,12 +237,12 @@ const sanitize_snapshot = (snapshot) => {
         }
         return {
           ...col,
-          params: sanitize_params(col.params)
+          params: sanitize_params(migrate_params(col.params))
         }
       }),
       where: snapshot.table_state.where?.map((clause) => ({
         ...clause,
-        params: sanitize_params(clause.params)
+        params: sanitize_params(migrate_params(clause.params))
       }))
     }
   }

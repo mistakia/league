@@ -9,10 +9,10 @@ const valid_practice_days = ['m', 'tu', 'w', 'th', 'f', 's', 'su']
 
 const get_params = ({ params = {} }) => {
   let nfl_week
-  if (params.nfl_week) {
-    nfl_week = Array.isArray(params.nfl_week)
-      ? params.nfl_week
-      : [params.nfl_week]
+  if (params.nfl_week_id) {
+    nfl_week = Array.isArray(params.nfl_week_id)
+      ? params.nfl_week_id
+      : [params.nfl_week_id]
   } else {
     let year = params.year || [current_season.stats_season_year]
     if (!Array.isArray(year)) {

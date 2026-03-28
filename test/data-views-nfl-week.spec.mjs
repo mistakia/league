@@ -10,7 +10,8 @@ import {
   group_nfl_weeks,
   format_week_ranges,
   get_postseason_week_label,
-  get_max_weeks_for_season_type
+  get_max_weeks_for_season_type,
+  get_all_nfl_week_identifiers
 } from '#libs-shared/nfl-week-identifier.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import { common_column_params } from '#libs-shared'
@@ -20,8 +21,8 @@ const expect = chai.expect
 
 describe('DATA VIEWS nfl_week parameter integration', function () {
   describe('nfl_plays_column_params', function () {
-    it('contains nfl_week parameter', () => {
-      expect(nfl_plays_column_params).to.have.property('nfl_week')
+    it('contains nfl_week_id parameter', () => {
+      expect(nfl_plays_column_params).to.have.property('nfl_week_id')
     })
 
     it('does not contain year parameter', () => {
@@ -51,29 +52,29 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
     })
   })
 
-  describe('common_column_params.nfl_week', function () {
+  describe('common_column_params.nfl_week_id', function () {
     it('has SELECT data type', () => {
-      expect(common_column_params.nfl_week).to.have.property('data_type')
+      expect(common_column_params.nfl_week_id).to.have.property('data_type')
     })
 
     it('has column_name nfl_week_id', () => {
-      expect(common_column_params.nfl_week.column_name).to.equal('nfl_week_id')
+      expect(common_column_params.nfl_week_id.column_name).to.equal('nfl_week_id')
     })
 
     it('has values array', () => {
-      expect(common_column_params.nfl_week.values).to.be.an('array')
-      expect(common_column_params.nfl_week.values.length).to.be.greaterThan(0)
+      expect(common_column_params.nfl_week_id.values).to.be.an('array')
+      expect(common_column_params.nfl_week_id.values.length).to.be.greaterThan(0)
     })
 
     it('values are valid nfl_week identifiers', () => {
-      for (const val of common_column_params.nfl_week.values.slice(0, 10)) {
+      for (const val of common_column_params.nfl_week_id.values.slice(0, 10)) {
         const parsed = parse_nfl_week_identifier({ identifier: val })
         expect(parsed).to.not.be.null
       }
     })
 
     it('has dynamic_values for current_nfl_week and last_n_nfl_weeks', () => {
-      const dynamic_types = common_column_params.nfl_week.dynamic_values.map(
+      const dynamic_types = common_column_params.nfl_week_id.dynamic_values.map(
         (d) => d.dynamic_type
       )
       expect(dynamic_types).to.include('current_nfl_week')
@@ -81,7 +82,7 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
     })
 
     it('has enable_multi_on_split for year and week', () => {
-      expect(common_column_params.nfl_week.enable_multi_on_split).to.deep.equal(
+      expect(common_column_params.nfl_week_id.enable_multi_on_split).to.deep.equal(
         ['year', 'week']
       )
     })
@@ -160,9 +161,9 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
     })
   })
 
-  describe('common_column_params.nfl_week component property', function () {
+  describe('common_column_params.nfl_week_id component property', function () {
     it('does not have a component property on the shared definition', () => {
-      expect(common_column_params.nfl_week).to.not.have.property('component')
+      expect(common_column_params.nfl_week_id).to.not.have.property('component')
     })
   })
 
@@ -297,6 +298,80 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       expect(nfl_weeks).to.include('2024_REG_WEEK_2')
       expect(nfl_weeks).to.include('2023_REG_WEEK_1')
       expect(nfl_weeks).to.include('2023_REG_WEEK_2')
+    })
+  })
+
+  describe('get_all_nfl_week_identifiers', function () {
+    it('returns identifiers for all years from 2000 to current season', () => {
+      const all = get_all_nfl_week_identifiers()
+      expect(all).to.be.an('array')
+      expect(all.length).to.be.greaterThan(0)
+
+      // Should include identifiers from year 2000
+      const has_2000 = all.some((id) => id.startsWith('2000_'))
+      expect(has_2000).to.equal(true)
+
+      // All identifiers should be valid
+      for (const val of all.slice(0, 20)) {
+        const parsed = parse_nfl_week_identifier({ identifier: val })
+        expect(parsed).to.not.be.null
+      }
+    })
+
+    it('includes all 3 season types per year', () => {
+      const all = get_all_nfl_week_identifiers()
+      const has_pre = all.some((id) => id.includes('_PRE_'))
+      const has_reg = all.some((id) => id.includes('_REG_'))
+      const has_post = all.some((id) => id.includes('_POST_'))
+      expect(has_pre).to.equal(true)
+      expect(has_reg).to.equal(true)
+      expect(has_post).to.equal(true)
+    })
+
+    it('produces 29 identifiers per year (4 PRE + 21 REG + 4 POST)', () => {
+      const all = get_all_nfl_week_identifiers()
+      const year_2020 = all.filter((id) => id.startsWith('2020_'))
+      expect(year_2020).to.have.length(29)
+    })
+  })
+
+  describe('common_column_params.nfl_week_id no default_value', function () {
+    it('does not have a default_value property', () => {
+      expect(common_column_params.nfl_week_id).to.not.have.property(
+        'default_value'
+      )
+    })
+  })
+
+  describe('common_column_params.nfl_week_id dynamic year-range values', function () {
+    it('has last_n_nfl_years dynamic value', () => {
+      const dynamic_types = common_column_params.nfl_week_id.dynamic_values.map(
+        (d) => d.dynamic_type
+      )
+      expect(dynamic_types).to.include('last_n_nfl_years')
+    })
+
+    it('has next_n_nfl_years dynamic value', () => {
+      const dynamic_types = common_column_params.nfl_week_id.dynamic_values.map(
+        (d) => d.dynamic_type
+      )
+      expect(dynamic_types).to.include('next_n_nfl_years')
+    })
+
+    it('last_n_nfl_years has default_value and has_value_field', () => {
+      const dv = common_column_params.nfl_week_id.dynamic_values.find(
+        (d) => d.dynamic_type === 'last_n_nfl_years'
+      )
+      expect(dv).to.have.property('default_value', 3)
+      expect(dv).to.have.property('has_value_field', true)
+    })
+
+    it('next_n_nfl_years has default_value and has_value_field', () => {
+      const dv = common_column_params.nfl_week_id.dynamic_values.find(
+        (d) => d.dynamic_type === 'next_n_nfl_years'
+      )
+      expect(dv).to.have.property('default_value', 1)
+      expect(dv).to.have.property('has_value_field', true)
     })
   })
 })

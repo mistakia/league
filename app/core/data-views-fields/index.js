@@ -128,8 +128,8 @@ export function PlayerTableFields({
     fields[key].accessorKey = value.player_value_path || key
     fields[key].description = data_view_fields_index[key] || null
 
-    if (value.column_params?.nfl_week) {
-      fields[key].column_params.nfl_week.component = ColumnParamNflWeekFilter
+    if (value.column_params?.nfl_week_id) {
+      fields[key].column_params.nfl_week_id.component = ColumnParamNflWeekFilter
     }
   }
 

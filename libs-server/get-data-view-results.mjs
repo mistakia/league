@@ -5,7 +5,8 @@ import {
   format_nfl_week_identifier,
   parse_nfl_week_identifier,
   apply_year_offset_to_nfl_weeks,
-  decompose_nfl_weeks
+  decompose_nfl_weeks,
+  get_nfl_week_identifiers_for_year
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
@@ -205,12 +206,12 @@ const process_dynamic_params = (params) => {
   resolve_nfl_week_params(processed_params)
 
   // Process year parameter (for season-level columns that still use year directly)
-  if (processed_params.year && !processed_params.nfl_week) {
+  if (processed_params.year && !processed_params.nfl_week_id) {
     processed_params.year = process_dynamic_year_param(processed_params.year)
   }
 
   // Process week parameter (for season-level columns that still use week directly)
-  if (processed_params.week && !processed_params.nfl_week) {
+  if (processed_params.week && !processed_params.nfl_week_id) {
     processed_params.week = process_dynamic_week_param(processed_params.week)
   }
 
@@ -331,6 +332,25 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
           }
           return result
         }
+        case 'last_n_nfl_years': {
+          const n = parseInt(item.value || 3, 10)
+          const result = []
+          for (let i = 0; i < n; i++) {
+            const y = current_season.year - i
+            if (y < 2000) break
+            result.push(...get_nfl_week_identifiers_for_year({ year: y }))
+          }
+          return result
+        }
+        case 'next_n_nfl_years': {
+          const n = parseInt(item.value || 1, 10)
+          const result = []
+          for (let i = 1; i <= n; i++) {
+            const y = current_season.year + i
+            result.push(...get_nfl_week_identifiers_for_year({ year: y }))
+          }
+          return result
+        }
         default:
           return []
       }
@@ -350,26 +370,28 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
 }
 
 const resolve_nfl_week_params = (params) => {
-  if (!params.nfl_week) return
+  if (!params.nfl_week_id) return
 
-  // Resolve dynamic nfl_week values
-  params.nfl_week = process_dynamic_nfl_week_param(params.nfl_week)
+  // Resolve dynamic nfl_week_id values
+  params.nfl_week_id = process_dynamic_nfl_week_param(params.nfl_week_id)
 
-  if (!params.nfl_week.length) return
+  if (!params.nfl_week_id.length) return
 
   // Decompose BEFORE offset expansion to get base year/week/seas_type
   // These base values are used by data-view-join-function.mjs which applies
   // year_offset independently via SQL arithmetic -- using post-offset years
   // would double-apply the offset
-  const base_decomposed = decompose_nfl_weeks({ nfl_weeks: params.nfl_week })
+  const base_decomposed = decompose_nfl_weeks({
+    nfl_weeks: params.nfl_week_id
+  })
   params.year = base_decomposed.years
   params.week = base_decomposed.weeks
   params.seas_type = base_decomposed.seas_types
 
-  // Apply year_offset to expand the nfl_week array
+  // Apply year_offset to expand the nfl_week_id array
   if (params.year_offset) {
-    params.nfl_week = apply_year_offset_to_nfl_weeks({
-      nfl_weeks: params.nfl_week,
+    params.nfl_week_id = apply_year_offset_to_nfl_weeks({
+      nfl_weeks: params.nfl_week_id,
       year_offset: params.year_offset
     })
   }

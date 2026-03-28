@@ -63,17 +63,14 @@ export const get_nfl_week_identifiers_for_year = ({
   return identifiers
 }
 
-export const get_nfl_week_identifiers_for_recent_years = ({ count = 5 }) => {
+export const get_all_nfl_week_identifiers = () => {
   const identifiers = []
-  const start_year = current_season.year
-  const end_year = Math.max(start_year - count + 1, MIN_YEAR)
-
-  for (let y = start_year; y >= end_year; y--) {
+  for (let y = current_season.year; y >= MIN_YEAR; y--) {
     identifiers.push(...get_nfl_week_identifiers_for_year({ year: y }))
   }
-
   return identifiers
 }
+
 
 export const apply_year_offset_to_nfl_weeks = ({ nfl_weeks, year_offset }) => {
   if (!year_offset || !nfl_weeks || !nfl_weeks.length) return nfl_weeks

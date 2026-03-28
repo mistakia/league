@@ -5,7 +5,7 @@ import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 export const get_default_params = ({ params = {} } = {}) => {
-  let nfl_week = params.nfl_week || []
+  let nfl_week = params.nfl_week_id || []
   if (!Array.isArray(nfl_week)) {
     nfl_week = [nfl_week]
   }

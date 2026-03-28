@@ -13,7 +13,7 @@ export const get_per_team_play_cte_table_name = ({
 } = {}) => {
   team_unit = params.team_unit || team_unit
 
-  let nfl_week = params.nfl_week || []
+  let nfl_week = params.nfl_week_id || []
   if (!Array.isArray(nfl_week)) {
     nfl_week = [nfl_week]
   }

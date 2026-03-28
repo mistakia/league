@@ -15,10 +15,10 @@ import data_view_join_function from '#libs-server/data-views/data-view-join-func
 const get_default_params = ({ params = {} }) => {
   let year, week, seas_type, nfl_week
 
-  if (params.nfl_week) {
-    nfl_week = Array.isArray(params.nfl_week)
-      ? params.nfl_week
-      : [params.nfl_week]
+  if (params.nfl_week_id) {
+    nfl_week = Array.isArray(params.nfl_week_id)
+      ? params.nfl_week_id
+      : [params.nfl_week_id]
     // Decompose first nfl_week value for single-value contexts
     const parsed = parse_nfl_week_identifier({ identifier: nfl_week[0] })
     year = parsed ? parsed.year : current_season.year

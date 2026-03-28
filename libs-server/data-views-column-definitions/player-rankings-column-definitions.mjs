@@ -26,10 +26,10 @@ const get_default_params = ({ params = {} } = {}) => {
   }
 
   let nfl_week
-  if (params.nfl_week) {
-    nfl_week = Array.isArray(params.nfl_week)
-      ? params.nfl_week
-      : [params.nfl_week]
+  if (params.nfl_week_id) {
+    nfl_week = Array.isArray(params.nfl_week_id)
+      ? params.nfl_week_id
+      : [params.nfl_week_id]
   } else {
     let year = params.year || [current_season.year]
     if (!Array.isArray(year)) {

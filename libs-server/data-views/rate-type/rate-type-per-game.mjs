@@ -3,7 +3,7 @@ import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 import db from '#db'
 
 const get_default_params = ({ params = {} } = {}) => {
-  let nfl_week = params.nfl_week || []
+  let nfl_week = params.nfl_week_id || []
   if (!Array.isArray(nfl_week)) {
     nfl_week = [nfl_week]
   }

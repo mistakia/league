@@ -10,7 +10,7 @@ export const get_per_player_cte_table_name = ({
   stat_type = null,
   rate_type_params = {}
 } = {}) => {
-  let nfl_week = params.nfl_week || []
+  let nfl_week = params.nfl_week_id || []
   if (!Array.isArray(nfl_week)) {
     nfl_week = [nfl_week]
   }

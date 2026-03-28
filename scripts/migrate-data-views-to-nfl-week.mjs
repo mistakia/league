@@ -97,7 +97,7 @@ const migrate_column_params = (params) => {
     return { changed: false, params }
   }
 
-  new_params.nfl_week = nfl_week_values
+  new_params.nfl_week_id = nfl_week_values
   delete new_params.year
   delete new_params.week
   delete new_params.seas_type

@@ -7,7 +7,7 @@ import {
   format_nfl_week_identifier,
   validate_nfl_week_identifier,
   get_nfl_week_identifiers_for_year,
-  get_nfl_week_identifiers_for_recent_years,
+
   apply_year_offset_to_nfl_weeks,
   decompose_nfl_weeks
 } from '#libs-shared/nfl-week-identifier.mjs'
@@ -171,18 +171,6 @@ describe('LIBS-SHARED nfl-week-identifier', function () {
     })
   })
 
-  describe('get_nfl_week_identifiers_for_recent_years', function () {
-    it('returns identifiers for multiple years', () => {
-      const result = get_nfl_week_identifiers_for_recent_years({ count: 2 })
-      // 2 years * 29 identifiers per year = 58
-      expect(result).to.have.length(58)
-    })
-
-    it('defaults to 5 years', () => {
-      const result = get_nfl_week_identifiers_for_recent_years({})
-      expect(result).to.have.length(5 * 29)
-    })
-  })
 
   describe('apply_year_offset_to_nfl_weeks', function () {
     it('applies single offset value', () => {
