@@ -1,7 +1,7 @@
 {
   "user_agent": "",
   "ssl": false,
-  "port": 443,
+  "port": 8082,
   "url": "https://example.com",
   "nominationTimer": 30000,
   "bidTimer": 15000,

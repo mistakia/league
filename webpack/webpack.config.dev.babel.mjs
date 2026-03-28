@@ -70,7 +70,7 @@ export default merge(baseConfig, {
   },
 
   devServer: {
-    port: 8083,
+    port: 8091,
     compress: true,
     open: true,
     hot: true,

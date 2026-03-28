@@ -122,7 +122,7 @@ export default merge(baseConfig, {
 
   // Add devServer config for serving production builds locally
   devServer: {
-    port: 8083,
+    port: 8091,
     compress: true,
     open: true,
     hot: false, // Disable HMR for production
