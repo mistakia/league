@@ -51,7 +51,12 @@ export default function ColumnParamNflWeekFilter({
 
   const handle_add_weeks = (new_week_ids) => {
     const merged = [...new Set([...static_selected, ...new_week_ids])]
-    handle_change([...merged, ...existing_dynamic])
+    // Drop the default dynamic value when user makes explicit selections
+    const default_type = column_param_definition?.default_value?.dynamic_type
+    const non_default_dynamic = existing_dynamic.filter(
+      (v) => v.dynamic_type !== default_type
+    )
+    handle_change([...merged, ...non_default_dynamic])
   }
 
   const handle_remove_group = (group_key) => {
