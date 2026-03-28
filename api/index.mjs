@@ -54,6 +54,7 @@ api.use((req, res, next) => {
     'Access-Control-Allow-Headers',
     'Authorization, Origin, X-Requested-With, Content-Type, Accept'
   )
+  res.set('Vary', 'Origin')
   next()
 })
 

@@ -103,6 +103,57 @@ export const apply_year_offset_to_nfl_weeks = ({ nfl_weeks, year_offset }) => {
   return [...new Set(expanded)]
 }
 
+export const group_nfl_weeks = ({ nfl_weeks }) => {
+  const groups = {}
+  for (const id of nfl_weeks) {
+    const parsed = parse_nfl_week_identifier({ identifier: id })
+    if (!parsed) continue
+    const key = `${parsed.year}_${parsed.seas_type}`
+    if (!groups[key]) groups[key] = []
+    groups[key].push(parsed.week)
+  }
+  for (const key of Object.keys(groups)) {
+    groups[key].sort((a, b) => a - b)
+  }
+  return groups
+}
+
+export const format_week_ranges = ({ weeks }) => {
+  if (!weeks || weeks.length === 0) return ''
+  const sorted = [...weeks].sort((a, b) => a - b)
+  const ranges = []
+  let start = sorted[0]
+  let end = sorted[0]
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === end + 1) {
+      end = sorted[i]
+    } else {
+      ranges.push(start === end ? `${start}` : `${start}-${end}`)
+      start = sorted[i]
+      end = sorted[i]
+    }
+  }
+  ranges.push(start === end ? `${start}` : `${start}-${end}`)
+  return ranges.join(', ')
+}
+
+const POSTSEASON_WEEK_LABELS = {
+  1: 'Wild Card',
+  2: 'Divisional',
+  3: 'Conference',
+  4: 'Super Bowl'
+}
+
+export const get_postseason_week_label = ({ week }) => {
+  return POSTSEASON_WEEK_LABELS[week] || `Week ${week}`
+}
+
+export const get_max_weeks_for_season_type = ({ seas_type }) => {
+  const range = WEEK_RANGES[seas_type]
+  return range ? range.max : 0
+}
+
 export const decompose_nfl_weeks = ({ nfl_weeks }) => {
   const years = new Set()
   const weeks = new Set()
