@@ -110,6 +110,17 @@ export async function get_plays_view_results_query({
   // Build base query
   const query = db('nfl_plays')
 
+  // Apply year filter directly (year was removed from nfl_plays_column_params
+  // in favor of nfl_week for data views, but the plays view uses year directly)
+  if (query_params.year) {
+    const year_values = Array.isArray(query_params.year)
+      ? query_params.year
+      : [query_params.year]
+    if (year_values.length) {
+      query.whereIn('nfl_plays.year', year_values)
+    }
+  }
+
   // Apply global params via apply_play_by_play_column_params_to_query
   apply_play_by_play_column_params_to_query({
     query,

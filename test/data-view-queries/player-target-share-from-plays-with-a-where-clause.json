@@ -2,27 +2,42 @@
   "name": "should handle player_target_share_from_plays with a where clause",
   "description": "Test case for should handle player_target_share_from_plays with a where clause",
   "request": {
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       {
         "column_id": "player_target_share_from_plays",
         "params": {
-          "year": [2023],
-          "dwn": [3]
+          "year": [
+            2023
+          ],
+          "dwn": [
+            3
+          ]
         }
       },
       {
         "column_id": "player_targets_from_plays",
         "params": {
-          "year": [2023],
-          "dwn": [3]
+          "year": [
+            2023
+          ],
+          "dwn": [
+            3
+          ]
         }
       },
       {
         "column_id": "player_target_share_from_plays",
         "params": {
-          "year": [2023],
-          "qtr": [1, 2]
+          "year": [
+            2023
+          ],
+          "qtr": [
+            1,
+            2
+          ]
         }
       }
     ],
@@ -32,8 +47,12 @@
         "operator": ">=",
         "value": "15",
         "params": {
-          "year": [2023],
-          "dwn": [3]
+          "year": [
+            2023
+          ],
+          "dwn": [
+            3
+          ]
         }
       }
     ],
@@ -44,8 +63,15 @@
       }
     ]
   },
-  "expected_query": "with \"t7016a4eb3ca6830e254e6e0537260d65\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"dwn\" in (3) group by COALESCE(trg_pid) having SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) >= '15'), \"t334d1d18d6572804e52aad88c061d2dd\" as (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"dwn\" in (3) group by \"pg\".\"pid\"), \"te4e0b9f3b474147853625688b0c339d2\" as (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"qtr\" in (1, 2) group by \"pg\".\"pid\") select \"player\".\"pid\", \"t7016a4eb3ca6830e254e6e0537260d65\".\"trg_from_plays\" AS \"trg_from_plays_0\", player.fname, player.lname, \"t334d1d18d6572804e52aad88c061d2dd\".\"trg_share_from_plays\" AS \"trg_share_from_plays_0\", \"te4e0b9f3b474147853625688b0c339d2\".\"trg_share_from_plays\" AS \"trg_share_from_plays_1\", \"player\".\"pos\" from \"player\" inner join \"t7016a4eb3ca6830e254e6e0537260d65\" on \"t7016a4eb3ca6830e254e6e0537260d65\".\"pid\" = \"player\".\"pid\" left join \"t334d1d18d6572804e52aad88c061d2dd\" on \"t334d1d18d6572804e52aad88c061d2dd\".\"pid\" = \"player\".\"pid\" left join \"te4e0b9f3b474147853625688b0c339d2\" on \"te4e0b9f3b474147853625688b0c339d2\".\"pid\" = \"player\".\"pid\" group by \"t7016a4eb3ca6830e254e6e0537260d65\".\"trg_from_plays\", player.fname, player.lname, \"t334d1d18d6572804e52aad88c061d2dd\".\"trg_share_from_plays\", \"te4e0b9f3b474147853625688b0c339d2\".\"trg_share_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["player", "plays", "filters", "parameters", "sorting", "cte"],
+  "expected_query": "with \"t3abfc4e176501ebf6fbf11063d97a561\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"dwn\" in (3) group by COALESCE(trg_pid) having SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) >= '15'), \"t3a4db4122d63abd193bcca701c89977d\" as (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"dwn\" in (3) group by \"pg\".\"pid\"), \"t07820df87c6eb141299a209650a7d9b4\" as (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"qtr\" in (1, 2) group by \"pg\".\"pid\") select \"player\".\"pid\", \"t3abfc4e176501ebf6fbf11063d97a561\".\"trg_from_plays\" AS \"trg_from_plays_0\", player.fname, player.lname, \"t3a4db4122d63abd193bcca701c89977d\".\"trg_share_from_plays\" AS \"trg_share_from_plays_0\", \"t07820df87c6eb141299a209650a7d9b4\".\"trg_share_from_plays\" AS \"trg_share_from_plays_1\", \"player\".\"pos\" from \"player\" inner join \"t3abfc4e176501ebf6fbf11063d97a561\" on \"t3abfc4e176501ebf6fbf11063d97a561\".\"pid\" = \"player\".\"pid\" left join \"t3a4db4122d63abd193bcca701c89977d\" on \"t3a4db4122d63abd193bcca701c89977d\".\"pid\" = \"player\".\"pid\" left join \"t07820df87c6eb141299a209650a7d9b4\" on \"t07820df87c6eb141299a209650a7d9b4\".\"pid\" = \"player\".\"pid\" group by \"t3abfc4e176501ebf6fbf11063d97a561\".\"trg_from_plays\", player.fname, player.lname, \"t3a4db4122d63abd193bcca701c89977d\".\"trg_share_from_plays\", \"t07820df87c6eb141299a209650a7d9b4\".\"trg_share_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "filters",
+    "parameters",
+    "sorting",
+    "cte"
+  ],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "one_week",

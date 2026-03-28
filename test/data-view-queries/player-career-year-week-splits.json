@@ -7,12 +7,17 @@
       {
         "column_id": "player_career_year",
         "params": {
-          "year": [2023],
+          "year": [
+            2023
+          ],
           "seas_type": "REG"
         }
       }
     ],
-    "splits": ["year", "week"],
+    "splits": [
+      "year",
+      "week"
+    ],
     "where": [
       {
         "column_id": "player_career_year",
@@ -37,5 +42,5 @@
     "parameters"
   ],
   "timeout_ms": 30000,
-  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2023) select \"player\".\"pid\", player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" inner join \"player_seasonlogs\" as \"t400d8fd8d99658efbdbc325edea87166\" on \"t400d8fd8d99658efbdbc325edea87166\".\"pid\" = \"player\".\"pid\" and t400d8fd8d99658efbdbc325edea87166.year = player_years.year and t400d8fd8d99658efbdbc325edea87166.seas_type = 'REG' left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and \"t209f3a217d72274fbedbe4d44e4a5095\".\"year\" = 2023 and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' where t400d8fd8d99658efbdbc325edea87166.career_year = '1' group by player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 10"
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2023) select \"player\".\"pid\", player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" inner join \"player_seasonlogs\" as \"t94ac00224f565e211ce527fca507baed\" on \"t94ac00224f565e211ce527fca507baed\".\"pid\" = \"player\".\"pid\" and t94ac00224f565e211ce527fca507baed.year = player_years.year and t94ac00224f565e211ce527fca507baed.seas_type = 'REG' left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and \"t209f3a217d72274fbedbe4d44e4a5095\".\"year\" = 2023 and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' where t94ac00224f565e211ce527fca507baed.career_year = '1' group by player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 10"
 }

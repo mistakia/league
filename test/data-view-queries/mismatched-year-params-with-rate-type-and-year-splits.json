@@ -7,14 +7,22 @@
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "year": [2021, 2022, 2023]
+          "year": [
+            2021,
+            2022,
+            2023
+          ]
         }
       },
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "rate_type": ["per_game"],
-          "year": [2023]
+          "rate_type": [
+            "per_game"
+          ],
+          "year": [
+            2023
+          ]
         }
       }
     ],
@@ -28,12 +36,23 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": ["WR"]
+        "value": [
+          "WR"
+        ]
       }
     ],
-    "prefix_columns": ["player_name"],
-    "splits": ["year"]
+    "prefix_columns": [
+      "player_name"
+    ],
+    "splits": [
+      "year"
+    ]
   },
-  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"tffa4ec673b4f60169d1851d9d0099ceb\" as (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs\".\"active\" = true and \"nfl_games\".\"year\" in (2021, 2022, 2023) group by \"nfl_games\".\"year\", \"player_gamelogs\".\"pid\"), \"te335326c9d2aa8c6ac0e66367251c7a2\" as (select COALESCE(trg_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2021, 2022, 2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"year\", COALESCE(trg_pid)), \"t1c3fcb1f32313815df18da7f8e31c3cd\" as (select COALESCE(trg_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"year\", COALESCE(trg_pid)) select \"player\".\"pid\", player.fname, player.lname, \"te335326c9d2aa8c6ac0e66367251c7a2\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", CAST(t1c3fcb1f32313815df18da7f8e31c3cd.rec_yds_from_plays AS DECIMAL) / NULLIF(CAST(tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count AS DECIMAL), 0) AS \"rec_yds_from_plays_1\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"tffa4ec673b4f60169d1851d9d0099ceb\" on \"tffa4ec673b4f60169d1851d9d0099ceb\".\"pid\" = \"player\".\"pid\" and \"tffa4ec673b4f60169d1851d9d0099ceb\".\"year\" = 2023 left join \"te335326c9d2aa8c6ac0e66367251c7a2\" on \"te335326c9d2aa8c6ac0e66367251c7a2\".\"pid\" = \"player\".\"pid\" and te335326c9d2aa8c6ac0e66367251c7a2.year = player_years.year and te335326c9d2aa8c6ac0e66367251c7a2.year IN (2021,2022,2023) left join \"t1c3fcb1f32313815df18da7f8e31c3cd\" on \"t1c3fcb1f32313815df18da7f8e31c3cd\".\"pid\" = \"player\".\"pid\" and \"t1c3fcb1f32313815df18da7f8e31c3cd\".\"year\" = 2023 where player.pos IN ('WR') group by player.fname, player.lname, \"te335326c9d2aa8c6ac0e66367251c7a2\".\"rec_yds_from_plays\", \"t1c3fcb1f32313815df18da7f8e31c3cd\".\"rec_yds_from_plays\", tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["rate_type", "year_splits", "mismatched_years", "cte"]
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t05e39f5f70132b957d199bed4db535fb\" as (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = true group by \"nfl_games\".\"year\", \"player_gamelogs\".\"pid\"), \"t335663aa03c109b219d83d28dc9b4e11\" as (select COALESCE(trg_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"year\", COALESCE(trg_pid)) select \"player\".\"pid\", player.fname, player.lname, \"t335663aa03c109b219d83d28dc9b4e11\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", CAST(t335663aa03c109b219d83d28dc9b4e11.rec_yds_from_plays AS DECIMAL) / NULLIF(CAST(t05e39f5f70132b957d199bed4db535fb.rate_type_total_count AS DECIMAL), 0) AS \"rec_yds_from_plays_1\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t05e39f5f70132b957d199bed4db535fb\" on \"t05e39f5f70132b957d199bed4db535fb\".\"pid\" = \"player\".\"pid\" and \"t05e39f5f70132b957d199bed4db535fb\".\"year\" = 2023 left join \"t335663aa03c109b219d83d28dc9b4e11\" on \"t335663aa03c109b219d83d28dc9b4e11\".\"pid\" = \"player\".\"pid\" and t335663aa03c109b219d83d28dc9b4e11.year = player_years.year and t335663aa03c109b219d83d28dc9b4e11.year IN (2021,2022,2023) where player.pos IN ('WR') group by player.fname, player.lname, \"t335663aa03c109b219d83d28dc9b4e11\".\"rec_yds_from_plays\", \"t335663aa03c109b219d83d28dc9b4e11\".\"rec_yds_from_plays\", t05e39f5f70132b957d199bed4db535fb.rate_type_total_count, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "rate_type",
+    "year_splits",
+    "mismatched_years",
+    "cte"
+  ]
 }

@@ -6,8 +6,12 @@
       {
         "column_id": "team_rush_yards_from_plays",
         "params": {
-          "rate_type": ["per_team_rush_play"],
-          "year": [2023]
+          "rate_type": [
+            "per_team_rush_play"
+          ],
+          "year": [
+            2023
+          ]
         }
       }
     ],
@@ -18,7 +22,7 @@
       }
     ]
   },
-  "expected_query": "with \"tc2ea28ca61de58886f92690134037be1\" as (select \"nfl_plays\".\"off\", COUNT(*) as rate_type_total_count from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" = 'RUSH' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"off\"), \"t36bf0474d4db796322b4fe1d9755f770\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(rush_yds) AS team_rush_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"off\"), \"t36bf0474d4db796322b4fe1d9755f770_team_stats\" as (select \"t36bf0474d4db796322b4fe1d9755f770\".\"nfl_team\", sum(t36bf0474d4db796322b4fe1d9755f770.team_rush_yds_from_plays) as team_rush_yds_from_plays from \"t36bf0474d4db796322b4fe1d9755f770\" group by \"t36bf0474d4db796322b4fe1d9755f770\".\"nfl_team\") select \"player\".\"pid\", CAST(t36bf0474d4db796322b4fe1d9755f770_team_stats.team_rush_yds_from_plays AS DECIMAL) / NULLIF(CAST(tc2ea28ca61de58886f92690134037be1.rate_type_total_count AS DECIMAL), 0) AS \"team_rush_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"tc2ea28ca61de58886f92690134037be1\" on \"tc2ea28ca61de58886f92690134037be1\".\"off\" = \"player\".\"current_nfl_team\" left join \"t36bf0474d4db796322b4fe1d9755f770_team_stats\" on \"t36bf0474d4db796322b4fe1d9755f770_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" group by \"t36bf0474d4db796322b4fe1d9755f770_team_stats\".\"team_rush_yds_from_plays\", tc2ea28ca61de58886f92690134037be1.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"t0166e29e0804120289d9ec40a2a776f3\" as (select \"nfl_plays\".\"off\", COUNT(*) as rate_type_total_count from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" = 'RUSH' group by \"nfl_plays\".\"off\"), \"t2f399e85c6db881110a16375aa52c279\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(rush_yds) AS team_rush_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"off\"), \"t2f399e85c6db881110a16375aa52c279_team_stats\" as (select \"t2f399e85c6db881110a16375aa52c279\".\"nfl_team\", sum(t2f399e85c6db881110a16375aa52c279.team_rush_yds_from_plays) as team_rush_yds_from_plays from \"t2f399e85c6db881110a16375aa52c279\" group by \"t2f399e85c6db881110a16375aa52c279\".\"nfl_team\") select \"player\".\"pid\", CAST(t2f399e85c6db881110a16375aa52c279_team_stats.team_rush_yds_from_plays AS DECIMAL) / NULLIF(CAST(t0166e29e0804120289d9ec40a2a776f3.rate_type_total_count AS DECIMAL), 0) AS \"team_rush_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t0166e29e0804120289d9ec40a2a776f3\" on \"t0166e29e0804120289d9ec40a2a776f3\".\"off\" = \"player\".\"current_nfl_team\" left join \"t2f399e85c6db881110a16375aa52c279_team_stats\" on \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" group by \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"team_rush_yds_from_plays\", t0166e29e0804120289d9ec40a2a776f3.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": [
     "team",
     "stats",

@@ -8,7 +8,9 @@
         "desc": true
       }
     ],
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       {
         "column_id": "player_receiving_yards_from_plays",
@@ -25,7 +27,11 @@
     ],
     "where": []
   },
-  "expected_query": "with \"tae05e511bbbc5c5e1af664f610aa1b2f\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (${[2023, ...last_3_years].sort((a, b) => a - b).join(', ')}) and \"nfl_plays\".\"seas_type\" in ('REG') group by COALESCE(trg_pid)) select \"player\".\"pid\", player.fname, player.lname, \"tae05e511bbbc5c5e1af664f610aa1b2f\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"tae05e511bbbc5c5e1af664f610aa1b2f\" on \"tae05e511bbbc5c5e1af664f610aa1b2f\".\"pid\" = \"player\".\"pid\" group by player.fname, player.lname, \"tae05e511bbbc5c5e1af664f610aa1b2f\".\"rec_yds_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["parameters", "sorting", "cte"],
+  "expected_query": "with \"t335663aa03c109b219d83d28dc9b4e11\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by COALESCE(trg_pid)) select \"player\".\"pid\", player.fname, player.lname, \"t335663aa03c109b219d83d28dc9b4e11\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t335663aa03c109b219d83d28dc9b4e11\" on \"t335663aa03c109b219d83d28dc9b4e11\".\"pid\" = \"player\".\"pid\" group by player.fname, player.lname, \"t335663aa03c109b219d83d28dc9b4e11\".\"rec_yds_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "parameters",
+    "sorting",
+    "cte"
+  ],
   "timeout_ms": 40000
 }

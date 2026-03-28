@@ -6,22 +6,36 @@
       {
         "column_id": "player_games_played",
         "params": {
-          "year": [2023]
+          "year": [
+            2023
+          ]
         }
       },
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "year": [2023],
-          "rate_type": ["per_game"]
+          "year": [
+            2023
+          ],
+          "rate_type": [
+            "per_game"
+          ]
         }
       },
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "year": [2023],
-          "week": [1, 2, 3],
-          "rate_type": ["per_game"]
+          "year": [
+            2023
+          ],
+          "week": [
+            1,
+            2,
+            3
+          ],
+          "rate_type": [
+            "per_game"
+          ]
         }
       }
     ],
@@ -32,7 +46,14 @@
       }
     ]
   },
-  "expected_query": "with \"tffa4ec673b4f60169d1851d9d0099ceb\" as (select \"player_gamelogs_year_2023\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2023.tm) as teams from \"player_gamelogs_year_2023\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2023\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs_year_2023\".\"active\" = true and \"nfl_games\".\"year\" in (2023) group by \"player_gamelogs_year_2023\".\"pid\"), \"td7c3e33ca21a03aa3317f8fa7968a99b\" as (select \"player_gamelogs_year_2023\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2023.tm) as teams from \"player_gamelogs_year_2023\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2023\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs_year_2023\".\"active\" = true and \"nfl_games\".\"year\" in (2023) and \"nfl_games\".\"week\" in (1, 2, 3) group by \"player_gamelogs_year_2023\".\"pid\"), \"t1c3fcb1f32313815df18da7f8e31c3cd\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by COALESCE(trg_pid)), \"t07addadcba8ab806b865cf1a15960ae2\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"week\" in (1, 2, 3) and \"nfl_plays\".\"seas_type\" in ('REG') group by COALESCE(trg_pid)) select \"player\".\"pid\", tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count as games_played_0, CAST(t1c3fcb1f32313815df18da7f8e31c3cd.rec_yds_from_plays AS DECIMAL) / NULLIF(CAST(tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count AS DECIMAL), 0) AS \"rec_yds_from_plays_0\", CAST(t07addadcba8ab806b865cf1a15960ae2.rec_yds_from_plays AS DECIMAL) / NULLIF(CAST(td7c3e33ca21a03aa3317f8fa7968a99b.rate_type_total_count AS DECIMAL), 0) AS \"rec_yds_from_plays_1\", \"player\".\"pos\" from \"player\" left join \"tffa4ec673b4f60169d1851d9d0099ceb\" on \"tffa4ec673b4f60169d1851d9d0099ceb\".\"pid\" = \"player\".\"pid\" left join \"td7c3e33ca21a03aa3317f8fa7968a99b\" on \"td7c3e33ca21a03aa3317f8fa7968a99b\".\"pid\" = \"player\".\"pid\" left join \"t1c3fcb1f32313815df18da7f8e31c3cd\" on \"t1c3fcb1f32313815df18da7f8e31c3cd\".\"pid\" = \"player\".\"pid\" left join \"t07addadcba8ab806b865cf1a15960ae2\" on \"t07addadcba8ab806b865cf1a15960ae2\".\"pid\" = \"player\".\"pid\" group by tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count, \"t1c3fcb1f32313815df18da7f8e31c3cd\".\"rec_yds_from_plays\", tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count, \"t07addadcba8ab806b865cf1a15960ae2\".\"rec_yds_from_plays\", td7c3e33ca21a03aa3317f8fa7968a99b.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 3 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["plays", "games", "parameters", "sorting", "rate_type", "cte"],
+  "expected_query": "with \"t05e39f5f70132b957d199bed4db535fb\" as (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = true group by \"player_gamelogs\".\"pid\"), \"t335663aa03c109b219d83d28dc9b4e11\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by COALESCE(trg_pid)) select \"player\".\"pid\", t05e39f5f70132b957d199bed4db535fb.rate_type_total_count as games_played_0, CAST(t335663aa03c109b219d83d28dc9b4e11.rec_yds_from_plays AS DECIMAL) / NULLIF(CAST(t05e39f5f70132b957d199bed4db535fb.rate_type_total_count AS DECIMAL), 0) AS \"rec_yds_from_plays_0\", CAST(t335663aa03c109b219d83d28dc9b4e11.rec_yds_from_plays AS DECIMAL) / NULLIF(CAST(t05e39f5f70132b957d199bed4db535fb.rate_type_total_count AS DECIMAL), 0) AS \"rec_yds_from_plays_1\", \"player\".\"pos\" from \"player\" left join \"t05e39f5f70132b957d199bed4db535fb\" on \"t05e39f5f70132b957d199bed4db535fb\".\"pid\" = \"player\".\"pid\" left join \"t335663aa03c109b219d83d28dc9b4e11\" on \"t335663aa03c109b219d83d28dc9b4e11\".\"pid\" = \"player\".\"pid\" group by t05e39f5f70132b957d199bed4db535fb.rate_type_total_count, \"t335663aa03c109b219d83d28dc9b4e11\".\"rec_yds_from_plays\", t05e39f5f70132b957d199bed4db535fb.rate_type_total_count, \"t335663aa03c109b219d83d28dc9b4e11\".\"rec_yds_from_plays\", t05e39f5f70132b957d199bed4db535fb.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 3 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "plays",
+    "games",
+    "parameters",
+    "sorting",
+    "rate_type",
+    "cte"
+  ],
   "timeout_ms": 40000
 }

@@ -2,8 +2,9 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.3 (Ubuntu 16.3-1.pgdg20.04+1)
--- Dumped by pg_dump version 16.3 (Ubuntu 16.3-1.pgdg20.04+1)
+
+-- Dumped from database version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
+-- Dumped by pg_dump version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -12,9 +13,9 @@ SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
+SET search_path = public;
 SET xmloption = content;
 SET client_min_messages = warning;
-SET search_path = public;
 SET row_security = off;
 
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_scoring_format_fkey;
@@ -34,1545 +35,9 @@ DROP TRIGGER IF EXISTS trigger_external_league_import_jobs_updated_at ON public.
 DROP TRIGGER IF EXISTS trigger_external_league_connections_updated_at ON public.external_league_connections;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2026_sourceid_pid_userid_week_year_seas__idx;
-DROP INDEX IF EXISTS public.projections_index_y2026_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2025_sourceid_pid_userid_week_year_seas__idx;
-DROP INDEX IF EXISTS public.projections_index_y2025_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2024_sourceid_pid_userid_week_year_seas_type;
-DROP INDEX IF EXISTS public.projections_index_y2024_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2023_sourceid_pid_userid_week_year_seas_type;
-DROP INDEX IF EXISTS public.projections_index_y2023_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2022_sourceid_pid_userid_week_year_seas_type;
-DROP INDEX IF EXISTS public.projections_index_y2022_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2021_sourceid_pid_userid_week_year_seas_type;
-DROP INDEX IF EXISTS public.projections_index_y2021_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2020_sourceid_pid_userid_week_year_seas_type;
-DROP INDEX IF EXISTS public.projections_index_y2020_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_default_sourceid_pid_userid_week_year_seas_ty;
-DROP INDEX IF EXISTS public.projections_index_default_pid_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2026_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2026_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2026_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2026_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2026_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2026_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2026_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2025_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2025_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2025_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2025_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2025_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2025_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2025_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2024_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2024_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2024_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2024_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2024_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2024_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2024_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2023_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2023_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2023_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2023_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2023_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2023_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2023_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2022_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2022_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2022_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2022_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2022_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2022_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2022_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2021_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2021_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2021_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2021_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2021_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2021_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2021_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2020_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2020_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2020_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2020_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2020_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2020_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2020_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2019_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2019_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2019_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2019_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2019_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2019_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2019_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2018_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2018_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2018_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2018_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2018_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2018_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2018_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2017_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2017_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2017_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2017_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2017_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2017_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2017_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2016_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2016_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2016_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2016_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2016_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2016_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2016_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2015_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2015_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2015_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2015_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2015_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2015_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2015_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2014_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2014_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2014_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2014_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2014_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2014_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2014_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2013_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2013_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2013_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2013_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2013_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2013_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2013_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2012_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2012_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2012_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2012_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2012_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2012_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2012_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2011_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2011_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2011_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2011_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2011_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2011_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2011_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2010_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2010_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2010_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2010_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2010_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2010_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2010_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2009_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2009_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2009_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2009_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2009_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2009_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2009_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2008_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2008_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2008_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2008_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2008_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2008_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2008_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2007_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2007_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2007_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2007_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2007_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2007_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2007_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2006_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2006_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2006_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2006_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2006_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2006_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2006_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2005_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2005_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2005_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2005_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2005_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2005_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2005_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2004_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2004_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2004_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2004_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2004_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2004_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2004_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2003_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2003_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2003_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2003_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2003_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2003_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2003_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2002_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2002_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2002_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2002_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2002_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2002_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2002_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2001_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2001_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2001_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2001_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2001_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2001_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2001_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2000_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2000_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2000_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2000_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2000_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2000_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_year_2000_active_pid_year_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_default_year_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_default_tm_esbid_pid_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_default_ruled_out_in_game_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_default_pid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_tm_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_pid_active_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_default_active_pid_year_idx;
 DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
-DROP INDEX IF EXISTS public."nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public."nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2026_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2026_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2025_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2025_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2024_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2024_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2023_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2023_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2022_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2022_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2021_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2021_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2020_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2020_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2019_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2019_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2018_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2018_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2017_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2017_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2016_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2016_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2015_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2015_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2014_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2014_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2013_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2013_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2012_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2012_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2011_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2011_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2010_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2010_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2009_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2009_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2008_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2008_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2007_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2007_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2006_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2006_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2005_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2005_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2004_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2004_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2003_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2003_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2002_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2002_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2001_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2001_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_assisted_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_bc_pid_psr_pid_trg__idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2000_year_esbid_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_ydl_100_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_trg_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_4_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_sportradar_play_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_sportradar_game_id_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_3_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_1_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_series_seq_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_route_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_qtr_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_psr_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_player_fuml_pid_week_year_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_play_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_play_action_idx;
-DROP INDEX IF EXISTS public."nfl_plays_year_2000_playId_idx";
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_pass_location_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_off_week_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_off_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_motion_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_esbid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_dwn_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_catchable_ball_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_box_defenders_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_bc_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_2_pid_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_sportradar_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
@@ -1635,9 +100,12 @@ DROP INDEX IF EXISTS public.idx_prop_markets_index_market_settled;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_projections_pid;
+DROP INDEX IF EXISTS public.idx_projections_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_index_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
+DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_archive_pid;
+DROP INDEX IF EXISTS public.idx_practice_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_position_game_outcome_defaults_year;
 DROP INDEX IF EXISTS public.idx_poaches_lid;
 DROP INDEX IF EXISTS public.idx_poach_releases_poachid;
@@ -1648,6 +116,7 @@ DROP INDEX IF EXISTS public.idx_player_sis_id;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
 DROP INDEX IF EXISTS public.idx_player_rtsports_id;
+DROP INDEX IF EXISTS public.idx_player_rankings_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pid_incl_pos_fname_lname;
@@ -1722,6 +191,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_pid_types;
 DROP INDEX IF EXISTS public.idx_nfl_plays_pass_location;
 DROP INDEX IF EXISTS public.idx_nfl_plays_off_week;
 DROP INDEX IF EXISTS public.idx_nfl_plays_off;
+DROP INDEX IF EXISTS public.idx_nfl_plays_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_nfl_plays_motion;
 DROP INDEX IF EXISTS public.idx_nfl_plays_fuml_pid_week_year;
 DROP INDEX IF EXISTS public.idx_nfl_plays_fantasy_points;
@@ -1737,6 +207,7 @@ DROP INDEX IF EXISTS public.idx_nfl_play_stats_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_current_week_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
+DROP INDEX IF EXISTS public.idx_nfl_games_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_matchups_simulation_timestamp;
 DROP INDEX IF EXISTS public.idx_matchups_lid;
 DROP INDEX IF EXISTS public.idx_leagues_commishid;
@@ -1857,6 +328,7 @@ DROP INDEX IF EXISTS public.idx_24608_pick;
 ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
+ALTER TABLE IF EXISTS ONLY public.user_plays_views DROP CONSTRAINT IF EXISTS user_plays_views_pkey;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS unique_super_priority;
@@ -2017,6 +489,7 @@ DROP TABLE IF EXISTS public.users_teams;
 DROP TABLE IF EXISTS public.users_sources;
 DROP SEQUENCE IF EXISTS public.users_id_seq;
 DROP TABLE IF EXISTS public.users;
+DROP TABLE IF EXISTS public.user_plays_views;
 DROP TABLE IF EXISTS public.user_data_views;
 DROP TABLE IF EXISTS public.urls;
 DROP SEQUENCE IF EXISTS public.transactions_uid_seq;
@@ -2276,6 +749,7 @@ DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying);
 DROP FUNCTION IF EXISTS public.update_external_league_import_jobs_updated_at();
 DROP FUNCTION IF EXISTS public.update_external_league_connections_updated_at();
+DROP FUNCTION IF EXISTS public.seas_type_to_text(val public.seas_type);
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP FUNCTION IF EXISTS public.needs_line_normalization(line numeric, name text);
 DROP FUNCTION IF EXISTS public.get_next_queued_job();
@@ -3021,6 +1495,17 @@ BEGIN
     setweight(to_tsvector('english', coalesce(NEW.lname,'')), 'A');
   RETURN NEW;
 END
+$$;
+
+
+--
+-- Name: seas_type_to_text(public.seas_type); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.seas_type_to_text(val public.seas_type) RETURNS text
+    LANGUAGE plpgsql IMMUTABLE STRICT
+    AS $$
+BEGIN RETURN val::text; END;
 $$;
 
 
@@ -5048,7 +3533,8 @@ CREATE TABLE public.nfl_games (
     away_play_caller character varying(36),
     home_play_caller character varying(36),
     sportradar_game_id character varying,
-    sportradar_season_id character varying
+    sportradar_season_id character varying,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -5495,7 +3981,8 @@ CREATE TABLE public.nfl_plays (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 )
 PARTITION BY RANGE (year);
 
@@ -6951,7 +5438,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -7349,7 +5837,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -7747,7 +6236,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -8145,7 +6635,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -8543,7 +7034,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -8941,7 +7433,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -9339,7 +7832,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -9737,7 +8231,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -10135,7 +8630,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -10533,7 +9029,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -10931,7 +9428,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -11329,7 +9827,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -11727,7 +10226,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -12125,7 +10625,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -12523,7 +11024,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -12921,7 +11423,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -13319,7 +11822,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -13717,7 +12221,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -14115,7 +12620,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -14513,7 +13019,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -14911,7 +13418,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -15309,7 +13817,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -15707,7 +14216,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -16105,7 +14615,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -16503,7 +15014,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -16901,7 +15413,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -17299,7 +15812,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
-    desc_nflfastr text
+    desc_nflfastr text,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23109,7 +21623,9 @@ CREATE TABLE public.player_rankings_index (
     overall_rank integer,
     position_rank integer,
     source_id public.rankings_source_id NOT NULL,
-    ranking_type public.ranking_type NOT NULL
+    ranking_type public.ranking_type NOT NULL,
+    seas_type character varying(10) DEFAULT 'REG'::character varying NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23477,7 +21993,9 @@ CREATE TABLE public.practice (
     su character varying(20),
     roster_status character varying(100),
     game_designation character varying(100),
-    source_status character varying(100)
+    source_status character varying(100),
+    seas_type character varying(10) DEFAULT 'REG'::character varying NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23529,7 +22047,8 @@ CREATE TABLE public.projections (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23633,7 +22152,8 @@ CREATE TABLE public.projections_index (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 )
 PARTITION BY RANGE (year);
 
@@ -23687,7 +22207,8 @@ CREATE TABLE public.projections_index_default (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23740,7 +22261,8 @@ CREATE TABLE public.projections_index_y2020 (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23793,7 +22315,8 @@ CREATE TABLE public.projections_index_y2021 (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23846,7 +22369,8 @@ CREATE TABLE public.projections_index_y2022 (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23899,7 +22423,8 @@ CREATE TABLE public.projections_index_y2023 (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -23952,7 +22477,8 @@ CREATE TABLE public.projections_index_y2024 (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24005,7 +22531,8 @@ CREATE TABLE public.projections_index_y2025 (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24058,7 +22585,8 @@ CREATE TABLE public.projections_index_y2026 (
     prtd numeric(4,1),
     seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
-    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -26257,14 +24785,6 @@ ALTER TABLE ONLY public.user_data_views
 
 
 --
--- Name: user_plays_views user_plays_views_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_plays_views
-    ADD CONSTRAINT user_plays_views_pkey PRIMARY KEY (view_id);
-
-
---
 -- Name: users idx_25127_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -27054,6 +25574,14 @@ ALTER TABLE ONLY public.urls
 
 ALTER TABLE ONLY public.urls
     ADD CONSTRAINT urls_url_key UNIQUE (url);
+
+
+--
+-- Name: user_plays_views user_plays_views_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_plays_views
+    ADD CONSTRAINT user_plays_views_pkey PRIMARY KEY (view_id);
 
 
 --
@@ -27900,6 +26428,13 @@ CREATE INDEX idx_matchups_simulation_timestamp ON public.matchups USING btree (s
 
 
 --
+-- Name: idx_nfl_games_nfl_week_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_games_nfl_week_id ON public.nfl_games USING btree (nfl_week_id);
+
+
+--
 -- Name: idx_nfl_games_year_seas_type_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28002,6 +26537,13 @@ CREATE INDEX idx_nfl_plays_fuml_pid_week_year ON ONLY public.nfl_plays USING btr
 --
 
 CREATE INDEX idx_nfl_plays_motion ON ONLY public.nfl_plays USING btree (motion);
+
+
+--
+-- Name: idx_nfl_plays_nfl_week_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_nfl_week_id ON ONLY public.nfl_plays USING btree (nfl_week_id);
 
 
 --
@@ -28523,6 +27065,13 @@ CREATE INDEX idx_player_prospect_profile_sis_id ON public.player_prospect_profil
 
 
 --
+-- Name: idx_player_rankings_index_nfl_week_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_rankings_index_nfl_week_id ON public.player_rankings_index USING btree (nfl_week_id);
+
+
+--
 -- Name: idx_player_rtsports_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28593,10 +27142,24 @@ CREATE INDEX idx_position_game_outcome_defaults_year ON public.position_game_out
 
 
 --
+-- Name: idx_practice_nfl_week_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_practice_nfl_week_id ON public.practice USING btree (nfl_week_id);
+
+
+--
 -- Name: idx_projections_archive_pid; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_projections_archive_pid ON public.projections_archive USING btree (pid);
+
+
+--
+-- Name: idx_projections_index_nfl_week_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_projections_index_nfl_week_id ON ONLY public.projections_index USING btree (nfl_week_id);
 
 
 --
@@ -28611,6 +27174,13 @@ CREATE INDEX idx_projections_index_pid ON ONLY public.projections_index USING bt
 --
 
 CREATE UNIQUE INDEX idx_projections_index_sourceid_pid_userid_week_year_seas_type ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, year, seas_type);
+
+
+--
+-- Name: idx_projections_nfl_week_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_projections_nfl_week_id ON public.projections USING btree (nfl_week_id);
 
 
 --
@@ -29111,6 +27681,13 @@ CREATE INDEX nfl_plays_year_2000_motion_idx ON public.nfl_plays_year_2000 USING 
 
 
 --
+-- Name: nfl_plays_year_2000_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_nfl_week_id_idx ON public.nfl_plays_year_2000 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2000_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29444,6 +28021,13 @@ CREATE INDEX nfl_plays_year_2001_esbid_idx ON public.nfl_plays_year_2001 USING b
 --
 
 CREATE INDEX nfl_plays_year_2001_motion_idx ON public.nfl_plays_year_2001 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2001_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_nfl_week_id_idx ON public.nfl_plays_year_2001 USING btree (nfl_week_id);
 
 
 --
@@ -29783,6 +28367,13 @@ CREATE INDEX nfl_plays_year_2002_motion_idx ON public.nfl_plays_year_2002 USING 
 
 
 --
+-- Name: nfl_plays_year_2002_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_nfl_week_id_idx ON public.nfl_plays_year_2002 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2002_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30116,6 +28707,13 @@ CREATE INDEX nfl_plays_year_2003_esbid_idx ON public.nfl_plays_year_2003 USING b
 --
 
 CREATE INDEX nfl_plays_year_2003_motion_idx ON public.nfl_plays_year_2003 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2003_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_nfl_week_id_idx ON public.nfl_plays_year_2003 USING btree (nfl_week_id);
 
 
 --
@@ -30455,6 +29053,13 @@ CREATE INDEX nfl_plays_year_2004_motion_idx ON public.nfl_plays_year_2004 USING 
 
 
 --
+-- Name: nfl_plays_year_2004_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_nfl_week_id_idx ON public.nfl_plays_year_2004 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2004_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30788,6 +29393,13 @@ CREATE INDEX nfl_plays_year_2005_esbid_idx ON public.nfl_plays_year_2005 USING b
 --
 
 CREATE INDEX nfl_plays_year_2005_motion_idx ON public.nfl_plays_year_2005 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2005_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_nfl_week_id_idx ON public.nfl_plays_year_2005 USING btree (nfl_week_id);
 
 
 --
@@ -31127,6 +29739,13 @@ CREATE INDEX nfl_plays_year_2006_motion_idx ON public.nfl_plays_year_2006 USING 
 
 
 --
+-- Name: nfl_plays_year_2006_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_nfl_week_id_idx ON public.nfl_plays_year_2006 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2006_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31460,6 +30079,13 @@ CREATE INDEX nfl_plays_year_2007_esbid_idx ON public.nfl_plays_year_2007 USING b
 --
 
 CREATE INDEX nfl_plays_year_2007_motion_idx ON public.nfl_plays_year_2007 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2007_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_nfl_week_id_idx ON public.nfl_plays_year_2007 USING btree (nfl_week_id);
 
 
 --
@@ -31799,6 +30425,13 @@ CREATE INDEX nfl_plays_year_2008_motion_idx ON public.nfl_plays_year_2008 USING 
 
 
 --
+-- Name: nfl_plays_year_2008_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_nfl_week_id_idx ON public.nfl_plays_year_2008 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2008_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32132,6 +30765,13 @@ CREATE INDEX nfl_plays_year_2009_esbid_idx ON public.nfl_plays_year_2009 USING b
 --
 
 CREATE INDEX nfl_plays_year_2009_motion_idx ON public.nfl_plays_year_2009 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2009_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_nfl_week_id_idx ON public.nfl_plays_year_2009 USING btree (nfl_week_id);
 
 
 --
@@ -32471,6 +31111,13 @@ CREATE INDEX nfl_plays_year_2010_motion_idx ON public.nfl_plays_year_2010 USING 
 
 
 --
+-- Name: nfl_plays_year_2010_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_nfl_week_id_idx ON public.nfl_plays_year_2010 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2010_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32804,6 +31451,13 @@ CREATE INDEX nfl_plays_year_2011_esbid_idx ON public.nfl_plays_year_2011 USING b
 --
 
 CREATE INDEX nfl_plays_year_2011_motion_idx ON public.nfl_plays_year_2011 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2011_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_nfl_week_id_idx ON public.nfl_plays_year_2011 USING btree (nfl_week_id);
 
 
 --
@@ -33143,6 +31797,13 @@ CREATE INDEX nfl_plays_year_2012_motion_idx ON public.nfl_plays_year_2012 USING 
 
 
 --
+-- Name: nfl_plays_year_2012_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_nfl_week_id_idx ON public.nfl_plays_year_2012 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2012_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33476,6 +32137,13 @@ CREATE INDEX nfl_plays_year_2013_esbid_idx ON public.nfl_plays_year_2013 USING b
 --
 
 CREATE INDEX nfl_plays_year_2013_motion_idx ON public.nfl_plays_year_2013 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2013_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_nfl_week_id_idx ON public.nfl_plays_year_2013 USING btree (nfl_week_id);
 
 
 --
@@ -33815,6 +32483,13 @@ CREATE INDEX nfl_plays_year_2014_motion_idx ON public.nfl_plays_year_2014 USING 
 
 
 --
+-- Name: nfl_plays_year_2014_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_nfl_week_id_idx ON public.nfl_plays_year_2014 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2014_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34148,6 +32823,13 @@ CREATE INDEX nfl_plays_year_2015_esbid_idx ON public.nfl_plays_year_2015 USING b
 --
 
 CREATE INDEX nfl_plays_year_2015_motion_idx ON public.nfl_plays_year_2015 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2015_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_nfl_week_id_idx ON public.nfl_plays_year_2015 USING btree (nfl_week_id);
 
 
 --
@@ -34487,6 +33169,13 @@ CREATE INDEX nfl_plays_year_2016_motion_idx ON public.nfl_plays_year_2016 USING 
 
 
 --
+-- Name: nfl_plays_year_2016_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_nfl_week_id_idx ON public.nfl_plays_year_2016 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2016_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34820,6 +33509,13 @@ CREATE INDEX nfl_plays_year_2017_esbid_idx ON public.nfl_plays_year_2017 USING b
 --
 
 CREATE INDEX nfl_plays_year_2017_motion_idx ON public.nfl_plays_year_2017 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2017_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_nfl_week_id_idx ON public.nfl_plays_year_2017 USING btree (nfl_week_id);
 
 
 --
@@ -35159,6 +33855,13 @@ CREATE INDEX nfl_plays_year_2018_motion_idx ON public.nfl_plays_year_2018 USING 
 
 
 --
+-- Name: nfl_plays_year_2018_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_nfl_week_id_idx ON public.nfl_plays_year_2018 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2018_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35492,6 +34195,13 @@ CREATE INDEX nfl_plays_year_2019_esbid_idx ON public.nfl_plays_year_2019 USING b
 --
 
 CREATE INDEX nfl_plays_year_2019_motion_idx ON public.nfl_plays_year_2019 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2019_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_nfl_week_id_idx ON public.nfl_plays_year_2019 USING btree (nfl_week_id);
 
 
 --
@@ -35831,6 +34541,13 @@ CREATE INDEX nfl_plays_year_2020_motion_idx ON public.nfl_plays_year_2020 USING 
 
 
 --
+-- Name: nfl_plays_year_2020_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_nfl_week_id_idx ON public.nfl_plays_year_2020 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2020_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36164,6 +34881,13 @@ CREATE INDEX nfl_plays_year_2021_esbid_idx ON public.nfl_plays_year_2021 USING b
 --
 
 CREATE INDEX nfl_plays_year_2021_motion_idx ON public.nfl_plays_year_2021 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2021_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_nfl_week_id_idx ON public.nfl_plays_year_2021 USING btree (nfl_week_id);
 
 
 --
@@ -36503,6 +35227,13 @@ CREATE INDEX nfl_plays_year_2022_motion_idx ON public.nfl_plays_year_2022 USING 
 
 
 --
+-- Name: nfl_plays_year_2022_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_nfl_week_id_idx ON public.nfl_plays_year_2022 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2022_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36836,6 +35567,13 @@ CREATE INDEX nfl_plays_year_2023_esbid_idx ON public.nfl_plays_year_2023 USING b
 --
 
 CREATE INDEX nfl_plays_year_2023_motion_idx ON public.nfl_plays_year_2023 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2023_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_nfl_week_id_idx ON public.nfl_plays_year_2023 USING btree (nfl_week_id);
 
 
 --
@@ -37175,6 +35913,13 @@ CREATE INDEX nfl_plays_year_2024_motion_idx ON public.nfl_plays_year_2024 USING 
 
 
 --
+-- Name: nfl_plays_year_2024_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_nfl_week_id_idx ON public.nfl_plays_year_2024 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2024_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37511,6 +36256,13 @@ CREATE INDEX nfl_plays_year_2025_motion_idx ON public.nfl_plays_year_2025 USING 
 
 
 --
+-- Name: nfl_plays_year_2025_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_nfl_week_id_idx ON public.nfl_plays_year_2025 USING btree (nfl_week_id);
+
+
+--
 -- Name: nfl_plays_year_2025_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37844,6 +36596,13 @@ CREATE INDEX nfl_plays_year_2026_esbid_idx ON public.nfl_plays_year_2026 USING b
 --
 
 CREATE INDEX nfl_plays_year_2026_motion_idx ON public.nfl_plays_year_2026 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2026_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_nfl_week_id_idx ON public.nfl_plays_year_2026 USING btree (nfl_week_id);
 
 
 --
@@ -39709,6 +38468,13 @@ CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vect
 
 
 --
+-- Name: projections_index_default_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_default_nfl_week_id_idx ON public.projections_index_default USING btree (nfl_week_id);
+
+
+--
 -- Name: projections_index_default_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -39720,6 +38486,13 @@ CREATE INDEX projections_index_default_pid_idx ON public.projections_index_defau
 --
 
 CREATE UNIQUE INDEX projections_index_default_sourceid_pid_userid_week_year_seas_ty ON public.projections_index_default USING btree (sourceid, pid, userid, week, year, seas_type);
+
+
+--
+-- Name: projections_index_y2020_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2020_nfl_week_id_idx ON public.projections_index_y2020 USING btree (nfl_week_id);
 
 
 --
@@ -39737,6 +38510,13 @@ CREATE UNIQUE INDEX projections_index_y2020_sourceid_pid_userid_week_year_seas_t
 
 
 --
+-- Name: projections_index_y2021_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2021_nfl_week_id_idx ON public.projections_index_y2021 USING btree (nfl_week_id);
+
+
+--
 -- Name: projections_index_y2021_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -39748,6 +38528,13 @@ CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 U
 --
 
 CREATE UNIQUE INDEX projections_index_y2021_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, year, seas_type);
+
+
+--
+-- Name: projections_index_y2022_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2022_nfl_week_id_idx ON public.projections_index_y2022 USING btree (nfl_week_id);
 
 
 --
@@ -39765,6 +38552,13 @@ CREATE UNIQUE INDEX projections_index_y2022_sourceid_pid_userid_week_year_seas_t
 
 
 --
+-- Name: projections_index_y2023_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2023_nfl_week_id_idx ON public.projections_index_y2023 USING btree (nfl_week_id);
+
+
+--
 -- Name: projections_index_y2023_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -39776,6 +38570,13 @@ CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 U
 --
 
 CREATE UNIQUE INDEX projections_index_y2023_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, year, seas_type);
+
+
+--
+-- Name: projections_index_y2024_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2024_nfl_week_id_idx ON public.projections_index_y2024 USING btree (nfl_week_id);
 
 
 --
@@ -39793,6 +38594,13 @@ CREATE UNIQUE INDEX projections_index_y2024_sourceid_pid_userid_week_year_seas_t
 
 
 --
+-- Name: projections_index_y2025_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2025_nfl_week_id_idx ON public.projections_index_y2025 USING btree (nfl_week_id);
+
+
+--
 -- Name: projections_index_y2025_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -39804,6 +38612,13 @@ CREATE INDEX projections_index_y2025_pid_idx ON public.projections_index_y2025 U
 --
 
 CREATE UNIQUE INDEX projections_index_y2025_sourceid_pid_userid_week_year_seas__idx ON public.projections_index_y2025 USING btree (sourceid, pid, userid, week, year, seas_type);
+
+
+--
+-- Name: projections_index_y2026_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2026_nfl_week_id_idx ON public.projections_index_y2026 USING btree (nfl_week_id);
 
 
 --
@@ -39888,6 +38703,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2000_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2000_nfl_week_id_idx;
 
 
 --
@@ -40227,6 +39049,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2001_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2001_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2001_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40560,6 +39389,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2002_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2002_nfl_week_id_idx;
 
 
 --
@@ -40899,6 +39735,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2003_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2003_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2003_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -41232,6 +40075,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2004_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2004_nfl_week_id_idx;
 
 
 --
@@ -41571,6 +40421,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2005_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2005_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2005_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -41904,6 +40761,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2006_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2006_nfl_week_id_idx;
 
 
 --
@@ -42243,6 +41107,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2007_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2007_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2007_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42576,6 +41447,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2008_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2008_nfl_week_id_idx;
 
 
 --
@@ -42915,6 +41793,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2009_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2009_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2009_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43248,6 +42133,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2010_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2010_nfl_week_id_idx;
 
 
 --
@@ -43587,6 +42479,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2011_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2011_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2011_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43920,6 +42819,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2012_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2012_nfl_week_id_idx;
 
 
 --
@@ -44259,6 +43165,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2013_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2013_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2013_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44592,6 +43505,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2014_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2014_nfl_week_id_idx;
 
 
 --
@@ -44931,6 +43851,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2015_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2015_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2015_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -45264,6 +44191,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2016_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2016_nfl_week_id_idx;
 
 
 --
@@ -45603,6 +44537,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2017_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2017_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2017_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -45936,6 +44877,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2018_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2018_nfl_week_id_idx;
 
 
 --
@@ -46275,6 +45223,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2019_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2019_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2019_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46608,6 +45563,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2020_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2020_nfl_week_id_idx;
 
 
 --
@@ -46947,6 +45909,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2021_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2021_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2021_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47280,6 +46249,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2022_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2022_nfl_week_id_idx;
 
 
 --
@@ -47619,6 +46595,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2023_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2023_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2023_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47952,6 +46935,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2024_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2024_nfl_week_id_idx;
 
 
 --
@@ -48291,6 +47281,13 @@ ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2
 
 
 --
+-- Name: nfl_plays_year_2025_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2025_nfl_week_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2025_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48624,6 +47621,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 --
 
 ALTER INDEX public.idx_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2026_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_year_2026_nfl_week_id_idx;
 
 
 --
@@ -50664,6 +49668,13 @@ ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.pl
 
 
 --
+-- Name: projections_index_default_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_default_nfl_week_id_idx;
+
+
+--
 -- Name: projections_index_default_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -50675,6 +49686,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_default_sourceid_pid_userid_week_year_seas_ty;
+
+
+--
+-- Name: projections_index_y2020_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_y2020_nfl_week_id_idx;
 
 
 --
@@ -50692,6 +49710,13 @@ ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type
 
 
 --
+-- Name: projections_index_y2021_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_y2021_nfl_week_id_idx;
+
+
+--
 -- Name: projections_index_y2021_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -50703,6 +49728,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2021_sourceid_pid_userid_week_year_seas_type;
+
+
+--
+-- Name: projections_index_y2022_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_y2022_nfl_week_id_idx;
 
 
 --
@@ -50720,6 +49752,13 @@ ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type
 
 
 --
+-- Name: projections_index_y2023_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_y2023_nfl_week_id_idx;
+
+
+--
 -- Name: projections_index_y2023_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -50731,6 +49770,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2023_sourceid_pid_userid_week_year_seas_type;
+
+
+--
+-- Name: projections_index_y2024_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_y2024_nfl_week_id_idx;
 
 
 --
@@ -50748,6 +49794,13 @@ ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type
 
 
 --
+-- Name: projections_index_y2025_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_y2025_nfl_week_id_idx;
+
+
+--
 -- Name: projections_index_y2025_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -50759,6 +49812,13 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 --
 
 ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2025_sourceid_pid_userid_week_year_seas__idx;
+
+
+--
+-- Name: projections_index_y2026_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.projections_index_y2026_nfl_week_id_idx;
 
 
 --
