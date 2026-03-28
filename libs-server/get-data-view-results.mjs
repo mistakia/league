@@ -305,6 +305,12 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
   nfl_weeks = nfl_weeks.flatMap((item) => {
     if (typeof item === 'object' && item !== null) {
       switch (item.dynamic_type) {
+        case 'current_year_reg_weeks': {
+          return get_nfl_week_identifiers_for_year({
+            year: current_season.stats_season_year,
+            seas_type: 'REG'
+          })
+        }
         case 'current_nfl_week': {
           return [
             format_nfl_week_identifier({
@@ -370,13 +376,7 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
 }
 
 const resolve_nfl_week_params = (params) => {
-  // Default to all REG weeks for current stats year when unset
-  if (!params.nfl_week_id) {
-    params.nfl_week_id = get_nfl_week_identifiers_for_year({
-      year: current_season.stats_season_year,
-      seas_type: 'REG'
-    })
-  }
+  if (!params.nfl_week_id) return
 
   // Resolve dynamic nfl_week_id values
   params.nfl_week_id = process_dynamic_nfl_week_param(params.nfl_week_id)

@@ -335,11 +335,14 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
     })
   })
 
-  describe('common_column_params.nfl_week_id no default_value', function () {
-    it('does not have a default_value property', () => {
-      expect(common_column_params.nfl_week_id).to.not.have.property(
+  describe('common_column_params.nfl_week_id default_value', function () {
+    it('has a dynamic default_value for current year REG weeks', () => {
+      expect(common_column_params.nfl_week_id).to.have.property(
         'default_value'
       )
+      expect(common_column_params.nfl_week_id.default_value).to.deep.equal({
+        dynamic_type: 'current_year_reg_weeks'
+      })
     })
   })
 

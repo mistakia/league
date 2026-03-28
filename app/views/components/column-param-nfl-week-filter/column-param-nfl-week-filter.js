@@ -112,18 +112,37 @@ export default function ColumnParamNflWeekFilter({
   const group_count = Object.keys(groups).length
   const static_count = static_selected.length
   const dynamic_count = Object.keys(dynamic_values).length
+  const default_dynamic = column_param_definition?.default_value
+  const is_default_dynamic =
+    default_dynamic &&
+    typeof default_dynamic === 'object' &&
+    default_dynamic.dynamic_type &&
+    existing_dynamic.length === 1 &&
+    existing_dynamic[0].dynamic_type === default_dynamic.dynamic_type &&
+    static_count === 0
+
   const all_selected =
-    !is_column_param_defined || (values.length > 0 && static_count === values.length)
+    is_default_dynamic ||
+    !is_column_param_defined ||
+    (values.length > 0 && static_count === values.length)
   const selected_label = mixed_state
     ? '-'
     : all_selected
       ? 'ALL'
       : `${static_count + dynamic_count} selected`
 
+  const handle_reset_to_default = () => {
+    if (default_dynamic && typeof default_dynamic === 'object') {
+      handle_change([default_dynamic])
+    } else {
+      handle_change(null)
+    }
+  }
+
   const body = (
     <div className='nfl-week-filter'>
       <div className='table-filter-item-dropdown-head'>
-        <div className='controls-button' onClick={() => handle_change(null)}>
+        <div className='controls-button' onClick={handle_reset_to_default}>
           All
         </div>
         <div className='controls-button' onClick={() => handle_change([])}>
