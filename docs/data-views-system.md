@@ -245,14 +245,29 @@ POST /data-views/search
 
 ### Parameter System
 
-**Time-Based Parameters**:
+**NFL Week Parameter** (weekly column definitions):
 
-- `year`: Array or single year, auto-uses partitioned tables for single years
-- `week`: Array or single week within season
-- `seas_type`: Season type ('REG', 'POST', 'PRE')
-- `year_offset`: For year calculations (e.g., previous season comparisons)
+- `nfl_week`: Composite identifier replacing separate year/week/seas*type. Format: `[YEAR]*[SEAS_TYPE]_WEEK_[WEEK]`(e.g.,`2024_REG_WEEK_5`). Maps to `nfl_week_id`generated column in database via`column_name: 'nfl_week_id'` property. Eliminates cartesian product problem when querying specific weeks across different years and season types.
+- `year_offset`: For year calculations (e.g., previous season comparisons). Applied during preprocessing to expand the nfl_week array.
 
-**Dynamic Parameters** (resolved at query time):
+**Dynamic nfl_week Values** (resolved at query time):
+
+- `{ dynamic_type: "current_nfl_week" }` → Current NFL week identifier (e.g., `2024_REG_WEEK_5`)
+- `{ dynamic_type: "last_n_nfl_weeks", value: 5 }` → Last 5 NFL week identifiers
+
+**Centralized Preprocessing** (`resolve_nfl_week_params` in `get-data-view-results.mjs`):
+
+1. Resolves dynamic nfl_week values to concrete identifier strings
+2. Decomposes nfl_week array into `params.year`, `params.week`, `params.seas_type` (pre-offset base values for join function compatibility)
+3. Applies `year_offset` expansion to produce final `params.nfl_week` array (post-offset, used for all WHERE clauses)
+
+**Season-Level Parameters** (retained for seasonlogs, ESPN scores, team seasonlogs):
+
+- `year` / `single_year`: Array or single year, auto-uses partitioned tables for single years
+- `week` / `single_week`: Array or single week within season
+- `seas_type` / `single_seas_type`: Season type ('REG', 'POST', 'PRE')
+
+**Legacy Dynamic Parameters** (for season-level columns):
 
 - `{ dynamic_type: "current_year" }` → Current NFL season
 - `{ dynamic_type: "last_n_years", value: 3 }` → [2024, 2023, 2022]
@@ -390,7 +405,12 @@ if (table_name !== data_view_options.from_table_name) {
 **Performance Impact**: Resolves dynamic parameters at query build time to enable optimization opportunities.
 
 ```javascript
-// Transform dynamic to static for optimization
+// nfl_week preprocessing (called first via resolve_nfl_week_params):
+{ nfl_week: [{ dynamic_type: "last_n_nfl_weeks", value: 3 }] }
+// Becomes: { nfl_week: ["2024_REG_WEEK_5", "2024_REG_WEEK_4", "2024_REG_WEEK_3"] }
+// Also sets: params.year, params.week, params.seas_type (decomposed base values)
+
+// Season-level dynamic resolution (for columns without nfl_week):
 { year: { dynamic_type: "last_n_years", value: 3 } }
 // Becomes: { year: [2024, 2023, 2022] }
 // Enables: Single-year table optimization when value = 1

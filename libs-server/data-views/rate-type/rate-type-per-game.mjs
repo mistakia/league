@@ -1,21 +1,11 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 import db from '#db'
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || []
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  let week = params.week || []
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
-  let year_offset = params.year_offset || []
-  if (!Array.isArray(year_offset)) {
-    year_offset = [year_offset]
+  let nfl_week = params.nfl_week || []
+  if (!Array.isArray(nfl_week)) {
+    nfl_week = [nfl_week]
   }
 
   let career_year = params.career_year || []
@@ -28,31 +18,13 @@ const get_default_params = ({ params = {} } = {}) => {
     career_game = [career_game]
   }
 
-  const adjusted_years = year.flatMap((y) => {
-    const base_year = Number(y)
-    if (year_offset.length === 2) {
-      // If year_offset is a range
-      const max_offset = Math.max(...year_offset.map(Number))
-      const min_offset = Math.min(...year_offset.map(Number))
-      return Array.from(
-        { length: max_offset - min_offset + 1 },
-        (_, i) => base_year + min_offset + i
-      )
-    } else if (year_offset.length === 1) {
-      // If year_offset is a single number
-      return [base_year + Number(year_offset[0])]
-    } else {
-      return [base_year]
-    }
-  })
-
-  const all_years = year.length
-    ? [...new Set([...year, ...adjusted_years])].sort((a, b) => a - b)
-    : []
+  // Derive all_years from nfl_week (post-offset expanded set)
+  const { years: all_years } = nfl_week.length
+    ? decompose_nfl_weeks({ nfl_weeks: nfl_week })
+    : { years: [] }
 
   return {
-    year,
-    week,
+    nfl_week,
     career_year,
     career_game,
     all_years
@@ -63,7 +35,7 @@ export const get_per_game_cte_table_name = ({
   params = {},
   is_team = false
 } = {}) => {
-  const { week, career_year, career_game, all_years } = get_default_params({
+  const { nfl_week, career_year, career_game } = get_default_params({
     params
   })
 
@@ -75,7 +47,7 @@ export const get_per_game_cte_table_name = ({
     : ''
 
   return get_table_hash(
-    `${prefix}_games_played${matchup_opponent_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
+    `${prefix}_games_played${matchup_opponent_suffix}_nfl_week_${nfl_week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
   )
 }
 
@@ -86,10 +58,9 @@ const add_player_per_game_cte = ({
   splits = [],
   effective_years
 }) => {
-  const { week, career_year, career_game } = get_default_params({
+  const { nfl_week, career_year, career_game } = get_default_params({
     params
   })
-  const { seas_type } = get_play_by_play_default_params({ params })
 
   // Use year-specific player_gamelogs table if a single year is specified
   const single_year =
@@ -103,8 +74,14 @@ const add_player_per_game_cte = ({
     .leftJoin('nfl_games', 'nfl_games.esbid', `${player_gamelogs_table}.esbid`)
     .count('* as rate_type_total_count')
     .select(db.raw(`array_agg(distinct ${player_gamelogs_table}.tm) as teams`))
-    .whereIn('nfl_games.seas_type', seas_type)
     .where(`${player_gamelogs_table}.active`, true)
+
+  if (nfl_week.length) {
+    cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)
+    if (effective_years.length) {
+      cte_query.whereIn('nfl_games.year', effective_years)
+    }
+  }
 
   if (career_year.length) {
     cte_query = cte_query.leftJoin('player_seasonlogs', function () {
@@ -112,14 +89,6 @@ const add_player_per_game_cte = ({
       this.andOn('player_seasonlogs.year', 'nfl_games.year')
       this.andOn('player_seasonlogs.seas_type', 'nfl_games.seas_type')
     })
-  }
-
-  if (effective_years.length) {
-    cte_query.whereIn('nfl_games.year', effective_years)
-  }
-
-  if (week.length) {
-    cte_query.whereIn('nfl_games.week', week)
   }
 
   if (career_year.length === 2) {
@@ -164,22 +133,18 @@ const add_team_per_game_cte = ({
   splits = [],
   effective_years
 }) => {
-  const { week } = get_default_params({
-    params
-  })
-  const { seas_type } = get_play_by_play_default_params({ params })
+  const { nfl_week } = get_default_params({ params })
 
   const cte_query = db('nfl_plays')
     .select('nfl_plays.off as team')
     .countDistinct('nfl_plays.esbid as rate_type_total_count')
-    .whereIn('nfl_plays.seas_type', seas_type)
 
-  if (effective_years.length) {
-    cte_query.whereIn('nfl_plays.year', effective_years)
-  }
-
-  if (week.length) {
-    cte_query.whereIn('nfl_plays.week', week)
+  if (nfl_week.length) {
+    cte_query.whereIn('nfl_plays.nfl_week_id', nfl_week)
+    // Partition pruning for year-partitioned nfl_plays
+    if (effective_years.length) {
+      cte_query.whereIn('nfl_plays.year', effective_years)
+    }
   }
 
   for (const split of splits) {

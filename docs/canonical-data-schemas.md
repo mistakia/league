@@ -580,3 +580,34 @@ Planned schema enhancements:
 - [JSON Schema Documentation](https://json-schema.org/)
 - [AJV Validator Documentation](https://ajv.js.org/)
 - [Platform API Documentation](../README.md#platform-apis)
+
+---
+
+## NFL Data Schema Extensions
+
+### nfl_week_id Generated Column
+
+Tables with weekly NFL data include a `nfl_week_id` stored generated column that provides an atomic identifier for a specific season week, eliminating cartesian products when querying across multiple years and weeks.
+
+**Format**: `[YEAR]_[SEAS_TYPE]_WEEK_[WEEK]`
+
+**Examples**: `2024_REG_WEEK_5`, `2024_POST_WEEK_1`, `2024_PRE_WEEK_2`
+
+**Components**:
+
+- YEAR: 4-digit year (2000-current)
+- SEAS_TYPE: PRE | REG | POST
+- WEEK: 1-4 for PRE, 1-21 for REG, 1-4 for POST
+
+**Tables with nfl_week_id**:
+
+| Table                   | Generated Expression                                                     | Notes                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `nfl_games`             | `year::text \|\| '_' \|\| seas_type \|\| '_WEEK_' \|\| week::text`       |                                                                                        |
+| `nfl_plays`             | `year::text \|\| '_' \|\| seas_type \|\| '_WEEK_' \|\| week::text`       | Partitioned by year; queries must include `whereIn('year', ...)` for partition pruning |
+| `projections`           | `year::text \|\| '_' \|\| seas_type::text \|\| '_WEEK_' \|\| week::text` | `seas_type` is ENUM, requires `::text` cast                                            |
+| `projections_index`     | Same as projections                                                      | Partitioned by year; requires partition pruning hint                                   |
+| `player_rankings_index` | `year::text \|\| '_' \|\| seas_type \|\| '_WEEK_' \|\| week::text`       | `seas_type` column added with `DEFAULT 'REG'`                                          |
+| `practice`              | `year::text \|\| '_' \|\| seas_type \|\| '_WEEK_' \|\| week::text`       | `seas_type` column added with `DEFAULT 'REG'`                                          |
+
+**Utility Module**: `libs-shared/nfl-week-identifier.mjs` provides parsing, formatting, validation, and generation functions for nfl_week_id values.

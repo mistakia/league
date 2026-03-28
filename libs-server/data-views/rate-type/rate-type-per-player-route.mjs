@@ -1,53 +1,17 @@
 import db from '#db'
-import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 export const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || [current_season.stats_season_year]
-  if (!Array.isArray(year)) {
-    year = [year]
+  let nfl_week = params.nfl_week || []
+  if (!Array.isArray(nfl_week)) {
+    nfl_week = [nfl_week]
   }
-
-  let week = params.week || []
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
-  let year_offset = params.year_offset || []
-  if (!Array.isArray(year_offset)) {
-    year_offset = [year_offset]
-  }
-
-  // TODO week offset
-
-  const adjusted_years = year.flatMap((y) => {
-    const base_year = Number(y)
-    if (year_offset.length === 2) {
-      const max_offset = Math.max(...year_offset.map(Number))
-      const min_offset = Math.min(...year_offset.map(Number))
-      return Array.from(
-        { length: max_offset - min_offset + 1 },
-        (_, i) => base_year + min_offset + i
-      )
-    } else if (year_offset.length === 1) {
-      return [base_year + Number(year_offset[0])]
-    } else {
-      return [base_year]
-    }
-  })
-
-  const all_years = year.length
-    ? [...new Set([...year, ...adjusted_years])].sort((a, b) => a - b)
-    : []
 
   return {
-    year,
-    week,
-    all_years
+    nfl_week
   }
 }
 
@@ -55,14 +19,14 @@ export const get_per_player_route_cte_table_name = ({
   params = {},
   group_by = null
 } = {}) => {
-  const { all_years, week } = get_default_params({ params })
+  const { nfl_week } = get_default_params({ params })
 
   const group_by_suffix = group_by ? `_${group_by}` : ''
 
   const play_level_params_suffix = get_play_level_params_hash_suffix({ params })
 
   return get_table_hash(
-    `per_player_route_pass_breakup${group_by_suffix}${play_level_params_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
+    `per_player_route_pass_breakup${group_by_suffix}${play_level_params_suffix}_nfl_week_${nfl_week.join('_')}`
   )
 }
 
@@ -74,8 +38,6 @@ export const add_per_player_route_cte = ({
   group_by = null,
   data_view_options = {}
 }) => {
-  const { seas_type } = get_play_by_play_default_params({ params })
-
   const cte_query = db('nfl_plays_receiver')
     .select('nfl_plays_receiver.gsis_id')
     .join('nfl_plays', function () {
@@ -119,20 +81,14 @@ export const add_per_player_route_cte = ({
     }
   }
 
-  let { year, week } = get_default_params({ params })
-
   const denominator_params = get_rate_type_denominator_params({ params })
-  if (data_view_options.year_range && data_view_options.year_range.length) {
-    year = data_view_options.year_range
-    delete denominator_params.year_offset
-  }
-  const filtered_params = { ...denominator_params, year, week, seas_type }
-  delete filtered_params.career_year
-  delete filtered_params.career_game
+  delete denominator_params.career_year
+  delete denominator_params.career_game
+  delete denominator_params.year_offset
 
   apply_play_by_play_column_params_to_query({
     query: cte_query,
-    params: filtered_params
+    params: denominator_params
   })
 
   players_query.with(rate_type_table_name, cte_query)

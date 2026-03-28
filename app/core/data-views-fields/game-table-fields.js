@@ -6,7 +6,7 @@ import COLUMN_GROUPS from './column-groups'
 import { common_column_params } from '@libs-shared'
 import GameOpponent from '@components/game-opponent'
 
-const { single_year, single_week, single_seas_type } = common_column_params
+const { nfl_week } = common_column_params
 
 const OpponentComponent = ({ row, column_index }) => {
   const is_home = row.original[`game_is_home_${column_index}`]
@@ -26,11 +26,9 @@ const create_game_field = (props) => ({
   size: 100,
   data_type: table_constants.TABLE_DATA_TYPES.TEXT,
   column_params: {
-    year: single_year,
-    week: single_week,
-    seas_type: single_seas_type
+    nfl_week
   },
-  splits: ['year', 'week', 'seas_type']
+  splits: ['year', 'week']
 })
 
 export default {

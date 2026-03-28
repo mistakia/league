@@ -144,7 +144,7 @@ function create_player_team_stats_query({
   having_clauses,
   data_view_options
 }) {
-  const { seas_type } = get_play_by_play_default_params({ params })
+  const default_params = get_play_by_play_default_params({ params })
   const player_team_stats_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
     .groupBy('player_gamelogs.pid')
@@ -154,7 +154,18 @@ function create_player_team_stats_query({
       this.andOn('nfl_games.year', '=', `${with_table_name}.year`)
       this.andOn('nfl_games.week', '=', `${with_table_name}.week`)
     })
-    .whereIn('nfl_games.seas_type', seas_type)
+
+  if (default_params.nfl_week) {
+    const nfl_week = Array.isArray(default_params.nfl_week)
+      ? default_params.nfl_week
+      : [default_params.nfl_week]
+    player_team_stats_query.whereIn('nfl_games.nfl_week_id', nfl_week)
+  } else {
+    player_team_stats_query.whereIn(
+      'nfl_games.seas_type',
+      default_params.seas_type
+    )
+  }
 
   add_select_columns({
     query: player_team_stats_query,

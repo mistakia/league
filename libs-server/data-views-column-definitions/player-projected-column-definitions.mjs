@@ -4,6 +4,7 @@ import {
 } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
+import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
@@ -12,13 +13,28 @@ import data_view_join_function from '#libs-server/data-views/data-view-join-func
 // TODO career_year
 
 const get_default_params = ({ params = {} }) => {
-  const year = Array.isArray(params.year)
-    ? params.year[0]
-    : params.year || current_season.year
-  const week = Array.isArray(params.week) ? params.week[0] : params.week || 0
-  const seas_type = Array.isArray(params.seas_type)
-    ? params.seas_type[0]
-    : params.seas_type || 'REG'
+  let year, week, seas_type, nfl_week
+
+  if (params.nfl_week) {
+    nfl_week = Array.isArray(params.nfl_week)
+      ? params.nfl_week
+      : [params.nfl_week]
+    // Decompose first nfl_week value for single-value contexts
+    const parsed = parse_nfl_week_identifier({ identifier: nfl_week[0] })
+    year = parsed ? parsed.year : current_season.year
+    week = parsed ? parsed.week : 0
+    seas_type = parsed ? parsed.seas_type : 'REG'
+  } else {
+    year = Array.isArray(params.year)
+      ? params.year[0]
+      : params.year || current_season.year
+    week = Array.isArray(params.week) ? params.week[0] : params.week || 0
+    seas_type = Array.isArray(params.seas_type)
+      ? params.seas_type[0]
+      : params.seas_type || 'REG'
+    nfl_week = null
+  }
+
   const scoring_format_hash =
     params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
   const league_format_hash =
@@ -29,6 +45,7 @@ const get_default_params = ({ params = {} }) => {
     year,
     week,
     seas_type,
+    nfl_week,
     scoring_format_hash,
     league_format_hash,
     league_id
@@ -48,37 +65,40 @@ const get_cache_info_for_player_projected_stats = ({ params = {} } = {}) => {
   }
 }
 
+const get_alias_key = ({ year, week, seas_type, nfl_week }) => {
+  if (nfl_week) {
+    return nfl_week.join('_')
+  }
+  return `${year}_week_${week}_${seas_type}`
+}
+
 const projections_index_table_alias = ({ params = {} }) => {
-  const { year, week, seas_type } = get_default_params({ params })
-  return get_table_hash(`projections_index_${year}_week_${week}_${seas_type}`)
+  const p = get_default_params({ params })
+  return get_table_hash(`projections_index_${get_alias_key(p)}`)
 }
 
 const scoring_format_player_projection_points_table_alias = ({
   params = {}
 }) => {
-  const { year, week, seas_type, scoring_format_hash } = get_default_params({
-    params
-  })
+  const p = get_default_params({ params })
   return get_table_hash(
-    `scoring_format_player_projection_points_${year}_week_${week}_${seas_type}_${scoring_format_hash}`
+    `scoring_format_player_projection_points_${get_alias_key(p)}_${p.scoring_format_hash}`
   )
 }
 
 const league_player_projection_values_table_alias = ({ params = {} }) => {
-  const { year, week, seas_type, league_id } = get_default_params({ params })
+  const p = get_default_params({ params })
   return get_table_hash(
-    `league_player_projection_values_${year}_week_${week}_${seas_type}_league_${league_id}`
+    `league_player_projection_values_${get_alias_key(p)}_league_${p.league_id}`
   )
 }
 
 const league_format_player_projection_values_table_alias = ({
   params = {}
 }) => {
-  const { year, week, seas_type, league_format_hash } = get_default_params({
-    params
-  })
+  const p = get_default_params({ params })
   return get_table_hash(
-    `league_format_player_projection_values_${year}_week_${week}_${seas_type}_${league_format_hash}`
+    `league_format_player_projection_values_${get_alias_key(p)}_${p.league_format_hash}`
   )
 }
 
@@ -154,10 +174,9 @@ const league_format_player_projection_values_join = (join_arguments) => {
   })
 }
 
-// TODO add support for seas_type
 const projections_index_join = (join_arguments) => {
   const { params = {} } = join_arguments
-  const { seas_type } = get_default_params({ params })
+  const { seas_type, nfl_week } = get_default_params({ params })
 
   data_view_join_function({
     ...join_arguments,
@@ -173,11 +192,20 @@ const projections_index_join = (join_arguments) => {
           '=',
           external_data_sources.AVERAGE
         )
-        this.andOn(
-          `${join_arguments.table_name}.seas_type`,
-          '=',
-          db.raw('?', [seas_type])
-        )
+        if (nfl_week) {
+          this.andOn(
+            db.raw(
+              `${join_arguments.table_name}.nfl_week_id IN (${nfl_week.map(() => '?').join(',')})`,
+              nfl_week
+            )
+          )
+        } else {
+          this.andOn(
+            `${join_arguments.table_name}.seas_type`,
+            '=',
+            db.raw('?', [seas_type])
+          )
+        }
       }
     }
   })

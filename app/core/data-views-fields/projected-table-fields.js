@@ -3,7 +3,7 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import { common_column_params } from '@libs-shared'
 import { current_season } from '@constants'
 
-const { single_year, single_week, single_seas_type } = common_column_params
+const { single_year, nfl_week } = common_column_params
 
 // Generate projection years dynamically from 2020 to current year
 const get_projection_years = () => {
@@ -81,13 +81,7 @@ export default function ({ week }) {
           }
         : period === 'Week'
           ? {
-              year: {
-                ...single_year,
-                default_value: current_season.year,
-                values: projection_years
-              },
-              week: single_week,
-              seas_type: single_seas_type
+              nfl_week
             }
           : undefined
   })

@@ -3,18 +3,33 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_frequent_update_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { current_season } from '#constants'
+import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 
 const valid_practice_days = ['m', 'tu', 'w', 'th', 'f', 's', 'su']
 
 const get_params = ({ params = {} }) => {
-  let year = params.year || [current_season.stats_season_year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  let week = params.single_week || [Math.max(current_season.week, 1)]
-  if (!Array.isArray(week)) {
-    week = [week]
+  let nfl_week
+  if (params.nfl_week) {
+    nfl_week = Array.isArray(params.nfl_week)
+      ? params.nfl_week
+      : [params.nfl_week]
+  } else {
+    let year = params.year || [current_season.stats_season_year]
+    if (!Array.isArray(year)) {
+      year = [year]
+    }
+    let week = params.single_week || [Math.max(current_season.week, 1)]
+    if (!Array.isArray(week)) {
+      week = [week]
+    }
+    nfl_week = []
+    for (const y of year) {
+      for (const w of week) {
+        nfl_week.push(
+          format_nfl_week_identifier({ year: y, seas_type: 'REG', week: w })
+        )
+      }
+    }
   }
 
   let practice_day = params.practice_day || ['w']
@@ -26,8 +41,7 @@ const get_params = ({ params = {} }) => {
   practice_day = practice_day.filter((day) => valid_practice_days.includes(day))
 
   return {
-    year,
-    week,
+    nfl_week,
     practice_day
   }
 }
@@ -35,8 +49,8 @@ const get_params = ({ params = {} }) => {
 const get_cache_info = create_frequent_update_cache_info({ get_params })
 
 const generate_table_alias = ({ params = {} } = {}) => {
-  const { year, week } = get_params({ params })
-  const key = `player_practice_${year}_${week}`
+  const { nfl_week } = get_params({ params })
+  const key = `player_practice_${nfl_week.join('_')}`
   return get_table_hash(key)
 }
 
@@ -47,7 +61,7 @@ const add_player_practice_with_statement = ({
   where_clauses = [],
   splits = []
 }) => {
-  const { year, week } = get_params({ params })
+  const { nfl_week } = get_params({ params })
 
   const with_query = db('practice')
     .select(
@@ -63,8 +77,7 @@ const add_player_practice_with_statement = ({
       's',
       'su'
     )
-    .whereIn('year', year)
-    .whereIn('week', week)
+    .whereIn('nfl_week_id', nfl_week)
 
   if (splits.includes('year')) {
     with_query.select('year')

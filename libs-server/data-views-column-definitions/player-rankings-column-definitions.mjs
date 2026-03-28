@@ -3,22 +3,50 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { current_season } from '#constants'
+import {
+  format_nfl_week_identifier,
+  decompose_nfl_weeks
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 // TODO career_year
 
 const get_cache_info = create_season_cache_info({
   get_params: ({ params = {} } = {}) => {
-    const { year } = get_default_params({ params })
-    return { year }
+    const { nfl_week } = get_default_params({ params })
+    if (!nfl_week.length) return { year: [], week: [] }
+    const { years, weeks } = decompose_nfl_weeks({ nfl_weeks: nfl_week })
+    return { year: years, week: weeks }
   }
 })
 
 const get_default_params = ({ params = {} } = {}) => {
   const default_params = {
-    year: [current_season.year],
-    week: [current_season.week],
     ranking_source_id: ['FANTASYPROS'],
     ranking_type: ['PPR_REDRAFT']
+  }
+
+  let nfl_week
+  if (params.nfl_week) {
+    nfl_week = Array.isArray(params.nfl_week)
+      ? params.nfl_week
+      : [params.nfl_week]
+  } else {
+    let year = params.year || [current_season.year]
+    if (!Array.isArray(year)) {
+      year = [year]
+    }
+    let week = params.week || [current_season.week]
+    if (!Array.isArray(week)) {
+      week = [week]
+    }
+    nfl_week = []
+    for (const y of year) {
+      for (const w of week) {
+        nfl_week.push(
+          format_nfl_week_identifier({ year: y, seas_type: 'REG', week: w })
+        )
+      }
+    }
   }
 
   for (const [key, default_value] of Object.entries(default_params)) {
@@ -29,12 +57,15 @@ const get_default_params = ({ params = {} } = {}) => {
     default_params[key] = value
   }
 
-  return default_params
+  return {
+    ...default_params,
+    nfl_week
+  }
 }
 
 const generate_table_alias = ({ params = {} } = {}) => {
-  const { year, week } = get_default_params({ params })
-  const key = `player_rankings_${year.join('_')}_${week.join('_')}`
+  const { nfl_week } = get_default_params({ params })
+  const key = `player_rankings_${nfl_week.join('_')}`
   return get_table_hash(key)
 }
 
@@ -46,7 +77,7 @@ const add_player_rankings_with_statement = ({
   select_strings = [],
   splits = []
 }) => {
-  const { year, week, ranking_source_id, ranking_type } = get_default_params({
+  const { nfl_week, ranking_source_id, ranking_type } = get_default_params({
     params
   })
 
@@ -54,8 +85,7 @@ const add_player_rankings_with_statement = ({
     .select('pid')
     .whereIn('source_id', ranking_source_id)
     .whereIn('ranking_type', ranking_type)
-    .whereIn('year', year)
-    .whereIn('week', week)
+    .whereIn('nfl_week_id', nfl_week)
 
   // Add year and week to SELECT when splits are included
   if (splits.includes('year')) {

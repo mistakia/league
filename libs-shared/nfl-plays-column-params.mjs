@@ -5,10 +5,8 @@ import { COLUMN_PARAM_GROUPS } from './column-param-groups.mjs'
 import {
   career_year,
   career_game,
-  year,
-  week,
   year_offset,
-  seas_type
+  nfl_week
 } from './common-column-params.mjs'
 
 const score_diff_preset_values = [
@@ -244,10 +242,8 @@ export default {
   career_year,
   career_game,
 
-  year,
+  nfl_week,
   year_offset,
-  week,
-  seas_type,
 
   ...nfl_games_params,
 

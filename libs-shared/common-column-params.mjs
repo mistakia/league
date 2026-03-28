@@ -6,6 +6,10 @@ import {
   nfl_season_types
 } from '#constants'
 import * as table_constants from 'react-table/src/constants.mjs'
+import {
+  format_nfl_week_identifier,
+  get_nfl_week_identifiers_for_recent_years
+} from './nfl-week-identifier.mjs'
 
 export const career_year = {
   data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -156,4 +160,28 @@ export const single_seas_type = {
   single: true,
   values: nfl_season_types,
   default_value: 'REG'
+}
+
+export const nfl_week = {
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  column_name: 'nfl_week_id',
+  values: get_nfl_week_identifiers_for_recent_years({ count: 5 }),
+  default_value: format_nfl_week_identifier({
+    year: current_season.stats_season_year,
+    seas_type: 'REG',
+    week: Math.max(current_season.week, 1)
+  }),
+  enable_multi_on_split: ['year', 'week'],
+  dynamic_values: [
+    {
+      dynamic_type: 'current_nfl_week',
+      label: 'Current NFL Week'
+    },
+    {
+      dynamic_type: 'last_n_nfl_weeks',
+      label: 'Last N NFL Weeks',
+      default_value: 5,
+      has_value_field: true
+    }
+  ]
 }

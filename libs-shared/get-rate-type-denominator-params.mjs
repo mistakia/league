@@ -4,6 +4,7 @@ import { COLUMN_PARAM_GROUPS } from './column-param-groups.mjs'
 const TIME_SCOPE_PARAM_KEYS = new Set([
   'career_year',
   'career_game',
+  'nfl_week',
   'year',
   'year_offset',
   'week',
