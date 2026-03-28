@@ -1,0 +1,180 @@
+import React, { useState, useCallback, useRef } from 'react'
+import PropTypes from 'prop-types'
+
+import { nfl_week_identifier } from '@libs-shared'
+
+const SEASON_TYPES = ['PRE', 'REG', 'POST']
+
+export default function NflWeekBuilder({ values, on_add }) {
+  const { years: available_years } = nfl_week_identifier.decompose_nfl_weeks({ nfl_weeks: values })
+  const sorted_years = [...available_years].sort((a, b) => b - a)
+
+  const [selected_years, set_selected_years] = useState([])
+  const [selected_types, set_selected_types] = useState([])
+  const [selected_weeks, set_selected_weeks] = useState({})
+  const drag_ref = useRef(null)
+
+  const toggle_year = (year) => {
+    set_selected_years((prev) =>
+      prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
+    )
+  }
+
+  const toggle_type = (type) => {
+    set_selected_types((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    )
+    set_selected_weeks((prev) => {
+      const updated = { ...prev }
+      delete updated[type]
+      return updated
+    })
+  }
+
+  const toggle_week = (seas_type, week) => {
+    set_selected_weeks((prev) => {
+      const type_weeks = prev[seas_type] || []
+      const next = type_weeks.includes(week)
+        ? type_weeks.filter((w) => w !== week)
+        : [...type_weeks, week]
+      return { ...prev, [seas_type]: next }
+    })
+  }
+
+  const select_all_weeks = (seas_type) => {
+    const max = nfl_week_identifier.get_max_weeks_for_season_type({ seas_type })
+    const all = Array.from({ length: max }, (_, i) => i + 1)
+    set_selected_weeks((prev) => ({ ...prev, [seas_type]: all }))
+  }
+
+  const handle_mouse_down = useCallback((seas_type, week, is_selected) => {
+    drag_ref.current = {
+      seas_type,
+      mode: is_selected ? 'deselect' : 'select'
+    }
+    toggle_week(seas_type, week)
+  }, [])
+
+  const handle_mouse_enter = useCallback(
+    (seas_type, week) => {
+      if (!drag_ref.current || drag_ref.current.seas_type !== seas_type) return
+      set_selected_weeks((prev) => {
+        const type_weeks = prev[seas_type] || []
+        if (drag_ref.current.mode === 'select') {
+          return type_weeks.includes(week)
+            ? prev
+            : { ...prev, [seas_type]: [...type_weeks, week] }
+        } else {
+          return { ...prev, [seas_type]: type_weeks.filter((w) => w !== week) }
+        }
+      })
+    },
+    []
+  )
+
+  const handle_mouse_up = useCallback(() => {
+    drag_ref.current = null
+  }, [])
+
+  const handle_add = () => {
+    const new_ids = []
+    for (const year of selected_years) {
+      for (const seas_type of selected_types) {
+        const weeks = selected_weeks[seas_type] || []
+        for (const week of weeks) {
+          const id = nfl_week_identifier.format_nfl_week_identifier({ year, seas_type, week })
+          if (nfl_week_identifier.validate_nfl_week_identifier({ identifier: id })) {
+            new_ids.push(id)
+          }
+        }
+      }
+    }
+    if (new_ids.length > 0) {
+      on_add(new_ids)
+      set_selected_years([])
+      set_selected_types([])
+      set_selected_weeks({})
+    }
+  }
+
+  const has_selection =
+    selected_years.length > 0 &&
+    selected_types.length > 0 &&
+    selected_types.some((t) => (selected_weeks[t] || []).length > 0)
+
+  return (
+    <div className='nfl-week-filter-section' onMouseUp={handle_mouse_up}>
+      <div className='nfl-week-filter-section-header'>Builder</div>
+
+      <div className='nfl-week-builder-row'>
+        <div className='nfl-week-builder-label'>Year</div>
+        {sorted_years.map((year) => (
+          <div
+            key={year}
+            className={`nfl-week-toggle-btn${selected_years.includes(year) ? ' active' : ''}`}
+            onClick={() => toggle_year(year)}>
+            {year}
+          </div>
+        ))}
+      </div>
+
+      <div className='nfl-week-builder-row'>
+        <div className='nfl-week-builder-label'>Type</div>
+        {SEASON_TYPES.map((type) => (
+          <div
+            key={type}
+            className={`nfl-week-toggle-btn${selected_types.includes(type) ? ' active' : ''}`}
+            onClick={() => toggle_type(type)}>
+            {type}
+          </div>
+        ))}
+      </div>
+
+      {selected_types.map((seas_type) => {
+        const max = nfl_week_identifier.get_max_weeks_for_season_type({ seas_type })
+        const type_weeks = selected_weeks[seas_type] || []
+        return (
+          <div key={seas_type} className='nfl-week-week-row'>
+            <div className='nfl-week-week-row-label'>{seas_type}</div>
+            {Array.from({ length: max }, (_, i) => i + 1).map((week) => {
+              const is_selected = type_weeks.includes(week)
+              const btn_label =
+                seas_type === 'POST'
+                  ? nfl_week_identifier.get_postseason_week_label({ week })
+                  : week
+              return (
+                <div
+                  key={week}
+                  className={`nfl-week-toggle-btn${is_selected ? ' active' : ''}`}
+                  onMouseDown={() =>
+                    handle_mouse_down(seas_type, week, is_selected)
+                  }
+                  onMouseEnter={() => handle_mouse_enter(seas_type, week)}>
+                  {btn_label}
+                </div>
+              )
+            })}
+            <div
+              className='nfl-week-toggle-btn'
+              onClick={() => select_all_weeks(seas_type)}>
+              All
+            </div>
+          </div>
+        )
+      })}
+
+      <div className='nfl-week-builder-add'>
+        <div
+          className={`controls-button${has_selection ? '' : ' disabled'}`}
+          onClick={has_selection ? handle_add : undefined}>
+          Add to Selection
+        </div>
+      </div>
+    </div>
+  )
+}
+
+NflWeekBuilder.propTypes = {
+  values: PropTypes.array.isRequired,
+  on_add: PropTypes.func.isRequired
+}
