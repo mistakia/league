@@ -18,6 +18,21 @@ export default function NflWeekBuilder({ values, on_add }) {
   const last_year_index_ref = useRef(null)
   const last_week_index_ref = useRef({})
 
+  const has_any_weeks = SEASON_TYPES.some(
+    (t) => (selected_weeks[t] || []).length > 0
+  )
+
+  const auto_select_reg_weeks = () => {
+    if (has_any_weeks) return
+    const max = nfl_week_identifier.get_max_weeks_for_season_type({
+      seas_type: 'REG'
+    })
+    set_selected_weeks((prev) => ({
+      ...prev,
+      REG: Array.from({ length: max }, (_, i) => i + 1)
+    }))
+  }
+
   const toggle_year = (year, event) => {
     if (event?.shiftKey && last_year_index_ref.current !== null) {
       const last_idx = sorted_years.indexOf(last_year_index_ref.current)
@@ -27,14 +42,19 @@ export default function NflWeekBuilder({ values, on_add }) {
         const end = Math.max(last_idx, curr_idx)
         const range = sorted_years.slice(start, end + 1)
         set_selected_years((prev) => [...new Set([...prev, ...range])])
+        auto_select_reg_weeks()
         last_year_index_ref.current = year
         return
       }
     }
     last_year_index_ref.current = year
+    const is_deselecting = selected_years.includes(year)
     set_selected_years((prev) =>
       prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
     )
+    if (!is_deselecting) {
+      auto_select_reg_weeks()
+    }
   }
 
   const toggle_week = (seas_type, week, event) => {
