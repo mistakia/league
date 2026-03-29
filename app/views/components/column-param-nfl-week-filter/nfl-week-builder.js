@@ -13,7 +13,6 @@ export default function NflWeekBuilder({ values, on_add }) {
   const sorted_years = [...available_years].sort((a, b) => b - a)
 
   const [selected_years, set_selected_years] = useState([])
-  const [selected_types, set_selected_types] = useState([])
   const [selected_weeks, set_selected_weeks] = useState({})
   const drag_ref = useRef(null)
   const last_year_index_ref = useRef(null)
@@ -35,12 +34,6 @@ export default function NflWeekBuilder({ values, on_add }) {
     last_year_index_ref.current = year
     set_selected_years((prev) =>
       prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
-    )
-  }
-
-  const toggle_type = (type) => {
-    set_selected_types((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     )
   }
 
@@ -119,7 +112,7 @@ export default function NflWeekBuilder({ values, on_add }) {
   const handle_add = () => {
     const new_ids = []
     for (const year of selected_years) {
-      for (const seas_type of selected_types) {
+      for (const seas_type of SEASON_TYPES) {
         const weeks = selected_weeks[seas_type] || []
         for (const week of weeks) {
           const id = nfl_week_identifier.format_nfl_week_identifier({ year, seas_type, week })
@@ -132,22 +125,19 @@ export default function NflWeekBuilder({ values, on_add }) {
     if (new_ids.length > 0) {
       on_add(new_ids)
       set_selected_years([])
-      set_selected_types([])
       set_selected_weeks({})
     }
   }
 
   const has_years = selected_years.length > 0
-  const has_types = selected_types.length > 0
-  const has_weeks = selected_types.some(
+  const has_weeks = SEASON_TYPES.some(
     (t) => (selected_weeks[t] || []).length > 0
   )
-  const has_selection = has_years && has_types && has_weeks
+  const has_selection = has_years && has_weeks
 
   const missing_parts = []
   if (!has_years) missing_parts.push('year')
-  if (!has_types) missing_parts.push('type')
-  if (has_types && !has_weeks) missing_parts.push('weeks')
+  if (!has_weeks) missing_parts.push('weeks')
 
   return (
     <div className='nfl-week-filter-section' onMouseUp={handle_mouse_up}>
@@ -161,18 +151,6 @@ export default function NflWeekBuilder({ values, on_add }) {
             className={`nfl-week-toggle-btn${selected_years.includes(year) ? ' active' : ''}`}
             onClick={(e) => toggle_year(year, e)}>
             {year}
-          </div>
-        ))}
-      </div>
-
-      <div className='nfl-week-builder-row'>
-        <div className='nfl-week-builder-label'>Type</div>
-        {SEASON_TYPES.map((type) => (
-          <div
-            key={type}
-            className={`nfl-week-toggle-btn${selected_types.includes(type) ? ' active' : ''}`}
-            onClick={() => toggle_type(type)}>
-            {type}
           </div>
         ))}
       </div>
