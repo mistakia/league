@@ -40,6 +40,7 @@
  *   node scripts/import-full-season.mjs --year 2024 --start-stage plays --skip plays.nflfastr
  */
 
+import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -959,6 +960,13 @@ const run_validation = async ({ year, ignore_cache, collector }) => {
  */
 const run_exports = async ({ year, collector }) => {
   collector.start_stage('exports', { year })
+
+  const data_dir = path.resolve(__dirname, '..', 'data')
+  if (!fs.existsSync(data_dir)) {
+    log(`Skipping exports -- data directory not initialized: ${data_dir}`)
+    collector.end_stage()
+    return
+  }
 
   try {
     await export_data_nfl_plays({ year, collector })

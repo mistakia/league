@@ -11,7 +11,7 @@ import {
 } from '#libs-shared'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const NICKNAMES_CSV_PATH = path.join(__dirname, '..', 'data', 'nicknames.csv')
+const NICKNAMES_CSV_PATH = path.join(__dirname, '..', 'config', 'nicknames.csv')
 
 // Module-level cache for nickname sets
 let nickname_sets = null
