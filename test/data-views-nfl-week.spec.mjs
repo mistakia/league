@@ -58,12 +58,16 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
     })
 
     it('has column_name nfl_week_id', () => {
-      expect(common_column_params.nfl_week_id.column_name).to.equal('nfl_week_id')
+      expect(common_column_params.nfl_week_id.column_name).to.equal(
+        'nfl_week_id'
+      )
     })
 
     it('has values array', () => {
       expect(common_column_params.nfl_week_id.values).to.be.an('array')
-      expect(common_column_params.nfl_week_id.values.length).to.be.greaterThan(0)
+      expect(common_column_params.nfl_week_id.values.length).to.be.greaterThan(
+        0
+      )
     })
 
     it('values are valid nfl_week identifiers', () => {
@@ -82,9 +86,9 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
     })
 
     it('has enable_multi_on_split for year and week', () => {
-      expect(common_column_params.nfl_week_id.enable_multi_on_split).to.deep.equal(
-        ['year', 'week']
-      )
+      expect(
+        common_column_params.nfl_week_id.enable_multi_on_split
+      ).to.deep.equal(['year', 'week'])
     })
   })
 
@@ -337,9 +341,7 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
 
   describe('common_column_params.nfl_week_id default_value', function () {
     it('has a dynamic default_value for current year REG weeks', () => {
-      expect(common_column_params.nfl_week_id).to.have.property(
-        'default_value'
-      )
+      expect(common_column_params.nfl_week_id).to.have.property('default_value')
       expect(common_column_params.nfl_week_id.default_value).to.deep.equal({
         dynamic_type: 'current_year_reg_weeks'
       })

@@ -6,67 +6,37 @@
       {
         "column_id": "player_receiving_first_down_share_from_plays",
         "params": {
-          "year": [
-            2023,
-            2022,
-            2021,
-            2020,
-            2019,
-            2018,
-            2017
-          ]
+          "year": [2023, 2022, 2021, 2020, 2019, 2018, 2017]
         }
       },
       {
         "column_id": "player_fantasy_points_per_game_from_seasonlogs",
         "params": {
-          "year": [
-            2023,
-            2022,
-            2021,
-            2020,
-            2019,
-            2018,
-            2017
-          ]
+          "year": [2023, 2022, 2021, 2020, 2019, 2018, 2017]
         }
       },
       {
         "column_id": "player_espn_overall_score",
         "params": {
-          "year": [
-            2023,
-            2022,
-            2021,
-            2020,
-            2019,
-            2018,
-            2017
-          ]
+          "year": [2023, 2022, 2021, 2020, 2019, 2018, 2017]
         }
       },
       {
         "column_id": "player_fantasy_points_per_game_from_seasonlogs",
         "params": {
-          "year_offset": [
-            -3
-          ]
+          "year_offset": [-3]
         }
       },
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "year_offset": [
-            1
-          ]
+          "year_offset": [1]
         }
       },
       {
         "column_id": "player_rush_yards_from_plays",
         "params": {
-          "year_offset": [
-            1
-          ]
+          "year_offset": [1]
         }
       }
     ],
@@ -81,9 +51,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       },
       {
         "column_id": "player_targets_from_plays",
@@ -96,21 +64,11 @@
         "value": "0"
       }
     ],
-    "prefix_columns": [
-      "player_name"
-    ],
-    "splits": [
-      "year"
-    ]
+    "prefix_columns": ["player_name"],
+    "splits": ["year"]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2017,2018,2019,2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t335663aa03c109b219d83d28dc9b4e11\" as (select COALESCE(trg_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"year\", COALESCE(trg_pid) having SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) >= '55'), \"t423257ea00ed1a9545f48158ff6af665\" as (select \"pg\".\"pid\", ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END), 0), 2) as recv_first_down_share_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) group by \"pg\".\"pid\", \"nfl_plays\".\"year\"), \"ta6e9d0cba1586e7c96bcc9f06277651b\" as (select COALESCE(trg_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"year\", COALESCE(trg_pid)), \"t80f9f7579fb3823f33e33cc215c65164\" as (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"year\", SUM(rush_yds) as rush_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"year\", COALESCE(bc_pid)) select \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\", player.fname, player.lname, \"player_seasonlogs\".\"espn_overall_score\" AS \"espn_overall_score_0\", \"t423257ea00ed1a9545f48158ff6af665\".\"recv_first_down_share_from_plays\" AS \"recv_first_down_share_from_plays_0\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", \"t69a82a5679e0babfe7e409feb1f22d17\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_1\", \"ta6e9d0cba1586e7c96bcc9f06277651b\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", \"t80f9f7579fb3823f33e33cc215c65164\".\"rush_yds_from_plays\" AS \"rush_yds_from_plays_0\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"tbc0f47cfe59a1398fb0e9c78eb43bba3\" inner join \"player\" on \"player\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" inner join \"t335663aa03c109b219d83d28dc9b4e11\" on \"t335663aa03c109b219d83d28dc9b4e11\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and t335663aa03c109b219d83d28dc9b4e11.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year inner join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and player_seasonlogs.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year and \"player_seasonlogs\".\"seas_type\" = 'REG' left join \"t423257ea00ed1a9545f48158ff6af665\" on \"t423257ea00ed1a9545f48158ff6af665\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and t423257ea00ed1a9545f48158ff6af665.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year and t423257ea00ed1a9545f48158ff6af665.year IN (2023,2022,2021,2020,2019,2018,2017) left join \"scoring_format_player_seasonlogs\" as \"t69a82a5679e0babfe7e409feb1f22d17\" on \"t69a82a5679e0babfe7e409feb1f22d17\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and t69a82a5679e0babfe7e409feb1f22d17.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year + -3 and t69a82a5679e0babfe7e409feb1f22d17.scoring_format_hash = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' left join \"ta6e9d0cba1586e7c96bcc9f06277651b\" on \"ta6e9d0cba1586e7c96bcc9f06277651b\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and ta6e9d0cba1586e7c96bcc9f06277651b.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year + 1 left join \"t80f9f7579fb3823f33e33cc215c65164\" on \"t80f9f7579fb3823f33e33cc215c65164\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and t80f9f7579fb3823f33e33cc215c65164.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year + 1 where \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' and player.pos IN ('WR') and player_seasonlogs.espn_overall_score > '0' group by player.fname, player.lname, \"player_seasonlogs\".\"espn_overall_score\", \"t423257ea00ed1a9545f48158ff6af665\".\"recv_first_down_share_from_plays\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"points_per_game\", \"t69a82a5679e0babfe7e409feb1f22d17\".\"points_per_game\", \"ta6e9d0cba1586e7c96bcc9f06277651b\".\"rec_yds_from_plays\", \"t80f9f7579fb3823f33e33cc215c65164\".\"rush_yds_from_plays\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 6 DESC NULLS LAST, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" asc limit 500",
-  "tags": [
-    "filters",
-    "parameters",
-    "sorting",
-    "cte",
-    "joins"
-  ],
+  "tags": ["filters", "parameters", "sorting", "cte", "joins"],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "six_hours",

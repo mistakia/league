@@ -208,7 +208,9 @@ const create_team_share_stat = ({
     for (const split of splits) {
       if (data_views_constants.split_params.includes(split)) {
         const column_param_definition = nfl_plays_column_params[split]
-        const table_name = (column_param_definition && column_param_definition.table) || 'nfl_plays'
+        const table_name =
+          (column_param_definition && column_param_definition.table) ||
+          'nfl_plays'
         const split_statement = `${table_name}.${split}`
         with_query.select(split_statement)
         with_query.groupBy(split_statement)

@@ -71,7 +71,6 @@ export const get_all_nfl_week_identifiers = () => {
   return identifiers
 }
 
-
 export const apply_year_offset_to_nfl_weeks = ({ nfl_weeks, year_offset }) => {
   if (!year_offset || !nfl_weeks || !nfl_weeks.length) return nfl_weeks
 

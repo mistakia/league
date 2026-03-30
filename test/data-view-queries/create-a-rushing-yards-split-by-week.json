@@ -2,45 +2,25 @@
   "name": "should create a rushing yards split by week",
   "description": "Test case for should create a rushing yards split by week",
   "request": {
-    "splits": [
-      "year",
-      "week"
-    ],
-    "prefix_columns": [
-      "player_name"
-    ],
+    "splits": ["year", "week"],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_rush_yards_from_plays",
         "params": {
-          "year": [
-            2020,
-            2021,
-            2022,
-            2023
-          ]
+          "year": [2020, 2021, 2022, 2023]
         }
       },
       {
         "column_id": "player_week_projected_rush_yds",
         "params": {
-          "year": [
-            2020,
-            2021,
-            2022,
-            2023
-          ]
+          "year": [2020, 2021, 2022, 2023]
         }
       },
       {
         "column_id": "team_rush_yards_from_plays",
         "params": {
-          "year": [
-            2020,
-            2021,
-            2022,
-            2023
-          ]
+          "year": [2020, 2021, 2022, 2023]
         }
       }
     ],
@@ -52,12 +32,7 @@
     ]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year), \"ta558dd0535371dc6c6f6ee436d18bbec\" as (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"week\", \"nfl_plays\".\"year\", SUM(rush_yds) as rush_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"week\", \"nfl_plays\".\"year\", COALESCE(bc_pid)), \"t2f399e85c6db881110a16375aa52c279\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(rush_yds) AS team_rush_yds_from_plays, \"nfl_plays\".\"year\", \"nfl_plays\".\"week\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\", \"nfl_plays\".\"week\"), \"t2f399e85c6db881110a16375aa52c279_team_stats\" as (select \"t2f399e85c6db881110a16375aa52c279\".\"nfl_team\", sum(t2f399e85c6db881110a16375aa52c279.team_rush_yds_from_plays) as team_rush_yds_from_plays, \"t2f399e85c6db881110a16375aa52c279\".\"year\", \"t2f399e85c6db881110a16375aa52c279\".\"week\" from \"t2f399e85c6db881110a16375aa52c279\" group by \"t2f399e85c6db881110a16375aa52c279\".\"nfl_team\", \"t2f399e85c6db881110a16375aa52c279\".\"year\", \"t2f399e85c6db881110a16375aa52c279\".\"week\") select \"player\".\"pid\", player.fname, player.lname, \"ta558dd0535371dc6c6f6ee436d18bbec\".\"rush_yds_from_plays\" AS \"rush_yds_from_plays_0\", \"t287c2fe45da938bac75fe7035039000b\".\"ry\" AS \"week_projected_rush_yds_0\", \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"team_rush_yds_from_plays\" AS \"team_rush_yds_from_plays_0\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" left join \"ta558dd0535371dc6c6f6ee436d18bbec\" on \"ta558dd0535371dc6c6f6ee436d18bbec\".\"pid\" = \"player\".\"pid\" and ta558dd0535371dc6c6f6ee436d18bbec.year = player_years.year and ta558dd0535371dc6c6f6ee436d18bbec.year IN (2020,2021,2022,2023) and ta558dd0535371dc6c6f6ee436d18bbec.week = player_years_weeks.week left join \"projections_index\" as \"t287c2fe45da938bac75fe7035039000b\" on \"t287c2fe45da938bac75fe7035039000b\".\"pid\" = \"player\".\"pid\" and t287c2fe45da938bac75fe7035039000b.year = player_years.year and t287c2fe45da938bac75fe7035039000b.year IN (2020,2021,2022,2023) and t287c2fe45da938bac75fe7035039000b.week = player_years_weeks.week and \"t287c2fe45da938bac75fe7035039000b\".\"sourceid\" = 18 and \"t287c2fe45da938bac75fe7035039000b\".\"seas_type\" = 'REG' left join \"t2f399e85c6db881110a16375aa52c279_team_stats\" on \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" and \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"week\" = \"player_years_weeks\".\"week\" and t2f399e85c6db881110a16375aa52c279_team_stats.year = player_years.year and t2f399e85c6db881110a16375aa52c279_team_stats.year IN (2020,2021,2022,2023) and t2f399e85c6db881110a16375aa52c279_team_stats.week = player_years_weeks.week group by player.fname, player.lname, \"ta558dd0535371dc6c6f6ee436d18bbec\".\"rush_yds_from_plays\", \"t287c2fe45da938bac75fe7035039000b\".\"ry\", \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"team_rush_yds_from_plays\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "parameters",
-    "sorting",
-    "cte",
-    "joins"
-  ],
+  "tags": ["parameters", "sorting", "cte", "joins"],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "one_week",

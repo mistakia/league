@@ -247,7 +247,7 @@ POST /data-views/search
 
 **NFL Week Parameter** (weekly column definitions):
 
-- `nfl_week_id`: Composite identifier replacing separate year/week/seas_type. Format: `[YEAR]_[SEAS_TYPE]_WEEK_[WEEK]` (e.g., `2024_REG_WEEK_5`). Maps to `nfl_week_id` column in database via `column_name: 'nfl_week_id'` property. Eliminates cartesian product problem when querying specific weeks across different years and season types. Values cover all years from 2000 to current season.
+- `nfl_week_id`: Composite identifier replacing separate year/week/seas*type. Format: `[YEAR]*[SEAS_TYPE]_WEEK_[WEEK]`(e.g.,`2024_REG_WEEK_5`). Maps to `nfl_week_id`column in database via`column_name: 'nfl_week_id'` property. Eliminates cartesian product problem when querying specific weeks across different years and season types. Values cover all years from 2000 to current season.
 - `year_offset`: For year calculations (e.g., previous season comparisons). Applied during preprocessing to expand the nfl_week_id array.
 
 **Dynamic nfl_week_id Values** (resolved at query time):

@@ -43,9 +43,7 @@ export default function ColumnParamNflWeekFilter({
 
   const existing_dynamic = useMemo(
     () =>
-      (selected_param_values || []).filter(
-        (v) => v && typeof v === 'object'
-      ),
+      (selected_param_values || []).filter((v) => v && typeof v === 'object'),
     [selected_param_values]
   )
 
@@ -113,7 +111,9 @@ export default function ColumnParamNflWeekFilter({
     )
   }
 
-  const groups = nfl_week_identifier.group_nfl_weeks({ nfl_weeks: static_selected })
+  const groups = nfl_week_identifier.group_nfl_weeks({
+    nfl_weeks: static_selected
+  })
   const group_count = Object.keys(groups).length
   const static_count = static_selected.length
   const dynamic_count = Object.keys(dynamic_values).length
@@ -155,7 +155,8 @@ export default function ColumnParamNflWeekFilter({
         </div>
         <div
           className='controls-button close'
-          onClick={() => set_trigger_close((prev) => !prev)}>
+          onClick={() => set_trigger_close((prev) => !prev)}
+        >
           Close
         </div>
       </div>
@@ -178,7 +179,8 @@ export default function ColumnParamNflWeekFilter({
                 className={`table-filter-item-dropdown-item${is_selected ? ' selected' : ''}`}
                 onClick={() =>
                   handle_dynamic_toggle(dv.dynamic_type, dv.default_value)
-                }>
+                }
+              >
                 <Checkbox checked={Boolean(is_selected)} size='small' />
                 <div className='table-filter-item-dropdown-item-label'>
                   {dv.label}

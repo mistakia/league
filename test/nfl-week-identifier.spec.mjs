@@ -7,7 +7,6 @@ import {
   format_nfl_week_identifier,
   validate_nfl_week_identifier,
   get_nfl_week_identifiers_for_year,
-
   apply_year_offset_to_nfl_weeks,
   decompose_nfl_weeks
 } from '#libs-shared/nfl-week-identifier.mjs'
@@ -170,7 +169,6 @@ describe('LIBS-SHARED nfl-week-identifier', function () {
       expect(result).to.have.length(4)
     })
   })
-
 
   describe('apply_year_offset_to_nfl_weeks', function () {
     it('applies single offset value', () => {

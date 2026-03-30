@@ -6,22 +6,12 @@
       {
         "column_id": "player_targets_from_plays",
         "params": {
-          "rate_type": [
-            "per_player_pass_attempt"
-          ],
-          "year": [
-            2023
-          ],
+          "rate_type": ["per_player_pass_attempt"],
+          "year": [2023],
           "rate_type_column_params": {
-            "targeted_receiver_separation": [
-              "OPEN",
-              "WIDE_OPEN"
-            ]
+            "targeted_receiver_separation": ["OPEN", "WIDE_OPEN"]
           },
-          "targeted_receiver_separation": [
-            "OPEN",
-            "WIDE_OPEN"
-          ]
+          "targeted_receiver_separation": ["OPEN", "WIDE_OPEN"]
         }
       }
     ],

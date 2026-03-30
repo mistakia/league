@@ -6,25 +6,19 @@
       {
         "column_id": "player_yards_created_from_plays",
         "params": {
-          "year": [
-            2024
-          ]
+          "year": [2024]
         }
       },
       {
         "column_id": "player_yards_blocked_from_plays",
         "params": {
-          "year": [
-            2024
-          ]
+          "year": [2024]
         }
       },
       {
         "column_id": "team_yards_blocked_from_plays",
         "params": {
-          "year": [
-            2024
-          ]
+          "year": [2024]
         }
       }
     ],
@@ -36,13 +30,6 @@
     ]
   },
   "expected_query": "with \"t5942eca62be402b50af32fb6a557197c\" as (select COALESCE(bc_pid, trg_pid) as pid, SUM(yards_created) as yards_created_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by COALESCE(bc_pid, trg_pid)), \"ta558dd0535371dc6c6f6ee436d18bbec\" as (select COALESCE(bc_pid) as pid, SUM(yards_blocked) as yards_blocked_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by COALESCE(bc_pid)), \"t2f399e85c6db881110a16375aa52c279\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(yards_blocked) AS team_yards_blocked_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"off\"), \"t2f399e85c6db881110a16375aa52c279_team_stats\" as (select \"t2f399e85c6db881110a16375aa52c279\".\"nfl_team\", sum(t2f399e85c6db881110a16375aa52c279.team_yards_blocked_from_plays) as team_yards_blocked_from_plays from \"t2f399e85c6db881110a16375aa52c279\" group by \"t2f399e85c6db881110a16375aa52c279\".\"nfl_team\") select \"player\".\"pid\", \"t5942eca62be402b50af32fb6a557197c\".\"yards_created_from_plays\" AS \"yards_created_from_plays_0\", \"ta558dd0535371dc6c6f6ee436d18bbec\".\"yards_blocked_from_plays\" AS \"yards_blocked_from_plays_0\", \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"team_yards_blocked_from_plays\" AS \"team_yards_blocked_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t5942eca62be402b50af32fb6a557197c\" on \"t5942eca62be402b50af32fb6a557197c\".\"pid\" = \"player\".\"pid\" left join \"ta558dd0535371dc6c6f6ee436d18bbec\" on \"ta558dd0535371dc6c6f6ee436d18bbec\".\"pid\" = \"player\".\"pid\" left join \"t2f399e85c6db881110a16375aa52c279_team_stats\" on \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" group by \"t5942eca62be402b50af32fb6a557197c\".\"yards_created_from_plays\", \"ta558dd0535371dc6c6f6ee436d18bbec\".\"yards_blocked_from_plays\", \"t2f399e85c6db881110a16375aa52c279_team_stats\".\"team_yards_blocked_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "player",
-    "team",
-    "plays",
-    "parameters",
-    "sorting",
-    "cte"
-  ],
+  "tags": ["player", "team", "plays", "parameters", "sorting", "cte"],
   "timeout_ms": 40000
 }

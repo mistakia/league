@@ -27,7 +27,9 @@ export default function NflWeekSelectionSummary({
   const grouped_values = useMemo(() => {
     const result = {}
     for (const v of values) {
-      const parsed = nfl_week_identifier.parse_nfl_week_identifier({ identifier: v })
+      const parsed = nfl_week_identifier.parse_nfl_week_identifier({
+        identifier: v
+      })
       if (!parsed) continue
       if (!result[parsed.year]) result[parsed.year] = []
       result[parsed.year].push(v)
@@ -57,7 +59,9 @@ export default function NflWeekSelectionSummary({
         const range_label =
           seas_type === 'POST'
             ? weeks
-                .map((w) => nfl_week_identifier.get_postseason_week_label({ week: w }))
+                .map((w) =>
+                  nfl_week_identifier.get_postseason_week_label({ week: w })
+                )
                 .join(', ')
             : nfl_week_identifier.format_week_ranges({ weeks })
 
@@ -68,7 +72,8 @@ export default function NflWeekSelectionSummary({
             </div>
             <div
               className='nfl-week-summary-group-remove'
-              onClick={() => on_remove_group(key)}>
+              onClick={() => on_remove_group(key)}
+            >
               Remove
             </div>
           </div>
@@ -77,7 +82,8 @@ export default function NflWeekSelectionSummary({
 
       <div
         className='nfl-week-full-list-toggle'
-        onClick={() => set_show_full_list(!show_full_list)}>
+        onClick={() => set_show_full_list(!show_full_list)}
+      >
         {show_full_list ? 'Hide full list' : 'Show full list'}
       </div>
 
@@ -92,7 +98,8 @@ export default function NflWeekSelectionSummary({
                   <div
                     key={value}
                     className='nfl-week-full-list-item'
-                    onClick={() => on_toggle_value(value)}>
+                    onClick={() => on_toggle_value(value)}
+                  >
                     <Checkbox checked={is_selected} size='small' />
                     <span>{value}</span>
                   </div>

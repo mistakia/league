@@ -2,12 +2,8 @@
   "name": "should create a splits query with espn open scores",
   "description": "Test case for should create a splits query with espn open scores",
   "request": {
-    "splits": [
-      "year"
-    ],
-    "prefix_columns": [
-      "player_name"
-    ],
+    "splits": ["year"],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_espn_open_score"
@@ -24,11 +20,7 @@
     ]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"tf7313f6d444cf837c99c37628018140f\" as (select \"pg\".\"pid\", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) group by \"pg\".\"pid\", \"nfl_plays\".\"year\") select \"player\".\"pid\", player.fname, player.lname, \"player_seasonlogs\".\"espn_open_score\" AS \"espn_open_score_0\", \"tf7313f6d444cf837c99c37628018140f\".\"weighted_opp_rating_from_plays\" AS \"weighted_opp_rating_from_plays_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"player\".\"pid\" and player_seasonlogs.year = player_years.year and \"player_seasonlogs\".\"seas_type\" = 'REG' left join \"tf7313f6d444cf837c99c37628018140f\" on \"tf7313f6d444cf837c99c37628018140f\".\"pid\" = \"player\".\"pid\" and tf7313f6d444cf837c99c37628018140f.year = player_years.year group by player.fname, player.lname, \"player_seasonlogs\".\"espn_open_score\", \"tf7313f6d444cf837c99c37628018140f\".\"weighted_opp_rating_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "sorting",
-    "cte",
-    "joins"
-  ],
+  "tags": ["sorting", "cte", "joins"],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "six_hours",

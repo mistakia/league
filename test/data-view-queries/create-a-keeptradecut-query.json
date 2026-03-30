@@ -2,9 +2,7 @@
   "name": "should create a keeptradecut query",
   "description": "Test case for should create a keeptradecut query",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_keeptradecut_value"
@@ -24,10 +22,7 @@
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "career_year": [
-            1,
-            1
-          ]
+          "career_year": [1, 1]
         }
       }
     ],
@@ -41,9 +36,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       },
       {
         "column_id": "player_keeptradecut_value",
@@ -53,12 +46,7 @@
     ]
   },
   "expected_query": "with \"tcb537b13ee1bcd23b68b4d81c66ecc55\" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" inner join \"player_seasonlogs\" on (\"nfl_plays\".\"trg_pid\" = \"player_seasonlogs\".\"pid\") and \"nfl_plays\".\"year\" = \"player_seasonlogs\".\"year\" and \"nfl_plays\".\"seas_type\" = \"player_seasonlogs\".\"seas_type\" where not \"play_type\" = 'NOPL' and \"player_seasonlogs\".\"career_year\" between 1 and 1 group by COALESCE(trg_pid)) select \"player\".\"pid\", player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\" AS \"player_keeptradecut_value_0\", \"tc1217193c5070a89efdea71626accdb4\".\"v\" AS \"player_keeptradecut_value_1\", \"te556c345bd166da4da43d4b959f92559\".\"v\" AS \"player_keeptradecut_overall_rank_0\", \"t6f65ccf9e546ca490414b8ef9d2e4338\".\"v\" AS \"player_keeptradecut_position_rank_0\", \"tcb537b13ee1bcd23b68b4d81c66ecc55\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", \"player\".\"pos\" from \"player\" inner join \"keeptradecut_rankings\" as \"tf2cba0496d67b9a09be0654ea0516e7c\" on \"tf2cba0496d67b9a09be0654ea0516e7c\".\"pid\" = \"player\".\"pid\" and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"qb\" = 2 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"type\" = 1 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"d\" = (select MAX(d) from \"keeptradecut_rankings\" where \"pid\" = player.pid and \"qb\" = 2 and \"type\" = 1) left join \"keeptradecut_rankings\" as \"tc1217193c5070a89efdea71626accdb4\" on \"tc1217193c5070a89efdea71626accdb4\".\"pid\" = \"player\".\"pid\" and \"tc1217193c5070a89efdea71626accdb4\".\"qb\" = 2 and \"tc1217193c5070a89efdea71626accdb4\".\"type\" = 1 and \"tc1217193c5070a89efdea71626accdb4\".\"d\" = EXTRACT(EPOCH FROM (to_timestamp('2022-01-01', 'YYYY-MM-DD') + interval '0 year') AT TIME ZONE 'UTC')::integer left join \"keeptradecut_rankings\" as \"te556c345bd166da4da43d4b959f92559\" on \"te556c345bd166da4da43d4b959f92559\".\"pid\" = \"player\".\"pid\" and \"te556c345bd166da4da43d4b959f92559\".\"qb\" = 2 and \"te556c345bd166da4da43d4b959f92559\".\"type\" = 3 and \"te556c345bd166da4da43d4b959f92559\".\"d\" = (select MAX(d) from \"keeptradecut_rankings\" where \"pid\" = player.pid and \"qb\" = 2 and \"type\" = 3) left join \"keeptradecut_rankings\" as \"t6f65ccf9e546ca490414b8ef9d2e4338\" on \"t6f65ccf9e546ca490414b8ef9d2e4338\".\"pid\" = \"player\".\"pid\" and \"t6f65ccf9e546ca490414b8ef9d2e4338\".\"qb\" = 2 and \"t6f65ccf9e546ca490414b8ef9d2e4338\".\"type\" = 2 and \"t6f65ccf9e546ca490414b8ef9d2e4338\".\"d\" = (select MAX(d) from \"keeptradecut_rankings\" where \"pid\" = player.pid and \"qb\" = 2 and \"type\" = 2) left join \"tcb537b13ee1bcd23b68b4d81c66ecc55\" on \"tcb537b13ee1bcd23b68b4d81c66ecc55\".\"pid\" = \"player\".\"pid\" where player.pos IN ('WR') and tf2cba0496d67b9a09be0654ea0516e7c.v >= '5000' group by player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\", \"tc1217193c5070a89efdea71626accdb4\".\"v\", \"te556c345bd166da4da43d4b959f92559\".\"v\", \"t6f65ccf9e546ca490414b8ef9d2e4338\".\"v\", \"tcb537b13ee1bcd23b68b4d81c66ecc55\".\"rec_yds_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 6 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "filters",
-    "parameters",
-    "sorting",
-    "cte"
-  ],
+  "tags": ["filters", "parameters", "sorting", "cte"],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "six_hours",

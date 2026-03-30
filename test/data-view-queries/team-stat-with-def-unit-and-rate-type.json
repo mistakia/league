@@ -20,13 +20,6 @@
     ]
   },
   "expected_query": "with \"t2656aa6e1ceff4cbb0f235fae2cb44e4\" as (select \"nfl_plays\".\"def\", COUNT(*) as rate_type_total_count from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" = 'PASS' group by \"nfl_plays\".\"def\"), \"t3d124e1d3a0de772b11da4a40e7dc6e1\" as (select \"nfl_plays\".\"def\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' group by \"nfl_plays\".\"def\"), \"t3d124e1d3a0de772b11da4a40e7dc6e1_team_stats\" as (select \"t3d124e1d3a0de772b11da4a40e7dc6e1\".\"nfl_team\", sum(t3d124e1d3a0de772b11da4a40e7dc6e1.team_pass_yds_from_plays) as team_pass_yds_from_plays from \"t3d124e1d3a0de772b11da4a40e7dc6e1\" group by \"t3d124e1d3a0de772b11da4a40e7dc6e1\".\"nfl_team\") select \"player\".\"pid\", CAST(t3d124e1d3a0de772b11da4a40e7dc6e1_team_stats.team_pass_yds_from_plays AS DECIMAL) / NULLIF(CAST(t2656aa6e1ceff4cbb0f235fae2cb44e4.rate_type_total_count AS DECIMAL), 0) AS \"team_pass_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t2656aa6e1ceff4cbb0f235fae2cb44e4\" on \"t2656aa6e1ceff4cbb0f235fae2cb44e4\".\"def\" = \"player\".\"current_nfl_team\" left join \"t3d124e1d3a0de772b11da4a40e7dc6e1_team_stats\" on \"t3d124e1d3a0de772b11da4a40e7dc6e1_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" group by \"t3d124e1d3a0de772b11da4a40e7dc6e1_team_stats\".\"team_pass_yds_from_plays\", t2656aa6e1ceff4cbb0f235fae2cb44e4.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "team",
-    "stats",
-    "parameters",
-    "sorting",
-    "rate_type",
-    "cte"
-  ],
+  "tags": ["team", "stats", "parameters", "sorting", "rate_type", "cte"],
   "timeout_ms": 40000
 }
