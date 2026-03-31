@@ -6,7 +6,10 @@ import {
   nfl_season_types
 } from '#constants'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { get_all_nfl_week_identifiers } from './nfl-week-identifier.mjs'
+import {
+  get_all_nfl_week_identifiers,
+  format_nfl_week_param_values
+} from './nfl-week-identifier.mjs'
 
 export const career_year = {
   data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -166,6 +169,32 @@ export const nfl_week_id = {
   values: get_all_nfl_week_identifiers(),
   default_value: { dynamic_type: 'current_year_reg_weeks' },
   enable_multi_on_split: ['year', 'week'],
+  format_param_values: (param_values, param_def) => {
+    const static_values = param_values.filter(
+      (v) => typeof v === 'string'
+    )
+    const dynamic_values = param_values.filter(
+      (v) => v && typeof v === 'object' && v.dynamic_type
+    )
+
+    const parts = []
+
+    if (dynamic_values.length) {
+      for (const dv of dynamic_values) {
+        const def = param_def?.dynamic_values?.find(
+          (d) => d.dynamic_type === dv.dynamic_type
+        )
+        const label = def?.label || dv.dynamic_type
+        parts.push(label + (dv.value ? ` (${dv.value})` : ''))
+      }
+    }
+
+    if (static_values.length) {
+      parts.push(format_nfl_week_param_values({ nfl_weeks: static_values }))
+    }
+
+    return parts.join(', ')
+  },
   dynamic_values: [
     {
       dynamic_type: 'current_year_reg_weeks',

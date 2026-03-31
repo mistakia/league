@@ -15,13 +15,9 @@ export default function NflWeekSelectionSummary({
   const [show_full_list, set_show_full_list] = useState(false)
 
   const sorted_group_keys = useMemo(() => {
-    return Object.keys(groups).sort((a, b) => {
-      const [ya, ta] = a.split('_')
-      const [yb, tb] = b.split('_')
-      if (ya !== yb) return parseInt(yb, 10) - parseInt(ya, 10)
-      const type_order = { PRE: 0, REG: 1, POST: 2 }
-      return (type_order[ta] ?? 0) - (type_order[tb] ?? 0)
-    })
+    return Object.keys(groups).sort(
+      nfl_week_identifier.compare_nfl_week_group_keys
+    )
   }, [groups])
 
   const grouped_values = useMemo(() => {

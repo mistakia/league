@@ -150,6 +150,35 @@ export const get_max_weeks_for_season_type = ({ seas_type }) => {
   return range ? range.max : 0
 }
 
+export const compare_nfl_week_group_keys = (a, b) => {
+  const [ya, ta] = a.split('_')
+  const [yb, tb] = b.split('_')
+  if (ya !== yb) return parseInt(yb, 10) - parseInt(ya, 10)
+  const type_order = { PRE: 0, REG: 1, POST: 2 }
+  return (type_order[ta] ?? 0) - (type_order[tb] ?? 0)
+}
+
+export const format_nfl_week_param_values = ({ nfl_weeks }) => {
+  if (!nfl_weeks || nfl_weeks.length === 0) return ''
+
+  const groups = group_nfl_weeks({ nfl_weeks })
+  const sorted_keys = Object.keys(groups).sort(compare_nfl_week_group_keys)
+
+  return sorted_keys
+    .map((key) => {
+      const weeks = groups[key]
+      const [year, seas_type] = key.split('_')
+      const range_label =
+        seas_type === 'POST'
+          ? weeks
+              .map((w) => get_postseason_week_label({ week: w }))
+              .join(', ')
+          : format_week_ranges({ weeks })
+      return `${year} ${seas_type}: ${range_label}`
+    })
+    .join(', ')
+}
+
 export const decompose_nfl_weeks = ({ nfl_weeks }) => {
   const years = new Set()
   const weeks = new Set()
