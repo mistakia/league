@@ -35,7 +35,7 @@ const convert_field_position_to_ydl_100 = (field_position) => {
 const VALID_COVERAGE_TYPES = new Set([
   'COVER_0', 'COVER_1', 'COVER_2', 'COVER_2_MAN',
   'COVER_3', 'COVER_4', 'COVER_5', 'COVER_6',
-  'COVER_9', 'COMBINATION', 'REDZONE'
+  'COVER_9', 'COMBINATION'
 ])
 
 const normalize_coverage_type = (value) => {
