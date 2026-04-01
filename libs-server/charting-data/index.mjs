@@ -4,8 +4,8 @@ import { fetch_with_retry } from '#libs-server'
 
 const log = debug('charting-data')
 
-const DEFAULT_REQUEST_DELAY_MS = 3000
-const DEFAULT_JITTER_MS = 2000
+const DEFAULT_REQUEST_DELAY_MS = 20000
+const DEFAULT_JITTER_MAX_MS = 20000
 const MAX_CONSECUTIVE_FAILURES = 5
 const CIRCUIT_BREAKER_COOLDOWN_MS = 60 * 1000
 
@@ -58,7 +58,7 @@ class ChartingDataClient {
     if (!this.last_request_at) return
 
     const elapsed = Date.now() - this.last_request_at
-    const jitter = Math.random() * DEFAULT_JITTER_MS
+    const jitter = Math.random() * DEFAULT_JITTER_MAX_MS
     const target_delay = this.request_delay_ms + jitter
 
     if (elapsed < target_delay) {
