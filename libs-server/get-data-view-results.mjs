@@ -1841,9 +1841,9 @@ export default async function ({
     )
 
     if (timeout) {
-      // Execute count query with timeout
-      const count_timeout_query = `SET LOCAL statement_timeout = ${timeout};`
-      const full_count_query = `${count_timeout_query} ${count_wrapper_query.toString()};`
+      // Execute count query with timeout and elevated work_mem for complex aggregations
+      const count_session_settings = `SET LOCAL statement_timeout = ${timeout}; SET LOCAL work_mem = '1GB';`
+      const full_count_query = `${count_session_settings} ${count_wrapper_query.toString()};`
       const count_response = await db.raw(full_count_query)
       total_count = parseInt(count_response[1].rows[0].total_count, 10)
     } else {
@@ -1855,8 +1855,8 @@ export default async function ({
 
   if (timeout) {
     const query_string = query.toString()
-    const timeout_query = `SET LOCAL statement_timeout = ${timeout};`
-    const full_query = `${timeout_query} ${query_string};`
+    const session_settings = `SET LOCAL statement_timeout = ${timeout}; SET LOCAL work_mem = '1GB';`
+    const full_query = `${session_settings} ${query_string};`
 
     const response = await db.raw(full_query)
     const data_view_results = response[1].rows
