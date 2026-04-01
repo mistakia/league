@@ -1845,11 +1845,12 @@ export default async function ({
       const count_session_settings = `SET LOCAL statement_timeout = ${timeout}; SET LOCAL work_mem = '1GB';`
       const full_count_query = `${count_session_settings} ${count_wrapper_query.toString()};`
       const count_response = await db.raw(full_count_query)
-      total_count = parseInt(count_response[1].rows[0].total_count, 10)
+      total_count = parseInt(count_response[2].rows[0].total_count, 10)
     } else {
-      // Execute count query
-      const count_result = await count_wrapper_query
-      total_count = parseInt(count_result.rows[0].total_count, 10)
+      // Execute count query with elevated work_mem
+      const full_count_query = `SET LOCAL work_mem = '1GB'; ${count_wrapper_query.toString()};`
+      const count_response = await db.raw(full_count_query)
+      total_count = parseInt(count_response[1].rows[0].total_count, 10)
     }
   }
 
@@ -1859,7 +1860,7 @@ export default async function ({
     const full_query = `${session_settings} ${query_string};`
 
     const response = await db.raw(full_query)
-    const data_view_results = response[1].rows
+    const data_view_results = response[2].rows
 
     return {
       data_view_results,
@@ -1871,7 +1872,10 @@ export default async function ({
     }
   }
 
-  const data_view_results = await query
+  const query_string = query.toString()
+  const full_query = `SET LOCAL work_mem = '1GB'; ${query_string};`
+  const response = await db.raw(full_query)
+  const data_view_results = response[1].rows
 
   return {
     data_view_results,
