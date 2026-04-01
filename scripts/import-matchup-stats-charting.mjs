@@ -1,0 +1,295 @@
+import debug from 'debug'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
+import db from '#db'
+import { is_main, report_job } from '#libs-server'
+import { current_season } from '#constants'
+import { job_types } from '#libs-shared/job-constants.mjs'
+import { ChartingDataClient } from '#libs-server/charting-data/index.mjs'
+import { match_charting_player } from '#libs-server/charting-data/player-matching.mjs'
+import { preload_active_players } from '#libs-server/player-cache.mjs'
+
+const log = debug('import-matchup-stats-charting')
+
+async function get_games_for_import({ year, week, esbid, seas_type }) {
+  const query = db('nfl_games')
+    .select('esbid', 'shieldid', 'year', 'week', 'seas_type', 'h', 'v')
+    .whereNotNull('shieldid')
+
+  if (esbid) {
+    query.where('esbid', esbid)
+  } else {
+    query.where('year', year)
+    if (week) {
+      query.where('week', week)
+    }
+    if (seas_type) {
+      query.where('seas_type', seas_type)
+    }
+  }
+
+  query.orderBy(['year', 'week', 'esbid'])
+  return query
+}
+
+function map_matchup_to_db_fields(matchup) {
+  const result = {}
+
+  // Map receiving matchup fields
+  if (matchup.routesRun !== undefined) result.receiving_routes_run = matchup.routesRun
+  if (matchup.targets !== undefined) result.receiving_targets = matchup.targets
+  if (matchup.receptions !== undefined) result.receiving_receptions = matchup.receptions
+  if (matchup.receivingYards !== undefined) result.receiving_yards = matchup.receivingYards
+  if (matchup.touchdowns !== undefined) result.receiving_touchdowns = matchup.touchdowns
+  if (matchup.yardsAfterCatch !== undefined) result.receiving_yards_after_catch = matchup.yardsAfterCatch
+  if (matchup.targetRate !== undefined) result.receiving_target_rate = matchup.targetRate
+  if (matchup.catchRate !== undefined) result.receiving_catch_rate = matchup.catchRate
+  if (matchup.yardsPerRouteRun !== undefined) result.receiving_yards_per_route_run = matchup.yardsPerRouteRun
+  if (matchup.epa !== undefined) result.receiving_epa = matchup.epa
+
+  // Map defense fields
+  if (matchup.passBreakups !== undefined) result.defense_pass_breakups = matchup.passBreakups
+  if (matchup.pressCoverageRate !== undefined) result.defense_press_coverage_rate = matchup.pressCoverageRate
+  if (matchup.nonPressCoverageRate !== undefined) result.defense_nonpress_coverage_rate = matchup.nonPressCoverageRate
+  if (matchup.interceptions !== undefined) result.defense_interceptions = matchup.interceptions
+  if (matchup.avgTimeToPressure !== undefined) result.defense_avg_time_to_pressure = matchup.avgTimeToPressure
+  if (matchup.fumblesForced !== undefined) result.defense_fumbles_forced = matchup.fumblesForced
+
+  // Map pressure/blocking fields
+  if (matchup.pressureAllowed !== undefined) result.pressure_allowed_count = matchup.pressureAllowed
+  if (matchup.pressureAllowedRate !== undefined) result.pressure_allowed_rate = matchup.pressureAllowedRate
+  if (matchup.sacksAllowed !== undefined) result.sacks_allowed = matchup.sacksAllowed
+  if (matchup.sackAllowedRate !== undefined) result.sack_allowed_rate = matchup.sackAllowedRate
+
+  // Map general fields
+  if (matchup.totalMatchupSnaps !== undefined) result.total_matchup_snaps = matchup.totalMatchupSnaps
+  if (matchup.doubleTeamCount !== undefined) result.double_team_count = matchup.doubleTeamCount
+  if (matchup.offenseImpactPlays !== undefined) result.offense_impact_plays = matchup.offenseImpactPlays
+  if (matchup.defenseImpactPlays !== undefined) result.defense_impact_plays = matchup.defenseImpactPlays
+
+  return result
+}
+
+function determine_matchup_type(matchup) {
+  if (matchup.matchupType) return matchup.matchupType.toUpperCase()
+  if (matchup.routesRun !== undefined || matchup.targets !== undefined) return 'RECEIVING'
+  if (matchup.pressureAllowed !== undefined || matchup.sacksAllowed !== undefined) return 'PASS_BLOCK'
+  return 'UNKNOWN'
+}
+
+const BATCH_SIZE = 500
+
+async function process_game({
+  game,
+  client,
+  stats,
+  dry = false
+}) {
+  const { esbid, shieldid, week } = game
+
+  log(`processing matchup stats for game ${esbid} (shield: ${shieldid}, week ${week})`)
+
+  let matchup_data
+  try {
+    matchup_data = await client.get_matchup_stats({ game_id: shieldid })
+  } catch (error) {
+    log(`failed to fetch matchup stats for game ${esbid}: ${error.message}`)
+    stats.games_failed += 1
+    return
+  }
+
+  if (!matchup_data || !Array.isArray(matchup_data)) {
+    log(`no matchup data returned for game ${esbid}`)
+    stats.games_empty += 1
+    return
+  }
+
+  log(`fetched ${matchup_data.length} matchup records for game ${esbid}`)
+
+  const rows_to_insert = []
+
+  for (const matchup of matchup_data) {
+    const offense_pid = await match_charting_player({
+      sumer_player_id: matchup.offensePlayerId,
+      football_name: matchup.offensePlayerFirstName,
+      last_name: matchup.offensePlayerLastName,
+      team_code: matchup.offenseTeamCode,
+      jersey_number: matchup.offenseJerseyNumber,
+      position: matchup.offensePosition
+    })
+
+    const defense_pid = await match_charting_player({
+      sumer_player_id: matchup.defensePlayerId,
+      football_name: matchup.defensePlayerFirstName,
+      last_name: matchup.defensePlayerLastName,
+      team_code: matchup.defenseTeamCode,
+      jersey_number: matchup.defenseJerseyNumber,
+      position: matchup.defensePosition
+    })
+
+    if (!offense_pid || !defense_pid) {
+      stats.players_unmatched += 1
+      continue
+    }
+
+    const matchup_type = determine_matchup_type(matchup)
+    const db_fields = map_matchup_to_db_fields(matchup)
+
+    rows_to_insert.push({
+      esbid,
+      offense_player_id: offense_pid,
+      defense_player_id: defense_pid,
+      matchup_type,
+      ...db_fields
+    })
+  }
+
+  if (!dry && rows_to_insert.length > 0) {
+    for (let i = 0; i < rows_to_insert.length; i += BATCH_SIZE) {
+      const batch = rows_to_insert.slice(i, i + BATCH_SIZE)
+      await db('nfl_matchup_stats')
+        .insert(batch)
+        .onConflict(['esbid', 'offense_player_id', 'defense_player_id', 'matchup_type'])
+        .merge()
+    }
+  }
+
+  stats.games_processed += 1
+  stats.total_matchups_inserted += rows_to_insert.length
+
+  log(
+    `game ${esbid}: ${rows_to_insert.length}/${matchup_data.length} matchups processed`
+  )
+}
+
+export async function import_matchup_stats_charting({
+  year = current_season.year,
+  week,
+  esbid,
+  dry = false,
+  proxy_pool = 'default',
+  use_proxy = true,
+  request_delay = 3000,
+  seas_type = null,
+  collector = null
+} = {}) {
+  console.time('import-matchup-stats-charting')
+  log(
+    `starting charting matchup stats import: year=${year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry}`
+  )
+
+  const client = new ChartingDataClient({
+    proxy_pool,
+    use_proxy,
+    request_delay_ms: request_delay
+  })
+
+  // Preload player cache for matching
+  await preload_active_players({ all_players: true })
+
+  const games = await get_games_for_import({ year, week, esbid, seas_type })
+  log(`found ${games.length} games to process`)
+
+  if (games.length === 0) {
+    console.timeEnd('import-matchup-stats-charting')
+    return { games_processed: 0 }
+  }
+
+  const stats = {
+    games_processed: 0,
+    games_failed: 0,
+    games_empty: 0,
+    total_matchups_inserted: 0,
+    players_unmatched: 0
+  }
+
+  for (const game of games) {
+    await process_game({ game, client, stats, dry })
+  }
+
+  console.timeEnd('import-matchup-stats-charting')
+
+  log('--- Import Summary ---')
+  log(`games processed: ${stats.games_processed}`)
+  log(`games failed: ${stats.games_failed}`)
+  log(`games empty: ${stats.games_empty}`)
+  log(`matchups inserted: ${stats.total_matchups_inserted}`)
+  log(`players unmatched: ${stats.players_unmatched}`)
+
+  return stats
+}
+
+const main = async () => {
+  let error
+  try {
+    const argv = yargs(hideBin(process.argv))
+      .option('year', {
+        type: 'number',
+        description: 'Year to import',
+        default: current_season.year
+      })
+      .option('week', {
+        type: 'number',
+        description: 'Specific week to import'
+      })
+      .option('esbid', {
+        type: 'number',
+        description: 'Specific game ID to import'
+      })
+      .option('dry', {
+        type: 'boolean',
+        description: 'Dry run mode',
+        default: false
+      })
+      .option('proxy_pool', {
+        type: 'string',
+        description: 'Proxy pool name',
+        default: 'default'
+      })
+      .option('request_delay', {
+        type: 'number',
+        description: 'Delay between requests (ms)',
+        default: 3000
+      })
+      .option('seas_type', {
+        type: 'string',
+        description: 'Season type (REG, POST, PRE)'
+      })
+      .option('no_proxy', {
+        type: 'boolean',
+        description: 'Disable proxy usage',
+        default: false
+      })
+      .argv
+
+    debug.enable('import-matchup-stats-charting,charting-data,charting-data:player-matching')
+
+    await import_matchup_stats_charting({
+      year: argv.year,
+      week: argv.week,
+      esbid: argv.esbid,
+      dry: argv.dry,
+      proxy_pool: argv.proxy_pool,
+      use_proxy: !argv.no_proxy,
+      request_delay: argv.request_delay,
+      seas_type: argv.seas_type
+    })
+  } catch (err) {
+    error = err
+    console.log(error)
+  }
+
+  await report_job({
+    job_type: job_types.IMPORT_MATCHUP_STATS_CHARTING,
+    error
+  })
+
+  process.exit()
+}
+
+if (is_main(import.meta.url)) {
+  main()
+}
+
+export default import_matchup_stats_charting

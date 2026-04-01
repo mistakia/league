@@ -71,6 +71,9 @@ import import_plays_nfl_v1 from './import-plays-nfl-v1.mjs'
 import import_plays_nflfastr from './import-plays-nflfastr.mjs'
 import import_plays_nflfastr_ftn from './import-plays-nflfastr-ftn.mjs'
 import import_plays_sportradar from './import-plays-sportradar.mjs'
+import import_players_charting from './import-players-charting.mjs'
+import import_plays_charting from './import-plays-charting.mjs'
+import import_matchup_stats_charting from './import-matchup-stats-charting.mjs'
 import process_plays from './process-plays.mjs'
 
 // Gamelog and aggregation scripts
@@ -170,7 +173,7 @@ const REPORT_OUTPUT_DIR = path.resolve(__dirname, '..', 'tmp')
 
 const log = debug('import-full-season')
 debug.enable(
-  'import-full-season,import-reporting,import-nfl-games-nfl,import-nfl-games-ngs,import-nfl-games-nflverse,import-games-sportradar,import-plays-nfl-v1,import-nflfastr-plays,import-ftn-charting-plays,import-plays-sportradar,process-plays,generate-player-gamelogs,audit-player-gamelogs'
+  'import-full-season,import-reporting,import-nfl-games-nfl,import-nfl-games-ngs,import-nfl-games-nflverse,import-games-sportradar,import-plays-nfl-v1,import-nflfastr-plays,import-ftn-charting-plays,import-plays-sportradar,import-plays-charting,import-matchup-stats-charting,import-players-charting,charting-data,process-plays,generate-player-gamelogs,audit-player-gamelogs'
 )
 
 const DELAYS = {
@@ -216,7 +219,7 @@ const STAGE_ORDER = [
  */
 const STAGE_SOURCES = {
   games: ['nfl', 'ngs', 'nflverse', 'sportradar'],
-  plays: ['nfl', 'ngs', 'nflfastr', 'ftn', 'sportradar'],
+  plays: ['nfl', 'ngs', 'nflfastr', 'ftn', 'sportradar', 'charting'],
   gamelogs: ['ngs'],
   advanced: ['espn', 'pff', 'dvoa']
 }
@@ -1169,6 +1172,37 @@ const import_full_season = async ({
         skip_sources
       })
       await wait(DELAYS.BETWEEN_STAGES)
+
+      // Charting data imports (players -> plays -> matchup stats)
+      if (
+        should_run_source({
+          stage_name: 'plays',
+          source_name: 'charting',
+          skip_sources
+        })
+      ) {
+        log('=== Charting Data Imports (players, plays, matchup stats) ===')
+        try {
+          // 1. Establish player ID mappings
+          await import_players_charting({ year, collector })
+          await wait(DELAYS.BETWEEN_SCRIPTS)
+
+          // 2. Import charting play-by-play data
+          await import_plays_charting({ year, collector })
+          await wait(DELAYS.BETWEEN_SCRIPTS)
+
+          // 3. Import matchup stats
+          await import_matchup_stats_charting({ year, collector })
+        } catch (error) {
+          collector.add_error(error, {
+            script: 'charting_data_imports',
+            year
+          })
+        }
+        await wait(DELAYS.BETWEEN_STAGES)
+      } else {
+        log('Skipping plays.charting (in skip list)')
+      }
     }
 
     // Backfill null gsisId on play_stats before aggregation
