@@ -81,9 +81,16 @@ async function process_game({
 
   let plays_matched = 0
   let plays_unmatched = 0
+  let plays_skipped_marker = 0
   let fields_updated = 0
 
   for (const source_play of plays_data) {
+    // Skip MARKER entries (TV timeouts, commercial breaks, etc.)
+    if (source_play.playType === 'MARKER') {
+      plays_skipped_marker += 1
+      continue
+    }
+
     const mapped_fields = map_charting_play_to_db_fields(source_play)
 
     // Primary match: sequence number (most reliable)
@@ -144,13 +151,15 @@ async function process_game({
   stats.games_processed += 1
   stats.total_plays_matched += plays_matched
   stats.total_plays_unmatched += plays_unmatched
+  stats.total_plays_skipped_marker += plays_skipped_marker
   stats.total_fields_updated += fields_updated
 
-  const match_rate = plays_data.length
-    ? ((plays_matched / plays_data.length) * 100).toFixed(1)
+  const actual_plays = plays_data.length - plays_skipped_marker
+  const match_rate = actual_plays
+    ? ((plays_matched / actual_plays) * 100).toFixed(1)
     : 0
   log(
-    `game ${esbid}: ${plays_matched}/${plays_data.length} matched (${match_rate}%), ${fields_updated} fields updated, ${plays_unmatched} unmatched`
+    `game ${esbid}: ${plays_matched}/${actual_plays} matched (${match_rate}%), ${fields_updated} fields updated, ${plays_unmatched} unmatched${plays_skipped_marker ? `, ${plays_skipped_marker} markers skipped` : ''}`
   )
 }
 
@@ -190,6 +199,7 @@ export async function import_plays_charting({
     games_empty: 0,
     total_plays_matched: 0,
     total_plays_unmatched: 0,
+    total_plays_skipped_marker: 0,
     total_fields_updated: 0
   }
 
@@ -205,6 +215,7 @@ export async function import_plays_charting({
   log(`games empty: ${stats.games_empty}`)
   log(`plays matched: ${stats.total_plays_matched}`)
   log(`plays unmatched: ${stats.total_plays_unmatched}`)
+  log(`marker plays skipped: ${stats.total_plays_skipped_marker}`)
   log(`fields updated: ${stats.total_fields_updated}`)
 
   return stats
