@@ -27,6 +27,47 @@ async function load_sumer_id_cache() {
   load_promise = null
 }
 
+async function _query_player_by_last_name_and_jersey({
+  last_name,
+  jersey_number,
+  normalized_team
+}) {
+  // Exact last name match with team
+  const base_query = () =>
+    db('player').select('pid').where('jnum', jersey_number)
+
+  // Try: exact lname + team
+  if (normalized_team) {
+    const rows = await base_query()
+      .whereRaw('LOWER(lname) = ?', [last_name.toLowerCase()])
+      .where('current_nfl_team', normalized_team)
+      .limit(2)
+    if (rows.length === 1) return { pid: rows[0].pid }
+  }
+
+  // Try: exact lname without team (offseason moves)
+  const rows_no_team = await base_query()
+    .whereRaw('LOWER(lname) = ?', [last_name.toLowerCase()])
+    .limit(2)
+  if (rows_no_team.length === 1) return { pid: rows_no_team[0].pid }
+
+  // Try: lname starts with (handles "Walker" matching "Walker III")
+  if (normalized_team) {
+    const rows_prefix = await base_query()
+      .whereRaw('LOWER(lname) LIKE ?', [`${last_name.toLowerCase()} %`])
+      .where('current_nfl_team', normalized_team)
+      .limit(2)
+    if (rows_prefix.length === 1) return { pid: rows_prefix[0].pid }
+  }
+
+  const rows_prefix_no_team = await base_query()
+    .whereRaw('LOWER(lname) LIKE ?', [`${last_name.toLowerCase()} %`])
+    .limit(2)
+  if (rows_prefix_no_team.length === 1) return { pid: rows_prefix_no_team[0].pid }
+
+  return null
+}
+
 export async function match_charting_player({
   sumer_player_id,
   football_name,
@@ -52,11 +93,32 @@ export async function match_charting_player({
     return null
   }
 
+  // Try with team filter first (handles most cases)
   const teams = normalized_team ? [normalized_team] : []
-  const matched_player = player_cache.find_player({
+  let matched_player = player_cache.find_player({
     name: formatted_name,
     teams
   })
+
+  // Fallback: try without team filter (handles offseason team changes)
+  if (!matched_player && normalized_team) {
+    matched_player = player_cache.find_player({
+      name: formatted_name,
+      teams: [],
+      ignore_free_agent: false
+    })
+  }
+
+  // Fallback: direct DB query by last name + jersey number
+  // Handles nickname mismatches (e.g., "Cobie"/"Decobie", "Ikem"/"Ikemefuna")
+  // and team changes where the name-based cache lookup returns multiple matches
+  if (!matched_player && last_name && jersey_number) {
+    matched_player = await _query_player_by_last_name_and_jersey({
+      last_name,
+      jersey_number,
+      normalized_team
+    })
+  }
 
   if (!matched_player) {
     log(
