@@ -36,45 +36,48 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
 function map_matchup_to_db_fields(matchup) {
   const result = {}
 
+  // Convert percentage (0-100) to fraction (0-1) for rate columns
+  const to_fraction = (val) => val != null ? parseFloat(val) / 100 : null
+
   // Map receiving matchup fields
-  if (matchup.routesRun !== undefined) result.receiving_routes_run = matchup.routesRun
-  if (matchup.targets !== undefined) result.receiving_targets = matchup.targets
-  if (matchup.receptions !== undefined) result.receiving_receptions = matchup.receptions
-  if (matchup.receivingYards !== undefined) result.receiving_yards = matchup.receivingYards
-  if (matchup.touchdowns !== undefined) result.receiving_touchdowns = matchup.touchdowns
-  if (matchup.yardsAfterCatch !== undefined) result.receiving_yards_after_catch = matchup.yardsAfterCatch
-  if (matchup.targetRate !== undefined) result.receiving_target_rate = matchup.targetRate
-  if (matchup.catchRate !== undefined) result.receiving_catch_rate = matchup.catchRate
-  if (matchup.yardsPerRouteRun !== undefined) result.receiving_yards_per_route_run = matchup.yardsPerRouteRun
-  if (matchup.epa !== undefined) result.receiving_epa = matchup.epa
+  if (matchup.receivingRoutesRun != null) result.receiving_routes_run = matchup.receivingRoutesRun
+  if (matchup.receivingTargets != null) result.receiving_targets = matchup.receivingTargets
+  if (matchup.receivingReceptions != null) result.receiving_receptions = matchup.receivingReceptions
+  if (matchup.receivingYards != null) result.receiving_yards = matchup.receivingYards
+  if (matchup.receivingTouchdowns != null) result.receiving_touchdowns = matchup.receivingTouchdowns
+  if (matchup.receivingYardsAfterCatch != null) result.receiving_yards_after_catch = matchup.receivingYardsAfterCatch
+  if (matchup.receivingTargetRate != null) result.receiving_target_rate = to_fraction(matchup.receivingTargetRate)
+  if (matchup.receivingCatchRate != null) result.receiving_catch_rate = to_fraction(matchup.receivingCatchRate)
+  if (matchup.receivingYardsPerRouteRun != null) result.receiving_yards_per_route_run = matchup.receivingYardsPerRouteRun
+  if (matchup.receivingEpa != null) result.receiving_epa = matchup.receivingEpa
 
   // Map defense fields
-  if (matchup.passBreakups !== undefined) result.defense_pass_breakups = matchup.passBreakups
-  if (matchup.pressCoverageRate !== undefined) result.defense_press_coverage_rate = matchup.pressCoverageRate
-  if (matchup.nonPressCoverageRate !== undefined) result.defense_nonpress_coverage_rate = matchup.nonPressCoverageRate
-  if (matchup.interceptions !== undefined) result.defense_interceptions = matchup.interceptions
-  if (matchup.avgTimeToPressure !== undefined) result.defense_avg_time_to_pressure = matchup.avgTimeToPressure
-  if (matchup.fumblesForced !== undefined) result.defense_fumbles_forced = matchup.fumblesForced
+  if (matchup.defensePassBreakups != null) result.defense_pass_breakups = matchup.defensePassBreakups
+  if (matchup.defensePressCoverageRate != null) result.defense_press_coverage_rate = to_fraction(matchup.defensePressCoverageRate)
+  if (matchup.defenseNonpressCoverageRate != null) result.defense_nonpress_coverage_rate = to_fraction(matchup.defenseNonpressCoverageRate)
+  if (matchup.defenseInterceptions != null) result.defense_interceptions = matchup.defenseInterceptions
+  if (matchup.defenseAverageTimeToPressure != null) result.defense_avg_time_to_pressure = matchup.defenseAverageTimeToPressure
+  if (matchup.defenseFumblesForced != null) result.defense_fumbles_forced = matchup.defenseFumblesForced
 
   // Map pressure/blocking fields
-  if (matchup.pressureAllowed !== undefined) result.pressure_allowed_count = matchup.pressureAllowed
-  if (matchup.pressureAllowedRate !== undefined) result.pressure_allowed_rate = matchup.pressureAllowedRate
-  if (matchup.sacksAllowed !== undefined) result.sacks_allowed = matchup.sacksAllowed
-  if (matchup.sackAllowedRate !== undefined) result.sack_allowed_rate = matchup.sackAllowedRate
+  if (matchup.pressureAllowedCount != null) result.pressure_allowed_count = matchup.pressureAllowedCount
+  if (matchup.pressureAllowedRate != null) result.pressure_allowed_rate = to_fraction(matchup.pressureAllowedRate)
+  if (matchup.sacksAllowed != null) result.sacks_allowed = matchup.sacksAllowed
+  if (matchup.sackAllowedRate != null) result.sack_allowed_rate = to_fraction(matchup.sackAllowedRate)
 
   // Map general fields
-  if (matchup.totalMatchupSnaps !== undefined) result.total_matchup_snaps = matchup.totalMatchupSnaps
-  if (matchup.doubleTeamCount !== undefined) result.double_team_count = matchup.doubleTeamCount
-  if (matchup.offenseImpactPlays !== undefined) result.offense_impact_plays = matchup.offenseImpactPlays
-  if (matchup.defenseImpactPlays !== undefined) result.defense_impact_plays = matchup.defenseImpactPlays
+  if (matchup.totalMatchupSnaps != null) result.total_matchup_snaps = matchup.totalMatchupSnaps
+  if (matchup.doubleTeamCount != null) result.double_team_count = matchup.doubleTeamCount
+  if (matchup.offensePlayerImpactPlays != null) result.offense_impact_plays = matchup.offensePlayerImpactPlays
+  if (matchup.defensePlayerImpactPlays != null) result.defense_impact_plays = matchup.defensePlayerImpactPlays
 
   return result
 }
 
 function determine_matchup_type(matchup) {
-  if (matchup.matchupType) return matchup.matchupType.toUpperCase()
-  if (matchup.routesRun !== undefined || matchup.targets !== undefined) return 'RECEIVING'
-  if (matchup.pressureAllowed !== undefined || matchup.sacksAllowed !== undefined) return 'PASS_BLOCK'
+  if (matchup.matchupType) return matchup.matchupType.toUpperCase().replace(/\s+/g, '_')
+  if (matchup.receivingRoutesRun != null || matchup.receivingTargets != null) return 'RECEIVING'
+  if (matchup.pressureAllowedCount != null || matchup.sacksAllowed != null) return 'PASS_BLOCK'
   return 'UNKNOWN'
 }
 
@@ -112,20 +115,20 @@ async function process_game({
   for (const matchup of matchup_data) {
     const offense_pid = await match_charting_player({
       sumer_player_id: matchup.offensePlayerId,
-      football_name: matchup.offensePlayerFirstName,
+      football_name: matchup.offensePlayerFootballName,
       last_name: matchup.offensePlayerLastName,
-      team_code: matchup.offenseTeamCode,
-      jersey_number: matchup.offenseJerseyNumber,
-      position: matchup.offensePosition
+      team_code: matchup.offensePlayerTeamCode,
+      jersey_number: matchup.offensePlayerJerseyNumber,
+      position: matchup.offensePlayerPosition
     })
 
     const defense_pid = await match_charting_player({
       sumer_player_id: matchup.defensePlayerId,
-      football_name: matchup.defensePlayerFirstName,
+      football_name: matchup.defensePlayerFootballName,
       last_name: matchup.defensePlayerLastName,
-      team_code: matchup.defenseTeamCode,
-      jersey_number: matchup.defenseJerseyNumber,
-      position: matchup.defensePosition
+      team_code: matchup.defensePlayerTeamCode,
+      jersey_number: matchup.defensePlayerJerseyNumber,
+      position: matchup.defensePlayerPosition
     })
 
     if (!offense_pid || !defense_pid) {
