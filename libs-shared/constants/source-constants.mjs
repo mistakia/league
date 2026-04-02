@@ -28,7 +28,8 @@ export const external_data_sources = {
   BETRIVERS_MD: 25,
   FANTASYLIFE_DWAIN_MCFARLAND: 26,
   FANTASYLIFE: 27,
-  SLEEPER: 28
+  SLEEPER: 28,
+  CHARTING: 29
 }
 
 export const external_data_source_keys = {}
@@ -66,7 +67,8 @@ export const external_data_source_display_names = {
   25: 'BetRivers (MD)',
   26: 'Fantasy Life (Dwain McFarland)',
   27: 'Fantasy Life',
-  28: 'Sleeper'
+  28: 'Sleeper',
+  29: 'Charting Data'
 }
 
 export const keeptradecut_metric_types = {

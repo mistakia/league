@@ -129,7 +129,10 @@ export const job_types = {
   CALCULATE_TEAM_DAILY_KTC_VALUE: 105,
   CHECK_DISK_SPACE: 106,
   IMPORT_PLAYERS_NGS: 107,
-  AUDIT_PLAYER_GAMELOGS: 108
+  AUDIT_PLAYER_GAMELOGS: 108,
+  IMPORT_PLAYS_CHARTING: 109,
+  IMPORT_MATCHUP_STATS_CHARTING: 110,
+  IMPORT_PLAYERS_CHARTING: 111
 }
 
 export const job_title_by_id = {
@@ -240,5 +243,8 @@ export const job_title_by_id = {
   105: 'Calculate Team Daily KTC Value',
   106: 'Check Disk Space',
   107: 'Import Players (NGS)',
-  108: 'Audit Player Gamelogs'
+  108: 'Audit Player Gamelogs',
+  109: 'Import Plays (Charting)',
+  110: 'Import Matchup Stats (Charting)',
+  111: 'Import Players (Charting)'
 }

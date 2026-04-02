@@ -205,6 +205,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_current_week_play_id;
+DROP INDEX IF EXISTS public.idx_nfl_matchup_stats_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_nfl_week_id;
@@ -281,6 +282,7 @@ DROP INDEX IF EXISTS public.idx_24905_status;
 DROP INDEX IF EXISTS public.idx_24855_pid;
 DROP INDEX IF EXISTS public.idx_24804_alias;
 DROP INDEX IF EXISTS public.idx_24798_yahoo_id;
+DROP INDEX IF EXISTS public.idx_24798_sumer_id;
 DROP INDEX IF EXISTS public.idx_24798_sportradar_id;
 DROP INDEX IF EXISTS public.idx_24798_sleeper_id;
 DROP INDEX IF EXISTS public.idx_24798_rotoworld_id;
@@ -419,6 +421,7 @@ ALTER TABLE IF EXISTS ONLY public.nfl_plays_rusher DROP CONSTRAINT IF EXISTS nfl
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS nfl_plays_receiver_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl_plays_player_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_passer DROP CONSTRAINT IF EXISTS nfl_plays_passer_pkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_matchup_stats DROP CONSTRAINT IF EXISTS nfl_matchup_stats_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
@@ -686,6 +689,7 @@ DROP TABLE IF EXISTS public.nfl_plays_current_week;
 DROP TABLE IF EXISTS public.nfl_plays;
 DROP TABLE IF EXISTS public.nfl_play_stats_current_week;
 DROP TABLE IF EXISTS public.nfl_play_stats;
+DROP TABLE IF EXISTS public.nfl_matchup_stats;
 DROP TABLE IF EXISTS public.nfl_games_changelog;
 DROP TABLE IF EXISTS public.nfl_games;
 DROP TABLE IF EXISTS public.nfl_draft_rankings_index;
@@ -3552,6 +3556,42 @@ CREATE TABLE public.nfl_games_changelog (
 
 
 --
+-- Name: nfl_matchup_stats; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_matchup_stats (
+    esbid integer NOT NULL,
+    offense_player_id character varying(25) NOT NULL,
+    defense_player_id character varying(25) NOT NULL,
+    matchup_type character varying(20) NOT NULL,
+    total_matchup_snaps smallint,
+    receiving_routes_run smallint,
+    receiving_targets smallint,
+    receiving_receptions smallint,
+    receiving_yards smallint,
+    receiving_touchdowns smallint,
+    receiving_yards_after_catch smallint,
+    receiving_target_rate numeric(8,6),
+    receiving_catch_rate numeric(8,6),
+    receiving_yards_per_route_run numeric(8,4),
+    receiving_epa numeric(16,12),
+    defense_pass_breakups smallint,
+    defense_press_coverage_rate numeric(8,6),
+    defense_nonpress_coverage_rate numeric(8,6),
+    defense_interceptions smallint,
+    pressure_allowed_count smallint,
+    pressure_allowed_rate numeric(8,6),
+    sacks_allowed smallint,
+    sack_allowed_rate numeric(8,6),
+    defense_avg_time_to_pressure numeric(8,4),
+    defense_fumbles_forced smallint,
+    double_team_count smallint,
+    offense_impact_plays smallint,
+    defense_impact_plays smallint
+);
+
+
+--
 -- Name: nfl_play_stats; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3982,7 +4022,30 @@ CREATE TABLE public.nfl_plays (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 )
 PARTITION BY RANGE (year);
 
@@ -4865,7 +4928,30 @@ CREATE TABLE public.nfl_plays_current_week (
     tackle_assist_3_pid character varying(25),
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
-    pass_location public.play_direction
+    pass_location public.play_direction,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -5439,7 +5525,30 @@ CREATE TABLE public.nfl_plays_year_2000 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -5838,7 +5947,30 @@ CREATE TABLE public.nfl_plays_year_2001 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -6237,7 +6369,30 @@ CREATE TABLE public.nfl_plays_year_2002 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -6636,7 +6791,30 @@ CREATE TABLE public.nfl_plays_year_2003 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -7035,7 +7213,30 @@ CREATE TABLE public.nfl_plays_year_2004 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -7434,7 +7635,30 @@ CREATE TABLE public.nfl_plays_year_2005 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -7833,7 +8057,30 @@ CREATE TABLE public.nfl_plays_year_2006 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -8232,7 +8479,30 @@ CREATE TABLE public.nfl_plays_year_2007 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -8631,7 +8901,30 @@ CREATE TABLE public.nfl_plays_year_2008 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -9030,7 +9323,30 @@ CREATE TABLE public.nfl_plays_year_2009 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -9429,7 +9745,30 @@ CREATE TABLE public.nfl_plays_year_2010 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -9828,7 +10167,30 @@ CREATE TABLE public.nfl_plays_year_2011 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -10227,7 +10589,30 @@ CREATE TABLE public.nfl_plays_year_2012 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -10626,7 +11011,30 @@ CREATE TABLE public.nfl_plays_year_2013 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -11025,7 +11433,30 @@ CREATE TABLE public.nfl_plays_year_2014 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -11424,7 +11855,30 @@ CREATE TABLE public.nfl_plays_year_2015 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -11823,7 +12277,30 @@ CREATE TABLE public.nfl_plays_year_2016 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -12222,7 +12699,30 @@ CREATE TABLE public.nfl_plays_year_2017 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -12621,7 +13121,30 @@ CREATE TABLE public.nfl_plays_year_2018 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -13020,7 +13543,30 @@ CREATE TABLE public.nfl_plays_year_2019 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -13419,7 +13965,30 @@ CREATE TABLE public.nfl_plays_year_2020 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -13818,7 +14387,30 @@ CREATE TABLE public.nfl_plays_year_2021 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -14217,7 +14809,30 @@ CREATE TABLE public.nfl_plays_year_2022 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -14616,7 +15231,30 @@ CREATE TABLE public.nfl_plays_year_2023 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -15015,7 +15653,30 @@ CREATE TABLE public.nfl_plays_year_2024 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -15414,7 +16075,30 @@ CREATE TABLE public.nfl_plays_year_2025 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -15813,7 +16497,30 @@ CREATE TABLE public.nfl_plays_year_2026 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    epa_charting numeric(16,12),
+    dropback_depth numeric(8,4),
+    play_action_concept character varying(100),
+    run_concept character varying(100),
+    run_gap_intent character varying(50),
+    run_gap_intent_side character varying(20),
+    run_gap_outcome character varying(50),
+    run_gap_outcome_side character varying(20),
+    mofc_played character varying(20),
+    mofc_look character varying(20),
+    pass_width numeric(8,4),
+    qb_scramble_side character varying(20),
+    split_run boolean,
+    reverse_run boolean,
+    pitch_run boolean,
+    option_run boolean,
+    qb_left_pocket boolean,
+    end_around_run boolean,
+    jet_sweep_run boolean,
+    lead_run boolean,
+    own_fumble_recovery boolean,
+    charting_play_type character varying(50),
+    charting_penalty_outcome character varying(100)
 );
 
 
@@ -16794,7 +17501,8 @@ CREATE TABLE public.player (
     sixty_yard_shuttle numeric(4,2),
     sixty_yard_shuttle_designation character varying(12),
     combine_attendance boolean,
-    hometown character varying(100)
+    hometown character varying(100),
+    sumer_id character varying(36)
 );
 
 
@@ -24857,6 +25565,14 @@ ALTER TABLE ONLY public.league_user_careerlogs
 
 
 --
+-- Name: nfl_matchup_stats nfl_matchup_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_matchup_stats
+    ADD CONSTRAINT nfl_matchup_stats_pkey PRIMARY KEY (esbid, offense_player_id, defense_player_id, matchup_type);
+
+
+--
 -- Name: nfl_plays_passer nfl_plays_passer_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -25917,6 +26633,13 @@ CREATE UNIQUE INDEX idx_24798_sportradar_id ON public.player USING btree (sportr
 
 
 --
+-- Name: idx_24798_sumer_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_24798_sumer_id ON public.player USING btree (sumer_id);
+
+
+--
 -- Name: idx_24798_yahoo_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -26446,6 +27169,13 @@ CREATE INDEX idx_nfl_games_year_seas_type_esbid ON public.nfl_games USING btree 
 --
 
 CREATE INDEX idx_nfl_games_year_seas_type_week_esbid ON public.nfl_games USING btree (year, seas_type, week, esbid);
+
+
+--
+-- Name: idx_nfl_matchup_stats_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_matchup_stats_esbid ON public.nfl_matchup_stats USING btree (esbid);
 
 
 --
