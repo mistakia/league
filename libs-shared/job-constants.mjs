@@ -132,7 +132,9 @@ export const job_types = {
   AUDIT_PLAYER_GAMELOGS: 108,
   IMPORT_PLAYS_CHARTING: 109,
   IMPORT_MATCHUP_STATS_CHARTING: 110,
-  IMPORT_PLAYERS_CHARTING: 111
+  IMPORT_PLAYERS_CHARTING: 111,
+  IMPORT_DRAFTKINGS_DFS_OWNERSHIP: 112,
+  IMPORT_FANDUEL_DFS_OWNERSHIP: 113
 }
 
 export const job_title_by_id = {
@@ -246,5 +248,7 @@ export const job_title_by_id = {
   108: 'Audit Player Gamelogs',
   109: 'Import Plays (Charting)',
   110: 'Import Matchup Stats (Charting)',
-  111: 'Import Players (Charting)'
+  111: 'Import Players (Charting)',
+  112: 'Import DraftKings DFS Ownership',
+  113: 'Import FanDuel DFS Ownership'
 }
