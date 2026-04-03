@@ -603,6 +603,8 @@ export default {
   // Player DFS fields
   player_dfs_salary:
     "The player's salary for Daily Fantasy Sports contests (DraftKings, FanDuel, etc.)",
+  player_dfs_ownership_pct:
+    "The player's ownership percentage in Daily Fantasy Sports contests (percentage of lineups containing this player)",
 
   // Player routes
   player_routes:
