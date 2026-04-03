@@ -2,8 +2,6 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 import db from '#db'
 import { is_main, batch_insert } from '#libs-server'
@@ -14,31 +12,78 @@ import {
 import { wait } from '#libs-server/wait.mjs'
 import { fixTeam } from '#libs-shared'
 
+const gamelog_team_cache = new Map()
+
+const load_gamelog_teams = async ({ year, week }) => {
+  const key = `${year}_${week}`
+  if (gamelog_team_cache.has(key)) {
+    return gamelog_team_cache.get(key)
+  }
+
+  const rows = await db('player_gamelogs')
+    .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
+    .join('player', 'player_gamelogs.pid', 'player.pid')
+    .where({ 'nfl_games.year': year, 'nfl_games.week': week })
+    .select(
+      'player_gamelogs.pid',
+      'player_gamelogs.tm',
+      'player.fname',
+      'player.lname'
+    )
+
+  // pid -> team for that week
+  const pid_team_map = new Map()
+  // lowercase "fname lname" -> gamelog team for that week
+  const name_team_map = new Map()
+  for (const row of rows) {
+    pid_team_map.set(row.pid, row.tm)
+    const name_key = `${row.fname} ${row.lname}`.trim().toLowerCase()
+    if (name_key) {
+      name_team_map.set(name_key, row.tm)
+    }
+  }
+
+  const result = { pid_team_map, name_team_map }
+  gamelog_team_cache.set(key, result)
+  return result
+}
+
 const log = debug('import-fantasylabs-backfill')
 debug.enable('import-fantasylabs-backfill')
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-const FL_BEARER_TOKEN = 'd69ca52a1f7e4f059360c2d5c3dce0c2'
 const FL_PER_CONTEST_URL =
   'https://dh5nxc6yx3kwy.cloudfront.net/contests/nfl'
 const REQUEST_DELAY_MS = 3000
-const BACKFILL_TARGETS_PATH = path.resolve(
-  __dirname,
-  '../../../../data/dfs/fantasylabs-backfill-targets.json'
-)
+const REQUEST_TIMEOUT_MS = 30000
+const BACKFILL_TARGETS_PATH = new URL(
+  '../../../../data/dfs/fantasylabs-backfill-targets.json',
+  import.meta.url
+).pathname
 
-const fetch_fl_contest_ownership = async ({ date, contest_id }) => {
+const get_fl_bearer_token = async () => {
+  const config_row = await db('config')
+    .where('key', 'fantasylabs_config')
+    .first()
+  if (!config_row?.value?.bearer_token) {
+    throw new Error(
+      'fantasylabs_config.bearer_token not found in config table'
+    )
+  }
+  return config_row.value.bearer_token
+}
+
+const fetch_fl_contest_ownership = async ({ date, contest_id, bearer_token }) => {
   const date_str = date.replace(/-/g, '')
   const url = `${FL_PER_CONTEST_URL}/${date_str}/${contest_id}/data/`
 
   const res = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${FL_BEARER_TOKEN}`,
+      Authorization: `Bearer ${bearer_token}`,
       Origin: 'https://terminal.fantasylabs.com',
       Referer: 'https://terminal.fantasylabs.com/',
       'Accept-Encoding': 'gzip, deflate, br'
-    }
+    },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
   })
 
   if (res.status === 401) {
@@ -127,6 +172,8 @@ const import_fantasylabs_backfill = async ({
     return
   }
 
+  const bearer_token = await get_fl_bearer_token()
+
   await preload_active_players({
     all_players: true,
     include_otc_id_index: false,
@@ -151,7 +198,8 @@ const import_fantasylabs_backfill = async ({
     try {
       fl_data = await fetch_fl_contest_ownership({
         date: target.date,
-        contest_id: target.contest_id
+        contest_id: target.contest_id,
+        bearer_token
       })
     } catch (err) {
       log('ERROR: %s', err.message)
@@ -169,6 +217,12 @@ const import_fantasylabs_backfill = async ({
       continue
     }
 
+    // load gamelog teams for historical team matching
+    const { name_team_map: gamelog_name_teams } = await load_gamelog_teams({
+      year: target.year,
+      week: target.week
+    })
+
     const ownership_inserts = []
     let matched = 0
     let unmatched = 0
@@ -178,22 +232,57 @@ const import_fantasylabs_backfill = async ({
         `${player_data.firstName} ${player_data.lastName}`.trim()
       if (!full_name || full_name === ' ') continue
 
-      // FL provides currentTeam which is team at time of contest
+      // FL provides currentTeam which may differ from the player's team
+      // at contest time if they were traded. Try FL team first, then
+      // fall back to gamelog team for the contest year/week.
       const fl_team = player_data.currentTeam
         ? fixTeam(player_data.currentTeam)
         : null
-      const teams = fl_team ? [fl_team] : []
 
       let player_row = null
-      try {
-        player_row = find_player({
-          name: full_name,
-          teams,
-          ignore_free_agent: false,
-          ignore_retired: false
-        })
-      } catch (err) {
-        // ignore
+
+      // 1. Try with FL-provided team
+      if (fl_team) {
+        try {
+          player_row = find_player({
+            name: full_name,
+            teams: [fl_team],
+            ignore_free_agent: false,
+            ignore_retired: false
+          })
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      // 2. If no match, try with historical team from gamelogs
+      if (!player_row) {
+        const gamelog_team = gamelog_name_teams.get(full_name.toLowerCase())
+        if (gamelog_team && gamelog_team !== fl_team) {
+          try {
+            player_row = find_player({
+              name: full_name,
+              teams: [gamelog_team],
+              ignore_free_agent: false,
+              ignore_retired: false
+            })
+          } catch (err) {
+            // ignore
+          }
+        }
+      }
+
+      // 3. Last resort: try without team filter (works for unique names)
+      if (!player_row) {
+        try {
+          player_row = find_player({
+            name: full_name,
+            ignore_free_agent: false,
+            ignore_retired: false
+          })
+        } catch (err) {
+          // ignore
+        }
       }
 
       if (!player_row) {

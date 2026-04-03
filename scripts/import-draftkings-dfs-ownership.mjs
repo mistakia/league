@@ -163,6 +163,7 @@ const import_ownership = async ({
 
   let total_ownership_records = 0
   let contests_processed = 0
+  const draftables_cache = new Map()
 
   try {
     for (const contest of contests) {
@@ -207,9 +208,12 @@ const import_ownership = async ({
         continue
       }
 
-      // load draftables for this draft group to build name -> dk_id index
-      let draftables_index = new Map()
-      if (contest.source_draft_group_id) {
+      // load draftables for this draft group to build name -> dk_id index (cached across contests)
+      let draftables_index = draftables_cache.get(
+        contest.source_draft_group_id
+      )
+      if (!draftables_index && contest.source_draft_group_id) {
+        draftables_index = new Map()
         try {
           const draftables_data =
             await draftkings.get_draftkings_draft_group_draftables({
@@ -228,6 +232,10 @@ const import_ownership = async ({
             err.message
           )
         }
+        draftables_cache.set(contest.source_draft_group_id, draftables_index)
+      }
+      if (!draftables_index) {
+        draftables_index = new Map()
       }
 
       const ownership_inserts = []
@@ -313,16 +321,18 @@ const import_ownership = async ({
         total_ownership_records += ownership_inserts.length
       }
 
-      // mark contest as imported
-      await db('dfs_contests')
-        .where({
-          source_contest_id: contest.source_contest_id,
-          source_id: 'DRAFTKINGS'
-        })
-        .update({
-          ownership_imported: true,
-          ownership_imported_at: new Date()
-        })
+      // mark contest as imported only if we matched players
+      if (ownership_inserts.length) {
+        await db('dfs_contests')
+          .where({
+            source_contest_id: contest.source_contest_id,
+            source_id: 'DRAFTKINGS'
+          })
+          .update({
+            ownership_imported: true,
+            ownership_imported_at: new Date()
+          })
+      }
 
       contests_processed++
       log(

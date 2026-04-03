@@ -326,16 +326,18 @@ const import_ownership = async ({
       total_ownership_records += ownership_inserts.length
     }
 
-    await db('dfs_contests')
-      .where({
-        source_contest_id: contest.source_contest_id,
-        source_id: 'FANDUEL'
-      })
-      .update({
-        ownership_imported: true,
-        ownership_imported_at: new Date(),
-        ownership_entry_sample_size: ownership_result.total_entries_sampled
-      })
+    if (ownership_inserts.length) {
+      await db('dfs_contests')
+        .where({
+          source_contest_id: contest.source_contest_id,
+          source_id: 'FANDUEL'
+        })
+        .update({
+          ownership_imported: true,
+          ownership_imported_at: new Date(),
+          ownership_entry_sample_size: ownership_result.total_entries_sampled
+        })
+    }
 
     contests_processed++
     log(
