@@ -298,9 +298,9 @@ const import_fantasylabs_backfill = async ({
 
       if (!player_row) {
         unmatched++
-        if (player_data.ownership > 5) {
+        if (player_data.ownership > 5 && player_data.position !== 'D') {
           log(
-            'unmatched high-ownership player: %s (%s %s) - %.1f%%',
+            'unmatched high-ownership player: %s (%s %s) - %s%%',
             full_name,
             player_data.position,
             fl_team || '??',
