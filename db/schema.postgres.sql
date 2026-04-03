@@ -137,6 +137,8 @@ DROP INDEX IF EXISTS public.idx_player_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_fname;
 DROP INDEX IF EXISTS public.idx_player_ffpc_id;
 DROP INDEX IF EXISTS public.idx_player_fantrax_id;
+DROP INDEX IF EXISTS public.idx_player_dfs_ownership_year_week;
+DROP INDEX IF EXISTS public.idx_player_dfs_ownership_draft_group;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
@@ -247,6 +249,8 @@ DROP INDEX IF EXISTS public.idx_draftkings_activity_last_seen;
 DROP INDEX IF EXISTS public.idx_draftkings_activity_checks;
 DROP INDEX IF EXISTS public.idx_draft_tid;
 DROP INDEX IF EXISTS public.idx_draft_lid;
+DROP INDEX IF EXISTS public.idx_dfs_contests_year_week;
+DROP INDEX IF EXISTS public.idx_dfs_contests_draft_group;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25141_userid_tid_year;
 DROP INDEX IF EXISTS public.idx_25138_sourceid;
@@ -398,6 +402,7 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_ffpc_i
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fantrax_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dfs_ownership DROP CONSTRAINT IF EXISTS player_dfs_ownership_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
@@ -459,6 +464,7 @@ ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_index DROP CONSTRAINT IF 
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_history_year_team_week_key;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS dvoa_team_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT IF EXISTS draftkings_category_activity_pkey;
+ALTER TABLE IF EXISTS ONLY public.dfs_contests DROP CONSTRAINT IF EXISTS dfs_contests_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
@@ -597,6 +603,7 @@ DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
 DROP TABLE IF EXISTS public.player_gamelogs_default;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_game_outcome_correlations;
+DROP TABLE IF EXISTS public.player_dfs_ownership;
 DROP TABLE IF EXISTS public.player_defender_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
 DROP TABLE IF EXISTS public.player_college_seasonlogs;
@@ -747,6 +754,7 @@ DROP TABLE IF EXISTS public.dvoa_team_gamelogs;
 DROP TABLE IF EXISTS public.draftkings_category_activity;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
+DROP TABLE IF EXISTS public.dfs_contests;
 DROP TABLE IF EXISTS public.config;
 DROP FUNCTION IF EXISTS public.update_selection_combination_definitions_updated_at();
 DROP FUNCTION IF EXISTS public.update_modified_column();
@@ -1606,6 +1614,31 @@ CREATE TABLE public.config (
     key character varying(255) NOT NULL,
     value jsonb,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
+-- Name: dfs_contests; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dfs_contests (
+    source_contest_id character varying(100) NOT NULL,
+    source_id public.dfs_source_id NOT NULL,
+    source_draft_group_id character varying(100),
+    contest_name character varying(255),
+    entry_fee integer,
+    entry_count integer,
+    max_entries integer,
+    game_type character varying(50),
+    sport character varying(10) DEFAULT 'NFL'::character varying,
+    year smallint,
+    week smallint,
+    start_date timestamp with time zone,
+    is_guaranteed boolean,
+    ownership_imported boolean DEFAULT false,
+    ownership_imported_at timestamp with time zone,
+    ownership_entry_sample_size integer,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -18594,6 +18627,25 @@ CREATE TABLE public.player_defender_gamelogs (
 
 
 --
+-- Name: player_dfs_ownership; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_dfs_ownership (
+    pid character varying(25) NOT NULL,
+    source_contest_id character varying(100) NOT NULL,
+    source_id public.dfs_source_id NOT NULL,
+    source_draft_group_id character varying(100),
+    ownership_pct numeric(5,2),
+    roster_position character varying(10),
+    fpts numeric(7,2),
+    source_player_display_name character varying(100),
+    year smallint,
+    week smallint,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
 -- Name: player_game_outcome_correlations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -25269,6 +25321,14 @@ ALTER TABLE ONLY public.config
 
 
 --
+-- Name: dfs_contests dfs_contests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dfs_contests
+    ADD CONSTRAINT dfs_contests_pkey PRIMARY KEY (source_contest_id, source_id);
+
+
+--
 -- Name: draftkings_category_activity draftkings_category_activity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -25754,6 +25814,14 @@ ALTER TABLE ONLY public.player_contracts
 
 ALTER TABLE ONLY public.player_defender_gamelogs
     ADD CONSTRAINT player_defender_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
+
+
+--
+-- Name: player_dfs_ownership player_dfs_ownership_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_dfs_ownership
+    ADD CONSTRAINT player_dfs_ownership_pkey PRIMARY KEY (pid, source_contest_id, source_id);
 
 
 --
@@ -26885,6 +26953,20 @@ CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree
 
 
 --
+-- Name: idx_dfs_contests_draft_group; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dfs_contests_draft_group ON public.dfs_contests USING btree (source_draft_group_id, source_id);
+
+
+--
+-- Name: idx_dfs_contests_year_week; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_dfs_contests_year_week ON public.dfs_contests USING btree (year, week, source_id);
+
+
+--
 -- Name: idx_draft_lid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -27652,6 +27734,20 @@ CREATE INDEX idx_player_college_seasonlogs_pid ON public.player_college_seasonlo
 --
 
 CREATE INDEX idx_player_college_seasonlogs_season ON public.player_college_seasonlogs USING btree (year);
+
+
+--
+-- Name: idx_player_dfs_ownership_draft_group; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_dfs_ownership_draft_group ON public.player_dfs_ownership USING btree (source_draft_group_id, source_id);
+
+
+--
+-- Name: idx_player_dfs_ownership_year_week; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_dfs_ownership_year_week ON public.player_dfs_ownership USING btree (year, week, source_id);
 
 
 --
