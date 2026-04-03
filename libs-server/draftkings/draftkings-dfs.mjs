@@ -1,6 +1,7 @@
 import debug from 'debug'
-import { execSync } from 'child_process'
-import fs from 'fs'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+import fs from 'fs/promises'
 
 import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 import { get_draftkings_config } from './draftkings-config.mjs'
@@ -86,24 +87,25 @@ export const download_draftkings_standings_csv = async ({
     api_log(`DK CSV downloaded: ${download.suggestedFilename()}`)
 
     // Downloaded file is a ZIP containing a single CSV
-    const raw_bytes = fs.readFileSync(download_path)
+    const raw_bytes = await fs.readFile(download_path)
     const is_zip = raw_bytes[0] === 0x50 && raw_bytes[1] === 0x4b
     let csv_text
 
     if (is_zip) {
       const tmp_dir = download_path + '_extracted'
-      fs.mkdirSync(tmp_dir, { recursive: true })
-      execSync(`unzip -o "${download_path}" -d "${tmp_dir}" && chmod -R u+rw "${tmp_dir}"`, {
+      await fs.mkdir(tmp_dir, { recursive: true })
+      const exec_async = promisify(exec)
+      await exec_async(`unzip -o "${download_path}" -d "${tmp_dir}" && chmod -R u+rw "${tmp_dir}"`, {
         maxBuffer: 100 * 1024 * 1024
       })
-      const files = fs.readdirSync(tmp_dir)
+      const files = await fs.readdir(tmp_dir)
       const csv_file = files.find((f) => f.endsWith('.csv'))
       if (!csv_file) {
         throw new Error('No CSV file found in zip')
       }
-      csv_text = fs.readFileSync(`${tmp_dir}/${csv_file}`, 'utf-8')
+      csv_text = await fs.readFile(`${tmp_dir}/${csv_file}`, 'utf-8')
       // Cleanup
-      fs.rmSync(tmp_dir, { recursive: true, force: true })
+      await fs.rm(tmp_dir, { recursive: true, force: true })
     } else {
       csv_text = raw_bytes.toString('utf-8')
     }

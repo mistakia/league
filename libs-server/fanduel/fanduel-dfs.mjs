@@ -109,7 +109,8 @@ export const get_fanduel_contest_entries = async ({
 
   log(`fetching entries for contest ${contest_id} page ${page}`)
   const res = await fetch_http2(url, {
-    headers
+    headers,
+    timeout: 30000
   })
 
   if (!res.ok) {
@@ -135,7 +136,8 @@ export const get_fanduel_entry_detail = async ({ entry_id, headers }) => {
 
   log(`fetching entry detail ${entry_id}`)
   const res = await fetch_http2(url, {
-    headers
+    headers,
+    timeout: 30000
   })
 
   if (!res.ok) {
