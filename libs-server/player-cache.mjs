@@ -22,6 +22,7 @@ class PlayerCache {
     this.players_by_sportradar_id = new Map()
     this.players_by_espn_id = new Map()
     this.players_by_draftkings_id = new Map()
+    this.players_by_fantasylabs_id = new Map()
     this.players_by_name_draft_year = new Map()
     this.is_initialized = false
   }
@@ -60,6 +61,7 @@ class PlayerCache {
       this._build_sportradar_id_index(players)
       this._build_espn_id_index(players)
       this._build_draftkings_id_index(players)
+      this._build_fantasylabs_id_index(players)
 
       if (include_otc_id_index) {
         this._build_otc_id_index(players)
@@ -87,6 +89,7 @@ class PlayerCache {
    * @param {number} params.espn_id - ESPN ID to search for
    * @param {number} params.otc_id - Over The Cap ID to search for
    * @param {number|string} params.draftkings_id - DraftKings ID to search for
+   * @param {number} params.fantasylabs_id - FantasyLabs ID to search for
    * @param {number} params.nfl_draft_year - NFL draft year (used with name for composite lookup)
    * @param {string[]} params.teams - Optional team abbreviations to filter by
    * @param {boolean} params.ignore_free_agent - Whether to exclude free agents (default: true)
@@ -101,6 +104,7 @@ class PlayerCache {
     espn_id,
     otc_id,
     draftkings_id,
+    fantasylabs_id,
     nfl_draft_year,
     teams = [],
     ignore_free_agent = true,
@@ -111,6 +115,20 @@ class PlayerCache {
     // Fast lookup by DraftKings ID if provided
     if (draftkings_id) {
       const player = this.players_by_draftkings_id.get(Number(draftkings_id))
+      if (player) {
+        const filtered_players = this._apply_filters([player], {
+          teams,
+          ignore_free_agent,
+          ignore_retired
+        })
+        return filtered_players.length > 0 ? filtered_players[0] : null
+      }
+      return null
+    }
+
+    // Fast lookup by FantasyLabs ID if provided
+    if (fantasylabs_id) {
+      const player = this.players_by_fantasylabs_id.get(Number(fantasylabs_id))
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -316,6 +334,7 @@ class PlayerCache {
     this.players_by_sportradar_id.clear()
     this.players_by_espn_id.clear()
     this.players_by_draftkings_id.clear()
+    this.players_by_fantasylabs_id.clear()
     this.players_by_name_draft_year.clear()
   }
 
@@ -394,6 +413,17 @@ class PlayerCache {
     for (const player of players) {
       if (player.draftkings_id) {
         this.players_by_draftkings_id.set(Number(player.draftkings_id), player)
+      }
+    }
+  }
+
+  _build_fantasylabs_id_index(players) {
+    for (const player of players) {
+      if (player.fantasylabs_id) {
+        this.players_by_fantasylabs_id.set(
+          Number(player.fantasylabs_id),
+          player
+        )
       }
     }
   }

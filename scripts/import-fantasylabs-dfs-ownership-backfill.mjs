@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import fs from 'fs'
 
 import db from '#db'
-import { is_main, batch_insert } from '#libs-server'
+import { is_main, batch_insert, updatePlayer } from '#libs-server'
 import {
   preload_active_players,
   find_player
@@ -232,17 +232,28 @@ const import_fantasylabs_backfill = async ({
         `${player_data.firstName} ${player_data.lastName}`.trim()
       if (!full_name || full_name === ' ') continue
 
-      // FL provides currentTeam which may differ from the player's team
-      // at contest time if they were traded. Try FL team first, then
-      // fall back to gamelog team for the contest year/week.
+      const fl_player_id = player_data.playerId
       const fl_team = player_data.currentTeam
         ? fixTeam(player_data.currentTeam)
         : null
 
       let player_row = null
 
-      // 1. Try with FL-provided team
-      if (fl_team) {
+      // 1. Try by fantasylabs_id (fastest, most reliable for repeat encounters)
+      if (fl_player_id) {
+        try {
+          player_row = find_player({
+            fantasylabs_id: fl_player_id,
+            ignore_free_agent: false,
+            ignore_retired: false
+          })
+        } catch (err) {
+          // ignore
+        }
+      }
+
+      // 2. Try with FL-provided team
+      if (!player_row && fl_team) {
         try {
           player_row = find_player({
             name: full_name,
@@ -255,7 +266,7 @@ const import_fantasylabs_backfill = async ({
         }
       }
 
-      // 2. If no match, try with historical team from gamelogs
+      // 3. Try with historical team from gamelogs
       if (!player_row) {
         const gamelog_team = gamelog_name_teams.get(full_name.toLowerCase())
         if (gamelog_team && gamelog_team !== fl_team) {
@@ -297,6 +308,14 @@ const import_fantasylabs_backfill = async ({
           )
         }
         continue
+      }
+
+      // save fantasylabs_id on matched player if not already set
+      if (fl_player_id && !player_row.fantasylabs_id && !dry_run) {
+        await updatePlayer({
+          player_row,
+          update: { fantasylabs_id: fl_player_id }
+        })
       }
 
       matched++

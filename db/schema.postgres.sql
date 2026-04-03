@@ -137,6 +137,7 @@ DROP INDEX IF EXISTS public.idx_player_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_fname;
 DROP INDEX IF EXISTS public.idx_player_ffpc_id;
 DROP INDEX IF EXISTS public.idx_player_fantrax_id;
+DROP INDEX IF EXISTS public.idx_player_fantasylabs_id;
 DROP INDEX IF EXISTS public.idx_player_dfs_ownership_year_week;
 DROP INDEX IF EXISTS public.idx_player_dfs_ownership_draft_group;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season;
@@ -17535,7 +17536,8 @@ CREATE TABLE public.player (
     sixty_yard_shuttle_designation character varying(12),
     combine_attendance boolean,
     hometown character varying(100),
-    sumer_id character varying(36)
+    sumer_id character varying(36),
+    fantasylabs_id integer
 );
 
 
@@ -27748,6 +27750,13 @@ CREATE INDEX idx_player_dfs_ownership_draft_group ON public.player_dfs_ownership
 --
 
 CREATE INDEX idx_player_dfs_ownership_year_week ON public.player_dfs_ownership USING btree (year, week, source_id);
+
+
+--
+-- Name: idx_player_fantasylabs_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_fantasylabs_id ON public.player USING btree (fantasylabs_id) WHERE (fantasylabs_id IS NOT NULL);
 
 
 --

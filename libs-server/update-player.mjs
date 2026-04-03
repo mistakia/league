@@ -35,6 +35,7 @@ const protected_props = [
   'fleaflicker_id',
   'fanduel_id',
   'draftkings_id',
+  'fantasylabs_id',
   'cfbref_id'
 ]
 
