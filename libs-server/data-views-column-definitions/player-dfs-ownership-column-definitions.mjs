@@ -62,8 +62,10 @@ const add_player_dfs_ownership_with_statement = ({
     return { year: parseInt(parts[0], 10), week: parseInt(parts[2], 10) }
   })
 
-  // Ranked CTE selects ownership from the contest with the most entries
-  // per draft group, so we get representative ownership for each week
+  // Ranked CTE selects ownership from the contest with the most complete
+  // ownership data per draft group (by non-zero ownership count), using
+  // entry_count as tiebreaker. Some FL-sourced contests have partial
+  // ownership despite being the largest by entries.
   const with_query = db.raw(
     `
     SELECT o.pid, o.ownership_pct, o.year, o.week
@@ -72,9 +74,16 @@ const add_player_dfs_ownership_with_statement = ({
       SELECT dc.source_contest_id, dc.source_id,
              ROW_NUMBER() OVER (
                PARTITION BY dc.source_draft_group_id, dc.source_id
-               ORDER BY dc.entry_count DESC
+               ORDER BY own_stats.nonzero_count DESC, dc.entry_count DESC
              ) AS rn
       FROM dfs_contests dc
+      INNER JOIN (
+        SELECT source_contest_id, source_id,
+               COUNT(*) FILTER (WHERE ownership_pct > 0) AS nonzero_count
+        FROM player_dfs_ownership
+        GROUP BY source_contest_id, source_id
+      ) own_stats ON own_stats.source_contest_id = dc.source_contest_id
+                  AND own_stats.source_id = dc.source_id
       WHERE dc.ownership_imported = true
         AND dc.source_id IN (${platform_source_id.map(() => '?').join(',')})
         AND (${year_week_pairs.map(() => '(dc.year = ? AND dc.week = ?)').join(' OR ')})
