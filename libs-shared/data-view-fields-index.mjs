@@ -491,6 +491,8 @@ export default {
     'The Expected Points Added (EPA) by the player on rushing and receiving plays (calculated from play-by-play data)',
   player_total_expected_points_added_from_plays:
     'The total Expected Points Added (EPA) by the player on all plays they were involved in - combines passing, rushing, and receiving EPA (calculated from play-by-play data)',
+  player_quarterback_epa_from_plays:
+    'The total QB EPA attributed to the quarterback across all plays in the game, using the nflfastR qb_epa metric which adjusts for turnover-worthy plays (calculated from play-by-play data)',
 
   team_win_percentage_added_from_plays:
     'Team Win Percentage Added (calculated from play-by-play data)',

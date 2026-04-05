@@ -16,6 +16,7 @@ import {
   get_completed_games
 } from '#libs-server/play-stats-utils.mjs'
 import populate_nfl_year_week_timestamp from './populate-nfl-year-week-timestamp.mjs'
+import populate_qb_pid from './populate-qb-pid.mjs'
 
 const log = debug('process-plays')
 debug.enable('process-plays')
@@ -250,6 +251,13 @@ const process_plays = async ({
   log(
     `Completed: ${all_play_updates.length} plays updated from ${completed_game_esbids.length} games`
   )
+
+  // Post-processing: populate qb_pid using snap-based identification
+  try {
+    await populate_qb_pid({ year, esbids: completed_game_esbids })
+  } catch (err) {
+    log(`Warning: qb_pid population failed: ${err.message}`)
+  }
 
   result.plays_processed = enriched_plays.length
   result.plays_updated = all_play_updates.length

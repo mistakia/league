@@ -880,6 +880,12 @@ export default {
       stat_name: 'rushing_and_receiving_expected_points_added_from_plays'
     }),
 
+  player_quarterback_epa_from_plays: player_stat_from_plays({
+    pid_columns: ['qb_pid'],
+    with_select_string: `SUM(qb_epa)`,
+    stat_name: 'quarterback_epa_from_plays'
+  }),
+
   player_quarterback_pressures_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
     with_select_string: `SUM(CASE WHEN qb_pressure_tracking = true OR qb_pressure = true THEN 1 ELSE 0 END)`,
