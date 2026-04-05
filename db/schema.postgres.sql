@@ -185,6 +185,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_series_seq;
 DROP INDEX IF EXISTS public.idx_nfl_plays_seas_type;
 DROP INDEX IF EXISTS public.idx_nfl_plays_route_ngs;
 DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
+DROP INDEX IF EXISTS public.idx_nfl_plays_qb_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_psr_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_play_type_seas_type_trg_pid_off_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_play_type;
@@ -4079,7 +4080,8 @@ CREATE TABLE public.nfl_plays (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 )
 PARTITION BY RANGE (year);
 
@@ -5582,7 +5584,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -6004,7 +6007,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -6426,7 +6430,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -6848,7 +6853,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -7270,7 +7276,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -7692,7 +7699,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -8114,7 +8122,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -8536,7 +8545,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -8958,7 +8968,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -9380,7 +9391,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -9802,7 +9814,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -10224,7 +10237,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -10646,7 +10660,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -11068,7 +11083,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -11490,7 +11506,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -11912,7 +11929,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -12334,7 +12352,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -12756,7 +12775,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -13178,7 +13198,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -13600,7 +13621,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -14022,7 +14044,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -14444,7 +14467,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -14866,7 +14890,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -15288,7 +15313,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -15710,7 +15736,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -16132,7 +16159,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -16554,7 +16582,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    qb_pid character varying(25)
 );
 
 
@@ -27424,6 +27453,13 @@ CREATE INDEX idx_nfl_plays_psr_pid ON ONLY public.nfl_plays USING btree (psr_pid
 
 
 --
+-- Name: idx_nfl_plays_qb_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_qb_pid ON ONLY public.nfl_plays USING btree (qb_pid);
+
+
+--
 -- Name: idx_nfl_plays_qtr; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28586,6 +28622,13 @@ CREATE INDEX nfl_plays_year_2000_psr_pid_idx ON public.nfl_plays_year_2000 USING
 
 
 --
+-- Name: nfl_plays_year_2000_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_qb_pid_idx ON public.nfl_plays_year_2000 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2000_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28926,6 +28969,13 @@ CREATE INDEX nfl_plays_year_2001_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2001_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_qb_pid_idx ON public.nfl_plays_year_2001 USING btree (qb_pid);
 
 
 --
@@ -29272,6 +29322,13 @@ CREATE INDEX nfl_plays_year_2002_psr_pid_idx ON public.nfl_plays_year_2002 USING
 
 
 --
+-- Name: nfl_plays_year_2002_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_qb_pid_idx ON public.nfl_plays_year_2002 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2002_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29612,6 +29669,13 @@ CREATE INDEX nfl_plays_year_2003_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2003_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_qb_pid_idx ON public.nfl_plays_year_2003 USING btree (qb_pid);
 
 
 --
@@ -29958,6 +30022,13 @@ CREATE INDEX nfl_plays_year_2004_psr_pid_idx ON public.nfl_plays_year_2004 USING
 
 
 --
+-- Name: nfl_plays_year_2004_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_qb_pid_idx ON public.nfl_plays_year_2004 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2004_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30298,6 +30369,13 @@ CREATE INDEX nfl_plays_year_2005_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2005_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_qb_pid_idx ON public.nfl_plays_year_2005 USING btree (qb_pid);
 
 
 --
@@ -30644,6 +30722,13 @@ CREATE INDEX nfl_plays_year_2006_psr_pid_idx ON public.nfl_plays_year_2006 USING
 
 
 --
+-- Name: nfl_plays_year_2006_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_qb_pid_idx ON public.nfl_plays_year_2006 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2006_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30984,6 +31069,13 @@ CREATE INDEX nfl_plays_year_2007_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2007_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_qb_pid_idx ON public.nfl_plays_year_2007 USING btree (qb_pid);
 
 
 --
@@ -31330,6 +31422,13 @@ CREATE INDEX nfl_plays_year_2008_psr_pid_idx ON public.nfl_plays_year_2008 USING
 
 
 --
+-- Name: nfl_plays_year_2008_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_qb_pid_idx ON public.nfl_plays_year_2008 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2008_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31670,6 +31769,13 @@ CREATE INDEX nfl_plays_year_2009_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2009_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_qb_pid_idx ON public.nfl_plays_year_2009 USING btree (qb_pid);
 
 
 --
@@ -32016,6 +32122,13 @@ CREATE INDEX nfl_plays_year_2010_psr_pid_idx ON public.nfl_plays_year_2010 USING
 
 
 --
+-- Name: nfl_plays_year_2010_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_qb_pid_idx ON public.nfl_plays_year_2010 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2010_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32356,6 +32469,13 @@ CREATE INDEX nfl_plays_year_2011_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2011_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_qb_pid_idx ON public.nfl_plays_year_2011 USING btree (qb_pid);
 
 
 --
@@ -32702,6 +32822,13 @@ CREATE INDEX nfl_plays_year_2012_psr_pid_idx ON public.nfl_plays_year_2012 USING
 
 
 --
+-- Name: nfl_plays_year_2012_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_qb_pid_idx ON public.nfl_plays_year_2012 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2012_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33042,6 +33169,13 @@ CREATE INDEX nfl_plays_year_2013_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2013_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_qb_pid_idx ON public.nfl_plays_year_2013 USING btree (qb_pid);
 
 
 --
@@ -33388,6 +33522,13 @@ CREATE INDEX nfl_plays_year_2014_psr_pid_idx ON public.nfl_plays_year_2014 USING
 
 
 --
+-- Name: nfl_plays_year_2014_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_qb_pid_idx ON public.nfl_plays_year_2014 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2014_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33728,6 +33869,13 @@ CREATE INDEX nfl_plays_year_2015_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2015_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_qb_pid_idx ON public.nfl_plays_year_2015 USING btree (qb_pid);
 
 
 --
@@ -34074,6 +34222,13 @@ CREATE INDEX nfl_plays_year_2016_psr_pid_idx ON public.nfl_plays_year_2016 USING
 
 
 --
+-- Name: nfl_plays_year_2016_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_qb_pid_idx ON public.nfl_plays_year_2016 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2016_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34414,6 +34569,13 @@ CREATE INDEX nfl_plays_year_2017_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2017_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_qb_pid_idx ON public.nfl_plays_year_2017 USING btree (qb_pid);
 
 
 --
@@ -34760,6 +34922,13 @@ CREATE INDEX nfl_plays_year_2018_psr_pid_idx ON public.nfl_plays_year_2018 USING
 
 
 --
+-- Name: nfl_plays_year_2018_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_qb_pid_idx ON public.nfl_plays_year_2018 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2018_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35100,6 +35269,13 @@ CREATE INDEX nfl_plays_year_2019_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2019_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_qb_pid_idx ON public.nfl_plays_year_2019 USING btree (qb_pid);
 
 
 --
@@ -35446,6 +35622,13 @@ CREATE INDEX nfl_plays_year_2020_psr_pid_idx ON public.nfl_plays_year_2020 USING
 
 
 --
+-- Name: nfl_plays_year_2020_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_qb_pid_idx ON public.nfl_plays_year_2020 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2020_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35786,6 +35969,13 @@ CREATE INDEX nfl_plays_year_2021_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2021_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_qb_pid_idx ON public.nfl_plays_year_2021 USING btree (qb_pid);
 
 
 --
@@ -36132,6 +36322,13 @@ CREATE INDEX nfl_plays_year_2022_psr_pid_idx ON public.nfl_plays_year_2022 USING
 
 
 --
+-- Name: nfl_plays_year_2022_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_qb_pid_idx ON public.nfl_plays_year_2022 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2022_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36472,6 +36669,13 @@ CREATE INDEX nfl_plays_year_2023_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2023_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_qb_pid_idx ON public.nfl_plays_year_2023 USING btree (qb_pid);
 
 
 --
@@ -36818,6 +37022,13 @@ CREATE INDEX nfl_plays_year_2024_psr_pid_idx ON public.nfl_plays_year_2024 USING
 
 
 --
+-- Name: nfl_plays_year_2024_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_qb_pid_idx ON public.nfl_plays_year_2024 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2024_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37161,6 +37372,13 @@ CREATE INDEX nfl_plays_year_2025_psr_pid_idx ON public.nfl_plays_year_2025 USING
 
 
 --
+-- Name: nfl_plays_year_2025_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_qb_pid_idx ON public.nfl_plays_year_2025 USING btree (qb_pid);
+
+
+--
 -- Name: nfl_plays_year_2025_qtr_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37501,6 +37719,13 @@ CREATE INDEX nfl_plays_year_2026_player_fuml_pid_week_year_idx ON public.nfl_pla
 --
 
 CREATE INDEX nfl_plays_year_2026_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2026_qb_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_qb_pid_idx ON public.nfl_plays_year_2026 USING btree (qb_pid);
 
 
 --
@@ -39611,6 +39836,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2000_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2000_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2000_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -39951,6 +40183,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2001_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2001_qb_pid_idx;
 
 
 --
@@ -40297,6 +40536,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2002_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2002_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2002_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40637,6 +40883,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2003_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2003_qb_pid_idx;
 
 
 --
@@ -40983,6 +41236,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2004_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2004_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2004_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -41323,6 +41583,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2005_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2005_qb_pid_idx;
 
 
 --
@@ -41669,6 +41936,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2006_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2006_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2006_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42009,6 +42283,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2007_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2007_qb_pid_idx;
 
 
 --
@@ -42355,6 +42636,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2008_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2008_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2008_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42695,6 +42983,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2009_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2009_qb_pid_idx;
 
 
 --
@@ -43041,6 +43336,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2010_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2010_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2010_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43381,6 +43683,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2011_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2011_qb_pid_idx;
 
 
 --
@@ -43727,6 +44036,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2012_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2012_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2012_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44067,6 +44383,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2013_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2013_qb_pid_idx;
 
 
 --
@@ -44413,6 +44736,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2014_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2014_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2014_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44753,6 +45083,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2015_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2015_qb_pid_idx;
 
 
 --
@@ -45099,6 +45436,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2016_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2016_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2016_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -45439,6 +45783,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2017_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2017_qb_pid_idx;
 
 
 --
@@ -45785,6 +46136,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2018_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2018_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2018_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46125,6 +46483,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2019_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2019_qb_pid_idx;
 
 
 --
@@ -46471,6 +46836,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2020_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2020_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2020_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46811,6 +47183,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2021_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2021_qb_pid_idx;
 
 
 --
@@ -47157,6 +47536,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2022_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2022_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2022_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47497,6 +47883,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2023_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2023_qb_pid_idx;
 
 
 --
@@ -47843,6 +48236,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2024_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2024_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2024_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48186,6 +48586,13 @@ ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2025_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2025_qb_pid_idx;
+
+
+--
 -- Name: nfl_plays_year_2025_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48526,6 +48933,13 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 --
 
 ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2026_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_qb_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_qb_pid ATTACH PARTITION public.nfl_plays_year_2026_qb_pid_idx;
 
 
 --
