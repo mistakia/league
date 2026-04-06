@@ -5,7 +5,8 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season, fantasy_positions } from '#constants'
-import { is_main, pfr, report_job } from '#libs-server'
+import { is_main, report_job } from '#libs-server'
+import * as pfr from '#private/libs-server/pro-football-reference.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {

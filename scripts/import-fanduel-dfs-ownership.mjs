@@ -172,7 +172,7 @@ const import_ownership = async ({
     )
 
     // load fixture players for fanduel_id -> player mapping
-    let fixture_player_index = new Map()
+    const fixture_player_index = new Map()
     if (contest.source_draft_group_id) {
       try {
         const fixture_data = await fanduel.get_dfs_fixture_players({

@@ -456,8 +456,6 @@ const format_epa_data = (play) => {
     ep_succ: is_kickoff
       ? negated_epa != null
         ? negated_epa > 0
-          ? true
-          : false
         : null
       : format_boolean(play.success),
     total_home_epa: format_number(play.total_home_epa),

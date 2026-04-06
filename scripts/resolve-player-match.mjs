@@ -17,7 +17,7 @@ import {
 } from '#libs-server'
 import { format_player_name, fixTeam, strings_are_similar } from '#libs-shared'
 import { search_players as espn_search_players } from '#libs-server/espn.mjs'
-import { search_players as pfr_search_players } from '#libs-server/pro-football-reference.mjs'
+import { search_players as pfr_search_players } from '#private/libs-server/pro-football-reference.mjs'
 
 // NFL Pro search is in private libs - dynamically import to handle missing module
 const get_nfl_pro_search = async () => {

@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { pfr, wait } from '#libs-server'
+import { wait } from '#libs-server'
+import * as pfr from '#private/libs-server/pro-football-reference.mjs'
 
 const log = debug('import-team-rosters-pfr')
 debug.enable('import-team-rosters-pfr,pro-football-reference,proxy-manager')

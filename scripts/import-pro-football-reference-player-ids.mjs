@@ -4,7 +4,8 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { format_player_name } from '#libs-shared'
-import { is_main, pfr } from '#libs-server'
+import { is_main } from '#libs-server'
+import * as pfr from '#private/libs-server/pro-football-reference.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
