@@ -187,11 +187,11 @@ export function extract_players_from_matchups(matchup_stats) {
     if (off_id && !players.has(off_id)) {
       players.set(off_id, {
         sumer_player_id: off_id,
-        football_name: matchup.offensePlayerFootballName,
+        football_name: matchup.offensePlayerFirstName,
         last_name: matchup.offensePlayerLastName,
-        team_code: matchup.offensePlayerTeamCode,
-        jersey_number: matchup.offensePlayerJerseyNumber,
-        position: matchup.offensePlayerPosition
+        team_code: matchup.offenseTeamCode,
+        jersey_number: matchup.offenseJerseyNumber,
+        position: matchup.offensePosition
       })
     }
 
@@ -199,11 +199,11 @@ export function extract_players_from_matchups(matchup_stats) {
     if (def_id && !players.has(def_id)) {
       players.set(def_id, {
         sumer_player_id: def_id,
-        football_name: matchup.defensePlayerFootballName,
+        football_name: matchup.defensePlayerFirstName,
         last_name: matchup.defensePlayerLastName,
-        team_code: matchup.defensePlayerTeamCode,
-        jersey_number: matchup.defensePlayerJerseyNumber,
-        position: matchup.defensePlayerPosition
+        team_code: matchup.defenseTeamCode,
+        jersey_number: matchup.defenseJerseyNumber,
+        position: matchup.defensePosition
       })
     }
   }
