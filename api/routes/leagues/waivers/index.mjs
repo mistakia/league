@@ -24,7 +24,7 @@ import {
   verify_reserve_status,
   get_super_priority_status
 } from '#libs-server'
-import { require_auth } from '../middleware.mjs'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 

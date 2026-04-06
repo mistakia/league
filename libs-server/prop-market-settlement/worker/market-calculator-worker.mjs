@@ -9,7 +9,10 @@
 import { parentPort, workerData } from 'worker_threads'
 import debug from 'debug'
 
-import { SettlementOrchestrator, HANDLER_TYPES } from '../index.mjs'
+import {
+  SettlementOrchestrator,
+  HANDLER_TYPES
+} from '#libs-server/prop-market-settlement/index.mjs'
 import {
   PlayerGamelogMarketHandler,
   NFLPlaysMarketHandler,

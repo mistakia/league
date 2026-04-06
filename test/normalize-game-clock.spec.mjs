@@ -1,7 +1,7 @@
 /* global describe it */
 import * as chai from 'chai'
 
-import { normalize_game_clock } from '../libs-server/play-enum-utils.mjs'
+import { normalize_game_clock } from '#libs-server/play-enum-utils.mjs'
 
 const { expect } = chai
 

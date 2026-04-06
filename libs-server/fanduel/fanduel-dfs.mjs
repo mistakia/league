@@ -2,7 +2,7 @@ import { fetch as fetch_http2 } from 'fetch-h2'
 import debug from 'debug'
 
 import { current_season } from '#constants'
-import * as cache from '../cache.mjs'
+import * as cache from '#libs-server/cache.mjs'
 import { get_fanduel_dfs_config } from './fanduel-config.mjs'
 import { wait } from '#libs-server/wait.mjs'
 
@@ -205,8 +205,7 @@ export const compute_fanduel_ownership = async ({
         headers
       })
 
-      const lineup =
-        entry_detail?.roster?.lineup || entry_detail?.lineup || []
+      const lineup = entry_detail?.roster?.lineup || entry_detail?.lineup || []
       for (const slot of lineup) {
         const fixture_player_id =
           slot?.player?._members?.[0] || slot?.fixture_player_id
@@ -231,9 +230,7 @@ export const compute_fanduel_ownership = async ({
   for (const [fixture_player_id, count] of player_counts) {
     ownership.push({
       fixture_player_id,
-      ownership_pct: Number(
-        ((count / total_entries_sampled) * 100).toFixed(2)
-      )
+      ownership_pct: Number(((count / total_entries_sampled) * 100).toFixed(2))
     })
   }
 

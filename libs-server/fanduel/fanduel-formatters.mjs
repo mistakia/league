@@ -2,7 +2,7 @@ import {
   player_game_alt_prop_types,
   team_game_market_types
 } from '#libs-shared/bookmaker-constants.mjs'
-import { normalize_selection_metric_line } from '../normalize-selection-metric-line.mjs'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 
 /**
  * Market types that use YES/NO selection types (player achieves milestone or not)

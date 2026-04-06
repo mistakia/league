@@ -8,7 +8,7 @@ import {
   processRelease,
   verifyUserTeam
 } from '#libs-server'
-import { require_auth } from '../leagues/middleware.mjs'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 

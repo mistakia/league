@@ -1,7 +1,7 @@
 /* global describe it */
 import * as chai from 'chai'
 
-import get_most_recent_practice_status from '../../libs-shared/get-most-recent-practice-status.mjs'
+import get_most_recent_practice_status from '#libs-shared/get-most-recent-practice-status.mjs'
 
 const expect = chai.expect
 

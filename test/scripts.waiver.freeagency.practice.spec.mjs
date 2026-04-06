@@ -12,7 +12,7 @@ import {
   checkLastTransaction,
   checkRoster
 } from './utils/index.mjs'
-import run from '../scripts/process-waivers-free-agency-practice.mjs'
+import run from '#scripts/process-waivers-free-agency-practice.mjs'
 
 process.env.NODE_ENV = 'test'
 

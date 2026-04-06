@@ -13,7 +13,7 @@ import {
 } from '#constants'
 import { Errors } from '#libs-shared'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
-import run from '../scripts/process-poaching-waivers.mjs'
+import run from '#scripts/process-poaching-waivers.mjs'
 
 process.env.NODE_ENV = 'test'
 

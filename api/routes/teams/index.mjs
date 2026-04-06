@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { verifyUserTeam } from '#libs-server'
-import { require_auth } from '../leagues/middleware.mjs'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 import activate from './activate.mjs'
 import cutlist from './cutlist.mjs'
 import deactivate from './deactivate.mjs'

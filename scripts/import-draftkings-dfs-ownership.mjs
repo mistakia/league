@@ -5,18 +5,13 @@ import path from 'path'
 import os from 'os'
 
 import db from '#db'
-import {
-  is_main,
-  report_job,
-  batch_insert,
-  draftkings
-} from '#libs-server'
+import { is_main, report_job, batch_insert, draftkings } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import {
   preload_active_players,
   find_player
 } from '#libs-server/player-cache.mjs'
-import { launch_persistent_context } from '../private/libs-server/stealth-browser.mjs'
+import { launch_persistent_context } from '#private/libs-server/stealth-browser.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
 
@@ -65,7 +60,8 @@ const discover_contests = async ({ year, dry_run = false }) => {
       continue
     }
 
-    const is_guaranteed = contest.attr?.IsGuaranteed === 'true' ||
+    const is_guaranteed =
+      contest.attr?.IsGuaranteed === 'true' ||
       contest.attr?.IsGuranteed === 'true'
 
     // parse start date from DK format /Date(ms)/
@@ -107,10 +103,16 @@ const discover_contests = async ({ year, dry_run = false }) => {
       items: contest_inserts,
       batch_size: 100,
       save: async (batch) => {
-        await db('dfs_contests').insert(batch).onConflict(['source_contest_id', 'source_id']).merge()
+        await db('dfs_contests')
+          .insert(batch)
+          .onConflict(['source_contest_id', 'source_id'])
+          .merge()
       }
     })
-    log('inserted/updated %d contests into dfs_contests', contest_inserts.length)
+    log(
+      'inserted/updated %d contests into dfs_contests',
+      contest_inserts.length
+    )
   }
 }
 
@@ -121,8 +123,10 @@ const import_ownership = async ({
   week = null
 } = {}) => {
   // load unimported DK contests
-  let query = db('dfs_contests')
-    .where({ source_id: 'DRAFTKINGS', ownership_imported: false })
+  let query = db('dfs_contests').where({
+    source_id: 'DRAFTKINGS',
+    ownership_imported: false
+  })
 
   if (contest_id) {
     query = query.where('source_contest_id', String(contest_id))
@@ -209,9 +213,7 @@ const import_ownership = async ({
       }
 
       // load draftables for this draft group to build name -> dk_id index (cached across contests)
-      let draftables_index = draftables_cache.get(
-        contest.source_draft_group_id
-      )
+      let draftables_index = draftables_cache.get(contest.source_draft_group_id)
       if (!draftables_index && contest.source_draft_group_id) {
         draftables_index = new Map()
         try {
@@ -301,7 +303,10 @@ const import_ownership = async ({
       )
 
       if (dry_run) {
-        log('DRY RUN -- would insert %d ownership records', ownership_inserts.length)
+        log(
+          'DRY RUN -- would insert %d ownership records',
+          ownership_inserts.length
+        )
         if (ownership_inserts.length) log(ownership_inserts[0])
         continue
       }

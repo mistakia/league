@@ -1,7 +1,7 @@
 /* global describe it beforeEach afterEach */
 import * as chai from 'chai'
 
-import { setupLocalStorageMock } from '../mocks/localStorage.mjs'
+import { setupLocalStorageMock } from '#test/mocks/localStorage.mjs'
 import {
   data_view_browser_storage_save_snapshot,
   data_view_browser_storage_load_view_history,

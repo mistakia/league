@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { LeagueConfigMapper } from '../mappers/index.mjs'
+import { LeagueConfigMapper } from '#libs-server/external-fantasy-leagues/mappers/index.mjs'
 import SyncUtils from './sync-utils.mjs'
 
 const log = debug('external:config-sync')

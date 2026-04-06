@@ -22,7 +22,7 @@ import { search_players as pfr_search_players } from '#private/libs-server/pro-f
 // NFL Pro search is in private libs - dynamically import to handle missing module
 const get_nfl_pro_search = async () => {
   try {
-    const module = await import('../private/libs-server/nfl-pro.mjs')
+    const module = await import('#private/libs-server/nfl-pro.mjs')
     return module.search_players
   } catch (err) {
     log('NFL Pro module not available')

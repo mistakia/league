@@ -1,5 +1,5 @@
-import season_dates from '../season-dates.mjs'
-import Season from '../season.mjs'
+import season_dates from '#libs-shared/season-dates.mjs'
+import Season from '#libs-shared/season.mjs'
 
 export const current_season = new Season(season_dates)
 export const current_week = current_season.week

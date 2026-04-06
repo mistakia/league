@@ -4,7 +4,7 @@ import {
   DEFAULT_SCORING_FORMAT_HASH
 } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import apply_play_by_play_column_params_to_query from '../apply-play-by-play-column-params-to-query.mjs'
+import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'

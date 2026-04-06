@@ -49,7 +49,8 @@
     "#jobs/*": "./jobs/*",
     "#league-import/*": "./league-import/*",
     "#private/libs-server": "./private/libs-server/index.mjs",
-    "#private/*": "./private/*"
+    "#private/*": "./private/*",
+    "#app/*": "./app/*"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",

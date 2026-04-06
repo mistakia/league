@@ -1,5 +1,5 @@
 import { fromJS, List } from 'immutable'
-import { plays_view_request_actions } from '../plays-view-request/actions'
+import { plays_view_request_actions } from '#app/core/plays-view-request/actions'
 
 const initial_state = fromJS({
   current_request: null,

@@ -3,7 +3,7 @@ import queryString from 'query-string'
 import dayjs from 'dayjs'
 import debug from 'debug'
 
-import { wait } from '../wait.mjs'
+import { wait } from '#libs-server/wait.mjs'
 
 const log = debug('fanduel:api')
 

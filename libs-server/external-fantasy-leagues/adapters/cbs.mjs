@@ -1,5 +1,5 @@
 import BaseAdapter from './base-adapter.mjs'
-import AuthenticatedApiClient from '../utils/authenticated-api-client.mjs'
+import AuthenticatedApiClient from '#libs-server/external-fantasy-leagues/utils/authenticated-api-client.mjs'
 import {
   stub_authenticate,
   stub_get_method,

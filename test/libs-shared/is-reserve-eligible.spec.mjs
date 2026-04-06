@@ -2,7 +2,7 @@
 import * as chai from 'chai'
 import MockDate from 'mockdate'
 
-import isReserveEligible from '../../libs-shared/is-reserve-eligible.mjs'
+import isReserveEligible from '#libs-shared/is-reserve-eligible.mjs'
 import {
   current_season,
   player_nfl_status,

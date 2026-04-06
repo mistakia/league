@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { roster_slot_types, player_tag_types } from '#constants'
-import { PlayerIdMapper } from '../mappers/index.mjs'
+import { PlayerIdMapper } from '#libs-server/external-fantasy-leagues/mappers/index.mjs'
 import SyncUtils from './sync-utils.mjs'
 
 const log = debug('external:roster-sync')

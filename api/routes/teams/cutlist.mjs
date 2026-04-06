@@ -3,7 +3,7 @@ import express from 'express'
 import { Roster } from '#libs-shared'
 import { player_tag_types } from '#constants'
 import { getRoster, verifyUserTeam, getLeague } from '#libs-server'
-import { require_auth } from '../leagues/middleware.mjs'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 

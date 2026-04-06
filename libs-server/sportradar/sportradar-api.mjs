@@ -6,8 +6,8 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { wait } from '#libs-server'
-import is_main from '../is-main.mjs'
-import * as cache from '../cache.mjs'
+import is_main from '#libs-server/is-main.mjs'
+import * as cache from '#libs-server/cache.mjs'
 
 const queue = new PQueue({ concurrency: 1 })
 let last_request

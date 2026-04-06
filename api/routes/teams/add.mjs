@@ -6,7 +6,7 @@ import {
   verifyUserTeam,
   verify_reserve_status
 } from '#libs-server'
-import { require_auth } from '../leagues/middleware.mjs'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 

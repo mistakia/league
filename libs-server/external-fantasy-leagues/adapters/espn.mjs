@@ -1,7 +1,7 @@
 import BaseAdapter from './base-adapter.mjs'
-import AuthenticatedApiClient from '../utils/authenticated-api-client.mjs'
-import { schema_validator } from '../utils/schema-validator.mjs'
-import { platform_authenticator } from '../utils/platform-authenticator.mjs'
+import AuthenticatedApiClient from '#libs-server/external-fantasy-leagues/utils/authenticated-api-client.mjs'
+import { schema_validator } from '#libs-server/external-fantasy-leagues/utils/schema-validator.mjs'
+import { platform_authenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
 import { format_nfl_injury_status } from '#libs-shared'
 import { player_nfl_status, current_season } from '#constants'
 

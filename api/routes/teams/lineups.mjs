@@ -12,7 +12,7 @@ import {
   roster_slot_types,
   transaction_types
 } from '#constants'
-import { require_auth } from '../leagues/middleware.mjs'
+import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
 

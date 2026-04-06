@@ -1,7 +1,7 @@
 /* global describe it */
 import * as chai from 'chai'
 
-import get_final_practice_day from '../../libs-shared/get-final-practice-day.mjs'
+import get_final_practice_day from '#libs-shared/get-final-practice-day.mjs'
 
 const expect = chai.expect
 

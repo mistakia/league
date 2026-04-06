@@ -3,18 +3,13 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import {
-  is_main,
-  report_job,
-  batch_insert,
-  fanduel
-} from '#libs-server'
+import { is_main, report_job, batch_insert, fanduel } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import {
   preload_active_players,
   find_player
 } from '#libs-server/player-cache.mjs'
-import { fanduel_dfs_session_manager } from '../private/libs-server/fanduel/index.mjs'
+import { fanduel_dfs_session_manager } from '#private/libs-server/fanduel/index.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
 
@@ -128,8 +123,10 @@ const import_ownership = async ({
   week = null,
   sample_size = 2000
 } = {}) => {
-  let query = db('dfs_contests')
-    .where({ source_id: 'FANDUEL', ownership_imported: false })
+  let query = db('dfs_contests').where({
+    source_id: 'FANDUEL',
+    ownership_imported: false
+  })
 
   if (fixture_list_id) {
     query = query.where('source_draft_group_id', String(fixture_list_id))

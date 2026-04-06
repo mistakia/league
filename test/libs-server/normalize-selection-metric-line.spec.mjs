@@ -2,7 +2,7 @@
 
 import * as chai from 'chai'
 
-import { normalize_selection_metric_line } from '../../libs-server/normalize-selection-metric-line.mjs'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 
 const expect = chai.expect
 

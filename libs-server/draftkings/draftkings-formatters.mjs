@@ -8,7 +8,7 @@ import { bookmaker_constants } from '#libs-shared'
 import { current_season } from '#constants'
 import { draftkings, clean_string } from '#libs-server'
 import { find_player } from '#libs-server/player-cache.mjs'
-import { normalize_selection_metric_line } from '../normalize-selection-metric-line.mjs'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import {
   is_game_event,
   extract_team_abbreviations,

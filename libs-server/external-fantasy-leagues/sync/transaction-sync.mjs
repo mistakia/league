@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { TransactionMapper } from '../mappers/index.mjs'
+import { TransactionMapper } from '#libs-server/external-fantasy-leagues/mappers/index.mjs'
 import SyncUtils from './sync-utils.mjs'
 
 const log = debug('external:transaction-sync')

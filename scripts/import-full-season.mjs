@@ -126,7 +126,7 @@ try {
 }
 
 try {
-  const ngs_module = await import('../private/scripts/import-plays-ngs.mjs')
+  const ngs_module = await import('#private/scripts/import-plays-ngs.mjs')
   import_plays_ngs = ngs_module.default
 } catch {
   // Private script not available

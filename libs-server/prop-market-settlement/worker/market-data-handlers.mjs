@@ -6,13 +6,13 @@
 import {
   HANDLER_TYPES,
   market_type_mappings
-} from '../market-type-mappings.mjs'
+} from '#libs-server/prop-market-settlement/market-type-mappings.mjs'
 import {
   calculate_metric_value,
   determine_selection_result,
   group_by_game,
   create_dual_result_objects
-} from '../prop-market-utils.mjs'
+} from '#libs-server/prop-market-settlement/prop-market-utils.mjs'
 
 /**
  * Base class for market data handlers

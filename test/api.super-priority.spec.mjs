@@ -420,7 +420,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
       // Test super priority status
       const get_super_priority_status = (
-        await import('../libs-server/get-super-priority-status.mjs')
+        await import('#libs-server/get-super-priority-status.mjs')
       ).default
       const status = await get_super_priority_status({
         pid: player.pid,
@@ -466,7 +466,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
       // Test super priority status
       const get_super_priority_status = (
-        await import('../libs-server/get-super-priority-status.mjs')
+        await import('#libs-server/get-super-priority-status.mjs')
       ).default
       const status = await get_super_priority_status({
         pid: player.pid,
@@ -568,7 +568,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
       // Test super priority status - should be ineligible
       const get_super_priority_status = (
-        await import('../libs-server/get-super-priority-status.mjs')
+        await import('#libs-server/get-super-priority-status.mjs')
       ).default
       const status = await get_super_priority_status({
         pid: player.pid,

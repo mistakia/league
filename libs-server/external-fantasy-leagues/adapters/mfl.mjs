@@ -1,6 +1,6 @@
 import BaseAdapter from './base-adapter.mjs'
-import AuthenticatedApiClient from '../utils/authenticated-api-client.mjs'
-import { platform_authenticator } from '../utils/platform-authenticator.mjs'
+import AuthenticatedApiClient from '#libs-server/external-fantasy-leagues/utils/authenticated-api-client.mjs'
+import { platform_authenticator } from '#libs-server/external-fantasy-leagues/utils/platform-authenticator.mjs'
 
 /**
  * MyFantasyLeague (MFL) adapter
