@@ -170,9 +170,7 @@ export const format_nfl_week_param_values = ({ nfl_weeks }) => {
       const [year, seas_type] = key.split('_')
       const range_label =
         seas_type === 'POST'
-          ? weeks
-              .map((w) => get_postseason_week_label({ week: w }))
-              .join(', ')
+          ? weeks.map((w) => get_postseason_week_label({ week: w })).join(', ')
           : format_week_ranges({ weeks })
       return `${year} ${seas_type}: ${range_label}`
     })

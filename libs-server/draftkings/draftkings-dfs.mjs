@@ -77,10 +77,12 @@ export const download_draftkings_standings_csv = async ({
 
   try {
     const download_promise = page.waitForEvent('download', { timeout: 30000 })
-    await page.goto(url, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000
-    }).catch(() => {})
+    await page
+      .goto(url, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000
+      })
+      .catch(() => {})
 
     const download = await download_promise
     const download_path = await download.path()
@@ -95,9 +97,12 @@ export const download_draftkings_standings_csv = async ({
       const tmp_dir = download_path + '_extracted'
       await fs.mkdir(tmp_dir, { recursive: true })
       const exec_async = promisify(exec)
-      await exec_async(`unzip -o "${download_path}" -d "${tmp_dir}" && chmod -R u+rw "${tmp_dir}"`, {
-        maxBuffer: 100 * 1024 * 1024
-      })
+      await exec_async(
+        `unzip -o "${download_path}" -d "${tmp_dir}" && chmod -R u+rw "${tmp_dir}"`,
+        {
+          maxBuffer: 100 * 1024 * 1024
+        }
+      )
       const files = await fs.readdir(tmp_dir)
       const csv_file = files.find((f) => f.endsWith('.csv'))
       if (!csv_file) {

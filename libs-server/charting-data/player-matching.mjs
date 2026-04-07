@@ -63,7 +63,8 @@ async function _query_player_by_last_name_and_jersey({
   const rows_prefix_no_team = await base_query()
     .whereRaw('LOWER(lname) LIKE ?', [`${last_name.toLowerCase()} %`])
     .limit(2)
-  if (rows_prefix_no_team.length === 1) return { pid: rows_prefix_no_team[0].pid }
+  if (rows_prefix_no_team.length === 1)
+    return { pid: rows_prefix_no_team[0].pid }
 
   return null
 }
@@ -148,7 +149,9 @@ export async function match_charting_player({
         )
       }
     } catch (error) {
-      log(`failed to update sumer_id for ${matched_player.pid}: ${error.message}`)
+      log(
+        `failed to update sumer_id for ${matched_player.pid}: ${error.message}`
+      )
     }
   }
 

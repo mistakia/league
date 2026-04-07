@@ -36,12 +36,7 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
   return query
 }
 
-async function process_game({
-  game,
-  client,
-  stats,
-  dry = false
-}) {
+async function process_game({ game, client, stats, dry = false }) {
   const { esbid, shieldid, week, h, v } = game
 
   log(`processing game ${esbid} (shield: ${shieldid}, week ${week}, ${v}@${h})`)
@@ -97,7 +92,11 @@ async function process_game({
     let db_play = plays_by_sequence.get(source_play.playSequenceNumber) || null
 
     // Fallback: try sequence - 1 for special plays (timeouts have off-by-one)
-    if (!db_play && source_play.down === 0 && source_play.playSequenceNumber > 0) {
+    if (
+      !db_play &&
+      source_play.down === 0 &&
+      source_play.playSequenceNumber > 0
+    ) {
       db_play =
         plays_by_sequence.get(source_play.playSequenceNumber - 1) || null
     }
@@ -261,8 +260,7 @@ const main = async () => {
         type: 'boolean',
         description: 'Disable proxy usage',
         default: false
-      })
-      .argv
+      }).argv
 
     debug.enable('import-plays-charting,charting-data')
 

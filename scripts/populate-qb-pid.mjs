@@ -37,12 +37,8 @@ const populate_qb_pid = async ({
   const esbid_list = esbids
     ? esbids.map((id) => parseInt(id, 10)).join(',')
     : null
-  const esbid_filter = esbid_list
-    ? `AND np.esbid IN (${esbid_list})`
-    : ''
-  const outer_esbid_filter = esbid_list
-    ? `AND p.esbid IN (${esbid_list})`
-    : ''
+  const esbid_filter = esbid_list ? `AND np.esbid IN (${esbid_list})` : ''
+  const outer_esbid_filter = esbid_list ? `AND p.esbid IN (${esbid_list})` : ''
 
   const update_query = has_snap_data
     ? `
@@ -109,9 +105,7 @@ const populate_qb_pid = async ({
   `
 
   if (dry_run) {
-    const plays_esbid_filter = esbid_list
-      ? `AND esbid IN (${esbid_list})`
-      : ''
+    const plays_esbid_filter = esbid_list ? `AND esbid IN (${esbid_list})` : ''
     const snaps_esbid_filter = esbid_list
       ? `AND ns.esbid IN (${esbid_list})`
       : ''

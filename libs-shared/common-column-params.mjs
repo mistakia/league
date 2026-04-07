@@ -170,9 +170,7 @@ export const nfl_week_id = {
   default_value: { dynamic_type: 'current_year_reg_weeks' },
   enable_multi_on_split: ['year', 'week'],
   format_param_values: (param_values, param_def) => {
-    const static_values = param_values.filter(
-      (v) => typeof v === 'string'
-    )
+    const static_values = param_values.filter((v) => typeof v === 'string')
     const dynamic_values = param_values.filter(
       (v) => v && typeof v === 'object' && v.dynamic_type
     )

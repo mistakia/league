@@ -37,61 +37,87 @@ function map_matchup_to_db_fields(matchup) {
   const result = {}
 
   // Convert percentage (0-100) to fraction (0-1) for rate columns
-  const to_fraction = (val) => val != null ? parseFloat(val) / 100 : null
+  const to_fraction = (val) => (val != null ? parseFloat(val) / 100 : null)
 
   // Map receiving matchup fields
-  if (matchup.receivingRoutesRun != null) result.receiving_routes_run = matchup.receivingRoutesRun
-  if (matchup.receivingTargets != null) result.receiving_targets = matchup.receivingTargets
-  if (matchup.receivingReceptions != null) result.receiving_receptions = matchup.receivingReceptions
-  if (matchup.receivingYards != null) result.receiving_yards = matchup.receivingYards
-  if (matchup.receivingTouchdowns != null) result.receiving_touchdowns = matchup.receivingTouchdowns
-  if (matchup.receivingYardsAfterCatch != null) result.receiving_yards_after_catch = matchup.receivingYardsAfterCatch
-  if (matchup.receivingTargetRate != null) result.receiving_target_rate = to_fraction(matchup.receivingTargetRate)
-  if (matchup.receivingCatchRate != null) result.receiving_catch_rate = to_fraction(matchup.receivingCatchRate)
-  if (matchup.receivingYardsPerRouteRun != null) result.receiving_yards_per_route_run = matchup.receivingYardsPerRouteRun
+  if (matchup.receivingRoutesRun != null)
+    result.receiving_routes_run = matchup.receivingRoutesRun
+  if (matchup.receivingTargets != null)
+    result.receiving_targets = matchup.receivingTargets
+  if (matchup.receivingReceptions != null)
+    result.receiving_receptions = matchup.receivingReceptions
+  if (matchup.receivingYards != null)
+    result.receiving_yards = matchup.receivingYards
+  if (matchup.receivingTouchdowns != null)
+    result.receiving_touchdowns = matchup.receivingTouchdowns
+  if (matchup.receivingYardsAfterCatch != null)
+    result.receiving_yards_after_catch = matchup.receivingYardsAfterCatch
+  if (matchup.receivingTargetRate != null)
+    result.receiving_target_rate = to_fraction(matchup.receivingTargetRate)
+  if (matchup.receivingCatchRate != null)
+    result.receiving_catch_rate = to_fraction(matchup.receivingCatchRate)
+  if (matchup.receivingYardsPerRouteRun != null)
+    result.receiving_yards_per_route_run = matchup.receivingYardsPerRouteRun
   if (matchup.receivingEpa != null) result.receiving_epa = matchup.receivingEpa
 
   // Map defense fields
-  if (matchup.defensePassBreakups != null) result.defense_pass_breakups = matchup.defensePassBreakups
-  if (matchup.defensePressCoverageRate != null) result.defense_press_coverage_rate = to_fraction(matchup.defensePressCoverageRate)
-  if (matchup.defenseNonpressCoverageRate != null) result.defense_nonpress_coverage_rate = to_fraction(matchup.defenseNonpressCoverageRate)
-  if (matchup.defenseInterceptions != null) result.defense_interceptions = matchup.defenseInterceptions
-  if (matchup.defenseAverageTimeToPressure != null) result.defense_avg_time_to_pressure = matchup.defenseAverageTimeToPressure
-  if (matchup.defenseFumblesForced != null) result.defense_fumbles_forced = matchup.defenseFumblesForced
+  if (matchup.defensePassBreakups != null)
+    result.defense_pass_breakups = matchup.defensePassBreakups
+  if (matchup.defensePressCoverageRate != null)
+    result.defense_press_coverage_rate = to_fraction(
+      matchup.defensePressCoverageRate
+    )
+  if (matchup.defenseNonpressCoverageRate != null)
+    result.defense_nonpress_coverage_rate = to_fraction(
+      matchup.defenseNonpressCoverageRate
+    )
+  if (matchup.defenseInterceptions != null)
+    result.defense_interceptions = matchup.defenseInterceptions
+  if (matchup.defenseAverageTimeToPressure != null)
+    result.defense_avg_time_to_pressure = matchup.defenseAverageTimeToPressure
+  if (matchup.defenseFumblesForced != null)
+    result.defense_fumbles_forced = matchup.defenseFumblesForced
 
   // Map pressure/blocking fields
-  if (matchup.pressureAllowedCount != null) result.pressure_allowed_count = matchup.pressureAllowedCount
-  if (matchup.pressureAllowedRate != null) result.pressure_allowed_rate = to_fraction(matchup.pressureAllowedRate)
+  if (matchup.pressureAllowedCount != null)
+    result.pressure_allowed_count = matchup.pressureAllowedCount
+  if (matchup.pressureAllowedRate != null)
+    result.pressure_allowed_rate = to_fraction(matchup.pressureAllowedRate)
   if (matchup.sacksAllowed != null) result.sacks_allowed = matchup.sacksAllowed
-  if (matchup.sackAllowedRate != null) result.sack_allowed_rate = to_fraction(matchup.sackAllowedRate)
+  if (matchup.sackAllowedRate != null)
+    result.sack_allowed_rate = to_fraction(matchup.sackAllowedRate)
 
   // Map general fields
-  if (matchup.totalMatchupSnaps != null) result.total_matchup_snaps = matchup.totalMatchupSnaps
-  if (matchup.doubleTeamCount != null) result.double_team_count = matchup.doubleTeamCount
-  if (matchup.offensePlayerImpactPlays != null) result.offense_impact_plays = matchup.offensePlayerImpactPlays
-  if (matchup.defensePlayerImpactPlays != null) result.defense_impact_plays = matchup.defensePlayerImpactPlays
+  if (matchup.totalMatchupSnaps != null)
+    result.total_matchup_snaps = matchup.totalMatchupSnaps
+  if (matchup.doubleTeamCount != null)
+    result.double_team_count = matchup.doubleTeamCount
+  if (matchup.offensePlayerImpactPlays != null)
+    result.offense_impact_plays = matchup.offensePlayerImpactPlays
+  if (matchup.defensePlayerImpactPlays != null)
+    result.defense_impact_plays = matchup.defensePlayerImpactPlays
 
   return result
 }
 
 function determine_matchup_type(matchup) {
-  if (matchup.matchupType) return matchup.matchupType.toUpperCase().replace(/\s+/g, '_')
-  if (matchup.receivingRoutesRun != null || matchup.receivingTargets != null) return 'RECEIVING'
-  if (matchup.pressureAllowedCount != null || matchup.sacksAllowed != null) return 'PASS_BLOCK'
+  if (matchup.matchupType)
+    return matchup.matchupType.toUpperCase().replace(/\s+/g, '_')
+  if (matchup.receivingRoutesRun != null || matchup.receivingTargets != null)
+    return 'RECEIVING'
+  if (matchup.pressureAllowedCount != null || matchup.sacksAllowed != null)
+    return 'PASS_BLOCK'
   return 'UNKNOWN'
 }
 
 const BATCH_SIZE = 500
 
-async function process_game({
-  game,
-  client,
-  stats,
-  dry = false
-}) {
+async function process_game({ game, client, stats, dry = false }) {
   const { esbid, shieldid, week } = game
 
-  log(`processing matchup stats for game ${esbid} (shield: ${shieldid}, week ${week})`)
+  log(
+    `processing matchup stats for game ${esbid} (shield: ${shieldid}, week ${week})`
+  )
 
   let matchup_data
   try {
@@ -153,7 +179,12 @@ async function process_game({
       const batch = rows_to_insert.slice(i, i + BATCH_SIZE)
       await db('nfl_matchup_stats')
         .insert(batch)
-        .onConflict(['esbid', 'offense_player_id', 'defense_player_id', 'matchup_type'])
+        .onConflict([
+          'esbid',
+          'offense_player_id',
+          'defense_player_id',
+          'matchup_type'
+        ])
         .merge()
     }
   }
@@ -263,10 +294,11 @@ const main = async () => {
         type: 'boolean',
         description: 'Disable proxy usage',
         default: false
-      })
-      .argv
+      }).argv
 
-    debug.enable('import-matchup-stats-charting,charting-data,charting-data:player-matching')
+    debug.enable(
+      'import-matchup-stats-charting,charting-data,charting-data:player-matching'
+    )
 
     await import_matchup_stats_charting({
       year: argv.year,

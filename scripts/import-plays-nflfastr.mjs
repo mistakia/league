@@ -500,18 +500,12 @@ const format_epa_data = (play) => {
 const format_wpa_data = (play) => {
   const is_kickoff = play.play_type === 'kickoff'
   return {
-    wp: format_number(
-      is_kickoff && play.wp != null ? 1 - play.wp : play.wp
-    ),
-    wpa: format_number(
-      is_kickoff && play.wpa != null ? -play.wpa : play.wpa
-    ),
+    wp: format_number(is_kickoff && play.wp != null ? 1 - play.wp : play.wp),
+    wpa: format_number(is_kickoff && play.wpa != null ? -play.wpa : play.wpa),
     home_wp: format_number(play.home_wp),
     away_wp: format_number(play.away_wp),
     vegas_wpa: format_number(
-      is_kickoff && play.vegas_wpa != null
-        ? -play.vegas_wpa
-        : play.vegas_wpa
+      is_kickoff && play.vegas_wpa != null ? -play.vegas_wpa : play.vegas_wpa
     ),
     vegas_home_wpa: format_number(play.vegas_home_wpa),
     home_wp_post: format_number(play.home_wp_post),
@@ -603,9 +597,7 @@ const format_score_data = (play) => {
       is_kickoff ? play.posteam_score : play.defteam_score
     ),
     score_diff: format_number(
-      is_kickoff
-        ? -play.score_differential
-        : play.score_differential
+      is_kickoff ? -play.score_differential : play.score_differential
     ),
     pos_score_post: format_number(
       is_kickoff ? play.defteam_score_post : play.posteam_score_post
@@ -614,9 +606,7 @@ const format_score_data = (play) => {
       is_kickoff ? play.posteam_score_post : play.defteam_score_post
     ),
     score_diff_post: format_number(
-      is_kickoff
-        ? -play.score_differential_post
-        : play.score_differential_post
+      is_kickoff ? -play.score_differential_post : play.score_differential_post
     )
   }
 }

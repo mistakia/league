@@ -49,7 +49,9 @@ async function validate_play_match_rates({ year }) {
   if (zero_match_games.length > 0) {
     log(`WARNING: ${zero_match_games.length} games with zero charted plays:`)
     for (const game of zero_match_games) {
-      log(`  week ${game.week}: ${game.matchup} (esbid: ${game.esbid}, ${game.total_plays} total plays)`)
+      log(
+        `  week ${game.week}: ${game.matchup} (esbid: ${game.esbid}, ${game.total_plays} total plays)`
+      )
     }
   }
 
@@ -68,9 +70,8 @@ async function validate_play_match_rates({ year }) {
 
   const total_charted = results.reduce((sum, r) => sum + r.charted_plays, 0)
   const total_all = results.reduce((sum, r) => sum + r.total_plays, 0)
-  const overall_rate = total_all > 0
-    ? ((total_charted / total_all) * 100).toFixed(1)
-    : 0
+  const overall_rate =
+    total_all > 0 ? ((total_charted / total_all) * 100).toFixed(1) : 0
   log(`overall: ${total_charted}/${total_all} plays charted (${overall_rate}%)`)
 
   return results
@@ -116,9 +117,17 @@ async function validate_column_coverage({ year }) {
   log('checking charting column null rates...')
 
   const charting_columns = [
-    'epa_charting', 'dropback_depth', 'play_action_concept',
-    'run_concept', 'run_gap_intent', 'mofc_played', 'mofc_look',
-    'pass_width', 'charting_play_type', 'coverage_type', 'man_zone'
+    'epa_charting',
+    'dropback_depth',
+    'play_action_concept',
+    'run_concept',
+    'run_gap_intent',
+    'mofc_played',
+    'mofc_look',
+    'pass_width',
+    'charting_play_type',
+    'coverage_type',
+    'man_zone'
   ]
 
   const games_with_charting = await db('nfl_plays')
@@ -148,7 +157,9 @@ async function validate_column_coverage({ year }) {
     const non_null_count = parseInt(non_null.count)
     const fill_rate = ((non_null_count / total_charted) * 100).toFixed(1)
     const status = parseFloat(fill_rate) < 10 ? 'LOW' : 'OK'
-    log(`  ${column}: ${fill_rate}% filled (${non_null_count}/${total_charted}) [${status}]`)
+    log(
+      `  ${column}: ${fill_rate}% filled (${non_null_count}/${total_charted}) [${status}]`
+    )
   }
 }
 
@@ -186,7 +197,9 @@ async function validate_epa_correlation({ year }) {
   log(`RMSE: ${rmse.toFixed(4)}`)
 }
 
-export async function validate_charting_import({ year = current_season.year } = {}) {
+export async function validate_charting_import({
+  year = current_season.year
+} = {}) {
   console.time('validate-charting-import')
   log(`validating charting import for year ${year}`)
 
@@ -200,13 +213,11 @@ export async function validate_charting_import({ year = current_season.year } = 
 
 const main = async () => {
   try {
-    const argv = yargs(hideBin(process.argv))
-      .option('year', {
-        type: 'number',
-        description: 'Year to validate',
-        default: current_season.year
-      })
-      .argv
+    const argv = yargs(hideBin(process.argv)).option('year', {
+      type: 'number',
+      description: 'Year to validate',
+      default: current_season.year
+    }).argv
 
     debug.enable('validate-charting-import')
 

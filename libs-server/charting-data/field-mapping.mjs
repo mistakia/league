@@ -33,9 +33,16 @@ const convert_field_position_to_ydl_100 = (field_position) => {
 }
 
 const VALID_COVERAGE_TYPES = new Set([
-  'COVER_0', 'COVER_1', 'COVER_2', 'COVER_2_MAN',
-  'COVER_3', 'COVER_4', 'COVER_5', 'COVER_6',
-  'COVER_9', 'COMBINATION'
+  'COVER_0',
+  'COVER_1',
+  'COVER_2',
+  'COVER_2_MAN',
+  'COVER_3',
+  'COVER_4',
+  'COVER_5',
+  'COVER_6',
+  'COVER_9',
+  'COMBINATION'
 ])
 
 const normalize_coverage_type = (value) => {
@@ -165,12 +172,18 @@ export function map_charting_play_to_db_fields(source_play) {
   }
 
   // coverageScheme -> coverage_type (enum: COVER_0, COVER_1, COVER_2, COVER_2_MAN, etc.)
-  if ('coverageScheme' in source_play && source_play.coverageScheme !== undefined) {
+  if (
+    'coverageScheme' in source_play &&
+    source_play.coverageScheme !== undefined
+  ) {
     result.coverage_type = normalize_coverage_type(source_play.coverageScheme)
   }
 
   // manZoneCoverage -> man_zone
-  if ('manZoneCoverage' in source_play && source_play.manZoneCoverage !== undefined) {
+  if (
+    'manZoneCoverage' in source_play &&
+    source_play.manZoneCoverage !== undefined
+  ) {
     result.man_zone = source_play.manZoneCoverage
   }
 
@@ -185,12 +198,18 @@ export function map_charting_play_to_db_fields(source_play) {
   }
 
   // offensivePersonnelBasic -> off_personnel
-  if ('offensivePersonnelBasic' in source_play && source_play.offensivePersonnelBasic !== undefined) {
+  if (
+    'offensivePersonnelBasic' in source_play &&
+    source_play.offensivePersonnelBasic !== undefined
+  ) {
     result.off_personnel = source_play.offensivePersonnelBasic
   }
 
   // defensivePersonnelPackage -> def_personnel
-  if ('defensivePersonnelPackage' in source_play && source_play.defensivePersonnelPackage !== undefined) {
+  if (
+    'defensivePersonnelPackage' in source_play &&
+    source_play.defensivePersonnelPackage !== undefined
+  ) {
     result.def_personnel = source_play.defensivePersonnelPackage
   }
 
@@ -223,10 +242,16 @@ export function map_charting_play_to_db_fields(source_play) {
   }
 
   // Score fields (API uses homeScoreAtStartOfPlay / awayScoreAtStartOfPlay)
-  if ('homeScoreAtStartOfPlay' in source_play && source_play.homeScoreAtStartOfPlay !== undefined) {
+  if (
+    'homeScoreAtStartOfPlay' in source_play &&
+    source_play.homeScoreAtStartOfPlay !== undefined
+  ) {
     result.home_score = source_play.homeScoreAtStartOfPlay
   }
-  if ('awayScoreAtStartOfPlay' in source_play && source_play.awayScoreAtStartOfPlay !== undefined) {
+  if (
+    'awayScoreAtStartOfPlay' in source_play &&
+    source_play.awayScoreAtStartOfPlay !== undefined
+  ) {
     result.away_score = source_play.awayScoreAtStartOfPlay
   }
 

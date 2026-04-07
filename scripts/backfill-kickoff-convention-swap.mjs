@@ -4,7 +4,22 @@ import { is_main } from '#libs-server'
 const main = async () => {
   // Snapshot sample kickoff return TD plays before backfill
   const before_sample = await db('nfl_plays')
-    .select('esbid', 'off', 'def', 'epa', 'ep', 'ep_succ', 'wp', 'wpa', 'pos_score', 'def_score', 'pos_score_post', 'def_score_post', 'score_diff', 'score_diff_post')
+    .select(
+      'esbid',
+      'off',
+      'def',
+      'epa',
+      'ep',
+      'ep_succ',
+      'wp',
+      'wpa',
+      'pos_score',
+      'def_score',
+      'pos_score_post',
+      'def_score_post',
+      'score_diff',
+      'score_diff_post'
+    )
     .where('play_type', 'KOFF')
     .where('td', true)
     .whereNotNull('epa')
@@ -12,7 +27,9 @@ const main = async () => {
 
   console.log('=== BEFORE backfill (kickoff return TDs) ===')
   for (const row of before_sample) {
-    console.log(`  ${row.esbid} | off=${row.off} def=${row.def} | epa=${row.epa} ep=${row.ep} ep_succ=${row.ep_succ} | wp=${row.wp} wpa=${row.wpa} | pos_score=${row.pos_score}->${row.pos_score_post} def_score=${row.def_score}->${row.def_score_post} score_diff=${row.score_diff}->${row.score_diff_post}`)
+    console.log(
+      `  ${row.esbid} | off=${row.off} def=${row.def} | epa=${row.epa} ep=${row.ep} ep_succ=${row.ep_succ} | wp=${row.wp} wpa=${row.wpa} | pos_score=${row.pos_score}->${row.pos_score_post} def_score=${row.def_score}->${row.def_score_post} score_diff=${row.score_diff}->${row.score_diff_post}`
+    )
   }
 
   // Run backfill in a transaction
@@ -45,7 +62,9 @@ const main = async () => {
         xyac_epa: db.raw('-xyac_epa'),
 
         // Re-derive ep_succ from negated epa
-        ep_succ: db.raw('CASE WHEN epa IS NOT NULL THEN (-epa > 0) ELSE NULL END'),
+        ep_succ: db.raw(
+          'CASE WHEN epa IS NOT NULL THEN (-epa > 0) ELSE NULL END'
+        ),
 
         // WPA fields: negate
         wpa: db.raw('-wpa'),
@@ -75,7 +94,22 @@ const main = async () => {
 
   // Verify after backfill
   const after_sample = await db('nfl_plays')
-    .select('esbid', 'off', 'def', 'epa', 'ep', 'ep_succ', 'wp', 'wpa', 'pos_score', 'def_score', 'pos_score_post', 'def_score_post', 'score_diff', 'score_diff_post')
+    .select(
+      'esbid',
+      'off',
+      'def',
+      'epa',
+      'ep',
+      'ep_succ',
+      'wp',
+      'wpa',
+      'pos_score',
+      'def_score',
+      'pos_score_post',
+      'def_score_post',
+      'score_diff',
+      'score_diff_post'
+    )
     .where('play_type', 'KOFF')
     .where('td', true)
     .whereNotNull('epa')
@@ -83,7 +117,9 @@ const main = async () => {
 
   console.log('\n=== AFTER backfill (kickoff return TDs) ===')
   for (const row of after_sample) {
-    console.log(`  ${row.esbid} | off=${row.off} def=${row.def} | epa=${row.epa} ep=${row.ep} ep_succ=${row.ep_succ} | wp=${row.wp} wpa=${row.wpa} | pos_score=${row.pos_score}->${row.pos_score_post} def_score=${row.def_score}->${row.def_score_post} score_diff=${row.score_diff}->${row.score_diff_post}`)
+    console.log(
+      `  ${row.esbid} | off=${row.off} def=${row.def} | epa=${row.epa} ep=${row.ep} ep_succ=${row.ep_succ} | wp=${row.wp} wpa=${row.wpa} | pos_score=${row.pos_score}->${row.pos_score_post} def_score=${row.def_score}->${row.def_score_post} score_diff=${row.score_diff}->${row.score_diff_post}`
+    )
   }
 
   // Verify return TDs have negative EPA
@@ -100,10 +136,14 @@ const main = async () => {
     .first()
 
   console.log('\n=== Verification: kickoff return TDs ===')
-  console.log(`  Total: ${td_check.total} | Negative EPA: ${td_check.negative_epa} | Positive EPA: ${td_check.positive_epa} | Avg EPA: ${Number(td_check.avg_epa).toFixed(4)}`)
+  console.log(
+    `  Total: ${td_check.total} | Negative EPA: ${td_check.negative_epa} | Positive EPA: ${td_check.positive_epa} | Avg EPA: ${Number(td_check.avg_epa).toFixed(4)}`
+  )
 
   if (td_check.negative_epa > td_check.positive_epa) {
-    console.log('  PASS: Majority of return TDs now have negative EPA (bad for kicking team)')
+    console.log(
+      '  PASS: Majority of return TDs now have negative EPA (bad for kicking team)'
+    )
   } else {
     console.log('  FAIL: Return TDs still show positive EPA')
   }

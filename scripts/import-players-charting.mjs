@@ -75,7 +75,9 @@ export async function import_players_charting({
   for (const game of games) {
     const { esbid: game_esbid, shieldid, week: game_week } = game
 
-    log(`processing game ${game_esbid} (shield: ${shieldid}, week ${game_week})`)
+    log(
+      `processing game ${game_esbid} (shield: ${shieldid}, week ${game_week})`
+    )
 
     // Fetch plays for player extraction
     try {
@@ -105,13 +107,17 @@ export async function import_players_charting({
         }
       }
     } catch (error) {
-      log(`failed to fetch matchup stats for game ${game_esbid}: ${error.message}`)
+      log(
+        `failed to fetch matchup stats for game ${game_esbid}: ${error.message}`
+      )
     }
 
     games_processed += 1
   }
 
-  log(`extracted ${all_players.size} unique players across ${games_processed} games`)
+  log(
+    `extracted ${all_players.size} unique players across ${games_processed} games`
+  )
 
   // Match players
   let matched = 0
@@ -120,7 +126,9 @@ export async function import_players_charting({
 
   for (const [, player_info] of all_players) {
     if (dry) {
-      log(`[dry] would match player: ${player_info.football_name} ${player_info.last_name} (${player_info.team_code})`)
+      log(
+        `[dry] would match player: ${player_info.football_name} ${player_info.last_name} (${player_info.team_code})`
+      )
       continue
     }
 
@@ -197,8 +205,7 @@ const main = async () => {
       .option('seas_type', {
         type: 'string',
         description: 'Season type (REG, POST, PRE)'
-      })
-      .argv
+      }).argv
 
     debug.enable(
       'import-players-charting,charting-data,charting-data:player-matching'
