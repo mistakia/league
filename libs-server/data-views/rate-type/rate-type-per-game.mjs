@@ -71,10 +71,24 @@ const add_player_per_game_cte = ({
 
   let cte_query = db(player_gamelogs_table)
     .select(`${player_gamelogs_table}.pid`)
-    .leftJoin('nfl_games', 'nfl_games.esbid', `${player_gamelogs_table}.esbid`)
     .count('* as rate_type_total_count')
     .select(db.raw(`array_agg(distinct ${player_gamelogs_table}.tm) as teams`))
     .where(`${player_gamelogs_table}.active`, true)
+
+  // Only join nfl_games when its columns are actually needed
+  const needs_nfl_games =
+    nfl_week.length > 0 ||
+    career_year.length > 0 ||
+    splits.includes('year') ||
+    splits.includes('week')
+
+  if (needs_nfl_games) {
+    cte_query.leftJoin(
+      'nfl_games',
+      'nfl_games.esbid',
+      `${player_gamelogs_table}.esbid`
+    )
+  }
 
   if (nfl_week.length) {
     cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)

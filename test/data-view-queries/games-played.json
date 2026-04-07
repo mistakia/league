@@ -17,7 +17,7 @@
       }
     ]
   },
-  "expected_query": "with \"t05e39f5f70132b957d199bed4db535fb\" as (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = true group by \"player_gamelogs\".\"pid\") select \"player\".\"pid\", t05e39f5f70132b957d199bed4db535fb.rate_type_total_count as games_played_0, \"player\".\"pos\" from \"player\" left join \"t05e39f5f70132b957d199bed4db535fb\" on \"t05e39f5f70132b957d199bed4db535fb\".\"pid\" = \"player\".\"pid\" group by t05e39f5f70132b957d199bed4db535fb.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"t05e39f5f70132b957d199bed4db535fb\" as (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams from \"player_gamelogs\" where \"player_gamelogs\".\"active\" = true group by \"player_gamelogs\".\"pid\") select \"player\".\"pid\", t05e39f5f70132b957d199bed4db535fb.rate_type_total_count as games_played_0, \"player\".\"pos\" from \"player\" left join \"t05e39f5f70132b957d199bed4db535fb\" on \"t05e39f5f70132b957d199bed4db535fb\".\"pid\" = \"player\".\"pid\" group by t05e39f5f70132b957d199bed4db535fb.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["plays", "games", "parameters", "sorting", "rate_type", "cte"],
   "timeout_ms": 40000
 }

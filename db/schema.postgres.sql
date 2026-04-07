@@ -27358,7 +27358,7 @@ CREATE INDEX idx_nfl_plays_esbid ON ONLY public.nfl_plays USING btree (esbid);
 -- Name: idx_nfl_plays_fantasy; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -28765,7 +28765,7 @@ CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -29115,7 +29115,7 @@ CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -29465,7 +29465,7 @@ CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -29815,7 +29815,7 @@ CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -30165,7 +30165,7 @@ CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -30515,7 +30515,7 @@ CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -30865,7 +30865,7 @@ CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -31215,7 +31215,7 @@ CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -31565,7 +31565,7 @@ CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -31915,7 +31915,7 @@ CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -32265,7 +32265,7 @@ CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -32615,7 +32615,7 @@ CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -32965,7 +32965,7 @@ CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -33315,7 +33315,7 @@ CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -33665,7 +33665,7 @@ CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -34015,7 +34015,7 @@ CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -34365,7 +34365,7 @@ CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -34715,7 +34715,7 @@ CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -35065,7 +35065,7 @@ CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -35415,7 +35415,7 @@ CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -35765,7 +35765,7 @@ CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -36115,7 +36115,7 @@ CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -36465,7 +36465,7 @@ CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -36815,7 +36815,7 @@ CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -37165,7 +37165,7 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -37515,7 +37515,7 @@ CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
@@ -37865,7 +37865,7 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
 
 
 --
