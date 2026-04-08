@@ -4,11 +4,9 @@ import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-b
 import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
+import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 export const get_default_params = ({ params = {} } = {}) => {
-  let nfl_week = params.nfl_week_id || []
-  if (!Array.isArray(nfl_week)) {
-    nfl_week = [nfl_week]
-  }
+  const nfl_week = resolve_nfl_week_id_from_year_param(params)
 
   return {
     nfl_week

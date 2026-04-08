@@ -1,12 +1,10 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
+import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import db from '#db'
 
 const get_default_params = ({ params = {} } = {}) => {
-  let nfl_week = params.nfl_week_id || []
-  if (!Array.isArray(nfl_week)) {
-    nfl_week = [nfl_week]
-  }
+  const nfl_week = resolve_nfl_week_id_from_year_param(params)
 
   let career_year = params.career_year || []
   if (!Array.isArray(career_year)) {

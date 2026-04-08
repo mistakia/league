@@ -4,6 +4,7 @@ import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-b
 import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
+import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 
 export const get_per_team_play_cte_table_name = ({
   params = {},
@@ -13,10 +14,7 @@ export const get_per_team_play_cte_table_name = ({
 } = {}) => {
   team_unit = params.team_unit || team_unit
 
-  let nfl_week = params.nfl_week_id || []
-  if (!Array.isArray(nfl_week)) {
-    nfl_week = [nfl_week]
-  }
+  const nfl_week = resolve_nfl_week_id_from_year_param(params)
 
   const play_type_suffix = play_type ? `_${play_type.toLowerCase()}` : ''
   const group_by_suffix = group_by ? `_${group_by}` : ''

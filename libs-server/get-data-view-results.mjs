@@ -226,7 +226,7 @@ const process_dynamic_params = (params) => {
 
 const process_dynamic_year_param = (year_param) => {
   let years = Array.isArray(year_param) ? year_param : [year_param]
-  const current_year = current_season.year
+  const current_year = current_season.stats_season_year
   const max_year = current_season.year
   const min_year = 2000
 
