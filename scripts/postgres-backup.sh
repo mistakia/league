@@ -207,13 +207,8 @@ fi
 tar -vcf $gz_file $sql_file
 rm $sql_file
 
-gdrive_backup_path="personal/projects/League/Data/Backups"
-
-# DISABLED: GDrive freeze for canonicalize-storage-hierarchy (2026-03-19)
-# if [ "$filename" = "checkpoint" ]; then
-#     rclone copyto "$gz_file" "google_drive_tintmail:$gdrive_backup_path/$gz_file"
-#     rclone dedupe newest "google_drive_tintmail:$gdrive_backup_path/" --include "$gz_file" 2>/dev/null || true
-# else
-#     /root/.google-drive-upload/bin/gupload -o $gz_file
-# fi
-rm $gz_file
+# Local retention: delete time-series backups older than 7 days for this backup_type.
+# Checkpoint files (checkpoint-*.tar.gz) are overwritten in place on each run, so
+# only the latest checkpoint per type is retained automatically. Storage server
+# pulls files from this directory via rsync and manages long-term retention.
+find "$dump_dir" -maxdepth 1 -type f -name "[0-9]*-${backup_type}.tar.gz" -mtime +7 -delete

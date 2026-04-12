@@ -155,6 +155,6 @@ fi
 tar -vcf $gz_file $sql_file
 rm $sql_file
 
-# DISABLED: GDrive freeze for canonicalize-storage-hierarchy (2026-03-19)
-# /root/.google-drive-upload/bin/gupload $gz_file
-rm $gz_file
+# Local retention: delete time-series backups older than 7 days for this backup_type.
+# Storage server pulls files from this directory via rsync and manages long-term retention.
+find "$DUMP_DIR" -maxdepth 1 -type f -name "[0-9]*-${backup_type}.tar.gz" -mtime +7 -delete
