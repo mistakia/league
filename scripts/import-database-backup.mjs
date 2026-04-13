@@ -15,8 +15,8 @@ const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
-const log = debug('import-database-from-drive')
-debug.enable('import-database-from-drive')
+const log = debug('import-database-backup')
+debug.enable('import-database-backup')
 
 const extract_dump_objects = ({ sql_text }) => {
   const tables = new Set()

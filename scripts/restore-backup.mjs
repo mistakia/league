@@ -17,8 +17,8 @@ const exec = (cmd, options = {}) =>
     ...options
   })
 
-const log = debug('download-backup-from-drive')
-debug.enable('download-backup-from-drive')
+const log = debug('restore-backup')
+debug.enable('restore-backup')
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))
