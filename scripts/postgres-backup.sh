@@ -207,8 +207,10 @@ fi
 tar -vcf $gz_file $sql_file
 rm $sql_file
 
-# Local retention: delete time-series backups older than 7 days for this backup_type.
+# Local retention: delete ALL time-series backups older than 7 days (any type).
+# Cleaning all types prevents stale files from other backup categories (which may
+# run on different schedules) from persisting and being re-copied by rsync.
 # Checkpoint files (checkpoint-*.tar.gz) are overwritten in place on each run, so
 # only the latest checkpoint per type is retained automatically. Storage server
 # pulls files from this directory via rsync and manages long-term retention.
-find "$dump_dir" -maxdepth 1 -type f -name "[0-9]*-${backup_type}.tar.gz" -mtime +7 -delete
+find "$dump_dir" -maxdepth 1 -type f -name "[0-9]*.tar.gz" -mtime +7 -delete

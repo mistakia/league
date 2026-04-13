@@ -8,7 +8,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { is_main, googleDrive, downloadFile } from '#libs-server'
+import { is_main } from '#libs-server'
 import config from '#config'
 
 const initialize_cli = () => {
@@ -96,26 +96,45 @@ const drop_conflicting_constraints_and_indexes = async ({ dump_sql_path }) => {
   }
 }
 
-const select_drive_file_by_type = async ({ type }) => {
-  const drive = await googleDrive()
-  const parent_id = '1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v'
-  const list_params = {
-    q: `"${parent_id}" in parents and trashed=false`,
-    orderBy: 'modifiedTime desc',
-    pageSize: 150
+const STORAGE_BACKUP_PATH =
+  '/mnt/md0/backups/servers/league-production/backups'
+const LOCAL_BACKUP_PATH = '/root/backups'
+
+const select_backup_file_by_type = async ({ type }) => {
+  const name_pattern = type || 'user'
+
+  if (fs.existsSync(LOCAL_BACKUP_PATH)) {
+    log('Searching local backups at %s', LOCAL_BACKUP_PATH)
+    const { stdout } = cp.execSync(
+      `ls -t "${LOCAL_BACKUP_PATH}"/*.tar.gz 2>/dev/null || true`,
+      { encoding: 'utf8' }
+    )
+    const files = stdout.trim().split('\n').filter(Boolean)
+    const match = files.find((f) => path.basename(f).includes(name_pattern))
+    return match ? { name: path.basename(match), local_path: match } : null
   }
-  const res = await drive.files.list(list_params)
-  const pattern_by_type = {
-    user: 'user',
-    logs: 'logs',
-    stats: 'stats',
-    betting: 'betting',
-    cache: 'cache',
-    full: 'full'
+
+  log('Searching storage server backups via SSH')
+  const { stdout } = cp.execSync(
+    `ssh storage 'ls -t ${STORAGE_BACKUP_PATH}/*.tar.gz 2>/dev/null || true'`,
+    { encoding: 'utf8' }
+  )
+  const files = stdout.trim().split('\n').filter(Boolean)
+  const match = files.find((f) => path.basename(f).includes(name_pattern))
+  if (!match) return null
+  return { name: path.basename(match), remote_path: match }
+}
+
+const fetch_backup_file = ({ file }) => {
+  if (file.local_path) {
+    return file.local_path
   }
-  const name_pattern = pattern_by_type[type] || pattern_by_type.user
-  const file = res.data.files.find((f) => f.name.includes(name_pattern))
-  return { drive, file }
+  const local_dest = path.join(os.tmpdir(), file.name)
+  log('Downloading %s from storage via scp', file.name)
+  cp.execSync(`scp storage:${file.remote_path} "${local_dest}"`, {
+    stdio: 'inherit'
+  })
+  return local_dest
 }
 
 const find_sql_file = ({ dir }) => {
@@ -147,14 +166,16 @@ const remove_if_exists = (target_path) => {
 
 const run = async ({ file_path, type = 'user' } = {}) => {
   let archive_path = file_path
+  let fetched_from_remote = false
   if (!archive_path) {
-    const { drive, file } = await select_drive_file_by_type({ type })
+    const file = await select_backup_file_by_type({ type })
     if (!file) {
       log('file not found')
       return
     }
-    log(`loading ${type} dump from drive: ${file.name}`)
-    archive_path = await downloadFile({ drive, file })
+    log(`loading ${type} dump: ${file.name}`)
+    archive_path = fetch_backup_file({ file })
+    fetched_from_remote = !file.local_path
   } else {
     log('using provided filepath')
   }
@@ -201,7 +222,7 @@ const run = async ({ file_path, type = 'user' } = {}) => {
     })
   } finally {
     remove_if_exists(temp_dir)
-    if (!file_path) remove_if_exists(archive_path)
+    if (!file_path && fetched_from_remote) remove_if_exists(archive_path)
   }
 }
 

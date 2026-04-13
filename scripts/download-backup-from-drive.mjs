@@ -8,7 +8,7 @@ import path from 'path'
 import { createReadStream, createWriteStream, existsSync } from 'fs'
 import readline from 'readline'
 
-import { is_main, googleDrive, downloadFile } from '#libs-server'
+import { is_main } from '#libs-server'
 
 // Increase maxBuffer size to handle larger outputs
 const exec = (cmd, options = {}) =>
@@ -212,31 +212,76 @@ DO UPDATE SET value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}'
   return output_file
 }
 
+const STORAGE_BACKUP_PATH =
+  '/mnt/md0/backups/servers/league-production/backups'
+const LOCAL_BACKUP_PATH = '/root/backups'
+
 /**
- * Find the latest backup file on Google Drive matching the query.
+ * Find the latest backup file matching the query.
+ * Checks local /root/backups/ first (when running on the league server),
+ * otherwise lists files on the storage server via SSH.
+ * Returns { name, remote_path } where remote_path is set for storage files.
  */
-const find_backup_file = async ({ drive, query }) => {
-  const list_params = {
-    q: `"1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v" in parents and trashed=false and name contains "${query}"`,
-    orderBy: 'modifiedByMeTime desc',
-    pageSize: 150
+const find_backup_file = async ({ query }) => {
+  if (existsSync(LOCAL_BACKUP_PATH)) {
+    log('Searching local backups at %s', LOCAL_BACKUP_PATH)
+    const { stdout } = await exec(
+      `ls -t "${LOCAL_BACKUP_PATH}"/*.tar.gz 2>/dev/null || true`
+    )
+    const files = stdout.trim().split('\n').filter(Boolean)
+    const match = files.find((f) => path.basename(f).includes(query))
+    if (!match) {
+      throw new Error(
+        `No backup files found matching "${query}" in ${LOCAL_BACKUP_PATH}`
+      )
+    }
+    return { name: path.basename(match), local_path: match }
   }
-  log('Searching for backup files matching:', query)
-  const res = await drive.files.list(list_params)
-  if (!res.data.files || res.data.files.length === 0) {
-    throw new Error(`No backup files found matching "${query}"`)
+
+  log('Searching storage server backups via SSH')
+  const { stdout } = await exec(
+    `ssh storage 'ls -t ${STORAGE_BACKUP_PATH}/*.tar.gz 2>/dev/null || true'`
+  )
+  const files = stdout.trim().split('\n').filter(Boolean)
+  const match = files.find((f) => path.basename(f).includes(query))
+  if (!match) {
+    throw new Error(
+      `No backup files found matching "${query}" on storage:${STORAGE_BACKUP_PATH}`
+    )
   }
-  return res.data.files[0]
+  return { name: path.basename(match), remote_path: match }
 }
 
 /**
- * Extract the SQL file from a downloaded tar.gz archive.
+ * Download a backup file from the storage server via scp,
+ * or return the local path if running on the league server.
+ */
+const download_file = async ({ file }) => {
+  if (file.local_path) {
+    log('Using local file: %s', file.local_path)
+    return file.local_path
+  }
+  const local_dest = `./${file.name}`
+  log('Downloading %s from storage via scp', file.name)
+  await exec(`scp storage:${file.remote_path} ${local_dest}`)
+  log('Download complete: %s', file.name)
+  return local_dest
+}
+
+/**
+ * Extract the SQL file from a tar.gz archive.
+ * Extracts to the current working directory to avoid writing temp files
+ * into the source backup directory.
  */
 const extract_sql_file_from_archive = async ({ downloaded_file }) => {
   log('Extracting backup file')
-  const extract_dir = path.dirname(downloaded_file)
+  const filename = path.basename(downloaded_file)
+  const extract_dir = process.cwd()
   await exec(`tar -xzf "${downloaded_file}" -C "${extract_dir}"`)
-  const extracted_sql_file = downloaded_file.replace('.tar.gz', '.sql')
+  const extracted_sql_file = path.join(
+    extract_dir,
+    filename.replace('.tar.gz', '.sql')
+  )
   if (!existsSync(extracted_sql_file)) {
     throw new Error(`Could not find extracted SQL file: ${extracted_sql_file}`)
   }
@@ -302,8 +347,10 @@ const handle_config_table_upsert = async ({
   await exec(psql_command)
   log('Config values updated successfully')
   if (options.config_only) {
-    // Clean up files
-    const files_to_clean = [downloaded_file, extracted_sql_file, upsert_file]
+    const files_to_clean = [extracted_sql_file, upsert_file]
+    if (!file.local_path) {
+      files_to_clean.push(downloaded_file)
+    }
     await exec(`rm ${files_to_clean.join(' ')}`)
     log('Cleaned up temporary files')
     return {
@@ -476,11 +523,9 @@ const download_backup_from_drive = async (
   options = {}
 ) => {
   try {
-    log('Connecting to Google Drive')
-    const drive = await googleDrive()
-    const file = await find_backup_file({ drive, query })
+    const file = await find_backup_file({ query })
     log(`Found backup file: ${file.name}`)
-    const downloaded_file = await downloadFile({ drive, file })
+    const downloaded_file = await download_file({ file })
     log(`Downloaded ${downloaded_file}`)
     const extracted_sql_file = await extract_sql_file_from_archive({
       downloaded_file
@@ -530,7 +575,11 @@ const download_backup_from_drive = async (
       db_password,
       options
     })
-    const files_to_clean = [downloaded_file, extracted_sql_file]
+    const files_to_clean = [extracted_sql_file]
+    // Only delete the archive if it was downloaded (not a local source file)
+    if (!file.local_path) {
+      files_to_clean.push(downloaded_file)
+    }
     if (import_file !== extracted_sql_file) {
       files_to_clean.push(import_file)
     }
