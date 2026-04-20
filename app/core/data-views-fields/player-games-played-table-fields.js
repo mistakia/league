@@ -8,7 +8,7 @@ export default {
     column_title: 'Games Played',
     header_label: 'GP',
     player_value_path: 'games_played',
-    size: 40,
+    size: 50,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params: {
       year,
