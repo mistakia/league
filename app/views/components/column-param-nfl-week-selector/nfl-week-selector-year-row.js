@@ -56,9 +56,7 @@ export default function NflWeekSelectorYearRow({
 
   const statics_set = useMemo(
     () =>
-      new Set(
-        (current_selection || []).filter((v) => typeof v === 'string')
-      ),
+      new Set((current_selection || []).filter((v) => typeof v === 'string')),
     [current_selection]
   )
 
@@ -72,7 +70,8 @@ export default function NflWeekSelectorYearRow({
       }
       let hits = 0
       for (const id of reg_ids) if (statics_set.has(id)) hits++
-      map[year] = hits === 0 ? 'none' : hits === reg_ids.length ? 'full' : 'partial'
+      map[year] =
+        hits === 0 ? 'none' : hits === reg_ids.length ? 'full' : 'partial'
     }
     return map
   }, [visible_years, statics_set])

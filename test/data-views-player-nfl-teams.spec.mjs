@@ -11,15 +11,15 @@ const def = player_team_column_definition.player_nfl_teams
 
 describe('player_nfl_teams routing', function () {
   it('falls back to player.current_nfl_team when no filter params or splits', () => {
-    expect(
-      def.is_where_column_array({ params: {}, splits: [] })
-    ).to.equal(false)
-    expect(def.main_select({ params: {}, splits: [], column_index: 0 })).to.deep.equal([
-      'player.current_nfl_team as player_nfl_teams_0'
-    ])
-    expect(def.main_where({ params: {}, splits: [], column_index: 0 })).to.equal(
-      'player.current_nfl_team'
+    expect(def.is_where_column_array({ params: {}, splits: [] })).to.equal(
+      false
     )
+    expect(
+      def.main_select({ params: {}, splits: [], column_index: 0 })
+    ).to.deep.equal(['player.current_nfl_team as player_nfl_teams_0'])
+    expect(
+      def.main_where({ params: {}, splits: [], column_index: 0 })
+    ).to.equal('player.current_nfl_team')
   })
 
   it('routes to CTE when nfl_week_id is set (multi-year or week-specific)', () => {

@@ -90,11 +90,7 @@ export default function data_view_join_function(join_arguments) {
         const team_join_target = data_view_options.player_year_teams_cte_name
           ? `${data_view_options.player_year_teams_cte_name}.team`
           : 'player.current_nfl_team'
-        this.on(
-          `${table_name}.${join_table_team_field}`,
-          '=',
-          team_join_target
-        )
+        this.on(`${table_name}.${join_table_team_field}`, '=', team_join_target)
 
         // Add week join condition for team stats tables when week split is enabled
         if (splits.includes('week') && table_name.includes('_team_stats')) {

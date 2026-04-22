@@ -249,11 +249,11 @@ POST /data-views/search
 
 Weekly data-view columns use one of three param flavors, picked by the data's natural grain:
 
-| Flavor                    | Param                      | Cardinality    | Used by                                                                                                                                            |
-| ------------------------- | -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Season-level              | `single_year` / `year`     | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, season-level rankings, ESPN scores, team DVOA, PFF grades, format logs                  |
-| Single-week point-in-time | `single_nfl_week_id`       | scalar         | DFS salary, DFS ownership, practice designation, weekly rankings, weekly projected market salary, betting game-prop markets, fantasy roster status |
-| Multi-week aggregation    | `nfl_week_id`              | multi          | play-by-play stats, games played, player-teams history                                                                                             |
+| Flavor                    | Param                  | Cardinality    | Used by                                                                                                                                            |
+| ------------------------- | ---------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Season-level              | `single_year` / `year` | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, season-level rankings, ESPN scores, team DVOA, PFF grades, format logs                  |
+| Single-week point-in-time | `single_nfl_week_id`   | scalar         | DFS salary, DFS ownership, practice designation, weekly rankings, weekly projected market salary, betting game-prop markets, fantasy roster status |
+| Multi-week aggregation    | `nfl_week_id`          | multi          | play-by-play stats, games played, player-teams history                                                                                             |
 
 `single_nfl_week_id` is the scalar counterpart of `nfl_week_id`. It stores as a one-element array and uses the same `ColumnParamNflWeekFilter` component in `single: true` mode. The server-side helper `resolve_single_nfl_week_id` in `libs-server/data-views/` extracts the scalar value with backward-compat fallback: `params.single_nfl_week_id` → `params.nfl_week_id[0]` → constructed from legacy `params.year` + `params.week` + `params.seas_type`.
 

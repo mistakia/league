@@ -2,16 +2,12 @@
   "name": "current season traded player team stats diggs 2025",
   "description": "Diggs 2025 primary repro: year:[2025] current season, no splits; team stat resolves via player_year_teams to traded team",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "team_pass_yards_from_plays",
         "params": {
-          "year": [
-            2025
-          ]
+          "year": [2025]
         }
       }
     ],

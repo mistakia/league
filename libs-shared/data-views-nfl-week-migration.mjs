@@ -93,7 +93,9 @@ const resolve_multi_identifiers = (params = {}) => {
   for (const y of years) {
     for (const w of weeks) {
       for (const st of types) {
-        out.push(format_nfl_week_identifier({ year: y, seas_type: st, week: w }))
+        out.push(
+          format_nfl_week_identifier({ year: y, seas_type: st, week: w })
+        )
       }
     }
   }

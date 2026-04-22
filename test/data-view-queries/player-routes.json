@@ -6,9 +6,7 @@
       {
         "column_id": "player_routes",
         "params": {
-          "year": [
-            2024
-          ]
+          "year": [2024]
         }
       }
     ],
@@ -20,13 +18,6 @@
     ]
   },
   "expected_query": "with \"tce66cf57ebb97797e5c8d3e5539ce862\" as materialized (select \"nfl_plays_receiver\".\"gsis_id\", COUNT(*) as rate_type_total_count from \"nfl_plays_receiver\" inner join \"nfl_plays\" on \"nfl_plays_receiver\".\"esbid\" = \"nfl_plays\".\"esbid\" and \"nfl_plays_receiver\".\"playId\" = \"nfl_plays\".\"playId\" where \"play_type\" = 'PASS' and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays_receiver\".\"year\" in (2024) group by \"nfl_plays_receiver\".\"gsis_id\") select \"player\".\"pid\", tce66cf57ebb97797e5c8d3e5539ce862.rate_type_total_count as player_routes_0, \"player\".\"pos\" from \"player\" left join \"tce66cf57ebb97797e5c8d3e5539ce862\" on \"tce66cf57ebb97797e5c8d3e5539ce862\".\"gsis_id\" = \"player\".\"gsisid\" group by tce66cf57ebb97797e5c8d3e5539ce862.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "player",
-    "plays",
-    "parameters",
-    "sorting",
-    "rate_type",
-    "cte"
-  ],
+  "tags": ["player", "plays", "parameters", "sorting", "rate_type", "cte"],
   "timeout_ms": 40000
 }

@@ -2,19 +2,12 @@
   "name": "year splits retired player team stats",
   "description": "Retired player (Brady) year-splits 2018-2021 produces non-NULL team stats via player_year_teams CTE",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "team_pass_yards_from_plays",
         "params": {
-          "year": [
-            2018,
-            2019,
-            2020,
-            2021
-          ]
+          "year": [2018, 2019, 2020, 2021]
         }
       }
     ],
@@ -25,9 +18,7 @@
         "value": "TOMX-BRAD-2000-1977-08-03"
       }
     ],
-    "splits": [
-      "year"
-    ],
+    "splits": ["year"],
     "sort": [
       {
         "column_id": "team_pass_yards_from_plays",

@@ -96,8 +96,7 @@ const drop_conflicting_constraints_and_indexes = async ({ dump_sql_path }) => {
   }
 }
 
-const STORAGE_BACKUP_PATH =
-  '/mnt/md0/backups/servers/league-production/backups'
+const STORAGE_BACKUP_PATH = '/mnt/md0/backups/servers/league-production/backups'
 const LOCAL_BACKUP_PATH = '/root/backups'
 
 const select_backup_file_by_type = async ({ type }) => {

@@ -6,9 +6,7 @@
       {
         "column_id": "pff_team_grades_offense",
         "params": {
-          "year": [
-            2024
-          ],
+          "year": [2024],
           "matchup_opponent_type": "current_week_opponent_total"
         }
       }
@@ -23,9 +21,7 @@
       {
         "column_id": "player_position",
         "params": {},
-        "value": [
-          "TEAM"
-        ],
+        "value": ["TEAM"],
         "operator": "IN"
       }
     ],

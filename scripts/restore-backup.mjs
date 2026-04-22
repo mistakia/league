@@ -212,8 +212,7 @@ DO UPDATE SET value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}'
   return output_file
 }
 
-const STORAGE_BACKUP_PATH =
-  '/mnt/md0/backups/servers/league-production/backups'
+const STORAGE_BACKUP_PATH = '/mnt/md0/backups/servers/league-production/backups'
 const LOCAL_BACKUP_PATH = '/root/backups'
 
 /**

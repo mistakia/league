@@ -8,17 +8,12 @@
         "desc": true
       }
     ],
-    "prefix_columns": [
-      "player_name",
-      "player_league_roster_status"
-    ],
+    "prefix_columns": ["player_name", "player_league_roster_status"],
     "columns": [
       {
         "column_id": "team_pass_attempts_from_plays",
         "params": {
-          "year": [
-            2023
-          ]
+          "year": [2023]
         }
       }
     ],
@@ -26,20 +21,11 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "DST"
-        ]
+        "value": ["DST"]
       }
     ]
   },
   "expected_query": "with \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) AS team_pass_att_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_PRE_WEEK_1', '2023_PRE_WEEK_2', '2023_PRE_WEEK_3', '2023_PRE_WEEK_4', '2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2023_REG_WEEK_5', '2023_REG_WEEK_6', '2023_REG_WEEK_7', '2023_REG_WEEK_8', '2023_REG_WEEK_9', '2023_REG_WEEK_10', '2023_REG_WEEK_11', '2023_REG_WEEK_12', '2023_REG_WEEK_13', '2023_REG_WEEK_14', '2023_REG_WEEK_15', '2023_REG_WEEK_16', '2023_REG_WEEK_17', '2023_REG_WEEK_18', '2023_REG_WEEK_19', '2023_REG_WEEK_20', '2023_REG_WEEK_21', '2023_POST_WEEK_1', '2023_POST_WEEK_2', '2023_POST_WEEK_3', '2023_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"year\" in (2023) group by \"nfl_plays\".\"off\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_att_from_plays) as team_pass_att_from_plays from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" = 'REG' and \"nfl_games\".\"year\" in (2023) and \"player_gamelogs\".\"year\" in (2023) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"player\".\"pid\", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_att_from_plays\" AS \"team_pass_att_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"rosters_players\" on \"rosters_players\".\"pid\" = \"player\".\"pid\" and \"rosters_players\".\"year\" = 2026 and \"rosters_players\".\"week\" = 0 and \"rosters_players\".\"lid\" = 1 left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = 2023 left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" where player.pos IN ('DST') group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_att_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 8 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "team",
-    "plays",
-    "filters",
-    "parameters",
-    "sorting",
-    "cte"
-  ],
+  "tags": ["team", "plays", "filters", "parameters", "sorting", "cte"],
   "timeout_ms": 40000
 }

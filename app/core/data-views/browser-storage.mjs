@@ -246,7 +246,8 @@ const sanitize_snapshot = (snapshot) => {
   }
 
   const post_columns = snapshot.table_state.columns?.map(migrate_column)
-  const post_prefix_columns = snapshot.table_state.prefix_columns?.map(migrate_column)
+  const post_prefix_columns =
+    snapshot.table_state.prefix_columns?.map(migrate_column)
 
   return {
     ...snapshot,

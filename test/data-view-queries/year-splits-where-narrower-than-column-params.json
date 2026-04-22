@@ -15,9 +15,23 @@
       }
     ],
     "where": [
-      { "column_id": "player_position", "operator": "IN", "value": ["WR", "TE"] },
-      { "column_id": "player_espn_open_score", "params": { "year": [2025] }, "operator": "IS NOT NULL", "value": null },
-      { "column_id": "player_espn_catch_score", "params": { "year": [2025] }, "operator": ">", "value": "0" }
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["WR", "TE"]
+      },
+      {
+        "column_id": "player_espn_open_score",
+        "params": { "year": [2025] },
+        "operator": "IS NOT NULL",
+        "value": null
+      },
+      {
+        "column_id": "player_espn_catch_score",
+        "params": { "year": [2025] },
+        "operator": ">",
+        "value": "0"
+      }
     ],
     "sort": [{ "column_id": "player_espn_open_score", "desc": true }]
   },

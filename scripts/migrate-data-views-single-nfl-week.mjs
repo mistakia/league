@@ -25,7 +25,13 @@ const argv = yargs(hideBin(process.argv))
     default: 500
   }).argv
 
-const migrate_table = async ({ table, id_column, apply, verbose, chunk_size }) => {
+const migrate_table = async ({
+  table,
+  id_column,
+  apply,
+  verbose,
+  chunk_size
+}) => {
   let last_id = null
   let total = 0
   let migrated_count = 0
@@ -76,7 +82,9 @@ const migrate_table = async ({ table, id_column, apply, verbose, chunk_size }) =
     }
   }
 
-  log(`${table}: total=${total} migrated=${migrated_count} skipped=${skipped_count}`)
+  log(
+    `${table}: total=${total} migrated=${migrated_count} skipped=${skipped_count}`
+  )
 }
 
 const main = async () => {

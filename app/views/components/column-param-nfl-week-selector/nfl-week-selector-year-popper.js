@@ -40,9 +40,7 @@ export default function NflWeekSelectorYearPopper({
 
   const statics_set = useMemo(
     () =>
-      new Set(
-        (current_selection || []).filter((v) => typeof v === 'string')
-      ),
+      new Set((current_selection || []).filter((v) => typeof v === 'string')),
     [current_selection]
   )
 
