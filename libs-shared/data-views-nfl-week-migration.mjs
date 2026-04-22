@@ -156,3 +156,23 @@ export const migrate_column_entry = ({ column_id, params }) => {
 
   return { column_id, params }
 }
+
+/**
+ * Apply `migrate_column_entry` to an array of column descriptors.
+ * Handles both string ids and `{column_id, params}` objects, preserving
+ * non-column fields (e.g. operator/value on where-clauses).
+ */
+export const migrate_entries_array = (entries) => {
+  if (!Array.isArray(entries)) return entries
+  return entries.map((entry) => {
+    if (typeof entry === 'string') {
+      return migrate_column_entry({ column_id: entry, params: {} }).column_id
+    }
+    if (!entry || !entry.column_id) return entry
+    const migrated = migrate_column_entry({
+      column_id: entry.column_id,
+      params: entry.params || {}
+    })
+    return { ...entry, column_id: migrated.column_id, params: migrated.params }
+  })
+}
