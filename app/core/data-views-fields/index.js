@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 
 import { data_view_fields_index } from '@libs-shared'
 import { current_season } from '@constants'
-import ColumnParamNflWeekFilter from '@components/column-param-nfl-week-filter'
+import ColumnParamNflWeekSelector from '@components/column-param-nfl-week-selector/column-param-nfl-week-selector.js'
 
 import betting_market_table_fields from './betting-market-table-fields'
 import espn_score_table_fields from './espn-score-table-fields'
@@ -129,11 +129,12 @@ export function PlayerTableFields({
     fields[key].description = data_view_fields_index[key] || null
 
     if (value.column_params?.nfl_week_id) {
-      fields[key].column_params.nfl_week_id.component = ColumnParamNflWeekFilter
+      fields[key].column_params.nfl_week_id.component =
+        ColumnParamNflWeekSelector
     }
     if (value.column_params?.single_nfl_week_id) {
       fields[key].column_params.single_nfl_week_id.component =
-        ColumnParamNflWeekFilter
+        ColumnParamNflWeekSelector
     }
   }
 

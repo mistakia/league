@@ -2,7 +2,7 @@ import { current_season, nfl_season_types } from '#constants'
 
 const NFL_WEEK_REGEX = /^(\d{4})_(PRE|REG|POST)_WEEK_(\d+)$/
 
-const WEEK_RANGES = {
+export const WEEK_RANGES = {
   PRE: { min: 1, max: 4 },
   REG: { min: 1, max: 21 },
   POST: { min: 1, max: 4 }

@@ -357,26 +357,11 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       expect(dynamic_types).to.include('last_n_nfl_years')
     })
 
-    it('has next_n_nfl_years dynamic value', () => {
-      const dynamic_types = common_column_params.nfl_week_id.dynamic_values.map(
-        (d) => d.dynamic_type
-      )
-      expect(dynamic_types).to.include('next_n_nfl_years')
-    })
-
     it('last_n_nfl_years has default_value and has_value_field', () => {
       const dv = common_column_params.nfl_week_id.dynamic_values.find(
         (d) => d.dynamic_type === 'last_n_nfl_years'
       )
       expect(dv).to.have.property('default_value', 3)
-      expect(dv).to.have.property('has_value_field', true)
-    })
-
-    it('next_n_nfl_years has default_value and has_value_field', () => {
-      const dv = common_column_params.nfl_week_id.dynamic_values.find(
-        (d) => d.dynamic_type === 'next_n_nfl_years'
-      )
-      expect(dv).to.have.property('default_value', 1)
       expect(dv).to.have.property('has_value_field', true)
     })
   })
@@ -422,14 +407,18 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       const result = resolve_single_nfl_week_id({
         params: { year: [2022], week: [9], seas_type: ['REG'] }
       })
-      expect(result).to.equal(format_nfl_week_identifier({ year: 2022, seas_type: 'REG', week: 9 }))
+      expect(result).to.equal(
+        format_nfl_week_identifier({ year: 2022, seas_type: 'REG', week: 9 })
+      )
     })
 
     it('defaults legacy seas_type to REG', () => {
       const result = resolve_single_nfl_week_id({
         params: { year: [2021], week: [3] }
       })
-      expect(result).to.equal(format_nfl_week_identifier({ year: 2021, seas_type: 'REG', week: 3 }))
+      expect(result).to.equal(
+        format_nfl_week_identifier({ year: 2021, seas_type: 'REG', week: 3 })
+      )
     })
 
     it('returns null when no params', () => {

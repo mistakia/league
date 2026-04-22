@@ -1,0 +1,293 @@
+.nfl-week-selector
+  display flex
+  flex-direction column
+  min-width 320px
+  max-width 420px
+  max-height calc(100vh - 200px)
+  overflow-y auto
+
+.nfl-week-selector-section
+  padding 10px 12px
+  border-bottom 1px solid $borderColor
+
+  &:last-child
+    border-bottom none
+
+.nfl-week-selector-section-head
+  display flex
+  align-items center
+  gap 8px
+  margin-bottom 8px
+
+  .nfl-week-selector-section-header
+    margin-bottom 0
+    flex 1
+
+.nfl-week-selector-section-header
+  font-size 0.625rem
+  font-weight 700
+  color lighten($textColor, 40%)
+  text-transform uppercase
+  letter-spacing 0.04em
+  margin-bottom 6px
+
+.nfl-week-selector-year-row
+  display flex
+  align-items center
+  flex-wrap wrap
+  gap 4px
+
+.nfl-week-selector-year-item
+  display inline-flex
+  align-items stretch
+  border 1px solid #e0e0e0
+  border-radius 4px
+  overflow hidden
+  background #f7f7f7
+  user-select none
+  transition border-color 120ms ease, background 120ms ease
+
+  &:hover
+    border-color #c0c0c0
+    background #efefef
+
+.nfl-week-selector-year-btn
+  padding 3px 8px
+  font-size 0.6875rem
+  font-weight 500
+  cursor pointer
+  user-select none
+  color lighten($textColor, 5%)
+  min-width 38px
+  text-align center
+  line-height 1.5
+
+  &.partial
+    background rgba(25, 118, 210, 0.10)
+    color #1976d2
+    font-weight 600
+
+  &.full
+    background rgba(25, 118, 210, 0.22)
+    color #1565c0
+    font-weight 700
+
+.nfl-week-selector-year-caret
+  display inline-flex
+  align-items center
+  justify-content center
+  padding 0 3px
+  border-left 1px solid #e0e0e0
+  cursor pointer
+  color lighten($textColor, 25%)
+
+  &:hover
+    background rgba(25, 118, 210, 0.08)
+    color #1976d2
+
+  .MuiSvgIcon-root
+    width 16px
+    height 16px
+
+.nfl-week-selector-note
+  font-size 0.625rem
+  color lighten($textColor, 40%)
+  font-style italic
+  line-height 1.4
+  margin-bottom 8px
+  padding 4px 6px
+  background rgba(25, 118, 210, 0.04)
+  border-radius 2px
+
+.nfl-week-selector-show-more
+  font-size 0.625rem
+  font-weight 600
+  color #1976d2
+  cursor pointer
+  padding 3px 6px
+  border-radius 3px
+  text-transform uppercase
+  letter-spacing 0.04em
+  user-select none
+
+  &:hover
+    background rgba(25, 118, 210, 0.10)
+
+.nfl-week-selector-year-popper
+  z-index 1500
+
+.nfl-week-selector-year-popper-body
+  background #fff
+  border 1px solid #d0d0d0
+  border-radius 6px
+  box-shadow 0 4px 14px rgba(0, 0, 0, 0.14)
+  padding 10px 12px
+  min-width 280px
+  margin-top 4px
+
+.nfl-week-selector-year-popper-title
+  font-size 0.8125rem
+  font-weight 700
+  color $textColor
+  padding-bottom 6px
+  margin-bottom 8px
+  border-bottom 1px solid $borderColor
+
+.nfl-week-selector-year-popper-section
+  margin-bottom 10px
+
+  &:last-child
+    margin-bottom 0
+
+.nfl-week-selector-year-popper-section-head
+  display flex
+  align-items center
+  gap 8px
+  font-size 0.625rem
+  font-weight 700
+  color lighten($textColor, 30%)
+  text-transform uppercase
+  letter-spacing 0.04em
+  margin-bottom 6px
+
+  > span:first-child
+    flex 1
+
+.nfl-week-selector-bulk-btn
+  font-size 0.625rem
+  font-weight 600
+  color #1976d2
+  cursor pointer
+  padding 2px 4px
+  border-radius 3px
+  text-transform uppercase
+  letter-spacing 0.04em
+
+  &:hover
+    background rgba(25, 118, 210, 0.10)
+
+.nfl-week-selector-year-popper-weeks
+  display flex
+  flex-wrap wrap
+  gap 4px
+
+.nfl-week-selector-week-btn
+  display inline-flex
+  align-items center
+  justify-content center
+  padding 3px 8px
+  font-size 0.6875rem
+  font-weight 500
+  border 1px solid #e0e0e0
+  border-radius 4px
+  cursor pointer
+  user-select none
+  background #f7f7f7
+  color lighten($textColor, 5%)
+  min-width 30px
+
+  &:hover
+    background #efefef
+    border-color #c0c0c0
+
+  &.active
+    background rgba(25, 118, 210, 0.22)
+    border-color rgba(25, 118, 210, 0.5)
+    color #1565c0
+    font-weight 700
+
+  &.disabled
+    opacity 0.35
+    cursor default
+    &:hover
+      background #f7f7f7
+      border-color #e0e0e0
+
+.nfl-week-selector-summary
+  background rgba(0, 0, 0, 0.015)
+
+.nfl-week-selector-summary-empty
+  font-size 0.6875rem
+  color lighten($textColor, 40%)
+  padding 2px 0
+  font-style italic
+
+.nfl-week-selector-summary-group
+  display flex
+  align-items center
+  justify-content space-between
+  gap 8px
+  padding 4px 0
+  font-size 0.6875rem
+  border-bottom 1px dashed rgba(0, 0, 0, 0.05)
+
+  &:last-of-type
+    border-bottom none
+
+.nfl-week-selector-summary-group-label
+  flex 1
+  color $textColor
+  line-height 1.4
+
+.nfl-week-selector-summary-group-remove
+  font-size 0.625rem
+  font-weight 600
+  color lighten($textColor, 50%)
+  cursor pointer
+  padding 2px 6px
+  border-radius 3px
+  text-transform uppercase
+  letter-spacing 0.04em
+
+  &:hover
+    color #d32f2f
+    background rgba(211, 47, 47, 0.08)
+
+.nfl-week-selector-full-list-toggle
+  font-size 0.625rem
+  font-weight 600
+  color #1976d2
+  cursor pointer
+  padding 6px 0 2px
+  text-transform uppercase
+  letter-spacing 0.04em
+
+  &:hover
+    text-decoration underline
+
+.nfl-week-selector-full-list
+  max-height 220px
+  overflow-y auto
+  margin-top 6px
+  padding-top 6px
+  border-top 1px solid $borderColor
+
+.nfl-week-selector-full-list-item
+  display flex
+  align-items center
+  padding 2px 0
+  cursor pointer
+  font-size 0.6875rem
+
+  &:hover
+    background #fafafa
+
+  .MuiCheckbox-root
+    padding 0 4px 0 0
+
+  .MuiSvgIcon-root
+    width 14px
+    height 14px
+
+.nfl-week-selector-history-controls
+  display inline-flex
+  align-items center
+  gap 2px
+  margin-right 6px
+
+  .MuiIconButton-root
+    padding 3px
+
+  .MuiSvgIcon-root
+    width 15px
+    height 15px

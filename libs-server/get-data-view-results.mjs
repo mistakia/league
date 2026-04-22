@@ -348,15 +348,6 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
           }
           return result
         }
-        case 'next_n_nfl_years': {
-          const n = parseInt(item.value || 1, 10)
-          const result = []
-          for (let i = 1; i <= n; i++) {
-            const y = current_season.year + i
-            result.push(...get_nfl_week_identifiers_for_year({ year: y }))
-          }
-          return result
-        }
         default:
           return []
       }

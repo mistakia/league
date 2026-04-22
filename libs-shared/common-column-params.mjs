@@ -215,12 +215,6 @@ export const nfl_week_id = {
       label: 'Last N NFL Years',
       default_value: 3,
       has_value_field: true
-    },
-    {
-      dynamic_type: 'next_n_nfl_years',
-      label: 'Next N NFL Years',
-      default_value: 1,
-      has_value_field: true
     }
   ]
 }
