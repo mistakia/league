@@ -14,18 +14,12 @@ const seasonlog_field = (props) => ({
   }
 })
 
-export default function ({ is_logged_in }) {
+export default function () {
   const fields = {
     player_career_year: seasonlog_field({
       column_title: 'Career Year',
       header_label: 'Career Yr',
       player_value_path: 'career_year'
-    })
-  }
-
-  if (!is_logged_in) {
-    Object.keys(fields).forEach((key) => {
-      fields[key].hidden = true
     })
   }
 

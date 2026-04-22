@@ -89,7 +89,7 @@ export function PlayerTableFields({
   const fields = {
     ...fantasy_league_table_fields({ week, is_logged_in }),
     ...player_pff_seasonlogs_table_fields({ is_logged_in }),
-    ...player_seasonlogs_table_fields({ is_logged_in }),
+    ...player_seasonlogs_table_fields(),
 
     ...projected_table_fields({ week }),
     ...player_table_fields({ is_logged_in }),
