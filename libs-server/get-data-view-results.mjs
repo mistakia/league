@@ -1073,6 +1073,7 @@ const get_grouped_clauses_by_table = ({
   splits
 }) => {
   const grouped_clauses_by_table = {}
+  const tables_seeded_by_column = new Set()
 
   for (const where_clause of where_clauses) {
     const { column_id, params: column_params } = where_clause
@@ -1126,6 +1127,13 @@ const get_grouped_clauses_by_table = ({
         select_columns: [],
         supported_splits: column_definition.supported_splits || []
       }
+      tables_seeded_by_column.add(table_name)
+    } else if (!tables_seeded_by_column.has(table_name)) {
+      // The group was seeded by a WHERE clause. Override group_column_params
+      // with the column's params so the display join reflects column intent
+      // rather than the (often narrower) WHERE filter scope.
+      grouped_clauses_by_table[table_name].group_column_params = column_params
+      tables_seeded_by_column.add(table_name)
     }
 
     grouped_clauses_by_table[table_name].select_columns.push({
