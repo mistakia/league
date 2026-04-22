@@ -176,3 +176,84 @@ export const migrate_entries_array = (entries) => {
     return { ...entry, column_id: migrated.column_id, params: migrated.params }
   })
 }
+
+const column_id_of = (c) => (typeof c === 'string' ? c : c?.column_id)
+
+/**
+ * Rewrite sort-array column_ids that reference legacy ranking names.
+ * Sort entries carry no params, so we cannot pick season vs week from the
+ * sort entry alone -- instead we scan the (already-migrated) columns list
+ * for the matching season/week target, disambiguating multiple references
+ * via `column_index` (the occurrence index among columns with the same id).
+ */
+export const migrate_sort_array = ({
+  sort,
+  post_columns,
+  post_prefix_columns
+}) => {
+  if (!Array.isArray(sort)) return sort
+  const find_new_id = (old_id, occurrence) => {
+    const mapping = RANKING_NAMES_MAP[old_id]
+    if (!mapping) return null
+    const targets = new Set([mapping.season, mapping.week])
+    const lookup_in = (cols) => {
+      if (!Array.isArray(cols)) return null
+      let seen = 0
+      for (const c of cols) {
+        const cid = column_id_of(c)
+        if (!targets.has(cid)) continue
+        if (seen === occurrence) return cid
+        seen++
+      }
+      return null
+    }
+    return lookup_in(post_columns) || lookup_in(post_prefix_columns)
+  }
+  return sort.map((entry) => {
+    if (!entry || typeof entry !== 'object' || !entry.column_id) return entry
+    const new_id = find_new_id(entry.column_id, entry.column_index || 0)
+    if (!new_id || new_id === entry.column_id) return entry
+    return { ...entry, column_id: new_id }
+  })
+}
+
+/**
+ * Migrate a full table_state in one pass. Returns `{ changed, table_state }`
+ * with new arrays for columns, prefix_columns, where, and sort.
+ */
+export const migrate_table_state = (table_state) => {
+  if (!table_state || typeof table_state !== 'object') {
+    return { changed: false, table_state }
+  }
+  const next = { ...table_state }
+  let changed = false
+
+  const migrate_list = (key) => {
+    if (!Array.isArray(table_state[key])) return
+    const migrated = migrate_entries_array(table_state[key])
+    if (JSON.stringify(migrated) !== JSON.stringify(table_state[key])) {
+      changed = true
+      next[key] = migrated
+    } else {
+      next[key] = table_state[key]
+    }
+  }
+
+  migrate_list('columns')
+  migrate_list('prefix_columns')
+  migrate_list('where')
+
+  if (Array.isArray(table_state.sort)) {
+    const migrated_sort = migrate_sort_array({
+      sort: table_state.sort,
+      post_columns: next.columns,
+      post_prefix_columns: next.prefix_columns
+    })
+    if (JSON.stringify(migrated_sort) !== JSON.stringify(table_state.sort)) {
+      changed = true
+      next.sort = migrated_sort
+    }
+  }
+
+  return { changed, table_state: next }
+}

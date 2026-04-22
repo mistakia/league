@@ -1,6 +1,9 @@
 /* global localStorage */
 
-import { migrate_column_entry } from '#libs-shared/data-views-nfl-week-migration.mjs'
+import {
+  migrate_column_entry,
+  migrate_sort_array
+} from '#libs-shared/data-views-nfl-week-migration.mjs'
 
 /**
  * Sanitizes parameter values to prevent nested arrays
@@ -242,12 +245,15 @@ const sanitize_snapshot = (snapshot) => {
     return snapshot
   }
 
+  const post_columns = snapshot.table_state.columns?.map(migrate_column)
+  const post_prefix_columns = snapshot.table_state.prefix_columns?.map(migrate_column)
+
   return {
     ...snapshot,
     table_state: {
       ...snapshot.table_state,
-      columns: snapshot.table_state.columns?.map(migrate_column),
-      prefix_columns: snapshot.table_state.prefix_columns?.map(migrate_column),
+      columns: post_columns,
+      prefix_columns: post_prefix_columns,
       where: snapshot.table_state.where?.map((clause) => {
         const migrated_params = migrate_params(clause.params || {})
         const migrated = migrate_column_entry({
@@ -259,6 +265,11 @@ const sanitize_snapshot = (snapshot) => {
           column_id: migrated.column_id,
           params: sanitize_params(migrated.params)
         }
+      }),
+      sort: migrate_sort_array({
+        sort: snapshot.table_state.sort,
+        post_columns,
+        post_prefix_columns
       })
     }
   }
