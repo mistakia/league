@@ -121,6 +121,10 @@ export default {
         __dirname,
         '../libs-shared/job-constants.mjs'
       ),
+      '@libs-shared/data-views-nfl-week-migration.mjs': path.resolve(
+        __dirname,
+        '../libs-shared/data-views-nfl-week-migration.mjs'
+      ),
       '@libs-shared': path.resolve(__dirname, '../libs-shared/index.mjs'),
       '@constants/season-constants': path.resolve(
         __dirname,
