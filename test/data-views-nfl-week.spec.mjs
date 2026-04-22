@@ -15,6 +15,7 @@ import {
 } from '#libs-shared/nfl-week-identifier.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import { common_column_params } from '#libs-shared'
+import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 chai.should()
 const expect = chai.expect
@@ -377,6 +378,62 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       )
       expect(dv).to.have.property('default_value', 1)
       expect(dv).to.have.property('has_value_field', true)
+    })
+  })
+
+  describe('common_column_params.single_nfl_week_id', function () {
+    it('exports a single-valued param keyed to nfl_week_id column', () => {
+      expect(common_column_params).to.have.property('single_nfl_week_id')
+      const p = common_column_params.single_nfl_week_id
+      expect(p.single).to.equal(true)
+      expect(p.column_name).to.equal('nfl_week_id')
+    })
+
+    it('only exposes current_nfl_week as a dynamic value', () => {
+      const types = common_column_params.single_nfl_week_id.dynamic_values.map(
+        (d) => d.dynamic_type
+      )
+      expect(types).to.deep.equal(['current_nfl_week'])
+    })
+
+    it('defaults to current_nfl_week', () => {
+      expect(
+        common_column_params.single_nfl_week_id.default_value
+      ).to.deep.equal({ dynamic_type: 'current_nfl_week' })
+    })
+  })
+
+  describe('resolve_single_nfl_week_id', function () {
+    it('returns single_nfl_week_id[0] when present', () => {
+      const result = resolve_single_nfl_week_id({
+        params: { single_nfl_week_id: ['2024_REG_WEEK_5'] }
+      })
+      expect(result).to.equal('2024_REG_WEEK_5')
+    })
+
+    it('falls back to nfl_week_id[0] if single not set', () => {
+      const result = resolve_single_nfl_week_id({
+        params: { nfl_week_id: ['2023_POST_WEEK_2', '2023_POST_WEEK_3'] }
+      })
+      expect(result).to.equal('2023_POST_WEEK_2')
+    })
+
+    it('constructs from legacy year/week/seas_type', () => {
+      const result = resolve_single_nfl_week_id({
+        params: { year: [2022], week: [9], seas_type: ['REG'] }
+      })
+      expect(result).to.equal(format_nfl_week_identifier({ year: 2022, seas_type: 'REG', week: 9 }))
+    })
+
+    it('defaults legacy seas_type to REG', () => {
+      const result = resolve_single_nfl_week_id({
+        params: { year: [2021], week: [3] }
+      })
+      expect(result).to.equal(format_nfl_week_identifier({ year: 2021, seas_type: 'REG', week: 3 }))
+    })
+
+    it('returns null when no params', () => {
+      expect(resolve_single_nfl_week_id({ params: {} })).to.equal(null)
     })
   })
 })

@@ -8,6 +8,7 @@ import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
+import { migrate_entries_array } from '@libs-shared/data-views-nfl-week-migration.mjs'
 
 import './plays.styl'
 
@@ -46,11 +47,16 @@ export default function PlaysPage({
   useEffect(() => {
     if (!view_id) {
       const search_params = new URLSearchParams(location.search)
-      const columns = JSON.parse(search_params.get('columns') || 'null') || []
+      const columns = migrate_entries_array(
+        JSON.parse(search_params.get('columns') || 'null') || []
+      )
       const sort = JSON.parse(search_params.get('sort') || 'null') || []
-      const where = JSON.parse(search_params.get('where') || 'null') || []
-      const prefix_columns =
+      const where = migrate_entries_array(
+        JSON.parse(search_params.get('where') || 'null') || []
+      )
+      const prefix_columns = migrate_entries_array(
         JSON.parse(search_params.get('prefix_columns') || 'null') || []
+      )
       const view_name = search_params.get('view_name') || ''
       const view_description = search_params.get('view_description') || ''
 

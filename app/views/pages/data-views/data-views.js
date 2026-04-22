@@ -10,6 +10,7 @@ import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
 import { Team } from '@core/teams'
 import { get_string_from_object } from '@libs-shared'
+import { migrate_entries_array } from '@libs-shared/data-views-nfl-week-migration.mjs'
 import { nfl_team_abbreviations } from '@constants'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
@@ -87,11 +88,16 @@ export default function DataViewsPage({
   useEffect(() => {
     if (!view_id) {
       const search_params = new URLSearchParams(location.search)
-      const columns = JSON.parse(search_params.get('columns') || 'null') || []
+      const columns = migrate_entries_array(
+        JSON.parse(search_params.get('columns') || 'null') || []
+      )
       const sort = JSON.parse(search_params.get('sort') || 'null') || []
-      const where = JSON.parse(search_params.get('where') || 'null') || []
-      const prefix_columns =
+      const where = migrate_entries_array(
+        JSON.parse(search_params.get('where') || 'null') || []
+      )
+      const prefix_columns = migrate_entries_array(
         JSON.parse(search_params.get('prefix_columns') || 'null') || []
+      )
       const splits = JSON.parse(search_params.get('splits') || 'null') || []
       const view_name = search_params.get('view_name') || ''
       const view_search_column_id =

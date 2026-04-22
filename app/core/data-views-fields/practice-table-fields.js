@@ -2,7 +2,7 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { common_column_params } from '#libs-shared'
 
-const { single_year, single_week } = common_column_params
+const { single_nfl_week_id } = common_column_params
 
 const create_practice_field = (props) => ({
   ...props,
@@ -10,8 +10,7 @@ const create_practice_field = (props) => ({
   size: 70,
   data_type: table_constants.TABLE_DATA_TYPES.TEXT,
   column_params: {
-    year: single_year,
-    single_week
+    single_nfl_week_id
   },
   splits: ['year', 'week']
 })

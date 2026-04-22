@@ -5,7 +5,7 @@ import COLUMN_GROUPS from './column-groups'
 import { common_column_params } from '@libs-shared'
 import { current_year } from '@constants'
 
-const { career_year, career_game, single_year, single_week, single_seas_type } =
+const { career_year, career_game, single_year, single_nfl_week_id } =
   common_column_params
 
 const from_betting_market = (field) => ({
@@ -50,12 +50,7 @@ const create_base_column_params = () => ({
     default_value: 'CLOSE',
     single: true
   },
-  year: {
-    ...single_year,
-    default_value: current_year,
-    values: Array.from({ length: current_year - 2023 + 1 }, (_, i) => 2023 + i)
-  },
-  week: single_week
+  single_nfl_week_id
 })
 
 const player_market_type_param = {
@@ -70,8 +65,7 @@ const create_game_prop_column_params = () => ({
   ...create_base_column_params(),
   market_type: player_market_type_param,
   career_year,
-  career_game,
-  seas_type: single_seas_type
+  career_game
 })
 
 const create_team_game_prop_column_params = () => ({

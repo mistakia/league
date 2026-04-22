@@ -1,6 +1,8 @@
 import { getLeague } from '#libs-server'
 import { current_season, roster_slot_types } from '#constants'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
+import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 import db from '#db'
 import player_projected_column_definitions from './player-projected-column-definitions.mjs'
@@ -82,9 +84,19 @@ export default {
       'rosters_players.tag'
     ],
     join: async ({ query, params = {}, data_view_options = {} }) => {
-      const { year = current_season.year, lid = 1 } = params
-      let week = params.week
-      if (!week) {
+      const { lid = 1 } = params
+
+      const resolved_nfl_week_id = resolve_single_nfl_week_id({ params })
+      let year
+      let week
+      if (resolved_nfl_week_id) {
+        const parsed = parse_nfl_week_identifier({
+          identifier: resolved_nfl_week_id
+        })
+        year = parsed.year
+        week = parsed.week
+      } else {
+        year = params.year || current_season.year
         const league = await getLeague({ lid, year })
         if (league) {
           const championship_round = Array.isArray(league.championship_round)

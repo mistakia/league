@@ -5,6 +5,7 @@ import {
 import { current_season, external_data_sources } from '#constants'
 import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
+import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
@@ -15,12 +16,19 @@ import data_view_join_function from '#libs-server/data-views/data-view-join-func
 const get_default_params = ({ params = {} }) => {
   let year, week, seas_type, nfl_week
 
-  if (params.nfl_week_id) {
-    nfl_week = Array.isArray(params.nfl_week_id)
-      ? params.nfl_week_id
-      : [params.nfl_week_id]
+  if (params.nfl_week_id || params.single_nfl_week_id) {
+    if (params.single_nfl_week_id) {
+      const resolved = resolve_single_nfl_week_id({ params })
+      nfl_week = resolved ? [resolved] : []
+    } else {
+      nfl_week = Array.isArray(params.nfl_week_id)
+        ? params.nfl_week_id
+        : [params.nfl_week_id]
+    }
     // Decompose first nfl_week value for single-value contexts
-    const parsed = parse_nfl_week_identifier({ identifier: nfl_week[0] })
+    const parsed = nfl_week.length
+      ? parse_nfl_week_identifier({ identifier: nfl_week[0] })
+      : null
     year = parsed ? parsed.year : current_season.year
     week = parsed ? parsed.week : 0
     seas_type = parsed ? parsed.seas_type : 'REG'

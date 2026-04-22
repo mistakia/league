@@ -4,6 +4,8 @@ import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_betting_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
+import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 const get_default_params = ({
   params,
@@ -14,12 +16,22 @@ const get_default_params = ({
   const default_bookmaker = is_team_game_prop
     ? bookmaker_constants.bookmakers.DRAFTKINGS
     : bookmaker_constants.bookmakers.FANDUEL
-  const year = Array.isArray(params.year)
-    ? params.year[0]
-    : params.year || current_season.year
-  const seas_type = Array.isArray(params.seas_type)
-    ? params.seas_type[0]
-    : params.seas_type || current_season.nfl_seas_type
+
+  const resolved_single_nfl_week_id = resolve_single_nfl_week_id({ params })
+  const parsed_single = resolved_single_nfl_week_id
+    ? parse_nfl_week_identifier({ identifier: resolved_single_nfl_week_id })
+    : null
+
+  const year = parsed_single
+    ? parsed_single.year
+    : Array.isArray(params.year)
+      ? params.year[0]
+      : params.year || current_season.year
+  const seas_type = parsed_single
+    ? parsed_single.seas_type
+    : Array.isArray(params.seas_type)
+      ? params.seas_type[0]
+      : params.seas_type || current_season.nfl_seas_type
 
   const hit_type = Array.isArray(params.hit_type)
     ? params.hit_type[0].toLowerCase()
@@ -31,7 +43,9 @@ const get_default_params = ({
 
   let week, market_type
 
-  if (is_game_prop) {
+  if (parsed_single) {
+    week = parsed_single.week
+  } else if (is_game_prop) {
     week = Array.isArray(params.week)
       ? params.week[0]
       : params.week || current_season.nfl_seas_week
