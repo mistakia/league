@@ -2,11 +2,6 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import db from '#db'
-import { is_historical_team_mode } from '#libs-server/data-views/historical-team-mode.mjs'
-import {
-  add_player_year_teams_cte,
-  ensure_player_year_teams_join
-} from '#libs-server/data-views/add-player-year-teams-cte.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   const nfl_week = resolve_nfl_week_id_from_year_param(params)
@@ -95,7 +90,13 @@ const add_player_per_game_cte = ({
 
   if (nfl_week.length) {
     cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)
-    if (effective_years.length) {
+  }
+
+  if (effective_years.length) {
+    if (!single_year) {
+      cte_query.whereIn(`${player_gamelogs_table}.year`, effective_years)
+    }
+    if (needs_nfl_games) {
       cte_query.whereIn('nfl_games.year', effective_years)
     }
   }
@@ -140,6 +141,9 @@ const add_player_per_game_cte = ({
 
   cte_query.groupBy(`${player_gamelogs_table}.pid`)
 
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would mask the partition-pruning
+  // behavior we rely on.
   players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
@@ -158,10 +162,11 @@ const add_team_per_game_cte = ({
 
   if (nfl_week.length) {
     cte_query.whereIn('nfl_plays.nfl_week_id', nfl_week)
-    // Partition pruning for year-partitioned nfl_plays
-    if (effective_years.length) {
-      cte_query.whereIn('nfl_plays.year', effective_years)
-    }
+  }
+
+  // Partition pruning for year-partitioned nfl_plays (independent of nfl_week)
+  if (effective_years.length) {
+    cte_query.whereIn('nfl_plays.year', effective_years)
   }
 
   for (const split of splits) {
@@ -184,6 +189,9 @@ const add_team_per_game_cte = ({
     cte_query.groupBy('nfl_plays.week')
   }
 
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would mask the partition-pruning
+  // behavior we rely on.
   players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
@@ -304,20 +312,6 @@ export const join_team_per_game_cte = ({
   params,
   data_view_options = {}
 }) => {
-  if (is_historical_team_mode({ params, splits })) {
-    add_player_year_teams_cte({
-      players_query,
-      params,
-      splits,
-      data_view_options
-    })
-    ensure_player_year_teams_join({
-      players_query,
-      data_view_options,
-      splits
-    })
-  }
-
   const year_offset = params.year_offset
   const has_year_offset_range =
     year_offset &&
@@ -357,10 +351,7 @@ export const join_team_per_game_cte = ({
           break
       }
     } else {
-      const team_join_target = data_view_options.player_year_teams_cte_name
-        ? `${data_view_options.player_year_teams_cte_name}.team`
-        : 'player.current_nfl_team'
-      this.on(`${rate_type_table_name}.team`, team_join_target)
+      this.on(`${rate_type_table_name}.team`, 'player.current_nfl_team')
     }
 
     if (splits.includes('year')) {

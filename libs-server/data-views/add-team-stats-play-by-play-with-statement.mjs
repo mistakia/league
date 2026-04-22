@@ -1,6 +1,7 @@
 import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 
 export const add_team_stats_play_by_play_with_statement = ({
   query,
@@ -54,6 +55,16 @@ export const add_team_stats_play_by_play_with_statement = ({
     with_query.groupBy('nfl_plays.week')
   }
 
+  if (!params.nfl_week_id) {
+    const effective_years = get_effective_years({ params, data_view_options })
+    if (effective_years.length) {
+      with_query.whereIn('nfl_plays.year', effective_years)
+    }
+  }
+
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would let the planner inline the
+  // CTE into a nested-loop that re-executes it per outer row.
   query.withMaterialized(with_table_name, with_query)
 
   const stats_query = limit_to_player_active_games
@@ -107,6 +118,7 @@ export const add_team_stats_play_by_play_with_statement = ({
     }
   }
 
+  // MATERIALIZED for the same reason as the base stats CTE above.
   query.withMaterialized(final_stats_table_name, stats_query)
 }
 
@@ -165,6 +177,12 @@ function create_player_team_stats_query({
       'nfl_games.seas_type',
       default_params.seas_type
     )
+  }
+
+  const effective_years = get_effective_years({ params, data_view_options })
+  if (effective_years.length) {
+    player_team_stats_query.whereIn('nfl_games.year', effective_years)
+    player_team_stats_query.whereIn('player_gamelogs.year', effective_years)
   }
 
   add_select_columns({

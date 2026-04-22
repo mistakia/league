@@ -8,6 +8,7 @@ import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 
 const should_use_main_where = ({ params, has_numerator_denominator }) => {
   return (
@@ -165,7 +166,8 @@ const create_team_share_stat = ({
     with_table_name,
     params,
     having_clauses = [],
-    splits = []
+    splits = [],
+    data_view_options = {}
   }) => {
     const { seas_type } = get_play_by_play_default_params({ params })
 
@@ -253,6 +255,20 @@ const create_team_share_stat = ({
       with_query.havingRaw(having_clause)
     }
 
+    const effective_years = get_effective_years({ params, data_view_options })
+    if (effective_years.length) {
+      // pg.year (player_gamelogs) is always safe to push -- apply_play_by_play
+      // does not reach player_gamelogs. Skip nfl_plays.year when nfl_week_id is
+      // set to avoid a duplicate with apply_play_by_play_column_params_to_query.
+      if (!params.nfl_week_id) {
+        with_query.whereIn('nfl_plays.year', effective_years)
+      }
+      with_query.whereIn('pg.year', effective_years)
+    }
+
+    // MATERIALIZED required: predicates are pushed at construction time; planner
+    // predicate push-into-CTE is not needed and would let the planner inline the
+    // CTE into a nested-loop that re-executes it per outer row.
     query.withMaterialized(with_table_name, with_query)
   },
   column_name,

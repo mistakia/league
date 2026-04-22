@@ -2,6 +2,7 @@ import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 
 export const add_defensive_play_by_play_with_statement = ({
   query,
@@ -10,7 +11,8 @@ export const add_defensive_play_by_play_with_statement = ({
   having_clauses = [],
   select_strings = [],
   pid_columns = [],
-  splits = []
+  splits = [],
+  data_view_options = {}
 }) => {
   if (!with_table_name) {
     throw new Error('with_table_name is required')
@@ -35,6 +37,11 @@ export const add_defensive_play_by_play_with_statement = ({
 
   const select_columns = new Set([...stat_columns, ...base_columns])
 
+  // Inner UNION-ALL branches scan nfl_plays directly; apply_play_by_play is wired
+  // to the outer defensive_plays subquery and cannot reach the branches, so this
+  // push is the sole source of partition pruning for those scans.
+  const effective_years = get_effective_years({ params, data_view_options })
+
   const with_query = db
     .queryBuilder()
     .select(db.raw('pid'))
@@ -48,6 +55,9 @@ export const add_defensive_play_by_play_with_statement = ({
         )
       )
       this.whereNotNull(pid_columns[0])
+      if (effective_years.length) {
+        this.whereIn('nfl_plays.year', effective_years)
+      }
 
       for (const pid_column of pid_columns.slice(1)) {
         this.unionAll(function () {
@@ -58,6 +68,9 @@ export const add_defensive_play_by_play_with_statement = ({
           )
             .from('nfl_plays')
             .whereNotNull(pid_column)
+          if (effective_years.length) {
+            this.whereIn('nfl_plays.year', effective_years)
+          }
         })
       }
 
@@ -130,5 +143,8 @@ export const add_defensive_play_by_play_with_statement = ({
     with_query.havingRaw(having_clause)
   }
 
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would let the planner inline the
+  // CTE into a nested-loop that re-executes it per outer row.
   query.withMaterialized(with_table_name, with_query)
 }

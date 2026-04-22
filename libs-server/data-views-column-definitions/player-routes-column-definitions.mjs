@@ -24,7 +24,8 @@ const player_routes_join = ({
     players_query: query,
     params,
     rate_type_table_name: table_name,
-    splits
+    splits,
+    data_view_options
   })
 
   join_per_player_route_cte({

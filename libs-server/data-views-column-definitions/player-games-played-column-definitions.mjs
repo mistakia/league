@@ -23,7 +23,8 @@ const games_played_join = ({
     players_query: query,
     params,
     rate_type_table_name: table_name,
-    splits
+    splits,
+    data_view_options
   })
 
   join_per_game_cte({
