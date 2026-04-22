@@ -1456,6 +1456,28 @@ To ensure future maintainability, all functions should follow these parameter do
 
 This comprehensive documentation provides the foundation for understanding the current implementation and guides performance improvements while maintaining the system's analytical capabilities and flexibility.
 
+## Year Pushdown Contract for CTE-Based Columns
+
+The contract below applies to every CTE builder backing a data-view column -- both the rate-type denominator CTEs in `libs-server/data-views/rate-type/` and the stat-column CTEs in `libs-server/data-views/add-*-play-by-play-with-statement.mjs` plus the inline `with:` handlers on `player-fantasy-points-from-plays-column-definitions.mjs` and the `create_team_share_stat` factory in `player-stats-from-plays-column-definitions.mjs`.
+
+Every such builder that scans a year-partitioned table MUST apply `effective_years` as a `WHERE ... IN (...)` predicate on every such table it scans, whenever `effective_years` is known from any source:
+
+- Column-level `params.year` (routed through `resolve_nfl_week_id_from_year_param`)
+- `nfl_week` decomposition via `decompose_nfl_weeks`
+- Split-driven `data_view_options.year_range`
+
+`effective_years` is the sorted union of `all_years` (derived from `nfl_week` decomposition) and `data_view_options.year_range`. When non-empty, builders push it onto every year-partitioned table touched by the CTE (for example `nfl_plays`, `nfl_snaps`, `nfl_plays_receiver`, `player_gamelogs`, `nfl_games`). Without this predicate the planner reads every year partition even when the outer query restricts the year axis.
+
+Column definitions that call a rate-type `add_*_cte` function or a stat-column `with:` handler MUST forward `data_view_options` into the call; the builder depends on `data_view_options.year_range` to compute `effective_years` for the split-driven case. Omitting it silently disables year pushdown for any column whose year signal comes only from splits. For UNION-ALL subqueries (see `add-defensive-play-by-play-with-statement.mjs`), push the predicate inside each inner `FROM nfl_plays` branch rather than on the outer wrapped subquery -- outer-query filters do not reach partition-pruning time.
+
+## Materialization Policy for CTE-Based Columns
+
+Every aggregation CTE built by a column's `with:` handler -- rate-type denominator CTEs and stat-column CTEs alike -- is registered via `withMaterialized`, not `with`. PostgreSQL 12+ inlines non-recursive CTEs referenced once, and with small outer-join cardinality the planner picks nested-loop plans that re-execute the CTE body hundreds of times (measured: 114x re-execution of the `player_receiving_yards_after_catch_from_plays` stat CTE on a year-split view consumed roughly 6 seconds of a 7.9 second baseline).
+
+Because every rate predicate is pushed at CTE construction time (see the Year Pushdown Contract above), planner predicate push-into-CTE is not needed. `withMaterialized` defeats that inlining and preserves the partition-pruning behavior we rely on.
+
+Split CTEs (`base_years`, `player_years`, `player_years_weeks`) stay inlineable -- they are small and the planner handles them well.
+
 ## Related Documentation
 
 ### Schema and Validation

@@ -90,7 +90,13 @@ const add_player_per_game_cte = ({
 
   if (nfl_week.length) {
     cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)
-    if (effective_years.length) {
+  }
+
+  if (effective_years.length) {
+    if (!single_year) {
+      cte_query.whereIn(`${player_gamelogs_table}.year`, effective_years)
+    }
+    if (needs_nfl_games) {
       cte_query.whereIn('nfl_games.year', effective_years)
     }
   }
@@ -135,7 +141,10 @@ const add_player_per_game_cte = ({
 
   cte_query.groupBy(`${player_gamelogs_table}.pid`)
 
-  players_query.with(rate_type_table_name, cte_query)
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would mask the partition-pruning
+  // behavior we rely on.
+  players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
 const add_team_per_game_cte = ({
@@ -153,10 +162,11 @@ const add_team_per_game_cte = ({
 
   if (nfl_week.length) {
     cte_query.whereIn('nfl_plays.nfl_week_id', nfl_week)
-    // Partition pruning for year-partitioned nfl_plays
-    if (effective_years.length) {
-      cte_query.whereIn('nfl_plays.year', effective_years)
-    }
+  }
+
+  // Partition pruning for year-partitioned nfl_plays (independent of nfl_week)
+  if (effective_years.length) {
+    cte_query.whereIn('nfl_plays.year', effective_years)
   }
 
   for (const split of splits) {
@@ -179,7 +189,10 @@ const add_team_per_game_cte = ({
     cte_query.groupBy('nfl_plays.week')
   }
 
-  players_query.with(rate_type_table_name, cte_query)
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would mask the partition-pruning
+  // behavior we rely on.
+  players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
 export const add_per_game_cte = ({

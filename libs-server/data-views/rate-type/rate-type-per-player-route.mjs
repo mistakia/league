@@ -5,6 +5,7 @@ import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
+import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 export const get_default_params = ({ params = {} } = {}) => {
   const nfl_week = resolve_nfl_week_id_from_year_param(params)
 
@@ -89,7 +90,26 @@ export const add_per_player_route_cte = ({
     params: denominator_params
   })
 
-  players_query.with(rate_type_table_name, cte_query)
+  const { nfl_week } = get_default_params({ params })
+  const { years: all_years } = nfl_week.length
+    ? decompose_nfl_weeks({ nfl_weeks: nfl_week })
+    : { years: [] }
+  const effective_years =
+    data_view_options.year_range && data_view_options.year_range.length
+      ? [...new Set([...data_view_options.year_range, ...all_years])].sort(
+          (a, b) => a - b
+        )
+      : all_years
+
+  if (effective_years.length) {
+    cte_query.whereIn('nfl_plays.year', effective_years)
+    cte_query.whereIn('nfl_plays_receiver.year', effective_years)
+  }
+
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would mask the partition-pruning
+  // behavior we rely on.
+  players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
 export const join_per_player_route_cte = ({

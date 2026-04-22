@@ -9,6 +9,7 @@ import data_view_join_function from '#libs-server/data-views/data-view-join-func
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 
 const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
@@ -81,7 +82,8 @@ const fantasy_points_from_plays_with = async ({
   params = {},
   with_table_name,
   having_clauses = [],
-  splits = []
+  splits = [],
+  data_view_options = {}
 }) => {
   const { seas_type } = get_play_by_play_default_params({ params })
 
@@ -210,6 +212,15 @@ const fantasy_points_from_plays_with = async ({
     params: filtered_params,
     table_name: 'nfl_plays'
   })
+
+  // Skip when params.nfl_week_id is set: apply_play_by_play_column_params_to_query
+  // already pushes nfl_plays.year for that path.
+  if (!params.nfl_week_id) {
+    const effective_years = get_effective_years({ params, data_view_options })
+    if (effective_years.length) {
+      filtered_plays_cte.whereIn('nfl_plays.year', effective_years)
+    }
+  }
 
   // Create the final UNION query using the pre-filtered CTE
   // Determine which columns to include in subqueries based on parameters
@@ -369,7 +380,10 @@ const fantasy_points_from_plays_with = async ({
     union_query = filtered_query.groupBy(group_by_columns)
   }
 
-  query.with(with_table_name, union_query)
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would let the planner inline the
+  // CTE into a nested-loop that re-executes it per outer row.
+  query.withMaterialized(with_table_name, union_query)
 }
 
 // Generate passing scoring SQL

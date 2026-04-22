@@ -2,6 +2,7 @@ import db from '#db'
 import { data_views_constants } from '#libs-shared'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
+import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 
 export const add_player_stats_play_by_play_with_statement = ({
   query,
@@ -10,7 +11,8 @@ export const add_player_stats_play_by_play_with_statement = ({
   having_clauses = [],
   select_strings = [],
   pid_columns,
-  splits = []
+  splits = [],
+  data_view_options = {}
 }) => {
   if (!with_table_name) {
     throw new Error('with_table_name is required')
@@ -98,5 +100,18 @@ export const add_player_stats_play_by_play_with_statement = ({
     with_query.havingRaw(having_clause)
   }
 
-  query.with(with_table_name, with_query)
+  // Skip when params.nfl_week_id is set: apply_play_by_play_column_params_to_query
+  // already pushes nfl_plays.year for that path.
+  if (!params.nfl_week_id) {
+    const effective_years = get_effective_years({ params, data_view_options })
+    if (effective_years.length) {
+      with_query.whereIn('nfl_plays.year', effective_years)
+    }
+  }
+
+  // MATERIALIZED required: predicates are pushed at construction time; planner
+  // predicate push-into-CTE is not needed and would mask the partition-pruning
+  // behavior we rely on, and would let the planner inline the CTE into a
+  // nested-loop that re-executes it per outer row.
+  query.withMaterialized(with_table_name, with_query)
 }
