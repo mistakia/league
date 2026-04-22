@@ -43,11 +43,9 @@ export const add_per_player_play_cte = ({
   const cte_query = db('nfl_plays')
     .select('nfl_snaps.gsis_it_id')
     .join('nfl_snaps', function () {
-      this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid').andOn(
-        'nfl_plays.playId',
-        '=',
-        'nfl_snaps.playId'
-      )
+      this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid')
+        .andOn('nfl_plays.playId', '=', 'nfl_snaps.playId')
+        .andOn('nfl_plays.year', '=', 'nfl_snaps.year')
     })
     .whereNot('play_type', 'NOPL')
     .groupBy('nfl_snaps.gsis_it_id')
