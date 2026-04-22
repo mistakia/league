@@ -2,6 +2,11 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import db from '#db'
+import { is_historical_team_mode } from '#libs-server/data-views/historical-team-mode.mjs'
+import {
+  add_player_year_teams_cte,
+  ensure_player_year_teams_join
+} from '#libs-server/data-views/add-player-year-teams-cte.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   const nfl_week = resolve_nfl_week_id_from_year_param(params)
@@ -299,6 +304,20 @@ export const join_team_per_game_cte = ({
   params,
   data_view_options = {}
 }) => {
+  if (is_historical_team_mode({ params, splits })) {
+    add_player_year_teams_cte({
+      players_query,
+      params,
+      splits,
+      data_view_options
+    })
+    ensure_player_year_teams_join({
+      players_query,
+      data_view_options,
+      splits
+    })
+  }
+
   const year_offset = params.year_offset
   const has_year_offset_range =
     year_offset &&
@@ -338,7 +357,10 @@ export const join_team_per_game_cte = ({
           break
       }
     } else {
-      this.on(`${rate_type_table_name}.team`, 'player.current_nfl_team')
+      const team_join_target = data_view_options.player_year_teams_cte_name
+        ? `${data_view_options.player_year_teams_cte_name}.team`
+        : 'player.current_nfl_team'
+      this.on(`${rate_type_table_name}.team`, team_join_target)
     }
 
     if (splits.includes('year')) {
