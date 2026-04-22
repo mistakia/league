@@ -1,5 +1,10 @@
 /* global localStorage */
 
+import {
+  migrate_column_entry,
+  migrate_sort_array
+} from '#libs-shared/data-views-nfl-week-migration.mjs'
+
 /**
  * Sanitizes parameter values to prevent nested arrays
  * @param {Object} params - Parameter object to sanitize
@@ -209,6 +214,28 @@ const migrate_params = (params) => {
 }
 
 /**
+ * Applies column-scoped migration (nfl_week_id / single_nfl_week_id / ranking split)
+ * to a column descriptor. Supports both string column ids and `{column_id, params}` objects.
+ */
+const migrate_column = (col) => {
+  if (typeof col === 'string') {
+    const migrated = migrate_column_entry({ column_id: col, params: {} })
+    return migrated.column_id
+  }
+  if (!col) return col
+  const migrated_params = migrate_params(col.params || {})
+  const migrated = migrate_column_entry({
+    column_id: col.column_id,
+    params: migrated_params
+  })
+  return {
+    ...col,
+    column_id: migrated.column_id,
+    params: sanitize_params(migrated.params)
+  }
+}
+
+/**
  * Sanitizes a loaded snapshot to fix any corrupted data
  * @param {Object} snapshot - Snapshot to sanitize
  * @returns {Object} Sanitized snapshot
@@ -218,32 +245,32 @@ const sanitize_snapshot = (snapshot) => {
     return snapshot
   }
 
+  const post_columns = snapshot.table_state.columns?.map(migrate_column)
+  const post_prefix_columns = snapshot.table_state.prefix_columns?.map(migrate_column)
+
   return {
     ...snapshot,
     table_state: {
       ...snapshot.table_state,
-      columns: snapshot.table_state.columns?.map((col) => {
-        if (typeof col === 'string') {
-          return col
-        }
+      columns: post_columns,
+      prefix_columns: post_prefix_columns,
+      where: snapshot.table_state.where?.map((clause) => {
+        const migrated_params = migrate_params(clause.params || {})
+        const migrated = migrate_column_entry({
+          column_id: clause.column_id,
+          params: migrated_params
+        })
         return {
-          ...col,
-          params: sanitize_params(migrate_params(col.params))
+          ...clause,
+          column_id: migrated.column_id,
+          params: sanitize_params(migrated.params)
         }
       }),
-      prefix_columns: snapshot.table_state.prefix_columns?.map((col) => {
-        if (typeof col === 'string') {
-          return col
-        }
-        return {
-          ...col,
-          params: sanitize_params(migrate_params(col.params))
-        }
-      }),
-      where: snapshot.table_state.where?.map((clause) => ({
-        ...clause,
-        params: sanitize_params(migrate_params(clause.params))
-      }))
+      sort: migrate_sort_array({
+        sort: snapshot.table_state.sort,
+        post_columns,
+        post_prefix_columns
+      })
     }
   }
 }

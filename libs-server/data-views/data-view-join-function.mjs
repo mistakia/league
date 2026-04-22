@@ -2,6 +2,11 @@ import debug from 'debug'
 import { current_season } from '#constants'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
+import { is_historical_team_mode } from '#libs-server/data-views/historical-team-mode.mjs'
+import {
+  add_player_year_teams_cte,
+  ensure_player_year_teams_join
+} from '#libs-server/data-views/add-player-year-teams-cte.mjs'
 
 const log = debug('data-views')
 
@@ -37,6 +42,20 @@ export default function data_view_join_function(join_arguments) {
   const year = params.year || default_year
   const week = params.week || 0
 
+  if (join_on_team && is_historical_team_mode({ params, splits })) {
+    add_player_year_teams_cte({
+      players_query: query,
+      params,
+      splits,
+      data_view_options
+    })
+    ensure_player_year_teams_join({
+      players_query: query,
+      data_view_options,
+      splits
+    })
+  }
+
   query[join_func](join_table_clause || table_name, function () {
     if (join_on_team) {
       const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
@@ -68,10 +87,13 @@ export default function data_view_join_function(join_arguments) {
             break
         }
       } else {
+        const team_join_target = data_view_options.player_year_teams_cte_name
+          ? `${data_view_options.player_year_teams_cte_name}.team`
+          : 'player.current_nfl_team'
         this.on(
           `${table_name}.${join_table_team_field}`,
           '=',
-          'player.current_nfl_team'
+          team_join_target
         )
 
         // Add week join condition for team stats tables when week split is enabled

@@ -5,7 +5,7 @@ import { nfl_week_identifier } from '@libs-shared'
 
 const SEASON_TYPES = ['PRE', 'REG', 'POST']
 
-export default function NflWeekBuilder({ values, on_add }) {
+export default function NflWeekBuilder({ values, on_add, single = false }) {
   const { years: available_years } = useMemo(
     () => nfl_week_identifier.decompose_nfl_weeks({ nfl_weeks: values }),
     [values]
@@ -23,6 +23,7 @@ export default function NflWeekBuilder({ values, on_add }) {
   )
 
   const auto_select_reg_weeks = () => {
+    if (single) return
     if (has_any_weeks) return
     const max = nfl_week_identifier.get_max_weeks_for_season_type({
       seas_type: 'REG'
@@ -34,6 +35,11 @@ export default function NflWeekBuilder({ values, on_add }) {
   }
 
   const toggle_year = (year, event) => {
+    if (single) {
+      last_year_index_ref.current = year
+      set_selected_years([year])
+      return
+    }
     if (event?.shiftKey && last_year_index_ref.current !== null) {
       const last_idx = sorted_years.indexOf(last_year_index_ref.current)
       const curr_idx = sorted_years.indexOf(year)
@@ -58,6 +64,11 @@ export default function NflWeekBuilder({ values, on_add }) {
   }
 
   const toggle_week = (seas_type, week, event) => {
+    if (single) {
+      last_week_index_ref.current = { [seas_type]: week }
+      set_selected_weeks({ [seas_type]: [week] })
+      return
+    }
     if (event?.shiftKey && last_week_index_ref.current[seas_type] != null) {
       const last = last_week_index_ref.current[seas_type]
       const start = Math.min(last, week)
@@ -98,6 +109,10 @@ export default function NflWeekBuilder({ values, on_add }) {
 
   const handle_mouse_down = useCallback(
     (seas_type, week, is_selected, event) => {
+      if (single) {
+        toggle_week(seas_type, week)
+        return
+      }
       if (event?.shiftKey) {
         toggle_week(seas_type, week, event)
         return
@@ -108,7 +123,7 @@ export default function NflWeekBuilder({ values, on_add }) {
       }
       toggle_week(seas_type, week)
     },
-    []
+    [single]
   )
 
   const handle_mouse_enter = useCallback((seas_type, week) => {
@@ -182,9 +197,11 @@ export default function NflWeekBuilder({ values, on_add }) {
         ))}
       </div>
 
-      <div className='nfl-week-builder-hint'>
-        Shift+click to select range, drag weeks to select
-      </div>
+      {!single && (
+        <div className='nfl-week-builder-hint'>
+          Shift+click to select range, drag weeks to select
+        </div>
+      )}
 
       {SEASON_TYPES.map((seas_type) => {
         const max = nfl_week_identifier.get_max_weeks_for_season_type({
@@ -213,18 +230,22 @@ export default function NflWeekBuilder({ values, on_add }) {
                 </div>
               )
             })}
-            <div
-              className='nfl-week-toggle-btn'
-              onClick={() => select_all_weeks(seas_type)}
-            >
-              All
-            </div>
-            <div
-              className='nfl-week-toggle-btn'
-              onClick={() => clear_all_weeks(seas_type)}
-            >
-              Clear
-            </div>
+            {!single && (
+              <>
+                <div
+                  className='nfl-week-toggle-btn'
+                  onClick={() => select_all_weeks(seas_type)}
+                >
+                  All
+                </div>
+                <div
+                  className='nfl-week-toggle-btn'
+                  onClick={() => clear_all_weeks(seas_type)}
+                >
+                  Clear
+                </div>
+              </>
+            )}
           </div>
         )
       })}
@@ -248,5 +269,6 @@ export default function NflWeekBuilder({ values, on_add }) {
 
 NflWeekBuilder.propTypes = {
   values: PropTypes.array.isRequired,
-  on_add: PropTypes.func.isRequired
+  on_add: PropTypes.func.isRequired,
+  single: PropTypes.bool
 }

@@ -245,6 +245,32 @@ POST /data-views/search
 
 ### Parameter System
 
+#### Three NFL Week / Year Param Flavors
+
+Weekly data-view columns use one of three param flavors, picked by the data's natural grain:
+
+| Flavor                    | Param                      | Cardinality    | Used by                                                                                                                                            |
+| ------------------------- | -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Season-level              | `single_year` / `year`     | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, season-level rankings, ESPN scores, team DVOA, PFF grades, format logs                  |
+| Single-week point-in-time | `single_nfl_week_id`       | scalar         | DFS salary, DFS ownership, practice designation, weekly rankings, weekly projected market salary, betting game-prop markets, fantasy roster status |
+| Multi-week aggregation    | `nfl_week_id`              | multi          | play-by-play stats, games played, player-teams history                                                                                             |
+
+`single_nfl_week_id` is the scalar counterpart of `nfl_week_id`. It stores as a one-element array and uses the same `ColumnParamNflWeekFilter` component in `single: true` mode. The server-side helper `resolve_single_nfl_week_id` in `libs-server/data-views/` extracts the scalar value with backward-compat fallback: `params.single_nfl_week_id` → `params.nfl_week_id[0]` → constructed from legacy `params.year` + `params.week` + `params.seas_type`.
+
+#### `player_season_*` vs `player_week_*` naming
+
+Fields that exist at both grains are split into explicit season and week variants. For example, `player_rankings` became six `player_season_*_ranking` fields (keyed on `single_year`, filtered by `week=0` + `seas_type='REG'`) and six `player_week_*_ranking` fields (keyed on `single_nfl_week_id`). The same `player_season_*` / `player_week_*` convention is used for projection fields (`player_season_projected_*`, `player_week_projected_*`).
+
+#### Saved-View Migration
+
+The `scripts/migrate-data-views-single-nfl-week.mjs` script performs column-scoped rewrites on `user_data_views.table_state` and `user_plays_views.table_state` rows:
+
+1. Ranking column rename runs first: `player_{avg,overall,position,min,max,std}_ranking` with absent week or week=0 renames to `player_season_*_ranking`; week>0 renames to `player_week_*_ranking` with `single_nfl_week_id` constructed from the legacy `year`/`week`/`seas_type` trio.
+2. Single-week column consolidation: for the `SINGLE_WEEK_COLUMNS` set, legacy `year`/`week`/`seas_type` params collapse into a one-element `single_nfl_week_id` array.
+3. Multi-week column consolidation: for the `MULTI_WEEK_COLUMNS` set, legacy params expand into a cross-product `nfl_week_id` array.
+
+The same transformation runs in the browser on localStorage snapshot restoration via `app/core/data-views/browser-storage.mjs`, which imports the shared helper in `libs-shared/data-views-nfl-week-migration.mjs`. Saved views still carrying `year`/`week`/`seas_type` keys continue to resolve correctly on the server via the helper's fallback path, so the migration is non-breaking.
+
 **NFL Week Parameter** (weekly column definitions):
 
 - `nfl_week_id`: Composite identifier replacing separate year/week/seas*type. Format: `[YEAR]*[SEAS_TYPE]_WEEK_[WEEK]`(e.g.,`2024_REG_WEEK_5`). Maps to `nfl_week_id`column in database via`column_name: 'nfl_week_id'` property. Eliminates cartesian product problem when querying specific weeks across different years and season types. Values cover all years from 2000 to current season.
@@ -865,6 +891,37 @@ join_rate_type_cte({
 - Eliminates redundant CTE calculation
 - Reduces query complexity and parse time
 - Enables PostgreSQL query plan optimization
+
+### Team-Scoped Joins
+
+**Problem**: Team-stat columns, rate-type `per_team_play` denominators, and rate-type `per_game` team denominators historically joined on `player.current_nfl_team`. This fails for (a) retired players (`current_nfl_team = 'INA'`), (b) historical queries where the player was on a different team, and (c) current-season queries for players traded mid/post-season (Stefon Diggs 2025 is the canonical repro).
+
+**Solution**: A shared `player_year_teams` CTE (`pid → year → primary_team`) sourced from `player_gamelogs` joined to `nfl_games` where `seas_type = 'REG'`. Primary team per `(pid, year)` is selected by `(array_agg(tm ORDER BY game_count DESC, tm ASC))[1]` — most regular-season games, alphabetical tie-break.
+
+**Trigger** (`libs-server/data-views/historical-team-mode.mjs`):
+
+```javascript
+is_historical_team_mode({ params, splits }) =
+  has_year_filter(params) || splits.length > 0
+```
+
+This is intentionally **broader** than the `player_nfl_teams` column trigger in `player-team-column-definition.mjs` (which excludes the current-season year). The broader trigger is required to fix the Diggs 2025 current-season traded-player case; when the player has not changed teams, `player_year_teams.team` equals `player.current_nfl_team`, so rates are unchanged.
+
+**Decentralized registration**: each of the three consumer sites calls `add_player_year_teams_cte` and `ensure_player_year_teams_join` on demand. Both helpers are idempotent (guarded by `data_view_options.player_year_teams_cte_name` and `data_view_options.player_year_teams_joined`). Centralized registration was rejected because `join_on_team` lives inside closures on many affected column definitions (e.g., `team-stats-from-plays`), which cannot be introspected without executing the closure.
+
+**Three consumer sites**:
+
+- `libs-server/data-views/data-view-join-function.mjs` — team-stat column joins (EPA, PROE, DVOA, team_pass_yards_from_plays, etc.)
+- `libs-server/data-views/rate-type/rate-type-per-team-play.mjs:join_per_team_play_cte`
+- `libs-server/data-views/rate-type/rate-type-per-game.mjs:join_team_per_game_cte` (NOT `join_player_per_game_cte`, which joins on `pid`)
+
+Each site falls back to `player.current_nfl_team` when historical mode is inactive (no year filter AND no splits).
+
+**Defensive-unit reasoning**: `rate-type-per-team-play.mjs` uses a single join expression regardless of `team_unit` ('off' or 'def'). `player_gamelogs.tm` stores the player's own team; for defensive players that equals the defensive team on `nfl_plays.def`, so no branch is needed.
+
+**Partition pruning**: the inner subquery applies `WHERE nfl_games.year IN (year_range) AND player_gamelogs.year IN (year_range)`. The second predicate is essential — `nfl_games.year` alone does not prune the `player_gamelogs` partitioned table.
+
+**Coexistence with `teams` array_agg**: the `teams` aggregation in `rate-type-per-game.mjs:add_player_per_game_cte` (consumed by the `player_nfl_teams` column) is left untouched. It returns the full set of teams for multi-team display, while `player_year_teams.team` returns the deterministic primary team for joining.
 
 ### Lazy Evaluation Pattern
 

@@ -6,15 +6,23 @@
       {
         "column_id": "team_espn_pass_block_win_rate",
         "params": {
-          "year": [2022, 2023, 2024]
+          "year": [
+            2022,
+            2023,
+            2024
+          ]
         }
       }
     ],
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "where": [
       {
         "column_id": "player_position",
-        "value": ["QB"],
+        "value": [
+          "QB"
+        ],
         "operator": "IN"
       }
     ],
@@ -24,10 +32,18 @@
         "desc": true
       }
     ],
-    "splits": ["year"],
+    "splits": [
+      "year"
+    ],
     "limit": 10
   },
-  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('QB')) select \"player\".\"pid\", player.fname, player.lname, \"ta4a43959d320efd1287471e098ae0de4\".\"pass_block_win_rate\" AS \"espn_team_pass_block_win_rate_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"espn_team_win_rates_index\" as \"ta4a43959d320efd1287471e098ae0de4\" on \"ta4a43959d320efd1287471e098ae0de4\".\"team\" = \"player\".\"current_nfl_team\" and ta4a43959d320efd1287471e098ae0de4.year = player_years.year and ta4a43959d320efd1287471e098ae0de4.year IN (2022,2023,2024) where player.pos IN ('QB') group by player.fname, player.lname, \"ta4a43959d320efd1287471e098ae0de4\".\"pass_block_win_rate\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 10",
-  "tags": ["team", "espn", "splits", "year", "joins"],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('QB')), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" = 'REG' and \"nfl_games\".\"year\" in (2022, 2023, 2024) and \"player_gamelogs\".\"year\" in (2022, 2023, 2024) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"player\".\"pid\", player.fname, player.lname, \"ta4a43959d320efd1287471e098ae0de4\".\"pass_block_win_rate\" AS \"espn_team_pass_block_win_rate_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = \"player_years\".\"year\" left join \"espn_team_win_rates_index\" as \"ta4a43959d320efd1287471e098ae0de4\" on \"ta4a43959d320efd1287471e098ae0de4\".\"team\" = \"player_year_teams\".\"team\" and ta4a43959d320efd1287471e098ae0de4.year = player_years.year and ta4a43959d320efd1287471e098ae0de4.year IN (2022,2023,2024) where player.pos IN ('QB') group by player.fname, player.lname, \"ta4a43959d320efd1287471e098ae0de4\".\"pass_block_win_rate\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 10",
+  "tags": [
+    "team",
+    "espn",
+    "splits",
+    "year",
+    "joins"
+  ],
   "timeout_ms": 35000
 }

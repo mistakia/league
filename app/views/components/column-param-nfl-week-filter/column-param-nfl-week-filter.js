@@ -22,6 +22,7 @@ export default function ColumnParamNflWeekFilter({
   const values = column_param_definition?.values || []
   const dynamic_value_defs = column_param_definition?.dynamic_values || []
   const is_column_param_defined = Boolean(selected_param_values)
+  const is_single = Boolean(column_param_definition?.single)
 
   const [trigger_close, set_trigger_close] = useState(null)
   const [dynamic_values, set_dynamic_values] = useState({})
@@ -48,6 +49,11 @@ export default function ColumnParamNflWeekFilter({
   )
 
   const handle_add_weeks = (new_week_ids) => {
+    if (is_single) {
+      const first = new_week_ids[0]
+      if (first) handle_change([first])
+      return
+    }
     const merged = [...new Set([...static_selected, ...new_week_ids])]
     // Drop the default dynamic value when user makes explicit selections
     const default_type = column_param_definition?.default_value?.dynamic_type
@@ -64,6 +70,10 @@ export default function ColumnParamNflWeekFilter({
   }
 
   const handle_toggle_value = (value) => {
+    if (is_single) {
+      handle_change([value])
+      return
+    }
     const is_selected = static_selected.includes(value)
     const new_static = is_selected
       ? static_selected.filter((v) => v !== value)
@@ -75,6 +85,16 @@ export default function ColumnParamNflWeekFilter({
     const is_currently_selected = selected_param_values?.some(
       (v) => v && typeof v === 'object' && v.dynamic_type === dynamic_type
     )
+
+    if (is_single) {
+      if (is_currently_selected) {
+        handle_change([])
+      } else {
+        const dv = dynamic_values[dynamic_type] || default_value
+        handle_change([{ dynamic_type, value: dv }])
+      }
+      return
+    }
 
     const other_dynamic = existing_dynamic.filter(
       (v) => v.dynamic_type !== dynamic_type
@@ -130,11 +150,16 @@ export default function ColumnParamNflWeekFilter({
     is_default_dynamic ||
     !is_column_param_defined ||
     (values.length > 0 && static_count === values.length)
+  const single_label =
+    is_single && static_count === 1 && dynamic_count === 0
+      ? nfl_week_identifier.format_nfl_week_param_values({
+          nfl_weeks: static_selected
+        })
+      : null
   const selected_label = mixed_state
     ? '-'
-    : all_selected
-      ? 'ALL'
-      : `${static_count + dynamic_count} selected`
+    : single_label ||
+      (all_selected ? 'ALL' : `${static_count + dynamic_count} selected`)
 
   const handle_reset_to_default = () => {
     if (default_dynamic && typeof default_dynamic === 'object') {
@@ -205,7 +230,11 @@ export default function ColumnParamNflWeekFilter({
         </div>
       )}
 
-      <NflWeekBuilder values={values} on_add={handle_add_weeks} />
+      <NflWeekBuilder
+        values={values}
+        on_add={handle_add_weeks}
+        single={is_single}
+      />
 
       <NflWeekSelectionSummary
         static_selected={static_selected}
