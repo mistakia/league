@@ -140,7 +140,7 @@ const add_player_per_game_cte = ({
 
   cte_query.groupBy(`${player_gamelogs_table}.pid`)
 
-  players_query.with(rate_type_table_name, cte_query)
+  players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
 const add_team_per_game_cte = ({
@@ -184,7 +184,7 @@ const add_team_per_game_cte = ({
     cte_query.groupBy('nfl_plays.week')
   }
 
-  players_query.with(rate_type_table_name, cte_query)
+  players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
 export const add_per_game_cte = ({

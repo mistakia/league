@@ -286,7 +286,7 @@ const fantasy_points_from_plays_with = async ({
       : output_columns_list
 
   let union_query = db
-    .with('filtered_plays', filtered_plays_cte)
+    .withMaterialized('filtered_plays', filtered_plays_cte)
     .select(
       'pid',
       db.raw('SUM(fantasy_points_from_plays) as fantasy_points_from_plays'),
@@ -369,7 +369,7 @@ const fantasy_points_from_plays_with = async ({
     union_query = filtered_query.groupBy(group_by_columns)
   }
 
-  query.with(with_table_name, union_query)
+  query.withMaterialized(with_table_name, union_query)
 }
 
 // Generate passing scoring SQL

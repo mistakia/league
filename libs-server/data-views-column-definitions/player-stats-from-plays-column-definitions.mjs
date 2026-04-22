@@ -253,7 +253,7 @@ const create_team_share_stat = ({
       with_query.havingRaw(having_clause)
     }
 
-    query.with(with_table_name, with_query)
+    query.withMaterialized(with_table_name, with_query)
   },
   column_name,
   use_having: true,

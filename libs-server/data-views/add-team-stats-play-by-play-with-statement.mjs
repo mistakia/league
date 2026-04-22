@@ -54,7 +54,7 @@ export const add_team_stats_play_by_play_with_statement = ({
     with_query.groupBy('nfl_plays.week')
   }
 
-  query.with(with_table_name, with_query)
+  query.withMaterialized(with_table_name, with_query)
 
   const stats_query = limit_to_player_active_games
     ? create_player_team_stats_query({
@@ -107,7 +107,7 @@ export const add_team_stats_play_by_play_with_statement = ({
     }
   }
 
-  query.with(final_stats_table_name, stats_query)
+  query.withMaterialized(final_stats_table_name, stats_query)
 }
 
 function create_team_stats_query({

@@ -87,7 +87,7 @@ export const add_per_player_cte = ({
     params: filtered_params
   })
 
-  players_query.with(rate_type_table_name, cte_query)
+  players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
 export const join_per_player_cte = ({

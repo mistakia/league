@@ -130,5 +130,5 @@ export const add_defensive_play_by_play_with_statement = ({
     with_query.havingRaw(having_clause)
   }
 
-  query.with(with_table_name, with_query)
+  query.withMaterialized(with_table_name, with_query)
 }

@@ -9,14 +9,18 @@
       {
         "column_id": "player_career_year",
         "params": {
-          "year": [2023],
+          "year": [
+            2023
+          ],
           "seas_type": "REG"
         }
       },
       {
         "column_id": "player_rush_yards_from_plays",
         "params": {
-          "year": [2023],
+          "year": [
+            2023
+          ],
           "seas_type": "REG"
         }
       }
@@ -25,7 +29,9 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": ["RB"]
+        "value": [
+          "RB"
+        ]
       },
       {
         "column_id": "player_career_year",
@@ -50,5 +56,5 @@
     "parameters"
   ],
   "timeout_ms": 35000,
-  "expected_query": "with \"t0c5e60186e061ea413a1099303dd3a2e\" as (select COALESCE(bc_pid) as pid, SUM(rush_yds) as rush_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_PRE_WEEK_1', '2023_PRE_WEEK_2', '2023_PRE_WEEK_3', '2023_PRE_WEEK_4', '2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2023_REG_WEEK_5', '2023_REG_WEEK_6', '2023_REG_WEEK_7', '2023_REG_WEEK_8', '2023_REG_WEEK_9', '2023_REG_WEEK_10', '2023_REG_WEEK_11', '2023_REG_WEEK_12', '2023_REG_WEEK_13', '2023_REG_WEEK_14', '2023_REG_WEEK_15', '2023_REG_WEEK_16', '2023_REG_WEEK_17', '2023_REG_WEEK_18', '2023_REG_WEEK_19', '2023_REG_WEEK_20', '2023_REG_WEEK_21', '2023_POST_WEEK_1', '2023_POST_WEEK_2', '2023_POST_WEEK_3', '2023_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2023) group by COALESCE(bc_pid)) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", \"player\".\"current_nfl_team\" AS \"current_nfl_team_0\", t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_yds_from_plays\" AS \"rush_yds_from_plays_0\", \"player\".\"pos\" from \"player\" inner join \"player_seasonlogs\" as \"t94ac00224f565e211ce527fca507baed\" on \"t94ac00224f565e211ce527fca507baed\".\"pid\" = \"player\".\"pid\" and t94ac00224f565e211ce527fca507baed.seas_type = 'REG' and t94ac00224f565e211ce527fca507baed.year = 2025 left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' and t209f3a217d72274fbedbe4d44e4a5095.year = 2023 left join \"t0c5e60186e061ea413a1099303dd3a2e\" on \"t0c5e60186e061ea413a1099303dd3a2e\".\"pid\" = \"player\".\"pid\" where player.pos IN ('RB') and t94ac00224f565e211ce527fca507baed.career_year <= '3' group by player.fname, player.lname, \"player\".\"pos\", \"player\".\"current_nfl_team\", t209f3a217d72274fbedbe4d44e4a5095.career_year, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_yds_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 7 DESC NULLS LAST, \"player\".\"pid\" asc limit 15"
+  "expected_query": "with \"t0c5e60186e061ea413a1099303dd3a2e\" as materialized (select COALESCE(bc_pid) as pid, SUM(rush_yds) as rush_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_PRE_WEEK_1', '2023_PRE_WEEK_2', '2023_PRE_WEEK_3', '2023_PRE_WEEK_4', '2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2023_REG_WEEK_5', '2023_REG_WEEK_6', '2023_REG_WEEK_7', '2023_REG_WEEK_8', '2023_REG_WEEK_9', '2023_REG_WEEK_10', '2023_REG_WEEK_11', '2023_REG_WEEK_12', '2023_REG_WEEK_13', '2023_REG_WEEK_14', '2023_REG_WEEK_15', '2023_REG_WEEK_16', '2023_REG_WEEK_17', '2023_REG_WEEK_18', '2023_REG_WEEK_19', '2023_REG_WEEK_20', '2023_REG_WEEK_21', '2023_POST_WEEK_1', '2023_POST_WEEK_2', '2023_POST_WEEK_3', '2023_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2023) group by COALESCE(bc_pid)) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", \"player\".\"current_nfl_team\" AS \"current_nfl_team_0\", t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_yds_from_plays\" AS \"rush_yds_from_plays_0\", \"player\".\"pos\" from \"player\" inner join \"player_seasonlogs\" as \"t94ac00224f565e211ce527fca507baed\" on \"t94ac00224f565e211ce527fca507baed\".\"pid\" = \"player\".\"pid\" and t94ac00224f565e211ce527fca507baed.seas_type = 'REG' and t94ac00224f565e211ce527fca507baed.year = 2025 left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' and t209f3a217d72274fbedbe4d44e4a5095.year = 2023 left join \"t0c5e60186e061ea413a1099303dd3a2e\" on \"t0c5e60186e061ea413a1099303dd3a2e\".\"pid\" = \"player\".\"pid\" where player.pos IN ('RB') and t94ac00224f565e211ce527fca507baed.career_year <= '3' group by player.fname, player.lname, \"player\".\"pos\", \"player\".\"current_nfl_team\", t209f3a217d72274fbedbe4d44e4a5095.career_year, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_yds_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 7 DESC NULLS LAST, \"player\".\"pid\" asc limit 15"
 }
