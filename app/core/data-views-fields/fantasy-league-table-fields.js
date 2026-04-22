@@ -5,7 +5,7 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { common_column_params } from '@libs-shared'
 
-const { single_year, single_week } = common_column_params
+const { single_nfl_week_id } = common_column_params
 
 export default function ({ week, is_logged_in }) {
   const fields = {
@@ -45,8 +45,7 @@ export default function ({ week, is_logged_in }) {
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: {
-        year: single_year,
-        week: single_week
+        single_nfl_week_id
       }
     },
 

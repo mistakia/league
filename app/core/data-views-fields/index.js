@@ -131,6 +131,10 @@ export function PlayerTableFields({
     if (value.column_params?.nfl_week_id) {
       fields[key].column_params.nfl_week_id.component = ColumnParamNflWeekFilter
     }
+    if (value.column_params?.single_nfl_week_id) {
+      fields[key].column_params.single_nfl_week_id.component =
+        ColumnParamNflWeekFilter
+    }
   }
 
   return fields

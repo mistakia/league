@@ -245,6 +245,32 @@ POST /data-views/search
 
 ### Parameter System
 
+#### Three NFL Week / Year Param Flavors
+
+Weekly data-view columns use one of three param flavors, picked by the data's natural grain:
+
+| Flavor                    | Param                      | Cardinality    | Used by                                                                                                                                            |
+| ------------------------- | -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Season-level              | `single_year` / `year`     | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, season-level rankings, ESPN scores, team DVOA, PFF grades, format logs                  |
+| Single-week point-in-time | `single_nfl_week_id`       | scalar         | DFS salary, DFS ownership, practice designation, weekly rankings, weekly projected market salary, betting game-prop markets, fantasy roster status |
+| Multi-week aggregation    | `nfl_week_id`              | multi          | play-by-play stats, games played, player-teams history                                                                                             |
+
+`single_nfl_week_id` is the scalar counterpart of `nfl_week_id`. It stores as a one-element array and uses the same `ColumnParamNflWeekFilter` component in `single: true` mode. The server-side helper `resolve_single_nfl_week_id` in `libs-server/data-views/` extracts the scalar value with backward-compat fallback: `params.single_nfl_week_id` → `params.nfl_week_id[0]` → constructed from legacy `params.year` + `params.week` + `params.seas_type`.
+
+#### `player_season_*` vs `player_week_*` naming
+
+Fields that exist at both grains are split into explicit season and week variants. For example, `player_rankings` became six `player_season_*_ranking` fields (keyed on `single_year`, filtered by `week=0` + `seas_type='REG'`) and six `player_week_*_ranking` fields (keyed on `single_nfl_week_id`). The same `player_season_*` / `player_week_*` convention is used for projection fields (`player_season_projected_*`, `player_week_projected_*`).
+
+#### Saved-View Migration
+
+The `scripts/migrate-data-views-single-nfl-week.mjs` script performs column-scoped rewrites on `user_data_views.table_state` and `user_plays_views.table_state` rows:
+
+1. Ranking column rename runs first: `player_{avg,overall,position,min,max,std}_ranking` with absent week or week=0 renames to `player_season_*_ranking`; week>0 renames to `player_week_*_ranking` with `single_nfl_week_id` constructed from the legacy `year`/`week`/`seas_type` trio.
+2. Single-week column consolidation: for the `SINGLE_WEEK_COLUMNS` set, legacy `year`/`week`/`seas_type` params collapse into a one-element `single_nfl_week_id` array.
+3. Multi-week column consolidation: for the `MULTI_WEEK_COLUMNS` set, legacy params expand into a cross-product `nfl_week_id` array.
+
+The same transformation runs in the browser on localStorage snapshot restoration via `app/core/data-views/browser-storage.mjs`, which imports the shared helper in `libs-shared/data-views-nfl-week-migration.mjs`. Saved views still carrying `year`/`week`/`seas_type` keys continue to resolve correctly on the server via the helper's fallback path, so the migration is non-breaking.
+
 **NFL Week Parameter** (weekly column definitions):
 
 - `nfl_week_id`: Composite identifier replacing separate year/week/seas*type. Format: `[YEAR]*[SEAS_TYPE]_WEEK_[WEEK]`(e.g.,`2024_REG_WEEK_5`). Maps to `nfl_week_id`column in database via`column_name: 'nfl_week_id'` property. Eliminates cartesian product problem when querying specific weeks across different years and season types. Values cover all years from 2000 to current season.

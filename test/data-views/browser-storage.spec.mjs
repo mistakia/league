@@ -402,4 +402,119 @@ describe('Data Views Browser Storage', function () {
       expect(history[1].change_type).to.equal('server_save')
     })
   })
+
+  describe('single_nfl_week_id column-scoped migration', () => {
+    it('migrates player_dfs_salary legacy year/week params to single_nfl_week_id', async () => {
+      const view_id = 'single-week-migration-view'
+      await data_view_browser_storage_save_snapshot({
+        view_id,
+        table_state: {
+          columns: [
+            {
+              column_id: 'player_dfs_salary',
+              params: { year: [2024], week: [5], seas_type: ['REG'] }
+            }
+          ]
+        },
+        change_type: 'user_edit'
+      })
+
+      const latest =
+        await data_view_browser_storage_get_latest_snapshot(view_id)
+      const col = latest.table_state.columns[0]
+      expect(col.column_id).to.equal('player_dfs_salary')
+      expect(col.params.single_nfl_week_id).to.deep.equal(['2024_REG_WEEK_5'])
+      expect(col.params.year).to.equal(undefined)
+      expect(col.params.week).to.equal(undefined)
+      expect(col.params.seas_type).to.equal(undefined)
+    })
+
+    it('renames season-level rankings to player_season_* variant', async () => {
+      const view_id = 'ranking-season-migration-view'
+      await data_view_browser_storage_save_snapshot({
+        view_id,
+        table_state: {
+          columns: [
+            {
+              column_id: 'player_average_ranking',
+              params: { year: [2024] }
+            }
+          ]
+        },
+        change_type: 'user_edit'
+      })
+
+      const latest =
+        await data_view_browser_storage_get_latest_snapshot(view_id)
+      const col = latest.table_state.columns[0]
+      expect(col.column_id).to.equal('player_season_average_ranking')
+      expect(col.params.year).to.deep.equal([2024])
+    })
+
+    it('renames week-specific rankings to player_week_* variant', async () => {
+      const view_id = 'ranking-week-migration-view'
+      await data_view_browser_storage_save_snapshot({
+        view_id,
+        table_state: {
+          columns: [
+            {
+              column_id: 'player_overall_ranking',
+              params: { year: [2024], week: [6], seas_type: ['REG'] }
+            }
+          ]
+        },
+        change_type: 'user_edit'
+      })
+
+      const latest =
+        await data_view_browser_storage_get_latest_snapshot(view_id)
+      const col = latest.table_state.columns[0]
+      expect(col.column_id).to.equal('player_week_overall_ranking')
+      expect(col.params.single_nfl_week_id).to.deep.equal(['2024_REG_WEEK_6'])
+    })
+
+    it('is idempotent for snapshots already on nfl_week_id', async () => {
+      const view_id = 'idempotent-migration-view'
+      await data_view_browser_storage_save_snapshot({
+        view_id,
+        table_state: {
+          columns: [
+            {
+              column_id: 'player_games_played',
+              params: { nfl_week_id: ['2024_REG_WEEK_3'] }
+            }
+          ]
+        },
+        change_type: 'user_edit'
+      })
+
+      const latest =
+        await data_view_browser_storage_get_latest_snapshot(view_id)
+      const col = latest.table_state.columns[0]
+      expect(col.column_id).to.equal('player_games_played')
+      expect(col.params.nfl_week_id).to.deep.equal(['2024_REG_WEEK_3'])
+    })
+
+    it('handles a snapshot with missing week param without throwing', async () => {
+      const view_id = 'missing-week-view'
+      await data_view_browser_storage_save_snapshot({
+        view_id,
+        table_state: {
+          columns: [
+            {
+              column_id: 'player_dfs_salary',
+              params: { year: [2024] }
+            }
+          ]
+        },
+        change_type: 'user_edit'
+      })
+
+      const latest =
+        await data_view_browser_storage_get_latest_snapshot(view_id)
+      const col = latest.table_state.columns[0]
+      expect(col.column_id).to.equal('player_dfs_salary')
+      expect(col.params.single_nfl_week_id).to.equal(undefined)
+    })
+  })
 })

@@ -4,31 +4,18 @@ import data_view_join_function from '#libs-server/data-views/data-view-join-func
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { current_season } from '#constants'
 import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
+import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 const get_params = ({ params = {} }) => {
-  let nfl_week
-  if (params.nfl_week_id) {
-    nfl_week = Array.isArray(params.nfl_week_id)
-      ? params.nfl_week_id
-      : [params.nfl_week_id]
-  } else {
-    let year = params.year || [current_season.stats_season_year]
-    if (!Array.isArray(year)) {
-      year = [year]
-    }
-    let week = params.week || [Math.max(current_season.week, 1)]
-    if (!Array.isArray(week)) {
-      week = [week]
-    }
-    nfl_week = []
-    for (const y of year) {
-      for (const w of week) {
-        nfl_week.push(
-          format_nfl_week_identifier({ year: y, seas_type: 'REG', week: w })
-        )
-      }
-    }
+  let nfl_week_id = resolve_single_nfl_week_id({ params })
+  if (!nfl_week_id) {
+    nfl_week_id = format_nfl_week_identifier({
+      year: current_season.stats_season_year,
+      seas_type: 'REG',
+      week: Math.max(current_season.week, 1)
+    })
   }
+  const nfl_week = [nfl_week_id]
 
   let career_year = params.career_year || []
   if (!Array.isArray(career_year)) {
