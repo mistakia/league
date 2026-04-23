@@ -102,8 +102,12 @@ export default async function ({
   apply_nfl_games_current_week_join({ db, query })
 
   const reference_params = nfl_week_identifier.reference_week_fallback_params()
-  const prior_week_params = reference_params ? reference_params.prior_params : null
-  const fallback_params = reference_params ? reference_params.fallback_params : null
+  const prior_week_params = reference_params
+    ? reference_params.prior_params
+    : null
+  const fallback_params = reference_params
+    ? reference_params.fallback_params
+    : null
 
   if (reference_params) {
     apply_nfl_games_offset_week_join({

@@ -3,10 +3,7 @@
 import MockDate from 'mockdate'
 
 import { current_season } from '#constants'
-import {
-  seed_nfl_games,
-  clear_nfl_games
-} from './seed-nfl-games.mjs'
+import { seed_nfl_games, clear_nfl_games } from './seed-nfl-games.mjs'
 
 const {
   regular_season_start,

@@ -14,8 +14,14 @@ const default_year = current_season.week
   : current_season.year - 1
 
 const PARSED_IDS = [
-  ...get_nfl_week_identifiers_for_year({ year: default_year, seas_type: 'REG' }),
-  ...get_nfl_week_identifiers_for_year({ year: default_year, seas_type: 'POST' })
+  ...get_nfl_week_identifiers_for_year({
+    year: default_year,
+    seas_type: 'REG'
+  }),
+  ...get_nfl_week_identifiers_for_year({
+    year: default_year,
+    seas_type: 'POST'
+  })
 ].map((id) => {
   const parsed = parse_nfl_week_identifier({ identifier: id })
   const label = parsed

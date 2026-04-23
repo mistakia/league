@@ -3,10 +3,7 @@
 import * as chai from 'chai'
 
 import knex from '#db'
-import {
-  seed_nfl_games,
-  clear_nfl_games
-} from './fixtures/seed-nfl-games.mjs'
+import { seed_nfl_games, clear_nfl_games } from './fixtures/seed-nfl-games.mjs'
 
 const expect = chai.expect
 

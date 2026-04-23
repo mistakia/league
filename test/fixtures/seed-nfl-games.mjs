@@ -39,9 +39,7 @@ const build_rows_for_weeks = ({ year, seas_type, min_week, max_week }) => {
   return rows
 }
 
-export const seed_nfl_games = async ({
-  year = current_season.year
-} = {}) => {
+export const seed_nfl_games = async ({ year = current_season.year } = {}) => {
   const rows = [
     ...build_rows_for_weeks({
       year,
@@ -60,8 +58,6 @@ export const seed_nfl_games = async ({
   return rows
 }
 
-export const clear_nfl_games = async ({
-  year = current_season.year
-} = {}) => {
+export const clear_nfl_games = async ({ year = current_season.year } = {}) => {
   await knex('nfl_games').where({ year }).del()
 }
