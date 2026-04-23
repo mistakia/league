@@ -1,5 +1,8 @@
-import { current_season } from '#constants'
-import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
+import {
+  format_nfl_week_identifier,
+  current_nfl_week_identifier,
+  current_nfl_week_params
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 // Resolves a `{dynamic_type: 'current_nfl_week'}` param object to a concrete
 // identifier. The `single_nfl_week_id` param in common-column-params defines
@@ -8,11 +11,7 @@ import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs
 const resolve_dynamic_single_nfl_week = (value) => {
   if (value && typeof value === 'object' && value.dynamic_type) {
     if (value.dynamic_type === 'current_nfl_week') {
-      return format_nfl_week_identifier({
-        year: current_season.year,
-        seas_type: 'REG',
-        week: Math.max(current_season.week, 1)
-      })
+      return current_nfl_week_identifier()
     }
     return null
   }
@@ -30,10 +29,29 @@ const first_scalar = (value) => {
  * Precedence:
  *   1. params.single_nfl_week_id (scalar, one-element array, or dynamic object)
  *   2. params.nfl_week_id[0] (compat with saved views that set the multi param)
- *   3. Construct from params.year + params.week + params.seas_type (defaults REG)
- *
- * Returns a scalar identifier string (e.g. "2024_REG_WEEK_5") or null.
+ *   3. Construct from params.year + params.week + params.seas_type
+ *   4. Fall back to the current nfl_week identifier.
  */
+const has_explicit_week_param = (params = {}) => {
+  const single = params.single_nfl_week_id
+  if (single != null && !(Array.isArray(single) && single.length === 0)) {
+    return true
+  }
+  const multi = params.nfl_week_id
+  if (multi != null && !(Array.isArray(multi) && multi.length === 0)) {
+    return true
+  }
+  return false
+}
+
+// Resolves only when the caller explicitly set `single_nfl_week_id` or
+// `nfl_week_id`. Returns null otherwise, so season-level callers can skip
+// attaching week-scoped joins.
+export function resolve_single_nfl_week_id_if_explicit({ params = {} } = {}) {
+  if (!has_explicit_week_param(params)) return null
+  return resolve_single_nfl_week_id({ params })
+}
+
 export default function resolve_single_nfl_week_id({ params = {} } = {}) {
   const single_value = first_scalar(params.single_nfl_week_id)
   if (single_value) return single_value
@@ -47,11 +65,18 @@ export default function resolve_single_nfl_week_id({ params = {} } = {}) {
     ? params.seas_type[0]
     : params.seas_type
   if (year != null && week != null) {
-    return format_nfl_week_identifier({
-      year,
-      seas_type: seas_type_param || 'REG',
-      week
-    })
+    let seas_type
+    if (seas_type_param) {
+      seas_type = seas_type_param
+    } else {
+      const current = current_nfl_week_params()
+      if (year === current.year && week === current.week) {
+        seas_type = current.seas_type
+      } else {
+        seas_type = 'REG'
+      }
+    }
+    return format_nfl_week_identifier({ year, seas_type, week })
   }
-  return null
+  return current_nfl_week_identifier()
 }

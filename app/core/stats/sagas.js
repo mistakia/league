@@ -9,6 +9,17 @@ import {
 import { player_actions } from '@core/players'
 import { stat_actions } from './actions'
 import { api_get_charted_plays } from '@core/api'
+import { parse_nfl_week_identifier } from '@libs-shared/nfl-week-identifier.mjs'
+
+const derive_seas_types_from_weeks = (weeks) => {
+  const set = new globalThis.Set()
+  for (const id of weeks) {
+    const parsed = parse_nfl_week_identifier({ identifier: id })
+    if (parsed) set.add(parsed.seas_type)
+  }
+  const result = [...set]
+  return result.length ? result.sort() : ['REG']
+}
 
 export function* loadChartedPlays() {
   const selected_players_page_view = yield select(
@@ -21,15 +32,17 @@ export function* loadChartedPlays() {
   if (should_load) {
     const request_history = yield select(get_request_history)
     const stats = yield select(get_stats_state)
-    const { years } = stats.toJS()
+    const years = stats.years.toJS()
+    const weeks = stats.weeks
+    const seas_types = derive_seas_types_from_weeks(weeks)
 
-    const request_key = `GET_CHARTED_PLAYS_${years.join('_')}`
+    const request_key = `GET_CHARTED_PLAYS_${years.join('_')}_${seas_types.join('_')}`
 
     if (request_history.has(request_key)) {
       return
     }
 
-    yield call(api_get_charted_plays, { years })
+    yield call(api_get_charted_plays, { years, seas_types })
   }
 }
 
@@ -54,7 +67,8 @@ export function* calculateStats() {
   } = yield select(get_stats_state)
   const league = yield select(get_current_league)
   const filtered = plays.filter((play) => {
-    if (!weeks.includes(play.week)) return false
+    const play_identifier = `${play.year}_${play.seas_type}_WEEK_${play.week}`
+    if (!weeks.has(play_identifier)) return false
     if (!days.includes(play.day)) return false
     if (!quarters.includes(play.qtr)) return false
     if (!downs.includes(play.dwn)) return false

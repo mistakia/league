@@ -2,7 +2,7 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import { current_season } from '#constants'
+import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 
 const get_params = ({ params = {} }) => {
@@ -13,28 +13,46 @@ const get_params = ({ params = {} }) => {
     return { nfl_week }
   }
 
-  // Fallback: construct nfl_week from year/week/seas_type for season-level callers
-  let year = params.year || [current_season.year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  let week = params.week || [Math.max(current_season.week, 1)]
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
+  // Cartesian fallback for callers that pass year[]/week[] arrays without
+  // nfl_week_id (the pre-migration form). When neither is present, fall back
+  // to the resolver default.
+  const years = params.year
+    ? Array.isArray(params.year)
+      ? params.year
+      : [params.year]
+    : null
+  const weeks = params.week
+    ? Array.isArray(params.week)
+      ? params.week
+      : [params.week]
+    : null
   const seas_type = Array.isArray(params.seas_type)
     ? params.seas_type[0]
-    : params.seas_type || current_season.nfl_seas_type
+    : params.seas_type
 
-  const nfl_week = []
-  for (const y of year) {
-    for (const w of week) {
-      nfl_week.push(format_nfl_week_identifier({ year: y, seas_type, week: w }))
+  if (years && weeks) {
+    const resolved_seas_type =
+      seas_type ||
+      (() => {
+        const parsed = resolve_single_nfl_week_id({ params })
+        return parsed ? parsed.split('_')[1] : 'REG'
+      })()
+    const nfl_week = []
+    for (const y of years) {
+      for (const w of weeks) {
+        nfl_week.push(
+          format_nfl_week_identifier({
+            year: y,
+            seas_type: resolved_seas_type,
+            week: w
+          })
+        )
+      }
     }
+    return { nfl_week }
   }
 
+  const nfl_week = [resolve_single_nfl_week_id({ params })]
   return { nfl_week }
 }
 

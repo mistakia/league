@@ -4,6 +4,7 @@ import db from '#db'
 import { getDraftDates } from '#libs-shared'
 import { current_season, waiver_types, transaction_types } from '#constants'
 import getLeague from './get-league.mjs'
+import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
 
 export default async function (lid) {
   const league = await getLeague({ lid })
@@ -90,14 +91,12 @@ export default async function (lid) {
       }
     ])
 
-  if (current_season.isRegularSeason) {
+  if (!current_season.isOffseason) {
     query
       .select('nfl_games.date')
       .select('nfl_games.time_est')
       .join('player', 'waivers.pid', 'player.pid')
-      .joinRaw(
-        `left join nfl_games on nfl_games.week = ${current_season.week} and nfl_games.year = ${current_season.year} and nfl_games.seas_type = 'REG' and (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h)`
-      )
+    apply_nfl_games_current_week_join({ db, query })
   }
 
   if (recent_transaction_pids.length) {
@@ -155,7 +154,7 @@ export default async function (lid) {
 
   const waiver_rows = await query
 
-  if (current_season.isRegularSeason) {
+  if (!current_season.isOffseason) {
     const now = dayjs()
     const filtered = waiver_rows.filter((waiver_row) => {
       if (!waiver_row.date) return true

@@ -14,9 +14,7 @@ const get_week_default_params = ({ params = {} } = {}) => {
     ranking_type: ['PPR_REDRAFT']
   }
 
-  const nfl_week_id =
-    resolve_single_nfl_week_id({ params }) ||
-    `${current_season.year}_REG_WEEK_${Math.max(current_season.week, 1)}`
+  const nfl_week_id = resolve_single_nfl_week_id({ params })
 
   for (const [key, default_value] of Object.entries(default_params)) {
     let value = params[key] || default_value

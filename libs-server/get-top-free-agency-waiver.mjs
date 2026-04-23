@@ -3,6 +3,7 @@ import timezone from 'dayjs/plugin/timezone.js'
 
 import db from '#db'
 import { current_season, waiver_types, transaction_types } from '#constants'
+import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
 
 dayjs.extend(timezone)
 
@@ -16,6 +17,7 @@ export default async function (leagueId) {
     .where('lid', leagueId)
 
   const recent_transaction_pids = recent_transaction_rows.map((t) => t.pid)
+
   const query = db('waivers')
     .select(
       'teams.*',
@@ -30,9 +32,6 @@ export default async function (leagueId) {
     )
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.pid', 'player.pid')
-    .joinRaw(
-      `left join nfl_games on (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h) and (nfl_games.week = ${current_season.week} or nfl_games.week is null) and (nfl_games.year = ${current_season.year} or nfl_games.year is null) and (nfl_games.seas_type = 'REG' or nfl_games.seas_type is null)`
-    )
     .where('teams.year', current_season.year)
     .where('waivers.lid', leagueId)
     .whereNull('processed')
@@ -56,6 +55,8 @@ export default async function (leagueId) {
         order: 'asc'
       }
     ])
+
+  apply_nfl_games_current_week_join({ db, query })
 
   if (recent_transaction_pids.length) {
     query.whereNotIn('waivers.pid', recent_transaction_pids)

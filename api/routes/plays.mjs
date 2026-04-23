@@ -73,8 +73,14 @@ function normalize_array_query_param(param_value) {
 /**
  * Determines if the given week/year represents the current week
  */
-function is_current_week({ week, year }) {
-  return !week || (week === current_season.week && year === current_season.year)
+function is_current_week({ week, year, seas_type }) {
+  if (!week) return true
+  const effective_seas_type = seas_type || 'REG'
+  return (
+    week === current_season.nfl_seas_week &&
+    year === current_season.year &&
+    effective_seas_type === current_season.nfl_seas_type
+  )
 }
 
 // ============================================================================
@@ -84,13 +90,13 @@ function is_current_week({ week, year }) {
 /**
  * Builds a query for historical plays (non-current week)
  */
-function build_historical_plays_query({ db, year, week }) {
+function build_historical_plays_query({ db, year, week, seas_type = 'REG' }) {
   return db('nfl_plays')
     .select(HISTORICAL_PLAYS_FIELDS)
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
     .where('nfl_plays.year', year)
     .where('nfl_plays.week', week)
-    .where('nfl_plays.seas_type', 'REG')
+    .where('nfl_plays.seas_type', seas_type)
 }
 
 /**
@@ -116,14 +122,19 @@ function build_current_week_play_stats_query({ db }) {
       )
     })
     .where('nfl_plays_current_week.year', current_season.year)
-    .where('nfl_plays_current_week.seas_type', 'REG')
+    .where('nfl_plays_current_week.seas_type', current_season.nfl_seas_type)
     .where('nfl_play_stats_current_week.valid', true)
 }
 
 /**
  * Builds a query for historical play stats
  */
-function build_historical_play_stats_query({ db, year, week }) {
+function build_historical_play_stats_query({
+  db,
+  year,
+  week,
+  seas_type = 'REG'
+}) {
   return db('nfl_play_stats')
     .select(
       'nfl_play_stats.*',
@@ -140,7 +151,7 @@ function build_historical_play_stats_query({ db, year, week }) {
     })
     .where('nfl_plays.year', year)
     .where('nfl_plays.week', week)
-    .where('nfl_plays.seas_type', 'REG')
+    .where('nfl_plays.seas_type', seas_type)
     .where('nfl_play_stats.valid', true)
 }
 
@@ -157,9 +168,12 @@ function build_charted_plays_cache_key({
   days,
   quarters,
   downs,
-  pid
+  pid,
+  seas_types = ['REG']
 }) {
   let cache_key = `nfl_plays_charted_year_${years.join('_')}`
+
+  cache_key = `${cache_key}_seas_types_${[...seas_types].sort().join('_')}`
 
   if (pid) {
     cache_key = `${cache_key}_pid_${pid}`
@@ -246,12 +260,16 @@ router.get('/?', async (req, res) => {
   try {
     const week = req.query.week ? Number(req.query.week) : null
     const year = req.query.year ? Number(req.query.year) : current_season.year
+    const seas_type = req.query.seas_type || undefined
 
-    const query = is_current_week({ week, year })
+    const query = is_current_week({ week, year, seas_type })
       ? getPlayByPlayQuery(db)
           .where('nfl_plays_current_week.year', current_season.year)
-          .where('nfl_plays_current_week.seas_type', 'REG')
-      : build_historical_plays_query({ db, year, week })
+          .where(
+            'nfl_plays_current_week.seas_type',
+            current_season.nfl_seas_type
+          )
+      : build_historical_plays_query({ db, year, week, seas_type })
 
     const data = await query
     res.send(data)
@@ -378,11 +396,12 @@ router.get('/stats', async (req, res) => {
   try {
     const week = req.query.week ? Number(req.query.week) : null
     const year = req.query.year ? Number(req.query.year) : current_season.year
-    const is_current_week_flag = is_current_week({ week, year })
+    const seas_type = req.query.seas_type || undefined
+    const is_current_week_flag = is_current_week({ week, year, seas_type })
 
     const query = is_current_week_flag
       ? build_current_week_play_stats_query({ db })
-      : build_historical_play_stats_query({ db, year, week })
+      : build_historical_play_stats_query({ db, year, week, seas_type })
 
     const data = await query
     res.send(data)
@@ -512,6 +531,8 @@ router.get('/charted', async (req, res) => {
     const days = normalize_array_query_param(req.query.days)
     const quarters = normalize_array_query_param(req.query.quarters)
     const downs = normalize_array_query_param(req.query.downs)
+    const seas_types_param = normalize_array_query_param(req.query.seas_types)
+    const seas_types = seas_types_param.length ? seas_types_param : ['REG']
     const { pid } = req.query
 
     // TODO filter by yfog range
@@ -530,9 +551,9 @@ router.get('/charted', async (req, res) => {
     }
 
     // Build base query
-    let query = getChartedPlayByPlayQuery(db).where(
+    let query = getChartedPlayByPlayQuery(db).whereIn(
       'nfl_games.seas_type',
-      'REG'
+      seas_types
     )
 
     // Apply player filter if provided
@@ -569,7 +590,8 @@ router.get('/charted', async (req, res) => {
       days,
       quarters,
       downs,
-      pid
+      pid,
+      seas_types
     })
     const cache_data = await redis_cache.get(cache_key)
 

@@ -2,7 +2,7 @@ import { getLeague } from '#libs-server'
 import { current_season, roster_slot_types } from '#constants'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
-import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 import db from '#db'
 import player_projected_column_definitions from './player-projected-column-definitions.mjs'
@@ -86,7 +86,11 @@ export default {
     join: async ({ query, params = {}, data_view_options = {} }) => {
       const { lid = 1 } = params
 
-      const resolved_nfl_week_id = resolve_single_nfl_week_id({ params })
+      // Roster year defaults to current_season.year (current fantasy year),
+      // NOT the week-identifier year which tracks stats_season_year during offseason.
+      const resolved_nfl_week_id = resolve_single_nfl_week_id_if_explicit({
+        params
+      })
       let year
       let week
       if (resolved_nfl_week_id) {

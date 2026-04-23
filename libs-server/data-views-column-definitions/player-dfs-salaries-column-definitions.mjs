@@ -2,19 +2,10 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import { current_season } from '#constants'
-import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 const get_params = ({ params = {} }) => {
-  let nfl_week_id = resolve_single_nfl_week_id({ params })
-  if (!nfl_week_id) {
-    nfl_week_id = format_nfl_week_identifier({
-      year: current_season.stats_season_year,
-      seas_type: 'REG',
-      week: Math.max(current_season.week, 1)
-    })
-  }
+  const nfl_week_id = resolve_single_nfl_week_id({ params })
   const nfl_week = [nfl_week_id]
 
   let career_year = params.career_year || []

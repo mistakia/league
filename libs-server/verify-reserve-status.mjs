@@ -1,8 +1,16 @@
 import db from '#db'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
-import { Roster, isReserveEligible, isReserveCovEligible } from '#libs-shared'
+import {
+  Roster,
+  isReserveEligible,
+  isReserveCovEligible,
+  nfl_week_identifier
+} from '#libs-shared'
 import { current_season, roster_slot_types } from '#constants'
+import apply_practice_current_week_join from './data-views/join-practice-current-week.mjs'
+import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
+import apply_nfl_games_offset_week_join from './data-views/join-nfl-games-offset-week.mjs'
 
 export default async function ({ team_id, league_id }) {
   const league = await getLeague({ lid: league_id })
@@ -11,42 +19,25 @@ export default async function ({ team_id, league_id }) {
   const reserve_pids = roster.reserve.map((p) => p.pid)
 
   const player_query = db('player')
-    .leftJoin('practice', function () {
-      this.on('player.pid', '=', 'practice.pid')
-        .andOn('practice.week', '=', current_season.week)
-        .andOn('practice.year', '=', current_season.year)
-        .andOn(db.raw("practice.seas_type = 'REG'"))
-    })
-    .leftJoin('nfl_games', function () {
-      this.on(function () {
-        this.on('nfl_games.h', '=', 'player.current_nfl_team').orOn(
-          'nfl_games.v',
-          '=',
-          'player.current_nfl_team'
-        )
-      })
-        .andOn('nfl_games.week', '=', current_season.week)
-        .andOn('nfl_games.year', '=', current_season.year)
-        .andOn(db.raw("nfl_games.seas_type = 'REG'"))
+  apply_practice_current_week_join({ db, query: player_query })
+  apply_nfl_games_current_week_join({ db, query: player_query })
+
+  const reference_params = nfl_week_identifier.reference_week_fallback_params()
+
+  if (reference_params) {
+    const { prior_params: prior_week_params, fallback_params } =
+      reference_params
+    apply_nfl_games_offset_week_join({
+      db,
+      query: player_query,
+      offset: -1,
+      alias: 'prior_week_game'
     })
 
-  // Only join prior week gamelog data if week > 1
-  if (current_season.week > 1) {
-    const prior_week = current_season.week - 1
-    // First join to prior week's game (to detect if it was a bye week)
-    player_query.leftJoin('nfl_games as prior_week_game', function () {
-      this.on(function () {
-        this.on('prior_week_game.h', '=', 'player.current_nfl_team').orOn(
-          'prior_week_game.v',
-          '=',
-          'player.current_nfl_team'
-        )
-      })
-        .andOn('prior_week_game.week', '=', prior_week)
-        .andOn('prior_week_game.year', '=', current_season.year)
-        .andOn(db.raw("prior_week_game.seas_type = 'REG'"))
-    })
-    // Join to reference week game (week - 2 if prior week was bye, else week - 1)
+    const fallback_week = fallback_params.week
+    const fallback_year = fallback_params.year
+    const fallback_seas_type = fallback_params.seas_type
+
     player_query.leftJoin('nfl_games as reference_week_game', function () {
       this.on(function () {
         this.on('reference_week_game.h', '=', 'player.current_nfl_team').orOn(
@@ -59,11 +50,26 @@ export default async function ({ team_id, league_id }) {
           'reference_week_game.week',
           '=',
           db.raw(
-            `CASE WHEN prior_week_game.esbid IS NULL THEN ${prior_week - 1} ELSE ${prior_week} END`
+            `CASE WHEN prior_week_game.esbid IS NULL THEN ?::int ELSE ?::int END`,
+            [fallback_week, prior_week_params.week]
           )
         )
-        .andOn('reference_week_game.year', '=', current_season.year)
-        .andOn(db.raw("reference_week_game.seas_type = 'REG'"))
+        .andOn(
+          'reference_week_game.year',
+          '=',
+          db.raw(
+            `CASE WHEN prior_week_game.esbid IS NULL THEN ?::int ELSE ?::int END`,
+            [fallback_year, prior_week_params.year]
+          )
+        )
+        .andOn(
+          'reference_week_game.seas_type',
+          '=',
+          db.raw(
+            `CASE WHEN prior_week_game.esbid IS NULL THEN ?::text ELSE ?::text END`,
+            [fallback_seas_type, prior_week_params.seas_type]
+          )
+        )
     })
     // Then join to player's gamelog for the reference week game
     player_query.leftJoin('player_gamelogs as prior_week_gamelog', function () {

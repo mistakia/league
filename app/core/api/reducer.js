@@ -172,7 +172,7 @@ export function api_reducer(state = initialState, { payload, type }) {
       return state.setIn(
         [
           'request_history',
-          `GET_CHARTED_PLAYS_${payload.opts.years.join('_')}`
+          `GET_CHARTED_PLAYS_${payload.opts.years.join('_')}_${[...(payload.opts.seas_types || ['REG'])].sort().join('_')}`
         ],
         true
       )
@@ -180,7 +180,7 @@ export function api_reducer(state = initialState, { payload, type }) {
     case stat_actions.GET_CHARTED_PLAYS_FAILED:
       return state.deleteIn([
         'request_history',
-        `GET_CHARTED_PLAYS_${payload.opts.years.join('_')}`
+        `GET_CHARTED_PLAYS_${payload.opts.years.join('_')}_${[...(payload.opts.seas_types || ['REG'])].sort().join('_')}`
       ])
 
     default:

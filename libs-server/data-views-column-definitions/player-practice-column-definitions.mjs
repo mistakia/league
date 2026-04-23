@@ -2,24 +2,12 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_frequent_update_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import { current_season } from '#constants'
-import { format_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 const valid_practice_days = ['m', 'tu', 'w', 'th', 'f', 's', 'su']
 
 const get_params = ({ params = {} }) => {
-  let nfl_week_id = resolve_single_nfl_week_id({ params })
-  if (!nfl_week_id) {
-    const is_post = current_season.nfl_seas_type === 'POST'
-    nfl_week_id = format_nfl_week_identifier({
-      year: current_season.stats_season_year,
-      seas_type: is_post ? 'POST' : 'REG',
-      week: is_post
-        ? Math.max(current_season.nfl_seas_week, 1)
-        : Math.max(current_season.week, 1)
-    })
-  }
+  const nfl_week_id = resolve_single_nfl_week_id({ params })
   const nfl_week = [nfl_week_id]
 
   let practice_day = params.practice_day || ['w']

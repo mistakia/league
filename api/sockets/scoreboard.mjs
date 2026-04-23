@@ -41,8 +41,8 @@ export default class Scoreboard {
     const query = getPlayByPlayQuery(db)
     const plays = await query
       .where('nfl_plays_current_week.year', current_season.year)
-      .where('nfl_plays_current_week.week', current_season.week)
-      .where('nfl_plays_current_week.seas_type', 'REG')
+      .where('nfl_plays_current_week.week', current_season.nfl_seas_week)
+      .where('nfl_plays_current_week.seas_type', current_season.nfl_seas_type)
       .where('updated', '>', updated)
 
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)

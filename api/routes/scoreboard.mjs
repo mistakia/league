@@ -74,7 +74,13 @@ const router = express.Router()
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const week = Number(req.query.week || current_season.week)
+    const week_param_provided = req.query.week != null
+    const week = Number(
+      req.query.week ||
+        (current_season.nfl_seas_type === 'POST'
+          ? current_season.nfl_seas_week
+          : current_season.week)
+    )
 
     if (isNaN(week)) {
       return res.status(400).send({ error: 'invalid week' })
@@ -84,10 +90,14 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid week' })
     }
 
+    const seas_type = week_param_provided
+      ? req.query.seas_type || 'REG'
+      : current_season.nfl_seas_type
+
     const query = getPlayByPlayQuery(db)
     const plays = await query
       .where('nfl_plays_current_week.week', week)
-      .where('nfl_plays_current_week.seas_type', 'REG')
+      .where('nfl_plays_current_week.seas_type', seas_type)
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
     const playStats = await db('nfl_play_stats_current_week').whereIn(
       'esbid',

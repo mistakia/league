@@ -2,24 +2,20 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone.js'
 import db from '#db'
 import { current_season, player_nfl_status } from '#constants'
+import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
 
 dayjs.extend(timezone)
 
 export default async function (pid) {
-  if (current_season.week === 0) {
+  if (current_season.isOffseason) {
     return false
   }
 
-  const player_rows = await db('player')
+  const query = db('player')
     .select('player.*', 'nfl_games.date', 'nfl_games.time_est')
     .where({ pid })
-    .joinRaw(
-      'left join nfl_games on player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h'
-    )
-    .where('nfl_games.week', current_season.week)
-    .where('nfl_games.year', current_season.year)
-    .where('nfl_games.seas_type', 'REG')
-    .limit(1)
+  apply_nfl_games_current_week_join({ db, query })
+  const player_rows = await query.whereNotNull('nfl_games.esbid').limit(1)
 
   const player_row = player_rows[0]
 

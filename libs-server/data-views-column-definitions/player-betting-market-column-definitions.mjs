@@ -5,7 +5,7 @@ import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_betting_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
-import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 const get_default_params = ({
   params,
@@ -17,7 +17,11 @@ const get_default_params = ({
     ? bookmaker_constants.bookmakers.DRAFTKINGS
     : bookmaker_constants.bookmakers.FANDUEL
 
-  const resolved_single_nfl_week_id = resolve_single_nfl_week_id({ params })
+  // Only attach week-scoped prop joins when an explicit week param was set.
+  // Empty arrays count as "not set" so season-level prop queries skip the join.
+  const resolved_single_nfl_week_id = resolve_single_nfl_week_id_if_explicit({
+    params
+  })
   const parsed_single = resolved_single_nfl_week_id
     ? parse_nfl_week_identifier({ identifier: resolved_single_nfl_week_id })
     : null

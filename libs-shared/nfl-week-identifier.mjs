@@ -157,6 +157,80 @@ export const get_postseason_week_label = ({ week }) => {
   return POSTSEASON_WEEK_LABELS[week] || `Week ${week}`
 }
 
+export const current_nfl_week_params = () => {
+  const year = current_season.stats_season_year
+  const live_type = current_season.nfl_seas_type
+  if (live_type === 'POST') {
+    return {
+      year,
+      seas_type: 'POST',
+      week: Math.max(current_season.nfl_seas_week, 1)
+    }
+  }
+  // REG and PRE (offseason) both default to the REG track. During offseason
+  // current_season.week is 0, which we clamp to REG week 1 as the last
+  // meaningful identifier for default queries.
+  return {
+    year,
+    seas_type: 'REG',
+    week: Math.max(current_season.week, 1)
+  }
+}
+
+export const current_nfl_week_identifier = () => {
+  return format_nfl_week_identifier(current_nfl_week_params())
+}
+
+export const nfl_week_offset_params = ({ offset }) => {
+  if (offset === 0) return current_nfl_week_params()
+  if (offset > 0) {
+    throw new Error(
+      `nfl_week_offset_params: positive offsets are not supported (got ${offset})`
+    )
+  }
+
+  const { year, seas_type, week } = current_nfl_week_params()
+  const steps = -offset
+  const cur_year = year
+  let cur_seas_type = seas_type
+  let cur_week = week
+
+  for (let i = 0; i < steps; i++) {
+    if (cur_seas_type === 'POST') {
+      if (cur_week > 1) {
+        cur_week -= 1
+      } else {
+        cur_seas_type = 'REG'
+        cur_week = REG_MAX_WEEKS_BY_ERA({ year: cur_year })
+      }
+    } else if (cur_seas_type === 'REG') {
+      if (cur_week > 1) {
+        cur_week -= 1
+      } else {
+        return null
+      }
+    } else {
+      return null
+    }
+  }
+
+  return { year: cur_year, seas_type: cur_seas_type, week: cur_week }
+}
+
+// Reference-week params for joins that need a "prior" week with a one-week
+// bye fallback. `prior_params` is the most recent played week; `fallback_params`
+// is two-weeks-prior when that exists, otherwise prior. Returns null when no
+// prior week exists (offseason / REG week 1).
+export const reference_week_fallback_params = () => {
+  const prior_params = nfl_week_offset_params({ offset: -1 })
+  if (!prior_params) return null
+  const two_weeks_prior_params = nfl_week_offset_params({ offset: -2 })
+  return {
+    prior_params,
+    fallback_params: two_weeks_prior_params || prior_params
+  }
+}
+
 export const get_max_weeks_for_season_type = ({ seas_type, year }) => {
   if (seas_type === 'REG') {
     if (!year) return 0

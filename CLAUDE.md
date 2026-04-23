@@ -239,9 +239,12 @@ Use `handle_season_args_for_script()` for year/week parameters.
 
 Current season info from `libs-shared/constants/season-constants.mjs`:
 
-- `current_season.year`, `current_season.week`
+- `current_season.year`, `current_season.week` (week is the **continuous counter** from `regular_season_start`, not per-type)
+- `current_season.nfl_seas_type` (`PRE`/`REG`/`POST`), `current_season.nfl_seas_week` (resets to 1 in POST), `current_season.stats_season_year` (Super Bowl gap / offseason stable)
 - `is_offseason`, `is_regular_season`
 - `fantasy_weeks`, `nfl_weeks`
+
+Never reconstruct an `nfl_week_id` locally. Use canonical helpers in `libs-shared/nfl-week-identifier.mjs`: `current_nfl_week_identifier()`, `current_nfl_week_params()`, `nfl_week_offset_params({ offset })`. See `docs/data-views-system.md` "Live current_season semantics" for the choke-point rules.
 
 ## Player Management
 

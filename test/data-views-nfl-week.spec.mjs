@@ -436,8 +436,9 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       )
     })
 
-    it('returns null when no params', () => {
-      expect(resolve_single_nfl_week_id({ params: {} })).to.equal(null)
+    it('falls back to current_nfl_week_identifier when no params', () => {
+      const id = resolve_single_nfl_week_id({ params: {} })
+      expect(id).to.match(/^\d{4}_(REG|POST|PRE)_WEEK_\d+$/)
     })
   })
 })

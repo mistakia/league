@@ -7,7 +7,9 @@ import {
   apply_year_offset_to_nfl_weeks,
   decompose_nfl_weeks,
   get_nfl_week_identifiers_for_year,
-  get_max_weeks_for_season_type
+  get_max_weeks_for_season_type,
+  current_nfl_week_identifier,
+  nfl_week_offset_params
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
@@ -330,29 +332,15 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
           })
         }
         case 'current_nfl_week': {
-          return [
-            format_nfl_week_identifier({
-              year: current_season.year,
-              seas_type: 'REG',
-              week: Math.max(current_season.week, 1)
-            })
-          ]
+          return [current_nfl_week_identifier()]
         }
         case 'last_n_nfl_weeks': {
           const n = parseInt(item.value || 5, 10)
           const result = []
-          let year = current_season.year
-          let week = current_season.week
-          const seas_type = 'REG'
-
           for (let i = 0; i < n; i++) {
-            if (week < 1) {
-              year -= 1
-              if (year < 2000) break
-              week = get_max_weeks_for_season_type({ seas_type: 'REG', year })
-            }
-            result.push(format_nfl_week_identifier({ year, seas_type, week }))
-            week -= 1
+            const params = nfl_week_offset_params({ offset: -i })
+            if (!params) break
+            result.push(format_nfl_week_identifier(params))
           }
           return result
         }

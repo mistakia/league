@@ -1554,6 +1554,26 @@ Postseason rounds are always encoded as `{year}_POST_WEEK_{1..4}` (Wild Card / D
 
 Writers that touch week-scoped rows in tables lacking a source-driven `seas_type` column (for example `practice`, `player_rankings_index`) must derive `seas_type` explicitly from `current_season.nfl_seas_type` on INSERT. The `DEFAULT 'REG'` on those columns has been dropped so omitting `seas_type` now raises a NOT NULL violation instead of silently misencoding postseason rows as REG.
 
+### Live current_season semantics
+
+`current_season.week` is the **continuous counter** from `regular_season_start` (week 1 = first REG game week, increments through the Super Bowl). `current_season.nfl_seas_week` **resets to 1** at the start of POST. These are NOT interchangeable; every `nfl_week_id` default must branch on `current_season.nfl_seas_type`.
+
+Canonical helpers live in `libs-shared/nfl-week-identifier.mjs`:
+
+- `current_nfl_week_params()` → `{year, seas_type, week}` with POST using `nfl_seas_week`, REG using `week`, year from `stats_season_year`.
+- `current_nfl_week_identifier()` → formatted `nfl_week_id` string.
+- `nfl_week_offset_params({ offset })` → canonical triple for a negative offset, honoring the REG↔POST boundary. Returns `null` when stepping before REG week 1 of the current year.
+
+Server code must never reconstruct identifiers locally. `resolve_single_nfl_week_id` is the sole choke point for the "current" fallback; column-def `get_params` must not branch on `nfl_seas_type`.
+
+Current-week joins go through shared helpers:
+
+- `apply_practice_current_week_join({ db, query, ... })` — `libs-server/data-views/join-practice-current-week.mjs`
+- `apply_nfl_games_current_week_join({ db, query, team_column, include_nullable_partition })` — `libs-server/data-views/join-nfl-games-current-week.mjs`
+- `apply_nfl_games_offset_week_join({ db, query, offset, alias })` — `libs-server/data-views/join-nfl-games-offset-week.mjs`
+
+Direct `joinRaw` / inline `where('seas_type', 'REG')` fragments on week-keyed tables are disallowed for the current-week and prior-week patterns. Season-aggregate REG conventions (season-level rankings `week=0`, PFR/ESPN REG-only published stats, "primary team by REG game count") remain REG-only by product convention.
+
 ## Related Documentation
 
 ### Schema and Validation

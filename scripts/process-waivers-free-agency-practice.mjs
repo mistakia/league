@@ -19,6 +19,7 @@ import {
   report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import apply_nfl_games_current_week_join from '#libs-server/data-views/join-nfl-games-current-week.mjs'
 
 const log = debug('process:waivers:freeagency')
 if (process.env.NODE_ENV !== 'test') {
@@ -103,12 +104,11 @@ const process_bulk_practice_waivers = async (daily, timestamp) => {
 
 // Helper functions
 const validate_game_timing = async (waiver_id, lid) => {
-  const waiver_with_game_info = await db('waivers')
+  const waiver_game_query = db('waivers')
     .select('waivers.*', 'nfl_games.date', 'nfl_games.time_est')
     .join('player', 'waivers.pid', 'player.pid')
-    .joinRaw(
-      `left join nfl_games on nfl_games.week = ${current_season.week} and nfl_games.year = ${current_season.year} and nfl_games.seas_type = 'REG' and (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h)`
-    )
+  apply_nfl_games_current_week_join({ db, query: waiver_game_query })
+  const waiver_with_game_info = await waiver_game_query
     .where('waivers.uid', waiver_id)
     .first()
 

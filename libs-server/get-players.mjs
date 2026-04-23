@@ -8,8 +8,12 @@ import {
   league_defaults,
   player_nfl_status
 } from '#constants'
+import { nfl_week_identifier } from '#libs-shared'
 import get_player_transactions from './get-player-transactions.mjs'
 import getLeague from './get-league.mjs'
+import apply_practice_current_week_join from './data-views/join-practice-current-week.mjs'
+import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
+import apply_nfl_games_offset_week_join from './data-views/join-nfl-games-offset-week.mjs'
 
 const log = debug('get_players')
 
@@ -94,42 +98,26 @@ export default async function ({
   }
 
   const query = db('player')
-    .leftJoin('practice', function () {
-      this.on('player.pid', '=', 'practice.pid')
-        .andOn('practice.week', '=', current_season.week)
-        .andOn('practice.year', '=', current_season.year)
-        .andOn(db.raw("practice.seas_type = 'REG'"))
-    })
-    .leftJoin('nfl_games', function () {
-      this.on(function () {
-        this.on('nfl_games.h', '=', 'player.current_nfl_team').orOn(
-          'nfl_games.v',
-          '=',
-          'player.current_nfl_team'
-        )
-      })
-        .andOn('nfl_games.week', '=', current_season.week)
-        .andOn('nfl_games.year', '=', current_season.year)
-        .andOn(db.raw("nfl_games.seas_type = 'REG'"))
+  apply_practice_current_week_join({ db, query })
+  apply_nfl_games_current_week_join({ db, query })
+
+  const reference_params = nfl_week_identifier.reference_week_fallback_params()
+  const prior_week_params = reference_params ? reference_params.prior_params : null
+  const fallback_params = reference_params ? reference_params.fallback_params : null
+
+  if (reference_params) {
+    apply_nfl_games_offset_week_join({
+      db,
+      query,
+      offset: -1,
+      alias: 'prior_week_game'
     })
 
-  // Only join prior week gamelog data if week > 1
-  if (current_season.week > 1) {
-    const prior_week = current_season.week - 1
-    // First join to prior week's game (to detect if it was a bye week)
-    query.leftJoin('nfl_games as prior_week_game', function () {
-      this.on(function () {
-        this.on('prior_week_game.h', '=', 'player.current_nfl_team').orOn(
-          'prior_week_game.v',
-          '=',
-          'player.current_nfl_team'
-        )
-      })
-        .andOn('prior_week_game.week', '=', prior_week)
-        .andOn('prior_week_game.year', '=', current_season.year)
-        .andOn(db.raw("prior_week_game.seas_type = 'REG'"))
-    })
-    // Join to reference week game (week - 2 if prior week was bye, else week - 1)
+    // Reference week: if prior week was a bye, use two-weeks-prior, else prior
+    const fallback_week = fallback_params.week
+    const fallback_year = fallback_params.year
+    const fallback_seas_type = fallback_params.seas_type
+
     query.leftJoin('nfl_games as reference_week_game', function () {
       this.on(function () {
         this.on('reference_week_game.h', '=', 'player.current_nfl_team').orOn(
@@ -142,11 +130,26 @@ export default async function ({
           'reference_week_game.week',
           '=',
           db.raw(
-            `CASE WHEN prior_week_game.esbid IS NULL THEN ${prior_week - 1} ELSE ${prior_week} END`
+            `CASE WHEN prior_week_game.esbid IS NULL THEN ?::int ELSE ?::int END`,
+            [fallback_week, prior_week_params.week]
           )
         )
-        .andOn('reference_week_game.year', '=', current_season.year)
-        .andOn(db.raw("reference_week_game.seas_type = 'REG'"))
+        .andOn(
+          'reference_week_game.year',
+          '=',
+          db.raw(
+            `CASE WHEN prior_week_game.esbid IS NULL THEN ?::int ELSE ?::int END`,
+            [fallback_year, prior_week_params.year]
+          )
+        )
+        .andOn(
+          'reference_week_game.seas_type',
+          '=',
+          db.raw(
+            `CASE WHEN prior_week_game.esbid IS NULL THEN ?::text ELSE ?::text END`,
+            [fallback_seas_type, prior_week_params.seas_type]
+          )
+        )
     })
     // Then join to player's gamelog for the reference week game
     query.leftJoin('player_gamelogs as prior_week_gamelog', function () {
@@ -225,7 +228,7 @@ export default async function ({
 
     // Calculate prior_week_inactive: true if no gamelog OR gamelog.active is false
     // Calculate prior_week_ruled_out: true if gamelog.ruled_out_in_game is true
-    if (current_season.week > 1) {
+    if (prior_week_params) {
       query.select(
         db.raw(
           'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.active = false THEN true ELSE false END as prior_week_inactive'
@@ -422,6 +425,8 @@ export default async function ({
     .where('year', current_season.year)
     .where('week', '>=', current_season.week)
     .whereIn('pid', returnedPlayerIds)
+    // projections data source publishes REG-only; POST projections intentionally omitted
+    // (see user:task/league/close-reg-post-week-encoding-gaps.md Out of Scope)
     .where('seas_type', 'REG')
   const rosProjections = await db('ros_projections')
     .where('sourceid', external_data_sources.AVERAGE)
