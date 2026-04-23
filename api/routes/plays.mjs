@@ -531,7 +531,9 @@ router.get('/charted', async (req, res) => {
     const days = normalize_array_query_param(req.query.days)
     const quarters = normalize_array_query_param(req.query.quarters)
     const downs = normalize_array_query_param(req.query.downs)
-    const seas_types_param = normalize_array_query_param(req.query.seas_types)
+    const seas_types_param = normalize_array_query_param(
+      req.query.seas_types
+    ).filter(Boolean)
     const seas_types = seas_types_param.length ? seas_types_param : ['REG']
     const { pid } = req.query
 
