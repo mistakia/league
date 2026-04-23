@@ -3,6 +3,10 @@
 import MockDate from 'mockdate'
 
 import { current_season } from '#constants'
+import {
+  seed_nfl_games,
+  clear_nfl_games
+} from './seed-nfl-games.mjs'
 
 const {
   regular_season_start,
@@ -16,15 +20,22 @@ const week_offset_for_seas_type = (seas_type, week = 1) => {
   return week
 }
 
-export const run_under_season_type = (seas_type, fn) => {
+export const run_under_season_type = (seas_type, fn, options = {}) => {
+  const { seed_nfl_games: seed = false, seed_year } = options
   describe(`[under ${seas_type}]`, function () {
-    before(() => {
+    before(async () => {
       const offset = week_offset_for_seas_type(seas_type)
       MockDate.set(regular_season_start.add(offset, 'week').toISOString())
+      if (seed) {
+        await seed_nfl_games({ year: seed_year })
+      }
     })
 
-    after(() => {
+    after(async () => {
       MockDate.reset()
+      if (seed) {
+        await clear_nfl_games({ year: seed_year })
+      }
     })
 
     fn()
