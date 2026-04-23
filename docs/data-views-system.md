@@ -1567,7 +1567,7 @@ Canonical helpers live in `libs-shared/nfl-week-identifier.mjs`:
 
 Server code must never reconstruct identifiers locally. Column-def "current" fallbacks choose one of two choke-points:
 
-- `resolve_single_nfl_week_id({ params })` — always resolves; returns `current_nfl_week_identifier()` when no explicit week param is set. Used by inherently week-scoped columns.
+- `resolve_single_nfl_week_id({ params })` — always resolves. Resolution order: `single_nfl_week_id` → `nfl_week_id[0]` → legacy `year` + `week` (+ `seas_type`) → legacy `year`-only (returns the most meaningful REG week for that year via `last_meaningful_reg_week_params_for_year`: era-max REG week for past years, current REG week during live REG, era-max REG week during live POST, REG week 1 during PRE/offseason) → `current_nfl_week_identifier()`. Used by inherently week-scoped columns.
 - `resolve_single_nfl_week_id_if_explicit({ params })` — returns `null` unless `single_nfl_week_id` or a non-empty `nfl_week_id` was explicitly provided. Empty arrays count as "not set". Used by columns whose behavior differs between season-level and week-level queries (betting-market props, roster-status).
 
 Column-def `get_params` must not branch on `nfl_seas_type`.

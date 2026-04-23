@@ -231,6 +231,27 @@ export const reference_week_fallback_params = () => {
   }
 }
 
+// Resolves a "year-only" saved view intent to the most meaningful REG week
+// for that year. Past/current years return a REG identifier; future years or
+// years before MIN_YEAR return null. For the live year, returns the current
+// REG week (clamped to >= 1) during REG, REG era-max during POST, and REG
+// week 1 during PRE/offseason.
+export const last_meaningful_reg_week_params_for_year = ({ year }) => {
+  if (year == null) return null
+  if (year < MIN_YEAR || year > current_season.year) return null
+  if (year < current_season.year) {
+    return { year, seas_type: 'REG', week: REG_MAX_WEEKS_BY_ERA({ year }) }
+  }
+  const live_type = current_season.nfl_seas_type
+  if (live_type === 'POST') {
+    return { year, seas_type: 'REG', week: REG_MAX_WEEKS_BY_ERA({ year }) }
+  }
+  if (live_type === 'REG') {
+    return { year, seas_type: 'REG', week: Math.max(current_season.week, 1) }
+  }
+  return { year, seas_type: 'REG', week: 1 }
+}
+
 export const get_max_weeks_for_season_type = ({ seas_type, year }) => {
   if (seas_type === 'REG') {
     if (!year) return 0

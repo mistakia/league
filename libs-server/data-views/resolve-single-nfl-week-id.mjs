@@ -1,7 +1,8 @@
 import {
   format_nfl_week_identifier,
   current_nfl_week_identifier,
-  current_nfl_week_params
+  current_nfl_week_params,
+  last_meaningful_reg_week_params_for_year
 } from '#libs-shared/nfl-week-identifier.mjs'
 
 // Resolves a `{dynamic_type: 'current_nfl_week'}` param object to a concrete
@@ -77,6 +78,12 @@ export default function resolve_single_nfl_week_id({ params = {} } = {}) {
       }
     }
     return format_nfl_week_identifier({ year, seas_type, week })
+  }
+  // Year-only intent: honor the saved view's year rather than silently
+  // returning the live current week.
+  if (year != null) {
+    const year_params = last_meaningful_reg_week_params_for_year({ year })
+    if (year_params) return format_nfl_week_identifier(year_params)
   }
   return current_nfl_week_identifier()
 }

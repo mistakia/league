@@ -67,6 +67,28 @@ describe('LIBS-SERVER resolve_single_nfl_week_id', function () {
     expect(id).to.match(/_POST_WEEK_2$/)
   })
 
+  it('year-only params for a past year returns REG era-max week', function () {
+    set_date_for_week({ seas_type: 'REG', week: 5 })
+    const id = resolve_single_nfl_week_id({ params: { year: 2020 } })
+    expect(id).to.equal('2020_REG_WEEK_17')
+  })
+
+  it('year-only params for a current REG year returns current week', function () {
+    set_date_for_week({ seas_type: 'REG', week: 4 })
+    const id = resolve_single_nfl_week_id({
+      params: { year: current_season.year }
+    })
+    expect(id).to.equal(`${current_season.year}_REG_WEEK_4`)
+  })
+
+  it('year-only params for a future year falls back to current identifier', function () {
+    set_date_for_week({ seas_type: 'REG', week: 5 })
+    const id = resolve_single_nfl_week_id({
+      params: { year: current_season.year + 1 }
+    })
+    expect(id).to.match(/_REG_WEEK_5$/)
+  })
+
   it('explicit seas_type is honored', function () {
     set_date_for_week({ seas_type: 'REG', week: 5 })
     const id = resolve_single_nfl_week_id({
