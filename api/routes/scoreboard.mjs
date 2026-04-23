@@ -74,7 +74,6 @@ const router = express.Router()
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const week_param_provided = req.query.week != null
     const week = Number(
       req.query.week ||
         (current_season.nfl_seas_type === 'POST'
@@ -90,9 +89,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid week' })
     }
 
-    const seas_type = week_param_provided
-      ? req.query.seas_type || 'REG'
-      : current_season.nfl_seas_type
+    const seas_type = req.query.seas_type || current_season.nfl_seas_type
 
     const query = getPlayByPlayQuery(db)
     const plays = await query
