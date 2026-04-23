@@ -6,6 +6,13 @@ import { uniqBy } from '#libs-shared'
 import { current_season } from '#constants'
 import { getPlayByPlayQuery, wait } from '#libs-server'
 
+export const build_scoreboard_current_plays_query = ({ db: _db, updated }) =>
+  getPlayByPlayQuery(_db)
+    .where('nfl_plays_current_week.year', current_season.year)
+    .where('nfl_plays_current_week.week', current_season.nfl_seas_week)
+    .where('nfl_plays_current_week.seas_type', current_season.nfl_seas_type)
+    .where('updated', '>', updated)
+
 export default class Scoreboard {
   constructor(wss) {
     this._wss = wss
@@ -38,12 +45,7 @@ export default class Scoreboard {
     )
     const updated = updateTimestamps[0] // get the oldest one
 
-    const query = getPlayByPlayQuery(db)
-    const plays = await query
-      .where('nfl_plays_current_week.year', current_season.year)
-      .where('nfl_plays_current_week.week', current_season.nfl_seas_week)
-      .where('nfl_plays_current_week.seas_type', current_season.nfl_seas_type)
-      .where('updated', '>', updated)
+    const plays = await build_scoreboard_current_plays_query({ db, updated })
 
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
     const playStats = await db('nfl_play_stats_current_week')

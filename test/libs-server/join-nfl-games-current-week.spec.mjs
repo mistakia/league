@@ -51,12 +51,19 @@ describe('LIBS-SERVER apply_nfl_games_current_week_join', function () {
         await clear_nfl_games({})
       })
 
-      it('joins the current REG-week row for the player team', async function () {
-        const query = knex('player').select('player.pid', 'nfl_games.seas_type')
+      it('joins the current REG-week row and excludes POST rows', async function () {
+        const query = knex('player').select(
+          'player.pid',
+          'nfl_games.seas_type',
+          'nfl_games.week'
+        )
         apply_nfl_games_current_week_join({ db: knex, query })
         const rows = await query.where('player.pid', TEST_PID)
+        // Seed contains both REG and POST games for KC across all weeks; the
+        // helper must match only the current REG week, not any POST row.
         expect(rows).to.have.length(1)
         expect(rows[0].seas_type).to.equal('REG')
+        expect(rows[0].week).to.equal(1)
       })
     },
     { seed_nfl_games: false }

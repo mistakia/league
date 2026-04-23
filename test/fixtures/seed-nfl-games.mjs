@@ -32,7 +32,13 @@ const build_rows_for_weeks = ({ year, seas_type, min_week, max_week }) => {
         week,
         seas_type,
         v,
-        h
+        h,
+        // Plausible non-null date/time so downstream consumers that filter
+        // on kickoff time (e.g. get-top-practice-squad-waiver) receive
+        // populated values. Date is set far in the future to avoid
+        // kickoff-filter drops in game-time-aware code paths.
+        date: `${year + 1}/12/01`,
+        time_est: '20:00:00'
       })
     }
   }
