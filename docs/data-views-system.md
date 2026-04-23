@@ -1562,14 +1562,20 @@ Canonical helpers live in `libs-shared/nfl-week-identifier.mjs`:
 
 - `current_nfl_week_params()` → `{year, seas_type, week}` with POST using `nfl_seas_week`, REG using `week`, year from `stats_season_year`.
 - `current_nfl_week_identifier()` → formatted `nfl_week_id` string.
-- `nfl_week_offset_params({ offset })` → canonical triple for a negative offset, honoring the REG↔POST boundary. Returns `null` when stepping before REG week 1 of the current year.
+- `nfl_week_offset_params({ offset })` → canonical triple for a negative offset, honoring the REG↔POST boundary. Returns `null` when stepping before REG week 1 of the current year. Throws on positive offsets.
+- `reference_week_fallback_params()` → `{ prior_params, fallback_params }` (or `null`). Used by reserve / gamelog reference-week joins that need a one-week bye fallback; `fallback_params` is two-weeks-prior when it exists, else `prior_params`.
 
-Server code must never reconstruct identifiers locally. `resolve_single_nfl_week_id` is the sole choke point for the "current" fallback; column-def `get_params` must not branch on `nfl_seas_type`.
+Server code must never reconstruct identifiers locally. Column-def "current" fallbacks choose one of two choke-points:
+
+- `resolve_single_nfl_week_id({ params })` — always resolves; returns `current_nfl_week_identifier()` when no explicit week param is set. Used by inherently week-scoped columns.
+- `resolve_single_nfl_week_id_if_explicit({ params })` — returns `null` unless `single_nfl_week_id` or a non-empty `nfl_week_id` was explicitly provided. Empty arrays count as "not set". Used by columns whose behavior differs between season-level and week-level queries (betting-market props, roster-status).
+
+Column-def `get_params` must not branch on `nfl_seas_type`.
 
 Current-week joins go through shared helpers:
 
 - `apply_practice_current_week_join({ db, query, ... })` — `libs-server/data-views/join-practice-current-week.mjs`
-- `apply_nfl_games_current_week_join({ db, query, team_column, include_nullable_partition })` — `libs-server/data-views/join-nfl-games-current-week.mjs`
+- `apply_nfl_games_current_week_join({ db, query, team_column })` — `libs-server/data-views/join-nfl-games-current-week.mjs`. Emits strict equality on `(year, seas_type, week)`; no `OR IS NULL` branch.
 - `apply_nfl_games_offset_week_join({ db, query, offset, alias })` — `libs-server/data-views/join-nfl-games-offset-week.mjs`
 
 Direct `joinRaw` / inline `where('seas_type', 'REG')` fragments on week-keyed tables are disallowed for the current-week and prior-week patterns. Season-aggregate REG conventions (season-level rankings `week=0`, PFR/ESPN REG-only published stats, "primary team by REG game count") remain REG-only by product convention.
