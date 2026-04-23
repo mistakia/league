@@ -89,6 +89,7 @@ const import_individual_fantasypros_weekly_rankings = async ({
       pos: params.pos,
       year,
       week,
+      seas_type: current_season.nfl_seas_type,
 
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({

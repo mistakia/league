@@ -106,6 +106,7 @@ const run = async () => {
         pid: player_row.pid,
         week,
         year,
+        seas_type: current_season.nfl_seas_type,
         ...practiceReport
       })
     }

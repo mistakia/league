@@ -22415,8 +22415,9 @@ CREATE TABLE public.player_rankings_index (
     position_rank integer,
     source_id public.rankings_source_id NOT NULL,
     ranking_type public.ranking_type NOT NULL,
-    seas_type character varying(10) DEFAULT 'REG'::character varying NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    seas_type character varying(10) NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT rankings_reg_week_bound CHECK ((NOT (((seas_type)::text = 'REG'::text) AND (week > 18))))
 );
 
 
@@ -22785,8 +22786,9 @@ CREATE TABLE public.practice (
     roster_status character varying(100),
     game_designation character varying(100),
     source_status character varying(100),
-    seas_type character varying(10) DEFAULT 'REG'::character varying NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED
+    seas_type character varying(10) NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    CONSTRAINT practice_reg_week_bound CHECK ((NOT (((seas_type)::text = 'REG'::text) AND (week > 18))))
 );
 
 
@@ -26784,7 +26786,7 @@ CREATE UNIQUE INDEX idx_24913_pid ON public.poach_releases USING btree (poachid,
 -- Name: idx_24923_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, year);
+CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, year, seas_type);
 
 
 --

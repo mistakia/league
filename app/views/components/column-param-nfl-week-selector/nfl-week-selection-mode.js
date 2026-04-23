@@ -5,6 +5,7 @@ const {
   format_nfl_week_identifier,
   validate_nfl_week_identifier,
   get_nfl_week_identifiers_for_year,
+  get_max_weeks_for_season_type,
   WEEK_RANGES
 } = nfl_week_identifier
 
@@ -87,10 +88,14 @@ export const apply_season_type_bulk = ({
   const prefix = `${year}_${seas_type}_WEEK_`
   const remaining = statics.filter((v) => !v.startsWith(prefix))
   if (action === 'clear') return remaining
-  const range = WEEK_RANGES[seas_type]
-  if (!range) return remaining
+  const max =
+    seas_type === 'REG'
+      ? get_max_weeks_for_season_type({ seas_type: 'REG', year })
+      : WEEK_RANGES[seas_type]?.max
+  if (!max) return remaining
+  const min = seas_type === 'REG' ? 1 : WEEK_RANGES[seas_type].min
   const added = []
-  for (let w = range.min; w <= range.max; w++) {
+  for (let w = min; w <= max; w++) {
     const id = format_nfl_week_identifier({ year, seas_type, week: w })
     if (validate_nfl_week_identifier({ identifier: id })) added.push(id)
   }

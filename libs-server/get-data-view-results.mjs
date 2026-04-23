@@ -6,7 +6,8 @@ import {
   parse_nfl_week_identifier,
   apply_year_offset_to_nfl_weeks,
   decompose_nfl_weeks,
-  get_nfl_week_identifiers_for_year
+  get_nfl_week_identifiers_for_year,
+  get_max_weeks_for_season_type
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
@@ -212,7 +213,10 @@ const process_dynamic_params = (params) => {
 
   // Process week parameter (for season-level columns that still use week directly)
   if (processed_params.week && !processed_params.nfl_week_id) {
-    processed_params.week = process_dynamic_week_param(processed_params.week)
+    processed_params.week = process_dynamic_week_param(
+      processed_params.week,
+      processed_params.year
+    )
   }
 
   if (processed_params.single_week) {
@@ -260,11 +264,25 @@ const process_dynamic_year_param = (year_param) => {
   return [...new Set(years)]
 }
 
-const process_dynamic_week_param = (week_param) => {
+const process_dynamic_week_param = (week_param, year_param) => {
   let weeks = Array.isArray(week_param) ? week_param : [week_param]
   const current_week = current_season.week
-  // TODO get max_week from db based on year
-  const max_week = 18
+  const years = Array.isArray(year_param)
+    ? year_param
+    : year_param != null
+      ? [year_param]
+      : [current_season.year]
+  const max_week = years.reduce(
+    (acc, y) =>
+      Math.max(
+        acc,
+        get_max_weeks_for_season_type({
+          seas_type: 'REG',
+          year: parseInt(y, 10)
+        })
+      ),
+    0
+  )
   const min_week = 0
 
   weeks = weeks.flatMap((week) => {
@@ -330,8 +348,8 @@ const process_dynamic_nfl_week_param = (nfl_week_param) => {
           for (let i = 0; i < n; i++) {
             if (week < 1) {
               year -= 1
-              week = 18
               if (year < 2000) break
+              week = get_max_weeks_for_season_type({ seas_type: 'REG', year })
             }
             result.push(format_nfl_week_identifier({ year, seas_type, week }))
             week -= 1
