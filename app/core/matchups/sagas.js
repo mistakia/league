@@ -52,7 +52,7 @@ export function* select_matchup() {
   const is_post_season_week = is_league_post_season_week({ year, week })
   console.log(`is_post_season_week: ${is_post_season_week}`)
 
-  if (year === current_season.week && is_post_season_week) {
+  if (year === current_season.year && is_post_season_week) {
     yield put(scoreboard_actions.select_week(current_season.week))
     return
   }
