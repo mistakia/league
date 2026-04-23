@@ -11,10 +11,13 @@ const valid_practice_days = ['m', 'tu', 'w', 'th', 'f', 's', 'su']
 const get_params = ({ params = {} }) => {
   let nfl_week_id = resolve_single_nfl_week_id({ params })
   if (!nfl_week_id) {
+    const is_post = current_season.nfl_seas_type === 'POST'
     nfl_week_id = format_nfl_week_identifier({
       year: current_season.stats_season_year,
-      seas_type: 'REG',
-      week: Math.max(current_season.week, 1)
+      seas_type: is_post ? 'POST' : 'REG',
+      week: is_post
+        ? Math.max(current_season.nfl_seas_week, 1)
+        : Math.max(current_season.week, 1)
     })
   }
   const nfl_week = [nfl_week_id]

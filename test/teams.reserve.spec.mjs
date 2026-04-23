@@ -1144,6 +1144,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         week: current_season.week,
         year: current_season.year,
+        seas_type: 'REG',
         w: 'DNP'
       })
 
@@ -1196,6 +1197,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         week: current_season.week,
         year: current_season.year,
+        seas_type: 'REG',
         th: 'LP'
       })
 
@@ -1248,6 +1250,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         week: current_season.week,
         year: current_season.year,
+        seas_type: 'REG',
         w: 'FULL'
       })
 

@@ -88,8 +88,21 @@ describe('LIBS-SHARED nfl-week-identifier', function () {
     it('accepts valid regular season weeks', () => {
       expect(validate_nfl_week_identifier({ identifier: '2024_REG_WEEK_1' })).to
         .be.true
-      expect(validate_nfl_week_identifier({ identifier: '2024_REG_WEEK_21' }))
+      expect(validate_nfl_week_identifier({ identifier: '2024_REG_WEEK_18' }))
         .to.be.true
+    })
+
+    it('enforces era-aware REG caps', () => {
+      expect(validate_nfl_week_identifier({ identifier: '2024_REG_WEEK_21' }))
+        .to.be.false
+      expect(validate_nfl_week_identifier({ identifier: '2020_REG_WEEK_17' }))
+        .to.be.true
+      expect(validate_nfl_week_identifier({ identifier: '2020_REG_WEEK_18' }))
+        .to.be.false
+      expect(validate_nfl_week_identifier({ identifier: '2023_REG_WEEK_18' }))
+        .to.be.true
+      expect(validate_nfl_week_identifier({ identifier: '2023_REG_WEEK_19' }))
+        .to.be.false
     })
 
     it('accepts valid preseason weeks', () => {
@@ -109,7 +122,7 @@ describe('LIBS-SHARED nfl-week-identifier', function () {
     it('rejects weeks out of range', () => {
       expect(validate_nfl_week_identifier({ identifier: '2024_REG_WEEK_0' })).to
         .be.false
-      expect(validate_nfl_week_identifier({ identifier: '2024_REG_WEEK_22' }))
+      expect(validate_nfl_week_identifier({ identifier: '2024_REG_WEEK_19' }))
         .to.be.false
       expect(validate_nfl_week_identifier({ identifier: '2024_PRE_WEEK_5' })).to
         .be.false
@@ -134,23 +147,32 @@ describe('LIBS-SHARED nfl-week-identifier', function () {
   })
 
   describe('get_nfl_week_identifiers_for_year', function () {
-    it('returns all identifiers for a year', () => {
+    it('returns all identifiers for a year (era-aware REG cap)', () => {
       const result = get_nfl_week_identifiers_for_year({ year: 2024 })
-      // PRE: 4 weeks + REG: 21 weeks + POST: 4 weeks = 29
-      expect(result).to.have.length(29)
+      // PRE: 4 + REG: 18 (>= 2021 era) + POST: 4 = 26
+      expect(result).to.have.length(26)
       expect(result[0]).to.equal('2024_PRE_WEEK_1')
       expect(result[4]).to.equal('2024_REG_WEEK_1')
       expect(result[result.length - 1]).to.equal('2024_POST_WEEK_4')
     })
 
-    it('returns identifiers for specific season type', () => {
+    it('returns identifiers for specific season type (2023)', () => {
       const result = get_nfl_week_identifiers_for_year({
-        year: 2024,
+        year: 2023,
         seas_type: 'REG'
       })
-      expect(result).to.have.length(21)
-      expect(result[0]).to.equal('2024_REG_WEEK_1')
-      expect(result[result.length - 1]).to.equal('2024_REG_WEEK_21')
+      expect(result).to.have.length(18)
+      expect(result[0]).to.equal('2023_REG_WEEK_1')
+      expect(result[result.length - 1]).to.equal('2023_REG_WEEK_18')
+    })
+
+    it('returns 17-week REG for 2020 era', () => {
+      const result = get_nfl_week_identifiers_for_year({
+        year: 2020,
+        seas_type: 'REG'
+      })
+      expect(result).to.have.length(17)
+      expect(result[result.length - 1]).to.equal('2020_REG_WEEK_17')
     })
 
     it('returns preseason identifiers', () => {
@@ -218,6 +240,14 @@ describe('LIBS-SHARED nfl-week-identifier', function () {
       expect(result).to.include('2024_REG_WEEK_5')
       expect(result).to.include('2023_REG_WEEK_6')
       expect(result).to.include('2024_REG_WEEK_6')
+    })
+
+    it('drops offset-target identifiers that violate era cap', () => {
+      const result = apply_year_offset_to_nfl_weeks({
+        nfl_weeks: ['2023_REG_WEEK_18'],
+        year_offset: -3
+      })
+      expect(result).to.not.include('2020_REG_WEEK_18')
     })
   })
 

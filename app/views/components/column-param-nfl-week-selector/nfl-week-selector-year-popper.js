@@ -12,6 +12,7 @@ import {
 
 const {
   WEEK_RANGES,
+  get_max_weeks_for_season_type,
   format_nfl_week_identifier,
   validate_nfl_week_identifier,
   get_postseason_week_label
@@ -47,10 +48,14 @@ export default function NflWeekSelectorYearPopper({
   const week_meta_by_type = useMemo(() => {
     const result = {}
     for (const seas_type of SEASON_TYPES) {
-      const range = WEEK_RANGES[seas_type]
-      if (!range) continue
+      const max =
+        seas_type === 'REG'
+          ? get_max_weeks_for_season_type({ seas_type: 'REG', year })
+          : WEEK_RANGES[seas_type]?.max
+      if (!max) continue
+      const min = seas_type === 'REG' ? 1 : WEEK_RANGES[seas_type].min
       const weeks = []
-      for (let w = range.min; w <= range.max; w++) {
+      for (let w = min; w <= max; w++) {
         const id = format_nfl_week_identifier({ year, seas_type, week: w })
         weeks.push({
           week: w,

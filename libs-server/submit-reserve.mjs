@@ -37,6 +37,7 @@ export default async function ({
       this.on('player.pid', '=', 'practice.pid')
         .andOn('practice.week', '=', current_season.week)
         .andOn('practice.year', '=', current_season.year)
+        .andOn(db.raw("practice.seas_type = 'REG'"))
     })
     .leftJoin('nfl_games', function () {
       this.on(function () {

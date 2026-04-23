@@ -6,6 +6,7 @@ const Row = ({ data }) => (
   <div className='player__selected-row'>
     <div className='row__group-body'>
       <div className='refactor table__cell metric'>{data.year}</div>
+      <div className='table__cell metric'>{data.seas_type || '-'}</div>
       <div className='table__cell metric'>{data.week}</div>
       <div className='table__cell text'>{data.status || '-'}</div>
       <div className='table__cell text'>{data.inj || '-'}</div>
@@ -64,6 +65,7 @@ export default function SelectedPlayerPractice({
         <div className='row__group'>
           <div className='row__group-body'>
             <div className='table__cell metric'>Year</div>
+            <div className='table__cell metric'>Type</div>
             <div className='table__cell metric'>Week</div>
             <div className='table__cell text'>Status</div>
             <div className='table__cell text'>Injury</div>

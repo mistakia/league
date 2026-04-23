@@ -52,8 +52,9 @@ export const regular_fantasy_weeks = [
 export const fantasy_weeks = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
 ]
+// Numeric REG week slots; era-aware bounds enforced via get_max_weeks_for_season_type.
 export const nfl_weeks = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
 ]
 export const game_days = ['WED', 'THU', 'TN', 'FRI', 'SAT', 'SUN', 'MN', 'SN']
 export const nfl_quarters = [1, 2, 3, 4, 5]

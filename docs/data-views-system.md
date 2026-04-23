@@ -1535,6 +1535,25 @@ Because every rate predicate is pushed at CTE construction time (see the Year Pu
 
 Split CTEs (`base_years`, `player_years`, `player_years_weeks`) stay inlineable -- they are small and the planner handles them well.
 
+## NFL Week Encoding Invariants
+
+`nfl_week_id` identifiers follow the shape `{year}_{seas_type}_WEEK_{week}` with `seas_type` in `{PRE, REG, POST}`. The REG max week is era-dependent, not a flat constant:
+
+| Year range    | REG max week |
+| ------------- | ------------ |
+| pre-1978      | 14           |
+| 1978-1989     | 16           |
+| 1982 (strike) | 9            |
+| 1987 (strike) | 15           |
+| 1990-2020     | 17           |
+| 2021+         | 18           |
+
+Postseason rounds are always encoded as `{year}_POST_WEEK_{1..4}` (Wild Card / Divisional / Conference / Super Bowl). The era map is inlined in `libs-shared/nfl-week-identifier.mjs` (`REG_MAX_WEEKS_BY_ERA`) and resolved via `get_max_weeks_for_season_type({ seas_type, year })`. Calling the resolver with `seas_type: 'REG'` but no `year` returns `0` (fail-loud).
+
+`practice` and `player_rankings_index` enforce a blanket `CHECK (NOT (seas_type='REG' AND week > 18))` at the DB level. The CHECK is intentionally era-blind because historical data already conforms and all going-forward writers cap REG at 18; an era-aware CHECK would require a trigger.
+
+Writers that touch week-scoped rows in tables lacking a source-driven `seas_type` column (for example `practice`, `player_rankings_index`) must derive `seas_type` explicitly from `current_season.nfl_seas_type` on INSERT. The `DEFAULT 'REG'` on those columns has been dropped so omitting `seas_type` now raises a NOT NULL violation instead of silently misencoding postseason rows as REG.
+
 ## Related Documentation
 
 ### Schema and Validation

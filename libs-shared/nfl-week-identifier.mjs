@@ -4,11 +4,22 @@ const NFL_WEEK_REGEX = /^(\d{4})_(PRE|REG|POST)_WEEK_(\d+)$/
 
 export const WEEK_RANGES = {
   PRE: { min: 1, max: 4 },
-  REG: { min: 1, max: 21 },
   POST: { min: 1, max: 4 }
 }
 
 const MIN_YEAR = 2000
+
+// Era-specific REG week caps, sourced from nfl_games history.
+// 1970-1977 = 14, 1978-1989 = 16 (1982 strike = 9, 1987 strike = 15),
+// 1990-2020 = 17, 2021+ = 18.
+const REG_MAX_WEEKS_BY_ERA = ({ year }) => {
+  if (year === 1982) return 9
+  if (year === 1987) return 15
+  if (year < 1978) return 14
+  if (year < 1990) return 16
+  if (year < 2021) return 17
+  return 18
+}
 
 export const parse_nfl_week_identifier = ({ identifier }) => {
   if (!identifier || typeof identifier !== 'string') return null
@@ -35,10 +46,10 @@ export const validate_nfl_week_identifier = ({ identifier }) => {
 
   if (year < MIN_YEAR || year > current_season.year) return false
 
-  const range = WEEK_RANGES[seas_type]
-  if (!range) return false
+  const max = get_max_weeks_for_season_type({ seas_type, year })
+  if (!max) return false
 
-  if (week < range.min || week > range.max) return false
+  if (week < 1 || week > max) return false
 
   return true
 }
@@ -51,9 +62,10 @@ export const get_nfl_week_identifiers_for_year = ({
   const identifiers = []
 
   for (const st of types) {
-    const range = WEEK_RANGES[st]
-    if (!range) continue
-    for (let w = range.min; w <= range.max; w++) {
+    const max = get_max_weeks_for_season_type({ seas_type: st, year })
+    if (!max) continue
+    const min = st === 'REG' ? 1 : WEEK_RANGES[st].min
+    for (let w = min; w <= max; w++) {
       identifiers.push(
         format_nfl_week_identifier({ year, seas_type: st, week: w })
       )
@@ -86,13 +98,13 @@ export const apply_year_offset_to_nfl_weeks = ({ nfl_weeks, year_offset }) => {
     for (let offset = min_offset; offset <= max_offset; offset++) {
       const offset_year = parsed.year + offset
       if (offset_year < MIN_YEAR || offset_year > current_season.year) continue
-      expanded.push(
-        format_nfl_week_identifier({
-          year: offset_year,
-          seas_type: parsed.seas_type,
-          week: parsed.week
-        })
-      )
+      const candidate = format_nfl_week_identifier({
+        year: offset_year,
+        seas_type: parsed.seas_type,
+        week: parsed.week
+      })
+      if (!validate_nfl_week_identifier({ identifier: candidate })) continue
+      expanded.push(candidate)
     }
   }
 
@@ -145,7 +157,11 @@ export const get_postseason_week_label = ({ week }) => {
   return POSTSEASON_WEEK_LABELS[week] || `Week ${week}`
 }
 
-export const get_max_weeks_for_season_type = ({ seas_type }) => {
+export const get_max_weeks_for_season_type = ({ seas_type, year }) => {
+  if (seas_type === 'REG') {
+    if (!year) return 0
+    return REG_MAX_WEEKS_BY_ERA({ year })
+  }
   const range = WEEK_RANGES[seas_type]
   return range ? range.max : 0
 }

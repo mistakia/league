@@ -260,8 +260,23 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       expect(get_max_weeks_for_season_type({ seas_type: 'PRE' })).to.equal(4)
     })
 
-    it('returns 21 for REG', () => {
-      expect(get_max_weeks_for_season_type({ seas_type: 'REG' })).to.equal(21)
+    it('returns era-aware REG max', () => {
+      expect(
+        get_max_weeks_for_season_type({ seas_type: 'REG', year: 2023 })
+      ).to.equal(18)
+      expect(
+        get_max_weeks_for_season_type({ seas_type: 'REG', year: 2020 })
+      ).to.equal(17)
+      expect(
+        get_max_weeks_for_season_type({ seas_type: 'REG', year: 1987 })
+      ).to.equal(15)
+      expect(
+        get_max_weeks_for_season_type({ seas_type: 'REG', year: 1982 })
+      ).to.equal(9)
+    })
+
+    it('returns 0 when REG is called without a year', () => {
+      expect(get_max_weeks_for_season_type({ seas_type: 'REG' })).to.equal(0)
     })
 
     it('returns 4 for POST', () => {
@@ -333,10 +348,10 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
       expect(has_post).to.equal(true)
     })
 
-    it('produces 29 identifiers per year (4 PRE + 21 REG + 4 POST)', () => {
+    it('produces 25 identifiers for 2020 (4 PRE + 17 REG + 4 POST)', () => {
       const all = get_all_nfl_week_identifiers()
       const year_2020 = all.filter((id) => id.startsWith('2020_'))
-      expect(year_2020).to.have.length(29)
+      expect(year_2020).to.have.length(25)
     })
   })
 
