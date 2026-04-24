@@ -75,7 +75,8 @@ export default function DataViewsPage({
   user_username,
   data_view_request,
   reset_data_view_cache,
-  load_data_view
+  load_data_view,
+  revert_data_view
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -332,6 +333,7 @@ export default function DataViewsPage({
         on_save_view={save_data_view}
         table_state={filtered_table_state}
         saved_table_state={filtered_saved_table_state}
+        on_revert_view={revert_data_view}
         all_columns={data_views_fields}
         selected_view={selected_data_view}
         select_view={on_select_view}
@@ -390,5 +392,6 @@ DataViewsPage.propTypes = {
   user_username: PropTypes.string,
   data_view_request: PropTypes.object,
   reset_data_view_cache: PropTypes.func,
-  load_data_view: PropTypes.func
+  load_data_view: PropTypes.func,
+  revert_data_view: PropTypes.func
 }

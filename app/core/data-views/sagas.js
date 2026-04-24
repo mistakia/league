@@ -1,4 +1,11 @@
-import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
+import {
+  takeLatest,
+  fork,
+  call,
+  select,
+  put,
+  debounce
+} from 'redux-saga/effects'
 
 import { data_views_actions } from './index'
 import {
@@ -21,20 +28,39 @@ import {
 } from '@core/selectors'
 import { data_view_request_actions } from '@core/data-view-request/actions'
 import { notification_actions } from '@core/notifications/actions'
+import store_registry from '@core/store-registry'
 
 import {
-  data_view_browser_storage_save_snapshot,
-  data_view_browser_storage_get_latest_snapshot,
-  data_view_browser_storage_clear_view_history,
-  data_view_browser_storage_set_last_active_view,
-  data_view_browser_storage_get_last_active_view,
-  data_view_browser_storage_cleanup_old_views,
-  data_view_browser_storage_get_all_view_ids,
-  data_view_browser_storage_load_metadata,
-  is_valid_table_state
-} from './browser-storage.mjs'
+  init_storage,
+  save_snapshot,
+  load_latest_snapshot,
+  save_last_active_view,
+  load_last_active_view,
+  clear_view,
+  clear_all,
+  reconcile_server_views,
+  get_all_stored_view_ids
+} from '#libs-shared/data-view-storage/storage.mjs'
+import { is_valid_table_state } from '#libs-shared/data-view-storage/validate.mjs'
+import deep_equal from '@core/utils/deep_equal'
 
 const DEFAULT_VIEW_IDS = new Set(Object.keys(default_data_views))
+
+// Install quota-exceeded callback at module load (before any saga runs) so
+// a DATA_VIEW_CHANGED arriving before the root saga reaches this line is still
+// covered. store_registry.getStore() is the saga-side dispatch escape hatch.
+init_storage({
+  on_quota_exceeded: () => {
+    const store = store_registry.getStore()
+    if (!store) return
+    store.dispatch(
+      notification_actions.show({
+        message: 'Could not save local view changes -- storage is full',
+        severity: 'error'
+      })
+    )
+  }
+})
 
 function* handle_data_view_request({
   data_view,
@@ -72,9 +98,6 @@ export function* data_view_changed({ payload }) {
   const { view_state_changed, view_metadata_changed, append_results } =
     view_change_params
 
-  // Handle browser persistence first
-  yield call(persist_table_state_to_browser, { payload })
-
   if (view_metadata_changed) {
     yield fork(save_data_view, { payload })
   }
@@ -107,7 +130,6 @@ export function* save_data_view({ payload }) {
     return
   }
 
-  // if the view already exists use the view_id, otherwise the server will create a new one
   if (view.get('saved_table_state')) {
     params.view_id = view_id
   } else {
@@ -179,125 +201,54 @@ export function* handle_get_data_view_fulfilled({ payload }) {
 }
 
 export function* handle_get_data_views_fulfilled({ payload }) {
-  // After views are loaded from server, restore browser state if available
   yield call(restore_browser_state_for_all_views, payload)
+  yield call(handle_reconcile_server_views, payload)
 }
 
 //= ====================================
 //  BROWSER PERSISTENCE
 // -------------------------------------
 
-// Cleanup interval: 10 minutes
-const CLEANUP_INTERVAL_MS = 10 * 60 * 1000
-
-/**
- * Check if cleanup is needed based on time elapsed since last cleanup
- */
-function* cleanup_if_needed() {
-  try {
-    const metadata = yield call(data_view_browser_storage_load_metadata)
-    const now = Date.now()
-    const last_cleanup = metadata.last_cleanup || 0
-
-    if (now - last_cleanup > CLEANUP_INTERVAL_MS) {
-      yield call(data_view_browser_storage_cleanup_old_views)
-    }
-  } catch (error) {
-    console.error('Error checking cleanup:', error)
-  }
-}
-
-/**
- * Persist table state to browser localStorage on every change
- * Triggered by DATA_VIEW_CHANGED action
- */
 export function* persist_table_state_to_browser({ payload }) {
   try {
     const { data_view, view_change_params = {} } = payload
-    const { view_state_changed } = view_change_params
+    const { view_state_changed, is_new_view, change_type } = view_change_params
 
-    // Skip persistence if this is a restoration operation (not a user edit)
-    // This prevents circular persistence when restore_view_states_from_browser runs
-    if (view_state_changed === false) {
-      return
-    }
-
-    // Skip if data_view is not provided (e.g., from SET_SELECTED_DATA_VIEW)
-    if (!data_view) {
-      return
-    }
+    if (view_state_changed === false) return
+    if (!data_view) return
 
     const { view_id, table_state } = data_view
-    const { is_new_view } = view_change_params
+    if (!view_id) return
 
-    if (!view_id || !is_valid_table_state(table_state)) {
-      return
-    }
-
-    // Skip persistence when the user resets to saved state (avoid noisy
-    // snapshots). saved_table_state is plain JS for server-loaded views and
-    // Immutable for the default views built via fromJS, so handle both.
-    const view = yield select(get_data_view_by_id, { view_id })
-    const saved_table_state = view?.get('saved_table_state')
-
-    if (saved_table_state) {
-      const saved_state_js = saved_table_state.toJS
-        ? saved_table_state.toJS()
-        : saved_table_state
-      if (JSON.stringify(table_state) === JSON.stringify(saved_state_js)) {
-        return
-      }
-    }
-
-    // Save snapshot to browser storage
-    yield call(data_view_browser_storage_save_snapshot, {
+    yield call(save_snapshot, {
       view_id,
       table_state,
-      change_type: 'user_edit'
+      change_type: change_type || 'user_edit',
+      is_new_view: Boolean(is_new_view)
     })
 
-    // Track last active view if this is a new view
-    // (for existing views, SET_SELECTED_DATA_VIEW handles this)
     if (is_new_view) {
-      yield call(data_view_browser_storage_set_last_active_view, view_id)
+      yield call(save_last_active_view, view_id)
     }
-
-    // Time-based periodic cleanup
-    yield call(cleanup_if_needed)
   } catch (error) {
-    // Log errors but don't fail the action
     console.error('Error persisting table state to browser:', error)
   }
 }
 
-/**
- * Persist last active view when view selection changes
- * Triggered by SET_SELECTED_DATA_VIEW action
- */
 export function* persist_selected_view_to_browser({ payload }) {
   try {
     const { data_view_id } = payload
-
-    if (!data_view_id) {
-      return
-    }
-
-    // Track last active view
-    yield call(data_view_browser_storage_set_last_active_view, data_view_id)
+    if (!data_view_id) return
+    if (DEFAULT_VIEW_IDS.has(data_view_id)) return
+    yield call(save_last_active_view, data_view_id)
   } catch (error) {
-    // Log errors but don't fail the action
     console.error('Error persisting selected view to browser:', error)
   }
 }
 
-/**
- * Collect all view IDs from server, Redux, and browser storage
- */
 function* collect_all_view_ids(server_data) {
   const all_views = yield select((state) => state.get('data_views'))
-  const browser_view_ids = yield call(
-    data_view_browser_storage_get_all_view_ids
-  )
+  const browser_view_ids = yield call(get_all_stored_view_ids)
 
   return new Set([
     ...(server_data ? server_data.map((v) => v.view_id) : []),
@@ -306,49 +257,37 @@ function* collect_all_view_ids(server_data) {
   ])
 }
 
-/**
- * Restore browser state for each view. Loading the snapshot self-heals
- * corruption (`load_view_history` prunes invalid entries and clears the
- * storage key when nothing valid remains). Default-view ids are read for the
- * self-heal side effect but are not dispatched - their canonical state lives
- * in default_data_views.
- */
 function* restore_view_states_from_browser(view_ids) {
   for (const view_id of view_ids) {
-    const snapshot = yield call(
-      data_view_browser_storage_get_latest_snapshot,
-      view_id
-    )
-
-    if (!snapshot || !is_valid_table_state(snapshot.table_state)) continue
     if (DEFAULT_VIEW_IDS.has(view_id)) continue
 
+    const snapshot = yield call(load_latest_snapshot, view_id)
+    if (!snapshot || !is_valid_table_state(snapshot.table_state)) continue
+
+    // Skip dispatch when the browser snapshot matches the server-saved state
+    // for this view - no user edits to restore, avoids startup write
+    // amplification from the debounce watcher.
+    const view = yield select(get_data_view_by_id, { view_id })
+    const saved = view?.get('saved_table_state')
+    if (saved != null) {
+      const saved_js = saved.toJS ? saved.toJS() : saved
+      if (deep_equal(snapshot.table_state, saved_js)) continue
+    }
+
     yield put(
-      data_views_actions.data_view_changed(
-        {
-          view_id,
-          table_state: snapshot.table_state
-        },
-        {
-          view_state_changed: false
-        }
-      )
+      data_views_actions.restore_data_view_table_state({
+        view_id,
+        table_state: snapshot.table_state
+      })
     )
   }
 }
 
-/**
- * Restore last active view if no URL override
- */
 function* restore_last_active_view_if_default(all_view_ids) {
   const current_selected_id = yield select(get_selected_data_view_id)
+  if (current_selected_id !== default_data_view_view_id) return
 
-  // Only restore if current selection is default (not overridden by URL)
-  if (current_selected_id !== default_data_view_view_id) {
-    return
-  }
-
-  const last_active = yield call(data_view_browser_storage_get_last_active_view)
+  const last_active = yield call(load_last_active_view)
 
   if (!last_active || !last_active.view_id) {
     yield put(
@@ -365,10 +304,6 @@ function* restore_last_active_view_if_default(all_view_ids) {
   yield put(data_views_actions.set_selected_data_view(view_id_to_select))
 }
 
-/**
- * Restore browser state for all views after server load
- * Merges browser-saved table_state with server-saved views and includes unsaved views
- */
 export function* restore_browser_state_for_all_views({ data }) {
   try {
     const all_view_ids = yield call(collect_all_view_ids, data)
@@ -379,49 +314,61 @@ export function* restore_browser_state_for_all_views({ data }) {
   }
 }
 
-/**
- * Mark server save in browser history
- * Triggered by POST_DATA_VIEW_FULFILLED action
- */
+export function* handle_reconcile_server_views({ data }) {
+  try {
+    const server_view_ids = Array.isArray(data) ? data.map((v) => v.view_id) : []
+    const all_views = yield select((state) => state.get('data_views'))
+    const redux_view_ids = all_views.keySeq().toArray()
+    yield call(reconcile_server_views, { server_view_ids, redux_view_ids })
+  } catch (error) {
+    console.error('Error reconciling server views:', error)
+  }
+}
+
 export function* mark_server_save_in_history({ payload }) {
   try {
     const { data } = payload
     const { view_id, table_state } = data
 
-    if (!view_id || !table_state) {
-      return
-    }
+    if (!view_id || !table_state) return
 
-    // Save snapshot with server_save type for potential future history UI
-    yield call(data_view_browser_storage_save_snapshot, {
+    yield call(save_snapshot, {
       view_id,
       table_state,
-      change_type: 'server_save'
+      change_type: 'server_save',
+      is_new_view: false
     })
   } catch (error) {
-    // Log errors but don't fail the action
     console.error('Error marking server save in browser history:', error)
   }
 }
 
-/**
- * Clean up browser storage when view is deleted
- * Triggered by DELETE_DATA_VIEW_FULFILLED action
- */
 export function* cleanup_browser_state_on_delete({ payload }) {
   try {
     const { opts } = payload
     const { view_id } = opts
-
-    if (!view_id) {
-      return
-    }
-
-    // Clear browser storage for this view
-    yield call(data_view_browser_storage_clear_view_history, view_id)
+    if (!view_id) return
+    yield call(clear_view, view_id)
   } catch (error) {
-    // Log errors but don't fail the action
     console.error('Error cleaning up browser state on delete:', error)
+  }
+}
+
+export function* handle_revert_data_view({ payload }) {
+  try {
+    const { view_id } = payload
+    if (!view_id) return
+    yield call(clear_view, view_id)
+  } catch (error) {
+    console.error('Error handling revert data view:', error)
+  }
+}
+
+export function* handle_clear_local_view_cache() {
+  try {
+    yield call(clear_all)
+  } catch (error) {
+    console.error('Error clearing local view cache:', error)
   }
 }
 
@@ -509,6 +456,17 @@ export function* watch_set_selected_data_view_for_browser_persist() {
   )
 }
 
+export function* watch_revert_data_view() {
+  yield takeLatest(data_views_actions.REVERT_DATA_VIEW, handle_revert_data_view)
+}
+
+export function* watch_clear_local_view_cache() {
+  yield takeLatest(
+    data_views_actions.CLEAR_LOCAL_VIEW_CACHE,
+    handle_clear_local_view_cache
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -527,5 +485,8 @@ export const data_views_sagas = [
   fork(watch_get_data_views_fulfilled),
   fork(watch_post_data_view_fulfilled_for_browser_mark),
   fork(watch_delete_data_view_fulfilled_for_browser_cleanup),
-  fork(watch_set_selected_data_view_for_browser_persist)
+  fork(watch_set_selected_data_view_for_browser_persist),
+  fork(watch_revert_data_view),
+  fork(watch_clear_local_view_cache),
+  debounce(250, data_views_actions.DATA_VIEW_CHANGED, persist_table_state_to_browser)
 ]

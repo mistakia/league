@@ -56,7 +56,11 @@ import { create_scoreboard } from '@core/scoreboard'
 import { Team } from '@core/teams'
 import { create_trade } from '@core/trade'
 import { Season } from '@core/seasons'
-import { default_data_view_view_id } from '@core/data-views/default-data-views'
+import {
+  default_data_view_view_id,
+  default_data_views
+} from '@core/data-views/default-data-views'
+import deep_equal from '@core/utils/deep_equal'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -3881,6 +3885,34 @@ export const get_selected_data_view = createSelector(
           : []
       }
     }
+  }
+)
+
+const DATA_VIEW_DEFAULT_IDS = new Set(Object.keys(default_data_views))
+
+export const get_has_unsaved_local_edits_map = createSelector(
+  (state) => state.get('data_views'),
+  (data_views) => {
+    const map = {}
+    data_views.forEach((view, view_id) => {
+      if (DATA_VIEW_DEFAULT_IDS.has(view_id)) {
+        map[view_id] = false
+        return
+      }
+      const table_state = view.get('table_state')
+      const saved_table_state = view.get('saved_table_state')
+      const ts_js = table_state && table_state.toJS ? table_state.toJS() : table_state
+      const saved_js =
+        saved_table_state && saved_table_state.toJS
+          ? saved_table_state.toJS()
+          : saved_table_state
+      if (saved_js == null) {
+        map[view_id] = false
+        return
+      }
+      map[view_id] = !deep_equal(ts_js, saved_js)
+    })
+    return map
   }
 )
 

@@ -49,6 +49,24 @@ export const data_views_actions = {
   load_data_view: (data_view_id) => ({
     type: data_views_actions.LOAD_DATA_VIEW,
     payload: { data_view_id }
+  }),
+
+  RESTORE_DATA_VIEW_TABLE_STATE: 'RESTORE_DATA_VIEW_TABLE_STATE',
+  restore_data_view_table_state: ({ view_id, table_state }) => ({
+    type: data_views_actions.RESTORE_DATA_VIEW_TABLE_STATE,
+    payload: { view_id, table_state }
+  }),
+
+  REVERT_DATA_VIEW: 'REVERT_DATA_VIEW',
+  revert_data_view: ({ view_id }) => ({
+    type: data_views_actions.REVERT_DATA_VIEW,
+    payload: { view_id }
+  }),
+
+  CLEAR_LOCAL_VIEW_CACHE: 'CLEAR_LOCAL_VIEW_CACHE',
+  clear_local_view_cache: () => ({
+    type: data_views_actions.CLEAR_LOCAL_VIEW_CACHE,
+    payload: {}
   })
 }
 

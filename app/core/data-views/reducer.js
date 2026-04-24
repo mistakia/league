@@ -4,7 +4,7 @@ import { app_actions } from '@core/app/actions'
 import { data_views_actions } from './index'
 import { default_data_views } from './default-data-views'
 import { data_view_request_actions } from '@core/data-view-request/actions'
-import { is_valid_table_state } from './browser-storage.mjs'
+import { is_valid_table_state } from '#libs-shared/data-view-storage/validate.mjs'
 
 // table_state is stored as a plain JS object (consistent with the other
 // reducer cases that build views via `new Map({ ...view, table_state })`) so
@@ -90,6 +90,21 @@ export function data_views_reducer(
         })
       }
       return state
+    }
+
+    case data_views_actions.RESTORE_DATA_VIEW_TABLE_STATE: {
+      const { view_id, table_state } = payload
+      if (!is_valid_table_state(table_state)) return state
+      return state.mergeIn([view_id], { view_id, table_state })
+    }
+
+    case data_views_actions.REVERT_DATA_VIEW: {
+      const { view_id } = payload
+      const view = state.get(view_id)
+      if (!view) return state
+      const saved = view.get('saved_table_state')
+      if (saved == null) return state
+      return state.setIn([view_id, 'table_state'], saved)
     }
 
     case data_views_actions.DATA_VIEW_CHANGED: {
