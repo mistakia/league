@@ -1,7 +1,10 @@
 import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
 import { data_views_actions } from './index'
-import { default_data_view_view_id } from './default-data-views'
+import {
+  default_data_view_view_id,
+  default_data_views
+} from './default-data-views'
 import {
   api_post_data_view,
   api_get_data_views,
@@ -27,8 +30,11 @@ import {
   data_view_browser_storage_get_last_active_view,
   data_view_browser_storage_cleanup_old_views,
   data_view_browser_storage_get_all_view_ids,
-  data_view_browser_storage_load_metadata
+  data_view_browser_storage_load_metadata,
+  is_valid_table_state
 } from './browser-storage.mjs'
+
+const DEFAULT_VIEW_IDS = new Set(Object.keys(default_data_views))
 
 function* handle_data_view_request({
   data_view,
@@ -224,27 +230,21 @@ export function* persist_table_state_to_browser({ payload }) {
     const { view_id, table_state } = data_view
     const { is_new_view } = view_change_params
 
-    if (!view_id || !table_state) {
+    if (!view_id || !is_valid_table_state(table_state)) {
       return
     }
 
-    // Detect if we're resetting to saved state by comparing with saved_table_state
-    // If the incoming table_state matches saved_table_state, skip browser persistence
-    // This prevents creating browser snapshots when user clicks "Reset"
+    // Skip persistence when the user resets to saved state (avoid noisy
+    // snapshots). saved_table_state is plain JS for server-loaded views and
+    // Immutable for the default views built via fromJS, so handle both.
     const view = yield select(get_data_view_by_id, { view_id })
     const saved_table_state = view?.get('saved_table_state')
 
     if (saved_table_state) {
-      // Convert to plain JS if it's an Immutable object, otherwise use as is
       const saved_state_js = saved_table_state.toJS
         ? saved_table_state.toJS()
         : saved_table_state
-
-      const is_resetting_to_saved =
-        JSON.stringify(table_state) === JSON.stringify(saved_state_js)
-
-      if (is_resetting_to_saved) {
-        // Don't persist to browser when resetting to saved state
+      if (JSON.stringify(table_state) === JSON.stringify(saved_state_js)) {
         return
       }
     }
@@ -307,7 +307,11 @@ function* collect_all_view_ids(server_data) {
 }
 
 /**
- * Restore browser state for each view
+ * Restore browser state for each view. Loading the snapshot self-heals
+ * corruption (`load_view_history` prunes invalid entries and clears the
+ * storage key when nothing valid remains). Default-view ids are read for the
+ * self-heal side effect but are not dispatched - their canonical state lives
+ * in default_data_views.
  */
 function* restore_view_states_from_browser(view_ids) {
   for (const view_id of view_ids) {
@@ -316,19 +320,20 @@ function* restore_view_states_from_browser(view_ids) {
       view_id
     )
 
-    if (snapshot && snapshot.table_state) {
-      yield put(
-        data_views_actions.data_view_changed(
-          {
-            view_id,
-            table_state: snapshot.table_state
-          },
-          {
-            view_state_changed: false // Don't trigger data request yet
-          }
-        )
+    if (!snapshot || !is_valid_table_state(snapshot.table_state)) continue
+    if (DEFAULT_VIEW_IDS.has(view_id)) continue
+
+    yield put(
+      data_views_actions.data_view_changed(
+        {
+          view_id,
+          table_state: snapshot.table_state
+        },
+        {
+          view_state_changed: false
+        }
       )
-    }
+    )
   }
 }
 
@@ -366,16 +371,10 @@ function* restore_last_active_view_if_default(all_view_ids) {
  */
 export function* restore_browser_state_for_all_views({ data }) {
   try {
-    // 1. Collect all view IDs from server, Redux, and browser storage
     const all_view_ids = yield call(collect_all_view_ids, data)
-
-    // 2. Restore browser state for all views
     yield call(restore_view_states_from_browser, all_view_ids)
-
-    // 3. Restore last active view if appropriate
     yield call(restore_last_active_view_if_default, all_view_ids)
   } catch (error) {
-    // Log errors and fall through to normal init
     console.error('Error restoring browser state for all views:', error)
   }
 }

@@ -56,6 +56,7 @@ import { create_scoreboard } from '@core/scoreboard'
 import { Team } from '@core/teams'
 import { create_trade } from '@core/trade'
 import { Season } from '@core/seasons'
+import { default_data_view_view_id } from '@core/data-views/default-data-views'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -3862,7 +3863,25 @@ export const get_selected_data_view_id = (state) =>
 export const get_selected_data_view = createSelector(
   get_selected_data_view_id,
   get_data_views,
-  (view_id, views) => views.get(view_id, new Map()).toJS()
+  (view_id, views) => {
+    // Fall back to the configured default view if the selected id does not
+    // resolve, so downstream code can rely on view_id/table_state existing.
+    const resolved = views.has(view_id)
+      ? views.get(view_id)
+      : views.get(default_data_view_view_id, new Map())
+    const view = resolved.toJS()
+    const table_state = view.table_state || {}
+    return {
+      ...view,
+      table_state: {
+        ...table_state,
+        columns: Array.isArray(table_state.columns) ? table_state.columns : [],
+        prefix_columns: Array.isArray(table_state.prefix_columns)
+          ? table_state.prefix_columns
+          : []
+      }
+    }
+  }
 )
 
 export const get_league_user_historical_ranks = createSelector(

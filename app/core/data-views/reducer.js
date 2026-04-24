@@ -4,6 +4,11 @@ import { app_actions } from '@core/app/actions'
 import { data_views_actions } from './index'
 import { default_data_views } from './default-data-views'
 import { data_view_request_actions } from '@core/data-view-request/actions'
+import { is_valid_table_state } from './browser-storage.mjs'
+
+// table_state is stored as a plain JS object (consistent with the other
+// reducer cases that build views via `new Map({ ...view, table_state })`) so
+// downstream consumers can use plain `.columns` / `.map` access.
 
 export function data_views_reducer(
   state = new Map(
@@ -89,10 +94,14 @@ export function data_views_reducer(
 
     case data_views_actions.DATA_VIEW_CHANGED: {
       const { data_view } = payload
-      return state.mergeIn([data_view.view_id], {
-        ...data_view,
-        table_state: data_view.table_state
-      })
+      // Drop invalid table_state so corrupted payloads (react-table destructure
+      // with undefined fields, stale browser snapshots, etc.) cannot wipe an
+      // existing view's columns/prefix_columns.
+      const { table_state, ...rest } = data_view
+      const merge_payload = is_valid_table_state(table_state)
+        ? { ...rest, table_state }
+        : rest
+      return state.mergeIn([data_view.view_id], merge_payload)
     }
 
     case data_view_request_actions.DATA_VIEW_REQUEST:

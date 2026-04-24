@@ -48,7 +48,7 @@ const get_players_percentiles = createSelector(
             event.addMetadata('field_info', {
               column_id,
               index,
-              data_view: selected_data_view.toJS()
+              data_view: selected_data_view
             })
           }
         )

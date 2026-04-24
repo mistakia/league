@@ -6,6 +6,17 @@ import {
 } from '#libs-shared/data-views-nfl-week-migration.mjs'
 
 /**
+ * Validate that a table_state object has the minimum required structure to be
+ * safely consumed by the data-view UI and selectors. Snapshots failing this
+ * check are dropped on load and never persisted.
+ */
+export const is_valid_table_state = (table_state) =>
+  Boolean(table_state) &&
+  typeof table_state === 'object' &&
+  Array.isArray(table_state.columns) &&
+  Array.isArray(table_state.prefix_columns)
+
+/**
  * Sanitizes parameter values to prevent nested arrays
  * @param {Object} params - Parameter object to sanitize
  * @returns {Object} Sanitized parameter object
@@ -29,6 +40,21 @@ const sanitize_params = (params) => {
   }
   return sanitized
 }
+
+const sanitize_column = (col) => {
+  if (typeof col === 'string') return col
+  return { ...col, params: sanitize_params(col.params) }
+}
+
+const sanitize_table_state = (table_state) => ({
+  ...table_state,
+  columns: table_state.columns.map(sanitize_column),
+  prefix_columns: table_state.prefix_columns.map(sanitize_column),
+  where: table_state.where?.map((clause) => ({
+    ...clause,
+    params: sanitize_params(clause.params)
+  }))
+})
 
 /**
  * Local storage helper - provides promise-based interface to localStorage
@@ -90,56 +116,22 @@ export const data_view_browser_storage_save_snapshot = async ({
   table_state,
   change_type
 }) => {
+  if (!is_valid_table_state(table_state)) {
+    return
+  }
+
+  const storage_key = `${DATA_VIEW_BROWSER_STORAGE_CONFIG.STORAGE_KEY_PREFIX}${view_id}`
+  const snapshot = {
+    table_state: sanitize_table_state(table_state),
+    change_type,
+    timestamp: Date.now()
+  }
+
   try {
-    const storage_key = `${DATA_VIEW_BROWSER_STORAGE_CONFIG.STORAGE_KEY_PREFIX}${view_id}`
+    let history = (await local_storage_helper.getItem(storage_key)) || []
+    if (!Array.isArray(history)) history = []
 
-    // Load existing history or initialize empty array
-    let history = []
-    try {
-      history = (await local_storage_helper.getItem(storage_key)) || []
-    } catch (e) {
-      // If parse fails, start fresh
-      history = []
-    }
-
-    // Sanitize table_state to prevent nested arrays in parameters
-    const sanitized_table_state = {
-      ...table_state,
-      columns: table_state.columns?.map((col) => {
-        if (typeof col === 'string') {
-          return col
-        }
-        return {
-          ...col,
-          params: sanitize_params(col.params)
-        }
-      }),
-      prefix_columns: table_state.prefix_columns?.map((col) => {
-        if (typeof col === 'string') {
-          return col
-        }
-        return {
-          ...col,
-          params: sanitize_params(col.params)
-        }
-      }),
-      where: table_state.where?.map((clause) => ({
-        ...clause,
-        params: sanitize_params(clause.params)
-      }))
-    }
-
-    // Create new snapshot
-    const snapshot = {
-      table_state: sanitized_table_state,
-      change_type,
-      timestamp: Date.now()
-    }
-
-    // Add to history
     history.push(snapshot)
-
-    // Trim to max size (FIFO - remove oldest)
     if (
       history.length > DATA_VIEW_BROWSER_STORAGE_CONFIG.MAX_SNAPSHOTS_PER_VIEW
     ) {
@@ -148,48 +140,20 @@ export const data_view_browser_storage_save_snapshot = async ({
       )
     }
 
-    // Save back to localStorage
     local_storage_helper.setItem(storage_key, history)
-
-    // Update metadata to track this view
     await data_view_browser_storage_update_metadata_for_view(view_id)
   } catch (error) {
     if (error.name === 'QuotaExceededError') {
-      // Attempt aggressive cleanup
       try {
         await data_view_browser_storage_cleanup_old_views()
-        // Retry save after cleanup (with sanitization)
-        const storage_key = `${DATA_VIEW_BROWSER_STORAGE_CONFIG.STORAGE_KEY_PREFIX}${view_id}`
-        const sanitized_table_state = {
-          ...table_state,
-          columns: table_state.columns?.map((col) => {
-            if (typeof col === 'string') return col
-            return { ...col, params: sanitize_params(col.params) }
-          }),
-          prefix_columns: table_state.prefix_columns?.map((col) => {
-            if (typeof col === 'string') return col
-            return { ...col, params: sanitize_params(col.params) }
-          }),
-          where: table_state.where?.map((clause) => ({
-            ...clause,
-            params: sanitize_params(clause.params)
-          }))
-        }
-        const snapshot = {
-          table_state: sanitized_table_state,
-          change_type,
-          timestamp: Date.now()
-        }
         local_storage_helper.setItem(storage_key, [snapshot])
       } catch (cleanup_error) {
-        // Degrade gracefully - log but don't fail
         console.error(
           'Browser storage quota exceeded, unable to save:',
           cleanup_error
         )
       }
     } else {
-      // Log other errors but don't fail
       console.error('Error saving browser storage snapshot:', error)
     }
   }
@@ -236,18 +200,17 @@ const migrate_column = (col) => {
 }
 
 /**
- * Sanitizes a loaded snapshot to fix any corrupted data
- * @param {Object} snapshot - Snapshot to sanitize
- * @returns {Object} Sanitized snapshot
+ * Sanitize and migrate a loaded snapshot. Returns null if the snapshot is
+ * structurally invalid so callers can drop it from history.
  */
 const sanitize_snapshot = (snapshot) => {
-  if (!snapshot || !snapshot.table_state) {
-    return snapshot
+  if (!snapshot || !is_valid_table_state(snapshot.table_state)) {
+    return null
   }
 
-  const post_columns = snapshot.table_state.columns?.map(migrate_column)
+  const post_columns = snapshot.table_state.columns.map(migrate_column)
   const post_prefix_columns =
-    snapshot.table_state.prefix_columns?.map(migrate_column)
+    snapshot.table_state.prefix_columns.map(migrate_column)
 
   return {
     ...snapshot,
@@ -294,10 +257,24 @@ export const data_view_browser_storage_load_view_history = async (view_id) => {
     if (!history || !Array.isArray(history)) {
       return []
     }
-    // Sanitize all loaded snapshots to fix any corrupted data
-    return history.map((snapshot) => sanitize_snapshot(snapshot))
+
+    const sanitized = history
+      .map((snapshot) => sanitize_snapshot(snapshot))
+      .filter(Boolean)
+
+    if (sanitized.length === 0) {
+      // All snapshots were corrupted or unmigratable - clear the entry
+      await data_view_browser_storage_clear_view_history(view_id)
+      return []
+    }
+
+    if (sanitized.length !== history.length) {
+      // Persist the pruned history so we don't re-process invalid snapshots
+      local_storage_helper.setItem(storage_key, sanitized)
+    }
+
+    return sanitized
   } catch (error) {
-    // Return empty array on any error (including JSON parse failures)
     console.error('Error loading browser storage history:', error)
     return []
   }
