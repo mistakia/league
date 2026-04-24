@@ -498,7 +498,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 4. Playoff team draft order will be based on the following results:
 
-(a) The losers of the Week 14 Wildcard round will receive the 7th and 8th pick, with the lowest scoring team receiving the 7th pick
+(a) The losers of the Week 15 Wildcard round will receive the 7th and 8th pick, with the lowest scoring team receiving the 7th pick
 
 (b) The winner of the LEAGUE CHAMPIONSHIP will receive the 12th pick, while the 2nd, 3rd and 4th place Teams will receive the 11th, 10th, and 9th picks respectively.
 
@@ -680,7 +680,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Timing.**
 
-2. The wildcard round shall begin on Week 14 of the NFL regular season.
+2. The wildcard round shall begin on Week 15 of the NFL regular season.
 
 **Participation.**
 
@@ -698,11 +698,11 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 **Format.**
 
-1. The CHAMPIONSHIP is a three (3) week competition wherein four (4) Teams compete and the top-scoring Team becomes the CHAMPION.
+1. The CHAMPIONSHIP is a two (2) week competition wherein four (4) Teams compete and the top-scoring Team becomes the CHAMPION.
 
 **Timing.**
 
-2. The championship shall begin on Week 15 of the NFL regular season.
+2. The championship shall begin on Week 16 of the NFL regular season.
 
 **Participation.**
 
