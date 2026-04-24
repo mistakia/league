@@ -6,7 +6,8 @@ import {
   get_stats_state,
   get_selected_data_view,
   get_teams_for_current_year,
-  get_data_views
+  get_data_views,
+  get_has_unsaved_local_edits_map
 } from '@core/selectors'
 import { data_views_actions } from '@core/data-views'
 import { get_data_views_fields } from '@core/data-views-fields'
@@ -100,6 +101,7 @@ const map_state_to_props = createSelector(
   get_players_percentiles,
   (state) => state.getIn(['app', 'user', 'username']),
   (state) => state.get('data_view_request'),
+  get_has_unsaved_local_edits_map,
   (
     allPlayersPending,
     userId,
@@ -114,7 +116,8 @@ const map_state_to_props = createSelector(
     teams,
     players_percentiles,
     user_username,
-    data_view_request
+    data_view_request,
+    has_unsaved_local_edits_map
   ) => ({
     user_id: userId,
     players: data_view_request.get('result').toJS(),
@@ -124,7 +127,13 @@ const map_state_to_props = createSelector(
       (selected_data_view.view_id.includes('STATS_BY_PLAY') && stats.isPending), // TODO handle player fields being loaded (stats, etc)
     selected_data_view,
     data_views_fields,
-    data_views: data_views.toList().toJS(),
+    data_views: data_views
+      .toList()
+      .toJS()
+      .map((view) => ({
+        ...view,
+        has_unsaved_local_edits: Boolean(has_unsaved_local_edits_map[view.view_id])
+      })),
     selected_player_pid,
     teamId,
     leagueId,
@@ -143,7 +152,9 @@ const map_dispatch_to_props = {
   save_data_view: data_views_actions.save_data_view,
   load_data_views: data_views_actions.load_data_views,
   reset_data_view_cache: data_views_actions.reset_data_view_cache,
-  load_data_view: data_views_actions.load_data_view
+  load_data_view: data_views_actions.load_data_view,
+  revert_data_view: data_views_actions.revert_data_view,
+  clear_local_view_cache: data_views_actions.clear_local_view_cache
 }
 
 export default connect(map_state_to_props, map_dispatch_to_props)(DataViewsPage)
