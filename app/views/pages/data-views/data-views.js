@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from 'react'
+import React, { useEffect, useMemo, useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, NavLink, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
@@ -8,6 +8,8 @@ import generate_view_id from 'react-table/src/utils/generate-view-id.js'
 
 import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
+import Button from '@components/button'
+import ClearDataViewCacheConfirmation from '@components/clear-data-view-cache-confirmation'
 import { Team } from '@core/teams'
 import { get_string_from_object } from '@libs-shared'
 import {
@@ -76,11 +78,13 @@ export default function DataViewsPage({
   data_view_request,
   reset_data_view_cache,
   load_data_view,
-  revert_data_view
+  revert_data_view,
+  clear_local_view_cache
 }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { view_id } = useParams()
+  const [cache_clear_dialog_open, set_cache_clear_dialog_open] = useState(false)
 
   useEffect(() => {
     load_data_views()
@@ -319,12 +323,23 @@ export default function DataViewsPage({
     <div className='page-table__container'>
       {render_request_status()}
       <div className='page-table__container-help'>
-        <InfoOutlinedIcon />
-        <span>
-          Visit the <NavLink to='/guides/data-views'>guide</NavLink> to learn
-          how to build data views.
-        </span>
+        <div className='page-table__container-help-info'>
+          <InfoOutlinedIcon />
+          <span>
+            Visit the <NavLink to='/guides/data-views'>guide</NavLink> to learn
+            how to build data views.
+          </span>
+        </div>
+        <Button text onClick={() => set_cache_clear_dialog_open(true)}>
+          Clear local cache
+        </Button>
       </div>
+      {cache_clear_dialog_open && (
+        <ClearDataViewCacheConfirmation
+          onClose={() => set_cache_clear_dialog_open(false)}
+          clear_local_view_cache={clear_local_view_cache}
+        />
+      )}
       <Table
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
         data={players}
@@ -393,5 +408,6 @@ DataViewsPage.propTypes = {
   data_view_request: PropTypes.object,
   reset_data_view_cache: PropTypes.func,
   load_data_view: PropTypes.func,
-  revert_data_view: PropTypes.func
+  revert_data_view: PropTypes.func,
+  clear_local_view_cache: PropTypes.func
 }
