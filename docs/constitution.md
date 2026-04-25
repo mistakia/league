@@ -524,7 +524,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 1. The date and time will be posted on the LEAGUE home page and will also be communicated to each Manager via email.
 
-2. The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no earlier than nine (9) days and no later than (1) day prior to the start of the Regular Season, and with no less than seven (7) days’ notice to the Teams.
+2. The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no earlier than ten (10) days and no later than two (2) days prior to the start of the Regular Season, and with no less than seven (7) days’ notice to the Teams.
 
 **Budget.**
 
@@ -538,7 +538,7 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 6. The Free Agency Period will begin no later than forty-eight (48) hours prior to the scheduled Free Agency Auction and last until the start of the Regular Season.
 
-7. The following day after the Free Agency Auction, Active Roster and Practice Squad waivers will be processed daily at 3 pm EST during the Free Agency Period.
+7. The following day after the Free Agency Auction, Active Roster, Practice Squad and Poaching waivers will be processed daily at 3 pm EST during the Free Agency Period.
 
 ## Article XIII
 
@@ -600,6 +600,10 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 20. Each team will have an unlimited number of Long Term IR slots. Players placed on LT-IR after the start of the Free Agency Auction and during the Regular Season cannot be placed in the starting lineup for the remainder of the season.
 
+**Reserve Eligibility.**
+
+21. Only active roster players are eligible for reserve slots (regular and long-term).
+
 ## Article XIV
 
 > PRACTICE SQUAD
@@ -642,7 +646,23 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 (b) First twenty-four (24) hours a practice squad player is signed;
 
-(c) Free Agency Period;
+(c) From the start of the Free Agency Period through the conclusion of the Free Agency Auction;
+
+**Super Priority For Poached Players.**
+
+16. When a poached player is first released, the original team will have Super-Priority to claim them when they are on waivers. This Super-Priority applies only to Practice Squad claims and does not reset the team’s waiver order. Super-Priority does not precede active roster claims. If the Super-Priority claim is successful, the player will be placed back on the Practice Squad (drafted or signed) at their original Practice Squad Salary. The Super-Priority remains in effect until one of the following occurs:
+
+(a) The player is rostered for at least four (4) weeks or started in at least one (1) week by the poaching team;
+
+(b) The player is traded to another team;
+
+(c) The player is signed as a Restricted Free Agent;
+
+(d) The player is extended and remains on the Active roster at the start of the Regular Season.
+
+**Practice Squad Reserve Eligibility.**
+
+17. A practice squad player with a poaching claim can be activated directly to reserve if they meet all reserve eligibility requirements.
 
 ## Article XV
 
