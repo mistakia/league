@@ -32,6 +32,7 @@ import {
 } from '#libs-server/play-enum-utils.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclusive-fields.mjs'
+import { add_personnel_counts_to_play_data } from '#libs-server/parse-personnel.mjs'
 
 /**
  * CLI Arguments:
@@ -730,6 +731,7 @@ const process_play = async ({
 }) => {
   const esbid = parseInt(item.old_game_id, 10)
   const formatted_play = format_play(item)
+  add_personnel_counts_to_play_data(formatted_play)
   const match_criteria = build_match_criteria(esbid, formatted_play, item)
 
   let db_play

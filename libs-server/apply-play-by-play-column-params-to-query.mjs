@@ -73,6 +73,52 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
       table_constants.TABLE_DATA_TYPES.BOOLEAN
     ) {
       query.where(`${param_table}.${column_name}`, param_value)
+    } else if (
+      column_param_definition.data_type ===
+      table_constants.TABLE_DATA_TYPES.PERSONNEL_GROUP
+    ) {
+      const column_specs = column_param_definition.column_specs
+      if (!Array.isArray(column_specs) || column_specs.length === 0) {
+        throw new Error(
+          `Missing column_specs for PERSONNEL_GROUP param ${column_param_key}`
+        )
+      }
+      const spec_by_key = Object.fromEntries(
+        column_specs.map((s) => [s.key, s])
+      )
+      const value_array = Array.isArray(param_value)
+        ? param_value
+        : [param_value]
+      const conjunctions = []
+      for (const value of value_array) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) continue
+        const entries = []
+        for (const [value_key, raw] of Object.entries(value)) {
+          const spec = spec_by_key[value_key]
+          if (!spec) {
+            throw new Error(
+              `Invalid key '${value_key}' for PERSONNEL_GROUP param ${column_param_key}`
+            )
+          }
+          const numeric = Number(raw)
+          if (!Number.isFinite(numeric)) {
+            throw new Error(
+              `Invalid value for PERSONNEL_GROUP key '${value_key}' in ${column_param_key}`
+            )
+          }
+          entries.push([`${param_table}.${spec.column}`, numeric])
+        }
+        if (entries.length) conjunctions.push(entries)
+      }
+      if (conjunctions.length === 0) continue
+
+      query.where((builder) => {
+        for (const entries of conjunctions) {
+          builder.orWhere((inner) => {
+            for (const [col, numeric] of entries) inner.where(col, numeric)
+          })
+        }
+      })
     }
   }
 }

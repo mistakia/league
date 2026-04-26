@@ -11,6 +11,7 @@ import { is_main, report_job, update_play, updatePlayer } from '#libs-server'
 import { get_game_play_by_play } from '#libs-server/sportradar/sportradar-api.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { SPORTRADAR_EXCLUSIVE_FIELDS } from '#libs-server/sportradar/sportradar-exclusive-fields.mjs'
+import { add_personnel_counts_to_play_data } from '#libs-server/parse-personnel.mjs'
 import {
   preload_plays,
   find_play,
@@ -1143,6 +1144,8 @@ const process_play = async ({
       `Slow map_sportradar_play_to_nfl_play: ${map_time}ms for play ${event.id}`
     )
   }
+
+  add_personnel_counts_to_play_data(mapped_play)
 
   const match_start_time = Date.now()
   const { db_play, multiple_match_error } = match_play_to_db({
