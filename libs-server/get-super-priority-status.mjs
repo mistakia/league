@@ -3,6 +3,7 @@ import {
   current_season,
   transaction_types,
   starting_lineup_slots,
+  active_roster_slots,
   transaction_type_display_names
 } from '#constants'
 import { is_main } from '#libs-server'
@@ -194,13 +195,15 @@ async function calculate_super_priority_from_source({
 
   const original_tid = pre_poach_transactions[0].tid
 
-  // Check if player was traded, signed as RFA, or extended by the poaching team
+  // Check if player was traded or signed as RFA by the poaching team.
+  // Per Amendment XXXIV §4, EXTENSION is handled separately because it only
+  // disqualifies when the player remained on the Active roster at the start
+  // of the Regular Season.
   const disqualifying_transactions = await db('transactions')
     .where({ pid, tid: poaching_tid, lid })
     .whereIn('type', [
       transaction_types.TRADE,
-      transaction_types.RESTRICTED_FREE_AGENCY_TAG,
-      transaction_types.EXTENSION
+      transaction_types.RESTRICTED_FREE_AGENCY_TAG
     ])
     .where('timestamp', '>', poach_timestamp)
     .limit(1)
@@ -213,17 +216,84 @@ async function calculate_super_priority_from_source({
     }
   }
 
+  // Extension trigger (Amendment XXXIV §4): joint condition. Disqualify only
+  // when (a) an extension exists after the poach, (b) the Regular Season has
+  // started, and (c) the player was on the Active roster at the start of the
+  // Regular Season. Pre-Regular-Season releases preserve eligibility.
+  const extension_transactions = await db('transactions')
+    .where({ pid, tid: poaching_tid, lid })
+    .where('type', transaction_types.EXTENSION)
+    .where('timestamp', '>', poach_timestamp)
+    .limit(1)
+
+  // Roster snapshots are scoped to the poach year — for prior-season poaches
+  // evaluated in a later season, the relevant context is the season the
+  // poach occurred in, not current_season.
+  const poach_year = poach_transaction.year
+  if (poach_year == null) {
+    return {
+      eligible: false,
+      original_tid,
+      reason: 'Cannot determine poach year'
+    }
+  }
+
+  if (extension_transactions.length) {
+    // Joint-condition gate: the Regular Season must have started for the
+    // poach year. For prior-season poaches this is trivially true.
+    let regular_season_started
+    if (poach_year < current_season.year) {
+      regular_season_started = true
+    } else {
+      const regular_season_first_day = current_season.regular_season_start.add(
+        1,
+        'week'
+      )
+      regular_season_started = !current_season.now.isBefore(
+        regular_season_first_day
+      )
+    }
+
+    if (regular_season_started) {
+      const active_at_regular_season_start = await db('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .where({
+          'rosters_players.pid': pid,
+          'rosters_players.tid': poaching_tid,
+          'rosters_players.lid': lid
+        })
+        .where('rosters.year', poach_year)
+        .where('rosters.week', 1)
+        .whereIn('rosters_players.slot', active_roster_slots)
+        .first()
+
+      if (active_at_regular_season_start) {
+        return {
+          eligible: false,
+          original_tid,
+          reason: `Player was ${transaction_type_display_names[transaction_types.EXTENSION]?.toLowerCase() || 'extended'}`
+        }
+      }
+    }
+  }
+
   // Check if player has been rostered for 4+ weeks on poaching team
-  const weeks_rostered = await db('rosters_players')
+  // (counted within the poach year)
+  const weeks_rostered_query = db('rosters_players')
     .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
       'rosters_players.pid': pid,
       'rosters_players.tid': poaching_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', current_season.year)
-    .where('rosters.week', '<=', current_season.week) // Only count weeks up to current week
-    .count('* as count')
+    .where('rosters.year', poach_year)
+    .where('rosters.week', '>=', 1)
+
+  if (poach_year === current_season.year) {
+    weeks_rostered_query.where('rosters.week', '<=', current_season.week)
+  }
+
+  const weeks_rostered = await weeks_rostered_query.count('* as count')
 
   if (weeks_rostered[0].count >= 4) {
     return {
@@ -233,17 +303,23 @@ async function calculate_super_priority_from_source({
     }
   }
 
-  // Check if player started 1+ games (was in a starting slot)
-  const games_started = await db('rosters_players')
+  // Check if player started 1+ games (was in a starting slot) in the poach year
+  const games_started_query = db('rosters_players')
     .join('rosters', 'rosters_players.rid', 'rosters.uid')
     .where({
       'rosters_players.pid': pid,
       'rosters_players.tid': poaching_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', current_season.year)
+    .where('rosters.year', poach_year)
+    .where('rosters.week', '>=', 1)
     .whereIn('rosters_players.slot', starting_lineup_slots)
-    .count('* as count')
+
+  if (poach_year === current_season.year) {
+    games_started_query.where('rosters.week', '<=', current_season.week)
+  }
+
+  const games_started = await games_started_query.count('* as count')
 
   if (games_started[0].count >= 1) {
     return {
