@@ -3901,7 +3901,8 @@ export const get_has_unsaved_local_edits_map = createSelector(
       }
       const table_state = view.get('table_state')
       const saved_table_state = view.get('saved_table_state')
-      const ts_js = table_state && table_state.toJS ? table_state.toJS() : table_state
+      const ts_js =
+        table_state && table_state.toJS ? table_state.toJS() : table_state
       const saved_js =
         saved_table_state && saved_table_state.toJS
           ? saved_table_state.toJS()

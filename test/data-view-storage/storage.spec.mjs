@@ -80,7 +80,9 @@ describe('data-view-storage storage module', function () {
         is_new_view: false
       })
       expect(ok).to.be.true
-      const history = JSON.parse(mockStorage.getItem('data_view_history_v-existing'))
+      const history = JSON.parse(
+        mockStorage.getItem('data_view_history_v-existing')
+      )
       expect(history).to.have.lengthOf(1)
       expect(history[0]).to.have.property('version', STORAGE_SCHEMA_VERSION)
     })
@@ -162,13 +164,16 @@ describe('data-view-storage storage module', function () {
           }
         }
       ]
-      mockStorage.setItem('data_view_history_v1', JSON.stringify(legacy_history))
+      mockStorage.setItem(
+        'data_view_history_v1',
+        JSON.stringify(legacy_history)
+      )
 
       const latest = load_latest_snapshot('v1')
       expect(latest.version).to.equal(STORAGE_SCHEMA_VERSION)
-      expect(latest.table_state.columns[0].params.single_nfl_week_id).to.deep.equal([
-        '2024_REG_WEEK_5'
-      ])
+      expect(
+        latest.table_state.columns[0].params.single_nfl_week_id
+      ).to.deep.equal(['2024_REG_WEEK_5'])
 
       const written = JSON.parse(mockStorage.getItem('data_view_history_v1'))
       expect(written[0].version).to.equal(STORAGE_SCHEMA_VERSION)
@@ -177,7 +182,9 @@ describe('data-view-storage storage module', function () {
     it('returns null when the latest entry has an invalid table_state', () => {
       mockStorage.setItem(
         'data_view_history_v1',
-        JSON.stringify([{ timestamp: 0, table_state: { columns: [], prefix_columns: [] } }])
+        JSON.stringify([
+          { timestamp: 0, table_state: { columns: [], prefix_columns: [] } }
+        ])
       )
       expect(load_latest_snapshot('v1')).to.be.null
     })
@@ -200,15 +207,18 @@ describe('data-view-storage storage module', function () {
           where: []
         }
       }
-      mockStorage.setItem('data_view_history_v1', JSON.stringify([legacy, legacy]))
+      mockStorage.setItem(
+        'data_view_history_v1',
+        JSON.stringify([legacy, legacy])
+      )
 
       const history = load_history('v1')
       expect(history).to.have.lengthOf(2)
       for (const snap of history) {
         expect(snap.version).to.equal(STORAGE_SCHEMA_VERSION)
-        expect(snap.table_state.columns[0].params.single_nfl_week_id).to.deep.equal([
-          '2024_REG_WEEK_5'
-        ])
+        expect(
+          snap.table_state.columns[0].params.single_nfl_week_id
+        ).to.deep.equal(['2024_REG_WEEK_5'])
       }
     })
   })
@@ -265,7 +275,10 @@ describe('data-view-storage storage module', function () {
         change_type: 'user_edit',
         is_new_view: false
       })
-      reconcile_server_views({ server_view_ids: ['v1'], redux_view_ids: ['v1'] })
+      reconcile_server_views({
+        server_view_ids: ['v1'],
+        redux_view_ids: ['v1']
+      })
       expect(mockStorage.getItem('data_view_history_v1')).to.not.be.null
       expect(mockStorage.getItem('data_view_history_v2')).to.be.null
     })
@@ -277,7 +290,10 @@ describe('data-view-storage storage module', function () {
         change_type: 'user_edit',
         is_new_view: false
       })
-      reconcile_server_views({ server_view_ids: [], redux_view_ids: ['client-new'] })
+      reconcile_server_views({
+        server_view_ids: [],
+        redux_view_ids: ['client-new']
+      })
       expect(mockStorage.getItem('data_view_history_client-new')).to.not.be.null
     })
 
@@ -293,8 +309,8 @@ describe('data-view-storage storage module', function () {
         JSON.stringify([])
       )
       reconcile_server_views({ server_view_ids: [], redux_view_ids: [] })
-      expect(mockStorage.getItem('data_view_history_SEASON_FANTASY_POINTS')).to.not
-        .be.null
+      expect(mockStorage.getItem('data_view_history_SEASON_FANTASY_POINTS')).to
+        .not.be.null
     })
   })
 

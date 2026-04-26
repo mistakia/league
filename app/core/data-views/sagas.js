@@ -316,7 +316,9 @@ export function* restore_browser_state_for_all_views({ data }) {
 
 export function* handle_reconcile_server_views({ data }) {
   try {
-    const server_view_ids = Array.isArray(data) ? data.map((v) => v.view_id) : []
+    const server_view_ids = Array.isArray(data)
+      ? data.map((v) => v.view_id)
+      : []
     const all_views = yield select((state) => state.get('data_views'))
     const redux_view_ids = all_views.keySeq().toArray()
     yield call(reconcile_server_views, { server_view_ids, redux_view_ids })
@@ -488,5 +490,9 @@ export const data_views_sagas = [
   fork(watch_set_selected_data_view_for_browser_persist),
   fork(watch_revert_data_view),
   fork(watch_clear_local_view_cache),
-  debounce(250, data_views_actions.DATA_VIEW_CHANGED, persist_table_state_to_browser)
+  debounce(
+    250,
+    data_views_actions.DATA_VIEW_CHANGED,
+    persist_table_state_to_browser
+  )
 ]

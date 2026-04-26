@@ -24,8 +24,8 @@ export default function ClearDataViewCacheConfirmation({
         <DialogContentText>
           This wipes all locally-cached snapshot history for every data view in
           this browser, including unsaved local edits that have not been pushed
-          to the server. Server-stored views are not affected and will reload
-          on the next request.
+          to the server. Server-stored views are not affected and will reload on
+          the next request.
         </DialogContentText>
       </DialogContent>
       <DialogActions>

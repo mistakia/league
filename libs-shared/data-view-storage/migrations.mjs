@@ -7,7 +7,8 @@ import { migrate_table_state } from './../data-views-nfl-week-migration.mjs'
 
 export const STORAGE_SCHEMA_VERSION = 1
 
-const is_dev = typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
+const is_dev =
+  typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
 
 const deep_freeze = (value) => {
   if (value === null || typeof value !== 'object' || Object.isFrozen(value)) {
@@ -18,7 +19,9 @@ const deep_freeze = (value) => {
 }
 
 const v0_to_v1 = (snapshot) => {
-  const { table_state: next_table_state } = migrate_table_state(snapshot.table_state)
+  const { table_state: next_table_state } = migrate_table_state(
+    snapshot.table_state
+  )
   return { ...snapshot, table_state: next_table_state, version: 1 }
 }
 

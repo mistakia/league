@@ -132,7 +132,9 @@ const map_state_to_props = createSelector(
       .toJS()
       .map((view) => ({
         ...view,
-        has_unsaved_local_edits: Boolean(has_unsaved_local_edits_map[view.view_id])
+        has_unsaved_local_edits: Boolean(
+          has_unsaved_local_edits_map[view.view_id]
+        )
       })),
     selected_player_pid,
     teamId,

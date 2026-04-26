@@ -112,7 +112,10 @@ const with_quota_recovery = (view_id, write_fn) => {
       write_fn()
       return true
     } catch (retry_error) {
-      console.error('Browser storage quota still exceeded after eviction:', retry_error)
+      console.error(
+        'Browser storage quota still exceeded after eviction:',
+        retry_error
+      )
       if (on_quota_exceeded_cb) {
         try {
           on_quota_exceeded_cb({ view_id })
@@ -183,7 +186,12 @@ const touch_view_access = (view_id) => {
   save_metadata(metadata)
 }
 
-export const save_snapshot = ({ view_id, table_state, change_type, is_new_view }) => {
+export const save_snapshot = ({
+  view_id,
+  table_state,
+  change_type,
+  is_new_view
+}) => {
   if (!view_id) return false
   if (DEFAULT_VIEW_IDS.has(view_id)) return false
   if (!is_valid_table_state(table_state)) return false
@@ -220,7 +228,9 @@ export const load_latest_snapshot = (view_id) => {
   const { snapshot, migrated } = run_migrations(last)
   if (migrated) {
     const next_history = history.slice(0, -1).concat([snapshot])
-    with_quota_recovery(view_id, () => write_json(storage_key_for(view_id), next_history))
+    with_quota_recovery(view_id, () =>
+      write_json(storage_key_for(view_id), next_history)
+    )
   }
   return snapshot
 }

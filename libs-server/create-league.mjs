@@ -16,7 +16,9 @@ export default async function ({ lid, commishid, ...params } = {}) {
   // scheduled no earlier than ten (10) days and no later than two (2) days
   // prior to the start of the Regular Season.
   if (league_params.free_agency_live_auction_start) {
-    const auction_start = dayjs.unix(league_params.free_agency_live_auction_start)
+    const auction_start = dayjs.unix(
+      league_params.free_agency_live_auction_start
+    )
     const regular_season_first_day = current_season.regular_season_start.add(
       1,
       'week'

@@ -75,7 +75,8 @@ describe('data-views saga integration contracts', () => {
         server_view_ids: [],
         redux_view_ids: ['client-only']
       })
-      expect(mockStorage.getItem('data_view_history_client-only')).to.not.be.null
+      expect(mockStorage.getItem('data_view_history_client-only')).to.not.be
+        .null
     })
 
     it('a view id absent from both server and redux is evicted', async () => {
