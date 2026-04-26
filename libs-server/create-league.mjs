@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import db from '#db'
 import {
   create_default_league,
@@ -9,6 +11,24 @@ import { current_season } from '#constants'
 export default async function ({ lid, commishid, ...params } = {}) {
   const default_league_params = create_default_league({ commishid })
   const league_params = Object.assign({}, default_league_params, params)
+
+  // Article XII §2 (Amendment XXXV): the Free Agency Live Auction must be
+  // scheduled no earlier than ten (10) days and no later than two (2) days
+  // prior to the start of the Regular Season.
+  if (league_params.free_agency_live_auction_start) {
+    const auction_start = dayjs.unix(league_params.free_agency_live_auction_start)
+    const regular_season_first_day = current_season.regular_season_start.add(
+      1,
+      'week'
+    )
+    const earliest = regular_season_first_day.subtract(10, 'days')
+    const latest = regular_season_first_day.subtract(2, 'days')
+    if (auction_start.isBefore(earliest) || auction_start.isAfter(latest)) {
+      throw new Error(
+        'free_agency_live_auction_start must be no earlier than 10 days and no later than 2 days prior to the start of the Regular Season (Article XII §2)'
+      )
+    }
+  }
 
   const league = {
     commishid,

@@ -11,7 +11,11 @@ export default function isSantuaryPeriod(league) {
 
   if (league.free_agency_live_auction_start) {
     const faPeriod = get_free_agent_period(league)
-    if (current_season.now.isBetween(faPeriod.start, faPeriod.end)) {
+    // Sanctuary period 3 (Amendment XXXV): from start of FA Period through
+    // conclusion of FA Auction. Falls back to period end when auction-end
+    // is not set.
+    const sanctuary_end = faPeriod.free_agency_live_auction_end || faPeriod.end
+    if (current_season.now.isBetween(faPeriod.start, sanctuary_end)) {
       return true
     }
   }
