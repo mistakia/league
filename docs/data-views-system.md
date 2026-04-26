@@ -1580,6 +1580,61 @@ Current-week joins go through shared helpers:
 
 Direct `joinRaw` / inline `where('seas_type', 'REG')` fragments on week-keyed tables are disallowed for the current-week and prior-week patterns. Season-aggregate REG conventions (season-level rankings `week=0`, PFR/ESPN REG-only published stats, "primary team by REG game count") remain REG-only by product convention.
 
+## PERSONNEL_GROUP Data Type
+
+The `PERSONNEL_GROUP` data type (`TABLE_DATA_TYPES.PERSONNEL_GROUP = 9`) is a multi-column conjunctive filter for offensive and defensive personnel packages. Used by the `off_personnel` and `def_personnel` column params in `libs-shared/nfl-plays-column-params.mjs`.
+
+### Value Shape
+
+The where-clause value is an array of plain objects. Each object is a conjunction across one or more position counts; the array itself is a disjunction (OR) of those conjunctions.
+
+```js
+[
+  { rb: 1, te: 1, wr: 3 },
+  { rb: 1, te: 2, wr: 2 }
+]
+```
+
+Translates to:
+
+```sql
+WHERE (
+  (off_personnel_rb_count = 1 AND off_personnel_te_count = 1 AND off_personnel_wr_count = 3)
+  OR
+  (off_personnel_rb_count = 1 AND off_personnel_te_count = 2 AND off_personnel_wr_count = 2)
+)
+```
+
+Keys absent from a value object are not constrained. This lets defensive presets like Nickel (`{ db: 5 }`) match without imposing DL/LB constraints.
+
+### Param Definition
+
+Each PERSONNEL_GROUP param specifies:
+
+- `column_specs`: array of `{ key, column, label, min, max, advanced? }` mapping object keys to physical columns and providing UI bounds.
+- `preset_values`: array of `{ label, value, n }` describing common packages with row-count annotations for tooltip display.
+
+### Backing Columns
+
+Authoritative columns (parsed from the NFL-feed `off_personnel` / `def_personnel` strings):
+
+- `off_personnel_qb_count`, `off_personnel_rb_count`, `off_personnel_te_count`, `off_personnel_wr_count`, `off_personnel_ol_count`
+- `def_personnel_dl_count`, `def_personnel_lb_count`, `def_personnel_db_count`
+
+PlayerProfiler-source columns (preserved snap-classification counts, not used by the filter):
+
+- `off_personnel_rb_count_pp`, `off_personnel_te_count_pp`, `off_personnel_wr_count_pp`
+
+Per-partition composite indexes cover `(off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count)` and `(def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count)`.
+
+### Discrepancy Log
+
+A one-time migration diagnostic table `personnel_count_discrepancies` captures rows where the parser disagreed with a pre-existing authoritative count value. Not written by ongoing imports. May be dropped after post-deployment verification confirms no investigation is needed.
+
+### Operator
+
+PERSONNEL_GROUP supports `IN` only. The validator (`react-table/src/validators/security-patterns.mjs`) accepts the array-of-objects shape via an additive `oneOf` branch with key allowlist and bounded integer values.
+
 ## Related Documentation
 
 ### Schema and Validation

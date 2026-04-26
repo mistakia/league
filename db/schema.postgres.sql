@@ -38,11 +38,71 @@ DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2026_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2026_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2025_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2025_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_def_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_off_personnel_counts_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_def_personnel_counts_idx;
 DROP INDEX IF EXISTS public.nfl_plays_sportradar_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_sportradar_game_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_def_personnel_dl_count_idx;
+DROP INDEX IF EXISTS public.nfl_plays_def_personnel_db_count_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
+DROP INDEX IF EXISTS public.nfl_plays_current_week_off_personnel_counts_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
 DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
+DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_dl_count_idx;
+DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_db_count_idx;
+DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_counts_idx;
 DROP INDEX IF EXISTS public.nfl_games_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.idx_weekly_market_selections_analysis_cache_composite;
 DROP INDEX IF EXISTS public.idx_waivers_super_priority;
@@ -421,6 +481,7 @@ ALTER TABLE IF EXISTS ONLY public.pff_team_gamelogs DROP CONSTRAINT IF EXISTS pf
 ALTER TABLE IF EXISTS ONLY public.pff_team_gamelogs DROP CONSTRAINT IF EXISTS pff_team_gamelogs_nfl_team_year_week_key;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
+ALTER TABLE IF EXISTS ONLY public.personnel_count_discrepancies DROP CONSTRAINT IF EXISTS personnel_count_discrepancies_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_timestamp_key;
 ALTER TABLE IF EXISTS ONLY public.nfl_team_gamelogs DROP CONSTRAINT IF EXISTS nfl_team_gamelogs_esbid_pid_year_unique;
@@ -627,6 +688,7 @@ DROP SEQUENCE IF EXISTS public.pff_team_gamelogs_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs_changelog;
 DROP SEQUENCE IF EXISTS public.pff_player_seasonlogs_changelog_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs;
+DROP TABLE IF EXISTS public.personnel_count_discrepancies;
 DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
 DROP TABLE IF EXISTS public.ngs_prospect_scores_index;
@@ -3965,14 +4027,6 @@ CREATE TABLE public.nfl_plays (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -4081,7 +4135,18 @@ CREATE TABLE public.nfl_plays (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint
 )
 PARTITION BY RANGE (year);
 
@@ -4987,7 +5052,26 @@ CREATE TABLE public.nfl_plays_current_week (
     lead_run boolean,
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
-    charting_penalty_outcome character varying(100)
+    charting_penalty_outcome character varying(100),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_current_week_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -5469,14 +5553,6 @@ CREATE TABLE public.nfl_plays_year_2000 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -5585,7 +5661,26 @@ CREATE TABLE public.nfl_plays_year_2000 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2000_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -5892,14 +5987,6 @@ CREATE TABLE public.nfl_plays_year_2001 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -6008,7 +6095,26 @@ CREATE TABLE public.nfl_plays_year_2001 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2001_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -6315,14 +6421,6 @@ CREATE TABLE public.nfl_plays_year_2002 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -6431,7 +6529,26 @@ CREATE TABLE public.nfl_plays_year_2002 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2002_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -6738,14 +6855,6 @@ CREATE TABLE public.nfl_plays_year_2003 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -6854,7 +6963,26 @@ CREATE TABLE public.nfl_plays_year_2003 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2003_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -7161,14 +7289,6 @@ CREATE TABLE public.nfl_plays_year_2004 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -7277,7 +7397,26 @@ CREATE TABLE public.nfl_plays_year_2004 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2004_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -7584,14 +7723,6 @@ CREATE TABLE public.nfl_plays_year_2005 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -7700,7 +7831,26 @@ CREATE TABLE public.nfl_plays_year_2005 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2005_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -8007,14 +8157,6 @@ CREATE TABLE public.nfl_plays_year_2006 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -8123,7 +8265,26 @@ CREATE TABLE public.nfl_plays_year_2006 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2006_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -8430,14 +8591,6 @@ CREATE TABLE public.nfl_plays_year_2007 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -8546,7 +8699,26 @@ CREATE TABLE public.nfl_plays_year_2007 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2007_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -8853,14 +9025,6 @@ CREATE TABLE public.nfl_plays_year_2008 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -8969,7 +9133,26 @@ CREATE TABLE public.nfl_plays_year_2008 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2008_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -9276,14 +9459,6 @@ CREATE TABLE public.nfl_plays_year_2009 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -9392,7 +9567,26 @@ CREATE TABLE public.nfl_plays_year_2009 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2009_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -9699,14 +9893,6 @@ CREATE TABLE public.nfl_plays_year_2010 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -9815,7 +10001,26 @@ CREATE TABLE public.nfl_plays_year_2010 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2010_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -10122,14 +10327,6 @@ CREATE TABLE public.nfl_plays_year_2011 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -10238,7 +10435,26 @@ CREATE TABLE public.nfl_plays_year_2011 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2011_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -10545,14 +10761,6 @@ CREATE TABLE public.nfl_plays_year_2012 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -10661,7 +10869,26 @@ CREATE TABLE public.nfl_plays_year_2012 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2012_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -10968,14 +11195,6 @@ CREATE TABLE public.nfl_plays_year_2013 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -11084,7 +11303,26 @@ CREATE TABLE public.nfl_plays_year_2013 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2013_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -11391,14 +11629,6 @@ CREATE TABLE public.nfl_plays_year_2014 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -11507,7 +11737,26 @@ CREATE TABLE public.nfl_plays_year_2014 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2014_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -11814,14 +12063,6 @@ CREATE TABLE public.nfl_plays_year_2015 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -11930,7 +12171,26 @@ CREATE TABLE public.nfl_plays_year_2015 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2015_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -12237,14 +12497,6 @@ CREATE TABLE public.nfl_plays_year_2016 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -12353,7 +12605,26 @@ CREATE TABLE public.nfl_plays_year_2016 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2016_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -12660,14 +12931,6 @@ CREATE TABLE public.nfl_plays_year_2017 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -12776,7 +13039,26 @@ CREATE TABLE public.nfl_plays_year_2017 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2017_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -13083,14 +13365,6 @@ CREATE TABLE public.nfl_plays_year_2018 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -13199,7 +13473,26 @@ CREATE TABLE public.nfl_plays_year_2018 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2018_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -13506,14 +13799,6 @@ CREATE TABLE public.nfl_plays_year_2019 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -13622,7 +13907,26 @@ CREATE TABLE public.nfl_plays_year_2019 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2019_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -13929,14 +14233,6 @@ CREATE TABLE public.nfl_plays_year_2020 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -14045,7 +14341,26 @@ CREATE TABLE public.nfl_plays_year_2020 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2020_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -14352,14 +14667,6 @@ CREATE TABLE public.nfl_plays_year_2021 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -14468,7 +14775,26 @@ CREATE TABLE public.nfl_plays_year_2021 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2021_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -14775,14 +15101,6 @@ CREATE TABLE public.nfl_plays_year_2022 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -14891,7 +15209,26 @@ CREATE TABLE public.nfl_plays_year_2022 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2022_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -15198,14 +15535,6 @@ CREATE TABLE public.nfl_plays_year_2023 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -15314,7 +15643,26 @@ CREATE TABLE public.nfl_plays_year_2023 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2023_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -15621,14 +15969,6 @@ CREATE TABLE public.nfl_plays_year_2024 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -15737,7 +16077,26 @@ CREATE TABLE public.nfl_plays_year_2024 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2024_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -16044,14 +16403,6 @@ CREATE TABLE public.nfl_plays_year_2025 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -16160,7 +16511,26 @@ CREATE TABLE public.nfl_plays_year_2025 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2025_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -16467,14 +16837,6 @@ CREATE TABLE public.nfl_plays_year_2026 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    num_qb smallint,
-    num_rb smallint,
-    num_wr smallint,
-    num_te smallint,
-    num_ol smallint,
-    num_lb smallint,
-    num_dl smallint,
-    num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
@@ -16583,7 +16945,26 @@ CREATE TABLE public.nfl_plays_year_2026 (
     own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    qb_pid character varying(25)
+    qb_pid character varying(25),
+    off_personnel_qb_count smallint,
+    off_personnel_rb_count smallint,
+    off_personnel_te_count smallint,
+    off_personnel_wr_count smallint,
+    off_personnel_ol_count smallint,
+    def_personnel_dl_count smallint,
+    def_personnel_lb_count smallint,
+    def_personnel_db_count smallint,
+    off_personnel_rb_count_pp smallint,
+    off_personnel_te_count_pp smallint,
+    off_personnel_wr_count_pp smallint,
+    CONSTRAINT nfl_plays_year_2026_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_ol_count_range_chk CHECK (((off_personnel_ol_count IS NULL) OR ((off_personnel_ol_count >= 0) AND (off_personnel_ol_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_qb_count_range_chk CHECK (((off_personnel_qb_count IS NULL) OR ((off_personnel_qb_count >= 0) AND (off_personnel_qb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_rb_count_range_chk CHECK (((off_personnel_rb_count IS NULL) OR ((off_personnel_rb_count >= 0) AND (off_personnel_rb_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_te_count_range_chk CHECK (((off_personnel_te_count IS NULL) OR ((off_personnel_te_count >= 0) AND (off_personnel_te_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_wr_count_range_chk CHECK (((off_personnel_wr_count IS NULL) OR ((off_personnel_wr_count >= 0) AND (off_personnel_wr_count <= 9))))
 );
 
 
@@ -17229,6 +17610,22 @@ CREATE TABLE public.percentiles (
     p99 numeric(8,2) NOT NULL,
     min numeric(8,2) NOT NULL,
     max numeric(8,2) NOT NULL
+);
+
+
+--
+-- Name: personnel_count_discrepancies; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.personnel_count_discrepancies (
+    esbid bigint NOT NULL,
+    playid integer NOT NULL,
+    side character(3) NOT NULL,
+    source_string character varying(100),
+    parse_status character varying(20) NOT NULL,
+    existing_counts jsonb,
+    parsed_counts jsonb,
+    recorded_at timestamp without time zone DEFAULT now()
 );
 
 
@@ -25722,6 +26119,14 @@ ALTER TABLE ONLY public.ngs_prospect_scores_index
 
 
 --
+-- Name: personnel_count_discrepancies personnel_count_discrepancies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.personnel_count_discrepancies
+    ADD CONSTRAINT personnel_count_discrepancies_pkey PRIMARY KEY (esbid, playid, side);
+
+
+--
 -- Name: pff_player_seasonlogs_changelog pff_player_seasonlogs_changelog_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -28456,6 +28861,27 @@ CREATE INDEX nfl_games_sportradar_game_id_idx ON public.nfl_games USING btree (s
 
 
 --
+-- Name: nfl_plays_current_week_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_current_week_def_personnel_counts_idx ON public.nfl_plays_current_week USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_current_week_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_current_week_def_personnel_db_count_idx ON public.nfl_plays_current_week USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_current_week_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_current_week_def_personnel_dl_count_idx ON public.nfl_plays_current_week USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_current_week_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28470,10 +28896,31 @@ CREATE UNIQUE INDEX "nfl_plays_current_week_esbid_playId" ON public.nfl_plays_cu
 
 
 --
+-- Name: nfl_plays_current_week_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_current_week_off_personnel_counts_idx ON public.nfl_plays_current_week USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
+
+
+--
 -- Name: nfl_plays_current_week_playId; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX "nfl_plays_current_week_playId" ON public.nfl_plays_current_week USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_def_personnel_db_count_idx ON ONLY public.nfl_plays USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_def_personnel_dl_count_idx ON ONLY public.nfl_plays USING btree (def_personnel_dl_count);
 
 
 --
@@ -28533,6 +28980,27 @@ CREATE INDEX nfl_plays_year_2000_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2000_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_def_personnel_counts_idx ON public.nfl_plays_year_2000 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2000_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_def_personnel_db_count_idx ON public.nfl_plays_year_2000 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2000_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_def_personnel_dl_count_idx ON public.nfl_plays_year_2000 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2000_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28565,6 +29033,13 @@ CREATE INDEX nfl_plays_year_2000_nfl_week_id_idx ON public.nfl_plays_year_2000 U
 --
 
 CREATE INDEX nfl_plays_year_2000_off_idx ON public.nfl_plays_year_2000 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2000_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_off_personnel_counts_idx ON public.nfl_plays_year_2000 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -28883,6 +29358,27 @@ CREATE INDEX nfl_plays_year_2001_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2001_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_def_personnel_counts_idx ON public.nfl_plays_year_2001 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2001_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_def_personnel_db_count_idx ON public.nfl_plays_year_2001 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2001_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_def_personnel_dl_count_idx ON public.nfl_plays_year_2001 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2001_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28915,6 +29411,13 @@ CREATE INDEX nfl_plays_year_2001_nfl_week_id_idx ON public.nfl_plays_year_2001 U
 --
 
 CREATE INDEX nfl_plays_year_2001_off_idx ON public.nfl_plays_year_2001 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2001_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_off_personnel_counts_idx ON public.nfl_plays_year_2001 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -29233,6 +29736,27 @@ CREATE INDEX nfl_plays_year_2002_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2002_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_def_personnel_counts_idx ON public.nfl_plays_year_2002 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2002_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_def_personnel_db_count_idx ON public.nfl_plays_year_2002 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2002_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_def_personnel_dl_count_idx ON public.nfl_plays_year_2002 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2002_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29265,6 +29789,13 @@ CREATE INDEX nfl_plays_year_2002_nfl_week_id_idx ON public.nfl_plays_year_2002 U
 --
 
 CREATE INDEX nfl_plays_year_2002_off_idx ON public.nfl_plays_year_2002 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2002_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_off_personnel_counts_idx ON public.nfl_plays_year_2002 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -29583,6 +30114,27 @@ CREATE INDEX nfl_plays_year_2003_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2003_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_def_personnel_counts_idx ON public.nfl_plays_year_2003 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2003_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_def_personnel_db_count_idx ON public.nfl_plays_year_2003 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2003_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_def_personnel_dl_count_idx ON public.nfl_plays_year_2003 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2003_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29615,6 +30167,13 @@ CREATE INDEX nfl_plays_year_2003_nfl_week_id_idx ON public.nfl_plays_year_2003 U
 --
 
 CREATE INDEX nfl_plays_year_2003_off_idx ON public.nfl_plays_year_2003 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2003_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_off_personnel_counts_idx ON public.nfl_plays_year_2003 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -29933,6 +30492,27 @@ CREATE INDEX nfl_plays_year_2004_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2004_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_def_personnel_counts_idx ON public.nfl_plays_year_2004 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2004_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_def_personnel_db_count_idx ON public.nfl_plays_year_2004 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2004_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_def_personnel_dl_count_idx ON public.nfl_plays_year_2004 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2004_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29965,6 +30545,13 @@ CREATE INDEX nfl_plays_year_2004_nfl_week_id_idx ON public.nfl_plays_year_2004 U
 --
 
 CREATE INDEX nfl_plays_year_2004_off_idx ON public.nfl_plays_year_2004 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2004_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_off_personnel_counts_idx ON public.nfl_plays_year_2004 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -30283,6 +30870,27 @@ CREATE INDEX nfl_plays_year_2005_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2005_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_def_personnel_counts_idx ON public.nfl_plays_year_2005 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2005_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_def_personnel_db_count_idx ON public.nfl_plays_year_2005 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2005_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_def_personnel_dl_count_idx ON public.nfl_plays_year_2005 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2005_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30315,6 +30923,13 @@ CREATE INDEX nfl_plays_year_2005_nfl_week_id_idx ON public.nfl_plays_year_2005 U
 --
 
 CREATE INDEX nfl_plays_year_2005_off_idx ON public.nfl_plays_year_2005 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2005_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_off_personnel_counts_idx ON public.nfl_plays_year_2005 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -30633,6 +31248,27 @@ CREATE INDEX nfl_plays_year_2006_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2006_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_def_personnel_counts_idx ON public.nfl_plays_year_2006 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2006_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_def_personnel_db_count_idx ON public.nfl_plays_year_2006 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2006_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_def_personnel_dl_count_idx ON public.nfl_plays_year_2006 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2006_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30665,6 +31301,13 @@ CREATE INDEX nfl_plays_year_2006_nfl_week_id_idx ON public.nfl_plays_year_2006 U
 --
 
 CREATE INDEX nfl_plays_year_2006_off_idx ON public.nfl_plays_year_2006 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2006_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_off_personnel_counts_idx ON public.nfl_plays_year_2006 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -30983,6 +31626,27 @@ CREATE INDEX nfl_plays_year_2007_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2007_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_def_personnel_counts_idx ON public.nfl_plays_year_2007 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2007_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_def_personnel_db_count_idx ON public.nfl_plays_year_2007 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2007_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_def_personnel_dl_count_idx ON public.nfl_plays_year_2007 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2007_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31015,6 +31679,13 @@ CREATE INDEX nfl_plays_year_2007_nfl_week_id_idx ON public.nfl_plays_year_2007 U
 --
 
 CREATE INDEX nfl_plays_year_2007_off_idx ON public.nfl_plays_year_2007 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2007_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_off_personnel_counts_idx ON public.nfl_plays_year_2007 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -31333,6 +32004,27 @@ CREATE INDEX nfl_plays_year_2008_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2008_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_def_personnel_counts_idx ON public.nfl_plays_year_2008 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2008_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_def_personnel_db_count_idx ON public.nfl_plays_year_2008 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2008_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_def_personnel_dl_count_idx ON public.nfl_plays_year_2008 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2008_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31365,6 +32057,13 @@ CREATE INDEX nfl_plays_year_2008_nfl_week_id_idx ON public.nfl_plays_year_2008 U
 --
 
 CREATE INDEX nfl_plays_year_2008_off_idx ON public.nfl_plays_year_2008 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2008_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_off_personnel_counts_idx ON public.nfl_plays_year_2008 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -31683,6 +32382,27 @@ CREATE INDEX nfl_plays_year_2009_catchable_ball_idx ON public.nfl_plays_year_200
 
 
 --
+-- Name: nfl_plays_year_2009_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_def_personnel_counts_idx ON public.nfl_plays_year_2009 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2009_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_def_personnel_db_count_idx ON public.nfl_plays_year_2009 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2009_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_def_personnel_dl_count_idx ON public.nfl_plays_year_2009 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2009_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31715,6 +32435,13 @@ CREATE INDEX nfl_plays_year_2009_nfl_week_id_idx ON public.nfl_plays_year_2009 U
 --
 
 CREATE INDEX nfl_plays_year_2009_off_idx ON public.nfl_plays_year_2009 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2009_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_off_personnel_counts_idx ON public.nfl_plays_year_2009 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -32033,6 +32760,27 @@ CREATE INDEX nfl_plays_year_2010_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2010_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_def_personnel_counts_idx ON public.nfl_plays_year_2010 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2010_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_def_personnel_db_count_idx ON public.nfl_plays_year_2010 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2010_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_def_personnel_dl_count_idx ON public.nfl_plays_year_2010 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2010_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32065,6 +32813,13 @@ CREATE INDEX nfl_plays_year_2010_nfl_week_id_idx ON public.nfl_plays_year_2010 U
 --
 
 CREATE INDEX nfl_plays_year_2010_off_idx ON public.nfl_plays_year_2010 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2010_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_off_personnel_counts_idx ON public.nfl_plays_year_2010 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -32383,6 +33138,27 @@ CREATE INDEX nfl_plays_year_2011_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2011_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_def_personnel_counts_idx ON public.nfl_plays_year_2011 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2011_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_def_personnel_db_count_idx ON public.nfl_plays_year_2011 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2011_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_def_personnel_dl_count_idx ON public.nfl_plays_year_2011 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2011_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32415,6 +33191,13 @@ CREATE INDEX nfl_plays_year_2011_nfl_week_id_idx ON public.nfl_plays_year_2011 U
 --
 
 CREATE INDEX nfl_plays_year_2011_off_idx ON public.nfl_plays_year_2011 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2011_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_off_personnel_counts_idx ON public.nfl_plays_year_2011 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -32733,6 +33516,27 @@ CREATE INDEX nfl_plays_year_2012_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2012_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_def_personnel_counts_idx ON public.nfl_plays_year_2012 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2012_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_def_personnel_db_count_idx ON public.nfl_plays_year_2012 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2012_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_def_personnel_dl_count_idx ON public.nfl_plays_year_2012 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2012_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32765,6 +33569,13 @@ CREATE INDEX nfl_plays_year_2012_nfl_week_id_idx ON public.nfl_plays_year_2012 U
 --
 
 CREATE INDEX nfl_plays_year_2012_off_idx ON public.nfl_plays_year_2012 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2012_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_off_personnel_counts_idx ON public.nfl_plays_year_2012 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -33083,6 +33894,27 @@ CREATE INDEX nfl_plays_year_2013_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2013_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_def_personnel_counts_idx ON public.nfl_plays_year_2013 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2013_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_def_personnel_db_count_idx ON public.nfl_plays_year_2013 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2013_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_def_personnel_dl_count_idx ON public.nfl_plays_year_2013 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2013_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33115,6 +33947,13 @@ CREATE INDEX nfl_plays_year_2013_nfl_week_id_idx ON public.nfl_plays_year_2013 U
 --
 
 CREATE INDEX nfl_plays_year_2013_off_idx ON public.nfl_plays_year_2013 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2013_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_off_personnel_counts_idx ON public.nfl_plays_year_2013 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -33433,6 +34272,27 @@ CREATE INDEX nfl_plays_year_2014_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2014_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_def_personnel_counts_idx ON public.nfl_plays_year_2014 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2014_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_def_personnel_db_count_idx ON public.nfl_plays_year_2014 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2014_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_def_personnel_dl_count_idx ON public.nfl_plays_year_2014 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2014_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33465,6 +34325,13 @@ CREATE INDEX nfl_plays_year_2014_nfl_week_id_idx ON public.nfl_plays_year_2014 U
 --
 
 CREATE INDEX nfl_plays_year_2014_off_idx ON public.nfl_plays_year_2014 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2014_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_off_personnel_counts_idx ON public.nfl_plays_year_2014 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -33783,6 +34650,27 @@ CREATE INDEX nfl_plays_year_2015_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2015_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_def_personnel_counts_idx ON public.nfl_plays_year_2015 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2015_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_def_personnel_db_count_idx ON public.nfl_plays_year_2015 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2015_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_def_personnel_dl_count_idx ON public.nfl_plays_year_2015 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2015_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33815,6 +34703,13 @@ CREATE INDEX nfl_plays_year_2015_nfl_week_id_idx ON public.nfl_plays_year_2015 U
 --
 
 CREATE INDEX nfl_plays_year_2015_off_idx ON public.nfl_plays_year_2015 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2015_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_off_personnel_counts_idx ON public.nfl_plays_year_2015 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -34133,6 +35028,27 @@ CREATE INDEX nfl_plays_year_2016_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2016_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_def_personnel_counts_idx ON public.nfl_plays_year_2016 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2016_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_def_personnel_db_count_idx ON public.nfl_plays_year_2016 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2016_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_def_personnel_dl_count_idx ON public.nfl_plays_year_2016 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2016_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34165,6 +35081,13 @@ CREATE INDEX nfl_plays_year_2016_nfl_week_id_idx ON public.nfl_plays_year_2016 U
 --
 
 CREATE INDEX nfl_plays_year_2016_off_idx ON public.nfl_plays_year_2016 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2016_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_off_personnel_counts_idx ON public.nfl_plays_year_2016 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -34483,6 +35406,27 @@ CREATE INDEX nfl_plays_year_2017_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2017_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_def_personnel_counts_idx ON public.nfl_plays_year_2017 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2017_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_def_personnel_db_count_idx ON public.nfl_plays_year_2017 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2017_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_def_personnel_dl_count_idx ON public.nfl_plays_year_2017 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2017_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34515,6 +35459,13 @@ CREATE INDEX nfl_plays_year_2017_nfl_week_id_idx ON public.nfl_plays_year_2017 U
 --
 
 CREATE INDEX nfl_plays_year_2017_off_idx ON public.nfl_plays_year_2017 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2017_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_off_personnel_counts_idx ON public.nfl_plays_year_2017 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -34833,6 +35784,27 @@ CREATE INDEX nfl_plays_year_2018_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2018_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_def_personnel_counts_idx ON public.nfl_plays_year_2018 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2018_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_def_personnel_db_count_idx ON public.nfl_plays_year_2018 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2018_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_def_personnel_dl_count_idx ON public.nfl_plays_year_2018 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2018_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34865,6 +35837,13 @@ CREATE INDEX nfl_plays_year_2018_nfl_week_id_idx ON public.nfl_plays_year_2018 U
 --
 
 CREATE INDEX nfl_plays_year_2018_off_idx ON public.nfl_plays_year_2018 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2018_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_off_personnel_counts_idx ON public.nfl_plays_year_2018 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -35183,6 +36162,27 @@ CREATE INDEX nfl_plays_year_2019_catchable_ball_idx ON public.nfl_plays_year_201
 
 
 --
+-- Name: nfl_plays_year_2019_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_def_personnel_counts_idx ON public.nfl_plays_year_2019 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2019_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_def_personnel_db_count_idx ON public.nfl_plays_year_2019 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2019_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_def_personnel_dl_count_idx ON public.nfl_plays_year_2019 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2019_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35215,6 +36215,13 @@ CREATE INDEX nfl_plays_year_2019_nfl_week_id_idx ON public.nfl_plays_year_2019 U
 --
 
 CREATE INDEX nfl_plays_year_2019_off_idx ON public.nfl_plays_year_2019 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2019_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_off_personnel_counts_idx ON public.nfl_plays_year_2019 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -35533,6 +36540,27 @@ CREATE INDEX nfl_plays_year_2020_catchable_ball_idx ON public.nfl_plays_year_202
 
 
 --
+-- Name: nfl_plays_year_2020_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_def_personnel_counts_idx ON public.nfl_plays_year_2020 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2020_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_def_personnel_db_count_idx ON public.nfl_plays_year_2020 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2020_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_def_personnel_dl_count_idx ON public.nfl_plays_year_2020 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2020_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35565,6 +36593,13 @@ CREATE INDEX nfl_plays_year_2020_nfl_week_id_idx ON public.nfl_plays_year_2020 U
 --
 
 CREATE INDEX nfl_plays_year_2020_off_idx ON public.nfl_plays_year_2020 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2020_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_off_personnel_counts_idx ON public.nfl_plays_year_2020 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -35883,6 +36918,27 @@ CREATE INDEX nfl_plays_year_2021_catchable_ball_idx ON public.nfl_plays_year_202
 
 
 --
+-- Name: nfl_plays_year_2021_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_def_personnel_counts_idx ON public.nfl_plays_year_2021 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2021_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_def_personnel_db_count_idx ON public.nfl_plays_year_2021 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2021_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_def_personnel_dl_count_idx ON public.nfl_plays_year_2021 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2021_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35915,6 +36971,13 @@ CREATE INDEX nfl_plays_year_2021_nfl_week_id_idx ON public.nfl_plays_year_2021 U
 --
 
 CREATE INDEX nfl_plays_year_2021_off_idx ON public.nfl_plays_year_2021 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2021_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_off_personnel_counts_idx ON public.nfl_plays_year_2021 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -36233,6 +37296,27 @@ CREATE INDEX nfl_plays_year_2022_catchable_ball_idx ON public.nfl_plays_year_202
 
 
 --
+-- Name: nfl_plays_year_2022_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_def_personnel_counts_idx ON public.nfl_plays_year_2022 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2022_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_def_personnel_db_count_idx ON public.nfl_plays_year_2022 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2022_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_def_personnel_dl_count_idx ON public.nfl_plays_year_2022 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2022_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36265,6 +37349,13 @@ CREATE INDEX nfl_plays_year_2022_nfl_week_id_idx ON public.nfl_plays_year_2022 U
 --
 
 CREATE INDEX nfl_plays_year_2022_off_idx ON public.nfl_plays_year_2022 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2022_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_off_personnel_counts_idx ON public.nfl_plays_year_2022 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -36583,6 +37674,27 @@ CREATE INDEX nfl_plays_year_2023_catchable_ball_idx ON public.nfl_plays_year_202
 
 
 --
+-- Name: nfl_plays_year_2023_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_def_personnel_counts_idx ON public.nfl_plays_year_2023 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2023_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_def_personnel_db_count_idx ON public.nfl_plays_year_2023 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2023_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_def_personnel_dl_count_idx ON public.nfl_plays_year_2023 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2023_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36615,6 +37727,13 @@ CREATE INDEX nfl_plays_year_2023_nfl_week_id_idx ON public.nfl_plays_year_2023 U
 --
 
 CREATE INDEX nfl_plays_year_2023_off_idx ON public.nfl_plays_year_2023 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2023_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_off_personnel_counts_idx ON public.nfl_plays_year_2023 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -36933,6 +38052,27 @@ CREATE INDEX nfl_plays_year_2024_catchable_ball_idx ON public.nfl_plays_year_202
 
 
 --
+-- Name: nfl_plays_year_2024_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_def_personnel_counts_idx ON public.nfl_plays_year_2024 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2024_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_def_personnel_db_count_idx ON public.nfl_plays_year_2024 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2024_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_def_personnel_dl_count_idx ON public.nfl_plays_year_2024 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2024_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36965,6 +38105,13 @@ CREATE INDEX nfl_plays_year_2024_nfl_week_id_idx ON public.nfl_plays_year_2024 U
 --
 
 CREATE INDEX nfl_plays_year_2024_off_idx ON public.nfl_plays_year_2024 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2024_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_off_personnel_counts_idx ON public.nfl_plays_year_2024 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -37283,6 +38430,27 @@ CREATE INDEX nfl_plays_year_2025_catchable_ball_idx ON public.nfl_plays_year_202
 
 
 --
+-- Name: nfl_plays_year_2025_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_def_personnel_counts_idx ON public.nfl_plays_year_2025 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2025_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_def_personnel_db_count_idx ON public.nfl_plays_year_2025 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2025_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_def_personnel_dl_count_idx ON public.nfl_plays_year_2025 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2025_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37315,6 +38483,13 @@ CREATE INDEX nfl_plays_year_2025_nfl_week_id_idx ON public.nfl_plays_year_2025 U
 --
 
 CREATE INDEX nfl_plays_year_2025_off_idx ON public.nfl_plays_year_2025 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2025_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_off_personnel_counts_idx ON public.nfl_plays_year_2025 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -37633,6 +38808,27 @@ CREATE INDEX nfl_plays_year_2026_catchable_ball_idx ON public.nfl_plays_year_202
 
 
 --
+-- Name: nfl_plays_year_2026_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_def_personnel_counts_idx ON public.nfl_plays_year_2026 USING btree (def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2026_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_def_personnel_db_count_idx ON public.nfl_plays_year_2026 USING btree (def_personnel_db_count);
+
+
+--
+-- Name: nfl_plays_year_2026_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_def_personnel_dl_count_idx ON public.nfl_plays_year_2026 USING btree (def_personnel_dl_count);
+
+
+--
 -- Name: nfl_plays_year_2026_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37665,6 +38861,13 @@ CREATE INDEX nfl_plays_year_2026_nfl_week_id_idx ON public.nfl_plays_year_2026 U
 --
 
 CREATE INDEX nfl_plays_year_2026_off_idx ON public.nfl_plays_year_2026 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2026_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_off_personnel_counts_idx ON public.nfl_plays_year_2026 USING btree (off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count);
 
 
 --
@@ -39747,6 +40950,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2000_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2000_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2000_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2000_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40094,6 +41311,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2001_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2001_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2001_def_personnel_dl_count_idx;
 
 
 --
@@ -40447,6 +41678,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2002_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2002_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2002_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2002_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40794,6 +42039,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2003_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2003_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2003_def_personnel_dl_count_idx;
 
 
 --
@@ -41147,6 +42406,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2004_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2004_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2004_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2004_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -41494,6 +42767,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2005_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2005_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2005_def_personnel_dl_count_idx;
 
 
 --
@@ -41847,6 +43134,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2006_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2006_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2006_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2006_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42194,6 +43495,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2007_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2007_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2007_def_personnel_dl_count_idx;
 
 
 --
@@ -42547,6 +43862,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2008_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2008_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2008_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2008_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42894,6 +44223,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2009_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2009_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2009_def_personnel_dl_count_idx;
 
 
 --
@@ -43247,6 +44590,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2010_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2010_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2010_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2010_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43594,6 +44951,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2011_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2011_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2011_def_personnel_dl_count_idx;
 
 
 --
@@ -43947,6 +45318,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2012_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2012_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2012_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2012_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44294,6 +45679,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2013_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2013_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2013_def_personnel_dl_count_idx;
 
 
 --
@@ -44647,6 +46046,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2014_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2014_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2014_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2014_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44994,6 +46407,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2015_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2015_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2015_def_personnel_dl_count_idx;
 
 
 --
@@ -45347,6 +46774,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2016_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2016_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2016_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2016_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -45694,6 +47135,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2017_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2017_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2017_def_personnel_dl_count_idx;
 
 
 --
@@ -46047,6 +47502,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2018_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2018_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2018_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2018_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46394,6 +47863,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2019_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2019_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2019_def_personnel_dl_count_idx;
 
 
 --
@@ -46747,6 +48230,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2020_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2020_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2020_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2020_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47094,6 +48591,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2021_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2021_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2021_def_personnel_dl_count_idx;
 
 
 --
@@ -47447,6 +48958,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2022_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2022_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2022_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2022_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47794,6 +49319,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2023_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2023_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2023_def_personnel_dl_count_idx;
 
 
 --
@@ -48147,6 +49686,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2024_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2024_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2024_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2024_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48497,6 +50050,20 @@ ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_play
 
 
 --
+-- Name: nfl_plays_year_2025_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2025_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2025_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2025_def_personnel_dl_count_idx;
+
+
+--
 -- Name: nfl_plays_year_2025_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48844,6 +50411,20 @@ ALTER INDEX public.idx_nfl_plays_box_defenders ATTACH PARTITION public.nfl_plays
 --
 
 ALTER INDEX public.idx_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2026_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_def_personnel_db_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.nfl_plays_year_2026_def_personnel_db_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_def_personnel_dl_count_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2026_def_personnel_dl_count_idx;
 
 
 --

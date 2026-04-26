@@ -10,7 +10,16 @@ export default function get_stats_column_param_key({
     .map((key) => {
       const value = params[key]
       if (Array.isArray(value)) {
-        return `${key}${value.sort().join('')}`
+        const parts = value
+          .map((v) => {
+            if (v && typeof v === 'object' && !Array.isArray(v)) {
+              const sorted_keys = Object.keys(v).sort()
+              return sorted_keys.map((k) => `${k}:${v[k]}`).join(',')
+            }
+            return String(v)
+          })
+          .sort()
+        return `${key}${parts.join('|')}`
       } else if (value !== undefined && value !== null) {
         return `${key}${value}`
       } else {
