@@ -367,6 +367,10 @@ export const api = {
     const url = `${API_URL}/data-views`
     return { url, ...POST(data) }
   },
+  post_data_view_param_option_counts({ table_state, target_param_name }) {
+    const url = `${API_URL}/data-views/param-option-counts`
+    return { url, ...POST({ table_state, target_param_name }) }
+  },
   delete_data_view({ view_id }) {
     const url = `${API_URL}/data-views/${view_id}`
     return { url, method: 'DELETE' }

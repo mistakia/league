@@ -1,4 +1,4 @@
-import { nfl_plays_column_params } from '#libs-shared'
+import { nfl_plays_column_params, serialize_preset_value } from '#libs-shared'
 
 export default function get_stats_column_param_key({
   params = {},
@@ -13,8 +13,7 @@ export default function get_stats_column_param_key({
         const parts = value
           .map((v) => {
             if (v && typeof v === 'object' && !Array.isArray(v)) {
-              const sorted_keys = Object.keys(v).sort()
-              return sorted_keys.map((k) => `${k}:${v[k]}`).join(',')
+              return serialize_preset_value(v)
             }
             return String(v)
           })

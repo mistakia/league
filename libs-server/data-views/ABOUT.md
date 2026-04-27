@@ -30,7 +30,11 @@ Split CTEs (`base_years`, `player_years`, `player_years_weeks`) remain inlineabl
 
 Every `with:` handler (whether the direct builders in this directory or the inline `with:` functions on column definitions) MUST accept `data_view_options` and forward it into the `effective_years` computation. The dispatcher in `libs-server/get-data-view-results.mjs` already passes `data_view_options` to `with_func`; omitting it from the handler signature silently disables year pushdown for columns whose year signal comes only from splits.
 
+## Helpers
+
+- `get-param-option-counts.mjs` -- load when working on column-param metadata or live filter previews. Computes `{ [serialize_preset_value]: count }` pivots for `OBJECT_PRESET` params by applying every active `nfl_plays_column_params` predicate from `table_state.where[*].params` *except* the targeted param, with a 10s `statement_timeout` fallback to `{ counts: {} }`.
+
 ## See Also
 
-- `docs/data-views-system.md`, sections "Year Pushdown Contract for CTE-Based Columns" and "Materialization Policy for CTE-Based Columns".
+- `docs/data-views-system.md`, sections "Year Pushdown Contract for CTE-Based Columns", "Materialization Policy for CTE-Based Columns", and "Param Option Counts".
 - `rate-type/ABOUT.md` for rate-type-specific notes.

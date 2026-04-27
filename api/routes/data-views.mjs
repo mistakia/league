@@ -2,6 +2,11 @@ import express from 'express'
 import crypto from 'crypto'
 import { validators, get_data_view_results, redis_cache } from '#libs-server'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
+import get_param_option_counts, {
+  collect_other_params
+} from '#libs-server/data-views/get-param-option-counts.mjs'
+import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
+import { nfl_plays_column_params } from '#libs-shared'
 import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
 
 const router = express.Router()
@@ -1186,6 +1191,54 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
     }
 
     res.send(formatted_results)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.post('/param-option-counts', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { table_state, target_param_name } = req.body || {}
+
+    if (!target_param_name || typeof target_param_name !== 'string') {
+      return res.status(400).send({ error: 'target_param_name is required' })
+    }
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        nfl_plays_column_params,
+        target_param_name
+      )
+    ) {
+      return res
+        .status(400)
+        .send({ error: `unknown target_param_name: ${target_param_name}` })
+    }
+
+    const other_params = collect_other_params({
+      table_state,
+      target_param_name
+    })
+
+    const cache_key = `param-option-counts:${target_param_name}:${get_stats_column_param_key(
+      { params: other_params }
+    )}`
+    const cached_result = await redis_cache.get(cache_key)
+    if (cached_result) {
+      return res.send(cached_result)
+    }
+
+    const result = await get_param_option_counts({
+      table_state,
+      target_param_name
+    })
+
+    if (result && result.counts && Object.keys(result.counts).length > 0) {
+      await redis_cache.set(cache_key, result, 1000 * 600)
+    }
+
+    res.send(result)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

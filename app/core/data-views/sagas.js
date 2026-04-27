@@ -18,6 +18,8 @@ import {
   api_delete_data_view,
   api_get_data_view
 } from '@core/api'
+import { api, api_request } from '@core/api/service'
+import { nfl_plays_column_params } from '#libs-shared'
 import { send } from '@core/ws'
 import {
   get_app,
@@ -375,6 +377,86 @@ export function* handle_clear_local_view_cache() {
 }
 
 //= ====================================
+//  PARAM OPTION COUNTS
+// -------------------------------------
+
+// DATA_VIEW_RESULT is handled only by the reducer, never dispatching
+// DATA_VIEW_CHANGED -- the debounce watcher below is therefore safe from a
+// fetch -> result -> fetch feedback loop.
+
+const TABLE_DATA_TYPES_OBJECT_PRESET = 9
+
+const collect_object_preset_params = (table_state) => {
+  const where = Array.isArray(table_state?.where) ? table_state.where : []
+  const param_names = new Set()
+  const signature_parts = []
+  for (let i = 0; i < where.length; i++) {
+    const where_params = where[i]?.params
+    if (!where_params || typeof where_params !== 'object') continue
+    const keys = Object.keys(where_params)
+      .filter((k) => {
+        const def = nfl_plays_column_params[k]
+        return def && def.data_type === TABLE_DATA_TYPES_OBJECT_PRESET
+      })
+      .sort()
+    for (const k of keys) {
+      param_names.add(k)
+      signature_parts.push(`${i}:${k}:${JSON.stringify(where_params[k])}`)
+    }
+  }
+  return {
+    param_names: Array.from(param_names),
+    signature: signature_parts.join('|')
+  }
+}
+
+function* fetch_param_option_counts({ table_state, target_param_name }) {
+  try {
+    const { token } = yield select(get_app)
+    const { request } = api_request(
+      api.post_data_view_param_option_counts,
+      { table_state, target_param_name },
+      token
+    )
+    const data = yield call(request)
+    yield put(
+      data_view_request_actions.param_option_counts_fulfilled({
+        target_param_name,
+        counts: data?.counts || {}
+      })
+    )
+  } catch (err) {
+    console.error('param-option-counts fetch failed', target_param_name, err)
+  }
+}
+
+export function* maybe_fetch_param_option_counts() {
+  const data_view = yield select(get_selected_data_view)
+  const table_state = data_view?.table_state
+  if (!table_state) return
+
+  const view_id = data_view.view_id
+  const { param_names, signature } = collect_object_preset_params(table_state)
+
+  const last_signatures = yield select((state) =>
+    state.getIn(['data_view_request', 'param_option_counts_signatures'])
+  )
+  const last_signature = last_signatures ? last_signatures.get(view_id) : null
+  if (last_signature === signature) return
+
+  yield put(
+    data_view_request_actions.param_option_counts_signature_set({
+      view_id,
+      signature
+    })
+  )
+
+  for (const target_param_name of param_names) {
+    yield call(fetch_param_option_counts, { table_state, target_param_name })
+  }
+}
+
+//= ====================================
 //  WATCHERS
 // -------------------------------------
 
@@ -494,5 +576,10 @@ export const data_views_sagas = [
     250,
     data_views_actions.DATA_VIEW_CHANGED,
     persist_table_state_to_browser
+  ),
+  debounce(
+    250,
+    data_views_actions.DATA_VIEW_CHANGED,
+    maybe_fetch_param_option_counts
   )
 ]

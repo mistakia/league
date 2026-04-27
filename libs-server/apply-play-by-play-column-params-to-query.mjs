@@ -6,12 +6,21 @@ import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 
 const nfl_games_param_keys = Object.keys(nfl_games_params)
 
-export default function ({ query, params, table_name = 'nfl_plays' }) {
+export default function ({
+  query,
+  params,
+  table_name = 'nfl_plays',
+  skip_param_name = null
+}) {
   const column_param_keys = Object.keys(nfl_plays_column_params)
   let nfl_games_joined = false
 
   for (const column_param_key of column_param_keys) {
     if (column_param_key === 'year_offset') {
+      continue
+    }
+
+    if (skip_param_name && column_param_key === skip_param_name) {
       continue
     }
 
@@ -75,12 +84,12 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
       query.where(`${param_table}.${column_name}`, param_value)
     } else if (
       column_param_definition.data_type ===
-      table_constants.TABLE_DATA_TYPES.PERSONNEL_GROUP
+      table_constants.TABLE_DATA_TYPES.OBJECT_PRESET
     ) {
       const column_specs = column_param_definition.column_specs
       if (!Array.isArray(column_specs) || column_specs.length === 0) {
         throw new Error(
-          `Missing column_specs for PERSONNEL_GROUP param ${column_param_key}`
+          `Missing column_specs for object preset param ${column_param_key}`
         )
       }
       const spec_by_key = Object.fromEntries(
@@ -97,13 +106,13 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
           const spec = spec_by_key[value_key]
           if (!spec) {
             throw new Error(
-              `Invalid key '${value_key}' for PERSONNEL_GROUP param ${column_param_key}`
+              `Invalid key '${value_key}' for object preset param ${column_param_key}`
             )
           }
           const numeric = Number(raw)
           if (!Number.isFinite(numeric)) {
             throw new Error(
-              `Invalid value for PERSONNEL_GROUP key '${value_key}' in ${column_param_key}`
+              `Invalid value for object preset key '${value_key}' in ${column_param_key}`
             )
           }
           entries.push([`${param_table}.${spec.column}`, numeric])
