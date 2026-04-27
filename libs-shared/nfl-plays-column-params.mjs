@@ -379,7 +379,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
   off_personnel: {
-    data_type: table_constants.TABLE_DATA_TYPES.PERSONNEL_GROUP,
+    data_type: table_constants.TABLE_DATA_TYPES.OBJECT_PRESET,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL],
     column_specs: [
       { key: 'rb', column: 'off_personnel_rb_count', label: 'RB', min: 0, max: 4 },
@@ -414,7 +414,7 @@ export default {
     ]
   },
   def_personnel: {
-    data_type: table_constants.TABLE_DATA_TYPES.PERSONNEL_GROUP,
+    data_type: table_constants.TABLE_DATA_TYPES.OBJECT_PRESET,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL],
     column_specs: [
       { key: 'dl', column: 'def_personnel_dl_count', label: 'DL', min: 0, max: 8 },

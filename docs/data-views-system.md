@@ -1580,9 +1580,9 @@ Current-week joins go through shared helpers:
 
 Direct `joinRaw` / inline `where('seas_type', 'REG')` fragments on week-keyed tables are disallowed for the current-week and prior-week patterns. Season-aggregate REG conventions (season-level rankings `week=0`, PFR/ESPN REG-only published stats, "primary team by REG game count") remain REG-only by product convention.
 
-## PERSONNEL_GROUP Data Type
+## OBJECT_PRESET Data Type
 
-The `PERSONNEL_GROUP` data type (`TABLE_DATA_TYPES.PERSONNEL_GROUP = 9`) is a multi-column conjunctive filter for offensive and defensive personnel packages. Used by the `off_personnel` and `def_personnel` column params in `libs-shared/nfl-plays-column-params.mjs`.
+The `OBJECT_PRESET` data type (`TABLE_DATA_TYPES.OBJECT_PRESET = 9`, formerly `PERSONNEL_GROUP`) is a multi-column conjunctive filter for value-object presets such as offensive and defensive personnel packages. Used by the `off_personnel` and `def_personnel` column params in `libs-shared/nfl-plays-column-params.mjs`. The data type is generic in `react-table`; football-specific key whitelisting lives in `libs-shared/validators/personnel-group.mjs`.
 
 ### Value Shape
 
@@ -1609,7 +1609,7 @@ Keys absent from a value object are not constrained. This lets defensive presets
 
 ### Param Definition
 
-Each PERSONNEL_GROUP param specifies:
+Each OBJECT_PRESET param specifies:
 
 - `column_specs`: array of `{ key, column, label, min, max, advanced? }` mapping object keys to physical columns and providing UI bounds.
 - `preset_values`: array of `{ label, value, n }` describing common packages with row-count annotations for tooltip display.
@@ -1633,7 +1633,43 @@ A one-time migration diagnostic table `personnel_count_discrepancies` captures r
 
 ### Operator
 
-PERSONNEL_GROUP supports `IN` only. The validator (`react-table/src/validators/security-patterns.mjs`) accepts the array-of-objects shape via an additive `oneOf` branch with key allowlist and bounded integer values.
+OBJECT_PRESET supports `IN` only. The structural validator (`react-table/src/validators/security-patterns.mjs`) accepts the array-of-objects shape generically (integer values, bounded range). Domain-specific key whitelisting (e.g. football positions) is layered on top via `create_object_preset_validator({ allowed_keys, value_max })` exported from `react-table` and consumed by `libs-shared/validators/personnel-group.mjs`.
+
+## Param Option Counts
+
+The param option counts endpoint provides live row-count previews for `OBJECT_PRESET` filter chips, replacing static `n` annotations with values that reflect the user's other active filters.
+
+### Endpoint Contract
+
+`POST /data-views/param-option-counts`
+
+Request body:
+
+```json
+{ "table_state": { "where": [ ... ] }, "target_param_name": "off_personnel" }
+```
+
+Response:
+
+```json
+{ "counts": { "rb:1,te:1,wr:3": 12345, "rb:1,te:2,wr:2": 6789 }, "generated_at": "<iso>" }
+```
+
+Keys are canonical signatures from `serialize_preset_value({ ... })` (sorted-key `k:v` joined by `,`). Values are unfiltered `COUNT(*)` over `nfl_plays` after applying every active `nfl_plays_column_params` predicate from `table_state.where[*].params` *except* the targeted param.
+
+### Cache Policy
+
+The endpoint caches via `redis_cache` at TTL 600 seconds, keyed by `param-option-counts:${target_param_name}:${get_stats_column_param_key({ params: other_params })}`. Server-side `statement_timeout` is 10 seconds; on timeout or any query failure the endpoint returns `{ counts: {} }` so the UI degrades silently to the static `n` defaults retained on the column-param definition.
+
+### `counts` Prop Contract
+
+`column-param-object-preset-filter` accepts an optional `counts` prop: a `{ [signature]: number }` map. When provided, each preset chip renders the live count in place of its static `preset.n`; absent or missing-key entries fall back to the static `n`. The `filter-controls-column-param-item` dispatcher passes `counts` through.
+
+### Client Pipeline
+
+1. `app/core/data-views/sagas.js` debounces `DATA_VIEW_CHANGED` (250ms), computes a stable signature of active `nfl_plays_column_params` keys + values across `table_state.where[*].params`, and forks one `fetch_param_option_counts` per active param when the signature changes.
+2. The reducer at `app/core/data-view-request/reducer.js` stores results under `param_option_counts[param_name][signature] = count`. The `DATA_VIEW_RESULT` reducer path does not dispatch `DATA_VIEW_CHANGED`, preventing fetch -> result -> fetch feedback.
+3. `get_enriched_data_views_fields` in `app/core/selectors.js` overlays live counts onto each `column_param_definition.preset_values[*].n` for OBJECT_PRESET params, then feeds the enriched fields to `<Table all_columns={...} />`.
 
 ## Related Documentation
 

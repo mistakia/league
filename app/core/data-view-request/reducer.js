@@ -1,4 +1,4 @@
-import { fromJS, List } from 'immutable'
+import { fromJS, List, Map } from 'immutable'
 import { data_views_actions } from '#app/core/data-views'
 import { data_view_request_actions } from './actions'
 
@@ -8,7 +8,9 @@ const initial_state = fromJS({
   status: null,
   result: List(),
   metadata: null,
-  error: null
+  error: null,
+  param_option_counts: Map(),
+  param_option_counts_signatures: Map()
 })
 
 export function data_view_request_reducer(
@@ -103,6 +105,24 @@ export function data_view_request_reducer(
         status: 'error',
         error: payload.error
       })
+
+    case data_view_request_actions.DATA_VIEW_PARAM_OPTION_COUNTS_FULFILLED:
+      return state.setIn(
+        ['param_option_counts', payload.target_param_name],
+        fromJS(payload.counts || {})
+      )
+
+    case data_view_request_actions.DATA_VIEW_PARAM_OPTION_COUNTS_SIGNATURE_SET:
+      return state.setIn(
+        ['param_option_counts_signatures', payload.view_id],
+        payload.signature
+      )
+
+    case data_views_actions.DELETE_DATA_VIEW_FULFILLED: {
+      const view_id = payload?.opts?.view_id
+      if (!view_id) return state
+      return state.deleteIn(['param_option_counts_signatures', view_id])
+    }
 
     default:
       return state

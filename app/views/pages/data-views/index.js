@@ -7,7 +7,8 @@ import {
   get_selected_data_view,
   get_teams_for_current_year,
   get_data_views,
-  get_has_unsaved_local_edits_map
+  get_has_unsaved_local_edits_map,
+  get_enriched_data_views_fields
 } from '@core/selectors'
 import { data_views_actions } from '@core/data-views'
 import { get_data_views_fields } from '@core/data-views-fields'
@@ -90,7 +91,7 @@ const map_state_to_props = createSelector(
   (state) => state.getIn(['players', 'allPlayersPending']),
   (state) => state.getIn(['app', 'userId']),
   get_stats_state,
-  get_data_views_fields,
+  get_enriched_data_views_fields,
   get_selected_data_view,
   get_data_views,
   (state) => state.getIn(['players', 'selected']),
