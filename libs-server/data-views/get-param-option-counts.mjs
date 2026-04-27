@@ -57,7 +57,25 @@ export default async function get_param_option_counts({
   const other_params = collect_other_params({ table_state, target_param_name })
   const param_table = target_definition.table || 'nfl_plays'
 
-  const select_exprs = column_specs.map(
+  // Restrict GROUP BY to keys actually used by preset_values so the query
+  // matches the existing covering indexes (e.g. off_personnel_counts_idx on
+  // rb/te/wr). Including unused spec columns falls off the index path and
+  // forces a full Seq Scan across all year partitions.
+  const preset_values = Array.isArray(target_definition.preset_values)
+    ? target_definition.preset_values
+    : []
+  const preset_keys_used = new Set()
+  for (const preset of preset_values) {
+    if (!preset || !preset.value || typeof preset.value !== 'object') continue
+    for (const key of Object.keys(preset.value)) preset_keys_used.add(key)
+  }
+  const active_specs = column_specs.filter((spec) =>
+    preset_keys_used.has(spec.key)
+  )
+  if (active_specs.length === 0) {
+    return { counts: {}, generated_at }
+  }
+  const select_exprs = active_specs.map(
     (spec) => `${param_table}.${spec.column}`
   )
 
@@ -82,7 +100,7 @@ export default async function get_param_option_counts({
     const counts = {}
     for (const row of rows) {
       const value_object = {}
-      for (const spec of column_specs) {
+      for (const spec of active_specs) {
         const v = row[spec.column]
         if (v === null || v === undefined) continue
         value_object[spec.key] = Number(v)
