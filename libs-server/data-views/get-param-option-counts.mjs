@@ -97,17 +97,34 @@ export default async function get_param_option_counts({
       return query.transacting(trx)
     })
 
+    // Each preset's signature aggregates GROUP BY rows whose preset-key values
+    // match. Presets use mixed key-sets (e.g. {db:4} and {dl,lb,db}) so we
+    // cannot directly key counts by raw GROUP BY tuples.
+    const column_by_key = Object.fromEntries(
+      active_specs.map((s) => [s.key, s.column])
+    )
     const counts = {}
-    for (const row of rows) {
-      const value_object = {}
-      for (const spec of active_specs) {
-        const v = row[spec.column]
-        if (v === null || v === undefined) continue
-        value_object[spec.key] = Number(v)
-      }
-      const signature = serialize_preset_value(value_object)
+    for (const preset of preset_values) {
+      if (!preset || !preset.value || typeof preset.value !== 'object') continue
+      const signature = serialize_preset_value(preset.value)
       if (!signature) continue
-      counts[signature] = Number(row.count)
+      let total = 0
+      for (const row of rows) {
+        let matches = true
+        for (const [key, expected] of Object.entries(preset.value)) {
+          const column = column_by_key[key]
+          if (!column) {
+            matches = false
+            break
+          }
+          if (Number(row[column]) !== Number(expected)) {
+            matches = false
+            break
+          }
+        }
+        if (matches) total += Number(row.count)
+      }
+      counts[signature] = total
     }
 
     return { counts, generated_at }
