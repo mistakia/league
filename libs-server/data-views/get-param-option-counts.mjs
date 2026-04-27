@@ -113,7 +113,7 @@ export default async function get_param_option_counts({
         let matches = true
         for (const [key, expected] of Object.entries(preset.value)) {
           const column = column_by_key[key]
-          if (!column) {
+          if (!column || row[column] == null) {
             matches = false
             break
           }
