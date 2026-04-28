@@ -212,7 +212,11 @@ describe('LIB - get_super_priority_status', function () {
     })
 
     it('should return not eligible when player was extended', async () => {
-      // Add extension transaction after poach
+      // Amendment XXXIV §4 joint condition: extension only disqualifies when
+      // the Regular Season has started AND the player was on the Active
+      // roster at week 1 of the poach year.
+      MockDate.set(regular_season_start.add('2', 'week').toISOString())
+
       await knex('transactions').insert({
         pid: player.pid,
         tid: 2,
@@ -223,6 +227,25 @@ describe('LIB - get_super_priority_status', function () {
         timestamp: poach_timestamp + 24 * 60 * 60,
         week: current_season.week,
         userid: 2
+      })
+
+      const [roster] = await knex('rosters')
+        .insert({
+          tid: 2,
+          week: 1,
+          year: current_season.year,
+          lid: 1
+        })
+        .returning('uid')
+      await knex('rosters_players').insert({
+        rid: roster.uid,
+        pid: player.pid,
+        tid: 2,
+        lid: 1,
+        slot: roster_slot_types.BENCH,
+        pos: player.pos,
+        week: 1,
+        year: current_season.year
       })
 
       const status = await get_super_priority_status({
@@ -264,6 +287,9 @@ describe('LIB - get_super_priority_status', function () {
     let player, poach_timestamp
 
     beforeEach(async () => {
+      // Roster-week filters require week >= 1, so anchor MockDate inside the
+      // Regular Season (week 6) for these scenarios.
+      MockDate.set(regular_season_start.add('6', 'week').toISOString())
       player = await selectPlayer({ rookie: false, random: false })
       poach_timestamp = Math.round(Date.now() / 1000) - 35 * 24 * 60 * 60 // 5 weeks ago
 

@@ -1,4 +1,5 @@
 import { createLeague } from '#libs-server'
+import { current_season } from '#constants'
 
 export default async function (knex) {
   await knex('users_sources').del()
@@ -31,7 +32,10 @@ export default async function (knex) {
     lid: 1,
     hosted: 1,
     draft_start: Math.round(Date.now() / 1000),
-    free_agency_live_auction_start: Math.round(Date.now() / 1000),
+    free_agency_live_auction_start: current_season.regular_season_start
+      .add(1, 'week')
+      .subtract(5, 'days')
+      .unix(),
     tddate: 1606626000
   })
 }
