@@ -7,10 +7,10 @@ import {
   get_selected_data_view,
   get_teams_for_current_year,
   get_data_views,
-  get_has_unsaved_local_edits_map,
-  get_enriched_data_views_fields
+  get_has_unsaved_local_edits_map
 } from '@core/selectors'
 import { data_views_actions } from '@core/data-views'
+import { get_enriched_data_views_fields } from '@core/data-views/selectors'
 import { get_data_views_fields } from '@core/data-views-fields'
 import { calculatePercentiles } from '@libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
