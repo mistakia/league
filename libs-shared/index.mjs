@@ -87,6 +87,7 @@ export { default as get_blake2b_hash } from './get-blake2b-hash.mjs'
 export { named_scoring_formats } from './named-scoring-formats-generated.mjs'
 export { named_league_formats } from './named-league-formats-generated.mjs'
 export * as penalty_utils from './penalty-utils.mjs'
+export { nfl_team_colors, get_team_color } from './nfl-team-colors.mjs'
 export {
   DEFAULT_SCORING_FORMAT_HASH,
   DEFAULT_LEAGUE_FORMAT_HASH,
