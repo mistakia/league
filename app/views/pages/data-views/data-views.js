@@ -16,6 +16,7 @@ import {
   get_team_color,
   get_position_color
 } from '@libs-shared'
+import get_split_label_suffix from '@libs-shared/get-split-label-suffix.mjs'
 import {
   migrate_entries_array,
   migrate_sort_array
@@ -291,18 +292,8 @@ export default function DataViewsPage({
     [filtered_table_state.splits]
   )
 
-  const get_split_label_suffix = useCallback(
-    (row) => {
-      if (current_splits.includes('week')) {
-        if (row.year == null || row.week == null) return ''
-        return ` (${row.year} W${row.week})`
-      }
-      if (current_splits.includes('year')) {
-        if (row.year == null) return ''
-        return ` (${row.year})`
-      }
-      return ''
-    },
+  const get_split_label_suffix_cb = useCallback(
+    (row) => get_split_label_suffix(current_splits, row),
     [current_splits]
   )
 
@@ -419,7 +410,7 @@ export default function DataViewsPage({
           point_color_mode ? get_scatter_point_color : null
         }
         get_scatter_point_label_suffix={
-          current_splits.length ? get_split_label_suffix : null
+          current_splits.length ? get_split_label_suffix_cb : null
         }
         is_scatter_plot_point_label_enabled={
           is_scatter_plot_point_label_enabled
