@@ -286,6 +286,26 @@ export default function DataViewsPage({
     [point_color_mode]
   )
 
+  const current_splits = useMemo(
+    () => filtered_table_state.splits || [],
+    [filtered_table_state.splits]
+  )
+
+  const get_split_label_suffix = useCallback(
+    (row) => {
+      if (current_splits.includes('week')) {
+        if (row.year == null || row.week == null) return ''
+        return ` (${row.year} W${row.week})`
+      }
+      if (current_splits.includes('year')) {
+        if (row.year == null) return ''
+        return ` (${row.year})`
+      }
+      return ''
+    },
+    [current_splits]
+  )
+
   const fetch_more = useCallback(() => {
     // Don't fetch more if we're already loading or fetching more
     const is_fetching =
@@ -397,6 +417,9 @@ export default function DataViewsPage({
         get_scatter_point_image={get_scatter_point_image}
         get_scatter_point_color={
           point_color_mode ? get_scatter_point_color : null
+        }
+        get_scatter_point_label_suffix={
+          current_splits.length ? get_split_label_suffix : null
         }
         is_scatter_plot_point_label_enabled={
           is_scatter_plot_point_label_enabled
