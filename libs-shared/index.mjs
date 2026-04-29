@@ -88,6 +88,7 @@ export { named_scoring_formats } from './named-scoring-formats-generated.mjs'
 export { named_league_formats } from './named-league-formats-generated.mjs'
 export * as penalty_utils from './penalty-utils.mjs'
 export { nfl_team_colors, get_team_color } from './nfl-team-colors.mjs'
+export { get_position_color } from './position-colors.mjs'
 export {
   DEFAULT_SCORING_FORMAT_HASH,
   DEFAULT_LEAGUE_FORMAT_HASH,

@@ -27,6 +27,18 @@ $te_color = tint(blue, 25%)
 $k_color = tint(grey, 25%)
 $dst_color = tint(black, 25%)
 
+// CSS custom properties — same values as the Stylus variables above so JS can
+// read them at runtime via getComputedStyle without duplicating hex literals.
+// tint(red,25%)=#ff4040 tint(orange,25%)=#ffbc40 tint(green,25%)=#40a040
+// tint(blue,25%)=#4040ff tint(grey,25%)=#a0a0a0 tint(black,25%)=#404040
+:root
+  --pos-QB #ff4040
+  --pos-WR #ffbc40
+  --pos-RB #40a040
+  --pos-TE #4040ff
+  --pos-K #a0a0a0
+  --pos-DST #404040
+
 // Position styling mixin for consistent position-based backgrounds and text colors
 position-background-mixin()
   &.QB

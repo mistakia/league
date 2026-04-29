@@ -11,7 +11,11 @@ import Loading from '@components/loading'
 import Button from '@components/button'
 import ClearDataViewCacheConfirmation from '@components/clear-data-view-cache-confirmation'
 import { Team } from '@core/teams'
-import { get_string_from_object } from '@libs-shared'
+import {
+  get_string_from_object,
+  get_team_color,
+  get_position_color
+} from '@libs-shared'
 import {
   migrate_entries_array,
   migrate_sort_array
@@ -266,6 +270,22 @@ export default function DataViewsPage({
     }
   }, [selected_data_view.saved_table_state, leagueId])
 
+  const point_color_mode =
+    filtered_table_state.scatter_plot_options?.point_color_mode
+
+  const get_scatter_point_color = useCallback(
+    (row) => {
+      if (point_color_mode === 'team') {
+        return get_team_color({ abbr: row.player_nfl_teams_0, key: 'primary' })
+      }
+      if (point_color_mode === 'position') {
+        return get_position_color(row.pos)
+      }
+      return undefined
+    },
+    [point_color_mode]
+  )
+
   const fetch_more = useCallback(() => {
     // Don't fetch more if we're already loading or fetching more
     const is_fetching =
@@ -375,6 +395,9 @@ export default function DataViewsPage({
         get_export_api_url={get_export_api_url}
         get_scatter_point_label={get_scatter_point_label}
         get_scatter_point_image={get_scatter_point_image}
+        get_scatter_point_color={
+          point_color_mode ? get_scatter_point_color : null
+        }
         is_scatter_plot_point_label_enabled={
           is_scatter_plot_point_label_enabled
         }
