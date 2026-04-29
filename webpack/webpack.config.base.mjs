@@ -129,6 +129,10 @@ export default {
         __dirname,
         '../libs-shared/nfl-week-identifier.mjs'
       ),
+      '@libs-shared/get-split-label-suffix.mjs': path.resolve(
+        __dirname,
+        '../libs-shared/get-split-label-suffix.mjs'
+      ),
       '@libs-shared': path.resolve(__dirname, '../libs-shared/index.mjs'),
       '@constants/season-constants': path.resolve(
         __dirname,
