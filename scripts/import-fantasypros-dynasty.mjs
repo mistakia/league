@@ -83,6 +83,7 @@ const import_individual_fantasypros_dynasty_rankings = async ({
       pos: params.pos,
       year,
       week: 0,
+      seas_type: 'REG',
 
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({
