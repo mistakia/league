@@ -110,11 +110,9 @@ export default function DataViewsPage({
       const where = migrate_entries_array(
         JSON.parse(search_params.get('where') || 'null') || []
       )
-      const sort = migrate_sort_array({
-        sort: JSON.parse(search_params.get('sort') || 'null') || [],
-        post_columns: columns,
-        post_prefix_columns: prefix_columns
-      })
+      const sort = migrate_sort_array(
+        JSON.parse(search_params.get('sort') || 'null') || []
+      )
       const splits = JSON.parse(search_params.get('splits') || 'null') || []
       const view_name = search_params.get('view_name') || ''
       const view_search_column_id =

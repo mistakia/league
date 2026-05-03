@@ -159,7 +159,7 @@ export const migrate_entries_array = (entries) => {
  * Rankings are season-only, so any legacy id maps directly to its season
  * variant in `RANKING_NAMES_MAP`.
  */
-export const migrate_sort_array = ({ sort }) => {
+export const migrate_sort_array = (sort) => {
   if (!Array.isArray(sort)) return sort
   return sort.map((entry) => {
     if (!entry || typeof entry !== 'object' || !entry.column_id) return entry
@@ -196,11 +196,7 @@ export const migrate_table_state = (table_state) => {
   migrate_list('where')
 
   if (Array.isArray(table_state.sort)) {
-    const migrated_sort = migrate_sort_array({
-      sort: table_state.sort,
-      post_columns: next.columns,
-      post_prefix_columns: next.prefix_columns
-    })
+    const migrated_sort = migrate_sort_array(table_state.sort)
     if (JSON.stringify(migrated_sort) !== JSON.stringify(table_state.sort)) {
       changed = true
       next.sort = migrated_sort
