@@ -34,30 +34,13 @@ export const MULTI_WEEK_COLUMNS = new Set([
 ])
 
 export const RANKING_NAMES_MAP = {
-  player_average_ranking: {
-    season: 'player_season_average_ranking',
-    week: 'player_week_average_ranking'
-  },
-  player_overall_ranking: {
-    season: 'player_season_overall_ranking',
-    week: 'player_week_overall_ranking'
-  },
-  player_position_ranking: {
-    season: 'player_season_position_ranking',
-    week: 'player_week_position_ranking'
-  },
-  player_min_ranking: {
-    season: 'player_season_min_ranking',
-    week: 'player_week_min_ranking'
-  },
-  player_max_ranking: {
-    season: 'player_season_max_ranking',
-    week: 'player_week_max_ranking'
-  },
-  player_ranking_standard_deviation: {
-    season: 'player_season_ranking_standard_deviation',
-    week: 'player_week_ranking_standard_deviation'
-  }
+  player_average_ranking: 'player_season_average_ranking',
+  player_overall_ranking: 'player_season_overall_ranking',
+  player_position_ranking: 'player_season_position_ranking',
+  player_min_ranking: 'player_season_min_ranking',
+  player_max_ranking: 'player_season_max_ranking',
+  player_ranking_standard_deviation:
+    'player_season_ranking_standard_deviation'
 }
 
 const as_array = (v) => (Array.isArray(v) ? v : v == null ? [] : [v])
@@ -117,23 +100,15 @@ const clean_legacy = (params) => {
 export const migrate_column_entry = ({ column_id, params }) => {
   params = params ? { ...params } : {}
 
-  // Ranking rename: must run before param consolidation since old name gates behavior
+  // Ranking rename: rankings are season-only; always emit the season variant
   if (Object.prototype.hasOwnProperty.call(RANKING_NAMES_MAP, column_id)) {
-    const mapping = RANKING_NAMES_MAP[column_id]
-    const week_val = as_array(params.week)[0]
-    const is_season = week_val == null || Number(week_val) === 0
-    if (is_season) {
-      column_id = mapping.season
-      delete params.week
-      delete params.seas_type
-      delete params.single_week
-      delete params.single_seas_type
-    } else {
-      column_id = mapping.week
-      const identifier = resolve_single_identifier(params)
-      if (identifier) params.single_nfl_week_id = [identifier]
-      clean_legacy(params)
-    }
+    column_id = RANKING_NAMES_MAP[column_id]
+    delete params.week
+    delete params.seas_type
+    delete params.single_week
+    delete params.single_seas_type
+    delete params.single_nfl_week_id
+    delete params.nfl_week_id
     return { column_id, params }
   }
 
@@ -179,41 +154,16 @@ export const migrate_entries_array = (entries) => {
   })
 }
 
-const column_id_of = (c) => (typeof c === 'string' ? c : c?.column_id)
-
 /**
  * Rewrite sort-array column_ids that reference legacy ranking names.
- * Sort entries carry no params, so we cannot pick season vs week from the
- * sort entry alone -- instead we scan the (already-migrated) columns list
- * for the matching season/week target, disambiguating multiple references
- * via `column_index` (the occurrence index among columns with the same id).
+ * Rankings are season-only, so any legacy id maps directly to its season
+ * variant in `RANKING_NAMES_MAP`.
  */
-export const migrate_sort_array = ({
-  sort,
-  post_columns,
-  post_prefix_columns
-}) => {
+export const migrate_sort_array = ({ sort }) => {
   if (!Array.isArray(sort)) return sort
-  const find_new_id = (old_id, occurrence) => {
-    const mapping = RANKING_NAMES_MAP[old_id]
-    if (!mapping) return null
-    const targets = new Set([mapping.season, mapping.week])
-    const lookup_in = (cols) => {
-      if (!Array.isArray(cols)) return null
-      let seen = 0
-      for (const c of cols) {
-        const cid = column_id_of(c)
-        if (!targets.has(cid)) continue
-        if (seen === occurrence) return cid
-        seen++
-      }
-      return null
-    }
-    return lookup_in(post_columns) || lookup_in(post_prefix_columns)
-  }
   return sort.map((entry) => {
     if (!entry || typeof entry !== 'object' || !entry.column_id) return entry
-    const new_id = find_new_id(entry.column_id, entry.column_index || 0)
+    const new_id = RANKING_NAMES_MAP[entry.column_id]
     if (!new_id || new_id === entry.column_id) return entry
     return { ...entry, column_id: new_id }
   })

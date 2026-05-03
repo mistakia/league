@@ -82,9 +82,6 @@ const import_individual_fantasypros_dynasty_rankings = async ({
       pid: player_row.pid,
       pos: params.pos,
       year,
-      week: 0,
-      seas_type: 'REG',
-
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({
         fantasypros_position_type,
@@ -109,7 +106,7 @@ const import_individual_fantasypros_dynasty_rankings = async ({
     log(`Inserting ${inserts.length} rankings into database`)
     await db('player_rankings_index')
       .insert(inserts)
-      .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
+      .onConflict(['year', 'source_id', 'ranking_type', 'pid'])
       .merge()
     await db('player_rankings_history').insert(
       inserts.map((i) => ({ ...i, timestamp }))

@@ -11,11 +11,11 @@ import {
 chai.should()
 const expect = chai.expect
 
-describe('player_rankings season/week split', function () {
+describe('player_rankings season-only fields', function () {
   describe('column definition exports', function () {
-    it('exports 12 ranking fields (6 season + 6 week)', () => {
+    it('exports 6 season ranking fields', () => {
       const keys = Object.keys(player_rankings_column_definitions)
-      expect(keys).to.have.length(12)
+      expect(keys).to.have.length(6)
     })
 
     it('exports player_season_* variants', () => {
@@ -39,44 +39,16 @@ describe('player_rankings season/week split', function () {
       )
     })
 
-    it('exports player_week_* variants', () => {
-      expect(player_rankings_column_definitions).to.have.property(
-        'player_week_average_ranking'
-      )
-      expect(player_rankings_column_definitions).to.have.property(
-        'player_week_overall_ranking'
-      )
-      expect(player_rankings_column_definitions).to.have.property(
-        'player_week_position_ranking'
-      )
-      expect(player_rankings_column_definitions).to.have.property(
-        'player_week_min_ranking'
-      )
-      expect(player_rankings_column_definitions).to.have.property(
-        'player_week_max_ranking'
-      )
-      expect(player_rankings_column_definitions).to.have.property(
-        'player_week_ranking_standard_deviation'
-      )
-    })
-
     it('season variants support only year split', () => {
       expect(
         player_rankings_column_definitions.player_season_average_ranking
           .supported_splits
       ).to.deep.equal(['year'])
     })
-
-    it('week variants support year and week splits', () => {
-      expect(
-        player_rankings_column_definitions.player_week_average_ranking
-          .supported_splits
-      ).to.deep.equal(['year', 'week'])
-    })
   })
 
   describe('migration helper rename behavior', function () {
-    it('renames old ranking with absent week to season variant', () => {
+    it('renames legacy ranking with absent week to season variant', () => {
       const out = migrate_column_entry({
         column_id: 'player_average_ranking',
         params: { year: [2024] }
@@ -86,27 +58,34 @@ describe('player_rankings season/week split', function () {
       expect(out.params.week).to.equal(undefined)
     })
 
-    it('renames old ranking with week=0 to season variant', () => {
+    it('renames legacy ranking with week=0 to season variant and strips week params', () => {
       const out = migrate_column_entry({
         column_id: 'player_overall_ranking',
-        params: { year: [2023], week: [0] }
+        params: { year: [2023], week: [0], seas_type: ['REG'] }
       })
       expect(out.column_id).to.equal('player_season_overall_ranking')
       expect(out.params.week).to.equal(undefined)
+      expect(out.params.seas_type).to.equal(undefined)
     })
 
-    it('renames old ranking with week>0 to week variant with single_nfl_week_id', () => {
+    it('renames legacy ranking with week>0 to season variant and strips week params', () => {
       const out = migrate_column_entry({
         column_id: 'player_position_ranking',
-        params: { year: [2023], week: [5], seas_type: ['REG'] }
+        params: {
+          year: [2023],
+          week: [5],
+          seas_type: ['REG'],
+          single_nfl_week_id: ['2023_REG_WEEK_5']
+        }
       })
-      expect(out.column_id).to.equal('player_week_position_ranking')
-      expect(out.params.single_nfl_week_id).to.deep.equal(['2023_REG_WEEK_5'])
-      expect(out.params.year).to.equal(undefined)
+      expect(out.column_id).to.equal('player_season_position_ranking')
+      expect(out.params.year).to.deep.equal([2023])
       expect(out.params.week).to.equal(undefined)
+      expect(out.params.seas_type).to.equal(undefined)
+      expect(out.params.single_nfl_week_id).to.equal(undefined)
     })
 
-    it('covers all 6 old ranking names', () => {
+    it('covers all 6 legacy ranking names', () => {
       expect(Object.keys(RANKING_NAMES_MAP)).to.have.length(6)
     })
   })

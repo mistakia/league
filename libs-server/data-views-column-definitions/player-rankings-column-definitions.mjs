@@ -3,101 +3,6 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { current_season } from '#constants'
-import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
-import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
-
-// --- Week-level (single nfl_week_id) ---
-
-const get_week_default_params = ({ params = {} } = {}) => {
-  const default_params = {
-    ranking_source_id: ['FANTASYPROS'],
-    ranking_type: ['PPR_REDRAFT']
-  }
-
-  const nfl_week_id = resolve_single_nfl_week_id({ params })
-
-  for (const [key, default_value] of Object.entries(default_params)) {
-    let value = params[key] || default_value
-    if (!Array.isArray(value)) {
-      value = [value]
-    }
-    default_params[key] = value
-  }
-
-  return {
-    ...default_params,
-    nfl_week_id
-  }
-}
-
-const get_week_cache_info = create_season_cache_info({
-  get_params: ({ params = {} } = {}) => {
-    const { nfl_week_id } = get_week_default_params({ params })
-    const { years, weeks } = decompose_nfl_weeks({ nfl_weeks: [nfl_week_id] })
-    return { year: years, week: weeks }
-  }
-})
-
-const generate_week_table_alias = ({ params = {} } = {}) => {
-  const { nfl_week_id, ranking_source_id, ranking_type } =
-    get_week_default_params({ params })
-  const key = `player_week_rankings_${nfl_week_id}_${ranking_source_id.join('_')}_${ranking_type.join('_')}`
-  return get_table_hash(key)
-}
-
-const add_player_week_rankings_with_statement = ({
-  query,
-  params = {},
-  with_table_name,
-  where_clauses = [],
-  select_strings = [],
-  splits = []
-}) => {
-  const { nfl_week_id, ranking_source_id, ranking_type } =
-    get_week_default_params({ params })
-
-  const with_query = db('player_rankings_index')
-    .select('pid')
-    .whereIn('source_id', ranking_source_id)
-    .whereIn('ranking_type', ranking_type)
-    .where('nfl_week_id', nfl_week_id)
-
-  if (splits.includes('year')) {
-    with_query.select('year')
-  }
-
-  if (splits.includes('week')) {
-    with_query.select('week')
-  }
-
-  if (select_strings.length) {
-    for (const select_string of select_strings) {
-      with_query.select(db.raw(select_string))
-    }
-  }
-
-  if (where_clauses.length) {
-    for (const where_clause of where_clauses) {
-      with_query.whereRaw(where_clause)
-    }
-  }
-
-  query.with(with_table_name, with_query)
-}
-
-const create_player_week_rankings_field = (field, select_as) => ({
-  column_name: field,
-  select_as: () => select_as,
-  table_name: 'player_rankings_index',
-  table_alias: generate_week_table_alias,
-  join: data_view_join_function,
-  with: add_player_week_rankings_with_statement,
-  supported_splits: ['year', 'week'],
-  with_where: () => `player_rankings_index.${field}`,
-  get_cache_info: get_week_cache_info
-})
-
-// --- Season-level (single_year) ---
 
 const get_season_default_params = ({ params = {} } = {}) => {
   const default_params = {
@@ -152,8 +57,6 @@ const add_player_season_rankings_with_statement = ({
     .whereIn('source_id', ranking_source_id)
     .whereIn('ranking_type', ranking_type)
     .whereIn('year', year)
-    .where('week', 0)
-    .where('seas_type', 'REG')
 
   if (splits.includes('year')) {
     with_query.select('year')
@@ -208,24 +111,6 @@ export default {
     'max_rank'
   ),
   player_season_ranking_standard_deviation: create_player_season_rankings_field(
-    'std',
-    'rank_stddev'
-  ),
-  player_week_average_ranking: create_player_week_rankings_field(
-    'avg',
-    'average_rank'
-  ),
-  player_week_overall_ranking: create_player_week_rankings_field(
-    'overall_rank',
-    'overall_rank'
-  ),
-  player_week_position_ranking: create_player_week_rankings_field(
-    'position_rank',
-    'position_rank'
-  ),
-  player_week_min_ranking: create_player_week_rankings_field('min', 'min_rank'),
-  player_week_max_ranking: create_player_week_rankings_field('max', 'max_rank'),
-  player_week_ranking_standard_deviation: create_player_week_rankings_field(
     'std',
     'rank_stddev'
   )

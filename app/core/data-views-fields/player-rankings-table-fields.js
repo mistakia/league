@@ -3,7 +3,7 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import { common_column_params } from '#libs-shared'
 import { current_season } from '@constants'
 
-const { single_year, single_nfl_week_id } = common_column_params
+const { single_year } = common_column_params
 
 const ranking_source_id = {
   values: [
@@ -66,19 +66,6 @@ const create_player_season_rankings_field = (props) => ({
   splits: ['year']
 })
 
-const create_player_week_rankings_field = (props) => ({
-  ...props,
-  column_groups: [COLUMN_GROUPS.RANKINGS],
-  size: 70,
-  data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-  column_params: {
-    single_nfl_week_id,
-    ranking_source_id,
-    ranking_type
-  },
-  splits: ['year', 'week']
-})
-
 export default {
   player_season_average_ranking: create_player_season_rankings_field({
     column_title: 'Season Average Ranking / Draft Position (ADP)',
@@ -117,41 +104,5 @@ export default {
       player_value_path: 'rank_stddev',
       reverse_percentiles: true
     }
-  ),
-  player_week_average_ranking: create_player_week_rankings_field({
-    column_title: 'Week Average Ranking / Draft Position (ADP)',
-    header_label: 'Avg',
-    player_value_path: 'average_rank',
-    reverse_percentiles: true
-  }),
-  player_week_overall_ranking: create_player_week_rankings_field({
-    column_title: 'Week Overall Ranking',
-    header_label: 'Overall Rank',
-    player_value_path: 'overall_rank',
-    reverse_percentiles: true
-  }),
-  player_week_position_ranking: create_player_week_rankings_field({
-    column_title: 'Week Position Ranking',
-    header_label: 'Pos Rank',
-    player_value_path: 'position_rank',
-    reverse_percentiles: true
-  }),
-  player_week_min_ranking: create_player_week_rankings_field({
-    column_title: 'Week Minimum Ranking',
-    header_label: 'Min Rank',
-    player_value_path: 'min_rank',
-    reverse_percentiles: true
-  }),
-  player_week_max_ranking: create_player_week_rankings_field({
-    column_title: 'Week Maximum Ranking',
-    header_label: 'Max Rank',
-    player_value_path: 'max_rank',
-    reverse_percentiles: true
-  }),
-  player_week_ranking_standard_deviation: create_player_week_rankings_field({
-    column_title: 'Week Ranking Standard Deviation',
-    header_label: 'Rank StdDev',
-    player_value_path: 'rank_stddev',
-    reverse_percentiles: true
-  })
+  )
 }

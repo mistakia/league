@@ -251,21 +251,21 @@ Weekly data-view columns use one of three param flavors, picked by the data's na
 
 | Flavor                    | Param                  | Cardinality    | Used by                                                                                                                                            |
 | ------------------------- | ---------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Season-level              | `single_year` / `year` | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, season-level rankings, ESPN scores, team DVOA, PFF grades, format logs                  |
-| Single-week point-in-time | `single_nfl_week_id`   | scalar         | DFS salary, DFS ownership, practice designation, weekly rankings, weekly projected market salary, betting game-prop markets, fantasy roster status |
+| Season-level              | `single_year` / `year` | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, rankings, ESPN scores, team DVOA, PFF grades, format logs                               |
+| Single-week point-in-time | `single_nfl_week_id`   | scalar         | DFS salary, DFS ownership, practice designation, weekly projected market salary, betting game-prop markets, fantasy roster status                  |
 | Multi-week aggregation    | `nfl_week_id`          | multi          | play-by-play stats, games played, player-teams history                                                                                             |
 
 `single_nfl_week_id` is the scalar counterpart of `nfl_week_id`. It stores as a one-element array and uses the same `ColumnParamNflWeekFilter` component in `single: true` mode. The server-side helper `resolve_single_nfl_week_id` in `libs-server/data-views/` extracts the scalar value with backward-compat fallback: `params.single_nfl_week_id` → `params.nfl_week_id[0]` → constructed from legacy `params.year` + `params.week` + `params.seas_type`.
 
 #### `player_season_*` vs `player_week_*` naming
 
-Fields that exist at both grains are split into explicit season and week variants. For example, `player_rankings` became six `player_season_*_ranking` fields (keyed on `single_year`, filtered by `week=0` + `seas_type='REG'`) and six `player_week_*_ranking` fields (keyed on `single_nfl_week_id`). The same `player_season_*` / `player_week_*` convention is used for projection fields (`player_season_projected_*`, `player_week_projected_*`).
+Fields that exist at both grains are split into explicit season and week variants. Projections expose six `player_season_projected_*` fields (keyed on `single_year`) and six `player_week_projected_*` fields (keyed on `single_nfl_week_id`). Rankings are season-only — six `player_season_*_ranking` fields keyed on `single_year`; the underlying `player_rankings_index` and `player_rankings_history` tables hold no week-level data and the week variant has been retired.
 
 #### Saved-View Migration
 
 The `scripts/migrate-data-views-single-nfl-week.mjs` script performs column-scoped rewrites on `user_data_views.table_state` and `user_plays_views.table_state` rows:
 
-1. Ranking column rename runs first: `player_{avg,overall,position,min,max,std}_ranking` with absent week or week=0 renames to `player_season_*_ranking`; week>0 renames to `player_week_*_ranking` with `single_nfl_week_id` constructed from the legacy `year`/`week`/`seas_type` trio.
+1. Ranking column rename runs first: legacy `player_{avg,overall,position,min,max,std}_ranking` always renames to `player_season_*_ranking`; any week-related params (`week`, `seas_type`, `single_week`, `single_seas_type`, `single_nfl_week_id`, `nfl_week_id`) are stripped since rankings are season-only.
 2. Single-week column consolidation: for the `SINGLE_WEEK_COLUMNS` set, legacy `year`/`week`/`seas_type` params collapse into a one-element `single_nfl_week_id` array.
 3. Multi-week column consolidation: for the `MULTI_WEEK_COLUMNS` set, legacy params expand into a cross-product `nfl_week_id` array.
 
@@ -1550,9 +1550,9 @@ Split CTEs (`base_years`, `player_years`, `player_years_weeks`) stay inlineable 
 
 Postseason rounds are always encoded as `{year}_POST_WEEK_{1..4}` (Wild Card / Divisional / Conference / Super Bowl). The era map is inlined in `libs-shared/nfl-week-identifier.mjs` (`REG_MAX_WEEKS_BY_ERA`) and resolved via `get_max_weeks_for_season_type({ seas_type, year })`. Calling the resolver with `seas_type: 'REG'` but no `year` returns `0` (fail-loud).
 
-`practice` and `player_rankings_index` enforce a blanket `CHECK (NOT (seas_type='REG' AND week > 18))` at the DB level. The CHECK is intentionally era-blind because historical data already conforms and all going-forward writers cap REG at 18; an era-aware CHECK would require a trigger.
+`practice` enforces a blanket `CHECK (NOT (seas_type='REG' AND week > 18))` at the DB level. The CHECK is intentionally era-blind because historical data already conforms and all going-forward writers cap REG at 18; an era-aware CHECK would require a trigger.
 
-Writers that touch week-scoped rows in tables lacking a source-driven `seas_type` column (for example `practice`, `player_rankings_index`) must derive `seas_type` explicitly from `current_season.nfl_seas_type` on INSERT. The `DEFAULT 'REG'` on those columns has been dropped so omitting `seas_type` now raises a NOT NULL violation instead of silently misencoding postseason rows as REG.
+Writers that touch week-scoped rows in tables lacking a source-driven `seas_type` column (for example `practice`) must derive `seas_type` explicitly from `current_season.nfl_seas_type` on INSERT. The `DEFAULT 'REG'` on those columns has been dropped so omitting `seas_type` now raises a NOT NULL violation instead of silently misencoding postseason rows as REG.
 
 ### Live current_season semantics
 

@@ -176,7 +176,6 @@ DROP INDEX IF EXISTS public.idx_player_sis_id;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
 DROP INDEX IF EXISTS public.idx_player_rtsports_id;
-DROP INDEX IF EXISTS public.idx_player_rankings_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pid_incl_pos_fname_lname;
@@ -22781,7 +22780,6 @@ CREATE TABLE public.player_prospect_profile (
 CREATE TABLE public.player_rankings_history (
     pid character varying(25),
     pos character varying(4) NOT NULL,
-    week smallint NOT NULL,
     year smallint,
     min integer,
     max integer,
@@ -22802,7 +22800,6 @@ CREATE TABLE public.player_rankings_history (
 CREATE TABLE public.player_rankings_index (
     pid character varying(25) NOT NULL,
     pos character varying(4) NOT NULL,
-    week smallint NOT NULL,
     year smallint NOT NULL,
     min integer,
     max integer,
@@ -22811,10 +22808,7 @@ CREATE TABLE public.player_rankings_index (
     overall_rank integer,
     position_rank integer,
     source_id public.rankings_source_id NOT NULL,
-    ranking_type public.ranking_type NOT NULL,
-    seas_type character varying(10) NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
-    CONSTRAINT rankings_reg_week_bound CHECK ((NOT (((seas_type)::text = 'REG'::text) AND (week > 18))))
+    ranking_type public.ranking_type NOT NULL
 );
 
 
@@ -26611,7 +26605,7 @@ ALTER TABLE ONLY public.player_prospect_profile
 --
 
 ALTER TABLE ONLY public.player_rankings_index
-    ADD CONSTRAINT player_rankings_index_unique UNIQUE (year, week, source_id, ranking_type, pid);
+    ADD CONSTRAINT player_rankings_index_unique UNIQUE (year, source_id, ranking_type, pid);
 
 
 --
@@ -28340,13 +28334,6 @@ CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
 --
 
 CREATE INDEX idx_player_prospect_profile_sis_id ON public.player_prospect_profile USING btree (sis_id);
-
-
---
--- Name: idx_player_rankings_index_nfl_week_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_player_rankings_index_nfl_week_id ON public.player_rankings_index USING btree (nfl_week_id);
 
 
 --
