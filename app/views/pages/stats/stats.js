@@ -46,8 +46,8 @@ const careerlog_group_fields = {
     weekly_high_scores: { label: 'Week Leader' }
   },
   Potential: {
-    pp: { label: 'Points' },
-    pp_pct: { label: '%', fixed: 1 },
+    potential_points: { label: 'Points' },
+    potential_points_pct: { label: '%', fixed: 1 },
     pw: { label: 'Wins' },
     pl: { label: 'Losses' }
   },
@@ -158,11 +158,11 @@ const season_fields = {
     }
   },
   Potential: {
-    pp: {
+    potential_points: {
       label: 'Points',
       tooltip: 'Potential points. Points scored with optimal lineup.'
     },
-    pp_pct: {
+    potential_points_pct: {
       label: '%',
       tooltip: 'Potential points percentage. Points scored with optimal lineup.'
     },

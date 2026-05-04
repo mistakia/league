@@ -59,10 +59,10 @@ const calculate_league_careerlogs = async ({ lid }) => {
       pf: 0,
       pa: 0,
       pdiff: 0,
-      pp: 0,
+      potential_points: 0,
       pw: 0,
       pl: 0,
-      pp_pct: 0,
+      potential_points_pct: 0,
       pmax: 0,
       pmin: Number.MAX_VALUE,
       worst_regular_season_finish: 0,
@@ -101,7 +101,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
       careerlog.pf += league_team_seasonlog.pf
       careerlog.pa += league_team_seasonlog.pa
       careerlog.pdiff += league_team_seasonlog.pdiff
-      careerlog.pp += league_team_seasonlog.pp
+      careerlog.potential_points += league_team_seasonlog.potential_points
       careerlog.pw += league_team_seasonlog.pw
       careerlog.pl += league_team_seasonlog.pl
       careerlog.pmax = Math.max(careerlog.pmax, league_team_seasonlog.pmax)
@@ -230,7 +230,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
     careerlog.best_season_all_play_pct =
       careerlog.best_season_all_play_pct * 100
 
-    careerlog.pp_pct = (careerlog.pf / careerlog.pp) * 100
+    careerlog.potential_points_pct =
+      (careerlog.pf / careerlog.potential_points) * 100
 
     return careerlog
   }

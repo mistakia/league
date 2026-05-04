@@ -524,11 +524,11 @@ export const fantasy_team_stats = [
   'pa',
   'pdiff',
 
-  'pp',
-  'ppp',
+  'potential_points',
+  'potential_points_penalty',
   'pw',
   'pl',
-  'pp_pct',
+  'potential_points_pct',
 
   'pmax',
   'pmin',
@@ -541,7 +541,7 @@ export const fantasy_team_stats = [
 
   'weekly_high_scores',
 
-  'doi',
+  'draft_order_index',
 
   ...Object.values(roster_slot_types).map((s) => `pSlot${s}`),
   ...fantasy_positions.map((p) => `pPos${p}`)

@@ -56,7 +56,7 @@ const generate_league_season_teams = async ({
   // draft order is determined by draft order index for teams that didnt make the post season
   const draft_order_non_post_season = league_team_seasonlogs
     .filter((t) => !t.post_season_finish)
-    .sort((a, b) => a.doi - b.doi)
+    .sort((a, b) => a.draft_order_index - b.draft_order_index)
     .map((t) => t.tid)
 
   // draft order is determined by post season finish for teams that made the post season

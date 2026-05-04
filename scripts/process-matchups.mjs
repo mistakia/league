@@ -75,8 +75,66 @@ const run = async ({ lid = 1, year = current_season.year }) => {
     matchup.hp = result[matchup.hid].points.weeks[week]
     matchup.ap = result[matchup.aid].points.weeks[week]
 
-    matchup.hpp = result[matchup.hid].potentialPoints[week]
-    matchup.app = result[matchup.aid].potentialPoints[week]
+    matchup.hpp = result[matchup.hid].potential_points_weekly[week]
+    matchup.app = result[matchup.aid].potential_points_weekly[week]
+  }
+
+  // Constitution Article XI section 3 + Amendment XXVI: when a team had a
+  // weekly optimal lineup that did not fill every required starter slot AND
+  // still owns its own upcoming first-round pick, replace that team's weekly
+  // potential points with the league-max for that week. Stored as a delta in
+  // potential_points_penalty; draft_order_index consumes (potential_points + penalty).
+  const potential_points_max_by_week = {}
+  for (const team of Object.values(result)) {
+    for (const [week_str, pp] of Object.entries(team.potential_points_weekly)) {
+      const week = Number(week_str)
+      if (
+        potential_points_max_by_week[week] === undefined ||
+        pp > potential_points_max_by_week[week]
+      ) {
+        potential_points_max_by_week[week] = pp
+      }
+    }
+  }
+
+  for (const team of Object.values(result)) {
+    if (team.incomplete_optimal_lineup_weeks.size === 0) continue
+    const owns_own_first_round_pick = await db('draft')
+      .where({
+        lid,
+        year: year + 1,
+        round: 1,
+        otid: team.tid,
+        tid: team.tid,
+        comp: false
+      })
+      .first('uid')
+    if (!owns_own_first_round_pick) continue
+    let penalty = 0
+    for (const week of team.incomplete_optimal_lineup_weeks) {
+      penalty +=
+        potential_points_max_by_week[week] - team.potential_points_weekly[week]
+    }
+    team.stats.potential_points_penalty = penalty
+  }
+
+  // Recompute draft_order_index now that penalties are applied. The placeholder
+  // values calculateStandings wrote (with penalty=0) are overwritten in place
+  // before the upsert spread.
+  const adjusted_pp_per_team = Object.values(result).map(
+    (t) => t.stats.potential_points + t.stats.potential_points_penalty
+  )
+  const apl_per_team = Object.values(result).map((t) => t.stats.apLosses)
+  const min_pp = Math.min(...adjusted_pp_per_team)
+  const max_pp = Math.max(...adjusted_pp_per_team)
+  const min_apl = Math.min(...apl_per_team)
+  const max_apl = Math.max(...apl_per_team)
+  for (const team of Object.values(result)) {
+    const adjusted_pp =
+      team.stats.potential_points + team.stats.potential_points_penalty
+    const norm_pp = (adjusted_pp - min_pp) / (max_pp - min_pp)
+    const norm_apl = (team.stats.apLosses - min_apl) / (max_apl - min_apl)
+    team.stats.draft_order_index = 9 * norm_pp + norm_apl || 0
   }
 
   const league_team_seasonlogs = []

@@ -37,11 +37,24 @@ const calculateStandings = ({
         weeks: {}
       },
       stats: create_empty_fantasy_team_stats(),
-      potentialPoints: {}
+      potential_points_weekly: {},
+      incomplete_optimal_lineup_weeks: new Set()
     }
 
     teamStats[tid].stats.pmin = Infinity
   }
+
+  const required_starter_count =
+    league.sqb +
+    league.srb +
+    league.swr +
+    league.ste +
+    league.srbwr +
+    league.srbwrte +
+    league.sqbrbwrte +
+    league.swrte +
+    league.sdst +
+    league.sk
 
   for (let week = 1; week <= finalWeek; week++) {
     let highest_score = -Infinity
@@ -81,12 +94,16 @@ const calculateStandings = ({
       }
 
       // calculate optimal lineup
-      const optimizeResult = optimizeStandingsLineup({
+      const optimize_result = optimizeStandingsLineup({
         players: optimizePlayers,
         league
       })
-      teamStats[tid].potentialPoints[week] = optimizeResult.total
-      teamStats[tid].stats.pp += optimizeResult.total
+      teamStats[tid].potential_points_weekly[week] = optimize_result.total
+      teamStats[tid].stats.potential_points += optimize_result.total
+
+      if (optimize_result.starters.length < required_starter_count) {
+        teamStats[tid].incomplete_optimal_lineup_weeks.add(week)
+      }
 
       if (teamStats[tid].stats.pmax < total) teamStats[tid].stats.pmax = total
       if (teamStats[tid].stats.pmin > total) teamStats[tid].stats.pmin = total
@@ -115,8 +132,8 @@ const calculateStandings = ({
       const homeScore = teamStats[m.hid].points.weeks[week]
       const awayScore = teamStats[m.aid].points.weeks[week]
 
-      const pHomeScore = teamStats[m.hid].potentialPoints[week]
-      const pAwayScore = teamStats[m.aid].potentialPoints[week]
+      const pHomeScore = teamStats[m.hid].potential_points_weekly[week]
+      const pAwayScore = teamStats[m.aid].potential_points_weekly[week]
 
       teamStats[m.hid].stats.pa += awayScore
       teamStats[m.aid].stats.pa += homeScore
@@ -156,26 +173,40 @@ const calculateStandings = ({
     }
   }
 
-  // calculate draft order
-  const potentialPoints = Object.values(teamStats).map((p) => p.stats.pp)
-  const allPlayLosses = Object.values(teamStats).map((p) => p.stats.apLosses)
-  const minPP = Math.min(...potentialPoints)
-  const maxPP = Math.max(...potentialPoints)
-  const minAPL = Math.min(...allPlayLosses)
-  const maxAPL = Math.max(...allPlayLosses)
+  // calculate draft order index from (potential_points + potential_points_penalty);
+  // potential_points_penalty defaults to 0 here -- the script layer applies the
+  // pick-ownership gate, sets the penalty per team, and recomputes this in place.
+  const potential_points_per_team = Object.values(teamStats).map(
+    (p) => p.stats.potential_points + p.stats.potential_points_penalty
+  )
+  const all_play_losses_per_team = Object.values(teamStats).map(
+    (p) => p.stats.apLosses
+  )
+  const min_potential_points = Math.min(...potential_points_per_team)
+  const max_potential_points = Math.max(...potential_points_per_team)
+  const min_all_play_losses = Math.min(...all_play_losses_per_team)
+  const max_all_play_losses = Math.max(...all_play_losses_per_team)
   for (const { uid: tid } of teams) {
-    const pp = teamStats[tid].stats.pp
-    const apl = teamStats[tid].stats.apLosses
-    const normPP = (pp - minPP) / (maxPP - minPP)
-    const normAPL = (apl - minAPL) / (maxAPL - minAPL)
-    teamStats[tid].stats.doi = 9 * normPP + normAPL || 0
+    const potential_points =
+      teamStats[tid].stats.potential_points +
+      teamStats[tid].stats.potential_points_penalty
+    const all_play_losses = teamStats[tid].stats.apLosses
+    const normalized_potential_points =
+      (potential_points - min_potential_points) /
+      (max_potential_points - min_potential_points)
+    const normalized_all_play_losses =
+      (all_play_losses - min_all_play_losses) /
+      (max_all_play_losses - min_all_play_losses)
+    teamStats[tid].stats.draft_order_index =
+      9 * normalized_potential_points + normalized_all_play_losses || 0
 
     const points = Object.values(teamStats[tid].points.weeks)
     teamStats[tid].stats.pdev = points.length ? standardDeviation(points) : null
     teamStats[tid].stats.pdiff =
       teamStats[tid].stats.pf - teamStats[tid].stats.pa
-    teamStats[tid].stats.pp_pct =
-      (teamStats[tid].stats.pf / teamStats[tid].stats.pp) * 100 || null
+    teamStats[tid].stats.potential_points_pct =
+      (teamStats[tid].stats.pf / teamStats[tid].stats.potential_points) * 100 ||
+      null
 
     if (teamStats[tid].stats.pmin === Infinity) teamStats[tid].stats.pmin = null
   }

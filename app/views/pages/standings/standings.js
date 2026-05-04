@@ -48,7 +48,7 @@ function StandingsTeam({ team, year, is_current_year, is_regular_season }) {
         </div>
       )}
       <div className='table__cell metric'>
-        {team.getIn(['stats', 'doi'], 0).toFixed(2)}
+        {team.getIn(['stats', 'draft_order_index'], 0).toFixed(2)}
       </div>
     </div>
   )
