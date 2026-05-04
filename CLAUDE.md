@@ -96,10 +96,11 @@ Deploy targets (SSH hosts): `league` (main: API + frontend), `league-worker-1` (
 
 **Schema Change Workflow:**
 
-1. Run SQL ALTER commands directly on the production database
-2. Export the updated schema using `yarn export:schema`
-3. Do NOT commit migration files or SQL commands to the repository
-4. The exported schema file (`db/schema.postgres.sql`) becomes the source of truth
+1. Author the SQL in `db/adhoc/YYYY-MM-DD-<slug>.sql`
+2. Run it against production with `yarn db:exec db/adhoc/<file>.sql` (wraps the file in a single transaction with `ON_ERROR_STOP=1`)
+3. Export the updated schema using `yarn export:schema`
+4. Commit both the adhoc file (audit trail) and the schema diff
+5. The exported schema file (`db/schema.postgres.sql`) is the source of truth; `db/adhoc/` is the append-only history of how it got there
 
 ## Key Documentation
 
