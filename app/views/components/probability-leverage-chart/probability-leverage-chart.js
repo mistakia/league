@@ -64,6 +64,9 @@ const ProbabilityLeverageChart = ({ teams }) => {
     credits: {
       enabled: false
     },
+    exporting: {
+      enabled: true
+    },
     tooltip: {
       valueSuffix: '%',
       formatter: function () {
