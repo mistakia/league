@@ -17,10 +17,7 @@ import {
   get_position_color
 } from '@libs-shared'
 import get_split_label_suffix from '@libs-shared/get-split-label-suffix.mjs'
-import {
-  migrate_entries_array,
-  migrate_sort_array
-} from '@libs-shared/data-views-nfl-week-migration.mjs'
+import parse_table_state_from_url from '@core/data-views/parse-table-state-from-url.mjs'
 import { nfl_team_abbreviations } from '@constants'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
@@ -101,23 +98,16 @@ export default function DataViewsPage({
   useEffect(() => {
     if (!view_id) {
       const search_params = new URLSearchParams(location.search)
-      const columns = migrate_entries_array(
-        JSON.parse(search_params.get('columns') || 'null') || []
-      )
-      const prefix_columns = migrate_entries_array(
-        JSON.parse(search_params.get('prefix_columns') || 'null') || []
-      )
-      const where = migrate_entries_array(
-        JSON.parse(search_params.get('where') || 'null') || []
-      )
-      const sort = migrate_sort_array(
-        JSON.parse(search_params.get('sort') || 'null') || []
-      )
-      const splits = JSON.parse(search_params.get('splits') || 'null') || []
-      const view_name = search_params.get('view_name') || ''
-      const view_search_column_id =
-        search_params.get('view_search_column_id') || ''
-      const view_description = search_params.get('view_description') || ''
+      const {
+        columns,
+        prefix_columns,
+        where,
+        sort,
+        splits,
+        view_name,
+        view_search_column_id,
+        view_description
+      } = parse_table_state_from_url(search_params)
 
       const has_table_state =
         columns.length || where.length || (prefix_columns.length && sort.length)

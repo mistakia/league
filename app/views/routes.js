@@ -35,6 +35,7 @@ const LeagueSettingsPage = lazy(() => import('@pages/league-settings'))
 const MatchupPage = lazy(() => import('@pages/matchup'))
 const UserSettingsPage = lazy(() => import('@pages/user-settings'))
 const ErrorTest = lazy(() => import('@components/error-test'))
+const ShortUrlResolverPage = lazy(() => import('@pages/short-url-resolver'))
 
 const map_state_to_props = createSelector(get_app, (app) => ({ app }))
 
@@ -109,6 +110,7 @@ const Routes = ({ app }) => {
         path='/guides/data-views'
         element={<MarkdownPage path='/guides/data-views.md' />}
       />
+      <Route path='/u/:hash' element={<ShortUrlResolverPage />} />
       <Route path='*' element={<UnmatchedRoute />} />
     </RouterRoutes>
   )

@@ -75,9 +75,6 @@ const speed_limiter = slowDown({
   maxDelayMs: 10000
 })
 
-// TODO require token
-api.use('/u', routes.shorten_url)
-
 // disable caching for all api routes
 api.use('/api/*', (req, res, next) => {
   res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
@@ -110,6 +107,7 @@ api.use('/api/percentiles', routes.percentiles)
 api.use('/api/seasonlogs', routes.seasonlogs)
 api.use('/api/cache', routes.cache)
 api.use('/api/data-views', routes.data_views)
+api.use('/api/u', speed_limiter, routes.shorten_url)
 api.use('/api/wagers', routes.wagers)
 api.use('/api/selection-combinations', routes.selection_combinations)
 

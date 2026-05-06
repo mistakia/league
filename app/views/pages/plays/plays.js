@@ -8,10 +8,7 @@ import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
-import {
-  migrate_entries_array,
-  migrate_sort_array
-} from '@libs-shared/data-views-nfl-week-migration.mjs'
+import parse_table_state_from_url from '@core/data-views/parse-table-state-from-url.mjs'
 
 import './plays.styl'
 
@@ -50,20 +47,14 @@ export default function PlaysPage({
   useEffect(() => {
     if (!view_id) {
       const search_params = new URLSearchParams(location.search)
-      const columns = migrate_entries_array(
-        JSON.parse(search_params.get('columns') || 'null') || []
-      )
-      const prefix_columns = migrate_entries_array(
-        JSON.parse(search_params.get('prefix_columns') || 'null') || []
-      )
-      const where = migrate_entries_array(
-        JSON.parse(search_params.get('where') || 'null') || []
-      )
-      const sort = migrate_sort_array(
-        JSON.parse(search_params.get('sort') || 'null') || []
-      )
-      const view_name = search_params.get('view_name') || ''
-      const view_description = search_params.get('view_description') || ''
+      const {
+        columns,
+        prefix_columns,
+        where,
+        sort,
+        view_name,
+        view_description
+      } = parse_table_state_from_url(search_params)
 
       const has_table_state =
         columns.length || where.length || (prefix_columns.length && sort.length)

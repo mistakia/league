@@ -13,14 +13,11 @@ const get_url_hash = (url) => {
 /**
  * @swagger
  * /u:
- *   servers:
- *     - url: '/'
- *       description: Root path
  *   post:
  *     tags:
  *       - Utilities
  *     summary: Create a shortened URL
- *     description: Create a shortened URL for xo.football or localhost domains. The service generates a unique hash for each URL and stores it for later retrieval.
+ *     description: Create a shortened URL for xo.football or localhost domains. The service generates a unique hash for each URL and stores it for later retrieval. The returned `short_url` is the user-visible path `/u/<hash>`; clients fetch the underlying URL via `GET /api/u/{hash}`.
  *     requestBody:
  *       required: true
  *       content:
@@ -109,14 +106,11 @@ router.post('/?', async (req, res) => {
 /**
  * @swagger
  * /u/{hash}:
- *   servers:
- *     - url: ''
- *       description: Root path (for shortened URLs)
  *   get:
  *     tags:
  *       - Utilities
- *     summary: Redirect to original URL
- *     description: Redirect to the original URL using the shortened URL hash. If the hash is found, the user is redirected to the original URL.
+ *     summary: Resolve a shortened URL
+ *     description: Returns the original URL for the given hash as a JSON body. The SPA route at `/u/:hash` consumes this endpoint and hydrates Redux state in-page; no HTTP redirect is issued, which avoids 431 (Request Header Fields Too Large) errors on large stored URLs.
  *     parameters:
  *       - name: hash
  *         in: path
@@ -126,28 +120,47 @@ router.post('/?', async (req, res) => {
  *         description: The hash from the shortened URL
  *         example: "a1b2c3d4e5f6g7h8"
  *     responses:
- *       302:
- *         description: Redirect to original URL
- *         headers:
- *           Location:
- *             schema:
- *               type: string
- *               format: uri
- *             description: The original URL to redirect to
- *             example: "https://xo.football/leagues/2/players"
- *       404:
- *         description: Shortened URL not found
+ *       200:
+ *         description: The resolved URL
  *         content:
- *           text/html:
+ *           application/json:
  *             schema:
- *               type: string
- *               example: "Cannot GET /u/invalidhash"
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                   format: uri
+ *                   description: The original URL stored for this hash
+ *                   example: "https://xo.football/data-views?columns=%5B%5D"
+ *                 url_hash:
+ *                   type: string
+ *                   description: The hash used to resolve the URL
+ *                   example: "a1b2c3d4e5f6g7h8"
+ *       404:
+ *         description: No URL is stored for the given hash
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "not_found"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/:hash', async (req, res) => {
-  const { hash } = req.params
-  const url = await db('urls').where('url_hash', hash).first()
-  if (url) {
-    res.redirect(url.url)
+  const { logger } = req.app.locals
+  try {
+    const { hash } = req.params
+    const row = await db('urls').where('url_hash', hash).first()
+    if (!row) {
+      return res.status(404).json({ error: 'not_found' })
+    }
+    res.json({ url: row.url, url_hash: hash })
+  } catch (error) {
+    logger.error(error)
+    res.status(500).json({ error: 'Internal Server Error' })
   }
 })
 
