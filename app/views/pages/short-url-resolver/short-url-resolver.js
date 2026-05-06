@@ -10,7 +10,7 @@ import parse_table_state_from_url from '@core/data-views/parse-table-state-from-
 
 import DataViewsPage from '@pages/data-views'
 import PlaysPage from '@pages/plays'
-import resolve_short_url_chain from './resolve-short-url-chain.mjs'
+import resolve_short_url_chain from '@libs-shared/resolve-short-url-chain.mjs'
 
 const STATUS_LOADING = 'loading'
 const STATUS_READY = 'ready'
@@ -50,6 +50,21 @@ export default function ShortUrlResolver({
           fetch_url_by_hash
         })
         if (cancelled) return
+
+        // Canonicalize the address bar so subsequent shortens (which read
+        // window.location.pathname) build canonical URLs instead of chained
+        // /u/<hash> ones.
+        if (
+          typeof window !== 'undefined' &&
+          window.history &&
+          typeof window.history.replaceState === 'function'
+        ) {
+          window.history.replaceState(
+            window.history.state,
+            '',
+            `${url_object.pathname}${url_object.search}${url_object.hash}`
+          )
+        }
 
         const search_params = url_object.searchParams
         const parsed = parse_table_state_from_url(search_params)

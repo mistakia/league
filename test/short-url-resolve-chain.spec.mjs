@@ -1,7 +1,7 @@
 /* global describe it */
 import * as chai from 'chai'
 
-import resolve_short_url_chain from '../app/views/pages/short-url-resolver/resolve-short-url-chain.mjs'
+import resolve_short_url_chain from '../libs-shared/resolve-short-url-chain.mjs'
 
 chai.should()
 const expect = chai.expect

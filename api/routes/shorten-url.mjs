@@ -1,5 +1,6 @@
 import express from 'express'
 import { get_blake2b_hash } from '#libs-shared'
+import resolve_short_url_chain from '#libs-shared/resolve-short-url-chain.mjs'
 
 import { validators } from '#libs-server'
 import db from '#db'
@@ -8,6 +9,29 @@ const router = express.Router()
 
 const get_url_hash = (url) => {
   return get_blake2b_hash(url, 16)
+}
+
+const canonicalize_short_url = async ({ url, logger }) => {
+  try {
+    const url_object = await resolve_short_url_chain({
+      initial_url: url,
+      fetch_url_by_hash: async (inner_hash) => {
+        const row = await db('urls').where('url_hash', inner_hash).first()
+        if (!row) {
+          throw new Error('inner_hash_not_found')
+        }
+        return row.url
+      }
+    })
+    return url_object.toString()
+  } catch (error) {
+    if (typeof logger === 'function') {
+      logger(
+        `shorten-url: failed to canonicalize chained URL (${error.message}); storing as-is`
+      )
+    }
+    return url
+  }
 }
 
 /**
@@ -81,18 +105,22 @@ const get_url_hash = (url) => {
 router.post('/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const { url } = req.body
-    const validation_result = validators.short_url_validator(url)
+    const { url: incoming_url } = req.body
+    const validation_result = validators.short_url_validator(incoming_url)
     if (validation_result !== true) {
       return res.status(400).json({ error: 'Invalid URL' })
     }
 
     const valid_domains = ['xo.football', 'localhost']
-    const url_object = new URL(url)
-    if (!valid_domains.includes(url_object.hostname)) {
+    const incoming_url_object = new URL(incoming_url)
+    if (!valid_domains.includes(incoming_url_object.hostname)) {
       return res.status(400).json({ error: 'Invalid domain' })
     }
 
+    // Defense-in-depth: if the client submitted a chained /u/<hash>... URL,
+    // resolve the chain and store/hash the canonical URL. Old/buggy clients
+    // can no longer pollute the table with chains.
+    const url = await canonicalize_short_url({ url: incoming_url, logger })
     const url_hash = get_url_hash(url)
     await db('urls').insert({ url, url_hash }).onConflict('url').ignore()
     const short_url = `/u/${url_hash}`

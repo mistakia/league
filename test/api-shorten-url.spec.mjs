@@ -92,4 +92,48 @@ describe('API /api/u (shortened URL)', function () {
       res.body.should.have.property('url')
     })
   })
+
+  describe('POST /api/u with chained /u/<hash> URL', () => {
+    it('canonicalizes chained URL before hashing/storing', async () => {
+      const post_inner = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: TEST_URL })
+      post_inner.should.have.status(200)
+      const inner_hash = post_inner.body.url_hash
+
+      const chained_url = `https://localhost/u/${inner_hash}?columns=%5B%22outer%22%5D`
+      const post_chained = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: chained_url })
+
+      post_chained.should.have.status(200)
+      // Canonicalized URL should be the inner pathname with the OUTER search.
+      post_chained.body.url.should.equal(
+        'https://localhost/data-views?columns=%5B%22outer%22%5D'
+      )
+      post_chained.body.url_hash.should.not.equal(inner_hash)
+
+      const get_chained = await chai_request
+        .execute(server)
+        .get(`/api/u/${post_chained.body.url_hash}`)
+      get_chained.should.have.status(200)
+      get_chained.body.url.should.equal(
+        'https://localhost/data-views?columns=%5B%22outer%22%5D'
+      )
+    })
+
+    it('falls back to storing as-is when inner hash is unknown', async () => {
+      const orphaned_url =
+        'https://localhost/u/0000000000000000000000000000000000000000?columns=%5B%5D'
+      const res = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: orphaned_url })
+
+      res.should.have.status(200)
+      res.body.url.should.equal(orphaned_url)
+    })
+  })
 })
