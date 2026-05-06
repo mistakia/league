@@ -10,6 +10,7 @@ import parse_table_state_from_url from '@core/data-views/parse-table-state-from-
 
 import DataViewsPage from '@pages/data-views'
 import PlaysPage from '@pages/plays'
+import resolve_short_url_chain from './resolve-short-url-chain.mjs'
 
 const STATUS_LOADING = 'loading'
 const STATUS_READY = 'ready'
@@ -30,12 +31,26 @@ export default function ShortUrlResolver({
 
     const { abort, request } = get_shortened_url({ hash })
 
+    const fetch_url_by_hash = async (inner_hash) => {
+      if (cancelled) throw new Error('cancelled')
+      const { request: inner_request } = get_shortened_url({
+        hash: inner_hash
+      })
+      const { url: inner_url } = await inner_request()
+      return inner_url
+    }
+
     const resolve = async () => {
       try {
         const { url } = await request()
         if (cancelled) return
 
-        const url_object = new URL(url)
+        const url_object = await resolve_short_url_chain({
+          initial_url: url,
+          fetch_url_by_hash
+        })
+        if (cancelled) return
+
         const search_params = url_object.searchParams
         const parsed = parse_table_state_from_url(search_params)
         const has_table_state =
