@@ -1,5 +1,8 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
+import {
+  decompose_nfl_weeks,
+  is_full_reg_season_nfl_week_id_set
+} from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import db from '#db'
 
@@ -88,7 +91,14 @@ const add_player_per_game_cte = ({
     )
   }
 
-  if (nfl_week.length) {
+  // When the nfl_week_id list covers full REG seasons for every year it
+  // touches, the year filter alone is sufficient. Emitting a 100+ element
+  // nfl_week_id IN list otherwise forces a bitmap heap scan + JIT and
+  // ~doubles CTE runtime versus the partition-pruned year-only path.
+  const nfl_week_covers_full_seasons = is_full_reg_season_nfl_week_id_set({
+    nfl_weeks: nfl_week
+  })
+  if (nfl_week.length && !nfl_week_covers_full_seasons) {
     cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)
   }
 
@@ -160,7 +170,12 @@ const add_team_per_game_cte = ({
     .select('nfl_plays.off as team')
     .countDistinct('nfl_plays.esbid as rate_type_total_count')
 
-  if (nfl_week.length) {
+  // Skip the nfl_week_id IN list when it covers full REG seasons; the year
+  // filter alone partition-prunes nfl_plays.
+  const nfl_week_covers_full_seasons = is_full_reg_season_nfl_week_id_set({
+    nfl_weeks: nfl_week
+  })
+  if (nfl_week.length && !nfl_week_covers_full_seasons) {
     cte_query.whereIn('nfl_plays.nfl_week_id', nfl_week)
   }
 

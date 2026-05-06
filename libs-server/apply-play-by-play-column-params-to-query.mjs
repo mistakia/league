@@ -2,7 +2,10 @@ import nfl_plays_column_params, {
   nfl_games_params
 } from '#libs-shared/nfl-plays-column-params.mjs'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
+import {
+  decompose_nfl_weeks,
+  is_full_reg_season_nfl_week_id_set
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 const nfl_games_param_keys = Object.keys(nfl_games_params)
 
@@ -67,14 +70,26 @@ export default function ({
         ? param_value
         : [param_value]
       if (column_values.length) {
-        query.whereIn(`${param_table}.${column_name}`, column_values)
-
-        // Partition pruning for nfl_week_id on year-partitioned tables
+        // Partition pruning for nfl_week_id on year-partitioned tables.
+        // When the list covers all REG weeks of every year it touches, the
+        // year filter alone is sufficient — emitting a 100+ element
+        // nfl_week_id IN list forces a bitmap heap scan + JIT that roughly
+        // doubles CTE runtime relative to the partition-pruned path.
         if (column_param_key === 'nfl_week_id') {
           const { years } = decompose_nfl_weeks({ nfl_weeks: column_values })
-          if (years.length) {
+          const covers_full_seasons = is_full_reg_season_nfl_week_id_set({
+            nfl_weeks: column_values
+          })
+          if (covers_full_seasons && years.length) {
             query.whereIn(`${param_table}.year`, years)
+          } else {
+            query.whereIn(`${param_table}.${column_name}`, column_values)
+            if (years.length) {
+              query.whereIn(`${param_table}.year`, years)
+            }
           }
+        } else {
+          query.whereIn(`${param_table}.${column_name}`, column_values)
         }
       }
     } else if (

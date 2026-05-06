@@ -88,6 +88,10 @@ Each stage makes key decisions that affect query performance:
 
 **CTE Reuse**: Rate type CTEs are shared across multiple columns with identical parameters to reduce query complexity.
 
+**Full-Season `nfl_week_id` Pruning**: When the resolved `nfl_week_id` array covers every REG week of every year it touches (e.g. saved views that filter by full years 2019-2025), `apply_play_by_play_column_params_to_query` and the `per_game` / `per_team_play` rate-type builders emit only a `year IN (...)` predicate and skip the 100+ element `nfl_week_id IN (...)` list. The skip is gated by `is_full_reg_season_nfl_week_id_set` in `libs-shared/nfl-week-identifier.mjs` — it returns false for any PRE/POST entries or any partial REG season, so single-week / mixed-season filters keep the full predicate. The redundant list otherwise forces a bitmap heap scan + JIT on partition-pruned `nfl_plays` scans and roughly doubles per-CTE runtime for multi-year views. Column authors that filter on `nfl_plays.nfl_week_id` directly (outside `apply_play_by_play_column_params_to_query`) should call the same helper before emitting their own list.
+
+**Historical-Team Joins for `per_team_play` Denominators**: `rate-type-per-team-play.mjs` joins the team-aggregated denominator (`per_team_pass_play`, `per_team_rush_play`, etc.) on the player's historical (pid, year) team via the shared `player_year_teams` CTE whenever `is_historical_team_mode({ params, splits })` returns true (year filter or year split present). Falls back to `player.current_nfl_team` only for live "current week" views. Without this, a player who changed teams between years would have his historical receiving stats divided by the current team's pass-play count.
+
 ## Column Definition Architecture
 
 ### Standard Column Definition Structure
