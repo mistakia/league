@@ -8,11 +8,82 @@ import {
 import * as table_constants from 'react-table/src/constants.mjs'
 import {
   get_all_nfl_week_identifiers,
-  format_nfl_week_param_values
+  format_nfl_week_param_values,
+  current_nfl_week_params,
+  nfl_week_offset_params,
+  format_nfl_week_identifier
 } from './nfl-week-identifier.mjs'
+
+const format_year_value = ({ value, def }) => {
+  const param_values = Array.isArray(value) ? value : [value]
+  const parts = param_values.map((v) => {
+    if (v && typeof v === 'object' && v.dynamic_type) {
+      const dynamic_def = def?.dynamic_values?.find(
+        (d) => d.dynamic_type === v.dynamic_type
+      )
+      const fallback =
+        (dynamic_def?.label || v.dynamic_type) +
+        (v.value != null ? ` (${v.value})` : '')
+      const n = parseInt(v.value ?? dynamic_def?.default_value ?? 3, 10)
+      const current = current_season.stats_season_year
+      switch (v.dynamic_type) {
+        case 'last_n_years': {
+          const end = current
+          const start = Math.max(2000, end - n + 1)
+          return start === end ? `${end}` : `${start}-${end}`
+        }
+        case 'next_n_years': {
+          const start = current + 1
+          const end = current + n
+          return start === end ? `${end}` : `${start}-${end}`
+        }
+        default:
+          return fallback
+      }
+    }
+    return String(v)
+  })
+  return parts.join(', ')
+}
+
+const format_week_value = ({ value, def }) => {
+  const param_values = Array.isArray(value) ? value : [value]
+  const parts = param_values.map((v) => {
+    if (v && typeof v === 'object' && v.dynamic_type) {
+      const dynamic_def = def?.dynamic_values?.find(
+        (d) => d.dynamic_type === v.dynamic_type
+      )
+      const fallback =
+        (dynamic_def?.label || v.dynamic_type) +
+        (v.value != null ? ` (${v.value})` : '')
+      const n = parseInt(v.value ?? dynamic_def?.default_value ?? 3, 10)
+      const current = current_season.week
+      switch (v.dynamic_type) {
+        case 'current_week':
+          return `${current}`
+        case 'last_n_weeks': {
+          const end = current
+          const start = Math.max(1, end - n + 1)
+          return start === end ? `${end}` : `${start}-${end}`
+        }
+        case 'next_n_weeks': {
+          const start = current + 1
+          const end = current + n
+          return start === end ? `${end}` : `${start}-${end}`
+        }
+        default:
+          return fallback
+      }
+    }
+    return String(v)
+  })
+  return parts.join(', ')
+}
 
 export const career_year = {
   data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+  label: 'Career Year',
+  show_key_in_short: true,
   min: 1,
   max: 25,
   preset_values: [
@@ -41,6 +112,8 @@ export const career_year = {
 
 export const career_game = {
   data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+  label: 'Career Game',
+  show_key_in_short: true,
   min: 1,
   max: 500,
   preset_values: [
@@ -63,6 +136,7 @@ export const year = {
   values: available_years,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   default_value: current_season.stats_season_year,
+  format_value: format_year_value,
   dynamic_values: [
     {
       dynamic_type: 'last_n_years',
@@ -90,6 +164,7 @@ export const single_year = {
 export const week = {
   values: nfl_weeks,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  format_value: format_week_value,
   dynamic_values: [
     {
       dynamic_type: 'last_n_weeks',
@@ -116,6 +191,7 @@ export const single_week = {
   single: true,
   default_value: Math.max(current_season.week, 1),
   enable_multi_on_split: ['week'],
+  format_value: format_week_value,
   dynamic_values: [
     {
       dynamic_type: 'current_week',
@@ -129,6 +205,7 @@ export const year_offset = {
   label: 'Year + N',
   min: -30,
   max: 30,
+  show_key_in_short: true,
   enable_on_splits: ['year']
 }
 
@@ -139,6 +216,7 @@ export const single_year_offset = {
   max: 30,
   default_value: 0,
   is_single: true,
+  show_key_in_short: true,
   enable_on_splits: ['year']
 }
 
@@ -162,7 +240,49 @@ export const single_seas_type = {
   default_value: 'REG'
 }
 
-const format_nfl_week_id_param_values = (param_values, param_def) => {
+const resolve_nfl_week_dynamic = ({ dv, def }) => {
+  const dynamic_def = def?.dynamic_values?.find(
+    (d) => d.dynamic_type === dv.dynamic_type
+  )
+  const fallback =
+    (dynamic_def?.label || dv.dynamic_type) +
+    (dv.value != null ? ` (${dv.value})` : '')
+
+  switch (dv.dynamic_type) {
+    case 'current_year_reg_weeks':
+      return `${current_season.stats_season_year} REG`
+    case 'current_nfl_week': {
+      const params = current_nfl_week_params()
+      if (!params) return fallback
+      return format_nfl_week_param_values({
+        nfl_weeks: [format_nfl_week_identifier(params)]
+      })
+    }
+    case 'last_n_nfl_weeks': {
+      const n = parseInt(dv.value ?? dynamic_def?.default_value ?? 5, 10)
+      const ids = []
+      for (let i = 0; i < n; i++) {
+        const params = nfl_week_offset_params({ offset: -i })
+        if (!params) break
+        ids.push(format_nfl_week_identifier(params))
+      }
+      return ids.length
+        ? format_nfl_week_param_values({ nfl_weeks: ids })
+        : fallback
+    }
+    case 'last_n_nfl_years': {
+      const n = parseInt(dv.value ?? dynamic_def?.default_value ?? 3, 10)
+      const end = current_season.year
+      const start = Math.max(2000, end - n + 1)
+      return start === end ? `${end}` : `${start}-${end}`
+    }
+    default:
+      return fallback
+  }
+}
+
+const format_nfl_week_id_value = ({ value, def }) => {
+  const param_values = Array.isArray(value) ? value : [value]
   const static_values = param_values.filter((v) => typeof v === 'string')
   const dynamic_values = param_values.filter(
     (v) => v && typeof v === 'object' && v.dynamic_type
@@ -170,14 +290,8 @@ const format_nfl_week_id_param_values = (param_values, param_def) => {
 
   const parts = []
 
-  if (dynamic_values.length) {
-    for (const dv of dynamic_values) {
-      const def = param_def?.dynamic_values?.find(
-        (d) => d.dynamic_type === dv.dynamic_type
-      )
-      const label = def?.label || dv.dynamic_type
-      parts.push(label + (dv.value ? ` (${dv.value})` : ''))
-    }
+  for (const dv of dynamic_values) {
+    parts.push(resolve_nfl_week_dynamic({ dv, def }))
   }
 
   if (static_values.length) {
@@ -194,7 +308,7 @@ export const nfl_week_id = {
   values: get_all_nfl_week_identifiers(),
   default_value: { dynamic_type: 'current_year_reg_weeks' },
   enable_multi_on_split: ['year', 'week'],
-  format_param_values: format_nfl_week_id_param_values,
+  format_value: format_nfl_week_id_value,
   dynamic_values: [
     {
       dynamic_type: 'current_year_reg_weeks',
@@ -226,7 +340,7 @@ export const single_nfl_week_id = {
   label: 'NFL Week',
   values: get_all_nfl_week_identifiers(),
   default_value: { dynamic_type: 'current_nfl_week' },
-  format_param_values: format_nfl_week_id_param_values,
+  format_value: format_nfl_week_id_value,
   dynamic_values: [
     {
       dynamic_type: 'current_nfl_week',

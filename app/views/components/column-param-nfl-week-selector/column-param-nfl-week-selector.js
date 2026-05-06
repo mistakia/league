@@ -3,8 +3,10 @@
 // undo / redo actions is the textbook reducer case.
 import React, { useState, useReducer, useMemo, useCallback } from 'react'
 import PropTypes from 'prop-types'
+import Tooltip from '@mui/material/Tooltip'
 
 import FilterBase from 'react-table/src/filter-base'
+import { format_column_params } from 'react-table/src/utils/format-column-params.js'
 import { nfl_week_identifier } from '@libs-shared'
 
 import NflWeekSelectorDynamicValuesSection from './nfl-week-selector-dynamic-values-section.js'
@@ -110,7 +112,6 @@ export default function ColumnParamNflWeekSelector({
     static_selected.length === 0
 
   const static_count = static_selected.length
-  const dynamic_count = existing_dynamic.length
 
   const all_selected =
     is_default_dynamic ||
@@ -121,7 +122,14 @@ export default function ColumnParamNflWeekSelector({
     ? '-'
     : all_selected
       ? 'ALL'
-      : `${static_count + dynamic_count} selected`
+      : format_column_params({
+          column_def: {
+            column_params: { [column_param_name]: column_param_definition }
+          },
+          column_state_params: { [column_param_name]: selected_param_values },
+          variant: 'short',
+          default_label: 'ALL'
+        })
 
   const handle_reset_to_default = useCallback(() => {
     push_history_entry(current_selection)
@@ -223,7 +231,13 @@ export default function ColumnParamNflWeekSelector({
     </div>
   )
 
-  return <FilterBase {...{ label, selected_label, body, trigger_close }} />
+  return (
+    <Tooltip title={selected_label}>
+      <span className='nfl-week-selector-chip'>
+        <FilterBase {...{ label, selected_label, body, trigger_close }} />
+      </span>
+    </Tooltip>
+  )
 }
 
 ColumnParamNflWeekSelector.propTypes = {

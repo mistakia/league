@@ -73,12 +73,16 @@ export const nfl_games_params = {
     groups: [COLUMN_PARAM_GROUPS.GAME]
   },
   wind: {
+    label: 'Wind',
+    show_key_in_short: true,
     min: 0,
     max: 100,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WEATHER]
   },
   temp: {
+    label: 'Temp',
+    show_key_in_short: true,
     min: -30,
     max: 109,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -206,12 +210,16 @@ export const nfl_games_params = {
     groups: [COLUMN_PARAM_GROUPS.GAME]
   },
   away_rest: {
+    label: 'Away Rest',
+    show_key_in_short: true,
     min: 4,
     max: 21,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.GAME]
   },
   home_rest: {
+    label: 'Home Rest',
+    show_key_in_short: true,
     min: 4,
     max: 21,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -230,6 +238,8 @@ export const nfl_games_params = {
     groups: [COLUMN_PARAM_GROUPS.BETTING_MARKETS]
   },
   total_line: {
+    label: 'Total Line',
+    show_key_in_short: true,
     min: 25,
     max: 65,
     step: 0.5,
@@ -296,6 +306,9 @@ export default {
   // },
 
   ydl_num: {
+    label: 'Yardline (from 50)',
+    short_label: 'YL from 50',
+    show_key_in_short: true,
     min: 1,
     max: 50,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -314,6 +327,9 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   ydl_100: {
+    label: 'Yardline (yds to end zone)',
+    short_label: 'Yds to GL',
+    show_key_in_short: true,
     min: 0,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -382,9 +398,27 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.OBJECT_PRESET,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL],
     column_specs: [
-      { key: 'rb', column: 'off_personnel_rb_count', label: 'RB', min: 0, max: 4 },
-      { key: 'te', column: 'off_personnel_te_count', label: 'TE', min: 0, max: 5 },
-      { key: 'wr', column: 'off_personnel_wr_count', label: 'WR', min: 0, max: 5 },
+      {
+        key: 'rb',
+        column: 'off_personnel_rb_count',
+        label: 'RB',
+        min: 0,
+        max: 4
+      },
+      {
+        key: 'te',
+        column: 'off_personnel_te_count',
+        label: 'TE',
+        min: 0,
+        max: 5
+      },
+      {
+        key: 'wr',
+        column: 'off_personnel_wr_count',
+        label: 'WR',
+        min: 0,
+        max: 5
+      },
       {
         key: 'qb',
         column: 'off_personnel_qb_count',
@@ -417,9 +451,27 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.OBJECT_PRESET,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL],
     column_specs: [
-      { key: 'dl', column: 'def_personnel_dl_count', label: 'DL', min: 0, max: 8 },
-      { key: 'lb', column: 'def_personnel_lb_count', label: 'LB', min: 0, max: 6 },
-      { key: 'db', column: 'def_personnel_db_count', label: 'DB', min: 3, max: 8 }
+      {
+        key: 'dl',
+        column: 'def_personnel_dl_count',
+        label: 'DL',
+        min: 0,
+        max: 8
+      },
+      {
+        key: 'lb',
+        column: 'def_personnel_lb_count',
+        label: 'LB',
+        min: 0,
+        max: 6
+      },
+      {
+        key: 'db',
+        column: 'def_personnel_db_count',
+        label: 'DB',
+        min: 3,
+        max: 8
+      }
     ],
     preset_values: [
       { label: 'Base', value: { db: 4 }, n: 62194 },
@@ -433,6 +485,8 @@ export default {
   },
 
   box_defenders: {
+    label: 'Box Defenders',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -445,12 +499,17 @@ export default {
     ]
   },
   pru: {
+    label: 'Pass Rushers (unblocked)',
+    short_label: 'Unblk PR',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   air_yards: {
+    label: 'Air Yards',
+    show_key_in_short: true,
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -464,6 +523,8 @@ export default {
   },
   // TODO allow decimal precision for time_to_throw
   time_to_throw: {
+    label: 'Time to Throw',
+    show_key_in_short: true,
     min: 0,
     max: 30,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -535,6 +596,8 @@ export default {
   },
 
   drive_seq: {
+    label: 'Drive #',
+    show_key_in_short: true,
     min: 1,
     max: 50,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -663,6 +726,8 @@ export default {
   // },
 
   series_seq: {
+    label: 'Series #',
+    show_key_in_short: true,
     min: 1,
     max: 90,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -711,6 +776,8 @@ export default {
   },
 
   play_clock: {
+    label: 'Play Clock',
+    show_key_in_short: true,
     min: 0,
     max: 90, // TODO figure out why this is so high
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -725,18 +792,27 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   sec_rem_qtr: {
+    label: 'Secs Remaining (Qtr)',
+    short_label: 'Sec Qtr',
+    show_key_in_short: true,
     min: 0,
     max: 900,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   sec_rem_half: {
+    label: 'Secs Remaining (Half)',
+    short_label: 'Sec Half',
+    show_key_in_short: true,
     min: 0,
     max: 1800,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   sec_rem_gm: {
+    label: 'Secs Remaining (Game)',
+    short_label: 'Sec Gm',
+    show_key_in_short: true,
     min: 0,
     max: 3600,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1101,11 +1177,15 @@ export default {
   },
 
   mbt: {
+    label: 'Missed/Broken Tackles',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
   avsk: {
+    label: 'Avoided Sacks',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1230,6 +1310,8 @@ export default {
   },
 
   n_offense_backfield: {
+    label: 'Backfield Players',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1241,6 +1323,8 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   time_to_pass: {
+    label: 'Time to Pass',
+    show_key_in_short: true,
     min: 0,
     max: 15,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1251,6 +1335,8 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   time_to_pressure: {
+    label: 'Time to Pressure',
+    show_key_in_short: true,
     min: 0,
     max: 15,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1265,12 +1351,17 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   db: {
+    label: 'DBs in Box',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   box_defenders_charted: {
+    label: 'Box Defenders (charted)',
+    short_label: 'Box Def chart',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1283,24 +1374,32 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   boxdb: {
+    label: 'Box DBs',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   pass_rushers: {
+    label: 'Pass Rushers',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   blitzers: {
+    label: 'Blitzers',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   db_blitzers: {
+    label: 'DB Blitzers',
+    show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1317,12 +1416,16 @@ export default {
   },
 
   ep: {
+    label: 'EP',
+    show_key_in_short: true,
     min: -4,
     max: 7,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   epa: {
+    label: 'EPA',
+    show_key_in_short: true,
     min: -14,
     max: 14,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1462,6 +1565,8 @@ export default {
   },
 
   wp: {
+    label: 'Win Prob',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1479,6 +1584,8 @@ export default {
     ]
   },
   wpa: {
+    label: 'Win Prob Added',
+    show_key_in_short: true,
     min: -1,
     max: 1,
     step: 0.01,
@@ -1492,6 +1599,8 @@ export default {
     ]
   },
   home_wp: {
+    label: 'Home Win Prob',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1499,6 +1608,8 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   away_wp: {
+    label: 'Away Win Prob',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1506,6 +1617,8 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_wpa: {
+    label: 'Vegas WPA',
+    show_key_in_short: true,
     min: -1,
     max: 1,
     step: 0.01,
@@ -1513,6 +1626,8 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_home_wpa: {
+    label: 'Vegas Home WPA',
+    show_key_in_short: true,
     min: -1,
     max: 1,
     step: 0.01,
@@ -1520,6 +1635,9 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   home_wp_post: {
+    label: 'Home Win Prob (post)',
+    short_label: 'H WP post',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1527,6 +1645,9 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   away_wp_post: {
+    label: 'Away Win Prob (post)',
+    short_label: 'A WP post',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1534,6 +1655,8 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_wp: {
+    label: 'Vegas Win Prob',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1541,6 +1664,9 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_home_wp: {
+    label: 'Vegas Home Win Prob',
+    short_label: 'V Home WP',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1673,6 +1799,8 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
   xyac_succ_prob: {
+    label: 'xYAC Success Prob',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1680,6 +1808,9 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
   xyac_fd_prob: {
+    label: 'xYAC First Down Prob',
+    short_label: 'xYAC FD',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1734,24 +1865,36 @@ export default {
   },
 
   home_to_rem: {
+    label: 'Home TOs Remaining',
+    short_label: 'H TO',
+    show_key_in_short: true,
     min: 0,
     max: 3,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   away_to_rem: {
+    label: 'Away TOs Remaining',
+    short_label: 'A TO',
+    show_key_in_short: true,
     min: 0,
     max: 3,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   pos_to_rem: {
+    label: 'Possession TOs Remaining',
+    short_label: 'Pos TO',
+    show_key_in_short: true,
     min: 0,
     max: 3,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   def_to_rem: {
+    label: 'Defending TOs Remaining',
+    short_label: 'Def TO',
+    show_key_in_short: true,
     min: 0,
     max: 3,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1768,30 +1911,42 @@ export default {
   },
 
   home_score: {
+    label: 'Home Score',
+    show_key_in_short: true,
     min: 0,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   away_score: {
+    label: 'Away Score',
+    show_key_in_short: true,
     min: 0,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   pos_score: {
+    label: 'Possession Team Score',
+    short_label: 'Pos Score',
+    show_key_in_short: true,
     min: 0,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   def_score: {
+    label: 'Defending Team Score',
+    short_label: 'Def Score',
+    show_key_in_short: true,
     min: 0,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   score_diff: {
+    label: 'Score Diff',
+    show_key_in_short: true,
     min: -70,
     max: 70,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1799,18 +1954,27 @@ export default {
     preset_values: score_diff_preset_values
   },
   pos_score_post: {
+    label: 'Possession Score (post)',
+    short_label: 'Pos post',
+    show_key_in_short: true,
     min: 0,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   def_score_post: {
+    label: 'Defending Score (post)',
+    short_label: 'Def post',
+    show_key_in_short: true,
     min: 0,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   score_diff_post: {
+    label: 'Score Diff (post)',
+    short_label: 'Diff post',
+    show_key_in_short: true,
     min: -70,
     max: 70,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1883,6 +2047,8 @@ export default {
   },
 
   xpass_prob: {
+    label: 'xPass Prob',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1890,6 +2056,8 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   pass_oe: {
+    label: 'Pass OE',
+    show_key_in_short: true,
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1897,6 +2065,8 @@ export default {
   },
 
   cp: {
+    label: 'Completion Prob',
+    show_key_in_short: true,
     min: 0,
     max: 1,
     step: 0.01,
@@ -1904,6 +2074,8 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   cpoe: {
+    label: 'CPOE',
+    show_key_in_short: true,
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
