@@ -51,21 +51,6 @@ export default function ShortUrlResolver({
         })
         if (cancelled) return
 
-        // Canonicalize the address bar so subsequent shortens (which read
-        // window.location.pathname) build canonical URLs instead of chained
-        // /u/<hash> ones.
-        if (
-          typeof window !== 'undefined' &&
-          window.history &&
-          typeof window.history.replaceState === 'function'
-        ) {
-          window.history.replaceState(
-            window.history.state,
-            '',
-            `${url_object.pathname}${url_object.search}${url_object.hash}`
-          )
-        }
-
         const search_params = url_object.searchParams
         const parsed = parse_table_state_from_url(search_params)
         const has_table_state =
@@ -80,7 +65,11 @@ export default function ShortUrlResolver({
           if (has_table_state) {
             data_view_changed(
               {
-                view_id: generate_view_id(),
+                // Preserve the URL's view_id so re-shortening from a /u/<hash>
+                // page produces the same canonical URL (and same hash) as the
+                // original shorten. Fall back to a fresh id if the URL had
+                // none.
+                view_id: parsed.view_id || generate_view_id(),
                 view_name: parsed.view_name,
                 view_search_column_id: parsed.view_search_column_id,
                 view_description: parsed.view_description,
@@ -114,7 +103,7 @@ export default function ShortUrlResolver({
           if (has_table_state) {
             plays_view_changed(
               {
-                view_id: generate_view_id(),
+                view_id: parsed.view_id || generate_view_id(),
                 view_name: parsed.view_name,
                 view_description: parsed.view_description,
                 table_state: {

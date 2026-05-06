@@ -124,6 +124,27 @@ describe('API /api/u (shortened URL)', function () {
       )
     })
 
+    it('is idempotent: re-shortening /u/<hash>?<same-state> returns the original hash', async () => {
+      // Simulate the exact production flow: client shortens canonical URL,
+      // then later (without replaceState) shortens /u/<hash>?<same-state>.
+      const canonical = `https://localhost/data-views?view_id=fixed-id&columns=%5B%22player_name%22%5D`
+      const post_first = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: canonical })
+      post_first.should.have.status(200)
+      const original_hash = post_first.body.url_hash
+
+      const chained = `https://localhost/u/${original_hash}?view_id=fixed-id&columns=%5B%22player_name%22%5D`
+      const post_second = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: chained })
+      post_second.should.have.status(200)
+      post_second.body.url_hash.should.equal(original_hash)
+      post_second.body.url.should.equal(canonical)
+    })
+
     it('falls back to storing as-is when inner hash is unknown', async () => {
       const orphaned_url =
         'https://localhost/u/0000000000000000000000000000000000000000?columns=%5B%5D'

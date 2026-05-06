@@ -46,6 +46,14 @@ describe('parse_table_state_from_url', function () {
     out.view_description.should.equal('Notes')
   })
 
+  it('parses view_id from the URL', () => {
+    const sp = build({
+      view_id: '1fd23039-c8c8-4774-bdb8-a8e98083706a'
+    })
+    const out = parse_table_state_from_url(sp)
+    out.view_id.should.equal('1fd23039-c8c8-4774-bdb8-a8e98083706a')
+  })
+
   it('defaults missing params to [] / "" matching prior inline-parser behavior', () => {
     const sp = build({})
     const out = parse_table_state_from_url(sp)
@@ -54,6 +62,7 @@ describe('parse_table_state_from_url', function () {
     out.where.should.deep.equal([])
     out.sort.should.deep.equal([])
     out.splits.should.deep.equal([])
+    out.view_id.should.equal('')
     out.view_name.should.equal('')
     out.view_search_column_id.should.equal('')
     out.view_description.should.equal('')
