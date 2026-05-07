@@ -3,7 +3,7 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { current_season } from '#constants'
+import { current_season, player_tag_types } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -76,9 +76,15 @@ const run = async () => {
       const extra_pids = existing_rows.filter(
         (p) => !current_pids.includes(p.pid)
       )
+      // Tags are season-specific (FRANCHISE/ROOKIE/RFA must be re-applied each
+      // offseason). On the year-rollover insert into year=N week=0, scrub any
+      // non-REGULAR tag carried forward from year=N-1's final week.
+      const next_tag = (p) =>
+        is_new_season ? player_tag_types.REGULAR : p.tag
+
       const inserts = missing_pids.map((p) => ({
         rid,
-        tag: p.tag,
+        tag: next_tag(p),
         slot: p.slot,
         pid: p.pid,
         pos: p.pos,
@@ -89,13 +95,15 @@ const run = async () => {
         week: nextWeek
       }))
 
-      const updates = overlapping_pids.filter((p) => {
-        const item = existing_rows.find((i) => i.pid === p.pid)
-        return (
-          item.slot !== p.slot || item.tag !== p.tag
-          // Extensions should persist and not be compared
-        )
-      })
+      const updates = overlapping_pids
+        .map((p) => ({ ...p, tag: next_tag(p) }))
+        .filter((p) => {
+          const item = existing_rows.find((i) => i.pid === p.pid)
+          return (
+            item.slot !== p.slot || item.tag !== p.tag
+            // Extensions should persist and not be compared
+          )
+        })
 
       if (inserts.length) {
         await db('rosters_players').insert(inserts)
