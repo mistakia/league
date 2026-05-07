@@ -12,9 +12,17 @@ import {
   getLastTransaction,
   report_job,
   is_main,
-  validate_franchise_tag
+  validate_franchise_tag,
+  has_league_notification_been_sent,
+  record_league_notification_sent
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+
+// Auto-process retry window: keep attempting for this many days past ext_date
+// in case the cron is missed (e.g., outage). The notification marker still
+// guarantees one-shot semantics within the window.
+const AUTO_PROCESS_WINDOW_DAYS = 14
+const NOTIFICATION_TYPE_EXTENSIONS_PROCESSED = 'extensions_processed'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -119,16 +127,70 @@ const run = async ({ lid }) => {
   }
 }
 
+// Auto-process extensions for any hosted league whose ext_date has passed and
+// has not yet been processed for this season. Idempotent at three levels:
+// (1) `run({ lid })` itself rebuilds the year's tag/extension transactions from
+// rosters_players state (DELETE-then-INSERT); (2) the notification marker below
+// short-circuits subsequent cron firings; (3) the unique constraint on
+// (lid, year, notification_type, event_timestamp) guards against races.
+const process_extensions_for_due_leagues = async () => {
+  const now = Math.round(Date.now() / 1000)
+  const window_end = (ext_date) => ext_date + AUTO_PROCESS_WINDOW_DAYS * 86400
+
+  const eligible = await db('seasons')
+    .join('leagues', 'leagues.uid', 'seasons.lid')
+    .where({ 'seasons.year': current_season.year, 'leagues.hosted': true })
+    .whereNotNull('seasons.ext_date')
+    .select('seasons.lid', 'seasons.ext_date')
+
+  for (const { lid, ext_date } of eligible) {
+    if (now < ext_date) {
+      log(
+        `league ${lid}: ext_date ${ext_date} not yet reached (now=${now}); skipping`
+      )
+      continue
+    }
+    if (now > window_end(ext_date)) {
+      log(
+        `league ${lid}: ext_date ${ext_date} more than ${AUTO_PROCESS_WINDOW_DAYS} days past; skipping`
+      )
+      continue
+    }
+    const already_processed = await has_league_notification_been_sent({
+      lid,
+      year: current_season.year,
+      notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
+      event_timestamp: ext_date
+    })
+    if (already_processed) {
+      log(`league ${lid}: extensions already processed for ext_date ${ext_date}`)
+      continue
+    }
+
+    log(`league ${lid}: processing extensions (ext_date ${ext_date} reached)`)
+    await run({ lid })
+    await record_league_notification_sent({
+      lid,
+      year: current_season.year,
+      notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
+      event_timestamp: ext_date,
+      message: `Extensions auto-applied at ext_date for league ${lid}`,
+      metadata: { ext_date, processed_at: now }
+    })
+  }
+}
+
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
     const lid = argv.lid
-    if (!lid) {
-      console.log('missing --lid')
-      return
+    if (lid) {
+      // Manual override: run immediately, no gating.
+      await run({ lid })
+    } else {
+      await process_extensions_for_due_leagues()
     }
-    await run({ lid })
   } catch (err) {
     error = err
     console.log(error)
