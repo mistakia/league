@@ -1,8 +1,9 @@
-/* global describe, it, beforeEach */
+/* global describe, it, before, beforeEach */
 import * as chai from 'chai'
 import fs from 'fs'
 import path from 'path'
 
+import { load_platform_response } from './utils/fixture-loader.mjs'
 import SyncOrchestrator from '#libs-server/external-fantasy-leagues/sync/sync-orchestrator.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -12,10 +13,7 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
   let orchestrator
   let test_fixtures
 
-  beforeEach(function () {
-    orchestrator = new SyncOrchestrator()
-
-    // Load test fixtures
+  before(async function () {
     const fixtures_path = path.join(
       process.cwd(),
       'test',
@@ -29,18 +27,12 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
           'utf8'
         )
       ),
-      sleeper_config: JSON.parse(
-        fs.readFileSync(
-          path.join(
-            fixtures_path,
-            'platform-responses',
-            'sleeper',
-            'league-config.json'
-          ),
-          'utf8'
-        )
-      )
+      sleeper_config: await load_platform_response('sleeper', 'league-config')
     }
+  })
+
+  beforeEach(function () {
+    orchestrator = new SyncOrchestrator()
   })
 
   describe('initialize_adapter', function () {

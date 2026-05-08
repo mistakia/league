@@ -1,0 +1,274 @@
+{
+  "mapper": "PlayerIdMapper (DB-dependent)",
+  "platform": "sleeper",
+  "source_fixture": "platform-responses/sleeper/players.json",
+  "generated_at": "2026-05-08T00:00:18.163Z",
+  "note": "PlayerIdMapper resolves external_id -> internal pid via find_player_row, which queries the player table. Tests using this mapper must stub find_player_row or run with the mocha test DB. This output captures the canonical inputs the mapper would receive when iterating the fixture.",
+  "total_players": 33,
+  "inputs": [
+    {
+      "external_id": "1",
+      "fallback_data": {
+        "name": "GJ Kinne",
+        "position": "QB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "3",
+      "fallback_data": {
+        "name": "David Harris",
+        "position": "LB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "4",
+      "fallback_data": {
+        "name": "Roddy White",
+        "position": "WR",
+        "team": null
+      }
+    },
+    {
+      "external_id": "5",
+      "fallback_data": {
+        "name": "Dallas Clark",
+        "position": "TE",
+        "team": null
+      }
+    },
+    {
+      "external_id": "11",
+      "fallback_data": {
+        "name": "Garrett Hartley",
+        "position": "K",
+        "team": null
+      }
+    },
+    {
+      "external_id": "16",
+      "fallback_data": {
+        "name": "Ray Rice",
+        "position": "RB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "17",
+      "fallback_data": {
+        "name": "Matt Prater",
+        "position": "K",
+        "team": null
+      }
+    },
+    {
+      "external_id": "19",
+      "fallback_data": {
+        "name": "Joe Flacco",
+        "position": "QB",
+        "team": "CLE"
+      }
+    },
+    {
+      "external_id": "44",
+      "fallback_data": {
+        "name": "Ahmad Brooks",
+        "position": "LB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "368",
+      "fallback_data": {
+        "name": "Jason McCourty",
+        "position": "DB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "421",
+      "fallback_data": {
+        "name": "Matthew Stafford",
+        "position": "QB",
+        "team": "LAR"
+      }
+    },
+    {
+      "external_id": "503",
+      "fallback_data": {
+        "name": "Graham Gano",
+        "position": "K",
+        "team": "NYG"
+      }
+    },
+    {
+      "external_id": "529",
+      "fallback_data": {
+        "name": "Carlos Dunlap",
+        "position": "DL",
+        "team": null
+      }
+    },
+    {
+      "external_id": "545",
+      "fallback_data": {
+        "name": "Sherrick McManis",
+        "position": "DB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "660",
+      "fallback_data": {
+        "name": "Peyton Hillis",
+        "position": "RB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "812",
+      "fallback_data": {
+        "name": "Lee Smith",
+        "position": "TE",
+        "team": "ATL"
+      }
+    },
+    {
+      "external_id": "815",
+      "fallback_data": {
+        "name": "Nick Bellore",
+        "position": "LB",
+        "team": "WAS"
+      }
+    },
+    {
+      "external_id": "868",
+      "fallback_data": {
+        "name": "Virgil Green",
+        "position": "TE",
+        "team": null
+      }
+    },
+    {
+      "external_id": "902",
+      "fallback_data": {
+        "name": "Dwayne Harris",
+        "position": "WR",
+        "team": null
+      }
+    },
+    {
+      "external_id": "1035",
+      "fallback_data": {
+        "name": "Nate Ebner",
+        "position": "DB",
+        "team": "NYG"
+      }
+    },
+    {
+      "external_id": "1192",
+      "fallback_data": {
+        "name": "Lavonte David",
+        "position": "LB",
+        "team": "TB"
+      }
+    },
+    {
+      "external_id": "1213",
+      "fallback_data": {
+        "name": "Harrison Smith",
+        "position": "DB",
+        "team": "MIN"
+      }
+    },
+    {
+      "external_id": "1352",
+      "fallback_data": {
+        "name": "Robert Woods",
+        "position": "WR",
+        "team": "PIT"
+      }
+    },
+    {
+      "external_id": "1408",
+      "fallback_data": {
+        "name": "Le'Veon Bell",
+        "position": "RB",
+        "team": "TB"
+      }
+    },
+    {
+      "external_id": "1642",
+      "fallback_data": {
+        "name": "Levine Toilolo",
+        "position": "TE",
+        "team": "NYG"
+      }
+    },
+    {
+      "external_id": "1984",
+      "fallback_data": {
+        "name": "Allen Hurns",
+        "position": "WR",
+        "team": "MIA"
+      }
+    },
+    {
+      "external_id": "2028",
+      "fallback_data": {
+        "name": "Derek Carr",
+        "position": "QB",
+        "team": null
+      }
+    },
+    {
+      "external_id": "4018",
+      "fallback_data": {
+        "name": "Joe Mixon",
+        "position": "RB",
+        "team": "HOU"
+      }
+    },
+    {
+      "external_id": "6914",
+      "fallback_data": {
+        "name": "Trevon Hill",
+        "position": "DL",
+        "team": null
+      }
+    },
+    {
+      "external_id": "7042",
+      "fallback_data": {
+        "name": "Tyler Bass",
+        "position": "K",
+        "team": "BUF"
+      }
+    },
+    {
+      "external_id": "7390",
+      "fallback_data": {
+        "name": "Domenique Davis",
+        "position": "DL",
+        "team": "PIT"
+      }
+    },
+    {
+      "external_id": "8262",
+      "fallback_data": {
+        "name": "D.J. Davidson",
+        "position": "DL",
+        "team": "NYG"
+      }
+    },
+    {
+      "external_id": "HOU",
+      "fallback_data": {
+        "name": "Houston Texans",
+        "position": "DEF",
+        "team": "HOU"
+      }
+    }
+  ]
+}
