@@ -70,7 +70,7 @@ function resolve_credentials(credentials_key) {
 
 function format_summary(result) {
   const lines = [
-    `Platform:           ${result.platform || result.platform_name || 'n/a'}`,
+    `Platform:           ${result.platform || 'n/a'}`,
     `Success:            ${result.success}`
   ]
   if (typeof result.duration_ms === 'number') {

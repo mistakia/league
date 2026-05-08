@@ -99,22 +99,25 @@ export class SyncUtils {
 
   /**
    * Create standardized sync output
+   * Input parameter names match output keys 1:1 — the result has `platform`,
+   * `validation`, etc., so callers can use destructuring shorthand or rename
+   * at the boundary (e.g. `platform: platform_name`).
    * @param {Object} options - Output creation options
-   * @param {string} options.platform_name - Platform identifier
+   * @param {string} options.platform - Platform identifier
    * @param {boolean} [options.success] - Whether sync was successful
    * @param {Object} [options.raw_data] - Raw data from platform
    * @param {Object} [options.mapped_data] - Processed/mapped data
-   * @param {Object} [options.validation_results] - Validation results
+   * @param {Object} [options.validation] - Validation results
    * @param {Array} [options.errors] - Any errors encountered
    * @param {Object} [options.metadata] - Additional metadata
    * @returns {Object} Standardized sync output
    */
   create_standardized_output({
-    platform_name,
+    platform,
     success = true,
     raw_data = {},
     mapped_data = {},
-    validation_results = {},
+    validation = {},
     errors = [],
     metadata = {}
   }) {
@@ -123,7 +126,7 @@ export class SyncUtils {
 
     return {
       success,
-      platform: platform_name,
+      platform,
       timestamp: new Date().toISOString(),
       duration_ms: end_time - start_time,
 
@@ -133,11 +136,11 @@ export class SyncUtils {
 
       // Validation and processing results
       validation: {
-        league_config_valid: validation_results.league_config_valid || false,
-        players_mapped: validation_results.players_mapped || 0,
-        players_failed: validation_results.players_failed || 0,
-        transactions_valid: validation_results.transactions_valid || 0,
-        transactions_invalid: validation_results.transactions_invalid || 0
+        league_config_valid: validation.league_config_valid || false,
+        players_mapped: validation.players_mapped || 0,
+        players_failed: validation.players_failed || 0,
+        transactions_valid: validation.transactions_valid || 0,
+        transactions_invalid: validation.transactions_invalid || 0
       },
 
       // Error tracking

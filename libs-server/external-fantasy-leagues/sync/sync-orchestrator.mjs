@@ -203,7 +203,7 @@ export default class SyncOrchestrator {
       })
 
       return this.sync_utils.create_standardized_output({
-        platform_name,
+        platform: platform_name,
         success: true,
         raw_data: {
           league_config,
@@ -212,7 +212,7 @@ export default class SyncOrchestrator {
           transactions,
           players
         },
-        validation_results: {
+        validation: {
           league_config_valid: !!league_config,
           players_mapped: Array.isArray(players) ? players.length : 0,
           transactions_valid: Array.isArray(transactions)
@@ -244,7 +244,7 @@ export default class SyncOrchestrator {
       )
 
       return this.sync_utils.create_standardized_output({
-        platform_name,
+        platform: platform_name,
         success: false,
         errors: sync_stats.errors,
         metadata: {
@@ -421,9 +421,9 @@ export default class SyncOrchestrator {
       log(`Completed sync for ${platform_name} league ${external_league_id}`)
 
       return this.sync_utils.create_standardized_output({
-        platform_name,
+        platform: platform_name,
         success: true,
-        validation_results: {
+        validation: {
           league_config_valid: true,
           players_mapped: sync_stats.players_mapped,
           transactions_valid: sync_stats.transactions_imported
@@ -454,7 +454,7 @@ export default class SyncOrchestrator {
       )
 
       return this.sync_utils.create_standardized_output({
-        platform_name,
+        platform: platform_name,
         success: false,
         errors: sync_stats.errors,
         metadata: {
@@ -494,7 +494,7 @@ export default class SyncOrchestrator {
 
     if (!validation.valid) {
       return this.sync_utils.create_standardized_output({
-        platform_name,
+        platform: platform_name,
         success: false,
         errors: validation.errors.map((msg) => ({
           type: 'validation',
@@ -581,10 +581,10 @@ export default class SyncOrchestrator {
       })
 
       return this.sync_utils.create_standardized_output({
-        platform_name,
+        platform: platform_name,
         success: true,
         raw_data: { league_config },
-        validation_results: {
+        validation: {
           league_config_valid: !!league_config
         },
         metadata: {
@@ -601,7 +601,7 @@ export default class SyncOrchestrator {
       })
 
       return this.sync_utils.create_standardized_output({
-        platform_name,
+        platform: platform_name,
         success: false,
         errors: [
           {

@@ -233,7 +233,7 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
 
     it('should create standardized output with errors', function () {
       const output = orchestrator.sync_utils.create_standardized_output({
-        platform_name: 'sleeper',
+        platform: 'sleeper',
         success: false,
         errors: [
           {
