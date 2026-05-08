@@ -1,9 +1,10 @@
 /* global describe, it, before, beforeEach */
 import * as chai from 'chai'
-import fs from 'fs'
-import path from 'path'
 
-import { load_platform_response } from './utils/fixture-loader.mjs'
+import {
+  load_platform_response,
+  load_test_fixture
+} from './utils/fixture-loader.mjs'
 import SyncOrchestrator from '#libs-server/external-fantasy-leagues/sync/sync-orchestrator.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -14,18 +15,9 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
   let test_fixtures
 
   before(async function () {
-    const fixtures_path = path.join(
-      process.cwd(),
-      'test',
-      'fixtures',
-      'external-fantasy-leagues'
-    )
     test_fixtures = {
-      player_mapper_data: JSON.parse(
-        fs.readFileSync(
-          path.join(fixtures_path, 'player-mapper-test-data.json'),
-          'utf8'
-        )
+      player_mapper_data: await load_test_fixture(
+        'player-mapper-test-data.json'
       ),
       sleeper_config: await load_platform_response('sleeper', 'league-config')
     }

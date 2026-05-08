@@ -62,7 +62,7 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
       })
     })
 
-    it('matches the real superflex league shape (12 teams, 1QB/2RB/3WR/1TE/2FLEX/15BN)', function () {
+    it('matches the real superflex league shape (1QB/2RB/3WR/1TE/2FLEX/15BN)', function () {
       const mapper = new LeagueConfigMapper()
       const league = sleeper_league_fixture.data.league
       const result = mapper.map_league_config({
@@ -72,7 +72,10 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
         roster_config: league.roster_positions
       })
 
-      result.league_format.should.have.property('num_teams', 12)
+      result.league_format.should.have.property(
+        'num_teams',
+        league_config_expected.expected_output.league_format.num_teams
+      )
       result.league_format.should.have.property('sqb', 1)
       result.league_format.should.have.property('srb', 2)
       result.league_format.should.have.property('swr', 3)

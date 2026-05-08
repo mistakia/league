@@ -107,28 +107,36 @@ async function main() {
   }
 
   for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i]
+    const token = argv[i]
+    let arg = token
+    let inline_value = null
+    if (token.startsWith('--') && token.includes('=')) {
+      const eq = token.indexOf('=')
+      arg = token.slice(0, eq)
+      inline_value = token.slice(eq + 1)
+    }
+    const take_value = () => (inline_value !== null ? inline_value : argv[++i])
     switch (arg) {
       case '--platform':
-        options.platform_name = argv[++i]
+        options.platform_name = take_value()
         break
       case '--external-league-id':
-        options.external_league_id = argv[++i]
+        options.external_league_id = take_value()
         break
       case '--internal-league-id':
-        options.internal_league_id = argv[++i]
+        options.internal_league_id = take_value()
         break
       case '--year':
-        options.year = parseInt(argv[++i], 10)
+        options.year = parseInt(take_value(), 10)
         break
       case '--week':
-        options.week = parseInt(argv[++i], 10)
+        options.week = parseInt(take_value(), 10)
         break
       case '--dry-run':
         options.dry_run = true
         break
       case '--credentials-key':
-        options.credentials_key = argv[++i]
+        options.credentials_key = take_value()
         break
       case '--help':
         print_help()
