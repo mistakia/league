@@ -1,0 +1,41 @@
+{
+  "mapper": "TransactionMapper.bulk_map_transactions",
+  "platform": "sleeper",
+  "source_fixture": "platform-responses/sleeper/transactions.json",
+  "generated_at": "2026-05-08T00:00:18.163Z",
+  "context_stub": {
+    "league_id": "lid-fixture",
+    "year": 2025,
+    "week": 1,
+    "player_mapping_strategy": "pid-sleeper-<external_player_id> for every player in the players fixture",
+    "team_mapping_strategy": "tid-<roster_id> for every roster",
+    "user_mapping_strategy": "userid-<user_id> for every league user"
+  },
+  "diagnostic": {
+    "external_transaction_top_level_keys": [
+      "adds",
+      "consenter_ids",
+      "created",
+      "creator",
+      "draft_picks",
+      "drops",
+      "leg",
+      "metadata",
+      "roster_ids",
+      "settings",
+      "status",
+      "status_updated",
+      "transaction_id",
+      "type",
+      "waiver_budget"
+    ],
+    "note": "Sleeper transactions nest player IDs in `adds`/`drops` dicts and use `roster_ids` (plural array). The current TransactionMapper.map_sleeper_fields reads `player_id` and `roster_id` (singular) directly off the transaction, so every Sleeper transaction fails validation_transaction (missing pid, tid) and is skipped. The 0/296 mapped figure here is the authentic mapper output and exposes this gap; tests built on this output should treat it as a regression baseline until the mapper is extended to fan adds/drops out into multiple internal transactions."
+  },
+  "summary": {
+    "total_external": 296,
+    "total_mapped": 0,
+    "skipped": 296,
+    "type_counts": {}
+  },
+  "mapped_transactions": []
+}

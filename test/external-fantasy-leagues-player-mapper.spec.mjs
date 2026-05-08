@@ -1,4 +1,4 @@
-/* global describe, it, beforeEach, afterEach */
+/* global describe, it, before, beforeEach, afterEach */
 import * as chai from 'chai'
 import db from '#db'
 import fs from 'fs/promises'
@@ -16,22 +16,20 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
   let mapper
   let test_data
 
-  beforeEach(async function () {
-    mapper = new PlayerIdMapper()
-
-    // Load test data from fixture
+  before(async function () {
     const fixture_path = path.join(
       __dirname,
       'fixtures/external-fantasy-leagues/player-mapper-test-data.json'
     )
     const fixture_content = await fs.readFile(fixture_path, 'utf8')
     test_data = JSON.parse(fixture_content)
+  })
 
-    // Clear any existing test data
+  beforeEach(async function () {
+    mapper = new PlayerIdMapper()
+
     const test_pids = test_data.test_players.map((player) => player.pid)
     await db('player').whereIn('pid', test_pids).del()
-
-    // Insert test players from fixture
     await db('player').insert(test_data.test_players)
   })
 

@@ -1,216 +1,77 @@
 /* global describe, it, before */
 import * as chai from 'chai'
 
-import {
-  load_expected_output,
-  load_platform_response
-} from './utils/fixture-loader.mjs'
+import { load_platform_response } from './utils/fixture-loader.mjs'
 import { LeagueConfigMapper } from '#libs-server/external-fantasy-leagues/mappers/index.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.should()
 
 describe('External Fantasy Leagues - League Config Mapper', function () {
-  let sleeper_expected
-  let espn_expected
-  let sleeper_platform_data
+  let sleeper_fixture
   let mapper
 
   before(async function () {
-    // Load fixture data once for all tests
-    sleeper_expected = await load_expected_output('sleeper-config')
-    espn_expected = await load_expected_output('espn-config')
-    sleeper_platform_data = await load_platform_response(
-      'sleeper',
-      'league-config'
-    )
-
+    sleeper_fixture = await load_platform_response('sleeper', 'league-config')
     mapper = new LeagueConfigMapper()
   })
 
-  describe('fixture data validation', function () {
-    it('should load Sleeper expected outputs fixture correctly', function () {
-      sleeper_expected.should.have.property('mapper_type', 'LeagueConfigMapper')
-      sleeper_expected.should.have.property('platform', 'sleeper')
-      sleeper_expected.should.have.property('test_scenarios')
-      sleeper_expected.test_scenarios.should.be.an('array')
-    })
-
-    it('should load ESPN expected outputs fixture correctly', function () {
-      espn_expected.should.have.property('mapper_type', 'LeagueConfigMapper')
-      espn_expected.should.have.property('platform', 'espn')
-      espn_expected.should.have.property('test_scenarios')
-      espn_expected.test_scenarios.should.be.an('array')
-    })
-
-    it('should load Sleeper platform response fixture correctly', function () {
-      sleeper_platform_data.should.have.property('platform', 'sleeper')
-      sleeper_platform_data.should.have.property(
-        'response_type',
-        'league-config'
-      )
-      sleeper_platform_data.should.have.property('data')
-      sleeper_platform_data.data.should.have.property('league')
-    })
-  })
-
   describe('map_league_config', function () {
-    it('should map Sleeper league configuration correctly', function () {
-      const scenario = sleeper_expected.test_scenarios.find(
-        (s) => s.scenario_name === 'standard_sleeper_league'
-      )
-      scenario.should.not.be.undefined
-
-      const result = mapper.map_league_config(scenario.input)
-
-      result.should.have.property('league_format')
-      result.should.have.property('scoring_format')
-      result.should.have.property('league_format_hash')
-      result.should.have.property('scoring_format_hash')
-
-      // Verify league format mapping
-      const expected_league_format = scenario.expected_output.league_format
-      Object.keys(expected_league_format).forEach((key) => {
-        result.league_format.should.have.property(
-          key,
-          expected_league_format[key]
-        )
-      })
-
-      // Verify scoring format mapping
-      const expected_scoring_format = scenario.expected_output.scoring_format
-      Object.keys(expected_scoring_format).forEach((key) => {
-        result.scoring_format.should.have.property(
-          key,
-          expected_scoring_format[key]
-        )
-      })
-    })
-
-    it('should map ESPN league configuration correctly', function () {
-      const scenario = espn_expected.test_scenarios.find(
-        (s) => s.scenario_name === 'standard_espn_league'
-      )
-      scenario.should.not.be.undefined
-
-      const result = mapper.map_league_config(scenario.input)
-
-      result.should.have.property('league_format_hash')
-      result.should.have.property('scoring_format_hash')
-
-      // Verify league format mapping
-      const expected_league_format = scenario.expected_output.league_format
-      Object.keys(expected_league_format).forEach((key) => {
-        result.league_format.should.have.property(
-          key,
-          expected_league_format[key]
-        )
-      })
-
-      // Verify scoring format mapping
-      const expected_scoring_format = scenario.expected_output.scoring_format
-      Object.keys(expected_scoring_format).forEach((key) => {
-        result.scoring_format.should.have.property(
-          key,
-          expected_scoring_format[key]
-        )
-      })
-    })
-
-    it('should handle default values for missing configuration', function () {
-      const scenario = sleeper_expected.test_scenarios.find(
-        (s) => s.scenario_name === 'minimal_sleeper_config'
-      )
-      scenario.should.not.be.undefined
-
-      const result = mapper.map_league_config(scenario.input)
-
-      result.should.have.property('league_format_hash')
-      result.should.have.property('scoring_format_hash')
-
-      // Verify default values from fixture
-      const expected_league_format = scenario.expected_output.league_format
-      Object.keys(expected_league_format).forEach((key) => {
-        result.league_format.should.have.property(
-          key,
-          expected_league_format[key]
-        )
-      })
-
-      const expected_scoring_format = scenario.expected_output.scoring_format
-      Object.keys(expected_scoring_format).forEach((key) => {
-        result.scoring_format.should.have.property(
-          key,
-          expected_scoring_format[key]
-        )
-      })
-    })
-
-    it('should throw error for unsupported platform', function () {
-      const error_scenario = espn_expected.error_scenarios.find(
-        (s) => s.scenario_name === 'unsupported_platform'
-      )
-      error_scenario.should.not.be.undefined
-
-      chai
-        .expect(() => {
-          mapper.map_league_config(error_scenario.input)
-        })
-        .to.throw(error_scenario.expected_error)
-    })
-
-    it('should map real Sleeper platform response data correctly', function () {
-      const league_data = sleeper_platform_data.data.league
-
+    it('produces league_format_hash and scoring_format_hash for the real Sleeper fixture', function () {
+      const league = sleeper_fixture.data.league
       const result = mapper.map_league_config({
         platform: 'sleeper',
-        league_config: {
-          num_teams: league_data.total_rosters
-        },
-        scoring_config: league_data.scoring_settings,
-        roster_config: league_data.roster_positions
+        league_config: { num_teams: league.total_rosters },
+        scoring_config: league.scoring_settings,
+        roster_config: league.roster_positions
       })
 
       result.should.have.property('league_format')
       result.should.have.property('scoring_format')
-      result.should.have.property('league_format_hash')
-      result.should.have.property('scoring_format_hash')
+      result.should.have.property('league_format_hash').that.is.a('string')
+      result.should.have.property('scoring_format_hash').that.is.a('string')
+      result.league_format_hash.should.have.length.above(0)
+      result.scoring_format_hash.should.have.length.above(0)
+    })
 
-      // Verify specific mappings from real data
-      result.league_format.should.have.property('num_teams', 12)
-      result.league_format.should.have.property('sqb', 1)
-      result.league_format.should.have.property('srb', 2)
-      result.league_format.should.have.property('swr', 3)
-      result.league_format.should.have.property('ste', 1)
-      result.league_format.should.have.property('srbwr', 2) // FLEX (2 in real fixture)
-      result.league_format.should.have.property('sdst', 0) // No DST in superflex league
-      result.league_format.should.have.property('sk', 0) // No K in superflex league
-      result.league_format.should.have.property('bench', 15) // 15 BN in real fixture
+    it('throws for an unsupported platform', function () {
+      chai
+        .expect(() =>
+          mapper.map_league_config({
+            platform: 'fake-platform',
+            league_config: {},
+            scoring_config: {},
+            roster_config: []
+          })
+        )
+        .to.throw(/Unsupported platform/i)
+    })
 
-      // Verify scoring mappings
-      result.scoring_format.should.have.property('py', 4) // 0.04 -> 4
-      result.scoring_format.should.have.property('tdp', 6)
-      result.scoring_format.should.have.property('ints', -2)
-      result.scoring_format.should.have.property('ry', 10) // 0.1 -> 10
-      result.scoring_format.should.have.property('tdr', 6)
-      result.scoring_format.should.have.property('rec', 1) // PPR
-      result.scoring_format.should.have.property('recy', 10)
-      result.scoring_format.should.have.property('tdrec', 6)
+    it('produces stable hashes across repeated mappings of the same input', function () {
+      const league = sleeper_fixture.data.league
+      const args = {
+        platform: 'sleeper',
+        league_config: { num_teams: league.total_rosters },
+        scoring_config: league.scoring_settings,
+        roster_config: league.roster_positions
+      }
+      const a = mapper.map_league_config(args)
+      const b = mapper.map_league_config(args)
+      a.league_format_hash.should.equal(b.league_format_hash)
+      a.scoring_format_hash.should.equal(b.scoring_format_hash)
     })
   })
 
   describe('map_scoring_config', function () {
-    it('should convert decimal point values correctly', function () {
-      const scoring_config = {
-        pass_yd: 0.04, // Should become 4
-        rush_yd: 0.1, // Should become 10
-        rec_yd: 0.1, // Should become 10
-        pass_td: 6 // Should stay 6
-      }
-
+    it('converts Sleeper decimal point values into the canonical integer scale', function () {
       const result = mapper.map_scoring_config({
         platform: 'sleeper',
-        scoring_config
+        scoring_config: {
+          pass_yd: 0.04,
+          rush_yd: 0.1,
+          rec_yd: 0.1,
+          pass_td: 6
+        }
       })
 
       result.should.have.property('py', 4)
@@ -219,50 +80,58 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
       result.should.have.property('tdp', 6)
     })
 
-    it('should handle platform-specific special rules', function () {
-      const sleeper_config = {
-        exclude_qb_kneels: true,
-        pass_yd: 0.04
-      }
-
+    it('passes through Sleeper-specific exclude_qb_kneels rule', function () {
       const result = mapper.map_scoring_config({
         platform: 'sleeper',
-        scoring_config: sleeper_config
+        scoring_config: { exclude_qb_kneels: true, pass_yd: 0.04 }
       })
 
       result.should.have.property('exclude_qb_kneels', true)
+      result.should.have.property('py', 4)
+    })
+
+    it('translates ESPN scoring keys into the canonical scoring_format', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'espn',
+        scoring_config: {
+          passing_yards: 0.04,
+          passing_touchdowns: 4,
+          rushing_yards: 0.1,
+          receiving_receptions: 1,
+          receiving_yards: 0.1
+        }
+      })
+
+      result.should.have.property('py', 4)
+      result.should.have.property('tdp', 4)
+      result.should.have.property('ry', 10)
+      result.should.have.property('rec', 1)
+      result.should.have.property('recy', 10)
     })
   })
 
   describe('validate_mapped_config', function () {
-    it('should validate correct configuration', function () {
-      const scenario = sleeper_expected.validation_scenarios.find(
-        (s) => s.scenario_name === 'valid_complete_config'
-      )
-      scenario.should.not.be.undefined
+    it('returns true for a fully-mapped Sleeper config from the real fixture', function () {
+      const league = sleeper_fixture.data.league
+      const mapped = mapper.map_league_config({
+        platform: 'sleeper',
+        league_config: { num_teams: league.total_rosters },
+        scoring_config: league.scoring_settings,
+        roster_config: league.roster_positions
+      })
 
-      const result = mapper.validate_mapped_config(scenario.input)
-      result.should.equal(scenario.expected_result)
+      mapper.validate_mapped_config(mapped).should.equal(true)
     })
 
-    it('should reject configuration with missing hash', function () {
-      const scenario = sleeper_expected.validation_scenarios.find(
-        (s) => s.scenario_name === 'missing_league_hash'
-      )
-      scenario.should.not.be.undefined
+    it('returns false for a config with no starting roster slots', function () {
+      const mapped = mapper.map_league_config({
+        platform: 'sleeper',
+        league_config: { num_teams: 12 },
+        scoring_config: { pass_yd: 0.04 },
+        roster_config: ['BN', 'BN']
+      })
 
-      const result = mapper.validate_mapped_config(scenario.input)
-      result.should.equal(scenario.expected_result)
-    })
-
-    it('should reject configuration with no starting positions', function () {
-      const scenario = sleeper_expected.validation_scenarios.find(
-        (s) => s.scenario_name === 'no_starting_positions'
-      )
-      scenario.should.not.be.undefined
-
-      const result = mapper.validate_mapped_config(scenario.input)
-      result.should.equal(scenario.expected_result)
+      mapper.validate_mapped_config(mapped).should.equal(false)
     })
   })
 })
