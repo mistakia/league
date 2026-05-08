@@ -21,32 +21,6 @@ const fixtures_root = path.join(
 
 const cache = new Map()
 
-async function find_fixture_file(directory, filename) {
-  let entries
-  try {
-    entries = await fs.readdir(directory, { withFileTypes: true })
-  } catch (err) {
-    if (err.code === 'ENOENT') return null
-    throw err
-  }
-
-  const direct_match = entries.find(
-    (entry) => entry.isFile() && entry.name === filename
-  )
-  if (direct_match) return path.join(directory, filename)
-
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      const found = await find_fixture_file(
-        path.join(directory, entry.name),
-        filename
-      )
-      if (found) return found
-    }
-  }
-  return null
-}
-
 async function read_json(file_path) {
   const content = await fs.readFile(file_path, 'utf8')
   return JSON.parse(content)
@@ -81,21 +55,38 @@ export async function load_expected_output(test_scenario) {
   const cache_key = `expected:${test_scenario}`
   if (cache.has(cache_key)) return cache.get(cache_key)
 
-  const expected_dir = path.join(fixtures_root, 'expected-outputs')
-  const fixture_path = await find_fixture_file(
-    expected_dir,
+  const file_path = path.join(
+    fixtures_root,
+    'expected-outputs',
     `${test_scenario}.json`
   )
 
-  if (!fixture_path) {
-    throw new Error(`Expected output fixture not found: ${test_scenario}`)
+  try {
+    const fixture = await read_json(file_path)
+    cache.set(cache_key, fixture)
+    return fixture
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      throw new Error(`Expected output fixture not found: ${test_scenario}`)
+    }
+    throw err
   }
-
-  const fixture = await read_json(fixture_path)
-  cache.set(cache_key, fixture)
-  return fixture
 }
 
-export function clear_fixture_cache() {
-  cache.clear()
+export async function load_test_fixture(relative_path) {
+  const cache_key = `test:${relative_path}`
+  if (cache.has(cache_key)) return cache.get(cache_key)
+
+  const file_path = path.join(fixtures_root, relative_path)
+
+  try {
+    const fixture = await read_json(file_path)
+    cache.set(cache_key, fixture)
+    return fixture
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      throw new Error(`Test fixture not found: ${relative_path}`)
+    }
+    throw err
+  }
 }

@@ -49,7 +49,7 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
   })
 
   describe('SleeperAdapter.get_league()', function () {
-    it('returns canonical league with 12 teams matching the baseline', async function () {
+    it('returns canonical league matching the baseline team count', async function () {
       const result = await adapter.get_league(league_id)
       const expected = sync_results_expected.canonical.league
 
@@ -57,9 +57,11 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
       result.should.have.property('external_id', league_id)
       result.should.have.property('name', expected.name)
       result.should.have.property('year', expected.year)
-      result.teams.should.have.length(12)
       result.teams.should.have.length(expected.teams.length)
-      result.settings.should.have.property('num_teams', 12)
+      result.settings.should.have.property(
+        'num_teams',
+        expected.settings.num_teams
+      )
       result.should.have.property(
         'commissioner_id',
         expected.commissioner_id
@@ -79,11 +81,10 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
   })
 
   describe('SleeperAdapter.get_rosters()', function () {
-    it('returns 12 canonical rosters with player arrays from the real fixture', async function () {
+    it('returns canonical rosters with player arrays from the real fixture', async function () {
       const result = await adapter.get_rosters({ league_id })
       const expected = sync_results_expected.canonical.rosters
 
-      result.should.have.length(12)
       result.should.have.length(expected.length)
 
       const first = result[0]
@@ -95,14 +96,13 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
   })
 
   describe('SleeperAdapter.get_transactions()', function () {
-    it('returns 296 canonical transactions correctly unpacking adds/drops', async function () {
+    it('returns canonical transactions correctly unpacking adds/drops', async function () {
       const result = await adapter.get_transactions({
         league_id,
         options: { week: 1 }
       })
       const expected = sync_results_expected.canonical.transactions
 
-      result.should.have.length(296)
       result.should.have.length(expected.length)
 
       const sample = result[0]
@@ -140,11 +140,10 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
   })
 
   describe('SleeperAdapter.get_players()', function () {
-    it('returns 33 canonical players from the real Sleeper fixture', async function () {
+    it('returns canonical players from the real Sleeper fixture', async function () {
       const result = await adapter.get_players({ filters: {} })
       const expected = sync_results_expected.canonical.players
 
-      result.should.have.length(33)
       result.should.have.length(expected.length)
 
       const sample = result[0]

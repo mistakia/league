@@ -14,6 +14,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { is_main } from '#libs-server'
 import {
   LeagueConfigMapper,
   TransactionMapper
@@ -247,7 +248,9 @@ async function main() {
   await write_expected('sleeper-sync-results.json', sync_output)
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+if (is_main(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
