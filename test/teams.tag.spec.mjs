@@ -140,6 +140,7 @@ describe('API /teams - tag', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer({ exclude_pids })
+      exclude_pids.push(player.pid)
       await addPlayer({
         player,
         leagueId,
