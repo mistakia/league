@@ -173,7 +173,7 @@ describe('API /teams - activate', function () {
     it('reserve player not on team', async () => {
       MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       const teamId = 1
       const leagueId = 1
       const userId = 1
