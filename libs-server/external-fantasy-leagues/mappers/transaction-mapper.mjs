@@ -35,6 +35,34 @@ const get_mapping_value = (mapping, key) => {
  */
 export default class TransactionMapper {
   constructor() {
+    // Sleeper transactions nest player IDs in `adds`/`drops` dicts and may
+    // include both sides in a single transaction (e.g. waiver claims that
+    // also drop a player, trades that move multiple players). The mapper
+    // fans these out into one internal row per moved player; the per-action
+    // map below selects the internal type for each side independently.
+    this.sleeper_action_mappings = {
+      add: { add: transaction_types.ROSTER_ADD },
+      drop: { drop: transaction_types.ROSTER_RELEASE },
+      trade: {
+        add: transaction_types.TRADE,
+        drop: transaction_types.TRADE
+      },
+      waiver: {
+        add: transaction_types.ROSTER_ADD,
+        drop: transaction_types.ROSTER_RELEASE
+      },
+      waiver_add: { add: transaction_types.ROSTER_ADD },
+      waiver_drop: { drop: transaction_types.ROSTER_RELEASE },
+      free_agent: {
+        add: transaction_types.ROSTER_ADD,
+        drop: transaction_types.ROSTER_RELEASE
+      },
+      commissioner: {
+        add: transaction_types.ROSTER_ADD,
+        drop: transaction_types.ROSTER_RELEASE
+      }
+    }
+
     // Platform-specific transaction type mappings
     this.transaction_mappings = {
       sleeper: {
@@ -91,68 +119,183 @@ export default class TransactionMapper {
    *   - player_mappings: Map of external_player_id -> internal_pid
    *   - team_mappings: Map of external_team_id -> internal_tid
    *   - user_mappings: Map of external_user_id -> internal_userid (optional)
-   * @returns {Object|null} Mapped internal transaction object or null if skipped/invalid
+   * @returns {Array<Object>} Mapped internal transaction rows (empty if skipped/invalid).
+   *   A single external transaction may map to multiple internal rows
+   *   (Sleeper trades and waiver claims fan out one row per moved player).
    */
   map_transaction({ platform, external_transaction, context }) {
     try {
-      const mapping = this.transaction_mappings[platform.toLowerCase()]
-      if (!mapping) {
+      const platform_lower = platform.toLowerCase()
+      if (!this.transaction_mappings[platform_lower]) {
         log(`No transaction mapping found for platform: ${platform}`)
-        return null
+        return []
       }
 
-      // Map transaction type
-      const external_type = this.extract_transaction_type({
-        platform,
-        external_transaction
-      })
-      const internal_type = mapping[external_type]
-
-      if (internal_type === null) {
-        log(
-          `Skipping transaction type: ${external_type} for platform: ${platform}`
-        )
-        return null
-      }
-
-      if (internal_type === undefined) {
-        log(
-          `Unknown transaction type: ${external_type} for platform: ${platform}`
-        )
-        return null
-      }
-
-      // Build internal transaction object
-      const internal_transaction = {
-        type: internal_type,
+      const base = {
         lid: context.league_id,
         year: context.year || current_season.year,
         week: context.week || this.extract_week(external_transaction),
         timestamp: this.extract_timestamp(external_transaction)
       }
 
-      // Map platform-specific fields (pid, tid, value, userid, etc.)
-      this.map_platform_fields({
-        platform,
-        external_transaction,
-        transaction: internal_transaction,
-        context
-      })
+      const candidates =
+        platform_lower === 'sleeper'
+          ? this.build_sleeper_transactions({
+              external_transaction,
+              base,
+              context
+            })
+          : this.build_legacy_single_transaction({
+              platform: platform_lower,
+              external_transaction,
+              base,
+              context
+            })
 
-      // Validate required fields are present
-      if (!this.validate_transaction(internal_transaction)) {
-        log(
-          `Invalid transaction after mapping: ${JSON.stringify(internal_transaction)}`
-        )
-        return null
+      const valid = []
+      for (const candidate of candidates) {
+        if (this.validate_transaction(candidate)) {
+          valid.push(candidate)
+        } else {
+          log(
+            `Invalid transaction after mapping: ${JSON.stringify(candidate)}`
+          )
+        }
       }
 
-      log(`Mapped ${platform} transaction: ${external_type} → ${internal_type}`)
-      return internal_transaction
+      return valid
     } catch (error) {
       log(`Error mapping transaction for ${platform}: ${error.message}`)
-      return null
+      return []
     }
+  }
+
+  /**
+   * Build internal transaction rows for a single Sleeper transaction.
+   * Sleeper transactions encode player movement as `adds`/`drops` dicts
+   * keyed by player_id with roster_id values, so one external transaction
+   * yields one internal row per add and per drop entry. For trades, both
+   * sides emit TRADE rows (tid = receiving roster for adds, tid =
+   * relinquishing roster for drops).
+   * @private
+   */
+  build_sleeper_transactions({ external_transaction, base, context }) {
+    // Accept either the raw Sleeper transaction shape (as returned by
+    // /league/{id}/transactions/{week} and the platform-response fixtures)
+    // or the canonical adapter output (which preserves the original under
+    // `platform_data`). Either form carries the `adds`/`drops` dicts the
+    // fan-out depends on.
+    const raw = external_transaction.platform_data || external_transaction
+
+    const sleeper_type = this.extract_transaction_type({
+      platform: 'sleeper',
+      external_transaction: raw
+    })
+    const action_map = this.sleeper_action_mappings[sleeper_type]
+    if (!action_map) {
+      log(`Unknown Sleeper transaction type: ${sleeper_type}`)
+      return []
+    }
+
+    const adds = raw.adds || {}
+    const drops = raw.drops || {}
+
+    const userid = raw.creator
+      ? get_mapping_value(context.user_mappings, raw.creator) || raw.creator
+      : undefined
+
+    const waiver_bid =
+      raw.settings?.waiver_bid ??
+      (typeof raw.waiver_budget === 'number' ? raw.waiver_budget : undefined)
+
+    const rows = []
+
+    if (action_map.add !== undefined) {
+      for (const [player_id, roster_id] of Object.entries(adds)) {
+        const row = {
+          ...base,
+          type: action_map.add,
+          pid:
+            get_mapping_value(context.player_mappings, player_id) || player_id,
+          tid:
+            get_mapping_value(context.team_mappings, roster_id) || roster_id
+        }
+        if (userid !== undefined) row.userid = userid
+        if (
+          row.type === transaction_types.ROSTER_ADD &&
+          waiver_bid !== undefined &&
+          waiver_bid !== null
+        ) {
+          row.value = waiver_bid
+        }
+        rows.push(row)
+      }
+    }
+
+    if (action_map.drop !== undefined) {
+      for (const [player_id, roster_id] of Object.entries(drops)) {
+        const row = {
+          ...base,
+          type: action_map.drop,
+          pid:
+            get_mapping_value(context.player_mappings, player_id) || player_id,
+          tid:
+            get_mapping_value(context.team_mappings, roster_id) || roster_id
+        }
+        if (userid !== undefined) row.userid = userid
+        rows.push(row)
+      }
+    }
+
+    return rows
+  }
+
+  /**
+   * Legacy single-row mapping path for ESPN/Yahoo/MFL and unknown platforms.
+   * These adapters have not been validated against real fixtures yet; the
+   * fan-out treatment is currently Sleeper-specific.
+   * @private
+   */
+  build_legacy_single_transaction({
+    platform,
+    external_transaction,
+    base,
+    context
+  }) {
+    const mapping = this.transaction_mappings[platform]
+    const external_type = this.extract_transaction_type({
+      platform,
+      external_transaction
+    })
+    const internal_type = mapping[external_type]
+
+    if (internal_type === null) {
+      log(
+        `Skipping transaction type: ${external_type} for platform: ${platform}`
+      )
+      return []
+    }
+
+    if (internal_type === undefined) {
+      log(
+        `Unknown transaction type: ${external_type} for platform: ${platform}`
+      )
+      return []
+    }
+
+    const internal_transaction = {
+      ...base,
+      type: internal_type
+    }
+
+    this.map_platform_fields({
+      platform,
+      external_transaction,
+      transaction: internal_transaction,
+      context
+    })
+
+    return [internal_transaction]
   }
 
   /**
@@ -277,10 +420,6 @@ export default class TransactionMapper {
     context
   }) {
     switch (platform.toLowerCase()) {
-      case 'sleeper':
-        this.map_sleeper_fields({ external_transaction, transaction, context })
-        break
-
       case 'espn':
         this.map_espn_fields({ external_transaction, transaction, context })
         break
@@ -295,45 +434,6 @@ export default class TransactionMapper {
 
       default:
         this.map_generic_fields({ external_transaction, transaction, context })
-    }
-  }
-
-  /**
-   * Map Sleeper-specific transaction fields
-   * @param {Object} params - Parameters object
-   * @private
-   */
-  map_sleeper_fields({ external_transaction, transaction, context }) {
-    // Map player ID
-    if (external_transaction.player_id) {
-      transaction.pid =
-        get_mapping_value(
-          context.player_mappings,
-          external_transaction.player_id
-        ) || external_transaction.player_id
-    }
-
-    // Map team ID
-    if (external_transaction.roster_id) {
-      transaction.tid =
-        get_mapping_value(
-          context.team_mappings,
-          external_transaction.roster_id
-        ) || external_transaction.roster_id
-    }
-
-    // Map bid amount for waivers
-    if (external_transaction.waiver_budget) {
-      transaction.value = external_transaction.waiver_budget
-    }
-
-    // Map creator (user who made the transaction)
-    if (external_transaction.creator) {
-      transaction.userid =
-        get_mapping_value(
-          context.user_mappings,
-          external_transaction.creator
-        ) || external_transaction.creator
     }
   }
 
@@ -473,13 +573,13 @@ export default class TransactionMapper {
         external_transaction,
         context
       })
-      if (mapped) {
-        mapped_transactions.push(mapped)
+      for (const row of mapped) {
+        mapped_transactions.push(row)
       }
     }
 
     log(
-      `Mapped ${mapped_transactions.length} of ${external_transactions.length} transactions for ${platform}`
+      `Mapped ${mapped_transactions.length} internal rows from ${external_transactions.length} ${platform} transactions`
     )
     return mapped_transactions
   }

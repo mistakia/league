@@ -89,15 +89,7 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
   })
 
   describe('TransactionMapper.bulk_map_transactions', function () {
-    it('documents known gap: maps 0/296 Sleeper transactions because the legacy mapper does not unpack adds/drops dicts', function () {
-      // KNOWN GAP — Sleeper transactions nest player IDs in `adds` / `drops`
-      // dicts and use plural `roster_ids`. The current
-      // TransactionMapper.map_sleeper_fields reads `player_id` and `roster_id`
-      // (singular) directly off the transaction, so every Sleeper transaction
-      // fails validate_transaction (missing pid, tid) and is skipped.
-      // Tracked separately for follow-up; this assertion is a regression
-      // baseline that will need to be updated once the mapper handles the
-      // real structure.
+    it('fans out Sleeper add/drop dicts into one internal row per moved player', function () {
       const mapper = new TransactionMapper()
       const player_mappings = new Map()
       for (const id of Object.keys(sleeper_players_fixture.data.players || {})) {
@@ -112,9 +104,11 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
         user_mappings.set(user.user_id, `userid-${user.user_id}`)
       }
 
+      const external_transactions =
+        sleeper_transactions_fixture.data.transactions
       const mapped = mapper.bulk_map_transactions({
         platform: 'sleeper',
-        external_transactions: sleeper_transactions_fixture.data.transactions,
+        external_transactions,
         context: {
           league_id: 'lid-fixture',
           year: 2025,
@@ -125,13 +119,20 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
         }
       })
 
+      let expected_rows = 0
+      for (const txn of external_transactions) {
+        expected_rows += Object.keys(txn.adds || {}).length
+        expected_rows += Object.keys(txn.drops || {}).length
+      }
+
+      mapped.should.have.length(expected_rows)
+      mapped.length.should.be.above(0)
       mapped.should.have.length(
         transaction_mappings_expected.summary.total_mapped
       )
       transaction_mappings_expected.summary.total_external.should.equal(
-        sleeper_transactions_fixture.data.transactions.length
+        external_transactions.length
       )
-      mapped.should.have.length(0)
     })
 
     it('extracts Sleeper transaction type and timestamp from real data', function () {

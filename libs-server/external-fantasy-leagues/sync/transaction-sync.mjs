@@ -144,8 +144,10 @@ export class TransactionSync {
           )
         }
 
-        // Map transaction to internal format
-        const mapped_transaction = this.transaction_mapper.map_transaction({
+        // Map transaction to internal format. A single external transaction
+        // may fan out to multiple internal rows (e.g. Sleeper trades emit
+        // one row per moved player).
+        const mapped_rows = this.transaction_mapper.map_transaction({
           platform: sync_context.platform,
           external_transaction,
           context: {
@@ -158,12 +160,14 @@ export class TransactionSync {
           }
         })
 
-        if (mapped_transaction) {
-          await this._insert_transaction({
-            transaction: mapped_transaction,
-            sync_stats,
-            sync_stats_errors
-          })
+        if (mapped_rows.length > 0) {
+          for (const transaction of mapped_rows) {
+            await this._insert_transaction({
+              transaction,
+              sync_stats,
+              sync_stats_errors
+            })
+          }
         } else {
           // Transaction was skipped or invalid (already logged by mapper)
           log(

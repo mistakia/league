@@ -81,56 +81,126 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
   })
 
   describe('bulk_map_transactions', function () {
-    it(
-      'documents known gap: maps 0/296 Sleeper transactions because the legacy mapper does not unpack adds/drops dicts',
-      function () {
-        // KNOWN GAP — Sleeper transactions nest player IDs in `adds`/`drops`
-        // dicts and use plural `roster_ids`. The current
-        // TransactionMapper.map_sleeper_fields reads `player_id` and
-        // `roster_id` (singular) directly off the transaction, so every
-        // Sleeper transaction fails validate_transaction (missing pid, tid)
-        // and is skipped. Tracked as a [bug] observation on the task entity
-        // (user:task/github/mistakia/league/162-import-and-sync-external-leagues.md);
-        // this assertion is a regression baseline that will need to be
-        // updated once the mapper handles the real structure.
-        const player_mappings = new Map()
-        for (const id of Object.keys(
-          sleeper_players_fixture.data.players || {}
-        )) {
-          player_mappings.set(id, `pid-sleeper-${id}`)
-        }
-        const team_mappings = new Map()
-        for (const roster of sleeper_rosters_fixture.data.rosters || []) {
-          team_mappings.set(roster.roster_id, `tid-${roster.roster_id}`)
-        }
-        const user_mappings = new Map()
-        for (const user of sleeper_league_fixture.data.users || []) {
-          user_mappings.set(user.user_id, `userid-${user.user_id}`)
-        }
-
-        const mapped = mapper.bulk_map_transactions({
-          platform: 'sleeper',
-          external_transactions:
-            sleeper_transactions_fixture.data.transactions,
-          context: {
-            league_id: 'lid-fixture',
-            year: 2025,
-            week: 1,
-            player_mappings,
-            team_mappings,
-            user_mappings
-          }
-        })
-
-        mapped.should.have.length(0)
-        mapped.should.have.length(
-          transaction_mappings_expected.summary.total_mapped
-        )
-        transaction_mappings_expected.summary.total_external.should.equal(
-          sleeper_transactions_fixture.data.transactions.length
-        )
+    function build_sleeper_context() {
+      const player_mappings = new Map()
+      for (const id of Object.keys(
+        sleeper_players_fixture.data.players || {}
+      )) {
+        player_mappings.set(id, `pid-sleeper-${id}`)
       }
-    )
+      const team_mappings = new Map()
+      for (const roster of sleeper_rosters_fixture.data.rosters || []) {
+        team_mappings.set(roster.roster_id, `tid-${roster.roster_id}`)
+      }
+      const user_mappings = new Map()
+      for (const user of sleeper_league_fixture.data.users || []) {
+        user_mappings.set(user.user_id, `userid-${user.user_id}`)
+      }
+      return {
+        league_id: 'lid-fixture',
+        year: 2025,
+        week: 1,
+        player_mappings,
+        team_mappings,
+        user_mappings
+      }
+    }
+
+    function expected_row_count(external_transactions) {
+      let total = 0
+      for (const txn of external_transactions) {
+        total += Object.keys(txn.adds || {}).length
+        total += Object.keys(txn.drops || {}).length
+      }
+      return total
+    }
+
+    it('fans out Sleeper transactions into one row per add/drop entry', function () {
+      const context = build_sleeper_context()
+      const external_transactions =
+        sleeper_transactions_fixture.data.transactions
+
+      const mapped = mapper.bulk_map_transactions({
+        platform: 'sleeper',
+        external_transactions,
+        context
+      })
+
+      const expected_count = expected_row_count(external_transactions)
+      mapped.should.have.length(expected_count)
+      mapped.length.should.be.above(0)
+      mapped.should.have.length(
+        transaction_mappings_expected.summary.total_mapped
+      )
+      transaction_mappings_expected.summary.total_external.should.equal(
+        external_transactions.length
+      )
+
+      for (const row of mapped) {
+        row.should.have.property('pid')
+        row.should.have.property('tid')
+        row.should.have.property('lid', 'lid-fixture')
+        row.should.have.property('year', 2025)
+        row.should.have.property('timestamp').that.is.a('number')
+        row.should.have.property('type')
+      }
+    })
+
+    it('emits one row per moved player on a 2x2 trade (transaction 1253441708964724736)', function () {
+      const context = build_sleeper_context()
+      const trade = sleeper_transactions_fixture.data.transactions.find(
+        (t) => t.transaction_id === '1253441708964724736'
+      )
+      trade.should.exist
+      trade.type.should.equal('trade')
+
+      const mapped = mapper.bulk_map_transactions({
+        platform: 'sleeper',
+        external_transactions: [trade],
+        context
+      })
+
+      mapped.should.have.length(4)
+      mapped.every((row) => row.type === transaction_types.TRADE).should.equal(
+        true
+      )
+      const tids = mapped.map((row) => row.tid).sort()
+      tids.should.deep.equal(['tid-11', 'tid-11', 'tid-4', 'tid-4'])
+    })
+
+    it('preserves waiver bid amount on the corresponding ROSTER_ADD row', function () {
+      const context = build_sleeper_context()
+      const waiver_with_bid =
+        sleeper_transactions_fixture.data.transactions.find(
+          (t) =>
+            t.type === 'waiver' &&
+            t.settings?.waiver_bid != null &&
+            t.adds &&
+            Object.keys(t.adds).length > 0
+        )
+      waiver_with_bid.should.exist
+
+      const mapped = mapper.bulk_map_transactions({
+        platform: 'sleeper',
+        external_transactions: [waiver_with_bid],
+        context
+      })
+
+      const add_row = mapped.find(
+        (row) => row.type === transaction_types.ROSTER_ADD
+      )
+      add_row.should.exist
+      add_row.should.have.property(
+        'value',
+        waiver_with_bid.settings.waiver_bid
+      )
+
+      for (const row of mapped) {
+        if (row.type === transaction_types.ROSTER_RELEASE) {
+          row.should.not.have.property('value')
+        }
+      }
+    })
   })
 
   describe('validate_transaction', function () {

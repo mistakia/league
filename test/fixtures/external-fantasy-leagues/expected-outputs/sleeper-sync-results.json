@@ -1,6 +1,6 @@
 {
   "source_fixtures": "platform-responses/sleeper/{league-config,rosters,transactions,players}.json",
-  "generated_at": "2026-05-08T00:00:18.226Z",
+  "generated_at": "2026-05-09T03:25:23.353Z",
   "note": "Canonical-format output produced by SleeperAdapter against real fixture data with api_client.get mocked to read fixtures. Used as the expected baseline for sync-orchestrator integration tests.",
   "canonical": {
     "league": {
@@ -467,7 +467,7 @@
       "status": "in_season",
       "commissioner_id": "203318845597818880",
       "created_at": null,
-      "last_updated_at": "2026-05-08T00:00:18.188Z",
+      "last_updated_at": "2026-05-09T03:25:23.316Z",
       "platform_data": {
         "league": {
           "name": "TA1 - Traders Anonymous",
@@ -888,7 +888,7 @@
         "team_external_id": "203318845597818880",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.164Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.291Z",
         "players": [
           {
             "player_ids": {
@@ -1772,7 +1772,7 @@
         "team_external_id": "535894381345058816",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.164Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.292Z",
         "players": [
           {
             "player_ids": {
@@ -2651,7 +2651,7 @@
         "team_external_id": "457972047369203712",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.165Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.292Z",
         "players": [
           {
             "player_ids": {
@@ -3539,7 +3539,7 @@
         "team_external_id": "205120533207977984",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.165Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.292Z",
         "players": [
           {
             "player_ids": {
@@ -4506,7 +4506,7 @@
         "team_external_id": "837532500317302784",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.165Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.292Z",
         "players": [
           {
             "player_ids": {
@@ -5369,7 +5369,7 @@
         "team_external_id": "331237191147610112",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.165Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.293Z",
         "players": [
           {
             "player_ids": {
@@ -6273,7 +6273,7 @@
         "team_external_id": "503754685199413248",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.165Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.293Z",
         "players": [
           {
             "player_ids": {
@@ -7110,7 +7110,7 @@
         "team_external_id": "456597014419861504",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.165Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.293Z",
         "players": [
           {
             "player_ids": {
@@ -8017,7 +8017,7 @@
         "team_external_id": "732419902845243392",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.165Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.293Z",
         "players": [
           {
             "player_ids": {
@@ -8897,7 +8897,7 @@
         "team_external_id": "461230402724425728",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.166Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.293Z",
         "players": [
           {
             "player_ids": {
@@ -9776,7 +9776,7 @@
         "team_external_id": "76475943417692160",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.166Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.293Z",
         "players": [
           {
             "player_ids": {
@@ -10663,7 +10663,7 @@
         "team_external_id": "462773356081442816",
         "week": 0,
         "year": 2026,
-        "roster_snapshot_date": "2026-05-08T00:00:18.166Z",
+        "roster_snapshot_date": "2026-05-09T03:25:23.293Z",
         "players": [
           {
             "player_ids": {

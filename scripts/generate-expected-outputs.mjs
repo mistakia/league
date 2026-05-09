@@ -110,6 +110,16 @@ function generate_transaction_mappings_output({
     context
   })
 
+  let skipped_external = 0
+  for (const external of external_transactions) {
+    const rows = mapper.map_transaction({
+      platform: 'sleeper',
+      external_transaction: external,
+      context
+    })
+    if (rows.length === 0) skipped_external += 1
+  }
+
   const type_counts = {}
   for (const txn of mapped) {
     type_counts[txn.type] = (type_counts[txn.type] || 0) + 1
@@ -136,12 +146,12 @@ function generate_transaction_mappings_output({
     diagnostic: {
       external_transaction_top_level_keys: sample_input,
       note:
-        'Sleeper transactions nest player IDs in `adds`/`drops` dicts and use `roster_ids` (plural array). The current TransactionMapper.map_sleeper_fields reads `player_id` and `roster_id` (singular) directly off the transaction, so every Sleeper transaction fails validation_transaction (missing pid, tid) and is skipped. The 0/296 mapped figure here is the authentic mapper output and exposes this gap; tests built on this output should treat it as a regression baseline until the mapper is extended to fan adds/drops out into multiple internal transactions.'
+        'Sleeper transactions nest player IDs in `adds`/`drops` dicts and use `roster_ids` (plural array). TransactionMapper fans these out into one internal row per moved player, so the mapped count exceeds the external transaction count whenever transactions move multiple players (trades, waiver claims that also drop a player).'
     },
     summary: {
       total_external: external_transactions.length,
       total_mapped: mapped.length,
-      skipped: external_transactions.length - mapped.length,
+      skipped_external,
       type_counts
     },
     mapped_transactions: mapped
