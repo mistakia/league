@@ -157,6 +157,21 @@ export default class SyncOrchestrator {
         data_type: 'rosters',
         progress_percentage: 40
       })
+      // include_players is tri-state:
+      //   'rostered' (default) -- intersect global catalog with roster pids
+      //   'all' (or true)      -- return the platform's full player catalog
+      //   false                -- skip the player fetch entirely
+      // The platform endpoints we use are global (e.g. Sleeper /players/nfl),
+      // so 'rostered' still pays the fetch cost; the intersection just trims
+      // the returned shape to what's league-relevant.
+      const include_players_mode =
+        fetch_options.include_players === false
+          ? false
+          : fetch_options.include_players === 'all' ||
+              fetch_options.include_players === true
+            ? 'all'
+            : 'rostered'
+
       if (fetch_options.include_transactions !== false) {
         await this.progress_reporter.report_fetch_progress({
           progress_callback,
@@ -164,15 +179,15 @@ export default class SyncOrchestrator {
           progress_percentage: 70
         })
       }
-      if (fetch_options.include_players !== false) {
+      if (include_players_mode !== false) {
         await this.progress_reporter.report_fetch_progress({
           progress_callback,
           data_type: 'players',
           progress_percentage: 85
         })
       }
-      const [league_config, rosters, transactions, players] = await Promise.all(
-        [
+      const [league_config, rosters, transactions, players_catalog] =
+        await Promise.all([
           adapter.get_league(external_league_id, { year: fetch_options.year }),
           adapter.get_rosters({
             league_id: external_league_id,
@@ -181,18 +196,26 @@ export default class SyncOrchestrator {
           }),
           fetch_options.include_transactions === false
             ? Promise.resolve([])
-            : adapter.get_transactions({
+            : this.sync_utils.fetch_transactions_in_range({
+                adapter,
                 league_id: external_league_id,
-                options: { week: fetch_options.week },
-                year: fetch_options.year
+                year: fetch_options.year,
+                week: fetch_options.week
               }),
-          fetch_options.include_players === false
+          include_players_mode === false
             ? Promise.resolve([])
             : adapter.get_players({
                 filters: fetch_options.player_filters || {}
               })
-        ]
-      )
+        ])
+
+      const players =
+        include_players_mode === 'rostered'
+          ? this.sync_utils.filter_players_to_rostered({
+              players: players_catalog,
+              rosters
+            })
+          : players_catalog
 
       await this.progress_reporter.report_completion_progress({
         progress_callback,
@@ -214,6 +237,16 @@ export default class SyncOrchestrator {
         },
         validation: {
           league_config_valid: !!league_config,
+          team_count: Array.isArray(league_config?.teams)
+            ? league_config.teams.length
+            : 0,
+          roster_count: Array.isArray(rosters) ? rosters.length : 0,
+          transaction_count: Array.isArray(transactions)
+            ? transactions.length
+            : 0,
+          player_count: Array.isArray(players) ? players.length : 0,
+          players_mode: include_players_mode,
+          // legacy aliases preserved for callers that read these
           players_mapped: Array.isArray(players) ? players.length : 0,
           transactions_valid: Array.isArray(transactions)
             ? transactions.length
@@ -553,40 +586,43 @@ export default class SyncOrchestrator {
         status: 'validating'
       })
 
-      // Initialize adapter for testing
-      const adapter = this.initialize_adapter({
+      // Dry-run semantics: do everything a real sync would read, just don't
+      // write to the DB. Route through fetch_league_data so callers see the
+      // same canonical shape and the same validation counts they'll get on
+      // a real sync. No write-path code is invoked along this branch.
+      const fetch_result = await this.fetch_league_data({
         platform_name,
-        adapter_config: sync_options.adapter_config
-      })
-
-      if (credentials && Object.keys(credentials).length > 0) {
-        await adapter.authenticate(credentials)
-      }
-
-      // Test basic connectivity
-      await this.progress_reporter.report_fetch_progress({
-        progress_callback,
-        data_type: 'config',
-        progress_percentage: 50
-      })
-
-      const league_config = await adapter.get_league(external_league_id)
-
-      await this.progress_reporter.report_completion_progress({
-        progress_callback,
-        status: 'fetch_complete',
-        validation_results: {
-          league_config_valid: !!league_config
+        external_league_id,
+        credentials,
+        fetch_options: {
+          year: sync_options.year,
+          week: sync_options.week,
+          adapter_config: sync_options.adapter_config,
+          include_transactions: sync_options.include_transactions,
+          include_players: sync_options.include_players,
+          player_filters: sync_options.player_filters,
+          progress_callback: sync_options.progress_callback
         }
       })
+
+      if (!fetch_result.success) {
+        return this.sync_utils.create_standardized_output({
+          platform: platform_name,
+          success: false,
+          errors: fetch_result.errors || [],
+          metadata: {
+            start_time,
+            sync_type: 'validation',
+            dry_run: true
+          }
+        })
+      }
 
       return this.sync_utils.create_standardized_output({
         platform: platform_name,
         success: true,
-        raw_data: { league_config },
-        validation: {
-          league_config_valid: !!league_config
-        },
+        raw_data: fetch_result.raw_data,
+        validation: fetch_result.validation,
         metadata: {
           start_time,
           sync_type: 'validation',

@@ -34,9 +34,17 @@ Required:
 
 Optional:
   --year <year>                Season year (defaults to current_season.year)
-  --week <week>                Week number (default: 1)
-  --dry-run                    Validate connection + read access only;
-                               do not write to the database
+  --week <week>                Single week to scope transaction fetches.
+                               When omitted, transactions iterate the full
+                               season (weeks 1-18) and concatenate.
+  --dry-run                    Read-only run: fetches league config,
+                               rosters, transactions, and players, reports
+                               counts, but does not write to the database.
+  --include-players <mode>     'rostered' (default), 'all', or 'none'.
+                               'rostered' intersects the platform's global
+                               player catalog with players appearing on a
+                               roster; 'all' returns the global catalog;
+                               'none' skips the player fetch entirely.
   --credentials-key <path>     Dot-separated key path into #config that holds
                                the credentials object (e.g.
                                external_fantasy_leagues.espn)
@@ -76,6 +84,22 @@ function format_summary(result) {
   if (typeof result.duration_ms === 'number') {
     lines.push(`Duration:           ${result.duration_ms} ms`)
   }
+  if (result.validation && Object.keys(result.validation).length > 0) {
+    const v = result.validation
+    if (typeof v.team_count === 'number') {
+      lines.push(`Teams:              ${v.team_count}`)
+    }
+    if (typeof v.roster_count === 'number') {
+      lines.push(`Rosters:            ${v.roster_count}`)
+    }
+    if (typeof v.transaction_count === 'number') {
+      lines.push(`Transactions:       ${v.transaction_count}`)
+    }
+    if (typeof v.player_count === 'number') {
+      const mode_label = v.players_mode ? ` (${v.players_mode})` : ''
+      lines.push(`Players:            ${v.player_count}${mode_label}`)
+    }
+  }
   if (result.sync_stats) {
     const s = result.sync_stats
     lines.push(`Players mapped:     ${s.players_mapped ?? 0}`)
@@ -103,7 +127,8 @@ async function main() {
     year: null,
     week: null,
     dry_run: false,
-    credentials_key: null
+    credentials_key: null,
+    include_players: null
   }
 
   for (let i = 0; i < argv.length; i++) {
@@ -135,6 +160,18 @@ async function main() {
       case '--dry-run':
         options.dry_run = true
         break
+      case '--include-players': {
+        const raw = take_value()
+        const valid = ['rostered', 'all', 'none']
+        if (!valid.includes(raw)) {
+          console.error(
+            `Invalid --include-players value: ${raw} (must be one of ${valid.join(', ')})`
+          )
+          process.exit(1)
+        }
+        options.include_players = raw === 'none' ? false : raw
+        break
+      }
       case '--credentials-key':
         options.credentials_key = take_value()
         break
@@ -163,6 +200,9 @@ async function main() {
   const sync_options = {}
   if (options.year != null) sync_options.year = options.year
   if (options.week != null) sync_options.week = options.week
+  if (options.include_players != null) {
+    sync_options.include_players = options.include_players
+  }
 
   const orchestrator = new SyncOrchestrator()
   const mode = options.dry_run ? 'dry-run' : 'full'

@@ -42,6 +42,111 @@ export class SyncUtils {
   }
 
   /**
+   * Fetch transactions across one or more weeks.
+   *
+   * Sleeper's transactions endpoint is per-week (`/league/{id}/transactions/{week}`),
+   * so a default invocation that doesn't specify a week would otherwise
+   * return only the current week. When `week` is undefined, iterate the
+   * full regular-season range with bounded concurrency and concatenate;
+   * this matches the dominant full-season import use case while preserving
+   * the fast per-week path for incremental syncs.
+   *
+   * @param {Object} options
+   * @param {Object} options.adapter - Platform adapter instance
+   * @param {string} options.league_id - External league ID
+   * @param {number} [options.year]
+   * @param {number} [options.week] - When undefined, iterate weeks 1..max_week
+   * @param {number} [options.max_week=18]
+   * @param {number} [options.concurrency=4]
+   * @returns {Promise<Array>} Concatenated transaction array
+   */
+  async fetch_transactions_in_range({
+    adapter,
+    league_id,
+    year,
+    week,
+    max_week = 18,
+    concurrency = 4
+  }) {
+    if (typeof week === 'number') {
+      const single = await adapter.get_transactions({
+        league_id,
+        options: { week },
+        year
+      })
+      return Array.isArray(single) ? single : []
+    }
+
+    const weeks = []
+    for (let w = 1; w <= max_week; w += 1) weeks.push(w)
+
+    const results = []
+    for (let i = 0; i < weeks.length; i += concurrency) {
+      const batch = weeks.slice(i, i + concurrency)
+      const batch_results = await Promise.all(
+        batch.map((w) =>
+          adapter.get_transactions({
+            league_id,
+            options: { week: w },
+            year
+          })
+        )
+      )
+      for (const r of batch_results) {
+        if (Array.isArray(r)) results.push(...r)
+      }
+    }
+    return results
+  }
+
+  /**
+   * Intersect a global player catalog with the player IDs that appear on
+   * the supplied roster set. Used to scope `fetch_league_data` output to
+   * league-relevant players when `include_players` is left at its default.
+   *
+   * @param {Object} options
+   * @param {Array} options.players - Canonical player array from adapter.get_players
+   * @param {Array} options.rosters - Canonical roster array from adapter.get_rosters
+   * @returns {Array} Subset of `players` whose external IDs appear on a roster
+   */
+  filter_players_to_rostered({ players, rosters }) {
+    if (!Array.isArray(players) || players.length === 0) return []
+    if (!Array.isArray(rosters) || rosters.length === 0) return []
+
+    const collect_ids = (player) => {
+      const ids = []
+      if (player?.player_ids && typeof player.player_ids === 'object') {
+        for (const value of Object.values(player.player_ids)) {
+          if (value != null) ids.push(String(value))
+        }
+      }
+      if (player?.external_id != null) ids.push(String(player.external_id))
+      if (player?.external_player_id != null) {
+        ids.push(String(player.external_player_id))
+      }
+      return ids
+    }
+
+    const rostered = new Set()
+    for (const roster of rosters) {
+      if (!Array.isArray(roster?.players)) continue
+      for (const player of roster.players) {
+        if (typeof player === 'string' || typeof player === 'number') {
+          rostered.add(String(player))
+          continue
+        }
+        for (const id of collect_ids(player)) rostered.add(id)
+      }
+    }
+
+    if (rostered.size === 0) return []
+
+    return players.filter((player) =>
+      collect_ids(player).some((id) => rostered.has(id))
+    )
+  }
+
+  /**
    * Initialize sync statistics object
    * @returns {Object} Initialized sync statistics
    */

@@ -316,6 +316,126 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
     })
   })
 
+  describe('fetch_transactions_in_range', function () {
+    it('iterates weeks 1..18 and concatenates when week is undefined', async function () {
+      const calls = []
+      const stub_adapter = {
+        get_transactions: async ({ league_id, options }) => {
+          calls.push(options.week)
+          return [{ transaction_id: `${league_id}-${options.week}-a` }]
+        }
+      }
+
+      const result = await orchestrator.sync_utils.fetch_transactions_in_range(
+        {
+          adapter: stub_adapter,
+          league_id: 'L1',
+          year: 2025
+        }
+      )
+
+      calls.should.have.length(18)
+      const sorted = [...calls].sort((a, b) => a - b)
+      sorted.should.deep.equal([
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
+      ])
+      result.should.have.length(18)
+    })
+
+    it('issues a single call when week is a number', async function () {
+      const calls = []
+      const stub_adapter = {
+        get_transactions: async ({ options }) => {
+          calls.push(options.week)
+          return [{ transaction_id: `t-${options.week}` }]
+        }
+      }
+
+      const result = await orchestrator.sync_utils.fetch_transactions_in_range(
+        {
+          adapter: stub_adapter,
+          league_id: 'L1',
+          year: 2025,
+          week: 5
+        }
+      )
+
+      calls.should.deep.equal([5])
+      result.should.have.length(1)
+      result[0].should.have.property('transaction_id', 't-5')
+    })
+
+    it('respects custom max_week and concurrency bound', async function () {
+      let in_flight = 0
+      let peak = 0
+      const stub_adapter = {
+        get_transactions: async () => {
+          in_flight += 1
+          peak = Math.max(peak, in_flight)
+          await new Promise((resolve) => setTimeout(resolve, 5))
+          in_flight -= 1
+          return []
+        }
+      }
+
+      await orchestrator.sync_utils.fetch_transactions_in_range({
+        adapter: stub_adapter,
+        league_id: 'L1',
+        max_week: 6,
+        concurrency: 2
+      })
+
+      peak.should.be.at.most(2)
+    })
+  })
+
+  describe('filter_players_to_rostered', function () {
+    it('returns the subset of the global catalog whose IDs appear on a roster', function () {
+      const players = [
+        { player_ids: { sleeper_id: '111' }, name: 'on roster' },
+        { player_ids: { sleeper_id: '222' }, name: 'on roster too' },
+        { player_ids: { sleeper_id: '999' }, name: 'free agent' }
+      ]
+      const rosters = [
+        { players: [{ player_ids: { sleeper_id: '111' } }] },
+        { players: [{ player_ids: { sleeper_id: '222' } }] }
+      ]
+
+      const filtered = orchestrator.sync_utils.filter_players_to_rostered({
+        players,
+        rosters
+      })
+      filtered.should.have.length(2)
+      filtered.map((p) => p.player_ids.sleeper_id).should.deep.equal([
+        '111',
+        '222'
+      ])
+    })
+
+    it('returns an empty array when no rosters are provided', function () {
+      const filtered = orchestrator.sync_utils.filter_players_to_rostered({
+        players: [{ player_ids: { sleeper_id: '111' } }],
+        rosters: []
+      })
+      filtered.should.deep.equal([])
+    })
+
+    it('treats string-id roster entries the same as object entries', function () {
+      const players = [
+        { player_ids: { sleeper_id: '111' } },
+        { player_ids: { sleeper_id: '222' } }
+      ]
+      const rosters = [{ players: ['111'] }]
+
+      const filtered = orchestrator.sync_utils.filter_players_to_rostered({
+        players,
+        rosters
+      })
+      filtered.should.have.length(1)
+      filtered[0].player_ids.sleeper_id.should.equal('111')
+    })
+  })
+
   // Note: Full sync_league integration tests would require database setup
   // and actual platform API calls. These tests focus on unit-level
   // functionality. Integration tests should be added separately.

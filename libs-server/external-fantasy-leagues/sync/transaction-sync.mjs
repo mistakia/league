@@ -46,14 +46,18 @@ export class TransactionSync {
     try {
       log(`Syncing transactions for ${sync_context.platform}`)
 
-      const external_transactions = await adapter.get_transactions({
-        league_id: sync_context.external_league_id,
-        options: {
-          week: sync_context.week,
+      // sync_options.week is the caller's explicit scoping signal -- when
+      // the CLI omits --week we want a full-season iteration, not the
+      // sync_context.week default of 1 (which is meaningful for the
+      // snapshot-style roster/team steps but wrong for the per-week
+      // transactions endpoint).
+      const external_transactions =
+        await this.sync_utils.fetch_transactions_in_range({
+          adapter,
+          league_id: sync_context.external_league_id,
           year: sync_context.year,
-          limit: sync_options.transaction_limit || 100
-        }
-      })
+          week: sync_options.week
+        })
 
       if (progress_callback) {
         await progress_callback('Retrieved transaction data', 75, {
