@@ -152,7 +152,7 @@ const find_filter_param_value_disjoint_from_columns = ({ where, columns }) => {
           code: 'filter_param_value_disjoint_from_columns',
           severity: 'info',
           filter_index,
-          message: `Filter scopes "${key}" to ${filter_scope}, but columns carry ${column_scope}. Scopes do not overlap; results may be empty.`
+          message: `Filter scopes "${key}" to ${filter_scope}, but columns carry ${column_scope}. Scopes do not overlap; results may be unexpected.`
         })
       }
     }
