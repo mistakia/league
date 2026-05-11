@@ -3043,7 +3043,7 @@ export const getTeamEvents = createSelector(
       })
     }
 
-    if (nextPick) {
+    if (nextPick && nextPick.draftWindow) {
       events.push({
         detail: 'Your Next Pick',
         date: nextPick.draftWindow
