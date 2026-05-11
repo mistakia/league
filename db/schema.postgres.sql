@@ -396,7 +396,6 @@ ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP C
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.user_plays_views DROP CONSTRAINT IF EXISTS user_plays_views_pkey;
-ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS unique_super_priority;
 ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
@@ -26782,14 +26781,6 @@ ALTER TABLE ONLY public.super_priority
 
 ALTER TABLE ONLY public.urls
     ADD CONSTRAINT urls_url_hash_key UNIQUE (url_hash);
-
-
---
--- Name: urls urls_url_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.urls
-    ADD CONSTRAINT urls_url_key UNIQUE (url);
 
 
 --
