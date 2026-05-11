@@ -56,13 +56,27 @@ export default function ShortUrlResolver({
         const has_table_state =
           parsed.columns.length ||
           parsed.where.length ||
-          (parsed.prefix_columns.length && parsed.sort.length)
+          (parsed.prefix_columns.length && parsed.sort.length) ||
+          Object.keys(parsed.rank_aggregation || {}).length ||
+          Object.keys(parsed.scatter_plot_options || {}).length ||
+          parsed.disable_scatter_plot === true
 
         if (
           url_object.pathname === '/data-views' ||
           url_object.pathname.startsWith('/data-views/')
         ) {
           if (has_table_state) {
+            const next_table_state = {
+              columns: parsed.columns,
+              sort: parsed.sort,
+              where: parsed.where,
+              prefix_columns: parsed.prefix_columns,
+              splits: parsed.splits,
+              q: parsed.q,
+              rank_aggregation: parsed.rank_aggregation,
+              scatter_plot_options: parsed.scatter_plot_options,
+              disable_scatter_plot: parsed.disable_scatter_plot
+            }
             data_view_changed(
               {
                 // Preserve the URL's view_id so re-shortening from a /u/<hash>
@@ -73,20 +87,8 @@ export default function ShortUrlResolver({
                 view_name: parsed.view_name,
                 view_search_column_id: parsed.view_search_column_id,
                 view_description: parsed.view_description,
-                table_state: {
-                  columns: parsed.columns,
-                  sort: parsed.sort,
-                  where: parsed.where,
-                  prefix_columns: parsed.prefix_columns,
-                  splits: parsed.splits
-                },
-                saved_table_state: {
-                  columns: parsed.columns,
-                  sort: parsed.sort,
-                  where: parsed.where,
-                  prefix_columns: parsed.prefix_columns,
-                  splits: parsed.splits
-                }
+                table_state: next_table_state,
+                saved_table_state: next_table_state
               },
               { view_state_changed: true }
             )
@@ -101,23 +103,23 @@ export default function ShortUrlResolver({
           url_object.pathname.startsWith('/plays/')
         ) {
           if (has_table_state) {
+            const next_table_state = {
+              columns: parsed.columns,
+              sort: parsed.sort,
+              where: parsed.where,
+              prefix_columns: parsed.prefix_columns,
+              q: parsed.q,
+              rank_aggregation: parsed.rank_aggregation,
+              scatter_plot_options: parsed.scatter_plot_options,
+              disable_scatter_plot: parsed.disable_scatter_plot
+            }
             plays_view_changed(
               {
                 view_id: parsed.view_id || generate_view_id(),
                 view_name: parsed.view_name,
                 view_description: parsed.view_description,
-                table_state: {
-                  columns: parsed.columns,
-                  sort: parsed.sort,
-                  where: parsed.where,
-                  prefix_columns: parsed.prefix_columns
-                },
-                saved_table_state: {
-                  columns: parsed.columns,
-                  sort: parsed.sort,
-                  where: parsed.where,
-                  prefix_columns: parsed.prefix_columns
-                }
+                table_state: next_table_state,
+                saved_table_state: next_table_state
               },
               { view_state_changed: true }
             )

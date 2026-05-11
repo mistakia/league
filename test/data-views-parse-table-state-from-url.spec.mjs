@@ -62,10 +62,39 @@ describe('parse_table_state_from_url', function () {
     out.where.should.deep.equal([])
     out.sort.should.deep.equal([])
     out.splits.should.deep.equal([])
+    out.q.should.equal('')
+    out.rank_aggregation.should.deep.equal({})
+    out.scatter_plot_options.should.deep.equal({})
+    out.disable_scatter_plot.should.equal(false)
     out.view_id.should.equal('')
     out.view_name.should.equal('')
     out.view_search_column_id.should.equal('')
     out.view_description.should.equal('')
+  })
+
+  it('parses q, rank_aggregation, scatter_plot_options, disable_scatter_plot, view_search_column_id', () => {
+    const sp = build({
+      q: 'mahomes',
+      rank_aggregation: JSON.stringify({ weights: { a: 1.0 } }),
+      scatter_plot_options: JSON.stringify({ x: 'a', y: 'b' }),
+      disable_scatter_plot: 'true',
+      view_search_column_id: 'player_name'
+    })
+    const out = parse_table_state_from_url(sp)
+    out.q.should.equal('mahomes')
+    out.rank_aggregation.should.deep.equal({ weights: { a: 1.0 } })
+    out.scatter_plot_options.should.deep.equal({ x: 'a', y: 'b' })
+    out.disable_scatter_plot.should.equal(true)
+    out.view_search_column_id.should.equal('player_name')
+  })
+
+  it('returns a flat object shape (not the helper two-key wrapper) so call sites destructure unchanged', () => {
+    const sp = build({ columns: JSON.stringify(['a']), view_id: 'v1' })
+    const out = parse_table_state_from_url(sp)
+    out.should.have.property('columns')
+    out.should.have.property('view_id')
+    out.should.not.have.property('table_state')
+    out.should.not.have.property('view_fields')
   })
 
   it('treats "null" json values as empty arrays / strings', () => {

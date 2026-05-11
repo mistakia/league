@@ -105,17 +105,37 @@ export default function DataViewsPage({
         where,
         sort,
         splits,
+        q,
+        rank_aggregation,
+        scatter_plot_options,
+        disable_scatter_plot,
         view_name,
         view_search_column_id,
         view_description
       } = parse_table_state_from_url(search_params)
 
       const has_table_state =
-        columns.length || where.length || (prefix_columns.length && sort.length)
+        columns.length ||
+        where.length ||
+        (prefix_columns.length && sort.length) ||
+        Object.keys(rank_aggregation || {}).length ||
+        Object.keys(scatter_plot_options || {}).length ||
+        disable_scatter_plot === true
 
       // Only handle URL-based table state initialization
       // Browser state restoration and default view selection is handled by sagas
       if (has_table_state) {
+        const next_table_state = {
+          columns,
+          sort,
+          where,
+          prefix_columns,
+          splits,
+          q,
+          rank_aggregation,
+          scatter_plot_options,
+          disable_scatter_plot
+        }
         data_view_changed(
           {
             // generate a new view_id to make sure it doesn't conflict with a saved view
@@ -123,20 +143,8 @@ export default function DataViewsPage({
             view_name,
             view_search_column_id,
             view_description,
-            table_state: {
-              columns,
-              sort,
-              where,
-              prefix_columns,
-              splits
-            },
-            saved_table_state: {
-              columns,
-              sort,
-              where,
-              prefix_columns,
-              splits
-            }
+            table_state: next_table_state,
+            saved_table_state: next_table_state
           },
           {
             view_state_changed: true

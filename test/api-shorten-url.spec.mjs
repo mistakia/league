@@ -145,7 +145,7 @@ describe('API /api/u (shortened URL)', function () {
       post_second.body.url.should.equal(canonical)
     })
 
-    it('falls back to storing as-is when inner hash is unknown', async () => {
+    it('returns 400 inner_hash_not_found when the chained URL points to an unknown hash', async () => {
       const orphaned_url =
         'https://localhost/u/0000000000000000000000000000000000000000?columns=%5B%5D'
       const res = await chai_request
@@ -153,8 +153,62 @@ describe('API /api/u (shortened URL)', function () {
         .post('/api/u')
         .send({ url: orphaned_url })
 
-      res.should.have.status(200)
-      res.body.url.should.equal(orphaned_url)
+      res.should.have.status(400)
+      res.body.should.have.property('error').that.equals('inner_hash_not_found')
+    })
+
+    it('returns 400 short_url_cycle when chained hashes loop', async () => {
+      // Build two rows whose stored URLs reference each other, then POST a
+      // chained URL that resolves into that cycle. We seed the rows directly
+      // via the API by shortening canonical URLs, then manually rewriting one
+      // row in the DB to point back at the other to form a cycle.
+      const { default: db } = await import('#db')
+
+      const canonical_a = 'https://localhost/data-views?columns=%5B%22a%22%5D'
+      const canonical_b = 'https://localhost/data-views?columns=%5B%22b%22%5D'
+      const post_a = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: canonical_a })
+      const post_b = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: canonical_b })
+      const hash_a = post_a.body.url_hash
+      const hash_b = post_b.body.url_hash
+
+      await db('urls')
+        .where('url_hash', hash_a)
+        .update({ url: `https://localhost/u/${hash_b}` })
+      await db('urls')
+        .where('url_hash', hash_b)
+        .update({ url: `https://localhost/u/${hash_a}` })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: `https://localhost/u/${hash_a}?columns=%5B%5D` })
+
+      res.should.have.status(400)
+      res.body.should.have.property('error').that.equals('short_url_cycle')
+    })
+
+    it('deduplicates identical canonical URLs via url_hash onConflict', async () => {
+      const canonical =
+        'https://localhost/data-views?view_id=dedup-id&columns=%5B%22dedup%22%5D'
+      const post_first = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: canonical })
+      const post_second = await chai_request
+        .execute(server)
+        .post('/api/u')
+        .send({ url: canonical })
+
+      post_first.should.have.status(200)
+      post_second.should.have.status(200)
+      post_second.body.url_hash.should.equal(post_first.body.url_hash)
+      post_second.body.url.should.equal(canonical)
     })
   })
 })

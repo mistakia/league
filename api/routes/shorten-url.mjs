@@ -11,27 +11,24 @@ const get_url_hash = (url) => {
   return get_blake2b_hash(url, 16)
 }
 
-const canonicalize_short_url = async ({ url, logger }) => {
-  try {
-    const url_object = await resolve_short_url_chain({
-      initial_url: url,
-      fetch_url_by_hash: async (inner_hash) => {
-        const row = await db('urls').where('url_hash', inner_hash).first()
-        if (!row) {
-          throw new Error('inner_hash_not_found')
-        }
-        return row.url
+const CANONICALIZE_ERROR_CODES = new Set([
+  'inner_hash_not_found',
+  'short_url_cycle',
+  'short_url_max_depth_exceeded'
+])
+
+const canonicalize_short_url = async ({ url }) => {
+  const url_object = await resolve_short_url_chain({
+    initial_url: url,
+    fetch_url_by_hash: async (inner_hash) => {
+      const row = await db('urls').where('url_hash', inner_hash).first()
+      if (!row) {
+        throw new Error('inner_hash_not_found')
       }
-    })
-    return url_object.toString()
-  } catch (error) {
-    if (typeof logger === 'function') {
-      logger(
-        `shorten-url: failed to canonicalize chained URL (${error.message}); storing as-is`
-      )
+      return row.url
     }
-    return url
-  }
+  })
+  return url_object.toString()
 }
 
 /**
@@ -99,6 +96,18 @@ const canonicalize_short_url = async ({ url, logger }) => {
  *             summary: Invalid domain
  *             value:
  *               error: "Invalid domain"
+ *           inner_hash_not_found:
+ *             summary: Chained /u/<hash> URL whose inner hash is not stored
+ *             value:
+ *               error: "inner_hash_not_found"
+ *           short_url_cycle:
+ *             summary: Chained URL whose inner hashes cycle
+ *             value:
+ *               error: "short_url_cycle"
+ *           short_url_max_depth_exceeded:
+ *             summary: Chained URL exceeded the maximum chain depth
+ *             value:
+ *               error: "short_url_max_depth_exceeded"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -120,12 +129,15 @@ router.post('/?', async (req, res) => {
     // Defense-in-depth: if the client submitted a chained /u/<hash>... URL,
     // resolve the chain and store/hash the canonical URL. Old/buggy clients
     // can no longer pollute the table with chains.
-    const url = await canonicalize_short_url({ url: incoming_url, logger })
+    const url = await canonicalize_short_url({ url: incoming_url })
     const url_hash = get_url_hash(url)
-    await db('urls').insert({ url, url_hash }).onConflict('url').ignore()
+    await db('urls').insert({ url, url_hash }).onConflict('url_hash').ignore()
     const short_url = `/u/${url_hash}`
     res.json({ short_url, url, url_hash })
   } catch (error) {
+    if (CANONICALIZE_ERROR_CODES.has(error.message)) {
+      return res.status(400).json({ error: error.message })
+    }
     logger.error(error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
