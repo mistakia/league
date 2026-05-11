@@ -1,14 +1,12 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
-import { useLocation, NavLink, useParams, useNavigate } from 'react-router-dom'
+import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import generate_view_id from 'react-table/src/utils/generate-view-id.js'
 
 import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
-import Button from '@components/button'
 import ClearDataViewCacheConfirmation from '@components/clear-data-view-cache-confirmation'
 import { Team } from '@core/teams'
 import {
@@ -21,6 +19,8 @@ import parse_table_state_from_url from '@core/data-views/parse-table-state-from-
 import { nfl_team_abbreviations } from '@constants'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
+import DataViewFilterChips from '@components/data-view-filter-chips'
+import DataViewNotices from '@components/data-view-notices'
 
 import './data-views.styl'
 
@@ -87,6 +87,7 @@ export default function DataViewsPage({
   const navigate = useNavigate()
   const { view_id } = useParams()
   const [cache_clear_dialog_open, set_cache_clear_dialog_open] = useState(false)
+  const [filter_controls_open, set_filter_controls_open] = useState(false)
 
   useEffect(() => {
     load_data_views()
@@ -341,18 +342,6 @@ export default function DataViewsPage({
   ) : (
     <div className='page-table__container'>
       {render_request_status()}
-      <div className='page-table__container-help'>
-        <div className='page-table__container-help-info'>
-          <InfoOutlinedIcon />
-          <span>
-            Visit the <NavLink to='/guides/data-views'>guide</NavLink> to learn
-            how to build data views.
-          </span>
-        </div>
-        <Button text onClick={() => set_cache_clear_dialog_open(true)}>
-          Clear local cache
-        </Button>
-      </div>
       {cache_clear_dialog_open && (
         <ClearDataViewCacheConfirmation
           onClose={() => set_cache_clear_dialog_open(false)}
@@ -360,8 +349,19 @@ export default function DataViewsPage({
         />
       )}
       <Table
+        controls_extension={
+          <>
+            <DataViewFilterChips
+              set_filter_controls_open={set_filter_controls_open}
+            />
+            <DataViewNotices />
+          </>
+        }
+        clear_local_cache={() => set_cache_clear_dialog_open(true)}
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
         data={players}
+        filter_controls_open={filter_controls_open}
+        set_filter_controls_open={set_filter_controls_open}
         metadata={data_view_request.metadata}
         on_view_change={on_view_change}
         on_save_view={save_data_view}

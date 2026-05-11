@@ -3882,7 +3882,8 @@ export const get_selected_data_view = createSelector(
         columns: Array.isArray(table_state.columns) ? table_state.columns : [],
         prefix_columns: Array.isArray(table_state.prefix_columns)
           ? table_state.prefix_columns
-          : []
+          : [],
+        where: Array.isArray(table_state.where) ? table_state.where : []
       }
     }
   }

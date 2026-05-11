@@ -1,0 +1,36 @@
+.data-view-notices
+  display flex
+  flex-direction column
+  gap 4px
+
+.data-view-notice
+  display flex
+  align-items center
+  gap 8px
+  padding 6px 10px
+  border 1px solid rgba(2, 136, 209, 0.35)
+  border-radius 4px
+  background rgb(229, 246, 253)
+  color rgb(1, 67, 97)
+  font 400 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+
+  .data-view-notice__icon
+    flex-shrink 0
+    color rgb(2, 136, 209)
+
+  .data-view-notice__message
+    flex 1
+
+  .data-view-notice__dismiss
+    flex-shrink 0
+    background transparent
+    border 0
+    padding 0 4px
+    cursor pointer
+    color rgb(1, 67, 97)
+    font-size 18px
+    line-height 1
+    opacity 0.55
+
+    &:hover
+      opacity 1

@@ -1675,6 +1675,43 @@ The endpoint caches via `redis_cache` at TTL 600 seconds, keyed by `param-option
 2. The reducer at `app/core/data-view-request/reducer.js` stores results under `param_option_counts[param_name][signature] = count`. The `DATA_VIEW_RESULT` reducer path does not dispatch `DATA_VIEW_CHANGED`, preventing fetch -> result -> fetch feedback.
 3. `get_enriched_data_views_fields` in `app/core/selectors.js` overlays live counts onto each `column_param_definition.preset_values[*].n` for OBJECT_PRESET params, then feeds the enriched fields to `<Table all_columns={...} />`.
 
+## Notices and Filter Chips
+
+The player-centric data-views page renders two client-only surfaces below the table's view controller (the search/controls row with Columns / Filter / Splits) and above the column headers, to make filter scope legible and to flag likely misconfigurations. They live in `react-table`'s `Table.controls_extension` slot, so they share the same sticky-left alignment as `table-quick-filters`.
+
+### Filter chip strip
+
+`<DataViewFilterChips>` renders one rectangular chip per active filter. Each chip's label is `column operator value - scope` (e.g. `Targets >= 100 - 2025 REG`); the scope segment is omitted when the filter has no time-scoped params. Clicking any chip opens the filter-controls panel (it does not focus a specific filter). The chip open path bypasses `add_where_params_from_columns` injection that `react-table`'s `TableFilterControls.handle_menu_toggle` runs when its own toggle is clicked -- intentional in v1: a chip click is "inspect existing filters", not "seed new ones".
+
+State plumbing: the panel's open/close state lives in `DataViewsPage` (`useState`) and is passed to both `<Table>` (controlled props `filter_controls_open` / `set_filter_controls_open` on `react-table`'s `Table`) and `<DataViewFilterChips>`. When the panel opens with filters present, `TableFilterControls` collapses the "Available Filters" tree once per open transition (ref-gated) so the user lands on "Selected Filters" without fighting later manual expansion.
+
+### Notices
+
+Below the chip strip, `<DataViewNotices>` renders soft-blue info notices (severity = info, inline SVG glyph, no MUI Alert) for any items emitted by the client selector `get_data_view_notices`. Each notice is dismissible per session via local `useState`; the container returns `null` when empty.
+
+Current notice codes:
+
+| Code                                       | Trigger                                                                                                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filter_param_key_absent_from_columns`     | A filter declares a param key (e.g. `nfl_week_id`, `scoring_format_hash`) that no active display column uses.                                                             |
+| `filter_param_value_disjoint_from_columns` | Both filter and column carry the same param key, but the filter's resolved value set is fully disjoint from every column's value set for that key.                       |
+
+Rule #2 includes a minimal client-side resolver for the `nfl_week_id` `dynamic_type` values that `process_dynamic_params` handles server-side (`current_year_reg_weeks`, `current_nfl_week`, `last_n_nfl_weeks`, `last_n_nfl_years`); other dynamic types skip the check rather than risk false positives.
+
+### File map
+
+| File                                                            | Role                                                          |
+| --------------------------------------------------------------- | ------------------------------------------------------------- |
+| `app/core/data-views/format-param-scope.mjs`                    | Pure formatter shared by chips and notices                    |
+| `app/core/data-views/active-filter-summaries.mjs`               | Selector input -> chip-shaped summaries                       |
+| `app/core/data-views/data-view-notices.mjs`                     | The two notice rules, concatenated by `get_data_view_notices` |
+| `app/views/components/data-view-filter-chips/`                  | Chip container + view + styles                                |
+| `app/views/components/data-view-notices/`                       | Notice container + view + styles                              |
+
+### Adding a third notice
+
+Add another `find_*` function inside `data-view-notices.mjs` and concat its output in the exported selector. Promote to a registry only at three rules (rule of three).
+
 ## Related Documentation
 
 ### Schema and Validation
