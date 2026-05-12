@@ -1,4 +1,4 @@
-import { parse_url_params_to_table_state } from 'react-table/src/utils/parse-url-params-to-table-state.js'
+import { parse_url_params_to_table_state } from 'react-table/src/utils/parse-url-params-to-table-state.mjs'
 
 import {
   migrate_entries_array,
