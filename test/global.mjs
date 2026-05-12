@@ -2,7 +2,7 @@ import knex from '#db'
 import path, { dirname } from 'path'
 import fs from 'fs/promises'
 import { fileURLToPath } from 'url'
-import scoring_formats_seed from '#db/seeds/scoring-formats.mjs'
+import scoring_formats_seed from '#db/fixtures/scoring-formats.mjs'
 import server from '#api'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))

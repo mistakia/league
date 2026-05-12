@@ -4,7 +4,7 @@
 import knex from '#db'
 import MockDate from 'mockdate'
 
-import league from '#db/seeds/league.mjs'
+import league from '#db/fixtures/league.mjs'
 import { current_season } from '#constants'
 
 process.env.NODE_ENV = 'test'

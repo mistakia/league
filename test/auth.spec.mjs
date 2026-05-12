@@ -4,7 +4,7 @@ import chai_http, { request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
-import users from '#db/seeds/users.mjs'
+import users from '#db/fixtures/users.mjs'
 import { error } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'

@@ -10,7 +10,7 @@ import {
   current_season
 } from '#constants'
 import { addPlayer, selectPlayer, fillRoster } from './utils/index.mjs'
-import league from '#db/seeds/league.mjs'
+import league from '#db/fixtures/league.mjs'
 import { processPoach } from '#libs-server'
 
 chai.should()

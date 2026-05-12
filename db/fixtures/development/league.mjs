@@ -1,9 +1,9 @@
-import draft from '#db/seeds/draft.mjs'
-import league from '#db/seeds/league.mjs'
-import users from '#db/seeds/users.mjs'
-import matchups from '#db/seeds/matchups.mjs'
-import draftPicks from '#db/seeds/draft-picks.mjs'
-import nflTeams from '#db/seeds/nfl-teams.mjs'
+import draft from '#db/fixtures/draft.mjs'
+import league from '#db/fixtures/league.mjs'
+import users from '#db/fixtures/users.mjs'
+import matchups from '#db/fixtures/matchups.mjs'
+import draftPicks from '#db/fixtures/draft-picks.mjs'
+import nflTeams from '#db/fixtures/nfl-teams.mjs'
 
 export async function seed(knex, Promise) {
   try {

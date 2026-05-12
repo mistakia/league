@@ -2,7 +2,7 @@
 import * as chai from 'chai'
 
 import knex from '#db'
-import league_seed from '#db/seeds/league.mjs'
+import league_seed from '#db/fixtures/league.mjs'
 import { current_season } from '#constants'
 import {
   bookmakers,

@@ -4,7 +4,7 @@ import * as chai from 'chai'
 import MockDate from 'mockdate'
 
 import knex from '#db'
-import league from '#db/seeds/league.mjs'
+import league from '#db/fixtures/league.mjs'
 import {
   current_season,
   roster_slot_types,

@@ -6,7 +6,7 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 
-import user from '#db/seeds/user.mjs'
+import user from '#db/fixtures/user.mjs'
 import { current_season } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {

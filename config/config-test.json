@@ -16,7 +16,7 @@
       "multipleStatements": true
     },
     "seeds": {
-      "directory": "./db/seeds/test",
+      "directory": "./db/fixtures/test",
       "loadExtensions": [".mjs"]
     }
   }

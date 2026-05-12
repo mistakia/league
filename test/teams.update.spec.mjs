@@ -4,7 +4,7 @@ import chai_http, { request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
-import league from '#db/seeds/league.mjs'
+import league from '#db/fixtures/league.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
 import { notLoggedIn, missing, invalid } from './utils/index.mjs'
 import { current_season } from '#constants'

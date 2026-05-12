@@ -6,7 +6,7 @@ import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
 import knex from '#db'
-import league from '#db/seeds/league.mjs'
+import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types, player_tag_types } from '#constants'
 import { Roster } from '#libs-shared'
 import { getLeague, getRoster } from '#libs-server'

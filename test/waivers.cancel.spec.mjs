@@ -5,8 +5,8 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 
-import league from '#db/seeds/league.mjs'
-import draftPicks from '#db/seeds/draft-picks.mjs'
+import league from '#db/fixtures/league.mjs'
+import draftPicks from '#db/fixtures/draft-picks.mjs'
 import {
   current_season,
   waiver_types,

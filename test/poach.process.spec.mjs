@@ -12,7 +12,7 @@ import {
 } from '#constants'
 import { user1 } from './fixtures/token.mjs'
 import { addPlayer, selectPlayer } from './utils/index.mjs'
-import league from '#db/seeds/league.mjs'
+import league from '#db/fixtures/league.mjs'
 
 chai.should()
 process.env.NODE_ENV = 'test'

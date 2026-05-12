@@ -6,8 +6,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import knex from '#db'
-import league from '#db/seeds/league.mjs'
-import draft from '#db/seeds/draft.mjs'
+import league from '#db/fixtures/league.mjs'
+import draft from '#db/fixtures/draft.mjs'
 import {
   current_season,
   roster_slot_types,

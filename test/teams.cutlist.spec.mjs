@@ -5,7 +5,7 @@ import MockDate from 'mockdate'
 
 import server from '#api'
 import knex from '#db'
-import league from '#db/seeds/league.mjs'
+import league from '#db/fixtures/league.mjs'
 import { roster_slot_types, current_season } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {

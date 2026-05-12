@@ -4,7 +4,7 @@ import * as chai from 'chai'
 import MockDate from 'mockdate'
 
 import knex from '#db'
-import league_seed from '#db/seeds/league.mjs'
+import league_seed from '#db/fixtures/league.mjs'
 import { current_season, waiver_types } from '#constants'
 import get_top_practice_squad_waiver from '#libs-server/get-top-practice-squad-waiver.mjs'
 
