@@ -8,6 +8,10 @@ import get_param_option_counts, {
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import { nfl_plays_column_params } from '#libs-shared'
 import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
+import load_view_organization from '#libs-server/view-organization/load-view-organization.mjs'
+import add_user_tag from '#libs-server/view-organization/add-user-tag.mjs'
+import remove_user_tag from '#libs-server/view-organization/remove-user-tag.mjs'
+import toggle_favorite from '#libs-server/view-organization/toggle-favorite.mjs'
 
 const router = express.Router()
 
@@ -489,6 +493,27 @@ router.get('/?', async (req, res) => {
 })
 
 /**
+ * GET /data-views/organization
+ * Returns the authenticated user's favorites and tags for all their data views.
+ * Orphaned rows (from deleted views) are filtered server-side.
+ * NOTE: must be registered before GET /:data_view_id to avoid path collision.
+ */
+router.get('/organization', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+    const user_id = req.auth.userId
+    const result = await load_view_organization({ user_id, db })
+    res.status(200).send(result)
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+/**
  * @swagger
  * /data-views/{data_view_id}:
  *   get:
@@ -820,12 +845,11 @@ router.delete('/:view_id', async (req, res) => {
       return res.status(401).send({ error: 'invalid userId' })
     }
 
-    await db('user_data_views')
-      .where({
-        view_id,
-        user_id
-      })
-      .del()
+    await db.transaction(async (trx) => {
+      await trx('user_data_view_favorites').where({ view_id }).del()
+      await trx('user_data_view_tags').where({ view_id }).del()
+      await trx('user_data_views').where({ view_id, user_id }).del()
+    })
 
     res.status(200).send({ success: true })
   } catch (err) {
@@ -1242,6 +1266,96 @@ router.post('/param-option-counts', async (req, res) => {
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
+  }
+})
+
+// ======================================
+// View Organization endpoints (continued — favorites and tags mutation)
+// ======================================
+
+/**
+ * POST /data-views/:view_id/favorite
+ * Idempotently add a view to the user's favorites. Returns 200 even if already favorited.
+ */
+router.post('/:view_id/favorite', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+    const user_id = req.auth.userId
+    const { view_id } = req.params
+    await toggle_favorite({ user_id, view_id, action: 'insert', db })
+    res.status(200).send({ success: true })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+/**
+ * DELETE /data-views/:view_id/favorite
+ * Remove a view from the user's favorites. Idempotent (200 if not favorited).
+ */
+router.delete('/:view_id/favorite', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+    const user_id = req.auth.userId
+    const { view_id } = req.params
+    await toggle_favorite({ user_id, view_id, action: 'delete', db })
+    res.status(200).send({ success: true })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+/**
+ * POST /data-views/:view_id/tags
+ * Add a user-authored tag to a view. Idempotent. Body: { tag_name }
+ * Sanitizes tag_name and promotes existing source='llm' rows to source='user'.
+ */
+router.post('/:view_id/tags', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+    const user_id = req.auth.userId
+    const { view_id } = req.params
+    const { tag_name } = req.body || {}
+    const result = await add_user_tag({ user_id, view_id, tag_name, db })
+    res.status(200).send({ success: true, tag_name: result.tag_name })
+  } catch (err) {
+    if (err.status === 400) {
+      return res.status(400).send({ error: err.message })
+    }
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+/**
+ * DELETE /data-views/:view_id/tags/:tag_name
+ * Remove a user-authored tag from a view. Only removes source='user' rows.
+ * LLM-generated tags (source='llm') are unaffected.
+ */
+router.delete('/:view_id/tags/:tag_name', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
+    }
+    const user_id = req.auth.userId
+    const { view_id, tag_name } = req.params
+    await remove_user_tag({ user_id, view_id, tag_name, db })
+    res.status(200).send({ success: true })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
   }
 })
 
