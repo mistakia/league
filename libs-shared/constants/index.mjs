@@ -60,7 +60,11 @@ export {
 } from './player-status-constants.mjs'
 
 // NFL teams constants
-export { nfl_team_abbreviations } from './nfl-teams-constants.mjs'
+export {
+  nfl_team_abbreviations,
+  nfl_team_value_groups,
+  build_nfl_team_values
+} from './nfl-teams-constants.mjs'
 
 // Colleges constants
 export {

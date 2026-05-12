@@ -59,15 +59,15 @@ const plays_view_fields = {
     size: 60,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     column_values: [
-      'PASS',
-      'RUSH',
-      'PUNT',
-      'KICK',
-      'FGXP',
-      'NOPL',
-      'KOFF',
-      'ONSD',
-      'CONV'
+      { value: 'PASS', label: 'PASS', group: 'Pass' },
+      { value: 'RUSH', label: 'RUSH', group: 'Run' },
+      { value: 'PUNT', label: 'PUNT', group: 'Special' },
+      { value: 'KICK', label: 'KICK', group: 'Special' },
+      { value: 'FGXP', label: 'FGXP', group: 'Special' },
+      { value: 'NOPL', label: 'NOPL', group: 'Special' },
+      { value: 'KOFF', label: 'KOFF', group: 'Special' },
+      { value: 'ONSD', label: 'ONSD', group: 'Special' },
+      { value: 'CONV', label: 'CONV', group: 'Special' }
     ]
   }),
   play_off_team: play_text_field({

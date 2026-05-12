@@ -5,7 +5,10 @@ import PlayerRowNFLTeam from '@components/player-row-nfl-team'
 import PlayerRowPositionColumn from '@components/player-row-position-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { fantasy_positions, nfl_team_abbreviations } from '@constants'
+import {
+  build_nfl_team_values,
+  nfl_team_value_groups
+} from '@constants'
 
 const contract_field = (props) => ({
   ...props,
@@ -13,6 +16,10 @@ const contract_field = (props) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_groups: [COLUMN_GROUPS.PLAYER_CONTRACT]
 })
+
+const nfl_team_column_values = build_nfl_team_values([
+  { value: 'INA', label: 'Inactive / No Team', group: null }
+])
 
 export default function ({ is_logged_in }) {
   return {
@@ -36,7 +43,15 @@ export default function ({ is_logged_in }) {
       header_label: 'Pos',
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      column_values: ['TEAM', ...fantasy_positions],
+      column_values: [
+        { value: 'TEAM', label: 'TEAM', group: null },
+        { value: 'QB', label: 'QB', group: 'Offense' },
+        { value: 'RB', label: 'RB', group: 'Offense' },
+        { value: 'WR', label: 'WR', group: 'Offense' },
+        { value: 'TE', label: 'TE', group: 'Offense' },
+        { value: 'K', label: 'K', group: 'Special Teams' },
+        { value: 'DST', label: 'DST', group: 'Defense' }
+      ],
       player_value_path: 'pos',
       component: React.memo(PlayerRowPositionColumn),
       operators: [
@@ -58,7 +73,8 @@ export default function ({ is_logged_in }) {
         table_constants.TABLE_OPERATORS.IS_NULL,
         table_constants.TABLE_OPERATORS.IS_NOT_NULL
       ],
-      column_values: ['INA', ...nfl_team_abbreviations]
+      column_values: nfl_team_column_values,
+      column_value_groups: nfl_team_value_groups
     },
     player_height: {
       column_title: 'Height',
@@ -254,7 +270,8 @@ export default function ({ is_logged_in }) {
         table_constants.TABLE_OPERATORS.IS_NULL,
         table_constants.TABLE_OPERATORS.IS_NOT_NULL
       ],
-      column_values: ['INA', ...nfl_team_abbreviations]
+      column_values: nfl_team_column_values,
+      column_value_groups: nfl_team_value_groups
     },
     player_position_depth: {
       column_title: 'Position Depth',

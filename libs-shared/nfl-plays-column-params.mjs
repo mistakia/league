@@ -1,13 +1,20 @@
 import * as table_constants from 'react-table/src/constants.mjs'
-import { nfl_downs, nfl_quarters, nfl_team_abbreviations } from '#constants'
+import {
+  nfl_downs,
+  nfl_quarters,
+  nfl_team_abbreviations,
+  build_nfl_team_values,
+  nfl_team_value_groups
+} from '#constants'
 import { COLUMN_PARAM_GROUPS } from './column-param-groups.mjs'
-
 import {
   career_year,
   career_game,
   year_offset,
   nfl_week_id
 } from './common-column-params.mjs'
+
+const nfl_team_param_values = build_nfl_team_values()
 
 const score_diff_preset_values = [
   {
@@ -289,7 +296,15 @@ export default {
   },
 
   play_type: {
-    values: ['CONV', 'FGXP', 'KOFF', 'NOPL', 'PASS', 'PUNT', 'RUSH'],
+    values: [
+      { value: 'PASS', label: 'PASS', group: 'Pass' },
+      { value: 'RUSH', label: 'RUSH', group: 'Run' },
+      { value: 'CONV', label: 'CONV', group: 'Special' },
+      { value: 'FGXP', label: 'FGXP', group: 'Special' },
+      { value: 'KOFF', label: 'KOFF', group: 'Special' },
+      { value: 'NOPL', label: 'NOPL', group: 'Special' },
+      { value: 'PUNT', label: 'PUNT', group: 'Special' }
+    ],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
   },
@@ -820,16 +835,19 @@ export default {
   },
 
   pos_team: {
-    values: nfl_team_abbreviations,
+    values: nfl_team_param_values,
+    value_groups: nfl_team_value_groups,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
   off: {
-    values: nfl_team_abbreviations,
+    values: nfl_team_param_values,
+    value_groups: nfl_team_value_groups,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
   def: {
-    values: nfl_team_abbreviations,
+    values: nfl_team_param_values,
+    value_groups: nfl_team_value_groups,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
