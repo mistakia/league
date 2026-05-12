@@ -10,7 +10,9 @@ NODE_ENV=production node scripts/<script-name>.mjs [options]
 
 ## generate-data-view-llm-tags.mjs
 
-Generates LLM-derived descriptor tags for saved user data views using Claude Haiku 4.5. Tags are persisted to `user_data_view_tags` with `source='llm'` and complement the deterministic auto-tags produced at render time.
+**Status:** scaffolding pending integration with the thread-metadata-style LLM setup. Not currently executed against production — initial seeding (2026-05-12) ran via an interactive Claude session writing batched `db/adhoc/2026-05-12-seed-llm-tags-batch-*.sql` files; the embedded prompt template and validation rules in this script captured what the interactive run used and what the future automation will reuse.
+
+Generates LLM-derived descriptor tags for saved user data views. Tags are persisted to `user_data_view_tags` with `source='llm'` and complement the deterministic auto-tags produced at render time.
 
 ### CLI Invocation
 
