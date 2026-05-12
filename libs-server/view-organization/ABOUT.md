@@ -17,6 +17,7 @@ Server-side helpers for the view organization feature: favorites and user/LLM-au
 ## API Routes
 
 Defined in `api/routes/data-views.mjs`:
+
 - `GET /data-views/organization` — returns load-view-organization result
 - `POST /data-views/:view_id/favorite` — insert favorite (idempotent)
 - `DELETE /data-views/:view_id/favorite` — remove favorite

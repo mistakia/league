@@ -12,7 +12,12 @@
  * @param {import('knex').Knex} params.db
  * @returns {Promise<void>}
  */
-export default async function remove_user_tag({ user_id, view_id, tag_name, db }) {
+export default async function remove_user_tag({
+  user_id,
+  view_id,
+  tag_name,
+  db
+}) {
   await db('user_data_view_tags')
     .where({ user_id, view_id, tag_name, source: 'user' })
     .del()

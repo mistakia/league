@@ -109,5 +109,8 @@ export const post_data_view_favorite_actions = create_api_actions(
 export const delete_data_view_favorite_actions = create_api_actions(
   'DELETE_DATA_VIEW_FAVORITE'
 )
-export const post_data_view_tag_actions = create_api_actions('POST_DATA_VIEW_TAG')
-export const delete_data_view_tag_actions = create_api_actions('DELETE_DATA_VIEW_TAG')
+export const post_data_view_tag_actions =
+  create_api_actions('POST_DATA_VIEW_TAG')
+export const delete_data_view_tag_actions = create_api_actions(
+  'DELETE_DATA_VIEW_TAG'
+)

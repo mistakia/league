@@ -115,7 +115,8 @@ function derive_position(view, subject) {
 
   // Rules 5 & 6: fall back on subject
   if (subject === 'player-stats') return 'multi-position'
-  if (subject === 'team-stats' || subject === 'defense-stats') return 'team-level'
+  if (subject === 'team-stats' || subject === 'defense-stats')
+    return 'team-level'
 
   return null
 }
@@ -131,10 +132,7 @@ function derive_metric_domain(column_ids) {
     if (typeof id !== 'string') continue
 
     // betting-markets (first match wins)
-    if (
-      /game_prop_/.test(id) ||
-      /_betting_markets/.test(id)
-    ) {
+    if (/game_prop_/.test(id) || /_betting_markets/.test(id)) {
       return 'betting-markets'
     }
   }

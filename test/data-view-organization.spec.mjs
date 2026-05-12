@@ -38,10 +38,18 @@ describe('API /data-views (view organization)', function () {
     const pw2 = await bcrypt.hash('testpass2', salt)
 
     const [u1] = await knex('users')
-      .insert({ email: 'orgtest1@test.com', username: 'orgtest1', password: pw1 })
+      .insert({
+        email: 'orgtest1@test.com',
+        username: 'orgtest1',
+        password: pw1
+      })
       .returning('id')
     const [u2] = await knex('users')
-      .insert({ email: 'orgtest2@test.com', username: 'orgtest2', password: pw2 })
+      .insert({
+        email: 'orgtest2@test.com',
+        username: 'orgtest2',
+        password: pw2
+      })
       .returning('id')
 
     user1_id = u1.id || u1
@@ -138,8 +146,18 @@ describe('API /data-views (view organization)', function () {
     it('filters orphaned tags but preserves system-view tags', async function () {
       const orphan_view_id = 'orphan-view-tags-zzz'
       await knex('user_data_view_tags').insert([
-        { user_id: user1_id, view_id: orphan_view_id, tag_name: 'should-be-gone', source: 'user' },
-        { user_id: user1_id, view_id: 'SEASON_PROJECTIONS', tag_name: 'system-tag', source: 'user' }
+        {
+          user_id: user1_id,
+          view_id: orphan_view_id,
+          tag_name: 'should-be-gone',
+          source: 'user'
+        },
+        {
+          user_id: user1_id,
+          view_id: 'SEASON_PROJECTIONS',
+          tag_name: 'system-tag',
+          source: 'user'
+        }
       ])
 
       const res = await chai_request
@@ -366,12 +384,20 @@ describe('API /data-views (view organization)', function () {
       res.should.have.status(200)
 
       const row = await knex('user_data_view_tags')
-        .where({ user_id: user1_id, view_id: view_id_1, tag_name: 'llm-promoted' })
+        .where({
+          user_id: user1_id,
+          view_id: view_id_1,
+          tag_name: 'llm-promoted'
+        })
         .first()
       expect(row.source).to.equal('user')
 
       const count = await knex('user_data_view_tags')
-        .where({ user_id: user1_id, view_id: view_id_1, tag_name: 'llm-promoted' })
+        .where({
+          user_id: user1_id,
+          view_id: view_id_1,
+          tag_name: 'llm-promoted'
+        })
         .count('* as n')
       expect(Number(count[0].n)).to.equal(1)
     })

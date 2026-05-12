@@ -43,7 +43,10 @@ export default async function load_view_organization({ user_id, db }) {
     if (!tags_by_view_id[row.view_id]) {
       tags_by_view_id[row.view_id] = []
     }
-    tags_by_view_id[row.view_id].push({ name: row.tag_name, source: row.source })
+    tags_by_view_id[row.view_id].push({
+      name: row.tag_name,
+      source: row.source
+    })
   }
 
   return { favorites, tags_by_view_id }

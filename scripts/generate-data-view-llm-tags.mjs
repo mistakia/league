@@ -87,7 +87,12 @@ Examples:
   View "WOPR by Week" → ["usage-share", "weekly-split"]
   View "Airyards.com First Read" → ["research", "route-concept", "air-yards-share"]`
 
-const build_user_message = ({ view_name, view_description, table_state, user_tags }) => {
+const build_user_message = ({
+  view_name,
+  view_description,
+  table_state,
+  user_tags
+}) => {
   // Extract top columns by occurrence
   const columns = table_state?.columns || []
   const column_id_counts = {}
@@ -139,12 +144,15 @@ const validate_tags = (raw) => {
   }
 
   if (parsed.length < 1 || parsed.length > 4) {
-    throw new Error(`Expected 1-4 tags, got ${parsed.length}: ${JSON.stringify(parsed)}`)
+    throw new Error(
+      `Expected 1-4 tags, got ${parsed.length}: ${JSON.stringify(parsed)}`
+    )
   }
 
   const validated = []
   for (const tag of parsed) {
-    if (typeof tag !== 'string') throw new Error(`Non-string tag: ${JSON.stringify(tag)}`)
+    if (typeof tag !== 'string')
+      throw new Error(`Non-string tag: ${JSON.stringify(tag)}`)
 
     const t = tag.trim().toLowerCase()
 
@@ -175,7 +183,7 @@ const initialize_cli = () =>
       type: 'string'
     })
     .option('user-id', {
-      describe: 'Scope to one user\'s views',
+      describe: "Scope to one user's views",
       type: 'number'
     })
     .option('dry-run', {
@@ -196,7 +204,7 @@ const main = async () => {
   if (!api_key) {
     console.error(
       'Error: ANTHROPIC_API_KEY environment variable is not set.\n' +
-      'Export it before running: export ANTHROPIC_API_KEY=sk-ant-...'
+        'Export it before running: export ANTHROPIC_API_KEY=sk-ant-...'
     )
     process.exit(1)
   }
@@ -217,13 +225,11 @@ const main = async () => {
   if (argv['view-id']) {
     query = query.where('view_id', argv['view-id'])
   } else if (argv['user-id']) {
-    query = query
-      .where('user_id', argv['user-id'])
-      .where(function () {
-        this.whereNull('llm_tags_generated_at').orWhereRaw(
-          'updated_at > llm_tags_generated_at'
-        )
-      })
+    query = query.where('user_id', argv['user-id']).where(function () {
+      this.whereNull('llm_tags_generated_at').orWhereRaw(
+        'updated_at > llm_tags_generated_at'
+      )
+    })
   } else {
     query = query.where(function () {
       this.whereNull('llm_tags_generated_at').orWhereRaw(
@@ -239,7 +245,9 @@ const main = async () => {
   // Filter out system views
   const user_views = views.filter((v) => !system_view_ids_set.has(v.view_id))
 
-  log(`Processing ${user_views.length} views (${views.length - user_views.length} system views skipped)`)
+  log(
+    `Processing ${user_views.length} views (${views.length - user_views.length} system views skipped)`
+  )
 
   if (user_views.length === 0) {
     console.log('No views to process.')

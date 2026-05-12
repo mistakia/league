@@ -41,17 +41,20 @@ NODE_ENV=production ANTHROPIC_API_KEY=sk-ant-... node scripts/generate-data-view
 Model: `claude-haiku-4-5-20251001`
 
 Approximate token budget per view:
+
 - System prompt (cached): ~400 tokens input. With prompt caching the repeated system prompt costs ~0.03/1M tokens (cache read) after the first request in the batch.
 - User message (per-view): ~150-250 tokens input.
 - Output: 20-60 tokens.
 
 Claude Haiku 4.5 pricing (as of May 2026):
+
 - Input: $0.80 / 1M tokens
 - Cache write: $1.00 / 1M tokens (first call)
 - Cache read: $0.08 / 1M tokens (subsequent calls)
 - Output: $4.00 / 1M tokens
 
 Estimated cost for the 166-view power-user backfill (C5):
+
 - System prompt cache write (first call): 400 tokens × $1.00/1M ≈ $0.0004
 - System prompt cache reads (165 remaining): 165 × 400 × $0.08/1M ≈ $0.005
 - User messages: 166 × 200 tokens × $0.80/1M ≈ $0.027
@@ -63,11 +66,13 @@ Latency per view: 1-3 seconds (Haiku is fast). Full 166-view batch expected in 3
 ### Prompt Anatomy
 
 The system prompt (cached across the batch) provides:
+
 1. The task description and output format rules (JSON array, 1-4 tags, kebab-case)
 2. The complete auto-tag vocabulary exclusion list — tags that collide with this list are rejected at validation time
 3. Worked examples covering the main view clusters (DFS, dynasty, matchup-preview, game-situation, research, weekly-split)
 
 The per-view user message (not cached) provides:
+
 - `view_name` and `view_description`
 - Top 20 column IDs by occurrence frequency in `table_state.columns`
 - Where-clause column IDs and values from `table_state.where`
@@ -101,6 +106,7 @@ Each view is processed inside a `try/catch`. A failure (Anthropic API error, val
 ### Logging
 
 Structured JSON to stdout, one line per view:
+
 ```json
 {"view_id":"...","user_id":130,"view_name":"Air Yards by week","tags":["weekly-split","air-yards-share"],"duration_ms":1234,"status":"ok"}
 {"view_id":"...","user_id":1,"view_name":"KTC Values","error":"Expected 1-4 tags, got 0","duration_ms":800,"status":"failed"}
