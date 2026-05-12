@@ -54,6 +54,7 @@
     "#app/*": "./app/*"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.2",
     "@sendgrid/mail": "^7.7.0",
     "@trashman/ed25519-blake2b": "0.0.8",
     "@tsmx/secure-config": "^2.3.0",
