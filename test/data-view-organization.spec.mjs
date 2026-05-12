@@ -24,11 +24,9 @@ async function get_token(email, password) {
 describe('API /data-views (view organization)', function () {
   this.timeout(20000)
   let token1
-  let token2
   let user1_id
   let user2_id
   let view_id_1
-  let view_id_2
 
   before(async function () {
     // Re-seed users
@@ -50,7 +48,7 @@ describe('API /data-views (view organization)', function () {
     user2_id = u2.id || u2
 
     token1 = await get_token('orgtest1@test.com', 'testpass1')
-    token2 = await get_token('orgtest2@test.com', 'testpass2')
+    await get_token('orgtest2@test.com', 'testpass2')
 
     // Clean up any existing data
     await knex('user_data_view_favorites').del()
@@ -61,7 +59,6 @@ describe('API /data-views (view organization)', function () {
     const v1 = 'test-view-org-1'
     const v2 = 'test-view-org-2'
     view_id_1 = v1
-    view_id_2 = v2
 
     await knex('user_data_views').insert({
       view_id: v1,
@@ -151,7 +148,7 @@ describe('API /data-views (view organization)', function () {
         .set('Authorization', `Bearer ${token1}`)
       res.should.have.status(200)
       expect(res.body.tags_by_view_id[orphan_view_id]).to.be.undefined
-      expect(res.body.tags_by_view_id['SEASON_PROJECTIONS']).to.deep.equal([
+      expect(res.body.tags_by_view_id.SEASON_PROJECTIONS).to.deep.equal([
         { name: 'system-tag', source: 'user' }
       ])
     })
