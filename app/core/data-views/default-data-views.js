@@ -1,5 +1,8 @@
 import { current_season } from '@constants'
 
+// system_view_ids_set is available from @libs-shared/view-organization/system-data-view-ids.mjs
+// for server-side and CLI consumers that need the stable ID list without loading this module.
+
 const is_regular_season_finished =
   current_season.week > current_season.finalWeek
 

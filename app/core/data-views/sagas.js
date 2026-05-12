@@ -16,7 +16,12 @@ import {
   api_post_data_view,
   api_get_data_views,
   api_delete_data_view,
-  api_get_data_view
+  api_get_data_view,
+  api_get_data_view_organization,
+  api_post_data_view_favorite,
+  api_delete_data_view_favorite,
+  api_post_data_view_tag,
+  api_delete_data_view_tag
 } from '@core/api'
 import { api, api_request } from '@core/api/service'
 import { nfl_plays_column_params } from '#libs-shared'
@@ -551,6 +556,129 @@ export function* watch_clear_local_view_cache() {
   )
 }
 
+// ======================================
+// View organization sagas (B11)
+// ======================================
+
+// Load organization data after views are fetched (hydrate favorites + tags)
+export function* handle_get_views_fulfilled_load_organization() {
+  yield call(api_get_data_view_organization)
+}
+
+export function* watch_get_data_views_fulfilled_load_organization() {
+  yield takeLatest(
+    data_views_actions.GET_DATA_VIEWS_FULFILLED,
+    handle_get_views_fulfilled_load_organization
+  )
+}
+
+// Saga handlers for page-dispatched trigger actions
+export function* handle_toggle_data_view_favorite({ payload }) {
+  const { view_id, is_favorited } = payload
+  if (is_favorited) {
+    yield call(api_delete_data_view_favorite, { view_id })
+  } else {
+    yield call(api_post_data_view_favorite, { view_id })
+  }
+}
+
+export function* watch_toggle_data_view_favorite() {
+  yield takeLatest(
+    data_views_actions.TOGGLE_DATA_VIEW_FAVORITE,
+    handle_toggle_data_view_favorite
+  )
+}
+
+export function* handle_add_data_view_tag({ payload }) {
+  const { view_id, tag_name } = payload
+  yield call(api_post_data_view_tag, { view_id, tag_name })
+}
+
+export function* watch_add_data_view_tag() {
+  yield takeLatest(
+    data_views_actions.ADD_DATA_VIEW_TAG,
+    handle_add_data_view_tag
+  )
+}
+
+export function* handle_remove_data_view_tag({ payload }) {
+  const { view_id, tag_name } = payload
+  yield call(api_delete_data_view_tag, { view_id, tag_name })
+}
+
+export function* watch_remove_data_view_tag() {
+  yield takeLatest(
+    data_views_actions.REMOVE_DATA_VIEW_TAG,
+    handle_remove_data_view_tag
+  )
+}
+
+// Favorite toggle sagas
+export function* handle_post_data_view_favorite_failed() {
+  yield put(
+    notification_actions.show({
+      message: 'Failed to add favorite',
+      severity: 'error'
+    })
+  )
+}
+
+export function* watch_post_data_view_favorite_failed() {
+  yield takeLatest(
+    data_views_actions.POST_DATA_VIEW_FAVORITE_FAILED,
+    handle_post_data_view_favorite_failed
+  )
+}
+
+export function* handle_delete_data_view_favorite_failed() {
+  yield put(
+    notification_actions.show({
+      message: 'Failed to remove favorite',
+      severity: 'error'
+    })
+  )
+}
+
+export function* watch_delete_data_view_favorite_failed() {
+  yield takeLatest(
+    data_views_actions.DELETE_DATA_VIEW_FAVORITE_FAILED,
+    handle_delete_data_view_favorite_failed
+  )
+}
+
+// Tag mutation sagas
+export function* handle_post_data_view_tag_failed() {
+  yield put(
+    notification_actions.show({
+      message: 'Failed to add tag',
+      severity: 'error'
+    })
+  )
+}
+
+export function* watch_post_data_view_tag_failed() {
+  yield takeLatest(
+    data_views_actions.POST_DATA_VIEW_TAG_FAILED,
+    handle_post_data_view_tag_failed
+  )
+}
+
+export function* handle_delete_data_view_tag_failed() {
+  yield put(
+    notification_actions.show({
+      message: 'Failed to remove tag',
+      severity: 'error'
+    })
+  )
+}
+
+export function* watch_delete_data_view_tag_failed() {
+  yield takeLatest(
+    data_views_actions.DELETE_DATA_VIEW_TAG_FAILED,
+    handle_delete_data_view_tag_failed
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -572,6 +700,14 @@ export const data_views_sagas = [
   fork(watch_set_selected_data_view_for_browser_persist),
   fork(watch_revert_data_view),
   fork(watch_clear_local_view_cache),
+  fork(watch_get_data_views_fulfilled_load_organization),
+  fork(watch_post_data_view_favorite_failed),
+  fork(watch_delete_data_view_favorite_failed),
+  fork(watch_post_data_view_tag_failed),
+  fork(watch_delete_data_view_tag_failed),
+  fork(watch_toggle_data_view_favorite),
+  fork(watch_add_data_view_tag),
+  fork(watch_remove_data_view_tag),
   debounce(
     250,
     data_views_actions.DATA_VIEW_CHANGED,

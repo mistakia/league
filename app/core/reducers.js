@@ -27,7 +27,10 @@ import { seasonlogs_reducer } from './seasonlogs'
 import { percentiles_reducer } from './percentiles'
 import { api_reducer } from './api'
 import { league_team_daily_values_reducer } from './league-team-daily-values'
-import { data_views_reducer } from './data-views'
+import {
+  data_views_reducer,
+  data_view_organization_reducer
+} from './data-views'
 import { league_careerlogs_reducer } from './league-careerlogs'
 import { data_view_request_reducer } from './data-view-request/reducer'
 import { plays_views_reducer } from './plays-view'
@@ -66,6 +69,7 @@ const rootReducer = (router) =>
     percentiles: percentiles_reducer,
     league_team_daily_values: league_team_daily_values_reducer,
     data_views: data_views_reducer,
+    data_view_organization: data_view_organization_reducer,
     league_careerlogs: league_careerlogs_reducer,
     data_view_request: data_view_request_reducer,
     plays_views: plays_views_reducer,

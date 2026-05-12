@@ -10,7 +10,10 @@ import {
   get_has_unsaved_local_edits_map
 } from '@core/selectors'
 import { data_views_actions } from '@core/data-views'
-import { get_enriched_data_views_fields } from '@core/data-views/selectors'
+import {
+  get_enriched_data_views_fields,
+  get_data_view_organization_props_for_table_view_controller
+} from '@core/data-views/selectors'
 import { get_data_views_fields } from '@core/data-views-fields'
 import { calculatePercentiles } from '@libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
@@ -103,6 +106,7 @@ const map_state_to_props = createSelector(
   (state) => state.getIn(['app', 'user', 'username']),
   (state) => state.get('data_view_request'),
   get_has_unsaved_local_edits_map,
+  get_data_view_organization_props_for_table_view_controller,
   (
     allPlayersPending,
     userId,
@@ -118,7 +122,8 @@ const map_state_to_props = createSelector(
     players_percentiles,
     user_username,
     data_view_request,
-    has_unsaved_local_edits_map
+    has_unsaved_local_edits_map,
+    view_organization_props
   ) => ({
     user_id: userId,
     players: data_view_request.get('result').toJS(),
@@ -144,7 +149,8 @@ const map_state_to_props = createSelector(
     teams,
     players_percentiles,
     user_username,
-    data_view_request: data_view_request.toJS()
+    data_view_request: data_view_request.toJS(),
+    ...view_organization_props
   })
 )
 
@@ -157,7 +163,11 @@ const map_dispatch_to_props = {
   reset_data_view_cache: data_views_actions.reset_data_view_cache,
   load_data_view: data_views_actions.load_data_view,
   revert_data_view: data_views_actions.revert_data_view,
-  clear_local_view_cache: data_views_actions.clear_local_view_cache
+  clear_local_view_cache: data_views_actions.clear_local_view_cache,
+  // View organization dispatchers (B14)
+  on_toggle_favorite: data_views_actions.toggle_data_view_favorite,
+  on_add_user_tag: data_views_actions.add_data_view_tag,
+  on_remove_user_tag: data_views_actions.remove_data_view_tag
 }
 
 export default connect(map_state_to_props, map_dispatch_to_props)(DataViewsPage)

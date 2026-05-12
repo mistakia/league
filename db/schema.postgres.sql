@@ -34,6 +34,9 @@ DROP TRIGGER IF EXISTS trigger_update_selection_combination_definitions_updated_
 DROP TRIGGER IF EXISTS trigger_external_league_import_jobs_updated_at ON public.external_league_import_jobs;
 DROP TRIGGER IF EXISTS trigger_external_league_connections_updated_at ON public.external_league_connections;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
+DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
+DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
+DROP INDEX IF EXISTS public.user_data_view_favorites_user_id_idx;
 DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
@@ -396,6 +399,8 @@ ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP C
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.user_plays_views DROP CONSTRAINT IF EXISTS user_plays_views_pkey;
+ALTER TABLE IF EXISTS ONLY public.user_data_view_tags DROP CONSTRAINT IF EXISTS user_data_view_tags_pkey;
+ALTER TABLE IF EXISTS ONLY public.user_data_view_favorites DROP CONSTRAINT IF EXISTS user_data_view_favorites_pkey;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS unique_super_priority;
 ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
@@ -561,6 +566,8 @@ DROP SEQUENCE IF EXISTS public.users_id_seq;
 DROP TABLE IF EXISTS public.users;
 DROP TABLE IF EXISTS public.user_plays_views;
 DROP TABLE IF EXISTS public.user_data_views;
+DROP TABLE IF EXISTS public.user_data_view_tags;
+DROP TABLE IF EXISTS public.user_data_view_favorites;
 DROP TABLE IF EXISTS public.urls;
 DROP SEQUENCE IF EXISTS public.transactions_uid_seq;
 DROP TABLE IF EXISTS public.transactions;
@@ -24741,6 +24748,31 @@ CREATE TABLE public.urls (
 
 
 --
+-- Name: user_data_view_favorites; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_data_view_favorites (
+    user_id bigint NOT NULL,
+    view_id character varying(36) NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
+-- Name: user_data_view_tags; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_data_view_tags (
+    user_id bigint NOT NULL,
+    view_id character varying(36) NOT NULL,
+    tag_name character varying(64) NOT NULL,
+    source character varying(8) NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT user_data_view_tags_source_check CHECK (((source)::text = ANY ((ARRAY['user'::character varying, 'llm'::character varying])::text[])))
+);
+
+
+--
 -- Name: user_data_views; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -24751,7 +24783,8 @@ CREATE TABLE public.user_data_views (
     table_state json,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    user_id bigint
+    user_id bigint,
+    llm_tags_generated_at timestamp with time zone
 );
 
 
@@ -26781,6 +26814,22 @@ ALTER TABLE ONLY public.super_priority
 
 ALTER TABLE ONLY public.urls
     ADD CONSTRAINT urls_url_hash_key UNIQUE (url_hash);
+
+
+--
+-- Name: user_data_view_favorites user_data_view_favorites_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_data_view_favorites
+    ADD CONSTRAINT user_data_view_favorites_pkey PRIMARY KEY (user_id, view_id);
+
+
+--
+-- Name: user_data_view_tags user_data_view_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_data_view_tags
+    ADD CONSTRAINT user_data_view_tags_pkey PRIMARY KEY (user_id, view_id, tag_name);
 
 
 --
@@ -40883,6 +40932,27 @@ CREATE UNIQUE INDEX projections_index_y2026_sourceid_pid_userid_week_year_seas__
 --
 
 CREATE INDEX trades_slots_trade_uid_idx ON public.trades_slots USING btree (trade_uid);
+
+
+--
+-- Name: user_data_view_favorites_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX user_data_view_favorites_user_id_idx ON public.user_data_view_favorites USING btree (user_id);
+
+
+--
+-- Name: user_data_view_tags_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX user_data_view_tags_user_id_idx ON public.user_data_view_tags USING btree (user_id);
+
+
+--
+-- Name: user_data_view_tags_user_source_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX user_data_view_tags_user_source_idx ON public.user_data_view_tags USING btree (user_id, source);
 
 
 --

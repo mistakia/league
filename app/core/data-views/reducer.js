@@ -1,4 +1,4 @@
-import Immutable, { Map } from 'immutable'
+import Immutable, { Map, Set as ImmutableSet, List } from 'immutable'
 
 import { app_actions } from '@core/app/actions'
 import { data_views_actions } from './index'
@@ -125,6 +125,152 @@ export function data_views_reducer(
     case data_view_request_actions.DATA_VIEW_RESULT:
     case data_view_request_actions.DATA_VIEW_ERROR:
       return state.setIn([payload.request_id, 'is_fetching'], false)
+
+    default:
+      return state
+  }
+}
+
+// ======================================
+// View organization reducer (B10)
+// State shape:
+//   favorite_view_ids: Immutable.Set<string>
+//   tags_by_view_id:   Immutable.Map<view_id, Immutable.List<{name, source}>>
+// ======================================
+
+const organization_initial_state = new Map({
+  favorite_view_ids: ImmutableSet(),
+  tags_by_view_id: new Map()
+})
+
+export function data_view_organization_reducer(
+  state = organization_initial_state,
+  { payload, type }
+) {
+  switch (type) {
+    // Hydrate from GET organization response
+    case data_views_actions.GET_DATA_VIEW_ORGANIZATION_FULFILLED: {
+      const { favorites = [], tags_by_view_id = {} } = payload.data
+      const new_favorites = ImmutableSet(favorites)
+      const new_tags = new Map(
+        Object.entries(tags_by_view_id).map(([view_id, tags]) => [
+          view_id,
+          List(tags.map((t) => ({ name: t.name, source: t.source })))
+        ])
+      )
+      return state
+        .set('favorite_view_ids', new_favorites)
+        .set('tags_by_view_id', new_tags)
+    }
+
+    case data_views_actions.GET_DATA_VIEW_ORGANIZATION_FAILED:
+      // Keep existing state on failure
+      return state
+
+    // Optimistic favorite insert
+    case data_views_actions.POST_DATA_VIEW_FAVORITE_PENDING: {
+      const { view_id } = payload.opts
+      return state.update('favorite_view_ids', (s) => s.add(view_id))
+    }
+
+    // Rollback optimistic favorite insert on failure
+    case data_views_actions.POST_DATA_VIEW_FAVORITE_FAILED: {
+      const { view_id } = payload.opts
+      return state.update('favorite_view_ids', (s) => s.delete(view_id))
+    }
+
+    case data_views_actions.POST_DATA_VIEW_FAVORITE_FULFILLED:
+      // Already applied optimistically; no-op
+      return state
+
+    // Optimistic favorite delete
+    case data_views_actions.DELETE_DATA_VIEW_FAVORITE_PENDING: {
+      const { view_id } = payload.opts
+      return state.update('favorite_view_ids', (s) => s.delete(view_id))
+    }
+
+    // Rollback optimistic favorite delete on failure
+    case data_views_actions.DELETE_DATA_VIEW_FAVORITE_FAILED: {
+      const { view_id } = payload.opts
+      return state.update('favorite_view_ids', (s) => s.add(view_id))
+    }
+
+    case data_views_actions.DELETE_DATA_VIEW_FAVORITE_FULFILLED:
+      // Already applied optimistically; no-op
+      return state
+
+    // Optimistic tag add
+    case data_views_actions.POST_DATA_VIEW_TAG_PENDING: {
+      const { view_id, tag_name } = payload.opts
+      if (!view_id || !tag_name) return state
+      return state.updateIn(['tags_by_view_id', view_id], (tags) => {
+        const current = tags || List()
+        // Remove existing entry for this tag_name (in case it's an llm row being promoted)
+        const filtered = current.filter((t) => t.name !== tag_name)
+        return filtered.push({ name: tag_name, source: 'user' })
+      })
+    }
+
+    // Rollback optimistic tag add on failure (remove the tag we added)
+    case data_views_actions.POST_DATA_VIEW_TAG_FAILED: {
+      const { view_id, tag_name, prior_source } = payload.opts
+      if (!view_id || !tag_name) return state
+      if (prior_source) {
+        // Restore the prior llm row that was overwritten optimistically
+        return state.updateIn(['tags_by_view_id', view_id], (tags) => {
+          const current = tags || List()
+          const filtered = current.filter((t) => t.name !== tag_name)
+          return filtered.push({ name: tag_name, source: prior_source })
+        })
+      }
+      // No prior row — remove the optimistically added tag
+      return state.updateIn(['tags_by_view_id', view_id], (tags) => {
+        if (!tags) return tags
+        return tags.filter((t) => t.name !== tag_name)
+      })
+    }
+
+    case data_views_actions.POST_DATA_VIEW_TAG_FULFILLED: {
+      // Normalize with server-confirmed tag_name (lowercased)
+      const { view_id } = payload.opts
+      const confirmed_tag_name = payload.data?.tag_name
+      if (!view_id || !confirmed_tag_name) return state
+      const pending_tag_name = payload.opts.tag_name
+      if (confirmed_tag_name === pending_tag_name) return state
+      // Rename pending tag to confirmed (sanitized) name
+      return state.updateIn(['tags_by_view_id', view_id], (tags) => {
+        if (!tags) return tags
+        return tags
+          .filter((t) => t.name !== pending_tag_name)
+          .push({ name: confirmed_tag_name, source: 'user' })
+      })
+    }
+
+    // Optimistic tag delete
+    case data_views_actions.DELETE_DATA_VIEW_TAG_PENDING: {
+      const { view_id, tag_name } = payload.opts
+      if (!view_id || !tag_name) return state
+      return state.updateIn(['tags_by_view_id', view_id], (tags) => {
+        if (!tags) return tags
+        return tags.filter((t) => !(t.name === tag_name && t.source === 'user'))
+      })
+    }
+
+    // Rollback optimistic tag delete on failure
+    case data_views_actions.DELETE_DATA_VIEW_TAG_FAILED: {
+      const { view_id, tag_name } = payload.opts
+      if (!view_id || !tag_name) return state
+      return state.updateIn(['tags_by_view_id', view_id], (tags) => {
+        const current = tags || List()
+        // Only add back if not already present
+        if (current.some((t) => t.name === tag_name)) return current
+        return current.push({ name: tag_name, source: 'user' })
+      })
+    }
+
+    case data_views_actions.DELETE_DATA_VIEW_TAG_FULFILLED:
+      // Already applied optimistically; no-op
+      return state
 
     default:
       return state

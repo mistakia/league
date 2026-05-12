@@ -16,6 +16,7 @@ import {
 } from '@libs-shared'
 import get_split_label_suffix from '@libs-shared/get-split-label-suffix.mjs'
 import parse_table_state_from_url from '@core/data-views/parse-table-state-from-url.mjs'
+import { derive_auto_tags } from '@core/data-views/derive-auto-tags'
 import { nfl_team_abbreviations } from '@constants'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
@@ -81,7 +82,13 @@ export default function DataViewsPage({
   reset_data_view_cache,
   load_data_view,
   revert_data_view,
-  clear_local_view_cache
+  clear_local_view_cache,
+  // View organization props (B14)
+  favorite_view_ids,
+  tags_by_view_id,
+  on_toggle_favorite,
+  on_add_user_tag,
+  on_remove_user_tag
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -411,6 +418,12 @@ export default function DataViewsPage({
         is_scatter_plot_point_label_enabled={
           is_scatter_plot_point_label_enabled
         }
+        favorite_view_ids={favorite_view_ids}
+        tags_by_view_id={tags_by_view_id}
+        on_toggle_favorite={on_toggle_favorite}
+        on_add_user_tag={on_add_user_tag}
+        on_remove_user_tag={on_remove_user_tag}
+        derive_auto_tags={derive_auto_tags}
       />
     </div>
   )
@@ -442,5 +455,11 @@ DataViewsPage.propTypes = {
   reset_data_view_cache: PropTypes.func,
   load_data_view: PropTypes.func,
   revert_data_view: PropTypes.func,
-  clear_local_view_cache: PropTypes.func
+  clear_local_view_cache: PropTypes.func,
+  // View organization props (B14) — all optional with no-op defaults
+  favorite_view_ids: PropTypes.object,
+  tags_by_view_id: PropTypes.object,
+  on_toggle_favorite: PropTypes.func,
+  on_add_user_tag: PropTypes.func,
+  on_remove_user_tag: PropTypes.func
 }
