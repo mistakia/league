@@ -11,6 +11,11 @@ export const data_views_actions = {
   ...create_api_action_types('DELETE_DATA_VIEW'),
   ...create_api_action_types('POST_DATA_VIEW'),
   ...create_api_action_types('GET_DATA_VIEW'),
+  ...create_api_action_types('GET_DATA_VIEW_ORGANIZATION'),
+  ...create_api_action_types('POST_DATA_VIEW_FAVORITE'),
+  ...create_api_action_types('DELETE_DATA_VIEW_FAVORITE'),
+  ...create_api_action_types('POST_DATA_VIEW_TAG'),
+  ...create_api_action_types('DELETE_DATA_VIEW_TAG'),
 
   DATA_VIEW_CHANGED: 'DATA_VIEW_CHANGED',
   data_view_changed: (data_view, view_change_params) => ({
@@ -67,6 +72,25 @@ export const data_views_actions = {
   clear_local_view_cache: () => ({
     type: data_views_actions.CLEAR_LOCAL_VIEW_CACHE,
     payload: {}
+  }),
+
+  // View organization trigger actions (dispatched by the page, watched by sagas)
+  TOGGLE_DATA_VIEW_FAVORITE: 'TOGGLE_DATA_VIEW_FAVORITE',
+  toggle_data_view_favorite: (view_id, is_favorited) => ({
+    type: data_views_actions.TOGGLE_DATA_VIEW_FAVORITE,
+    payload: { view_id, is_favorited }
+  }),
+
+  ADD_DATA_VIEW_TAG: 'ADD_DATA_VIEW_TAG',
+  add_data_view_tag: (view_id, tag_name) => ({
+    type: data_views_actions.ADD_DATA_VIEW_TAG,
+    payload: { view_id, tag_name }
+  }),
+
+  REMOVE_DATA_VIEW_TAG: 'REMOVE_DATA_VIEW_TAG',
+  remove_data_view_tag: (view_id, tag_name) => ({
+    type: data_views_actions.REMOVE_DATA_VIEW_TAG,
+    payload: { view_id, tag_name }
   })
 }
 
@@ -74,3 +98,16 @@ export const get_data_views_actions = create_api_actions('GET_DATA_VIEWS')
 export const delete_data_view_actions = create_api_actions('DELETE_DATA_VIEW')
 export const post_data_view_actions = create_api_actions('POST_DATA_VIEW')
 export const get_data_view_actions = create_api_actions('GET_DATA_VIEW')
+
+// View organization action triplets (B9)
+export const get_data_view_organization_actions = create_api_actions(
+  'GET_DATA_VIEW_ORGANIZATION'
+)
+export const post_data_view_favorite_actions = create_api_actions(
+  'POST_DATA_VIEW_FAVORITE'
+)
+export const delete_data_view_favorite_actions = create_api_actions(
+  'DELETE_DATA_VIEW_FAVORITE'
+)
+export const post_data_view_tag_actions = create_api_actions('POST_DATA_VIEW_TAG')
+export const delete_data_view_tag_actions = create_api_actions('DELETE_DATA_VIEW_TAG')

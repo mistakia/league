@@ -375,6 +375,26 @@ export const api = {
     const url = `${API_URL}/data-views/${view_id}`
     return { url, method: 'DELETE' }
   },
+  get_data_view_organization() {
+    const url = `${API_URL}/data-views/organization`
+    return { url }
+  },
+  post_data_view_favorite({ view_id }) {
+    const url = `${API_URL}/data-views/${view_id}/favorite`
+    return { url, ...POST({}) }
+  },
+  delete_data_view_favorite({ view_id }) {
+    const url = `${API_URL}/data-views/${view_id}/favorite`
+    return { url, method: 'DELETE' }
+  },
+  post_data_view_tag({ view_id, tag_name }) {
+    const url = `${API_URL}/data-views/${view_id}/tags`
+    return { url, ...POST({ tag_name }) }
+  },
+  delete_data_view_tag({ view_id, tag_name }) {
+    const url = `${API_URL}/data-views/${view_id}/tags/${encodeURIComponent(tag_name)}`
+    return { url, method: 'DELETE' }
+  },
   get_data_views({ user_id, username }) {
     let url = `${API_URL}/data-views`
     const params = new URLSearchParams()

@@ -91,5 +91,10 @@ export {
   api_post_plays_view,
   api_delete_plays_view,
   api_get_plays_views,
-  api_get_plays_view
+  api_get_plays_view,
+  api_get_data_view_organization,
+  api_post_data_view_favorite,
+  api_delete_data_view_favorite,
+  api_post_data_view_tag,
+  api_delete_data_view_tag
 } from './sagas'

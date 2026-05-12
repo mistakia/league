@@ -107,7 +107,12 @@ import {
   post_data_view_actions,
   delete_data_view_actions,
   get_data_views_actions,
-  get_data_view_actions
+  get_data_view_actions,
+  get_data_view_organization_actions,
+  post_data_view_favorite_actions,
+  delete_data_view_favorite_actions,
+  post_data_view_tag_actions,
+  delete_data_view_tag_actions
 } from '@core/data-views/actions'
 import {
   post_plays_view_actions,
@@ -637,4 +642,35 @@ export const api_get_plays_view = fetch.bind(
   null,
   api.get_plays_view,
   get_plays_view_actions
+)
+
+// View organization API functions (B11)
+export const api_get_data_view_organization = fetch.bind(
+  null,
+  api.get_data_view_organization,
+  get_data_view_organization_actions
+)
+
+export const api_post_data_view_favorite = fetch.bind(
+  null,
+  api.post_data_view_favorite,
+  post_data_view_favorite_actions
+)
+
+export const api_delete_data_view_favorite = fetch.bind(
+  null,
+  api.delete_data_view_favorite,
+  delete_data_view_favorite_actions
+)
+
+export const api_post_data_view_tag = fetch.bind(
+  null,
+  api.post_data_view_tag,
+  post_data_view_tag_actions
+)
+
+export const api_delete_data_view_tag = fetch.bind(
+  null,
+  api.delete_data_view_tag,
+  delete_data_view_tag_actions
 )

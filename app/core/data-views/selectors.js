@@ -8,6 +8,39 @@ import { serialize_preset_value } from '#libs-shared'
 const get_param_option_counts_state = (state) =>
   state.getIn(['data_view_request', 'param_option_counts'], Map())
 
+// ======================================
+// View organization selector (B12)
+// ======================================
+
+export const get_data_view_organization_state = (state) =>
+  state.get('data_view_organization')
+
+/**
+ * Returns the state portion of the prop bag consumed by TableViewController.
+ * The dispatcher props (on_toggle_favorite, on_add_user_tag, etc.) are added
+ * by the page container in mapDispatchToProps and merged at the call site in
+ * data-views.js (B14).
+ *
+ * @returns {{
+ *   favorite_view_ids: Immutable.Set<string>,
+ *   tags_by_view_id: Immutable.Map<string, Immutable.List<{name, source}>>
+ * }}
+ */
+export const get_data_view_organization_props_for_table_view_controller =
+  createSelector(get_data_view_organization_state, (org_state) => {
+    if (!org_state) {
+      return {
+        favorite_view_ids: undefined,
+        tags_by_view_id: undefined
+      }
+    }
+
+    return {
+      favorite_view_ids: org_state.get('favorite_view_ids'),
+      tags_by_view_id: org_state.get('tags_by_view_id')
+    }
+  })
+
 export const get_enriched_data_views_fields = createSelector(
   get_data_views_fields,
   get_param_option_counts_state,
