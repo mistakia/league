@@ -163,7 +163,9 @@ const process_extensions_for_due_leagues = async () => {
       event_timestamp: ext_date
     })
     if (already_processed) {
-      log(`league ${lid}: extensions already processed for ext_date ${ext_date}`)
+      log(
+        `league ${lid}: extensions already processed for ext_date ${ext_date}`
+      )
       continue
     }
 

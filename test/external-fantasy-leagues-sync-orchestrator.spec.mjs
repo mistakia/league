@@ -326,13 +326,11 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
         }
       }
 
-      const result = await orchestrator.sync_utils.fetch_transactions_in_range(
-        {
-          adapter: stub_adapter,
-          league_id: 'L1',
-          year: 2025
-        }
-      )
+      const result = await orchestrator.sync_utils.fetch_transactions_in_range({
+        adapter: stub_adapter,
+        league_id: 'L1',
+        year: 2025
+      })
 
       calls.should.have.length(18)
       const sorted = [...calls].sort((a, b) => a - b)
@@ -351,14 +349,12 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
         }
       }
 
-      const result = await orchestrator.sync_utils.fetch_transactions_in_range(
-        {
-          adapter: stub_adapter,
-          league_id: 'L1',
-          year: 2025,
-          week: 5
-        }
-      )
+      const result = await orchestrator.sync_utils.fetch_transactions_in_range({
+        adapter: stub_adapter,
+        league_id: 'L1',
+        year: 2025,
+        week: 5
+      })
 
       calls.should.deep.equal([5])
       result.should.have.length(1)
@@ -406,10 +402,9 @@ describe('External Fantasy Leagues - Sync Orchestrator', function () {
         rosters
       })
       filtered.should.have.length(2)
-      filtered.map((p) => p.player_ids.sleeper_id).should.deep.equal([
-        '111',
-        '222'
-      ])
+      filtered
+        .map((p) => p.player_ids.sleeper_id)
+        .should.deep.equal(['111', '222'])
     })
 
     it('returns an empty array when no rosters are provided', function () {

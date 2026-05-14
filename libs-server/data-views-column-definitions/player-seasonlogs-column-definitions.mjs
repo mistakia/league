@@ -60,6 +60,7 @@ export default {
     main_where: ({ table_name }) => `${table_name}.career_year`,
     main_group_by: ({ table_name }) => [`${table_name}.career_year`],
     supported_splits: ['year', 'week'],
+    granularity: ['player_year', 'player_year_week'],
     column_params: {
       year: single_year,
       seas_type

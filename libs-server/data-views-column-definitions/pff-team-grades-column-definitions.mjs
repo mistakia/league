@@ -45,6 +45,7 @@ const create_pff_team_field = (column_name, display_name) => ({
   table_alias: pff_team_seasonlogs_table_alias,
   join: pff_team_seasonlogs_join,
   supported_splits: ['year'],
+  granularity: ['team_year'],
   get_cache_info,
   main_select: ({ table_name, column_index }) => [
     `${table_name}.${column_name} as ${display_name}_${column_index}`

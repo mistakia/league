@@ -14,7 +14,7 @@ const games_played_join = ({
   splits
 }) => {
   const already_added_for_per_game_rate_type =
-    data_view_options.rate_type_tables[table_name]
+    data_view_options.query_context?.applied_output_ctes?.has(table_name)
   if (already_added_for_per_game_rate_type) {
     return
   }
@@ -41,6 +41,7 @@ export default {
     table_alias: get_per_game_cte_table_name,
     join: games_played_join,
     supported_splits: ['year'],
+    granularity: ['player_year'],
     select_as: () => 'games_played',
     main_select: ({ table_name, column_index }) => {
       return [

@@ -16,11 +16,6 @@ import data_views_column_definitions from '#libs-server/data-views-column-defini
 import * as validators from '#libs-server/validators.mjs'
 
 import {
-  get_rate_type_cte_table_name,
-  add_rate_type_cte,
-  join_rate_type_cte
-} from '#libs-server/data-views/rate-type/index.mjs'
-import {
   get_main_select_string,
   get_with_select_string
 } from '#libs-server/data-views/select-string.mjs'
@@ -30,6 +25,24 @@ import {
   get_with_where_string
 } from '#libs-server/data-views/where-string.mjs'
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
+import { build_query_context } from '#libs-server/data-views/query-context.mjs'
+import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
+import { resolve as resolve_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
+import { get_identity } from '#libs-server/data-views/identities.mjs'
+
+// A base identity in granularity (e.g. `player`) means the column needs no
+// split joins; the column reads from the base table directly.
+const derive_supported_splits_from_granularity = (granularity = []) => {
+  const supports = new Set()
+  let has_base = false
+  for (const id of granularity) {
+    const identity = get_identity(id)
+    if (identity.splits.length === 0) has_base = true
+    for (const split of identity.splits) supports.add(split)
+  }
+  if (has_base) return []
+  return Array.from(supports)
+}
 
 let column_param_backwards_compatibility_mappings = {}
 
@@ -672,9 +685,11 @@ const get_from_table_config = ({
         return sort_based_from_table
       }
 
-      // Check if the column definition supports all required splits
+      const granularity_splits = derive_supported_splits_from_granularity(
+        column_definition?.granularity
+      )
       const supports_all_splits = splits.every((split) =>
-        column_definition?.supported_splits?.includes(split)
+        granularity_splits.includes(split)
       )
 
       if (supports_all_splits) {
@@ -1090,7 +1105,7 @@ const get_grouped_clauses_by_table = ({
         group_column_params: column_params,
         where_clauses: [],
         select_columns: [],
-        supported_splits: column_definition.supported_splits || []
+        granularity: column_definition.granularity || []
       }
     }
     grouped_clauses_by_table[table_name].where_clauses.push(where_clause)
@@ -1122,7 +1137,7 @@ const get_grouped_clauses_by_table = ({
         group_column_params: column_params,
         where_clauses: [],
         select_columns: [],
-        supported_splits: column_definition.supported_splits || []
+        granularity: column_definition.granularity || []
       }
       tables_seeded_by_column.add(table_name)
     } else if (!tables_seeded_by_column.has(table_name)) {
@@ -1149,7 +1164,10 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   for (const [table_name, table_info] of Object.entries(
     grouped_clauses_by_table
   )) {
-    const supported_splits_key = table_info.supported_splits
+    const supported_splits = derive_supported_splits_from_granularity(
+      table_info.granularity
+    )
+    const supported_splits_key = supported_splits
       .filter((split) => splits.includes(split))
       .sort()
       .join('_')
@@ -1197,7 +1215,8 @@ export const get_data_view_results_query = async ({
   prefix_columns = [],
   sort = [],
   offset = 0,
-  limit = 500
+  limit = 500,
+  subjects = ['player']
 } = {}) => {
   const validator_result = validators.table_state_validator({
     splits,
@@ -1250,6 +1269,10 @@ export const get_data_view_results_query = async ({
   prefix_columns = prefix_columns.map(process_item_params)
   sort = sort.map(process_item_params)
 
+  columns = normalize_columns({ columns, splits })
+  prefix_columns = normalize_columns({ columns: prefix_columns, splits })
+  where = normalize_columns({ columns: where, splits })
+
   // Determine primary table first to optimize query structure
   const from_table_config = get_from_table_config({
     sort,
@@ -1272,10 +1295,22 @@ export const get_data_view_results_query = async ({
     from_table_type: from_table_config.from_table_type,
     from_table_column_id: from_table_config.column_id,
     year_coalesce_args: [],
-    rate_type_tables: {},
     matchup_opponent_types: new Set(),
     year_range: []
   }
+
+  // year_range is mutated below once the split branch computes it -- every
+  // reader (bridge add_cte, output aggregator) runs later during column
+  // processing.
+  const query_context = build_query_context({
+    subjects,
+    splits,
+    year_range: [],
+    params: {},
+    db,
+    players_query
+  })
+  data_view_options.query_context = query_context
   const data_view_metadata = {
     created_at: Date.now(),
     cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
@@ -1318,7 +1353,14 @@ export const get_data_view_results_query = async ({
     }
   }
 
+  // matchup_opponent_type joins reference player.current_nfl_team; skip
+  // entirely when the query is team-identity.
+  const is_matchup_player_identity_active = () =>
+    query_context.identity_id.startsWith('player')
   for (const opponent_type of data_view_options.matchup_opponent_types) {
+    if (!is_matchup_player_identity_active()) {
+      continue
+    }
     switch (opponent_type) {
       case 'current_week_opponent_total':
         add_week_opponent_cte_tables({
@@ -1365,6 +1407,7 @@ export const get_data_view_results_query = async ({
   if (splits.includes('week') || splits.includes('year')) {
     const year_range = get_year_range([...prefix_columns, ...columns], where)
     data_view_options.year_range = year_range
+    query_context.year_range = year_range
 
     // Create base_years CTE
     players_query.with(
@@ -1403,6 +1446,8 @@ export const get_data_view_results_query = async ({
     } else {
       players_query.with('player_years', db.raw(base_query))
     }
+
+    query_context.applied_bridges.add('player->player_year')
   }
 
   if (splits.includes('week')) {
@@ -1421,6 +1466,8 @@ export const get_data_view_results_query = async ({
         `SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year${year_filter_clause}`
       )
     )
+
+    query_context.applied_bridges.add('player_year->player_year_week')
   }
 
   // Set up the from table and player joins using consolidated function
@@ -1433,6 +1480,14 @@ export const get_data_view_results_query = async ({
 
   // Setup centralized references for player pid, year, and week after from table is determined
   setup_central_references({ data_view_options, splits })
+
+  // Plugins delegating into shared helpers (add_player_year_teams_cte,
+  // ensure_player_year_teams_join) use data_view_options as their idempotency
+  // cache; sharing the reference prevents the CTE being registered twice.
+  query_context.pid_reference = data_view_options.pid_reference
+  query_context.year_reference = data_view_options.year_reference
+  query_context.week_reference = data_view_options.week_reference
+  query_context.data_view_options = data_view_options
 
   // sanitize parameters
 
@@ -1492,75 +1547,86 @@ export const get_data_view_results_query = async ({
     process_cache_info({ cache_info, data_view_metadata })
   }
 
+  // Columns sharing a CTE name fold to the last writer's params (legacy
+  // semantic from when data_view_options.rate_type_tables was an object
+  // keyed by cte_name).
+  const output_cte_dispatch = new Map()
   for (const [index, column] of [
     ...prefix_columns,
     ...columns,
     ...where
   ].entries()) {
     if (
-      typeof column === 'object' &&
-      column.params &&
-      column.params.rate_type
+      !(
+        typeof column === 'object' &&
+        column.params &&
+        column.params.rate_type
+      )
     ) {
-      const rate_type = Array.isArray(column.params.rate_type)
-        ? column.params.rate_type[0]
-        : column.params.rate_type
-
-      const column_definition = data_views_column_definitions[column.column_id]
-      if (
-        !column_definition ||
-        !column_definition.supported_rate_types ||
-        !column_definition.supported_rate_types.includes(rate_type)
-      ) {
-        continue
-      }
-
-      const column_index = get_column_index({
-        column_id: column.column_id,
-        index,
-        columns: table_columns
-      })
-      const rate_type_table_name = get_rate_type_cte_table_name({
-        params: column.params,
-        rate_type,
-        team_unit: column_definition.team_unit,
-        is_team: column_definition.is_team
-      })
-      data_view_options.rate_type_tables[rate_type_table_name] = {
-        params: column.params,
-        rate_type,
-        team_unit: column_definition.team_unit,
-        is_team: column_definition.is_team
-      }
-      rate_type_column_mapping[`${column.column_id}_${column_index}`] =
-        rate_type_table_name
+      continue
     }
+    const rate_type = Array.isArray(column.params.rate_type)
+      ? column.params.rate_type[0]
+      : column.params.rate_type
+
+    const column_definition = data_views_column_definitions[column.column_id]
+    if (
+      !column_definition ||
+      !column_definition.supported_rate_types ||
+      !column_definition.supported_rate_types.includes(rate_type)
+    ) {
+      continue
+    }
+    if (!column.params.output) {
+      // normalize-output-param failed to translate (unknown legacy token).
+      continue
+    }
+
+    const column_index = get_column_index({
+      column_id: column.column_id,
+      index,
+      columns: table_columns
+    })
+    const { period, aggregation } = column.params.output
+    const plugin = resolve_output_aggregator({ period, aggregation })
+    const identity_id = column_definition.is_team ? 'team_year' : 'player_year'
+    const column_def = { ...column_definition, column_id: column.column_id }
+    const cte_name = plugin.get_cte_name({
+      column_def,
+      params: column.params,
+      identity_id,
+      period
+    })
+    output_cte_dispatch.set(cte_name, {
+      plugin,
+      column_def,
+      params: column.params,
+      identity_id,
+      period
+    })
+    rate_type_column_mapping[`${column.column_id}_${column_index}`] = cte_name
   }
 
   for (const [
-    rate_type_table_name,
-    { params, rate_type, team_unit, is_team }
-  ] of Object.entries(data_view_options.rate_type_tables)) {
-    add_rate_type_cte({
-      players_query,
+    cte_name,
+    { plugin, column_def, params, identity_id, period }
+  ] of output_cte_dispatch) {
+    plugin.add_cte({
+      query_context,
+      column_def,
       params,
-      rate_type_table_name,
-      splits,
-      rate_type,
-      team_unit,
-      is_team,
-      data_view_options
+      cte_name,
+      identity_id,
+      period
     })
-    join_rate_type_cte({
-      players_query,
-      params,
-      rate_type_table_name,
-      splits,
-      rate_type,
-      team_unit,
-      is_team,
-      data_view_options
+    plugin.join_cte({
+      query_context,
+      column_def,
+      cte_name,
+      identity_id,
+      params
     })
+    query_context.joined_output_ctes.add(cte_name)
   }
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
@@ -1817,7 +1883,8 @@ export default async function ({
   offset = 0,
   limit = 500,
   timeout = null,
-  calculate_total_count = true
+  calculate_total_count = true,
+  subjects = ['player']
 } = {}) {
   const { query, data_view_metadata } = await get_data_view_results_query({
     splits,
@@ -1826,7 +1893,8 @@ export default async function ({
     prefix_columns,
     sort,
     offset,
-    limit
+    limit,
+    subjects
   })
 
   const data_view_query_string = query.toString()

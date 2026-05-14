@@ -509,6 +509,7 @@ const create_player_betting_market_field = ({
     betting_markets_table_alias({ ...args, is_player_game_prop }),
   join: player_betting_market_join,
   with: (args) => player_betting_market_with({ ...args, is_player_game_prop }),
+  granularity: ['player', 'player_year', 'player_year_week'],
   get_cache_info: create_betting_cache_info({
     get_params: ({ params = {} } = {}) => {
       const { year, week } = get_default_params({
@@ -533,6 +534,7 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
     }),
   join: team_betting_market_join,
   with: team_betting_market_with,
+  granularity: ['player', 'player_year', 'player_year_week'],
   get_cache_info: create_betting_cache_info({
     get_params: ({ params = {} } = {}) => {
       const { year, week } = get_default_params({
@@ -659,6 +661,7 @@ export default {
       }),
     join: team_game_implied_team_total_join,
     with: team_game_implied_team_total_with,
+    granularity: ['player', 'player_year', 'player_year_week'],
     get_cache_info: create_betting_cache_info({
       get_params: ({ params = {} } = {}) => {
         const { year, week } = get_default_params({

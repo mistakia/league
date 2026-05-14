@@ -32,7 +32,8 @@ export default function DataViewFilterChips({
             key={s.filter_index}
             type='button'
             className='data-view-filter-chip'
-            onClick={handle_chip_click}>
+            onClick={handle_chip_click}
+          >
             {label}
           </button>
         )

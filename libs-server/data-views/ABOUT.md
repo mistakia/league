@@ -32,7 +32,7 @@ Every `with:` handler (whether the direct builders in this directory or the inli
 
 ## Helpers
 
-- `get-param-option-counts.mjs` -- load when working on column-param metadata or live filter previews. Computes `{ [serialize_preset_value]: count }` pivots for `OBJECT_PRESET` params by applying every active `nfl_plays_column_params` predicate from `table_state.where[*].params` *except* the targeted param, with a 10s `statement_timeout` fallback to `{ counts: {} }`.
+- `get-param-option-counts.mjs` -- load when working on column-param metadata or live filter previews. Computes `{ [serialize_preset_value]: count }` pivots for `OBJECT_PRESET` params by applying every active `nfl_plays_column_params` predicate from `table_state.where[*].params` _except_ the targeted param, with a 10s `statement_timeout` fallback to `{ counts: {} }`.
 
 ## See Also
 

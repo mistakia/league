@@ -79,8 +79,7 @@ const run = async () => {
       // Tags are season-specific (FRANCHISE/ROOKIE/RFA must be re-applied each
       // offseason). On the year-rollover insert into year=N week=0, scrub any
       // non-REGULAR tag carried forward from year=N-1's final week.
-      const next_tag = (p) =>
-        is_new_season ? player_tag_types.REGULAR : p.tag
+      const next_tag = (p) => (is_new_season ? player_tag_types.REGULAR : p.tag)
 
       const inserts = missing_pids.map((p) => ({
         rid,

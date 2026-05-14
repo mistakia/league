@@ -58,6 +58,7 @@ const create_espn_score_columns = (column_name) => ({
   column_name,
   join: espn_score_join,
   supported_splits: ['year'],
+  granularity: ['player_year'],
   get_cache_info: get_cache_info_for_espn_score
 })
 

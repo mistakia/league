@@ -92,7 +92,9 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
     it('fans out Sleeper add/drop dicts into one internal row per moved player', function () {
       const mapper = new TransactionMapper()
       const player_mappings = new Map()
-      for (const id of Object.keys(sleeper_players_fixture.data.players || {})) {
+      for (const id of Object.keys(
+        sleeper_players_fixture.data.players || {}
+      )) {
         player_mappings.set(id, `pid-sleeper-${id}`)
       }
       const team_mappings = new Map()

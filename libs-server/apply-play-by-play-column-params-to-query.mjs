@@ -108,7 +108,8 @@ export default function ({
         : [param_value]
       const conjunctions = []
       for (const value of value_array) {
-        if (!value || typeof value !== 'object' || Array.isArray(value)) continue
+        if (!value || typeof value !== 'object' || Array.isArray(value))
+          continue
         const entries = []
         for (const [value_key, raw] of Object.entries(value)) {
           const spec = spec_by_key[value_key]

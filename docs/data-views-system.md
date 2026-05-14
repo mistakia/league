@@ -253,11 +253,11 @@ POST /data-views/search
 
 Weekly data-view columns use one of three param flavors, picked by the data's natural grain:
 
-| Flavor                    | Param                  | Cardinality    | Used by                                                                                                                                            |
-| ------------------------- | ---------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Season-level              | `single_year` / `year` | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, rankings, ESPN scores, team DVOA, PFF grades, format logs                               |
-| Single-week point-in-time | `single_nfl_week_id`   | scalar         | DFS salary, DFS ownership, practice designation, weekly projected market salary, betting game-prop markets, fantasy roster status                  |
-| Multi-week aggregation    | `nfl_week_id`          | multi          | play-by-play stats, games played, player-teams history                                                                                             |
+| Flavor                    | Param                  | Cardinality    | Used by                                                                                                                           |
+| ------------------------- | ---------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Season-level              | `single_year` / `year` | scalar / multi | ADP, KTC, contracts, seasonlogs, season-level projections, rankings, ESPN scores, team DVOA, PFF grades, format logs              |
+| Single-week point-in-time | `single_nfl_week_id`   | scalar         | DFS salary, DFS ownership, practice designation, weekly projected market salary, betting game-prop markets, fantasy roster status |
+| Multi-week aggregation    | `nfl_week_id`          | multi          | play-by-play stats, games played, player-teams history                                                                            |
 
 `single_nfl_week_id` is the scalar counterpart of `nfl_week_id`. It stores as a one-element array and uses the same `ColumnParamNflWeekFilter` component in `single: true` mode. The server-side helper `resolve_single_nfl_week_id` in `libs-server/data-views/` extracts the scalar value with backward-compat fallback: `params.single_nfl_week_id` → `params.nfl_week_id[0]` → constructed from legacy `params.year` + `params.week` + `params.seas_type`.
 
@@ -1593,7 +1593,7 @@ The `OBJECT_PRESET` data type (`TABLE_DATA_TYPES.OBJECT_PRESET = 9`, formerly `P
 The where-clause value is an array of plain objects. Each object is a conjunction across one or more position counts; the array itself is a disjunction (OR) of those conjunctions.
 
 ```js
-[
+;[
   { rb: 1, te: 1, wr: 3 },
   { rb: 1, te: 2, wr: 2 }
 ]
@@ -1656,10 +1656,13 @@ Request body:
 Response:
 
 ```json
-{ "counts": { "rb:1,te:1,wr:3": 12345, "rb:1,te:2,wr:2": 6789 }, "generated_at": "<iso>" }
+{
+  "counts": { "rb:1,te:1,wr:3": 12345, "rb:1,te:2,wr:2": 6789 },
+  "generated_at": "<iso>"
+}
 ```
 
-Keys are canonical signatures from `serialize_preset_value({ ... })` (sorted-key `k:v` joined by `,`). Values are unfiltered `COUNT(*)` over `nfl_plays` after applying every active `nfl_plays_column_params` predicate from `table_state.where[*].params` *except* the targeted param.
+Keys are canonical signatures from `serialize_preset_value({ ... })` (sorted-key `k:v` joined by `,`). Values are unfiltered `COUNT(*)` over `nfl_plays` after applying every active `nfl_plays_column_params` predicate from `table_state.where[*].params` _except_ the targeted param.
 
 ### Cache Policy
 
@@ -1691,22 +1694,22 @@ Below the chip strip, `<DataViewNotices>` renders soft-blue info notices (severi
 
 Current notice codes:
 
-| Code                                       | Trigger                                                                                                                                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filter_param_key_absent_from_columns`     | A filter declares a param key (e.g. `nfl_week_id`, `scoring_format_hash`) that no active display column uses.                                                             |
-| `filter_param_value_disjoint_from_columns` | Both filter and column carry the same param key, but the filter's resolved value set is fully disjoint from every column's value set for that key.                       |
+| Code                                       | Trigger                                                                                                                                            |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filter_param_key_absent_from_columns`     | A filter declares a param key (e.g. `nfl_week_id`, `scoring_format_hash`) that no active display column uses.                                      |
+| `filter_param_value_disjoint_from_columns` | Both filter and column carry the same param key, but the filter's resolved value set is fully disjoint from every column's value set for that key. |
 
 Rule #2 includes a minimal client-side resolver for the `nfl_week_id` `dynamic_type` values that `process_dynamic_params` handles server-side (`current_year_reg_weeks`, `current_nfl_week`, `last_n_nfl_weeks`, `last_n_nfl_years`); other dynamic types skip the check rather than risk false positives.
 
 ### File map
 
-| File                                                            | Role                                                          |
-| --------------------------------------------------------------- | ------------------------------------------------------------- |
-| `app/core/data-views/format-param-scope.mjs`                    | Pure formatter shared by chips and notices                    |
-| `app/core/data-views/active-filter-summaries.mjs`               | Selector input -> chip-shaped summaries                       |
-| `app/core/data-views/data-view-notices.mjs`                     | The two notice rules, concatenated by `get_data_view_notices` |
-| `app/views/components/data-view-filter-chips/`                  | Chip container + view + styles                                |
-| `app/views/components/data-view-notices/`                       | Notice container + view + styles                              |
+| File                                              | Role                                                          |
+| ------------------------------------------------- | ------------------------------------------------------------- |
+| `app/core/data-views/format-param-scope.mjs`      | Pure formatter shared by chips and notices                    |
+| `app/core/data-views/active-filter-summaries.mjs` | Selector input -> chip-shaped summaries                       |
+| `app/core/data-views/data-view-notices.mjs`       | The two notice rules, concatenated by `get_data_view_notices` |
+| `app/views/components/data-view-filter-chips/`    | Chip container + view + styles                                |
+| `app/views/components/data-view-notices/`         | Notice container + view + styles                              |
 
 ### Adding a third notice
 

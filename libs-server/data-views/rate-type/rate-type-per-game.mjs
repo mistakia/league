@@ -5,6 +5,8 @@ import {
 } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import db from '#db'
+import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
+import { is_team_identity } from '#libs-server/data-views/identities.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   const nfl_week = resolve_nfl_week_id_from_year_param(params)
@@ -439,4 +441,59 @@ export const join_per_game_cte = ({
       data_view_options
     })
   }
+}
+
+// ---- output-aggregator plugin interface (identity-driven) -----------------
+
+export const consumes_params = [
+  'year',
+  'nfl_week_id',
+  'seas_type',
+  'year_offset',
+  'career_year',
+  'career_game',
+  'matchup_opponent_type',
+  'output_column_params',
+  'rate_type_column_params'
+]
+
+export const get_cte_name = ({ params, identity_id }) => {
+  const is_team = is_team_identity(identity_id)
+  return get_per_game_cte_table_name({ params, is_team })
+}
+
+export const add_cte = ({ query_context, params, cte_name, identity_id }) => {
+  if (query_context.applied_output_ctes.has(cte_name)) return
+  const is_team = is_team_identity(identity_id)
+  add_per_game_cte({
+    players_query: query_context.players_query,
+    params,
+    rate_type_table_name: cte_name,
+    splits: query_context.splits,
+    is_team,
+    data_view_options: { year_range: query_context.year_range }
+  })
+  query_context.applied_output_ctes.add(cte_name)
+}
+
+export const join_cte = ({ query_context, cte_name, identity_id, params }) => {
+  const is_team = is_team_identity(identity_id)
+  join_per_game_cte({
+    players_query: query_context.players_query,
+    rate_type_table_name: cte_name,
+    splits: query_context.splits,
+    params: params ?? query_context.params,
+    is_team,
+    data_view_options: query_context.data_view_options
+  })
+}
+
+export const emit_outer_select = emit_rate_outer_select
+
+export default {
+  consumes_params,
+  get_cte_name,
+  add_cte,
+  join_cte,
+  emit_outer_select
 }

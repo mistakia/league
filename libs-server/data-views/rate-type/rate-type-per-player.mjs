@@ -1,4 +1,5 @@
 import db from '#db'
+import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_rate_type_denominator_params, {
@@ -180,4 +181,62 @@ export const join_per_player_cte = ({
       )
     }
   })
+}
+
+// ---- output-aggregator plugin interface (identity-driven) -----------------
+
+export const consumes_params = [
+  'year',
+  'nfl_week_id',
+  'seas_type',
+  'year_offset',
+  'output_column_params',
+  'rate_type_column_params'
+]
+
+export const get_cte_name = ({ params, dispatch_params = {} }) => {
+  return get_per_player_cte_table_name({
+    params,
+    stat_type: dispatch_params.stat_type ?? null,
+    rate_type_params: dispatch_params.rate_type_params ?? {}
+  })
+}
+
+export const add_cte = ({
+  query_context,
+  params,
+  cte_name,
+  dispatch_params = {}
+}) => {
+  if (query_context.applied_output_ctes.has(cte_name)) return
+  add_per_player_cte({
+    players_query: query_context.players_query,
+    params,
+    rate_type_table_name: cte_name,
+    splits: query_context.splits,
+    stat_type: dispatch_params.stat_type ?? null,
+    rate_type_params: dispatch_params.rate_type_params ?? {},
+    data_view_options: { year_range: query_context.year_range }
+  })
+  query_context.applied_output_ctes.add(cte_name)
+}
+
+export const join_cte = ({ query_context, cte_name, params }) => {
+  join_per_player_cte({
+    players_query: query_context.players_query,
+    params: params ?? query_context.params,
+    rate_type_table_name: cte_name,
+    splits: query_context.splits,
+    data_view_options: query_context.data_view_options
+  })
+}
+
+export const emit_outer_select = emit_rate_outer_select
+
+export default {
+  consumes_params,
+  get_cte_name,
+  add_cte,
+  join_cte,
+  emit_outer_select
 }

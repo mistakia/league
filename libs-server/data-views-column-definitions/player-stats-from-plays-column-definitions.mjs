@@ -147,6 +147,7 @@ const player_stat_from_plays = ({
     data_view_join_function({ ...args, join_year_on_year_split: true }),
   use_having: true,
   supported_splits: ['year', 'week'],
+  granularity: ['player_year', 'player_year_week'],
   supported_rate_types,
   get_cache_info: get_cache_info_for_fields_from_plays
 })
@@ -278,6 +279,7 @@ const create_team_share_stat = ({
   join: (args) =>
     data_view_join_function({ ...args, join_year_on_year_split: true }),
   supported_splits: ['year', 'week'],
+  granularity: ['player_year', 'player_year_week'],
   has_numerator_denominator,
   main_select_string_year_offset_range,
   with_where: ({ params }) => {

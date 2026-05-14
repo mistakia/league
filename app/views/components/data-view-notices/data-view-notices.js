@@ -10,7 +10,8 @@ const InfoGlyph = () => (
     width='16'
     height='16'
     aria-hidden='true'
-    focusable='false'>
+    focusable='false'
+  >
     <path
       fill='currentColor'
       d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z'
@@ -40,7 +41,8 @@ export default function DataViewNotices({ notices }) {
               type='button'
               className='data-view-notice__dismiss'
               aria-label='Dismiss notice'
-              onClick={() => set_dismissed({ ...dismissed, [key]: true })}>
+              onClick={() => set_dismissed({ ...dismissed, [key]: true })}
+            >
               ×
             </button>
           </div>

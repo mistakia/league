@@ -59,6 +59,7 @@ export default {
     column_name: 'pfr_season_value',
     join: pfr_season_value_join,
     supported_splits: ['year'],
+    granularity: ['player_year'],
     get_cache_info: get_cache_info_for_pfr_season_value
   }
 }

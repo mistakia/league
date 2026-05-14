@@ -62,7 +62,7 @@ export default {
     },
     join: ({ query, table_name, params, splits, data_view_options }) => {
       const already_added_for_per_game_rate_type =
-        data_view_options.rate_type_tables[table_name]
+        data_view_options.query_context?.applied_output_ctes?.has(table_name)
       if (already_added_for_per_game_rate_type) {
         return
       }
@@ -84,6 +84,7 @@ export default {
       }
     },
     get_cache_info,
-    supported_splits: ['year', 'week']
+    supported_splits: ['year', 'week'],
+    granularity: ['player_year', 'player_year_week']
   }
 }

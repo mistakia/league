@@ -1,10 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import {
-  nfl_plays_column_params,
-  serialize_preset_value
-} from '#libs-shared'
+import { nfl_plays_column_params, serialize_preset_value } from '#libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 
@@ -129,7 +126,11 @@ export default async function get_param_option_counts({
 
     return { counts, generated_at }
   } catch (err) {
-    log('get_param_option_counts failed for %s: %s', target_param_name, err.message)
+    log(
+      'get_param_option_counts failed for %s: %s',
+      target_param_name,
+      err.message
+    )
     return { counts: {}, generated_at }
   }
 }

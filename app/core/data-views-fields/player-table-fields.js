@@ -5,10 +5,7 @@ import PlayerRowNFLTeam from '@components/player-row-nfl-team'
 import PlayerRowPositionColumn from '@components/player-row-position-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import {
-  build_nfl_team_values,
-  nfl_team_value_groups
-} from '@constants'
+import { build_nfl_team_values, nfl_team_value_groups } from '@constants'
 
 const contract_field = (props) => ({
   ...props,

@@ -62,9 +62,7 @@ function resolve_credentials(credentials_key) {
   let cursor = config
   for (const part of parts) {
     if (cursor == null || typeof cursor !== 'object' || !(part in cursor)) {
-      throw new Error(
-        `Credentials key not found in config: ${credentials_key}`
-      )
+      throw new Error(`Credentials key not found in config: ${credentials_key}`)
     }
     cursor = cursor[part]
   }

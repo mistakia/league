@@ -2,6 +2,15 @@ import * as table_constants from 'react-table/src/constants.mjs'
 
 export { default as is_play_level_rate_type } from './is-play-level-rate-type.mjs'
 
+// Re-export the canonical output-column-param names so consumers can migrate
+// incrementally. Legacy `*_rate_type_param` exports below remain available for
+// one release cycle; both are retired in retire-rate-type-compat-shims.
+export {
+  offensive_output_param,
+  defensive_player_output_param,
+  offensive_player_output_param
+} from './output-column-param.mjs'
+
 const base_rate_type_param = {
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
@@ -49,8 +58,11 @@ const param_override_config = {
       'career_year',
       'career_game',
       'rate_type',
+      'output',
       'rate_type_match_column_params',
-      'rate_type_column_params'
+      'rate_type_column_params',
+      'output_match_column_params',
+      'output_column_params'
     ]
   }
 }
