@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+For graph context (related task dir, system docs, sibling repos), see [ABOUT.md](ABOUT.md). System architecture, data model, deploy topology, and data sources are canonical in user-base under `text/league/` — link to them rather than restating here.
+
 ## Project Overview
 
 This is **xo.football**, an open-source fantasy football league management platform featuring live auctions, advanced analytics, betting market integration, and comprehensive data views. Built with React/Redux frontend and Express.js/PostgreSQL backend.
