@@ -5,7 +5,6 @@ module.exports = {
       watch: '.',
       env_production: {
         NODE_ENV: 'production',
-        CONFIG_ENCRYPTION_KEY: process.env.CONFIG_ENCRYPTION_KEY,
         CONFIG_ENCRYPTION_KEY_FILE: process.env.CONFIG_ENCRYPTION_KEY_FILE
       },
       max_memory_restart: '3G',
