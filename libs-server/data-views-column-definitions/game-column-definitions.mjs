@@ -134,7 +134,6 @@ export default {
     table_alias: generate_table_alias,
     join: (args) => data_view_join_function({ ...args, join_on_team: true }),
     with: add_game_with_statement,
-    supported_splits: ['year', 'week'],
     granularity: ['player_year', 'player_year_week'],
     get_cache_info
   }

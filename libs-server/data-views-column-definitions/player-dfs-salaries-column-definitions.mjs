@@ -106,7 +106,6 @@ const create_player_dfs_salaries_field = (field) => ({
   table_alias: generate_table_alias,
   join: data_view_join_function,
   with: add_player_dfs_salaries_with_statement,
-  supported_splits: ['year', 'week'],
   granularity: ['player_year', 'player_year_week'],
   with_where: () => 'player_salaries.salary',
   get_cache_info

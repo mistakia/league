@@ -71,7 +71,6 @@ const create_player_espn_line_column = (column_name) => ({
   column_name,
   select_as: () => `espn_line_${column_name}`,
   join: player_espn_line_join,
-  supported_splits: ['year'],
   granularity: ['player_year'],
   get_cache_info
 })
@@ -82,7 +81,6 @@ const create_team_espn_line_column = (column_name) => ({
   select_as: () => `espn_team_${column_name}`,
   table_alias: espn_team_win_rates_table_alias,
   join: team_espn_line_join,
-  supported_splits: ['year'],
   granularity: ['team_year'],
   get_cache_info
 })

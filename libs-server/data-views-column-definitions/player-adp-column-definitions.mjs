@@ -80,7 +80,6 @@ const create_player_adp_field = (field, select_as) => ({
   table_alias: generate_table_alias,
   join: data_view_join_function,
   with: add_player_adp_with_statement,
-  supported_splits: ['year'],
   granularity: ['player_year'],
   with_where: () => `player_adp_index.${field}`,
   get_cache_info

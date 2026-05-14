@@ -84,7 +84,6 @@ const create_player_season_rankings_field = (field, select_as) => ({
   table_alias: generate_season_table_alias,
   join: data_view_join_function,
   with: add_player_season_rankings_with_statement,
-  supported_splits: ['year'],
   granularity: ['player_year'],
   with_where: () => `player_rankings_index.${field}`,
   get_cache_info: get_season_cache_info

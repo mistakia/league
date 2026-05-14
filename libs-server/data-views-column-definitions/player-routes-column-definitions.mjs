@@ -41,7 +41,6 @@ export default {
   player_routes: {
     table_alias: get_per_player_route_cte_table_name,
     join: player_routes_join,
-    supported_splits: ['year', 'week'],
     granularity: ['player_year', 'player_year_week'],
     select_as: () => 'player_routes',
     main_select: ({ table_name, column_index, rate_type_table_name }) => {

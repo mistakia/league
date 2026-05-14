@@ -42,8 +42,8 @@ describe('player_rankings season-only fields', function () {
     it('season variants support only year split', () => {
       expect(
         player_rankings_column_definitions.player_season_average_ranking
-          .supported_splits
-      ).to.deep.equal(['year'])
+          .granularity
+      ).to.deep.equal(['player_year'])
     })
   })
 

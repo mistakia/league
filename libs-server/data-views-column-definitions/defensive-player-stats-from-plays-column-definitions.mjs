@@ -69,7 +69,6 @@ const defensive_player_stat_from_plays = ({
   },
   join: defensive_player_join,
   pid_columns,
-  supported_splits: ['year', 'week'],
   granularity: ['player_year', 'player_year_week'],
   supported_rate_types: [
     'per_game',

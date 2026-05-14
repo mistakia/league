@@ -147,7 +147,6 @@ const team_stat_from_plays = ({
       return `${table_name}${table_suffix}.week`
     },
     use_having: true,
-    supported_splits: ['year', 'week'],
     granularity: force_player_active
       ? ['player_year', 'player_year_week']
       : ['team_year', 'team_year_week'],
@@ -157,8 +156,7 @@ const team_stat_from_plays = ({
       ? { supports_output: final_supports_output, measure_source: 'plays' }
       : {}),
     ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
-    get_cache_info: get_cache_info_for_fields_from_plays,
-    is_team: !force_player_active
+    get_cache_info: get_cache_info_for_fields_from_plays
   }
 }
 

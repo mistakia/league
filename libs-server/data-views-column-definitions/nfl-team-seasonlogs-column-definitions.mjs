@@ -128,7 +128,6 @@ const create_field_from_nfl_team_seasonlogs = (column_name) => ({
   table_name: 'nfl_team_seasonlogs',
   table_alias: nfl_team_seasonlogs_table_alias,
   join: nfl_team_seasonlogs_join,
-  supported_splits: ['year'],
   granularity: ['team_year'],
   get_cache_info
 })
@@ -139,7 +138,6 @@ const create_field_from_league_nfl_team_seasonlogs = (column_name) => ({
   table_name: 'league_nfl_team_seasonlogs',
   table_alias: league_nfl_team_seasonlogs_table_alias,
   join: league_nfl_team_seasonlogs_join,
-  supported_splits: ['year'],
   granularity: ['team_year'],
   get_cache_info
 })

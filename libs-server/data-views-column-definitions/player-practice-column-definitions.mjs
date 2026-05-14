@@ -81,7 +81,6 @@ const create_player_practice_field = (field, alias) => ({
   table_alias: generate_table_alias,
   join: data_view_join_function,
   with: add_player_practice_with_statement,
-  supported_splits: ['year', 'week'],
   granularity: ['player_year', 'player_year_week'],
   with_where: () => field,
   get_cache_info
@@ -95,7 +94,6 @@ const create_player_practice_designation_field = (practice_day) => ({
   table_alias: generate_table_alias,
   join: data_view_join_function,
   with: add_player_practice_with_statement,
-  supported_splits: ['year', 'week'],
   granularity: ['player_year', 'player_year_week'],
   with_where: () => practice_day,
   get_cache_info

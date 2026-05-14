@@ -40,7 +40,6 @@ export default {
   player_games_played: {
     table_alias: get_per_game_cte_table_name,
     join: games_played_join,
-    supported_splits: ['year'],
     granularity: ['player_year'],
     select_as: () => 'games_played',
     main_select: ({ table_name, column_index }) => {
