@@ -20,10 +20,13 @@ export const add_cte = ({ query_context }) => {
 }
 
 export const join_cte = ({ query_context }) => {
-  const { players_query } = query_context
+  const { players_query, splits = [] } = query_context
+  const join_on_year = splits.includes('year')
   players_query.innerJoin('player_years_weeks', function () {
     this.on('player_years_weeks.pid', 'player.pid')
-    this.andOn('player_years_weeks.year', 'player_years.year')
+    if (join_on_year) {
+      this.on('player_years_weeks.year', 'player_years.year')
+    }
   })
 }
 

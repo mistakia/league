@@ -7,7 +7,7 @@ const base_years_sql = (year_range) => {
   if (!Array.isArray(year_range) || year_range.length === 0) {
     throw new Error('team-to-team-year bridge requires non-empty year_range')
   }
-  return `SELECT unnest(ARRAY[${year_range.join(',')}]::int[]) AS year`
+  return `SELECT unnest(ARRAY[${year_range.join(',')}]) as year`
 }
 
 const register_cte = (query_context, name, raw_sql) => {
