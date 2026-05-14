@@ -53,6 +53,7 @@ const create_player_contract_field = (field) => ({
   table_name: 'player_contracts',
   table_alias: player_contract_table_alias,
   join: player_contract_join,
+  granularity: ['player', 'player_year', 'player_year_week'],
   get_cache_info
 })
 

@@ -62,10 +62,7 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
         'num_teams',
         expected.settings.num_teams
       )
-      result.should.have.property(
-        'commissioner_id',
-        expected.commissioner_id
-      )
+      result.should.have.property('commissioner_id', expected.commissioner_id)
     })
 
     it('translates Sleeper scoring_settings into the canonical scoring_settings shape', async function () {
@@ -131,10 +128,12 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
         'ROSTER_DROP'
       ])
       for (const txn of result) {
-        valid_types.has(txn.transaction_type).should.equal(
-          true,
-          `unexpected transaction_type: ${txn.transaction_type}`
-        )
+        valid_types
+          .has(txn.transaction_type)
+          .should.equal(
+            true,
+            `unexpected transaction_type: ${txn.transaction_type}`
+          )
       }
     })
   })
@@ -165,15 +164,11 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
       league.teams.should.have.length(
         sync_results_expected.canonical.league.teams.length
       )
-      rosters.should.have.length(
-        sync_results_expected.canonical.rosters.length
-      )
+      rosters.should.have.length(sync_results_expected.canonical.rosters.length)
       transactions.should.have.length(
         sync_results_expected.canonical.transactions.length
       )
-      players.should.have.length(
-        sync_results_expected.canonical.players.length
-      )
+      players.should.have.length(sync_results_expected.canonical.players.length)
     })
   })
 })

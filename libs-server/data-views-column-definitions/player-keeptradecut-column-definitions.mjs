@@ -159,6 +159,7 @@ const create_keeptradecut_definition = (type) => ({
   },
   week_select: () => `nfl_year_week_timestamp.week`,
   supported_splits: ['year', 'week'],
+  granularity: ['player_year', 'player_year_week'],
   get_cache_info: get_cache_info_for_keeptradecut
 })
 

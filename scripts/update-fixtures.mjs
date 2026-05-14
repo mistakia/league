@@ -49,9 +49,7 @@ function run_node_script(script_path, extra_args = []) {
       if (code === 0) resolve()
       else
         reject(
-          new Error(
-            `${path.basename(script_path)} exited with code ${code}`
-          )
+          new Error(`${path.basename(script_path)} exited with code ${code}`)
         )
     })
   })

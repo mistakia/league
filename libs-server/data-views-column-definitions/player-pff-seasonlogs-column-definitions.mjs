@@ -82,6 +82,7 @@ const create_field_from_pff_player_seasonlogs = (column_name) => ({
   table_alias: pff_player_seasonlogs_table_alias,
   join: pff_player_seasonlogs_join,
   supported_splits: ['year'],
+  granularity: ['player_year'],
   column_params: {
     year,
     career_year

@@ -6,12 +6,8 @@
       {
         "column_id": "team_pass_yards_from_plays",
         "params": {
-          "rate_type": [
-            "per_team_pass_play"
-          ],
-          "year": [
-            2023
-          ]
+          "rate_type": ["per_team_pass_play"],
+          "year": [2023]
         }
       }
     ],

@@ -39,8 +39,7 @@ export const RANKING_NAMES_MAP = {
   player_position_ranking: 'player_season_position_ranking',
   player_min_ranking: 'player_season_min_ranking',
   player_max_ranking: 'player_season_max_ranking',
-  player_ranking_standard_deviation:
-    'player_season_ranking_standard_deviation'
+  player_ranking_standard_deviation: 'player_season_ranking_standard_deviation'
 }
 
 const as_array = (v) => (Array.isArray(v) ? v : v == null ? [] : [v])

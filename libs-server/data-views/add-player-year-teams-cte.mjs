@@ -60,6 +60,12 @@ export const add_player_year_teams_cte = ({
 
   data_view_options.player_year_teams_cte_name = PLAYER_YEAR_TEAMS_CTE_NAME
   data_view_options.player_year_teams_year_range = year_range
+
+  if (data_view_options.query_context) {
+    data_view_options.query_context.applied_bridges.add(
+      'player_year->team_year'
+    )
+  }
 }
 
 export const ensure_player_year_teams_join = ({

@@ -62,15 +62,20 @@ export default function get_rate_type_denominator_params({ params = {} } = {}) {
     }
   }
 
-  if (params.rate_type_column_params) {
-    // Use denominator-specific play-level param overrides
-    for (const [key, value] of Object.entries(params.rate_type_column_params)) {
+  // Canonical key under the identity-model contract is `output_column_params`;
+  // `rate_type_column_params` is retained as an alias for one release cycle and
+  // is read only when the canonical key is absent. Removed in
+  // retire-rate-type-compat-shims.
+  const output_column_params =
+    params.output_column_params ?? params.rate_type_column_params
+
+  if (output_column_params) {
+    for (const [key, value] of Object.entries(output_column_params)) {
       if (play_level_param_keys.has(key)) {
         result[key] = value
       }
     }
   }
-  // When rate_type_column_params is absent (backwards compatible), no play-level params are included
 
   return result
 }

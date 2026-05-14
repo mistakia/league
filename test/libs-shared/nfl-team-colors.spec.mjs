@@ -53,7 +53,9 @@ describe('LIBS-SHARED nfl-team-colors', function () {
 
   describe('get_team_color', function () {
     it('should return primary color by default', function () {
-      expect(get_team_color({ abbr: 'NE' })).to.equal(nfl_team_colors.NE.primary)
+      expect(get_team_color({ abbr: 'NE' })).to.equal(
+        nfl_team_colors.NE.primary
+      )
     })
 
     it('should return primary color when key is primary', function () {
@@ -91,9 +93,7 @@ describe('LIBS-SHARED nfl-team-colors', function () {
     })
 
     it('should return correct color for LA (Rams)', function () {
-      expect(get_team_color({ abbr: 'LA', key: 'primary' })).to.equal(
-        '#003594'
-      )
+      expect(get_team_color({ abbr: 'LA', key: 'primary' })).to.equal('#003594')
     })
   })
 })

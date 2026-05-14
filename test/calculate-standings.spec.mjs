@@ -53,11 +53,22 @@ const teams = [
 // (4 letters - 4 letters - 4 digits - 4 digits - 2 digits - 2 digits); use
 // real-format pids so .starters.length reflects what the LP solver placed.
 const letters = (n) =>
-  String.fromCharCode(...Array.from({ length: 4 }, (_, k) => 65 + ((n + k) % 26)))
+  String.fromCharCode(
+    ...Array.from({ length: 4 }, (_, k) => 65 + ((n + k) % 26))
+  )
 const make_pid = (i) =>
-  `${letters(i)}-${letters(i + 5)}-2020-1990-01-${String(i % 28 + 1).padStart(2, '0')}`
+  `${letters(i)}-${letters(i + 5)}-2020-1990-01-${String((i % 28) + 1).padStart(2, '0')}`
 
-const make_gamelog = ({ pid, week, py = 0, ptd = 0, ry = 0, rtd = 0, recy = 0, rectd = 0 }) => ({
+const make_gamelog = ({
+  pid,
+  week,
+  py = 0,
+  ptd = 0,
+  ry = 0,
+  rtd = 0,
+  recy = 0,
+  rectd = 0
+}) => ({
   pid,
   week,
   py,
@@ -103,7 +114,10 @@ const make_filler_gamelogs = (tid) =>
 
 const filler_tids = [2, 3, 4]
 const filler_starters_by_tid = Object.fromEntries(
-  filler_tids.map((tid) => [tid, make_filler_roster(tid).map((p) => ({ ...p, slot: 1 }))])
+  filler_tids.map((tid) => [
+    tid,
+    make_filler_roster(tid).map((p) => ({ ...p, slot: 1 }))
+  ])
 )
 const filler_active_by_tid = Object.fromEntries(
   filler_tids.map((tid) => [tid, make_filler_roster(tid)])
@@ -126,7 +140,10 @@ describe('LIBS-SHARED calculate-standings -- incomplete optimal lineup detector'
       { pid: make_pid(7), pos: 'K' }
     ]
     const starters = {
-      1: { 1: roster.map((p) => ({ ...p, slot: 1 })), ...filler_starters_by_tid }
+      1: {
+        1: roster.map((p) => ({ ...p, slot: 1 })),
+        ...filler_starters_by_tid
+      }
     }
     const active = { 1: { 1: roster, ...filler_active_by_tid } }
     const gamelogs = [
@@ -168,7 +185,10 @@ describe('LIBS-SHARED calculate-standings -- incomplete optimal lineup detector'
       { pid: make_pid(7), pos: 'K' }
     ]
     const starters = {
-      1: { 1: roster.map((p) => ({ ...p, slot: 1 })), ...filler_starters_by_tid }
+      1: {
+        1: roster.map((p) => ({ ...p, slot: 1 })),
+        ...filler_starters_by_tid
+      }
     }
     const active = { 1: { 1: roster, ...filler_active_by_tid } }
     const gamelogs = [
@@ -202,7 +222,10 @@ describe('LIBS-SHARED calculate-standings -- incomplete optimal lineup detector'
       { pid: make_pid(7), pos: 'K' }
     ]
     const starters = {
-      1: { 1: roster.map((p) => ({ ...p, slot: 1 })), ...filler_starters_by_tid }
+      1: {
+        1: roster.map((p) => ({ ...p, slot: 1 })),
+        ...filler_starters_by_tid
+      }
     }
     const active = { 1: { 1: roster, ...filler_active_by_tid } }
     // team 1 has no gamelogs (all players inactive); team 2 still does so the

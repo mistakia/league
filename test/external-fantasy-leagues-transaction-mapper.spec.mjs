@@ -47,9 +47,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
     })
 
     it('reports platform support correctly', function () {
-      mapper
-        .is_platform_supported({ platform: 'sleeper' })
-        .should.equal(true)
+      mapper.is_platform_supported({ platform: 'sleeper' }).should.equal(true)
       mapper
         .is_platform_supported({ platform: 'unsupported-platform' })
         .should.equal(false)
@@ -161,9 +159,9 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
       })
 
       mapped.should.have.length(4)
-      mapped.every((row) => row.type === transaction_types.TRADE).should.equal(
-        true
-      )
+      mapped
+        .every((row) => row.type === transaction_types.TRADE)
+        .should.equal(true)
       const tids = mapped.map((row) => row.tid).sort()
       tids.should.deep.equal(['tid-11', 'tid-11', 'tid-4', 'tid-4'])
     })
@@ -190,10 +188,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
         (row) => row.type === transaction_types.ROSTER_ADD
       )
       add_row.should.exist
-      add_row.should.have.property(
-        'value',
-        waiver_with_bid.settings.waiver_bid
-      )
+      add_row.should.have.property('value', waiver_with_bid.settings.waiver_bid)
 
       for (const row of mapped) {
         if (row.type === transaction_types.ROSTER_RELEASE) {
@@ -223,15 +218,11 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
         timestamp: 1700000000,
         type: transaction_types.ROSTER_ADD
       }
-      mapper
-        .validate_transaction({ ...base, pid: null })
-        .should.equal(false)
+      mapper.validate_transaction({ ...base, pid: null }).should.equal(false)
       mapper
         .validate_transaction({ ...base, tid: undefined })
         .should.equal(false)
-      mapper
-        .validate_transaction({ ...base, lid: null })
-        .should.equal(false)
+      mapper.validate_transaction({ ...base, lid: null }).should.equal(false)
     })
 
     it('returns false for a timestamp before 2001', function () {

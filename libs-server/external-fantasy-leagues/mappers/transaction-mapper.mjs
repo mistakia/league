@@ -157,9 +157,7 @@ export default class TransactionMapper {
         if (this.validate_transaction(candidate)) {
           valid.push(candidate)
         } else {
-          log(
-            `Invalid transaction after mapping: ${JSON.stringify(candidate)}`
-          )
+          log(`Invalid transaction after mapping: ${JSON.stringify(candidate)}`)
         }
       }
 
@@ -217,8 +215,7 @@ export default class TransactionMapper {
           type: action_map.add,
           pid:
             get_mapping_value(context.player_mappings, player_id) || player_id,
-          tid:
-            get_mapping_value(context.team_mappings, roster_id) || roster_id
+          tid: get_mapping_value(context.team_mappings, roster_id) || roster_id
         }
         if (userid !== undefined) row.userid = userid
         if (
@@ -239,8 +236,7 @@ export default class TransactionMapper {
           type: action_map.drop,
           pid:
             get_mapping_value(context.player_mappings, player_id) || player_id,
-          tid:
-            get_mapping_value(context.team_mappings, roster_id) || roster_id
+          tid: get_mapping_value(context.team_mappings, roster_id) || roster_id
         }
         if (userid !== undefined) row.userid = userid
         rows.push(row)

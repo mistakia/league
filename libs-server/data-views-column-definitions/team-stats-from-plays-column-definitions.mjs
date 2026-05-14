@@ -109,6 +109,7 @@ const team_stat_from_plays = ({
   },
   use_having: true,
   supported_splits: ['year', 'week'],
+  granularity: ['team_year', 'team_year_week'],
   supported_rate_types,
   is_rate,
   get_cache_info: get_cache_info_for_fields_from_plays,

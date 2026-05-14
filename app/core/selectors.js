@@ -4077,4 +4077,3 @@ export function get_league_historical_ranks_by_team_id(state, { tid }) {
   const league_historical_ranks = get_league_team_historical_ranks(state)
   return league_historical_ranks[tid] || {}
 }
-

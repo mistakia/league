@@ -345,6 +345,10 @@ const create_projected_stat = (base_object, stat_name) => {
       ...base_object,
       select_as: () => `${prefix}_projected_${stat_name}`,
       supported_splits: prefix === 'week' ? ['year', 'week'] : ['year'],
+      granularity:
+        prefix === 'week'
+          ? ['player_year', 'player_year_week']
+          : ['player_year'],
       get_cache_info: get_cache_info_for_player_projected_stats,
       join: (join_arguments) =>
         base_object.join({
@@ -386,6 +390,7 @@ export default {
     table_alias: league_player_projection_values_table_alias,
     select_as: () => 'player_season_projected_inflation_adjusted_market_salary',
     join: league_player_projection_values_join,
+    granularity: ['player', 'player_year', 'player_year_week'],
     get_cache_info: get_cache_info_for_player_projected_stats
   },
 

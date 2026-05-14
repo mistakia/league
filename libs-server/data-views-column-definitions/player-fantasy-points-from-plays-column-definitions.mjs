@@ -567,6 +567,7 @@ export default {
     with: fantasy_points_from_plays_with,
     join: data_view_join_function,
     supported_splits: ['year', 'week'],
+    granularity: ['player_year', 'player_year_week'],
     supported_rate_types: [
       'per_game',
       'per_team_half',

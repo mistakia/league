@@ -99,7 +99,9 @@ const find_filter_param_key_absent_from_columns = ({ where, columns }) => {
           key,
           resolve_param_values(key, params[key]) || []
         )
-        const scope_part = filter_value_preview ? ` (${filter_value_preview})` : ''
+        const scope_part = filter_value_preview
+          ? ` (${filter_value_preview})`
+          : ''
         notices.push({
           code: 'filter_param_key_absent_from_columns',
           severity: 'info',

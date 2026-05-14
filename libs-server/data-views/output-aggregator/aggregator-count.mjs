@@ -1,0 +1,103 @@
+import crypto from 'crypto'
+
+import { build_period_cte } from './build-period-cte.mjs'
+import { consumed_params_signature } from './consumed-params-signature.mjs'
+
+export const consumes_params = ['year', 'nfl_week_id', 'seas_type']
+
+const valid_period = (period) => period === 'game' || period === 'season'
+
+export const get_cte_name = ({ column_def, params, identity_id, period }) => {
+  if (!valid_period(period)) {
+    throw new Error(
+      `count aggregator requires period in (game, season); got ${period}`
+    )
+  }
+  const key = JSON.stringify({
+    column_id: column_def.column_id,
+    measure_source: column_def.measure_source,
+    identity_id,
+    period,
+    params: consumed_params_signature({ params, consumes_params })
+  })
+  const hash = crypto.createHash('md5').update(key).digest('hex').slice(0, 12)
+  return `count_${period}_${hash}`
+}
+
+export const add_cte = ({
+  query_context,
+  column_def,
+  params,
+  cte_name,
+  identity_id,
+  period
+}) => {
+  if (query_context.applied_output_ctes.has(cte_name)) return
+  const sub = build_period_cte({
+    measure_source: column_def.measure_source,
+    measure_expr: column_def.measure_expr({
+      table_name:
+        column_def.measure_source === 'plays' ? 'nfl_plays' : 'player_gamelogs',
+      params,
+      identity_id
+    }),
+    measure_predicate: column_def.measure_predicate
+      ? column_def.measure_predicate({ params, identity_id })
+      : null,
+    period,
+    query_context,
+    identity_id
+  })
+  query_context.players_query.withMaterialized(cte_name, sub)
+  query_context.applied_output_ctes.add(cte_name)
+}
+
+export const join_cte = ({ query_context, cte_name, identity_id }) => {
+  const {
+    players_query,
+    pid_reference,
+    team_reference,
+    year_reference,
+    splits
+  } = query_context
+  const is_team = identity_id.startsWith('team')
+  players_query.leftJoin(cte_name, function () {
+    if (is_team) {
+      this.on(`${cte_name}.team_code`, '=', team_reference)
+    } else {
+      this.on(`${cte_name}.pid`, '=', pid_reference)
+    }
+    if (splits.includes('year') && year_reference) {
+      this.andOn(`${cte_name}.year`, '=', year_reference)
+    }
+  })
+}
+
+const op_sql = (op) => {
+  const allowed = ['>=', '>', '<=', '<', '=', '<>']
+  if (!allowed.includes(op)) throw new Error(`Unsupported threshold op: ${op}`)
+  return op
+}
+
+export const emit_outer_select = ({ cte_name, column_index, params }) => {
+  const threshold = params?.output?.threshold
+  if (!threshold || threshold.op == null || threshold.value == null) {
+    throw new Error(
+      'count aggregator requires params.output.threshold {op, value}'
+    )
+  }
+  const alias = `count_value_${column_index}`
+  const op = op_sql(threshold.op)
+  return {
+    sql: `COUNT(DISTINCT ${cte_name}.period_key) FILTER (WHERE ${cte_name}.measure_total ${op} ?) AS ${alias}`,
+    bindings: [threshold.value]
+  }
+}
+
+export default {
+  consumes_params,
+  get_cte_name,
+  add_cte,
+  join_cte,
+  emit_outer_select
+}

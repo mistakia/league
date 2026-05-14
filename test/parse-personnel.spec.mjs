@@ -42,9 +42,9 @@ describe('parse_personnel_string', function () {
     })
 
     it('rejects short-code that overflows wr', function () {
-      expect(
-        parse_personnel_string({ value: '99', side: 'off' })
-      ).to.equal(null)
+      expect(parse_personnel_string({ value: '99', side: 'off' })).to.equal(
+        null
+      )
     })
 
     it('applies QB and OL defaults when absent', function () {
@@ -64,31 +64,31 @@ describe('parse_personnel_string', function () {
     it('soft-maps Nickel', function () {
       expect(
         parse_personnel_string({ value: 'Nickel', side: 'def' })
-      ).to.deep.equal({ db:5 })
+      ).to.deep.equal({ db: 5 })
     })
 
     it('soft-maps Dime', function () {
       expect(
         parse_personnel_string({ value: 'Dime', side: 'def' })
-      ).to.deep.equal({ db:6 })
+      ).to.deep.equal({ db: 6 })
     })
 
     it('soft-maps Base', function () {
       expect(
         parse_personnel_string({ value: 'Base', side: 'def' })
-      ).to.deep.equal({ db:4 })
+      ).to.deep.equal({ db: 4 })
     })
 
     it('soft-maps 0-3DB', function () {
       expect(
         parse_personnel_string({ value: '0-3DB', side: 'def' })
-      ).to.deep.equal({ db:3 })
+      ).to.deep.equal({ db: 3 })
     })
 
     it('soft-maps 7+DB', function () {
       expect(
         parse_personnel_string({ value: '7+DB', side: 'def' })
-      ).to.deep.equal({ db:7 })
+      ).to.deep.equal({ db: 7 })
     })
   })
 

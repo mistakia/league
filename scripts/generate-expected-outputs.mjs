@@ -145,8 +145,7 @@ function generate_transaction_mappings_output({
     },
     diagnostic: {
       external_transaction_top_level_keys: sample_input,
-      note:
-        'Sleeper transactions nest player IDs in `adds`/`drops` dicts and use `roster_ids` (plural array). TransactionMapper fans these out into one internal row per moved player, so the mapped count exceeds the external transaction count whenever transactions move multiple players (trades, waiver claims that also drop a player).'
+      note: 'Sleeper transactions nest player IDs in `adds`/`drops` dicts and use `roster_ids` (plural array). TransactionMapper fans these out into one internal row per moved player, so the mapped count exceeds the external transaction count whenever transactions move multiple players (trades, waiver claims that also drop a player).'
     },
     summary: {
       total_external: external_transactions.length,
@@ -198,23 +197,29 @@ async function generate_sync_results_output({
   adapter.api_client.get = async (url) => {
     if (url.includes('/users')) return league_fixture.data.users
     if (url.includes('/rosters')) return rosters_fixture.data.rosters
-    if (url.includes('/transactions/')) return transactions_fixture.data.transactions
+    if (url.includes('/transactions/'))
+      return transactions_fixture.data.transactions
     if (url.includes('/players/nfl')) return players_fixture.data.players
     if (url.includes('/league/')) return league_fixture.data.league
     throw new Error(`Unexpected URL in fixture-driven generator: ${url}`)
   }
 
   const league_id = league_fixture.data.league.league_id
-  const [league_canonical, rosters_canonical, transactions_canonical, players_canonical] =
-    await Promise.all([
-      adapter.get_league(league_id),
-      adapter.get_rosters({ league_id }),
-      adapter.get_transactions({ league_id, options: { week: 1 } }),
-      adapter.get_players({ filters: {} })
-    ])
+  const [
+    league_canonical,
+    rosters_canonical,
+    transactions_canonical,
+    players_canonical
+  ] = await Promise.all([
+    adapter.get_league(league_id),
+    adapter.get_rosters({ league_id }),
+    adapter.get_transactions({ league_id, options: { week: 1 } }),
+    adapter.get_players({ filters: {} })
+  ])
 
   return {
-    source_fixtures: 'platform-responses/sleeper/{league-config,rosters,transactions,players}.json',
+    source_fixtures:
+      'platform-responses/sleeper/{league-config,rosters,transactions,players}.json',
     generated_at: new Date().toISOString(),
     note: 'Canonical-format output produced by SleeperAdapter against real fixture data with api_client.get mocked to read fixtures. Used as the expected baseline for sync-orchestrator integration tests.',
     canonical: {
@@ -229,13 +234,17 @@ async function generate_sync_results_output({
 async function main() {
   await fs.mkdir(expected_outputs_dir, { recursive: true })
 
-  const [league_fixture, rosters_fixture, transactions_fixture, players_fixture] =
-    await Promise.all([
-      read_fixture('league-config.json'),
-      read_fixture('rosters.json'),
-      read_fixture('transactions.json'),
-      read_fixture('players.json')
-    ])
+  const [
+    league_fixture,
+    rosters_fixture,
+    transactions_fixture,
+    players_fixture
+  ] = await Promise.all([
+    read_fixture('league-config.json'),
+    read_fixture('rosters.json'),
+    read_fixture('transactions.json'),
+    read_fixture('players.json')
+  ])
 
   const league_output = generate_league_config_output({ league_fixture })
   const transaction_output = generate_transaction_mappings_output({
