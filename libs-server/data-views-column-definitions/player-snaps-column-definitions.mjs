@@ -41,7 +41,6 @@ export default {
   player_snaps: {
     table_alias: get_per_player_play_cte_table_name,
     join: player_snaps_join,
-    supported_splits: ['year', 'week'],
     granularity: ['player_year', 'player_year_week'],
     select_as: () => 'player_snaps',
     main_select: ({ table_name, column_index, rate_type_table_name }) => {

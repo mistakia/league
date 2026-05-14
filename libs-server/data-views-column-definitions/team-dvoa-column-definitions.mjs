@@ -76,7 +76,6 @@ const create_dvoa_team_unit_field = (column_name) => ({
   table_name: 'dvoa_team_unit_seasonlogs_index',
   table_alias: dvoa_team_unit_seasonlogs_table_alias,
   join: dvoa_team_unit_seasonlogs_join,
-  supported_splits: ['year'],
   granularity: ['team_year'],
   get_cache_info
 })

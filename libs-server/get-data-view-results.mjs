@@ -1654,7 +1654,11 @@ export const get_data_view_results_query = async ({
     })
     const { period, aggregation } = column.params.output
     const plugin = resolve_output_aggregator({ period, aggregation })
-    const identity_id = column_definition.is_team ? 'team_year' : 'player_year'
+    const identity_id = (column_definition.granularity || []).some((g) =>
+      g.startsWith('team')
+    )
+      ? 'team_year'
+      : 'player_year'
     const column_def = { ...column_definition, column_id: column.column_id }
     const cte_name = plugin.get_cte_name({
       column_def,
@@ -1721,7 +1725,11 @@ export const get_data_view_results_query = async ({
       index,
       columns: table_columns
     })
-    const identity_id = column_definition.is_team ? 'team_year' : 'player_year'
+    const identity_id = (column_definition.granularity || []).some((g) =>
+      g.startsWith('team')
+    )
+      ? 'team_year'
+      : 'player_year'
     const column_def = { ...column_definition, column_id: column.column_id }
     const result = apply_output_aggregator({
       query_context,

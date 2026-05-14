@@ -174,7 +174,6 @@ export default {
       )
     },
     use_having: true,
-    supported_splits: ['year'],
     granularity: ['player_year'],
     get_cache_info: player_table_get_cache_info
   },

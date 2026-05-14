@@ -84,7 +84,6 @@ export default {
       }
     },
     get_cache_info,
-    supported_splits: ['year', 'week'],
     granularity: ['player_year', 'player_year_week']
   }
 }

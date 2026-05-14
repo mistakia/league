@@ -95,7 +95,6 @@ const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   table_name: 'league_format_player_seasonlogs',
   table_alias: league_format_player_seasonlogs_table_alias,
   join: league_format_player_seasonlogs_join,
-  supported_splits: ['year'],
   granularity: ['player_year'],
   get_cache_info: get_cache_info_for_league_format_seasonlogs,
   get_table_conditions: league_format_seasonlogs_conditions
