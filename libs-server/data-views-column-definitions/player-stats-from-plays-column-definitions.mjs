@@ -9,6 +9,10 @@ import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/ge
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import {
+  strip_outer_sum,
+  derive_periods_from_rate_types
+} from '#libs-server/data-views/strip-outer-sum.mjs'
 
 const should_use_main_where = ({ params, has_numerator_denominator }) => {
   return (
@@ -41,6 +45,8 @@ const player_stat_from_plays = ({
   numerator_select,
   denominator_select,
   has_numerator_denominator = false,
+  supports_output = null,
+  measure_expr = null,
   supported_rate_types = [
     'per_game',
     'per_team_half',
@@ -63,7 +69,35 @@ const player_stat_from_plays = ({
     'per_player_pass_play',
     'per_player_rush_play'
   ]
-}) => ({
+}) => {
+  const auto_inner = strip_outer_sum(with_select_string)
+  const can_auto_derive =
+    !has_numerator_denominator &&
+    auto_inner !== null &&
+    supported_rate_types &&
+    supported_rate_types.length > 0
+  const derived_supports_output = can_auto_derive
+    ? {
+        periods: [
+          'game',
+          'season',
+          ...derive_periods_from_rate_types(supported_rate_types)
+        ],
+        aggregations: ['rate', 'count']
+      }
+    : null
+  // Auto-derive closure accepts `{ table_name }` to match the explicit-
+  // override contract used by hand-written measure_expr functions. Today
+  // every auto-derived column references stat columns that exist only on
+  // `nfl_plays` (no overlap with `nfl_games`), so the inner expression is
+  // unambiguous unprefixed -- but the contract is honored so future
+  // explicit overrides and auto-derived columns coexist symmetrically.
+  const derived_measure_expr = can_auto_derive
+    ? ({ table_name } = {}) => auto_inner
+    : null
+  const final_supports_output = supports_output || derived_supports_output
+  const final_measure_expr = measure_expr || derived_measure_expr
+  return ({
   table_alias: ({ params }) =>
     generate_table_alias({ type: 'play_by_play', params, pid_columns }),
   column_name: stat_name,
@@ -149,8 +183,13 @@ const player_stat_from_plays = ({
   supported_splits: ['year', 'week'],
   granularity: ['player_year', 'player_year_week'],
   supported_rate_types,
+  ...(final_supports_output
+    ? { supports_output: final_supports_output, measure_source: 'plays' }
+    : {}),
+  ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
   get_cache_info: get_cache_info_for_fields_from_plays
-})
+  })
+}
 
 const create_team_share_stat = ({
   column_name,
@@ -699,7 +738,13 @@ export default {
   player_receiving_yards_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
     with_select_string: `SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)`,
-    stat_name: 'rec_yds_from_plays'
+    stat_name: 'rec_yds_from_plays',
+    supports_output: {
+      periods: ['game', 'season'],
+      aggregations: ['rate', 'count']
+    },
+    measure_expr: ({ table_name }) =>
+      `CASE WHEN ${table_name}.comp = true THEN ${table_name}.recv_yds ELSE 0 END`
   }),
   player_receiving_touchdowns_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],

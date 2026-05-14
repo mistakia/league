@@ -27,7 +27,10 @@ import {
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
-import { resolve as resolve_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
+import {
+  resolve as resolve_output_aggregator,
+  apply_output_aggregator
+} from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { get_identity } from '#libs-server/data-views/identities.mjs'
 
 // A base identity in granularity (e.g. `player`) means the column needs no
@@ -848,6 +851,7 @@ const add_clauses_for_table = async ({
   group_column_params = {},
   splits = [],
   rate_type_column_mapping = {},
+  output_select_mapping = {},
   data_view_options,
   data_view_metadata
 }) => {
@@ -874,6 +878,7 @@ const add_clauses_for_table = async ({
       column_definition,
       table_name,
       rate_type_column_mapping,
+      output_select_mapping,
       splits,
       data_view_options
     })
@@ -1026,14 +1031,26 @@ const add_clauses_for_table = async ({
       data_view_options
     })
     for (const select_string of select_strings) {
-      players_query.select(db.raw(select_string))
+      if (select_string?.sql) {
+        players_query.select(
+          db.raw(select_string.sql, select_string.bindings || [])
+        )
+      } else {
+        players_query.select(db.raw(select_string))
+      }
     }
     for (const group_by_string of group_by_strings) {
       players_query.groupBy(db.raw(group_by_string))
     }
   } else {
     for (const select_string of select_strings) {
-      players_query.select(db.raw(select_string))
+      if (select_string?.sql) {
+        players_query.select(
+          db.raw(select_string.sql, select_string.bindings || [])
+        )
+      } else {
+        players_query.select(db.raw(select_string))
+      }
     }
     for (const group_by_string of group_by_strings) {
       players_query.groupBy(db.raw(group_by_string))
@@ -1287,6 +1304,7 @@ export const get_data_view_results_query = async ({
 
   const table_columns = []
   const rate_type_column_mapping = {}
+  const output_select_mapping = {}
   const data_view_options = {
     opening_days_joined: false,
     player_seasonlogs_joined: false,
@@ -1629,6 +1647,45 @@ export const get_data_view_results_query = async ({
     query_context.joined_output_ctes.add(cte_name)
   }
 
+  // Output-aggregator dispatch for columns retrofitted onto the native
+  // `output` param contract (Phase C step 1). Runs alongside the legacy
+  // rate-type loop above; a single column is processed by exactly one
+  // path because the new path requires `column_definition.supports_output`
+  // which is only set on retrofitted columns.
+  for (const [index, column] of [
+    ...prefix_columns,
+    ...columns,
+    ...where
+  ].entries()) {
+    if (
+      typeof column !== 'object' ||
+      !column.params ||
+      !column.params.output ||
+      column.params.rate_type
+    ) {
+      continue
+    }
+    const column_definition = data_views_column_definitions[column.column_id]
+    if (!column_definition || !column_definition.supports_output) {
+      continue
+    }
+    const column_index = get_column_index({
+      column_id: column.column_id,
+      index,
+      columns: table_columns
+    })
+    const identity_id = column_definition.is_team ? 'team_year' : 'player_year'
+    const column_def = { ...column_definition, column_id: column.column_id }
+    const result = apply_output_aggregator({
+      query_context,
+      column_def,
+      params: column.params,
+      identity_id,
+      column_index
+    })
+    output_select_mapping[`${column.column_id}_${column_index}`] = result
+  }
+
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
     where,
     table_columns,
@@ -1684,6 +1741,7 @@ export const get_data_view_results_query = async ({
         group_column_params,
         splits: available_splits,
         rate_type_column_mapping,
+        output_select_mapping,
         data_view_options,
         data_view_metadata
       })
