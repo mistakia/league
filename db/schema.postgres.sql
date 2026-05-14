@@ -395,6 +395,7 @@ DROP INDEX IF EXISTS public.idx_24626_baseline;
 DROP INDEX IF EXISTS public.idx_24623_player_value;
 DROP INDEX IF EXISTS public.idx_24613_team;
 DROP INDEX IF EXISTS public.idx_24608_pick;
+ALTER TABLE IF EXISTS ONLY public.worker_heartbeat DROP CONSTRAINT IF EXISTS worker_heartbeat_pkey;
 ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
@@ -556,6 +557,7 @@ ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFA
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
+DROP TABLE IF EXISTS public.worker_heartbeat;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
 DROP TABLE IF EXISTS public.waivers;
@@ -24963,6 +24965,20 @@ CREATE TABLE public.weekly_market_selections_analysis_cache (
 
 
 --
+-- Name: worker_heartbeat; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.worker_heartbeat (
+    worker_name character varying(64) NOT NULL,
+    last_iteration_at bigint NOT NULL,
+    last_iteration_status character varying(16) NOT NULL,
+    last_iteration_detail text,
+    loop_count integer DEFAULT 0 NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: nfl_plays_year_2000; Type: TABLE ATTACH; Schema: public; Owner: -
 --
 
@@ -26862,6 +26878,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.weekly_market_selections_analysis_cache
     ADD CONSTRAINT weekly_market_selections_analysis_cache_pkey PRIMARY KEY (source_id, source_market_id, source_selection_id);
+
+
+--
+-- Name: worker_heartbeat worker_heartbeat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.worker_heartbeat
+    ADD CONSTRAINT worker_heartbeat_pkey PRIMARY KEY (worker_name);
 
 
 --

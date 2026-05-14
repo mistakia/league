@@ -1,7 +1,12 @@
 import debug from 'debug'
 
 import db from '#db'
-import { wait, report_job, is_main } from '#libs-server'
+import {
+  wait,
+  report_job,
+  write_worker_heartbeat,
+  is_main
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { job as import_draftkings_odds } from '#scripts/import-draftkings-odds.mjs'
 import { job as import_pinnacle_odds } from '#scripts/import-pinnacle-odds.mjs'
@@ -218,6 +223,28 @@ const import_live_odds_worker = async () => {
       log(
         `Iteration ${loop_count}: ${results.imports_succeeded}/${results.imports_attempted} imports succeeded`
       )
+    }
+
+    let heartbeat_status
+    if (results.imports_attempted === 0) {
+      heartbeat_status = 'idle'
+    } else if (results.imports_failed === 0) {
+      heartbeat_status = 'success'
+    } else if (results.imports_succeeded === 0) {
+      heartbeat_status = 'failure'
+    } else {
+      heartbeat_status = 'partial'
+    }
+
+    try {
+      await write_worker_heartbeat({
+        worker_name: 'import-live-odds-worker',
+        status: heartbeat_status,
+        detail: `attempted=${results.imports_attempted} succeeded=${results.imports_succeeded} failed=${results.imports_failed}`,
+        loop_count
+      })
+    } catch (err) {
+      log(`heartbeat write failed: ${err.message}`)
     }
 
     // Wait for remaining throttle time unless we're exiting
