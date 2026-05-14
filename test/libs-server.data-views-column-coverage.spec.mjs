@@ -9,20 +9,11 @@ const expect = chai.expect
 
 const known_identity_ids = new Set(Object.keys(identities))
 
-// Empty placeholder stubs in the aggregator that no code path references.
-// They are not real column definitions and are excluded from the coverage
-// assertion until they either gain implementations or get removed.
-const COVERAGE_ALLOWLIST = new Set([
-  'week_opponent_abbreviation',
-  'week_opponent_points_allowed_over_average'
-])
-
 describe('data-views column-definition coverage', () => {
   it('every column carries granularity with known identity ids', () => {
     const missing = []
     const unknown = []
     for (const [column_id, def] of Object.entries(data_views_column_definitions)) {
-      if (COVERAGE_ALLOWLIST.has(column_id)) continue
       if (!def || typeof def !== 'object') continue
       const granularity = def.granularity
       if (!Array.isArray(granularity) || granularity.length === 0) {

@@ -48,6 +48,9 @@ const derive_supported_splits_from_granularity = (granularity = []) => {
   return Array.from(supports)
 }
 
+const is_team_column_definition = (column_definition) =>
+  (column_definition.granularity || []).some((g) => g.startsWith('team'))
+
 let column_param_backwards_compatibility_mappings = {}
 
 try {
@@ -1654,9 +1657,7 @@ export const get_data_view_results_query = async ({
     })
     const { period, aggregation } = column.params.output
     const plugin = resolve_output_aggregator({ period, aggregation })
-    const identity_id = (column_definition.granularity || []).some((g) =>
-      g.startsWith('team')
-    )
+    const identity_id = is_team_column_definition(column_definition)
       ? 'team_year'
       : 'player_year'
     const column_def = { ...column_definition, column_id: column.column_id }
@@ -1725,9 +1726,7 @@ export const get_data_view_results_query = async ({
       index,
       columns: table_columns
     })
-    const identity_id = (column_definition.granularity || []).some((g) =>
-      g.startsWith('team')
-    )
+    const identity_id = is_team_column_definition(column_definition)
       ? 'team_year'
       : 'player_year'
     const column_def = { ...column_definition, column_id: column.column_id }

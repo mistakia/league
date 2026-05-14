@@ -158,8 +158,5 @@ export default {
     get_cache_info: create_static_cache_info({
       ttl: 1000 * 60 * 60 * 12 // 12 hours
     })
-  },
-
-  week_opponent_abbreviation: {},
-  week_opponent_points_allowed_over_average: {}
+  }
 }
