@@ -71,6 +71,7 @@ export default {
 
   player_league_roster_status: {
     table_name: 'rosters_players',
+    granularity: ['player', 'player_year', 'player_year_week'],
     main_where: () => player_league_roster_status_select,
     main_select: () => [
       `${player_league_roster_status_select} AS player_league_roster_status`,
@@ -129,6 +130,7 @@ export default {
   player_league_salary: {
     column_name: 'value',
     table_name: 'transactions',
+    granularity: ['player', 'player_year', 'player_year_week'],
     table_alias: () => 'latest_transactions',
     select_as: () => 'player_salary',
     main_where: ({ table_name }) => `${table_name}.value`,
