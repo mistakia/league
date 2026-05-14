@@ -3,7 +3,6 @@ module.exports = {
     {
       name: 'import-live-plays-worker',
       script: 'jobs/import-live-plays-worker.mjs',
-      watch: '.',
       autorestart: true,
       max_memory_restart: '1G',
       merge_logs: true,

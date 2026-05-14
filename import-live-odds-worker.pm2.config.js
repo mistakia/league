@@ -3,8 +3,9 @@ module.exports = {
     {
       name: 'import-live-odds-worker',
       script: 'jobs/import-live-odds-worker.mjs',
-      watch: '.',
       autorestart: true,
+      min_uptime: '60s',
+      max_restarts: 10,
       max_memory_restart: '1G',
       merge_logs: true,
       env_production: {
