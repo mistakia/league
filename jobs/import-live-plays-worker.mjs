@@ -8,8 +8,11 @@ import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 const log = debug('import-live-plays-worker')
 debug.enable('import-live-plays-worker')
 
-const LOOP_INTERVAL_MS = 60000 // 60 seconds between iterations
-const ITERATION_TIMEOUT_MS = 300000 // 5 minutes max per iteration
+const LOOP_INTERVAL_MS = 60_000 // active games: 1 minute between iterations
+const IDLE_INTERVAL_MS = 5 * 60_000 // REG season but no live games: 5 minutes
+const OFFSEASON_INTERVAL_MS = 60 * 60_000 // not in REG season: 1 hour
+const SHUTDOWN_CHECK_INTERVAL_MS = 30_000 // chunk size for interruptible sleep so SIGINT is honored within 30s
+const ITERATION_TIMEOUT_MS = 300_000 // 5 minutes max per iteration
 
 // Use object to allow modification detection by linter
 const state = { should_exit: false }
@@ -68,48 +71,52 @@ const run_import_iteration = async () => {
   }
 }
 
+// Sleep that wakes early on SIGINT/SIGTERM so long offseason/idle sleeps do not
+// delay shutdown. Polls state.should_exit every SHUTDOWN_CHECK_INTERVAL_MS.
+const interruptible_wait = async (total_ms) => {
+  const end = Date.now() + total_ms
+  while (Date.now() < end && !state.should_exit) {
+    const remaining = end - Date.now()
+    await wait(Math.min(SHUTDOWN_CHECK_INTERVAL_MS, remaining))
+  }
+}
+
 /**
- * Main worker loop - runs continuously importing live plays
+ * Main worker loop - runs continuously, adapting sleep cadence to whether
+ * we are in regular season and whether any games are currently live.
+ *
+ * The worker never exits voluntarily (it sleeps instead). This avoids fighting
+ * pm2 autorestart and prevents the offseason restart-storm that previously
+ * generated GB of log churn.
  */
 const import_live_plays_worker = async () => {
   log('Starting live plays worker...')
-
-  // Only run during regular season
-  if (current_season.nfl_seas_type !== 'REG') {
-    log(
-      `Not in regular season (current: ${current_season.nfl_seas_type}), exiting worker`
-    )
-    return
-  }
-
   setup_signal_handlers()
 
   let loop_count = 0
-  let all_games_skipped = false
 
-  while (!state.should_exit && !all_games_skipped) {
-    const throttle_timer = wait(LOOP_INTERVAL_MS)
+  while (!state.should_exit) {
+    if (current_season.nfl_seas_type !== 'REG') {
+      log(
+        `Not in regular season (current: ${current_season.nfl_seas_type}), sleeping ${OFFSEASON_INTERVAL_MS / 1000}s`
+      )
+      await interruptible_wait(OFFSEASON_INTERVAL_MS)
+      continue
+    }
 
     loop_count += 1
     log(`Running import iteration ${loop_count}`)
+    const all_games_skipped = await run_import_iteration()
+    if (state.should_exit) break
 
-    all_games_skipped = await run_import_iteration()
-
+    const sleep_ms = all_games_skipped ? IDLE_INTERVAL_MS : LOOP_INTERVAL_MS
     if (all_games_skipped) {
-      log(`All games completed or skipped after ${loop_count} iterations`)
+      log(`No active games, sleeping ${sleep_ms / 1000}s`)
     }
-
-    // Wait for remaining throttle time unless we're exiting
-    if (!state.should_exit && !all_games_skipped) {
-      await throttle_timer
-    }
+    await interruptible_wait(sleep_ms)
   }
 
-  log(
-    `Worker exiting (should_exit: ${state.should_exit}, all_games_skipped: ${all_games_skipped})`
-  )
-
-  // Clean up database connection
+  log(`Worker exiting (should_exit: ${state.should_exit})`)
   await db.destroy()
 }
 

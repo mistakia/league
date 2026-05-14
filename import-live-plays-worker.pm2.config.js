@@ -4,6 +4,8 @@ module.exports = {
       name: 'import-live-plays-worker',
       script: 'jobs/import-live-plays-worker.mjs',
       autorestart: true,
+      min_uptime: '60s',
+      max_restarts: 10,
       max_memory_restart: '1G',
       merge_logs: true,
       env_production: {
