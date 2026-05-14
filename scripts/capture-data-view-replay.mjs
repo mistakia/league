@@ -44,7 +44,8 @@ const parse_url_to_table_state = (full_url) => {
 const main = async () => {
   const argv = yargs(hideBin(process.argv))
     .option('out', { type: 'string', demandOption: true })
-    .option('limit', { type: 'number', default: 100 }).argv
+    .option('limit', { type: 'number', default: 100 })
+    .option('explain', { type: 'boolean', default: true }).argv
 
   const rows = await db('urls')
     .select(db.raw("encode(url_hash, 'hex') as hash_hex"), 'url')
@@ -62,6 +63,16 @@ const main = async () => {
       } else {
         const { query } = await get_data_view_results_query(table_state)
         entry.sql = query.toString()
+        if (argv.explain) {
+          try {
+            const explain_rows = await db.raw(
+              `EXPLAIN (FORMAT JSON, COSTS true) ${entry.sql}`
+            )
+            entry.plan = explain_rows.rows?.[0]?.['QUERY PLAN'] ?? null
+          } catch (explain_error) {
+            entry.explain_error = explain_error.message
+          }
+        }
       }
     } catch (e) {
       entry.error = e.message

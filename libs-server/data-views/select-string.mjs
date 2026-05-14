@@ -12,10 +12,27 @@ const get_select_string = ({
   column_definition,
   table_name,
   rate_type_column_mapping,
+  output_select_mapping = {},
   splits,
   is_main_select = false,
   data_view_options = {}
 }) => {
+  // Output-aggregator dispatch (Phase C step 1): when a retrofitted column
+  // is invoked with `params.output`, the dispatcher pre-resolved the outer
+  // SELECT via the aggregator plugin. Return its raw SQL here so the main
+  // SELECT uses the aggregator-emitted expression instead of the legacy
+  // main_select / column-value path. Only fires for is_main_select; WITH
+  // selects never reference the aggregator CTE.
+  if (is_main_select) {
+    const output_select = output_select_mapping[`${column_id}_${column_index}`]
+    if (output_select && output_select.sql) {
+      return {
+        select: [output_select],
+        group_by: []
+      }
+    }
+  }
+
   const rate_type_table_name =
     rate_type_column_mapping[`${column_id}_${column_index}`]
   const join_table_name =

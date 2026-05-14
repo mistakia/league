@@ -27,8 +27,12 @@ import {
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
-import { resolve as resolve_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
+import {
+  resolve as resolve_output_aggregator,
+  apply_output_aggregator
+} from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { get_identity } from '#libs-server/data-views/identities.mjs'
+import { resolve as resolve_bridge } from '#libs-server/data-views/bridge-registry.mjs'
 
 // A base identity in granularity (e.g. `player`) means the column needs no
 // split joins; the column reads from the base table directly.
@@ -657,8 +661,10 @@ const get_from_table_config = ({
   columns,
   prefix_columns,
   splits,
+  subjects = ['player'],
   data_views_column_definitions
 }) => {
+  const subject_id = subjects[0]
   const sort_based_from_table = determine_from_table({
     sort,
     columns,
@@ -679,26 +685,42 @@ const get_from_table_config = ({
       column_definition &&
       can_use_as_from_table(column_definition, sort_based_from_table.column_id)
     ) {
-      // Use sort-based from table if available and no splits are configured
-      // or if it supports all required splits
-      if (splits.length === 0) {
-        return sort_based_from_table
-      }
-
-      const granularity_splits = derive_supported_splits_from_granularity(
-        column_definition?.granularity
-      )
-      const supports_all_splits = splits.every((split) =>
-        granularity_splits.includes(split)
+      const granularity = column_definition.granularity || []
+      const identity_compatible = granularity.some(
+        (identity_id) => get_identity(identity_id).subject === subject_id
       )
 
-      if (supports_all_splits) {
-        return sort_based_from_table
+      if (identity_compatible) {
+        // Use sort-based from table if available and no splits are configured
+        // or if it supports all required splits
+        if (splits.length === 0) {
+          return sort_based_from_table
+        }
+
+        const granularity_splits =
+          derive_supported_splits_from_granularity(granularity)
+        const supports_all_splits = splits.every((split) =>
+          granularity_splits.includes(split)
+        )
+
+        if (supports_all_splits) {
+          return sort_based_from_table
+        }
       }
     }
   }
 
-  // Always fall back to player table as the from table
+  // Fall back to the subject's canonical FROM table -- the identity's
+  // canonical from_source.table for the active subject + splits.
+  if (subject_id === 'team') {
+    if (splits.includes('week')) {
+      return { from_table_name: 'team_years_weeks', from_table_type: 'table' }
+    }
+    if (splits.includes('year')) {
+      return { from_table_name: 'team_years', from_table_type: 'table' }
+    }
+    return { from_table_name: 'team', from_table_type: 'table' }
+  }
   return {
     from_table_name: 'player',
     from_table_type: 'table'
@@ -718,12 +740,35 @@ const setup_from_table_and_player_joins = ({
   players_query,
   from_table_config,
   data_views_column_definitions,
-  splits = []
+  splits = [],
+  query_context
 }) => {
   const { from_table_name, from_table_type, column_id, column_params } =
     from_table_config
 
   log(`Setting up from table: ${from_table_name} (type: ${from_table_type})`)
+
+  const subject_id = query_context.subject_id
+
+  // Team-identity FROM-source dispatch: register the team identity's CTEs
+  // (team VALUES, team_years, team_years_weeks per active splits), FROM the
+  // identity's canonical table, SELECT team_code instead of pid, skip the
+  // player inner join.
+  if (subject_id === 'team') {
+    const identity = get_identity(query_context.identity_id)
+    const from_source = identity.from_source({
+      year_range: query_context.year_range
+    })
+    for (const { name, sql } of from_source.with) {
+      if (query_context.registered_ctes.has(name)) continue
+      players_query.with(name, db.raw(sql))
+      query_context.registered_ctes.add(name)
+    }
+    players_query.from(from_source.table)
+    players_query.select(`${from_source.table}.team_code`)
+    log(`Set up team-identity from table: ${from_source.table}`)
+    return
+  }
 
   // For 'table' type, get the actual table name and set up alias if needed
   let actual_table_name = from_table_name
@@ -765,20 +810,20 @@ const setup_from_table_and_player_joins = ({
     }
   }
 
-  // Add inner joins for split tables only when from table is 'player' and splits are enabled
+  // Join split-identity bridges only when from table is 'player'; non-player
+  // from-tables rely on their own year/week columns (legacy reference
+  // heuristic still active until checkpoint (d) drops it).
   if (from_table_name === 'player') {
     if (splits.includes('year')) {
-      players_query.innerJoin('player_years', 'player_years.pid', 'player.pid')
+      const player_year_bridge = resolve_bridge('player', 'player_year')
+      player_year_bridge.join_cte({ query_context })
     }
-
     if (splits.includes('week')) {
-      players_query.innerJoin('player_years_weeks', function () {
-        this.on('player_years_weeks.pid', 'player.pid')
-        // Also join on year if both year and week splits are active
-        if (splits.includes('year')) {
-          this.on('player_years_weeks.year', 'player_years.year')
-        }
-      })
+      const player_year_week_bridge = resolve_bridge(
+        'player_year',
+        'player_year_week'
+      )
+      player_year_week_bridge.join_cte({ query_context })
     }
   }
 
@@ -848,6 +893,7 @@ const add_clauses_for_table = async ({
   group_column_params = {},
   splits = [],
   rate_type_column_mapping = {},
+  output_select_mapping = {},
   data_view_options,
   data_view_metadata
 }) => {
@@ -874,6 +920,7 @@ const add_clauses_for_table = async ({
       column_definition,
       table_name,
       rate_type_column_mapping,
+      output_select_mapping,
       splits,
       data_view_options
     })
@@ -1026,14 +1073,26 @@ const add_clauses_for_table = async ({
       data_view_options
     })
     for (const select_string of select_strings) {
-      players_query.select(db.raw(select_string))
+      if (select_string?.sql) {
+        players_query.select(
+          db.raw(select_string.sql, select_string.bindings || [])
+        )
+      } else {
+        players_query.select(db.raw(select_string))
+      }
     }
     for (const group_by_string of group_by_strings) {
       players_query.groupBy(db.raw(group_by_string))
     }
   } else {
     for (const select_string of select_strings) {
-      players_query.select(db.raw(select_string))
+      if (select_string?.sql) {
+        players_query.select(
+          db.raw(select_string.sql, select_string.bindings || [])
+        )
+      } else {
+        players_query.select(db.raw(select_string))
+      }
     }
     for (const group_by_string of group_by_strings) {
       players_query.groupBy(db.raw(group_by_string))
@@ -1182,8 +1241,23 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   return grouped_by_splits
 }
 
-const setup_central_references = ({ data_view_options, splits }) => {
+const setup_central_references = ({
+  data_view_options,
+  splits,
+  query_context
+}) => {
   const { from_table_name } = data_view_options
+
+  // Team-subject: references come from the active identity. Bypass the
+  // legacy from_table_name heuristic.
+  if (query_context && query_context.subject_id === 'team') {
+    const identity = get_identity(query_context.identity_id)
+    data_view_options.pid_reference = identity.team_column
+    data_view_options.team_reference = identity.team_column
+    data_view_options.year_reference = identity.year_column
+    data_view_options.week_reference = identity.week_column
+    return data_view_options
+  }
 
   // Setup player PID reference
   data_view_options.pid_reference = `${from_table_name}.pid`
@@ -1279,6 +1353,7 @@ export const get_data_view_results_query = async ({
     columns,
     prefix_columns,
     splits,
+    subjects,
     data_views_column_definitions
   })
 
@@ -1287,6 +1362,7 @@ export const get_data_view_results_query = async ({
 
   const table_columns = []
   const rate_type_column_mapping = {}
+  const output_select_mapping = {}
   const data_view_options = {
     opening_days_joined: false,
     player_seasonlogs_joined: false,
@@ -1409,65 +1485,54 @@ export const get_data_view_results_query = async ({
     data_view_options.year_range = year_range
     query_context.year_range = year_range
 
-    // Create base_years CTE
-    players_query.with(
-      'base_years',
-      db.raw(`SELECT unnest(ARRAY[${year_range.join(',')}]) as year`)
-    )
+    if (query_context.subject_id === 'team') {
+      const team_year_bridge = resolve_bridge('team', 'team_year')
+      team_year_bridge.add_cte({ query_context })
+      query_context.applied_bridges.add('team->team_year')
 
-    // Find position filter if it exists
-    const position_filter = where.find(
-      (clause) =>
-        clause.column_id === 'player_position' &&
-        (Array.isArray(clause.value)
-          ? clause.value.length > 0
-          : Boolean(clause.value))
-    )
-
-    // Create player_years CTE with optional position filter
-    const base_query =
-      'SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years'
-
-    if (position_filter) {
-      const column_definition = data_views_column_definitions.player_position
-      const position_where_string = get_where_string({
-        where_clause: position_filter,
-        column_definition,
-        table_name: 'player',
-        column_index: 0,
-        is_main_select: false,
-        params: position_filter.params || {}
-      })
-
-      players_query.with(
-        'player_years',
-        db.raw(`${base_query} WHERE ${position_where_string}`)
-      )
+      if (splits.includes('week')) {
+        const team_year_week_bridge = resolve_bridge(
+          'team_year',
+          'team_year_week'
+        )
+        team_year_week_bridge.add_cte({ query_context })
+        query_context.applied_bridges.add('team_year->team_year_week')
+      }
     } else {
-      players_query.with('player_years', db.raw(base_query))
-    }
-
-    query_context.applied_bridges.add('player->player_year')
-  }
-
-  if (splits.includes('week')) {
-    // Extract year filter directly from the year_range
-    const year_range = get_year_range([...prefix_columns, ...columns], where)
-    const single_year_filter = year_range.length === 1 ? year_range[0] : null
-
-    // Create player_years_weeks CTE with optional year filter
-    const year_filter_clause = single_year_filter
-      ? ` WHERE nfl_year_week_timestamp.year = ${single_year_filter}`
-      : ''
-
-    players_query.with(
-      'player_years_weeks',
-      db.raw(
-        `SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year${year_filter_clause}`
+      // Find position filter if it exists
+      const position_filter = where.find(
+        (clause) =>
+          clause.column_id === 'player_position' &&
+          (Array.isArray(clause.value)
+            ? clause.value.length > 0
+            : Boolean(clause.value))
       )
-    )
 
-    query_context.applied_bridges.add('player_year->player_year_week')
+      if (position_filter) {
+        const column_definition = data_views_column_definitions.player_position
+        query_context.position_filter_sql = get_where_string({
+          where_clause: position_filter,
+          column_definition,
+          table_name: 'player',
+          column_index: 0,
+          is_main_select: false,
+          params: position_filter.params || {}
+        })
+      }
+
+      const player_year_bridge = resolve_bridge('player', 'player_year')
+      player_year_bridge.add_cte({ query_context })
+      query_context.applied_bridges.add('player->player_year')
+
+      if (splits.includes('week')) {
+        const player_year_week_bridge = resolve_bridge(
+          'player_year',
+          'player_year_week'
+        )
+        player_year_week_bridge.add_cte({ query_context })
+        query_context.applied_bridges.add('player_year->player_year_week')
+      }
+    }
   }
 
   // Set up the from table and player joins using consolidated function
@@ -1475,18 +1540,18 @@ export const get_data_view_results_query = async ({
     players_query,
     from_table_config,
     data_views_column_definitions,
-    splits
+    splits,
+    query_context
   })
 
   // Setup centralized references for player pid, year, and week after from table is determined
-  setup_central_references({ data_view_options, splits })
+  setup_central_references({ data_view_options, splits, query_context })
 
-  // Plugins delegating into shared helpers (add_player_year_teams_cte,
-  // ensure_player_year_teams_join) use data_view_options as their idempotency
-  // cache; sharing the reference prevents the CTE being registered twice.
-  query_context.pid_reference = data_view_options.pid_reference
-  query_context.year_reference = data_view_options.year_reference
-  query_context.week_reference = data_view_options.week_reference
+  // query_context.{pid,year,week}_reference retain their identity-derived
+  // values from build_query_context; data_view_options keeps the legacy
+  // heuristic for consumers that still read through it (select-string,
+  // data-view-join-function, add-player-year-teams-cte, rate-type plugins).
+  // The two views coexist until consumers migrate off data_view_options.
   query_context.data_view_options = data_view_options
 
   // sanitize parameters
@@ -1629,6 +1694,45 @@ export const get_data_view_results_query = async ({
     query_context.joined_output_ctes.add(cte_name)
   }
 
+  // Output-aggregator dispatch for columns retrofitted onto the native
+  // `output` param contract (Phase C step 1). Runs alongside the legacy
+  // rate-type loop above; a single column is processed by exactly one
+  // path because the new path requires `column_definition.supports_output`
+  // which is only set on retrofitted columns.
+  for (const [index, column] of [
+    ...prefix_columns,
+    ...columns,
+    ...where
+  ].entries()) {
+    if (
+      typeof column !== 'object' ||
+      !column.params ||
+      !column.params.output ||
+      column.params.rate_type
+    ) {
+      continue
+    }
+    const column_definition = data_views_column_definitions[column.column_id]
+    if (!column_definition || !column_definition.supports_output) {
+      continue
+    }
+    const column_index = get_column_index({
+      column_id: column.column_id,
+      index,
+      columns: table_columns
+    })
+    const identity_id = column_definition.is_team ? 'team_year' : 'player_year'
+    const column_def = { ...column_definition, column_id: column.column_id }
+    const result = apply_output_aggregator({
+      query_context,
+      column_def,
+      params: column.params,
+      identity_id,
+      column_index
+    })
+    output_select_mapping[`${column.column_id}_${column_index}`] = result
+  }
+
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
     where,
     table_columns,
@@ -1684,6 +1788,7 @@ export const get_data_view_results_query = async ({
         group_column_params,
         splits: available_splits,
         rate_type_column_mapping,
+        output_select_mapping,
         data_view_options,
         data_view_metadata
       })
@@ -1851,21 +1956,23 @@ export const get_data_view_results_query = async ({
     }
   }
 
-  // Use the centralized pid reference
-  players_query.orderBy(data_view_options.pid_reference, 'asc')
+  if (query_context.subject_id === 'team') {
+    players_query.orderBy(data_view_options.team_reference, 'asc')
+    players_query.groupBy(data_view_options.team_reference)
+  } else {
+    players_query.orderBy(data_view_options.pid_reference, 'asc')
+    players_query.select('player.pos')
+    players_query.groupBy(
+      data_view_options.pid_reference,
+      'player.lname',
+      'player.fname',
+      'player.pos'
+    )
+  }
 
   if (offset) {
     players_query.offset(offset)
   }
-
-  players_query.select('player.pos')
-
-  players_query.groupBy(
-    data_view_options.pid_reference,
-    'player.lname',
-    'player.fname',
-    'player.pos'
-  )
   players_query.limit(limit)
 
   return {

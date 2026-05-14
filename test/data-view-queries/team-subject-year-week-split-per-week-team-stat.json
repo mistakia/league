@@ -1,0 +1,29 @@
+{
+  "name": "team subject year and week splits with per-week team column",
+  "description": "Team subject + year+week split + per-week team column",
+  "request": {
+    "subjects": [
+      "team"
+    ],
+    "splits": [
+      "year",
+      "week"
+    ],
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "year": [
+            2023
+          ]
+        }
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"team_years\" as (SELECT team.team_code, base_years.year FROM team CROSS JOIN base_years), \"team_years_weeks\" as (SELECT team_years.team_code, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM team_years INNER JOIN nfl_year_week_timestamp ON team_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2023), \"team\" as (SELECT team_code FROM (VALUES ('ARI'),('ATL'),('BAL'),('BUF'),('CAR'),('CHI'),('CIN'),('CLE'),('DAL'),('DEN'),('DET'),('GB'),('HOU'),('IND'),('JAX'),('KC'),('LA'),('LAC'),('LV'),('MIA'),('MIN'),('NE'),('NO'),('NYG'),('NYJ'),('PHI'),('PIT'),('SEA'),('SF'),('TB'),('TEN'),('WAS')) AS t(team_code)), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, \"nfl_plays\".\"year\", \"nfl_plays\".\"week\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_PRE_WEEK_1', '2023_PRE_WEEK_2', '2023_PRE_WEEK_3', '2023_PRE_WEEK_4', '2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2023_REG_WEEK_5', '2023_REG_WEEK_6', '2023_REG_WEEK_7', '2023_REG_WEEK_8', '2023_REG_WEEK_9', '2023_REG_WEEK_10', '2023_REG_WEEK_11', '2023_REG_WEEK_12', '2023_REG_WEEK_13', '2023_REG_WEEK_14', '2023_REG_WEEK_15', '2023_REG_WEEK_16', '2023_REG_WEEK_17', '2023_REG_WEEK_18', '2023_POST_WEEK_1', '2023_POST_WEEK_2', '2023_POST_WEEK_3', '2023_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"year\" in (2023) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\", \"nfl_plays\".\"week\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_yds_from_plays) as team_pass_yds_from_plays, \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\" from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" = 'REG' and \"nfl_games\".\"year\" in (2023) and \"player_gamelogs\".\"year\" in (2023) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"team_years_weeks\".\"team_code\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"team_years_weeks\".\"year\", \"team_years_weeks\".\"week\" from \"team_years_weeks\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"team_years_weeks\".\"team_code\" and \"player_year_teams\".\"year\" = \"team_years_weeks\".\"year\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" and \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"week\" = \"team_years_weeks\".\"week\" and \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"year\" = 2023 and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.week = team_years_weeks.week group by \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\", \"team_years_weeks\".\"year\", \"team_years_weeks\".\"week\", \"team_years_weeks\".\"team_code\" order by \"team_years_weeks\".\"team_code\" asc limit 500",
+  "tags": [
+    "team-subject",
+    "identity"
+  ],
+  "timeout_ms": 40000
+}

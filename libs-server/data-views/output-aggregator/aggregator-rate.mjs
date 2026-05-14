@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import { build_period_cte } from './build-period-cte.mjs'
+import { add_period_cte } from './build-period-cte.mjs'
 import { consumed_params_signature } from './consumed-params-signature.mjs'
 
 export const consumes_params = [
@@ -22,33 +22,7 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
   return `rate_${period}_${hash}`
 }
 
-export const add_cte = ({
-  query_context,
-  column_def,
-  params,
-  cte_name,
-  identity_id,
-  period
-}) => {
-  if (query_context.applied_output_ctes.has(cte_name)) return
-  const sub = build_period_cte({
-    measure_source: column_def.measure_source,
-    measure_expr: column_def.measure_expr({
-      table_name:
-        column_def.measure_source === 'plays' ? 'nfl_plays' : 'player_gamelogs',
-      params,
-      identity_id
-    }),
-    measure_predicate: column_def.measure_predicate
-      ? column_def.measure_predicate({ params, identity_id })
-      : null,
-    period,
-    query_context,
-    identity_id
-  })
-  query_context.players_query.withMaterialized(cte_name, sub)
-  query_context.applied_output_ctes.add(cte_name)
-}
+export const add_cte = add_period_cte
 
 export const join_cte = ({ query_context, cte_name, identity_id }) => {
   const {

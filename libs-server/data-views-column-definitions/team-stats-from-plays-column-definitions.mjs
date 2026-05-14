@@ -5,6 +5,10 @@ import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import { nfl_plays_team_column_params } from '#libs-shared'
+import {
+  strip_outer_sum,
+  derive_periods_from_rate_types
+} from '#libs-server/data-views/strip-outer-sum.mjs'
 
 const generate_table_alias = ({ params = {} } = {}) => {
   const additional_keys = Object.keys(nfl_plays_team_column_params).sort()
@@ -17,6 +21,9 @@ const team_stat_from_plays = ({
   stat_name,
   is_rate = false,
   rate_with_selects,
+  force_player_active = false,
+  supports_output = null,
+  measure_expr = null,
   supported_rate_types = [
     'per_game',
     'per_team_half',
@@ -27,151 +34,205 @@ const team_stat_from_plays = ({
     'per_team_drive',
     'per_team_series'
   ]
-}) => ({
-  table_alias: generate_table_alias,
-  column_name: stat_name,
-  with_select: () =>
-    is_rate ? rate_with_selects : [`${select_string} AS ${stat_name}`],
-  with_where: ({ table_name, params }) => {
-    if (is_rate) {
-      return `sum(${table_name}.${stat_name}_numerator) / NULLIF(sum(${table_name}.${stat_name}_denominator), 0)`
-    }
+}) => {
+  // Player-identity variant always limits to the player's active games.
+  // For team variant, the legacy `params.limit_to_player_active_games`
+  // branch still applies; it is removed when the saved-view migrator
+  // ships and the team variant becomes strictly team-keyed.
+  const resolve_active = (params) =>
+    force_player_active || params?.limit_to_player_active_games || false
 
-    // should be handled in main where
-    if (params.rate_type && params.rate_type.length) {
+  const auto_inner = is_rate ? null : strip_outer_sum(select_string)
+  const can_auto_derive =
+    !is_rate &&
+    auto_inner !== null &&
+    supported_rate_types &&
+    supported_rate_types.length > 0
+  const derived_supports_output = can_auto_derive
+    ? {
+        periods: [
+          'game',
+          'season',
+          ...derive_periods_from_rate_types(supported_rate_types)
+        ],
+        aggregations: ['rate', 'count']
+      }
+    : null
+  const derived_measure_expr = can_auto_derive
+    ? ({ table_name } = {}) => auto_inner
+    : null
+  const final_supports_output = supports_output || derived_supports_output
+  const final_measure_expr = measure_expr || derived_measure_expr
+
+  return {
+    table_alias: generate_table_alias,
+    column_name: stat_name,
+    with_select: () =>
+      is_rate ? rate_with_selects : [`${select_string} AS ${stat_name}`],
+    with_where: ({ table_name, params }) => {
+      if (is_rate) {
+        return `sum(${table_name}.${stat_name}_numerator) / NULLIF(sum(${table_name}.${stat_name}_denominator), 0)`
+      }
+
+      // should be handled in main where
+      if (params.rate_type && params.rate_type.length) {
+        return null
+      }
+
+      return `sum(${table_name}.${stat_name})`
+    },
+    main_where: ({
+      table_name,
+      params,
+      column_id,
+      column_index,
+      rate_type_column_mapping
+    }) => {
+      if (is_rate) {
+        return null
+      }
+
+      if (params.rate_type && params.rate_type.length) {
+        const rate_type_table_name =
+          rate_type_column_mapping[`${column_id}_${column_index}`]
+        return get_rate_type_sql({
+          table_name: `${table_name}_player_team_stats`,
+          column_name: stat_name,
+          rate_type_table_name
+        })
+      }
+
       return null
-    }
-
-    return `sum(${table_name}.${stat_name})`
-  },
-  main_where: ({
-    table_name,
-    params,
-    column_id,
-    column_index,
-    rate_type_column_mapping
-  }) => {
-    if (is_rate) {
-      return null
-    }
-
-    if (params.rate_type && params.rate_type.length) {
-      const rate_type_table_name =
-        rate_type_column_mapping[`${column_id}_${column_index}`]
-      return get_rate_type_sql({
-        table_name: `${table_name}_player_team_stats`,
-        column_name: stat_name,
-        rate_type_table_name
-      })
-    }
-
-    return null
-  },
-  with: add_team_stats_play_by_play_with_statement,
-  join_table_name: (args) => {
-    const limit_to_player_active_games =
-      args.params?.limit_to_player_active_games || false
-    return limit_to_player_active_games
-      ? `${args.table_name}_player_team_stats`
-      : `${args.table_name}_team_stats`
-  },
-  join: (args) => {
-    const limit_to_player_active_games =
-      args.params?.limit_to_player_active_games || false
-    data_view_join_function({
-      ...args,
-      join_year_on_year_split: true,
-      join_on_team: !limit_to_player_active_games,
-      table_name: limit_to_player_active_games
+    },
+    with: force_player_active
+      ? (args) =>
+          add_team_stats_play_by_play_with_statement({
+            ...args,
+            params: { ...args.params, limit_to_player_active_games: true }
+          })
+      : add_team_stats_play_by_play_with_statement,
+    join_table_name: (args) => {
+      const limit_to_player_active_games = resolve_active(args.params)
+      return limit_to_player_active_games
         ? `${args.table_name}_player_team_stats`
         : `${args.table_name}_team_stats`
-    })
-  },
-  year_select: ({ table_name, column_params = {} }) => {
-    const table_suffix = column_params.limit_to_player_active_games
-      ? '_player_team_stats'
-      : '_team_stats'
-    if (!column_params.year_offset) {
-      return `${table_name}${table_suffix}.year`
-    }
+    },
+    join: (args) => {
+      const limit_to_player_active_games = resolve_active(args.params)
+      data_view_join_function({
+        ...args,
+        join_year_on_year_split: true,
+        join_on_team: !limit_to_player_active_games,
+        table_name: limit_to_player_active_games
+          ? `${args.table_name}_player_team_stats`
+          : `${args.table_name}_team_stats`
+      })
+    },
+    year_select: ({ table_name, column_params = {} }) => {
+      const active = resolve_active(column_params)
+      const table_suffix = active ? '_player_team_stats' : '_team_stats'
+      if (!column_params.year_offset) {
+        return `${table_name}${table_suffix}.year`
+      }
 
-    const year_offset = Array.isArray(column_params.year_offset)
-      ? column_params.year_offset[0]
-      : column_params.year_offset
+      const year_offset = Array.isArray(column_params.year_offset)
+        ? column_params.year_offset[0]
+        : column_params.year_offset
 
-    return `${table_name}${table_suffix}.year - ${year_offset}`
-  },
-  week_select: ({ table_name, column_params = {} }) => {
-    const table_suffix = column_params.limit_to_player_active_games
-      ? '_player_team_stats'
-      : '_team_stats'
-    return `${table_name}${table_suffix}.week`
-  },
-  use_having: true,
-  supported_splits: ['year', 'week'],
-  granularity: ['team_year', 'team_year_week'],
-  supported_rate_types,
-  is_rate,
-  get_cache_info: get_cache_info_for_fields_from_plays,
-  is_team: true
-})
+      return `${table_name}${table_suffix}.year - ${year_offset}`
+    },
+    week_select: ({ table_name, column_params = {} }) => {
+      const active = resolve_active(column_params)
+      const table_suffix = active ? '_player_team_stats' : '_team_stats'
+      return `${table_name}${table_suffix}.week`
+    },
+    use_having: true,
+    supported_splits: ['year', 'week'],
+    granularity: force_player_active
+      ? ['player_year', 'player_year_week']
+      : ['team_year', 'team_year_week'],
+    supported_rate_types,
+    is_rate,
+    ...(final_supports_output
+      ? { supports_output: final_supports_output, measure_source: 'plays' }
+      : {}),
+    ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
+    get_cache_info: get_cache_info_for_fields_from_plays,
+    is_team: !force_player_active
+  }
+}
 
-export default {
-  team_pass_yards_from_plays: team_stat_from_plays({
+// Each stat is exported twice:
+//   `team_<stat>_from_plays`          -- team-identity variant (default;
+//                                       respects legacy
+//                                       `params.limit_to_player_active_games`
+//                                       branch until the saved-view migrator
+//                                       lands and column-def sweep #9 strips
+//                                       the branch).
+//   `player_team_<stat>_from_plays`   -- player-identity variant
+//                                       (`force_player_active: true`;
+//                                       granularity = player_year /
+//                                       player_year_week). The saved-view
+//                                       migrator rewrites legacy
+//                                       `team_<stat>_from_plays` +
+//                                       `limit_to_player_active_games: true`
+//                                       saved entries onto the new id.
+const stat_specs = {
+  team_pass_yards_from_plays: {
     select_string: `SUM(pass_yds)`,
     stat_name: 'team_pass_yds_from_plays'
-  }),
-  team_pass_rate_over_expected_from_plays: team_stat_from_plays({
+  },
+  team_pass_rate_over_expected_from_plays: {
     select_string: `AVG(pass_oe)`,
     stat_name: 'team_pass_rate_over_expected_from_plays',
     supported_rate_types: []
-  }),
-  team_completion_percentage_over_expected_from_plays: team_stat_from_plays({
+  },
+  team_completion_percentage_over_expected_from_plays: {
     select_string: `AVG(cpoe)`,
     stat_name: 'team_completion_percentage_over_expected_from_plays',
     supported_rate_types: []
-  }),
-  team_pass_attempts_from_plays: team_stat_from_plays({
+  },
+  team_pass_attempts_from_plays: {
     select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_att_from_plays'
-  }),
-  team_pass_completions_from_plays: team_stat_from_plays({
+  },
+  team_pass_completions_from_plays: {
     select_string: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_comp_from_plays'
-  }),
-  team_pass_touchdowns_from_plays: team_stat_from_plays({
+  },
+  team_pass_touchdowns_from_plays: {
     select_string: `SUM(CASE WHEN pass_td = true THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_td_from_plays'
-  }),
-  team_pass_air_yards_from_plays: team_stat_from_plays({
+  },
+  team_pass_air_yards_from_plays: {
     select_string: `SUM(dot)`,
     stat_name: 'team_pass_air_yds_from_plays'
-  }),
-  team_yards_after_catch_from_plays: team_stat_from_plays({
+  },
+  team_yards_after_catch_from_plays: {
     select_string: `SUM(yards_after_catch)`,
     stat_name: 'team_yards_after_catch_from_plays'
-  }),
-  team_rush_yards_from_plays: team_stat_from_plays({
+  },
+  team_rush_yards_from_plays: {
     select_string: `SUM(rush_yds)`,
     stat_name: 'team_rush_yds_from_plays'
-  }),
-  team_rush_attempts_from_plays: team_stat_from_plays({
+  },
+  team_rush_attempts_from_plays: {
     select_string: `COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END)`,
     stat_name: 'team_rush_att_from_plays'
-  }),
-  team_rush_touchdowns_from_plays: team_stat_from_plays({
+  },
+  team_rush_touchdowns_from_plays: {
     select_string: `SUM(CASE WHEN rush_td = true THEN 1 ELSE 0 END)`,
     stat_name: 'team_rush_td_from_plays'
-  }),
-  team_expected_points_added_from_plays: team_stat_from_plays({
+  },
+  team_expected_points_added_from_plays: {
     select_string: `SUM(epa)`,
     stat_name: 'team_ep_added_from_plays'
-  }),
-  team_win_percentage_added_from_plays: team_stat_from_plays({
+  },
+  team_win_percentage_added_from_plays: {
     select_string: `SUM(wpa)`,
     stat_name: 'team_wp_added_from_plays'
-  }),
-  team_success_rate_from_plays: team_stat_from_plays({
+  },
+  team_success_rate_from_plays: {
     rate_with_selects: [
       `SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator`,
       `COUNT(*) as team_success_rate_from_plays_denominator`
@@ -179,8 +240,8 @@ export default {
     stat_name: 'team_success_rate_from_plays',
     is_rate: true,
     supported_rate_types: []
-  }),
-  team_expected_points_success_rate_from_plays: team_stat_from_plays({
+  },
+  team_expected_points_success_rate_from_plays: {
     rate_with_selects: [
       `SUM(CASE WHEN ep_succ = true THEN 1 ELSE 0 END) as team_expected_points_success_rate_from_plays_numerator`,
       `COUNT(*) as team_expected_points_success_rate_from_plays_denominator`
@@ -188,8 +249,8 @@ export default {
     stat_name: 'team_expected_points_success_rate_from_plays',
     is_rate: true,
     supported_rate_types: []
-  }),
-  team_explosive_play_rate_from_plays: team_stat_from_plays({
+  },
+  team_explosive_play_rate_from_plays: {
     rate_with_selects: [
       `SUM(CASE WHEN pass_yds >= 20 OR rush_yds >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator`,
       `COUNT(*) as team_explosive_play_rate_from_plays_denominator`
@@ -197,34 +258,32 @@ export default {
     stat_name: 'team_explosive_play_rate_from_plays',
     is_rate: true,
     supported_rate_types: []
-  }),
-  team_play_count_from_plays: team_stat_from_plays({
+  },
+  team_play_count_from_plays: {
     select_string: `COUNT(*)`,
     stat_name: 'team_play_count_from_plays'
-  }),
-  team_series_count_from_plays: team_stat_from_plays({
+  },
+  team_series_count_from_plays: {
     select_string: `COUNT(DISTINCT CONCAT(esbid, '_', series_seq))`,
     stat_name: 'team_series_count_from_plays'
-  }),
-  team_drive_count_from_plays: team_stat_from_plays({
+  },
+  team_drive_count_from_plays: {
     select_string: `COUNT(DISTINCT CONCAT(esbid, '_', drive_seq))`,
     stat_name: 'team_drive_count_from_plays'
-  }),
-  team_offensive_play_count_from_plays: team_stat_from_plays({
+  },
+  team_offensive_play_count_from_plays: {
     select_string: `COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END)`,
     stat_name: 'team_offensive_play_count_from_plays'
-  }),
-
-  team_yards_created_from_plays: team_stat_from_plays({
+  },
+  team_yards_created_from_plays: {
     select_string: `SUM(yards_created)`,
     stat_name: 'team_yards_created_from_plays'
-  }),
-  team_yards_blocked_from_plays: team_stat_from_plays({
+  },
+  team_yards_blocked_from_plays: {
     select_string: `SUM(yards_blocked)`,
     stat_name: 'team_yards_blocked_from_plays'
-  }),
-
-  team_series_conversion_rate_from_plays: team_stat_from_plays({
+  },
+  team_series_conversion_rate_from_plays: {
     rate_with_selects: [
       `COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator`,
       `COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator`
@@ -232,5 +291,17 @@ export default {
     stat_name: 'team_series_conversion_rate_from_plays',
     is_rate: true,
     supported_rate_types: []
+  }
+}
+
+const definitions = {}
+for (const [team_id, spec] of Object.entries(stat_specs)) {
+  definitions[team_id] = team_stat_from_plays(spec)
+  const player_id = team_id.replace(/^team_/, 'player_team_')
+  definitions[player_id] = team_stat_from_plays({
+    ...spec,
+    force_player_active: true
   })
 }
+
+export default definitions
