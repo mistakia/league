@@ -2,7 +2,9 @@ module.exports = {
   apps: [
     {
       script: 'server.mjs',
-      watch: '.',
+      autorestart: true,
+      min_uptime: '60s',
+      max_restarts: 10,
       env_production: {
         NODE_ENV: 'production',
         CONFIG_ENCRYPTION_KEY_FILE: process.env.CONFIG_ENCRYPTION_KEY_FILE
