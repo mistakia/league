@@ -4,8 +4,9 @@
 // user:text/league/data-view-storage-architecture.md for the full contract.
 
 import { migrate_table_state } from './../data-views-nfl-week-migration.mjs'
+import { migrate_table_state as migrate_saved_view_table_state } from './../data-views-saved-view-migration.mjs'
 
-export const STORAGE_SCHEMA_VERSION = 1
+export const STORAGE_SCHEMA_VERSION = 2
 
 const is_dev =
   typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
@@ -25,7 +26,17 @@ const v0_to_v1 = (snapshot) => {
   return { ...snapshot, table_state: next_table_state, version: 1 }
 }
 
-export const migrations = [{ from: 0, to: 1, migrate: v0_to_v1 }]
+const v1_to_v2 = (snapshot) => {
+  const { table_state: next_table_state } = migrate_saved_view_table_state(
+    snapshot.table_state
+  )
+  return { ...snapshot, table_state: next_table_state, version: 2 }
+}
+
+export const migrations = [
+  { from: 0, to: 1, migrate: v0_to_v1 },
+  { from: 1, to: 2, migrate: v1_to_v2 }
+]
 
 export const run_migrations = (snapshot) => {
   if (!snapshot || typeof snapshot !== 'object') {

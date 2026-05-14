@@ -2,7 +2,10 @@ import Validator from 'fastest-validator'
 
 import { current_season } from '#constants'
 
-const v = new Validator({ haltOnFirstError: true })
+const v = new Validator({
+  haltOnFirstError: true,
+  useNewCustomCheckerFunction: true
+})
 
 const league_id_schema = {
   type: 'number',
@@ -72,6 +75,49 @@ const sort_schema = {
 }
 export const sort_validator = v.compile(sort_schema)
 
+const output_threshold_schema = {
+  type: 'object',
+  optional: true,
+  props: {
+    op: { type: 'string', enum: ['>=', '>', '<=', '<', '=', '!='] },
+    value: { type: 'number' }
+  }
+}
+
+const output_param_schema = {
+  type: 'object',
+  optional: true,
+  props: {
+    period: { type: 'string' },
+    aggregation: { type: 'string', enum: ['rate', 'count'] },
+    threshold: output_threshold_schema
+  },
+  custom(value, errors) {
+    if (!value) return value
+    if (value.aggregation === 'count' && !value.threshold) {
+      errors.push({
+        type: 'outputCountRequiresThreshold',
+        actual: value
+      })
+    }
+    if (value.threshold && value.aggregation !== 'count') {
+      errors.push({
+        type: 'outputThresholdRequiresCount',
+        actual: value
+      })
+    }
+    return value
+  }
+}
+
+const params_with_output_schema = {
+  type: 'object',
+  optional: true,
+  props: {
+    output: output_param_schema
+  }
+}
+
 const columns_schema = {
   type: 'array',
   items: [
@@ -79,7 +125,7 @@ const columns_schema = {
       type: 'object',
       props: {
         column_id: { type: 'string' },
-        params: { type: 'object', optional: true }
+        params: params_with_output_schema
       }
     },
     {
@@ -143,7 +189,7 @@ const where_schema = {
           { type: 'array', items: { type: 'number' } }
         ]
       },
-      params: { type: 'object', optional: true }
+      params: params_with_output_schema
     }
   },
   $$root: true,
@@ -180,13 +226,23 @@ const splits_schema = {
   optional: true
 }
 
+const subjects_schema = {
+  type: 'array',
+  items: { type: 'string', enum: ['player', 'team'] },
+  min: 1,
+  max: 1,
+  optional: true,
+  default: ['player']
+}
+
 const table_state_schema = {
   offset: offset_schema,
   limit: limit_schema,
   sort: sort_schema,
   columns: columns_schema,
   where: where_schema,
-  splits: splits_schema
+  splits: splits_schema,
+  subjects: subjects_schema
 }
 export const table_state_validator = v.compile(table_state_schema)
 

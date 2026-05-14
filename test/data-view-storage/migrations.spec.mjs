@@ -26,10 +26,10 @@ const legacy_snapshot = () => ({
 })
 
 describe('data-view-storage migrations module', () => {
-  it('v0->v1 produces expected single_nfl_week_id shape', () => {
+  it('v0 snapshot chains through all migrations and reaches STORAGE_SCHEMA_VERSION', () => {
     const { snapshot, migrated } = run_migrations(legacy_snapshot())
     expect(migrated).to.be.true
-    expect(snapshot.version).to.equal(1)
+    expect(snapshot.version).to.equal(STORAGE_SCHEMA_VERSION)
     expect(
       snapshot.table_state.columns[0].params.single_nfl_week_id
     ).to.deep.equal(['2024_REG_WEEK_5'])
