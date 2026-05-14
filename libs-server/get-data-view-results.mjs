@@ -1547,12 +1547,11 @@ export const get_data_view_results_query = async ({
   // Setup centralized references for player pid, year, and week after from table is determined
   setup_central_references({ data_view_options, splits, query_context })
 
-  // Plugins delegating into shared helpers (add_player_year_teams_cte,
-  // ensure_player_year_teams_join) use data_view_options as their idempotency
-  // cache; sharing the reference prevents the CTE being registered twice.
-  query_context.pid_reference = data_view_options.pid_reference
-  query_context.year_reference = data_view_options.year_reference
-  query_context.week_reference = data_view_options.week_reference
+  // query_context.{pid,year,week}_reference retain their identity-derived
+  // values from build_query_context; data_view_options keeps the legacy
+  // heuristic for consumers that still read through it (select-string,
+  // data-view-join-function, add-player-year-teams-cte, rate-type plugins).
+  // The two views coexist until consumers migrate off data_view_options.
   query_context.data_view_options = data_view_options
 
   // sanitize parameters
