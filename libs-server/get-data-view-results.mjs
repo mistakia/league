@@ -683,8 +683,21 @@ const get_from_table_config = ({
     const column_definition =
       data_views_column_definitions[sort_based_from_table.column_id]
 
+    // Reject the sort-based FROM optimization when the sort column will be
+    // routed through apply_output_aggregator (params.output set, after
+    // normalize-output-param translation, + supports_output on the def).
+    // Otherwise the legacy `with` hook materializes the same source data as
+    // the FROM table while the aggregator-rate CTE materializes it again
+    // for the value -- the orphan-CTE gate cannot suppress the legacy CTE
+    // when it is the FROM source.
+    const aggregator_handled = Boolean(
+      sort_based_from_table.column_params?.output &&
+        column_definition?.supports_output
+    )
+
     if (
       column_definition &&
+      !aggregator_handled &&
       can_use_as_from_table(column_definition, sort_based_from_table.column_id)
     ) {
       const granularity = column_definition.granularity || []
@@ -1121,11 +1134,6 @@ const add_clauses_for_table = async ({
 
   if (with_func) {
     // used by team stats column definitions
-    // Only emit wrapper SUMs for columns whose inner CTE select expressions
-    // were actually produced (legacy path). Aggregator-handled column ids
-    // were skipped above before reaching `with_select_strings`, so their
-    // names are absent from the inner CTE and must be absent from the
-    // wrapper too.
     const select_column_names = []
     const rate_columns = []
     for (const column_id of legacy_column_ids) {
