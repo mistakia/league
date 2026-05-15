@@ -145,15 +145,23 @@ export const build_period_cte = ({
     const inner_union = union_subs
       .slice(1)
       .reduce((acc, sub) => acc.unionAll(sub), union_subs[0])
+    // Include `nfl_games.year` only when the consumer query splits on year
+    // OR when we're operating at non-aggregate period grain. Aggregate grain
+    // without a year split collapses to pid only -- including year would
+    // produce multiple rows per pid and break the 1:1 join with the outer
+    // query (MAX returns one year's total instead of the cross-year total).
+    const include_year =
+      !is_aggregate || query_context.splits.includes('year')
     const outer = db
       .from(inner_union.as('role_union'))
       .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
-      .select('nfl_games.year')
       .select('role_union.pid AS pid')
       .select(db.raw('SUM(role_union.pts) AS measure_total'))
       .groupByRaw('"role_union"."pid"')
-      .groupByRaw('"nfl_games"."year"')
       .havingRaw('SUM(role_union.pts) > 0')
+    if (include_year) {
+      outer.select('nfl_games.year').groupByRaw('"nfl_games"."year"')
+    }
     if (!is_aggregate) {
       outer
         .select(db.raw(`${period_key} AS period_key`))
@@ -195,9 +203,10 @@ export const build_period_cte = ({
 
   if (source.extra_join) source.extra_join(sub)
 
-  sub
-    .innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)
-    .select('nfl_games.year')
+  const include_year =
+    !is_aggregate || query_context.splits.includes('year')
+  sub.innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)
+  if (include_year) sub.select('nfl_games.year')
   if (!is_aggregate) {
     sub.select(db.raw(`${period_key} AS period_key`))
   }
@@ -219,7 +228,7 @@ export const build_period_cte = ({
   sub.select(db.raw(`SUM(${measure_expr}) AS measure_total`))
   sub.groupByRaw(is_team ? `${source_table}.${source.team_col}` : pid_expr)
   if (!is_aggregate) sub.groupByRaw(period_key)
-  sub.groupByRaw('"nfl_games"."year"')
+  if (include_year) sub.groupByRaw('"nfl_games"."year"')
 
   if (measure_predicate) {
     sub.whereRaw(measure_predicate)
