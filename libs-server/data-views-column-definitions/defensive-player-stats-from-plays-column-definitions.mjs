@@ -31,6 +31,17 @@ const defensive_player_join = (options) => {
   })
 }
 
+// Output-aggregator retrofit: each `pid_column` contributes 1 to the count
+// (the `pid_column` virtual column doesn't exist in nfl_plays; we synthesize
+// it per role). The legacy `select_string` form aggregates over the WITH
+// CTE's synthetic pid_column rows; the role_union path produces equivalent
+// counts per period.
+const defensive_role_attributions = ({ pid_columns }) =>
+  pid_columns.map((pid_column) => ({
+    pid_column,
+    measure_expr: '1'
+  }))
+
 const defensive_player_stat_from_plays = ({
   pid_columns,
   select_string,
@@ -39,6 +50,25 @@ const defensive_player_stat_from_plays = ({
   table_alias: ({ params }) =>
     defensive_player_table_alias({ pid_columns, params }),
   column_name: stat_name,
+  measure_source: 'plays_role_union',
+  role_attributions: () => defensive_role_attributions({ pid_columns }),
+  supports_output: {
+    periods: [
+      'game',
+      'season',
+      'team_play',
+      'team_pass_play',
+      'team_rush_play',
+      'team_half',
+      'team_quarter',
+      'team_drive',
+      'team_series',
+      'player_play',
+      'player_pass_play',
+      'player_rush_play'
+    ],
+    aggregations: ['rate', 'count']
+  },
   with_select: () => [`${select_string} AS ${stat_name}`],
   with_where: ({ params }) => {
     // should be handled in main where

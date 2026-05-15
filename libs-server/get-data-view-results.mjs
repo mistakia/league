@@ -27,10 +27,7 @@ import {
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
-import {
-  resolve as resolve_output_aggregator,
-  apply_output_aggregator
-} from '#libs-server/data-views/output-aggregator-registry.mjs'
+import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { get_identity } from '#libs-server/data-views/identities.mjs'
 import { resolve as resolve_bridge } from '#libs-server/data-views/bridge-registry.mjs'
 
@@ -1023,18 +1020,30 @@ const add_clauses_for_table = async ({
       column_index: 0,
       params: where_clause.params,
       rate_type_column_mapping,
+      output_select_mapping,
       splits,
       data_view_options
     })
 
+    // Route to HAVING when the column already exposes the value as a
+    // main-SELECT alias -- either via legacy `use_having` or because the
+    // output-aggregator path emitted `${column_name}_${column_index}` in
+    // the main SELECT.
+    const has_output_alias = Boolean(
+      output_select_mapping[`${where_clause.column_id}_0`]
+    )
+
     if (main_where_string) {
-      if (column_definition.use_having) {
+      if (column_definition.use_having || has_output_alias) {
         main_having_clause_strings.push(main_where_string)
       } else {
         main_where_clause_strings.push(main_where_string)
       }
 
-      if (column_definition.main_where_group_by) {
+      if (
+        !has_output_alias &&
+        column_definition.main_where_group_by
+      ) {
         const main_where_group_by_string =
           column_definition.main_where_group_by({
             params: where_clause.params,
@@ -1615,95 +1624,13 @@ export const get_data_view_results_query = async ({
     process_cache_info({ cache_info, data_view_metadata })
   }
 
-  // Columns sharing a CTE name fold to the last writer's params (legacy
-  // semantic from when data_view_options.rate_type_tables was an object
-  // keyed by cte_name).
-  const output_cte_dispatch = new Map()
-  for (const [index, column] of [
-    ...prefix_columns,
-    ...columns,
-    ...where
-  ].entries()) {
-    if (
-      !(
-        typeof column === 'object' &&
-        column.params &&
-        column.params.rate_type
-      )
-    ) {
-      continue
-    }
-    const rate_type = Array.isArray(column.params.rate_type)
-      ? column.params.rate_type[0]
-      : column.params.rate_type
-
-    const column_definition = data_views_column_definitions[column.column_id]
-    if (
-      !column_definition ||
-      !column_definition.supported_rate_types ||
-      !column_definition.supported_rate_types.includes(rate_type)
-    ) {
-      continue
-    }
-    if (!column.params.output) {
-      // normalize-output-param failed to translate (unknown legacy token).
-      continue
-    }
-
-    const column_index = get_column_index({
-      column_id: column.column_id,
-      index,
-      columns: table_columns
-    })
-    const { period, aggregation } = column.params.output
-    const plugin = resolve_output_aggregator({ period, aggregation })
-    const identity_id = is_team_column_definition(column_definition)
-      ? 'team_year'
-      : 'player_year'
-    const column_def = { ...column_definition, column_id: column.column_id }
-    const cte_name = plugin.get_cte_name({
-      column_def,
-      params: column.params,
-      identity_id,
-      period
-    })
-    output_cte_dispatch.set(cte_name, {
-      plugin,
-      column_def,
-      params: column.params,
-      identity_id,
-      period
-    })
-    rate_type_column_mapping[`${column.column_id}_${column_index}`] = cte_name
-  }
-
-  for (const [
-    cte_name,
-    { plugin, column_def, params, identity_id, period }
-  ] of output_cte_dispatch) {
-    plugin.add_cte({
-      query_context,
-      column_def,
-      params,
-      cte_name,
-      identity_id,
-      period
-    })
-    plugin.join_cte({
-      query_context,
-      column_def,
-      cte_name,
-      identity_id,
-      params
-    })
-    query_context.joined_output_ctes.add(cte_name)
-  }
-
-  // Output-aggregator dispatch for columns retrofitted onto the native
-  // `output` param contract (Phase C step 1). Runs alongside the legacy
-  // rate-type loop above; a single column is processed by exactly one
-  // path because the new path requires `column_definition.supports_output`
-  // which is only set on retrofitted columns.
+  // Output-aggregator dispatch. Every column with `params.output` (either
+  // native or translated from legacy `params.rate_type` by
+  // normalize-output-param) and `supports_output` on its column-def routes
+  // through apply_output_aggregator, which materializes the CTE(s), joins
+  // them, and emits the outer SELECT into `output_select_mapping`. The
+  // legacy `rate_type_tables` / `rate_type_column_mapping` dispatch loop
+  // was retired here.
   for (const [index, column] of [
     ...prefix_columns,
     ...columns,
@@ -1712,8 +1639,7 @@ export const get_data_view_results_query = async ({
     if (
       typeof column !== 'object' ||
       !column.params ||
-      !column.params.output ||
-      column.params.rate_type
+      !column.params.output
     ) {
       continue
     }

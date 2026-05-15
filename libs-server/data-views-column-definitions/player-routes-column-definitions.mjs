@@ -42,7 +42,30 @@ export default {
     table_alias: get_per_player_route_cte_table_name,
     join: player_routes_join,
     granularity: ['player_year', 'player_year_week'],
+    column_name: 'player_routes',
     select_as: () => 'player_routes',
+    // Output-aggregator retrofit: when params.output is set, the dispatcher's
+    // apply_output_aggregator materializes a numerator CTE (route count per
+    // period via plays_receiver) and emit_rate_outer_select reads from it
+    // against the chosen denominator plugin (per_game / per_team_play /
+    // etc.). Standalone (no output param) keeps using the legacy main_select
+    // that reads rate_type_total_count off the per_player_route CTE.
+    measure_source: 'plays_receiver',
+    measure_expr: () => '1',
+    measure_predicate: () => "nfl_plays.play_type='PASS'",
+    supports_output: {
+      periods: [
+        'game',
+        'season',
+        'team_play',
+        'team_pass_play',
+        'team_half',
+        'team_quarter',
+        'team_drive',
+        'team_series'
+      ],
+      aggregations: ['rate', 'count']
+    },
     main_select: ({ table_name, column_index, rate_type_table_name }) => {
       const select_expression = rate_type_table_name
         ? get_rate_type_sql({

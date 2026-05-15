@@ -7,6 +7,7 @@ export const get_where_string = ({
   is_main_select = false,
   params = {},
   rate_type_column_mapping,
+  output_select_mapping = {},
   splits,
   data_view_options = {}
 }) => {
@@ -15,9 +16,19 @@ export const get_where_string = ({
   const column_name = use_select_as
     ? column_definition.select_as({ params: where_clause.params })
     : column_definition.column_name
-  const where_func = is_main_select
-    ? column_definition.main_where
-    : column_definition.with_where
+  // When the column resolves through the output-aggregator path, the main
+  // SELECT emits `${column_name}_${column_index}` (aggregator-rate /
+  // emit-rate-outer-select). The where-clause must reference that HAVING-
+  // visible alias directly; the column-def's `main_where` (which historically
+  // synthesized rate-type division SQL via rate_type_column_mapping) is
+  // bypassed.
+  const has_output =
+    is_main_select &&
+    output_select_mapping[`${where_clause.column_id}_${column_index}`]
+  const where_func =
+    !has_output && (is_main_select
+      ? column_definition.main_where
+      : column_definition.with_where)
   const where_column = where_func
     ? where_func({
         table_name,
@@ -29,7 +40,7 @@ export const get_where_string = ({
         splits,
         data_view_options
       })
-    : column_definition.use_having
+    : column_definition.use_having || has_output
       ? `${column_name}_${column_index}`
       : `${table_name}.${column_name}`
 

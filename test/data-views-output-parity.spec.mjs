@@ -115,7 +115,7 @@ describe('Data View output parity', () => {
         where = []
       } = fixture
       const name = `[${family}] ${column_id} :: rate_type=${rate_type} ↔ output=${output.period}/${output.aggregation}`
-      it.skip(name, async function () {
+      it(name, async function () {
         this.timeout(40000)
         await assert_output_parity({
           column_id,

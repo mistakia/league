@@ -81,6 +81,7 @@ export const build_period_cte = ({
   measure_predicate,
   role_attributions,
   pid_columns,
+  apply_filters,
   period,
   query_context,
   identity_id
@@ -121,6 +122,12 @@ export const build_period_cte = ({
         if (query_context.year_range && query_context.year_range.length) {
           sub.whereIn(`${source_table}.year`, query_context.year_range)
         }
+        // Column-supplied filter hook: lets columns with complex param-
+        // driven filter shapes (e.g. fantasy points reusing
+        // apply_play_by_play_column_params_to_query) apply Knex builder
+        // operations directly. Runs once per inner role sub so partition
+        // pruning fires before the UNION.
+        if (apply_filters) apply_filters({ query: sub })
         return sub
       }
     )
@@ -204,6 +211,8 @@ export const build_period_cte = ({
     sub.whereIn('nfl_games.year', query_context.year_range)
   }
 
+  if (apply_filters) apply_filters({ query: sub })
+
   return sub
 }
 
@@ -240,6 +249,10 @@ export const add_period_cte = async ({
       : null,
     role_attributions,
     pid_columns: column_def.pid_columns,
+    apply_filters: column_def.apply_filters
+      ? ({ query }) =>
+          column_def.apply_filters({ query, params, identity_id })
+      : null,
     period,
     query_context,
     identity_id

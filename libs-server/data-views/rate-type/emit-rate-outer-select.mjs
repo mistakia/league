@@ -36,7 +36,15 @@ export const emit_rate_outer_select = ({
   params,
   identity_id
 }) => {
-  const alias = `rate_value_${column_index}`
+  // Alias matches `aggregator-rate.emit_outer_select` and the legacy
+  // `${column_name}_${column_index}` shape so where-string.mjs's
+  // `use_having` fallback at L32 references the right column.
+  if (!column_def.column_name) {
+    throw new Error(
+      `emit_rate_outer_select requires column_def.column_name (column_id=${column_def.column_id})`
+    )
+  }
+  const alias = `${column_def.column_name}_${column_index}`
 
   if (numerator_via_cte({ column_def })) {
     const num_cte = get_numerator_cte_name({ column_def, params, identity_id })
