@@ -32,7 +32,7 @@ export const get_numerator_cte_name = ({ column_def, params, identity_id }) =>
     column_def,
     params,
     identity_id,
-    period: 'game'
+    period: 'aggregate'
   })
 
 export const emit_rate_outer_select = ({
@@ -53,8 +53,14 @@ export const emit_rate_outer_select = ({
   const alias = `${column_def.column_name}_${column_index}`
 
   const num_cte = get_numerator_cte_name({ column_def, params, identity_id })
+  // Numerator CTE is materialized at `period='aggregate'` grain (one row per
+  // (pid|team_code, year)) so the join is 1:1. MAX wraps both values so
+  // Postgres accepts the expression alongside the outer query's SELECT-
+  // driven GROUP BY -- since the join is 1:1, MAX returns the single
+  // value. CAST to DECIMAL avoids integer division truncation (legacy
+  // get_rate_type_sql had the same CAST).
   return {
-    sql: `SUM(${num_cte}.measure_total) / NULLIF(MAX(${cte_name}.rate_type_total_count), 0) AS ${alias}`,
+    sql: `CAST(MAX(${num_cte}.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(${cte_name}.rate_type_total_count) AS DECIMAL), 0) AS ${alias}`,
     bindings: []
   }
 }

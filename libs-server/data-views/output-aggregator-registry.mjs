@@ -191,11 +191,17 @@ export const apply_output_aggregator = async ({
   // when the chosen plugin is aggregator_rate itself (it already materializes
   // the canonical period CTE).
   if (plugin !== aggregator_rate && numerator_via_cte()) {
+    // period='aggregate' collapses the numerator CTE to (pid|team_code,
+    // year) grain so it joins 1:1 with the outer query. Without this,
+    // multi-column rate queries cross-multiply via per-period rows in each
+    // numerator CTE, inflating SUM(measure_total) by the cardinality of
+    // sibling numerator CTEs. See emit-rate-outer-select.mjs for the
+    // corresponding outer SELECT shape.
     const num_cte_name = aggregator_rate.get_cte_name({
       column_def,
       params,
       identity_id,
-      period: 'game'
+      period: 'aggregate'
     })
     await aggregator_rate.add_cte({
       query_context,
@@ -203,7 +209,7 @@ export const apply_output_aggregator = async ({
       params,
       cte_name: num_cte_name,
       identity_id,
-      period: 'game'
+      period: 'aggregate'
     })
     if (!query_context.joined_output_ctes.has(num_cte_name)) {
       aggregator_rate.join_cte({

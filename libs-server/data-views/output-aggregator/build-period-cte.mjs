@@ -5,9 +5,17 @@ const game_period_key =
   "CONCAT(nfl_games.year, '_', nfl_games.week, '_', nfl_games.esbid)"
 const season_period_key = "CONCAT(nfl_games.year, '_', nfl_games.seas_type)"
 
+// `period='aggregate'` is the numerator-CTE grain used when a legacy
+// denominator plugin owns the rate division. The CTE collapses to (pid|
+// team_code, year) with measure_total = SUM(measure_expr) over all matched
+// rows -- no period_key column. Joins 1:1 to outer, so multi-column queries
+// don't cross-multiply (the bug per-period CTEs hit when two retrofitted
+// columns each materialized their own per-(pid, period_key) CTE and the
+// outer row count became prod of both, inflating SUMs).
 const period_key_expr = (period) => {
   if (period === 'game') return game_period_key
   if (period === 'season') return season_period_key
+  if (period === 'aggregate') return null
   throw new Error(`build_period_cte does not handle period: ${period}`)
 }
 
@@ -98,6 +106,8 @@ export const build_period_cte = ({
     )
   }
 
+  const is_aggregate = period === 'aggregate'
+
   if (source.pid_via === 'role_union') {
     if (!role_attributions || !role_attributions.length) {
       throw new Error(
@@ -138,16 +148,17 @@ export const build_period_cte = ({
     const outer = db
       .from(inner_union.as('role_union'))
       .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
-      .select(db.raw(`${period_key} AS period_key`))
       .select('nfl_games.year')
       .select('role_union.pid AS pid')
       .select(db.raw('SUM(role_union.pts) AS measure_total'))
-      .groupBy([
-        db.raw('"role_union"."pid"'),
-        db.raw(period_key),
-        db.raw('"nfl_games"."year"')
-      ])
+      .groupByRaw('"role_union"."pid"')
+      .groupByRaw('"nfl_games"."year"')
       .havingRaw('SUM(role_union.pts) > 0')
+    if (!is_aggregate) {
+      outer
+        .select(db.raw(`${period_key} AS period_key`))
+        .groupByRaw(period_key)
+    }
     if (query_context.year_range && query_context.year_range.length) {
       outer.whereIn('nfl_games.year', query_context.year_range)
     }
@@ -186,8 +197,10 @@ export const build_period_cte = ({
 
   sub
     .innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)
-    .select(db.raw(`${period_key} AS period_key`))
     .select('nfl_games.year')
+  if (!is_aggregate) {
+    sub.select(db.raw(`${period_key} AS period_key`))
+  }
 
   if (extra_player_join) {
     sub.innerJoin(
@@ -204,15 +217,9 @@ export const build_period_cte = ({
   }
 
   sub.select(db.raw(`SUM(${measure_expr}) AS measure_total`))
-  // Single groupBy call -- Knex sometimes drops trailing args when prior
-  // calls used db.raw, and we need every non-aggregated select in the
-  // group key (pid_expr/team_col, period_key, year).
-  const group_cols = [
-    db.raw(is_team ? `${source_table}.${source.team_col}` : pid_expr),
-    db.raw(period_key),
-    db.raw('"nfl_games"."year"')
-  ]
-  sub.groupBy(group_cols)
+  sub.groupByRaw(is_team ? `${source_table}.${source.team_col}` : pid_expr)
+  if (!is_aggregate) sub.groupByRaw(period_key)
+  sub.groupByRaw('"nfl_games"."year"')
 
   if (measure_predicate) {
     sub.whereRaw(measure_predicate)
