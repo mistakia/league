@@ -119,7 +119,22 @@ register('player_route', 'rate', adapt(plugin_per_player_route, {}))
 
 for (const period of COUNT_PERIODS) register(period, 'count', aggregator_count)
 
-export const resolve = ({ period, aggregation }) => {
+export const resolve = ({ period, aggregation, column_def }) => {
+  // Per-column override: columns whose value lives in a denominator-shaped
+  // CTE (player-routes, player-snaps) cannot use the legacy per-family
+  // plugin's `SUM(measure_expr)/rate_type_total_count` emit shape (no outer
+  // measure source exists). They declare `output_aggregator` directly on the
+  // column-def and bypass the registry; their measure is materialized via
+  // `build_period_cte` so `aggregator-rate` / `aggregator-count` produce the
+  // correct `SUM(measure_total)/COUNT(period_key)` emission.
+  if (column_def?.output_aggregator) {
+    const overrides = column_def.output_aggregator
+    const plugin =
+      typeof overrides === 'function'
+        ? overrides
+        : overrides[aggregation] || overrides.default || overrides
+    if (plugin?.add_cte && plugin?.emit_outer_select) return plugin
+  }
   const plugin = registry.get(period)?.get(aggregation)
   if (!plugin) {
     throw new Error(
@@ -134,7 +149,7 @@ export const has_aggregator = ({ period, aggregation }) =>
 
 export const get_cte_name = ({ column_def, params, identity_id }) => {
   const { period, aggregation } = params.output
-  const plugin = resolve({ period, aggregation })
+  const plugin = resolve({ period, aggregation, column_def })
   return plugin.get_cte_name({ column_def, params, identity_id, period })
 }
 
@@ -146,7 +161,7 @@ export const apply_output_aggregator = ({
   column_index
 }) => {
   const { period, aggregation } = params.output
-  const plugin = resolve({ period, aggregation })
+  const plugin = resolve({ period, aggregation, column_def })
   const cte_name = plugin.get_cte_name({
     column_def,
     params,
