@@ -1,4 +1,6 @@
 import aggregator_count from './output-aggregator/aggregator-count.mjs'
+import aggregator_rate from './output-aggregator/aggregator-rate.mjs'
+import { numerator_via_cte } from './rate-type/emit-rate-outer-select.mjs'
 import plugin_per_game from './rate-type/rate-type-per-game.mjs'
 import plugin_per_team_play from './rate-type/rate-type-per-team-play.mjs'
 import plugin_per_player from './rate-type/rate-type-per-player.mjs'
@@ -179,6 +181,38 @@ export const apply_output_aggregator = async ({
   if (!query_context.joined_output_ctes.has(cte_name)) {
     plugin.join_cte({ query_context, cte_name, identity_id })
     query_context.joined_output_ctes.add(cte_name)
+  }
+  // Numerator CTE: legacy denominator-style plugins (per_game / per_player /
+  // per_team_play / per_player_play / per_player_route) only materialize the
+  // denominator. Columns whose measure isn't an inline expression over
+  // nfl_plays / player_gamelogs (e.g. `plays_role_union` for fantasy points,
+  // `snaps` for snap counts, `plays_receiver` for routes) need a separately
+  // materialized numerator CTE; emit_rate_outer_select reads from it. Skipped
+  // when the chosen plugin is aggregator_rate itself (it already materializes
+  // the canonical period CTE).
+  if (plugin !== aggregator_rate && numerator_via_cte({ column_def })) {
+    const num_cte_name = aggregator_rate.get_cte_name({
+      column_def,
+      params,
+      identity_id,
+      period: 'game'
+    })
+    await aggregator_rate.add_cte({
+      query_context,
+      column_def,
+      params,
+      cte_name: num_cte_name,
+      identity_id,
+      period: 'game'
+    })
+    if (!query_context.joined_output_ctes.has(num_cte_name)) {
+      aggregator_rate.join_cte({
+        query_context,
+        cte_name: num_cte_name,
+        identity_id
+      })
+      query_context.joined_output_ctes.add(num_cte_name)
+    }
   }
   return plugin.emit_outer_select({
     column_def,
