@@ -49,6 +49,11 @@ export const join_cte = ({ query_context, cte_name, identity_id }) => {
 }
 
 export const emit_outer_select = ({ column_def, cte_name, column_index }) => {
+  if (!column_def.column_name) {
+    throw new Error(
+      `aggregator-rate requires column_def.column_name (column_id=${column_def.column_id})`
+    )
+  }
   const alias = `${column_def.column_name}_${column_index}`
   return {
     sql: `SUM(${cte_name}.measure_total) / NULLIF(COUNT(${cte_name}.period_key), 0) AS ${alias}`,

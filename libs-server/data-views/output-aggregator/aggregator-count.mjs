@@ -68,6 +68,11 @@ export const emit_outer_select = ({
       'count aggregator requires params.output.threshold {op, value}'
     )
   }
+  if (!column_def.column_name) {
+    throw new Error(
+      `aggregator-count requires column_def.column_name (column_id=${column_def.column_id})`
+    )
+  }
   const alias = `${column_def.column_name}_${column_index}`
   const op = op_sql(threshold.op)
   return {

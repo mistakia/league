@@ -102,6 +102,11 @@ export const build_period_cte = ({
         `measure_source '${measure_source}' requires role_attributions`
       )
     }
+    // SECURITY: `pid_column` must be a hardcoded identifier and
+    // `measure_expr` must contain only column refs / literals -- both are
+    // emitted via db.raw/whereRaw without bindings. Any param-derived value
+    // routed through them is a SQL-injection surface; column-defs must use
+    // Knex bindings for runtime values. Same convention as `measure_predicate`.
     const union_subs = role_attributions.map(
       ({ pid_column, measure_expr: role_measure_expr }) => {
         const sub = db(source_table)
@@ -110,13 +115,18 @@ export const build_period_cte = ({
           .select(db.raw(`${role_measure_expr} AS pts`))
           .whereRaw(`${source_table}.${pid_column} IS NOT NULL`)
         if (measure_predicate) sub.whereRaw(measure_predicate)
+        // Push year filter into each inner sub so the partitioned
+        // `nfl_plays_year_<N>` partitions prune at scan time, instead of
+        // discarding rows after the outer `nfl_games` join.
+        if (query_context.year_range && query_context.year_range.length) {
+          sub.whereIn(`${source_table}.year`, query_context.year_range)
+        }
         return sub
       }
     )
-    const inner_union = union_subs.reduce((acc, sub, i) => {
-      if (i === 0) return sub
-      return acc.unionAll(sub)
-    })
+    const inner_union = union_subs
+      .slice(1)
+      .reduce((acc, sub) => acc.unionAll(sub), union_subs[0])
     const outer = db
       .from(inner_union.as('role_union'))
       .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
