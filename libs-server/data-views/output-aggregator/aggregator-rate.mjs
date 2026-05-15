@@ -11,12 +11,15 @@ export const consumes_params = [
 ]
 
 export const get_cte_name = ({ column_def, params, identity_id, period }) => {
+  const effective = column_def.consumes_params_extra
+    ? [...consumes_params, ...column_def.consumes_params_extra]
+    : consumes_params
   const key = JSON.stringify({
     column_id: column_def.column_id,
     measure_source: column_def.measure_source,
     identity_id,
     period,
-    params: consumed_params_signature({ params, consumes_params })
+    params: consumed_params_signature({ params, consumes_params: effective })
   })
   const hash = crypto.createHash('md5').update(key).digest('hex').slice(0, 12)
   return `rate_${period}_${hash}`

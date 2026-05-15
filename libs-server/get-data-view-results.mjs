@@ -1730,7 +1730,7 @@ export const get_data_view_results_query = async ({
       ? 'team_year'
       : 'player_year'
     const column_def = { ...column_definition, column_id: column.column_id }
-    const result = apply_output_aggregator({
+    const result = await apply_output_aggregator({
       query_context,
       column_def,
       params: column.params,

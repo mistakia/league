@@ -153,7 +153,7 @@ export const get_cte_name = ({ column_def, params, identity_id }) => {
   return plugin.get_cte_name({ column_def, params, identity_id, period })
 }
 
-export const apply_output_aggregator = ({
+export const apply_output_aggregator = async ({
   query_context,
   column_def,
   params,
@@ -168,7 +168,7 @@ export const apply_output_aggregator = ({
     identity_id,
     period
   })
-  plugin.add_cte({
+  await plugin.add_cte({
     query_context,
     column_def,
     params,

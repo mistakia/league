@@ -52,6 +52,18 @@ const SOURCES = {
         )
       })
     }
+  },
+  // role_union: one column-def attributes a single play row to multiple
+  // pids via per-role UNION ALL. Each role contributes a `{ pid_column,
+  // measure_expr }` tuple; build_period_cte materializes the inner UNION
+  // ALL and groups by (pid, period_key, year). Used by
+  // player_fantasy_points_from_plays where a play credits QB + receiver
+  // simultaneously and a COALESCE(pid_columns) shape would drop one
+  // attribution.
+  plays_role_union: {
+    table: 'nfl_plays',
+    team_col: null,
+    pid_via: 'role_union'
   }
 }
 
@@ -67,6 +79,7 @@ export const build_period_cte = ({
   measure_source,
   measure_expr,
   measure_predicate,
+  role_attributions,
   pid_columns,
   period,
   query_context,
@@ -81,6 +94,42 @@ export const build_period_cte = ({
     throw new Error(
       `measure_source '${measure_source}' does not support team identity`
     )
+  }
+
+  if (source.pid_via === 'role_union') {
+    if (!role_attributions || !role_attributions.length) {
+      throw new Error(
+        `measure_source '${measure_source}' requires role_attributions`
+      )
+    }
+    const union_subs = role_attributions.map(
+      ({ pid_column, measure_expr: role_measure_expr }) => {
+        const sub = db(source_table)
+          .select(db.raw(`${source_table}.${pid_column} AS pid`))
+          .select(`${source_table}.esbid`)
+          .select(db.raw(`${role_measure_expr} AS pts`))
+          .whereRaw(`${source_table}.${pid_column} IS NOT NULL`)
+        if (measure_predicate) sub.whereRaw(measure_predicate)
+        return sub
+      }
+    )
+    const inner_union = union_subs.reduce((acc, sub, i) => {
+      if (i === 0) return sub
+      return acc.unionAll(sub)
+    })
+    const outer = db
+      .from(inner_union.as('role_union'))
+      .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
+      .select(db.raw(`${period_key} AS period_key`))
+      .select('nfl_games.year')
+      .select('role_union.pid AS pid')
+      .select(db.raw('SUM(role_union.pts) AS measure_total'))
+      .groupBy('role_union.pid', db.raw(period_key), 'nfl_games.year')
+      .havingRaw('SUM(role_union.pts) > 0')
+    if (query_context.year_range && query_context.year_range.length) {
+      outer.whereIn('nfl_games.year', query_context.year_range)
+    }
+    return outer
   }
 
   // pid expression resolution.
@@ -152,7 +201,7 @@ export const build_period_cte = ({
 // `applied_output_ctes`; aggregator-count and aggregator-rate differ only
 // in `join_cte` / `emit_outer_select`, so the CTE construction and
 // materialization are factored here.
-export const add_period_cte = ({
+export const add_period_cte = async ({
   query_context,
   column_def,
   params,
@@ -162,16 +211,24 @@ export const add_period_cte = ({
 }) => {
   if (query_context.applied_output_ctes.has(cte_name)) return
   const source = resolve_source(column_def.measure_source)
+  const role_attributions =
+    source.pid_via === 'role_union'
+      ? await column_def.role_attributions({ params, identity_id })
+      : null
   const sub = build_period_cte({
     measure_source: column_def.measure_source,
-    measure_expr: column_def.measure_expr({
-      table_name: source.table,
-      params,
-      identity_id
-    }),
+    measure_expr:
+      source.pid_via === 'role_union'
+        ? null
+        : column_def.measure_expr({
+            table_name: source.table,
+            params,
+            identity_id
+          }),
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,
+    role_attributions,
     pid_columns: column_def.pid_columns,
     period,
     query_context,
