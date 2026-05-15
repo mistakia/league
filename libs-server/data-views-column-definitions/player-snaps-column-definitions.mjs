@@ -42,7 +42,24 @@ export default {
     table_alias: get_per_player_play_cte_table_name,
     join: player_snaps_join,
     granularity: ['player_year', 'player_year_week'],
+    column_name: 'player_snaps',
     select_as: () => 'player_snaps',
+    measure_source: 'snaps',
+    measure_expr: () => '1',
+    supports_output: {
+      periods: [
+        'game',
+        'season',
+        'team_play',
+        'team_pass_play',
+        'team_rush_play',
+        'team_half',
+        'team_quarter',
+        'team_drive',
+        'team_series'
+      ],
+      aggregations: ['rate', 'count']
+    },
     main_select: ({ table_name, column_index, rate_type_table_name }) => {
       const select_expression = rate_type_table_name
         ? get_rate_type_sql({

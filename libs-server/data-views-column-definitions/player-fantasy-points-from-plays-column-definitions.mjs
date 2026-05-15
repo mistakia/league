@@ -11,6 +11,28 @@ import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/ge
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 
+const FP_OUTPUT_PERIODS = [
+  'game',
+  'season',
+  'team_play',
+  'team_pass_play',
+  'team_rush_play',
+  'team_half',
+  'team_quarter',
+  'team_drive',
+  'team_series',
+  'player_rush_attempt',
+  'player_pass_attempt',
+  'player_target',
+  'player_catchable_target',
+  'player_catchable_deep_target',
+  'player_reception',
+  'player_play',
+  'player_route',
+  'player_pass_play',
+  'player_rush_play'
+]
+
 const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
   const key = column_param_keys
@@ -386,13 +408,12 @@ const fantasy_points_from_plays_with = async ({
   query.withMaterialized(with_table_name, union_query)
 }
 
-// Generate passing scoring SQL
-const generate_passing_scoring_sql = async (scoring_format) => {
+// Per-row passing scoring inner expression (no SUM / ROUND wrapper).
+const generate_passing_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
     if (!scoring_format) {
-      // Default passing scoring: 0.04 points per yard, 4 points per TD, -1 point per interception
-      return 'ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE("int"::int, 0) * -1), 2)'
+      return 'COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE("int"::int, 0) * -1'
     }
   }
 
@@ -400,16 +421,17 @@ const generate_passing_scoring_sql = async (scoring_format) => {
   const ptd = scoring_format.tdp || 0
   const ints = scoring_format.ints || 0
 
-  return `ROUND(SUM(COALESCE(pass_yds, 0) * ${py} + COALESCE(pass_td::int, 0) * ${ptd} + COALESCE("int"::int, 0) * ${ints}), 2)`
+  return `COALESCE(pass_yds, 0) * ${py} + COALESCE(pass_td::int, 0) * ${ptd} + COALESCE("int"::int, 0) * ${ints}`
 }
 
-// Generate rushing scoring SQL
-const generate_rushing_scoring_sql = async (scoring_format) => {
+const generate_passing_scoring_sql = async (scoring_format) =>
+  `ROUND(SUM(${await generate_passing_scoring_inner(scoring_format)}), 2)`
+
+const generate_rushing_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
     if (!scoring_format) {
-      // Default rushing scoring: 0.1 points per yard, 6 points per TD
-      return 'ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2)'
+      return 'COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6'
     }
   }
 
@@ -420,13 +442,11 @@ const generate_rushing_scoring_sql = async (scoring_format) => {
 
   let sql = `COALESCE(rush_yds, 0) * ${ry} + COALESCE(rush_td::int, 0) * ${rtd}`
 
-  // Add points per rush attempt
   if (ra) {
     sql += ` + ${ra}`
   }
 
   if (rufd) {
-    // For Sleeper Scott Fish Bowl, exclude touchdown plays from first down calculation
     const is_sleeper_sfb =
       scoring_format &&
       scoring_format.scoring_format_hash ===
@@ -438,19 +458,20 @@ const generate_rushing_scoring_sql = async (scoring_format) => {
     }
   }
 
-  return `ROUND(SUM(${sql}), 2)`
+  return sql
 }
 
-// Generate receiving scoring SQL
-const generate_receiving_scoring_sql = async (
+const generate_rushing_scoring_sql = async (scoring_format) =>
+  `ROUND(SUM(${await generate_rushing_scoring_inner(scoring_format)}), 2)`
+
+const generate_receiving_scoring_inner = async (
   scoring_format,
   has_position_data = false
 ) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
     if (!scoring_format) {
-      // Default receiving scoring: 1 point per reception (full PPR), 0.1 points per yard, 6 points per TD
-      return 'ROUND(SUM(COALESCE(comp::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6), 2)'
+      return 'COALESCE(comp::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6'
     }
   }
 
@@ -465,23 +486,17 @@ const generate_receiving_scoring_sql = async (
 
   let sql = `COALESCE(recv_yds, 0) * ${recy} + COALESCE(pass_td::int, 0) * ${rctd}`
 
-  // Handle reception points based on position data availability
   if (has_position_data && (rbrec !== rec || wrrec !== rec || terec !== rec)) {
-    // Position-specific reception scoring
     sql += ` + CASE WHEN comp = true THEN CASE trg_pos WHEN 'RB' THEN ${rbrec} WHEN 'WR' THEN ${wrrec} WHEN 'TE' THEN ${terec} ELSE ${rec} END ELSE 0 END`
   } else {
-    // Standard reception scoring
     sql += ` + COALESCE(comp::int, 0) * ${rec}`
   }
 
-  // Add target points if applicable
   if (trg) {
     sql += ` + ${trg}`
   }
 
-  // Add receiving first down points
   if (recfd) {
-    // For Sleeper Scott Fish Bowl, exclude touchdown plays from first down calculation
     const is_sleeper_sfb =
       scoring_format &&
       scoring_format.scoring_format_hash ===
@@ -493,29 +508,31 @@ const generate_receiving_scoring_sql = async (
     }
   }
 
-  return `ROUND(SUM(${sql}), 2)`
+  return sql
 }
 
-// Generate fumble scoring SQL
-// NOTE: This currently only handles fumble lost penalties (fuml).
-// Fumble return TDs (fum_ret_td) are credited to a different player (the recoverer)
-// and would require joining with nfl_play_stats to identify statId 56/58/60/62.
-// For now, fum_ret_td scoring is handled via gamelogs (calculate-stats-from-play-stats.mjs).
-// TODO: Add fumble return TD support by joining with play_stats for statId 56/58/60/62
-const generate_fumble_scoring_sql = async (scoring_format) => {
+const generate_receiving_scoring_sql = async (
+  scoring_format,
+  has_position_data = false
+) =>
+  `ROUND(SUM(${await generate_receiving_scoring_inner(scoring_format, has_position_data)}), 2)`
+
+// NOTE: only handles fumble lost penalties (fuml). Fum return TDs are credited
+// to the recoverer (different pid) and would require joining nfl_play_stats.
+const generate_fumble_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
     if (!scoring_format) {
-      // Default fumble scoring: -1 point per fumble (turnover penalty)
-      return 'ROUND(SUM(-1), 2)'
+      return '-1'
     }
   }
 
   const fuml = scoring_format.fuml || 0
-  // fum_ret_td scoring requires play_stats join - not yet implemented for data views
-  // const fum_ret_td = scoring_format.fum_ret_td || 0
-  return `ROUND(SUM(${fuml}), 2)`
+  return String(fuml)
 }
+
+const generate_fumble_scoring_sql = async (scoring_format) =>
+  `ROUND(SUM(${await generate_fumble_scoring_inner(scoring_format)}), 2)`
 
 const should_use_main_where = ({ params }) => {
   return (
@@ -524,6 +541,48 @@ const should_use_main_where = ({ params }) => {
       params.year_offset.length > 1) ||
     (params.rate_type && params.rate_type.length > 0)
   )
+}
+
+// Build the role-union role_attributions for fantasy points. Each role
+// emits the per-play scoring expression (no SUM/ROUND wrapper -- the
+// aggregator's SUM wraps it). Position-aware receiving (rbrec/wrrec/terec)
+// is intentionally NOT enabled here: it requires a leftJoin on `player`
+// inside the role_union inner sub, which the build_period_cte role_union
+// path does not yet support. All three production scoring_format_hashes
+// in baseline.json have uniform `rec` values, so this is parity-safe.
+// SFB format `ed9c2daa...` would diverge -- track as a follow-up.
+const fp_role_attributions = async ({ params }) => {
+  const scoring_format = await get_scoring_format(params.scoring_format_hash)
+  const rushing_inner = await generate_rushing_scoring_inner(scoring_format)
+  const passing_inner = await generate_passing_scoring_inner(scoring_format)
+  const receiving_inner = await generate_receiving_scoring_inner(
+    scoring_format,
+    false
+  )
+  const fumble_inner = await generate_fumble_scoring_inner(scoring_format)
+  return [
+    { pid_column: 'bc_pid', measure_expr: rushing_inner },
+    { pid_column: 'psr_pid', measure_expr: passing_inner },
+    { pid_column: 'trg_pid', measure_expr: receiving_inner },
+    { pid_column: 'player_fuml_pid', measure_expr: fumble_inner }
+  ]
+}
+
+// Apply the same param-driven filters that the legacy `with` builder
+// applies to its filtered_plays CTE. Runs once per inner role sub in
+// build_period_cte's role_union path.
+const fp_apply_filters = ({ query, params }) => {
+  const { seas_type } = get_play_by_play_default_params({ params })
+  const filtered_params = { ...params, seas_type }
+  delete filtered_params.career_year
+  delete filtered_params.career_game
+
+  query.whereNotIn('nfl_plays.play_type', ['NOPL'])
+  apply_play_by_play_column_params_to_query({
+    query,
+    params: filtered_params,
+    table_name: 'nfl_plays'
+  })
 }
 
 export default {
@@ -567,6 +626,14 @@ export default {
     with: fantasy_points_from_plays_with,
     join: data_view_join_function,
     granularity: ['player_year', 'player_year_week'],
+    measure_source: 'plays_role_union',
+    role_attributions: fp_role_attributions,
+    apply_filters: fp_apply_filters,
+    supports_output: {
+      periods: FP_OUTPUT_PERIODS,
+      aggregations: ['rate', 'count']
+    },
+    consumes_params_extra: ['scoring_format_hash'],
     supported_rate_types: [
       'per_game',
       'per_team_half',

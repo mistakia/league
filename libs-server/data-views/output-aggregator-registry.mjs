@@ -1,4 +1,6 @@
 import aggregator_count from './output-aggregator/aggregator-count.mjs'
+import aggregator_rate from './output-aggregator/aggregator-rate.mjs'
+import { numerator_via_cte } from './rate-type/emit-rate-outer-select.mjs'
 import plugin_per_game from './rate-type/rate-type-per-game.mjs'
 import plugin_per_team_play from './rate-type/rate-type-per-team-play.mjs'
 import plugin_per_player from './rate-type/rate-type-per-player.mjs'
@@ -119,7 +121,22 @@ register('player_route', 'rate', adapt(plugin_per_player_route, {}))
 
 for (const period of COUNT_PERIODS) register(period, 'count', aggregator_count)
 
-export const resolve = ({ period, aggregation }) => {
+export const resolve = ({ period, aggregation, column_def }) => {
+  // Per-column override: columns whose value lives in a denominator-shaped
+  // CTE (player-routes, player-snaps) cannot use the legacy per-family
+  // plugin's `SUM(measure_expr)/rate_type_total_count` emit shape (no outer
+  // measure source exists). They declare `output_aggregator` directly on the
+  // column-def and bypass the registry; their measure is materialized via
+  // `build_period_cte` so `aggregator-rate` / `aggregator-count` produce the
+  // correct `SUM(measure_total)/COUNT(period_key)` emission.
+  if (column_def?.output_aggregator) {
+    const overrides = column_def.output_aggregator
+    const plugin =
+      typeof overrides === 'function'
+        ? overrides
+        : overrides[aggregation] || overrides.default || overrides
+    if (plugin?.add_cte && plugin?.emit_outer_select) return plugin
+  }
   const plugin = registry.get(period)?.get(aggregation)
   if (!plugin) {
     throw new Error(
@@ -134,11 +151,11 @@ export const has_aggregator = ({ period, aggregation }) =>
 
 export const get_cte_name = ({ column_def, params, identity_id }) => {
   const { period, aggregation } = params.output
-  const plugin = resolve({ period, aggregation })
+  const plugin = resolve({ period, aggregation, column_def })
   return plugin.get_cte_name({ column_def, params, identity_id, period })
 }
 
-export const apply_output_aggregator = ({
+export const apply_output_aggregator = async ({
   query_context,
   column_def,
   params,
@@ -146,14 +163,14 @@ export const apply_output_aggregator = ({
   column_index
 }) => {
   const { period, aggregation } = params.output
-  const plugin = resolve({ period, aggregation })
+  const plugin = resolve({ period, aggregation, column_def })
   const cte_name = plugin.get_cte_name({
     column_def,
     params,
     identity_id,
     period
   })
-  plugin.add_cte({
+  await plugin.add_cte({
     query_context,
     column_def,
     params,
@@ -162,8 +179,47 @@ export const apply_output_aggregator = ({
     period
   })
   if (!query_context.joined_output_ctes.has(cte_name)) {
-    plugin.join_cte({ query_context, cte_name, identity_id })
+    plugin.join_cte({ query_context, cte_name, identity_id, params })
     query_context.joined_output_ctes.add(cte_name)
+  }
+  // Numerator CTE: legacy denominator-style plugins (per_game / per_player /
+  // per_team_play / per_player_play / per_player_route) only materialize the
+  // denominator. Columns whose measure isn't an inline expression over
+  // nfl_plays / player_gamelogs (e.g. `plays_role_union` for fantasy points,
+  // `snaps` for snap counts, `plays_receiver` for routes) need a separately
+  // materialized numerator CTE; emit_rate_outer_select reads from it. Skipped
+  // when the chosen plugin is aggregator_rate itself (it already materializes
+  // the canonical period CTE).
+  if (plugin !== aggregator_rate && numerator_via_cte()) {
+    // period='aggregate' collapses the numerator CTE to (pid|team_code,
+    // year) grain so it joins 1:1 with the outer query. Without this,
+    // multi-column rate queries cross-multiply via per-period rows in each
+    // numerator CTE, inflating SUM(measure_total) by the cardinality of
+    // sibling numerator CTEs. See emit-rate-outer-select.mjs for the
+    // corresponding outer SELECT shape.
+    const num_cte_name = aggregator_rate.get_cte_name({
+      column_def,
+      params,
+      identity_id,
+      period: 'aggregate'
+    })
+    await aggregator_rate.add_cte({
+      query_context,
+      column_def,
+      params,
+      cte_name: num_cte_name,
+      identity_id,
+      period: 'aggregate'
+    })
+    if (!query_context.joined_output_ctes.has(num_cte_name)) {
+      aggregator_rate.join_cte({
+        query_context,
+        cte_name: num_cte_name,
+        identity_id,
+        params
+      })
+      query_context.joined_output_ctes.add(num_cte_name)
+    }
   }
   return plugin.emit_outer_select({
     column_def,
