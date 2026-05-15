@@ -28,6 +28,8 @@ import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-oppon
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
+import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
+import { build_batched_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
 import { get_identity } from '#libs-server/data-views/identities.mjs'
 import { resolve as resolve_bridge } from '#libs-server/data-views/bridge-registry.mjs'
 
@@ -1715,6 +1717,13 @@ export const get_data_view_results_query = async ({
     })
     output_select_mapping[`${column.column_id}_${column_index}`] = result
   }
+
+  // Materialize all coalesced output-aggregator CTEs. Deferred until after
+  // the per-column dispatch loop so multiple measures sharing a scan key
+  // (same source / period / identity / predicate / apply_filters) land in
+  // one materialized CTE with N `SUM(...) AS m_<hash>` columns instead of
+  // N separate single-SUM CTEs each rescanning the source table.
+  flush_measure_batches({ query_context, build_batched_period_cte })
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
     where,

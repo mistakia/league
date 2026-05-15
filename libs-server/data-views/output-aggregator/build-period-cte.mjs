@@ -1,5 +1,10 @@
 import db from '#db'
 import { has_bridge, resolve as resolve_bridge } from '../bridge-registry.mjs'
+import {
+  compute_measure_alias,
+  is_batchable,
+  register_measure
+} from './measure-batch.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.year, '_', nfl_games.week, '_', nfl_games.esbid)"
@@ -84,6 +89,12 @@ const resolve_source = (measure_source) => {
   return SOURCES.gamelogs
 }
 
+// Single-measure entrypoint. Thin wrapper over `build_batched_period_cte`
+// that lifts the legacy `measure_expr` arg into a one-entry `measures` list
+// emitting `SUM(measure_expr) AS measure_total`. Retained for role-union
+// callers and as a back-compat surface; the batched path (used by the rate
+// / count aggregators when they coalesce co-locatable measures) calls
+// `build_batched_period_cte` directly with N entries.
 export const build_period_cte = ({
   measure_source,
   measure_expr,
@@ -91,6 +102,105 @@ export const build_period_cte = ({
   role_attributions,
   pid_columns,
   apply_filters,
+  period,
+  query_context,
+  identity_id,
+  params = {}
+}) => {
+  if (measure_source === 'plays_role_union') {
+    return build_role_union_period_cte({
+      measure_predicate,
+      role_attributions,
+      apply_filters,
+      period,
+      query_context,
+      params
+    })
+  }
+  return build_batched_period_cte({
+    measure_source,
+    measure_predicate,
+    pid_columns,
+    apply_filters,
+    measures: [{ alias: 'measure_total', measure_expr }],
+    period,
+    query_context,
+    identity_id,
+    params
+  })
+}
+
+const build_role_union_period_cte = ({
+  measure_predicate,
+  role_attributions,
+  apply_filters,
+  period,
+  query_context,
+  params
+}) => {
+  // Preserved verbatim from the legacy role-union branch. Role-union sources
+  // build a per-role UNION ALL and are not batchable; see measure-batch.mjs
+  // `BATCHABLE_SOURCES`.
+  const source = SOURCES.plays_role_union
+  const source_table = source.table
+  const period_key = period_key_expr(period)
+  const is_aggregate = period === 'aggregate'
+  if (!role_attributions || !role_attributions.length) {
+    throw new Error(
+      `measure_source 'plays_role_union' requires role_attributions`
+    )
+  }
+  const union_subs = role_attributions.map(
+    ({ pid_column, measure_expr: role_measure_expr }) => {
+      const sub = db(source_table)
+        .select(db.raw(`${source_table}.${pid_column} AS pid`))
+        .select(`${source_table}.esbid`)
+        .select(db.raw(`${role_measure_expr} AS pts`))
+        .whereRaw(`${source_table}.${pid_column} IS NOT NULL`)
+      if (measure_predicate) sub.whereRaw(measure_predicate)
+      if (query_context.year_range && query_context.year_range.length) {
+        sub.whereIn(`${source_table}.year`, query_context.year_range)
+      }
+      if (apply_filters) apply_filters({ query: sub })
+      return sub
+    }
+  )
+  const inner_union = union_subs
+    .slice(1)
+    .reduce((acc, sub) => acc.unionAll(sub), union_subs[0])
+  const include_year =
+    !is_aggregate || query_context.splits.includes('year')
+  const outer = db
+    .from(inner_union.as('role_union'))
+    .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
+    .select('role_union.pid AS pid')
+    .select(db.raw('SUM(role_union.pts) AS measure_total'))
+    .groupByRaw('"role_union"."pid"')
+    .havingRaw('SUM(role_union.pts) > 0')
+  if (include_year) {
+    outer.select('nfl_games.year').groupByRaw('"nfl_games"."year"')
+  }
+  if (!is_aggregate) {
+    outer
+      .select(db.raw(`${period_key} AS period_key`))
+      .groupByRaw(period_key)
+  }
+  if (query_context.year_range && query_context.year_range.length) {
+    outer.whereIn('nfl_games.year', query_context.year_range)
+  }
+  return outer
+}
+
+// Coalesced builder: emits one CTE that selects multiple `SUM(<expr>) AS
+// <alias>` columns over a single (source_table -> nfl_games) scan. Used by
+// the rate / count aggregators when several measures share the same scan
+// key (see measure-batch.mjs).
+export const build_batched_period_cte = ({
+  measure_source,
+  measure_predicate,
+  pid_columns,
+  apply_filters,
+  measures,
   period,
   query_context,
   identity_id,
@@ -119,68 +229,9 @@ export const build_period_cte = ({
   const is_aggregate = period === 'aggregate'
 
   if (source.pid_via === 'role_union') {
-    if (!role_attributions || !role_attributions.length) {
-      throw new Error(
-        `measure_source '${measure_source}' requires role_attributions`
-      )
-    }
-    // SECURITY: `pid_column` must be a hardcoded identifier and
-    // `measure_expr` must contain only column refs / literals -- both are
-    // emitted via db.raw/whereRaw without bindings. Any param-derived value
-    // routed through them is a SQL-injection surface; column-defs must use
-    // Knex bindings for runtime values. Same convention as `measure_predicate`.
-    const union_subs = role_attributions.map(
-      ({ pid_column, measure_expr: role_measure_expr }) => {
-        const sub = db(source_table)
-          .select(db.raw(`${source_table}.${pid_column} AS pid`))
-          .select(`${source_table}.esbid`)
-          .select(db.raw(`${role_measure_expr} AS pts`))
-          .whereRaw(`${source_table}.${pid_column} IS NOT NULL`)
-        if (measure_predicate) sub.whereRaw(measure_predicate)
-        // Push year filter into each inner sub so the partitioned
-        // `nfl_plays_year_<N>` partitions prune at scan time, instead of
-        // discarding rows after the outer `nfl_games` join.
-        if (query_context.year_range && query_context.year_range.length) {
-          sub.whereIn(`${source_table}.year`, query_context.year_range)
-        }
-        // Column-supplied filter hook: lets columns with complex param-
-        // driven filter shapes (e.g. fantasy points reusing
-        // apply_play_by_play_column_params_to_query) apply Knex builder
-        // operations directly. Runs once per inner role sub so partition
-        // pruning fires before the UNION.
-        if (apply_filters) apply_filters({ query: sub })
-        return sub
-      }
+    throw new Error(
+      'build_batched_period_cte does not handle role_union; route via build_period_cte'
     )
-    const inner_union = union_subs
-      .slice(1)
-      .reduce((acc, sub) => acc.unionAll(sub), union_subs[0])
-    // Include `nfl_games.year` only when the consumer query splits on year
-    // OR when we're operating at non-aggregate period grain. Aggregate grain
-    // without a year split collapses to pid only -- including year would
-    // produce multiple rows per pid and break the 1:1 join with the outer
-    // query (MAX returns one year's total instead of the cross-year total).
-    const include_year =
-      !is_aggregate || query_context.splits.includes('year')
-    const outer = db
-      .from(inner_union.as('role_union'))
-      .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
-      .select('role_union.pid AS pid')
-      .select(db.raw('SUM(role_union.pts) AS measure_total'))
-      .groupByRaw('"role_union"."pid"')
-      .havingRaw('SUM(role_union.pts) > 0')
-    if (include_year) {
-      outer.select('nfl_games.year').groupByRaw('"nfl_games"."year"')
-    }
-    if (!is_aggregate) {
-      outer
-        .select(db.raw(`${period_key} AS period_key`))
-        .groupByRaw(period_key)
-    }
-    if (query_context.year_range && query_context.year_range.length) {
-      outer.whereIn('nfl_games.year', query_context.year_range)
-    }
-    return outer
   }
 
   // pid expression resolution.
@@ -235,7 +286,13 @@ export const build_period_cte = ({
     sub.select(db.raw(`${pid_expr} AS pid`))
   }
 
-  sub.select(db.raw(`SUM(${measure_expr}) AS measure_total`))
+  // One SUM(...) AS <alias> per measure. Single-measure callers pass one
+  // entry with alias='measure_total' (legacy shape); batched callers pass
+  // N entries with alias='m_<hash>' each. Identifiers in `alias` are
+  // generated from md5 hashes and are safe to embed via db.raw.
+  for (const { alias, measure_expr: m_expr } of measures) {
+    sub.select(db.raw(`SUM(${m_expr}) AS ${alias}`))
+  }
   sub.groupByRaw(is_team ? `${source_table}.${source.team_col}` : pid_expr)
   if (!is_aggregate) sub.groupByRaw(period_key)
   if (include_year) sub.groupByRaw('"nfl_games"."year"')
@@ -310,23 +367,56 @@ export const add_period_cte = async ({
   identity_id,
   period
 }) => {
-  if (query_context.applied_output_ctes.has(cte_name)) return
   ensure_split_bridges({ query_context, identity_id })
   const source = resolve_source(column_def.measure_source)
-  const role_attributions =
-    source.pid_via === 'role_union'
-      ? await column_def.role_attributions({ params, identity_id })
-      : null
+  // Batchable sources route into the measure-batch registry; the CTE is
+  // materialized in a single `withMaterialized` call at flush time with one
+  // `SUM(...) AS m_<hash>` column per registered measure. See measure-batch.mjs.
+  if (is_batchable({ column_def }) && source.pid_via !== 'role_union') {
+    const measure_alias = compute_measure_alias({
+      column_def,
+      params,
+      identity_id
+    })
+    const measure_expr = column_def.measure_expr({
+      table_name: source.table,
+      params,
+      identity_id
+    })
+    const common = {
+      measure_source: column_def.measure_source,
+      measure_predicate: column_def.measure_predicate
+        ? column_def.measure_predicate({ params, identity_id })
+        : null,
+      pid_columns: column_def.pid_columns,
+      apply_filters: column_def.apply_filters
+        ? ({ query }) =>
+            column_def.apply_filters({ query, params, identity_id })
+        : null,
+      period,
+      identity_id,
+      params
+    }
+    register_measure({
+      query_context,
+      group_key: cte_name, // get_cte_name is derived from group_key, so reuse
+      cte_name,
+      measure_alias,
+      measure_expr,
+      common
+    })
+    return
+  }
+  // Legacy single-measure path for role_union (heterogeneous inner UNIONs
+  // not eligible for batching).
+  if (query_context.applied_output_ctes.has(cte_name)) return
+  const role_attributions = await column_def.role_attributions({
+    params,
+    identity_id
+  })
   const sub = build_period_cte({
     measure_source: column_def.measure_source,
-    measure_expr:
-      source.pid_via === 'role_union'
-        ? null
-        : column_def.measure_expr({
-            table_name: source.table,
-            params,
-            identity_id
-          }),
+    measure_expr: null,
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,

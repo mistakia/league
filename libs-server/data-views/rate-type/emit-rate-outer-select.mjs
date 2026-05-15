@@ -15,6 +15,10 @@
 // SECURITY: cte names are deterministic identifiers (md5-prefixed); the SQL
 // is emitted without bindings.
 import aggregator_rate from '../output-aggregator/aggregator-rate.mjs'
+import {
+  compute_measure_alias,
+  is_batchable
+} from '../output-aggregator/measure-batch.mjs'
 
 // All rate emits now flow through the pre-aggregated numerator CTE.
 // The inline `SUM(measure_expr)` shape (legacy `${table_name}.column / denom`)
@@ -59,8 +63,14 @@ export const emit_rate_outer_select = ({
   // driven GROUP BY -- since the join is 1:1, MAX returns the single
   // value. CAST to DECIMAL avoids integer division truncation (legacy
   // get_rate_type_sql had the same CAST).
+  //
+  // Batched numerator CTEs name each measure `m_<hash>`; role-union retains
+  // the legacy singleton `measure_total` column.
+  const measure_alias = is_batchable({ column_def })
+    ? compute_measure_alias({ column_def, params, identity_id })
+    : 'measure_total'
   return {
-    sql: `CAST(MAX(${num_cte}.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(${cte_name}.rate_type_total_count) AS DECIMAL), 0) AS ${alias}`,
+    sql: `CAST(MAX(${num_cte}.${measure_alias}) AS DECIMAL) / NULLIF(CAST(MAX(${cte_name}.rate_type_total_count) AS DECIMAL), 0) AS ${alias}`,
     bindings: []
   }
 }

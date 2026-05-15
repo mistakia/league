@@ -2,6 +2,12 @@ import crypto from 'crypto'
 
 import { add_period_cte } from './build-period-cte.mjs'
 import { consumed_params_signature } from './consumed-params-signature.mjs'
+import {
+  compute_cte_name,
+  compute_group_key,
+  compute_measure_alias,
+  is_batchable
+} from './measure-batch.mjs'
 import { is_historical_team_mode } from '../historical-team-mode.mjs'
 import {
   add_player_year_teams_cte,
@@ -19,6 +25,19 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
   const effective = column_def.consumes_params_extra
     ? [...consumes_params, ...column_def.consumes_params_extra]
     : consumes_params
+  // Batchable sources derive CTE name from the group key so multiple
+  // column-defs that share a scan signature collapse to one CTE. Role-union
+  // (and any future non-batchable) sources keep per-column-id hashing.
+  if (is_batchable({ column_def })) {
+    const group_key = compute_group_key({
+      column_def,
+      params,
+      identity_id,
+      period,
+      consumes_params: effective
+    })
+    return compute_cte_name({ group_key, period })
+  }
   const key = JSON.stringify({
     column_id: column_def.column_id,
     measure_source: column_def.measure_source,
@@ -100,15 +119,26 @@ export const join_cte = ({
   })
 }
 
-export const emit_outer_select = ({ column_def, cte_name, column_index }) => {
+export const emit_outer_select = ({
+  column_def,
+  cte_name,
+  column_index,
+  params,
+  identity_id
+}) => {
   if (!column_def.column_name) {
     throw new Error(
       `aggregator-rate requires column_def.column_name (column_id=${column_def.column_id})`
     )
   }
   const alias = `${column_def.column_name}_${column_index}`
+  // Batched CTEs name each measure `m_<hash>`. Role-union keeps the legacy
+  // `measure_total` singleton column.
+  const measure_alias = is_batchable({ column_def })
+    ? compute_measure_alias({ column_def, params, identity_id })
+    : 'measure_total'
   return {
-    sql: `SUM(${cte_name}.measure_total) / NULLIF(COUNT(${cte_name}.period_key), 0) AS ${alias}`,
+    sql: `SUM(${cte_name}.${measure_alias}) / NULLIF(COUNT(${cte_name}.period_key), 0) AS ${alias}`,
     bindings: []
   }
 }

@@ -2,6 +2,12 @@ import crypto from 'crypto'
 
 import { add_period_cte } from './build-period-cte.mjs'
 import { consumed_params_signature } from './consumed-params-signature.mjs'
+import {
+  compute_cte_name,
+  compute_group_key,
+  compute_measure_alias,
+  is_batchable
+} from './measure-batch.mjs'
 import { is_historical_team_mode } from '../historical-team-mode.mjs'
 import {
   add_player_year_teams_cte,
@@ -21,6 +27,21 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
   const effective = column_def.consumes_params_extra
     ? [...consumes_params, ...column_def.consumes_params_extra]
     : consumes_params
+  // Batchable sources derive CTE name from the group key with a `count_`
+  // prefix so count CTEs share scans across columns with matching scan
+  // signatures. Aggregator-rate uses a `rate_` prefix, so rate and count
+  // do not cross-share even when group_keys collide; the cosmetic split
+  // keeps the two aggregator families clearly distinguished in EXPLAIN.
+  if (is_batchable({ column_def })) {
+    const group_key = compute_group_key({
+      column_def,
+      params,
+      identity_id,
+      period,
+      consumes_params: effective
+    })
+    return compute_cte_name({ group_key, period }).replace(/^rate_/, 'count_')
+  }
   const key = JSON.stringify({
     column_id: column_def.column_id,
     measure_source: column_def.measure_source,
@@ -99,7 +120,8 @@ export const emit_outer_select = ({
   column_def,
   cte_name,
   column_index,
-  params
+  params,
+  identity_id
 }) => {
   const threshold = params?.output?.threshold
   if (!threshold || threshold.op == null || threshold.value == null) {
@@ -114,8 +136,11 @@ export const emit_outer_select = ({
   }
   const alias = `${column_def.column_name}_${column_index}`
   const op = op_sql(threshold.op)
+  const measure_alias = is_batchable({ column_def })
+    ? compute_measure_alias({ column_def, params, identity_id })
+    : 'measure_total'
   return {
-    sql: `COUNT(DISTINCT ${cte_name}.period_key) FILTER (WHERE ${cte_name}.measure_total ${op} ?) AS ${alias}`,
+    sql: `COUNT(DISTINCT ${cte_name}.period_key) FILTER (WHERE ${cte_name}.${measure_alias} ${op} ?) AS ${alias}`,
     bindings: [threshold.value]
   }
 }
