@@ -2,6 +2,11 @@ import crypto from 'crypto'
 
 import { add_period_cte } from './build-period-cte.mjs'
 import { consumed_params_signature } from './consumed-params-signature.mjs'
+import { is_historical_team_mode } from '../historical-team-mode.mjs'
+import {
+  add_player_year_teams_cte,
+  ensure_player_year_teams_join
+} from '../add-player-year-teams-cte.mjs'
 
 export const consumes_params = ['year', 'nfl_week_id', 'seas_type']
 
@@ -41,6 +46,23 @@ const resolve_team_join_target = ({ query_context, params }) => {
     return 'current_week_opponents.opponent'
   if (matchup === 'next_week_opponent_total')
     return 'next_week_opponents.opponent'
+  if (is_historical_team_mode({ params, splits: query_context.splits })) {
+    const data_view_options = query_context.data_view_options
+    if (data_view_options) {
+      add_player_year_teams_cte({
+        players_query: query_context.players_query,
+        params,
+        splits: query_context.splits,
+        data_view_options
+      })
+      ensure_player_year_teams_join({
+        players_query: query_context.players_query,
+        data_view_options,
+        splits: query_context.splits
+      })
+      return `${data_view_options.player_year_teams_cte_name}.team`
+    }
+  }
   return 'player.current_nfl_team'
 }
 

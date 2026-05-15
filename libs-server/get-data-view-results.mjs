@@ -1409,6 +1409,7 @@ export const get_data_view_results_query = async ({
     players_query
   })
   data_view_options.query_context = query_context
+  query_context.data_view_options = data_view_options
   const data_view_metadata = {
     created_at: Date.now(),
     cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week

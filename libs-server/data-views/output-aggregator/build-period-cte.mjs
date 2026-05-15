@@ -93,11 +93,21 @@ export const build_period_cte = ({
   apply_filters,
   period,
   query_context,
-  identity_id
+  identity_id,
+  params = {}
 }) => {
   const is_team = identity_id.startsWith('team')
   const period_key = period_key_expr(period)
-  const source = resolve_source(measure_source)
+  const base_source = resolve_source(measure_source)
+  // For the `plays` source, params.team_unit selects which side of the play
+  // the team grouping uses: 'def' groups by defender, otherwise offense
+  // (pos_team). Mirrors the legacy `add_team_stats_play_by_play_with_statement`
+  // semantics so team_unit='def' team-stat columns aggregate per defender.
+  const team_col_override =
+    measure_source === 'plays' && params?.team_unit === 'def'
+      ? 'def'
+      : base_source.team_col
+  const source = { ...base_source, team_col: team_col_override }
   const source_table = source.table
 
   if (is_team && !source.team_col) {
@@ -328,7 +338,8 @@ export const add_period_cte = async ({
       : null,
     period,
     query_context,
-    identity_id
+    identity_id,
+    params
   })
   query_context.players_query.withMaterialized(cte_name, sub)
   query_context.applied_output_ctes.add(cte_name)

@@ -2,6 +2,11 @@ import crypto from 'crypto'
 
 import { add_period_cte } from './build-period-cte.mjs'
 import { consumed_params_signature } from './consumed-params-signature.mjs'
+import { is_historical_team_mode } from '../historical-team-mode.mjs'
+import {
+  add_player_year_teams_cte,
+  ensure_player_year_teams_join
+} from '../add-player-year-teams-cte.mjs'
 
 export const consumes_params = [
   'year',
@@ -36,6 +41,9 @@ export const add_cte = add_period_cte
 // - subject 'player' viewing a team-keyed column:
 //   - matchup_opponent_type=current_week_opponent_total -> current_week_opponents.opponent
 //   - matchup_opponent_type=next_week_opponent_total -> next_week_opponents.opponent
+//   - historical-team-mode (year filter / year split): join through the
+//     player_year_teams bridge so players without active games that year
+//     resolve to NULL team (legacy parity).
 //   - default -> player.current_nfl_team
 const resolve_team_join_target = ({ query_context, params }) => {
   if (query_context.subject_id === 'team') return query_context.team_reference
@@ -49,6 +57,23 @@ const resolve_team_join_target = ({ query_context, params }) => {
     return 'current_week_opponents.opponent'
   if (matchup === 'next_week_opponent_total')
     return 'next_week_opponents.opponent'
+  if (is_historical_team_mode({ params, splits: query_context.splits })) {
+    const data_view_options = query_context.data_view_options
+    if (data_view_options) {
+      add_player_year_teams_cte({
+        players_query: query_context.players_query,
+        params,
+        splits: query_context.splits,
+        data_view_options
+      })
+      ensure_player_year_teams_join({
+        players_query: query_context.players_query,
+        data_view_options,
+        splits: query_context.splits
+      })
+      return `${data_view_options.player_year_teams_cte_name}.team`
+    }
+  }
   return 'player.current_nfl_team'
 }
 
