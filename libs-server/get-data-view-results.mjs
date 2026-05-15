@@ -917,6 +917,28 @@ const add_clauses_for_table = async ({
   let join_func = null
   let with_func = null
 
+  // Columns whose output was already produced by apply_output_aggregator
+  // (entry in output_select_mapping) must skip legacy with/join attribution,
+  // otherwise the aggregator CTE is built AND an orphaned legacy CTE is
+  // materialized + LEFT JOINed for the same column -- redundant work that
+  // measurably regresses query latency (see plan: post-Phase-B timeout
+  // investigation 2026-05-15).
+  //
+  // Exception: when this group's `table_name` is the query's `from_table_name`,
+  // the legacy CTE is the primary FROM source and must remain materialized.
+  // The orphan-CTE optimization only applies to LEFT-JOINed legacy tables.
+  const table_is_from_table =
+    table_name === data_view_options.from_table_name
+  const is_aggregator_handled = (column_id, column_index) =>
+    !table_is_from_table &&
+    Boolean(output_select_mapping[`${column_id}_${column_index}`])
+
+  // When every column at this table_name group is aggregator-handled, skip
+  // the legacy fallback LEFT JOIN at the bottom of this function -- the
+  // aggregator already added its own CTEs and joins. Without this gate, the
+  // fallback joins an unused (and possibly absent) legacy CTE.
+  let any_legacy_column = false
+
   for (const {
     column_id,
     column_index,
@@ -937,6 +959,13 @@ const add_clauses_for_table = async ({
 
     select_strings.push(...main_select_result.select)
     group_by_strings.push(...main_select_result.group_by)
+
+    if (is_aggregator_handled(column_id, column_index)) {
+      column_ids.push(column_id)
+      continue
+    }
+
+    any_legacy_column = true
 
     if (column_definition.join) {
       join_func = column_definition.join
@@ -975,11 +1004,20 @@ const add_clauses_for_table = async ({
     const column_definition =
       data_views_column_definitions[where_clause.column_id]
 
-    if (column_definition.join) {
+    const where_handled_by_aggregator = is_aggregator_handled(
+      where_clause.column_id,
+      0
+    )
+
+    if (!where_handled_by_aggregator) {
+      any_legacy_column = true
+    }
+
+    if (!where_handled_by_aggregator && column_definition.join) {
       join_func = column_definition.join
     }
 
-    if (column_definition.with) {
+    if (!where_handled_by_aggregator && column_definition.with) {
       with_func = column_definition.with
       pid_columns = column_definition.pid_columns
 
@@ -1144,6 +1182,7 @@ const add_clauses_for_table = async ({
       })
     } else if (
       !skip_join_for_offset_range &&
+      any_legacy_column &&
       table_name !== 'player' &&
       table_name !== 'nfl_plays' &&
       (select_strings.length ||
