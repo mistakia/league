@@ -45,8 +45,8 @@ export const join_cte = ({ query_context, cte_name, identity_id }) => {
   })
 }
 
-export const emit_outer_select = ({ cte_name, column_index }) => {
-  const alias = `rate_value_${column_index}`
+export const emit_outer_select = ({ column_def, cte_name, column_index }) => {
+  const alias = `${column_def.column_name}_${column_index}`
   return {
     sql: `SUM(${cte_name}.measure_total) / NULLIF(COUNT(${cte_name}.period_key), 0) AS ${alias}`,
     bindings: []

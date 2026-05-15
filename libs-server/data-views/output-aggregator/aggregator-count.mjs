@@ -53,14 +53,19 @@ const op_sql = (op) => {
   return op
 }
 
-export const emit_outer_select = ({ cte_name, column_index, params }) => {
+export const emit_outer_select = ({
+  column_def,
+  cte_name,
+  column_index,
+  params
+}) => {
   const threshold = params?.output?.threshold
   if (!threshold || threshold.op == null || threshold.value == null) {
     throw new Error(
       'count aggregator requires params.output.threshold {op, value}'
     )
   }
-  const alias = `count_value_${column_index}`
+  const alias = `${column_def.column_name}_${column_index}`
   const op = op_sql(threshold.op)
   return {
     sql: `COUNT(DISTINCT ${cte_name}.period_key) FILTER (WHERE ${cte_name}.measure_total ${op} ?) AS ${alias}`,
