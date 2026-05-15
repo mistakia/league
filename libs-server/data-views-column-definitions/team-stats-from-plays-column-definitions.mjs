@@ -1,4 +1,6 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
+import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
@@ -63,6 +65,20 @@ const team_stat_from_plays = ({
     : null
   const final_supports_output = supports_output || derived_supports_output
   const final_measure_expr = measure_expr || derived_measure_expr
+  const final_apply_filters = can_auto_derive
+    ? ({ query, params }) => {
+        const defaults = get_play_by_play_default_params({ params })
+        const filtered_params = { ...defaults }
+        delete filtered_params.career_year
+        delete filtered_params.career_game
+        query.whereNot('nfl_plays.play_type', 'NOPL')
+        apply_play_by_play_column_params_to_query({
+          query,
+          params: filtered_params,
+          table_name: 'nfl_plays'
+        })
+      }
+    : null
 
   return {
     table_alias: generate_table_alias,
@@ -156,6 +172,7 @@ const team_stat_from_plays = ({
       ? { supports_output: final_supports_output, measure_source: 'plays' }
       : {}),
     ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
+    ...(final_apply_filters ? { apply_filters: final_apply_filters } : {}),
     get_cache_info: get_cache_info_for_fields_from_plays
   }
 }

@@ -1,4 +1,5 @@
 import db from '#db'
+import { has_bridge, resolve as resolve_bridge } from '../bridge-registry.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.year, '_', nfl_games.week, '_', nfl_games.esbid)"
@@ -141,7 +142,11 @@ export const build_period_cte = ({
       .select('nfl_games.year')
       .select('role_union.pid AS pid')
       .select(db.raw('SUM(role_union.pts) AS measure_total'))
-      .groupBy('role_union.pid', db.raw(period_key), 'nfl_games.year')
+      .groupBy([
+        db.raw('"role_union"."pid"'),
+        db.raw(period_key),
+        db.raw('"nfl_games"."year"')
+      ])
       .havingRaw('SUM(role_union.pts) > 0')
     if (query_context.year_range && query_context.year_range.length) {
       outer.whereIn('nfl_games.year', query_context.year_range)
@@ -194,14 +199,20 @@ export const build_period_cte = ({
 
   if (is_team) {
     sub.select(`${source_table}.${source.team_col} as team_code`)
-    sub.groupBy(`${source_table}.${source.team_col}`)
   } else {
     sub.select(db.raw(`${pid_expr} AS pid`))
-    sub.groupBy(db.raw(pid_expr))
   }
 
   sub.select(db.raw(`SUM(${measure_expr}) AS measure_total`))
-  sub.groupBy(db.raw(period_key), 'nfl_games.year')
+  // Single groupBy call -- Knex sometimes drops trailing args when prior
+  // calls used db.raw, and we need every non-aggregated select in the
+  // group key (pid_expr/team_col, period_key, year).
+  const group_cols = [
+    db.raw(is_team ? `${source_table}.${source.team_col}` : pid_expr),
+    db.raw(period_key),
+    db.raw('"nfl_games"."year"')
+  ]
+  sub.groupBy(group_cols)
 
   if (measure_predicate) {
     sub.whereRaw(measure_predicate)
@@ -220,6 +231,51 @@ export const build_period_cte = ({
 // `applied_output_ctes`; aggregator-count and aggregator-rate differ only
 // in `join_cte` / `emit_outer_select`, so the CTE construction and
 // materialization are factored here.
+// Ensure the split-identity bridges required by the join condition are
+// materialized AND joined. The dispatcher at
+// libs-server/get-data-view-results.mjs:1535-1546 calls `bridge.add_cte()`
+// and pre-marks `applied_bridges` even when the from-table is non-player
+// (so `bridge.join_cte()` at line 818-827 is skipped). This leaves the
+// player_years CTE materialized but not joined to the main query -- our
+// aggregator-rate / aggregator-count join clauses reference
+// `player_years.year`, which fails 42P01 in Postgres.
+//
+// Track our own `joined_split_bridges` set so we add the inner-join exactly
+// once per query, independent of the dispatcher's `applied_bridges` state.
+const ensure_split_bridge_joined = ({ query_context, from, to }) => {
+  if (!query_context.joined_split_bridges)
+    query_context.joined_split_bridges = new Set()
+  const key = `${from}->${to}`
+  if (query_context.joined_split_bridges.has(key)) return
+  const bridge = resolve_bridge(from, to)
+  bridge.add_cte({ query_context })
+  bridge.join_cte({ query_context })
+  query_context.joined_split_bridges.add(key)
+}
+
+const ensure_split_bridges = ({ query_context, identity_id }) => {
+  if (identity_id.startsWith('team')) return
+  const { subject_id, splits } = query_context
+  if (subject_id !== 'player') return
+  if (splits.includes('year') && has_bridge('player', 'player_year')) {
+    ensure_split_bridge_joined({
+      query_context,
+      from: 'player',
+      to: 'player_year'
+    })
+  }
+  if (
+    splits.includes('week') &&
+    has_bridge('player_year', 'player_year_week')
+  ) {
+    ensure_split_bridge_joined({
+      query_context,
+      from: 'player_year',
+      to: 'player_year_week'
+    })
+  }
+}
+
 export const add_period_cte = async ({
   query_context,
   column_def,
@@ -229,6 +285,7 @@ export const add_period_cte = async ({
   period
 }) => {
   if (query_context.applied_output_ctes.has(cte_name)) return
+  ensure_split_bridges({ query_context, identity_id })
   const source = resolve_source(column_def.measure_source)
   const role_attributions =
     source.pid_via === 'role_union'

@@ -5,9 +5,10 @@
 // counting pass after the regex guards against false matches like
 // `SUM(x) + SUM(y)` where the regex's `.*` would greedily include the second
 // SUM.
-export const strip_outer_sum = (with_select_string) => {
-  if (typeof with_select_string !== 'string') return null
-  const match = with_select_string.match(/^SUM\(([\s\S]*)\)$/)
+const strip_outer_call = (s, name) => {
+  if (typeof s !== 'string') return null
+  const re = new RegExp(`^${name}\\(([\\s\\S]*)\\)$`)
+  const match = s.match(re)
   if (!match) return null
   let depth = 0
   for (let i = 0; i < match[1].length; i++) {
@@ -18,6 +19,22 @@ export const strip_outer_sum = (with_select_string) => {
     }
   }
   return depth === 0 ? match[1] : null
+}
+
+export const strip_outer_sum = (with_select_string) => {
+  const sum_inner = strip_outer_call(with_select_string, 'SUM')
+  if (sum_inner !== null) return sum_inner
+  // Recognize `COUNT(CASE WHEN <pred> THEN 1 ELSE NULL END)` as equivalent
+  // to `SUM(CASE WHEN <pred> THEN 1 ELSE 0 END)`. The auto-derived inner
+  // expression returned here keeps the same row-level semantics: 1 when
+  // predicate holds, 0 otherwise. COUNT semantics over NULL also discard
+  // the row from the count, which matches SUM-of-zero in the outer SUM
+  // wrapper applied by build_period_cte.
+  const count_inner = strip_outer_call(with_select_string, 'COUNT')
+  if (count_inner !== null) {
+    return count_inner.replace(/\bELSE\s+NULL\s+END\b/i, 'ELSE 0 END')
+  }
+  return null
 }
 
 // Translate the legacy `per_<period>` rate-type tokens into the canonical

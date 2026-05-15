@@ -814,16 +814,26 @@ const setup_from_table_and_player_joins = ({
   // from-tables rely on their own year/week columns (legacy reference
   // heuristic still active until checkpoint (d) drops it).
   if (from_table_name === 'player') {
-    if (splits.includes('year')) {
+    if (!query_context.joined_split_bridges)
+      query_context.joined_split_bridges = new Set()
+    if (
+      splits.includes('year') &&
+      !query_context.joined_split_bridges.has('player->player_year')
+    ) {
       const player_year_bridge = resolve_bridge('player', 'player_year')
       player_year_bridge.join_cte({ query_context })
+      query_context.joined_split_bridges.add('player->player_year')
     }
-    if (splits.includes('week')) {
+    if (
+      splits.includes('week') &&
+      !query_context.joined_split_bridges.has('player_year->player_year_week')
+    ) {
       const player_year_week_bridge = resolve_bridge(
         'player_year',
         'player_year_week'
       )
       player_year_week_bridge.join_cte({ query_context })
+      query_context.joined_split_bridges.add('player_year->player_year_week')
     }
   }
 

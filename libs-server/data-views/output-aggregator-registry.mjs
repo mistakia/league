@@ -179,7 +179,7 @@ export const apply_output_aggregator = async ({
     period
   })
   if (!query_context.joined_output_ctes.has(cte_name)) {
-    plugin.join_cte({ query_context, cte_name, identity_id })
+    plugin.join_cte({ query_context, cte_name, identity_id, params })
     query_context.joined_output_ctes.add(cte_name)
   }
   // Numerator CTE: legacy denominator-style plugins (per_game / per_player /
@@ -190,7 +190,7 @@ export const apply_output_aggregator = async ({
   // materialized numerator CTE; emit_rate_outer_select reads from it. Skipped
   // when the chosen plugin is aggregator_rate itself (it already materializes
   // the canonical period CTE).
-  if (plugin !== aggregator_rate && numerator_via_cte({ column_def })) {
+  if (plugin !== aggregator_rate && numerator_via_cte()) {
     const num_cte_name = aggregator_rate.get_cte_name({
       column_def,
       params,
@@ -209,7 +209,8 @@ export const apply_output_aggregator = async ({
       aggregator_rate.join_cte({
         query_context,
         cte_name: num_cte_name,
-        identity_id
+        identity_id,
+        params
       })
       query_context.joined_output_ctes.add(num_cte_name)
     }

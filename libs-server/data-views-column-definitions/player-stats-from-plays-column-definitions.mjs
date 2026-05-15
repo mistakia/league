@@ -97,6 +97,24 @@ const player_stat_from_plays = ({
     : null
   const final_supports_output = supports_output || derived_supports_output
   const final_measure_expr = measure_expr || derived_measure_expr
+  // Mirror `add_player_stats_play_by_play_with_statement` filtering against
+  // the aggregator-rate / aggregator-count CTE so cross-period totals match
+  // legacy parity. Auto-derived only -- columns with hand-supplied
+  // `apply_filters` (e.g. fantasy points) keep their own bypass.
+  const final_apply_filters = can_auto_derive
+    ? ({ query, params }) => {
+        const defaults = get_play_by_play_default_params({ params })
+        const filtered_params = { ...defaults }
+        delete filtered_params.career_year
+        delete filtered_params.career_game
+        query.whereNot('nfl_plays.play_type', 'NOPL')
+        apply_play_by_play_column_params_to_query({
+          query,
+          params: filtered_params,
+          table_name: 'nfl_plays'
+        })
+      }
+    : null
   return ({
   table_alias: ({ params }) =>
     generate_table_alias({ type: 'play_by_play', params, pid_columns }),
@@ -186,6 +204,7 @@ const player_stat_from_plays = ({
     ? { supports_output: final_supports_output, measure_source: 'plays' }
     : {}),
   ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
+  ...(final_apply_filters ? { apply_filters: final_apply_filters } : {}),
   get_cache_info: get_cache_info_for_fields_from_plays
   })
 }
@@ -737,10 +756,6 @@ export default {
     pid_columns: ['trg_pid'],
     with_select_string: `SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)`,
     stat_name: 'rec_yds_from_plays',
-    supports_output: {
-      periods: ['game', 'season'],
-      aggregations: ['rate', 'count']
-    },
     measure_expr: ({ table_name }) =>
       `CASE WHEN ${table_name}.comp = true THEN ${table_name}.recv_yds ELSE 0 END`
   }),

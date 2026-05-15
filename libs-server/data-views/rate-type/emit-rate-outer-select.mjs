@@ -16,10 +16,16 @@
 // is emitted without bindings.
 import aggregator_rate from '../output-aggregator/aggregator-rate.mjs'
 
-const INLINE_SOURCES = new Set(['plays', 'gamelogs', undefined, null])
-
-export const numerator_via_cte = ({ column_def }) =>
-  !INLINE_SOURCES.has(column_def.measure_source)
+// All rate emits now flow through the pre-aggregated numerator CTE.
+// The inline `SUM(measure_expr)` shape (legacy `${table_name}.column / denom`)
+// only worked when the main query had `nfl_plays` / `player_gamelogs`
+// directly joined, which has never been the case under the column-def
+// contract -- the column's own `.with` materializes a per-player CTE that
+// the main query joins, so unqualified column refs in `measure_expr` (e.g.
+// `comp`, `yards_after_catch`) resolve at the wrong scope. The numerator
+// CTE shape sidesteps this by re-materializing the measure against
+// nfl_plays inside aggregator-rate's CTE.
+export const numerator_via_cte = () => true
 
 export const get_numerator_cte_name = ({ column_def, params, identity_id }) =>
   aggregator_rate.get_cte_name({
@@ -46,29 +52,9 @@ export const emit_rate_outer_select = ({
   }
   const alias = `${column_def.column_name}_${column_index}`
 
-  if (numerator_via_cte({ column_def })) {
-    const num_cte = get_numerator_cte_name({ column_def, params, identity_id })
-    return {
-      sql: `SUM(${num_cte}.measure_total) / NULLIF(MAX(${cte_name}.rate_type_total_count), 0) AS ${alias}`,
-      bindings: []
-    }
-  }
-
-  const table_name =
-    column_def.measure_source === 'plays' ? 'nfl_plays' : 'player_gamelogs'
-  const measure_expr = column_def.measure_expr({
-    table_name,
-    params,
-    identity_id
-  })
-  const predicate_sql = column_def.measure_predicate
-    ? column_def.measure_predicate({ params, identity_id })
-    : null
-  const numerator = predicate_sql
-    ? `SUM(CASE WHEN ${predicate_sql} THEN ${measure_expr} ELSE 0 END)`
-    : `SUM(${measure_expr})`
+  const num_cte = get_numerator_cte_name({ column_def, params, identity_id })
   return {
-    sql: `${numerator} / NULLIF(${cte_name}.rate_type_total_count, 0) AS ${alias}`,
+    sql: `SUM(${num_cte}.measure_total) / NULLIF(MAX(${cte_name}.rate_type_total_count), 0) AS ${alias}`,
     bindings: []
   }
 }

@@ -17,14 +17,19 @@ export const get_where_string = ({
     ? column_definition.select_as({ params: where_clause.params })
     : column_definition.column_name
   // When the column resolves through the output-aggregator path, the main
-  // SELECT emits `${column_name}_${column_index}` (aggregator-rate /
-  // emit-rate-outer-select). The where-clause must reference that HAVING-
-  // visible alias directly; the column-def's `main_where` (which historically
-  // synthesized rate-type division SQL via rate_type_column_mapping) is
-  // bypassed.
-  const has_output =
-    is_main_select &&
-    output_select_mapping[`${where_clause.column_id}_${column_index}`]
+  // SELECT emits `<aggregate_expression> AS <column_name>_<column_index>`.
+  // Postgres rejects references to SELECT aliases in HAVING, so the
+  // where-clause must reference the underlying aggregate expression
+  // directly. Extract it by stripping the trailing ` AS <alias>` from the
+  // aggregator-emitted SQL.
+  const output_emitted =
+    is_main_select
+      ? output_select_mapping[`${where_clause.column_id}_${column_index}`]
+      : null
+  const has_output = Boolean(output_emitted)
+  const aggregator_expr = has_output
+    ? output_emitted.sql.replace(/\s+AS\s+\S+\s*$/i, '')
+    : null
   const where_func =
     !has_output && (is_main_select
       ? column_definition.main_where
@@ -40,9 +45,11 @@ export const get_where_string = ({
         splits,
         data_view_options
       })
-    : column_definition.use_having || has_output
-      ? `${column_name}_${column_index}`
-      : `${table_name}.${column_name}`
+    : has_output
+      ? aggregator_expr
+      : column_definition.use_having
+        ? `${column_name}_${column_index}`
+        : `${table_name}.${column_name}`
 
   if (where_func && !where_column) return ''
 

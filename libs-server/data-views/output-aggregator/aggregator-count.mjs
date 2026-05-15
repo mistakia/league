@@ -29,18 +29,35 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
 
 export const add_cte = add_period_cte
 
-export const join_cte = ({ query_context, cte_name, identity_id }) => {
-  const {
-    players_query,
-    pid_reference,
-    team_reference,
-    year_reference,
-    splits
-  } = query_context
+const resolve_team_join_target = ({ query_context, params }) => {
+  if (query_context.subject_id === 'team') return query_context.team_reference
+  const raw = params?.matchup_opponent_type
+  const matchup = Array.isArray(raw)
+    ? raw[0] && typeof raw[0] === 'object'
+      ? null
+      : raw[0]
+    : raw
+  if (matchup === 'current_week_opponent_total')
+    return 'current_week_opponents.opponent'
+  if (matchup === 'next_week_opponent_total')
+    return 'next_week_opponents.opponent'
+  return 'player.current_nfl_team'
+}
+
+export const join_cte = ({
+  query_context,
+  cte_name,
+  identity_id,
+  params = {}
+}) => {
+  const { players_query, pid_reference, year_reference, splits } = query_context
   const is_team = identity_id.startsWith('team')
+  const team_target = is_team
+    ? resolve_team_join_target({ query_context, params })
+    : null
   players_query.leftJoin(cte_name, function () {
     if (is_team) {
-      this.on(`${cte_name}.team_code`, '=', team_reference)
+      this.on(`${cte_name}.team_code`, '=', team_target)
     } else {
       this.on(`${cte_name}.pid`, '=', pid_reference)
     }
