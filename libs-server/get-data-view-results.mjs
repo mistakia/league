@@ -35,6 +35,7 @@ import {
   resolve_references
 } from '#libs-server/data-views/identities.mjs'
 import { resolve as resolve_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
+import { attach_source } from '#libs-server/data-views/source-attach/dispatcher.mjs'
 
 // A base identity in granularity (e.g. `player`) means the column needs no
 // split joins; the column reads from the base table directly.
@@ -989,7 +990,20 @@ const add_clauses_for_table = async ({
     any_legacy_column = true
     legacy_column_ids.add(column_id)
 
-    if (column_definition.join) {
+    if (
+      column_definition.source &&
+      (column_definition.source.table || column_definition.source.attach)
+    ) {
+      join_func = ({ query, params, join_type }) =>
+        attach_source({
+          players_query: query,
+          query_context: data_view_options.query_context,
+          column_def: { ...column_definition, column_id },
+          params,
+          table_alias: table_name,
+          join_type
+        })
+    } else if (column_definition.join) {
       join_func = column_definition.join
     }
 
@@ -1035,7 +1049,21 @@ const add_clauses_for_table = async ({
       any_legacy_column = true
     }
 
-    if (!where_handled_by_aggregator && column_definition.join) {
+    if (
+      !where_handled_by_aggregator &&
+      column_definition.source &&
+      (column_definition.source.table || column_definition.source.attach)
+    ) {
+      join_func = ({ query, params, join_type }) =>
+        attach_source({
+          players_query: query,
+          query_context: data_view_options.query_context,
+          column_def: { ...column_definition, column_id: where_clause.column_id },
+          params,
+          table_alias: table_name,
+          join_type
+        })
+    } else if (!where_handled_by_aggregator && column_definition.join) {
       join_func = column_definition.join
     }
 
