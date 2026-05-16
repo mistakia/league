@@ -1,0 +1,1160 @@
+{
+  "version": 1,
+  "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+  "captured_at": "2026-05-16T03:54:50.872Z",
+  "fixture_count": 128,
+  "results": {
+    "adjust-specified-year-params-when-year-offset-is-specified.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:48.756Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-keeptradecut-query-with-splits.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:48.792Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2021,2022,2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"t30ec20e93640f09004253a1349250c1a\".\"v\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_rankings\" as \"t30ec20e93640f09004253a1349250c1a\" on \"t30ec20e93640f09004253a1349250c1a\".\"pid\" = \"player\".\"pid\" and \"t30ec20e93640f09004253a1349250c1a\".\"qb\" = $1 and \"t30ec20e93640f09004253a1349250c1a\".\"type\" = $2 and \"t30ec20e93640f09004253a1349250c1a\".\"d\" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (player_years.year) group by player.fname, player.lname, \"t30ec20e93640f09004253a1349250c1a\".\"v\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit $3 - materialized view \"opening_days\" has not been populated"
+    },
+    "create-a-keeptradecut-query.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:48.797Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-for-fantasy-points-from-plays-with-specific-route-weeks-rate-type-and-player-filters.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:48.881Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-for-player-keeptradecut-value-and-fantasy-points-from-plays-for-wide-receivers-with-year-splits.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:48.893Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t4590257d3227cc6343df566e2bba7128\" as materialized (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ($1) and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\" having SUM(fantasy_points_from_plays) > 0) select \"player\".\"pid\", player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\" AS \"player_keeptradecut_value_0\", \"t4590257d3227cc6343df566e2bba7128\".\"fantasy_points_from_plays\" AS \"fantasy_points_from_plays_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_rankings\" as \"tf2cba0496d67b9a09be0654ea0516e7c\" on \"tf2cba0496d67b9a09be0654ea0516e7c\".\"pid\" = \"player\".\"pid\" and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"qb\" = $29 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"type\" = $30 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"d\" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (player_years.year) left join \"t4590257d3227cc6343df566e2bba7128\" on \"t4590257d3227cc6343df566e2bba7128\".\"pid\" = \"player\".\"pid\" and t4590257d3227cc6343df566e2bba7128.year = player_years.year where player.pos IN ('WR') group by player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\", \"t4590257d3227cc6343df566e2bba7128\".\"fantasy_points_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit $31 - materialized view \"opening_days\" has not been populated"
+    },
+    "create-a-query-for-season-projected-stats-split.json": {
+      "row_count": 464,
+      "column_count": 8,
+      "row_hash": "2f46a1741391ad8d52c47874b5ee8c65e6d3df69f28a782b78f49ab591d1ce32",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:48.937Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-for-season-projected-stats.json": {
+      "row_count": 500,
+      "column_count": 21,
+      "row_hash": "c37cd8835077ca7b3335e596e2687a19f111d1ade520401ddb3e36022b4271fa",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:48.954Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-for-week-projected-stats.json": {
+      "row_count": 500,
+      "column_count": 9,
+      "row_hash": "57218ab605084fbebe19fbb2b4d29ed07b6821c1a82adbc40bcedd1addfd0d86",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:48.974Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-showing-career-gamelogs-with-a-where-filter-on-first-game-receiving-yards.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:48.980Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-an-n1-column.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:49.033Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-fantasy-points-from-careerlogs.json": {
+      "row_count": 500,
+      "column_count": 11,
+      "row_hash": "7a0f5bacc7fcae19104c4de4db98997c74ba9baab0c6a15836934538ccdd15cc",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.084Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-fantasy-points-from-seasonlogs.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:49.089Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-field-from-player-game-prop-betting-markets.json": {
+      "row_count": 500,
+      "column_count": 5,
+      "row_hash": "63698951e422e9568c5e9cd27ee0b2d9e70c25dfdf8375769a24fc0d86bc1626",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.091Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-fields-from-league-format-seasonlogs-and-careerlogs.json": {
+      "row_count": 500,
+      "column_count": 20,
+      "row_hash": "cab6fde737ad4556906b7cc49da27f927d2cf99fc2612a5f3b02b2512b6941fb",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.096Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-fields-from-season-prop-betting-markets.json": {
+      "row_count": 500,
+      "column_count": 7,
+      "row_hash": "29852bd96e2f717fd5d4555315249f4e759fabb33a36edac4c4258c23f8ca71f",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.109Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-player-current-age.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "5092027479b3c4a154cd9ad1b80cfd7a5c3b6ebd08d63db59040bd0ee670c313",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.117Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-player-metrics-weighted-opportunity-and-roster-status-sorted-by-bmi.json": {
+      "row_count": 500,
+      "column_count": 15,
+      "row_hash": "164f45f1132d93ea54f5f28d85440671e2c686115a104ccb01ac522b678d22dd",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.130Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-query-with-prospect-columns-weighted-opportunity-and-opportunity-share.json": {
+      "row_count": 500,
+      "column_count": 9,
+      "row_hash": "e2efbbab48e2968e60cf8fd6f57030035df92ebfa73fee8be770cc290144f718",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.219Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-rushing-yards-split-by-week.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.303Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year), \"t0c5e60186e061ea413a1099303dd3a2e\" as materialized (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"week\", \"nfl_plays\".\"year\", SUM(rush_yds) as rush_yds_from_plays from \"nfl_plays\" where not \"play_type\" = $1 and \"nfl_plays\".\"nfl_week_id\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $100, $101, $102, $103, $104) and \"nfl_plays\".\"year\" in ($105, $106, $107, $108) and \"nfl_plays\".\"year\" in ($109, $110, $111, $112) group by \"nfl_plays\".\"week\", \"nfl_plays\".\"year\", COALESCE(bc_pid)), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(rush_yds) AS team_rush_yds_from_plays, \"nfl_plays\".\"year\", \"nfl_plays\".\"week\" from \"nfl_plays\" where not \"play_type\" = $113 and \"nfl_plays\".\"nfl_week_id\" in ($114, $115, $116, $117, $118, $119, $120, $121, $122, $123, $124, $125, $126, $127, $128, $129, $130, $131, $132, $133, $134, $135, $136, $137, $138, $139, $140, $141, $142, $143, $144, $145, $146, $147, $148, $149, $150, $151, $152, $153, $154, $155, $156, $157, $158, $159, $160, $161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171, $172, $173, $174, $175, $176, $177, $178, $179, $180, $181, $182, $183, $184, $185, $186, $187, $188, $189, $190, $191, $192, $193, $194, $195, $196, $197, $198, $199, $200, $201, $202, $203, $204, $205, $206, $207, $208, $209, $210, $211, $212, $213, $214, $215, $216) and \"nfl_plays\".\"year\" in ($217, $218, $219, $220) and \"nfl_plays\".\"year\" in ($221, $222, $223, $224) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\", \"nfl_plays\".\"week\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_rush_yds_from_plays) as team_rush_yds_from_plays, \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\" from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" = $225 and \"nfl_games\".\"year\" in ($226, $227, $228, $229) and \"player_gamelogs\".\"year\" in ($230, $231, $232, $233) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"player\".\"pid\", player.fname, player.lname, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_yds_from_plays\" AS \"rush_yds_from_plays_0\", \"t287c2fe45da938bac75fe7035039000b\".\"ry\" AS \"week_projected_rush_yds_0\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_rush_yds_from_plays\" AS \"team_rush_yds_from_plays_0\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" left join \"t0c5e60186e061ea413a1099303dd3a2e\" on \"t0c5e60186e061ea413a1099303dd3a2e\".\"pid\" = \"player\".\"pid\" and t0c5e60186e061ea413a1099303dd3a2e.year = player_years.year and t0c5e60186e061ea413a1099303dd3a2e.year IN (2020,2021,2022,2023) and t0c5e60186e061ea413a1099303dd3a2e.week = player_years_weeks.week left join \"projections_index\" as \"t287c2fe45da938bac75fe7035039000b\" on \"t287c2fe45da938bac75fe7035039000b\".\"pid\" = \"player\".\"pid\" and t287c2fe45da938bac75fe7035039000b.year = player_years.year and t287c2fe45da938bac75fe7035039000b.year IN (2020,2021,2022,2023) and t287c2fe45da938bac75fe7035039000b.week = player_years_weeks.week and \"t287c2fe45da938bac75fe7035039000b\".\"sourceid\" = 18 and \"t287c2fe45da938bac75fe7035039000b\".\"seas_type\" = $234 left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = \"player_years\".\"year\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" and \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"week\" = \"player_years_weeks\".\"week\" and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.year = player_years.year and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.year IN (2020,2021,2022,2023) and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.week = player_years_weeks.week group by player.fname, player.lname, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_yds_from_plays\", \"t287c2fe45da938bac75fe7035039000b\".\"ry\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_rush_yds_from_plays\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit $235 - materialized view \"nfl_year_week_timestamp\" has not been populated"
+    },
+    "create-a-split-query-year.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "49c65fecd4b33aabdc00f8bd33abb152d5901a73b6dcaaf173db8296302b680f",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.320Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-splits-query-with-espn-open-scores.json": {
+      "row_count": 500,
+      "column_count": 7,
+      "row_hash": "4b8347f64cbfbcaf21e285e2508f6c1b420d94e426cf7850839af357ead7e30b",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.335Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-splits-query-year.json": {
+      "row_count": 500,
+      "column_count": 8,
+      "row_hash": "bfe9e782f428f2fef740cdbc8ce2e547fc264627de719717586aca72a5ef76be",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.427Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "create-a-year-splits-query-with-player-age-at-time-of-split.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.447Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"t98531c6d5c2090f23cfc501ab69d3ed8\" as materialized (select COALESCE(trg_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = $1 and \"nfl_plays\".\"nfl_week_id\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $100, $101, $102, $103, $104) and \"nfl_plays\".\"year\" in ($105, $106, $107, $108) and \"nfl_plays\".\"year\" in ($109, $110, $111, $112) group by \"nfl_plays\".\"year\", COALESCE(trg_pid)) select \"player\".\"pid\", player.fname, player.lname, \"t98531c6d5c2090f23cfc501ab69d3ed8\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", CASE WHEN player.dob IS NULL OR player.dob = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) END as age_0, \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t98531c6d5c2090f23cfc501ab69d3ed8\" on \"t98531c6d5c2090f23cfc501ab69d3ed8\".\"pid\" = \"player\".\"pid\" and t98531c6d5c2090f23cfc501ab69d3ed8.year = player_years.year and t98531c6d5c2090f23cfc501ab69d3ed8.year IN (2023,2022,2021,2020) left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" group by player.fname, player.lname, \"t98531c6d5c2090f23cfc501ab69d3ed8\".\"rec_yds_from_plays\", player.dob, opening_days.opening_day, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit $113 - materialized view \"opening_days\" has not been populated"
+    },
+    "current-season-traded-player-team-stats.json": {
+      "row_count": 500,
+      "column_count": 5,
+      "row_hash": "41f62e17a2821635e3052f62e3a299adc56880af1a364fd3fd3014c9df221b89",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.457Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "dynamic-year-param.json": {
+      "row_count": 500,
+      "column_count": 5,
+      "row_hash": "a7a95a87d38d7578cb9c39b59cdde38d8e400c7b5cceb54ea9a0b45ae9c2c3d6",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.464Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "fantasy-points-query-with-both-career-year-and-career-game-params.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:49.471Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "fantasy-points-query-with-career-game-only.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:49.514Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "fantasy-points-query-with-career-year-param-and-per-game-rate-type.json": {
+      "row_count": 41,
+      "column_count": 22,
+      "row_hash": "91c88e9d80a103fc58d5e31a5af188fa05228ad806144582141c0f43c5b52d9d",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.558Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "filter-by-active-rosters.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:49.698Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "from-table-optimization-multi-column-comprehensive.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:49.778Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "games-played-with-multiple-rate-types.json": {
+      "row_count": 500,
+      "column_count": 5,
+      "row_hash": "43a56e8ecca44a0a9d6072290bb60f5c8dde8883ba08f59b42a4b2e2eee6e974",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.826Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "games-played.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "38572ed56c592278d630b230e1e9ef1212f1b177f59e38774de2160ee7a8d23b",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.834Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "generate-a-fantasy-points-by-play-with-per-game-rate-type-query.json": {
+      "row_count": 500,
+      "column_count": 9,
+      "row_hash": "d802826b36059489a9aa33bdd5d2262c9397254895b9fe8c09b309ad10bc5ec7",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.837Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "generate-a-query-with-a-team-stat-column-current-season.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "4b7f3de9808ac0d4d5b46a12e1d0953d950c3739634183e5a8e962f3ab407d19",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:49.976Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "generate-a-query-with-a-team-stat-column.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "4b7f3de9808ac0d4d5b46a12e1d0953d950c3739634183e5a8e962f3ab407d19",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.056Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "generate-a-tackle-assist-columns-query.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.065Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"tf11890ff3026bb6310b96dd6deeafa55\" as materialized (select pid, SUM(CASE WHEN pid_column = 'solo_tackle_1_pid' THEN 1 WHEN pid_column = 'solo_tackle_2_pid' THEN 1 WHEN pid_column = 'solo_tackle_3_pid' THEN 1 WHEN pid_column = 'assisted_tackle_1_pid' THEN 1 WHEN pid_column = 'assisted_tackle_2_pid' THEN 1 WHEN pid_column = 'tackle_assist_1_pid' THEN 1 WHEN pid_column = 'tackle_assist_2_pid' THEN 1 WHEN pid_column = 'tackle_assist_3_pid' THEN 1 ELSE 0 END) AS combined_tackles_from_plays from (select assisted_tackle_1_pid as pid, 'assisted_tackle_1_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"assisted_tackle_1_pid\" is not null and \"nfl_plays\".\"year\" in ($1) union all select assisted_tackle_2_pid as pid, 'assisted_tackle_2_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"assisted_tackle_2_pid\" is not null and \"nfl_plays\".\"year\" in ($2) union all select solo_tackle_1_pid as pid, 'solo_tackle_1_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_1_pid\" is not null and \"nfl_plays\".\"year\" in ($3) union all select solo_tackle_2_pid as pid, 'solo_tackle_2_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_2_pid\" is not null and \"nfl_plays\".\"year\" in ($4) union all select solo_tackle_3_pid as pid, 'solo_tackle_3_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_3_pid\" is not null and \"nfl_plays\".\"year\" in ($5) union all select tackle_assist_1_pid as pid, 'tackle_assist_1_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"tackle_assist_1_pid\" is not null and \"nfl_plays\".\"year\" in ($6) union all select tackle_assist_2_pid as pid, 'tackle_assist_2_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"tackle_assist_2_pid\" is not null and \"nfl_plays\".\"year\" in ($7) union all select tackle_assist_3_pid as pid, 'tackle_assist_3_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"tackle_assist_3_pid\" is not null and \"nfl_plays\".\"year\" in ($8)) as \"defensive_plays\" where not \"play_type\" = $9 and \"defensive_plays\".\"nfl_week_id\" in ($10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35) and \"defensive_plays\".\"year\" in ($36) group by \"pid\") select \"player\".\"pid\", \"tf11890ff3026bb6310b96dd6deeafa55\".\"combined_tackles_from_plays\" AS \"combined_tackles_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"tf11890ff3026bb6310b96dd6deeafa55\" on \"tf11890ff3026bb6310b96dd6deeafa55\".\"pid\" = \"player\".\"pid\" group by \"tf11890ff3026bb6310b96dd6deeafa55\".\"combined_tackles_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit $37 - column defensive_plays.nfl_week_id does not exist"
+    },
+    "generate-a-tackle-columns-query.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.068Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"tab190a3e975735b3a466eed732bf27e7\" as materialized (select pid, SUM(CASE WHEN pid_column = 'solo_tackle_1_pid' THEN 1 WHEN pid_column = 'solo_tackle_2_pid' THEN 1 WHEN pid_column = 'solo_tackle_3_pid' THEN 1 ELSE 0 END) AS solo_tackles_from_plays from (select solo_tackle_1_pid as pid, 'solo_tackle_1_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_1_pid\" is not null and \"nfl_plays\".\"year\" in ($1) union all select solo_tackle_2_pid as pid, 'solo_tackle_2_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_2_pid\" is not null and \"nfl_plays\".\"year\" in ($2) union all select solo_tackle_3_pid as pid, 'solo_tackle_3_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_3_pid\" is not null and \"nfl_plays\".\"year\" in ($3)) as \"defensive_plays\" where not \"play_type\" = $4 and \"defensive_plays\".\"nfl_week_id\" in ($5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30) and \"defensive_plays\".\"year\" in ($31) group by \"pid\") select \"player\".\"pid\", \"tab190a3e975735b3a466eed732bf27e7\".\"solo_tackles_from_plays\" AS \"solo_tackles_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"tab190a3e975735b3a466eed732bf27e7\" on \"tab190a3e975735b3a466eed732bf27e7\".\"pid\" = \"player\".\"pid\" group by \"tab190a3e975735b3a466eed732bf27e7\".\"solo_tackles_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit $32 - column defensive_plays.nfl_week_id does not exist"
+    },
+    "generate-query-for-fantasy-points-by-plays-split-by-year-2022-to-2023.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.070Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "keeptradecut-and-fantasy-points-from-plays-with-year-and-week-split.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.077Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year), \"t4590257d3227cc6343df566e2bba7128\" as materialized (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ($1) and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\", \"week\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\", \"week\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\", \"week\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\", \"week\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\", \"week\" having SUM(fantasy_points_from_plays) > 0) select \"player\".\"pid\", player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\" AS \"player_keeptradecut_value_0\", \"t4590257d3227cc6343df566e2bba7128\".\"fantasy_points_from_plays\" AS \"fantasy_points_from_plays_0\", CASE WHEN player.dob IS NULL OR player.dob = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) END as age_0, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"nfl_year_week_timestamp\" on \"nfl_year_week_timestamp\".\"year\" = \"player_years_weeks\".\"year\" and \"nfl_year_week_timestamp\".\"week\" = \"player_years_weeks\".\"week\" inner join \"keeptradecut_rankings\" as \"tf2cba0496d67b9a09be0654ea0516e7c\" on \"tf2cba0496d67b9a09be0654ea0516e7c\".\"pid\" = \"player\".\"pid\" and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"qb\" = $29 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"type\" = $30 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"d\" = \"nfl_year_week_timestamp\".\"week_timestamp\" left join \"t4590257d3227cc6343df566e2bba7128\" on \"t4590257d3227cc6343df566e2bba7128\".\"pid\" = \"player\".\"pid\" and t4590257d3227cc6343df566e2bba7128.year = player_years.year and t4590257d3227cc6343df566e2bba7128.week = player_years_weeks.week where player.pos IN ('WR') group by player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\", \"t4590257d3227cc6343df566e2bba7128\".\"fantasy_points_from_plays\", player.dob, opening_days.opening_day, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit $31 - materialized view \"nfl_year_week_timestamp\" has not been populated"
+    },
+    "keeptradecut-value-year-split.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.126Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", \"t84d95af855d699f03c85a849d680271c\".\"v\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_rankings\" as \"t84d95af855d699f03c85a849d680271c\" on \"t84d95af855d699f03c85a849d680271c\".\"pid\" = \"player\".\"pid\" and \"t84d95af855d699f03c85a849d680271c\".\"qb\" = $1 and \"t84d95af855d699f03c85a849d680271c\".\"type\" = $2 and \"t84d95af855d699f03c85a849d680271c\".\"d\" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (player_years.year) group by player.fname, player.lname, \"player\".\"pos\", \"t84d95af855d699f03c85a849d680271c\".\"v\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit $3 - materialized view \"opening_days\" has not been populated"
+    },
+    "keeptradecut-value-year-week-split.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.128Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2024) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", \"t6969e51994e27c5e6da014be05b68c96\".\"v\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"nfl_year_week_timestamp\" on \"nfl_year_week_timestamp\".\"year\" = \"player_years_weeks\".\"year\" and \"nfl_year_week_timestamp\".\"week\" = \"player_years_weeks\".\"week\" inner join \"keeptradecut_rankings\" as \"t6969e51994e27c5e6da014be05b68c96\" on \"t6969e51994e27c5e6da014be05b68c96\".\"pid\" = \"player\".\"pid\" and \"t6969e51994e27c5e6da014be05b68c96\".\"qb\" = $1 and \"t6969e51994e27c5e6da014be05b68c96\".\"type\" = $2 and \"t6969e51994e27c5e6da014be05b68c96\".\"d\" = \"nfl_year_week_timestamp\".\"week_timestamp\" group by player.fname, player.lname, \"player\".\"pos\", \"t6969e51994e27c5e6da014be05b68c96\".\"v\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit $3 - materialized view \"nfl_year_week_timestamp\" has not been populated"
+    },
+    "mismatched-year-params-with-rate-type-and-year-splits.json": {
+      "row_count": 500,
+      "column_count": 7,
+      "row_hash": "ec7f88a26d2c0bca3bf479f2a2aedd82dda477d04a8f44fa54eb86b4e0eb3dfa",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.131Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "multi-team-player-team-stats.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "8bb446ccf08512d41a9e8753a3dfee01e49ff0e8f2549f46a1d4d9f6389097f7",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.145Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "multi-year-play-by-play-column-without-year-split.json": {
+      "row_count": 79,
+      "column_count": 5,
+      "row_hash": "ce85a517648ccea40a7c90818c8f5733efc1f2bc53029914e6752d772ce967fb",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.152Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "nfl-team-league-seasonlogs-fields.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.158Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "nfl-team-seasonlogs-fields.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.162Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "per-player-catchable-deep-target.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "e3feaa229ec113bc5bdb8679c3d848a6b146d36aaad5021f5302b23596399d71",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.166Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "pff-player-seasonlogs-with-career-year.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.174Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "pff-player-seasonlogs-with-where.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.176Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "pff-player-seasonlogs.json": {
+      "row_count": 500,
+      "column_count": 41,
+      "row_hash": "45dab3215a87df5e5ee7a12da264d308f063e48fd1f4f3b169f2a0db456c023b",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.181Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "pff-team-grades-default-behavior.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.201Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "pff-team-grades-next-week-opponent.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.205Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "pff-team-grades-with-matchup-opponent-type-param.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.208Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-air-yards-share-from-plays.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.210Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-career-year-different-season-types.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.214Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-career-year-week-splits.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.216Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2023) select \"player\".\"pid\", player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" inner join \"player_seasonlogs\" as \"t94ac00224f565e211ce527fca507baed\" on \"t94ac00224f565e211ce527fca507baed\".\"pid\" = \"player\".\"pid\" and t94ac00224f565e211ce527fca507baed.year = player_years.year and t94ac00224f565e211ce527fca507baed.seas_type = 'REG' left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and \"t209f3a217d72274fbedbe4d44e4a5095\".\"year\" = $1 and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' where t94ac00224f565e211ce527fca507baed.career_year = '1' group by player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit $2 - materialized view \"nfl_year_week_timestamp\" has not been populated"
+    },
+    "player-career-year-with-other-columns.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.219Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-career-year-year-splits.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.223Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-career-year.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.227Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-contract-no-params.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "f312d5e50ae0a541f4d550d5e71f438b07c7a605b53aef6be6c6b8282cbf2567",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.230Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-contract-with-no-params.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "f312d5e50ae0a541f4d550d5e71f438b07c7a605b53aef6be6c6b8282cbf2567",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.232Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-contract-with-year.json": {
+      "row_count": 500,
+      "column_count": 4,
+      "row_hash": "88a2d48150c9c59a5e3e65995a81001feed8c5528adcc3158d8b23219e177297",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.235Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-espn-line-win-rate.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "b6e75b1631c9b3f9b5528035d21a3731c138cc8e253d2292f759f7573009a000",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.237Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-game-prop-implied-probability-from-betting-markets.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "94775c15948975a91a815033b1388d9b0d6552b57a141f706fb433ea09a53a42",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.240Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-nfl-teams.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.244Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-practice.json": {
+      "row_count": 500,
+      "column_count": 11,
+      "row_hash": "2216e8173b04672e2f8c6a55c2122d8ef33728f418c46f5e10c51986a1d27ae7",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.257Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-prop-historical-hit-rate-and-edge-with-where.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.266Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-rankings.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.270Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-receiving-with-nfl-games-table-params.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "6f4c70aa764791d212f2682db1d8caa32edb337b6864d1bca8696a8834d2df11",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.274Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-receiving-with-nflgames-table-params.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "6f4c70aa764791d212f2682db1d8caa32edb337b6864d1bca8696a8834d2df11",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.278Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-recv-yds-count-game-threshold-100.json": {
+      "row_count": 500,
+      "column_count": 5,
+      "row_hash": "7ce60ff942dce8c64d8cacea6c409a84c5d9b99923e4038d65b831b7ac5478f1",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.281Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-routes.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "0a1281df3f28c8f5d7a529377c0b8405788b7f8c97673ad5572900c1b8962cdc",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.288Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-rush-yards-after-contact-per-attempt-from-plays-year-offset-range.json": {
+      "row_count": 500,
+      "column_count": 7,
+      "row_hash": "d4a3eeaa971c9b2ad0ed6e1120b87576876badfaa5f6a31d24b8dc89312ded97",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.292Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-salaries-with-where.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.312Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-snaps.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a23187be2e977ce819a65454ab5c2062834b2f47c409a9d890fc7dd5915fed42",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.317Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-target-share-from-plays-different-params.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.360Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-target-share-from-plays-duplicates.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.366Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-target-share-from-plays-with-a-where-clause.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.370Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-target-share-from-plays.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.376Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "player-yards-created-and-blocked-team-yards-blocked.json": {
+      "row_count": 500,
+      "column_count": 5,
+      "row_hash": "7bb078e9febdb204541ea59d910c952a52323f2cc26e7c9ae76bf8677e407f3b",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.379Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "playersalaries-with-where.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.387Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "query-wr-fantasy-stats-with-year-splits-and-sort-by-points-per-game-seasonlogs-careerlogs-plays-and-keeptradecut.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.390Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2017,2018,2019,2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t656309e23a0bbe1d45d84f6eac4f1819\" as materialized (select \"pg\".\"pid\", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = $1 and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in ($2, $3, $4, $5, $6, $7, $8) and \"pg\".\"year\" in ($9, $10, $11, $12, $13, $14, $15) group by \"pg\".\"pid\", \"nfl_plays\".\"year\") select \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\", player.fname, player.lname, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", \"t656309e23a0bbe1d45d84f6eac4f1819\".\"weighted_opp_rating_from_plays\" AS \"weighted_opp_rating_from_plays_0\", \"player_seasonlogs\".\"espn_overall_score\" AS \"espn_overall_score_0\", \"tf10ab6aa2ef9ce40e9149027e3db4030\".\"v\" AS \"player_keeptradecut_value_0\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"tbc0f47cfe59a1398fb0e9c78eb43bba3\" inner join \"player\" on \"player\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" left join \"t656309e23a0bbe1d45d84f6eac4f1819\" on \"t656309e23a0bbe1d45d84f6eac4f1819\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and t656309e23a0bbe1d45d84f6eac4f1819.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year and t656309e23a0bbe1d45d84f6eac4f1819.year IN (2023,2022,2021,2020,2019,2018) left join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and player_seasonlogs.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year and \"player_seasonlogs\".\"seas_type\" = $16 left join \"opening_days\" on \"opening_days\".\"year\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\" left join \"keeptradecut_rankings\" as \"tf10ab6aa2ef9ce40e9149027e3db4030\" on \"tf10ab6aa2ef9ce40e9149027e3db4030\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and \"tf10ab6aa2ef9ce40e9149027e3db4030\".\"qb\" = $17 and \"tf10ab6aa2ef9ce40e9149027e3db4030\".\"type\" = $18 and \"tf10ab6aa2ef9ce40e9149027e3db4030\".\"d\" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '1 year'))::integer and opening_days.year = (tbc0f47cfe59a1398fb0e9c78eb43bba3.year) where \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"scoring_format_hash\" = $19 and player.pos IN ('WR') group by player.fname, player.lname, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"points_per_game\", \"t656309e23a0bbe1d45d84f6eac4f1819\".\"weighted_opp_rating_from_plays\", \"player_seasonlogs\".\"espn_overall_score\", \"tf10ab6aa2ef9ce40e9149027e3db4030\".\"v\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" asc limit $20 - materialized view \"opening_days\" has not been populated"
+    },
+    "rate-type-backwards-compatibility.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "e3feaa229ec113bc5bdb8679c3d848a6b146d36aaad5021f5302b23596399d71",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.407Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "rate-type-cte-year-pushdown-regression.json": {
+      "row_count": 500,
+      "column_count": 11,
+      "row_hash": "bfbf28b36707a07d17d5ea1006cdd6c0fbbb4cb369c46aca1edb56ed20ebaeb5",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.412Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "rate-type-with-independent-denominator-params.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "e3feaa229ec113bc5bdb8679c3d848a6b146d36aaad5021f5302b23596399d71",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.429Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "rate-type-with-matched-column-params.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "e3feaa229ec113bc5bdb8679c3d848a6b146d36aaad5021f5302b23596399d71",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.434Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "return-a-query.json": {
+      "row_count": 1000,
+      "column_count": 2,
+      "row_hash": "c2b7b66ed8636ab4e256036461a1e183d5103f295513a639b80bd175aed5b572",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.440Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "scoring-format-from-table-optimization-with-year-splits.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.442Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "scoring-format-from-table-optimization.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.443Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "single-year-offset-with-rate-type.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.444Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('RB')), \"t107f5905edf79f4540d27f4c7967ba90\" as materialized (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = $1 and \"nfl_games\".\"nfl_week_id\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $100, $101, $102, $103, $104) and \"player_gamelogs\".\"year\" in ($105, $106, $107, $108) and \"nfl_games\".\"year\" in ($109, $110, $111, $112) group by \"nfl_games\".\"year\", \"player_gamelogs\".\"pid\"), \"rate_aggregate_affbf7bd5da5\" as materialized (select \"role_union\".\"pid\" as \"pid\", SUM(role_union.pts) AS measure_total, \"nfl_games\".\"year\" from (select nfl_plays.bc_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6 AS pts from \"nfl_plays\" where nfl_plays.bc_pid IS NOT NULL and \"nfl_plays\".\"year\" in ($113, $114, $115, $116) and \"nfl_plays\".\"play_type\" not in ($117) union all select nfl_plays.psr_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1 AS pts from \"nfl_plays\" where nfl_plays.psr_pid IS NOT NULL and \"nfl_plays\".\"year\" in ($118, $119, $120, $121) and \"nfl_plays\".\"play_type\" not in ($122) union all select nfl_plays.trg_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1 AS pts from \"nfl_plays\" where nfl_plays.trg_pid IS NOT NULL and \"nfl_plays\".\"year\" in ($123, $124, $125, $126) and \"nfl_plays\".\"play_type\" not in ($127) union all select nfl_plays.player_fuml_pid AS pid, \"nfl_plays\".\"esbid\", -1 AS pts from \"nfl_plays\" where nfl_plays.player_fuml_pid IS NOT NULL and \"nfl_plays\".\"year\" in ($128, $129, $130, $131) and \"nfl_plays\".\"play_type\" not in ($132)) as \"role_union\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"role_union\".\"esbid\" where \"nfl_games\".\"year\" in ($133, $134, $135, $136) group by \"role_union\".\"pid\", \"nfl_games\".\"year\" having SUM(role_union.pts) > 0), \"td3e58c9af2784a38918c4ab350c00288\" as materialized (select COALESCE(bc_pid, trg_pid) as pid, \"nfl_plays\".\"year\", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from \"nfl_plays\" where not \"play_type\" = $137 and \"nfl_plays\".\"nfl_week_id\" in ($138, $139, $140, $141, $142, $143, $144, $145, $146, $147, $148, $149, $150, $151, $152, $153, $154, $155, $156, $157, $158, $159, $160, $161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171, $172, $173, $174, $175, $176, $177, $178, $179, $180, $181, $182, $183, $184, $185, $186, $187, $188, $189, $190, $191, $192, $193, $194, $195, $196, $197, $198, $199, $200, $201, $202, $203, $204, $205, $206, $207, $208, $209, $210, $211, $212, $213, $214, $215, $216, $217, $218, $219, $220, $221, $222, $223, $224, $225, $226, $227, $228, $229, $230, $231, $232, $233, $234, $235, $236, $237, $238, $239, $240) and \"nfl_plays\".\"year\" in ($241, $242, $243, $244) and \"nfl_plays\".\"year\" in ($245, $246, $247, $248) group by \"nfl_plays\".\"year\", COALESCE(bc_pid, trg_pid)), \"t1537737bd3160d2c96fbec3cde8ea85b\" as materialized (select COALESCE(bc_pid, trg_pid) as pid, \"nfl_plays\".\"year\", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from \"nfl_plays\" where not \"play_type\" = $249 and \"nfl_plays\".\"nfl_week_id\" in ($250, $251, $252, $253, $254, $255, $256, $257, $258, $259, $260, $261, $262, $263, $264, $265, $266, $267, $268, $269, $270, $271, $272, $273, $274, $275, $276, $277, $278, $279, $280, $281, $282, $283, $284, $285, $286, $287, $288, $289, $290, $291, $292, $293, $294, $295, $296, $297, $298, $299, $300, $301, $302, $303, $304, $305, $306, $307, $308, $309, $310, $311, $312, $313, $314, $315, $316, $317, $318, $319, $320, $321, $322, $323, $324, $325, $326, $327, $328, $329, $330, $331, $332, $333, $334, $335, $336, $337, $338, $339, $340, $341, $342, $343, $344, $345, $346, $347, $348, $349, $350, $351, $352) and \"nfl_plays\".\"year\" in ($353, $354, $355, $356) and \"nfl_plays\".\"year\" in ($357, $358, $359, $360) group by \"nfl_plays\".\"year\", COALESCE(bc_pid, trg_pid)) select \"player\".\"pid\", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"te70f12f316e28f29e682d081b42501b8\".\"v\" AS \"player_keeptradecut_value_0\", \"td3e58c9af2784a38918c4ab350c00288\".\"weighted_opportunity_from_plays\" AS \"weighted_opportunity_from_plays_0\", CAST(MAX(rate_aggregate_affbf7bd5da5.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(t107f5905edf79f4540d27f4c7967ba90.rate_type_total_count) AS DECIMAL), 0) AS fantasy_points_from_plays_0, \"t1537737bd3160d2c96fbec3cde8ea85b\".\"weighted_opportunity_from_plays\" AS \"weighted_opportunity_from_plays_1\", CAST(MAX(rate_aggregate_affbf7bd5da5.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(t107f5905edf79f4540d27f4c7967ba90.rate_type_total_count) AS DECIMAL), 0) AS fantasy_points_from_plays_1, \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t107f5905edf79f4540d27f4c7967ba90\" on \"t107f5905edf79f4540d27f4c7967ba90\".\"pid\" = \"player\".\"pid\" and \"t107f5905edf79f4540d27f4c7967ba90\".\"year\" = \"player_years\".\"year\" left join \"rate_aggregate_affbf7bd5da5\" on \"rate_aggregate_affbf7bd5da5\".\"pid\" = \"player\".\"pid\" and \"rate_aggregate_affbf7bd5da5\".\"year\" = \"player_years\".\"year\" left join \"rosters_players\" on \"rosters_players\".\"pid\" = \"player\".\"pid\" and \"rosters_players\".\"year\" = 2026 and \"rosters_players\".\"week\" = 0 and \"rosters_players\".\"lid\" = 1 left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_rankings\" as \"te70f12f316e28f29e682d081b42501b8\" on \"te70f12f316e28f29e682d081b42501b8\".\"pid\" = \"player\".\"pid\" and \"te70f12f316e28f29e682d081b42501b8\".\"qb\" = $361 and \"te70f12f316e28f29e682d081b42501b8\".\"type\" = $362 and \"te70f12f316e28f29e682d081b42501b8\".\"d\" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (player_years.year) left join \"td3e58c9af2784a38918c4ab350c00288\" on \"td3e58c9af2784a38918c4ab350c00288\".\"pid\" = \"player\".\"pid\" and td3e58c9af2784a38918c4ab350c00288.year = player_years.year and td3e58c9af2784a38918c4ab350c00288.year IN (2023,2022,2021,2020) left join \"t1537737bd3160d2c96fbec3cde8ea85b\" on \"t1537737bd3160d2c96fbec3cde8ea85b\".\"pid\" = \"player\".\"pid\" and t1537737bd3160d2c96fbec3cde8ea85b.year = player_years.year + $363 where player.pos IN ('RB') group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"te70f12f316e28f29e682d081b42501b8\".\"v\", \"td3e58c9af2784a38918c4ab350c00288\".\"weighted_opportunity_from_plays\", \"t1537737bd3160d2c96fbec3cde8ea85b\".\"weighted_opportunity_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 12 DESC NULLS LAST, \"player\".\"pid\" asc limit $364 - materialized view \"opening_days\" has not been populated"
+    },
+    "sort-by-fantasy-points-from-plays-not-in-selected-columns.json": {
+      "row_count": 79,
+      "column_count": 5,
+      "row_hash": "be3a183df243a0313a4ab15998a9100eef94c4b20422840de72154d40d792d44",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.465Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "sort-by-splits-year.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.470Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('RB')), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2024), \"t05e39f5f70132b957d199bed4db535fb\" as materialized (select \"player_gamelogs_year_2024\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2024.tm) as teams, \"nfl_games\".\"week\", \"nfl_games\".\"year\" from \"player_gamelogs_year_2024\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2024\".\"esbid\" where \"player_gamelogs_year_2024\".\"active\" = $1 and \"nfl_games\".\"year\" in ($2) group by \"nfl_games\".\"week\", \"nfl_games\".\"year\", \"player_gamelogs_year_2024\".\"pid\"), \"td3e58c9af2784a38918c4ab350c00288\" as materialized (select COALESCE(bc_pid, trg_pid) as pid, \"nfl_plays\".\"week\", \"nfl_plays\".\"year\", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from \"nfl_plays\" where not \"play_type\" = $3 and \"nfl_plays\".\"nfl_week_id\" in ($4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29) and \"nfl_plays\".\"year\" in ($30) and \"nfl_plays\".\"year\" in ($31) group by \"nfl_plays\".\"week\", \"nfl_plays\".\"year\", COALESCE(bc_pid, trg_pid)) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", t05e39f5f70132b957d199bed4db535fb.teams as player_nfl_teams_0, \"td3e58c9af2784a38918c4ab350c00288\".\"weighted_opportunity_from_plays\" AS \"weighted_opportunity_from_plays_0\", \"player_years_weeks\".\"week\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" left join \"t05e39f5f70132b957d199bed4db535fb\" on \"t05e39f5f70132b957d199bed4db535fb\".\"pid\" = \"player\".\"pid\" and \"t05e39f5f70132b957d199bed4db535fb\".\"year\" = \"player_years\".\"year\" and \"t05e39f5f70132b957d199bed4db535fb\".\"week\" = \"player_years_weeks\".\"week\" left join \"td3e58c9af2784a38918c4ab350c00288\" on \"td3e58c9af2784a38918c4ab350c00288\".\"pid\" = \"player\".\"pid\" and \"td3e58c9af2784a38918c4ab350c00288\".\"year\" = $32 and td3e58c9af2784a38918c4ab350c00288.week = player_years_weeks.week where player.pos IN ('RB') and 'TB'::text = ANY(t05e39f5f70132b957d199bed4db535fb.teams::text[]) group by player.fname, player.lname, \"player\".\"pos\", t05e39f5f70132b957d199bed4db535fb.teams, \"td3e58c9af2784a38918c4ab350c00288\".\"weighted_opportunity_from_plays\", \"player_years_weeks\".\"week\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by player_years_weeks.week DESC NULLS LAST, \"player\".\"pid\" asc limit $33 - materialized view \"nfl_year_week_timestamp\" has not been populated"
+    },
+    "team-dova.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.474Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-drive-count-from-plays.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.478Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-espn-line-win-rates-with-matchup-opponent-type-param.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.480Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-espn-win-rates-multiple-matchup-types.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.483Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-espn-win-rates-with-year-splits.json": {
+      "row_count": 10,
+      "column_count": 6,
+      "row_hash": "6c61a9ab9195656180868edfada2d5f11632fdb780d49ee8e873ed8ff58082f0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.485Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-espn-win-rates.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "740c0ea0350d60ed2a9a7468b3cd2d274473946d99805c8348a07727724b0d74",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.487Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-field-with-matchup-opponent-type-param.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.491Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-game-implied-team-total-from-betting-markets.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "e161a8dcecb0d9ed7b5d35c1eb7a25a21911ea41b3ba4a20c25e1aab1f8bd619",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.497Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-pass-attempts-from-plays-using-dst.json": {
+      "row_count": 41,
+      "column_count": 9,
+      "row_hash": "8f2d88c14f132b45eb03e1857f880be7cdee4bddd92ed17c73152c120606de9c",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.502Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-series-success-rate-from-plays.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "b9ec02e08131cda7995e0cf31372b3d4f253ecfa4e6b6302e14e4e1b4724a8e9",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.508Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-per-team-play.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.512Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-def-unit-and-rate-type-limit-to-player-active.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.516Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-def-unit-and-rate-type.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.521Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-per-team-drive.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.525Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-per-team-half.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.531Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-per-team-pass-play.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.536Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-per-team-play.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.540Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-per-team-quarter.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.545Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-per-team-rush-play.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "af609b9bf836d4d2b9e3a45c68a0067d12ba882c90b1ff88cb4532e7e8bc9588",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.550Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-per-team-series.json": {
+      "row_count": 500,
+      "column_count": 3,
+      "row_hash": "a5472ffdf043e7bf40603c442f8de2e624b763e91d0d74ea946dced36b1b6fe0",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.556Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-stat-with-week-split-only.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.560Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2023), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, \"nfl_plays\".\"week\" from \"nfl_plays\" where not \"play_type\" = $1 and \"nfl_plays\".\"nfl_week_id\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) and \"nfl_plays\".\"year\" in ($28) and \"nfl_plays\".\"year\" in ($29) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"week\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_yds_from_plays) as team_pass_yds_from_plays, \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\" from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" = $30 and \"nfl_games\".\"year\" in ($31) and \"player_gamelogs\".\"year\" in ($32) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"player\".\"pid\", player.fname, player.lname, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = $33 left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" and \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"week\" = \"player_years_weeks\".\"week\" and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.week = player_years_weeks.week where player.pos IN ('WR') group by player.fname, player.lname, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit $34 - materialized view \"nfl_year_week_timestamp\" has not been populated"
+    },
+    "team-subject-no-splits-team-pass-att.json": {
+      "row_count": 32,
+      "column_count": 2,
+      "row_hash": "26d38bdd202288bc65631a60a0b192449f6ce96db36d458a726d6f8d8abfd8d3",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.564Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "team-subject-year-split-multiple-team-stats.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.567Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023]) as year), \"team_years\" as (SELECT team.team_code, base_years.year FROM team CROSS JOIN base_years), \"team\" as (SELECT team_code FROM (VALUES ('ARI'),('ATL'),('BAL'),('BUF'),('CAR'),('CHI'),('CIN'),('CLE'),('DAL'),('DEN'),('DET'),('GB'),('HOU'),('IND'),('JAX'),('KC'),('LA'),('LAC'),('LV'),('MIA'),('MIN'),('NE'),('NO'),('NYG'),('NYJ'),('PHI'),('PIT'),('SEA'),('SF'),('TB'),('TEN'),('WAS')) AS t(team_code)), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, SUM(rush_yds) AS team_rush_yds_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = $1 and \"nfl_plays\".\"nfl_week_id\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53) and \"nfl_plays\".\"year\" in ($54, $55) and \"nfl_plays\".\"year\" in ($56, $57) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_yds_from_plays) as team_pass_yds_from_plays, sum(t5a2b2569de6127331d06ab399f9f3dd7.team_rush_yds_from_plays) as team_rush_yds_from_plays, \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\" from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" = $58 and \"nfl_games\".\"year\" in ($59, $60) and \"player_gamelogs\".\"year\" in ($61, $62) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"team_years\".\"team_code\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_rush_yds_from_plays\" AS \"team_rush_yds_from_plays_0\", \"team_years\".\"year\" from \"team_years\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"team_years\".\"team_code\" and \"player_year_teams\".\"year\" = \"team_years\".\"year\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.year = team_years.year and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.year IN (2023,2022) group by \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_rush_yds_from_plays\", \"team_years\".\"year\", \"team_years\".\"team_code\" order by \"team_years\".\"team_code\" asc limit $63 - relation \"team\" does not exist"
+    },
+    "team-subject-year-week-split-per-week-team-stat.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.570Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"team_years\" as (SELECT team.team_code, base_years.year FROM team CROSS JOIN base_years), \"team_years_weeks\" as (SELECT team_years.team_code, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM team_years INNER JOIN nfl_year_week_timestamp ON team_years.year = nfl_year_week_timestamp.year WHERE nfl_year_week_timestamp.year = 2023), \"team\" as (SELECT team_code FROM (VALUES ('ARI'),('ATL'),('BAL'),('BUF'),('CAR'),('CHI'),('CIN'),('CLE'),('DAL'),('DEN'),('DET'),('GB'),('HOU'),('IND'),('JAX'),('KC'),('LA'),('LAC'),('LV'),('MIA'),('MIN'),('NE'),('NO'),('NYG'),('NYJ'),('PHI'),('PIT'),('SEA'),('SF'),('TB'),('TEN'),('WAS')) AS t(team_code)), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, \"nfl_plays\".\"year\", \"nfl_plays\".\"week\" from \"nfl_plays\" where not \"play_type\" = $1 and \"nfl_plays\".\"nfl_week_id\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) and \"nfl_plays\".\"year\" in ($28) and \"nfl_plays\".\"year\" in ($29) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\", \"nfl_plays\".\"week\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_yds_from_plays) as team_pass_yds_from_plays, \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\" from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"week\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" = $30 and \"nfl_games\".\"year\" in ($31) and \"player_gamelogs\".\"year\" in ($32) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"team_years_weeks\".\"team_code\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"team_years_weeks\".\"year\", \"team_years_weeks\".\"week\" from \"team_years_weeks\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"team_years_weeks\".\"team_code\" and \"player_year_teams\".\"year\" = \"team_years_weeks\".\"year\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" and \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"week\" = \"team_years_weeks\".\"week\" and \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"year\" = $33 and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.week = team_years_weeks.week group by \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\", \"team_years_weeks\".\"year\", \"team_years_weeks\".\"week\", \"team_years_weeks\".\"team_code\" order by \"team_years_weeks\".\"team_code\" asc limit $34 - relation \"team\" does not exist"
+    },
+    "team-success-rate-from-plays.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.572Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "test-condition-for-scoring-format-hash-param-multiple-fantasy-points-from-play.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.575Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "week-and-year-split-with-keeptradecut-and-fantasypoints-from-plays-with-per-game-rate-type-sanitize.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.582Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year), \"t4590257d3227cc6343df566e2bba7128\" as materialized (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ($1) and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\", \"week\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\", \"week\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\", \"week\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\", \"week\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\", \"week\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\", \"week\" having SUM(fantasy_points_from_plays) > 0) select \"player\".\"pid\", player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\" AS \"player_keeptradecut_value_0\", \"t4590257d3227cc6343df566e2bba7128\".\"fantasy_points_from_plays\" AS \"fantasy_points_from_plays_0\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"nfl_year_week_timestamp\" on \"nfl_year_week_timestamp\".\"year\" = \"player_years_weeks\".\"year\" and \"nfl_year_week_timestamp\".\"week\" = \"player_years_weeks\".\"week\" inner join \"keeptradecut_rankings\" as \"tf2cba0496d67b9a09be0654ea0516e7c\" on \"tf2cba0496d67b9a09be0654ea0516e7c\".\"pid\" = \"player\".\"pid\" and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"qb\" = $29 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"type\" = $30 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"d\" = \"nfl_year_week_timestamp\".\"week_timestamp\" left join \"t4590257d3227cc6343df566e2bba7128\" on \"t4590257d3227cc6343df566e2bba7128\".\"pid\" = \"player\".\"pid\" and t4590257d3227cc6343df566e2bba7128.year = player_years.year and t4590257d3227cc6343df566e2bba7128.week = player_years_weeks.week where player.pos IN ('WR') group by player.fname, player.lname, \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\", \"t4590257d3227cc6343df566e2bba7128\".\"fantasy_points_from_plays\", \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit $31 - materialized view \"nfl_year_week_timestamp\" has not been populated"
+    },
+    "year-offset-range-no-duplicate-base-years.json": {
+      "row_count": 116,
+      "column_count": 7,
+      "row_hash": "3bce28ccd91956dda65541b043ef52bcb4cefd14590baf666227a66c10411a20",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.631Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "year-offset-range-with-rate-type-and-where-filter.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.637Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "year-offset-range-with-where-filters.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.663Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "year-split-query-with-player-age-and-ktc-value-tests-the-order-in-which-year-split-tables-are-joined.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.684Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2017,2018,2019,2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t656309e23a0bbe1d45d84f6eac4f1819\" as materialized (select \"pg\".\"pid\", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = $1 and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in ($2, $3, $4, $5, $6, $7, $8) and \"pg\".\"year\" in ($9, $10, $11, $12, $13, $14, $15) group by \"pg\".\"pid\", \"nfl_plays\".\"year\") select \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\", player.fname, player.lname, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", \"t656309e23a0bbe1d45d84f6eac4f1819\".\"weighted_opp_rating_from_plays\" AS \"weighted_opp_rating_from_plays_0\", \"player_seasonlogs\".\"espn_overall_score\" AS \"espn_overall_score_0\", \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\" AS \"player_keeptradecut_value_0\", CASE WHEN player.dob IS NULL OR player.dob = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) END as age_0, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"tbc0f47cfe59a1398fb0e9c78eb43bba3\" inner join \"player\" on \"player\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" left join \"t656309e23a0bbe1d45d84f6eac4f1819\" on \"t656309e23a0bbe1d45d84f6eac4f1819\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and t656309e23a0bbe1d45d84f6eac4f1819.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year and t656309e23a0bbe1d45d84f6eac4f1819.year IN (2023,2022,2021,2020,2019,2018) left join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and player_seasonlogs.year = tbc0f47cfe59a1398fb0e9c78eb43bba3.year and \"player_seasonlogs\".\"seas_type\" = $16 left join \"opening_days\" on \"opening_days\".\"year\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\" left join \"keeptradecut_rankings\" as \"tf2cba0496d67b9a09be0654ea0516e7c\" on \"tf2cba0496d67b9a09be0654ea0516e7c\".\"pid\" = \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"qb\" = $17 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"type\" = $18 and \"tf2cba0496d67b9a09be0654ea0516e7c\".\"d\" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (tbc0f47cfe59a1398fb0e9c78eb43bba3.year) where \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"scoring_format_hash\" = $19 and player.pos IN ('WR') group by player.fname, player.lname, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"points_per_game\", \"t656309e23a0bbe1d45d84f6eac4f1819\".\"weighted_opp_rating_from_plays\", \"player_seasonlogs\".\"espn_overall_score\", \"tf2cba0496d67b9a09be0654ea0516e7c\".\"v\", player.dob, opening_days.opening_day, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"year\", \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"tbc0f47cfe59a1398fb0e9c78eb43bba3\".\"pid\" asc limit $20 - materialized view \"opening_days\" has not been populated"
+    },
+    "year-split-with-multiple-rate-type-with-statements.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.700Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "year-splits-retired-player-team-stats.json": {
+      "row_count": 500,
+      "column_count": 6,
+      "row_hash": "ba35f7bc1def3836066d646e6f9cbe3bdf06dc6a0b6d62425f93a30b935418e7",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.718Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "year-splits-where-narrower-than-column-params.json": {
+      "row_count": 0,
+      "column_count": 0,
+      "row_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seed_sparse": true,
+      "captured_at": "2026-05-16T03:54:50.736Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "year-splits-with-a-column-set-to-a-specific-year.json": {
+      "row_count": 500,
+      "column_count": 7,
+      "row_hash": "a09682ee9292fdc53503fc1b316684dfcf814b816dcec307af2b535fcc9eb40a",
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.740Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": null
+    },
+    "year-splits-with-sort-by-age.json": {
+      "row_count": null,
+      "column_count": null,
+      "row_hash": null,
+      "seed_sparse": false,
+      "captured_at": "2026-05-16T03:54:50.857Z",
+      "captured_against": "e8ed7a1a18fb2864b686933262e0d3b03fcd5206",
+      "error": "with \"base_years\" as (SELECT unnest(ARRAY[2017,2018,2019,2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t656309e23a0bbe1d45d84f6eac4f1819\" as materialized (select \"pg\".\"pid\", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = $1 and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in ($2, $3, $4, $5, $6, $7, $8) and \"pg\".\"year\" in ($9, $10, $11, $12, $13, $14, $15) group by \"pg\".\"pid\", \"nfl_plays\".\"year\") select \"player\".\"pid\", player.fname, player.lname, \"player\".\"ngs_draft_grade\" AS \"ngs_draft_grade_0\", \"t656309e23a0bbe1d45d84f6eac4f1819\".\"weighted_opp_rating_from_plays\" AS \"weighted_opp_rating_from_plays_0\", \"player_seasonlogs\".\"espn_overall_score\" AS \"espn_overall_score_0\", CASE WHEN player.dob IS NULL OR player.dob = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) END as age_0, \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t656309e23a0bbe1d45d84f6eac4f1819\" on \"t656309e23a0bbe1d45d84f6eac4f1819\".\"pid\" = \"player\".\"pid\" and t656309e23a0bbe1d45d84f6eac4f1819.year = player_years.year and t656309e23a0bbe1d45d84f6eac4f1819.year IN (2023,2022,2021,2020,2019,2018,2017) left join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"player\".\"pid\" and player_seasonlogs.year = player_years.year and \"player_seasonlogs\".\"seas_type\" = $16 left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" where player.pos IN ('WR') group by player.fname, player.lname, \"player\".\"ngs_draft_grade\", \"t656309e23a0bbe1d45d84f6eac4f1819\".\"weighted_opp_rating_from_plays\", \"player_seasonlogs\".\"espn_overall_score\", player.dob, opening_days.opening_day, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 7 DESC NULLS LAST, \"player\".\"pid\" asc limit $17 - materialized view \"opening_days\" has not been populated"
+    }
+  }
+}
