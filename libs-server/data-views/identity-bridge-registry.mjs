@@ -1,3 +1,4 @@
+import debug from 'debug'
 import player_to_player_year from './identity-bridges/player-to-player-year.mjs'
 import player_year_to_player_year_week from './identity-bridges/player-year-to-player-year-week.mjs'
 import player_year_to_team_year from './identity-bridges/player-year-to-team-year.mjs'
@@ -17,6 +18,8 @@ const bridge_modules = [
   team_year_to_team_year_week
 ]
 
+const log = debug('data-views:identity-bridge')
+
 const bridges = new Map()
 
 const key_of = (from, to, mode) => `${from}|${to}|${mode}`
@@ -24,6 +27,9 @@ const key_of = (from, to, mode) => `${from}|${to}|${mode}`
 const register_bridge = (bridge) => {
   const mode = bridge.mode || 'default'
   const k = key_of(bridge.from, bridge.to, mode)
+  if (bridges.has(k)) {
+    log(`identity-bridge overwrite for ${k}`)
+  }
   bridges.set(k, bridge)
 }
 
@@ -56,7 +62,5 @@ export const apply_bridge = ({
   bridge.join_cte({ query_context, params })
   query_context.applied_bridges.add(key)
 }
-
-export const register = (bridge) => register_bridge(bridge)
 
 export { bridges }

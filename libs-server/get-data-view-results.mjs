@@ -931,6 +931,20 @@ const add_clauses_for_table = async ({
   const select_strings = []
   const group_by_strings = []
 
+  const make_source_join_func = (column_definition, column_id) => ({
+    query,
+    params,
+    join_type
+  }) =>
+    attach_source({
+      players_query: query,
+      query_context: data_view_options.query_context,
+      column_def: { ...column_definition, column_id },
+      params,
+      table_alias: table_name,
+      join_type
+    })
+
   // the pid column and join_func should be the same among column definitions with the same table name/alias
   let pid_columns = null
   let join_func = null
@@ -994,15 +1008,7 @@ const add_clauses_for_table = async ({
       column_definition.source &&
       (column_definition.source.table || column_definition.source.attach)
     ) {
-      join_func = ({ query, params, join_type }) =>
-        attach_source({
-          players_query: query,
-          query_context: data_view_options.query_context,
-          column_def: { ...column_definition, column_id },
-          params,
-          table_alias: table_name,
-          join_type
-        })
+      join_func = make_source_join_func(column_definition, column_id)
     } else if (column_definition.join) {
       join_func = column_definition.join
     }
@@ -1054,15 +1060,7 @@ const add_clauses_for_table = async ({
       column_definition.source &&
       (column_definition.source.table || column_definition.source.attach)
     ) {
-      join_func = ({ query, params, join_type }) =>
-        attach_source({
-          players_query: query,
-          query_context: data_view_options.query_context,
-          column_def: { ...column_definition, column_id: where_clause.column_id },
-          params,
-          table_alias: table_name,
-          join_type
-        })
+      join_func = make_source_join_func(column_definition, where_clause.column_id)
     } else if (!where_handled_by_aggregator && column_definition.join) {
       join_func = column_definition.join
     }

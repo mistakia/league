@@ -4,6 +4,17 @@ import { register } from '../source-attach-registry.mjs'
 // canonical reference columns; the source row joins by direct key equality
 // against query_context's pid/team/year/week references.
 
+const REF_FOR = {
+  pid: 'pid_reference',
+  team: 'team_reference',
+  year: 'year_reference',
+  week: 'week_reference'
+}
+
+// Predicate emission order is fixed so callers see a deterministic ON / AND
+// sequence and the first ON pairs with the most-specific cell key.
+const KEY_ORDER = ['pid', 'team', 'year', 'week']
+
 const make_rule = (identity_id) => ({
   cell_identity: identity_id,
   source_grain: identity_id,
@@ -11,42 +22,25 @@ const make_rule = (identity_id) => ({
   required_identity_bridges: [],
   emit_predicate({ query_context, source, table_alias, builder }) {
     const ref = table_alias || source.table
-    const {
-      pid_reference,
-      team_reference,
-      year_reference,
-      week_reference
-    } = query_context
+    const key_columns = source.key_columns || {}
+    const { db } = query_context
 
-    let on_called = false
-    const join_first = (col, val) => {
-      if (!on_called) {
-        builder.on(col, '=', val)
-        on_called = true
-      } else {
-        builder.andOn(col, '=', val)
+    let first_emitted = false
+    for (const key of KEY_ORDER) {
+      const source_col = key_columns[key]
+      const cell_ref = query_context[REF_FOR[key]]
+      if (!source_col || !cell_ref) continue
+
+      const lhs = `${ref}.${source_col}`
+      if (key === 'week' && source.week_type === 'string') {
+        builder.andOn(db.raw(`${lhs} = CAST(${cell_ref} AS VARCHAR)`))
+        continue
       }
-    }
-
-    if (source.key_columns.pid && pid_reference) {
-      join_first(`${ref}.${source.key_columns.pid}`, pid_reference)
-    }
-    if (source.key_columns.team && team_reference) {
-      join_first(`${ref}.${source.key_columns.team}`, team_reference)
-    }
-    if (source.key_columns.year && year_reference) {
-      join_first(`${ref}.${source.key_columns.year}`, year_reference)
-    }
-    if (source.key_columns.week && week_reference) {
-      const week_col = `${ref}.${source.key_columns.week}`
-      if (source.week_type === 'string') {
-        builder.andOn(
-          query_context.db.raw(
-            `${week_col} = CAST(${week_reference} AS VARCHAR)`
-          )
-        )
+      if (!first_emitted) {
+        builder.on(lhs, '=', cell_ref)
+        first_emitted = true
       } else {
-        join_first(week_col, week_reference)
+        builder.andOn(lhs, '=', cell_ref)
       }
     }
   }

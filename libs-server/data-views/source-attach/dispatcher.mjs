@@ -47,9 +47,9 @@ export const attach_source = ({
     rule = resolve_rule(cell_identity, source.grain, 'default')
   }
   if (!rule) {
-    throw new Error(
-      `No source-attach rule for (cell=${cell_identity}, source=${source.grain}, mode=${mode}); column_id=${column_def.column_id}`
-    )
+    const msg = `No source-attach rule for (cell=${cell_identity}, source=${source.grain}, mode=${mode}); column_id=${column_def.column_id}`
+    log(msg)
+    throw new Error(msg)
   }
 
   const required =

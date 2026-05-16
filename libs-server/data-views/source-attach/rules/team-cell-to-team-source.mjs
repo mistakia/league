@@ -13,18 +13,22 @@ const emit_team_year_predicate = ({
   include_week
 }) => {
   const ref = table_alias || source.table
+  const key_columns = source.key_columns || {}
   const { team_reference, year_reference, week_reference, db } = query_context
 
-  builder.on(`${ref}.${source.key_columns.team}`, '=', team_reference)
-  if (include_year && source.key_columns.year && year_reference) {
-    builder.andOn(`${ref}.${source.key_columns.year}`, '=', year_reference)
+  if (!key_columns.team || !team_reference) {
+    throw new Error(
+      `team-cell-to-team-source rule requires source.key_columns.team and query_context.team_reference (source.table=${source.table})`
+    )
   }
-  if (include_week && source.key_columns.week && week_reference) {
-    const week_col = `${ref}.${source.key_columns.week}`
+  builder.on(`${ref}.${key_columns.team}`, '=', team_reference)
+  if (include_year && key_columns.year && year_reference) {
+    builder.andOn(`${ref}.${key_columns.year}`, '=', year_reference)
+  }
+  if (include_week && key_columns.week && week_reference) {
+    const week_col = `${ref}.${key_columns.week}`
     if (source.week_type === 'string') {
-      builder.andOn(
-        db.raw(`${week_col} = CAST(${week_reference} AS VARCHAR)`)
-      )
+      builder.andOn(db.raw(`${week_col} = CAST(${week_reference} AS VARCHAR)`))
     } else {
       builder.andOn(week_col, '=', week_reference)
     }
