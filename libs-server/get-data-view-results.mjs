@@ -30,7 +30,10 @@ import { normalize_columns } from '#libs-server/data-views/normalize-output-para
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
 import { build_batched_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
-import { get_identity } from '#libs-server/data-views/identities.mjs'
+import {
+  get_identity,
+  resolve_references
+} from '#libs-server/data-views/identities.mjs'
 import { resolve as resolve_bridge } from '#libs-server/data-views/bridge-registry.mjs'
 
 // A base identity in granularity (e.g. `player`) means the column needs no
@@ -1327,46 +1330,6 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   return grouped_by_splits
 }
 
-const setup_central_references = ({
-  data_view_options,
-  splits,
-  query_context
-}) => {
-  const { from_table_name } = data_view_options
-
-  // Team-subject: references come from the active identity. Bypass the
-  // legacy from_table_name heuristic.
-  if (query_context && query_context.subject_id === 'team') {
-    const identity = get_identity(query_context.identity_id)
-    data_view_options.pid_reference = identity.team_column
-    data_view_options.team_reference = identity.team_column
-    data_view_options.year_reference = identity.year_column
-    data_view_options.week_reference = identity.week_column
-    return data_view_options
-  }
-
-  // Setup player PID reference
-  data_view_options.pid_reference = `${from_table_name}.pid`
-
-  // Setup year and week references based on splits and from table
-  if (splits.includes('year') && from_table_name === 'player') {
-    // Use split table reference when from table is player
-    data_view_options.year_reference = 'player_years.year'
-  } else {
-    // Use from table reference when from table is not player
-    data_view_options.year_reference = `${from_table_name}.year`
-  }
-
-  if (splits.includes('week') && from_table_name === 'player') {
-    // Use split table reference when from table is player
-    data_view_options.week_reference = 'player_years_weeks.week'
-  } else {
-    // Use from table reference when from table is not player
-    data_view_options.week_reference = `${from_table_name}.week`
-  }
-
-  return data_view_options
-}
 
 export const get_data_view_results_query = async ({
   splits = [],
@@ -1631,14 +1594,21 @@ export const get_data_view_results_query = async ({
     query_context
   })
 
-  // Setup centralized references for player pid, year, and week after from table is determined
-  setup_central_references({ data_view_options, splits, query_context })
-
-  // query_context.{pid,year,week}_reference retain their identity-derived
-  // values from build_query_context; data_view_options keeps the legacy
-  // heuristic for consumers that still read through it (select-string,
-  // data-view-join-function, add-player-year-teams-cte, rate-type plugins).
-  // The two views coexist until consumers migrate off data_view_options.
+  // Resolve reference column expressions for the chosen FROM-table and the
+  // active identity. query_context retains its identity-derived references
+  // from build_query_context (bridges, output-aggregators, and other
+  // identity-aware consumers read those values). data_view_options exposes
+  // the FROM-table-aware view for legacy consumers (select-string,
+  // data-view-join-function, add-player-year-teams-cte, rate-type plugins)
+  // that still join measures via the from-table's own pid/year/week columns.
+  const references = resolve_references({
+    identity_id: query_context.identity_id,
+    from_table_name: data_view_options.from_table_name
+  })
+  data_view_options.pid_reference = references.pid_reference
+  data_view_options.team_reference = references.team_reference
+  data_view_options.year_reference = references.year_reference
+  data_view_options.week_reference = references.week_reference
   query_context.data_view_options = data_view_options
 
   // sanitize parameters

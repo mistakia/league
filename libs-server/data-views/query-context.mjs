@@ -1,4 +1,9 @@
-import { identities, get_identity, is_team_identity } from './identities.mjs'
+import {
+  identities,
+  get_identity,
+  is_team_identity,
+  resolve_references
+} from './identities.mjs'
 import { identity_for } from './subject-registry.mjs'
 
 export const build_query_context = ({
@@ -37,4 +42,4 @@ export const build_query_context = ({
   }
 }
 
-export { identities, get_identity, is_team_identity }
+export { identities, get_identity, is_team_identity, resolve_references }
