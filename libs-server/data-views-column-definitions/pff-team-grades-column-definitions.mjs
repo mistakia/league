@@ -1,6 +1,5 @@
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_aggregate_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
@@ -29,22 +28,21 @@ const pff_team_seasonlogs_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(`pff_team_seasonlogs_${year.join('_')}${suffix}`)
 }
 
-const pff_team_seasonlogs_join = (join_arguments) => {
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    default_year: current_season.stats_season_year,
-    join_on_team: true,
-    join_table_clause: `pff_team_seasonlogs as ${join_arguments.table_name}`
-  })
+const pff_team_source = {
+  table: 'pff_team_seasonlogs',
+  grain: 'team_year',
+  key_columns: { team: 'nfl_team', year: 'year' },
+  extra_predicates: (params) => {
+    const { year } = get_default_params({ params })
+    return [{ column: 'year', value: year[0] }]
+  }
 }
 
 const create_pff_team_field = (column_name, display_name) => ({
   column_name,
   table_name: 'pff_team_seasonlogs',
   table_alias: pff_team_seasonlogs_table_alias,
-  join: pff_team_seasonlogs_join,
-  granularity: ['team_year'],
+  source: pff_team_source,
   get_cache_info,
   main_select: ({ table_name, column_index }) => [
     `${table_name}.${column_name} as ${display_name}_${column_index}`

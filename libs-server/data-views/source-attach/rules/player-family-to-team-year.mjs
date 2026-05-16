@@ -27,7 +27,6 @@ register({
   source_grain: 'team_year',
   mode: 'default',
   required_identity_bridges: [
-    { from: 'player', to: 'player_year', mode: 'default' },
     { from: 'player_year', to: 'team_year', mode: 'default' }
   ],
   emit_predicate: emit
