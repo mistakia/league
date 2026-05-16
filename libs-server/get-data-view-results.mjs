@@ -34,7 +34,7 @@ import {
   get_identity,
   resolve_references
 } from '#libs-server/data-views/identities.mjs'
-import { resolve as resolve_bridge } from '#libs-server/data-views/bridge-registry.mjs'
+import { resolve as resolve_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 
 // A base identity in granularity (e.g. `player`) means the column needs no
 // split joins; the column reads from the base table directly.

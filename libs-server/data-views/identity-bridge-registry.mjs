@@ -1,13 +1,13 @@
-import player_to_player_year from './bridges/player-to-player-year.mjs'
-import player_year_to_player_year_week from './bridges/player-year-to-player-year-week.mjs'
-import player_year_to_team_year from './bridges/player-year-to-team-year.mjs'
-import team_to_team_year from './bridges/team-to-team-year.mjs'
-import team_year_to_team_year_week from './bridges/team-year-to-team-year-week.mjs'
+import player_to_player_year from './identity-bridges/player-to-player-year.mjs'
+import player_year_to_player_year_week from './identity-bridges/player-year-to-player-year-week.mjs'
+import player_year_to_team_year from './identity-bridges/player-year-to-team-year.mjs'
+import team_to_team_year from './identity-bridges/team-to-team-year.mjs'
+import team_year_to_team_year_week from './identity-bridges/team-year-to-team-year-week.mjs'
 
 // Registry key is `"<from>|<to>|<mode>"` (mode defaults to 'default'). Bridges
 // declare mode via `export const mode`; callers omit mode to get the default.
-// `is_reachable({cell_identity, source_grain})` answers the column-def
-// reachability check independent of mode.
+// Identity bridges perform pure row-shape composition; source attachment lives
+// in source-attach-registry.mjs (which owns reachability for column-defs).
 
 const bridge_modules = [
   player_to_player_year,
@@ -18,7 +18,6 @@ const bridge_modules = [
 ]
 
 const bridges = new Map()
-const reachable = new Map()
 
 const key_of = (from, to, mode) => `${from}|${to}|${mode}`
 
@@ -26,9 +25,6 @@ const register_bridge = (bridge) => {
   const mode = bridge.mode || 'default'
   const k = key_of(bridge.from, bridge.to, mode)
   bridges.set(k, bridge)
-  const reach_key = `${bridge.from}|${bridge.to}`
-  if (!reachable.has(reach_key)) reachable.set(reach_key, new Set())
-  reachable.get(reach_key).add(mode)
 }
 
 for (const bridge of bridge_modules) {
@@ -45,9 +41,6 @@ export const resolve = (from, to, mode = 'default') => {
 
 export const has_bridge = (from, to, mode = 'default') =>
   bridges.has(key_of(from, to, mode))
-
-export const is_reachable = ({ cell_identity, source_grain }) =>
-  reachable.has(`${cell_identity}|${source_grain}`)
 
 export const apply_bridge = ({
   query_context,

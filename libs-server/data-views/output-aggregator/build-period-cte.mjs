@@ -1,5 +1,5 @@
 import db from '#db'
-import { has_bridge, resolve as resolve_bridge } from '../bridge-registry.mjs'
+import { has_bridge, resolve as resolve_bridge } from '../identity-bridge-registry.mjs'
 import {
   compute_measure_alias,
   is_batchable,
