@@ -55,15 +55,15 @@ const espn_team_win_rates_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(hash_key)
 }
 
-const team_espn_line_join = (join_arguments) => {
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    join_on_team: true,
-    join_table_team_field: 'team',
-    join_table_clause: `espn_team_win_rates_index as ${join_arguments.table_name}`,
-    default_year: current_season.stats_season_year
-  })
+const espn_team_source = {
+  table: 'espn_team_win_rates_index',
+  grain: 'team_year',
+  key_columns: { team: 'team', year: 'year' },
+  extra_predicates: (params) => {
+    const raw = params.year ?? current_season.stats_season_year
+    const arr = Array.isArray(raw) ? raw : [raw]
+    return [{ column: 'year', op: 'in', value: arr.map(Number) }]
+  }
 }
 
 const create_player_espn_line_column = (column_name) => ({
@@ -80,8 +80,7 @@ const create_team_espn_line_column = (column_name) => ({
   column_name,
   select_as: () => `espn_team_${column_name}`,
   table_alias: espn_team_win_rates_table_alias,
-  join: team_espn_line_join,
-  granularity: ['team_year'],
+  source: espn_team_source,
   get_cache_info
 })
 
