@@ -7,11 +7,7 @@ import get_rate_type_denominator_params, {
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
-import { is_historical_team_mode } from '#libs-server/data-views/historical-team-mode.mjs'
-import {
-  add_player_year_teams_cte,
-  ensure_player_year_teams_join
-} from '#libs-server/data-views/add-player-year-teams-cte.mjs'
+import { ensure_player_year_teams_join_if_historical } from '#libs-server/data-views/add-player-year-teams-cte.mjs'
 
 export const get_per_team_play_cte_table_name = ({
   params = {},
@@ -137,19 +133,12 @@ export const join_per_team_play_cte = ({
   // a WR who changed teams between years would have his historical receiving
   // stats divided by the current team's pass-play count instead of his
   // actual team's count.
-  if (is_historical_team_mode({ params, splits })) {
-    add_player_year_teams_cte({
-      players_query,
-      params,
-      splits,
-      data_view_options
-    })
-    ensure_player_year_teams_join({
-      players_query,
-      data_view_options,
-      splits
-    })
-  }
+  ensure_player_year_teams_join_if_historical({
+    players_query,
+    params,
+    splits,
+    data_view_options
+  })
 
   const year_offset = params.year_offset
   const has_year_offset_range =

@@ -2,11 +2,7 @@ import debug from 'debug'
 import { current_season } from '#constants'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
-import { is_historical_team_mode } from '#libs-server/data-views/historical-team-mode.mjs'
-import {
-  add_player_year_teams_cte,
-  ensure_player_year_teams_join
-} from '#libs-server/data-views/add-player-year-teams-cte.mjs'
+import { ensure_player_year_teams_join_if_historical } from '#libs-server/data-views/add-player-year-teams-cte.mjs'
 
 const log = debug('data-views')
 
@@ -42,17 +38,12 @@ export default function data_view_join_function(join_arguments) {
   const year = params.year || default_year
   const week = params.week || 0
 
-  if (join_on_team && is_historical_team_mode({ params, splits })) {
-    add_player_year_teams_cte({
+  if (join_on_team) {
+    ensure_player_year_teams_join_if_historical({
       players_query: query,
       params,
       splits,
       data_view_options
-    })
-    ensure_player_year_teams_join({
-      players_query: query,
-      data_view_options,
-      splits
     })
   }
 

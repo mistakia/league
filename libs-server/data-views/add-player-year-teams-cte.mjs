@@ -3,6 +3,20 @@ import { current_season } from '#constants'
 
 const PLAYER_YEAR_TEAMS_CTE_NAME = 'player_year_teams'
 
+// Year-grain player->team association is needed whenever the query has a
+// year filter or year split: joining team-keyed fact tables through
+// player.current_nfl_team would attribute historical stats to the player's
+// present team. This predicate stays private; callers attach the bridge via
+// ensure_player_year_teams_join_if_historical.
+const has_year_filter = (params = {}) => {
+  if (!params || params.year == null) return false
+  const year_array = Array.isArray(params.year) ? params.year : [params.year]
+  return year_array.length > 0
+}
+
+const is_historical_team_mode = ({ params = {}, splits = [] } = {}) =>
+  has_year_filter(params) || splits.includes('year')
+
 const resolve_year_range = ({ params = {}, data_view_options = {} }) => {
   if (
     Array.isArray(data_view_options.year_range) &&
@@ -98,4 +112,25 @@ export const ensure_player_year_teams_join = ({
   })
 
   data_view_options.player_year_teams_joined = true
+}
+
+export const ensure_player_year_teams_join_if_historical = ({
+  players_query,
+  params = {},
+  splits = [],
+  data_view_options = {}
+}) => {
+  if (!is_historical_team_mode({ params, splits })) return false
+  add_player_year_teams_cte({
+    players_query,
+    params,
+    splits,
+    data_view_options
+  })
+  ensure_player_year_teams_join({
+    players_query,
+    data_view_options,
+    splits
+  })
+  return true
 }
