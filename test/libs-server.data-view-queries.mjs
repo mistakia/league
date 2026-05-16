@@ -2,7 +2,10 @@
 
 import MockDate from 'mockdate'
 import debug from 'debug'
+import fs from 'node:fs'
+import path from 'node:path'
 import * as chai from 'chai'
+import { fileURLToPath } from 'node:url'
 
 import {
   get_data_view_results_query,
@@ -10,6 +13,38 @@ import {
   process_expected_query
 } from '#libs-server'
 import { compare_queries } from './utils/index.mjs'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Source/bridge migration: byte-identical SQL is no longer the gate -- result
+// equivalence is. Fixtures whose SQL shape intentionally changes set
+// `skip_query_match: true`; the harness logs the diff to the working-tier slug
+// for hand review and continues to assert metadata. Toggle SBA_LOG_SQL_DIFFS=0
+// to silence the catalog write.
+const SQL_DIFF_CATALOG_PATH = path.resolve(
+  __dirname,
+  '../../../../scratch/league/source-bridge-architecture/sql-diff-catalog.md'
+)
+const sql_diff_catalog_enabled =
+  process.env.SBA_LOG_SQL_DIFFS !== '0' &&
+  fs.existsSync(path.dirname(SQL_DIFF_CATALOG_PATH))
+
+const log_sql_diff = (filename, actual, expected) => {
+  if (!sql_diff_catalog_enabled) return
+  const entry =
+    `\n## ${filename}\n` +
+    `Captured: ${new Date().toISOString()}\n\n` +
+    '### actual\n```sql\n' +
+    actual +
+    '\n```\n\n### expected (legacy)\n```sql\n' +
+    expected +
+    '\n```\n'
+  try {
+    fs.appendFileSync(SQL_DIFF_CATALOG_PATH, entry)
+  } catch {
+    // best-effort logging; never fail the harness on catalog write errors
+  }
+}
 
 const { expect } = chai
 
@@ -57,8 +92,22 @@ describe('Data View', () => {
               data_view_test_query.expected_query
             )
 
-            // Compare with expected query
-            compare_queries(actual_query, expected_query)
+            // Source/bridge migration: fixtures whose SQL shape intentionally
+            // diverges (orphan-CTE drops, direct team-subject joins, dispatcher
+            // re-routed bridges) flag skip_query_match. The harness logs the
+            // diff for hand review; result-set equivalence is gated by the
+            // separate data-view-queries-result-equivalence.spec.mjs harness.
+            if (data_view_test_query.skip_query_match) {
+              if (actual_query !== expected_query) {
+                log_sql_diff(
+                  data_view_test_query.filename,
+                  actual_query,
+                  expected_query
+                )
+              }
+            } else {
+              compare_queries(actual_query, expected_query)
+            }
 
             // Validate data_view_metadata if specified in test case
             if (data_view_test_query.expected_metadata) {
