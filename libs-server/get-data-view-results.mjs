@@ -1817,10 +1817,15 @@ export const get_data_view_results_query = async ({
       columns: table_columns
     })
 
-    // Add a check to ensure column is not null
+    // Add a check to ensure column is not null. Stale saved-view sorts can
+    // reference column_ids that are not in the current selected columns
+    // (typical pattern: URL retains a sort after the user removed the
+    // sorted column from the view). The sort is correctly skipped; demoted
+    // from console.warn to the data-views debug channel so replay capture
+    // and production logs stay quiet.
     if (!column) {
-      console.warn(
-        `Sort column not found for column_id: ${sort_clause.column_id}`
+      log(
+        `Sort column not found for column_id: ${sort_clause.column_id} (column_index=${sort_clause.column_index})`
       )
       continue
     }
