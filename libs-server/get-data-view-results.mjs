@@ -940,15 +940,10 @@ const add_clauses_for_table = async ({
   // otherwise the aggregator CTE is built AND an orphaned legacy CTE is
   // materialized + LEFT JOINed for the same column -- redundant work that
   // measurably regresses query latency (see plan: post-Phase-B timeout
-  // investigation 2026-05-15).
-  //
-  // Exception: when this group's `table_name` is the query's `from_table_name`,
-  // the legacy CTE is the primary FROM source and must remain materialized.
-  // The orphan-CTE optimization only applies to LEFT-JOINed legacy tables.
-  const table_is_from_table =
-    table_name === data_view_options.from_table_name
+  // investigation 2026-05-15). Post Unit 2(b), get_from_table_config rejects
+  // aggregator-handled columns as the FROM source, so the prior
+  // !table_is_from_table guard is no longer reachable.
   const is_aggregator_handled = (column_id, column_index) =>
-    !table_is_from_table &&
     Boolean(output_select_mapping[`${column_id}_${column_index}`])
 
   // When every column at this table_name group is aggregator-handled, skip
