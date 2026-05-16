@@ -80,6 +80,9 @@ export const attach_source = ({
       : []
   const { db } = query_context
 
+  const qualify = (col) =>
+    col.includes('.') ? col : `${table_alias || source.table}.${col}`
+
   players_query[join_method](target, function () {
     rule.emit_predicate({
       query_context,
@@ -90,12 +93,13 @@ export const attach_source = ({
     })
     for (const p of extras) {
       const op = p.op || '='
+      const col = qualify(p.column)
       if (op === '=') {
-        this.andOn(p.column, '=', db.raw('?', [p.value]))
+        this.andOn(col, '=', db.raw('?', [p.value]))
       } else if (op === 'in') {
-        this.andOnIn(p.column, p.value)
+        this.andOnIn(col, p.value)
       } else if (op === 'between') {
-        this.andOnBetween(p.column, p.value)
+        this.andOnBetween(col, p.value)
       } else {
         throw new Error(
           `Unknown source.extra_predicates op: ${op} (column_id=${column_def.column_id})`
