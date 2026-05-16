@@ -1,7 +1,5 @@
-import db from '#db'
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_aggregate_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
@@ -57,26 +55,24 @@ const dvoa_team_unit_seasonlogs_table_alias = ({ params = {} } = {}) => {
   )
 }
 
-const dvoa_team_unit_seasonlogs_join = (join_arguments) => {
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    default_year: current_season.stats_season_year,
-    join_on_team: true,
-    join_table_clause: `dvoa_team_unit_seasonlogs_index as ${join_arguments.table_name}`,
-    additional_conditions: function ({ table_name, params }) {
-      const { team_unit } = get_default_params({ params })
-      this.andOn(`${table_name}.team_unit`, '=', db.raw('?', [team_unit]))
-    }
-  })
+const dvoa_team_source = {
+  table: 'dvoa_team_unit_seasonlogs_index',
+  grain: 'team_year',
+  key_columns: { team: 'nfl_team', year: 'year' },
+  extra_predicates: (params) => {
+    const { year, team_unit } = get_default_params({ params })
+    return [
+      { column: 'year', value: year[0] },
+      { column: 'team_unit', value: team_unit }
+    ]
+  }
 }
 
 const create_dvoa_team_unit_field = (column_name) => ({
   column_name,
   table_name: 'dvoa_team_unit_seasonlogs_index',
   table_alias: dvoa_team_unit_seasonlogs_table_alias,
-  join: dvoa_team_unit_seasonlogs_join,
-  granularity: ['team_year'],
+  source: dvoa_team_source,
   get_cache_info
 })
 
