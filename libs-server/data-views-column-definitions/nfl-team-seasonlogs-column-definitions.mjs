@@ -1,8 +1,6 @@
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import db from '#db'
 
 // TODO should use scoring_format_hash instead of league_id
 const default_league_id = 1
@@ -65,52 +63,38 @@ const league_nfl_team_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const nfl_team_seasonlogs_join = (join_arguments) => {
-  const { params = {} } = join_arguments
-  const { stat_key } = get_default_params({ params })
-
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    default_year: current_season.stats_season_year,
-    join_table_clause: `nfl_team_seasonlogs as ${join_arguments.table_name}`,
-    join_on_team: true,
-    join_table_team_field: 'tm',
-    additional_conditions: function () {
-      if (stat_key) {
-        this.andOn(
-          `${join_arguments.table_name}.stat_key`,
-          '=',
-          db.raw('?', [stat_key])
-        )
-      }
-    }
-  })
+const year_in_predicate = (params) => {
+  const raw = params.year ?? current_season.stats_season_year
+  const arr = Array.isArray(raw) ? raw : [raw]
+  return { column: 'year', op: 'in', value: arr.map(Number) }
 }
 
-const league_nfl_team_seasonlogs_join = (join_arguments) => {
-  const { params = {} } = join_arguments
-  const { league_id, stat_key } = get_default_params({ params })
-
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    default_year: current_season.stats_season_year,
-    join_table_clause: `league_nfl_team_seasonlogs as ${join_arguments.table_name}`,
-    join_on_team: true,
-    join_table_team_field: 'tm',
-    additional_conditions: function () {
-      this.andOn(
-        `${join_arguments.table_name}.lid`,
-        '=',
-        db.raw('?', [league_id])
-      ).andOn(
-        `${join_arguments.table_name}.stat_key`,
-        '=',
-        db.raw('?', [stat_key])
-      )
+const nfl_team_source = {
+  table: 'nfl_team_seasonlogs',
+  grain: 'team_year',
+  key_columns: { team: 'tm', year: 'year' },
+  extra_predicates: (params) => {
+    const { stat_key } = get_default_params({ params })
+    const extras = [year_in_predicate(params)]
+    if (stat_key) {
+      extras.push({ column: 'stat_key', value: stat_key })
     }
-  })
+    return extras
+  }
+}
+
+const league_nfl_team_source = {
+  table: 'league_nfl_team_seasonlogs',
+  grain: 'team_year',
+  key_columns: { team: 'tm', year: 'year' },
+  extra_predicates: (params) => {
+    const { stat_key, league_id } = get_default_params({ params })
+    return [
+      year_in_predicate(params),
+      { column: 'lid', value: league_id },
+      { column: 'stat_key', value: stat_key }
+    ]
+  }
 }
 
 const get_cache_info = create_season_cache_info({
@@ -127,8 +111,7 @@ const create_field_from_nfl_team_seasonlogs = (column_name) => ({
   select_as: () => `nfl_team_seasonlogs_${column_name}`,
   table_name: 'nfl_team_seasonlogs',
   table_alias: nfl_team_seasonlogs_table_alias,
-  join: nfl_team_seasonlogs_join,
-  granularity: ['team_year'],
+  source: nfl_team_source,
   get_cache_info
 })
 
@@ -137,8 +120,7 @@ const create_field_from_league_nfl_team_seasonlogs = (column_name) => ({
   select_as: () => `league_nfl_team_seasonlogs_${column_name}`,
   table_name: 'league_nfl_team_seasonlogs',
   table_alias: league_nfl_team_seasonlogs_table_alias,
-  join: league_nfl_team_seasonlogs_join,
-  granularity: ['team_year'],
+  source: league_nfl_team_source,
   get_cache_info
 })
 
