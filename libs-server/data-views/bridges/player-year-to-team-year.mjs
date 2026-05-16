@@ -3,6 +3,7 @@ import { current_season } from '#constants'
 
 export const from = 'player_year'
 export const to = 'team_year'
+export const mode = 'default'
 
 const CTE_NAME = 'player_year_teams'
 
@@ -48,4 +49,4 @@ export const join_cte = ({ query_context }) => {
   })
 }
 
-export default { from, to, add_cte, join_cte }
+export default { from, to, mode, add_cte, join_cte }

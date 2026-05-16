@@ -2,6 +2,7 @@ import db from '#db'
 
 export const from = 'player'
 export const to = 'player_year'
+export const mode = 'default'
 
 const base_years_sql = (year_range) => {
   if (!Array.isArray(year_range) || year_range.length === 0) {
@@ -34,4 +35,4 @@ export const join_cte = ({ query_context }) => {
   players_query.innerJoin('player_years', 'player_years.pid', 'player.pid')
 }
 
-export default { from, to, add_cte, join_cte }
+export default { from, to, mode, add_cte, join_cte }

@@ -2,6 +2,7 @@ import db from '#db'
 
 export const from = 'team_year'
 export const to = 'team_year_week'
+export const mode = 'default'
 
 export const add_cte = ({ query_context }) => {
   const { year_range } = query_context
@@ -27,4 +28,4 @@ export const join_cte = ({ query_context }) => {
   })
 }
 
-export default { from, to, add_cte, join_cte }
+export default { from, to, mode, add_cte, join_cte }

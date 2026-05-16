@@ -4,6 +4,11 @@ import player_year_to_team_year from './bridges/player-year-to-team-year.mjs'
 import team_to_team_year from './bridges/team-to-team-year.mjs'
 import team_year_to_team_year_week from './bridges/team-year-to-team-year-week.mjs'
 
+// Registry key is `"<from>|<to>|<mode>"` (mode defaults to 'default'). Bridges
+// declare mode via `export const mode`; callers omit mode to get the default.
+// `is_reachable({cell_identity, source_grain})` answers the column-def
+// reachability check independent of mode.
+
 const bridge_modules = [
   player_to_player_year,
   player_year_to_player_year_week,
@@ -13,28 +18,52 @@ const bridge_modules = [
 ]
 
 const bridges = new Map()
-for (const bridge of bridge_modules) {
-  if (!bridges.has(bridge.from)) bridges.set(bridge.from, new Map())
-  bridges.get(bridge.from).set(bridge.to, bridge)
+const reachable = new Map()
+
+const key_of = (from, to, mode) => `${from}|${to}|${mode}`
+
+const register_bridge = (bridge) => {
+  const mode = bridge.mode || 'default'
+  const k = key_of(bridge.from, bridge.to, mode)
+  bridges.set(k, bridge)
+  const reach_key = `${bridge.from}|${bridge.to}`
+  if (!reachable.has(reach_key)) reachable.set(reach_key, new Set())
+  reachable.get(reach_key).add(mode)
 }
 
-export const resolve = (from, to) => {
-  const bridge = bridges.get(from)?.get(to)
+for (const bridge of bridge_modules) {
+  register_bridge(bridge)
+}
+
+export const resolve = (from, to, mode = 'default') => {
+  const bridge = bridges.get(key_of(from, to, mode))
   if (!bridge) {
-    throw new Error(`No bridge from ${from} to ${to}`)
+    throw new Error(`No bridge from ${from} to ${to} (mode=${mode})`)
   }
   return bridge
 }
 
-export const has_bridge = (from, to) => Boolean(bridges.get(from)?.get(to))
+export const has_bridge = (from, to, mode = 'default') =>
+  bridges.has(key_of(from, to, mode))
 
-export const apply_bridge = ({ query_context, from, to }) => {
-  const key = `${from}->${to}`
+export const is_reachable = ({ cell_identity, source_grain }) =>
+  reachable.has(`${cell_identity}|${source_grain}`)
+
+export const apply_bridge = ({
+  query_context,
+  from,
+  to,
+  mode = 'default',
+  params = {}
+}) => {
+  const key = `${from}->${to}|${mode}`
   if (query_context.applied_bridges.has(key)) return
-  const bridge = resolve(from, to)
-  bridge.add_cte({ query_context })
-  bridge.join_cte({ query_context })
+  const bridge = resolve(from, to, mode)
+  bridge.add_cte({ query_context, params })
+  bridge.join_cte({ query_context, params })
   query_context.applied_bridges.add(key)
 }
+
+export const register = (bridge) => register_bridge(bridge)
 
 export { bridges }
