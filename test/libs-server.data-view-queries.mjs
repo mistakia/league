@@ -25,21 +25,27 @@ const SQL_DIFF_CATALOG_PATH = path.resolve(
   __dirname,
   '../../../../scratch/league/source-bridge-architecture/sql-diff-catalog.md'
 )
-const sql_diff_catalog_enabled =
-  process.env.SBA_LOG_SQL_DIFFS !== '0' &&
-  fs.existsSync(path.dirname(SQL_DIFF_CATALOG_PATH))
+const sql_diff_catalog_enabled = process.env.SBA_LOG_SQL_DIFFS !== '0'
+let sql_diff_catalog_initialized = false
 
 const log_sql_diff = (filename, actual, expected) => {
   if (!sql_diff_catalog_enabled) return
-  const entry =
-    `\n## ${filename}\n` +
-    `Captured: ${new Date().toISOString()}\n\n` +
-    '### actual\n```sql\n' +
-    actual +
-    '\n```\n\n### expected (legacy)\n```sql\n' +
-    expected +
-    '\n```\n'
   try {
+    if (!sql_diff_catalog_initialized) {
+      fs.mkdirSync(path.dirname(SQL_DIFF_CATALOG_PATH), { recursive: true })
+      fs.writeFileSync(
+        SQL_DIFF_CATALOG_PATH,
+        `# SQL diff catalog\n\nRun ${new Date().toISOString()}\n`
+      )
+      sql_diff_catalog_initialized = true
+    }
+    const entry =
+      `\n## ${filename}\n\n` +
+      '### actual\n```sql\n' +
+      actual +
+      '\n```\n\n### expected (legacy)\n```sql\n' +
+      expected +
+      '\n```\n'
     fs.appendFileSync(SQL_DIFF_CATALOG_PATH, entry)
   } catch {
     // best-effort logging; never fail the harness on catalog write errors
