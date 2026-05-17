@@ -2859,17 +2859,26 @@ CREATE TABLE public.league_format_player_careerlogs (
     league_format_hash character varying(64) NOT NULL,
     draft_rank smallint,
     startable_games smallint,
-    points_added numeric(6,1),
-    points_added_per_game numeric(3,1),
-    best_season_points_added_per_game numeric(3,1),
-    points_added_first_three_seas numeric(6,1),
-    points_added_first_four_seas numeric(6,1),
-    points_added_first_five_seas numeric(6,1),
-    points_added_first_seas numeric(6,1),
-    points_added_second_seas numeric(6,1),
-    points_added_third_seas numeric(6,1),
+    points_added_earned numeric(6,1),
+    points_added_earned_per_game numeric(3,1),
+    best_season_points_added_earned_per_game numeric(3,1),
+    points_added_earned_first_three_seasons numeric(6,1),
+    points_added_earned_first_four_seasons numeric(6,1),
+    points_added_earned_first_five_seasons numeric(6,1),
+    points_added_earned_first_season numeric(6,1),
+    points_added_earned_second_season numeric(6,1),
+    points_added_earned_third_season numeric(6,1),
     earned_salary numeric(6,2),
-    best_season_earned_salary numeric(6,2)
+    best_season_earned_salary numeric(6,2),
+    points_added_net numeric(6,1),
+    points_added_net_per_game numeric(3,1),
+    best_season_points_added_net_per_game numeric(3,1),
+    points_added_net_first_season numeric(6,1),
+    points_added_net_second_season numeric(6,1),
+    points_added_net_third_season numeric(6,1),
+    points_added_net_first_three_seasons numeric(6,1),
+    points_added_net_first_four_seasons numeric(6,1),
+    points_added_net_first_five_seasons numeric(6,1)
 );
 
 
@@ -2881,7 +2890,8 @@ CREATE TABLE public.league_format_player_gamelogs (
     pid character varying(25) NOT NULL,
     esbid integer NOT NULL,
     league_format_hash character varying(64) NOT NULL,
-    points_added numeric(4,1)
+    points_added_earned numeric(4,1),
+    points_added_net numeric(4,1)
 );
 
 
@@ -2891,7 +2901,7 @@ CREATE TABLE public.league_format_player_gamelogs (
 
 CREATE TABLE public.league_format_player_projection_values (
     pid character varying(25) NOT NULL,
-    week character varying(3) NOT NULL,
+    week character varying(10) NOT NULL,
     year smallint NOT NULL,
     league_format_hash character varying(64) NOT NULL,
     pts_added numeric(5,2),
@@ -2908,13 +2918,15 @@ CREATE TABLE public.league_format_player_seasonlogs (
     year smallint NOT NULL,
     league_format_hash character varying(64) NOT NULL,
     startable_games smallint,
-    points_added numeric(4,1),
-    points_added_per_game numeric(3,1),
-    points_added_rnk smallint,
-    points_added_pos_rnk smallint,
+    points_added_earned numeric(4,1),
+    points_added_earned_per_game numeric(3,1),
+    points_added_earned_rank smallint,
+    points_added_earned_position_rank smallint,
     earned_salary numeric(6,2),
-    points_added_per_game_rnk smallint,
-    points_added_per_game_pos_rnk smallint
+    points_added_earned_per_game_rank smallint,
+    points_added_earned_per_game_position_rank smallint,
+    points_added_net numeric(5,1),
+    points_added_net_per_game numeric(3,1)
 );
 
 
