@@ -1,7 +1,7 @@
+import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
@@ -16,6 +16,81 @@ const generate_table_alias = ({ params = {} } = {}) => {
   const additional_keys = Object.keys(nfl_plays_team_column_params).sort()
   const key = get_stats_column_param_key({ params, additional_keys })
   return get_table_hash(`team_stats_from_plays__${key}`)
+}
+
+// Mirrors data_view_join_function with join_year_on_year_split=true. Two
+// shapes: player-identity (force_player_active=true) joins the *_player_team_
+// stats CTE by pid; team-identity joins the *_team_stats CTE by team. Year
+// and week predicates are emitted only when the bucket's splits projected
+// those columns onto the CTE.
+const apply_team_stats_join = ({
+  query_context,
+  params,
+  table_alias,
+  join_type,
+  splits = [],
+  force_player_active
+}) => {
+  const dv = query_context.data_view_options || {}
+  const { players_query } = query_context
+  const pid_reference = dv.pid_reference ?? query_context.pid_reference
+  const team_reference = dv.team_reference ?? query_context.team_reference
+  const year_reference = dv.year_reference ?? query_context.year_reference
+  const week_reference = dv.week_reference ?? query_context.week_reference
+  const player_year_teams_cte_name =
+    dv.player_year_teams_cte_name ?? query_context.player_year_teams_cte_name
+  const limit_to_player_active_games =
+    force_player_active || params?.limit_to_player_active_games || false
+  const join_on_team = !limit_to_player_active_games
+  const suffix = limit_to_player_active_games
+    ? '_player_team_stats'
+    : '_team_stats'
+  const target = `${table_alias}${suffix}`
+  const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
+  const join_year = splits.includes('year')
+  const join_week = splits.includes('week')
+
+  players_query[join_method](target, function () {
+    if (join_on_team) {
+      const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
+        ? params.matchup_opponent_type[0] &&
+          typeof params.matchup_opponent_type[0] === 'object'
+          ? null
+          : params.matchup_opponent_type[0]
+        : params.matchup_opponent_type
+      if (matchup_opponent_type === 'current_week_opponent_total') {
+        this.on(`${target}.nfl_team`, '=', 'current_week_opponents.opponent')
+      } else if (matchup_opponent_type === 'next_week_opponent_total') {
+        this.on(`${target}.nfl_team`, '=', 'next_week_opponents.opponent')
+      } else {
+        // Team-identity cells expose team_reference directly (no
+        // player_year_teams indirection); player-identity cells route through
+        // player_year_teams when historical-team mode is active, else
+        // player.current_nfl_team.
+        let team_join_target
+        if (team_reference) {
+          team_join_target = team_reference
+        } else if (player_year_teams_cte_name) {
+          team_join_target = `${player_year_teams_cte_name}.team`
+        } else {
+          team_join_target = 'player.current_nfl_team'
+        }
+        this.on(`${target}.nfl_team`, '=', team_join_target)
+        if (join_week && week_reference) {
+          this.andOn(db.raw(`${target}.week = ${week_reference}`))
+        }
+      }
+    } else {
+      this.on(`${target}.pid`, '=', pid_reference)
+    }
+
+    if (join_year && year_reference) {
+      this.andOn(db.raw(`${target}.year = ${year_reference}`))
+    }
+    if (join_week && week_reference && !join_on_team) {
+      this.andOn(db.raw(`${target}.week = ${week_reference}`))
+    }
+  })
 }
 
 const team_stat_from_plays = ({
@@ -133,16 +208,16 @@ const team_stat_from_plays = ({
         ? `${args.table_name}_player_team_stats`
         : `${args.table_name}_team_stats`
     },
-    join: (args) => {
-      const limit_to_player_active_games = resolve_active(args.params)
-      data_view_join_function({
-        ...args,
-        join_year_on_year_split: true,
-        join_on_team: !limit_to_player_active_games,
-        table_name: limit_to_player_active_games
-          ? `${args.table_name}_player_team_stats`
-          : `${args.table_name}_team_stats`
-      })
+    // grain set to the base identity (no implicit year/week extension): the
+    // attach reads splits to decide whether to emit year/week predicates,
+    // matching the legacy data_view_join_function shape. Using 'team_year' /
+    // 'player_year' would require the team-to-team-year bridge which mandates
+    // a non-empty year_range -- not provided for no-splits team-subject
+    // fixtures.
+    source: {
+      grain: force_player_active ? 'player' : 'team',
+      attach: (attach_args) =>
+        apply_team_stats_join({ ...attach_args, force_player_active })
     },
     year_select: ({ table_name, column_params = {} }) => {
       const active = resolve_active(column_params)

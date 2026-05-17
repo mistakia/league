@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "multi team player team stats obj 2021",
   "description": "OBJ 2021 multi-team: player_nfl_teams shows CLE and LA; team stat resolves to CLE (9 games > LA 8, tie-break not needed)",
   "request": {

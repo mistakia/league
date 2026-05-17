@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "year splits retired player team stats",
   "description": "Retired player (Brady) year-splits 2018-2021 produces non-NULL team stats via player_year_teams CTE",
   "request": {

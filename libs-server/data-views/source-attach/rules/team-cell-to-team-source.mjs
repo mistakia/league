@@ -93,3 +93,22 @@ register({
   emit_predicate: (ctx) =>
     emit_team_year_predicate({ ...ctx, include_year: true, include_week: true })
 })
+
+// (team_year, team) and (team_year_week, team): cell row carries
+// team_reference via the wider identity; source only carries team. No bridge
+// chain required because the cell already exposes the team column.
+register({
+  cell_identity: 'team_year',
+  source_grain: 'team',
+  mode: 'default',
+  required_identity_bridges: [],
+  emit_predicate: (ctx) => emit_team_year_predicate({ ...ctx })
+})
+
+register({
+  cell_identity: 'team_year_week',
+  source_grain: 'team',
+  mode: 'default',
+  required_identity_bridges: [],
+  emit_predicate: (ctx) => emit_team_year_predicate({ ...ctx })
+})
