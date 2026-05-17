@@ -77,8 +77,10 @@ export const add_player_year_teams_cte = ({
 
   if (data_view_options.query_context) {
     data_view_options.query_context.applied_bridges.add(
-      'player_year->team_year'
+      'player_year->team_year|default'
     )
+    data_view_options.query_context.player_year_teams_cte_name =
+      PLAYER_YEAR_TEAMS_CTE_NAME
   }
 }
 

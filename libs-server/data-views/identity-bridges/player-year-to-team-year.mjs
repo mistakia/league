@@ -57,6 +57,14 @@ export const add_cte = ({ query_context, params = {} }) => {
   players_query.withMaterialized(CTE_NAME, cte_query)
   query_context.player_year_teams_cte_name = CTE_NAME
   query_context.player_year_teams_year_range = year_range
+  // Mirror onto data_view_options so the legacy
+  // ensure_player_year_teams_join_if_historical wrapper (still called by
+  // aggregator-rate / aggregator-count until Step 5) sees the attachment
+  // and skips its own materialization.
+  if (query_context.data_view_options) {
+    query_context.data_view_options.player_year_teams_cte_name = CTE_NAME
+    query_context.data_view_options.player_year_teams_year_range = year_range
+  }
 }
 
 export const join_cte = ({ query_context, params = {} }) => {
@@ -72,6 +80,11 @@ export const join_cte = ({ query_context, params = {} }) => {
       this.andOn(`${CTE_NAME}.year`, '=', db.raw('?', [join_year]))
     }
   })
+  // Legacy ensure_player_year_teams_join (still called by aggregator-rate /
+  // aggregator-count) reads this flag to skip its own leftJoin.
+  if (query_context.data_view_options) {
+    query_context.data_view_options.player_year_teams_joined = true
+  }
 }
 
 export default { from, to, mode, add_cte, join_cte }
