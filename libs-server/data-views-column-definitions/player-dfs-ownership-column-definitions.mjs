@@ -1,6 +1,5 @@
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
@@ -28,68 +27,72 @@ const generate_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(key)
 }
 
-const add_player_dfs_ownership_with_statement = ({
-  query,
-  params = {},
-  with_table_name
-}) => {
-  const { nfl_week, platform_source_id } = get_params({ params })
+const player_dfs_ownership_source = {
+  // Grain 'player': legacy data_view_join_function emitted pid-only equality
+  // regardless of cell granularity; CTE collapses each player to one row via
+  // the nfl_week_id + draft-group ranking filter.
+  grain: 'player',
+  attach: ({ query_context, params, table_alias, join_type = 'LEFT' }) => {
+    const { nfl_week, platform_source_id } = get_params({ params })
+    const { players_query, pid_reference } = query_context
+    const cte_name = table_alias
 
-  // Parse nfl_week identifiers back to year/week pairs for filtering
-  const year_week_pairs = nfl_week.map((nwi) => {
-    const parsed = parse_nfl_week_identifier({ identifier: nwi })
-    return { year: parsed.year, week: parsed.week }
-  })
+    // Parse nfl_week identifiers back to year/week pairs for filtering
+    const year_week_pairs = nfl_week.map((nwi) => {
+      const parsed = parse_nfl_week_identifier({ identifier: nwi })
+      return { year: parsed.year, week: parsed.week }
+    })
 
-  // Ranked CTE selects ownership from the contest with the most complete
-  // ownership data per draft group (by non-zero ownership count), using
-  // entry_count as tiebreaker. Some FL-sourced contests have partial
-  // ownership despite being the largest by entries.
-  const with_query = db.raw(
-    `
-    SELECT o.pid, o.ownership_pct, o.year, o.week
-    FROM player_dfs_ownership o
-    INNER JOIN (
-      SELECT dc.source_contest_id, dc.source_id,
-             ROW_NUMBER() OVER (
-               PARTITION BY dc.source_draft_group_id, dc.source_id
-               ORDER BY own_stats.nonzero_count DESC, dc.entry_count DESC
-             ) AS rn
-      FROM dfs_contests dc
+    // Ranked CTE selects ownership from the contest with the most complete
+    // ownership data per draft group (by non-zero ownership count), using
+    // entry_count as tiebreaker. Some FL-sourced contests have partial
+    // ownership despite being the largest by entries.
+    const cte_query = db.raw(
+      `
+      SELECT o.pid, o.ownership_pct, o.year, o.week
+      FROM player_dfs_ownership o
       INNER JOIN (
-        SELECT source_contest_id, source_id,
-               COUNT(*) FILTER (WHERE ownership_pct > 0) AS nonzero_count
-        FROM player_dfs_ownership
-        GROUP BY source_contest_id, source_id
-      ) own_stats ON own_stats.source_contest_id = dc.source_contest_id
-                  AND own_stats.source_id = dc.source_id
-      WHERE dc.ownership_imported = true
-        AND dc.source_id IN (${platform_source_id.map(() => '?').join(',')})
-        AND (${year_week_pairs.map(() => '(dc.year = ? AND dc.week = ?)').join(' OR ')})
-    ) rc ON o.source_contest_id = rc.source_contest_id
-        AND o.source_id = rc.source_id
-        AND rc.rn = 1
-    WHERE o.source_id IN (${platform_source_id.map(() => '?').join(',')})
-    `,
-    [
-      ...platform_source_id,
-      ...year_week_pairs.flatMap((p) => [p.year, p.week]),
-      ...platform_source_id
-    ]
-  )
+        SELECT dc.source_contest_id, dc.source_id,
+               ROW_NUMBER() OVER (
+                 PARTITION BY dc.source_draft_group_id, dc.source_id
+                 ORDER BY own_stats.nonzero_count DESC, dc.entry_count DESC
+               ) AS rn
+        FROM dfs_contests dc
+        INNER JOIN (
+          SELECT source_contest_id, source_id,
+                 COUNT(*) FILTER (WHERE ownership_pct > 0) AS nonzero_count
+          FROM player_dfs_ownership
+          GROUP BY source_contest_id, source_id
+        ) own_stats ON own_stats.source_contest_id = dc.source_contest_id
+                    AND own_stats.source_id = dc.source_id
+        WHERE dc.ownership_imported = true
+          AND dc.source_id IN (${platform_source_id.map(() => '?').join(',')})
+          AND (${year_week_pairs.map(() => '(dc.year = ? AND dc.week = ?)').join(' OR ')})
+      ) rc ON o.source_contest_id = rc.source_contest_id
+          AND o.source_id = rc.source_id
+          AND rc.rn = 1
+      WHERE o.source_id IN (${platform_source_id.map(() => '?').join(',')})
+      `,
+      [
+        ...platform_source_id,
+        ...year_week_pairs.flatMap((p) => [p.year, p.week]),
+        ...platform_source_id
+      ]
+    )
 
-  query.with(with_table_name, with_query)
+    players_query.with(cte_name, cte_query)
+    const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
+    players_query[join_method](cte_name, function () {
+      this.on(`${cte_name}.pid`, '=', pid_reference)
+    })
+  }
 }
 
 const create_player_dfs_ownership_field = (field) => ({
   column_name: field,
-  table_name: 'player_dfs_ownership',
   select_as: () => 'dfs_ownership_pct',
   table_alias: generate_table_alias,
-  join: data_view_join_function,
-  with: add_player_dfs_ownership_with_statement,
-  granularity: ['player_year', 'player_year_week'],
-  with_where: () => 'player_dfs_ownership.ownership_pct',
+  source: player_dfs_ownership_source,
   get_cache_info
 })
 
