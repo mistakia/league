@@ -8,7 +8,7 @@ import {
   compute_measure_alias,
   is_batchable
 } from './measure-batch.mjs'
-import { ensure_player_year_teams_join_if_historical } from '../add-player-year-teams-cte.mjs'
+import * as identity_bridge_registry from '../identity-bridge-registry.mjs'
 
 export const consumes_params = ['year', 'nfl_week_id', 'seas_type']
 
@@ -63,19 +63,14 @@ const resolve_team_join_target = ({ query_context, params }) => {
     return 'current_week_opponents.opponent'
   if (matchup === 'next_week_opponent_total')
     return 'next_week_opponents.opponent'
-  const data_view_options = query_context.data_view_options
-  if (
-    data_view_options &&
-    ensure_player_year_teams_join_if_historical({
-      players_query: query_context.players_query,
-      params,
-      splits: query_context.splits,
-      data_view_options
-    })
-  ) {
-    return `${data_view_options.player_year_teams_cte_name}.team`
-  }
-  return 'player.current_nfl_team'
+  identity_bridge_registry.apply_bridge({
+    query_context,
+    from: 'player_year',
+    to: 'team_year',
+    mode: 'default',
+    params
+  })
+  return 'player_year_teams.team'
 }
 
 export const join_cte = ({

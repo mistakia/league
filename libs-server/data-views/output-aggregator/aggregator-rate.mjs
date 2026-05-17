@@ -8,7 +8,7 @@ import {
   compute_measure_alias,
   is_batchable
 } from './measure-batch.mjs'
-import { ensure_player_year_teams_join_if_historical } from '../add-player-year-teams-cte.mjs'
+import * as identity_bridge_registry from '../identity-bridge-registry.mjs'
 
 export const consumes_params = [
   'year',
@@ -47,19 +47,11 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
 
 export const add_cte = add_period_cte
 
-// Derive the team-side join target for a team-keyed CTE. Mirrors the legacy
-// `join_team_per_game_cte` logic so player-subject views can consume team-
-// stat columns and respect matchup_opponent_type the same way they did
-// before the dispatcher rewrite.
-//
-// - subject 'team': use the team identity's team_column (from query_context).
-// - subject 'player' viewing a team-keyed column:
-//   - matchup_opponent_type=current_week_opponent_total -> current_week_opponents.opponent
-//   - matchup_opponent_type=next_week_opponent_total -> next_week_opponents.opponent
-//   - historical-team-mode (year filter / year split): join through the
-//     player_year_teams bridge so players without active games that year
-//     resolve to NULL team (legacy parity).
-//   - default -> player.current_nfl_team
+// Derive the team-side join target for a team-keyed CTE consumed by a
+// player-cell view. Subject 'team' uses the team identity reference directly;
+// matchup branches join against the opponents CTE attached upstream. For the
+// default player-cell case, route through the player_year->team_year identity
+// bridge so historical-team-mode is structural rather than a runtime branch.
 const resolve_team_join_target = ({ query_context, params }) => {
   if (query_context.subject_id === 'team') return query_context.team_reference
   const raw = params?.matchup_opponent_type
@@ -72,19 +64,14 @@ const resolve_team_join_target = ({ query_context, params }) => {
     return 'current_week_opponents.opponent'
   if (matchup === 'next_week_opponent_total')
     return 'next_week_opponents.opponent'
-  const data_view_options = query_context.data_view_options
-  if (
-    data_view_options &&
-    ensure_player_year_teams_join_if_historical({
-      players_query: query_context.players_query,
-      params,
-      splits: query_context.splits,
-      data_view_options
-    })
-  ) {
-    return `${data_view_options.player_year_teams_cte_name}.team`
-  }
-  return 'player.current_nfl_team'
+  identity_bridge_registry.apply_bridge({
+    query_context,
+    from: 'player_year',
+    to: 'team_year',
+    mode: 'default',
+    params
+  })
+  return 'player_year_teams.team'
 }
 
 export const join_cte = ({
