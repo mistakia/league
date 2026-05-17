@@ -9,7 +9,6 @@ import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-n
 
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
 // TODO career_year
 
@@ -110,250 +109,237 @@ const league_format_player_projection_values_table_alias = ({
   )
 }
 
-const league_player_projection_values_join = (join_arguments) => {
-  const { params = {} } = join_arguments
-  const { league_id } = get_default_params({ params })
+// Wraps the legacy data_view_join_function semantics. Year and week predicates
+// follow query_context references when the cell exposes them (player_year /
+// player_year_week cells); otherwise they pin to the default params.
+const apply_projected_join = ({
+  query_context,
+  params,
+  table_alias,
+  join_type,
+  join_table_clause,
+  join_year = true,
+  join_week = true,
+  cast_join_week_to_string = false,
+  additional_conditions
+}) => {
+  const { players_query, pid_reference, year_reference, week_reference } =
+    query_context
+  const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
+  const year = params.year || current_season.year
+  const week = params.week || 0
 
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    join_week: true,
-    join_table_clause: `league_player_projection_values as ${join_arguments.table_name}`,
-    additional_conditions: function () {
-      this.andOn(
-        `${join_arguments.table_name}.lid`,
-        '=',
-        db.raw('?', [league_id])
-      )
-    }
-  })
-}
+  players_query[join_method](join_table_clause, function () {
+    this.on(`${table_alias}.pid`, '=', pid_reference)
 
-const scoring_format_player_projection_points_join = (join_arguments) => {
-  const { params = {} } = join_arguments
-  const { scoring_format_hash } = get_default_params({ params })
-
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    join_week: !join_arguments.is_rest_of_season,
-    cast_join_week_to_string: true,
-    join_table_clause: `scoring_format_player_projection_points as ${join_arguments.table_name}`,
-    additional_conditions: function () {
-      this.andOn(
-        `${join_arguments.table_name}.scoring_format_hash`,
-        '=',
-        db.raw('?', [scoring_format_hash])
-      )
-      if (join_arguments.is_rest_of_season) {
+    if (join_year) {
+      if (year_reference) {
+        this.andOn(db.raw(`${table_alias}.year = ${year_reference}`))
+        if (params.year) {
+          const year_array = Array.isArray(year) ? year : [year]
+          if (year_array.length) {
+            this.andOn(
+              db.raw(`${table_alias}.year IN (${year_array.join(',')})`)
+            )
+          }
+        }
+      } else {
         this.andOn(
-          `${join_arguments.table_name}.week`,
+          `${table_alias}.year`,
           '=',
-          db.raw('?', ['ros'])
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
         )
       }
     }
-  })
-}
 
-const league_format_player_projection_values_join = (join_arguments) => {
-  const { params = {} } = join_arguments
-  const { league_format_hash } = get_default_params({ params })
-
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    join_week: !join_arguments.is_rest_of_season,
-    join_table_clause: `league_format_player_projection_values as ${join_arguments.table_name}`,
-    additional_conditions: function () {
-      this.andOn(
-        `${join_arguments.table_name}.league_format_hash`,
-        '=',
-        db.raw('?', [league_format_hash])
-      )
-      if (join_arguments.is_rest_of_season) {
+    if (join_week) {
+      if (week_reference) {
+        const week_clause = cast_join_week_to_string
+          ? `CAST(${week_reference} AS VARCHAR)`
+          : week_reference
+        this.andOn(db.raw(`${table_alias}.week = ${week_clause}`))
+        if (params.week) {
+          const week_array = Array.isArray(week)
+            ? week.map(String)
+            : [String(week)]
+          if (week_array.length) {
+            this.andOn(
+              db.raw(`${table_alias}.week IN (${week_array.join(',')})`)
+            )
+          }
+        }
+      } else {
         this.andOn(
-          `${join_arguments.table_name}.week`,
+          `${table_alias}.week`,
           '=',
-          db.raw('?', ['ros'])
+          db.raw('?', [String(Array.isArray(week) ? week[0] : week)])
         )
       }
+    }
+
+    if (additional_conditions) {
+      additional_conditions.call(this)
     }
   })
 }
 
-const projections_index_join = (join_arguments) => {
-  const { params = {} } = join_arguments
-  const { seas_type, nfl_week } = get_default_params({ params })
+const make_league_player_projection_source = () => ({
+  grain: 'player',
+  attach: ({ query_context, params, table_alias, join_type }) => {
+    const { league_id } = get_default_params({ params })
+    apply_projected_join({
+      query_context,
+      params,
+      table_alias,
+      join_type,
+      join_table_clause: `league_player_projection_values as ${table_alias}`,
+      join_year: true,
+      join_week: true,
+      additional_conditions() {
+        this.andOn(`${table_alias}.lid`, '=', db.raw('?', [league_id]))
+      }
+    })
+  }
+})
 
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    join_week: !join_arguments.is_rest_of_season,
-    join_table_clause: join_arguments.is_rest_of_season
-      ? `ros_projections as ${join_arguments.table_name}`
-      : `projections_index as ${join_arguments.table_name}`,
-    additional_conditions: function () {
-      if (!join_arguments.is_rest_of_season) {
+const make_league_format_player_projection_source = ({
+  is_rest_of_season = false
+} = {}) => ({
+  grain: 'player',
+  attach: ({ query_context, params, table_alias, join_type }) => {
+    const { league_format_hash } = get_default_params({ params })
+    apply_projected_join({
+      query_context,
+      params,
+      table_alias,
+      join_type,
+      join_table_clause: `league_format_player_projection_values as ${table_alias}`,
+      join_year: true,
+      join_week: !is_rest_of_season,
+      additional_conditions() {
         this.andOn(
-          `${join_arguments.table_name}.sourceid`,
+          `${table_alias}.league_format_hash`,
+          '=',
+          db.raw('?', [league_format_hash])
+        )
+        if (is_rest_of_season) {
+          this.andOn(`${table_alias}.week`, '=', db.raw('?', ['ros']))
+        }
+      }
+    })
+  }
+})
+
+const make_scoring_format_player_projection_source = ({
+  is_rest_of_season = false
+} = {}) => ({
+  grain: 'player',
+  attach: ({ query_context, params, table_alias, join_type }) => {
+    const { scoring_format_hash } = get_default_params({ params })
+    apply_projected_join({
+      query_context,
+      params,
+      table_alias,
+      join_type,
+      join_table_clause: `scoring_format_player_projection_points as ${table_alias}`,
+      join_year: true,
+      join_week: !is_rest_of_season,
+      cast_join_week_to_string: true,
+      additional_conditions() {
+        this.andOn(
+          `${table_alias}.scoring_format_hash`,
+          '=',
+          db.raw('?', [scoring_format_hash])
+        )
+        if (is_rest_of_season) {
+          this.andOn(`${table_alias}.week`, '=', db.raw('?', ['ros']))
+        }
+      }
+    })
+  }
+})
+
+const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
+  grain: 'player',
+  attach: ({ query_context, params, table_alias, join_type }) => {
+    const { seas_type, nfl_week } = get_default_params({ params })
+    const join_table_clause = is_rest_of_season
+      ? `ros_projections as ${table_alias}`
+      : `projections_index as ${table_alias}`
+    apply_projected_join({
+      query_context,
+      params,
+      table_alias,
+      join_type,
+      join_table_clause,
+      join_year: true,
+      join_week: !is_rest_of_season,
+      additional_conditions() {
+        if (is_rest_of_season) return
+        this.andOn(
+          `${table_alias}.sourceid`,
           '=',
           external_data_sources.AVERAGE
         )
         if (nfl_week) {
           this.andOn(
             db.raw(
-              `${join_arguments.table_name}.nfl_week_id IN (${nfl_week.map(() => '?').join(',')})`,
+              `${table_alias}.nfl_week_id IN (${nfl_week.map(() => '?').join(',')})`,
               nfl_week
             )
           )
         } else {
           this.andOn(
-            `${join_arguments.table_name}.seas_type`,
+            `${table_alias}.seas_type`,
             '=',
             db.raw('?', [seas_type])
           )
         }
       }
-    }
-  })
-}
+    })
+  }
+})
 
 const player_projected_points_added = {
   column_name: 'pts_added',
-  table_name: 'league_format_player_projection_values',
   table_alias: league_format_player_projection_values_table_alias,
-  join: league_format_player_projection_values_join
+  source_factory: make_league_format_player_projection_source
 }
 
 const player_projected_market_salary = {
   column_name: 'market_salary',
-  table_name: 'league_format_player_projection_values',
   table_alias: league_format_player_projection_values_table_alias,
-  join: league_format_player_projection_values_join
+  source_factory: make_league_format_player_projection_source
 }
 
 const player_projected_salary_adjusted_points_added = {
   column_name: 'salary_adj_pts_added',
-  table_name: 'league_player_projection_values',
   table_alias: league_player_projection_values_table_alias,
-  join: league_player_projection_values_join
+  source_factory: make_league_player_projection_source
 }
 
 const player_projected_points = {
   column_name: 'total',
-  table_name: 'scoring_format_player_projection_points',
   table_alias: scoring_format_player_projection_points_table_alias,
-  join: scoring_format_player_projection_points_join
+  source_factory: make_scoring_format_player_projection_source
 }
 
-const player_projected_pass_atts = {
-  column_name: 'pa',
-  table_name: 'projections_index',
+const projections_index_base = (column_name) => ({
+  column_name,
   table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
+  source_factory: make_projections_index_source
+})
 
-const player_projected_pass_comps = {
-  column_name: 'pc',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_pass_yds = {
-  column_name: 'py',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_pass_tds = {
-  column_name: 'tdp',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_pass_ints = {
-  column_name: 'ints',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_rush_atts = {
-  column_name: 'ra',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_rush_yds = {
-  column_name: 'ry',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_rush_tds = {
-  column_name: 'tdr',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_fumbles_lost = {
-  column_name: 'fuml',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_targets = {
-  column_name: 'trg',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_recs = {
-  column_name: 'rec',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_rec_yds = {
-  column_name: 'recy',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const player_projected_rec_tds = {
-  column_name: 'tdrec',
-  table_name: 'projections_index',
-  table_alias: projections_index_table_alias,
-  join: projections_index_join
-}
-
-const create_projected_stat = (base_object, stat_name) => {
+const create_projected_stat = (base, stat_name) => {
+  const { source_factory, ...rest } = base
   const prefixes = ['week', 'season', 'rest_of_season']
   return prefixes.reduce((acc, prefix) => {
+    const is_rest_of_season = prefix === 'rest_of_season'
     acc[`player_${prefix}_projected_${stat_name}`] = {
-      ...base_object,
+      ...rest,
       select_as: () => `${prefix}_projected_${stat_name}`,
-      granularity:
-        prefix === 'week'
-          ? ['player_year', 'player_year_week']
-          : ['player_year'],
-      get_cache_info: get_cache_info_for_player_projected_stats,
-      join: (join_arguments) =>
-        base_object.join({
-          ...join_arguments,
-          is_rest_of_season: prefix === 'rest_of_season'
-        })
+      source: source_factory({ is_rest_of_season }),
+      get_cache_info: get_cache_info_for_player_projected_stats
     }
     return acc
   }, {})
@@ -367,29 +353,27 @@ const projected_stat_column_defintions = {
   ),
   ...create_projected_stat(player_projected_points_added, 'points_added'),
   ...create_projected_stat(player_projected_points, 'points'),
-  ...create_projected_stat(player_projected_pass_atts, 'pass_atts'),
-  ...create_projected_stat(player_projected_pass_comps, 'pass_comps'),
-  ...create_projected_stat(player_projected_pass_yds, 'pass_yds'),
-  ...create_projected_stat(player_projected_pass_tds, 'pass_tds'),
-  ...create_projected_stat(player_projected_pass_ints, 'pass_ints'),
-  ...create_projected_stat(player_projected_rush_atts, 'rush_atts'),
-  ...create_projected_stat(player_projected_rush_yds, 'rush_yds'),
-  ...create_projected_stat(player_projected_rush_tds, 'rush_tds'),
-  ...create_projected_stat(player_projected_fumbles_lost, 'fumbles_lost'),
-  ...create_projected_stat(player_projected_targets, 'targets'),
-  ...create_projected_stat(player_projected_recs, 'recs'),
-  ...create_projected_stat(player_projected_rec_yds, 'rec_yds'),
-  ...create_projected_stat(player_projected_rec_tds, 'rec_tds')
+  ...create_projected_stat(projections_index_base('pa'), 'pass_atts'),
+  ...create_projected_stat(projections_index_base('pc'), 'pass_comps'),
+  ...create_projected_stat(projections_index_base('py'), 'pass_yds'),
+  ...create_projected_stat(projections_index_base('tdp'), 'pass_tds'),
+  ...create_projected_stat(projections_index_base('ints'), 'pass_ints'),
+  ...create_projected_stat(projections_index_base('ra'), 'rush_atts'),
+  ...create_projected_stat(projections_index_base('ry'), 'rush_yds'),
+  ...create_projected_stat(projections_index_base('tdr'), 'rush_tds'),
+  ...create_projected_stat(projections_index_base('fuml'), 'fumbles_lost'),
+  ...create_projected_stat(projections_index_base('trg'), 'targets'),
+  ...create_projected_stat(projections_index_base('rec'), 'recs'),
+  ...create_projected_stat(projections_index_base('recy'), 'rec_yds'),
+  ...create_projected_stat(projections_index_base('tdrec'), 'rec_tds')
 }
 
 export default {
   player_season_projected_inflation_adjusted_market_salary: {
     column_name: 'market_salary_adj',
-    table_name: 'league_player_projection_values',
     table_alias: league_player_projection_values_table_alias,
     select_as: () => 'player_season_projected_inflation_adjusted_market_salary',
-    join: league_player_projection_values_join,
-    granularity: ['player', 'player_year', 'player_year_week'],
+    source: make_league_player_projection_source(),
     get_cache_info: get_cache_info_for_player_projected_stats
   },
 
