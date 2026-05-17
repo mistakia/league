@@ -1,15 +1,6 @@
-import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { current_season } from '#constants'
-
-const get_cache_info = create_season_cache_info({
-  get_params: ({ params = {} } = {}) => {
-    const { year } = get_default_params({ params })
-    return { year }
-  }
-})
 
 const get_default_params = ({ params = {} } = {}) => {
   const default_params = {
@@ -29,59 +20,38 @@ const get_default_params = ({ params = {} } = {}) => {
   return default_params
 }
 
+const get_cache_info = create_season_cache_info({
+  get_params: ({ params = {} } = {}) => {
+    const { year } = get_default_params({ params })
+    return { year }
+  }
+})
+
 const generate_table_alias = ({ params = {} } = {}) => {
   const { year } = get_default_params({ params })
   const key = `player_adp_${year.join('_')}`
   return get_table_hash(key)
 }
 
-const add_player_adp_with_statement = ({
-  query,
-  params = {},
-  with_table_name,
-  where_clauses = [],
-  select_strings = [],
-  splits = []
-}) => {
-  const { year, adp_source_id, adp_type } = get_default_params({
-    params
-  })
-
-  const with_query = db('player_adp_index')
-    .select('pid')
-    .whereIn('source_id', adp_source_id)
-    .whereIn('adp_type', adp_type)
-    .whereIn('year', year)
-
-  // Add year to SELECT when splits are included
-  if (splits.includes('year')) {
-    with_query.select('year')
+const player_adp_source = {
+  table: 'player_adp_index',
+  grain: 'player_year',
+  key_columns: { pid: 'pid', year: 'year' },
+  year_default: (params) => get_default_params({ params }).year,
+  extra_predicates: (params) => {
+    const { adp_source_id, adp_type } = get_default_params({ params })
+    return [
+      { column: 'source_id', op: 'in', value: adp_source_id },
+      { column: 'adp_type', op: 'in', value: adp_type }
+    ]
   }
-
-  if (select_strings.length) {
-    for (const select_string of select_strings) {
-      with_query.select(db.raw(select_string))
-    }
-  }
-
-  if (where_clauses.length) {
-    for (const where_clause of where_clauses) {
-      with_query.whereRaw(where_clause)
-    }
-  }
-
-  query.with(with_table_name, with_query)
 }
 
 const create_player_adp_field = (field, select_as) => ({
   column_name: field,
   select_as: () => select_as,
-  table_name: 'player_adp_index',
   table_alias: generate_table_alias,
-  join: data_view_join_function,
-  with: add_player_adp_with_statement,
-  granularity: ['player_year'],
-  with_where: () => `player_adp_index.${field}`,
+  source: player_adp_source,
   get_cache_info
 })
 
