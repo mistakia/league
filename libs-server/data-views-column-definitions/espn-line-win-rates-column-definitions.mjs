@@ -1,5 +1,3 @@
-import db from '#db'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
@@ -17,28 +15,22 @@ const get_cache_info = create_exact_year_cache_info({
   get_year: (params) => get_default_params({ params }).year
 })
 
-const player_espn_line_join = (options) => {
-  data_view_join_function({
-    ...options,
-    additional_conditions: function ({
-      table_name,
-      params,
-      splits,
-      data_view_options
-    }) {
-      const { year, win_rate_type } = get_default_params({ params })
+const espn_player_win_rates_table_alias = ({ params = {} } = {}) => {
+  const { year, win_rate_type } = get_default_params({ params })
+  return get_table_hash(`espn_player_win_rates_${year}_${win_rate_type}`)
+}
 
-      this.andOn(
-        `${table_name}.espn_win_rate_type`,
-        '=',
-        db.raw('?', [win_rate_type])
-      )
-
-      if (!splits.includes('year')) {
-        this.andOn(`${table_name}.year`, '=', year)
-      }
+const espn_player_source = {
+  table: 'espn_player_win_rates_index',
+  grain: 'player_year',
+  key_columns: { pid: 'pid', year: 'year' },
+  year_default: (params) => [get_default_params({ params }).year],
+  extra_predicates: (params) => [
+    {
+      column: 'espn_win_rate_type',
+      value: get_default_params({ params }).win_rate_type
     }
-  })
+  ]
 }
 
 const espn_team_win_rates_table_alias = ({ params = {} } = {}) => {
@@ -67,11 +59,10 @@ const espn_team_source = {
 }
 
 const create_player_espn_line_column = (column_name) => ({
-  table_name: 'espn_player_win_rates_index',
   column_name,
   select_as: () => `espn_line_${column_name}`,
-  join: player_espn_line_join,
-  granularity: ['player_year'],
+  table_alias: espn_player_win_rates_table_alias,
+  source: espn_player_source,
   get_cache_info
 })
 
