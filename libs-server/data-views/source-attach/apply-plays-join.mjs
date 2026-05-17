@@ -1,13 +1,13 @@
 import db from '#db'
 
 // Shared source.attach helper for column-defs whose `with` callback builds a
-// pid+year(+week) CTE off `nfl_plays`. Mirrors data_view_join_function (no
-// flags) plus an optional `extra_conditions` callback for per-column predicates
-// like `pid_column`. Pid equality is always emitted; year/week predicates are
-// emitted only when the bucket's splits projected those columns onto the CTE.
-// Year/week references prefer from-table-aware data_view_options so from-
-// table-optimization scenarios resolve against the FROM-table aliases instead
-// of the unjoined player_years identity CTE.
+// pid+year(+week) CTE off `nfl_plays`. Accepts an optional `extra_conditions`
+// callback for per-column predicates like `pid_column`. Pid equality is
+// always emitted; year/week predicates are emitted only when the bucket's
+// splits projected those columns onto the CTE. Year/week references prefer
+// from-table-aware data_view_options so from-table-optimization scenarios
+// resolve against the FROM-table aliases instead of the unjoined player_years
+// identity CTE.
 export const apply_plays_join = ({
   query_context,
   params,

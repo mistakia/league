@@ -32,9 +32,9 @@ const generate_table_alias = ({ params = {} } = {}) => {
 
 const player_practice_source = {
   table: 'practice',
-  // Grain 'player': legacy data_view_join_function emitted pid-only equality
-  // regardless of cell granularity; the nfl_week_id filter collapses to one
-  // row per player.
+  // Grain 'player': the nfl_week_id filter collapses to one row per player,
+  // so pid-only equality is the correct join predicate regardless of the
+  // cell's split shape.
   grain: 'player',
   key_columns: { pid: 'pid' },
   extra_predicates: (params) => [

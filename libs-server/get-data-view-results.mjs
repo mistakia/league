@@ -1622,9 +1622,9 @@ export const get_data_view_results_query = async ({
   // active identity. query_context retains its identity-derived references
   // from build_query_context (bridges, output-aggregators, and other
   // identity-aware consumers read those values). data_view_options exposes
-  // the FROM-table-aware view for legacy consumers (select-string,
-  // data-view-join-function, add-player-year-teams-cte, rate-type plugins)
-  // that still join measures via the from-table's own pid/year/week columns.
+  // the FROM-table-aware view consumed by select-string emission and
+  // column-def attach functions that join measures via the from-table's own
+  // pid/year/week columns.
   const references = resolve_references({
     identity_id: query_context.identity_id,
     from_table_name: data_view_options.from_table_name

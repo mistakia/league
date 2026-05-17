@@ -18,11 +18,13 @@ const generate_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(`team_stats_from_plays__${key}`)
 }
 
-// Mirrors data_view_join_function with join_year_on_year_split=true. Two
-// shapes: player-identity (force_player_active=true) joins the *_player_team_
-// stats CTE by pid; team-identity joins the *_team_stats CTE by team. Year
-// and week predicates are emitted only when the bucket's splits projected
-// those columns onto the CTE.
+// Two shapes: player-identity (force_player_active=true) joins the
+// *_player_team_stats CTE by pid; team-identity joins the *_team_stats CTE
+// by team. Year and week predicates are emitted only when the bucket's
+// splits projected those columns onto the CTE. References are sourced
+// from data_view_options when available (FROM-table-aware) and fall back
+// to the identity-derived query_context defaults; player_year_teams_cte_name
+// lives only on query_context (set by the identity bridge).
 const apply_team_stats_join = ({
   query_context,
   params,
@@ -31,14 +33,12 @@ const apply_team_stats_join = ({
   splits = [],
   force_player_active
 }) => {
-  const dv = query_context.data_view_options || {}
-  const { players_query } = query_context
-  const pid_reference = dv.pid_reference ?? query_context.pid_reference
-  const team_reference = dv.team_reference ?? query_context.team_reference
-  const year_reference = dv.year_reference ?? query_context.year_reference
-  const week_reference = dv.week_reference ?? query_context.week_reference
-  const player_year_teams_cte_name =
-    dv.player_year_teams_cte_name ?? query_context.player_year_teams_cte_name
+  const dv = query_context.data_view_options
+  const { players_query, player_year_teams_cte_name } = query_context
+  const pid_reference = dv?.pid_reference ?? query_context.pid_reference
+  const team_reference = dv?.team_reference ?? query_context.team_reference
+  const year_reference = dv?.year_reference ?? query_context.year_reference
+  const week_reference = dv?.week_reference ?? query_context.week_reference
   const limit_to_player_active_games =
     force_player_active || params?.limit_to_player_active_games || false
   const join_on_team = !limit_to_player_active_games
@@ -209,11 +209,10 @@ const team_stat_from_plays = ({
         : `${args.table_name}_team_stats`
     },
     // grain set to the base identity (no implicit year/week extension): the
-    // attach reads splits to decide whether to emit year/week predicates,
-    // matching the legacy data_view_join_function shape. Using 'team_year' /
-    // 'player_year' would require the team-to-team-year bridge which mandates
-    // a non-empty year_range -- not provided for no-splits team-subject
-    // fixtures.
+    // attach reads splits to decide whether to emit year/week predicates.
+    // Using 'team_year' / 'player_year' would require the team-to-team-year
+    // bridge which mandates a non-empty year_range -- not provided for
+    // no-splits team-subject fixtures.
     source: {
       grain: force_player_active ? 'player' : 'team',
       attach: (attach_args) =>

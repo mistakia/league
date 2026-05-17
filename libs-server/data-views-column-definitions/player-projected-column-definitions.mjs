@@ -109,9 +109,9 @@ const league_format_player_projection_values_table_alias = ({
   )
 }
 
-// Wraps the legacy data_view_join_function semantics. Year and week predicates
-// follow query_context references when the cell exposes them (player_year /
-// player_year_week cells); otherwise they pin to the default params.
+// Year and week predicates follow query_context references when the cell
+// exposes them (player_year / player_year_week cells); otherwise they pin to
+// the default params.
 const apply_projected_join = ({
   query_context,
   params,

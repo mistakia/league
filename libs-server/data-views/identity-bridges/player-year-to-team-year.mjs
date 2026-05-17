@@ -8,9 +8,8 @@ export const mode = 'default'
 const CTE_NAME = 'player_year_teams'
 
 // Bridges may run in contexts where query_context.year_range is empty
-// (player-cell + team_year-source attach with no year split). Mirror the
-// legacy resolve_year_range in add-player-year-teams-cte.mjs by deriving
-// from params.year, falling back to current_season.year.
+// (player-cell + team_year-source attach with no year split). Derive from
+// params.year, falling back to current_season.year.
 const resolve_year_range = ({ query_context, params }) => {
   if (
     Array.isArray(query_context.year_range) &&

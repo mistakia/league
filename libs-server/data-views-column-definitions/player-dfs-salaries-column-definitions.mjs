@@ -40,9 +40,9 @@ const generate_table_alias = ({ params = {} } = {}) => {
 }
 
 const player_dfs_salaries_source = {
-  // Grain is 'player': legacy data_view_join_function emits pid-only equality
-  // regardless of cell granularity, and the CTE collapses each player to a
-  // single salary row via the nfl_week_id filter.
+  // Grain 'player': the CTE collapses each player to a single salary row
+  // via the nfl_week_id filter, so pid-only equality is the correct join
+  // predicate regardless of the cell's split shape.
   grain: 'player',
   attach: ({ query_context, params, table_alias, join_type }) => {
     const { nfl_week, career_year, career_game, platform_source_id } =
