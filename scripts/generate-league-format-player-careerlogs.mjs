@@ -30,6 +30,20 @@ const generate_league_format_player_careerlogs = async ({
   const player_seasons = await db('league_format_player_seasonlogs').where({
     league_format_hash
   })
+
+  // Partial-backfill guard: abort if any seasonlog row has the earned column
+  // populated but the net column NULL. Without this guard, the net sum would
+  // silently treat missing rows as zero and persist understated career totals
+  // that survive future re-derivations.
+  const partial_backfill_count = player_seasons.filter(
+    (s) => s.points_added_earned !== null && s.points_added_net === null
+  ).length
+  if (partial_backfill_count > 0) {
+    throw new Error(
+      `cannot generate careerlogs for ${league_format_hash}: ${partial_backfill_count} seasonlog rows have points_added_earned populated but points_added_net NULL. Re-run the seasonlog generator first.`
+    )
+  }
+
   const seasons_by_pid = groupBy(player_seasons, 'pid')
   const pids = Object.keys(seasons_by_pid)
   const draft_classes_query = await db('player')
@@ -63,7 +77,9 @@ const generate_league_format_player_careerlogs = async ({
     const second_season = sorted.slice(1, 2)
     const third_season = sorted.slice(2, 3)
 
-    const points_added = sum(seasons.map((s) => s.points_added))
+    const points_added_earned = sum(seasons.map((s) => s.points_added_earned))
+    const net_of = (s) => s.points_added_net ?? 0
+    const points_added_net = sum(seasons.map(net_of))
     const games = sum(seasons.map((s) => s.games))
     const startable_games = sum(seasons.map((s) => s.startable_games))
 
@@ -77,26 +93,45 @@ const generate_league_format_player_careerlogs = async ({
       draft_rank,
 
       startable_games,
-      points_added,
-      points_added_per_game: games ? points_added / games : null,
-      best_season_points_added_per_game: Math.max(
-        ...seasons.map((s) => s.points_added_per_game)
+      points_added_earned,
+      points_added_earned_per_game: games ? points_added_earned / games : null,
+      points_added_net,
+      points_added_net_per_game: games ? points_added_net / games : null,
+      best_season_points_added_earned_per_game: Math.max(
+        ...seasons.map((s) => s.points_added_earned_per_game ?? 0)
+      ),
+      best_season_points_added_net_per_game: Math.max(
+        ...seasons.map((s) => s.points_added_net_per_game ?? 0)
       ),
       best_season_earned_salary: Math.max(
         ...seasons.map((s) => s.earned_salary)
       ),
-      points_added_first_three_seas: sum(
-        first_three_seasons.map((s) => s.points_added)
+      points_added_earned_first_three_seasons: sum(
+        first_three_seasons.map((s) => s.points_added_earned)
       ),
-      points_added_first_four_seas: sum(
-        first_four_seasons.map((s) => s.points_added)
+      points_added_earned_first_four_seasons: sum(
+        first_four_seasons.map((s) => s.points_added_earned)
       ),
-      points_added_first_five_seas: sum(
-        first_five_seasons.map((s) => s.points_added)
+      points_added_earned_first_five_seasons: sum(
+        first_five_seasons.map((s) => s.points_added_earned)
       ),
-      points_added_first_seas: sum(first_season.map((s) => s.points_added)),
-      points_added_second_seas: sum(second_season.map((s) => s.points_added)),
-      points_added_third_seas: sum(third_season.map((s) => s.points_added))
+      points_added_earned_first_season: sum(
+        first_season.map((s) => s.points_added_earned)
+      ),
+      points_added_earned_second_season: sum(
+        second_season.map((s) => s.points_added_earned)
+      ),
+      points_added_earned_third_season: sum(
+        third_season.map((s) => s.points_added_earned)
+      ),
+      points_added_net_first_three_seasons: sum(
+        first_three_seasons.map(net_of)
+      ),
+      points_added_net_first_four_seasons: sum(first_four_seasons.map(net_of)),
+      points_added_net_first_five_seasons: sum(first_five_seasons.map(net_of)),
+      points_added_net_first_season: sum(first_season.map(net_of)),
+      points_added_net_second_season: sum(second_season.map(net_of)),
+      points_added_net_third_season: sum(third_season.map(net_of))
     })
   }
 

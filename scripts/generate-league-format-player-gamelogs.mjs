@@ -37,11 +37,13 @@ const generate_league_format_player_gamelogs = async ({
   for (const pid in result.players) {
     const item = result.players[pid]
 
+    const week_number = item.games[0].week
     inserts.push({
       pid,
       esbid: item.games[0].esbid,
       league_format_hash,
-      points_added: item.pts_added
+      points_added_earned: item.pts_added_earned,
+      points_added_net: item.pts_added_raw_by_week[week_number]
     })
   }
 

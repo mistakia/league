@@ -66,17 +66,19 @@ const calculate_points_added_baseline_season = async ({ league }) => {
     const sums = {}
     for (const year in byPosition) {
       const players = byPosition[year]
-      const sorted = players.sort((a, b) => b.pts_added - a.pts_added)
+      const sorted = players.sort(
+        (a, b) => b.pts_added_earned - a.pts_added_earned
+      )
       for (const [index, player] of sorted.entries()) {
         if (sums[index]) {
-          sums[index].pts_added += player.pts_added
+          sums[index].pts_added += player.pts_added_earned
           sums[index].value += player.value
           sums[index].points += player.points
         } else {
           sums[index] = {
             pos,
             rank: index + 1,
-            pts_added: player.pts_added,
+            pts_added: player.pts_added_earned,
             value: player.value,
             points: player.points
           }

@@ -1843,12 +1843,19 @@ const options = {
                 'Position rank for the week (when leagueId provided)',
               example: 3
             },
-            points_added: {
+            points_added_earned: {
               type: 'number',
               nullable: true,
               description:
-                'Points added above baseline (when leagueId provided)',
+                'Points added above baseline, positive-week sum (when leagueId provided)',
               example: 5.2
+            },
+            points_added_net: {
+              type: 'number',
+              nullable: true,
+              description:
+                'Points added above baseline, cumulative including negative weeks (when leagueId provided)',
+              example: 4.1
             },
             pa: {
               type: 'integer',

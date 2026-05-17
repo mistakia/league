@@ -180,7 +180,8 @@ router.get('/gamelogs/players', async (req, res) => {
         .select(
           'scoring_format_player_gamelogs.points',
           'scoring_format_player_gamelogs.pos_rnk',
-          'league_format_player_gamelogs.points_added'
+          'league_format_player_gamelogs.points_added_earned',
+          'league_format_player_gamelogs.points_added_net'
         )
         .where(function () {
           this.where(

@@ -145,20 +145,30 @@ const calculate_points_added = async ({
     points_by_position[pos] = []
   }
 
-  // calculate earned contract value
+  // The -999 sentinel guard applies to BOTH raw_by_week (prevents leak into
+  // persisted points_added_net) and earned_net (prevents shifting the aggregate
+  // by -999 * weeks_missed).
   let total_pts_added = 0
   for (const player of players) {
     player.pts_added.earned = 0
-    player.starts = Object.values(player.pts_added).filter((v) => v > 0).length
+    let earned_net = 0
+    const raw_by_week = {}
+    player.starts = 0
     player.points = sum(Object.values(player.points).map((p) => p.total))
-    for (const value of Object.values(player.pts_added)) {
-      if (value <= 0) {
-        continue
+    for (const [key, value] of Object.entries(player.pts_added)) {
+      const week_number = Number(key)
+      if (!Number.isFinite(week_number)) continue
+      if (value === -999) continue
+      raw_by_week[week_number] = value
+      earned_net += value
+      if (value > 0) {
+        player.starts += 1
+        player.pts_added.earned += value
+        total_pts_added += value
       }
-
-      player.pts_added.earned += value
-      total_pts_added += value
     }
+    player.pts_added.earned_net = earned_net
+    player.pts_added_raw_by_week = raw_by_week
 
     points_by_position[player.pos].push(player.points)
   }
@@ -177,7 +187,9 @@ const calculate_points_added = async ({
       rookie: player.nfl_draft_year === year,
       pos: player.pos,
       pos_rnk: player.pos_rnk,
-      pts_added: player.pts_added.earned,
+      pts_added_earned: player.pts_added.earned,
+      pts_added_net: player.pts_added.earned_net,
+      pts_added_raw_by_week: player.pts_added_raw_by_week,
       value: player.market_salary.earned,
       points: player.points,
       games: player.games,
@@ -216,7 +228,7 @@ const main = async () => {
       week
     })
     const top200 = Object.values(players)
-      .sort((a, b) => b.pts_added - a.pts_added)
+      .sort((a, b) => b.pts_added_earned - a.pts_added_earned)
       .slice(0, 200)
     const p = new Table()
     const getColor = (pos) => {
@@ -236,7 +248,7 @@ const main = async () => {
         {
           index: index + 1,
           name: player.player,
-          pts_added: player.pts_added.toFixed(2),
+          pts_added: player.pts_added_earned.toFixed(2),
           points: player.points.toFixed(2),
           rank: `${player.pos}${player.pos_rnk}`,
           value: `$${player.value}`,

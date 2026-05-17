@@ -38,10 +38,10 @@ const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
       league_format_hash,
       rank: Number(rank),
       median_best_season_points_added_per_game: median(
-        players.map((p) => p.best_season_points_added_per_game)
+        players.map((p) => p.best_season_points_added_earned_per_game)
       ),
       median_career_points_added_per_game: median(
-        players.map((p) => p.points_added_per_game)
+        players.map((p) => p.points_added_earned_per_game)
       )
     })
   }

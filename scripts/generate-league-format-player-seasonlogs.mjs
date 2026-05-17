@@ -52,7 +52,12 @@ const generate_league_format_player_seasonlogs = async ({
     const pos = player_gamelogs[0].pos
 
     const games = player_gamelogs.length
-    const points_added = sum(player_gamelogs.map((g) => g.points_added))
+    const points_added_earned = sum(
+      player_gamelogs.map((g) => g.points_added_earned)
+    )
+    const points_added_net = sum(
+      player_gamelogs.map((g) => g.points_added_net)
+    )
 
     // process / create inserts
     inserts.push({
@@ -60,53 +65,63 @@ const generate_league_format_player_seasonlogs = async ({
       year,
       league_format_hash,
       pos,
-      points_added,
-      points_added_per_game: points_added / games,
-      startable_games: player_gamelogs.filter((p) => p.points_added > 0).length
+      points_added_earned,
+      points_added_earned_per_game: points_added_earned / games,
+      points_added_net,
+      points_added_net_per_game: points_added_net / games,
+      startable_games: player_gamelogs.filter(
+        (p) => p.points_added_earned > 0
+      ).length
     })
   }
 
   const seasons_by_pos = groupBy(inserts, 'pos')
-  const sorted_by_points_added_by_pos = {}
-  const sorted_by_points_added_per_game_by_pos = {}
+  const sorted_by_points_added_earned_by_pos = {}
+  const sorted_by_points_added_earned_per_game_by_pos = {}
   for (const pos in seasons_by_pos) {
-    sorted_by_points_added_by_pos[pos] = seasons_by_pos[pos]
-      .map((i) => i.points_added)
+    sorted_by_points_added_earned_by_pos[pos] = seasons_by_pos[pos]
+      .map((i) => i.points_added_earned)
       .sort((a, b) => b - a)
-    sorted_by_points_added_per_game_by_pos[pos] = seasons_by_pos[pos]
-      .map((i) => i.points_added_per_game)
+    sorted_by_points_added_earned_per_game_by_pos[pos] = seasons_by_pos[pos]
+      .map((i) => i.points_added_earned_per_game)
       .sort((a, b) => b - a)
   }
 
-  const sorted_by_points_added = inserts
-    .map((i) => i.points_added)
+  const sorted_by_points_added_earned = inserts
+    .map((i) => i.points_added_earned)
     .sort((a, b) => b - a)
-  const sorted_by_points_added_per_game = inserts
-    .map((i) => i.points_added_per_game)
+  const sorted_by_points_added_earned_per_game = inserts
+    .map((i) => i.points_added_earned_per_game)
     .sort((a, b) => b - a)
 
   // Calculate total points added for the season
-  const total_points_added = sum(inserts.map((i) => i.points_added))
+  const total_points_added_earned = sum(
+    inserts.map((i) => i.points_added_earned)
+  )
 
   // Calculate the rate of $ per points added
   const total_league_salary = league_format.cap * league_format.num_teams
-  const rate_per_point = total_league_salary / total_points_added
+  const rate_per_point = total_league_salary / total_points_added_earned
 
   for (const insert of inserts) {
-    insert.points_added_rnk =
-      sorted_by_points_added.indexOf(insert.points_added) + 1
-    insert.points_added_pos_rnk =
-      sorted_by_points_added_by_pos[insert.pos].indexOf(insert.points_added) + 1
-    insert.points_added_per_game_rnk =
-      sorted_by_points_added_per_game.indexOf(insert.points_added_per_game) + 1
-    insert.points_added_per_game_pos_rnk =
-      sorted_by_points_added_per_game_by_pos[insert.pos].indexOf(
-        insert.points_added_per_game
+    insert.points_added_earned_rank =
+      sorted_by_points_added_earned.indexOf(insert.points_added_earned) + 1
+    insert.points_added_earned_position_rank =
+      sorted_by_points_added_earned_by_pos[insert.pos].indexOf(
+        insert.points_added_earned
+      ) + 1
+    insert.points_added_earned_per_game_rank =
+      sorted_by_points_added_earned_per_game.indexOf(
+        insert.points_added_earned_per_game
+      ) + 1
+    insert.points_added_earned_per_game_position_rank =
+      sorted_by_points_added_earned_per_game_by_pos[insert.pos].indexOf(
+        insert.points_added_earned_per_game
       ) + 1
 
     // Calculate earned salary
     insert.earned_salary = Number(
-      (insert.points_added * rate_per_point).toFixed(2)
+      (insert.points_added_earned * rate_per_point).toFixed(2)
     )
 
     delete insert.pos

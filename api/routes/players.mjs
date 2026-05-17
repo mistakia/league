@@ -625,7 +625,8 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                     esbid: "2024011401"
  *                     points: 24.5
  *                     pos_rnk: 3
- *                     points_added: 8.2
+ *                     points_added_earned: 8.2
+ *                     points_added_net: 6.8
  *                     day: "Sunday"
  *                     date: "2024-01-14"
  *                     week: 18
@@ -640,7 +641,8 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                     esbid: "2024011401"
  *                     points: 24.5
  *                     pos_rnk: 3
- *                     points_added: 8.2
+ *                     points_added_earned: 8.2
+ *                     points_added_net: 6.8
  *                     day: "Sunday"
  *                     date: "2024-01-14"
  *                     week: 18
@@ -664,7 +666,8 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                     esbid: "2024011401"
  *                     points: 18.7
  *                     pos_rnk: 5
- *                     points_added: 6.1
+ *                     points_added_earned: 6.1
+ *                     points_added_net: 4.4
  *                     day: "Sunday"
  *                     date: "2024-01-14"
  *                     week: 18
@@ -742,7 +745,8 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       .select(
         'scoring_format_player_gamelogs.points',
         'scoring_format_player_gamelogs.pos_rnk',
-        'league_format_player_gamelogs.points_added'
+        'league_format_player_gamelogs.points_added_earned',
+        'league_format_player_gamelogs.points_added_net'
       )
       .where(function () {
         this.where(
@@ -1175,12 +1179,14 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
         'scoring_format_player_seasonlogs.points_pos_rnk',
         'scoring_format_player_seasonlogs.points_per_game_rnk',
         'scoring_format_player_seasonlogs.points_per_game_pos_rnk',
-        'league_format_player_seasonlogs.points_added',
-        'league_format_player_seasonlogs.points_added_per_game',
-        'league_format_player_seasonlogs.points_added_rnk',
-        'league_format_player_seasonlogs.points_added_pos_rnk',
-        'league_format_player_seasonlogs.points_added_per_game_rnk',
-        'league_format_player_seasonlogs.points_added_per_game_pos_rnk',
+        'league_format_player_seasonlogs.points_added_earned',
+        'league_format_player_seasonlogs.points_added_earned_per_game',
+        'league_format_player_seasonlogs.points_added_earned_rank',
+        'league_format_player_seasonlogs.points_added_earned_position_rank',
+        'league_format_player_seasonlogs.points_added_earned_per_game_rank',
+        'league_format_player_seasonlogs.points_added_earned_per_game_position_rank',
+        'league_format_player_seasonlogs.points_added_net',
+        'league_format_player_seasonlogs.points_added_net_per_game',
         'league_format_player_seasonlogs.startable_games',
         'league_format_player_seasonlogs.earned_salary'
       )

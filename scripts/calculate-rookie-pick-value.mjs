@@ -37,14 +37,16 @@ const calculateRookiePickValue = async ({ year }) => {
   for (const pid in rookieSeason) {
     const playerRookieSeason = rookieSeason[pid]
     const playerResult = {
-      pts_added: playerRookieSeason.pts_added,
+      pts_added_earned: playerRookieSeason.pts_added_earned,
+      pts_added_net: playerRookieSeason.pts_added_net,
       value: playerRookieSeason.value,
       points: playerRookieSeason.points
     }
     for (let i = 2; i <= limit; i++) {
       const playerSeason = seasons[i][pid]
       if (playerSeason) {
-        playerResult.pts_added += playerSeason.pts_added
+        playerResult.pts_added_earned += playerSeason.pts_added_earned
+        playerResult.pts_added_net += playerSeason.pts_added_net
         playerResult.value += playerSeason.value
         playerResult.points += playerSeason.points
       }
@@ -86,7 +88,7 @@ if (is_main(import.meta.url)) {
           {
             index: index + 1,
             pid: player.pid,
-            pts_added: player.pts_added.toFixed(2),
+            pts_added: player.pts_added_earned.toFixed(2),
             points: player.points.toFixed(2),
             position_rank: player.position_rank,
             value: player.value,

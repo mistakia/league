@@ -45,37 +45,45 @@ export default {
     'The number of startable games for the player in a season based on league format',
   player_earned_salary_from_seasonlogs:
     "The player's points added converted to a salary amount for a season based on league format",
-  player_points_added_from_seasonlogs:
-    'The points added by the player in a season based on league format',
-  player_points_added_per_game_from_seasonlogs:
-    'The points added per game by the player in a season based on league format',
-  player_points_added_rank_from_seasonlogs:
-    "The rank of the player's points added in a season based on league format",
-  player_points_added_position_rank_from_seasonlogs:
-    "The position rank of the player's points added in a season based on league format",
+  player_points_added_earned_from_seasonlogs:
+    'The points added by the player in a season based on league format (positive-week sum, earned)',
+  player_points_added_earned_per_game_from_seasonlogs:
+    'The points added per game by the player in a season based on league format (positive-week sum, earned)',
+  player_points_added_earned_rank_from_seasonlogs:
+    "The rank of the player's earned points added in a season based on league format",
+  player_points_added_earned_position_rank_from_seasonlogs:
+    "The position rank of the player's earned points added in a season based on league format",
+  player_points_added_net_from_seasonlogs:
+    'The points added by the player in a season based on league format (cumulative, positive + negative weeks)',
+  player_points_added_net_per_game_from_seasonlogs:
+    'The points added per game by the player in a season based on league format (cumulative, positive + negative weeks)',
 
   player_startable_games_from_careerlogs:
     'The number of startable games for the player in their career based on league format',
-  player_points_added_from_careerlogs:
-    'The points added by the player in their career based on league format',
-  player_points_added_per_game_from_careerlogs:
-    'The points added per game by the player in their career based on league format',
-  player_best_season_points_added_per_game_from_careerlogs:
-    "The best season's points added per game by the player in their career based on league format",
+  player_points_added_earned_from_careerlogs:
+    'The points added by the player in their career based on league format (positive-week sum, earned)',
+  player_points_added_earned_per_game_from_careerlogs:
+    'The points added per game by the player in their career based on league format (positive-week sum, earned)',
+  player_best_season_points_added_earned_per_game_from_careerlogs:
+    "The best season's earned points added per game by the player in their career based on league format",
   player_best_season_earned_salary_from_careerlogs:
     "The best season's earned salary by the player in their career based on league format",
-  player_points_added_first_three_seasons_from_careerlogs:
-    "The points added in the first three seasons of the player's career based on league format",
-  player_points_added_first_four_seasons_from_careerlogs:
-    "The points added in the first four seasons of the player's career based on league format",
-  player_points_added_first_five_seasons_from_careerlogs:
-    "The points added in the first five seasons of the player's career based on league format",
-  player_points_added_first_season_from_careerlogs:
-    "The points added in the first season (rookie year) of the player's career based on league format",
-  player_points_added_second_season_from_careerlogs:
-    "The points added in the second season of the player's career based on league format",
-  player_points_added_third_season_from_careerlogs:
-    "The points added in the third season of the player's career based on league format",
+  player_points_added_earned_first_three_seasons_from_careerlogs:
+    "The earned points added in the first three seasons of the player's career based on league format",
+  player_points_added_earned_first_four_seasons_from_careerlogs:
+    "The earned points added in the first four seasons of the player's career based on league format",
+  player_points_added_earned_first_five_seasons_from_careerlogs:
+    "The earned points added in the first five seasons of the player's career based on league format",
+  player_points_added_earned_first_season_from_careerlogs:
+    "The earned points added in the first season (rookie year) of the player's career based on league format",
+  player_points_added_earned_second_season_from_careerlogs:
+    "The earned points added in the second season of the player's career based on league format",
+  player_points_added_earned_third_season_from_careerlogs:
+    "The earned points added in the third season of the player's career based on league format",
+  player_points_added_net_from_careerlogs:
+    'The points added by the player in their career based on league format (cumulative, positive + negative weeks)',
+  player_points_added_net_per_game_from_careerlogs:
+    'The points added per game by the player in their career based on league format (cumulative, positive + negative weeks)',
   player_draft_rank_from_careerlogs:
     'The draft class rank of the player based on their draft position',
 

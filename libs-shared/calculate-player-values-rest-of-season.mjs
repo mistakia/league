@@ -13,9 +13,11 @@ export default function ({ players, league }) {
 
   for (const player of players) {
     let player_ros_pts_added = 0
+    let player_ros_pts_added_net = 0
     for (const [week, pts_added] of Object.entries(player.pts_added)) {
       const wk = Number(week)
       if (wk && wk >= current_season.week) {
+        player_ros_pts_added_net += pts_added
         if (pts_added < 0) {
           continue
         }
@@ -25,6 +27,7 @@ export default function ({ players, league }) {
       }
     }
     player.pts_added.ros = player_ros_pts_added
+    player.pts_added.ros_net = player_ros_pts_added_net
   }
 
   // calculate ros contract value

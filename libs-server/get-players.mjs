@@ -286,12 +286,14 @@ export default async function ({
   if (league_format_hash) {
     const league_format_player_seasonlogs_selects = [
       'league_format_player_seasonlogs.startable_games',
-      'league_format_player_seasonlogs.points_added',
-      'league_format_player_seasonlogs.points_added_per_game',
-      'league_format_player_seasonlogs.points_added_rnk',
-      'league_format_player_seasonlogs.points_added_pos_rnk',
-      'league_format_player_seasonlogs.points_added_per_game_rnk',
-      'league_format_player_seasonlogs.points_added_per_game_pos_rnk'
+      'league_format_player_seasonlogs.points_added_earned',
+      'league_format_player_seasonlogs.points_added_earned_per_game',
+      'league_format_player_seasonlogs.points_added_earned_rank',
+      'league_format_player_seasonlogs.points_added_earned_position_rank',
+      'league_format_player_seasonlogs.points_added_earned_per_game_rank',
+      'league_format_player_seasonlogs.points_added_earned_per_game_position_rank',
+      'league_format_player_seasonlogs.points_added_net',
+      'league_format_player_seasonlogs.points_added_net_per_game'
     ]
     query
       .leftJoin('league_format_player_seasonlogs', function () {

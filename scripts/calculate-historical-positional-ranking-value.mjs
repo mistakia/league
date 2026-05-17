@@ -41,14 +41,14 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
       const players = byPosition[year]
       for (const player of players) {
         if (sums[player.pos_rnk]) {
-          sums[player.pos_rnk].pts_added += player.pts_added
+          sums[player.pos_rnk].pts_added += player.pts_added_earned
           sums[player.pos_rnk].value += player.value
           sums[player.pos_rnk].points += player.points
         } else {
           sums[player.pos_rnk] = {
             pos,
             rank: player.pos_rnk,
-            pts_added: player.pts_added,
+            pts_added: player.pts_added_earned,
             value: player.value,
             points: player.points
           }
@@ -111,7 +111,7 @@ if (is_main(import.meta.url)) {
       p.addRow(
         {
           position: `${player.pos}${player.rank}`,
-          pts_added: player.pts_added.toFixed(1),
+          pts_added: player.pts_added_earned.toFixed(1),
           regression: player.reg,
           actual: player.value.toFixed(2)
         },

@@ -144,60 +144,80 @@ export default {
     create_field_from_league_format_player_seasonlogs('startable_games'),
   player_earned_salary_from_seasonlogs:
     create_field_from_league_format_player_seasonlogs('earned_salary'),
-  player_points_added_from_seasonlogs:
-    create_field_from_league_format_player_seasonlogs('points_added'),
-  player_points_added_per_game_from_seasonlogs:
-    create_field_from_league_format_player_seasonlogs('points_added_per_game'),
-  player_points_added_rank_from_seasonlogs:
-    create_field_from_league_format_player_seasonlogs('points_added_rnk'),
-  player_points_added_position_rank_from_seasonlogs:
-    create_field_from_league_format_player_seasonlogs('points_added_pos_rnk'),
-  player_points_added_per_game_rank_from_seasonlogs:
+  player_points_added_earned_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs('points_added_earned'),
+  player_points_added_earned_per_game_from_seasonlogs:
     create_field_from_league_format_player_seasonlogs(
-      'points_added_per_game_rnk'
+      'points_added_earned_per_game'
     ),
-  player_points_added_per_game_position_rank_from_seasonlogs:
+  player_points_added_earned_rank_from_seasonlogs:
     create_field_from_league_format_player_seasonlogs(
-      'points_added_per_game_pos_rnk'
+      'points_added_earned_rank'
+    ),
+  player_points_added_earned_position_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_earned_position_rank'
+    ),
+  player_points_added_earned_per_game_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_earned_per_game_rank'
+    ),
+  player_points_added_earned_per_game_position_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_earned_per_game_position_rank'
+    ),
+  player_points_added_net_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs('points_added_net'),
+  player_points_added_net_per_game_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_net_per_game'
     ),
 
   player_startable_games_from_careerlogs:
     create_field_from_league_format_player_careerlogs('startable_games'),
-  player_points_added_from_careerlogs:
-    create_field_from_league_format_player_careerlogs('points_added'),
-  player_points_added_per_game_from_careerlogs:
-    create_field_from_league_format_player_careerlogs('points_added_per_game'),
-  player_best_season_points_added_per_game_from_careerlogs:
+  player_points_added_earned_from_careerlogs:
+    create_field_from_league_format_player_careerlogs('points_added_earned'),
+  player_points_added_earned_per_game_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
-      'best_season_points_added_per_game'
+      'points_added_earned_per_game'
+    ),
+  player_best_season_points_added_earned_per_game_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'best_season_points_added_earned_per_game'
     ),
   player_best_season_earned_salary_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
       'best_season_earned_salary'
     ),
-  player_points_added_first_three_seasons_from_careerlogs:
+  player_points_added_earned_first_three_seasons_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
-      'points_added_first_three_seas'
+      'points_added_earned_first_three_seasons'
     ),
-  player_points_added_first_four_seasons_from_careerlogs:
+  player_points_added_earned_first_four_seasons_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
-      'points_added_first_four_seas'
+      'points_added_earned_first_four_seasons'
     ),
-  player_points_added_first_five_seasons_from_careerlogs:
+  player_points_added_earned_first_five_seasons_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
-      'points_added_first_five_seas'
+      'points_added_earned_first_five_seasons'
     ),
-  player_points_added_first_season_from_careerlogs:
+  player_points_added_earned_first_season_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
-      'points_added_first_seas'
+      'points_added_earned_first_season'
     ),
-  player_points_added_second_season_from_careerlogs:
+  player_points_added_earned_second_season_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
-      'points_added_second_seas'
+      'points_added_earned_second_season'
     ),
-  player_points_added_third_season_from_careerlogs:
+  player_points_added_earned_third_season_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
-      'points_added_third_seas'
+      'points_added_earned_third_season'
+    ),
+  player_points_added_net_from_careerlogs:
+    create_field_from_league_format_player_careerlogs('points_added_net'),
+  player_points_added_net_per_game_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'points_added_net_per_game'
     ),
   player_draft_rank_from_careerlogs:
     create_field_from_league_format_player_careerlogs('draft_rank')

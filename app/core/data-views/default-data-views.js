@@ -20,26 +20,26 @@ export const default_data_views = {
     table_state: {
       sort: [
         {
-          column_id: 'player_points_added_from_seasonlogs',
+          column_id: 'player_points_added_earned_from_seasonlogs',
           desc: true
         }
       ],
       prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
       columns: [
         {
-          column_id: 'player_points_added_from_seasonlogs',
+          column_id: 'player_points_added_earned_from_seasonlogs',
           params: {
             year: [current_season.year]
           }
         },
         {
-          column_id: 'player_points_added_rank_from_seasonlogs',
+          column_id: 'player_points_added_earned_rank_from_seasonlogs',
           params: {
             year: [current_season.year]
           }
         },
         {
-          column_id: 'player_points_added_position_rank_from_seasonlogs',
+          column_id: 'player_points_added_earned_position_rank_from_seasonlogs',
           params: {
             year: [current_season.year]
           }
