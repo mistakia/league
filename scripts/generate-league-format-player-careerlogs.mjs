@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { sum, groupBy } from '#libs-shared'
 import { fantasy_positions } from '#constants'
-import { is_main, getLeague } from '#libs-server'
+import { is_main, getLeague, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 const initialize_cli = () => {
@@ -160,10 +160,17 @@ const generate_league_format_player_careerlogs = async ({
     log(
       `updating ${inserts.length} league players for league_format ${league_format_hash}`
     )
-    await db('league_format_player_careerlogs')
-      .insert(inserts)
-      .onConflict(['pid', 'league_format_hash'])
-      .merge()
+    // 23 columns per row * thousands of players exceeds Postgres' 65535
+    // bind-parameter wire-protocol limit on a single insert; batch.
+    await batch_insert({
+      items: inserts,
+      save: (items) =>
+        db('league_format_player_careerlogs')
+          .insert(items)
+          .onConflict(['pid', 'league_format_hash'])
+          .merge(),
+      batch_size: 1000
+    })
   }
 }
 
