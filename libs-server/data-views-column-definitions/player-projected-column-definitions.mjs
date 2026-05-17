@@ -339,6 +339,14 @@ const create_projected_stat = (base, stat_name) => {
       ...rest,
       select_as: () => `${prefix}_projected_${stat_name}`,
       source: source_factory({ is_rest_of_season }),
+      // Retained during the parallel-path window: group_tables_by_supported_
+      // splits in get-data-view-results.mjs buckets tables by their granularity
+      // to decide split routing. Step 6's source-attach reachability walk
+      // replaces this; until then the field stays to preserve the legacy
+      // bucket key. No result-set baseline covers the projected-stat fixtures,
+      // so dropping silently risks an unverified regression.
+      granularity:
+        prefix === 'week' ? ['player_year', 'player_year_week'] : ['player_year'],
       get_cache_info: get_cache_info_for_player_projected_stats
     }
     return acc
@@ -374,6 +382,7 @@ export default {
     table_alias: league_player_projection_values_table_alias,
     select_as: () => 'player_season_projected_inflation_adjusted_market_salary',
     source: make_league_player_projection_source(),
+    granularity: ['player', 'player_year', 'player_year_week'],
     get_cache_info: get_cache_info_for_player_projected_stats
   },
 
