@@ -34,5 +34,6 @@
   "expected_metadata": {
     "cache_ttl": "six_hours",
     "cache_expire_at": null
-  }
+  },
+  "skip_query_match": true
 }

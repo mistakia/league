@@ -39,6 +39,21 @@ export const attach_source = ({
 
   const cell_identity = query_context.identity_id
   const mode = resolve_mode(params)
+
+  // Rules need from-table-aware references: the joined source attaches to
+  // whatever's actually in the FROM clause. query_context's defaults are
+  // identity-aware and reference identity CTEs (player_years, team_years)
+  // which aren't joined when from_table is a fact table. Identity-bridges
+  // still read the identity-aware values directly from query_context.
+  const dv = query_context.data_view_options || {}
+  const rule_ctx = {
+    ...query_context,
+    pid_reference: dv.pid_reference ?? query_context.pid_reference,
+    team_reference: dv.team_reference ?? query_context.team_reference,
+    year_reference: dv.year_reference ?? query_context.year_reference,
+    week_reference: dv.week_reference ?? query_context.week_reference
+  }
+
   let rule = resolve_rule(cell_identity, source.grain, mode)
   if (!rule && mode !== 'default') {
     log(
@@ -68,9 +83,10 @@ export const attach_source = ({
 
   if (source.table) {
     const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
-    const target = table_alias
-      ? `${source.table} as ${table_alias}`
-      : source.table
+    const target =
+      table_alias && table_alias !== source.table
+        ? `${source.table} as ${table_alias}`
+        : source.table
     const extras =
       typeof source.extra_predicates === 'function'
         ? source.extra_predicates(params) || []
@@ -82,7 +98,7 @@ export const attach_source = ({
 
     players_query[join_method](target, function () {
       rule.emit_predicate({
-        query_context,
+        query_context: rule_ctx,
         source,
         table_alias,
         params,

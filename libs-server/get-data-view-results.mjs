@@ -868,9 +868,10 @@ const is_year_offset_range = (params) =>
   params.year_offset[0] !== params.year_offset[1]
 
 const get_table_name = ({ column_definition, column_params, splits }) => {
-  return column_definition.table_alias
-    ? column_definition.table_alias({ params: column_params, splits })
-    : column_definition.table_name
+  if (column_definition.table_alias) {
+    return column_definition.table_alias({ params: column_params, splits })
+  }
+  return column_definition.table_name || column_definition.source?.table
 }
 
 const get_column_name_from_main_select = (column_definition, column_index) => {
