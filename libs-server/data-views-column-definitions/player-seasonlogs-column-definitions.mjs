@@ -1,7 +1,5 @@
-import db from '#db'
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { single_year, seas_type } from '#libs-shared/common-column-params.mjs'
 
@@ -27,39 +25,26 @@ const player_seasonlogs_table_alias = ({ params = {} }) => {
   return get_table_hash(`player_seasonlogs_${year}_${seasType}`)
 }
 
-const player_seasonlogs_join = (join_arguments) => {
-  const additional_conditions = function ({ params, table_name, splits }) {
-    const { single_year: year, seas_type: seasType } = get_default_params({
-      params
-    })
-
-    this.andOn(db.raw(`${table_name}.seas_type = '${seasType}'`))
-
-    if (!splits.includes('year')) {
-      this.andOn(db.raw(`${table_name}.year = ${year}`))
-    }
-  }
-
-  return data_view_join_function({
-    ...join_arguments,
-    join_table_clause: `player_seasonlogs as ${join_arguments.table_name}`,
-    additional_conditions,
-    skip_week_split_join: true // Skip automatic week join for week splits
-  })
+const player_seasonlogs_source = {
+  table: 'player_seasonlogs',
+  grain: 'player_year',
+  key_columns: { pid: 'pid', year: 'year' },
+  year_default: (params) => get_default_params({ params }).single_year,
+  extra_predicates: (params) => [
+    { column: 'seas_type', value: get_default_params({ params }).seas_type }
+  ]
 }
 
 export default {
   player_career_year: {
-    table_name: 'player_seasonlogs',
     column_name: 'career_year',
     table_alias: player_seasonlogs_table_alias,
-    join: player_seasonlogs_join,
+    source: player_seasonlogs_source,
     main_select: ({ column_index, table_name }) => [
       `${table_name}.career_year as career_year_${column_index}`
     ],
     main_where: ({ table_name }) => `${table_name}.career_year`,
     main_group_by: ({ table_name }) => [`${table_name}.career_year`],
-    granularity: ['player_year', 'player_year_week'],
     column_params: {
       year: single_year,
       seas_type
