@@ -66,45 +66,49 @@ export const attach_source = ({
     })
   }
 
+  if (source.table) {
+    const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
+    const target = table_alias
+      ? `${source.table} as ${table_alias}`
+      : source.table
+    const extras =
+      typeof source.extra_predicates === 'function'
+        ? source.extra_predicates(params) || []
+        : []
+    const { db } = query_context
+
+    const qualify = (col) =>
+      col.includes('.') ? col : `${table_alias || source.table}.${col}`
+
+    players_query[join_method](target, function () {
+      rule.emit_predicate({
+        query_context,
+        source,
+        table_alias,
+        params,
+        builder: this
+      })
+      for (const p of extras) {
+        const op = p.op || '='
+        const col = qualify(p.column)
+        if (op === '=') {
+          this.andOn(col, '=', db.raw('?', [p.value]))
+        } else if (op === 'in') {
+          this.andOnIn(col, p.value)
+        } else if (op === 'between') {
+          this.andOnBetween(col, p.value)
+        } else {
+          throw new Error(
+            `Unknown source.extra_predicates op: ${op} (column_id=${column_def.column_id})`
+          )
+        }
+      }
+    })
+  }
+
+  // attach runs AFTER the primary leftJoin so secondary joins/WHEREs that
+  // reference the primary alias resolve in the SQL's left-to-right order.
   if (typeof source.attach === 'function') {
     source.attach({ query_context, params, table_alias })
   }
-
-  if (!source.table) return
-
-  const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
-  const target = table_alias ? `${source.table} as ${table_alias}` : source.table
-  const extras =
-    typeof source.extra_predicates === 'function'
-      ? source.extra_predicates(params) || []
-      : []
-  const { db } = query_context
-
-  const qualify = (col) =>
-    col.includes('.') ? col : `${table_alias || source.table}.${col}`
-
-  players_query[join_method](target, function () {
-    rule.emit_predicate({
-      query_context,
-      source,
-      table_alias,
-      params,
-      builder: this
-    })
-    for (const p of extras) {
-      const op = p.op || '='
-      const col = qualify(p.column)
-      if (op === '=') {
-        this.andOn(col, '=', db.raw('?', [p.value]))
-      } else if (op === 'in') {
-        this.andOnIn(col, p.value)
-      } else if (op === 'between') {
-        this.andOnBetween(col, p.value)
-      } else {
-        throw new Error(
-          `Unknown source.extra_predicates op: ${op} (column_id=${column_def.column_id})`
-        )
-      }
-    }
-  })
 }

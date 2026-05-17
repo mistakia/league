@@ -1,7 +1,5 @@
-import db from '#db'
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { career_year, year } from '#libs-shared/common-column-params.mjs'
 
@@ -47,25 +45,23 @@ const pff_player_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const pff_player_seasonlogs_join = (join_arguments) => {
-  const { query, table_name, params = {} } = join_arguments
-  const { career_year: career_year_param } = get_pff_params({ params })
-
-  // First, do the normal PFF join
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    default_year: current_season.stats_season_year,
-    join_table_clause: `pff_player_seasonlogs as ${table_name}`
-  })
-
-  // If career_year is specified, add a secondary join to player_seasonlogs for filtering
-  if (career_year_param.length) {
-    const career_year_alias = `${table_name}_career_year`
-    query
+const pff_player_source = {
+  table: 'pff_player_seasonlogs',
+  grain: 'player_year',
+  key_columns: { pid: 'pid', year: 'year' },
+  year_default: (params) => get_pff_params({ params }).year.map(Number),
+  attach: ({ query_context, params, table_alias }) => {
+    const { career_year: career_year_param } = get_pff_params({ params })
+    if (!career_year_param.length) return
+    // Secondary INNER join + WHERE filter to constrain rows by career_year.
+    // References the primary leftJoin's alias; Knex assembles both joins at
+    // compile time so this can run before the primary attach.
+    const career_year_alias = `${table_alias}_career_year`
+    const { db } = query_context
+    query_context.players_query
       .join(`player_seasonlogs as ${career_year_alias}`, function () {
-        this.on(`${career_year_alias}.pid`, '=', `${table_name}.pid`)
-          .andOn(`${career_year_alias}.year`, '=', `${table_name}.year`)
+        this.on(`${career_year_alias}.pid`, '=', `${table_alias}.pid`)
+          .andOn(`${career_year_alias}.year`, '=', `${table_alias}.year`)
           .andOn(`${career_year_alias}.seas_type`, '=', db.raw('?', ['REG']))
       })
       .whereBetween(`${career_year_alias}.career_year`, [
@@ -78,10 +74,8 @@ const pff_player_seasonlogs_join = (join_arguments) => {
 const create_field_from_pff_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `pff_${column_name}`,
-  table_name: 'pff_player_seasonlogs',
   table_alias: pff_player_seasonlogs_table_alias,
-  join: pff_player_seasonlogs_join,
-  granularity: ['player_year'],
+  source: pff_player_source,
   column_params: {
     year,
     career_year
