@@ -1,6 +1,4 @@
-import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_frequent_update_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
@@ -32,70 +30,31 @@ const generate_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(key)
 }
 
-const add_player_practice_with_statement = ({
-  query,
-  params = {},
-  with_table_name,
-  where_clauses = [],
-  splits = []
-}) => {
-  const { nfl_week } = get_params({ params })
-
-  const with_query = db('practice')
-    .select(
-      'pid',
-      'game_designation',
-      'roster_status',
-      'inj',
-      'm',
-      'tu',
-      'w',
-      'th',
-      'f',
-      's',
-      'su'
-    )
-    .whereIn('nfl_week_id', nfl_week)
-
-  if (splits.includes('year')) {
-    with_query.select('year')
-  }
-
-  if (splits.includes('week')) {
-    with_query.select('week')
-  }
-
-  if (where_clauses.length) {
-    for (const where_clause of where_clauses) {
-      with_query.whereRaw(where_clause)
-    }
-  }
-
-  query.with(with_table_name, with_query)
+const player_practice_source = {
+  table: 'practice',
+  // Grain 'player': legacy data_view_join_function emitted pid-only equality
+  // regardless of cell granularity; the nfl_week_id filter collapses to one
+  // row per player.
+  grain: 'player',
+  key_columns: { pid: 'pid' },
+  extra_predicates: (params) => [
+    { column: 'nfl_week_id', op: 'in', value: get_params({ params }).nfl_week }
+  ]
 }
 
 const create_player_practice_field = (field, alias) => ({
   column_name: field,
-  table_name: 'practice',
   select_as: () => alias,
   table_alias: generate_table_alias,
-  join: data_view_join_function,
-  with: add_player_practice_with_statement,
-  granularity: ['player_year', 'player_year_week'],
-  with_where: () => field,
+  source: player_practice_source,
   get_cache_info
 })
 
 const create_player_practice_designation_field = (practice_day) => ({
   column_name: practice_day,
-  table_name: 'practice',
-  with_select: () => [`${practice_day}`],
   select_as: () => `player_practice_designation_${practice_day}`,
   table_alias: generate_table_alias,
-  join: data_view_join_function,
-  with: add_player_practice_with_statement,
-  granularity: ['player_year', 'player_year_week'],
-  with_where: () => practice_day,
+  source: player_practice_source,
   get_cache_info
 })
 
