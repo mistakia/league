@@ -17,6 +17,12 @@ export default function ({ players, league }) {
     for (const [week, pts_added] of Object.entries(player.pts_added)) {
       const wk = Number(week)
       if (wk && wk >= current_season.week) {
+        // -999 is the "player did not play / not initialized" sentinel
+        // from calculate-points-added.mjs. Must skip BEFORE the net
+        // accumulator picks it up.
+        if (pts_added === -999) {
+          continue
+        }
         player_ros_pts_added_net += pts_added
         if (pts_added < 0) {
           continue
