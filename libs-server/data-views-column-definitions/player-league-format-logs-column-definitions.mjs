@@ -1,9 +1,6 @@
-import db from '#db'
 import { DEFAULT_LEAGUE_FORMAT_HASH } from '#libs-shared'
 import { current_season } from '#constants'
-import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import {
   create_exact_year_cache_info,
   create_static_cache_info,
@@ -47,29 +44,22 @@ const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const league_format_player_seasonlogs_join = (join_arguments) => {
-  const additional_conditions = function ({ params, table_name, splits }) {
-    const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
-
-    let year = params.year || [current_season.stats_season_year]
-    if (!Array.isArray(year)) {
-      year = [year]
-    }
-
-    this.andOn(
-      db.raw(`${table_name}.league_format_hash = '${league_format_hash}'`)
-    )
-
-    if (!splits.includes('year') && year.length > 0) {
-      this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
-    }
+const league_format_seasonlogs_year_default = (params) => {
+  let year = params.year || [current_season.stats_season_year]
+  if (!Array.isArray(year)) {
+    year = [year]
   }
+  return year
+}
 
-  data_view_join_function({
-    ...join_arguments,
-    join_table_clause: `league_format_player_seasonlogs as ${join_arguments.table_name}`,
-    additional_conditions
-  })
+const league_format_player_seasonlogs_source = {
+  table: 'league_format_player_seasonlogs',
+  grain: 'player_year',
+  key_columns: { pid: 'pid', year: 'year' },
+  year_default: league_format_seasonlogs_year_default,
+  extra_predicates: (params) => [
+    { column: 'league_format_hash', value: get_league_format_hash(params) }
+  ]
 }
 
 const league_format_seasonlogs_conditions = ({ params, splits = [] }) => {
@@ -92,10 +82,8 @@ const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
-  table_name: 'league_format_player_seasonlogs',
   table_alias: league_format_player_seasonlogs_table_alias,
-  join: league_format_player_seasonlogs_join,
-  granularity: ['player_year'],
+  source: league_format_player_seasonlogs_source,
   get_cache_info: get_cache_info_for_league_format_seasonlogs,
   get_table_conditions: league_format_seasonlogs_conditions
 })
@@ -105,37 +93,21 @@ const league_format_player_careerlogs_table_alias = ({ params = {} }) => {
   return get_table_hash(`league_format_player_careerlogs_${league_format_hash}`)
 }
 
-const league_format_player_careerlogs_join = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  params = {},
-  data_view_options = {}
-}) => {
-  const join_func = get_join_func(join_type)
-  const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
-
-  const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
-    this.andOn(
-      db.raw(`${table_name}.league_format_hash = '${league_format_hash}'`)
-    )
-  }
-
-  query[join_func](
-    `league_format_player_careerlogs as ${table_name}`,
-    join_conditions
-  )
+const league_format_player_careerlogs_source = {
+  table: 'league_format_player_careerlogs',
+  grain: 'player',
+  key_columns: { pid: 'pid' },
+  extra_predicates: (params) => [
+    { column: 'league_format_hash', value: get_league_format_hash(params) }
+  ]
 }
 
 const create_field_from_league_format_player_careerlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_careerlogs`,
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
-  table_name: 'league_format_player_careerlogs',
   table_alias: league_format_player_careerlogs_table_alias,
-  join: league_format_player_careerlogs_join,
-  granularity: ['player', 'player_year', 'player_year_week'],
+  source: league_format_player_careerlogs_source,
   get_cache_info: get_cache_info_for_league_format_careerlogs
 })
 
