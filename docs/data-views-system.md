@@ -1726,6 +1726,7 @@ Add another `find_*` function inside `data-view-notices.mjs` and concat its outp
 
 ### Implementation Details
 
+- **Source/Bridge Architecture** — canonical reference for the source descriptor schema, identity-bridge and source-attach registries, dispatcher contract, rule-family coverage, and recipes for extending the system. Lives in user-base at `text/league/data-views/source-bridge-architecture.md`.
 - **[Fantasy Points Column Definition](./fantasy-points-column-definition.md)** - Comprehensive real-world column implementation example
 - **[Query Builder Function Reference](./query-builder-function-reference.md)** - Complete function documentation with parameters and usage
 
