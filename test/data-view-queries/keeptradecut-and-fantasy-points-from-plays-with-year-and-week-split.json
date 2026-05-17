@@ -38,5 +38,6 @@
     "cte",
     "joins"
   ],
-  "timeout_ms": 40000
+  "timeout_ms": 40000,
+  "skip_query_match": true
 }

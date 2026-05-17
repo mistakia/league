@@ -103,11 +103,6 @@ const defensive_player_stat_from_plays = ({
   },
   source: defensive_plays_source,
   pid_columns,
-  // Retained during the parallel-path window: group_tables_by_supported_splits
-  // buckets tables by `derive_supported_splits_from_granularity(granularity)`,
-  // and the with-statement adds year/week columns to the CTE only when those
-  // splits are routed through. Step 6 swaps to source.grain-driven walking.
-  granularity: ['player_year', 'player_year_week'],
   supported_rate_types: [
     'per_game',
     'per_team_half',

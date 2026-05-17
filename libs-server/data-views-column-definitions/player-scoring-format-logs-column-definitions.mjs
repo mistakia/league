@@ -106,11 +106,6 @@ const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: scoring_format_player_seasonlogs_table_alias,
   source: scoring_format_player_seasonlogs_source,
-  // granularity retained during the source/bridge parallel-path window so
-  // `get_from_table_config` (libs-server/get-data-view-results.mjs) still
-  // recognizes this column as from-table-eligible. Drops in Step 6 alongside
-  // the registry-walk replacement.
-  granularity: ['player_year'],
   get_cache_info: get_cache_info_for_scoring_format_seasonlogs,
   get_table_conditions: scoring_format_seasonlogs_conditions
 })

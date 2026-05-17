@@ -37,22 +37,19 @@ import {
 import { resolve as resolve_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import { attach_source } from '#libs-server/data-views/source-attach/dispatcher.mjs'
 
-// A base identity in granularity (e.g. `player`) means the column needs no
-// split joins; the column reads from the base table directly.
-const derive_supported_splits_from_granularity = (granularity = []) => {
-  const supports = new Set()
-  let has_base = false
-  for (const id of granularity) {
-    const identity = get_identity(id)
-    if (identity.splits.length === 0) has_base = true
-    for (const split of identity.splits) supports.add(split)
-  }
-  if (has_base) return []
-  return Array.from(supports)
+// Splits inherently supported by the column's row shape. `source.grain` is
+// the row-shape identity declared by the column-def; the identity's splits
+// list determines whether the column can anchor a year/week split query as
+// the sort-based FROM table. Base identities (`player`, `team`) declare zero
+// splits, so they only anchor no-split queries.
+const derive_supported_splits_from_source = (column_definition) => {
+  const grain = column_definition.source?.grain
+  if (!grain) return []
+  return get_identity(grain).splits
 }
 
 const is_team_column_definition = (column_definition) =>
-  (column_definition.granularity || []).some((g) => g.startsWith('team'))
+  Boolean(column_definition.source?.grain?.startsWith('team'))
 
 let column_param_backwards_compatibility_mappings = {}
 
@@ -704,10 +701,9 @@ const get_from_table_config = ({
       !aggregator_handled &&
       can_use_as_from_table(column_definition, sort_based_from_table.column_id)
     ) {
-      const granularity = column_definition.granularity || []
-      const identity_compatible = granularity.some(
-        (identity_id) => get_identity(identity_id).subject === subject_id
-      )
+      const grain = column_definition.source?.grain
+      const identity_compatible =
+        grain && get_identity(grain).subject === subject_id
 
       if (identity_compatible) {
         // Use sort-based from table if available and no splits are configured
@@ -716,10 +712,11 @@ const get_from_table_config = ({
           return sort_based_from_table
         }
 
-        const granularity_splits =
-          derive_supported_splits_from_granularity(granularity)
+        const grain_splits = derive_supported_splits_from_source(
+          column_definition
+        )
         const supports_all_splits = splits.every((split) =>
-          granularity_splits.includes(split)
+          grain_splits.includes(split)
         )
 
         if (supports_all_splits) {
@@ -1280,7 +1277,7 @@ const get_grouped_clauses_by_table = ({
         group_column_params: column_params,
         where_clauses: [],
         select_columns: [],
-        granularity: column_definition.granularity || []
+        column_definition
       }
     }
     grouped_clauses_by_table[table_name].where_clauses.push(where_clause)
@@ -1312,7 +1309,7 @@ const get_grouped_clauses_by_table = ({
         group_column_params: column_params,
         where_clauses: [],
         select_columns: [],
-        granularity: column_definition.granularity || []
+        column_definition
       }
       tables_seeded_by_column.add(table_name)
     } else if (!tables_seeded_by_column.has(table_name)) {
@@ -1339,8 +1336,8 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   for (const [table_name, table_info] of Object.entries(
     grouped_clauses_by_table
   )) {
-    const supported_splits = derive_supported_splits_from_granularity(
-      table_info.granularity
+    const supported_splits = derive_supported_splits_from_source(
+      table_info.column_definition
     )
     const supported_splits_key = supported_splits
       .filter((split) => splits.includes(split))

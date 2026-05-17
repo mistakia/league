@@ -84,6 +84,6 @@ export default {
       }
     },
     get_cache_info,
-    granularity: ['player_year', 'player_year_week']
+    source: { grain: 'player_year' }
   }
 }

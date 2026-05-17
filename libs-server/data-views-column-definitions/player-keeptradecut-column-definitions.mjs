@@ -158,7 +158,7 @@ const create_keeptradecut_definition = (type) => ({
       : `EXTRACT(YEAR FROM TO_TIMESTAMP(${table_name}.d))`
   },
   week_select: () => `nfl_year_week_timestamp.week`,
-  granularity: ['player_year', 'player_year_week'],
+  source: { grain: 'player_year' },
   get_cache_info: get_cache_info_for_keeptradecut
 })
 

@@ -45,10 +45,6 @@ export default {
   player_snaps: {
     table_alias: get_per_player_play_cte_table_name,
     source: player_snaps_source,
-    // Retained during the parallel-path window: group_tables_by_supported_splits
-    // routes year/week split buckets via derive_supported_splits_from_granularity.
-    // Step 6 swaps to source.grain-driven reachability walking.
-    granularity: ['player_year', 'player_year_week'],
     column_name: 'player_snaps',
     select_as: () => 'player_snaps',
     measure_source: 'snaps',

@@ -238,9 +238,6 @@ const team_stat_from_plays = ({
       return `${table_name}${table_suffix}.week`
     },
     use_having: true,
-    granularity: force_player_active
-      ? ['player_year', 'player_year_week']
-      : ['team_year', 'team_year_week'],
     supported_rate_types,
     is_rate,
     ...(final_supports_output

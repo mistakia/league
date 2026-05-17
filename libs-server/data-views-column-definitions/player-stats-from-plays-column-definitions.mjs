@@ -202,11 +202,6 @@ const player_stat_from_plays = ({
   with: add_player_stats_play_by_play_with_statement,
   source: plays_source,
   use_having: true,
-  // Retained during the parallel-path window: group_tables_by_supported_splits
-  // buckets tables by `derive_supported_splits_from_granularity(granularity)`,
-  // and the with-statement adds year/week columns to the CTE only when those
-  // splits are routed through. Step 6 swaps to source.grain-driven walking.
-  granularity: ['player_year', 'player_year_week'],
   supported_rate_types,
   ...(final_supports_output
     ? { supports_output: final_supports_output, measure_source: 'plays' }
@@ -342,7 +337,6 @@ const create_team_share_stat = ({
   table_alias: ({ params }) =>
     generate_table_alias({ type: column_name, params, pid_columns }),
   source: plays_source,
-  granularity: ['player_year', 'player_year_week'],
   has_numerator_denominator,
   main_select_string_year_offset_range,
   with_where: ({ params }) => {

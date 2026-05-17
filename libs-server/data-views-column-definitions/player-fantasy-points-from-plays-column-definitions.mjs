@@ -630,11 +630,6 @@ export default {
     column_name: 'fantasy_points_from_plays',
     with: fantasy_points_from_plays_with,
     source: plays_source,
-    // Retained during the parallel-path window: group_tables_by_supported_splits
-    // buckets tables by `derive_supported_splits_from_granularity(granularity)`,
-    // and the with-statement adds year/week columns to the CTE only when those
-    // splits are routed through. Step 6 swaps to source.grain-driven walking.
-    granularity: ['player_year', 'player_year_week'],
     measure_source: 'plays_role_union',
     role_attributions: fp_role_attributions,
     apply_filters: fp_apply_filters,

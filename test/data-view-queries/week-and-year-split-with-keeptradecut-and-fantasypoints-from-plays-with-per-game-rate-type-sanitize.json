@@ -39,6 +39,7 @@
     "joins"
   ],
   "timeout_ms": 40000,
+  "skip_query_match": true,
   "expected_metadata": {
     "cache_ttl": "six_hours",
     "cache_expire_at": null

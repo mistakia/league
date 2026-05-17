@@ -45,10 +45,6 @@ export default {
   player_routes: {
     table_alias: get_per_player_route_cte_table_name,
     source: player_routes_source,
-    // Retained during the parallel-path window: group_tables_by_supported_splits
-    // routes year/week split buckets via derive_supported_splits_from_granularity.
-    // Step 6 swaps to source.grain-driven reachability walking.
-    granularity: ['player_year', 'player_year_week'],
     column_name: 'player_routes',
     select_as: () => 'player_routes',
     // Output-aggregator retrofit: when params.output is set, the dispatcher's
