@@ -1,4 +1,5 @@
 import { register } from '../source-attach-registry.mjs'
+import { emit_year_match } from './player-family-to-player-year.mjs'
 
 // Cross-grain pairings on the team side. Direct team-key equality (no
 // player_year_teams orphan). Bridges are chained only when the cell row
@@ -8,6 +9,7 @@ const emit_team_year_predicate = ({
   query_context,
   source,
   table_alias,
+  params,
   builder,
   include_year,
   include_week
@@ -22,8 +24,16 @@ const emit_team_year_predicate = ({
     )
   }
   builder.on(`${ref}.${key_columns.team}`, '=', team_reference)
-  if (include_year && key_columns.year && year_reference) {
-    builder.andOn(`${ref}.${key_columns.year}`, '=', year_reference)
+  if (include_year) {
+    emit_year_match({
+      builder,
+      db,
+      year_reference,
+      source,
+      key_columns,
+      params,
+      ref
+    })
   }
   if (include_week && key_columns.week && week_reference) {
     const week_col = `${ref}.${key_columns.week}`

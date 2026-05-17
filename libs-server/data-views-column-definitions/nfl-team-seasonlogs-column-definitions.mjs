@@ -63,23 +63,20 @@ const league_nfl_team_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const year_in_predicate = (params) => {
+const year_default = (params) => {
   const raw = params.year ?? current_season.stats_season_year
   const arr = Array.isArray(raw) ? raw : [raw]
-  return { column: 'year', op: 'in', value: arr.map(Number) }
+  return arr.map(Number)
 }
 
 const nfl_team_source = {
   table: 'nfl_team_seasonlogs',
   grain: 'team_year',
   key_columns: { team: 'tm', year: 'year' },
+  year_default,
   extra_predicates: (params) => {
     const { stat_key } = get_default_params({ params })
-    const extras = [year_in_predicate(params)]
-    if (stat_key) {
-      extras.push({ column: 'stat_key', value: stat_key })
-    }
-    return extras
+    return stat_key ? [{ column: 'stat_key', value: stat_key }] : []
   }
 }
 
@@ -87,10 +84,10 @@ const league_nfl_team_source = {
   table: 'league_nfl_team_seasonlogs',
   grain: 'team_year',
   key_columns: { team: 'tm', year: 'year' },
+  year_default,
   extra_predicates: (params) => {
     const { stat_key, league_id } = get_default_params({ params })
     return [
-      year_in_predicate(params),
       { column: 'lid', value: league_id },
       { column: 'stat_key', value: stat_key }
     ]

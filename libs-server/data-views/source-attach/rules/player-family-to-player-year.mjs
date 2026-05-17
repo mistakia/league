@@ -5,10 +5,10 @@ import { register } from '../source-attach-registry.mjs'
 // year_reference (player cell needs player_to_player_year to expose
 // year_reference; player_year/player_year_week cells already carry it).
 
-const emit = ({ query_context, source, table_alias, builder }) => {
+const emit = ({ query_context, source, table_alias, params, builder }) => {
   const ref = table_alias || source.table
   const key_columns = source.key_columns || {}
-  const { pid_reference, year_reference } = query_context
+  const { pid_reference, year_reference, db } = query_context
 
   if (!key_columns.pid) {
     throw new Error(
@@ -17,9 +17,49 @@ const emit = ({ query_context, source, table_alias, builder }) => {
   }
 
   builder.on(`${ref}.${key_columns.pid}`, '=', pid_reference)
-  if (key_columns.year && year_reference) {
-    builder.andOn(`${ref}.${key_columns.year}`, '=', year_reference)
+  emit_year_match({
+    builder,
+    db,
+    year_reference,
+    source,
+    key_columns,
+    params,
+    ref
+  })
+}
+
+export const emit_year_match = ({
+  builder,
+  db,
+  year_reference,
+  source,
+  key_columns,
+  params,
+  ref,
+  is_first = false
+}) => {
+  if (!key_columns.year) return
+  const col = `${ref}.${key_columns.year}`
+  const eq = is_first ? builder.on.bind(builder) : builder.andOn.bind(builder)
+  if (year_reference) {
+    eq(col, '=', year_reference)
+    return
   }
+  if (typeof source.year_default !== 'function') return
+  const v = source.year_default(params)
+  if (v == null) return
+  if (Array.isArray(v)) {
+    if (v.length === 1) {
+      eq(col, '=', db.raw('?', [v[0]]))
+    } else if (v.length > 1) {
+      const in_op = is_first
+        ? builder.onIn.bind(builder)
+        : builder.andOnIn.bind(builder)
+      in_op(col, v)
+    }
+    return
+  }
+  eq(col, '=', db.raw('?', [v]))
 }
 
 register({

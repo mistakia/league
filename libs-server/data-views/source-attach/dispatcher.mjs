@@ -67,7 +67,7 @@ export const attach_source = ({
   }
 
   if (typeof source.attach === 'function') {
-    source.attach(query_context, params)
+    source.attach({ query_context, params, table_alias })
   }
 
   if (!source.table) return

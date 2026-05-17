@@ -59,10 +59,10 @@ const espn_team_source = {
   table: 'espn_team_win_rates_index',
   grain: 'team_year',
   key_columns: { team: 'team', year: 'year' },
-  extra_predicates: (params) => {
+  year_default: (params) => {
     const raw = params.year ?? current_season.stats_season_year
     const arr = Array.isArray(raw) ? raw : [raw]
-    return [{ column: 'year', op: 'in', value: arr.map(Number) }]
+    return arr.map(Number)
   }
 }
 
