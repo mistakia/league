@@ -28,7 +28,8 @@ export const attach_source = ({
   column_def,
   params = {},
   table_alias,
-  join_type = 'LEFT'
+  join_type = 'LEFT',
+  splits = []
 }) => {
   const { source } = column_def
   if (!source || (!source.table && !source.attach)) {
@@ -124,7 +125,15 @@ export const attach_source = ({
 
   // attach runs AFTER the primary leftJoin so secondary joins/WHEREs that
   // reference the primary alias resolve in the SQL's left-to-right order.
+  // Splits is forwarded so CTE-backed attaches know which predicates the
+  // with: callback actually projected onto the joined CTE.
   if (typeof source.attach === 'function') {
-    source.attach({ query_context, params, table_alias, join_type })
+    source.attach({
+      query_context,
+      params,
+      table_alias,
+      join_type,
+      splits
+    })
   }
 }

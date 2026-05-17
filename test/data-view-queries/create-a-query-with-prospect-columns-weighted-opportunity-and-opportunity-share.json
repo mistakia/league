@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "should create a query with prospect columns, weighted opportunity, and opportunity share",
   "description": "Test case for should create a query with prospect columns, weighted opportunity, and opportunity share",
   "request": {

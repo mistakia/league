@@ -938,7 +938,8 @@ const add_clauses_for_table = async ({
   const make_source_join_func = (column_definition, column_id) => ({
     query,
     params,
-    join_type
+    join_type,
+    splits: arg_splits
   }) =>
     attach_source({
       players_query: query,
@@ -946,7 +947,8 @@ const add_clauses_for_table = async ({
       column_def: { ...column_definition, column_id },
       params,
       table_alias: table_name,
-      join_type
+      join_type,
+      splits: arg_splits ?? splits
     })
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias

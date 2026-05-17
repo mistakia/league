@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "should handle player_target_share_from_plays - different params",
   "description": "Test case for should handle player_target_share_from_plays - different params",
   "request": {

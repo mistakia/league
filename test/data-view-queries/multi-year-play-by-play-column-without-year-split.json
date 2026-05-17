@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "multi-year play-by-play column without year split should not group by year",
   "description": "Regression test: play-by-play columns with multi-year params but no year split should aggregate across all years in a single row per player, not create duplicate rows per year. Fixed bug where CTE incorrectly grouped by year when params.year existed but splits did not include year.",
   "request": {

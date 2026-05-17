@@ -2,7 +2,6 @@ import db from '#db'
 import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { add_player_stats_play_by_play_with_statement } from '#libs-server/data-views/add-player-stats-play-by-play-with-statement.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
@@ -22,6 +21,94 @@ const should_use_main_where = ({ params, has_numerator_denominator }) => {
       has_numerator_denominator) ||
     (params.rate_type && params.rate_type.length > 0)
   )
+}
+
+// Mirrors data_view_join_function with join_year_on_year_split=true: pid
+// equality always; year/week predicates only when the column-def's bucket
+// projected those columns onto the CTE (splits-driven, mirroring the legacy
+// caller). Includes the year_offset_range and params.year IN constraints the
+// legacy splits-active path emitted.
+const apply_plays_join = ({
+  query_context,
+  params,
+  table_alias,
+  join_type,
+  splits = []
+}) => {
+  // Prefer from-table-aware overrides (data_view_options) so the join works
+  // both when this CTE is the FROM table and when player_years is.
+  const dv = query_context.data_view_options || {}
+  const { players_query } = query_context
+  const pid_reference = dv.pid_reference ?? query_context.pid_reference
+  const year_reference = dv.year_reference ?? query_context.year_reference
+  const week_reference = dv.week_reference ?? query_context.week_reference
+  const year_offset_param = params.year_offset
+  const year_offset_range = Array.isArray(year_offset_param)
+    ? year_offset_param
+    : [year_offset_param || 0, year_offset_param || 0]
+  const min_year_offset = Math.min(...year_offset_range)
+  const max_year_offset = Math.max(...year_offset_range)
+  const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
+  const join_year = splits.includes('year')
+  const join_week = splits.includes('week')
+
+  players_query[join_method](table_alias, function () {
+    this.on(`${table_alias}.pid`, '=', pid_reference)
+
+    if (join_year && year_reference) {
+      if (min_year_offset !== 0 || max_year_offset !== 0) {
+        if (min_year_offset === max_year_offset) {
+          this.andOn(
+            db.raw(`${table_alias}.year = ${year_reference} + ?`, [
+              min_year_offset
+            ])
+          )
+        } else {
+          this.andOn(
+            db.raw(
+              `${table_alias}.year BETWEEN ${year_reference} + ? AND ${year_reference} + ?`,
+              [min_year_offset, max_year_offset]
+            )
+          )
+        }
+      } else {
+        const single_year_param_set =
+          params.year &&
+          (Array.isArray(params.year) ? params.year.length === 1 : true)
+        if (single_year_param_set) {
+          const specific_year = Array.isArray(params.year)
+            ? params.year[0]
+            : params.year
+          this.andOn(
+            `${table_alias}.year`,
+            '=',
+            db.raw('?', [specific_year])
+          )
+        } else {
+          this.andOn(db.raw(`${table_alias}.year = ${year_reference}`))
+          if (params.year) {
+            const year_array = Array.isArray(params.year)
+              ? params.year
+              : [params.year]
+            if (year_array.length > 0) {
+              this.andOn(
+                db.raw(`${table_alias}.year IN (${year_array.join(',')})`)
+              )
+            }
+          }
+        }
+      }
+    }
+
+    if (join_week && week_reference) {
+      this.andOn(db.raw(`${table_alias}.week = ${week_reference}`))
+    }
+  })
+}
+
+const plays_source = {
+  grain: 'player_year',
+  attach: apply_plays_join
 }
 
 const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
@@ -195,9 +282,12 @@ const player_stat_from_plays = ({
   },
   pid_columns,
   with: add_player_stats_play_by_play_with_statement,
-  join: (args) =>
-    data_view_join_function({ ...args, join_year_on_year_split: true }),
+  source: plays_source,
   use_having: true,
+  // Retained during the parallel-path window: group_tables_by_supported_splits
+  // buckets tables by `derive_supported_splits_from_granularity(granularity)`,
+  // and the with-statement adds year/week columns to the CTE only when those
+  // splits are routed through. Step 6 swaps to source.grain-driven walking.
   granularity: ['player_year', 'player_year_week'],
   supported_rate_types,
   ...(final_supports_output
@@ -333,8 +423,7 @@ const create_team_share_stat = ({
   use_having: true,
   table_alias: ({ params }) =>
     generate_table_alias({ type: column_name, params, pid_columns }),
-  join: (args) =>
-    data_view_join_function({ ...args, join_year_on_year_split: true }),
+  source: plays_source,
   granularity: ['player_year', 'player_year_week'],
   has_numerator_denominator,
   main_select_string_year_offset_range,

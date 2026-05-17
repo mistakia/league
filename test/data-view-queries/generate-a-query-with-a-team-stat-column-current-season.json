@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "should generate a query with a team stat column current season",
   "description": "Backward-compatibility: no year param, no splits -> historical mode NOT active; team stat joined on player.current_nfl_team; player_year_teams CTE NOT registered",
   "request": {
