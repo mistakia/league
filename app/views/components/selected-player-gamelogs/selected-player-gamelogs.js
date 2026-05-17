@@ -8,7 +8,11 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 import './selected-player-gamelogs.styl'
 
 // Fantasy stats to show in gamelogs (only total points and points added)
-const GAMELOGS_FANTASY_STATS_FILTER = ['points', 'points_added']
+const GAMELOGS_FANTASY_STATS_FILTER = [
+  'points',
+  'points_added_earned',
+  'points_added_net'
+]
 
 const QUARTER_LABELS = ['Q1', 'Q2', 'Q3', 'Q4']
 
@@ -97,7 +101,9 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
                 {(game.points || 0).toFixed(1)}
               </div>
               <div className='table__cell metric'>
-                {game.points_added ? game.points_added.toFixed(1) : '-'}
+                {game.points_added_earned
+                  ? game.points_added_earned.toFixed(1)
+                  : '-'}
               </div>
             </div>
           </div>

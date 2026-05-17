@@ -23,12 +23,14 @@ const FANTASY_STAT_HEADER_MAP = {
   points_pos_rnk: 'Rnk',
   points_per_game: 'FP/G',
   points_per_game_pos_rnk: 'Rnk',
-  points_added: 'Pts+',
-  points_added_rnk: 'Ovr',
-  points_added_pos_rnk: 'Rnk',
-  points_added_per_game: 'Pts+/G',
-  points_added_per_game_rnk: 'Ovr',
-  points_added_per_game_pos_rnk: 'Rnk'
+  points_added_earned: 'Pts+ Earned',
+  points_added_earned_rank: 'Ovr',
+  points_added_earned_position_rank: 'Rnk',
+  points_added_earned_per_game: 'Pts+ Earned/G',
+  points_added_earned_per_game_rank: 'Ovr',
+  points_added_earned_per_game_position_rank: 'Rnk',
+  points_added_net: 'Pts+ Net',
+  points_added_net_per_game: 'Pts+ Net/G'
 }
 
 // Order of fantasy stats (must match FANTASY_STATS in player-selected-row.js)
@@ -37,12 +39,14 @@ const FANTASY_STATS_ORDER = [
   'points_pos_rnk',
   'points_per_game',
   'points_per_game_pos_rnk',
-  'points_added',
-  'points_added_rnk',
-  'points_added_pos_rnk',
-  'points_added_per_game',
-  'points_added_per_game_rnk',
-  'points_added_per_game_pos_rnk'
+  'points_added_earned',
+  'points_added_earned_rank',
+  'points_added_earned_position_rank',
+  'points_added_earned_per_game',
+  'points_added_earned_per_game_rank',
+  'points_added_earned_per_game_position_rank',
+  'points_added_net',
+  'points_added_net_per_game'
 ]
 
 const get_fantasy_stats_headers = (fantasy_stats_filter = null) => {
@@ -63,12 +67,14 @@ const categories = {
     'Rnk',
     'FP/G',
     'Rnk',
-    'Pts+',
+    'Pts+ Earned',
     'Ovr',
     'Rnk',
-    'Pts+/G',
+    'Pts+ Earned/G',
     'Ovr',
-    'Rnk'
+    'Rnk',
+    'Pts+ Net',
+    'Pts+ Net/G'
   ],
   passing_production: ['ATT', 'YDS', 'TD', 'INT', 'DB', 'CAY', 'YAC'],
   passing_efficiency: ['RTG', 'Y/A', 'CMP%', 'xCMP%', 'CPOE', 'EPA/DB'],

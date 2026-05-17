@@ -9,12 +9,14 @@ const FANTASY_STATS = [
   'points_pos_rnk',
   'points_per_game',
   'points_per_game_pos_rnk',
-  'points_added',
-  'points_added_rnk',
-  'points_added_pos_rnk',
-  'points_added_per_game',
-  'points_added_per_game_rnk',
-  'points_added_per_game_pos_rnk'
+  'points_added_earned',
+  'points_added_earned_rank',
+  'points_added_earned_position_rank',
+  'points_added_earned_per_game',
+  'points_added_earned_per_game_rank',
+  'points_added_earned_per_game_position_rank',
+  'points_added_net',
+  'points_added_net_per_game'
 ]
 
 const DEFENSE_STATS = [
@@ -137,8 +139,8 @@ const RECEIVING_REDZONE = ['redzone_targets', 'endzone_targets']
 const POSITION_RANK_FIELDS = [
   'points_pos_rnk',
   'points_per_game_pos_rnk',
-  'points_added_pos_rnk',
-  'points_added_per_game_pos_rnk'
+  'points_added_earned_position_rank',
+  'points_added_earned_per_game_position_rank'
 ]
 
 const PERCENTAGE_FIELDS = [
@@ -166,8 +168,10 @@ const PERCENTAGE_FIELDS = [
 const FIELD_FIXED_VALUES = {
   points: 1,
   points_per_game: 1,
-  points_added: 1,
-  points_added_per_game: 1,
+  points_added_earned: 1,
+  points_added_earned_per_game: 1,
+  points_added_net: 1,
+  points_added_net_per_game: 1,
   pass_epa_per_db: 2,
   pass_rating: 1,
   pass_yards_per_attempt: 1,

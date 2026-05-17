@@ -281,8 +281,10 @@ export default function SelectedPlayer({
                     <div className='selected__player-season-stat'>
                       <label>Total</label>
                       <StackedMetric
-                        value={latest_seasonlog.points_added}
-                        position_rank={latest_seasonlog.points_added_pos_rnk}
+                        value={latest_seasonlog.points_added_earned}
+                        position_rank={
+                          latest_seasonlog.points_added_earned_position_rank
+                        }
                         position={pos}
                         fixed={1}
                         use_rank_color
@@ -291,9 +293,9 @@ export default function SelectedPlayer({
                     <div className='selected__player-season-stat'>
                       <label>Per Game</label>
                       <StackedMetric
-                        value={latest_seasonlog.points_added_per_game}
+                        value={latest_seasonlog.points_added_earned_per_game}
                         position_rank={
-                          latest_seasonlog.points_added_per_game_pos_rnk
+                          latest_seasonlog.points_added_earned_per_game_position_rank
                         }
                         position={pos}
                         fixed={1}

@@ -85,7 +85,7 @@ export default class PlayerRosterTotal extends React.Component {
         (typeof player_seasonlog_points === 'number'
           ? player_seasonlog_points
           : 0)
-      const player_points_added = player_map.get('points_added')
+      const player_points_added = player_map.get('points_added_earned')
       points_added_total =
         points_added_total +
         (typeof player_points_added === 'number' ? player_points_added : 0)

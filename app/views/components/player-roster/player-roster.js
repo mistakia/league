@@ -97,11 +97,17 @@ class PlayerRoster extends Player {
       'points_per_game_pos_rnk',
       null
     )
-    const points_added = player_map.get('points_added', null)
-    const points_added_per_game = player_map.get('points_added_per_game', null)
-    const points_added_pos_rnk = player_map.get('points_added_pos_rnk', null)
-    const points_added_per_game_pos_rnk = player_map.get(
-      'points_added_per_game_pos_rnk',
+    const points_added_earned = player_map.get('points_added_earned', null)
+    const points_added_earned_per_game = player_map.get(
+      'points_added_earned_per_game',
+      null
+    )
+    const points_added_earned_position_rank = player_map.get(
+      'points_added_earned_position_rank',
+      null
+    )
+    const points_added_earned_per_game_position_rank = player_map.get(
+      'points_added_earned_per_game_position_rank',
       null
     )
 
@@ -281,17 +287,17 @@ class PlayerRoster extends Player {
             <div className='row__group'>
               <div className='row__group-body'>
                 <StackedMetric
-                  value={points_added}
-                  position_rank={points_added_pos_rnk}
+                  value={points_added_earned}
+                  position_rank={points_added_earned_position_rank}
                   position={pos}
-                  percentile={percentiles.points_added}
+                  percentile={percentiles.points_added_earned}
                   fixed={1}
                 />
                 <StackedMetric
-                  value={points_added_per_game}
-                  position_rank={points_added_per_game_pos_rnk}
+                  value={points_added_earned_per_game}
+                  position_rank={points_added_earned_per_game_position_rank}
                   position={pos}
-                  percentile={percentiles.points_added_per_game}
+                  percentile={percentiles.points_added_earned_per_game}
                   fixed={1}
                 />
               </div>

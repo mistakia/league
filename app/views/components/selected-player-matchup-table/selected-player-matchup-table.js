@@ -64,7 +64,7 @@ export default function SelectedPlayerMatchupTable({
           {(item.stats.pts || 0).toFixed(1)}
         </div>
         <div className='table__cell metric'>
-          {item.points_added ? item.points_added.toFixed(1) : '-'}
+          {item.points_added_earned ? item.points_added_earned.toFixed(1) : '-'}
         </div>
         <div className='table__cell metric'>{item.stats.rnk || '-'}</div>
       </>
@@ -96,7 +96,9 @@ export default function SelectedPlayerMatchupTable({
           {(gamelog.pts || 0).toFixed(1)}
         </div>
         <div className='table__cell metric'>
-          {gamelog.points_added ? gamelog.points_added.toFixed(1) : '-'}
+          {gamelog.points_added_earned
+            ? gamelog.points_added_earned.toFixed(1)
+            : '-'}
         </div>
         <div className='table__cell metric'>{gamelog.pos_rnk || '-'}</div>
       </>
