@@ -1,6 +1,4 @@
-import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
@@ -41,73 +39,69 @@ const generate_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(key)
 }
 
-const add_player_dfs_salaries_with_statement = ({
-  query,
-  params = {},
-  with_table_name,
-  where_clauses = []
-}) => {
-  const { nfl_week, career_year, career_game, platform_source_id } = get_params(
-    { params }
-  )
+const player_dfs_salaries_source = {
+  // Grain is 'player': legacy data_view_join_function emits pid-only equality
+  // regardless of cell granularity, and the CTE collapses each player to a
+  // single salary row via the nfl_week_id filter.
+  grain: 'player',
+  attach: ({ query_context, params, table_alias, join_type = 'LEFT' }) => {
+    const { nfl_week, career_year, career_game, platform_source_id } =
+      get_params({ params })
+    const { db, players_query, pid_reference } = query_context
+    const cte_name = table_alias
 
-  const with_query = db('player_salaries')
-    .select(
-      'player_salaries.pid',
-      'player_salaries.salary',
-      'nfl_games.year',
-      'nfl_games.week'
-    )
-    .join('nfl_games', function () {
-      this.on('player_salaries.esbid', '=', 'nfl_games.esbid')
-    })
-    .whereIn('player_salaries.source_id', platform_source_id)
-    .whereIn('nfl_games.nfl_week_id', nfl_week)
-
-  if (where_clauses.length) {
-    for (const where_clause of where_clauses) {
-      with_query.whereRaw(where_clause)
-    }
-  }
-
-  if (career_year.length) {
-    with_query.join('player_seasonlogs', function () {
-      this.on('player_salaries.pid', '=', 'player_seasonlogs.pid')
-        .andOn('nfl_games.year', '=', 'player_seasonlogs.year')
-        .andOn('nfl_games.seas_type', '=', 'player_seasonlogs.seas_type')
-    })
-    with_query.whereBetween('player_seasonlogs.career_year', [
-      Math.min(career_year[0], career_year[1]),
-      Math.max(career_year[0], career_year[1])
-    ])
-  }
-
-  if (career_game.length) {
-    with_query.join('player_gamelogs', function () {
-      this.on('player_salaries.pid', '=', 'player_gamelogs.pid').andOn(
-        'nfl_games.esbid',
-        '=',
-        'player_gamelogs.esbid'
+    const cte_query = db('player_salaries')
+      .select(
+        'player_salaries.pid',
+        'player_salaries.salary',
+        'nfl_games.year',
+        'nfl_games.week'
       )
-    })
-    with_query.whereBetween('player_gamelogs.career_game', [
-      Math.min(career_game[0], career_game[1]),
-      Math.max(career_game[0], career_game[1])
-    ])
-  }
+      .join('nfl_games', function () {
+        this.on('player_salaries.esbid', '=', 'nfl_games.esbid')
+      })
+      .whereIn('player_salaries.source_id', platform_source_id)
+      .whereIn('nfl_games.nfl_week_id', nfl_week)
 
-  query.with(with_table_name, with_query)
+    if (career_year.length) {
+      cte_query.join('player_seasonlogs', function () {
+        this.on('player_salaries.pid', '=', 'player_seasonlogs.pid')
+          .andOn('nfl_games.year', '=', 'player_seasonlogs.year')
+          .andOn('nfl_games.seas_type', '=', 'player_seasonlogs.seas_type')
+      })
+      cte_query.whereBetween('player_seasonlogs.career_year', [
+        Math.min(career_year[0], career_year[1]),
+        Math.max(career_year[0], career_year[1])
+      ])
+    }
+
+    if (career_game.length) {
+      cte_query.join('player_gamelogs', function () {
+        this.on('player_salaries.pid', '=', 'player_gamelogs.pid').andOn(
+          'nfl_games.esbid',
+          '=',
+          'player_gamelogs.esbid'
+        )
+      })
+      cte_query.whereBetween('player_gamelogs.career_game', [
+        Math.min(career_game[0], career_game[1]),
+        Math.max(career_game[0], career_game[1])
+      ])
+    }
+
+    players_query.with(cte_name, cte_query)
+    const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
+    players_query[join_method](cte_name, function () {
+      this.on(`${cte_name}.pid`, '=', pid_reference)
+    })
+  }
 }
 
 const create_player_dfs_salaries_field = (field) => ({
   column_name: field,
-  table_name: 'player_salaries',
   select_as: () => 'dfs_salary',
   table_alias: generate_table_alias,
-  join: data_view_join_function,
-  with: add_player_dfs_salaries_with_statement,
-  granularity: ['player_year', 'player_year_week'],
-  with_where: () => 'player_salaries.salary',
+  source: player_dfs_salaries_source,
   get_cache_info
 })
 

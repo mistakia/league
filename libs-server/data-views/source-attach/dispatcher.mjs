@@ -125,6 +125,6 @@ export const attach_source = ({
   // attach runs AFTER the primary leftJoin so secondary joins/WHEREs that
   // reference the primary alias resolve in the SQL's left-to-right order.
   if (typeof source.attach === 'function') {
-    source.attach({ query_context, params, table_alias })
+    source.attach({ query_context, params, table_alias, join_type })
   }
 }
