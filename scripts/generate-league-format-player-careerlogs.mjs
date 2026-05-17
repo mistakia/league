@@ -46,6 +46,22 @@ const generate_league_format_player_careerlogs = async ({
 
   const seasons_by_pid = groupBy(player_seasons, 'pid')
   const pids = Object.keys(seasons_by_pid)
+
+  // Active-game counts per pid: each row in league_format_player_gamelogs is
+  // a game the player produced a player_gamelogs entry for (i.e. was active).
+  // The seasonlog table has no `games` column, so career totals must come from
+  // the gamelog source. REG-only matches the upstream scope.
+  const game_count_rows = await db('league_format_player_gamelogs as g')
+    .join('nfl_games as ng', 'ng.esbid', 'g.esbid')
+    .where('g.league_format_hash', league_format_hash)
+    .where('ng.seas_type', 'REG')
+    .select('g.pid')
+    .count('* as games')
+    .groupBy('g.pid')
+  const games_by_pid = game_count_rows.reduce((acc, row) => {
+    acc[row.pid] = Number(row.games)
+    return acc
+  }, {})
   const draft_classes_query = await db('player')
     .select('nfl_draft_year', 'pid', 'dpos')
     .whereIn('pos', fantasy_positions)
@@ -80,7 +96,7 @@ const generate_league_format_player_careerlogs = async ({
     const points_added_earned = sum(seasons.map((s) => s.points_added_earned))
     const net_of = (s) => s.points_added_net ?? 0
     const points_added_net = sum(seasons.map(net_of))
-    const games = sum(seasons.map((s) => s.games))
+    const games = games_by_pid[pid] || 0
     const startable_games = sum(seasons.map((s) => s.startable_games))
 
     const draft_rank =
