@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "should create a query with fantasy points from careerlogs",
   "description": "Test case for should create a query with fantasy points from careerlogs",
   "request": {

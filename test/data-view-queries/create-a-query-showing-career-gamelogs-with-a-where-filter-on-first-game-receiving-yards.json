@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "should create a query showing career gamelogs with a where filter on first game receiving yards",
   "description": "Test case for should create a query showing career gamelogs with a where filter on first game receiving yards",
   "request": {

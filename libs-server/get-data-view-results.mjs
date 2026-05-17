@@ -794,7 +794,10 @@ const setup_from_table_and_player_joins = ({
   let column_definition = null
   if (from_table_type === 'table' && column_id) {
     column_definition = data_views_column_definitions[column_id]
-    actual_table_name = column_definition?.table_name || from_table_name
+    actual_table_name =
+      column_definition?.table_name ||
+      column_definition?.source?.table ||
+      from_table_name
   }
 
   // Set up the from table with alias if needed

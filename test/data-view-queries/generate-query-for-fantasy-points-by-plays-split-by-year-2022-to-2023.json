@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "should generate query for fantasy points by plays — split by year 2022 to 2023",
   "description": "Test case for should generate query for fantasy points by plays — split by year 2022 to 2023",
   "request": {

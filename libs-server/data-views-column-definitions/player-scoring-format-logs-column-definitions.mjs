@@ -1,9 +1,6 @@
-import db from '#db'
 import { DEFAULT_SCORING_FORMAT_HASH } from '#libs-shared'
 import { current_season } from '#constants'
-import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import {
   create_exact_year_cache_info,
   create_static_cache_info,
@@ -56,26 +53,6 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const scoring_format_player_seasonlogs_join = (join_arguments) => {
-  data_view_join_function({
-    ...join_arguments,
-    join_year: true,
-    default_year: current_season.stats_season_year,
-    join_table_clause: `scoring_format_player_seasonlogs as ${join_arguments.table_name}`,
-    additional_conditions: function ({ params, table_name }) {
-      let scoring_format_hash =
-        params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
-      if (Array.isArray(scoring_format_hash)) {
-        scoring_format_hash = scoring_format_hash[0]
-      }
-
-      this.andOn(
-        db.raw(`${table_name}.scoring_format_hash = ?`, [scoring_format_hash])
-      )
-    }
-  })
-}
-
 const scoring_format_seasonlogs_conditions = ({ params, splits = [] }) => {
   const conditions = [
     { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
@@ -92,6 +69,16 @@ const scoring_format_seasonlogs_conditions = ({ params, splits = [] }) => {
   return conditions
 }
 
+const scoring_format_player_seasonlogs_source = {
+  table: 'scoring_format_player_seasonlogs',
+  grain: 'player_year',
+  key_columns: { pid: 'pid', year: 'year' },
+  year_default: (params) => get_default_params({ params }).year,
+  extra_predicates: (params) => [
+    { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
+  ]
+}
+
 const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {
   let scoring_format_hash =
     params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
@@ -104,40 +91,25 @@ const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const scoring_format_player_careerlogs_join = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  params = {},
-  data_view_options = {}
-}) => {
-  const join_func = get_join_func(join_type)
-  let scoring_format_hash =
-    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
-  if (Array.isArray(scoring_format_hash)) {
-    scoring_format_hash = scoring_format_hash[0]
-  }
-
-  const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
-    this.andOn(
-      db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
-    )
-  }
-
-  query[join_func](
-    `scoring_format_player_careerlogs as ${table_name}`,
-    join_conditions
-  )
+const scoring_format_player_careerlogs_source = {
+  table: 'scoring_format_player_careerlogs',
+  grain: 'player',
+  key_columns: { pid: 'pid' },
+  extra_predicates: (params) => [
+    { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
+  ]
 }
 
 const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
-  table_name: 'scoring_format_player_seasonlogs',
   table_alias: scoring_format_player_seasonlogs_table_alias,
-  join: scoring_format_player_seasonlogs_join,
+  source: scoring_format_player_seasonlogs_source,
+  // granularity retained during the source/bridge parallel-path window so
+  // `get_from_table_config` (libs-server/get-data-view-results.mjs) still
+  // recognizes this column as from-table-eligible. Drops in Step 6 alongside
+  // the registry-walk replacement.
   granularity: ['player_year'],
   get_cache_info: get_cache_info_for_scoring_format_seasonlogs,
   get_table_conditions: scoring_format_seasonlogs_conditions
@@ -147,11 +119,11 @@ const create_field_from_scoring_format_player_careerlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_careerlogs`,
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
-  table_name: 'scoring_format_player_careerlogs',
   table_alias: scoring_format_player_careerlogs_table_alias,
-  join: scoring_format_player_careerlogs_join,
-  granularity: ['player', 'player_year', 'player_year_week'],
+  source: scoring_format_player_careerlogs_source,
   get_cache_info: get_cache_info_for_scoring_format_careerlogs
+  // careerlogs has no get_table_conditions; from-table-optimization is
+  // ineligible regardless of granularity, so the field is omitted.
 })
 
 export default {
