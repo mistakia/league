@@ -84,6 +84,10 @@ const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: league_format_player_seasonlogs_table_alias,
   source: league_format_player_seasonlogs_source,
+  // Retained during the parallel-path window so get_from_table_config can
+  // still pick this column as the sort-based FROM table. Step 6 swaps to
+  // source-attach reachability walking off source.grain.
+  granularity: ['player_year'],
   get_cache_info: get_cache_info_for_league_format_seasonlogs,
   get_table_conditions: league_format_seasonlogs_conditions
 })
@@ -108,6 +112,10 @@ const create_field_from_league_format_player_careerlogs = (column_name) => ({
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: league_format_player_careerlogs_table_alias,
   source: league_format_player_careerlogs_source,
+  // Retained during the parallel-path window so get_from_table_config can
+  // still pick this column as the sort-based FROM table. Step 6 swaps to
+  // source-attach reachability walking off source.grain.
+  granularity: ['player', 'player_year', 'player_year_week'],
   get_cache_info: get_cache_info_for_league_format_careerlogs
 })
 
