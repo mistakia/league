@@ -7,40 +7,47 @@ import {
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 
-const player_routes_join = ({
-  data_view_options,
-  table_name,
-  query,
+const apply_player_routes_attach = ({
+  query_context,
   params,
+  table_alias,
   splits
 }) => {
-  const already_added_for_per_player_route_rate_type =
-    data_view_options.query_context?.applied_output_ctes?.has(table_name)
-  if (already_added_for_per_player_route_rate_type) {
+  if (query_context.applied_output_ctes?.has(table_alias)) {
     return
   }
 
+  const { players_query, data_view_options } = query_context
+
   add_per_player_route_cte({
-    players_query: query,
+    players_query,
     params,
-    rate_type_table_name: table_name,
+    rate_type_table_name: table_alias,
     splits,
     data_view_options
   })
 
   join_per_player_route_cte({
-    players_query: query,
-    rate_type_table_name: table_name,
+    players_query,
+    rate_type_table_name: table_alias,
     splits,
     params,
     data_view_options
   })
 }
 
+const player_routes_source = {
+  grain: 'player_year',
+  attach: apply_player_routes_attach
+}
+
 export default {
   player_routes: {
     table_alias: get_per_player_route_cte_table_name,
-    join: player_routes_join,
+    source: player_routes_source,
+    // Retained during the parallel-path window: group_tables_by_supported_splits
+    // routes year/week split buckets via derive_supported_splits_from_granularity.
+    // Step 6 swaps to source.grain-driven reachability walking.
     granularity: ['player_year', 'player_year_week'],
     column_name: 'player_routes',
     select_as: () => 'player_routes',
