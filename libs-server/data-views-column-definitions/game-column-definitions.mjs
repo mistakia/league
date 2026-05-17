@@ -1,6 +1,5 @@
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 import {
@@ -67,56 +66,48 @@ const generate_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(key)
 }
 
-const add_game_with_statement = ({
-  query,
-  params = {},
-  with_table_name,
-  where_clauses = []
-}) => {
-  const { nfl_week } = get_params({ params })
+const game_source = {
+  // Source carries (nfl_team, game_opponent, year, week) per game; joins
+  // through player-family-to-team-year (player_year_teams CTE) so the cell
+  // row's historical team mapping selects the right opponent row.
+  grain: 'team_year',
+  attach: ({ query_context, params, table_alias, join_type = 'LEFT' }) => {
+    const { nfl_week } = get_params({ params })
+    const { players_query } = query_context
+    const cte_name = table_alias
 
-  const with_query = db('nfl_games')
-    .select(
-      'year',
-      'week',
-      db.raw('v as nfl_team'),
-      db.raw('h as game_opponent'),
-      db.raw('true as game_is_home')
-    )
-    .whereIn('nfl_week_id', nfl_week)
-    .union(function () {
-      this.select(
+    const cte_query = db('nfl_games')
+      .select(
         'year',
         'week',
-        db.raw('h as nfl_team'),
-        db.raw('v as game_opponent'),
-        db.raw('false as game_is_home')
+        db.raw('v as nfl_team'),
+        db.raw('h as game_opponent'),
+        db.raw('true as game_is_home')
       )
-        .from('nfl_games')
-        .whereIn('nfl_week_id', nfl_week)
+      .whereIn('nfl_week_id', nfl_week)
+      .union(function () {
+        this.select(
+          'year',
+          'week',
+          db.raw('h as nfl_team'),
+          db.raw('v as game_opponent'),
+          db.raw('false as game_is_home')
+        )
+          .from('nfl_games')
+          .whereIn('nfl_week_id', nfl_week)
+      })
 
-      if (where_clauses.length) {
-        for (const where_clause of where_clauses) {
-          if (where_clause.includes('game_opponent')) {
-            this.whereRaw(where_clause.replace('game_opponent', 'v'))
-          } else {
-            this.whereRaw(where_clause)
-          }
-        }
-      }
+    players_query.with(cte_name, cte_query)
+
+    const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
+    players_query[join_method](cte_name, function () {
+      this.on(`${cte_name}.nfl_team`, '=', 'player_year_teams.team').andOn(
+        `${cte_name}.year`,
+        '=',
+        'player_year_teams.year'
+      )
     })
-
-  if (where_clauses.length) {
-    for (const where_clause of where_clauses) {
-      if (where_clause.includes('game_opponent')) {
-        with_query.whereRaw(where_clause.replace('game_opponent', 'h'))
-      } else {
-        with_query.whereRaw(where_clause)
-      }
-    }
   }
-
-  query.with(with_table_name, with_query)
 }
 
 export default {
@@ -130,11 +121,9 @@ export default {
       `${table_name}.game_opponent`,
       `${table_name}.game_is_home`
     ],
-    with_where: () => `game_opponent`,
+    main_where: ({ table_name }) => `${table_name}.game_opponent`,
     table_alias: generate_table_alias,
-    join: (args) => data_view_join_function({ ...args, join_on_team: true }),
-    with: add_game_with_statement,
-    granularity: ['player_year', 'player_year_week'],
+    source: game_source,
     get_cache_info
   }
 }

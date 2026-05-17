@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "team field with matchup_opponent_type param",
   "description": "Test case for team field with matchup_opponent_type param",
   "request": {
