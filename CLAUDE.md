@@ -27,7 +27,7 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 - `yarn build` - Build production bundle
 - `yarn analyze` - Build with bundle analyzer
-- `yarn deploy` - **API + workers only**: pulls code on main server, installs deps, reloads PM2 server process. Does **NOT** rebuild or rsync the frontend `dist/` bundle. Frontend changes (any file under `app/`, `webpack/`, `libs-shared/` consumed by the SPA, or routes/components) require running `yarn build && yarn deploy:dist` separately.
+- `yarn deploy` - **API + workers only**: pulls code on main server from `origin/master`, installs deps, reloads PM2 server process. Does **NOT** rebuild or rsync the frontend `dist/` bundle. Frontend changes (any file under `app/`, `webpack/`, `libs-shared/` consumed by the SPA, or routes/components) require running `yarn build && yarn deploy:dist` separately. **Push to `origin/master` before running `yarn deploy`** — pm2 deploy pulls from origin; an unpushed local commit will deploy the prior origin state and leave production on stale code.
 - `yarn deploy:dist` - Frontend-only deploy: rsyncs locally-built `dist/` to `/root/league/source/dist` on the main server. No API restart. Pair with `yarn build` to refresh the SPA bundle.
 - `yarn load:main` - Update code and deps on main server without PM2 reload
 - `yarn load:worker1` - Update code and reload worker processes on worker server 1
