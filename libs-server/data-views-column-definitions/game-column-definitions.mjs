@@ -71,7 +71,15 @@ const game_source = {
   // through player-family-to-team-year (player_year_teams CTE) so the cell
   // row's historical team mapping selects the right opponent row.
   grain: 'team_year',
-  attach: ({ query_context, params, table_alias, join_type = 'LEFT' }) => {
+  attach: ({ query_context, params, table_alias, join_type }) => {
+    // Team-subject queries reach this attach via team-cell-to-team-source,
+    // which does NOT attach player_year_teams. The legacy join_on_team path
+    // resolved either alias; under the bridge model we'd need separate
+    // (team*, team_year) registration for this column. Until Step 6's
+    // source-attach reachability check gates that, silently skip — the
+    // column's intended audience is player-family cells.
+    if (!query_context.player_year_teams_cte_name) return
+
     const { nfl_week } = get_params({ params })
     const { players_query } = query_context
     const cte_name = table_alias

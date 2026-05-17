@@ -44,7 +44,7 @@ const player_dfs_salaries_source = {
   // regardless of cell granularity, and the CTE collapses each player to a
   // single salary row via the nfl_week_id filter.
   grain: 'player',
-  attach: ({ query_context, params, table_alias, join_type = 'LEFT' }) => {
+  attach: ({ query_context, params, table_alias, join_type }) => {
     const { nfl_week, career_year, career_game, platform_source_id } =
       get_params({ params })
     const { db, players_query, pid_reference } = query_context

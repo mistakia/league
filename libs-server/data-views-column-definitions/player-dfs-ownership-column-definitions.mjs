@@ -32,7 +32,7 @@ const player_dfs_ownership_source = {
   // regardless of cell granularity; CTE collapses each player to one row via
   // the nfl_week_id + draft-group ranking filter.
   grain: 'player',
-  attach: ({ query_context, params, table_alias, join_type = 'LEFT' }) => {
+  attach: ({ query_context, params, table_alias, join_type }) => {
     const { nfl_week, platform_source_id } = get_params({ params })
     const { players_query, pid_reference } = query_context
     const cte_name = table_alias
