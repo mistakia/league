@@ -575,10 +575,14 @@ const fp_role_attributions = async ({ params }) => {
 
 // Apply the same param-driven filters that the legacy `with` builder
 // applies to its filtered_plays CTE. Runs once per inner role sub in
-// build_period_cte's role_union path.
+// build_period_cte's role_union path. Spread the full default-params
+// (not just seas_type) so the nfl_week_id derived from params.year is
+// applied -- otherwise role-union CTEs ignored params.year and scanned
+// all-time plays. career_year/career_game are stripped and reinstated by
+// fp_apply_career_year_filters below.
 const fp_apply_filters = ({ query, params }) => {
-  const { seas_type } = get_play_by_play_default_params({ params })
-  const filtered_params = { ...params, seas_type }
+  const default_params = get_play_by_play_default_params({ params })
+  const filtered_params = { ...default_params }
   delete filtered_params.career_year
   delete filtered_params.career_game
 

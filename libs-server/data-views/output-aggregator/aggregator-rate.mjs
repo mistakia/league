@@ -1,5 +1,7 @@
 import crypto from 'crypto'
 
+import db from '#db'
+
 import { add_period_cte } from './build-period-cte.mjs'
 import { consumed_params_signature } from './consumed-params-signature.mjs'
 import {
@@ -10,8 +12,17 @@ import {
 } from './measure-batch.mjs'
 import * as identity_bridge_registry from '../identity-bridge-registry.mjs'
 
+// consumes_params drives both CTE name hashing (so distinct param sets emit
+// distinct CTEs) and consumed_params_signature for cache keys. `week` and
+// `year_offset` must be included because join_cte / build_period_cte are
+// invoked once per distinct CTE -- two column instances sharing a CTE
+// alias would share both the JOIN condition and the inner filters, which
+// is incorrect when the instances differ in week range (mutually-exclusive
+// inner filter) or year_offset (different JOIN arithmetic).
 export const consumes_params = [
   'year',
+  'year_offset',
+  'week',
   'nfl_week_id',
   'seas_type',
   'matchup_opponent_type'
@@ -74,6 +85,17 @@ const resolve_team_join_target = ({ query_context, params }) => {
   return 'player_year_teams.team'
 }
 
+// Resolve params.year_offset into [min, max]; null when no offset.
+const resolve_year_offset_range = (params) => {
+  const raw = params && params.year_offset
+  if (raw == null) return null
+  const arr = Array.isArray(raw) ? raw : [raw, raw]
+  if (!arr.length) return null
+  const nums = arr.map(Number).filter((n) => Number.isFinite(n))
+  if (!nums.length) return null
+  return [Math.min(...nums), Math.max(...nums)]
+}
+
 export const join_cte = ({
   query_context,
   cte_name,
@@ -85,6 +107,7 @@ export const join_cte = ({
   const team_target = is_team
     ? resolve_team_join_target({ query_context, params })
     : null
+  const offset_range = resolve_year_offset_range(params)
   players_query.leftJoin(cte_name, function () {
     if (is_team) {
       this.on(`${cte_name}.team_code`, '=', team_target)
@@ -92,7 +115,23 @@ export const join_cte = ({
       this.on(`${cte_name}.pid`, '=', pid_reference)
     }
     if (splits.includes('year') && year_reference) {
-      this.andOn(`${cte_name}.year`, '=', year_reference)
+      if (offset_range) {
+        const [min_off, max_off] = offset_range
+        if (min_off === max_off) {
+          this.andOn(
+            db.raw(`${cte_name}.year = ${year_reference} + ?`, [min_off])
+          )
+        } else {
+          this.andOn(
+            db.raw(
+              `${cte_name}.year BETWEEN ${year_reference} + ? AND ${year_reference} + ?`,
+              [min_off, max_off]
+            )
+          )
+        }
+      } else {
+        this.andOn(`${cte_name}.year`, '=', year_reference)
+      }
     }
   })
 }

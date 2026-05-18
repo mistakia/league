@@ -456,17 +456,49 @@ const process_item_params = (item) => {
 const get_year_range = (columns, where) => {
   const years = new Set()
 
+  // Collect year_offset shifts so the year_range covers years a column with
+  // year_offset would look up at the outer join. Required since aggregator
+  // CTEs that share a scan across instances differing only in year_offset
+  // rely on the CTE containing the offset-shifted rows.
+  const add_shifted = (year, offsets) => {
+    const parsed = parseInt(year, 10)
+    if (!Number.isFinite(parsed)) return
+    if (!offsets.length) {
+      if (parsed <= current_season.year) years.add(parsed)
+      return
+    }
+    for (const off of offsets) {
+      const shifted = parsed + off
+      if (shifted <= current_season.year) years.add(shifted)
+    }
+  }
+
+  const collect_offsets = (params) => {
+    const raw = params && params.year_offset
+    if (raw == null) return []
+    const arr = Array.isArray(raw) ? raw : [raw]
+    const nums = arr.map((n) => parseInt(n, 10)).filter((n) => Number.isFinite(n))
+    if (!nums.length) return []
+    const min = Math.min(...nums)
+    const max = Math.max(...nums)
+    // Expand any range into integer steps so each offset year is covered.
+    const out = []
+    for (let i = min; i <= max; i++) out.push(i)
+    return out
+  }
+
   const check_params = (params) => {
     if (params.year) {
       const year_array = Array.isArray(params.year)
         ? params.year
         : [params.year]
-      year_array.forEach((year) => {
-        const parsed_year = parseInt(year, 10)
-        if (parsed_year <= current_season.year) {
-          years.add(parsed_year)
-        }
-      })
+      const offsets = collect_offsets(params)
+      // Always include the base years (offset 0) so a year_offset column does
+      // not strip the unshifted column's coverage.
+      year_array.forEach((y) => add_shifted(y, []))
+      if (offsets.length) {
+        year_array.forEach((y) => add_shifted(y, offsets))
+      }
     }
   }
 
