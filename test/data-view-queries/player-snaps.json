@@ -15,7 +15,13 @@
     ]
   },
   "skip_query_match": true,
-  "expected_query": "with \"tbf0efce2c321a391b20b8e3c21cad25a\" as materialized (select \"nfl_snaps\".\"gsis_it_id\", COUNT(*) as rate_type_total_count from \"nfl_plays\" inner join \"nfl_snaps\" on \"nfl_plays\".\"esbid\" = \"nfl_snaps\".\"esbid\" and \"nfl_plays\".\"playId\" = \"nfl_snaps\".\"playId\" and \"nfl_plays\".\"year\" = \"nfl_snaps\".\"year\" where not \"play_type\" = 'NOPL' and \"play_type\" in ('PASS', 'RUSH') group by \"nfl_snaps\".\"gsis_it_id\") select \"player\".\"pid\", tbf0efce2c321a391b20b8e3c21cad25a.rate_type_total_count as player_snaps_0, \"player\".\"pos\" from \"player\" left join \"tbf0efce2c321a391b20b8e3c21cad25a\" on \"tbf0efce2c321a391b20b8e3c21cad25a\".\"gsis_it_id\" = \"player\".\"gsis_it_id\" group by tbf0efce2c321a391b20b8e3c21cad25a.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["player", "plays", "sorting", "rate_type", "cte"],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"tbf0efce2c321a391b20b8e3c21cad25a\" as materialized (select \"nfl_snaps\".\"gsis_it_id\", COUNT(*) as rate_type_total_count from \"nfl_plays\" inner join \"nfl_snaps\" on \"nfl_plays\".\"esbid\" = \"nfl_snaps\".\"esbid\" and \"nfl_plays\".\"playId\" = \"nfl_snaps\".\"playId\" and \"nfl_plays\".\"year\" = \"nfl_snaps\".\"year\" where not \"play_type\" = 'NOPL' and \"play_type\" in ('PASS', 'RUSH') group by \"nfl_snaps\".\"gsis_it_id\") select \"player\".\"pid\", tbf0efce2c321a391b20b8e3c21cad25a.rate_type_total_count as player_snaps_0, \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"tbf0efce2c321a391b20b8e3c21cad25a\" on \"tbf0efce2c321a391b20b8e3c21cad25a\".\"gsis_it_id\" = \"player\".\"gsis_it_id\" group by tbf0efce2c321a391b20b8e3c21cad25a.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "sorting",
+    "rate_type",
+    "cte"
+  ],
   "timeout_ms": 40000
 }

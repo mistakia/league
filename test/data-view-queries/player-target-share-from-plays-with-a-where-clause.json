@@ -3,27 +3,42 @@
   "name": "should handle player_target_share_from_plays with a where clause",
   "description": "Test case for should handle player_target_share_from_plays with a where clause",
   "request": {
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       {
         "column_id": "player_target_share_from_plays",
         "params": {
-          "year": [2023],
-          "dwn": [3]
+          "year": [
+            2023
+          ],
+          "dwn": [
+            3
+          ]
         }
       },
       {
         "column_id": "player_targets_from_plays",
         "params": {
-          "year": [2023],
-          "dwn": [3]
+          "year": [
+            2023
+          ],
+          "dwn": [
+            3
+          ]
         }
       },
       {
         "column_id": "player_target_share_from_plays",
         "params": {
-          "year": [2023],
-          "qtr": [1, 2]
+          "year": [
+            2023
+          ],
+          "qtr": [
+            1,
+            2
+          ]
         }
       }
     ],
@@ -33,8 +48,12 @@
         "operator": ">=",
         "value": "15",
         "params": {
-          "year": [2023],
-          "dwn": [3]
+          "year": [
+            2023
+          ],
+          "dwn": [
+            3
+          ]
         }
       }
     ],
@@ -45,8 +64,15 @@
       }
     ]
   },
-  "expected_query": "with \"tcb7c8e00e4d3f2856c85f708282c61ff\" as materialized (select COALESCE(trg_pid) as pid, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_PRE_WEEK_1', '2023_PRE_WEEK_2', '2023_PRE_WEEK_3', '2023_PRE_WEEK_4', '2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2023_REG_WEEK_5', '2023_REG_WEEK_6', '2023_REG_WEEK_7', '2023_REG_WEEK_8', '2023_REG_WEEK_9', '2023_REG_WEEK_10', '2023_REG_WEEK_11', '2023_REG_WEEK_12', '2023_REG_WEEK_13', '2023_REG_WEEK_14', '2023_REG_WEEK_15', '2023_REG_WEEK_16', '2023_REG_WEEK_17', '2023_REG_WEEK_18', '2023_POST_WEEK_1', '2023_POST_WEEK_2', '2023_POST_WEEK_3', '2023_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"dwn\" in (3) and \"nfl_plays\".\"year\" in (2023) group by COALESCE(trg_pid) having SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) >= '15'), \"tf5b7795e7b14f28206eb086009732161\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"dwn\" in (3) and \"nfl_plays\".\"year\" in (2023) and \"pg\".\"year\" in (2023) group by \"pg\".\"pid\"), \"t61c0d040edcc38f630a950a621e3e0d1\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"qtr\" in (1, 2) and \"nfl_plays\".\"year\" in (2023) and \"pg\".\"year\" in (2023) group by \"pg\".\"pid\") select \"player\".\"pid\", \"tcb7c8e00e4d3f2856c85f708282c61ff\".\"trg_from_plays\" AS \"trg_from_plays_0\", player.fname, player.lname, \"tf5b7795e7b14f28206eb086009732161\".\"trg_share_from_plays\" AS \"trg_share_from_plays_0\", \"t61c0d040edcc38f630a950a621e3e0d1\".\"trg_share_from_plays\" AS \"trg_share_from_plays_1\", \"player\".\"pos\" from \"player\" inner join \"tcb7c8e00e4d3f2856c85f708282c61ff\" on \"tcb7c8e00e4d3f2856c85f708282c61ff\".\"pid\" = \"player\".\"pid\" left join \"tf5b7795e7b14f28206eb086009732161\" on \"tf5b7795e7b14f28206eb086009732161\".\"pid\" = \"player\".\"pid\" left join \"t61c0d040edcc38f630a950a621e3e0d1\" on \"t61c0d040edcc38f630a950a621e3e0d1\".\"pid\" = \"player\".\"pid\" group by \"tcb7c8e00e4d3f2856c85f708282c61ff\".\"trg_from_plays\", player.fname, player.lname, \"tf5b7795e7b14f28206eb086009732161\".\"trg_share_from_plays\", \"t61c0d040edcc38f630a950a621e3e0d1\".\"trg_share_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["player", "plays", "filters", "parameters", "sorting", "cte"],
+  "expected_query": "with \"tcb7c8e00e4d3f2856c85f708282c61ff\" as materialized (select COALESCE(trg_pid) as pid, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_PRE_WEEK_1', '2023_PRE_WEEK_2', '2023_PRE_WEEK_3', '2023_PRE_WEEK_4', '2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2023_REG_WEEK_5', '2023_REG_WEEK_6', '2023_REG_WEEK_7', '2023_REG_WEEK_8', '2023_REG_WEEK_9', '2023_REG_WEEK_10', '2023_REG_WEEK_11', '2023_REG_WEEK_12', '2023_REG_WEEK_13', '2023_REG_WEEK_14', '2023_REG_WEEK_15', '2023_REG_WEEK_16', '2023_REG_WEEK_17', '2023_REG_WEEK_18', '2023_POST_WEEK_1', '2023_POST_WEEK_2', '2023_POST_WEEK_3', '2023_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"dwn\" in (3) and \"nfl_plays\".\"year\" in (2023) group by COALESCE(trg_pid) having SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) >= '15'), \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"tf5b7795e7b14f28206eb086009732161\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"dwn\" in (3) and \"nfl_plays\".\"year\" in (2023) and \"pg\".\"year\" in (2023) group by \"pg\".\"pid\"), \"ta762c0f59b3a05014c3a37bcd98b385b\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"qtr\" in (1, 2) and \"nfl_plays\".\"year\" in (2023) and \"pg\".\"year\" in (2023) group by \"pg\".\"pid\") select \"player\".\"pid\", \"tcb7c8e00e4d3f2856c85f708282c61ff\".\"trg_from_plays\" AS \"trg_from_plays_0\", player.fname, player.lname, \"tf5b7795e7b14f28206eb086009732161\".\"trg_share_from_plays\" AS \"trg_share_from_plays_0\", \"ta762c0f59b3a05014c3a37bcd98b385b\".\"trg_share_from_plays\" AS \"trg_share_from_plays_1\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"tcb7c8e00e4d3f2856c85f708282c61ff\" on \"tcb7c8e00e4d3f2856c85f708282c61ff\".\"pid\" = \"player\".\"pid\" left join \"tf5b7795e7b14f28206eb086009732161\" on \"tf5b7795e7b14f28206eb086009732161\".\"pid\" = \"player\".\"pid\" left join \"ta762c0f59b3a05014c3a37bcd98b385b\" on \"ta762c0f59b3a05014c3a37bcd98b385b\".\"pid\" = \"player\".\"pid\" group by \"tcb7c8e00e4d3f2856c85f708282c61ff\".\"trg_from_plays\", player.fname, player.lname, \"tf5b7795e7b14f28206eb086009732161\".\"trg_share_from_plays\", \"ta762c0f59b3a05014c3a37bcd98b385b\".\"trg_share_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "filters",
+    "parameters",
+    "sorting",
+    "cte"
+  ],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "one_week",
