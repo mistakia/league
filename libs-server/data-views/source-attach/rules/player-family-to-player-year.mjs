@@ -78,16 +78,23 @@ export const emit_year_match = ({
       : Number(n)
   if (Array.isArray(v)) {
     if (offset_range && offset_range[0] !== offset_range[1]) {
-      // Range offset against a multi-year default: emit BETWEEN over the
-      // unioned shifted bounds.
-      const min_anchor = Math.min(...v.map(Number))
-      const max_anchor = Math.max(...v.map(Number))
-      eq(
-        db.raw(`${col} BETWEEN ? AND ?`, [
-          min_anchor + offset_range[0],
-          max_anchor + offset_range[1]
-        ])
-      )
+      // Range offset against a multi-year default: enumerate the full
+      // cross-product of {year_default values} x {offset range values}
+      // into an IN (...) list so that only combinations actually in the
+      // cross-product are matched. A BETWEEN over [min_anchor+min_off,
+      // max_anchor+max_off] over-includes years that fall in the range
+      // but are not reachable by any (anchor, offset) pair.
+      const [min_off, max_off] = offset_range
+      const years = new Set()
+      for (const anchor of v.map(Number)) {
+        for (let off = min_off; off <= max_off; off++) {
+          years.add(anchor + off)
+        }
+      }
+      const in_op = is_first
+        ? builder.onIn.bind(builder)
+        : builder.andOnIn.bind(builder)
+      in_op(col, [...years].sort((a, b) => a - b))
       return
     }
     const shifted = v.map(shift)

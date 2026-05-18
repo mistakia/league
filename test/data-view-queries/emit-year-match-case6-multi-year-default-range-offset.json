@@ -1,0 +1,42 @@
+{
+  "name": "emit_year_match case 6: multi-year year_default with range year_offset uses IN not BETWEEN",
+  "description": "Verifies that a source with a multi-year year_default joined with a range year_offset emits an IN(...) predicate enumerating the cross-product rather than an over-inclusive BETWEEN. year=[2022,2023] + year_offset=[1,2] should produce IN(2023,2024,2025).",
+  "request": {
+    "prefix_columns": [
+      "player_name"
+    ],
+    "columns": [
+      {
+        "column_id": "player_adp",
+        "params": {
+          "year": [2022, 2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["QB"]
+      },
+      {
+        "column_id": "player_adp",
+        "operator": ">=",
+        "value": 10,
+        "params": {
+          "year": [2022, 2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, (SELECT SUM(t6ff56cb89c37c5a5c611dbec0907b26f.adp) FROM t6ff56cb89c37c5a5c611dbec0907b26f WHERE t6ff56cb89c37c5a5c611dbec0907b26f.pid = player.pid AND t6ff56cb89c37c5a5c611dbec0907b26f.year BETWEEN null + 1 AND null + 2) AS \"adp_0\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_adp_index\" as \"t6ff56cb89c37c5a5c611dbec0907b26f\" on \"t6ff56cb89c37c5a5c611dbec0907b26f\".\"pid\" = \"player\".\"pid\" and \"t6ff56cb89c37c5a5c611dbec0907b26f\".\"year\" in (2023, 2024, 2025) and \"t6ff56cb89c37c5a5c611dbec0907b26f\".\"source_id\" in ('SLEEPER') and \"t6ff56cb89c37c5a5c611dbec0907b26f\".\"adp_type\" in ('PPR_REDRAFT') where player.pos IN ('QB') and t6ff56cb89c37c5a5c611dbec0907b26f.adp >= '10' group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "year_offset",
+    "year_default",
+    "regression",
+    "emit_year_match",
+    "adp"
+  ]
+}
