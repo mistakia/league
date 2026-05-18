@@ -188,6 +188,30 @@ const build_role_union_period_cte = ({
   if (query_context.year_range && query_context.year_range.length) {
     outer.whereIn('nfl_games.year', query_context.year_range)
   }
+  // career_year / career_game: legacy with_func joined player_seasonlogs on
+  // (pid, year, seas_type) and filtered between bounds. Mirror that here so
+  // role-union numerators respect career_year params -- without this, the
+  // per-game denominator (rate-type-per-game.mjs) correctly restricts to
+  // career_year games while the numerator sums all-time, inflating the rate.
+  const career_year = params && params.career_year
+  const career_game = params && params.career_game
+  if (career_year || career_game) {
+    outer.innerJoin('player_seasonlogs', function () {
+      this.on('player_seasonlogs.pid', '=', 'role_union.pid')
+      this.andOn('player_seasonlogs.year', '=', 'nfl_games.year')
+      this.andOn('player_seasonlogs.seas_type', '=', 'nfl_games.seas_type')
+    })
+    if (career_year) {
+      const arr = Array.isArray(career_year) ? career_year : [career_year, career_year]
+      const [lo, hi] = [Math.min(Number(arr[0]), Number(arr[1])), Math.max(Number(arr[0]), Number(arr[1]))]
+      outer.whereBetween('player_seasonlogs.career_year', [lo, hi])
+    }
+    if (career_game) {
+      const arr = Array.isArray(career_game) ? career_game : [career_game, career_game]
+      const [lo, hi] = [Math.min(Number(arr[0]), Number(arr[1])), Math.max(Number(arr[0]), Number(arr[1]))]
+      outer.whereBetween('player_seasonlogs.career_game', [lo, hi])
+    }
+  }
   return outer
 }
 
