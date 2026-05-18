@@ -68,6 +68,7 @@ const import_single_fantasypros_draft_rankings = async ({
   year,
   fantasypros_scoring_type,
   fantasypros_position_type,
+  superflex,
   dry_run = false,
   ignore_cache = false
 }) => {
@@ -113,6 +114,7 @@ const import_single_fantasypros_draft_rankings = async ({
       ranking_type: format_ranking_type({
         fantasypros_scoring_type,
         fantasypros_position_type,
+        superflex,
         dynasty: false,
         rookie: false
       }),
