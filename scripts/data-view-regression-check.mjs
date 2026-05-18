@@ -136,6 +136,26 @@ const ensure_worktree = () => {
     log(`[worktree] refreshing ${worktree_root} to ${ref}`)
     execSync(`git fetch --quiet`, { cwd: project_root, stdio: ['ignore', 2, 'inherit'] })
     execSync(`git reset --hard ${ref}`, { cwd: worktree_root, stdio: ['ignore', 2, 'inherit'] })
+    // git reset --hard may remove or replace node_modules if it was tracked at
+    // the base ref. Re-create the symlink idempotently so the worktree always
+    // shares the main checkout's node_modules without a separate yarn install.
+    const refresh_link = path.join(worktree_root, 'node_modules')
+    const link_target = path.join(project_root, 'node_modules')
+    let needs_symlink = !fs.existsSync(refresh_link)
+    if (!needs_symlink) {
+      try {
+        const stat = fs.lstatSync(refresh_link)
+        if (!stat.isSymbolicLink() || fs.realpathSync(refresh_link) !== fs.realpathSync(link_target)) {
+          fs.rmSync(refresh_link, { recursive: true, force: true })
+          needs_symlink = true
+        }
+      } catch {
+        needs_symlink = true
+      }
+    }
+    if (needs_symlink) {
+      fs.symlinkSync(link_target, refresh_link, 'dir')
+    }
   }
   // The build-sql helper may not exist at the base ref. Copy the head version
   // in; it only calls get_data_view_results_query + load_data_view_test_queries_sync
