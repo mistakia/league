@@ -252,9 +252,14 @@ const decide_stage_3_fingerprint_pair = ({ pair, backfill_refs }) => {
   const [row_a, row_b] = pair
   const cost_x = fp_distance(row_a, fp_all) + fp_distance(row_b, fp_op)
   const cost_y = fp_distance(row_a, fp_op) + fp_distance(row_b, fp_all)
-  const denom = Math.max(cost_x, cost_y, 0.01)
+  // Confidence formula: 1 - (min/max)^1.5. Sharper than gap/max -- a 2x cost
+  // ratio yields conf ~0.65 instead of ~0.50, and 4x yields ~0.88 instead of
+  // ~0.75. Matches intuition: doubling the opposite-orientation cost is
+  // strong evidence.
+  const lo = Math.min(cost_x, cost_y)
+  const hi = Math.max(cost_x, cost_y, 0.01)
+  const confidence = Math.min(1.0, 1 - Math.pow(lo / hi, 1.5))
   const gap = Math.abs(cost_x - cost_y)
-  const confidence = Math.min(1.0, gap / denom)
   const flagged = gap < 0.05
   const [a_decision, b_decision] =
     cost_x <= cost_y ? ['ALL', 'OP'] : ['OP', 'ALL']
@@ -282,9 +287,10 @@ const decide_stage_3_fingerprint_single = ({ row, backfill_refs }) => {
   if (!fp_all || !fp_op) return null
   const d_all = fp_distance(row, fp_all)
   const d_op = fp_distance(row, fp_op)
-  const denom = Math.max(d_all, d_op, 0.01)
+  const lo = Math.min(d_all, d_op)
+  const hi = Math.max(d_all, d_op, 0.01)
+  const confidence = Math.min(1.0, 1 - Math.pow(lo / hi, 1.5))
   const gap = Math.abs(d_all - d_op)
-  const confidence = Math.min(1.0, gap / denom)
   const flagged = gap < 0.05
   return {
     decision: d_all <= d_op ? 'ALL' : 'OP',
@@ -703,14 +709,25 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
         final_conf = fp_single.confidence
         base_notes = fp_single.notes
       } else {
+        // Majority count first (all source votes count regardless of their
+        // own confidence), weighted sum as tiebreaker.
+        const c_all = singleton_votes.filter((v) => v.decision === 'ALL').length
+        const c_op = singleton_votes.filter((v) => v.decision === 'OP').length
         const w_all = singleton_votes.filter((v) => v.decision === 'ALL').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
         const w_op = singleton_votes.filter((v) => v.decision === 'OP').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
         const total = w_all + w_op
-        final_decision = w_all >= w_op ? 'ALL' : 'OP'
+        final_decision = c_all !== c_op
+          ? (c_all > c_op ? 'ALL' : 'OP')
+          : (w_all >= w_op ? 'ALL' : 'OP')
         const winner_w = final_decision === 'ALL' ? w_all : w_op
         final_conf = Math.min(0.95, winner_w / Math.max(total, 0.01))
-        base_notes = `single-vote winner=${final_decision} w_all=${w_all.toFixed(2)} w_op=${w_op.toFixed(2)}`
+        base_notes = `single-vote winner=${final_decision} c_all=${c_all} c_op=${c_op} w_all=${w_all.toFixed(2)} w_op=${w_op.toFixed(2)}`
       }
+      const sing_concur = singleton_votes.filter((v) => v.decision === final_decision).length
+      const sing_dissent = singleton_votes.filter((v) => v.decision !== final_decision).length
+      if (sing_concur >= 3 && sing_dissent === 0) final_conf = Math.max(final_conf, 0.99)
+      else if (sing_concur >= 2 && sing_dissent === 0) final_conf = Math.max(final_conf, 0.95)
+      else if (sing_concur >= 2 && sing_dissent === 1) final_conf = Math.max(final_conf, 0.92)
       const concur = singleton_votes.filter((v) => v.decision === final_decision).map((v) => v.src)
       const dissent = singleton_votes.filter((v) => v.decision !== final_decision).map((v) => v.src)
       const tag_parts = []
@@ -760,19 +777,38 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
     if (sleeper_decisions) votes.push({ src: 'sleeper', orient: orientation_of(sleeper_decisions), conf: sleeper_decisions[0].confidence })
     if (ktc_decisions) votes.push({ src: 'ktc', orient: orientation_of(ktc_decisions), conf: ktc_decisions[0].confidence })
     if (votes.length > 0) {
-      const weight_x = votes.filter((v) => v.orient === 'X').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
-      const weight_y = votes.filter((v) => v.orient === 'Y').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
+      // Majority-count first (2 agreeing sources beat 1 even if it has higher
+      // confidence). Count uses all source votes regardless of their own
+      // confidence -- a low-confidence vote still indicates that source's
+      // preferred orientation. Weighted sum as tiebreaker when counts equal.
+      const oriented = votes.filter((v) => v.orient)
+      const count_x = oriented.filter((v) => v.orient === 'X').length
+      const count_y = oriented.filter((v) => v.orient === 'Y').length
+      const weight_x = oriented.filter((v) => v.orient === 'X').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
+      const weight_y = oriented.filter((v) => v.orient === 'Y').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
       const total = weight_x + weight_y
-      const winner = weight_x >= weight_y ? 'X' : 'Y'
+      const winner = count_x !== count_y
+        ? (count_x > count_y ? 'X' : 'Y')
+        : (weight_x >= weight_y ? 'X' : 'Y')
       const winner_w = winner === 'X' ? weight_x : weight_y
       // Backfill fingerprint is the trusted reference: if it has high
       // confidence (>=0.5) we keep its decision regardless of other sources.
-      // For low-confidence fingerprint, multi-source vote rules.
+      // For low-confidence fingerprint, multi-source vote rules. Final
+      // confidence is lifted by cross-source agreement: triple-source concurrence
+      // is treated as near-certain (>=0.95) because the three signals are
+      // independent (fingerprint = aggregation shape, sleeper = human ADP,
+      // ktc = trade value), so coincidental agreement on a wrong label has
+      // very low prior probability.
       const trust_fp = fp_decisions && fp_decisions[0].confidence >= 0.5
       const final_orient = trust_fp ? orientation_of(fp_decisions) : winner
-      const final_conf = trust_fp
+      let final_conf = trust_fp
         ? fp_decisions[0].confidence
         : Math.min(0.95, winner_w / Math.max(total, 0.01))
+      const concur_count_pre = votes.filter((v) => v.orient === final_orient).length
+      const dissent_count_pre = votes.filter((v) => v.orient !== final_orient && v.orient !== null).length
+      if (concur_count_pre >= 3 && dissent_count_pre === 0) final_conf = Math.max(final_conf, 0.99)
+      else if (concur_count_pre >= 2 && dissent_count_pre === 0) final_conf = Math.max(final_conf, 0.95)
+      else if (concur_count_pre >= 2 && dissent_count_pre === 1) final_conf = Math.max(final_conf, 0.92)
       const [row_a, row_b] = group
       const [a_dec, b_dec] = final_orient === 'X' ? ['ALL', 'OP'] : ['OP', 'ALL']
       const concur = votes.filter((v) => v.orient === final_orient).map((v) => v.src)
