@@ -53,12 +53,18 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
+// get_table_conditions fires when scoring_format_player_seasonlogs is selected
+// as the FROM table (from-table-optimization). source.extra_predicates below
+// fires when the source is attached as a measure (source-attach dispatch).
+// The two paths are mutually exclusive per source instance: FROM-table path
+// emits WHERE on the from-table alias; measure path emits AND ON during the
+// LEFT JOIN. The year predicate is handled symmetrically: WHERE here when
+// FROM, AND ON via player-family-to-player-year emit_year_match when measure.
 const scoring_format_seasonlogs_conditions = ({ params, splits = [] }) => {
   const conditions = [
     { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
   ]
 
-  // Add year filter when no year splits are active
   if (!splits.includes('year') && params.year) {
     const year = Array.isArray(params.year) ? params.year[0] : params.year
     if (year !== undefined && year !== null) {

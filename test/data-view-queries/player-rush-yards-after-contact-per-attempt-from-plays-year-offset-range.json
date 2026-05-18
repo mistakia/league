@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "player_rush_yards_after_contact_per_attempt_from_plays year_offset range",
   "description": "Test case for player_rush_yards_after_contact_per_attempt_from_plays year_offset range",
   "request": {

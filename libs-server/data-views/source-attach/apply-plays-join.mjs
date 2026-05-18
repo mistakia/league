@@ -66,9 +66,7 @@ export const apply_plays_join = ({
               ? params.year
               : [params.year]
             if (year_array.length > 0) {
-              this.andOn(
-                db.raw(`${table_alias}.year IN (${year_array.join(',')})`)
-              )
+              this.andOnIn(`${table_alias}.year`, year_array)
             }
           }
         }

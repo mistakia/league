@@ -127,6 +127,13 @@ export const attach_source = ({
   // reference the primary alias resolve in the SQL's left-to-right order.
   // Splits is forwarded so CTE-backed attaches know which predicates the
   // with: callback actually projected onto the joined CTE.
+  //
+  // Pass raw query_context (not rule_ctx) so source.attach observes any
+  // mutations emit_predicate made above -- rule_ctx is a snapshot via spread,
+  // not a live view, and attaches like game-column-definitions branch on
+  // late-registered fields (e.g. player_year_teams_cte_name). Attach helpers
+  // that need FROM-table-aware references use the dv.X ?? query_context.X
+  // fallback pattern locally.
   if (typeof source.attach === 'function') {
     source.attach({
       query_context,

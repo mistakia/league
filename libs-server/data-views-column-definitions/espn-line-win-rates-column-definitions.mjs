@@ -20,6 +20,12 @@ const espn_player_win_rates_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(`espn_player_win_rates_${year}_${win_rate_type}`)
 }
 
+// extra_predicates emits only espn_win_rate_type. The year predicate is
+// emitted by the source-attach rule (player-family-to-player-year
+// emit_year_match) via query_context.year_reference; year_default is the
+// fallback only used when year_reference is unset (never under current
+// build_query_context contract). key_columns.{pid,year} are consumed by
+// the rule for the ON-clause join.
 const espn_player_source = {
   table: 'espn_player_win_rates_index',
   grain: 'player_year',

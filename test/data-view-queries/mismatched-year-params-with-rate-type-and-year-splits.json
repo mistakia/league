@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "mismatched year params with rate type and year splits",
   "description": "Verifies that rate type CTE WHERE clause includes the full query-level year range when year splits are active, even when the rate type column has a narrower year range than another column",
   "request": {

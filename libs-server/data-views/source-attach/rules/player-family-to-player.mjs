@@ -9,12 +9,6 @@ const emit = ({ query_context, source, table_alias, builder }) => {
   const key_columns = source.key_columns || {}
   const { pid_reference } = query_context
 
-  if (!key_columns.pid) {
-    throw new Error(
-      `player-family-to-player requires source.key_columns.pid (source.table=${source.table})`
-    )
-  }
-
   builder.on(`${ref}.${key_columns.pid}`, '=', pid_reference)
 }
 

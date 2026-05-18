@@ -10,12 +10,6 @@ const emit = ({ query_context, source, table_alias, params, builder }) => {
   const key_columns = source.key_columns || {}
   const { pid_reference, year_reference, db } = query_context
 
-  if (!key_columns.pid) {
-    throw new Error(
-      `player-family-to-player-year requires source.key_columns.pid (source.table=${source.table})`
-    )
-  }
-
   builder.on(`${ref}.${key_columns.pid}`, '=', pid_reference)
   emit_year_match({
     builder,

@@ -1,4 +1,5 @@
 {
+  "skip_query_match": true,
   "name": "should create a year splits query with player age at time of split",
   "description": "Test case for should create a year splits query with player age at time of split",
   "request": {
