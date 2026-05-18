@@ -395,6 +395,7 @@ export const add_period_cte = async ({
   column_def,
   params,
   cte_name,
+  group_key: caller_group_key,
   identity_id,
   period
 }) => {
@@ -428,9 +429,14 @@ export const add_period_cte = async ({
       identity_id,
       params
     }
+    // Use the pre-hash group_key passed by the caller when available so that
+    // the measure_batches map key is the canonical scan-signature object
+    // (transparent for debugging). Fall back to cte_name for callers that do
+    // not supply group_key (e.g. column-level output_aggregator overrides).
+    const batch_group_key = caller_group_key ?? cte_name
     register_measure({
       query_context,
-      group_key: cte_name, // get_cte_name is derived from group_key, so reuse
+      group_key: batch_group_key,
       cte_name,
       measure_alias,
       measure_expr,

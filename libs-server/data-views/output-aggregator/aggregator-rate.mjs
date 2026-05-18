@@ -56,7 +56,26 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
   return `rate_${period}_${hash}`
 }
 
-export const add_cte = add_period_cte
+// Wrapper that enriches the add_period_cte call with the pre-hash group_key
+// so the measure_batches map carries a transparent canonical key rather than
+// the already-hashed cte_name string.
+export const add_cte = (args) => {
+  const { column_def, params, identity_id, period } = args
+  if (is_batchable({ column_def })) {
+    const effective = column_def.consumes_params_extra
+      ? [...consumes_params, ...column_def.consumes_params_extra]
+      : consumes_params
+    const group_key = compute_group_key({
+      column_def,
+      params,
+      identity_id,
+      period,
+      consumes_params: effective
+    })
+    return add_period_cte({ ...args, group_key })
+  }
+  return add_period_cte(args)
+}
 
 // Derive the team-side join target for a team-keyed CTE consumed by a
 // player-cell view. Subject 'team' uses the team identity reference directly;
