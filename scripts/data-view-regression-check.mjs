@@ -104,6 +104,7 @@ const run_build_sql = ({ cwd, filenames }) =>
     child.stdout.on('data', (c) => (stdout += c))
     child.stderr.on('data', (c) => (stderr += c))
     child.on('error', reject)
+    child.stdin.end(JSON.stringify(filenames))
     child.on('close', (code) => {
       if (code !== 0) {
         return reject(new Error(`build-sql exited ${code}: ${stderr.trim()}`))
@@ -123,8 +124,9 @@ const ensure_worktree = () => {
   if (!fs.existsSync(worktree_root)) {
     log(`[worktree] git worktree add ${worktree_root} ${ref}`)
     fs.mkdirSync(path.dirname(worktree_root), { recursive: true })
-    execSync(`git fetch --quiet`, { cwd: project_root, stdio: 'inherit' })
-    execSync(`git worktree add --detach ${JSON.stringify(worktree_root)} ${ref}`, { cwd: project_root, stdio: 'inherit' })
+    // Route git stdout to our stderr to keep --json mode's stdout clean.
+    execSync(`git fetch --quiet`, { cwd: project_root, stdio: ['ignore', 2, 'inherit'] })
+    execSync(`git worktree add --detach ${JSON.stringify(worktree_root)} ${ref}`, { cwd: project_root, stdio: ['ignore', 2, 'inherit'] })
     // share node_modules with the main checkout -- avoids a second yarn install
     const link = path.join(worktree_root, 'node_modules')
     if (!fs.existsSync(link)) {
@@ -132,9 +134,16 @@ const ensure_worktree = () => {
     }
   } else {
     log(`[worktree] refreshing ${worktree_root} to ${ref}`)
-    execSync(`git fetch --quiet`, { cwd: project_root, stdio: 'inherit' })
-    execSync(`git reset --hard ${ref}`, { cwd: worktree_root, stdio: 'inherit' })
+    execSync(`git fetch --quiet`, { cwd: project_root, stdio: ['ignore', 2, 'inherit'] })
+    execSync(`git reset --hard ${ref}`, { cwd: worktree_root, stdio: ['ignore', 2, 'inherit'] })
   }
+  // The build-sql helper may not exist at the base ref. Copy the head version
+  // in; it only calls get_data_view_results_query + load_data_view_test_queries_sync
+  // via #libs-server, which will resolve to the worktree's own code.
+  fs.copyFileSync(
+    path.join(project_root, 'scripts', 'data-view-regression-build-sql.mjs'),
+    path.join(worktree_root, 'scripts', 'data-view-regression-build-sql.mjs')
+  )
 }
 
 // ---------- Row hashing ----------

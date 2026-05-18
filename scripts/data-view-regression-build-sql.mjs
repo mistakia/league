@@ -32,10 +32,17 @@ const main = async () => {
       out[fixture.filename] = { sql: null, error: e && e.message ? e.message : String(e) }
     }
   }
-  process.stdout.write(JSON.stringify(out))
+  const json = JSON.stringify(out)
+  await new Promise((resolve) => {
+    if (process.stdout.write(json)) resolve()
+    else process.stdout.once('drain', resolve)
+  })
 }
 
-main().catch((e) => {
-  process.stderr.write(`fatal: ${e && e.stack ? e.stack : e}\n`)
-  process.exit(1)
-})
+main().then(
+  () => process.exit(0),
+  (e) => {
+    process.stderr.write(`fatal: ${e && e.stack ? e.stack : e}\n`)
+    process.exit(1)
+  }
+)
