@@ -269,7 +269,7 @@ const main = async () => {
   const entries = await map_with_concurrency(fixtures, argv.concurrency, async (fixture) => {
     const fn = fixture.filename
     const head = head_sql[fn] || { sql: null, error: 'missing in head set' }
-    const base = base_sql[fn] || { sql: null, error: 'missing in base set' }
+    const base = base_sql[fn] || { sql: null, error: null }
 
     if (head.error) return { fixture: fn, status: 'error_build_head', detail: head.error }
     if (!head.sql) return { fixture: fn, status: 'error_build_head', detail: 'no SQL on head' }
