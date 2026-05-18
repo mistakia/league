@@ -38,5 +38,5 @@ source
 .deploys
 tmp
 
-# Data view baseline capture sidecar (staged, manually promoted into tracked baseline)
-test/data-view-queries-result-baselines.captured.json
+# Cached git worktree used by scripts/data-view-regression-check.mjs
+.cache/

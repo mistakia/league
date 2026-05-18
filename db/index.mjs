@@ -11,6 +11,15 @@ if (process.env.LEAGUE_DB_HOST) {
 if (process.env.LEAGUE_DB_PORT) {
   config.postgres.connection.port = process.env.LEAGUE_DB_PORT
 }
+if (process.env.LEAGUE_DB_USER) {
+  config.postgres.connection.user = process.env.LEAGUE_DB_USER
+}
+if (process.env.LEAGUE_DB_PASSWORD) {
+  config.postgres.connection.password = process.env.LEAGUE_DB_PASSWORD
+}
+if (process.env.LEAGUE_DB_DATABASE) {
+  config.postgres.connection.database = process.env.LEAGUE_DB_DATABASE
+}
 
 const postgres = Knex(config.postgres)
 export default postgres
