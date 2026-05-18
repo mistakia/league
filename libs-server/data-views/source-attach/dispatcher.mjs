@@ -68,6 +68,24 @@ export const attach_source = ({
     throw new Error(msg)
   }
 
+  // Enforce structural requirements per source grain before the rule fires.
+  // team_year sources that use a standard source.table join must declare
+  // key_columns.team so the emit_predicate can reference the team column; a
+  // missing declaration produces a silent mismatch at runtime that is hard to
+  // diagnose from the resulting SQL. Sources that supply a custom `attach`
+  // function manage their own join logic and are exempt.
+  if (
+    source.table &&
+    !source.attach &&
+    source.grain === 'team_year' &&
+    !(source.key_columns && source.key_columns.team)
+  ) {
+    throw new Error(
+      `column ${column_def.column_id} declared team_year grain without key_columns.team` +
+        ` (source.table=${source.table})`
+    )
+  }
+
   const required =
     typeof rule.required_identity_bridges === 'function'
       ? rule.required_identity_bridges(params) || []
