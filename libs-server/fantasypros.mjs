@@ -19,10 +19,19 @@ export const get_fantasypros_rankings = async ({
   year = current_season.year,
   week = 0,
   fantasypros_scoring_type = 'HALF',
-  fantasypros_position_type = 'ALL'
+  fantasypros_position_type = 'ALL',
+  dynasty = false,
+  rookie = false
 } = {}) => {
-  const ranking_type = week === 0 ? 'draft' : 'weekly'
-  const cache_key = `/fantasypros/rankings/${year}/${week}/${fantasypros_scoring_type}/${fantasypros_position_type}.json`
+  let ranking_type
+  if (dynasty) {
+    ranking_type = 'dynasty'
+  } else if (rookie) {
+    ranking_type = 'rookies'
+  } else {
+    ranking_type = week === 0 ? 'draft' : 'weekly'
+  }
+  const cache_key = `/fantasypros/rankings/${year}/${week}/${fantasypros_scoring_type}/${fantasypros_position_type}/${ranking_type}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
