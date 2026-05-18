@@ -2,6 +2,10 @@ import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import {
+  decompose_nfl_weeks,
+  is_full_year_seas_type_coverage
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 export const add_team_stats_play_by_play_with_statement = ({
   query,
@@ -171,7 +175,13 @@ function create_player_team_stats_query({
     const nfl_week = Array.isArray(default_params.nfl_week_id)
       ? default_params.nfl_week_id
       : [default_params.nfl_week_id]
-    player_team_stats_query.whereIn('nfl_games.nfl_week_id', nfl_week)
+    const { seas_types } = decompose_nfl_weeks({ nfl_weeks: nfl_week })
+    if (!is_full_year_seas_type_coverage({ nfl_weeks: nfl_week })) {
+      player_team_stats_query.whereIn('nfl_games.nfl_week_id', nfl_week)
+    }
+    if (seas_types.length) {
+      player_team_stats_query.whereIn('nfl_games.seas_type', seas_types)
+    }
   } else {
     player_team_stats_query.whereIn(
       'nfl_games.seas_type',

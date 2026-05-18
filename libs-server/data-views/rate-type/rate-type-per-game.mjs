@@ -1,7 +1,7 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import {
   decompose_nfl_weeks,
-  is_full_reg_season_nfl_week_id_set
+  is_full_year_seas_type_coverage
 } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import db from '#db'
@@ -93,11 +93,14 @@ const add_player_per_game_cte = ({
     )
   }
 
-  if (
-    nfl_week.length &&
-    !is_full_reg_season_nfl_week_id_set({ nfl_weeks: nfl_week })
-  ) {
-    cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)
+  if (nfl_week.length) {
+    const { seas_types } = decompose_nfl_weeks({ nfl_weeks: nfl_week })
+    if (!is_full_year_seas_type_coverage({ nfl_weeks: nfl_week })) {
+      cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)
+    }
+    if (seas_types.length) {
+      cte_query.whereIn('nfl_games.seas_type', seas_types)
+    }
   }
 
   if (effective_years.length) {
@@ -177,14 +180,21 @@ const add_team_per_game_cte = ({
     group_cols.push('week')
   }
 
+  const { seas_types } = nfl_week.length
+    ? decompose_nfl_weeks({ nfl_weeks: nfl_week })
+    : { seas_types: [] }
+  const covers_full_year_seas_type =
+    nfl_week.length &&
+    is_full_year_seas_type_coverage({ nfl_weeks: nfl_week })
+
   const make_side = (team_col) => {
     const sub = db('nfl_games').select(`${team_col} as team`, 'year')
     if (splits.includes('week')) sub.select('week')
-    if (
-      nfl_week.length &&
-      !is_full_reg_season_nfl_week_id_set({ nfl_weeks: nfl_week })
-    ) {
+    if (nfl_week.length && !covers_full_year_seas_type) {
       sub.whereIn('nfl_games.nfl_week_id', nfl_week)
+    }
+    if (seas_types.length) {
+      sub.whereIn('nfl_games.seas_type', seas_types)
     }
     if (effective_years.length) {
       sub.whereIn('nfl_games.year', effective_years)

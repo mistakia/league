@@ -4,8 +4,9 @@ import nfl_plays_column_params, {
 import * as table_constants from 'react-table/src/constants.mjs'
 import {
   decompose_nfl_weeks,
-  is_full_reg_season_nfl_week_id_set
+  is_full_year_seas_type_coverage
 } from '#libs-shared/nfl-week-identifier.mjs'
+import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 
 const nfl_games_param_keys = Object.keys(nfl_games_params)
 
@@ -15,6 +16,20 @@ export default function ({
   table_name = 'nfl_plays',
   skip_param_name = null
 }) {
+  // nfl_week_id is the canonical time-scope filter. Self-resolve from
+  // year + seas_type (default REG) when callers pass only year, so the
+  // helper emits consistent year + seas_type + (optional) nfl_week_id IN
+  // predicates regardless of entry point.
+  if (
+    !params.nfl_week_id &&
+    params.year &&
+    skip_param_name !== 'nfl_week_id'
+  ) {
+    const resolved = resolve_nfl_week_id_from_year_param(params)
+    if (resolved.length) {
+      params = { ...params, nfl_week_id: resolved }
+    }
+  }
   const column_param_keys = Object.keys(nfl_plays_column_params)
   let nfl_games_joined = false
 
@@ -71,15 +86,22 @@ export default function ({
         : [param_value]
       if (column_values.length) {
         if (column_param_key === 'nfl_week_id') {
-          const { years } = decompose_nfl_weeks({ nfl_weeks: column_values })
-          const covers_full_seasons = is_full_reg_season_nfl_week_id_set({
+          const { years, seas_types } = decompose_nfl_weeks({
             nfl_weeks: column_values
           })
-          if (!covers_full_seasons) {
+          const covers_full_year_seas_type =
+            is_full_year_seas_type_coverage({ nfl_weeks: column_values })
+          if (!covers_full_year_seas_type) {
             query.whereIn(`${param_table}.${column_name}`, column_values)
           }
-          if (years.length) {
+          // Only emit derived year IN when `year` is not set as a param of its
+          // own -- the year column_param iteration emits it independently and
+          // a duplicate predicate is cosmetic noise.
+          if (years.length && params.year == null) {
             query.whereIn(`${param_table}.year`, years)
+          }
+          if (seas_types.length) {
+            query.whereIn(`${param_table}.seas_type`, seas_types)
           }
         } else {
           query.whereIn(`${param_table}.${column_name}`, column_values)

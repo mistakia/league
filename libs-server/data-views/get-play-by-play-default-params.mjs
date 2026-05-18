@@ -7,7 +7,10 @@ export default ({ params }) => {
       ? [params.seas_type]
       : ['REG']
 
-  const nfl_week_id = resolve_nfl_week_id_from_year_param(params)
+  const nfl_week_id = resolve_nfl_week_id_from_year_param({
+    ...params,
+    seas_type
+  })
 
   return {
     ...params,

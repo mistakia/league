@@ -2,11 +2,15 @@ import { get_nfl_week_identifiers_for_year } from '#libs-shared/nfl-week-identif
 
 /**
  * Resolves nfl_week_id values from params, falling back to converting
- * year param to nfl_week_id when nfl_week_id is not explicitly set.
+ * year + seas_type params to nfl_week_id when nfl_week_id is not
+ * explicitly set.
  *
- * Play-based columns filter via nfl_week_id rather than year directly.
- * When a column has year param set but no nfl_week_id, this function
- * generates the equivalent nfl_week_id values from the year.
+ * nfl_week_id is the canonical filter at the params layer. When the user
+ * supplies only year (and optionally seas_type), this expands to the full
+ * cross-product of (year, seas_type) weeks. seas_type defaults to ['REG'];
+ * the apply helper emits derived year/seas_type predicates alongside the
+ * IN-list to engage partition pruning and (year, seas_type, ...) composite
+ * indexes on nfl_plays.
  */
 export default function resolve_nfl_week_id_from_year_param(params = {}) {
   let nfl_week = params.nfl_week_id || []
@@ -20,8 +24,15 @@ export default function resolve_nfl_week_id_from_year_param(params = {}) {
       .map((y) => parseInt(y, 10))
       .filter((y) => !isNaN(y))
     if (valid_years.length) {
+      const seas_type_array = Array.isArray(params.seas_type)
+        ? params.seas_type
+        : params.seas_type
+          ? [params.seas_type]
+          : ['REG']
       nfl_week = valid_years.flatMap((y) =>
-        get_nfl_week_identifiers_for_year({ year: y })
+        seas_type_array.flatMap((st) =>
+          get_nfl_week_identifiers_for_year({ year: y, seas_type: st })
+        )
       )
     }
   }

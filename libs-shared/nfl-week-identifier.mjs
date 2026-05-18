@@ -289,25 +289,27 @@ export const format_nfl_week_param_values = ({ nfl_weeks }) => {
 }
 
 // Returns true when the given list of nfl_week_id values equals (as a set) the
-// union of all REG-season week identifiers for the years it touches, with no
-// PRE/POST entries. When this holds, the year filter alone is sufficient and
-// callers can skip emitting a (potentially 100+ element) nfl_week_id IN list,
-// which otherwise forces a bitmap heap scan + JIT and ~doubles CTE runtime
-// versus the partition-pruned year-only path.
-export const is_full_reg_season_nfl_week_id_set = ({ nfl_weeks }) => {
+// full week enumeration for every (year, seas_type) pair it touches. When this
+// holds, the IN-list adds no information beyond derived year + seas_type
+// predicates, so callers can skip emitting a (potentially 100+ element)
+// nfl_week_id IN list and lean on partition pruning + the (year, seas_type,
+// ...) composite indexes on nfl_plays. Falls back to false (emit IN-list) when
+// the user has narrowed to specific weeks within a (year, seas_type) pair.
+export const is_full_year_seas_type_coverage = ({ nfl_weeks }) => {
   if (!Array.isArray(nfl_weeks) || nfl_weeks.length === 0) return false
   const groups = group_nfl_weeks({ nfl_weeks })
   const keys = Object.keys(groups)
   if (keys.length === 0) return false
   for (const key of keys) {
     const [year_str, seas_type] = key.split('_')
-    if (seas_type !== 'REG') return false
     const year = parseInt(year_str, 10)
-    const max = get_max_weeks_for_season_type({ seas_type: 'REG', year })
+    const max = get_max_weeks_for_season_type({ seas_type, year })
     if (!max) return false
+    const min = seas_type === 'REG' ? 1 : WEEK_RANGES[seas_type].min
     const weeks = new Set(groups[key])
-    if (weeks.size !== max) return false
-    for (let w = 1; w <= max; w++) {
+    const expected_size = max - min + 1
+    if (weeks.size !== expected_size) return false
+    for (let w = min; w <= max; w++) {
       if (!weeks.has(w)) return false
     }
   }

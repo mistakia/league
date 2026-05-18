@@ -20,6 +20,12 @@ When adding a new builder or extending an existing one to scan a new year-partit
 
 For UNION-ALL subqueries (see `add-defensive-play-by-play-with-statement.mjs`), push the predicate inside each branch's inner `FROM nfl_plays` scan, not only on the outer wrapped subquery -- outer-query filters do not reach partition-pruning time.
 
+### Seas-Type Pushdown Contract
+
+`seas_type` is the canonical season-type filter. `resolve_nfl_week_id_from_year_param` defaults `seas_type` to `['REG']` when unset, so the `nfl_week_id` IN-list produced by year-only callers covers only REG weeks. `apply_play_by_play_column_params_to_query` decomposes the IN-list via `decompose_nfl_weeks` and always emits `whereIn('<table>.seas_type', seas_types)` alongside the year predicate -- this engages the `(year, seas_type, ...)` composite indexes on `nfl_plays` and matches the partition layout. The `nfl_week_id IN (...)` predicate itself is emitted only when `is_full_year_seas_type_coverage` returns false (user narrowed to specific weeks within a season type); otherwise the redundant IN-list is dropped.
+
+Builders that scan `nfl_plays` / `nfl_games` outside `apply_play_by_play_column_params_to_query` must follow the same pattern: decompose the resolved `nfl_week_id` list to `{years, seas_types}` and emit the derived `seas_type IN (...)` predicate alongside the year predicate, gating the `nfl_week_id IN (...)` clause on `!is_full_year_seas_type_coverage(...)`. Skipping the `seas_type` predicate silently re-admits PRE / POST plays and defeats the composite-index access path.
+
 ### Materialization Invariant
 
 Every stat or rate-type aggregation CTE MUST be registered via `query.withMaterialized(...)`, never `query.with(...)`. Predicates are always pushed at construction time in the builder, so the planner's predicate push-into-CTE is not needed. `withMaterialized` also prevents the planner from inlining the CTE into nested-loop plans that re-execute it per outer row (measured: 114x re-execution of a single stat CTE on a year-split view consumed ~6s before this invariant was established).
