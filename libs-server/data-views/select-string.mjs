@@ -1,3 +1,5 @@
+import { resolve_team_join_target } from './resolve-team-join-target.mjs'
+
 export const get_rate_type_sql = ({
   table_name,
   column_name,
@@ -15,7 +17,8 @@ const get_select_string = ({
   output_select_mapping = {},
   splits,
   is_main_select = false,
-  data_view_options = {}
+  data_view_options = {},
+  query_context = null
 }) => {
   // Output-aggregator dispatch (Phase C step 1): when a retrofitted column
   // is invoked with `params.output`, the dispatcher pre-resolved the outer
@@ -105,10 +108,23 @@ const get_select_string = ({
 
     // Use centralized references
     const year_clause = data_view_options.year_reference
-    const pid_reference = data_view_options.pid_reference
+    // Team-grained sources have nfl_team, not pid; the correlated subquery
+    // must use the same projection target that apply_team_stats_join would
+    // use in the non-offset-range JOIN path (matchup opponent, per-season
+    // team, or current_nfl_team).
+    const is_team_grain =
+      typeof column_definition.source?.grain === 'string' &&
+      column_definition.source.grain.startsWith('team')
+    const correlation_key = is_team_grain ? 'nfl_team' : 'pid'
+    const correlation_ref = is_team_grain
+      ? resolve_team_join_target({
+          query_context: query_context || { data_view_options },
+          params: column_params
+        })
+      : data_view_options.pid_reference
 
     if (column_definition.has_numerator_denominator) {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0) FROM ${join_table_name} WHERE ${join_table_name}.pid = ${pid_reference} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
+      final_select_expression = `(SELECT SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
     } else if (column_definition.main_select_string_year_offset_range) {
       final_select_expression =
         column_definition.main_select_string_year_offset_range({
@@ -117,11 +133,11 @@ const get_select_string = ({
           data_view_options
         })
     } else {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${column_definition.column_name}) FROM ${join_table_name} WHERE ${join_table_name}.pid = ${pid_reference} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
+      final_select_expression = `(SELECT SUM(${join_table_name}.${column_definition.column_name}) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
     }
 
     if (rate_type_table_name) {
-      final_select_expression = `${final_select_expression} / NULLIF((SELECT CAST(SUM(${rate_type_table_name}.rate_type_total_count) AS DECIMAL) FROM ${rate_type_table_name} WHERE ${rate_type_table_name}.pid = ${pid_reference} AND ${rate_type_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}), 0)`
+      final_select_expression = `${final_select_expression} / NULLIF((SELECT CAST(SUM(${rate_type_table_name}.rate_type_total_count) AS DECIMAL) FROM ${rate_type_table_name} WHERE ${rate_type_table_name}.${correlation_key} = ${correlation_ref} AND ${rate_type_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}), 0)`
     }
   } else {
     final_select_expression = select_expression

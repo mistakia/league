@@ -3,6 +3,7 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
+import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
@@ -34,9 +35,8 @@ const apply_team_stats_join = ({
   force_player_active
 }) => {
   const dv = query_context.data_view_options
-  const { players_query, player_year_teams_cte_name } = query_context
+  const { players_query } = query_context
   const pid_reference = dv?.pid_reference ?? query_context.pid_reference
-  const team_reference = dv?.team_reference ?? query_context.team_reference
   const year_reference = dv?.year_reference ?? query_context.year_reference
   const week_reference = dv?.week_reference ?? query_context.week_reference
   const limit_to_player_active_games =
@@ -49,36 +49,21 @@ const apply_team_stats_join = ({
   const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
   const join_year = splits.includes('year')
   const join_week = splits.includes('week')
+  const team_join_target = join_on_team
+    ? resolve_team_join_target({ query_context, params })
+    : null
+  const matchup_branch =
+    team_join_target === 'current_week_opponents.opponent' ||
+    team_join_target === 'next_week_opponents.opponent'
 
   players_query[join_method](target, function () {
     if (join_on_team) {
-      const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
-        ? params.matchup_opponent_type[0] &&
-          typeof params.matchup_opponent_type[0] === 'object'
-          ? null
-          : params.matchup_opponent_type[0]
-        : params.matchup_opponent_type
-      if (matchup_opponent_type === 'current_week_opponent_total') {
-        this.on(`${target}.nfl_team`, '=', 'current_week_opponents.opponent')
-      } else if (matchup_opponent_type === 'next_week_opponent_total') {
-        this.on(`${target}.nfl_team`, '=', 'next_week_opponents.opponent')
-      } else {
-        // Team-identity cells expose team_reference directly (no
-        // player_year_teams indirection); player-identity cells route through
-        // player_year_teams when historical-team mode is active, else
-        // player.current_nfl_team.
-        let team_join_target
-        if (team_reference) {
-          team_join_target = team_reference
-        } else if (player_year_teams_cte_name) {
-          team_join_target = `${player_year_teams_cte_name}.team`
-        } else {
-          team_join_target = 'player.current_nfl_team'
-        }
-        this.on(`${target}.nfl_team`, '=', team_join_target)
-        if (join_week && week_reference) {
-          this.andOn(db.raw(`${target}.week = ${week_reference}`))
-        }
+      this.on(`${target}.nfl_team`, '=', team_join_target)
+      // Matchup-opponent joins are point-in-time (no week predicate); the
+      // own-team / per-season-team branches carry through the week predicate
+      // alongside the team key.
+      if (!matchup_branch && join_week && week_reference) {
+        this.andOn(db.raw(`${target}.week = ${week_reference}`))
       }
     } else {
       this.on(`${target}.pid`, '=', pid_reference)

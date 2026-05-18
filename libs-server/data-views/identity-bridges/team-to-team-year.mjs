@@ -1,4 +1,5 @@
 import db from '#db'
+import { nfl_team_abbreviations } from '#libs-shared/constants/nfl-teams-constants.mjs'
 
 export const from = 'team'
 export const to = 'team_year'
@@ -11,6 +12,11 @@ const base_years_sql = (year_range) => {
   return `SELECT unnest(ARRAY[${year_range.join(',')}]) as year`
 }
 
+const team_values_cte_sql = () => {
+  const tuples = nfl_team_abbreviations.map((code) => `('${code}')`).join(',')
+  return `SELECT team_code FROM (VALUES ${tuples}) AS t(team_code)`
+}
+
 const register_cte = (query_context, name, raw_sql) => {
   if (query_context.registered_ctes.has(name)) return
   query_context.players_query.with(name, db.raw(raw_sql))
@@ -19,7 +25,12 @@ const register_cte = (query_context, name, raw_sql) => {
 
 export const add_cte = ({ query_context }) => {
   const { year_range } = query_context
+  // Order matters: Postgres CTEs may only reference siblings declared
+  // earlier in the WITH list. team_years references team, so team must
+  // be registered first even when the team identity's from_source would
+  // otherwise add it later via setup_from_table_and_player_joins.
   register_cte(query_context, 'base_years', base_years_sql(year_range))
+  register_cte(query_context, 'team', team_values_cte_sql())
   register_cte(
     query_context,
     'team_years',

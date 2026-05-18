@@ -993,7 +993,8 @@ const add_clauses_for_table = async ({
       rate_type_column_mapping,
       output_select_mapping,
       splits,
-      data_view_options
+      data_view_options,
+      query_context: data_view_options.query_context
     })
 
     select_strings.push(...main_select_result.select)
@@ -1028,7 +1029,8 @@ const add_clauses_for_table = async ({
         table_name,
         rate_type_column_mapping,
         splits,
-        data_view_options
+        data_view_options,
+        query_context: data_view_options.query_context
       })
       with_select_strings.push(...with_select_result.select)
       group_by_strings.push(...with_select_result.group_by)
@@ -1096,7 +1098,8 @@ const add_clauses_for_table = async ({
           table_name,
           rate_type_column_mapping,
           splits,
-          data_view_options
+          data_view_options,
+          query_context: data_view_options.query_context
         })
         with_select_strings.push(...with_select_result.select)
         group_by_strings.push(...with_select_result.group_by)
