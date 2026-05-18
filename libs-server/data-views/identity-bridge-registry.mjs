@@ -53,13 +53,18 @@ export const apply_bridge = ({
   from,
   to,
   mode = 'default',
-  params = {}
+  params = {},
+  source = null
 }) => {
   const key = `${from}->${to}|${mode}`
   if (query_context.applied_bridges.has(key)) return
   const bridge = resolve(from, to, mode)
-  bridge.add_cte({ query_context, params })
-  bridge.join_cte({ query_context, params })
+  // `source` is forwarded to bridges that need source-specific defaults
+  // (e.g. player_year->team_year uses source.year_default to anchor the
+  // player_year_teams CTE's year when no year split is active and params
+  // carry no explicit year).
+  bridge.add_cte({ query_context, params, source })
+  bridge.join_cte({ query_context, params, source })
   query_context.applied_bridges.add(key)
 }
 

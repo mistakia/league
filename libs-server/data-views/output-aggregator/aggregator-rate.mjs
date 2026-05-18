@@ -63,7 +63,10 @@ export const add_cte = add_period_cte
 // matchup branches join against the opponents CTE attached upstream. For the
 // default player-cell case, route through the player_year->team_year identity
 // bridge so historical-team-mode is structural rather than a runtime branch.
-const resolve_team_join_target = ({ query_context, params }) => {
+// `source` is forwarded to the bridge so its resolve_year_range can consult
+// source.year_default when neither query_context.year_range nor params.year
+// is set (e.g. team-stat columns in offseason).
+const resolve_team_join_target = ({ query_context, params, source }) => {
   if (query_context.subject_id === 'team') return query_context.team_reference
   const raw = params?.matchup_opponent_type
   const matchup = Array.isArray(raw)
@@ -80,7 +83,8 @@ const resolve_team_join_target = ({ query_context, params }) => {
     from: 'player_year',
     to: 'team_year',
     mode: 'default',
-    params
+    params,
+    source
   })
   return 'player_year_teams.team'
 }
@@ -100,12 +104,17 @@ export const join_cte = ({
   query_context,
   cte_name,
   identity_id,
-  params = {}
+  params = {},
+  column_def = null
 }) => {
   const { players_query, pid_reference, year_reference, splits } = query_context
   const is_team = identity_id.startsWith('team')
   const team_target = is_team
-    ? resolve_team_join_target({ query_context, params })
+    ? resolve_team_join_target({
+        query_context,
+        params,
+        source: column_def?.source || null
+      })
     : null
   const offset_range = resolve_year_offset_range(params)
   players_query.leftJoin(cte_name, function () {

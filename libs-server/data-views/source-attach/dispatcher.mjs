@@ -78,7 +78,8 @@ export const attach_source = ({
       from: b.from,
       to: b.to,
       mode: b.mode || 'default',
-      params
+      params,
+      source
     })
   }
 

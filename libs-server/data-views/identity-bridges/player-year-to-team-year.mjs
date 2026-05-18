@@ -8,9 +8,17 @@ export const mode = 'default'
 const CTE_NAME = 'player_year_teams'
 
 // Bridges may run in contexts where query_context.year_range is empty
-// (player-cell + team_year-source attach with no year split). Derive from
-// params.year, falling back to current_season.year.
-const resolve_year_range = ({ query_context, params }) => {
+// (player-cell + team_year-source attach with no year split). Resolution
+// order:
+//   1. query_context.year_range (year/week split present)
+//   2. params.year (explicit per-column override)
+//   3. source.year_default(params) -- the attaching source's anchor year
+//      (e.g. ESPN team-stats default to current_season.stats_season_year)
+//   4. current_season.year (no source context; defensive)
+// Without step 3 the historical-team CTE was built for current_season.year
+// (e.g. 2026 in-offseason) and the source attach found no rows -- causing
+// every team-year stat to return null for active players.
+const resolve_year_range = ({ query_context, params, source }) => {
   if (
     Array.isArray(query_context.year_range) &&
     query_context.year_range.length > 0
@@ -26,12 +34,24 @@ const resolve_year_range = ({ query_context, params }) => {
       return Array.from(new Set(parsed)).sort((a, b) => a - b)
     }
   }
+  if (source && typeof source.year_default === 'function') {
+    const v = source.year_default(params || {})
+    if (v != null) {
+      const arr = Array.isArray(v) ? v : [v]
+      const parsed = arr
+        .map((y) => parseInt(y, 10))
+        .filter((y) => Number.isFinite(y))
+      if (parsed.length > 0) {
+        return Array.from(new Set(parsed)).sort((a, b) => a - b)
+      }
+    }
+  }
   return [current_season.year]
 }
 
-export const add_cte = ({ query_context, params = {} }) => {
+export const add_cte = ({ query_context, params = {}, source = null }) => {
   const { players_query } = query_context
-  const year_range = resolve_year_range({ query_context, params })
+  const year_range = resolve_year_range({ query_context, params, source })
 
   const inner_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
@@ -58,9 +78,9 @@ export const add_cte = ({ query_context, params = {} }) => {
   query_context.player_year_teams_year_range = year_range
 }
 
-export const join_cte = ({ query_context, params = {} }) => {
+export const join_cte = ({ query_context, params = {}, source = null }) => {
   const { players_query, splits, pid_reference, year_reference } = query_context
-  const year_range = resolve_year_range({ query_context, params })
+  const year_range = resolve_year_range({ query_context, params, source })
   players_query.leftJoin(CTE_NAME, function () {
     this.on(`${CTE_NAME}.pid`, '=', pid_reference)
     if (splits.includes('year') && year_reference) {

@@ -179,7 +179,7 @@ export const apply_output_aggregator = async ({
     period
   })
   if (!query_context.joined_output_ctes.has(cte_name)) {
-    plugin.join_cte({ query_context, cte_name, identity_id, params })
+    plugin.join_cte({ query_context, cte_name, identity_id, params, column_def })
     query_context.joined_output_ctes.add(cte_name)
   }
   // Numerator CTE: legacy denominator-style plugins (per_game / per_player /

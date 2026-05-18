@@ -51,7 +51,7 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
 
 export const add_cte = add_period_cte
 
-const resolve_team_join_target = ({ query_context, params }) => {
+const resolve_team_join_target = ({ query_context, params, source }) => {
   if (query_context.subject_id === 'team') return query_context.team_reference
   const raw = params?.matchup_opponent_type
   const matchup = Array.isArray(raw)
@@ -68,7 +68,8 @@ const resolve_team_join_target = ({ query_context, params }) => {
     from: 'player_year',
     to: 'team_year',
     mode: 'default',
-    params
+    params,
+    source
   })
   return 'player_year_teams.team'
 }
@@ -77,12 +78,17 @@ export const join_cte = ({
   query_context,
   cte_name,
   identity_id,
-  params = {}
+  params = {},
+  column_def = null
 }) => {
   const { players_query, pid_reference, year_reference, splits } = query_context
   const is_team = identity_id.startsWith('team')
   const team_target = is_team
-    ? resolve_team_join_target({ query_context, params })
+    ? resolve_team_join_target({
+        query_context,
+        params,
+        source: column_def?.source || null
+      })
     : null
   players_query.leftJoin(cte_name, function () {
     if (is_team) {
