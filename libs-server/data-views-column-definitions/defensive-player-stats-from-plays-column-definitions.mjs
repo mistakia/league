@@ -32,6 +32,11 @@ const apply_defensive_plays_join = (args) =>
 
 const defensive_plays_source = {
   grain: 'player_year',
+  // `with` builder (add_defensive_play_by_play_with_statement) projects week
+  // onto the CTE under week-splits. Declare supports_splits so the dispatcher
+  // forwards week to with_func instead of stripping it via the grain's
+  // ['year'] intersection.
+  supports_splits: ['year', 'week'],
   attach: apply_defensive_plays_join
 }
 

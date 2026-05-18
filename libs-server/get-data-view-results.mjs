@@ -42,7 +42,18 @@ import { attach_source } from '#libs-server/data-views/source-attach/dispatcher.
 // list determines whether the column can anchor a year/week split query as
 // the sort-based FROM table. Base identities (`player`, `team`) declare zero
 // splits, so they only anchor no-split queries.
+//
+// `source.supports_splits` is an explicit override for cases where the
+// grain is deliberately narrow (e.g. team-stats-from-plays uses grain='team'
+// to avoid the team-to-team-year bridge for no-splits team-subject fixtures)
+// but the column's `with` builder projects wider splits onto the CTE. Without
+// the override, group_tables_by_supported_splits intersects the request
+// splits with the grain's splits and silently drops anything wider -- the
+// `with` builder then never sees the dropped split and the CTE collapses
+// to a season/career total at every per-week row.
 const derive_supported_splits_from_source = (column_definition) => {
+  const override = column_definition.source?.supports_splits
+  if (Array.isArray(override)) return override
   const grain = column_definition.source?.grain
   if (!grain) return []
   return get_identity(grain).splits

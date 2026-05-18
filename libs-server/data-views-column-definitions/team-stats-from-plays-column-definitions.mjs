@@ -198,8 +198,15 @@ const team_stat_from_plays = ({
     // Using 'team_year' / 'player_year' would require the team-to-team-year
     // bridge which mandates a non-empty year_range -- not provided for
     // no-splits team-subject fixtures.
+    //
+    // supports_splits is declared explicitly because the `with` builder
+    // (add_team_stats_play_by_play_with_statement) DOES project year/week
+    // onto the CTE when those splits are active; without this override,
+    // group_tables_by_supported_splits would intersect the request splits
+    // against grain's [] and drop year/week before forwarding to with_func.
     source: {
       grain: force_player_active ? 'player' : 'team',
+      supports_splits: ['year', 'week'],
       attach: (attach_args) =>
         apply_team_stats_join({ ...attach_args, force_player_active })
     },

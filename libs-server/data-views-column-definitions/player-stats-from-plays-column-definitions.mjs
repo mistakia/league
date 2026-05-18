@@ -26,6 +26,13 @@ const should_use_main_where = ({ params, has_numerator_denominator }) => {
 
 const plays_source = {
   grain: 'player_year',
+  // Grain narrowed to player_year (not player_year_week) so the team-to-
+  // team-year bridge path doesn't get exercised by week splits. The `with`
+  // builder (add_player_stats_play_by_play_with_statement) projects year
+  // AND week onto the CTE; declare supports_splits so the dispatcher
+  // forwards both to with_func instead of intersecting against grain's
+  // ['year'] and dropping week.
+  supports_splits: ['year', 'week'],
   attach: apply_plays_join
 }
 
