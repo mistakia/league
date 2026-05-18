@@ -5,6 +5,7 @@ import {
   is_batchable,
   register_measure
 } from './measure-batch.mjs'
+import { normalize_career_year_range } from '../param-utils.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.year, '_', nfl_games.week, '_', nfl_games.esbid)"
@@ -210,12 +211,14 @@ const build_role_union_period_cte = ({
     })
     if (career_year) {
       const arr = Array.isArray(career_year) ? career_year : [career_year, career_year]
-      const [lo, hi] = [Math.min(Number(arr[0]), Number(arr[1])), Math.max(Number(arr[0]), Number(arr[1]))]
-      outer.whereBetween('player_seasonlogs.career_year', [lo, hi])
+      outer.whereBetween(
+        'player_seasonlogs.career_year',
+        normalize_career_year_range(arr)
+      )
     }
     if (career_game) {
       const arr = Array.isArray(career_game) ? career_game : [career_game, career_game]
-      const [lo, hi] = [Math.min(Number(arr[0]), Number(arr[1])), Math.max(Number(arr[0]), Number(arr[1]))]
+      const [lo, hi] = normalize_career_year_range(arr)
       outer.whereBetween('player_seasonlogs.career_game', [lo, hi])
     }
   }

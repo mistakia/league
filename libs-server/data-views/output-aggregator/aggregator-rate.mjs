@@ -11,6 +11,7 @@ import {
   is_batchable
 } from './measure-batch.mjs'
 import * as identity_bridge_registry from '../identity-bridge-registry.mjs'
+import { resolve_year_offset_range } from '../param-utils.mjs'
 
 // consumes_params drives both CTE name hashing (so distinct param sets emit
 // distinct CTEs) and consumed_params_signature for cache keys. `week` and
@@ -106,17 +107,6 @@ const resolve_team_join_target = ({ query_context, params, source }) => {
     source
   })
   return 'player_year_teams.team'
-}
-
-// Resolve params.year_offset into [min, max]; null when no offset.
-const resolve_year_offset_range = (params) => {
-  const raw = params && params.year_offset
-  if (raw == null) return null
-  const arr = Array.isArray(raw) ? raw : [raw, raw]
-  if (!arr.length) return null
-  const nums = arr.map(Number).filter((n) => Number.isFinite(n))
-  if (!nums.length) return null
-  return [Math.min(...nums), Math.max(...nums)]
 }
 
 export const join_cte = ({

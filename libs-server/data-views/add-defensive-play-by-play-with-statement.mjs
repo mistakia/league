@@ -3,6 +3,7 @@ import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-b
 import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import { normalize_career_year_range } from '#libs-server/data-views/param-utils.mjs'
 
 export const add_defensive_play_by_play_with_statement = ({
   query,
@@ -108,10 +109,10 @@ export const add_defensive_play_by_play_with_statement = ({
         .andOn('defensive_plays.year', '=', 'player_seasonlogs.year')
         .andOn('defensive_plays.seas_type', '=', 'player_seasonlogs.seas_type')
     })
-    with_query.whereBetween('player_seasonlogs.career_year', [
-      Math.min(params.career_year[0], params.career_year[1]),
-      Math.max(params.career_year[0], params.career_year[1])
-    ])
+    with_query.whereBetween(
+      'player_seasonlogs.career_year',
+      normalize_career_year_range(params.career_year)
+    )
   }
 
   if (params.career_game) {
@@ -122,10 +123,10 @@ export const add_defensive_play_by_play_with_statement = ({
         'player_gamelogs.esbid'
       )
     })
-    with_query.whereBetween('player_gamelogs.career_game', [
-      Math.min(params.career_game[0], params.career_game[1]),
-      Math.max(params.career_game[0], params.career_game[1])
-    ])
+    with_query.whereBetween(
+      'player_gamelogs.career_game',
+      normalize_career_year_range(params.career_game)
+    )
   }
 
   // Remove career_year and career_game from params before applying other filters

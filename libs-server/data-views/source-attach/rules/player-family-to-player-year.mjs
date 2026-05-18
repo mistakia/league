@@ -1,4 +1,5 @@
 import { register } from '../source-attach-registry.mjs'
+import { resolve_year_offset_range } from '../../param-utils.mjs'
 
 // (player|player_year|player_year_week, player_year, default). Source rows
 // carry their own pid + year columns; cell row exposes pid_reference and
@@ -20,18 +21,6 @@ const emit = ({ query_context, source, table_alias, params, builder }) => {
     params,
     ref
   })
-}
-
-// Resolve params.year_offset into [min, max]. Returns null when no offset
-// is specified so callers can take their non-offset code path.
-const resolve_year_offset_range = (params) => {
-  const raw = params && params.year_offset
-  if (raw == null) return null
-  const arr = Array.isArray(raw) ? raw : [raw, raw]
-  if (!arr.length) return null
-  const nums = arr.map(Number).filter((n) => Number.isFinite(n))
-  if (!nums.length) return null
-  return [Math.min(...nums), Math.max(...nums)]
 }
 
 export const emit_year_match = ({
