@@ -585,6 +585,11 @@ const fp_apply_filters = ({ query, params }) => {
   const filtered_params = { ...default_params }
   delete filtered_params.career_year
   delete filtered_params.career_game
+  // Strip params consumed by the outer scoring-format path (listed in
+  // consumes_params_extra) that apply_play_by_play_column_params_to_query
+  // does not understand. Explicitly removing them documents that they are
+  // intentionally excluded from the play-filter path.
+  delete filtered_params.scoring_format_hash
 
   query.whereNotIn('nfl_plays.play_type', ['NOPL'])
   apply_play_by_play_column_params_to_query({
