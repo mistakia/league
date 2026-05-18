@@ -161,6 +161,13 @@ const build_role_union_period_cte = ({
       if (query_context.year_range && query_context.year_range.length) {
         sub.whereIn(`${source_table}.year`, query_context.year_range)
       }
+      // apply_filters (fp_apply_filters) filters nfl_plays.seas_type in each
+      // inner sub. The outer innerJoin on nfl_games does not add a separate
+      // nfl_games.seas_type predicate; the inner filter is the sole gate.
+      // Both columns carry the same value per esbid (nfl_plays.seas_type ==
+      // nfl_games.seas_type for any matched row), so the inner filter is
+      // sufficient and consistent -- the outer nfl_games join provides the
+      // year/period_key grouping columns only.
       if (apply_filters) apply_filters({ query: sub })
       return sub
     }
