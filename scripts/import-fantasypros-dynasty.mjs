@@ -119,6 +119,11 @@ const import_fantasypros_dynasty_rankings = async ({
   dry_run = false,
   ignore_cache = false
 } = {}) => {
+  if (year < 2011) {
+    throw new Error(
+      `FantasyPros archive starts at 2011; year=${year} silently returns current-year data and would corrupt the requested year`
+    )
+  }
   const fantasypros_position_types = [
     {
       fantasypros_position_type: 'ALL',
