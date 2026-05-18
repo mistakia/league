@@ -1,0 +1,20 @@
+{
+  "skip_query_match": true,
+  "name": "scoring_format_hash split by year on player-scoring-format-logs",
+  "description": "Exercises the get_table_conditions vs extra_predicates path on scoring_format_player_seasonlogs with a year split active. When year split is active, the year predicate is dropped from get_table_conditions; only scoring_format_hash remains. Coverage gap (e).",
+  "request": {
+    "splits": ["year"],
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_from_seasonlogs",
+        "params": {
+          "year": [2022, 2023]
+        }
+      }
+    ]
+  },
+  "expected_query": "",
+  "tags": ["scoring_format_hash", "split", "coverage-gap"],
+  "timeout_ms": 60000
+}

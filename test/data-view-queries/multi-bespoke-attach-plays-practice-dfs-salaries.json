@@ -1,0 +1,33 @@
+{
+  "skip_query_match": true,
+  "name": "multi-bespoke attach combining plays, practice, and dfs-salaries",
+  "description": "Composes two or more bespoke-attach sources at differing grains in one query: plays (player_year aggregation), practice (player_week), and dfs-salaries (player_week). Coverage gap (c).",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_rush_yards_from_plays",
+        "params": {
+          "year": [2023]
+        }
+      },
+      {
+        "column_id": "player_practice_designation_wednesday",
+        "params": {
+          "year": [2023],
+          "week": [1]
+        }
+      },
+      {
+        "column_id": "player_dfs_salary",
+        "params": {
+          "year": [2023],
+          "week": [1]
+        }
+      }
+    ]
+  },
+  "expected_query": "",
+  "tags": ["multi-bespoke-attach", "coverage-gap"],
+  "timeout_ms": 60000
+}

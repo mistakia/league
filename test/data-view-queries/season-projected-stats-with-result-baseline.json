@@ -1,0 +1,25 @@
+{
+  "skip_query_match": true,
+  "name": "season projected stats wired into result-equivalence",
+  "description": "Promotes a projected fixture into the result-equivalence harness so the projected path has at least one baselined fixture. Coverage gap (f).",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_season_projected_rush_atts",
+        "params": {
+          "year": [2024]
+        }
+      },
+      {
+        "column_id": "player_season_projected_points_added",
+        "params": {
+          "year": [2024]
+        }
+      }
+    ]
+  },
+  "expected_query": "",
+  "tags": ["projected", "result-baseline", "coverage-gap"],
+  "timeout_ms": 60000
+}

@@ -1,0 +1,21 @@
+{
+  "skip_query_match": true,
+  "name": "matchup_opponent_type combined with year_offset",
+  "description": "Crosses the inline matchup branch (matchup_opponent_type) with year_offset behavior on a team-stats-from-plays column. Coverage gap (d).",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "year": [2024],
+          "year_offset": [-1, 0],
+          "matchup_opponent_type": ["current_week_opponent_total"]
+        }
+      }
+    ]
+  },
+  "expected_query": "",
+  "tags": ["matchup_opponent_type", "year_offset", "coverage-gap"],
+  "timeout_ms": 60000
+}

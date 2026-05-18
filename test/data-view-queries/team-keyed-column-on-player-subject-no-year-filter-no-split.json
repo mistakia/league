@@ -1,0 +1,17 @@
+{
+  "skip_query_match": true,
+  "name": "team-keyed column on player subject with no year filter and no year split",
+  "description": "Exercises the bridge-always-materializes path for a team-keyed measure on a player-subject query with no year filter and no year split. Coverage gap (a).",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {}
+      }
+    ]
+  },
+  "expected_query": "",
+  "tags": ["bridge", "team-keyed", "coverage-gap"],
+  "timeout_ms": 60000
+}
