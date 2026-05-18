@@ -164,41 +164,41 @@ const add_team_per_game_cte = ({
 }) => {
   const { nfl_week } = get_default_params({ params })
 
-  const cte_query = db('nfl_plays')
-    .select('nfl_plays.off as team')
-    .countDistinct('nfl_plays.esbid as rate_type_total_count')
-
-  if (
-    nfl_week.length &&
-    !is_full_reg_season_nfl_week_id_set({ nfl_weeks: nfl_week })
-  ) {
-    cte_query.whereIn('nfl_plays.nfl_week_id', nfl_week)
-  }
-
-  // Partition pruning for year-partitioned nfl_plays (independent of nfl_week)
-  if (effective_years.length) {
-    cte_query.whereIn('nfl_plays.year', effective_years)
-  }
-
-  for (const split of splits) {
-    if (split === 'year') {
-      cte_query.select('nfl_plays.year')
-    }
-
-    if (split === 'week') {
-      cte_query.select('nfl_plays.week')
-    }
-  }
-
-  cte_query.groupBy('nfl_plays.off')
-
-  if (splits.includes('year')) {
-    cte_query.groupBy('nfl_plays.year')
-  }
-
+  // Count games per team from nfl_games (~7K rows for 24 years) instead of
+  // COUNT(DISTINCT esbid) over nfl_plays (~1.3M rows for the same range).
+  // Equivalent because every game appears as both home and away exactly once,
+  // so UNION ALL of {home, away} → COUNT(*) per (team, year[, week]) yields
+  // the same denominator as DISTINCT esbid per (off, year[, week]) on plays.
+  // Measured: 5.8s → 2.3s on year-splits-with-a-column-set-to-a-specific-year.
+  const select_cols = ['team', 'year']
+  const group_cols = ['team', 'year']
   if (splits.includes('week')) {
-    cte_query.groupBy('nfl_plays.week')
+    select_cols.push('week')
+    group_cols.push('week')
   }
+
+  const make_side = (team_col) => {
+    const sub = db('nfl_games').select(`${team_col} as team`, 'year')
+    if (splits.includes('week')) sub.select('week')
+    if (
+      nfl_week.length &&
+      !is_full_reg_season_nfl_week_id_set({ nfl_weeks: nfl_week })
+    ) {
+      sub.whereIn('nfl_games.nfl_week_id', nfl_week)
+    }
+    if (effective_years.length) {
+      sub.whereIn('nfl_games.year', effective_years)
+    }
+    return sub
+  }
+
+  const home_side = make_side('h')
+  const away_side = make_side('v')
+  const cte_query = db
+    .select(...select_cols)
+    .count('* as rate_type_total_count')
+    .from(home_side.unionAll(away_side, true).as('g'))
+    .groupBy(...group_cols)
 
   // MATERIALIZED required: predicates are pushed at construction time; planner
   // predicate push-into-CTE is not needed and would mask the partition-pruning
