@@ -44,7 +44,7 @@ import { attach_source } from '#libs-server/data-views/source-attach/dispatcher.
 // splits, so they only anchor no-split queries.
 //
 // `source.supports_splits` is an explicit override for cases where the
-// grain is deliberately narrow (e.g. team-stats-from-plays uses grain='team'
+// grain is deliberately narrow (e.g. team-stats-from-plays uses grain='team_year'
 // to avoid the team-to-team-year bridge for no-splits team-subject fixtures)
 // but the column's `with` builder projects wider splits onto the CTE. Without
 // the override, group_tables_by_supported_splits intersects the request
