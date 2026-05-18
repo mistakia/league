@@ -1618,13 +1618,16 @@ export const get_data_view_results_query = async ({
     query_context
   })
 
-  // Resolve reference column expressions for the chosen FROM-table and the
-  // active identity. query_context retains its identity-derived references
-  // from build_query_context (bridges, output-aggregators, and other
-  // identity-aware consumers read those values). data_view_options exposes
-  // the FROM-table-aware view consumed by select-string emission and
-  // column-def attach functions that join measures via the from-table's own
-  // pid/year/week columns.
+  // Phase C reference-mirror activation: query_context is the single source
+  // of truth for identity-derived references (set by build_query_context;
+  // read by identity-aware consumers -- identity-bridges, output-aggregators,
+  // source-attach rules/helpers). data_view_options is the FROM-table-aware
+  // override layer (set here from resolve_references; read by FROM-table-aware
+  // consumers -- select-string emission, outer SELECT/orderBy/groupBy, and
+  // column-def attach functions that join measures to the FROM table's own
+  // pid/year/week columns). For player-canonical FROM and team subject the
+  // two views are identical; they diverge only when sort-opt picks a
+  // player-fact-table FROM, where the FROM table exposes its own pid/year/week.
   const references = resolve_references({
     identity_id: query_context.identity_id,
     from_table_name: data_view_options.from_table_name
