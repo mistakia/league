@@ -79,17 +79,45 @@ const read_head_sql_stored = (filename) => {
   return j.expected_query || null
 }
 
-const read_base_sql_stored = (filename) => {
-  try {
-    const buf = execSync(
-      `git show ${argv['base-ref']}:test/data-view-queries/${filename}`,
-      { cwd: project_root, stdio: ['ignore', 'pipe', 'pipe'] }
-    )
-    const j = JSON.parse(buf.toString('utf8'))
-    return j.expected_query || null
-  } catch {
-    return null // fixture absent from base ref
+// Single batched `git cat-file --batch` invocation reads N fixtures with one
+// subprocess instead of N. Returns { [filename]: { sql, error: null } } where
+// sql is null for fixtures absent from the base ref.
+const read_base_sql_stored_batch = (filenames) => {
+  const base_ref = argv['base-ref']
+  const specs = filenames
+    .map((fn) => `${base_ref}:test/data-view-queries/${fn}`)
+    .join('\n')
+  const out = execSync('git cat-file --batch', {
+    cwd: project_root,
+    input: specs,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    maxBuffer: 1024 * 1024 * 512
+  })
+  // Parse cat-file --batch output stream:
+  //   <header LF><contents LF>...
+  // header is either "<sha> <type> <size>" or "<spec> missing"
+  const result = {}
+  let cursor = 0
+  for (const fn of filenames) {
+    const lf = out.indexOf(0x0a, cursor)
+    const header = out.slice(cursor, lf).toString('utf8')
+    cursor = lf + 1
+    if (header.endsWith(' missing')) {
+      result[fn] = { sql: null, error: null }
+      continue
+    }
+    const parts = header.split(' ')
+    const size = parseInt(parts[parts.length - 1], 10)
+    const body = out.slice(cursor, cursor + size).toString('utf8')
+    cursor += size + 1 // trailing LF after contents
+    try {
+      const j = JSON.parse(body)
+      result[fn] = { sql: j.expected_query || null, error: null }
+    } catch {
+      result[fn] = { sql: null, error: null }
+    }
   }
+  return result
 }
 
 const run_build_sql = ({ cwd, filenames }) =>
@@ -263,7 +291,7 @@ const main = async () => {
   log(`[sql] sourcing base SQL (${argv['regen-base'] ? 'regen' : 'stored'})`)
   const base_sql = argv['regen-base']
     ? await run_build_sql({ cwd: worktree_root, filenames })
-    : Object.fromEntries(filenames.map((fn) => [fn, { sql: read_base_sql_stored(fn), error: null }]))
+    : read_base_sql_stored_batch(filenames)
 
   // Per-fixture classify + execute.
   const entries = await map_with_concurrency(fixtures, argv.concurrency, async (fixture) => {
