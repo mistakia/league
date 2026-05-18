@@ -86,8 +86,8 @@ JOB_PROJECT=league
 ## At 03:00 on Wednesday and Saturday — dynasty rankings
 0 3 * * 3,6 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasypros-dynasty.mjs --ignore_cache >> /var/log/league/import-fantasypros-dynasty.log 2>&1
 
-## Daily from June through August
-0 5 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasypros-draft.mjs --ignore_cache >> /var/log/league/import-fantasypros-draft.log 2>&1
+## Daily from May through August (post-NFL-Draft draft season window)
+0 5 * 5-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-fantasypros-draft.mjs --ignore_cache >> /var/log/league/import-fantasypros-draft.log 2>&1
 
 ## Import weekly rankings
 ## TODO
