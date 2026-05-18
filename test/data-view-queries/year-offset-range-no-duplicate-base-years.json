@@ -2,19 +2,28 @@
   "name": "year offset range no duplicate base years",
   "description": "Verifies that year_offset range columns do not expand base_years and do not produce a redundant LEFT JOIN when no WHERE filter exists on the offset column",
   "request": {
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       {
         "column_id": "player_rush_attempts_from_plays",
         "params": {
-          "year": [2024]
+          "year": [
+            2024
+          ]
         }
       },
       {
         "column_id": "player_rush_attempts_from_plays",
         "params": {
-          "year": [2024],
-          "year_offset": [1, 30]
+          "year": [
+            2024
+          ],
+          "year_offset": [
+            1,
+            30
+          ]
         }
       }
     ],
@@ -25,16 +34,27 @@
         "desc": true
       }
     ],
-    "splits": ["year"],
+    "splits": [
+      "year"
+    ],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": ["RB"]
+        "value": [
+          "RB"
+        ]
       }
     ]
   },
-  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('RB')), \"t0c5e60186e061ea413a1099303dd3a2e\" as materialized (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"year\", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2024_PRE_WEEK_1', '2024_PRE_WEEK_2', '2024_PRE_WEEK_3', '2024_PRE_WEEK_4', '2024_REG_WEEK_1', '2024_REG_WEEK_2', '2024_REG_WEEK_3', '2024_REG_WEEK_4', '2024_REG_WEEK_5', '2024_REG_WEEK_6', '2024_REG_WEEK_7', '2024_REG_WEEK_8', '2024_REG_WEEK_9', '2024_REG_WEEK_10', '2024_REG_WEEK_11', '2024_REG_WEEK_12', '2024_REG_WEEK_13', '2024_REG_WEEK_14', '2024_REG_WEEK_15', '2024_REG_WEEK_16', '2024_REG_WEEK_17', '2024_REG_WEEK_18', '2024_POST_WEEK_1', '2024_POST_WEEK_2', '2024_POST_WEEK_3', '2024_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"year\" in (2024) group by \"nfl_plays\".\"year\", COALESCE(bc_pid)), \"td0f987962731a9c18701b65873f64987\" as materialized (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"year\", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2024_PRE_WEEK_1', '2024_PRE_WEEK_2', '2024_PRE_WEEK_3', '2024_PRE_WEEK_4', '2024_REG_WEEK_1', '2024_REG_WEEK_2', '2024_REG_WEEK_3', '2024_REG_WEEK_4', '2024_REG_WEEK_5', '2024_REG_WEEK_6', '2024_REG_WEEK_7', '2024_REG_WEEK_8', '2024_REG_WEEK_9', '2024_REG_WEEK_10', '2024_REG_WEEK_11', '2024_REG_WEEK_12', '2024_REG_WEEK_13', '2024_REG_WEEK_14', '2024_REG_WEEK_15', '2024_REG_WEEK_16', '2024_REG_WEEK_17', '2024_REG_WEEK_18', '2024_POST_WEEK_1', '2024_POST_WEEK_2', '2024_POST_WEEK_3', '2024_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"year\" in (2024) group by \"nfl_plays\".\"year\", COALESCE(bc_pid)) select \"player\".\"pid\", player.fname, player.lname, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_atts_from_plays\" AS \"rush_atts_from_plays_0\", (SELECT SUM(td0f987962731a9c18701b65873f64987.rush_atts_from_plays) FROM td0f987962731a9c18701b65873f64987 WHERE td0f987962731a9c18701b65873f64987.pid = player.pid AND td0f987962731a9c18701b65873f64987.year BETWEEN player_years.year + 1 AND player_years.year + 30) AS \"rush_atts_from_plays_1\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t0c5e60186e061ea413a1099303dd3a2e\" on \"t0c5e60186e061ea413a1099303dd3a2e\".\"pid\" = \"player\".\"pid\" and \"t0c5e60186e061ea413a1099303dd3a2e\".\"year\" = 2024 where player.pos IN ('RB') group by player.fname, player.lname, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_atts_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["year", "splits", "plays", "year_offset", "joins", "regression"],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('RB')), \"t0c5e60186e061ea413a1099303dd3a2e\" as materialized (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"year\", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2024_PRE_WEEK_1', '2024_PRE_WEEK_2', '2024_PRE_WEEK_3', '2024_PRE_WEEK_4', '2024_REG_WEEK_1', '2024_REG_WEEK_2', '2024_REG_WEEK_3', '2024_REG_WEEK_4', '2024_REG_WEEK_5', '2024_REG_WEEK_6', '2024_REG_WEEK_7', '2024_REG_WEEK_8', '2024_REG_WEEK_9', '2024_REG_WEEK_10', '2024_REG_WEEK_11', '2024_REG_WEEK_12', '2024_REG_WEEK_13', '2024_REG_WEEK_14', '2024_REG_WEEK_15', '2024_REG_WEEK_16', '2024_REG_WEEK_17', '2024_REG_WEEK_18', '2024_POST_WEEK_1', '2024_POST_WEEK_2', '2024_POST_WEEK_3', '2024_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"year\" in (2024, 2025, 2026) group by \"nfl_plays\".\"year\", COALESCE(bc_pid)), \"t82aa6d352dc33c53a5a7d0a40c78cdf6\" as materialized (select COALESCE(bc_pid) as pid, \"nfl_plays\".\"year\", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2024_PRE_WEEK_1', '2024_PRE_WEEK_2', '2024_PRE_WEEK_3', '2024_PRE_WEEK_4', '2024_REG_WEEK_1', '2024_REG_WEEK_2', '2024_REG_WEEK_3', '2024_REG_WEEK_4', '2024_REG_WEEK_5', '2024_REG_WEEK_6', '2024_REG_WEEK_7', '2024_REG_WEEK_8', '2024_REG_WEEK_9', '2024_REG_WEEK_10', '2024_REG_WEEK_11', '2024_REG_WEEK_12', '2024_REG_WEEK_13', '2024_REG_WEEK_14', '2024_REG_WEEK_15', '2024_REG_WEEK_16', '2024_REG_WEEK_17', '2024_REG_WEEK_18', '2024_POST_WEEK_1', '2024_POST_WEEK_2', '2024_POST_WEEK_3', '2024_POST_WEEK_4') and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"year\" in (2024, 2025, 2026) group by \"nfl_plays\".\"year\", COALESCE(bc_pid)) select \"player\".\"pid\", player.fname, player.lname, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_atts_from_plays\" AS \"rush_atts_from_plays_0\", (SELECT SUM(t82aa6d352dc33c53a5a7d0a40c78cdf6.rush_atts_from_plays) FROM t82aa6d352dc33c53a5a7d0a40c78cdf6 WHERE t82aa6d352dc33c53a5a7d0a40c78cdf6.pid = player.pid AND t82aa6d352dc33c53a5a7d0a40c78cdf6.year BETWEEN player_years.year + 1 AND player_years.year + 30) AS \"rush_atts_from_plays_1\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t0c5e60186e061ea413a1099303dd3a2e\" on \"t0c5e60186e061ea413a1099303dd3a2e\".\"pid\" = \"player\".\"pid\" and \"t0c5e60186e061ea413a1099303dd3a2e\".\"year\" = 2024 where player.pos IN ('RB') group by player.fname, player.lname, \"t0c5e60186e061ea413a1099303dd3a2e\".\"rush_atts_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "year",
+    "splits",
+    "plays",
+    "year_offset",
+    "joins",
+    "regression"
+  ],
   "timeout_ms": 35000
 }
