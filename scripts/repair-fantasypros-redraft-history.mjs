@@ -21,12 +21,17 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { is_main, find_player_row, fantasypros } from '#libs-server'
+import { is_main } from '#libs-server'
 
 const log = debug('repair-fantasypros-redraft-history')
 debug.enable('repair-fantasypros-redraft-history,fantasypros,fetch,get-player')
 
 const FIX_EPOCH = 1779000000
+// Manual-backfill timestamps (2026-05-18) are the post-fix reference snapshots:
+// rows are already pid-resolved via find_player_row and include the full
+// (overall_rank, min, max, avg, std) fingerprint for both ALL and OP buckets.
+const BACKFILL_TS_MIN = 1779066293
+const BACKFILL_TS_MAX = 1779073577
 const SCOPE_RANKING_TYPES = [
   'STANDARD_REDRAFT',
   'PPR_REDRAFT',
@@ -36,6 +41,16 @@ const SCORING_FROM_LABEL = {
   STANDARD_REDRAFT: 'STD',
   PPR_REDRAFT: 'PPR',
   HALF_PPR_REDRAFT: 'HALF'
+}
+const NON_SF_LABEL_FOR_SCORING = {
+  STD: 'STANDARD_REDRAFT',
+  PPR: 'PPR_REDRAFT',
+  HALF: 'HALF_PPR_REDRAFT'
+}
+const SF_LABEL_FOR_SCORING = {
+  STD: 'STANDARD_SUPERFLEX_REDRAFT',
+  PPR: 'PPR_SUPERFLEX_REDRAFT',
+  HALF: 'HALF_PPR_SUPERFLEX_REDRAFT'
 }
 const SF_LABEL = {
   STANDARD_REDRAFT: 'STANDARD_SUPERFLEX_REDRAFT',
@@ -53,49 +68,49 @@ const SLEEPER_OP_TYPE = {
   HALF_PPR_REDRAFT: 'HALF_PPR_SUPERFLEX_REDRAFT'
 }
 
-// Build {pid: rank_ecr} maps from the FP year-level API. Returns a nested
-// structure refs[year][scoring] = { all: Map, op: Map } where each Map is
-// pid -> overall_rank.
-const build_fp_refs = async ({ years, scorings }) => {
+// Build the DB-sourced reference: pid -> full fingerprint per (year, scoring,
+// bucket). Backfill rows at the 2026-05-18 manual-backfill timestamps are
+// post-fix and pre-resolved via find_player_row. Returns:
+//   refs[year][scoring] = { all: Map(pid -> fp), op: Map(pid -> fp) }
+// where fp = { rank, min, max, avg, std }.
+const build_backfill_refs = async ({ years }) => {
+  const labels = []
+  for (const sc of ['STD', 'PPR', 'HALF']) {
+    labels.push(NON_SF_LABEL_FOR_SCORING[sc], SF_LABEL_FOR_SCORING[sc])
+  }
+  const rows = await db('player_rankings_history')
+    .select('year', 'pid', 'pos', 'overall_rank', 'min', 'max', 'avg', 'std', 'ranking_type')
+    .where({ source_id: 'FANTASYPROS' })
+    .whereBetween('timestamp', [BACKFILL_TS_MIN, BACKFILL_TS_MAX])
+    .whereIn('year', years)
+    .whereIn('ranking_type', labels)
   const refs = {}
   for (const year of years) {
-    refs[year] = {}
-    for (const scoring of scorings) {
-      const result = { all: new Map(), op: new Map() }
-      for (const [pos_key, target_map] of [['ALL', result.all], ['OP', result.op]]) {
-        const data = await fantasypros.get_fantasypros_rankings({
-          year,
-          fantasypros_scoring_type: scoring,
-          fantasypros_position_type: pos_key,
-          ignore_cache: false
-        })
-        if (!data || !data.players) {
-          throw new Error(`FP ref fetch failed: year=${year} scoring=${scoring} pos=${pos_key}`)
-        }
-        let resolved = 0
-        let missing = 0
-        for (const item of data.players) {
-          let player_row
-          try {
-            player_row = await find_player_row({
-              name: item.player_name,
-              team: item.player_team_id,
-              pos: item.player_position_id
-            })
-          } catch (err) {
-            missing += 1
-            continue
-          }
-          if (!player_row) {
-            missing += 1
-            continue
-          }
-          target_map.set(player_row.pid, Number(item.rank_ecr))
-          resolved += 1
-        }
-        log(`refs: year=${year} scoring=${scoring} pos=${pos_key} resolved=${resolved} missing=${missing}`)
-      }
-      refs[year][scoring] = result
+    refs[year] = {
+      STD: { all: new Map(), op: new Map() },
+      PPR: { all: new Map(), op: new Map() },
+      HALF: { all: new Map(), op: new Map() }
+    }
+  }
+  for (const r of rows) {
+    const rt = r.ranking_type
+    const scoring =
+      rt === 'STANDARD_REDRAFT' || rt === 'STANDARD_SUPERFLEX_REDRAFT' ? 'STD'
+      : rt === 'HALF_PPR_REDRAFT' || rt === 'HALF_PPR_SUPERFLEX_REDRAFT' ? 'HALF'
+      : 'PPR'
+    const bucket = SF_LABEL_FOR_SCORING[scoring] === rt ? 'op' : 'all'
+    const fp = {
+      rank: Number(r.overall_rank),
+      min: Number(r.min),
+      max: Number(r.max),
+      avg: Number(r.avg),
+      std: Number(r.std)
+    }
+    refs[r.year][scoring][bucket].set(r.pid, fp)
+  }
+  for (const year of years) {
+    for (const sc of ['STD', 'PPR', 'HALF']) {
+      log(`backfill: year=${year} scoring=${sc} all_pids=${refs[year][sc].all.size} op_pids=${refs[year][sc].op.size}`)
     }
   }
   return refs
@@ -122,7 +137,7 @@ const get_buggy_timestamps = async () => {
 const load_scope_rows = async ({ buggy_timestamps }) => {
   if (buggy_timestamps.length === 0) return []
   const rows = await db('player_rankings_history')
-    .select('timestamp', 'pid', 'pos', 'year', 'ranking_type', 'overall_rank', 'min', 'max')
+    .select('timestamp', 'pid', 'pos', 'year', 'ranking_type', 'overall_rank', 'min', 'max', 'avg', 'std', 'position_rank')
     .where({ source_id: 'FANTASYPROS' })
     .whereIn('ranking_type', SCOPE_RANKING_TYPES)
     .whereIn('timestamp', buggy_timestamps)
@@ -152,38 +167,9 @@ const decide_stage_1 = ({ row }) => {
   return null
 }
 
-const decide_stage_2 = ({ row, refs }) => {
-  const scoring = SCORING_FROM_LABEL[row.ranking_type]
-  const year_refs = refs[row.year]?.[scoring]
-  if (!year_refs) return null
-  const in_all = year_refs.all.has(row.pid)
-  const in_op = year_refs.op.has(row.pid)
-  if (in_all && !in_op) {
-    return {
-      decision: 'ALL',
-      stage: 2,
-      confidence: 0.95,
-      all_ref_rank: year_refs.all.get(row.pid),
-      op_ref_rank: null,
-      notes: 'pid in A_only ref set'
-    }
-  }
-  if (!in_all && in_op) {
-    return {
-      decision: 'OP',
-      stage: 2,
-      confidence: 0.95,
-      all_ref_rank: null,
-      op_ref_rank: year_refs.op.get(row.pid),
-      notes: 'pid in O_only ref set'
-    }
-  }
-  return null
-}
-
 // Generic 2x2 cost-matrix assignment given an ALL-bucket reference rank and
-// an OP-bucket reference rank for the pair's shared pid. Used by stages 3
-// (FP year refs), 4 (Sleeper nearest-ts ranks), and 5 (KTC qb1/qb2 ranks).
+// an OP-bucket reference rank for the pair's shared pid. Used by stages 4
+// (Sleeper nearest-ts ranks) and 5 (KTC qb1/qb2 ranks).
 const assign_pair = ({ pair, all_ref_rank, op_ref_rank, stage, note_prefix }) => {
   if (pair.length !== 2) return null
   if (all_ref_rank == null || op_ref_rank == null) return null
@@ -210,17 +196,104 @@ const assign_pair = ({ pair, all_ref_rank, op_ref_rank, stage, note_prefix }) =>
   ]
 }
 
-const decide_stage_3_pair = ({ pair, refs }) => {
-  const scoring = SCORING_FROM_LABEL[pair[0].ranking_type]
-  const year_refs = refs[pair[0].year]?.[scoring]
-  if (!year_refs) return null
-  return assign_pair({
-    pair,
-    all_ref_rank: year_refs.all.get(pair[0].pid),
-    op_ref_rank: year_refs.op.get(pair[0].pid),
+// Normalized 5-dim fingerprint distance between a buggy row and a backfill
+// fingerprint. Each dim is |a-b| / max(a, b, eps) so all dims contribute in
+// roughly [0, 1] and are summed. Lower is closer.
+const fp_distance = (row, fp) => {
+  const safe = (a, b, eps) => Math.max(Math.abs(a), Math.abs(b), eps)
+  const da = Math.abs(row.overall_rank - fp.rank) / safe(row.overall_rank, fp.rank, 1)
+  const db_ = Math.abs(Number(row.min) - fp.min) / safe(Number(row.min), fp.min, 1)
+  const dc = Math.abs(Number(row.max) - fp.max) / safe(Number(row.max), fp.max, 1)
+  const dd = Math.abs(Number(row.avg) - fp.avg) / safe(Number(row.avg), fp.avg, 1)
+  const de = Math.abs(Number(row.std) - fp.std) / safe(Number(row.std), fp.std, 0.5)
+  return da + db_ + dc + dd + de
+}
+
+// Stage 2 membership using backfill DB refs: forced if pid appears in only
+// one bucket. Backfill is post-fix and pre-resolved, so single-bucket presence
+// is a near-definitive signal.
+const decide_stage_2 = ({ row, backfill_refs }) => {
+  const scoring = SCORING_FROM_LABEL[row.ranking_type]
+  const yref = backfill_refs[row.year]?.[scoring]
+  if (!yref) return null
+  const in_all = yref.all.has(row.pid)
+  const in_op = yref.op.has(row.pid)
+  if (in_all && !in_op) {
+    const fp = yref.all.get(row.pid)
+    return {
+      decision: 'ALL', stage: 2, confidence: 0.95,
+      all_ref_rank: fp.rank, op_ref_rank: null,
+      notes: 'backfill ALL-only'
+    }
+  }
+  if (!in_all && in_op) {
+    const fp = yref.op.get(row.pid)
+    return {
+      decision: 'OP', stage: 2, confidence: 0.95,
+      all_ref_rank: null, op_ref_rank: fp.rank,
+      notes: 'backfill OP-only'
+    }
+  }
+  return null
+}
+
+// Stage 3 pair classifier: 5-dim fingerprint cost matrix using backfill refs.
+// Strictly more discriminative than the FP-API rank-only cost matrix; runs
+// first when the pid is present in both backfill buckets.
+const decide_stage_3_fingerprint_pair = ({ pair, backfill_refs }) => {
+  if (pair.length !== 2) return null
+  const row = pair[0]
+  const scoring = SCORING_FROM_LABEL[row.ranking_type]
+  const yref = backfill_refs[row.year]?.[scoring]
+  if (!yref) return null
+  const fp_all = yref.all.get(row.pid)
+  const fp_op = yref.op.get(row.pid)
+  if (!fp_all || !fp_op) return null
+  const [row_a, row_b] = pair
+  const cost_x = fp_distance(row_a, fp_all) + fp_distance(row_b, fp_op)
+  const cost_y = fp_distance(row_a, fp_op) + fp_distance(row_b, fp_all)
+  const denom = Math.max(cost_x, cost_y, 0.01)
+  const gap = Math.abs(cost_x - cost_y)
+  const confidence = Math.min(1.0, gap / denom)
+  const flagged = gap < 0.05
+  const [a_decision, b_decision] =
+    cost_x <= cost_y ? ['ALL', 'OP'] : ['OP', 'ALL']
+  const base = {
     stage: 3,
-    note_prefix: '2x2 fp'
-  })
+    confidence,
+    all_ref_rank: fp_all.rank,
+    op_ref_rank: fp_op.rank,
+    notes: `5d-fp cost_x=${cost_x.toFixed(3)} cost_y=${cost_y.toFixed(3)}${flagged ? ' FLAGGED' : ''}`
+  }
+  return [
+    { row: row_a, ...base, decision: a_decision, pair_partner_rank: row_b.overall_rank },
+    { row: row_b, ...base, decision: b_decision, pair_partner_rank: row_a.overall_rank }
+  ]
+}
+
+// Stage 3 single-row classifier using backfill fingerprints. If the pid is
+// in both buckets, pick whichever fingerprint the row is closer to.
+const decide_stage_3_fingerprint_single = ({ row, backfill_refs }) => {
+  const scoring = SCORING_FROM_LABEL[row.ranking_type]
+  const yref = backfill_refs[row.year]?.[scoring]
+  if (!yref) return null
+  const fp_all = yref.all.get(row.pid)
+  const fp_op = yref.op.get(row.pid)
+  if (!fp_all || !fp_op) return null
+  const d_all = fp_distance(row, fp_all)
+  const d_op = fp_distance(row, fp_op)
+  const denom = Math.max(d_all, d_op, 0.01)
+  const gap = Math.abs(d_all - d_op)
+  const confidence = Math.min(1.0, gap / denom)
+  const flagged = gap < 0.05
+  return {
+    decision: d_all <= d_op ? 'ALL' : 'OP',
+    stage: 3,
+    confidence,
+    all_ref_rank: fp_all.rank,
+    op_ref_rank: fp_op.rank,
+    notes: `5d-fp d_all=${d_all.toFixed(3)} d_op=${d_op.toFixed(3)}${flagged ? ' FLAGGED' : ''}`
+  }
 }
 
 // Single-row variant: decides one row based on which ref rank it's closer to.
@@ -558,12 +631,12 @@ const audit_row_from = ({ row, decision }) => ({
   all_ref_rank: decision.all_ref_rank ?? null,
   op_ref_rank: decision.op_ref_rank ?? null,
   pair_partner_rank: decision.pair_partner_rank ?? null,
-  sleeper_all_rank: null,
-  sleeper_op_rank: null,
-  sleeper_ts: null,
-  ktc_value_1qb: null,
-  ktc_value_sf: null,
-  ktc_d: null,
+  sleeper_all_rank: decision.sleeper_all_rank ?? null,
+  sleeper_op_rank: decision.sleeper_op_rank ?? null,
+  sleeper_ts: decision.sleeper_ts ?? null,
+  ktc_value_1qb: decision.ktc_value_1qb ?? null,
+  ktc_value_sf: decision.ktc_value_sf ?? null,
+  ktc_d: decision.ktc_d ?? null,
   notes: decision.notes ?? null
 })
 
@@ -580,11 +653,10 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
   const rows = await load_scope_rows({ buggy_timestamps })
   log(`scope rows=${rows.length}`)
 
-  // 2. Build references in parallel: FP year-level + Sleeper nearest-snapshot + KTC.
+  // 2. Build references: backfill DB (full fingerprint) + Sleeper + KTC.
   const years = Array.from(new Set(rows.map((r) => r.year))).sort()
-  const scorings = ['STD', 'PPR', 'HALF']
-  log(`building FP refs for years=${years.join(',')} scorings=${scorings.join(',')}`)
-  const refs = await build_fp_refs({ years, scorings })
+  log(`building backfill refs for years=${years.join(',')}`)
+  const backfill_refs = await build_backfill_refs({ years })
   log('building Sleeper refs')
   const sleeper_refs = await build_sleeper_refs({ buggy_timestamps })
   log('building KTC refs')
@@ -602,30 +674,140 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
   for (const [, group] of groups) {
     if (group.length === 1) {
       const row = group[0]
-      // Singletons: 1 -> 2 (fp set) -> 4 (sleeper) -> 5 (ktc) -> 6 (residual).
-      const decision =
+      // Singletons: 1 (K/DST) -> 2 (backfill membership: pid in one bucket) ->
+      // weighted vote across fingerprint + sleeper + ktc + position-rank
+      // heuristic -> 6 (residual). Singletons mean the pid was in only one
+      // bucket at the buggy snapshot; we still need to determine which.
+      const forced =
         decide_stage_1({ row }) ??
-        decide_stage_2({ row, refs }) ??
-        decide_stage_4_single({ row, sleeper_refs }) ??
-        decide_stage_5_single({ row, ktc_refs }) ??
-        decide_stage_6_single({ row })
+        decide_stage_2({ row, backfill_refs })
+      if (forced) {
+        push_audit(row, forced)
+        continue
+      }
+      const fp_single = decide_stage_3_fingerprint_single({ row, backfill_refs })
+      const sleeper_single = decide_stage_4_single({ row, sleeper_refs })
+      const ktc_single = decide_stage_5_single({ row, ktc_refs })
+      const singleton_votes = []
+      if (fp_single) singleton_votes.push({ src: 'fp', decision: fp_single.decision, conf: fp_single.confidence })
+      if (sleeper_single) singleton_votes.push({ src: 'sleeper', decision: sleeper_single.decision, conf: sleeper_single.confidence })
+      if (ktc_single) singleton_votes.push({ src: 'ktc', decision: ktc_single.decision, conf: ktc_single.confidence })
+      if (singleton_votes.length === 0) {
+        push_audit(row, decide_stage_6_single({ row }))
+        continue
+      }
+      const trust_fp = fp_single && fp_single.confidence >= 0.5
+      let final_decision, final_conf, base_notes
+      if (trust_fp) {
+        final_decision = fp_single.decision
+        final_conf = fp_single.confidence
+        base_notes = fp_single.notes
+      } else {
+        const w_all = singleton_votes.filter((v) => v.decision === 'ALL').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
+        const w_op = singleton_votes.filter((v) => v.decision === 'OP').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
+        const total = w_all + w_op
+        final_decision = w_all >= w_op ? 'ALL' : 'OP'
+        const winner_w = final_decision === 'ALL' ? w_all : w_op
+        final_conf = Math.min(0.95, winner_w / Math.max(total, 0.01))
+        base_notes = `single-vote winner=${final_decision} w_all=${w_all.toFixed(2)} w_op=${w_op.toFixed(2)}`
+      }
+      const concur = singleton_votes.filter((v) => v.decision === final_decision).map((v) => v.src)
+      const dissent = singleton_votes.filter((v) => v.decision !== final_decision).map((v) => v.src)
+      const tag_parts = []
+      if (concur.length) tag_parts.push(`agree=${concur.join(',')}`)
+      if (dissent.length) tag_parts.push(`dissent=${dissent.join(',')}`)
+      const final_notes = `${base_notes || 'single-vote'} ${tag_parts.join(' ')}`.trim()
+      const decision = {
+        decision: final_decision,
+        stage: 3,
+        confidence: final_conf,
+        all_ref_rank: fp_single?.all_ref_rank ?? null,
+        op_ref_rank: fp_single?.op_ref_rank ?? null,
+        notes: final_notes,
+        sleeper_all_rank: sleeper_single?.sleeper_all_rank ?? null,
+        sleeper_op_rank: sleeper_single?.sleeper_op_rank ?? null,
+        sleeper_ts: sleeper_single?.sleeper_ts ?? null,
+        ktc_value_1qb: ktc_single?.ktc_value_1qb ?? null,
+        ktc_value_sf: ktc_single?.ktc_value_sf ?? null,
+        ktc_d: ktc_single?.ktc_d ?? null
+      }
       push_audit(row, decision)
       continue
     }
-    // Pair group: try stage 1 (forced) on both, else 2x2 with fp/sleeper/ktc.
+    // Pair group: try stage 1 (forced) on both, else multi-source candidates.
     const forced = group.map((row) => decide_stage_1({ row }))
     if (forced.every((d) => d != null)) {
       for (let i = 0; i < group.length; i++) push_audit(group[i], forced[i])
       continue
     }
-    // Evaluate FP, Sleeper, KTC and pick whichever has the highest confidence.
-    // This breaks Stage-3 ties (~26% of pairs have FP cost_x=cost_y where the
-    // pid's ref ranks sit between the two row ranks).
-    const candidates = [
-      decide_stage_3_pair({ pair: group, refs }),
-      decide_stage_4_pair({ pair: group, sleeper_refs }),
-      decide_stage_5_pair({ pair: group, ktc_refs })
-    ].filter((c) => c != null)
+    // Weighted-vote arbitration across backfill-fingerprint, Sleeper, and KTC.
+    // Each source casts a vote for orientation X (row_a=ALL, row_b=OP) or Y
+    // (row_a=OP, row_b=ALL) with weight = its own confidence. Final decision
+    // follows the heaviest orientation; confidence = winner / total. This
+    // correctly handles the case where fingerprint is a coin-flip (low conf)
+    // but Sleeper+KTC concur strongly on the opposite orientation -- their
+    // combined weight overrides. When only fingerprint is present (Sleeper/KTC
+    // miss the pid) it carries the decision at its own confidence.
+    const fp_decisions = decide_stage_3_fingerprint_pair({ pair: group, backfill_refs })
+    const sleeper_decisions = decide_stage_4_pair({ pair: group, sleeper_refs })
+    const ktc_decisions = decide_stage_5_pair({ pair: group, ktc_refs })
+    const votes = []
+    const orientation_of = (decs) =>
+      decs[0].decision === 'ALL' && decs[1].decision === 'OP' ? 'X'
+        : decs[0].decision === 'OP' && decs[1].decision === 'ALL' ? 'Y'
+          : null
+    if (fp_decisions) votes.push({ src: 'fp', orient: orientation_of(fp_decisions), conf: fp_decisions[0].confidence })
+    if (sleeper_decisions) votes.push({ src: 'sleeper', orient: orientation_of(sleeper_decisions), conf: sleeper_decisions[0].confidence })
+    if (ktc_decisions) votes.push({ src: 'ktc', orient: orientation_of(ktc_decisions), conf: ktc_decisions[0].confidence })
+    if (votes.length > 0) {
+      const weight_x = votes.filter((v) => v.orient === 'X').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
+      const weight_y = votes.filter((v) => v.orient === 'Y').reduce((s, v) => s + Math.max(v.conf, 0.05), 0)
+      const total = weight_x + weight_y
+      const winner = weight_x >= weight_y ? 'X' : 'Y'
+      const winner_w = winner === 'X' ? weight_x : weight_y
+      // Backfill fingerprint is the trusted reference: if it has high
+      // confidence (>=0.5) we keep its decision regardless of other sources.
+      // For low-confidence fingerprint, multi-source vote rules.
+      const trust_fp = fp_decisions && fp_decisions[0].confidence >= 0.5
+      const final_orient = trust_fp ? orientation_of(fp_decisions) : winner
+      const final_conf = trust_fp
+        ? fp_decisions[0].confidence
+        : Math.min(0.95, winner_w / Math.max(total, 0.01))
+      const [row_a, row_b] = group
+      const [a_dec, b_dec] = final_orient === 'X' ? ['ALL', 'OP'] : ['OP', 'ALL']
+      const concur = votes.filter((v) => v.orient === final_orient).map((v) => v.src)
+      const dissent = votes.filter((v) => v.orient !== final_orient && v.orient !== null).map((v) => v.src)
+      const base_notes = trust_fp
+        ? (fp_decisions[0].notes || '5d-fp')
+        : `vote winner=${final_orient} wx=${weight_x.toFixed(2)} wy=${weight_y.toFixed(2)}`
+      const tag_parts = []
+      if (concur.length) tag_parts.push(`agree=${concur.join(',')}`)
+      if (dissent.length) tag_parts.push(`dissent=${dissent.join(',')}`)
+      const notes = `${base_notes} ${tag_parts.join(' ')}`.trim()
+      const fp_all = fp_decisions ? fp_decisions[0].all_ref_rank : null
+      const fp_op = fp_decisions ? fp_decisions[0].op_ref_rank : null
+      const decs = [
+        { row: row_a, decision: a_dec, stage: 3, confidence: final_conf,
+          all_ref_rank: fp_all, op_ref_rank: fp_op, pair_partner_rank: row_b.overall_rank, notes },
+        { row: row_b, decision: b_dec, stage: 3, confidence: final_conf,
+          all_ref_rank: fp_all, op_ref_rank: fp_op, pair_partner_rank: row_a.overall_rank, notes }
+      ]
+      for (const d of decs) {
+        if (sleeper_decisions) {
+          d.sleeper_all_rank = sleeper_decisions[0].sleeper_all_rank ?? null
+          d.sleeper_op_rank = sleeper_decisions[0].sleeper_op_rank ?? null
+          d.sleeper_ts = sleeper_decisions[0].sleeper_ts ?? null
+        }
+        if (ktc_decisions) {
+          d.ktc_value_1qb = ktc_decisions[0].ktc_value_1qb ?? null
+          d.ktc_value_sf = ktc_decisions[0].ktc_value_sf ?? null
+          d.ktc_d = ktc_decisions[0].ktc_d ?? null
+        }
+        push_audit(d.row, d)
+      }
+      continue
+    }
+    const candidates = [].filter((c) => c != null)
     let pair_decisions = null
     if (candidates.length > 0) {
       pair_decisions = candidates[0]
