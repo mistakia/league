@@ -79,7 +79,7 @@ const scoring_format_player_seasonlogs_source = {
   table: 'scoring_format_player_seasonlogs',
   grain: 'player_year',
   key_columns: { pid: 'pid', year: 'year' },
-  year_default: (params) => get_default_params({ params }).year,
+  year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => [
     { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
   ]

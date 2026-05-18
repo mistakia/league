@@ -29,7 +29,7 @@ const player_seasonlogs_source = {
   table: 'player_seasonlogs',
   grain: 'player_year',
   key_columns: { pid: 'pid', year: 'year' },
-  year_default: (params) => get_default_params({ params }).single_year,
+  year_default: (params) => [get_default_params({ params }).single_year],
   extra_predicates: (params) => [
     { column: 'seas_type', value: get_default_params({ params }).seas_type }
   ]

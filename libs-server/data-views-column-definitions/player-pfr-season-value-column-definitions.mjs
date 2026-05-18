@@ -24,7 +24,7 @@ const pfr_season_value_source = {
   table: 'player_seasonlogs',
   grain: 'player_year',
   key_columns: { pid: 'pid', year: 'year' },
-  year_default: (params) => get_valid_year(params.year),
+  year_default: (params) => [get_valid_year(params.year)],
   extra_predicates: (params) => {
     const extras = [{ column: 'seas_type', value: 'REG' }]
     if (params.career_year) {
