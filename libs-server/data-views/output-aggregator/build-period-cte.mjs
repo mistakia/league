@@ -268,6 +268,18 @@ export const build_batched_period_cte = ({
     )
   }
 
+  // The batched path has no player_seasonlogs join, so career_year /
+  // career_game predicates cannot be enforced here. Legacy with_func callers
+  // strip these params before apply_filters; any future batched-path consumer
+  // that relies on career-scoped filtering must be routed through
+  // build_role_union_period_cte (which joins player_seasonlogs) or extend this
+  // builder to mirror that join.
+  if (params.career_year != null || params.career_game != null) {
+    throw new Error(
+      'build_batched_period_cte does not support career_year/career_game; route via build_role_union_period_cte or extend the batched path'
+    )
+  }
+
   // pid expression resolution.
   // - 'native': source has a `pid` column.
   // - 'gsis_bridge': source carries gsis_it_id; INNER JOIN player to emit pid.
