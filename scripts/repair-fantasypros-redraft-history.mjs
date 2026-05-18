@@ -209,6 +209,112 @@ const fp_distance = (row, fp) => {
   return da + db_ + dc + dd + de
 }
 
+// Build a position-rank pattern lookup from backfill: for each (year, scoring,
+// bucket, pos), a sorted array of (overall_rank, position_rank). Given a
+// candidate row's pos and position_rank, returns the backfill's overall_rank
+// at that position_rank (linear scan; pools are <100 rows per partition).
+const build_position_rank_lookup = async ({ years }) => {
+  const labels = []
+  for (const sc of ['STD', 'PPR', 'HALF']) labels.push(NON_SF_LABEL_FOR_SCORING[sc], SF_LABEL_FOR_SCORING[sc])
+  const rows = await db('player_rankings_history')
+    .select('year', 'pos', 'overall_rank', 'position_rank', 'ranking_type')
+    .where({ source_id: 'FANTASYPROS' })
+    .whereBetween('timestamp', [BACKFILL_TS_MIN, BACKFILL_TS_MAX])
+    .whereIn('year', years)
+    .whereIn('ranking_type', labels)
+  const lookup = {}
+  for (const r of rows) {
+    if (r.position_rank == null) continue
+    const rt = r.ranking_type
+    const scoring = rt === 'STANDARD_REDRAFT' || rt === 'STANDARD_SUPERFLEX_REDRAFT' ? 'STD'
+      : rt === 'HALF_PPR_REDRAFT' || rt === 'HALF_PPR_SUPERFLEX_REDRAFT' ? 'HALF' : 'PPR'
+    const bucket = SF_LABEL_FOR_SCORING[scoring] === rt ? 'op' : 'all'
+    lookup[r.year] = lookup[r.year] || {}
+    lookup[r.year][scoring] = lookup[r.year][scoring] || { all: {}, op: {} }
+    const map = lookup[r.year][scoring][bucket]
+    map[r.pos] = map[r.pos] || []
+    map[r.pos].push({ or: r.overall_rank, pr: r.position_rank })
+  }
+  for (const y of Object.keys(lookup)) {
+    for (const sc of Object.keys(lookup[y])) {
+      for (const b of ['all', 'op']) {
+        for (const p of Object.keys(lookup[y][sc][b])) {
+          lookup[y][sc][b][p].sort((a, b) => a.pr - b.pr)
+        }
+      }
+    }
+  }
+  return lookup
+}
+
+// Given (pos, position_rank), find the closest backfill row in a bucket and
+// return its overall_rank. Returns null if the position has no backfill data
+// or no row with that position_rank exists.
+const lookup_or_at_pr = (bucket_pos_map, pos, position_rank) => {
+  const list = bucket_pos_map?.[pos]
+  if (!list || list.length === 0) return null
+  // Find row with the matching position_rank or nearest neighbor.
+  let best = list[0]
+  let best_d = Math.abs(list[0].pr - position_rank)
+  for (const item of list) {
+    const d = Math.abs(item.pr - position_rank)
+    if (d < best_d) { best = item; best_d = d }
+  }
+  // Only return if we found within a reasonable distance.
+  return best_d <= 5 ? best.or : null
+}
+
+// Position-rank-pattern vote: independent of fingerprint, sleeper, ktc.
+// Stored position_rank reflects which run produced the row. The bucket
+// where the (pos, position_rank) backfill pattern places overall_rank
+// closer to the row's overall_rank wins.
+const decide_position_rank_pair = ({ pair, pr_lookup }) => {
+  if (pair.length !== 2) return null
+  const [row_a, row_b] = pair
+  if (row_a.position_rank == null || row_b.position_rank == null) return null
+  const scoring = SCORING_FROM_LABEL[row_a.ranking_type]
+  const yref = pr_lookup[row_a.year]?.[scoring]
+  if (!yref) return null
+  const or_a_all = lookup_or_at_pr(yref.all, row_a.pos, row_a.position_rank)
+  const or_a_op = lookup_or_at_pr(yref.op, row_a.pos, row_a.position_rank)
+  const or_b_all = lookup_or_at_pr(yref.all, row_b.pos, row_b.position_rank)
+  const or_b_op = lookup_or_at_pr(yref.op, row_b.pos, row_b.position_rank)
+  if (or_a_all == null || or_a_op == null || or_b_all == null || or_b_op == null) return null
+  const d = (a, b) => Math.abs(a - b)
+  const cost_x = d(row_a.overall_rank, or_a_all) + d(row_b.overall_rank, or_b_op)
+  const cost_y = d(row_a.overall_rank, or_a_op) + d(row_b.overall_rank, or_b_all)
+  const lo = Math.min(cost_x, cost_y)
+  const hi = Math.max(cost_x, cost_y, 0.01)
+  const confidence = Math.min(1.0, 1 - Math.pow(lo / hi, 1.5))
+  const [a_dec, b_dec] = cost_x <= cost_y ? ['ALL', 'OP'] : ['OP', 'ALL']
+  return [
+    { row: row_a, decision: a_dec, stage: 3, confidence, all_ref_rank: or_a_all, op_ref_rank: or_a_op, pair_partner_rank: row_b.overall_rank, notes: `pr-pat cx=${cost_x.toFixed(1)} cy=${cost_y.toFixed(1)}` },
+    { row: row_b, decision: b_dec, stage: 3, confidence, all_ref_rank: or_b_all, op_ref_rank: or_b_op, pair_partner_rank: row_a.overall_rank, notes: `pr-pat cx=${cost_x.toFixed(1)} cy=${cost_y.toFixed(1)}` }
+  ]
+}
+
+const decide_position_rank_single = ({ row, pr_lookup }) => {
+  if (row.position_rank == null) return null
+  const scoring = SCORING_FROM_LABEL[row.ranking_type]
+  const yref = pr_lookup[row.year]?.[scoring]
+  if (!yref) return null
+  const or_all = lookup_or_at_pr(yref.all, row.pos, row.position_rank)
+  const or_op = lookup_or_at_pr(yref.op, row.pos, row.position_rank)
+  if (or_all == null && or_op == null) return null
+  if (or_all == null) return { decision: 'OP', stage: 3, confidence: 0.5, all_ref_rank: null, op_ref_rank: or_op, notes: 'pr-pat OP-only' }
+  if (or_op == null) return { decision: 'ALL', stage: 3, confidence: 0.5, all_ref_rank: or_all, op_ref_rank: null, notes: 'pr-pat ALL-only' }
+  const d_all = Math.abs(row.overall_rank - or_all)
+  const d_op = Math.abs(row.overall_rank - or_op)
+  const lo = Math.min(d_all, d_op)
+  const hi = Math.max(d_all, d_op, 0.01)
+  const confidence = Math.min(1.0, 1 - Math.pow(lo / hi, 1.5))
+  return {
+    decision: d_all <= d_op ? 'ALL' : 'OP', stage: 3, confidence,
+    all_ref_rank: or_all, op_ref_rank: or_op,
+    notes: `pr-pat d_all=${d_all} d_op=${d_op}`
+  }
+}
+
 // Stage 2 membership using backfill DB refs: forced if pid appears in only
 // one bucket. Backfill is post-fix and pre-resolved, so single-bucket presence
 // is a near-definitive signal.
@@ -667,6 +773,8 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
   const sleeper_refs = await build_sleeper_refs({ buggy_timestamps })
   log('building KTC refs')
   const ktc_refs = await build_ktc_refs({ buggy_timestamps })
+  log('building position-rank pattern lookup')
+  const pr_lookup = await build_position_rank_lookup({ years })
 
   // 3. Group rows and run the staged decision pipeline.
   const groups = group_rows(rows)
@@ -694,10 +802,12 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
       const fp_single = decide_stage_3_fingerprint_single({ row, backfill_refs })
       const sleeper_single = decide_stage_4_single({ row, sleeper_refs })
       const ktc_single = decide_stage_5_single({ row, ktc_refs })
+      const pr_single = decide_position_rank_single({ row, pr_lookup })
       const singleton_votes = []
       if (fp_single) singleton_votes.push({ src: 'fp', decision: fp_single.decision, conf: fp_single.confidence })
       if (sleeper_single) singleton_votes.push({ src: 'sleeper', decision: sleeper_single.decision, conf: sleeper_single.confidence })
       if (ktc_single) singleton_votes.push({ src: 'ktc', decision: ktc_single.decision, conf: ktc_single.confidence })
+      if (pr_single) singleton_votes.push({ src: 'pr', decision: pr_single.decision, conf: pr_single.confidence })
       if (singleton_votes.length === 0) {
         push_audit(row, decide_stage_6_single({ row }))
         continue
@@ -725,9 +835,12 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
       }
       const sing_concur = singleton_votes.filter((v) => v.decision === final_decision).length
       const sing_dissent = singleton_votes.filter((v) => v.decision !== final_decision).length
-      if (sing_concur >= 3 && sing_dissent === 0) final_conf = Math.max(final_conf, 0.99)
+      if (sing_concur >= 4 && sing_dissent === 0) final_conf = Math.max(final_conf, 0.995)
+      else if (sing_concur >= 3 && sing_dissent === 0) final_conf = Math.max(final_conf, 0.99)
+      else if (sing_concur >= 3 && sing_dissent === 1) final_conf = Math.max(final_conf, 0.95)
       else if (sing_concur >= 2 && sing_dissent === 0) final_conf = Math.max(final_conf, 0.95)
       else if (sing_concur >= 2 && sing_dissent === 1) final_conf = Math.max(final_conf, 0.92)
+      else if (sing_concur >= 2 && sing_dissent === 2) final_conf = Math.max(final_conf, 0.70)
       const concur = singleton_votes.filter((v) => v.decision === final_decision).map((v) => v.src)
       const dissent = singleton_votes.filter((v) => v.decision !== final_decision).map((v) => v.src)
       const tag_parts = []
@@ -768,6 +881,7 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
     const fp_decisions = decide_stage_3_fingerprint_pair({ pair: group, backfill_refs })
     const sleeper_decisions = decide_stage_4_pair({ pair: group, sleeper_refs })
     const ktc_decisions = decide_stage_5_pair({ pair: group, ktc_refs })
+    const pr_decisions = decide_position_rank_pair({ pair: group, pr_lookup })
     const votes = []
     const orientation_of = (decs) =>
       decs[0].decision === 'ALL' && decs[1].decision === 'OP' ? 'X'
@@ -776,6 +890,7 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
     if (fp_decisions) votes.push({ src: 'fp', orient: orientation_of(fp_decisions), conf: fp_decisions[0].confidence })
     if (sleeper_decisions) votes.push({ src: 'sleeper', orient: orientation_of(sleeper_decisions), conf: sleeper_decisions[0].confidence })
     if (ktc_decisions) votes.push({ src: 'ktc', orient: orientation_of(ktc_decisions), conf: ktc_decisions[0].confidence })
+    if (pr_decisions) votes.push({ src: 'pr', orient: orientation_of(pr_decisions), conf: pr_decisions[0].confidence })
     if (votes.length > 0) {
       // Majority-count first (2 agreeing sources beat 1 even if it has higher
       // confidence). Count uses all source votes regardless of their own
@@ -806,9 +921,12 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
         : Math.min(0.95, winner_w / Math.max(total, 0.01))
       const concur_count_pre = votes.filter((v) => v.orient === final_orient).length
       const dissent_count_pre = votes.filter((v) => v.orient !== final_orient && v.orient !== null).length
-      if (concur_count_pre >= 3 && dissent_count_pre === 0) final_conf = Math.max(final_conf, 0.99)
+      if (concur_count_pre >= 4 && dissent_count_pre === 0) final_conf = Math.max(final_conf, 0.995)
+      else if (concur_count_pre >= 3 && dissent_count_pre === 0) final_conf = Math.max(final_conf, 0.99)
+      else if (concur_count_pre >= 3 && dissent_count_pre === 1) final_conf = Math.max(final_conf, 0.95)
       else if (concur_count_pre >= 2 && dissent_count_pre === 0) final_conf = Math.max(final_conf, 0.95)
       else if (concur_count_pre >= 2 && dissent_count_pre === 1) final_conf = Math.max(final_conf, 0.92)
+      else if (concur_count_pre >= 2 && dissent_count_pre === 2) final_conf = Math.max(final_conf, 0.70)
       const [row_a, row_b] = group
       const [a_dec, b_dec] = final_orient === 'X' ? ['ALL', 'OP'] : ['OP', 'ALL']
       const concur = votes.filter((v) => v.orient === final_orient).map((v) => v.src)
@@ -864,6 +982,76 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
   }
 
   log(`decisions: stage_1=${counters.stage_1} stage_2=${counters.stage_2} stage_3=${counters.stage_3} stage_4=${counters.stage_4} stage_5=${counters.stage_5} stage_6=${counters.stage_6} unresolved=${counters.unresolved}`)
+
+  // 3.5. Cross-timestamp consensus pass for pairs. Each (pid, ranking_type,
+  // year) group represents the SAME two FP-run-origin rows across N buggy
+  // timestamps. Orientation is time-invariant in truth: the ALL-run always
+  // produces ALL-origin rows. Per-timestamp fp/ktc fingerprint noise (esp.
+  // for rookies whose May 2026 backfill is post-season retconned) causes
+  // some pair decisions to flip across days for the same (pid, rt). We pin
+  // each (pid, rt, year) to a single orientation by aggregating per-day
+  // decisions weighted by per-day confidence, using the lower-min row as a
+  // stable family identifier across timestamps.
+  const pair_audit_by_key = new Map()
+  for (const ar of audit_rows) {
+    if (ar.pair_partner_rank == null) continue
+    const key = `${ar.pid}|${ar.ranking_type}|${ar.year}`
+    let list = pair_audit_by_key.get(key)
+    if (!list) { list = []; pair_audit_by_key.set(key, list) }
+    list.push(ar)
+  }
+  let consensus_flips = 0
+  let consensus_groups = 0
+  for (const [key, audits] of pair_audit_by_key) {
+    if (audits.length < 4) continue // need enough timestamps for consensus to mean something
+    // Group by timestamp: each timestamp has 2 audit rows (the pair).
+    const by_ts = new Map()
+    for (const a of audits) {
+      let p = by_ts.get(a.timestamp)
+      if (!p) { p = []; by_ts.set(a.timestamp, p) }
+      p.push(a)
+    }
+    // Tally per-timestamp: "low-min row -> ALL" vs "low-min row -> OP",
+    // weighted by per-timestamp confidence.
+    let w_low_all = 0; let w_low_op = 0
+    let c_low_all = 0; let c_low_op = 0
+    const valid_pairs = []
+    for (const [ts, p] of by_ts) {
+      if (p.length !== 2) continue
+      const [lo, hi] = p[0].min <= p[1].min ? [p[0], p[1]] : [p[1], p[0]]
+      const conf = lo.confidence
+      if (lo.decision === 'ALL') { w_low_all += conf; c_low_all += 1 }
+      else { w_low_op += conf; c_low_op += 1 }
+      valid_pairs.push({ ts, lo, hi })
+    }
+    if (valid_pairs.length < 4) continue
+    consensus_groups += 1
+    const dominant_low_decision = (c_low_all !== c_low_op)
+      ? (c_low_all > c_low_op ? 'ALL' : 'OP')
+      : (w_low_all >= w_low_op ? 'ALL' : 'OP')
+    const total_w = w_low_all + w_low_op
+    const winner_w = dominant_low_decision === 'ALL' ? w_low_all : w_low_op
+    const winner_c = dominant_low_decision === 'ALL' ? c_low_all : c_low_op
+    const consensus_share = winner_c / valid_pairs.length
+    // Confidence floor based on cross-timestamp consensus: e.g., 80/91
+    // consensus = 0.88 share -> floor 0.94. 91/91 = floor 0.99.
+    const consensus_floor = Math.min(0.99, 0.5 + 0.49 * consensus_share)
+    for (const { ts, lo, hi } of valid_pairs) {
+      const correct_low_dec = dominant_low_decision
+      const correct_hi_dec = dominant_low_decision === 'ALL' ? 'OP' : 'ALL'
+      let flipped = false
+      if (lo.decision !== correct_low_dec) { lo.decision = correct_low_dec; flipped = true }
+      if (hi.decision !== correct_hi_dec) { hi.decision = correct_hi_dec; flipped = true }
+      if (flipped) consensus_flips += 2
+      // Lift confidence to the consensus floor.
+      lo.confidence = Math.max(Number(lo.confidence), consensus_floor)
+      hi.confidence = Math.max(Number(hi.confidence), consensus_floor)
+      const tag = `consensus=${winner_c}/${valid_pairs.length}`
+      if (!lo.notes?.includes('consensus=')) lo.notes = `${lo.notes || ''} ${tag}`.trim()
+      if (!hi.notes?.includes('consensus=')) hi.notes = `${hi.notes || ''} ${tag}`.trim()
+    }
+  }
+  log(`cross-timestamp consensus: applied to ${consensus_groups} (pid,rt,year) groups, flipped ${consensus_flips} per-row decisions`)
 
   // 4. Persist audit rows in batches.
   await db('fp_redraft_salvage_audit').del()
