@@ -237,11 +237,14 @@ const execute_sql = async (sql) => {
   // statement_timeout is also set to bound runaway queries.
   return db.transaction(async (trx) => {
     await trx.raw('SET TRANSACTION READ ONLY')
-    // 300s tolerance: a small number of legitimate fixtures (e.g.
-    // year-splits-with-a-column-set-to-a-specific-year, 24-year per_game rate
-    // over nfl_plays) run ~165s post-migration as the price of per-instance
-    // CTEs required for correctness on differing params.year/year_offset/week.
-    await trx.raw("SET LOCAL statement_timeout = '300s'")
+    await trx.raw("SET LOCAL statement_timeout = '120s'")
+    // Match the production execution environment in
+    // libs-server/get-data-view-results.mjs (work_mem=1GB, jit=off). Without
+    // these, fixtures like year-splits-with-a-column-set-to-a-specific-year
+    // spend 99% of their wall-clock JIT-compiling 2500+ functions whose
+    // benefit doesn't pay back on data-view's many-CTE shape (165s vs 5s).
+    await trx.raw("SET LOCAL work_mem = '1GB'")
+    await trx.raw('SET LOCAL jit = off')
     const result = await trx.raw(sql)
     // node-pg returns {rows, ...}; if a different driver returns an array,
     // accept it as-is.
