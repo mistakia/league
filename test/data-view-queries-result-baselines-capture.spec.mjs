@@ -1,19 +1,19 @@
 /* global describe it before */
 //
 // Captures result-set baseline hashes for every fixture under
-// test/data-view-queries/. Wraps the dependency-injected engine in
-// user-base/scratch/league/source-bridge-architecture/baseline-capture.mjs so
-// the engine can live alongside the rest of the working-tier slug while still
-// running through the league repo's seeded test DB bootstrap (test/global.mjs).
+// test/data-view-queries/. Engine lives in test/helpers/data-view-baseline-capture.mjs.
 //
 // Invocation:
 //   yarn test --reporter min test/data-view-queries-result-baselines-capture.spec.mjs
 //
-// Output: writes the consolidated hashes to
-//   scratch/league/source-bridge-architecture/baseline-result-hashes.json
-// Promote step (separate task) copies that file to
-//   test/data-view-queries-result-baselines.json
-// once the captured hashes are reviewed.
+// Output: writes consolidated hashes to a .captured.json sidecar in test/
+// (gitignored). Manual promotion step copies that file to the tracked
+// baseline once reviewed:
+//   cp test/data-view-queries-result-baselines.captured.json test/data-view-queries-result-baselines.json
+//
+// Override the output path via env var DATA_VIEW_BASELINE_OUTPUT_PATH; used
+// by the regression-detection harness to redirect captures into a per-worktree
+// JSON file under the finish-line scratch slug.
 
 import MockDate from 'mockdate'
 import debug from 'debug'
@@ -27,13 +27,12 @@ import {
   load_data_view_test_queries_sync
 } from '#libs-server'
 
-import { capture_all_baselines } from '../../../../scratch/league/source-bridge-architecture/baseline-capture.mjs'
+import { capture_all_baselines } from './helpers/data-view-baseline-capture.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const output_path = path.resolve(
-  __dirname,
-  '../../../../scratch/league/source-bridge-architecture/baseline-result-hashes.json'
-)
+const output_path =
+  process.env.DATA_VIEW_BASELINE_OUTPUT_PATH ||
+  path.resolve(__dirname, 'data-view-queries-result-baselines.captured.json')
 
 const get_master_sha = () => {
   try {

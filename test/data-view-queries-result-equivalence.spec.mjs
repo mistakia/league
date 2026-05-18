@@ -21,7 +21,7 @@ import {
   load_data_view_test_queries_sync
 } from '#libs-server'
 
-import { capture_fixture_baseline } from '../../../../scratch/league/source-bridge-architecture/baseline-capture.mjs'
+import { capture_fixture_baseline } from './helpers/data-view-baseline-capture.mjs'
 
 const { expect } = chai
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
