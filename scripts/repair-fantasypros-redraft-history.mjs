@@ -1090,9 +1090,9 @@ const main_repair = async ({ dry_run = true, apply = false }) => {
     const result = await trx.raw(`
       UPDATE player_rankings_history h
       SET ranking_type = CASE h.ranking_type::text
-          WHEN 'STANDARD_REDRAFT' THEN 'STANDARD_SUPERFLEX_REDRAFT'::rankings_type
-          WHEN 'PPR_REDRAFT'      THEN 'PPR_SUPERFLEX_REDRAFT'::rankings_type
-          WHEN 'HALF_PPR_REDRAFT' THEN 'HALF_PPR_SUPERFLEX_REDRAFT'::rankings_type
+          WHEN 'STANDARD_REDRAFT' THEN 'STANDARD_SUPERFLEX_REDRAFT'::ranking_type
+          WHEN 'PPR_REDRAFT'      THEN 'PPR_SUPERFLEX_REDRAFT'::ranking_type
+          WHEN 'HALF_PPR_REDRAFT' THEN 'HALF_PPR_SUPERFLEX_REDRAFT'::ranking_type
         END
       FROM fp_redraft_salvage_audit a
       WHERE a.timestamp = h.timestamp
