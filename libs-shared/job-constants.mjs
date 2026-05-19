@@ -135,7 +135,8 @@ export const job_types = {
   IMPORT_PLAYERS_CHARTING: 111,
   IMPORT_DRAFTKINGS_DFS_OWNERSHIP: 112,
   IMPORT_FANDUEL_DFS_OWNERSHIP: 113,
-  FANTASYPROS_ROOKIE: 114
+  FANTASYPROS_ROOKIE: 114,
+  GENERATE_LEAGUE_TEAM_PLAYER_SEASONLOGS: 115
 }
 
 export const job_title_by_id = {
@@ -252,5 +253,6 @@ export const job_title_by_id = {
   111: 'Import Players (Charting)',
   112: 'Import DraftKings DFS Ownership',
   113: 'Import FanDuel DFS Ownership',
-  114: 'FantasyPros Rookie'
+  114: 'FantasyPros Rookie',
+  115: 'Generate League Team Player Seasonlogs'
 }
