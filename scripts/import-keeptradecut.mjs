@@ -24,6 +24,20 @@ const initialize_cli = () => {
 const log = debug('import-keeptradecut')
 debug.enable('import-keeptradecut,get-player,update-player,fetch')
 
+const KTC_PICK_SLOT = { Early: 1, Mid: 2, Late: 3 }
+const KTC_PICK_ROUND = { '1st': 1, '2nd': 2, '3rd': 3, '4th': 4 }
+const KTC_PICK_NAME_RE = /^(\d{4}) (Early|Mid|Late) (1st|2nd|3rd|4th)$/
+
+const parse_ktc_pick_name = (name) => {
+  const m = KTC_PICK_NAME_RE.exec(name)
+  if (!m) return null
+  return {
+    year: Number(m[1]),
+    slot: KTC_PICK_SLOT[m[2]],
+    round: KTC_PICK_ROUND[m[3]]
+  }
+}
+
 const parse_keeptradecut_date = (date_str) => {
   const formatted_date =
     '20' +
@@ -75,43 +89,65 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   log(`Processing ${data.length} players`)
 
   for (const item of data) {
-    let player_row
     const keeptradecut_player = players_index[item.playerID]
+    const inserts = []
+    let pid
 
     if (keeptradecut_player.position === 'RDP') {
-      // skip draft pick values for now
-      continue
-    }
-
-    try {
-      player_row = await find_player_row({ keeptradecut_id: item.playerID })
-      if (!player_row) {
-        player_row = await find_player_row({
-          name: keeptradecut_player.playerName,
-          pos: keeptradecut_player.position,
-          team: keeptradecut_player.team,
-          nfl_draft_year: keeptradecut_player.draftYear
-        })
-
-        if (player_row) {
-          await updatePlayer({
-            player_row,
-            update: { keeptradecut_id: item.playerID }
-          })
-        } else {
-          log(
-            `PlayerID ${keeptradecut_player.playerID} not found, name: ${keeptradecut_player.playerName}, team: ${keeptradecut_player.team}, slug: ${keeptradecut_player.slug}, draft year: ${keeptradecut_player.draftYear}`
-          )
-          continue
-        }
+      const meta = parse_ktc_pick_name(keeptradecut_player.playerName)
+      if (!meta) {
+        log(
+          `unparseable RDP playerName: ${keeptradecut_player.playerName} (id=${item.playerID})`
+        )
+        continue
       }
-    } catch (err) {
-      log(`Error getting player ${item.playerID}: ${err}`)
-      continue
-    }
+      pid = `KTCPICK-${item.playerID}`
+      const now = dayjs().unix()
+      if (!dry) {
+        await db('keeptradecut_pick')
+          .insert({
+            pid,
+            ktc_player_id: item.playerID,
+            ktc_player_name: keeptradecut_player.playerName,
+            year: meta.year,
+            round: meta.round,
+            slot: meta.slot,
+            created_at: now,
+            updated_at: now
+          })
+          .onConflict('pid')
+          .merge(['ktc_player_name', 'year', 'round', 'slot', 'updated_at'])
+      }
+    } else {
+      let player_row
+      try {
+        player_row = await find_player_row({ keeptradecut_id: item.playerID })
+        if (!player_row) {
+          player_row = await find_player_row({
+            name: keeptradecut_player.playerName,
+            pos: keeptradecut_player.position,
+            team: keeptradecut_player.team,
+            nfl_draft_year: keeptradecut_player.draftYear
+          })
 
-    const inserts = []
-    const { pid } = player_row
+          if (player_row) {
+            await updatePlayer({
+              player_row,
+              update: { keeptradecut_id: item.playerID }
+            })
+          } else {
+            log(
+              `PlayerID ${keeptradecut_player.playerID} not found, name: ${keeptradecut_player.playerName}, team: ${keeptradecut_player.team}, slug: ${keeptradecut_player.slug}, draft year: ${keeptradecut_player.draftYear}`
+            )
+            continue
+          }
+        }
+      } catch (err) {
+        log(`Error getting player ${item.playerID}: ${err}`)
+        continue
+      }
+      pid = player_row.pid
+    }
 
     if (full) {
       const slug = keeptradecut_player.slug
@@ -121,65 +157,107 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       })
 
       const dom = new JSDOM(html, { runScripts: 'dangerously' })
-      dom.window.playerOneQB.overallValue.forEach((i) => {
-        inserts.push({
-          qb: 1,
-          pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
-          type: keeptradecut_metric_types.VALUE
+      if (keeptradecut_player.position === 'RDP') {
+        dom.window.playerOneQB?.overallValue?.forEach((i) => {
+          inserts.push({
+            qb: 1,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.VALUE
+          })
         })
-      })
 
-      dom.window.playerOneQB.overallRankHistory.forEach((i) => {
-        inserts.push({
-          qb: 1,
-          pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
-          type: keeptradecut_metric_types.OVERALL_RANK
+        dom.window.playerOneQB?.overallRankHistory?.forEach((i) => {
+          inserts.push({
+            qb: 1,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.OVERALL_RANK
+          })
         })
-      })
 
-      dom.window.playerOneQB.positionalRankHistory.forEach((i) => {
-        inserts.push({
-          qb: 1,
-          pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
-          type: keeptradecut_metric_types.POSITION_RANK
+        dom.window.playerSuperflex?.overallValue?.forEach((i) => {
+          inserts.push({
+            qb: 2,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.VALUE
+          })
         })
-      })
 
-      dom.window.playerSuperflex.overallValue.forEach((i) => {
-        inserts.push({
-          qb: 2,
-          pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
-          type: keeptradecut_metric_types.VALUE
+        dom.window.playerSuperflex?.overallRankHistory?.forEach((i) => {
+          inserts.push({
+            qb: 2,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.OVERALL_RANK
+          })
         })
-      })
+      } else {
+        dom.window.playerOneQB.overallValue.forEach((i) => {
+          inserts.push({
+            qb: 1,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.VALUE
+          })
+        })
 
-      dom.window.playerSuperflex.overallRankHistory.forEach((i) => {
-        inserts.push({
-          qb: 2,
-          pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
-          type: keeptradecut_metric_types.OVERALL_RANK
+        dom.window.playerOneQB.overallRankHistory.forEach((i) => {
+          inserts.push({
+            qb: 1,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.OVERALL_RANK
+          })
         })
-      })
 
-      dom.window.playerSuperflex.positionalRankHistory.forEach((i) => {
-        inserts.push({
-          qb: 2,
-          pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
-          type: keeptradecut_metric_types.POSITION_RANK
+        dom.window.playerOneQB.positionalRankHistory.forEach((i) => {
+          inserts.push({
+            qb: 1,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.POSITION_RANK
+          })
         })
-      })
+
+        dom.window.playerSuperflex.overallValue.forEach((i) => {
+          inserts.push({
+            qb: 2,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.VALUE
+          })
+        })
+
+        dom.window.playerSuperflex.overallRankHistory.forEach((i) => {
+          inserts.push({
+            qb: 2,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.OVERALL_RANK
+          })
+        })
+
+        dom.window.playerSuperflex.positionalRankHistory.forEach((i) => {
+          inserts.push({
+            qb: 2,
+            pid,
+            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            v: i.v,
+            type: keeptradecut_metric_types.POSITION_RANK
+          })
+        })
+      }
     } else {
       item.oneQB?.valueHistory?.forEach((compressed_str) => {
         const { d, v } = parse_compressed_value(compressed_str)
