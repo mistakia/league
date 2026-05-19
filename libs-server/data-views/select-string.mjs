@@ -1,5 +1,61 @@
 import { resolve_team_join_target } from './resolve-team-join-target.mjs'
 
+// Escape a literal for inline SQL emission. Mirrors the minimal quoting the
+// rest of this file already relies on -- raw template-literal interpolation
+// of column params -- but applies it consistently to source.extra_predicates
+// values so the correlated-subquery emitter doesn't smuggle in unquoted
+// strings or unescaped quotes.
+const format_sql_literal = (value) => {
+  if (value === null || value === undefined) return 'NULL'
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  return `'${String(value).replace(/'/g, "''")}'`
+}
+
+// Compute the year-set produced by source.year_default crossed with a
+// year_offset range, for sources whose attach rule would emit an
+// `year IN (...)` predicate on the join (player-family-to-player-year's
+// no-year_reference branch). Returned as a sorted IN-list fragment, or null
+// if the source declares no year_default.
+const compute_year_in_list = (source, column_params, min_off, max_off) => {
+  if (typeof source?.year_default !== 'function') return null
+  const v = source.year_default(column_params)
+  if (v == null) return null
+  const anchors = (Array.isArray(v) ? v : [v])
+    .map(Number)
+    .filter((n) => Number.isFinite(n))
+  if (!anchors.length) return null
+  const years = new Set()
+  for (const anchor of anchors) {
+    for (let off = min_off; off <= max_off; off++) years.add(anchor + off)
+  }
+  return [...years].sort((a, b) => a - b).join(',')
+}
+
+// Emit a WHERE-fragment string that reapplies source.extra_predicates against
+// the inner FROM relation. Needed because the correlated SUM subquery is
+// re-scanned from the underlying table (not the outer JOIN alias), so the
+// alias's discriminator predicates must be re-emitted to avoid summing across
+// every source_id / adp_type / etc.
+const format_extra_predicates_sql = (source, column_params, inner_table) => {
+  if (typeof source?.extra_predicates !== 'function') return ''
+  const extras = source.extra_predicates(column_params) || []
+  return extras
+    .map((p) => {
+      const op = p.op || '='
+      const col = p.column.includes('.') ? p.column : `${inner_table}.${p.column}`
+      if (op === '=') return ` AND ${col} = ${format_sql_literal(p.value)}`
+      if (op === 'in') {
+        const list = (p.value || []).map(format_sql_literal).join(', ')
+        return ` AND ${col} IN (${list})`
+      }
+      if (op === 'between') {
+        return ` AND ${col} BETWEEN ${format_sql_literal(p.value[0])} AND ${format_sql_literal(p.value[1])}`
+      }
+      throw new Error(`Unknown source.extra_predicates op: ${op}`)
+    })
+    .join('')
+}
+
 export const get_rate_type_sql = ({
   table_name,
   column_name,
@@ -123,18 +179,43 @@ const get_select_string = ({
         })
       : data_view_options.pid_reference
 
-    // When the active identity has no year split (e.g. `player`), year_clause
-    // is null and a `year BETWEEN null + N AND null + M` predicate would be
-    // emitted -- always null, and references team_stats.year which isn't
-    // projected. The CTE builder expands its year filter to cover the offset
-    // range upstream, so the outer correlated subquery can drop the year
-    // predicate and aggregate across the pre-restricted CTE rows.
-    const year_predicate = year_clause
-      ? ` AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
+    // The correlated SUM subquery's inner FROM must name a relation visible
+    // in its own scope. join_table_name may be an outer-query JOIN alias
+    // (e.g. the hashed alias for `player_adp_index`), and Postgres does not
+    // expose outer FROM-clause aliases as relations to subqueries -- only
+    // their columns are correlatable. When the source declares a real table,
+    // re-scan that table directly inside the subquery and reapply the
+    // discriminator predicates (year-set + source.extra_predicates) that the
+    // outer JOIN normally enforces. CTE-backed sources (no source.table)
+    // keep referencing the outer relation by name -- CTE names are visible
+    // throughout the WITH block.
+    const source = column_definition.source
+    const inner_table = source?.table || join_table_name
+    const inner_qualifies_via_alias = inner_table !== join_table_name
+
+    let year_predicate
+    if (year_clause) {
+      year_predicate = ` AND ${inner_table}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
+    } else if (inner_qualifies_via_alias) {
+      const in_list = compute_year_in_list(
+        source,
+        column_params,
+        min_year_offset,
+        max_year_offset
+      )
+      year_predicate = in_list ? ` AND ${inner_table}.year IN (${in_list})` : ''
+    } else {
+      // CTE-backed source: the CTE builder already restricted to the offset
+      // year range upstream, so no per-row year anchor is needed here.
+      year_predicate = ''
+    }
+
+    const extra_predicates_sql = inner_qualifies_via_alias
+      ? format_extra_predicates_sql(source, column_params, inner_table)
       : ''
 
     if (column_definition.has_numerator_denominator) {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref}${year_predicate})`
+      final_select_expression = `(SELECT SUM(${inner_table}.${select_as}_numerator) / NULLIF(SUM(${inner_table}.${select_as}_denominator), 0) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
     } else if (column_definition.main_select_string_year_offset_range) {
       final_select_expression =
         column_definition.main_select_string_year_offset_range({
@@ -143,7 +224,7 @@ const get_select_string = ({
           data_view_options
         })
     } else {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${column_definition.column_name}) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref}${year_predicate})`
+      final_select_expression = `(SELECT SUM(${inner_table}.${column_definition.column_name}) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
     }
 
     if (rate_type_table_name) {

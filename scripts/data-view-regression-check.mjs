@@ -56,6 +56,12 @@ const argv = yargs(hideBin(process.argv))
   .option('concurrency', { type: 'number', default: 4 })
   .option('sample-rows', { type: 'number', default: 5 })
   .option('json', { type: 'boolean', default: false })
+  .option('smoke-execute-unchanged', {
+    type: 'boolean',
+    default: false,
+    description:
+      'Also execute HEAD SQL for fixtures whose SQL is unchanged between base and head. Catches latent bugs (e.g. correlated-subquery alias-as-relation) that existed at the base ref but never produced a SQL diff.'
+  })
   .strict()
   .parseSync()
 
@@ -317,6 +323,24 @@ const main = async () => {
     if (base.error) return { fixture: fn, status: 'error_build_base', detail: base.error }
 
     if (head.sql === base.sql) {
+      if (!argv['smoke-execute-unchanged']) {
+        return { fixture: fn, status: 'unchanged' }
+      }
+      // Latent-bug guard: execute HEAD SQL even when unchanged. Surfaces
+      // structural defects that pre-existed the diff window (correlated
+      // subqueries that reference an outer JOIN alias as a relation, missing
+      // tables, etc.). Result hashing is unnecessary -- we only assert it
+      // runs without a Postgres error.
+      try {
+        await execute_sql(head.sql)
+      } catch (e) {
+        return {
+          fixture: fn,
+          status: 'error_smoke',
+          detail: e.message,
+          head_sql: head.sql
+        }
+      }
       return { fixture: fn, status: 'unchanged' }
     }
 
@@ -365,7 +389,7 @@ const main = async () => {
   if (argv.json) {
     process.stdout.write(JSON.stringify({ base_ref: argv['base-ref'], entries }, null, 2) + '\n')
   } else {
-    const order = ['regression', 'error_head', 'error_base', 'error_build_head', 'error_build_base', 'equivalent', 'new', 'unchanged']
+    const order = ['regression', 'error_head', 'error_base', 'error_smoke', 'error_build_head', 'error_build_base', 'equivalent', 'new', 'unchanged']
     for (const status of order) {
       const items = by_status[status] || []
       if (!items.length) continue

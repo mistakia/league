@@ -26,6 +26,15 @@ For UNION-ALL subqueries (see `add-defensive-play-by-play-with-statement.mjs`), 
 
 Builders that scan `nfl_plays` / `nfl_games` outside `apply_play_by_play_column_params_to_query` must follow the same pattern: decompose the resolved `nfl_week_id` list to `{years, seas_types}` and emit the derived `seas_type IN (...)` predicate alongside the year predicate, gating the `nfl_week_id IN (...)` clause on `!is_full_year_seas_type_coverage(...)`. Skipping the `seas_type` predicate silently re-admits PRE / POST plays and defeats the composite-index access path.
 
+### Correlated Subquery Inner-FROM Contract
+
+`select-string.mjs` emits a correlated `(SELECT SUM(...) FROM ...)` for columns invoked with a `year_offset` range. The inner `FROM` must name a relation that resolves in the subquery's own scope -- Postgres does not expose outer FROM-clause aliases (hashed `tXXXX` aliases bound via `INNER JOIN <source.table> AS tXXXX`) as relations to subqueries; only their columns are correlatable.
+
+Rule for column-definition authors:
+
+- Sources declared with `source.table` (real-table joins like `player_adp_index`) are re-scanned inside the subquery directly from `source.table`. The discriminator predicates the outer JOIN applies (year-set from `source.year_default` x `year_offset`, plus `source.extra_predicates`) are reapplied inside the subquery -- the alias's predicates are not visible to the inner scope. If you add a new discriminator (year-tag, format-hash, etc.), wire it through `source.extra_predicates` or `source.year_default` so the emitter reapplies it; don't bolt it onto the outer JOIN via a custom `source.attach` and assume the inner subquery inherits it.
+- Sources declared with `source.attach` (CTE-backed) keep the outer relation name in the inner `FROM`. CTE names are visible throughout the WITH block, so this is well-defined; the CTE builder must have already restricted to the offset year range upstream (Year Pushdown Contract above).
+
 ### Materialization Invariant
 
 Every stat or rate-type aggregation CTE MUST be registered via `query.withMaterialized(...)`, never `query.with(...)`. Predicates are always pushed at construction time in the builder, so the planner's predicate push-into-CTE is not needed. `withMaterialized` also prevents the planner from inlining the CTE into nested-loop plans that re-execute it per outer row (measured: 114x re-execution of a single stat CTE on a year-split view consumed ~6s before this invariant was established).
