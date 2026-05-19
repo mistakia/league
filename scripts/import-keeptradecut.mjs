@@ -162,7 +162,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 1,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.VALUE
           })
@@ -172,7 +172,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 1,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.OVERALL_RANK
           })
@@ -182,7 +182,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 2,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.VALUE
           })
@@ -192,7 +192,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 2,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.OVERALL_RANK
           })
@@ -202,7 +202,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 1,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.VALUE
           })
@@ -212,7 +212,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 1,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.OVERALL_RANK
           })
@@ -222,7 +222,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 1,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.POSITION_RANK
           })
@@ -232,7 +232,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 2,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.VALUE
           })
@@ -242,7 +242,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 2,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.OVERALL_RANK
           })
@@ -252,7 +252,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           inserts.push({
             qb: 2,
             pid,
-            d: dayjs(i.d, 'YYYY-MM-DD').unix(),
+            d: parse_keeptradecut_date(i.d),
             v: i.v,
             type: keeptradecut_metric_types.POSITION_RANK
           })
