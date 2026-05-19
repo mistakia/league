@@ -4,6 +4,7 @@ import * as chai from 'chai'
 
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import { identities } from '#libs-server/data-views/identities.mjs'
+import derive_granularity from '#libs-server/data-views/derive-granularity.mjs'
 
 const expect = chai.expect
 
@@ -15,8 +16,8 @@ describe('data-views column-definition coverage', () => {
     const unknown = []
     for (const [column_id, def] of Object.entries(data_views_column_definitions)) {
       if (!def || typeof def !== 'object') continue
-      const granularity = def.granularity
-      if (!Array.isArray(granularity) || granularity.length === 0) {
+      const granularity = derive_granularity(def)
+      if (!granularity.length) {
         missing.push(column_id)
         continue
       }

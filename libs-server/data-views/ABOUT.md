@@ -36,6 +36,15 @@ Split CTEs (`base_years`, `player_years`, `player_years_weeks`) remain inlineabl
 
 Every `with:` handler (whether the direct builders in this directory or the inline `with:` functions on column definitions) MUST accept `data_view_options` and forward it into the `effective_years` computation. The dispatcher in `libs-server/get-data-view-results.mjs` already passes `data_view_options` to `with_func`; omitting it from the handler signature silently disables year pushdown for columns whose year signal comes only from splits.
 
+### Granularity Declaration
+
+Every column definition declares the identity ids it is compatible with. The declaration is declarative-only today (validated by `test/libs-server.data-views-column-coverage.spec.mjs`; no runtime consumer reads it yet). Authoring rule:
+
+- The column's `source.grain` is the canonical declaration. The four observed grains (`player`, `player_year`, `team`, `team_year`) are themselves valid identity ids, so the helper `derive-granularity.mjs` defaults `granularity` to `[source.grain]`.
+- Set `granularity:` explicitly on a column only when its compatible identity-id set diverges from the `source.grain` default (e.g. season-only views of a finer-grain source).
+
+Adding `granularity` to every column manually is unnecessary; the helper does the derivation. Set `source.grain` correctly on the source descriptor and the spec is satisfied.
+
 ## Helpers
 
 - `get-param-option-counts.mjs` -- load when working on column-param metadata or live filter previews. Computes `{ [serialize_preset_value]: count }` pivots for `OBJECT_PRESET` params by applying every active `nfl_plays_column_params` predicate from `table_state.where[*].params` _except_ the targeted param, with a 10s `statement_timeout` fallback to `{ counts: {} }`.
