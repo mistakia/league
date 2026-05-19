@@ -37,7 +37,8 @@ export const add_per_player_cte = ({
   splits,
   stat_type,
   rate_type_params = {},
-  data_view_options = {}
+  data_view_options = {},
+  query_context = null
 }) => {
   const cte_query = db('nfl_plays').whereNot('play_type', 'NOPL')
 
@@ -86,23 +87,9 @@ export const add_per_player_cte = ({
 
   apply_play_by_play_column_params_to_query({
     query: cte_query,
-    params: filtered_params
+    params: filtered_params,
+    query_context
   })
-
-  const nfl_week = resolve_nfl_week_id_from_year_param(params)
-  const { years: all_years } = nfl_week.length
-    ? decompose_nfl_weeks({ nfl_weeks: nfl_week })
-    : { years: [] }
-  const effective_years =
-    data_view_options.year_range && data_view_options.year_range.length
-      ? [...new Set([...data_view_options.year_range, ...all_years])].sort(
-          (a, b) => a - b
-        )
-      : all_years
-
-  if (effective_years.length) {
-    cte_query.whereIn('nfl_plays.year', effective_years)
-  }
 
   // MATERIALIZED required: predicates are pushed at construction time; planner
   // predicate push-into-CTE is not needed and would mask the partition-pruning
@@ -216,7 +203,7 @@ export const add_cte = ({
     splits: query_context.splits,
     stat_type: dispatch_params.stat_type ?? null,
     rate_type_params: dispatch_params.rate_type_params ?? {},
-    data_view_options: { year_range: query_context.year_range }
+    query_context
   })
   query_context.applied_output_ctes.add(cte_name)
 }

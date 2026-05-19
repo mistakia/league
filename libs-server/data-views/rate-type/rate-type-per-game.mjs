@@ -1,9 +1,10 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import {
-  decompose_nfl_weeks,
-  is_full_year_seas_type_coverage
-} from '#libs-shared/nfl-week-identifier.mjs'
+import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
+import {
+  apply_scope_to_query,
+  compute_effective_scope
+} from '#libs-server/data-views/apply-scope-to-query.mjs'
 import db from '#db'
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import { is_team_identity } from '#libs-server/data-views/identities.mjs'
@@ -59,15 +60,21 @@ const add_player_per_game_cte = ({
   params,
   rate_type_table_name,
   splits = [],
-  effective_years
+  query_context
 }) => {
-  const { nfl_week, career_year, career_game } = get_default_params({
-    params
-  })
+  const { career_year, career_game } = get_default_params({ params })
 
-  // Use year-specific player_gamelogs table if a single year is specified
-  const single_year =
-    effective_years && effective_years.length === 1 ? effective_years[0] : null
+  // Effective view-level scope, narrowed by any per-column override.
+  // years drives the single-year partition optimization and the
+  // player_gamelogs.year predicate; the full nfl_week_id set drives the
+  // nfl_games seas_type / nfl_week_id predicates via apply_scope_to_query.
+  const effective_scope = compute_effective_scope({
+    query_context,
+    column_params: params
+  })
+  const { years } = decompose_nfl_weeks({ nfl_weeks: effective_scope })
+  const sorted_years = [...years].sort((a, b) => a - b)
+  const single_year = sorted_years.length === 1 ? sorted_years[0] : null
   const player_gamelogs_table = single_year
     ? `player_gamelogs_year_${single_year}`
     : 'player_gamelogs'
@@ -78,9 +85,10 @@ const add_player_per_game_cte = ({
     .select(db.raw(`array_agg(distinct ${player_gamelogs_table}.tm) as teams`))
     .where(`${player_gamelogs_table}.active`, true)
 
-  // Only join nfl_games when its columns are actually needed
+  // nfl_games join is required whenever the view has scoped weeks (the common
+  // case after view-scope unification) or career filters / splits are active.
   const needs_nfl_games =
-    nfl_week.length > 0 ||
+    effective_scope.length > 0 ||
     career_year.length > 0 ||
     splits.includes('year') ||
     splits.includes('week')
@@ -91,25 +99,16 @@ const add_player_per_game_cte = ({
       'nfl_games.esbid',
       `${player_gamelogs_table}.esbid`
     )
+    apply_scope_to_query({
+      query: cte_query,
+      table_name: 'nfl_games',
+      query_context,
+      column_params: params
+    })
   }
 
-  if (nfl_week.length) {
-    const { seas_types } = decompose_nfl_weeks({ nfl_weeks: nfl_week })
-    if (!is_full_year_seas_type_coverage({ nfl_weeks: nfl_week })) {
-      cte_query.whereIn('nfl_games.nfl_week_id', nfl_week)
-    }
-    if (seas_types.length) {
-      cte_query.whereIn('nfl_games.seas_type', seas_types)
-    }
-  }
-
-  if (effective_years.length) {
-    if (!single_year) {
-      cte_query.whereIn(`${player_gamelogs_table}.year`, effective_years)
-    }
-    if (needs_nfl_games) {
-      cte_query.whereIn('nfl_games.year', effective_years)
-    }
+  if (sorted_years.length && !single_year) {
+    cte_query.whereIn(`${player_gamelogs_table}.year`, sorted_years)
   }
 
   if (career_year.length) {
@@ -163,10 +162,8 @@ const add_team_per_game_cte = ({
   params,
   rate_type_table_name,
   splits = [],
-  effective_years
+  query_context
 }) => {
-  const { nfl_week } = get_default_params({ params })
-
   // Count games per team from nfl_games (~7K rows for 24 years) instead of
   // COUNT(DISTINCT esbid) over nfl_plays (~1.3M rows for the same range).
   // Equivalent because every game appears as both home and away exactly once,
@@ -180,25 +177,15 @@ const add_team_per_game_cte = ({
     group_cols.push('week')
   }
 
-  const { seas_types } = nfl_week.length
-    ? decompose_nfl_weeks({ nfl_weeks: nfl_week })
-    : { seas_types: [] }
-  const covers_full_year_seas_type =
-    nfl_week.length &&
-    is_full_year_seas_type_coverage({ nfl_weeks: nfl_week })
-
   const make_side = (team_col) => {
     const sub = db('nfl_games').select(`${team_col} as team`, 'year')
     if (splits.includes('week')) sub.select('week')
-    if (nfl_week.length && !covers_full_year_seas_type) {
-      sub.whereIn('nfl_games.nfl_week_id', nfl_week)
-    }
-    if (seas_types.length) {
-      sub.whereIn('nfl_games.seas_type', seas_types)
-    }
-    if (effective_years.length) {
-      sub.whereIn('nfl_games.year', effective_years)
-    }
+    apply_scope_to_query({
+      query: sub,
+      table_name: 'nfl_games',
+      query_context,
+      column_params: params
+    })
     return sub
   }
 
@@ -222,23 +209,15 @@ export const add_per_game_cte = ({
   rate_type_table_name,
   splits = [],
   is_team = false,
-  data_view_options = {}
+  query_context
 }) => {
-  const { all_years } = get_default_params({ params })
-  const effective_years =
-    data_view_options.year_range && data_view_options.year_range.length
-      ? [...new Set([...data_view_options.year_range, ...all_years])].sort(
-          (a, b) => a - b
-        )
-      : all_years
-
   if (is_team) {
     add_team_per_game_cte({
       players_query,
       params,
       rate_type_table_name,
       splits,
-      effective_years
+      query_context
     })
   } else {
     add_player_per_game_cte({
@@ -246,7 +225,7 @@ export const add_per_game_cte = ({
       params,
       rate_type_table_name,
       splits,
-      effective_years
+      query_context
     })
   }
 }
@@ -481,7 +460,7 @@ export const add_cte = ({ query_context, params, cte_name, identity_id }) => {
     rate_type_table_name: cte_name,
     splits: query_context.splits,
     is_team,
-    data_view_options: { year_range: query_context.year_range }
+    query_context
   })
   query_context.applied_output_ctes.add(cte_name)
 }

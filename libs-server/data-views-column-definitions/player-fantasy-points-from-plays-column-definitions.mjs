@@ -237,12 +237,17 @@ const fantasy_points_from_plays_with = async ({
   apply_play_by_play_column_params_to_query({
     query: filtered_plays_cte,
     params: filtered_params,
-    table_name: 'nfl_plays'
+    table_name: 'nfl_plays',
+    query_context: data_view_options.query_context
   })
 
-  // Skip when params.nfl_week_id is set: apply_play_by_play_column_params_to_query
-  // already pushes nfl_plays.year for that path.
-  if (!params.nfl_week_id) {
+  // Skip when scope has been emitted: apply_play_by_play_column_params_to_query
+  // (with query_context) already pushes nfl_plays.year via apply_scope_to_query.
+  const view_scope_emitted =
+    data_view_options.query_context &&
+    data_view_options.query_context.nfl_week_ids &&
+    data_view_options.query_context.nfl_week_ids.length
+  if (!params.nfl_week_id && !view_scope_emitted) {
     const effective_years = get_effective_years({ params, data_view_options })
     if (effective_years.length) {
       filtered_plays_cte.whereIn('nfl_plays.year', effective_years)

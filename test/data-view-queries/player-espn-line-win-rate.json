@@ -17,8 +17,14 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", \"espn_player_win_rates_index\".\"win_rate\" AS \"espn_line_win_rate_0\", \"player\".\"pos\" from \"player\" left join \"espn_player_win_rates_index\" on \"espn_player_win_rates_index\".\"pid\" = \"player\".\"pid\" and \"espn_player_win_rates_index\".\"espn_win_rate_type\" = 'PASS_BLOCK' and \"espn_player_win_rates_index\".\"year\" = ${constants.current_season.stats_season_year} group by \"espn_player_win_rates_index\".\"win_rate\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["player", "plays", "parameters", "sorting", "rate_type"],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", \"t6abead8770b52c2269bd1859cdf99b10\".\"win_rate\" AS \"espn_line_win_rate_0\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"espn_player_win_rates_index\" as \"t6abead8770b52c2269bd1859cdf99b10\" on \"t6abead8770b52c2269bd1859cdf99b10\".\"pid\" = \"player\".\"pid\" and \"t6abead8770b52c2269bd1859cdf99b10\".\"year\" = 2025 and \"t6abead8770b52c2269bd1859cdf99b10\".\"espn_win_rate_type\" = 'PASS_BLOCK' group by \"t6abead8770b52c2269bd1859cdf99b10\".\"win_rate\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "parameters",
+    "sorting",
+    "rate_type"
+  ],
   "timeout_ms": 40000,
   "skip_query_match": true
 }

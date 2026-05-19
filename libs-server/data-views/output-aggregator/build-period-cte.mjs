@@ -6,6 +6,7 @@ import {
   register_measure
 } from './measure-batch.mjs'
 import { normalize_career_year_range } from '../param-utils.mjs'
+import { apply_scope_to_query } from '../apply-scope-to-query.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.year, '_', nfl_games.week, '_', nfl_games.esbid)"
@@ -159,16 +160,17 @@ const build_role_union_period_cte = ({
         .select(db.raw(`${role_measure_expr} AS pts`))
         .whereRaw(`${source_table}.${pid_column} IS NOT NULL`)
       if (measure_predicate) sub.whereRaw(measure_predicate)
-      if (query_context.year_range && query_context.year_range.length) {
-        sub.whereIn(`${source_table}.year`, query_context.year_range)
-      }
-      // apply_filters (fp_apply_filters) filters nfl_plays.seas_type in each
-      // inner sub. The outer innerJoin on nfl_games does not add a separate
-      // nfl_games.seas_type predicate; the inner filter is the sole gate.
-      // Both columns carry the same value per esbid (nfl_plays.seas_type ==
-      // nfl_games.seas_type for any matched row), so the inner filter is
-      // sufficient and consistent -- the outer nfl_games join provides the
-      // year/period_key grouping columns only.
+      // Emit view-scope (year + seas_type + optional nfl_week_id) on the inner
+      // sub against the source table. nfl_plays carries seas_type / nfl_week_id
+      // alongside year, so partition pruning + composite indexes engage from a
+      // single emission. The outer nfl_games join below adds matching predicates
+      // (defense in depth) without depending on apply_filters to gate season type.
+      apply_scope_to_query({
+        query: sub,
+        table_name: source_table,
+        query_context,
+        column_params: params
+      })
       if (apply_filters) apply_filters({ query: sub })
       return sub
     }
@@ -193,9 +195,12 @@ const build_role_union_period_cte = ({
       .select(db.raw(`${period_key} AS period_key`))
       .groupByRaw(period_key)
   }
-  if (query_context.year_range && query_context.year_range.length) {
-    outer.whereIn('nfl_games.year', query_context.year_range)
-  }
+  apply_scope_to_query({
+    query: outer,
+    table_name: 'nfl_games',
+    query_context,
+    column_params: params
+  })
   // career_year / career_game: legacy with_func joined player_seasonlogs on
   // (pid, year, seas_type) and filtered between bounds. Mirror that here so
   // role-union numerators respect career_year params -- without this, the
@@ -347,9 +352,16 @@ export const build_batched_period_cte = ({
     sub.whereRaw(measure_predicate)
   }
 
-  if (query_context.year_range && query_context.year_range.length) {
-    sub.whereIn('nfl_games.year', query_context.year_range)
-  }
+  // Emit view-scope on the outer nfl_games join (the source-table side gets
+  // it via apply_filters when the column-def routes through
+  // apply_play_by_play_column_params_to_query; defense-in-depth here ensures
+  // the join is gated by season-type regardless of apply_filters specifics).
+  apply_scope_to_query({
+    query: sub,
+    table_name: 'nfl_games',
+    query_context,
+    column_params: params
+  })
 
   if (apply_filters) apply_filters({ query: sub })
 

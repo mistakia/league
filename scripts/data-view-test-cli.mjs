@@ -14,7 +14,10 @@ import {
   format_sql,
   normalize_sql_for_comparison
 } from '#libs-server/format-sql.mjs'
-import { compare_queries } from '#test/utils/index.mjs'
+// Import compare_queries directly rather than through the test/utils barrel,
+// which transitively pulls in #api (and its SSL-key reads) under
+// NODE_ENV=production. Direct import keeps the CLI invokable in any env.
+import compare_queries from '#test/utils/compare-queries.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

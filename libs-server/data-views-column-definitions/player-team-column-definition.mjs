@@ -72,7 +72,7 @@ export default {
           params,
           rate_type_table_name: table_name,
           splits,
-          data_view_options
+          query_context: data_view_options.query_context
         })
         join_per_game_cte({
           players_query: query,

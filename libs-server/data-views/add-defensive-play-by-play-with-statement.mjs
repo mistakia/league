@@ -137,7 +137,8 @@ export const add_defensive_play_by_play_with_statement = ({
   apply_play_by_play_column_params_to_query({
     query: with_query,
     params: filtered_params,
-    table_name: 'defensive_plays'
+    table_name: 'defensive_plays',
+    query_context: data_view_options.query_context
   })
 
   // Add groupBy clause

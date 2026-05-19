@@ -26,6 +26,7 @@ import {
 } from '#libs-server/data-views/where-string.mjs'
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
+import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
@@ -1497,10 +1498,20 @@ export const get_data_view_results_query = async ({
   // year_range is mutated below once the split branch computes it -- every
   // reader (bridge add_cte, output aggregator) runs later during column
   // processing.
+  // Resolve the canonical view-level nfl_week_id scope once, up front.
+  // This is the single source of truth for what (year, seas_type, week)
+  // tuples the query touches. The REG-only default lives in resolve_view_scope.
+  const nfl_week_ids = resolve_view_scope({
+    prefix_columns,
+    columns,
+    where
+  })
+
   const query_context = build_query_context({
     subjects,
     splits,
     year_range: [],
+    nfl_week_ids,
     params: {},
     db,
     players_query

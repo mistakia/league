@@ -7,6 +7,7 @@ import {
   is_full_year_seas_type_coverage
 } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
+import { apply_scope_to_query } from '#libs-server/data-views/apply-scope-to-query.mjs'
 
 const nfl_games_param_keys = Object.keys(nfl_games_params)
 
@@ -14,13 +15,37 @@ export default function ({
   query,
   params,
   table_name = 'nfl_plays',
-  skip_param_name = null
+  skip_param_name = null,
+  query_context = null
 }) {
-  // nfl_week_id is the canonical time-scope filter. Self-resolve from
-  // year + seas_type (default REG) when callers pass only year, so the
-  // helper emits consistent year + seas_type + (optional) nfl_week_id IN
-  // predicates regardless of entry point.
-  if (
+  // View-scope-aware time predicate emission. When a query_context is
+  // supplied (data-views path), apply_scope_to_query owns the year /
+  // seas_type / nfl_week_id predicates and inherits the view-level REG
+  // default for columns that supply no time params of their own. The
+  // per-key iteration below then skips those keys to avoid duplicates.
+  //
+  // For callers without a query_context (legacy entrypoints / plays-view),
+  // fall back to the column-only self-resolve: when only year is supplied,
+  // expand year (+ default REG seas_type) into nfl_week_id so the IN-list
+  // branch emits the derived year/seas_type predicates.
+  const scope_owned = Boolean(
+    query_context &&
+      query_context.nfl_week_ids &&
+      query_context.nfl_week_ids.length &&
+      skip_param_name !== 'nfl_week_id'
+  )
+  if (scope_owned) {
+    apply_scope_to_query({
+      query,
+      table_name,
+      query_context,
+      column_params: params
+    })
+    params = { ...params }
+    delete params.nfl_week_id
+    delete params.year
+    delete params.seas_type
+  } else if (
     !params.nfl_week_id &&
     params.year &&
     skip_param_name !== 'nfl_week_id'

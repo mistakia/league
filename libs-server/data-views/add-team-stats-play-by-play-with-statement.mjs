@@ -43,7 +43,8 @@ export const add_team_stats_play_by_play_with_statement = ({
 
   apply_play_by_play_column_params_to_query({
     query: with_query,
-    params: filtered_params
+    params: filtered_params,
+    query_context: data_view_options.query_context
   })
 
   // Add groupBy clause before having
@@ -59,7 +60,11 @@ export const add_team_stats_play_by_play_with_statement = ({
     with_query.groupBy('nfl_plays.week')
   }
 
-  if (!params.nfl_week_id) {
+  const view_scope_emitted =
+    data_view_options.query_context &&
+    data_view_options.query_context.nfl_week_ids &&
+    data_view_options.query_context.nfl_week_ids.length
+  if (!params.nfl_week_id && !view_scope_emitted) {
     let effective_years = get_effective_years({ params, data_view_options })
     // When year_offset spans a range and the data view has no year split,
     // the outer correlated subquery in select-string.mjs cannot anchor a per-

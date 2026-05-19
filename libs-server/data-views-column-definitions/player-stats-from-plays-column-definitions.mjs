@@ -315,7 +315,8 @@ const create_team_share_stat = ({
 
     apply_play_by_play_column_params_to_query({
       query: with_query,
-      params: filtered_params
+      params: filtered_params,
+      query_context: data_view_options.query_context
     })
 
     const unique_having_clauses = new Set(having_clauses)
@@ -323,12 +324,16 @@ const create_team_share_stat = ({
       with_query.havingRaw(having_clause)
     }
 
+    const view_scope_emitted =
+      data_view_options.query_context &&
+      data_view_options.query_context.nfl_week_ids &&
+      data_view_options.query_context.nfl_week_ids.length
     const effective_years = get_effective_years({ params, data_view_options })
     if (effective_years.length) {
       // pg.year (player_gamelogs) is always safe to push -- apply_play_by_play
       // does not reach player_gamelogs. Skip nfl_plays.year when nfl_week_id is
-      // set to avoid a duplicate with apply_play_by_play_column_params_to_query.
-      if (!params.nfl_week_id) {
+      // set OR when view scope has already emitted year, to avoid a duplicate.
+      if (!params.nfl_week_id && !view_scope_emitted) {
         with_query.whereIn('nfl_plays.year', effective_years)
       }
       with_query.whereIn('pg.year', effective_years)

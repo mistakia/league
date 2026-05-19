@@ -2,6 +2,7 @@ import db from '#db'
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
+import { apply_scope_to_query } from '#libs-server/data-views/apply-scope-to-query.mjs'
 import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
@@ -39,7 +40,8 @@ export const add_per_player_play_cte = ({
   splits,
   play_type = null,
   group_by = null,
-  data_view_options = {}
+  data_view_options = {},
+  query_context = null
 }) => {
   const cte_query = db('nfl_plays')
     .select('nfl_snaps.gsis_it_id')
@@ -95,23 +97,21 @@ export const add_per_player_play_cte = ({
 
   apply_play_by_play_column_params_to_query({
     query: cte_query,
-    params: denominator_params
+    params: denominator_params,
+    query_context
   })
 
-  const { nfl_week } = get_default_params({ params })
-  const { years: all_years } = nfl_week.length
-    ? decompose_nfl_weeks({ nfl_weeks: nfl_week })
-    : { years: [] }
-  const effective_years =
-    data_view_options.year_range && data_view_options.year_range.length
-      ? [...new Set([...data_view_options.year_range, ...all_years])].sort(
-          (a, b) => a - b
-        )
-      : all_years
-
-  if (effective_years.length) {
-    cte_query.whereIn('nfl_plays.year', effective_years)
-    cte_query.whereIn('nfl_snaps.year', effective_years)
+  // nfl_snaps carries year but not seas_type / nfl_week_id; mirror the
+  // view-scope year predicate onto it explicitly.
+  if (query_context && query_context.nfl_week_ids && query_context.nfl_week_ids.length) {
+    apply_scope_to_query({
+      query: cte_query,
+      table_name: 'nfl_snaps',
+      query_context,
+      column_params: params,
+      has_seas_type: false,
+      has_nfl_week_id: false
+    })
   }
 
   // MATERIALIZED required: predicates are pushed at construction time; planner
@@ -250,7 +250,7 @@ export const add_cte = ({
     splits: query_context.splits,
     play_type: dispatch_params.play_type ?? null,
     group_by: dispatch_params.group_by ?? null,
-    data_view_options: { year_range: query_context.year_range }
+    query_context
   })
   query_context.applied_output_ctes.add(cte_name)
 }

@@ -90,7 +90,8 @@ export const add_player_stats_play_by_play_with_statement = ({
 
   apply_play_by_play_column_params_to_query({
     query: with_query,
-    params: filtered_params
+    params: filtered_params,
+    query_context: data_view_options.query_context
   })
 
   // Add groupBy clause before having
@@ -101,9 +102,15 @@ export const add_player_stats_play_by_play_with_statement = ({
     with_query.havingRaw(having_clause)
   }
 
-  // Skip when params.nfl_week_id is set: apply_play_by_play_column_params_to_query
-  // already pushes nfl_plays.year for that path.
-  if (!params.nfl_week_id) {
+  // Skip when scope has been emitted: apply_play_by_play_column_params_to_query
+  // (with query_context) already pushes nfl_plays.year via apply_scope_to_query,
+  // and the legacy nfl_week_id branch pushes year on its own when nfl_week_id is
+  // set. Only emit here for callers without view scope and without nfl_week_id.
+  const view_scope_emitted =
+    data_view_options.query_context &&
+    data_view_options.query_context.nfl_week_ids &&
+    data_view_options.query_context.nfl_week_ids.length
+  if (!params.nfl_week_id && !view_scope_emitted) {
     const effective_years = get_effective_years({ params, data_view_options })
     if (effective_years.length) {
       with_query.whereIn('nfl_plays.year', effective_years)
