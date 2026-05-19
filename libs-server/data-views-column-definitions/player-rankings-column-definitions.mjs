@@ -59,6 +59,7 @@ const create_player_season_rankings_field = (field, select_as) => ({
   select_as: () => select_as,
   table_alias: generate_season_table_alias,
   source: player_season_rankings_source,
+  granularity: ['player_year'],
   get_cache_info: get_season_cache_info
 })
 
