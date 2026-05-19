@@ -6,8 +6,9 @@ import db from '#db'
 import { is_main, batch_insert, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-import compute_rostered_metrics from '#libs-server/league-team-player-seasonlogs/compute-rostered-metrics.mjs'
-import compute_started_metrics from '#libs-server/league-team-player-seasonlogs/compute-started-metrics.mjs'
+import { active_roster_slots, starting_lineup_slots } from '#constants'
+
+import compute_roster_slot_metrics from '#libs-server/league-team-player-seasonlogs/compute-roster-slot-metrics.mjs'
 import compute_optimal_metrics from '#libs-server/league-team-player-seasonlogs/compute-optimal-metrics.mjs'
 
 const log = debug('generate-league-team-player-seasonlogs')
@@ -50,15 +51,19 @@ const build_rows_for_slice = async ({
       'salary'
     )
 
-  const rostered = await compute_rostered_metrics({
+  const rostered = await compute_roster_slot_metrics({
     lid,
     year,
-    league_format_hash
+    league_format_hash,
+    slots: active_roster_slots,
+    suffix: 'rostered'
   })
-  const started = await compute_started_metrics({
+  const started = await compute_roster_slot_metrics({
     lid,
     year,
-    league_format_hash
+    league_format_hash,
+    slots: starting_lineup_slots,
+    suffix: 'started'
   })
   const optimal = with_optimal
     ? await compute_optimal_metrics({
@@ -154,13 +159,13 @@ export const generate_league_team_player_seasonlogs = async ({
   year,
   with_optimal = false
 }) => {
-  let year_hash_pairs = await db('seasons')
+  const year_hash_pairs = await db('seasons')
     .where({ lid })
+    .modify((q) => {
+      if (year) q.where({ year })
+    })
     .distinct('year', 'league_format_hash')
     .orderBy('year', 'asc')
-  if (year) {
-    year_hash_pairs = year_hash_pairs.filter((p) => p.year === year)
-  }
 
   const slice_failures = []
 
@@ -183,6 +188,9 @@ export const generate_league_team_player_seasonlogs = async ({
       with_optimal
     })
 
+    // Floor oracle: every team that fielded a roster in (lid, y) should be
+    // represented by at least one row. `seasons` carries one league_format_hash
+    // per (lid, y), so the cross-hash tid count equals the per-hash floor.
     const floor_row = await db('rosters_players')
       .where({ lid, year: y })
       .countDistinct({ floor: 'tid' })

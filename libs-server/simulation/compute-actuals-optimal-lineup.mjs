@@ -27,9 +27,6 @@ const log = debug('simulation:compute-actuals-optimal-lineup')
  * @param {number} params.tid - Fantasy team ID
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @param {string} params.league_format_hash - League-format hash (caller
- *   passes the hash being processed; this helper resolves the scoring
- *   format from the supplied league_format_record)
  * @param {Object} params.league_format_record - Full league_formats row.
  *   Required by getOptimizerPositionConstraints (slot counts) and to
  *   resolve the scoring_format_hash that keys scoring_format_player_gamelogs.
@@ -40,7 +37,6 @@ export async function compute_actuals_optimal_lineup({
   tid,
   week,
   year,
-  league_format_hash,
   league_format_record
 }) {
   const { scoring_format_hash } = league_format_record
@@ -100,7 +96,6 @@ export async function compute_actuals_optimal_lineup({
  * @param {number[]} params.team_ids
  * @param {number} params.week
  * @param {number} params.year
- * @param {string} params.league_format_hash
  * @param {Object} params.league_format_record
  * @returns {Promise<Map<number, string[]>>} Map of tid -> starter_pids
  */
@@ -109,7 +104,6 @@ export async function compute_actuals_optimal_lineups_for_teams({
   team_ids,
   week,
   year,
-  league_format_hash,
   league_format_record
 }) {
   const lineups = new Map()
@@ -119,7 +113,6 @@ export async function compute_actuals_optimal_lineups_for_teams({
       tid,
       week,
       year,
-      league_format_hash,
       league_format_record
     })
     if (starter_pids.length > 0) {

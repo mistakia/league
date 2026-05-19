@@ -1,19 +1,28 @@
 /**
- * Compute weeks_rostered and pts_added_{earned,net}_rostered per (tid, pid)
- * for a given (lid, year, league_format_hash) slice.
+ * Compute weeks-count and pts_added_{earned,net} per (tid, pid) for a given
+ * (lid, year, league_format_hash) slice, parameterized by which roster slot
+ * family to count.
+ *
+ * Used for both the rostered lens (`active_roster_slots`, suffix `rostered`)
+ * and the started lens (`starting_lineup_slots`, suffix `started`).
  */
 
 import db from '#db'
-import { active_roster_slots } from '#constants'
 
-export default async function compute_rostered_metrics({
+export default async function compute_roster_slot_metrics({
   lid,
   year,
-  league_format_hash
+  league_format_hash,
+  slots,
+  suffix
 }) {
+  const weeks_key = `weeks_${suffix}`
+  const earned_key = `pts_added_earned_${suffix}`
+  const net_key = `pts_added_net_${suffix}`
+
   const weeks_rows = await db('rosters_players')
     .where({ lid, year })
-    .whereIn('slot', active_roster_slots)
+    .whereIn('slot', slots)
     .countDistinct({ weeks: 'week' })
     .select('tid', 'pid')
     .groupBy('tid', 'pid')
@@ -28,7 +37,7 @@ export default async function compute_rostered_metrics({
     .where('r.lid', lid)
     .where('n.year', year)
     .where('g.league_format_hash', league_format_hash)
-    .whereIn('r.slot', active_roster_slots)
+    .whereIn('r.slot', slots)
     .groupBy('r.tid', 'g.pid')
     .select('r.tid', 'g.pid')
     .sum({ pts_added_earned: 'g.points_added_earned' })
@@ -38,21 +47,21 @@ export default async function compute_rostered_metrics({
   const key = (tid, pid) => `${tid}__${pid}`
   for (const r of weeks_rows) {
     out.set(key(r.tid, r.pid), {
-      weeks_rostered: Number(r.weeks),
-      pts_added_earned_rostered: null,
-      pts_added_net_rostered: null
+      [weeks_key]: Number(r.weeks),
+      [earned_key]: null,
+      [net_key]: null
     })
   }
   for (const r of pts_rows) {
     const k = key(r.tid, r.pid)
     const existing = out.get(k) || {
-      weeks_rostered: 0,
-      pts_added_earned_rostered: null,
-      pts_added_net_rostered: null
+      [weeks_key]: 0,
+      [earned_key]: null,
+      [net_key]: null
     }
-    existing.pts_added_earned_rostered =
+    existing[earned_key] =
       r.pts_added_earned == null ? null : Number(r.pts_added_earned)
-    existing.pts_added_net_rostered =
+    existing[net_key] =
       r.pts_added_net == null ? null : Number(r.pts_added_net)
     out.set(k, existing)
   }

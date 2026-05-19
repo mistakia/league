@@ -48,7 +48,6 @@ export default async function compute_optimal_metrics({
       team_ids,
       week,
       year,
-      league_format_hash,
       league_format_record
     })
     for (const [tid, starter_pids] of lineups) {
