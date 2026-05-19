@@ -13,7 +13,8 @@ import {
   updatePlayer,
   wait,
   report_job,
-  fetch_with_retry
+  fetch_with_retry,
+  batch_insert
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -288,10 +289,15 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       continue
     }
 
-    await db('keeptradecut_rankings')
-      .insert(inserts)
-      .onConflict(['pid', 'd', 'qb', 'type'])
-      .ignore()
+    await batch_insert({
+      items: inserts,
+      batch_size: 5000,
+      save: (batch) =>
+        db('keeptradecut_rankings')
+          .insert(batch)
+          .onConflict(['pid', 'd', 'qb', 'type'])
+          .ignore()
+    })
 
     log(`Inserted ${inserts.length} values for playerID ${item.playerID}`)
 
