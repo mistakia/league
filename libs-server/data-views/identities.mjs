@@ -184,6 +184,13 @@ export const is_team_identity = (identity_id) => identity_id.startsWith('team')
 //     column-def `granularity`) exposes columns named `pid`, `year`, `week`.
 //     Use those directly; bridges are not attached (would multiply rows
 //     against finer-grain fact tables).
+//
+// Note: the granularity gate above currently reads `def.granularity` directly
+// on the column definition. The longer-term single source of truth is the
+// column's `source.grain` declaration -- when get_from_table_config is
+// updated to consume that, it should call derive_granularity from
+// libs-server/data-views/derive-granularity.mjs rather than reading
+// def.granularity, so per-column overrides remain centralized.
 export const resolve_references = ({ identity_id, from_table_name }) => {
   const identity = get_identity(identity_id)
 
