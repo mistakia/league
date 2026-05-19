@@ -6890,7 +6890,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cloakbrowser@npm:^0.3.9":
+"cloakbrowser@npm:0.3.18":
   version: 0.3.18
   resolution: "cloakbrowser@npm:0.3.18"
   dependencies:
@@ -13224,7 +13224,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:^1.58.2":
+"playwright-core@npm:1.58.2":
   version: 1.58.2
   resolution: "playwright-core@npm:1.58.2"
   bin:
@@ -14653,7 +14653,7 @@ __metadata:
     chai: "npm:5.1.2"
     chai-http: "npm:^5.1.1"
     cheerio: "npm:^1.0.0"
-    cloakbrowser: "npm:^0.3.9"
+    cloakbrowser: "npm:0.3.18"
     compression: "npm:^1.7.5"
     concurrently: "npm:^9.1.2"
     console-table-printer: "npm:^2.12.1"
@@ -14724,7 +14724,7 @@ __metadata:
     p-queue: "npm:^8.0.1"
     percentile: "npm:1.6.0"
     pg: "npm:^8.13.1"
-    playwright-core: "npm:^1.58.2"
+    playwright-core: "npm:1.58.2"
     prettier: "npm:3.4.2"
     prettier-plugin-embed: "npm:^0.5.0"
     prettier-plugin-sql: "npm:^0.19.1"
