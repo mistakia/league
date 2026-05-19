@@ -1572,6 +1572,12 @@ export const get_data_view_results_query = async ({
           '=',
           'current_week_opponents.nfl_team'
         )
+        // Correlated subqueries (e.g. team-stats join when year_offset is
+        // active without a year split) reference current_week_opponents.opponent
+        // as an outer column. Add it to the outer GROUP BY so PG accepts the
+        // reference. Functionally one opponent per nfl_team in a given week,
+        // so this never multiplies output cardinality.
+        players_query.groupBy('current_week_opponents.opponent')
         break
 
       case 'next_week_opponent_total': {
@@ -1591,6 +1597,8 @@ export const get_data_view_results_query = async ({
           '=',
           'next_week_opponents.nfl_team'
         )
+        // See current_week_opponents branch above.
+        players_query.groupBy('next_week_opponents.opponent')
         break
       }
 

@@ -123,8 +123,18 @@ const get_select_string = ({
         })
       : data_view_options.pid_reference
 
+    // When the active identity has no year split (e.g. `player`), year_clause
+    // is null and a `year BETWEEN null + N AND null + M` predicate would be
+    // emitted -- always null, and references team_stats.year which isn't
+    // projected. The CTE builder expands its year filter to cover the offset
+    // range upstream, so the outer correlated subquery can drop the year
+    // predicate and aggregate across the pre-restricted CTE rows.
+    const year_predicate = year_clause
+      ? ` AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
+      : ''
+
     if (column_definition.has_numerator_denominator) {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
+      final_select_expression = `(SELECT SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref}${year_predicate})`
     } else if (column_definition.main_select_string_year_offset_range) {
       final_select_expression =
         column_definition.main_select_string_year_offset_range({
@@ -133,11 +143,14 @@ const get_select_string = ({
           data_view_options
         })
     } else {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${column_definition.column_name}) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
+      final_select_expression = `(SELECT SUM(${join_table_name}.${column_definition.column_name}) FROM ${join_table_name} WHERE ${join_table_name}.${correlation_key} = ${correlation_ref}${year_predicate})`
     }
 
     if (rate_type_table_name) {
-      final_select_expression = `${final_select_expression} / NULLIF((SELECT CAST(SUM(${rate_type_table_name}.rate_type_total_count) AS DECIMAL) FROM ${rate_type_table_name} WHERE ${rate_type_table_name}.${correlation_key} = ${correlation_ref} AND ${rate_type_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}), 0)`
+      const rate_year_predicate = year_clause
+        ? ` AND ${rate_type_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
+        : ''
+      final_select_expression = `${final_select_expression} / NULLIF((SELECT CAST(SUM(${rate_type_table_name}.rate_type_total_count) AS DECIMAL) FROM ${rate_type_table_name} WHERE ${rate_type_table_name}.${correlation_key} = ${correlation_ref}${rate_year_predicate}), 0)`
     }
   } else {
     final_select_expression = select_expression

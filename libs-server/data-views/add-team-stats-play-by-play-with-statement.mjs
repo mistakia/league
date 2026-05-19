@@ -60,7 +60,32 @@ export const add_team_stats_play_by_play_with_statement = ({
   }
 
   if (!params.nfl_week_id) {
-    const effective_years = get_effective_years({ params, data_view_options })
+    let effective_years = get_effective_years({ params, data_view_options })
+    // When year_offset spans a range and the data view has no year split,
+    // the outer correlated subquery in select-string.mjs cannot anchor a per-
+    // row year reference, so it collapses across the offset range. Expand the
+    // CTE's year filter to cover (min(year)+min(offset)) .. (max(year)+max(offset))
+    // so the pre-aggregate sees the right data; otherwise the CTE is restricted
+    // to params.year only and offset windows beyond the explicit year are empty.
+    const year_offset = params.year_offset
+    const has_year_offset_range =
+      year_offset &&
+      Array.isArray(year_offset) &&
+      year_offset.length > 1 &&
+      year_offset[0] !== year_offset[1]
+    if (
+      has_year_offset_range &&
+      !splits.includes('year') &&
+      effective_years.length
+    ) {
+      const min_off = Math.min(...year_offset)
+      const max_off = Math.max(...year_offset)
+      const min_y = Math.min(...effective_years) + min_off
+      const max_y = Math.max(...effective_years) + max_off
+      const expanded = []
+      for (let y = min_y; y <= max_y; y++) expanded.push(y)
+      effective_years = expanded
+    }
     if (effective_years.length) {
       with_query.whereIn('nfl_plays.year', effective_years)
     }
