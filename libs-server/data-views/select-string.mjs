@@ -1,4 +1,5 @@
 import { resolve_team_join_target } from './resolve-team-join-target.mjs'
+import { is_year_offset_range } from './year-offset-range.mjs'
 
 // Escape a literal for inline SQL emission. Mirrors the minimal quoting the
 // rest of this file already relies on -- raw template-literal interpolation
@@ -122,7 +123,11 @@ const get_select_string = ({
   const select_func = is_main_select
     ? column_definition.main_select
     : column_definition.with_select
-  if (select_func) {
+  const should_yield_to_year_offset_override =
+    is_main_select &&
+    is_year_offset_range(column_params) &&
+    column_definition.main_select_string_year_offset_range
+  if (select_func && !should_yield_to_year_offset_override) {
     return {
       select: select_func({
         table_name,
@@ -151,11 +156,7 @@ const get_select_string = ({
       : column_definition.column_name
 
   const has_year_offset_range =
-    is_main_select &&
-    column_params.year_offset &&
-    Array.isArray(column_params.year_offset) &&
-    column_params.year_offset.length > 1 &&
-    column_params.year_offset[0] !== column_params.year_offset[1]
+    is_main_select && is_year_offset_range(column_params)
 
   let final_select_expression
   if (is_main_select && has_year_offset_range) {

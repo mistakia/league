@@ -1,0 +1,46 @@
+{
+  "name": "view scope player nfl teams year offset range no splits",
+  "description": "Locks player_nfl_teams + year_offset range alone (no splits) routes through CTE via should_use_cte widening; year_predicate omitted because CTE lacks year column",
+  "request": {
+    "prefix_columns": [
+      "player_name"
+    ],
+    "columns": [
+      {
+        "column_id": "player_nfl_teams",
+        "params": {
+          "year": [
+            2024
+          ],
+          "year_offset": [
+            1,
+            9
+          ]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "RB"
+        ]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_nfl_teams",
+        "column_index": 0,
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t3d2efe2602a05b1642021b304ba51fb2\" as materialized (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = true and \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2025, 2026) and \"player_gamelogs\".\"year\" in (2025, 2026) group by \"player_gamelogs\".\"pid\") select \"player\".\"pid\", player.fname, player.lname, (SELECT array_agg(DISTINCT t) FROM (SELECT unnest(t3d2efe2602a05b1642021b304ba51fb2.teams) AS t FROM t3d2efe2602a05b1642021b304ba51fb2 WHERE t3d2efe2602a05b1642021b304ba51fb2.pid = player.pid) sub) AS \"player_nfl_teams_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('RB') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "year_offset",
+    "player_team",
+    "regression"
+  ],
+  "timeout_ms": 35000
+}

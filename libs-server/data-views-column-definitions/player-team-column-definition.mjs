@@ -1,8 +1,9 @@
 import {
   get_per_game_cte_table_name,
-  add_per_game_cte,
   join_per_game_cte
 } from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
+import { register_per_game_cte } from '#libs-server/data-views/register-per-game-cte.mjs'
+import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 
@@ -26,7 +27,8 @@ const should_use_cte = ({ params = {}, splits = [] } = {}) => {
     nfl_week_id.length > 0 ||
     career_year.length > 0 ||
     career_game.length > 0 ||
-    splits.length > 0
+    splits.length > 0 ||
+    is_year_offset_range(params)
   )
 }
 
@@ -36,6 +38,7 @@ export default {
   player_nfl_teams: {
     is_where_column_array: ({ params = {}, splits = [] } = {}) =>
       should_use_cte({ params, splits }),
+    select_as: () => 'player_nfl_teams',
     table_alias: ({ params = {}, splits = [] } = {}) => {
       if (should_use_cte({ params, splits })) {
         return get_per_game_cte_table_name({ params })
@@ -60,20 +63,31 @@ export default {
       }
       return ['player.current_nfl_team']
     },
+    // Set of all teams the player was on in any year of the window.
+    main_select_string_year_offset_range: ({
+      table_name,
+      params,
+      data_view_options
+    }) => {
+      const min_year_offset = Math.min(...params.year_offset)
+      const max_year_offset = Math.max(...params.year_offset)
+      const year_clause = data_view_options.year_reference
+      const year_predicate = year_clause
+        ? ` AND ${table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
+        : ''
+      return `(SELECT array_agg(DISTINCT t) FROM (SELECT unnest(${table_name}.teams) AS t FROM ${table_name} WHERE ${table_name}.pid = ${data_view_options.pid_reference}${year_predicate}) sub)`
+    },
+    register_ctes: ({ query, params, splits, data_view_options }) => {
+      if (should_use_cte({ params, splits })) {
+        register_per_game_cte({ query, params, splits, data_view_options })
+      }
+    },
     join: ({ query, table_name, params, splits, data_view_options }) => {
-      const already_added_for_per_game_rate_type =
-        data_view_options.query_context?.applied_output_ctes?.has(table_name)
-      if (already_added_for_per_game_rate_type) {
+      if (data_view_options.query_context?.applied_output_ctes?.has(table_name)) {
         return
       }
       if (should_use_cte({ params, splits })) {
-        add_per_game_cte({
-          players_query: query,
-          params,
-          rate_type_table_name: table_name,
-          splits,
-          query_context: data_view_options.query_context
-        })
+        register_per_game_cte({ query, params, splits, data_view_options })
         join_per_game_cte({
           players_query: query,
           rate_type_table_name: table_name,

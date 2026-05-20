@@ -1022,12 +1022,25 @@ const add_clauses_for_table = async ({
   // raising `column ... does not exist` at execution.
   const legacy_column_ids = new Set()
 
+  // Always-invoked CTE registration hook. Decouples CTE WITH-list registration
+  // from JOIN emission for columns that share CTE infrastructure with
+  // output-aggregator plugins. Idempotent via `applied_output_ctes`. Fires in
+  // both select-columns and where-clauses loops so where-only column usage
+  // still registers the CTE.
   for (const {
     column_id,
     column_index,
     column_params = {}
   } of select_columns) {
     const column_definition = data_views_column_definitions[column_id]
+    if (column_definition.register_ctes) {
+      await column_definition.register_ctes({
+        query: players_query,
+        params: column_params,
+        splits,
+        data_view_options
+      })
+    }
     const main_select_result = get_main_select_string({
       column_id,
       column_params,
@@ -1094,6 +1107,15 @@ const add_clauses_for_table = async ({
   for (const where_clause of where_clauses) {
     const column_definition =
       data_views_column_definitions[where_clause.column_id]
+
+    if (column_definition.register_ctes) {
+      await column_definition.register_ctes({
+        query: players_query,
+        params: where_clause.params,
+        splits,
+        data_view_options
+      })
+    }
 
     const where_handled_by_aggregator = is_aggregator_handled(
       where_clause.column_id,
