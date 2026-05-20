@@ -89,6 +89,8 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
   log(`Processing ${data.length} players`)
 
+  const liquidity_d = dayjs().startOf('day').unix()
+
   for (const item of data) {
     const keeptradecut_player = players_index[item.playerID]
     const inserts = []
@@ -281,6 +283,48 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           type: keeptradecut_metric_types.VALUE
         })
       })
+    }
+
+    // Liquidity is cheap-path-only; KTC publishes no liquidityHistory on per-slug HTML.
+    if (keeptradecut_player.position !== 'RDP') {
+      const liquidity_inserts = []
+
+      if (keeptradecut_player.oneQBValues) {
+        liquidity_inserts.push({
+          pid,
+          superflex: false,
+          d: liquidity_d,
+          raw_liquidity: keeptradecut_player.oneQBValues.rawLiquidity,
+          std_liquidity: keeptradecut_player.oneQBValues.stdLiquidity,
+          trade_count: keeptradecut_player.oneQBValues.tradeCount
+        })
+      }
+      if (keeptradecut_player.superflexValues) {
+        liquidity_inserts.push({
+          pid,
+          superflex: true,
+          d: liquidity_d,
+          raw_liquidity: keeptradecut_player.superflexValues.rawLiquidity,
+          std_liquidity: keeptradecut_player.superflexValues.stdLiquidity,
+          trade_count: keeptradecut_player.superflexValues.tradeCount
+        })
+      }
+
+      log(
+        `liquidity playerID ${item.playerID} rows: ${liquidity_inserts.length}`
+      )
+
+      if (!dry && liquidity_inserts.length) {
+        await batch_insert({
+          items: liquidity_inserts,
+          batch_size: 5000,
+          save: (batch) =>
+            db('keeptradecut_liquidity')
+              .insert(batch)
+              .onConflict(['pid', 'superflex', 'd'])
+              .merge(['raw_liquidity', 'std_liquidity', 'trade_count'])
+        })
+      }
     }
 
     if (dry) {
