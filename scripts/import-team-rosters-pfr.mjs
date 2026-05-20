@@ -1,41 +1,164 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fs from 'fs'
+import path from 'path'
+import { spawn } from 'child_process'
+import { JSDOM } from 'jsdom'
 
 import db from '#db'
-import { wait } from '#libs-server'
-import * as pfr from '#private/libs-server/pro-football-reference.mjs'
+import { active_nfl_teams } from '#private/libs-server/pro-football-reference.mjs'
 
 const log = debug('import-team-rosters-pfr')
 debug.enable('import-team-rosters-pfr,pro-football-reference,proxy-manager')
 
-// Constants
-const WAIT_TIME_AFTER_REQUEST = 5000 // 5 seconds
-const WAIT_TIME_AFTER_ERROR = 5000 // 5 seconds
+const BROWSER_TASK = path.resolve(
+  import.meta.dirname,
+  '../private/scripts/browser-tasks/pro-football-reference.mjs'
+)
+const SANDBOX_WRAPPER = '/usr/local/bin/run-as-stealth-browser-node'
+const PRO_FOOTBALL_REFERENCE_URL = 'https://www.pro-football-reference.com'
+
+// Mirrors the format_game_html function in the pfr lib to uncomment hidden tables
+const format_game_html = (html) => {
+  const regex = /<div class="placeholder"><\/div>[^<]{0,10}<!--([\s\S]*?)-->/g
+  let match
+  while ((match = regex.exec(html)) !== null) {
+    const [full_match, comment] = match
+    html = html.replace(full_match, comment)
+  }
+  return html
+}
+
+/**
+ * Parse a PFR team roster HTML page into player objects.
+ * Mirrors parse_roster_table in private/libs-server/pro-football-reference.mjs.
+ */
+const parse_roster_html = (html, team, year) => {
+  const formatted = format_game_html(html)
+  const dom = new JSDOM(formatted)
+  const doc = dom.window.document
+  const roster_table = doc.querySelector('table#roster')
+  if (!roster_table) {
+    throw new Error(`no roster table found for ${team} ${year}`)
+  }
+
+  const players = []
+  const rows = roster_table.querySelectorAll('tbody tr')
+
+  for (const row of rows) {
+    if (!row.querySelector('td[data-stat="player"]')) continue
+    const player_link = row.querySelector('td[data-stat="player"] a')
+    if (!player_link) continue
+
+    const extract_text = (selector, convert_to_number = false) => {
+      const element = row.querySelector(selector)
+      const text = element ? element.textContent : null
+      return convert_to_number ? (text ? Number(text) : null) : text
+    }
+
+    players.push({
+      pfr_id: player_link.href.split('/').slice(-1)[0].split('.')[0],
+      name: player_link.textContent,
+      number: extract_text('th[data-stat="uniform_number"]', true),
+      position: extract_text('td[data-stat="pos"]'),
+      age: extract_text('td[data-stat="age"]', true),
+      games_played: extract_text('td[data-stat="g"]', true) || 0,
+      games_started: extract_text('td[data-stat="gs"]', true) || 0,
+      weight: extract_text('td[data-stat="weight"]', true),
+      height: extract_text('td[data-stat="height"]'),
+      college: extract_text('td[data-stat="college_id"]'),
+      birth_date: extract_text('td[data-stat="birth_date_mod"]'),
+      experience: extract_text('td[data-stat="experience"]'),
+      av: extract_text('td[data-stat="av"]', true) || 0,
+      draft_info: extract_text('td[data-stat="draft_info"]'),
+      team,
+      year
+    })
+  }
+
+  return players
+}
+
+/**
+ * Run the sandboxed PFR browser task. Fetches all team roster URLs for the
+ * given year via CloakBrowser and returns raw HTML pages array.
+ */
+const run_browser_task = async ({ year, ignore_cache = false }) => {
+  const tmp_dir = fs.mkdtempSync('/tmp/cb-pfr-')
+  fs.chmodSync(tmp_dir, 0o777)
+  log('handoff tempdir: %s', tmp_dir)
+
+  const caller_label =
+    process.env.CLOAKBROWSER_CALLER ||
+    (process.env.JOB_PROJECT ? `job:${process.env.JOB_PROJECT}` : 'import-team-rosters-pfr')
+
+  // Write URL list to a temp file to avoid shell arg length limits
+  const url_file = path.join(tmp_dir, 'urls.txt')
+  const roster_urls = active_nfl_teams.map(
+    (team) => `${PRO_FOOTBALL_REFERENCE_URL}/teams/${team}/${year}_roster.htm`
+  )
+  fs.writeFileSync(url_file, roster_urls.join('\n'), 'utf-8')
+
+  const args = [
+    BROWSER_TASK,
+    '--out-dir', tmp_dir,
+    '--url-file', url_file,
+    '--wait-between-ms', '5000',
+    '--caller-label', caller_label
+  ]
+  if (ignore_cache) args.push('--ignore-cache')
+
+  try {
+    log('spawning sandboxed browser task as _stealth-browser (%d roster URLs)', roster_urls.length)
+    await new Promise((resolve, reject) => {
+      const child = spawn(SANDBOX_WRAPPER, args, {
+        stdio: ['ignore', 'inherit', 'inherit']
+      })
+      child.on('error', reject)
+      child.on('exit', (code, signal) => {
+        if (signal) return reject(new Error(`browser-task killed by signal ${signal}`))
+        if (code !== 0) return reject(new Error(`browser-task exited with code ${code}`))
+        resolve()
+      })
+    })
+
+    const out_path = path.join(tmp_dir, 'pages.json')
+    if (!fs.existsSync(out_path)) {
+      throw new Error(`browser-task did not produce ${out_path}`)
+    }
+    const pages = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
+    log('read %d pages from sandbox handoff', pages.length)
+    return { pages, roster_urls }
+  } finally {
+    try {
+      fs.rmSync(tmp_dir, { recursive: true, force: true })
+    } catch (err) {
+      log('handoff cleanup failed (non-fatal): %s', err.message)
+    }
+  }
+}
 
 const get_all_rosters = async ({ year, ignore_cache = false }) => {
+  const { pages, roster_urls } = await run_browser_task({ year, ignore_cache })
+
   const rosters = []
+  for (let i = 0; i < active_nfl_teams.length; i++) {
+    const team = active_nfl_teams[i]
+    const url = roster_urls[i]
+    const page_result = pages.find((p) => p.url === url)
 
-  for (const team of pfr.active_nfl_teams) {
+    if (!page_result || !page_result.html) {
+      log('failed to get roster page for %s %d: %s', team, year, page_result?.error || 'no HTML')
+      continue
+    }
+
     try {
-      log(`getting roster for ${team} ${year}`)
-      const result = await pfr.get_team_roster({ team, year, ignore_cache })
-      const roster = result.players
-      rosters.push(...roster.map((player) => ({ ...player, team, year })))
-
-      // Only wait if this was not a cache hit
-      if (!result.cache_hit) {
-        log(
-          `waiting ${WAIT_TIME_AFTER_REQUEST / 1000} seconds after fetching ${team} ${year}`
-        )
-        await wait(WAIT_TIME_AFTER_REQUEST) // Be nice to PFR servers
-      } else {
-        log(`skipping wait for cached ${team} ${year}`)
-      }
+      const players = parse_roster_html(page_result.html, team, year)
+      rosters.push(...players)
+      log('parsed %d players for %s %d', players.length, team, year)
     } catch (err) {
-      log(`error getting roster for ${team} ${year}: ${err.message}`)
-      // Always wait after errors to be nice
-      await wait(WAIT_TIME_AFTER_ERROR)
+      log('error parsing roster for %s %d: %s', team, year, err.message)
     }
   }
 

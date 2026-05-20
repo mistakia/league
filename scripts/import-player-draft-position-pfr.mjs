@@ -1,12 +1,141 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fs from 'fs'
+import path from 'path'
+import { spawn } from 'child_process'
+import { JSDOM } from 'jsdom'
 
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main, updatePlayer, find_player_row } from '#libs-server'
-import * as pfr from '#private/libs-server/pro-football-reference.mjs'
+import { fixTeam } from '#libs-shared'
 // import { job_types } from '#libs-shared/job-constants.mjs'
+
+const BROWSER_TASK = path.resolve(
+  import.meta.dirname,
+  '../private/scripts/browser-tasks/pro-football-reference.mjs'
+)
+const SANDBOX_WRAPPER = '/usr/local/bin/run-as-stealth-browser-node'
+const PRO_FOOTBALL_REFERENCE_URL = 'https://www.pro-football-reference.com'
+
+/**
+ * Run the sandboxed PFR browser task. Fetches the given URL(s) via CloakBrowser
+ * (handles Cloudflare challenges) and returns raw HTML pages array.
+ */
+const run_browser_task = async ({ urls, ignore_cache = false }) => {
+  const tmp_dir = fs.mkdtempSync('/tmp/cb-pfr-')
+  fs.chmodSync(tmp_dir, 0o777)
+  log('handoff tempdir: %s', tmp_dir)
+
+  const caller_label =
+    process.env.CLOAKBROWSER_CALLER ||
+    (process.env.JOB_PROJECT ? `job:${process.env.JOB_PROJECT}` : 'import-player-draft-position-pfr')
+
+  const args = [BROWSER_TASK, '--out-dir', tmp_dir, '--caller-label', caller_label]
+  for (const url of urls) {
+    args.push('--url', url)
+  }
+  if (ignore_cache) args.push('--ignore-cache')
+
+  try {
+    log('spawning sandboxed browser task as _stealth-browser')
+    await new Promise((resolve, reject) => {
+      const child = spawn(SANDBOX_WRAPPER, args, {
+        stdio: ['ignore', 'inherit', 'inherit']
+      })
+      child.on('error', reject)
+      child.on('exit', (code, signal) => {
+        if (signal) return reject(new Error(`browser-task killed by signal ${signal}`))
+        if (code !== 0) return reject(new Error(`browser-task exited with code ${code}`))
+        resolve()
+      })
+    })
+
+    const out_path = path.join(tmp_dir, 'pages.json')
+    if (!fs.existsSync(out_path)) {
+      throw new Error(`browser-task did not produce ${out_path}`)
+    }
+    const pages = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
+    log('read %d pages from sandbox handoff', pages.length)
+    return pages
+  } finally {
+    try {
+      fs.rmSync(tmp_dir, { recursive: true, force: true })
+    } catch (err) {
+      log('handoff cleanup failed (non-fatal): %s', err.message)
+    }
+  }
+}
+
+/**
+ * Parse PFR draft page HTML into draft player objects.
+ * Mirrors the parsing logic in private/libs-server/pro-football-reference.mjs.
+ */
+const parse_draft_html = (html, year) => {
+  const dom = new JSDOM(html)
+  const doc = dom.window.document
+  const draft_players = []
+  const rows = doc.querySelectorAll('#drafts tbody tr:not(.thead)')
+
+  for (const row of rows) {
+    const round_el = row.querySelector('[data-stat="draft_round"]')
+    const pick_el = row.querySelector('[data-stat="draft_pick"]')
+    const team_el = row.querySelector('[data-stat="team"] a')
+    const player_el = row.querySelector('[data-stat="player"] a')
+    const pos_el = row.querySelector('[data-stat="pos"]')
+
+    if (!round_el || !pick_el) continue
+
+    const round = Number(round_el.textContent)
+    const overall_pick = Number(pick_el.textContent)
+    if (!round || !overall_pick) continue
+
+    const team = team_el ? fixTeam(team_el.textContent) : null
+    const player_name = player_el
+      ? player_el.textContent
+      : row.querySelector('[data-stat="player"]')?.textContent || ''
+    const pfr_id = player_el
+      ? player_el.getAttribute('href').split('/').pop().replace('.htm', '')
+      : null
+    const draft_position = pos_el?.textContent || null
+
+    const all_pro_first_team_selections = Number(
+      row.querySelector('[data-stat="all_pros_first_team"]')?.textContent || 0
+    )
+    const pro_bowl_selections = Number(
+      row.querySelector('[data-stat="pro_bowls"]')?.textContent || 0
+    )
+    const years_as_primary_starter = Number(
+      row.querySelector('[data-stat="years_as_primary_starter"]')?.textContent || 0
+    )
+    const pfr_weighted_career_approximate_value = Number(
+      row.querySelector('[data-stat="career_av"]')?.textContent || 0
+    )
+    const pfr_weighted_career_approximate_value_drafted_team = Number(
+      row.querySelector('[data-stat="draft_av"]')?.textContent || 0
+    )
+    const college_link = row.querySelector('[data-stat="college_id"] a')
+    const college_team = college_link ? college_link.textContent : null
+
+    draft_players.push({
+      round,
+      overall_pick,
+      team,
+      player_name,
+      pfr_id,
+      draft_position,
+      all_pro_first_team_selections,
+      pro_bowl_selections,
+      years_as_primary_starter,
+      pfr_weighted_career_approximate_value,
+      pfr_weighted_career_approximate_value_drafted_team,
+      college_team
+    })
+  }
+
+  return draft_players
+}
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -22,7 +151,15 @@ const import_player_draft_position_pfr = async ({
   ignore_cache = false,
   dry = false
 } = {}) => {
-  const draft_players = await pfr.get_draft({ year, ignore_cache })
+  const draft_url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/draft.htm`
+  const pages = await run_browser_task({ urls: [draft_url], ignore_cache })
+
+  const page_result = pages.find((p) => p.url === draft_url)
+  if (!page_result || !page_result.html) {
+    throw new Error(`browser-task failed to fetch draft page for ${year}: ${page_result?.error || 'no HTML'}`)
+  }
+
+  const draft_players = parse_draft_html(page_result.html, year)
 
   log(`Importing ${draft_players.length} draft players for ${year}`)
 
