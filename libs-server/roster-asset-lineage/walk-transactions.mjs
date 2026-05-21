@@ -301,12 +301,11 @@ const walk_transactions = async ({ lid }) => {
     } else if (event.kind === 'super_priority_resign') {
       // Type 19 SUPER_PRIORITY transaction: the original team has exercised
       // its super-priority claim on a previously-poached-then-released player.
-      // Per Amend XXXIV, the window opens on the poaching team's release and
-      // closes here. Decorate the most recent released holding for this pid
-      // (the poaching team's released holding) with super_priority_until set
-      // to the exercise timestamp. Do not open a new holding; the original
-      // team's reclaimed PS ownership remains an unmodeled gap until the
-      // separate super-priority-resign lineage edge is added.
+      // Per Constitution Article XIV §16 (Amend XXXIV), the player is placed
+      // back on the original team's Practice Squad at the original PS salary.
+      // Decorate the poacher's released holding with super_priority_until,
+      // open a new holding on the original team (event.tid), and emit a
+      // SUPER_PRIORITY_RESIGN edge connecting them.
       let released
       for (const candidate of ctx.holding_drafts) {
         if (candidate.asset_type !== ASSET_TYPE.PLAYER) continue
@@ -324,6 +323,23 @@ const walk_transactions = async ({ lid }) => {
       } else {
         note_warning('super_priority_no_released_holding')
       }
+      const opened = open_player_holding({
+        tid: event.tid,
+        player_id: event.player_id,
+        occurred_at: event.occurred_at,
+        salary_basis: SALARY_BASIS.PS_SALARY,
+        year: event.year
+      })
+      emit_edge({
+        transformation_id: randomUUID(),
+        transformation_type: TRANSFORMATION_TYPE.SUPER_PRIORITY_RESIGN,
+        occurred_at: event.occurred_at,
+        source_draft_id: released ? released.draft_id : null,
+        target_draft_id: opened.draft_id,
+        source_share: released ? 1.0 : null,
+        target_share: 1.0,
+        transaction_id: event.transaction_id
+      })
     } else if (event.kind === 'player_release') {
       const closed = close_open({
         key: player_key(event.tid, event.player_id),
@@ -419,6 +435,19 @@ const walk_transactions = async ({ lid }) => {
         note_warning('pick_conversion_no_open_pick')
       } else if (!player_draft_id) {
         note_warning('pick_conversion_no_player_draft')
+      }
+    } else if (event.kind === 'rookie_draft_completed') {
+      // Close any pick holdings still open at draft-window close. Per the
+      // 2023-09-03 commissioner ruling, undrafted picks expire to FA at the
+      // close of the draft window (no compensation, no successor asset).
+      for (const draft of ctx.holding_drafts) {
+        if (draft.asset_type !== ASSET_TYPE.PICK) continue
+        if (draft.pick_year !== event.year) continue
+        if (draft.period_end) continue
+        draft.period_end = event.occurred_at
+        draft.terminated_by = TERMINATED_BY.EXPIRED_TO_FA
+        ctx.open.delete(pick_key(draft.tid, draft.pickid))
+        note_warning('pick_expired_undrafted')
       }
     } else if (event.kind === 'coverage_warning') {
       note_warning(event.label)
@@ -862,6 +891,42 @@ const build_event_stream = async ({ lid }) => {
         occurred_at: new Date(pick.selection_timestamp * 1000)
       })
     }
+  }
+
+  // End-of-draft pass: any pick holding still open after the draft window
+  // closes is considered expired per the 2023-09-03 commissioner ruling
+  // ("considering them expired once the draft window expired"). Emit a
+  // synthetic `rookie_draft_completed` event per year that the handler uses
+  // to close all open PICK holdings with that pick_year, terminating them
+  // with EXPIRED_TO_FA. Timestamp source order:
+  //   1. seasons.rookie_draft_completed_at (when populated; 2025+ only today)
+  //   2. MAX(draft.selection_timestamp) for that year
+  // (Falls through silently if neither is available -- no event emitted.)
+  const max_selection_by_year = new Map()
+  for (const pick of all_picks) {
+    if (!pick.selection_timestamp) continue
+    const prior = max_selection_by_year.get(pick.year)
+    if (prior == null || pick.selection_timestamp > prior) {
+      max_selection_by_year.set(pick.year, pick.selection_timestamp)
+    }
+  }
+  const seasons_rows = await db('seasons')
+    .where({ lid })
+    .select('year', 'rookie_draft_completed_at')
+  const rookie_draft_completed_by_year = new Map()
+  for (const s of seasons_rows) {
+    const ts =
+      s.rookie_draft_completed_at ?? max_selection_by_year.get(s.year)
+    if (ts) rookie_draft_completed_by_year.set(s.year, Number(ts))
+  }
+  for (const [year, ts] of rookie_draft_completed_by_year) {
+    events.push({
+      sort_ts: ts,
+      sort_priority: 9, // after pick_conversion (4) and trade (3) at same ts
+      kind: 'rookie_draft_completed',
+      year,
+      occurred_at: new Date(ts * 1000)
+    })
   }
 
   // Immediate-release flow (process-poach.mjs): when the poaching team lacks
