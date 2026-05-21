@@ -15,7 +15,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['dist/*', 'tmp/*', '.yarn/**/*']
+    ignores: ['dist/*', 'tmp/*', '.yarn/**/*', '.cache/**', 'private/**']
   },
   ...compat
     .extends('standard', 'standard-jsx', 'standard-react', 'prettier')
