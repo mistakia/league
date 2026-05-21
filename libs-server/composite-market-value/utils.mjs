@@ -55,14 +55,29 @@ export const latest_in_window_by_pid = (pid_idx, pid, target_date_iso, window_da
 }
 
 // Resolve a representative (league_format_hash, scoring_format_hash) per
-// format_category for source-axis lookups. Cached per process.
+// format_category for source-axis lookups. Picks the hash with the most
+// league_format_player_careerlogs rows at draft_rank >= 1 -- the pick-value
+// curve and other format-derived signals only exist for hashes the format-
+// data-generation pipeline has actually populated, and an unpopulated hash
+// silently collapses ADP/rankings extracts to empty Maps.
+// Cached per process.
 let _fc_format_cache = null
 export const load_fc_format_map = async () => {
   if (_fc_format_cache) return _fc_format_cache
   const out = new Map()
   const mappings = await db('format_category_signal_mapping').orderBy('format_category')
   for (const m of mappings) {
-    const row = await db('league_formats').where('format_category', m.format_category).first()
+    const rows = await db('league_formats as lf')
+      .select('lf.league_format_hash', 'lf.scoring_format_hash')
+      .select(db.raw(
+        '(SELECT COUNT(*) FROM league_format_player_careerlogs c ' +
+        'WHERE c.league_format_hash = lf.league_format_hash ' +
+        'AND c.draft_rank >= 1) AS careerlog_rows'
+      ))
+      .where('lf.format_category', m.format_category)
+      .orderBy('careerlog_rows', 'desc')
+      .limit(1)
+    const row = rows[0]
     if (row) out.set(m.format_category, {
       league_format_hash: row.league_format_hash,
       scoring_format_hash: row.scoring_format_hash
