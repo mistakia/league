@@ -602,7 +602,7 @@ const build_event_stream = async ({ lid }) => {
   for (const pick of all_picks) {
     let endow_date = endowment_by_year.get(pick.year)
     const earliest_trade = earliest_trade_by_pickid.get(pick.uid)
-    if (earliest_trade && earliest_trade * 1000 <= endow_date.getTime()) {
+    if (earliest_trade && earliest_trade * 1000 < endow_date.getTime()) {
       endow_date = new Date(earliest_trade * 1000 - 60_000)
     }
     events.push({

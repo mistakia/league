@@ -219,7 +219,7 @@ const ktc_at = (idx, pid, target_unix) => {
   return rows[0].v
 }
 
-const compute_snapshot_for_draft = ({ draft, lid, idx }) => {
+const compute_snapshot_for_draft = ({ draft, lid, idx, salary_eligible_draft_ids }) => {
   const period_start = draft.period_start
   const period_end = draft.period_end
   const start_unix = Math.floor(period_start.getTime() / 1000)
@@ -298,14 +298,21 @@ const compute_snapshot_for_draft = ({ draft, lid, idx }) => {
       result.ps_slot_subtype = ps_subtype(first_row.slot)
     }
 
-    // salary attribution (START_TEAM_BEARS)
-    const sl = idx.seasonlogs.get(`${draft.player_id}__${draft.year}`)
-    if (sl) {
-      result.salary_paid = sl.start_tid === draft.tid ? sl.salary : 0
+    // salary attribution (START_TEAM_BEARS): credit only the earliest holding
+    // per (tid, pid, year) so re-acquisitions within the same season don't
+    // double-count the season's cap hit.
+    const is_eligible = salary_eligible_draft_ids.has(draft.draft_id)
+    if (!is_eligible) {
+      result.salary_paid = 0
     } else {
-      const a = idx.auction_salary.get(`${draft.player_id}__${draft.year}`)
-      if (a) result.salary_paid = a.tid === draft.tid ? a.value : 0
-      else result.salary_paid = 0
+      const sl = idx.seasonlogs.get(`${draft.player_id}__${draft.year}`)
+      if (sl) {
+        result.salary_paid = sl.start_tid === draft.tid ? sl.salary : 0
+      } else {
+        const a = idx.auction_salary.get(`${draft.player_id}__${draft.year}`)
+        if (a) result.salary_paid = a.tid === draft.tid ? a.value : 0
+        else result.salary_paid = 0
+      }
     }
   } else if (draft.asset_type === ASSET_TYPE.PICK) {
     // Pick projection: by rank if known else median of round.
@@ -347,11 +354,26 @@ const compute_snapshots_bulk = async ({ lid, holding_drafts }) => {
 
   const idx = await load_indexes({ lid, player_ids, years, format_hashes })
 
+  // Pre-compute salary-credit eligibility: the earliest holding per
+  // (tid, player_id, year) is the salary-bearing one under START_TEAM_BEARS.
+  const earliest_by_key = new Map()
+  for (const d of holding_drafts) {
+    if (d.asset_type !== ASSET_TYPE.PLAYER || !d.player_id) continue
+    const key = `${d.tid}__${d.player_id}__${d.year}`
+    const prior = earliest_by_key.get(key)
+    if (!prior || d.period_start < prior.period_start) {
+      earliest_by_key.set(key, d)
+    }
+  }
+  const salary_eligible_draft_ids = new Set(
+    Array.from(earliest_by_key.values()).map((d) => d.draft_id)
+  )
+
   const snapshots = []
   for (const draft of holding_drafts) {
     snapshots.push({
       draft_id: draft.draft_id,
-      snapshot: compute_snapshot_for_draft({ draft, lid, idx })
+      snapshot: compute_snapshot_for_draft({ draft, lid, idx, salary_eligible_draft_ids })
     })
   }
   return snapshots
