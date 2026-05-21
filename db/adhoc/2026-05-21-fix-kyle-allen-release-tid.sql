@@ -42,6 +42,6 @@ UPDATE public.transactions
    AND pid = 'KYLE-ALLE-2018-1996-03-08'
    AND type = 1
    AND tid = 5
-   AND timestamp = 1669559049;
+   AND timestamp = 1669558849;
 
 COMMIT;
