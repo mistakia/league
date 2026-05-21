@@ -55,11 +55,12 @@ export const latest_in_window_by_pid = (pid_idx, pid, target_date_iso, window_da
 }
 
 // Resolve a representative (league_format_hash, scoring_format_hash) per
-// format_category for source-axis lookups. Picks the hash with the most
-// league_format_player_careerlogs rows at draft_rank >= 1 -- the pick-value
-// curve and other format-derived signals only exist for hashes the format-
-// data-generation pipeline has actually populated, and an unpopulated hash
-// silently collapses ADP/rankings extracts to empty Maps.
+// format_category for source-axis lookups. Prefers hashes that already have
+// league_format_draft_pick_value populated, then breaks ties by the count of
+// league_format_player_careerlogs rows at draft_rank >= 1. Without the
+// pv_curve preference, an arbitrary tiebreak among hashes with identical
+// careerlog counts can land on an unpopulated hash and silently collapse
+// ADP/rankings extracts to empty Maps.
 // Cached per process.
 let _fc_format_cache = null
 export const load_fc_format_map = async () => {
@@ -70,12 +71,22 @@ export const load_fc_format_map = async () => {
     const rows = await db('league_formats as lf')
       .select('lf.league_format_hash', 'lf.scoring_format_hash')
       .select(db.raw(
+        '(SELECT COUNT(*) FROM league_format_draft_pick_value pv ' +
+        'WHERE pv.league_format_hash = lf.league_format_hash) AS pv_rows'
+      ))
+      .select(db.raw(
         '(SELECT COUNT(*) FROM league_format_player_careerlogs c ' +
         'WHERE c.league_format_hash = lf.league_format_hash ' +
         'AND c.draft_rank >= 1) AS careerlog_rows'
       ))
       .where('lf.format_category', m.format_category)
-      .orderBy('careerlog_rows', 'desc')
+      .orderByRaw(
+        '(SELECT COUNT(*) FROM league_format_draft_pick_value pv ' +
+        'WHERE pv.league_format_hash = lf.league_format_hash) > 0 DESC, ' +
+        '(SELECT COUNT(*) FROM league_format_player_careerlogs c ' +
+        'WHERE c.league_format_hash = lf.league_format_hash ' +
+        'AND c.draft_rank >= 1) DESC, lf.league_format_hash ASC'
+      )
       .limit(1)
     const row = rows[0]
     if (row) out.set(m.format_category, {
