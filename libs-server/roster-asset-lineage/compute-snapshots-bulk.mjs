@@ -112,7 +112,13 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   idx.gamelogs = new Map()
   if (player_ids.length && format_hashes.length) {
     const gl_rows = await db('league_format_player_gamelogs')
-      .select('pid', 'esbid', 'league_format_hash', 'points_added_net', 'points_added_earned')
+      .select(
+        'pid',
+        'esbid',
+        'league_format_hash',
+        'points_added_net',
+        'points_added_earned'
+      )
       .whereIn('pid', player_ids)
       .whereIn('league_format_hash', format_hashes)
     for (const r of gl_rows) {
@@ -120,20 +126,37 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
       if (!idx.gamelogs.has(k)) idx.gamelogs.set(k, new Map())
       idx.gamelogs.get(k).set(r.esbid, {
         net: r.points_added_net != null ? Number(r.points_added_net) : 0,
-        earned: r.points_added_earned != null ? Number(r.points_added_earned) : 0
+        earned:
+          r.points_added_earned != null ? Number(r.points_added_earned) : 0
       })
     }
   }
 
   // esbid -> (year, week) for the year range
   idx.esbid_to_yw = new Map()
+  // (year, week) -> earliest game timestamp (unix sec). Used to assign each
+  // rosters_players row to the holding active at that NFL week. Week 0
+  // (preseason placeholder) is synthesized as week 1 minus 7 days; weeks
+  // without games keep no anchor and are skipped conservatively.
+  idx.week_anchor = new Map()
   if (years.length) {
     const games = await db('nfl_games')
-      .select('esbid', 'year', 'week')
+      .select('esbid', 'year', 'week', 'seas_type', 'timestamp')
       .whereIn('year', years)
-      .where('seas_type', 'REG')
+      .whereIn('seas_type', ['REG', 'POST'])
     for (const g of games) {
-      idx.esbid_to_yw.set(g.esbid, { year: g.year, week: g.week })
+      if (g.seas_type === 'REG') {
+        idx.esbid_to_yw.set(g.esbid, { year: g.year, week: g.week })
+      }
+      const k = `${g.year}__${g.week}`
+      const ts = g.timestamp != null ? Number(g.timestamp) : null
+      if (ts == null) continue
+      const prior = idx.week_anchor.get(k)
+      if (prior == null || ts < prior) idx.week_anchor.set(k, ts)
+    }
+    for (const y of years) {
+      const w1 = idx.week_anchor.get(`${y}__1`)
+      if (w1 != null) idx.week_anchor.set(`${y}__0`, w1 - 7 * 24 * 3600)
     }
   }
 
@@ -156,13 +179,20 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   idx.pick_values = new Map()
   if (format_hashes.length) {
     const pv_rows = await db('league_format_draft_pick_value')
-      .select('league_format_hash', 'rank', 'median_best_season_points_added_per_game')
+      .select(
+        'league_format_hash',
+        'rank',
+        'median_best_season_points_added_per_game'
+      )
       .whereIn('league_format_hash', format_hashes)
     for (const r of pv_rows) {
       const k = `${r.league_format_hash}__${r.rank}`
-      idx.pick_values.set(k, r.median_best_season_points_added_per_game != null
-        ? Number(r.median_best_season_points_added_per_game)
-        : null)
+      idx.pick_values.set(
+        k,
+        r.median_best_season_points_added_per_game != null
+          ? Number(r.median_best_season_points_added_per_game)
+          : null
+      )
     }
   }
 
@@ -186,7 +216,10 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
       .whereIn('pid', player_ids)
       .whereIn('year', years)
     for (const r of sl_rows) {
-      idx.seasonlogs.set(`${r.pid}__${r.year}`, { start_tid: r.start_tid, salary: r.salary })
+      idx.seasonlogs.set(`${r.pid}__${r.year}`, {
+        start_tid: r.start_tid,
+        salary: r.salary
+      })
     }
   }
 
@@ -199,7 +232,10 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
       .where('type', 7)
       .whereIn('pid', player_ids)
     for (const r of a_rows) {
-      idx.auction_salary.set(`${r.pid}__${r.year}`, { tid: r.tid, value: r.value })
+      idx.auction_salary.set(`${r.pid}__${r.year}`, {
+        tid: r.tid,
+        value: r.value
+      })
     }
   }
 
@@ -219,7 +255,12 @@ const ktc_at = (idx, pid, target_unix) => {
   return rows[0].v
 }
 
-const compute_snapshot_for_draft = ({ draft, lid, idx, salary_eligible_draft_ids }) => {
+const compute_snapshot_for_draft = ({
+  draft,
+  lid,
+  idx,
+  salary_eligible_draft_ids
+}) => {
   const period_start = draft.period_start
   const period_end = draft.period_end
   const start_unix = Math.floor(period_start.getTime() / 1000)
@@ -245,35 +286,59 @@ const compute_snapshot_for_draft = ({ draft, lid, idx, salary_eligible_draft_ids
   }
 
   if (draft.asset_type === ASSET_TYPE.PLAYER && draft.player_id) {
-    result.composite_market_value_at_acquisition = ktc_at(idx, draft.player_id, start_unix)
+    result.composite_market_value_at_acquisition = ktc_at(
+      idx,
+      draft.player_id,
+      start_unix
+    )
     if (end_unix)
-      result.composite_market_value_at_termination = ktc_at(idx, draft.player_id, end_unix)
+      result.composite_market_value_at_termination = ktc_at(
+        idx,
+        draft.player_id,
+        end_unix
+      )
 
     if (draft.league_format_hash) {
       const proj_key = `${draft.player_id}__${draft.league_format_hash}__${draft.year}`
-      result.projected_pts_added_at_acquisition = idx.projections.get(proj_key) ?? null
+      result.projected_pts_added_at_acquisition =
+        idx.projections.get(proj_key) ?? null
     }
 
-    // Slot weeks + realized
+    // Slot weeks + realized. Each rosters_players row is bucketed to one
+    // holding by anchoring (year, week) to that week's first NFL-game
+    // timestamp and accepting only rows whose anchor falls within the
+    // holding's [period_start, period_end) window. Without this filter
+    // adjacent holdings on the same (tid, pid) double-count overlapping
+    // seasons because the year iteration pulls every (tid, pid, y) row.
     const start_year = dayjs(period_start).year()
     const end_year = dayjs(period_end || new Date()).year()
+    const period_end_unix =
+      end_unix == null ? Number.MAX_SAFE_INTEGER : end_unix
     let first_row = null
     for (let y = start_year; y <= end_year; y++) {
       const rows = idx.rosters.get(`${draft.tid}__${draft.player_id}__${y}`)
       if (!rows) continue
       for (const r of rows) {
+        const anchor = idx.week_anchor.get(`${y}__${r.week}`)
+        if (anchor == null) continue
+        if (anchor < start_unix) continue
+        if (anchor >= period_end_unix) continue
         if (!first_row) first_row = r
         const slot = r.slot
         if (PS_SLOT_SET.has(slot)) result.weeks_practice_squad++
-        else if (slot === roster_slot_types.RESERVE_SHORT_TERM) result.weeks_reserve_short_term++
-        else if (slot === roster_slot_types.RESERVE_LONG_TERM) result.weeks_reserve_long_term++
+        else if (slot === roster_slot_types.RESERVE_SHORT_TERM)
+          result.weeks_reserve_short_term++
+        else if (slot === roster_slot_types.RESERVE_LONG_TERM)
+          result.weeks_reserve_long_term++
         else if (slot === roster_slot_types.COV) result.weeks_cov++
         else if (ACTIVE_SLOT_SET.has(slot)) result.weeks_active++
         if (STARTING_SLOT_SET.has(slot)) result.weeks_started++
 
         // gamelog lookup
         if (draft.league_format_hash) {
-          const gl = idx.gamelogs.get(`${draft.player_id}__${draft.league_format_hash}`)
+          const gl = idx.gamelogs.get(
+            `${draft.player_id}__${draft.league_format_hash}`
+          )
           if (gl) {
             // find esbid(s) for (y, r.week)
             for (const [esbid, yw] of idx.esbid_to_yw) {
@@ -281,13 +346,15 @@ const compute_snapshot_for_draft = ({ draft, lid, idx, salary_eligible_draft_ids
               const stats = gl.get(esbid)
               if (!stats) continue
               result.realized_pts_added_net_through_termination += stats.net
-              result.realized_pts_added_earned_through_termination += stats.earned
+              result.realized_pts_added_earned_through_termination +=
+                stats.earned
               if (ACTIVE_SLOT_SET.has(slot))
                 result.realized_pts_added_net_in_active_slot += stats.net
               if (STARTING_SLOT_SET.has(slot))
                 result.realized_pts_added_net_in_started_slot += stats.net
               if (PS_SLOT_SET.has(slot))
-                result.realized_pts_added_net_in_practice_squad_slot += stats.net
+                result.realized_pts_added_net_in_practice_squad_slot +=
+                  stats.net
             }
           }
         }
@@ -323,9 +390,8 @@ const compute_snapshot_for_draft = ({ draft, lid, idx, salary_eligible_draft_ids
         if (nt) rank = (draft.pick_round - 1) * nt + Math.ceil(nt / 2)
       }
       if (rank != null) {
-        result.projected_pts_added_at_acquisition = idx.pick_values.get(
-          `${draft.league_format_hash}__${rank}`
-        ) ?? null
+        result.projected_pts_added_at_acquisition =
+          idx.pick_values.get(`${draft.league_format_hash}__${rank}`) ?? null
       }
     }
     // Pick market value, salary, realized: NULL/zero by design.
@@ -373,7 +439,12 @@ const compute_snapshots_bulk = async ({ lid, holding_drafts }) => {
   for (const draft of holding_drafts) {
     snapshots.push({
       draft_id: draft.draft_id,
-      snapshot: compute_snapshot_for_draft({ draft, lid, idx, salary_eligible_draft_ids })
+      snapshot: compute_snapshot_for_draft({
+        draft,
+        lid,
+        idx,
+        salary_eligible_draft_ids
+      })
     })
   }
   return snapshots

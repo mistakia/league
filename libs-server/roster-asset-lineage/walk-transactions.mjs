@@ -103,7 +103,10 @@ const walk_transactions = async ({ lid }) => {
     coverage_warnings: new Map()
   }
   const note_warning = (label) => {
-    ctx.coverage_warnings.set(label, (ctx.coverage_warnings.get(label) || 0) + 1)
+    ctx.coverage_warnings.set(
+      label,
+      (ctx.coverage_warnings.get(label) || 0) + 1
+    )
   }
 
   const open_player_holding = ({
@@ -221,6 +224,11 @@ const walk_transactions = async ({ lid }) => {
   for (const event of events) {
     if (event.kind === 'player_acquisition') {
       const cfg = PLAYER_ACQUISITION_TRANSACTION_TYPES[event.transaction_type]
+      // Track any prior holding closed by this acquisition so the lineage edge
+      // can carry its draft_id as source. Without this wiring the recursive
+      // v_roster_asset_lineage_walk stops at depth 0 on every intra-team
+      // succession (extension, tag, same-team RFA, poach-from-other-team).
+      let prior_closed = null
       // Acquisitions that mid-flight imply a termination on a prior owner:
       // POACHED moves player from another team; close that team's holding first.
       if (event.transaction_type === transaction_types.POACHED) {
@@ -233,7 +241,7 @@ const walk_transactions = async ({ lid }) => {
             draft.player_id === event.player_id &&
             draft.tid !== event.tid
           ) {
-            close_open({
+            prior_closed = close_open({
               key,
               occurred_at: event.occurred_at,
               terminated_by: TERMINATED_BY.TRADE
@@ -242,17 +250,23 @@ const walk_transactions = async ({ lid }) => {
           }
         }
       }
-      // EXTENSION / FRANCHISE_TAG / ROOKIE_TAG close the prior same-team holding.
+      // EXTENSION / FRANCHISE_TAG / ROOKIE_TAG / RFA (same-team) close the
+      // prior same-team holding. Same-team RFA: prior auction/extension on
+      // same tid is already closed by RELEASE; if for some reason it is still
+      // open (e.g., audit-corrected lineage), close it via EXTENSION so we
+      // do not leave two open holdings on the same key.
       if (
         event.transaction_type === transaction_types.EXTENSION ||
         event.transaction_type === transaction_types.FRANCHISE_TAG ||
-        event.transaction_type === transaction_types.ROOKIE_TAG
+        event.transaction_type === transaction_types.ROOKIE_TAG ||
+        event.transaction_type === transaction_types.RESTRICTED_FREE_AGENCY_TAG
       ) {
-        close_open({
+        const closed = close_open({
           key: player_key(event.tid, event.player_id),
           occurred_at: event.occurred_at,
           terminated_by: TERMINATED_BY.EXTENSION
         })
+        if (closed) prior_closed = closed
       }
       const draft = open_player_holding({
         tid: event.tid,
@@ -268,9 +282,9 @@ const walk_transactions = async ({ lid }) => {
         transformation_id: randomUUID(),
         transformation_type: cfg.transformation,
         occurred_at: event.occurred_at,
-        source_draft_id: null,
+        source_draft_id: prior_closed ? prior_closed.draft_id : null,
         target_draft_id: draft.draft_id,
-        source_share: null,
+        source_share: prior_closed ? 1.0 : null,
         target_share: 1.0,
         transaction_id: event.transaction_id
       })
@@ -299,7 +313,8 @@ const walk_transactions = async ({ lid }) => {
         if (candidate.player_id !== event.player_id) continue
         if (candidate.terminated_by !== TERMINATED_BY.RELEASE) continue
         if (!candidate.period_end) continue
-        if (candidate.period_end.getTime() > event.occurred_at.getTime()) continue
+        if (candidate.period_end.getTime() > event.occurred_at.getTime())
+          continue
         if (!released || candidate.period_end > released.period_end) {
           released = candidate
         }
@@ -350,7 +365,15 @@ const walk_transactions = async ({ lid }) => {
         target_share: 1.0
       })
     } else if (event.kind === 'trade') {
-      apply_trade({ event, ctx, close_open, open_player_holding, open_pick_holding, emit_edge, note_warning })
+      apply_trade({
+        event,
+        ctx,
+        close_open,
+        open_player_holding,
+        open_pick_holding,
+        emit_edge,
+        note_warning
+      })
     } else if (event.kind === 'pick_endowment') {
       const draft = open_pick_holding({
         tid: event.tid,
@@ -379,7 +402,9 @@ const walk_transactions = async ({ lid }) => {
       })
       // Player holding is opened by the corresponding DRAFT transaction (player_acquisition).
       // Look it up; emit PICK_CONVERSION edge linking the two.
-      const player_draft_id = ctx.open.get(player_key(event.tid, event.player_id))
+      const player_draft_id = ctx.open.get(
+        player_key(event.tid, event.player_id)
+      )
       if (closed && player_draft_id) {
         emit_edge({
           transformation_id: randomUUID(),
@@ -493,16 +518,18 @@ const build_event_stream = async ({ lid }) => {
 
   // Cross-team RFA wins are emitted from restricted_free_agency_bids; the
   // corresponding transactions table RESTRICTED_FREE_AGENCY_TAG row would
-  // open a second holding on the winning team at the same timestamp (same
-  // draft_id key) and orphan the first. Build the suppression set keyed by
-  // (winning_tid, pid, processed_ts).
+  // open a second holding on the winning team and orphan the first. The
+  // transactions row's timestamp drifts a few seconds from the bid's
+  // `processed` value (insert-time vs resolution-time), so suppression is
+  // keyed on (winning_tid, pid, year): at most one successful cross-team
+  // RFA win per (tid, pid, year) exists by league rule.
   const cross_team_rfa_wins = await db('restricted_free_agency_bids')
     .where({ lid, succ: true })
     .whereNotNull('processed')
     .whereRaw('tid != player_tid')
-    .select('tid', 'pid', 'processed')
+    .select('tid', 'pid', 'year')
   const cross_team_rfa_key_set = new Set(
-    cross_team_rfa_wins.map((r) => `${r.tid}__${r.pid}__${r.processed}`)
+    cross_team_rfa_wins.map((r) => `${r.tid}__${r.pid}__${r.year}`)
   )
 
   // 2. Player transactions (excluding those that resolve via a trade).
@@ -548,7 +575,7 @@ const build_event_stream = async ({ lid }) => {
     }
     if (
       tran.type === transaction_types.RESTRICTED_FREE_AGENCY_TAG &&
-      cross_team_rfa_key_set.has(`${tran.tid}__${tran.pid}__${tran.timestamp}`)
+      cross_team_rfa_key_set.has(`${tran.tid}__${tran.pid}__${tran.year}`)
     ) {
       // Cross-team RFA win: the rfa_cross_team_win event from
       // restricted_free_agency_bids handles open/close. Skip the transactions
@@ -658,7 +685,8 @@ const build_event_stream = async ({ lid }) => {
         asset_type: ASSET_TYPE.PLAYER,
         player_id: tp.pid,
         from_tid: tp.tid,
-        to_tid: tp.tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
+        to_tid:
+          tp.tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
       })
     }
     for (const tpi of trade_picks.filter((r) => r.tradeid === trade.uid)) {
@@ -685,7 +713,8 @@ const build_event_stream = async ({ lid }) => {
         pick_original_owner_tid: meta.otid,
         pick_draft_overall_position: meta.pick,
         from_tid: tpi.tid,
-        to_tid: tpi.tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
+        to_tid:
+          tpi.tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
       })
     }
     events.push({
@@ -699,7 +728,18 @@ const build_event_stream = async ({ lid }) => {
   }
 
   // 5. Pick endowment + conversion.
-  const all_picks = await db('draft').where({ lid }).select('uid', 'pid', 'tid', 'otid', 'round', 'pick', 'year', 'selection_timestamp')
+  const all_picks = await db('draft')
+    .where({ lid })
+    .select(
+      'uid',
+      'pid',
+      'tid',
+      'otid',
+      'round',
+      'pick',
+      'year',
+      'selection_timestamp'
+    )
   // Default endowment timestamp by year (prior-year draft_start).
   const years_for_picks = Array.from(new Set(all_picks.map((p) => p.year)))
   const endowment_by_year = new Map()
