@@ -115,6 +115,10 @@ const walk_transactions = async ({ lid }) => {
     year
   }) => {
     const draft_id = `p__${tid}__${player_id}__${occurred_at.getTime()}`
+    if (ctx.drafts_by_id.has(draft_id)) {
+      note_warning('duplicate_draft_id_player')
+      return ctx.drafts_by_id.get(draft_id)
+    }
     const draft = {
       draft_id,
       lid,
@@ -148,6 +152,10 @@ const walk_transactions = async ({ lid }) => {
     occurred_at
   }) => {
     const draft_id = `pk__${tid}__${pickid}__${occurred_at.getTime()}`
+    if (ctx.drafts_by_id.has(draft_id)) {
+      note_warning('duplicate_draft_id_pick')
+      return ctx.drafts_by_id.get(draft_id)
+    }
     const draft = {
       draft_id,
       lid,
@@ -443,6 +451,20 @@ const build_event_stream = async ({ lid }) => {
     trade_transactionids.map((r) => r.transactionid)
   )
 
+  // Cross-team RFA wins are emitted from restricted_free_agency_bids; the
+  // corresponding transactions table RESTRICTED_FREE_AGENCY_TAG row would
+  // open a second holding on the winning team at the same timestamp (same
+  // draft_id key) and orphan the first. Build the suppression set keyed by
+  // (winning_tid, pid, processed_ts).
+  const cross_team_rfa_wins = await db('restricted_free_agency_bids')
+    .where({ lid, succ: true })
+    .whereNotNull('processed')
+    .whereRaw('tid != player_tid')
+    .select('tid', 'pid', 'processed')
+  const cross_team_rfa_key_set = new Set(
+    cross_team_rfa_wins.map((r) => `${r.tid}__${r.pid}__${r.processed}`)
+  )
+
   // 2. Player transactions (excluding those that resolve via a trade).
   const transactions = await db('transactions')
     .select('uid', 'tid', 'pid', 'type', 'timestamp', 'year', 'value')
@@ -458,6 +480,22 @@ const build_event_stream = async ({ lid }) => {
     if (tran.type === transaction_types.TRADE) continue
     const ts = new Date(tran.timestamp * 1000)
     if (INTRA_HOLDING_TRANSACTION_TYPES.has(tran.type)) continue
+    if (
+      tran.type === transaction_types.RESTRICTED_FREE_AGENCY_TAG &&
+      cross_team_rfa_key_set.has(`${tran.tid}__${tran.pid}__${tran.timestamp}`)
+    ) {
+      // Cross-team RFA win: the rfa_cross_team_win event from
+      // restricted_free_agency_bids handles open/close. Skip the transactions
+      // row to avoid emitting a duplicate holding with the same draft_id.
+      events.push({
+        sort_ts: tran.timestamp,
+        sort_priority: 5,
+        kind: 'coverage_warning',
+        label: 'rfa_tag_cross_team_dual_path_skipped',
+        occurred_at: ts
+      })
+      continue
+    }
     if (tran.type === transaction_types.ROSTER_RELEASE) {
       events.push({
         sort_ts: tran.timestamp,
@@ -559,13 +597,27 @@ const build_event_stream = async ({ lid }) => {
     }
     for (const tpi of trade_picks.filter((r) => r.tradeid === trade.uid)) {
       const meta = pick_meta_by_id.get(tpi.pickid)
+      if (!meta) {
+        // Stray trades_picks row pointing at a draft row that no longer exists
+        // (or never did). Without metadata we cannot open a typed pick holding;
+        // skip the leg and surface as a coverage warning rather than emit a
+        // holding with NULL pick_year/round/otid.
+        events.push({
+          sort_ts: trade.accepted,
+          sort_priority: 5,
+          kind: 'coverage_warning',
+          label: 'trade_pick_meta_missing',
+          occurred_at: new Date(trade.accepted * 1000)
+        })
+        continue
+      }
       legs.push({
         asset_type: ASSET_TYPE.PICK,
         pickid: tpi.pickid,
-        pick_year: meta?.year || null,
-        pick_round: meta?.round || null,
-        pick_original_owner_tid: meta?.otid || null,
-        pick_draft_overall_position: meta?.pick || null,
+        pick_year: meta.year,
+        pick_round: meta.round,
+        pick_original_owner_tid: meta.otid,
+        pick_draft_overall_position: meta.pick,
         from_tid: tpi.tid,
         to_tid: tpi.tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
       })
