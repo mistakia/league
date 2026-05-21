@@ -23,12 +23,17 @@ const BROWSER_TASK = path.resolve(
 const SANDBOX_WRAPPER = '/usr/local/bin/run-as-stealth-browser-node'
 
 /**
- * Run the sandboxed DraftKings browser task to capture session cookies.
- * The browser task uses page.route() (which cannot cross processes) to
- * intercept DK requests and capture STIDN/STH/jwe cookies. On success,
- * this function stores them in the DB via draftkings_session_manager.
+ * Run the sandboxed DraftKings browser task. The same sandbox call captures
+ * session cookies (page.route() interception) AND -- if contest_ids is
+ * supplied -- downloads the per-contest CSVs inside the same persistent
+ * context. The Playwright BrowserContext cannot cross processes, so the
+ * CSV-download phase must stay co-resident with the cookie capture.
+ *
+ * Returns { cookies, tmp_dir, csv_files } -- the orchestrator owns the
+ * tmp_dir lifetime and reads CSVs by name (contest-<id>.csv) before
+ * cleaning up.
  */
-const run_browser_task = async () => {
+const run_browser_task = async ({ contest_ids = [] } = {}) => {
   const tmp_dir = fs.mkdtempSync('/tmp/cb-draftkings-')
   fs.chmodSync(tmp_dir, 0o777)
   log('handoff tempdir: %s', tmp_dir)
@@ -42,43 +47,38 @@ const run_browser_task = async () => {
     '--out-dir', tmp_dir,
     '--caller-label', caller_label
   ]
-
-  try {
-    log('spawning sandboxed browser task as _stealth-browser')
-    await new Promise((resolve, reject) => {
-      const child = spawn(SANDBOX_WRAPPER, args, {
-        stdio: ['ignore', 'inherit', 'inherit']
-      })
-      child.on('error', reject)
-      child.on('exit', (code, signal) => {
-        if (signal) return reject(new Error(`browser-task killed by signal ${signal}`))
-        if (code !== 0) return reject(new Error(`browser-task exited with code ${code}`))
-        resolve()
-      })
-    })
-
-    const out_path = path.join(tmp_dir, 'session_cookies.json')
-    if (!fs.existsSync(out_path)) {
-      throw new Error(`browser-task did not produce ${out_path}`)
-    }
-    const cookies = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
-    log('read DK session cookies from sandbox handoff')
-
-    // Persist to DB so the CSV download path can use them
-    await draftkings_session_manager.store_draftkings_session_data({
-      cookies,
-      is_session_valid: true
-    })
-    log('DraftKings session cookies persisted to DB')
-
-    return cookies
-  } finally {
-    try {
-      fs.rmSync(tmp_dir, { recursive: true, force: true })
-    } catch (err) {
-      log('handoff cleanup failed (non-fatal): %s', err.message)
-    }
+  if (contest_ids.length) {
+    args.push('--contest-ids', contest_ids.join(','))
   }
+
+  log('spawning sandboxed browser task as _stealth-browser (contests=%d)', contest_ids.length)
+  await new Promise((resolve, reject) => {
+    const child = spawn(SANDBOX_WRAPPER, args, {
+      stdio: ['ignore', 'inherit', 'inherit']
+    })
+    child.on('error', reject)
+    child.on('exit', (code, signal) => {
+      if (signal) return reject(new Error(`browser-task killed by signal ${signal}`))
+      if (code !== 0) return reject(new Error(`browser-task exited with code ${code}`))
+      resolve()
+    })
+  })
+
+  const out_path = path.join(tmp_dir, 'session_cookies.json')
+  if (!fs.existsSync(out_path)) {
+    fs.rmSync(tmp_dir, { recursive: true, force: true })
+    throw new Error(`browser-task did not produce ${out_path}`)
+  }
+  const cookies = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
+  log('read DK session cookies from sandbox handoff')
+
+  await draftkings_session_manager.store_draftkings_session_data({
+    cookies,
+    is_session_valid: true
+  })
+  log('DraftKings session cookies persisted to DB')
+
+  return { cookies, tmp_dir }
 }
 
 const log = debug('import-draftkings-dfs-ownership')
@@ -219,25 +219,17 @@ const import_ownership = async ({
     include_name_draft_index: false
   })
 
-  // Capture DraftKings session via sandboxed browser task. The page.route()
-  // cookie interception must run inside the _stealth-browser sandbox.
-  log('capturing DraftKings session via sandboxed browser task')
-  await run_browser_task()
-
-  // Retrieve the stored cookies for use in CSV downloads
-  const dk_session_cookies = await draftkings_session_manager.get_valid_draftkings_session_cookies()
-  log('DraftKings session cookies retrieved from DB')
+  // Single sandboxed pass: captures session cookies AND downloads each
+  // contest CSV inside the same _stealth-browser BrowserContext. The CSVs
+  // land in the handoff tempdir as contest-<id>.csv; the orchestrator
+  // reads them by name below.
+  const contest_ids = contests.map((c) => c.source_contest_id)
+  log('capturing DraftKings session + downloading %d contest CSVs via sandboxed browser task', contest_ids.length)
+  const { tmp_dir } = await run_browser_task({ contest_ids })
 
   let total_ownership_records = 0
   let contests_processed = 0
   const draftables_cache = new Map()
-
-  // Note: download_draftkings_standings_csv receives browser_context for
-  // navigation-based downloads. Since CSV download requires an authenticated
-  // browser session, we pass the stored cookies; if the library requires a
-  // live browser_context, a follow-up refactor of WS4-B will sandbox that
-  // half too. For now we pass null and rely on cookie-based fetch if supported.
-  const browser_context = null
 
   try {
     for (const contest of contests) {
@@ -249,20 +241,15 @@ const import_ownership = async ({
         contest.source_draft_group_id
       )
 
-      let csv_text
-      try {
-        csv_text = await draftkings.download_draftkings_standings_csv({
-          contest_id: contest.source_contest_id,
-          browser_context
-        })
-      } catch (err) {
+      const csv_path = path.join(tmp_dir, `contest-${contest.source_contest_id}.csv`)
+      if (!fs.existsSync(csv_path)) {
         log(
-          'failed to download CSV for contest %s: %s',
-          contest.source_contest_id,
-          err.message
+          'no CSV produced by sandbox for contest %s -- skipping',
+          contest.source_contest_id
         )
         continue
       }
+      const csv_text = fs.readFileSync(csv_path, 'utf-8')
 
       if (!csv_text || csv_text.trim().length === 0) {
         log('empty CSV for contest %s -- skipping', contest.source_contest_id)
@@ -417,9 +404,10 @@ const import_ownership = async ({
       )
     }
   } finally {
-    if (browser_context) {
-      await browser_context.close()
-      log('browser context closed')
+    try {
+      fs.rmSync(tmp_dir, { recursive: true, force: true })
+    } catch (err) {
+      log('handoff cleanup failed (non-fatal): %s', err.message)
     }
   }
 
