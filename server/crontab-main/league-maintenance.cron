@@ -9,8 +9,12 @@
 ## Every Monday at 5:00AM (with optimal-lineup pass)
 0 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all --with-optimal >> /var/log/league/league-generate-league-team-player-seasonlogs-with-optimal.log 2>&1
 
-## Every day at 5:00AM
-0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
+## Every day at 5:00AM (--rebuild reasserts canonical state; the walker is
+## idempotent and lid=1 rebuild runs in ~5 seconds, so the daily cost is
+## negligible. Without --rebuild any future emission bug that leaks past
+## the suppression guards in walk-transactions.mjs accumulates orphans
+## the partial unique indexes cannot recover from on their own.)
+0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all --rebuild >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
 
 ## Calibrate composite market value sources (15 5 daily; 15-min buffer after FantasyPros draft import at 0 5 * 5-8 *)
 15 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calibrate-composite-market-value-sources.mjs >> /var/log/league/calibrate-composite-market-value-sources.log 2>&1
