@@ -74,12 +74,17 @@ const generate_for_date_and_category = async ({
   const rank_idx = index_by_pid(rankings)
   const props_idx = index_by_pid(props)
 
-  // Calibration must exist for a source to contribute; if absent, treat that
-  // source as missing for this cell (so its weight redistributes).
+  // Calibration must exist AND have no fallback_reason for a source to
+  // contribute. Fallback rows (calibration_undersized / calibration_low_r_squared)
+  // record scale=1/intercept=0 for reproducibility, but blending source values
+  // in their native units (e.g. props FP ~100 against KTC ~10000) would
+  // silently distort the composite. Treat fallback as absent so weight
+  // redistributes.
   const apply_calib = (source_id, v) => {
     if (v == null) return null
     const c = calib_by_source.get(source_id)
     if (!c) return null
+    if (c.fallback_reason) return null
     return Number(c.scale_factor) * v + Number(c.intercept)
   }
 
