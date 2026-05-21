@@ -145,6 +145,7 @@ const main = async () => {
       argv,
       script_name: 'generate-league-player-seasonlogs',
       script_function: generate_league_player_seasonlogs,
+      season_only: true,
       year_query: ({ seas_type = 'REG' }) =>
         db('league_format_player_gamelogs')
           .join(
