@@ -31,13 +31,29 @@ const get_ranking = (item) => ({
   position_rank: Number(item.pos_rank.replace(/\D/g, ''))
 })
 
-const format_ranking_type = ({ fantasypros_position_type, superflex }) => {
+// FantasyPros scoring-type query param values -> our ranking_type prefix.
+// FantasyPros uses 'STD' for non-PPR; we map to STANDARD to match the
+// format_category_signal_mapping enum.
+const SCORING_TYPE_TO_RANKING_PREFIX = {
+  STD: 'STANDARD',
+  HALF: 'HALF_PPR',
+  PPR: 'PPR'
+}
+
+const format_ranking_type = ({ fantasypros_scoring_type, superflex }) => {
   const sf = superflex ? 'SUPERFLEX_' : ''
-  return `PPR_${sf}DYNASTY`
+  const prefix = SCORING_TYPE_TO_RANKING_PREFIX[fantasypros_scoring_type]
+  if (!prefix) {
+    throw new Error(
+      `unknown fantasypros_scoring_type: ${fantasypros_scoring_type}`
+    )
+  }
+  return `${prefix}_${sf}DYNASTY`
 }
 
 const import_individual_fantasypros_dynasty_rankings = async ({
   year,
+  fantasypros_scoring_type,
   fantasypros_position_type,
   superflex,
   dry_run = false,
@@ -45,7 +61,7 @@ const import_individual_fantasypros_dynasty_rankings = async ({
 }) => {
   const data = await fantasypros.get_fantasypros_rankings({
     year,
-    fantasypros_scoring_type: 'PPR',
+    fantasypros_scoring_type,
     fantasypros_position_type,
     dynasty: true,
     ignore_cache
@@ -84,7 +100,7 @@ const import_individual_fantasypros_dynasty_rankings = async ({
       year,
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({
-        fantasypros_position_type,
+        fantasypros_scoring_type,
         superflex
       }),
       ...ranking
@@ -134,15 +150,22 @@ const import_fantasypros_dynasty_rankings = async ({
       superflex: true
     }
   ]
+  // Three scoring variants per superflex/non-superflex axis: PPR, HALF (half-ppr),
+  // STD (standard). Matches format_category_signal_mapping dynasty enum
+  // ({STANDARD,HALF_PPR,PPR} x {DYNASTY,SUPERFLEX_DYNASTY}).
+  const fantasypros_scoring_types = ['PPR', 'HALF', 'STD']
 
-  for (const item of fantasypros_position_types) {
-    await import_individual_fantasypros_dynasty_rankings({
-      year,
-      ...item,
-      dry_run,
-      ignore_cache
-    })
-    await wait(2000)
+  for (const fantasypros_scoring_type of fantasypros_scoring_types) {
+    for (const item of fantasypros_position_types) {
+      await import_individual_fantasypros_dynasty_rankings({
+        year,
+        fantasypros_scoring_type,
+        ...item,
+        dry_run,
+        ignore_cache
+      })
+      await wait(2000)
+    }
   }
 }
 
