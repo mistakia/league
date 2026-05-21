@@ -446,9 +446,27 @@ const apply_trade = ({
   const source_drafts = []
   const target_drafts = []
 
+  // Resolve the actual open pick_key for a pickid, regardless of which team
+  // the trades_picks row claims is losing. Handles upstream data errors where
+  // trades_picks.tid points at a team that does not currently hold the pick
+  // (observed on lid=1 trade #64 where pick 37 was recorded as losing from
+  // tid 9 even though trade #2 had already moved it to tid 1). Returns the
+  // {key, tid} pair so the caller can swap winning_tid when the recorded
+  // losing_tid is wrong.
+  const find_open_pick = (pickid) => {
+    for (const key of ctx.open.keys()) {
+      if (!key.startsWith('pk__')) continue
+      const parts = key.split('__')
+      if (parts[2] === String(pickid)) {
+        return { key, tid: Number(parts[1]) }
+      }
+    }
+    return null
+  }
+
   for (const leg of event.legs) {
     const losing_tid = leg.from_tid
-    const winning_tid = leg.to_tid
+    let winning_tid = leg.to_tid
     if (leg.asset_type === ASSET_TYPE.PLAYER) {
       const closed = close_open({
         key: player_key(losing_tid, leg.player_id),
@@ -466,12 +484,29 @@ const apply_trade = ({
       source_drafts.push(closed?.draft_id || null)
       target_drafts.push(opened.draft_id)
     } else if (leg.asset_type === ASSET_TYPE.PICK) {
-      const closed = close_open({
+      let closed = close_open({
         key: pick_key(losing_tid, leg.pickid),
         occurred_at: event.occurred_at,
         terminated_by: TERMINATED_BY.TRADE
       })
-      if (!closed) note_warning('trade_no_open_source_pick')
+      if (!closed) {
+        // Fallback: find whichever team actually holds the pick. If the
+        // resolved holder is the recorded winning_tid, the trades_picks tids
+        // were reversed -- swap so we close on the real loser and open on
+        // the real winner.
+        const found = find_open_pick(leg.pickid)
+        if (found) {
+          if (found.tid === winning_tid) winning_tid = losing_tid
+          closed = close_open({
+            key: found.key,
+            occurred_at: event.occurred_at,
+            terminated_by: TERMINATED_BY.TRADE
+          })
+          note_warning('trade_pick_source_tid_corrected')
+        } else {
+          note_warning('trade_no_open_source_pick')
+        }
+      }
       const opened = open_pick_holding({
         tid: winning_tid,
         pickid: leg.pickid,
