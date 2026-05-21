@@ -678,6 +678,23 @@ const build_event_stream = async ({ lid }) => {
         .select('uid', 'round', 'year', 'otid', 'pick')
     : []
   const pick_meta_by_id = new Map(picks_meta.map((p) => [p.uid, p]))
+  // Standings-allocated owner per pickid. The `draft.otid` column reflects the
+  // pick's eventual owner (sometimes already mutated by trades), not the team
+  // standings allocated it to. The earliest-accepted trade's losing tid is the
+  // team that held the pick before any trade fired -- which is the standings
+  // owner. Picks that were never traded keep `draft.otid` (no mutation
+  // occurred). This map is consumed both by the trade-leg loop below (to set
+  // `pick_original_owner_tid` on each opened holding) and by the pick
+  // endowment loop further down (to endow the pick to the correct team so
+  // subsequent trade legs find it in ctx.open).
+  const standings_tid_by_pickid = new Map()
+  for (const trade of trades) {
+    for (const tpi of trade_picks.filter((r) => r.tradeid === trade.uid)) {
+      if (!standings_tid_by_pickid.has(tpi.pickid)) {
+        standings_tid_by_pickid.set(tpi.pickid, tpi.tid)
+      }
+    }
+  }
   for (const trade of trades) {
     const legs = []
     for (const tp of trade_players.filter((r) => r.tradeid === trade.uid)) {
@@ -710,7 +727,8 @@ const build_event_stream = async ({ lid }) => {
         pickid: tpi.pickid,
         pick_year: meta.year,
         pick_round: meta.round,
-        pick_original_owner_tid: meta.otid,
+        pick_original_owner_tid:
+          standings_tid_by_pickid.get(tpi.pickid) ?? meta.otid,
         pick_draft_overall_position: meta.pick,
         from_tid: tpi.tid,
         to_tid:
@@ -763,15 +781,18 @@ const build_event_stream = async ({ lid }) => {
     if (earliest_trade && earliest_trade * 1000 < endow_date.getTime()) {
       endow_date = new Date(earliest_trade * 1000 - 60_000)
     }
+    // standings owner = earliest trade's losing tid, else draft.otid (the
+    // pick was never traded, so otid still reflects standings allocation).
+    const standings_tid = standings_tid_by_pickid.get(pick.uid) ?? pick.otid
     events.push({
       sort_ts: Math.floor(endow_date.getTime() / 1000),
       sort_priority: 0, // process endowments first so trades-of-picks find an open source
       kind: 'pick_endowment',
-      tid: pick.otid, // endowed to the original-owner team
+      tid: standings_tid,
       pickid: pick.uid,
       pick_year: pick.year,
       pick_round: pick.round,
-      pick_original_owner_tid: pick.otid,
+      pick_original_owner_tid: standings_tid,
       pick_draft_overall_position: pick.pick,
       occurred_at: endow_date
     })
