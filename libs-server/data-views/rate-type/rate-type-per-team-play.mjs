@@ -6,7 +6,6 @@ import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
-import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
 
 export const get_per_team_play_cte_table_name = ({

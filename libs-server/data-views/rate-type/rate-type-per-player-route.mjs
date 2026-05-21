@@ -7,7 +7,7 @@ import get_rate_type_denominator_params, {
   get_play_level_params_hash_suffix
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
-import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
+
 export const get_default_params = ({ params = {} } = {}) => {
   const nfl_week = resolve_nfl_week_id_from_year_param(params)
 
