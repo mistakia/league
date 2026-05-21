@@ -35,6 +35,7 @@ DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS trigger_update_selection_combination_definitions_updated_at ON public.selection_combination_definitions;
 DROP TRIGGER IF EXISTS trigger_external_league_import_jobs_updated_at ON public.external_league_import_jobs;
 DROP TRIGGER IF EXISTS trigger_external_league_connections_updated_at ON public.external_league_connections;
+DROP TRIGGER IF EXISTS trg_cmv_classify_league_format ON public.league_formats;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
@@ -407,6 +408,12 @@ DROP INDEX IF EXISTS public.idx_24626_baseline;
 DROP INDEX IF EXISTS public.idx_24623_player_value;
 DROP INDEX IF EXISTS public.idx_24613_team;
 DROP INDEX IF EXISTS public.idx_24608_pick;
+DROP INDEX IF EXISTS public.cmv_player_unique_idx;
+DROP INDEX IF EXISTS public.cmv_player_date_idx;
+DROP INDEX IF EXISTS public.cmv_pick_unique_idx;
+DROP INDEX IF EXISTS public.cmv_pick_date_idx;
+DROP INDEX IF EXISTS public.cmv_date_category_type_idx;
+DROP INDEX IF EXISTS public.cmv_blend_weights_category_effective_idx;
 ALTER TABLE IF EXISTS ONLY public.worker_heartbeat DROP CONSTRAINT IF EXISTS worker_heartbeat_pkey;
 ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
@@ -537,6 +544,7 @@ ALTER TABLE IF EXISTS ONLY public.matchups DROP CONSTRAINT IF EXISTS "idx_24699_
 ALTER TABLE IF EXISTS ONLY public.league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_24658_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.league_migrations DROP CONSTRAINT IF EXISTS "idx_24652_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.draft DROP CONSTRAINT IF EXISTS "idx_24608_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.format_category_signal_mapping DROP CONSTRAINT IF EXISTS format_category_signal_mapping_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_job_history DROP CONSTRAINT IF EXISTS external_league_import_job_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_pkey;
@@ -554,6 +562,9 @@ ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT I
 ALTER TABLE IF EXISTS ONLY public.dfs_contests DROP CONSTRAINT IF EXISTS dfs_contests_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
+ALTER TABLE IF EXISTS ONLY public.composite_market_value_daily DROP CONSTRAINT IF EXISTS composite_market_value_daily_pkey;
+ALTER TABLE IF EXISTS ONLY public.composite_market_value_calibration DROP CONSTRAINT IF EXISTS composite_market_value_calibration_pkey;
+ALTER TABLE IF EXISTS ONLY public.composite_market_value_blend_weights DROP CONSTRAINT IF EXISTS composite_market_value_blend_weights_pkey;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
@@ -579,6 +590,8 @@ ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFA
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN cmv_row_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
 DROP TABLE IF EXISTS public.worker_heartbeat;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
@@ -839,6 +852,7 @@ DROP TABLE IF EXISTS public.keeptradecut_liquidity;
 DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
 DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.invite_codes;
+DROP TABLE IF EXISTS public.format_category_signal_mapping;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP TABLE IF EXISTS public.external_league_import_jobs;
 DROP TABLE IF EXISTS public.external_league_import_job_history;
@@ -858,6 +872,11 @@ DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.dfs_contests;
 DROP TABLE IF EXISTS public.config;
+DROP SEQUENCE IF EXISTS public.composite_market_value_daily_cmv_row_id_seq;
+DROP TABLE IF EXISTS public.composite_market_value_daily;
+DROP TABLE IF EXISTS public.composite_market_value_calibration;
+DROP SEQUENCE IF EXISTS public.composite_market_value_blend_weights_version_id_seq;
+DROP TABLE IF EXISTS public.composite_market_value_blend_weights;
 DROP FUNCTION IF EXISTS public.update_selection_combination_definitions_updated_at();
 DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying);
@@ -868,6 +887,8 @@ DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP FUNCTION IF EXISTS public.needs_line_normalization(line numeric, name text);
 DROP FUNCTION IF EXISTS public.get_next_queued_job();
 DROP FUNCTION IF EXISTS public.complete_job(p_job_id uuid, p_success boolean, p_results jsonb, p_error_message text, p_error_context jsonb, p_stats_players_mapped integer, p_stats_players_failed integer, p_stats_rosters_updated integer, p_stats_transactions_imported integer, p_stats_transactions_failed integer);
+DROP FUNCTION IF EXISTS public.cmv_derive_format_category(sqb smallint, sqbrbwrte smallint, rec numeric);
+DROP FUNCTION IF EXISTS public.cmv_classify_league_format();
 DROP FUNCTION IF EXISTS public.archive_completed_import_jobs();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
@@ -1506,6 +1527,50 @@ COMMENT ON FUNCTION public.archive_completed_import_jobs() IS 'Archives complete
 
 
 --
+-- Name: cmv_classify_league_format(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cmv_classify_league_format() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  rec_val numeric;
+BEGIN
+  SELECT rec INTO rec_val FROM league_scoring_formats WHERE scoring_format_hash = NEW.scoring_format_hash;
+  NEW.format_category := cmv_derive_format_category(NEW.sqb, NEW.sqbrbwrte, rec_val);
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: cmv_derive_format_category(smallint, smallint, numeric); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.cmv_derive_format_category(sqb smallint, sqbrbwrte smallint, rec numeric) RETURNS smallint
+    LANGUAGE plpgsql IMMUTABLE
+    AS $$
+DECLARE
+  superflex boolean := (sqb > 1 OR sqbrbwrte > 0);
+  scoring_axis smallint;
+BEGIN
+  IF rec IS NULL OR rec < 0.25 THEN
+    scoring_axis := 0;
+  ELSIF rec < 0.75 THEN
+    scoring_axis := 1;
+  ELSE
+    scoring_axis := 2;
+  END IF;
+  IF superflex THEN
+    RETURN 4 + scoring_axis;
+  ELSE
+    RETURN 1 + scoring_axis;
+  END IF;
+END;
+$$;
+
+
+--
 -- Name: complete_job(uuid, boolean, jsonb, text, jsonb, integer, integer, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1707,6 +1772,146 @@ $$;
 
 
 SET default_table_access_method = heap;
+
+--
+-- Name: composite_market_value_blend_weights; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.composite_market_value_blend_weights (
+    version_id integer NOT NULL,
+    format_category smallint,
+    effective_from date NOT NULL,
+    ktc_weight numeric(4,3) NOT NULL,
+    adp_weight numeric(4,3) NOT NULL,
+    rankings_weight numeric(4,3) NOT NULL,
+    props_weight numeric(4,3) NOT NULL,
+    draft_pick_model_weight numeric(4,3) NOT NULL,
+    notes text,
+    CONSTRAINT cmv_weights_sum_one CHECK ((abs((((((ktc_weight + adp_weight) + rankings_weight) + props_weight) + draft_pick_model_weight) - 1.000)) < 0.005))
+);
+
+
+--
+-- Name: TABLE composite_market_value_blend_weights; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.composite_market_value_blend_weights IS 'Versioned blend weights per (format_category, effective_from). format_category=NULL means default weights (used when no format-specific override exists for a given format category on the blend date). Weights sum to 1.000.';
+
+
+--
+-- Name: composite_market_value_blend_weights_version_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.composite_market_value_blend_weights_version_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: composite_market_value_blend_weights_version_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.composite_market_value_blend_weights_version_id_seq OWNED BY public.composite_market_value_blend_weights.version_id;
+
+
+--
+-- Name: composite_market_value_calibration; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.composite_market_value_calibration (
+    source smallint NOT NULL,
+    format_category smallint NOT NULL,
+    date date NOT NULL,
+    scale_factor numeric(8,4) NOT NULL,
+    intercept numeric(10,3) NOT NULL,
+    overlap_sample_size smallint NOT NULL,
+    r_squared numeric(4,3),
+    fallback_reason text
+);
+
+
+--
+-- Name: TABLE composite_market_value_calibration; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.composite_market_value_calibration IS 'Per-(source, format_category, date) linear calibration of native-unit source values onto the KTC axis. Persisted for reproducibility. fallback_reason is set when overlap_sample_size<30 (calibration_undersized) or r_squared<0.5 (calibration_low_r_squared); in those cases scale_factor=1, intercept=0.';
+
+
+--
+-- Name: COLUMN composite_market_value_calibration.source; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.composite_market_value_calibration.source IS 'Enum: 1=ktc, 2=adp, 3=rankings, 4=props, 5=draft_pick_model.';
+
+
+--
+-- Name: composite_market_value_daily; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.composite_market_value_daily (
+    cmv_row_id bigint NOT NULL,
+    format_category smallint NOT NULL,
+    asset_type smallint NOT NULL,
+    player_id character varying(25),
+    pick_year smallint,
+    pick_round smallint,
+    pick_original_owner_tid integer,
+    date date NOT NULL,
+    ktc_value numeric(8,1),
+    adp_value numeric(8,1),
+    rankings_value numeric(8,1),
+    props_value numeric(8,1),
+    draft_pick_model_value numeric(8,1),
+    composite_value numeric(8,1) NOT NULL,
+    composite_coverage_score numeric(3,2) NOT NULL,
+    blend_weights_version_id integer NOT NULL,
+    CONSTRAINT cmv_asset_keys_chk CHECK ((((asset_type = 1) AND (player_id IS NOT NULL) AND (pick_year IS NULL) AND (pick_round IS NULL) AND (pick_original_owner_tid IS NULL)) OR ((asset_type = 2) AND (player_id IS NULL) AND (pick_year IS NOT NULL) AND (pick_round IS NOT NULL) AND (pick_original_owner_tid IS NOT NULL))))
+);
+
+
+--
+-- Name: TABLE composite_market_value_daily; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.composite_market_value_daily IS 'Daily-grain composite market-value index. One row per (format_category, asset, date). Per-source columns (ktc/adp/rankings/props/draft_pick_model) are KTC-calibrated; composite_value is the weighted average over present sources. composite_coverage_score is the share of intended-source weight that was present in-window for this row.';
+
+
+--
+-- Name: COLUMN composite_market_value_daily.format_category; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.composite_market_value_daily.format_category IS 'Enum: 1=single_qb_standard, 2=single_qb_half_ppr, 3=single_qb_full_ppr, 4=superflex_standard, 5=superflex_half_ppr, 6=superflex_full_ppr.';
+
+
+--
+-- Name: COLUMN composite_market_value_daily.asset_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.composite_market_value_daily.asset_type IS 'Enum: 1=player, 2=pick. Natural key columns enforced via CHECK + partial unique indexes.';
+
+
+--
+-- Name: composite_market_value_daily_cmv_row_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.composite_market_value_daily_cmv_row_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: composite_market_value_daily_cmv_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.composite_market_value_daily_cmv_row_id_seq OWNED BY public.composite_market_value_daily.cmv_row_id;
+
 
 --
 -- Name: config; Type: TABLE; Schema: public; Owner: -
@@ -2770,6 +2975,26 @@ CREATE TABLE public.footballoutsiders (
 
 
 --
+-- Name: format_category_signal_mapping; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.format_category_signal_mapping (
+    format_category smallint NOT NULL,
+    ktc_qb_axis smallint NOT NULL,
+    adp_type text NOT NULL,
+    ranking_type text NOT NULL,
+    props_scoring_formula_template text
+);
+
+
+--
+-- Name: TABLE format_category_signal_mapping; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.format_category_signal_mapping IS 'Static 6-row mapping from format_category to per-source axis: ktc qb=1|2, Sleeper adp_type, FantasyPros ranking_type, props scoring template. Runtime joins look this up to select the right source rows per format category.';
+
+
+--
 -- Name: invite_codes; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3027,7 +3252,8 @@ CREATE TABLE public.league_formats (
     pts_base_season_wr numeric(3,1),
     pts_base_season_te numeric(3,1),
     pts_base_season_k numeric(3,1),
-    pts_base_season_dst numeric(3,1)
+    pts_base_season_dst numeric(3,1),
+    format_category smallint
 );
 
 
@@ -3113,6 +3339,13 @@ COMMENT ON COLUMN public.league_formats.pts_base_season_k IS 'k pts/season basel
 --
 
 COMMENT ON COLUMN public.league_formats.pts_base_season_dst IS 'dst pts/season baseline';
+
+
+--
+-- Name: COLUMN league_formats.format_category; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_formats.format_category IS 'Denormalized resolution of (superflex × scoring axis) into the 6-bucket format_category enum. Populated by the cmv_classify_league_format trigger on insert/update; one-time backfill ran with the DDL.';
 
 
 --
@@ -25983,6 +26216,20 @@ ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_in
 
 
 --
+-- Name: composite_market_value_blend_weights version_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.composite_market_value_blend_weights ALTER COLUMN version_id SET DEFAULT nextval('public.composite_market_value_blend_weights_version_id_seq'::regclass);
+
+
+--
+-- Name: composite_market_value_daily cmv_row_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.composite_market_value_daily ALTER COLUMN cmv_row_id SET DEFAULT nextval('public.composite_market_value_daily_cmv_row_id_seq'::regclass);
+
+
+--
 -- Name: draft uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -26158,6 +26405,30 @@ ALTER TABLE ONLY public.waivers ALTER COLUMN uid SET DEFAULT nextval('public.wai
 
 
 --
+-- Name: composite_market_value_blend_weights composite_market_value_blend_weights_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.composite_market_value_blend_weights
+    ADD CONSTRAINT composite_market_value_blend_weights_pkey PRIMARY KEY (version_id);
+
+
+--
+-- Name: composite_market_value_calibration composite_market_value_calibration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.composite_market_value_calibration
+    ADD CONSTRAINT composite_market_value_calibration_pkey PRIMARY KEY (source, format_category, date);
+
+
+--
+-- Name: composite_market_value_daily composite_market_value_daily_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.composite_market_value_daily
+    ADD CONSTRAINT composite_market_value_daily_pkey PRIMARY KEY (cmv_row_id);
+
+
+--
 -- Name: config config_key_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -26291,6 +26562,14 @@ ALTER TABLE ONLY public.external_league_import_job_history
 
 ALTER TABLE ONLY public.external_league_import_jobs
     ADD CONSTRAINT external_league_import_jobs_pkey PRIMARY KEY (job_id);
+
+
+--
+-- Name: format_category_signal_mapping format_category_signal_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.format_category_signal_mapping
+    ADD CONSTRAINT format_category_signal_mapping_pkey PRIMARY KEY (format_category);
 
 
 --
@@ -27331,6 +27610,48 @@ ALTER TABLE ONLY public.weekly_market_selections_analysis_cache
 
 ALTER TABLE ONLY public.worker_heartbeat
     ADD CONSTRAINT worker_heartbeat_pkey PRIMARY KEY (worker_name);
+
+
+--
+-- Name: cmv_blend_weights_category_effective_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX cmv_blend_weights_category_effective_idx ON public.composite_market_value_blend_weights USING btree (COALESCE((format_category)::integer, '-1'::integer), effective_from);
+
+
+--
+-- Name: cmv_date_category_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX cmv_date_category_type_idx ON public.composite_market_value_daily USING btree (date, format_category, asset_type);
+
+
+--
+-- Name: cmv_pick_date_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX cmv_pick_date_idx ON public.composite_market_value_daily USING btree (pick_year, pick_round, pick_original_owner_tid, date) WHERE (asset_type = 2);
+
+
+--
+-- Name: cmv_pick_unique_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX cmv_pick_unique_idx ON public.composite_market_value_daily USING btree (format_category, pick_year, pick_round, pick_original_owner_tid, date) WHERE (asset_type = 2);
+
+
+--
+-- Name: cmv_player_date_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX cmv_player_date_idx ON public.composite_market_value_daily USING btree (player_id, date) WHERE (asset_type = 1);
+
+
+--
+-- Name: cmv_player_unique_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX cmv_player_unique_idx ON public.composite_market_value_daily USING btree (format_category, player_id, date) WHERE (asset_type = 1);
 
 
 --
@@ -53262,6 +53583,13 @@ CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON publi
 
 
 --
+-- Name: league_formats trg_cmv_classify_league_format; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF sqb, sqbrbwrte, scoring_format_hash ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
+
+
+--
 -- Name: external_league_connections trigger_external_league_connections_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -53401,6 +53729,41 @@ GRANT USAGE ON SCHEMA public TO league_readonly;
 
 
 --
+-- Name: TABLE composite_market_value_blend_weights; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.composite_market_value_blend_weights TO league_readonly;
+
+
+--
+-- Name: SEQUENCE composite_market_value_blend_weights_version_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.composite_market_value_blend_weights_version_id_seq TO league_readonly;
+
+
+--
+-- Name: TABLE composite_market_value_calibration; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.composite_market_value_calibration TO league_readonly;
+
+
+--
+-- Name: TABLE composite_market_value_daily; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.composite_market_value_daily TO league_readonly;
+
+
+--
+-- Name: SEQUENCE composite_market_value_daily_cmv_row_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.composite_market_value_daily_cmv_row_id_seq TO league_readonly;
+
+
+--
 -- Name: TABLE config; Type: ACL; Schema: public; Owner: -
 --
 
@@ -53531,6 +53894,13 @@ GRANT SELECT ON TABLE public.external_league_import_jobs TO league_readonly;
 --
 
 GRANT SELECT ON TABLE public.footballoutsiders TO league_readonly;
+
+
+--
+-- Name: TABLE format_category_signal_mapping; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.format_category_signal_mapping TO league_readonly;
 
 
 --
