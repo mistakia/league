@@ -25445,7 +25445,7 @@ CREATE VIEW public.v_roster_asset_lineage_walk AS
         UNION ALL
          SELECT w.originating_holding_id,
             t.target_holding_id,
-            (w.cumulative_weight * (t.source_share * t.target_share)),
+            (w.cumulative_weight * t.target_share),
             (w.depth + 1),
             w.root_kind
            FROM (walk w
@@ -25464,7 +25464,7 @@ CREATE VIEW public.v_roster_asset_lineage_walk AS
 -- Name: VIEW v_roster_asset_lineage_walk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON VIEW public.v_roster_asset_lineage_walk IS 'Recursive walk anchored at salary-bearing holdings (root_kind=salary) and standings-endowed picks (root_kind=endowment). Composite edge weight along a path = product of (source_share * target_share). Depth capped at 20 (sufficient for realistic trade chains).';
+COMMENT ON VIEW public.v_roster_asset_lineage_walk IS 'Recursive walk anchored at salary-bearing holdings (root_kind=salary) and standings-endowed picks (root_kind=endowment). Composite edge weight along a path = product of target_share values along the chain (source_share is the same fraction one hop earlier; multiplying both double-counts). Depth capped at 20.';
 
 
 --
