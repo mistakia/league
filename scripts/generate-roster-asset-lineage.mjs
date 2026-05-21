@@ -9,6 +9,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import walk_transactions from '#libs-server/roster-asset-lineage/walk-transactions.mjs'
 import compute_snapshots_bulk from '#libs-server/roster-asset-lineage/compute-snapshots-bulk.mjs'
 import refresh_extension_state from '#libs-server/roster-asset-lineage/refresh-extension-state.mjs'
+import audit_corrections from '#libs-server/roster-asset-lineage/audit-corrections-seed.mjs'
 
 import { SALARY_ATTRIBUTION_RULE, TERMINATED_BY } from '#libs-server/roster-asset-lineage/constants.mjs'
 
@@ -147,7 +148,11 @@ const generate_roster_asset_lineage = async ({
       composite_market_value_at_termination:
         snap.composite_market_value_at_termination ?? null,
       terminated_by: draft.terminated_by || TERMINATED_BY.STILL_HELD,
+      is_rookie_tag: draft.is_rookie_tag === true,
+      protected_for_year: draft.protected_for_year ?? null,
+      super_priority_until: draft.super_priority_until ?? null,
       audit_corrected: false,
+      correction_note: null,
       __draft_id: draft.draft_id
     }
   })
@@ -196,6 +201,36 @@ const generate_roster_asset_lineage = async ({
     })
   }
   log(`inserted ${transformation_rows.length} roster_asset_transformation rows`)
+
+  // Apply audit-corrections seed: flag holdings keyed by (lid, tid, player_id,
+  // period_start_ts) with audit_corrected=true and a correction_note. Each
+  // entry is expected to match exactly one holding; mismatches surface as
+  // log warnings rather than errors so a rebuild on a different league does
+  // not fail on unrelated seed entries.
+  let audit_corrections_applied = 0
+  for (const entry of audit_corrections) {
+    if (entry.lid !== lid) continue
+    const period_start = new Date(entry.period_start_ts * 1000)
+    const updated = await db('roster_asset_holding')
+      .where({
+        lid: entry.lid,
+        tid: entry.tid,
+        player_id: entry.player_id,
+        period_start
+      })
+      .update({
+        audit_corrected: true,
+        correction_note: entry.correction_note
+      })
+    if (updated === 0) {
+      log(
+        `audit-correction seed did not match any holding: lid=${entry.lid} tid=${entry.tid} player_id=${entry.player_id} period_start_ts=${entry.period_start_ts}`
+      )
+    } else {
+      audit_corrections_applied += updated
+    }
+  }
+  log(`applied ${audit_corrections_applied} audit-correction seed entries`)
 
   // Final pass: refresh denormalized extension state.
   const refreshed = await refresh_extension_state({ lid })

@@ -74,7 +74,6 @@ const INTRA_HOLDING_TRANSACTION_TYPES = new Set([
   transaction_types.RESERVE_IR,
   transaction_types.RESERVE_COV,
   transaction_types.RESERVE_LONG_TERM,
-  transaction_types.PRACTICE_PROTECTED,
   transaction_types.AUCTION_BID
 ])
 
@@ -134,7 +133,10 @@ const walk_transactions = async ({ lid }) => {
       period_end: null,
       salary_basis,
       year,
-      terminated_by: TERMINATED_BY.STILL_HELD
+      terminated_by: TERMINATED_BY.STILL_HELD,
+      is_rookie_tag: false,
+      protected_for_year: null,
+      super_priority_until: null
     }
     ctx.drafts_by_id.set(draft_id, draft)
     ctx.holding_drafts.push(draft)
@@ -259,6 +261,9 @@ const walk_transactions = async ({ lid }) => {
         salary_basis: cfg.salary_basis,
         year: event.year
       })
+      if (event.transaction_type === transaction_types.ROOKIE_TAG) {
+        draft.is_rookie_tag = true
+      }
       emit_edge({
         transformation_id: randomUUID(),
         transformation_type: cfg.transformation,
@@ -269,6 +274,41 @@ const walk_transactions = async ({ lid }) => {
         target_share: 1.0,
         transaction_id: event.transaction_id
       })
+    } else if (event.kind === 'practice_protected') {
+      // PRACTICE_PROTECTED is an intra-holding marker: decorate the open PS
+      // holding with the league year for which the player is PS-protected.
+      const draft_id = ctx.open.get(player_key(event.tid, event.player_id))
+      const draft = draft_id ? ctx.drafts_by_id.get(draft_id) : null
+      if (draft) {
+        draft.protected_for_year = event.year
+      } else {
+        note_warning('practice_protected_no_open_holding')
+      }
+    } else if (event.kind === 'super_priority_resign') {
+      // Type 19 SUPER_PRIORITY transaction: the original team has exercised
+      // its super-priority claim on a previously-poached-then-released player.
+      // Per Amend XXXIV, the window opens on the poaching team's release and
+      // closes here. Decorate the most recent released holding for this pid
+      // (the poaching team's released holding) with super_priority_until set
+      // to the exercise timestamp. Do not open a new holding; the original
+      // team's reclaimed PS ownership remains an unmodeled gap until the
+      // separate super-priority-resign lineage edge is added.
+      let released
+      for (const candidate of ctx.holding_drafts) {
+        if (candidate.asset_type !== ASSET_TYPE.PLAYER) continue
+        if (candidate.player_id !== event.player_id) continue
+        if (candidate.terminated_by !== TERMINATED_BY.RELEASE) continue
+        if (!candidate.period_end) continue
+        if (candidate.period_end.getTime() > event.occurred_at.getTime()) continue
+        if (!released || candidate.period_end > released.period_end) {
+          released = candidate
+        }
+      }
+      if (released) {
+        released.super_priority_until = event.occurred_at
+      } else {
+        note_warning('super_priority_no_released_holding')
+      }
     } else if (event.kind === 'player_release') {
       const closed = close_open({
         key: player_key(event.tid, event.player_id),
@@ -480,6 +520,32 @@ const build_event_stream = async ({ lid }) => {
     if (tran.type === transaction_types.TRADE) continue
     const ts = new Date(tran.timestamp * 1000)
     if (INTRA_HOLDING_TRANSACTION_TYPES.has(tran.type)) continue
+    if (tran.type === transaction_types.PRACTICE_PROTECTED) {
+      events.push({
+        sort_ts: tran.timestamp,
+        sort_priority: 5, // after acquisitions/releases at the same timestamp
+        kind: 'practice_protected',
+        tid: tran.tid,
+        player_id: tran.pid,
+        occurred_at: ts,
+        year: tran.year,
+        transaction_id: tran.uid
+      })
+      continue
+    }
+    if (tran.type === transaction_types.SUPER_PRIORITY) {
+      events.push({
+        sort_ts: tran.timestamp,
+        sort_priority: 5, // after releases (priority 1) at the same timestamp
+        kind: 'super_priority_resign',
+        tid: tran.tid,
+        player_id: tran.pid,
+        occurred_at: ts,
+        year: tran.year,
+        transaction_id: tran.uid
+      })
+      continue
+    }
     if (
       tran.type === transaction_types.RESTRICTED_FREE_AGENCY_TAG &&
       cross_team_rfa_key_set.has(`${tran.tid}__${tran.pid}__${tran.timestamp}`)
@@ -679,6 +745,30 @@ const build_event_stream = async ({ lid }) => {
         player_id: pick.pid,
         occurred_at: new Date(pick.selection_timestamp * 1000)
       })
+    }
+  }
+
+  // Immediate-release flow (process-poach.mjs): when the poaching team lacks
+  // roster space, the POACHED transaction is followed at the same timestamp
+  // by a ROSTER_RELEASE on the same (tid, pid). Bump the release priority so
+  // it processes after the acquisition, otherwise the release fires against
+  // a not-yet-opened holding and the released period never gets recorded --
+  // which then orphans any later super-priority resign.
+  const poach_keys = new Set()
+  for (const ev of events) {
+    if (
+      ev.kind === 'player_acquisition' &&
+      ev.transaction_type === transaction_types.POACHED
+    ) {
+      poach_keys.add(`${ev.sort_ts}__${ev.tid}__${ev.player_id}`)
+    }
+  }
+  for (const ev of events) {
+    if (
+      ev.kind === 'player_release' &&
+      poach_keys.has(`${ev.sort_ts}__${ev.tid}__${ev.player_id}`)
+    ) {
+      ev.sort_priority = 6
     }
   }
 
