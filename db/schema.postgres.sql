@@ -18,6 +18,8 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_target_holding_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_source_holding_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_scoring_format_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
@@ -38,6 +40,12 @@ DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
 DROP INDEX IF EXISTS public.user_data_view_favorites_user_id_idx;
 DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
+DROP INDEX IF EXISTS public.roster_asset_transformation_target_idx;
+DROP INDEX IF EXISTS public.roster_asset_transformation_source_idx;
+DROP INDEX IF EXISTS public.roster_asset_transformation_lid_occurred_idx;
+DROP INDEX IF EXISTS public.roster_asset_transformation_id_idx;
+DROP INDEX IF EXISTS public.roster_asset_holding_team_period_idx;
+DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
@@ -418,10 +426,14 @@ ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRA
 ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRAINT IF EXISTS selection_combination_definitions_combination_name_key;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
+ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_pkey;
+ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_pkey;
+ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_lid_tid_asset_type_player_id_pick_year_key;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
 ALTER TABLE IF EXISTS ONLY public.position_game_outcome_defaults DROP CONSTRAINT IF EXISTS position_game_outcome_defaults_pkey;
 ALTER TABLE IF EXISTS ONLY public.playoffs DROP CONSTRAINT IF EXISTS playoffs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_team_extension_state DROP CONSTRAINT IF EXISTS player_team_extension_state_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
 ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_year_unique;
@@ -552,6 +564,8 @@ ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_odds_history ALTER COLUMN history_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_definitions ALTER COLUMN combination_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.rosters ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.roster_asset_transformation ALTER COLUMN transformation_row_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.roster_asset_holding ALTER COLUMN holding_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index_new ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index ALTER COLUMN prop_id DROP DEFAULT;
@@ -570,6 +584,7 @@ DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
 DROP TABLE IF EXISTS public.waivers;
 DROP TABLE IF EXISTS public.waiver_releases;
+DROP VIEW IF EXISTS public.v_roster_asset_lineage_walk;
 DROP TABLE IF EXISTS public.users_teams;
 DROP TABLE IF EXISTS public.users_sources;
 DROP SEQUENCE IF EXISTS public.users_id_seq;
@@ -608,6 +623,10 @@ DROP TABLE IF EXISTS public.schedule;
 DROP SEQUENCE IF EXISTS public.rosters_uid_seq;
 DROP TABLE IF EXISTS public.rosters_players;
 DROP TABLE IF EXISTS public.rosters;
+DROP SEQUENCE IF EXISTS public.roster_asset_transformation_transformation_row_id_seq;
+DROP TABLE IF EXISTS public.roster_asset_transformation;
+DROP SEQUENCE IF EXISTS public.roster_asset_holding_holding_id_seq;
+DROP TABLE IF EXISTS public.roster_asset_holding;
 DROP TABLE IF EXISTS public.ros_projections;
 DROP TABLE IF EXISTS public.restricted_free_agency_releases;
 DROP SEQUENCE IF EXISTS public.restricted_free_agency_bids_uid_seq;
@@ -642,6 +661,7 @@ DROP TABLE IF EXISTS public.poach_releases;
 DROP TABLE IF EXISTS public.playoffs;
 DROP TABLE IF EXISTS public.players_status;
 DROP TABLE IF EXISTS public.player_variance;
+DROP TABLE IF EXISTS public.player_team_extension_state;
 DROP TABLE IF EXISTS public.player_seasonlogs;
 DROP TABLE IF EXISTS public.player_salaries;
 DROP TABLE IF EXISTS public.player_rushing_gamelogs;
@@ -3573,8 +3593,16 @@ CREATE TABLE public.leagues (
     espn_id bigint,
     sleeper_id bigint,
     mfl_id bigint,
-    fleaflicker_id bigint
+    fleaflicker_id bigint,
+    salary_attribution_rule smallint DEFAULT 0 NOT NULL
 );
+
+
+--
+-- Name: COLUMN leagues.salary_attribution_rule; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.leagues.salary_attribution_rule IS 'Enum SALARY_ATTRIBUTION_RULE: 0=NO_CAP, 1=AUCTION_BUDGET, 2=START_TEAM_BEARS, 3=CONTRACT_FOLLOWS. v1 generator implements START_TEAM_BEARS only; other values raise coverage_warning and skip.';
 
 
 --
@@ -23066,6 +23094,29 @@ CREATE TABLE public.player_seasonlogs (
 
 
 --
+-- Name: player_team_extension_state; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_team_extension_state (
+    lid integer NOT NULL,
+    tid integer NOT NULL,
+    pid character varying(25) NOT NULL,
+    extension_count smallint DEFAULT 0 NOT NULL,
+    franchise_tag_history_years smallint[],
+    rookie_tag_used_year smallint,
+    last_reset_event smallint,
+    last_refreshed_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE player_team_extension_state; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_team_extension_state IS 'Denormalized extension/tag state per (lid, tid, pid) for fast offseason quotes. last_reset_event enum: 1=rfa_win, 2=release, 3=traded_away.';
+
+
+--
 -- Name: player_variance; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -24272,6 +24323,188 @@ CREATE TABLE public.ros_projections (
 
 
 --
+-- Name: roster_asset_holding; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.roster_asset_holding (
+    holding_id bigint NOT NULL,
+    lid integer NOT NULL,
+    tid integer NOT NULL,
+    asset_type smallint NOT NULL,
+    player_id character varying(25),
+    pick_year smallint,
+    pick_round smallint,
+    pick_original_owner_tid integer,
+    pick_draft_overall_position smallint,
+    period_start timestamp without time zone NOT NULL,
+    period_end timestamp without time zone,
+    league_format_hash character varying(64) NOT NULL,
+    salary_paid integer,
+    salary_basis smallint,
+    initial_slot_type smallint,
+    ps_slot_subtype smallint,
+    weeks_active smallint DEFAULT 0 NOT NULL,
+    weeks_practice_squad smallint DEFAULT 0 NOT NULL,
+    weeks_reserve_short_term smallint DEFAULT 0 NOT NULL,
+    weeks_reserve_long_term smallint DEFAULT 0 NOT NULL,
+    weeks_cov smallint DEFAULT 0 NOT NULL,
+    weeks_started smallint DEFAULT 0 NOT NULL,
+    projected_pts_added_at_acquisition numeric(6,1),
+    realized_pts_added_net_through_termination numeric(6,1),
+    realized_pts_added_earned_through_termination numeric(6,1),
+    realized_pts_added_net_in_active_slot numeric(6,1),
+    realized_pts_added_net_in_started_slot numeric(6,1),
+    realized_pts_added_net_in_practice_squad_slot numeric(6,1),
+    projected_pts_added_remaining_at_termination numeric(6,1),
+    composite_market_value_at_acquisition numeric(8,1),
+    composite_market_value_at_termination numeric(8,1),
+    extension_count_at_acquisition smallint,
+    franchise_tag_consecutive_count_at_acquisition smallint,
+    is_rookie_tag boolean DEFAULT false NOT NULL,
+    protected_for_year smallint,
+    super_priority_until timestamp without time zone,
+    audit_corrected boolean DEFAULT false NOT NULL,
+    correction_note text,
+    terminated_by smallint
+);
+
+
+--
+-- Name: TABLE roster_asset_holding; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.roster_asset_holding IS 'Append-only node table for the roster-asset lineage graph at (lid, asset, ownership-period) grain. One row per contiguous ownership period of a player or pick by a team. Salary attribution follows leagues.salary_attribution_rule; START_TEAM_BEARS populates salary_paid only on the start-team row. Corrections never overwrite history -- they append a new row with audit_corrected=true and the prior row remains for forensic walk.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.asset_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.asset_type IS 'Enum ASSET_TYPE: 1=player, 2=pick.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.player_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.player_id IS 'Full-word external-ID name; aliases to existing pid at JOIN boundaries (JOIN rosters_players r ON r.pid = h.player_id). Populated when asset_type=player.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.salary_basis; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.salary_basis IS 'Enum: 1=auction, 2=extension, 3=rfa, 4=franchise_tag, 5=rookie_tag, 6=rookie_contract (drafted rookies; no separate draft basis), 7=ps_salary.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.initial_slot_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.initial_slot_type IS 'Enum mirroring roster-constants.mjs slot-family groupings: 1=active (starting + BENCH), 2=practice_squad (PS/PSP/PSD/PSDP), 3=reserve_short_term, 4=reserve_long_term, 5=cov. No taxi slot exists in this system.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.ps_slot_subtype; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.ps_slot_subtype IS 'Enum derived from PS sub-families: 1=drafted_ps (PSD+PSDP), 2=signed_ps (PS+PSP). NULL if not in PS family.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.terminated_by; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.terminated_by IS 'Enum TERMINATED_BY: 1=trade, 2=release, 3=season_end, 4=extension, 5=expired_to_fa, 6=pick_converted, 7=auto_cap_release, 8=nullified_decommission, 9=super_priority_resign, 10=still_held.';
+
+
+--
+-- Name: roster_asset_holding_holding_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.roster_asset_holding_holding_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: roster_asset_holding_holding_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.roster_asset_holding_holding_id_seq OWNED BY public.roster_asset_holding.holding_id;
+
+
+--
+-- Name: roster_asset_transformation; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.roster_asset_transformation (
+    transformation_row_id bigint NOT NULL,
+    transformation_id uuid NOT NULL,
+    lid integer NOT NULL,
+    transaction_id integer,
+    transformation_type smallint NOT NULL,
+    occurred_at timestamp without time zone NOT NULL,
+    source_holding_id bigint,
+    target_holding_id bigint,
+    source_share numeric(4,3),
+    target_share numeric(4,3),
+    audit_corrected boolean DEFAULT false NOT NULL,
+    correction_note text
+);
+
+
+--
+-- Name: TABLE roster_asset_transformation; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.roster_asset_transformation IS 'Append-only edge table for the lineage graph. Rows sharing transformation_id belong to the same underlying transaction (e.g., a multi-asset trade emits one row per leg, each with computed source_share/target_share derived from composite market value at occurred_at). Composite edge weight = source_share * target_share.';
+
+
+--
+-- Name: COLUMN roster_asset_transformation.transformation_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_transformation.transformation_type IS 'Enum TRANSFORMATION_TYPE: 1=trade, 2=auction, 3=rfa_win, 4=franchise_tag, 5=rookie_tag, 6=extension, 7=draft, 8=waiver_claim, 9=fa_signing, 10=ps_signing, 11=poach, 12=release, 13=pick_conversion, 14=season_rollover, 15=standings_endowment, 16=decommission_reassignment, 17=super_priority_resign, 18=auto_cap_release, 19=failed_poach_sanctuary, 20=protect.';
+
+
+--
+-- Name: COLUMN roster_asset_transformation.source_share; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_transformation.source_share IS 'This source-row share in [0,1] of its basket; NULL only for endowment (no source).';
+
+
+--
+-- Name: COLUMN roster_asset_transformation.target_share; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_transformation.target_share IS 'This target-row share in [0,1] of its basket; NULL for terminations with no target (release, auto_cap_release, expired_to_fa, failed_poach_sanctuary, nullified_decommission).';
+
+
+--
+-- Name: roster_asset_transformation_transformation_row_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.roster_asset_transformation_transformation_row_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: roster_asset_transformation_transformation_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.roster_asset_transformation_transformation_row_id_seq OWNED BY public.roster_asset_transformation.transformation_row_id;
+
+
+--
 -- Name: rosters; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -24951,6 +25184,53 @@ CREATE TABLE public.users_teams (
     tid integer NOT NULL,
     year smallint NOT NULL
 );
+
+
+--
+-- Name: v_roster_asset_lineage_walk; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.v_roster_asset_lineage_walk AS
+ WITH RECURSIVE walk AS (
+         SELECT h.holding_id AS originating_holding_id,
+            h.holding_id AS current_holding_id,
+            1.0 AS cumulative_weight,
+            0 AS depth,
+            'salary'::text AS root_kind
+           FROM public.roster_asset_holding h
+          WHERE (h.salary_paid > 0)
+        UNION ALL
+         SELECT h.holding_id,
+            h.holding_id,
+            1.0 AS "numeric",
+            0,
+            'endowment'::text AS text
+           FROM (public.roster_asset_holding h
+             JOIN public.roster_asset_transformation t ON ((t.target_holding_id = h.holding_id)))
+          WHERE (t.transformation_type = 15)
+        UNION ALL
+         SELECT w.originating_holding_id,
+            t.target_holding_id,
+            (w.cumulative_weight * (t.source_share * t.target_share)),
+            (w.depth + 1),
+            w.root_kind
+           FROM (walk w
+             JOIN public.roster_asset_transformation t ON ((t.source_holding_id = w.current_holding_id)))
+          WHERE ((t.target_holding_id IS NOT NULL) AND (w.depth < 20))
+        )
+ SELECT originating_holding_id,
+    current_holding_id,
+    cumulative_weight,
+    depth,
+    root_kind
+   FROM walk;
+
+
+--
+-- Name: VIEW v_roster_asset_lineage_walk; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.v_roster_asset_lineage_walk IS 'Recursive walk anchored at salary-bearing holdings (root_kind=salary) and standings-endowed picks (root_kind=endowment). Composite edge weight along a path = product of (source_share * target_share). Depth capped at 20 (sufficient for realistic trade chains).';
 
 
 --
@@ -25791,6 +26071,20 @@ ALTER TABLE ONLY public.props_index_new ALTER COLUMN prop_id SET DEFAULT nextval
 --
 
 ALTER TABLE ONLY public.restricted_free_agency_bids ALTER COLUMN uid SET DEFAULT nextval('public.restricted_free_agency_bids_uid_seq'::regclass);
+
+
+--
+-- Name: roster_asset_holding holding_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_holding ALTER COLUMN holding_id SET DEFAULT nextval('public.roster_asset_holding_holding_id_seq'::regclass);
+
+
+--
+-- Name: roster_asset_transformation transformation_row_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_transformation ALTER COLUMN transformation_row_id SET DEFAULT nextval('public.roster_asset_transformation_transformation_row_id_seq'::regclass);
 
 
 --
@@ -26824,6 +27118,14 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: player_team_extension_state player_team_extension_state_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_team_extension_state
+    ADD CONSTRAINT player_team_extension_state_pkey PRIMARY KEY (lid, tid, pid);
+
+
+--
 -- Name: player_variance player_variance_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -26853,6 +27155,30 @@ ALTER TABLE ONLY public.position_game_outcome_defaults
 
 ALTER TABLE ONLY public.prop_pairing_props
     ADD CONSTRAINT prop_pairing_props_unique UNIQUE (pairing_id, source_market_id, source_selection_id);
+
+
+--
+-- Name: roster_asset_holding roster_asset_holding_lid_tid_asset_type_player_id_pick_year_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_holding
+    ADD CONSTRAINT roster_asset_holding_lid_tid_asset_type_player_id_pick_year_key UNIQUE (lid, tid, asset_type, player_id, pick_year, pick_round, pick_original_owner_tid, period_start);
+
+
+--
+-- Name: roster_asset_holding roster_asset_holding_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_holding
+    ADD CONSTRAINT roster_asset_holding_pkey PRIMARY KEY (holding_id);
+
+
+--
+-- Name: roster_asset_transformation roster_asset_transformation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_transformation
+    ADD CONSTRAINT roster_asset_transformation_pkey PRIMARY KEY (transformation_row_id);
 
 
 --
@@ -41099,6 +41425,48 @@ CREATE UNIQUE INDEX projections_index_y2026_sourceid_pid_userid_week_year_seas__
 
 
 --
+-- Name: roster_asset_holding_asset_lookup_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX roster_asset_holding_asset_lookup_idx ON public.roster_asset_holding USING btree (lid, asset_type, player_id, pick_year, pick_round, pick_original_owner_tid, period_start);
+
+
+--
+-- Name: roster_asset_holding_team_period_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX roster_asset_holding_team_period_idx ON public.roster_asset_holding USING btree (lid, tid, period_start);
+
+
+--
+-- Name: roster_asset_transformation_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX roster_asset_transformation_id_idx ON public.roster_asset_transformation USING btree (transformation_id);
+
+
+--
+-- Name: roster_asset_transformation_lid_occurred_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX roster_asset_transformation_lid_occurred_idx ON public.roster_asset_transformation USING btree (lid, occurred_at);
+
+
+--
+-- Name: roster_asset_transformation_source_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX roster_asset_transformation_source_idx ON public.roster_asset_transformation USING btree (source_holding_id);
+
+
+--
+-- Name: roster_asset_transformation_target_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX roster_asset_transformation_target_idx ON public.roster_asset_transformation USING btree (target_holding_id);
+
+
+--
 -- Name: trades_slots_trade_uid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -53010,6 +53378,22 @@ ALTER TABLE ONLY public.player_variance
 
 
 --
+-- Name: roster_asset_transformation roster_asset_transformation_source_holding_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_transformation
+    ADD CONSTRAINT roster_asset_transformation_source_holding_id_fkey FOREIGN KEY (source_holding_id) REFERENCES public.roster_asset_holding(holding_id);
+
+
+--
+-- Name: roster_asset_transformation roster_asset_transformation_target_holding_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_transformation
+    ADD CONSTRAINT roster_asset_transformation_target_holding_id_fkey FOREIGN KEY (target_holding_id) REFERENCES public.roster_asset_holding(holding_id);
+
+
+--
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
 --
 
@@ -54393,6 +54777,13 @@ GRANT SELECT ON TABLE public.player_seasonlogs TO league_readonly;
 
 
 --
+-- Name: TABLE player_team_extension_state; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.player_team_extension_state TO league_readonly;
+
+
+--
 -- Name: TABLE player_variance; Type: ACL; Schema: public; Owner: -
 --
 
@@ -54628,6 +55019,34 @@ GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_readonly;
 --
 
 GRANT SELECT ON TABLE public.ros_projections TO league_readonly;
+
+
+--
+-- Name: TABLE roster_asset_holding; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.roster_asset_holding TO league_readonly;
+
+
+--
+-- Name: SEQUENCE roster_asset_holding_holding_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.roster_asset_holding_holding_id_seq TO league_readonly;
+
+
+--
+-- Name: TABLE roster_asset_transformation; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.roster_asset_transformation TO league_readonly;
+
+
+--
+-- Name: SEQUENCE roster_asset_transformation_transformation_row_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.roster_asset_transformation_transformation_row_id_seq TO league_readonly;
 
 
 --
@@ -54894,6 +55313,13 @@ GRANT SELECT ON TABLE public.users_sources TO league_readonly;
 --
 
 GRANT SELECT ON TABLE public.users_teams TO league_readonly;
+
+
+--
+-- Name: TABLE v_roster_asset_lineage_walk; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.v_roster_asset_lineage_walk TO league_readonly;
 
 
 --
