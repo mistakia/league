@@ -12,6 +12,12 @@
 ## Every day at 5:00AM
 0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
 
+## Calibrate composite market value sources (15 5 daily; 15-min buffer after FantasyPros draft import at 0 5 * 5-8 *)
+15 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calibrate-composite-market-value-sources.mjs >> /var/log/league/calibrate-composite-market-value-sources.log 2>&1
+
+## Generate composite market value daily (45 5; runs after calibration)
+45 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-composite-market-value.mjs >> /var/log/league/generate-composite-market-value.log 2>&1
+
 ## Announce restricted free agent at 9pm
 0 21 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
 

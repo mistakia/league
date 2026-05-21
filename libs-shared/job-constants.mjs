@@ -137,7 +137,9 @@ export const job_types = {
   IMPORT_FANDUEL_DFS_OWNERSHIP: 113,
   FANTASYPROS_ROOKIE: 114,
   GENERATE_LEAGUE_TEAM_PLAYER_SEASONLOGS: 115,
-  GENERATE_ROSTER_ASSET_LINEAGE: 116
+  GENERATE_ROSTER_ASSET_LINEAGE: 116,
+  CALIBRATE_COMPOSITE_MARKET_VALUE_SOURCES: 117,
+  GENERATE_COMPOSITE_MARKET_VALUE: 118
 }
 
 export const job_title_by_id = {
@@ -256,5 +258,7 @@ export const job_title_by_id = {
   113: 'Import FanDuel DFS Ownership',
   114: 'FantasyPros Rookie',
   115: 'Generate League Team Player Seasonlogs',
-  116: 'Generate Roster Asset Lineage'
+  116: 'Generate Roster Asset Lineage',
+  117: 'Calibrate Composite Market Value Sources',
+  118: 'Generate Composite Market Value'
 }
