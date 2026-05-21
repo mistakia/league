@@ -46,6 +46,8 @@ DROP INDEX IF EXISTS public.roster_asset_transformation_source_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_lid_occurred_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_id_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_team_period_idx;
+DROP INDEX IF EXISTS public.roster_asset_holding_player_unique_idx;
+DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
@@ -435,7 +437,6 @@ ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_pkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_pkey;
-ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_lid_tid_asset_type_player_id_pick_year_key;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
 ALTER TABLE IF EXISTS ONLY public.position_game_outcome_defaults DROP CONSTRAINT IF EXISTS position_game_outcome_defaults_pkey;
 ALTER TABLE IF EXISTS ONLY public.playoffs DROP CONSTRAINT IF EXISTS playoffs_pkey;
@@ -27437,14 +27438,6 @@ ALTER TABLE ONLY public.prop_pairing_props
 
 
 --
--- Name: roster_asset_holding roster_asset_holding_lid_tid_asset_type_player_id_pick_year_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.roster_asset_holding
-    ADD CONSTRAINT roster_asset_holding_lid_tid_asset_type_player_id_pick_year_key UNIQUE (lid, tid, asset_type, player_id, pick_year, pick_round, pick_original_owner_tid, period_start);
-
-
---
 -- Name: roster_asset_holding roster_asset_holding_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -41750,6 +41743,20 @@ CREATE UNIQUE INDEX projections_index_y2026_sourceid_pid_userid_week_year_seas__
 --
 
 CREATE INDEX roster_asset_holding_asset_lookup_idx ON public.roster_asset_holding USING btree (lid, asset_type, player_id, pick_year, pick_round, pick_original_owner_tid, period_start);
+
+
+--
+-- Name: roster_asset_holding_pick_unique_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX roster_asset_holding_pick_unique_idx ON public.roster_asset_holding USING btree (lid, tid, pick_year, pick_round, pick_original_owner_tid, pick_draft_overall_position, period_start) WHERE (asset_type = 2);
+
+
+--
+-- Name: roster_asset_holding_player_unique_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX roster_asset_holding_player_unique_idx ON public.roster_asset_holding USING btree (lid, tid, player_id, period_start) WHERE (asset_type = 1);
 
 
 --
