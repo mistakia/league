@@ -363,14 +363,39 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     })
   }
   log(`inserted ${unique_team_daily_value_inserts.length} team daily values`)
+
+  // Freshness oracle: after running, max(date) per lid should be within
+  // max_day_interval days of today. A stale max(date) means the script ran to
+  // completion without advancing the table — silent partial-success.
+  const max_date_row = await db('league_team_daily_values')
+    .where({ lid })
+    .max({ max_date: 'date' })
+    .first()
+  const max_date = max_date_row?.max_date
+  if (!max_date) {
+    return {
+      lid,
+      shortfall: `no rows in league_team_daily_values for lid=${lid} after run`
+    }
+  }
+  const stale_days = dayjs().diff(dayjs(max_date), 'day')
+  if (stale_days > max_day_interval) {
+    return {
+      lid,
+      shortfall: `staleness: max(date)=${max_date} is ${stale_days}d > max_day_interval=${max_day_interval} for lid=${lid}`
+    }
+  }
+  return { lid, shortfall: null }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
+    const shortfalls = []
     if (argv.lid) {
-      await calculate_team_daily_ktc_value({ lid: argv.lid })
+      const result = await calculate_team_daily_ktc_value({ lid: argv.lid })
+      if (result?.shortfall) shortfalls.push(result.shortfall)
     } else {
       // get all hosted leagues that are not archived
       const leagues = await db('leagues')
@@ -379,8 +404,14 @@ const main = async () => {
         .whereNull('archived_at')
 
       for (const league of leagues) {
-        await calculate_team_daily_ktc_value({ lid: league.uid })
+        const result = await calculate_team_daily_ktc_value({ lid: league.uid })
+        if (result?.shortfall) shortfalls.push(result.shortfall)
       }
+    }
+    if (shortfalls.length > 0) {
+      const err = new Error(shortfalls.join('; '))
+      err.row_count_shortfall = true
+      throw err
     }
   } catch (err) {
     error = err
