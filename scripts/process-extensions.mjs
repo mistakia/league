@@ -14,7 +14,8 @@ import {
   is_main,
   validate_franchise_tag,
   has_league_notification_been_sent,
-  record_league_notification_sent
+  record_league_notification_sent,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -229,11 +230,7 @@ const main = async () => {
       await run({ lid })
     } else {
       const { shortfall } = await process_extensions_for_due_leagues()
-      if (shortfall) {
-        const err = new Error(shortfall)
-        err.row_count_shortfall = true
-        throw err
-      }
+      throw_if_shortfall(shortfall)
     }
   } catch (err) {
     error = err

@@ -6,7 +6,7 @@ import os from 'os'
 import fetch from 'node-fetch'
 
 import db from '#db'
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -152,17 +152,13 @@ const main = async () => {
       `=== SUMMARY === ${JSON.stringify({ script: 'import-espn-receiving-tracking-metrics', year: argv.year || 'all', ...result })}`
     )
 
-    if (
+    throw_if_shortfall(
       !argv.year &&
-      !argv.dry &&
-      result.players_updated < RTM_PLAYERS_UPDATED_FLOOR_UNBOUNDED
-    ) {
-      const err = new Error(
-        `import-espn-receiving-tracking-metrics shortfall: players_updated=${result.players_updated} (floor=${RTM_PLAYERS_UPDATED_FLOOR_UNBOUNDED} for unbounded run); players_not_matched=${result.players_not_matched}`
-      )
-      err.row_count_shortfall = true
-      throw err
-    }
+        !argv.dry &&
+        result.players_updated < RTM_PLAYERS_UPDATED_FLOOR_UNBOUNDED
+        ? `import-espn-receiving-tracking-metrics shortfall: players_updated=${result.players_updated} (floor=${RTM_PLAYERS_UPDATED_FLOOR_UNBOUNDED} for unbounded run); players_not_matched=${result.players_not_matched}`
+        : null
+    )
   } catch (err) {
     error = err
     log(error)

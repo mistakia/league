@@ -3,7 +3,12 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { is_main, batch_insert, report_job } from '#libs-server'
+import {
+  is_main,
+  batch_insert,
+  report_job,
+  throw_if_shortfall
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 import { active_roster_slots, starting_lineup_slots } from '#constants'
@@ -222,11 +227,9 @@ export const generate_league_team_player_seasonlogs = async ({
     )
   }
 
-  if (slice_failures.length > 0) {
-    const err = new Error(slice_failures.join('; '))
-    err.row_count_shortfall = true
-    throw err
-  }
+  throw_if_shortfall(
+    slice_failures.length > 0 ? slice_failures.join('; ') : null
+  )
 }
 
 const main = async () => {

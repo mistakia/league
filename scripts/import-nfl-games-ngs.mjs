@@ -8,7 +8,7 @@ import timezone from 'dayjs/plugin/timezone.js'
 import db from '#db'
 import { fixTeam, getGameDayAbbreviation } from '#libs-shared'
 import { current_season } from '#constants'
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { NGS_API_URL } from '#private/libs-server/ngs.mjs'
 
@@ -158,13 +158,11 @@ const main = async () => {
     const year = argv.year
     const result = await run({ year })
 
-    if (result.games_processed < NFL_GAMES_FLOOR_PER_YEAR) {
-      const err = new Error(
-        `nfl_games row-count shortfall for year ${year ?? current_season.year}: ${result.games_processed} games processed (floor=${NFL_GAMES_FLOOR_PER_YEAR})`
-      )
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(
+      result.games_processed < NFL_GAMES_FLOOR_PER_YEAR
+        ? `nfl_games row-count shortfall for year ${year ?? current_season.year}: ${result.games_processed} games processed (floor=${NFL_GAMES_FLOOR_PER_YEAR})`
+        : null
+    )
   } catch (err) {
     error = err
     console.log(error)

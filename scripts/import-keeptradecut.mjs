@@ -14,7 +14,8 @@ import {
   wait,
   report_job,
   fetch_with_retry,
-  batch_insert
+  batch_insert,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -379,11 +380,7 @@ const main = async () => {
     const shortfalls = []
     const result = await importKeepTradeCut({ full: argv.full, dry: argv.dry })
     if (result?.shortfall) shortfalls.push(result.shortfall)
-    if (shortfalls.length > 0) {
-      const err = new Error(shortfalls.join('; '))
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(shortfalls.length > 0 ? shortfalls.join('; ') : null)
   } catch (err) {
     error = err
     log(err)

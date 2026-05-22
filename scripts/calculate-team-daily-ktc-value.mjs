@@ -14,7 +14,8 @@ import {
   get_trades,
   get_restricted_free_agency_signings,
   batch_insert,
-  report_job
+  report_job,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -408,11 +409,7 @@ const main = async () => {
         if (result?.shortfall) shortfalls.push(result.shortfall)
       }
     }
-    if (shortfalls.length > 0) {
-      const err = new Error(shortfalls.join('; '))
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(shortfalls.length > 0 ? shortfalls.join('; ') : null)
   } catch (err) {
     error = err
     log(error)

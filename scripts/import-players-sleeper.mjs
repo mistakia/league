@@ -15,7 +15,8 @@ import {
   updatePlayer,
   createPlayer,
   report_job,
-  fetch_with_retry
+  fetch_with_retry,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -236,11 +237,7 @@ const main = async () => {
     if (argv.fields) {
       log(`Complete field list: ${Object.keys(fields)}`)
     }
-    if (shortfall) {
-      const err = new Error(shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(shortfall)
   } catch (err) {
     error = err
     log(error)

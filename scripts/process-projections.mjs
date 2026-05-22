@@ -29,7 +29,8 @@ import {
   is_main,
   batch_insert,
   report_job,
-  simulation
+  simulation,
+  throw_if_shortfall
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
@@ -691,11 +692,7 @@ const check_oracle = async ({ seas_type }) => {
     const details = stale_leagues
       .map((l) => `lid=${l.uid} processed_at=${l.processed_at ?? 'null'}`)
       .join('; ')
-    const err = new Error(
-      `process-projections freshness oracle failed: ${details}`
-    )
-    err.row_count_shortfall = true
-    return err
+    return `process-projections freshness oracle failed: ${details}`
   }
 
   return null
@@ -708,7 +705,7 @@ const main = async () => {
     const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
     await run()
     const shortfall = await check_oracle({ seas_type })
-    if (shortfall) throw shortfall
+    throw_if_shortfall(shortfall)
   } catch (err) {
     error = err
     console.log(error)

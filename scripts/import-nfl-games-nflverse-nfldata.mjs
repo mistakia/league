@@ -13,7 +13,8 @@ import {
   readCSV,
   update_nfl_game,
   report_job,
-  fetch_with_retry
+  fetch_with_retry,
+  throw_if_shortfall
 } from '#libs-server'
 import {
   preload_active_players,
@@ -344,13 +345,11 @@ const main = async () => {
     console.log(
       `=== SUMMARY === ${JSON.stringify({ script: 'import-nfl-games-nflverse-nfldata', year: argv.year || 'all', ...result })}`
     )
-    if (!argv.year && result.games_processed < NFLVERSE_GAMES_FLOOR_UNBOUNDED) {
-      const err = new Error(
-        `import-nfl-games-nflverse-nfldata shortfall: ${result.games_processed} games processed (floor=${NFLVERSE_GAMES_FLOOR_UNBOUNDED} for unbounded run)`
-      )
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(
+      !argv.year && result.games_processed < NFLVERSE_GAMES_FLOOR_UNBOUNDED
+        ? `import-nfl-games-nflverse-nfldata shortfall: ${result.games_processed} games processed (floor=${NFLVERSE_GAMES_FLOOR_UNBOUNDED} for unbounded run)`
+        : null
+    )
   } catch (err) {
     error = err
     console.log(

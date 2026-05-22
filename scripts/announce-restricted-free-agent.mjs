@@ -16,7 +16,8 @@ import {
   getLeague,
   report_job,
   has_league_notification_been_sent,
-  record_league_notification_sent
+  record_league_notification_sent,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -471,11 +472,7 @@ const main = async () => {
     } else {
       // Process all eligible leagues
       const { shortfall } = await process_all_leagues({ dry_run, use_previous })
-      if (shortfall) {
-        const err = new Error(shortfall)
-        err.row_count_shortfall = true
-        throw err
-      }
+      throw_if_shortfall(shortfall)
     }
   } catch (err) {
     error = err

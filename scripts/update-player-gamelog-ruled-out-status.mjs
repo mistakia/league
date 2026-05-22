@@ -45,7 +45,8 @@ import { current_season } from '#constants'
 import {
   is_main,
   report_job,
-  handle_season_args_for_script
+  handle_season_args_for_script,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { get_target_week } from '#libs-shared'
@@ -444,11 +445,7 @@ const main = async () => {
 
     if (!argv.dry) {
       const freshness_shortfall = await check_players_status_freshness()
-      if (freshness_shortfall) {
-        const err = new Error(freshness_shortfall)
-        err.row_count_shortfall = true
-        throw err
-      }
+      throw_if_shortfall(freshness_shortfall)
     }
   } catch (err) {
     error = err

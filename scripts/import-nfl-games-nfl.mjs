@@ -7,7 +7,13 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { fixTeam, getGameDayAbbreviation } from '#libs-shared'
 import { current_season } from '#constants'
-import { is_main, wait, nfl, report_job } from '#libs-server'
+import {
+  is_main,
+  wait,
+  nfl,
+  report_job,
+  throw_if_shortfall
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(timezone)
@@ -175,16 +181,11 @@ const main = async () => {
       // current week has no nfl_games rows AND the API returned nothing —
       // silent failure (e.g., upstream auth shift returning empty payload).
       const result = await run({ ignore_cache })
-      if (
-        (result.games_processed || 0) === 0 &&
-        (result.games_skipped || 0) === 0
-      ) {
-        const err = new Error(
-          `import-nfl-games-nfl --current shortfall: 0 games processed AND 0 games skipped — no current-week rows AND API returned no games`
-        )
-        err.row_count_shortfall = true
-        throw err
-      }
+      throw_if_shortfall(
+        (result.games_processed || 0) === 0 && (result.games_skipped || 0) === 0
+          ? `import-nfl-games-nfl --current shortfall: 0 games processed AND 0 games skipped — no current-week rows AND API returned no games`
+          : null
+      )
     } else if (argv.year && argv.all) {
       const year = argv.year
 

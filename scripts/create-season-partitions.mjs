@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -255,26 +255,22 @@ const main = async () => {
           !attached.has(`${parent_table}|${partition_table}`)
       )
 
-      if (missing.length || !result.success) {
-        const parts = []
-        if (missing.length) {
-          parts.push(
-            `expected partition(s) not attached in pg_inherits: ${missing
-              .map((m) => `${m.partition_table} -> ${m.parent_table}`)
-              .join(', ')}`
-          )
-        }
-        if (result.errors?.length) {
-          parts.push(
-            `partition creation errors: ${result.errors
-              .map((e) => `${e.partition_table} (${e.error})`)
-              .join('; ')}`
-          )
-        }
-        const err = new Error(parts.join(' | '))
-        err.row_count_shortfall = true
-        throw err
+      const parts = []
+      if (missing.length) {
+        parts.push(
+          `expected partition(s) not attached in pg_inherits: ${missing
+            .map((m) => `${m.partition_table} -> ${m.parent_table}`)
+            .join(', ')}`
+        )
       }
+      if (result.errors?.length) {
+        parts.push(
+          `partition creation errors: ${result.errors
+            .map((e) => `${e.partition_table} (${e.error})`)
+            .join('; ')}`
+        )
+      }
+      throw_if_shortfall(parts.length ? parts.join(' | ') : null)
     }
   } catch (err) {
     error = err

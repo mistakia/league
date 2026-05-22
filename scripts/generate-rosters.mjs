@@ -4,7 +4,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season, player_tag_types } from '#constants'
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('generate-rosters')
@@ -150,11 +150,9 @@ const run = async () => {
     }
   }
 
-  if (slice_failures.length > 0) {
-    const err = new Error(slice_failures.join('; '))
-    err.row_count_shortfall = true
-    throw err
-  }
+  throw_if_shortfall(
+    slice_failures.length > 0 ? slice_failures.join('; ') : null
+  )
 }
 
 const main = async () => {

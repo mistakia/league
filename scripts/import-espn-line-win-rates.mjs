@@ -5,7 +5,7 @@ import { fetch as fetch_http2 } from 'fetch-h2'
 import * as cheerio from 'cheerio'
 
 import db from '#db'
-import { is_main, report_job, espn } from '#libs-server'
+import { is_main, report_job, espn, throw_if_shortfall } from '#libs-server'
 import {
   preload_active_players,
   find_player
@@ -285,13 +285,11 @@ const main = async () => {
           `team_win_rates_inserted=${result.team_win_rates_inserted} (floor=${ESPN_TEAM_WIN_RATES_FLOOR})`
         )
       }
-      if (shortfalls.length) {
-        const err = new Error(
-          `import-espn-line-win-rates shortfall: ${shortfalls.join('; ')}`
-        )
-        err.row_count_shortfall = true
-        throw err
-      }
+      throw_if_shortfall(
+        shortfalls.length
+          ? `import-espn-line-win-rates shortfall: ${shortfalls.join('; ')}`
+          : null
+      )
     }
   } catch (err) {
     error = err
