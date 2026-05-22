@@ -5,7 +5,12 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season, external_data_sources } from '#constants'
-import { is_main, find_player_row, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  check_projections_index_floor
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -119,7 +124,7 @@ const run = async ({
 } = {}) => {
   // do not pull in any projections after the season has ended
   if (current_season.week > current_season.nflFinalWeek) {
-    return
+    return { skipped: true }
   }
 
   const year = current_season.year
@@ -229,13 +234,27 @@ const run = async ({
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
+
+  return {
+    skipped: false,
+    year,
+    week,
+    sourceid: external_data_sources.FFTODAY,
+    seas_type: 'REG'
+  }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await run({ dry: argv.dry, is_regular_season_projection: argv.season })
+    const result = await run({
+      dry: argv.dry,
+      is_regular_season_projection: argv.season
+    })
+    if (result && !result.skipped && !argv.dry) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     console.log(error)

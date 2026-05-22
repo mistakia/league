@@ -5,7 +5,12 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season, external_data_sources } from '#constants'
-import { is_main, find_player_row, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  check_projections_index_floor
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -157,16 +162,24 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
 const run = async ({ season = false, dry = false } = {}) => {
   // do not pull in any projections after the season has ended
   if (current_season.week > current_season.nflFinalWeek) {
-    return
+    return { skipped: true }
   }
 
   if (season) {
     await runOne({ week: 0, dry })
   }
 
-  let week = Math.max(1, current_season.week)
-  for (; week <= current_season.finalWeek; week++) {
+  const start_week = Math.max(1, current_season.week)
+  for (let week = start_week; week <= current_season.finalWeek; week++) {
     await runOne({ week, dry })
+  }
+
+  return {
+    skipped: false,
+    year,
+    week: season ? 0 : start_week,
+    sourceid: external_data_sources.NFL,
+    seas_type: 'REG'
   }
 }
 
@@ -174,7 +187,10 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await run({ season: argv.season, dry: argv.dry })
+    const result = await run({ season: argv.season, dry: argv.dry })
+    if (result && !result.skipped && !argv.dry) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     console.log(error)

@@ -6,7 +6,8 @@ import {
   find_player_row,
   is_main,
   report_job,
-  four_for_four
+  four_for_four,
+  check_projections_index_floor
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
 import db from '#db'
@@ -49,7 +50,7 @@ const run = async ({
   // do not pull in any projections after the season has ended
   if (current_season.now.isAfter(current_season.end)) {
     log('Season has ended, skipping')
-    return
+    return { skipped: true }
   }
 
   const year = current_season.year
@@ -144,13 +145,27 @@ const run = async ({
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
+
+  return {
+    skipped: false,
+    year,
+    week,
+    sourceid: external_data_sources['4FOR4'],
+    seas_type
+  }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await run({ is_regular_season_projection: argv.season, dry_run: argv.dry })
+    const result = await run({
+      is_regular_season_projection: argv.season,
+      dry_run: argv.dry
+    })
+    if (result && !result.skipped && !argv.dry) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     console.log(error)

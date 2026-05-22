@@ -8,7 +8,8 @@ import {
   is_main,
   find_player_row,
   report_job,
-  fetch_with_retry
+  fetch_with_retry,
+  check_projections_index_floor
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -43,12 +44,12 @@ const timestamp = Math.floor(Date.now() / 1000)
 const run = async ({ dry_run = false } = {}) => {
   // do not pull in any projections after the season has ended
   if (current_season.week > current_season.nflFinalWeek) {
-    return
+    return { skipped: true }
   }
 
   if (!current_season.week) {
     log('No projections available for current week')
-    return
+    return { skipped: true }
   }
 
   const config_row = await db('config').where({ key: 'fbg_config' }).first()
@@ -177,13 +178,24 @@ const run = async ({ dry_run = false } = {}) => {
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
+
+  return {
+    skipped: false,
+    year: current_season.year,
+    week,
+    sourceids: Object.values(projectors),
+    seas_type: 'REG'
+  }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await run({ dry_run: argv.dry })
+    const result = await run({ dry_run: argv.dry })
+    if (result && !result.skipped && !argv.dry) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     console.log(error)

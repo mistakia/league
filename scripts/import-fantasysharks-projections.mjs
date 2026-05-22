@@ -8,7 +8,8 @@ import {
   is_main,
   find_player_row,
   report_job,
-  fetch_with_retry
+  fetch_with_retry,
+  check_projections_index_floor
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -28,7 +29,7 @@ const run = async ({ season = false, dry = false } = {}) => {
   const timestamp = Math.round(Date.now() / 1000)
   // do not pull in any projections after the season has ended
   if (current_season.week > current_season.nflFinalWeek) {
-    return
+    return { skipped: true }
   }
 
   log(URL)
@@ -119,13 +120,24 @@ const run = async ({ season = false, dry = false } = {}) => {
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
+
+  return {
+    skipped: false,
+    year,
+    week,
+    sourceid: external_data_sources.FANTASY_SHARKS,
+    seas_type: 'REG'
+  }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await run({ season: argv.season, dry: argv.dry })
+    const result = await run({ season: argv.season, dry: argv.dry })
+    if (result && !result.skipped && !argv.dry) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     console.log(error)

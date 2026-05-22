@@ -9,7 +9,8 @@ import {
   find_player_row,
   report_job,
   espn,
-  fetch_with_retry
+  fetch_with_retry,
+  check_projections_index_floor
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -30,7 +31,7 @@ const run = async ({
 }) => {
   // do not pull in any projections after the season has ended
   if (current_season.week > current_season.nflFinalWeek) {
-    return
+    return { skipped: true }
   }
 
   const URL =
@@ -134,6 +135,14 @@ const run = async ({
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
+
+  return {
+    skipped: false,
+    year,
+    week,
+    sourceid: external_data_sources.ESPN,
+    seas_type: 'REG'
+  }
 }
 
 const main = async () => {
@@ -141,12 +150,15 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const week = argv.season ? 0 : Math.max(current_season.week, 1)
-    await run({
+    const result = await run({
       week,
       season_totals: argv.season,
       year: argv.year,
       dry_run: argv.dry
     })
+    if (result && !result.skipped && !argv.dry) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     console.log(error)
