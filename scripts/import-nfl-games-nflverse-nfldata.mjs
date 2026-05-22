@@ -323,6 +323,13 @@ const import_nfl_games_nflverse_nfldata = async ({
   return result
 }
 
+// Conservative floor for the full nflverse games CSV (thousands of rows
+// spanning the modern NFL data window). 1000 catches CSV-not-downloaded /
+// empty-CSV / parsing-failure scenarios that today exit cleanly with 0
+// games processed. Single-year backfill is whitelisted via argv.year so
+// the floor is only applied to the cron's unbounded run.
+const NFLVERSE_GAMES_FLOOR_UNBOUNDED = 1000
+
 const main = async () => {
   let error
   try {
@@ -337,6 +344,13 @@ const main = async () => {
     console.log(
       `=== SUMMARY === ${JSON.stringify({ script: 'import-nfl-games-nflverse-nfldata', year: argv.year || 'all', ...result })}`
     )
+    if (!argv.year && result.games_processed < NFLVERSE_GAMES_FLOOR_UNBOUNDED) {
+      const err = new Error(
+        `import-nfl-games-nflverse-nfldata shortfall: ${result.games_processed} games processed (floor=${NFLVERSE_GAMES_FLOOR_UNBOUNDED} for unbounded run)`
+      )
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     console.log(

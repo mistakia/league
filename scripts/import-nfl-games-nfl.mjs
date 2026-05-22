@@ -169,7 +169,22 @@ const main = async () => {
     const ignore_cache = argv.ignore_cache
 
     if (argv.current) {
-      await run({ ignore_cache })
+      // Cron entry-point. Oracle: either the API returned at least one game
+      // (games_processed > 0) or the early-return path saw existing rows
+      // already fully populated (games_skipped > 0). Both zero means the
+      // current week has no nfl_games rows AND the API returned nothing —
+      // silent failure (e.g., upstream auth shift returning empty payload).
+      const result = await run({ ignore_cache })
+      if (
+        (result.games_processed || 0) === 0 &&
+        (result.games_skipped || 0) === 0
+      ) {
+        const err = new Error(
+          `import-nfl-games-nfl --current shortfall: 0 games processed AND 0 games skipped — no current-week rows AND API returned no games`
+        )
+        err.row_count_shortfall = true
+        throw err
+      }
     } else if (argv.year && argv.all) {
       const year = argv.year
 

@@ -146,12 +146,25 @@ const run = async ({ year = current_season.year, collector = null } = {}) => {
   return result
 }
 
+// Conservative floor for a full NFL season schedule (~285 games incl. PRE
+// + REG + POST). 100 catches catastrophic API failures (empty payload,
+// truncated response) while remaining flexible for partial-year edge cases.
+const NFL_GAMES_FLOOR_PER_YEAR = 100
+
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
     const year = argv.year
-    await run({ year })
+    const result = await run({ year })
+
+    if (result.games_processed < NFL_GAMES_FLOOR_PER_YEAR) {
+      const err = new Error(
+        `nfl_games row-count shortfall for year ${year ?? current_season.year}: ${result.games_processed} games processed (floor=${NFL_GAMES_FLOOR_PER_YEAR})`
+      )
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     console.log(error)
