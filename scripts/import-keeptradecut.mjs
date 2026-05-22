@@ -347,13 +347,41 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
     if (full) await wait(4000)
   }
+
+  // Freshness oracle: after running, max(d) in keeptradecut_rankings should be
+  // within 48h of now. Cron runs daily at 04:30; a stale max means the script
+  // completed without writing any new rows — silent partial-success.
+  if (!dry) {
+    const freshness_threshold_hours = 48
+    const max_row = await db('keeptradecut_rankings').max({ max_d: 'd' }).first()
+    const max_d = max_row?.max_d
+    if (!max_d) {
+      return {
+        shortfall: 'no rows found in keeptradecut_rankings after run'
+      }
+    }
+    const stale_hours = dayjs().diff(dayjs.unix(max_d), 'hour')
+    if (stale_hours > freshness_threshold_hours) {
+      return {
+        shortfall: `staleness: max(d)=${dayjs.unix(max_d).format('YYYY-MM-DD')} is ${stale_hours}h > threshold=${freshness_threshold_hours}h`
+      }
+    }
+  }
+  return { shortfall: null }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await importKeepTradeCut({ full: argv.full, dry: argv.dry })
+    const shortfalls = []
+    const result = await importKeepTradeCut({ full: argv.full, dry: argv.dry })
+    if (result?.shortfall) shortfalls.push(result.shortfall)
+    if (shortfalls.length > 0) {
+      const err = new Error(shortfalls.join('; '))
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     log(err)
