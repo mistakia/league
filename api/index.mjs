@@ -22,6 +22,8 @@ import cache from './cache.mjs'
 import routes from './routes/index.mjs'
 import db from '#db'
 import sockets from './sockets/index.mjs'
+import { create_logger } from '#libs-shared/log.mjs'
+import { create_error_handler } from '#libs-server/middleware/error-handler.mjs'
 
 const logger = debug('api')
 const defaults = {}
@@ -159,6 +161,14 @@ api.use('/*', (req, res, next) => {
     }
   })
 })
+
+// Error middleware: emits log_error signals and returns a sanitized response.
+// Mounted last so it captures next(err) from any preceding route.
+api.use(
+  create_error_handler({
+    logger: create_logger('api:error', { service: 'league-server' })
+  })
+)
 
 const createServer = () => {
   if (!options.ssl) {

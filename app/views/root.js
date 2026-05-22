@@ -32,12 +32,58 @@ Highcharts.setOptions({
   }
 })
 
+// Dual-write callback: forward Bugsnag events to /api/errors so they
+// land in the unified signal queue during the retirement soak. Returns
+// true so Bugsnag still delivers the event normally.
+// keepalive: true caps body at ~64KB in Chromium and is unsupported in
+// Firefox < 106; truncate the stack so oversized traces don't silently
+// drop the report.
+const KEEPALIVE_STACK_LIMIT = 16000
+
+const truncate_stack = (stack) => {
+  if (typeof stack !== 'string') return stack
+  if (stack.length <= KEEPALIVE_STACK_LIMIT) return stack
+  return (
+    stack.slice(0, KEEPALIVE_STACK_LIMIT) +
+    `\n...[truncated ${stack.length - KEEPALIVE_STACK_LIMIT} chars]`
+  )
+}
+
+const dual_write_to_league_api = (event) => {
+  try {
+    const error = event?.originalError || event?.errors?.[0] || {}
+    const raw_stack =
+      error?.stack || event?.errors?.[0]?.stacktrace || null
+    fetch('/api/errors', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        error: {
+          message:
+            error?.message ||
+            event?.errors?.[0]?.errorMessage ||
+            'Unknown',
+          stack: truncate_stack(raw_stack),
+          name:
+            error?.name || event?.errors?.[0]?.errorClass || 'Error'
+        }
+      })
+    }).catch(() => {})
+  } catch (_send_error) {
+    // never let dual-write block Bugsnag delivery
+  }
+  return true
+}
+
 Bugsnag.start({
   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
   autoDetectErrors: !IS_DEV,
   appVersion: APP_VERSION,
   plugins: [new BugsnagPluginReact()],
-  enabledReleaseStages: ['production']
+  enabledReleaseStages: ['production'],
+  onError: dual_write_to_league_api
 })
 
 // Get Bugsnag's ErrorBoundary and configure it with our custom ErrorView

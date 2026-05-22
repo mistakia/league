@@ -2,8 +2,19 @@ import express from 'express'
 
 import config from '#config'
 import { sendEmail } from '#libs-server'
+import { create_logger } from '#libs-shared/log.mjs'
 
 const router = express.Router()
+
+const HIGH_SEVERITY_ERROR_CLASSES = new Set([
+  'TypeError',
+  'ReferenceError',
+  'RangeError',
+  'SyntaxError',
+  'EvalError'
+])
+
+const route_logger = create_logger('api:errors', { service: 'league-client' })
 
 /**
  * @swagger
@@ -202,6 +213,34 @@ router.post('/?', async (req, res) => {
       userAgent: user_agent
     }
     logger(message)
+    // Dual-write to base's unified signal queue during Bugsnag retirement
+    // soak. Best-effort, non-blocking; failures do not affect the response.
+    if (config.signals_api_url) {
+      try {
+        const error_class = error?.name || 'Error'
+        const severity = HIGH_SEVERITY_ERROR_CLASSES.has(error_class)
+          ? 'high'
+          : 'medium'
+        const synthetic = new Error(error?.message || 'Unknown client error')
+        synthetic.name = error_class
+        if (error?.stack) synthetic.stack = error.stack
+        route_logger.error(synthetic, {
+          severity,
+          context: {
+            league_id: leagueId || null,
+            team_id: teamId || null,
+            user_id: userId || null,
+            ip: ip || null,
+            user_agent: user_agent || null,
+            filename: error?.filename || null,
+            lineno: error?.lineno ?? null,
+            colno: error?.colno ?? null
+          }
+        })
+      } catch (_dual_write_error) {
+        // swallow
+      }
+    }
     await sendEmail({
       to: config.email.admin,
       subject: `client error: ${error.message}`,
