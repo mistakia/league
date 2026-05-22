@@ -50,6 +50,11 @@ const getReport = (item) => {
   return data
 }
 
+// Per-run in-season floor. A typical weekly NFL practice report touches
+// 50-150 players; 20 is generous against partial data while catching
+// empty rotowire payload / wholesale find_player_row failure modes.
+const PRACTICE_REPORT_FLOOR_PER_WEEK = 20
+
 const run = async () => {
   // do not pull in reports outside of the NFL season
   if (
@@ -58,12 +63,13 @@ const run = async () => {
       current_season.end
     )
   ) {
-    return
+    return { shortfall: null, in_season: false }
   }
 
   const data = await fetch_with_retry({ url, response_type: 'json' })
 
   const missing = []
+  let players_processed = 0
   for (const item of data) {
     let player_row
 
@@ -110,18 +116,32 @@ const run = async () => {
         ...practiceReport
       })
     }
+    players_processed++
   }
 
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) =>
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
+
+  if (players_processed < PRACTICE_REPORT_FLOOR_PER_WEEK) {
+    return {
+      shortfall: `practice report row-count shortfall for (year=${year}, week=${week}): ${players_processed} players processed (floor=${PRACTICE_REPORT_FLOOR_PER_WEEK})`,
+      in_season: true
+    }
+  }
+  return { shortfall: null, in_season: true }
 }
 
 const main = async () => {
   let error
   try {
-    await run()
+    const result = await run()
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     console.log(error)

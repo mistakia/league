@@ -131,6 +131,13 @@ const import_espn_receiving_tracking_metrics = async ({
   return result
 }
 
+// Unbounded run (no --year) processes RTM data across all historical years
+// — typically thousands of player_seasonlogs records. 200 catches the
+// silent failure mode where the S3 JSON is fetched but gsisid lookups all
+// fail (e.g., player table schema drift), leaving players_updated=0 with
+// no thrown error.
+const RTM_PLAYERS_UPDATED_FLOOR_UNBOUNDED = 200
+
 const main = async () => {
   let error
   try {
@@ -144,6 +151,18 @@ const main = async () => {
     console.log(
       `=== SUMMARY === ${JSON.stringify({ script: 'import-espn-receiving-tracking-metrics', year: argv.year || 'all', ...result })}`
     )
+
+    if (
+      !argv.year &&
+      !argv.dry &&
+      result.players_updated < RTM_PLAYERS_UPDATED_FLOOR_UNBOUNDED
+    ) {
+      const err = new Error(
+        `import-espn-receiving-tracking-metrics shortfall: players_updated=${result.players_updated} (floor=${RTM_PLAYERS_UPDATED_FLOOR_UNBOUNDED} for unbounded run); players_not_matched=${result.players_not_matched}`
+      )
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     log(error)

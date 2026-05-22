@@ -28,7 +28,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
 
   if (current_season.week > current_season.nflFinalWeek) {
     log('Skipping — outside regular season')
-    return result
+    return { ...result, skipped: true }
   }
 
   const timestamp = Math.floor(Date.now() / 1000)
@@ -255,6 +255,14 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   return result
 }
 
+// In-season per-run floors. ESPN publishes win rates for ~30-50 players
+// per category (pass_rush/pass_block/run_stop/run_block = 4 tables) and
+// all 32 teams. 50 player rows and 16 team rows catch wholesale parser
+// failure / upstream HTML restructure without false-alarming on partial
+// data.
+const ESPN_PLAYER_WIN_RATES_FLOOR = 50
+const ESPN_TEAM_WIN_RATES_FLOOR = 16
+
 const main = async () => {
   let error
   try {
@@ -263,6 +271,27 @@ const main = async () => {
       console.log(
         `=== SUMMARY === ${JSON.stringify({ script: 'import-espn-line-win-rates', ...result, unmatched_players: undefined })}`
       )
+    }
+
+    if (result && !result.skipped) {
+      const shortfalls = []
+      if (result.player_win_rates_inserted < ESPN_PLAYER_WIN_RATES_FLOOR) {
+        shortfalls.push(
+          `player_win_rates_inserted=${result.player_win_rates_inserted} (floor=${ESPN_PLAYER_WIN_RATES_FLOOR})`
+        )
+      }
+      if (result.team_win_rates_inserted < ESPN_TEAM_WIN_RATES_FLOOR) {
+        shortfalls.push(
+          `team_win_rates_inserted=${result.team_win_rates_inserted} (floor=${ESPN_TEAM_WIN_RATES_FLOOR})`
+        )
+      }
+      if (shortfalls.length) {
+        const err = new Error(
+          `import-espn-line-win-rates shortfall: ${shortfalls.join('; ')}`
+        )
+        err.row_count_shortfall = true
+        throw err
+      }
     }
   } catch (err) {
     error = err

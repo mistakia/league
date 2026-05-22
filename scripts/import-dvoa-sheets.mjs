@@ -1019,7 +1019,7 @@ const import_dvoa_sheets = async ({
     const effective_seas_type = seas_type || current_season.nfl_seas_type
     if (effective_seas_type !== 'REG') {
       log(`Skipping import of DVOA sheets for ${effective_seas_type} season`)
-      return
+      return { skipped: true, timestamp: null }
     }
 
     const dvoa_config = await get_dvoa_config()
@@ -1041,7 +1041,7 @@ const import_dvoa_sheets = async ({
       log(
         `Skipping DVOA import - no sheets available until after NFL week 2 (currently week ${nfl_week})`
       )
-      return
+      return { skipped: true, timestamp: null }
     } else {
       // Calculate which Tuesday of the month we're on
       // NFL weeks start on Tuesday, so we count Tuesdays in the current month
@@ -1228,18 +1228,41 @@ const import_dvoa_sheets = async ({
         log(`Unhandled worksheet: ${worksheet.name}`)
     }
   }
+
+  return { skipped: false, timestamp, year }
 }
+
+// Per-run floor on rows written to the primary DVOA history table at this
+// run's timestamp. A successful run touches 32 teams × multiple team_units
+// across many worksheets — hundreds of rows. 32 is generous against partial
+// data while catching wholesale processor-failure modes where the script
+// exits cleanly with 0 rows inserted.
+const DVOA_HISTORY_FLOOR_PER_RUN = 32
 
 const main = async () => {
   const argv = initialize_cli()
   let error
   try {
-    await import_dvoa_sheets({
+    const result = await import_dvoa_sheets({
       filepath: argv.filepath,
       dry_run: argv.dry,
       year: argv.year,
       seas_type: argv.seas_type
     })
+
+    if (result && !result.skipped && !argv.dry) {
+      const [row] = await db('dvoa_team_unit_seasonlogs_history')
+        .where({ timestamp: result.timestamp })
+        .count('* as cnt')
+      const count = Number(row?.cnt || 0)
+      if (count < DVOA_HISTORY_FLOOR_PER_RUN) {
+        const err = new Error(
+          `dvoa_team_unit_seasonlogs_history row-count shortfall at timestamp=${result.timestamp} year=${result.year}: ${count} rows (floor=${DVOA_HISTORY_FLOOR_PER_RUN})`
+        )
+        err.row_count_shortfall = true
+        throw err
+      }
+    }
   } catch (err) {
     error = err
     log(error)
