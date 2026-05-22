@@ -1,0 +1,49 @@
+{
+  "name": "broken tackles from plays for wide receivers via trg_pid",
+  "description": "Strict trg_pid attribution check: filtered to WR-only with a minimum games threshold, this view exercises the receiving-only side of the COALESCE(bc_pid, trg_pid) attribution. Pre-fix (pid_columns: ['bc_pid']), every row would render as zero broken tackles because nfl_plays.bc_pid is NULL on completed receptions -- WR broken tackles are attributed to trg_pid. Post-fix the column must surface non-zero totals for players like Puka Nacua and Zay Flowers.",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_broken_tackles_from_plays",
+        "params": {
+          "year": [
+            2025
+          ]
+        }
+      },
+      {
+        "column_id": "player_targets_from_plays",
+        "params": {
+          "year": [
+            2025
+          ]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "WR"
+        ]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_broken_tackles_from_plays",
+        "desc": true
+      }
+    ],
+    "limit": 15
+  },
+  "expected_query": "with \"td3e58c9af2784a38918c4ab350c00288\" as materialized (select COALESCE(bc_pid, trg_pid) as pid, SUM(mbt) as broken_tackles_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2025) group by COALESCE(bc_pid, trg_pid)), \"base_years\" as (SELECT unnest(ARRAY[2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"t98531c6d5c2090f23cfc501ab69d3ed8\" as materialized (select COALESCE(trg_pid) as pid, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2025) group by COALESCE(trg_pid)) select \"player\".\"pid\", \"td3e58c9af2784a38918c4ab350c00288\".\"broken_tackles_from_plays\" AS \"broken_tackles_from_plays_0\", \"t98531c6d5c2090f23cfc501ab69d3ed8\".\"trg_from_plays\" AS \"trg_from_plays_0\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"td3e58c9af2784a38918c4ab350c00288\" on \"td3e58c9af2784a38918c4ab350c00288\".\"pid\" = \"player\".\"pid\" left join \"t98531c6d5c2090f23cfc501ab69d3ed8\" on \"t98531c6d5c2090f23cfc501ab69d3ed8\".\"pid\" = \"player\".\"pid\" where player.pos IN ('WR') group by \"td3e58c9af2784a38918c4ab350c00288\".\"broken_tackles_from_plays\", \"t98531c6d5c2090f23cfc501ab69d3ed8\".\"trg_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 15",
+  "tags": [
+    "player",
+    "plays",
+    "parameters",
+    "cte",
+    "regression"
+  ],
+  "timeout_ms": 40000
+}
