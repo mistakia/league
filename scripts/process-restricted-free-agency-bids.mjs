@@ -134,7 +134,6 @@ const run = async ({ dry_run = false } = {}) => {
   }
 
   const timestamp = Math.round(Date.now() / 1000)
-  let bids_processed = 0
 
   // Get current date in EST
   const current_date_est = dayjs().tz('America/New_York')
@@ -443,7 +442,6 @@ const run = async ({ dry_run = false } = {}) => {
             processed: timestamp
           })
           .where('uid', winning_bid.uid)
-        bids_processed += 1
       }
 
       // Get next bids to process for this league
@@ -509,7 +507,7 @@ const main = async () => {
     const result = await run({ dry_run })
     if (result?.shortfall) {
       const err = new Error(result.shortfall)
-      err.rfa_shortfall = true
+      err.row_count_shortfall = true
       throw err
     }
   } catch (err) {

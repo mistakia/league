@@ -144,7 +144,7 @@ const main = async () => {
     const result = await run({ daily })
     if (result?.shortfall) {
       const err = new Error(result.shortfall)
-      err.poach_shortfall = true
+      err.row_count_shortfall = true
       throw err
     }
   } catch (err) {

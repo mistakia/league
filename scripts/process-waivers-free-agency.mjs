@@ -1,6 +1,7 @@
 import { Errors } from '#libs-shared'
 import { waiver_types } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { current_season } from '#libs-shared/constants/season-constants.mjs'
 import { report_job, get_waiver_by_id } from '#libs-server'
 import db from '#db'
 import yargs from 'yargs'
@@ -39,6 +40,14 @@ const run_active = async ({ daily = false }) => {
     error = err
   }
 
+  // processActiveWaivers silently returns (no throw) under two gating
+  // conditions that must not register as shortfall: regular-season waiver
+  // period (full cohort runs only off-period) and offseason non-daily ticks.
+  // Mirror them here so a no-op tick with pending waivers does not alert.
+  const is_inner_gated_skip =
+    (current_season.isRegularSeason && current_season.isWaiverPeriod) ||
+    (!current_season.isRegularSeason && !daily)
+
   // Oracle: if the empty-queue sentinel was thrown, or if pre-snapshot showed
   // nothing pending, this was a legitimate no-op — skip the shortfall check.
   // Otherwise verify that every league that had pending waivers going in now
@@ -47,6 +56,7 @@ const run_active = async ({ daily = false }) => {
   const is_legitimate_noop =
     error instanceof Errors.EmptyFreeAgencyWaivers ||
     error instanceof Errors.NotRegularSeason ||
+    is_inner_gated_skip ||
     pre_league_ids.size === 0
 
   if (!error && !is_legitimate_noop && pre_league_ids.size > 0) {
@@ -111,6 +121,14 @@ const run_practice = async ({ daily = false }) => {
     error = err
   }
 
+  // processPracticeWaivers silently returns (no throw) under three gating
+  // conditions that must not register as shortfall: after the final NFL week,
+  // offseason non-daily ticks, and regular-season waiver period.
+  const is_inner_gated_skip =
+    current_season.week > current_season.finalWeek ||
+    (!current_season.isRegularSeason && !daily) ||
+    (current_season.isRegularSeason && current_season.isWaiverPeriod)
+
   // Oracle: if the empty-queue sentinel was thrown, or if pre-snapshot showed
   // nothing pending, this was a legitimate no-op — skip the shortfall check.
   // Otherwise verify that every league that had pending waivers going in now
@@ -118,6 +136,7 @@ const run_practice = async ({ daily = false }) => {
   let shortfall_error = null
   const is_legitimate_noop =
     error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers ||
+    is_inner_gated_skip ||
     pre_league_ids.size === 0
 
   if (!error && !is_legitimate_noop && pre_league_ids.size > 0) {

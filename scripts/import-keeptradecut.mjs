@@ -353,7 +353,9 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   // completed without writing any new rows — silent partial-success.
   if (!dry) {
     const freshness_threshold_hours = 48
-    const max_row = await db('keeptradecut_rankings').max({ max_d: 'd' }).first()
+    const max_row = await db('keeptradecut_rankings')
+      .max({ max_d: 'd' })
+      .first()
     const max_d = max_row?.max_d
     if (!max_d) {
       return {

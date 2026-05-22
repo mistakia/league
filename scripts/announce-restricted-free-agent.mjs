@@ -393,8 +393,7 @@ const process_all_leagues = async ({
   // exactly which ones we are responsible for verifying.
   const due_leagues = []
   for (const league of eligible_leagues) {
-    const announcement_timestamp =
-      league.announcement_info.correct_timestamp
+    const announcement_timestamp = league.announcement_info.correct_timestamp
     if (dry_run) {
       due_leagues.push({ lid: league.lid, announcement_timestamp })
       continue

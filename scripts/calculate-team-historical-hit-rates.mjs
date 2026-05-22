@@ -269,7 +269,9 @@ const calculate_team_historical_hit_rates = async ({
   log(`Processing ${selections.length} team yardage selections`)
 
   if (selections.length === 0) {
-    log('No selections found to process — legitimate no-op (offseason or no data for year)')
+    log(
+      'No selections found to process — legitimate no-op (offseason or no data for year)'
+    )
     return { shortfall: null }
   }
 

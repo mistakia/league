@@ -667,7 +667,12 @@ const run = async ({ year = current_season.year } = {}) => {
   }
 }
 
-const check_oracle = async () => {
+const check_oracle = async ({ seas_type }) => {
+  // POST-season run() short-circuits after process_average_projections without
+  // calling process_league(), so leagues.processed_at intentionally stays
+  // stale. Skip the freshness oracle in that case.
+  if (seas_type === 'POST') return null
+
   // Freshness oracle: every hosted, non-archived league must have been
   // processed within the last 2 hours (4 missed 30-min cron cycles).
   // leagues.processed_at is set to the script-start epoch at the end of
@@ -689,7 +694,7 @@ const check_oracle = async () => {
     const err = new Error(
       `process-projections freshness oracle failed: ${details}`
     )
-    err.shortfall = true
+    err.row_count_shortfall = true
     return err
   }
 
@@ -700,8 +705,9 @@ const main = async () => {
   debug.enable('process-projections,project-lineups,simulation:*')
   let error
   try {
+    const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
     await run()
-    const shortfall = await check_oracle()
+    const shortfall = await check_oracle({ seas_type })
     if (shortfall) throw shortfall
   } catch (err) {
     error = err

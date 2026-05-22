@@ -20,7 +20,7 @@ const run = async () => {
   }
 
   // get list of hosted leagues
-  const leagues = await db('leagues').where('hosted', true)
+  const leagues = await db('leagues').where('hosted', 1)
 
   const slice_failures = []
 

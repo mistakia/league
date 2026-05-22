@@ -39,14 +39,12 @@ const run = async () => {
   let eligible_before = 0
   for (const team of teams) {
     const protected_pids = protected_pids_by_tid[team.uid] || []
-    const count_query = db('rosters_players')
-      .count({ n: '*' })
-      .where({
-        tag: player_tag_types.RESTRICTED_FREE_AGENCY,
-        week: 0,
-        year: current_season.year,
-        tid: team.uid
-      })
+    const count_query = db('rosters_players').count({ n: '*' }).where({
+      tag: player_tag_types.RESTRICTED_FREE_AGENCY,
+      week: 0,
+      year: current_season.year,
+      tid: team.uid
+    })
     if (protected_pids.length > 0) {
       count_query.whereNotIn('pid', protected_pids)
     }
@@ -101,14 +99,12 @@ const run = async () => {
   let remaining = 0
   for (const team of teams) {
     const protected_pids = protected_pids_by_tid[team.uid] || []
-    const count_query = db('rosters_players')
-      .count({ n: '*' })
-      .where({
-        tag: player_tag_types.RESTRICTED_FREE_AGENCY,
-        week: 0,
-        year: current_season.year,
-        tid: team.uid
-      })
+    const count_query = db('rosters_players').count({ n: '*' }).where({
+      tag: player_tag_types.RESTRICTED_FREE_AGENCY,
+      week: 0,
+      year: current_season.year,
+      tid: team.uid
+    })
     if (protected_pids.length > 0) {
       count_query.whereNotIn('pid', protected_pids)
     }
@@ -136,7 +132,7 @@ const main = async () => {
     const result = await run()
     if (result?.shortfall) {
       const err = new Error(result.shortfall)
-      err.oracle_shortfall = true
+      err.row_count_shortfall = true
       throw err
     }
   } catch (err) {
