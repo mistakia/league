@@ -130,6 +130,12 @@ const import_individual_fantasypros_dynasty_rankings = async ({
   }
 }
 
+// Per-variant row-count floor. Catches silent failure where the upstream
+// player-name format shifts and every find_player_row returns null, leaving
+// inserts.length === 0 with no thrown error. 50 is generous against typical
+// dynasty ranking sizes (~150-300 ranked players per variant).
+const RANKINGS_FLOOR_PER_VARIANT = 50
+
 const import_fantasypros_dynasty_rankings = async ({
   year,
   dry_run = false,
@@ -155,8 +161,15 @@ const import_fantasypros_dynasty_rankings = async ({
   // ({STANDARD,HALF_PPR,PPR} x {DYNASTY,SUPERFLEX_DYNASTY}).
   const fantasypros_scoring_types = ['PPR', 'HALF', 'STD']
 
+  const expected_variants = []
   for (const fantasypros_scoring_type of fantasypros_scoring_types) {
     for (const item of fantasypros_position_types) {
+      expected_variants.push(
+        format_ranking_type({
+          fantasypros_scoring_type,
+          superflex: item.superflex
+        })
+      )
       await import_individual_fantasypros_dynasty_rankings({
         year,
         fantasypros_scoring_type,
@@ -167,6 +180,38 @@ const import_fantasypros_dynasty_rankings = async ({
       await wait(2000)
     }
   }
+
+  if (dry_run) {
+    return { shortfall: null }
+  }
+
+  // Oracle: every variant we attempted must have at least the floor number of
+  // rows in `player_rankings_history` written at this run's timestamp.
+  const variant_counts = await db('player_rankings_history')
+    .where({ year, source_id: 'FANTASYPROS', timestamp })
+    .whereIn('ranking_type', expected_variants)
+    .groupBy('ranking_type')
+    .select('ranking_type')
+    .count('* as cnt')
+  const counts_by_variant = new Map(
+    variant_counts.map((r) => [r.ranking_type, Number(r.cnt)])
+  )
+  const shortfalls = []
+  for (const variant of expected_variants) {
+    const cnt = counts_by_variant.get(variant) || 0
+    if (cnt < RANKINGS_FLOOR_PER_VARIANT) {
+      shortfalls.push(
+        `${variant}: ${cnt} rows (floor=${RANKINGS_FLOOR_PER_VARIANT})`
+      )
+    }
+  }
+
+  if (shortfalls.length) {
+    return {
+      shortfall: `player_rankings_history row-count shortfall at timestamp=${timestamp} year=${year} source=FANTASYPROS: ${shortfalls.join('; ')}`
+    }
+  }
+  return { shortfall: null }
 }
 
 const main = async () => {
@@ -174,11 +219,16 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const year = argv.year ? argv.year : current_season.year
-    await import_fantasypros_dynasty_rankings({
+    const result = await import_fantasypros_dynasty_rankings({
       year,
       dry_run: argv.dry,
       ignore_cache: argv.ignore_cache
     })
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     console.log(error)
