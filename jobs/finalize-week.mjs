@@ -283,47 +283,38 @@ const main = async () => {
 
   try {
     finalize_result = await finalize_week()
+
+    if (!finalize_result?.success) {
+      throw new Error(
+        `Week finalization failed: ${finalize_result?.reason || 'unknown error'}`
+      )
+    }
+
+    // External post-condition oracle: independent of finalize_result.success.
+    // Catches the silent case where internal success=true but scores were not
+    // actually written to the matchups table.
+    const { week, year, seas_type } = finalize_result.results
+    const league_ids = await get_hosted_league_ids()
+    const oracle_shortfalls = await verify_matchup_scores({
+      league_ids,
+      year,
+      week,
+      seas_type
+    })
+    if (oracle_shortfalls.length > 0) {
+      log(`matchups oracle FAILED: ${oracle_shortfalls.join('; ')}`)
+      throw new Error(
+        `Week finalization oracle failed: ${oracle_shortfalls.join('; ')}`
+      )
+    }
   } catch (err) {
     error = err
     log(error)
   }
 
-  // External post-condition oracle: independent of finalize_result.success.
-  // Catches the silent case where internal success=true but scores were not
-  // actually written to the matchups table.
-  let oracle_shortfalls = []
-  if (finalize_result?.success) {
-    try {
-      const { week, year, seas_type } = finalize_result.results
-      const league_ids = await get_hosted_league_ids()
-      oracle_shortfalls = await verify_matchup_scores({
-        league_ids,
-        year,
-        week,
-        seas_type
-      })
-      if (oracle_shortfalls.length > 0) {
-        log(`matchups oracle FAILED: ${oracle_shortfalls.join('; ')}`)
-      }
-    } catch (oracle_err) {
-      log(`matchups oracle error: ${oracle_err.message}`)
-      oracle_shortfalls = [`oracle query failed: ${oracle_err.message}`]
-    }
-  }
-
-  const oracle_passed = oracle_shortfalls.length === 0
-  const internal_success = finalize_result?.success ?? false
-  const job_success = internal_success && oracle_passed
-
   await report_job({
     job_type: job_types.FINALIZE_WEEK,
-    error,
-    succ: job_success,
-    reason: job_success
-      ? `Week finalized successfully`
-      : oracle_shortfalls.length > 0
-        ? `Week finalization oracle failed: ${oracle_shortfalls.join('; ')}`
-        : `Week finalization failed: ${error?.message || 'unknown error'}`
+    error
   })
 
   process.exit()
