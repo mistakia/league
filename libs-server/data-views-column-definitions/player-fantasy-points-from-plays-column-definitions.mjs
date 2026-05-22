@@ -651,7 +651,16 @@ export default {
       periods: FP_OUTPUT_PERIODS,
       aggregations: ['rate', 'count']
     },
-    consumes_params_extra: ['scoring_format_hash'],
+    // scoring_format_hash is consumed by the role-attribution computation;
+    // the play-filter keys are consumed by fp_apply_filters via
+    // apply_play_by_play_column_params_to_query. Both surfaces must
+    // differentiate the CTE-name hash so two fantasy-points columns whose
+    // per-column filter params diverge (e.g. one has qtr, one does not)
+    // materialize into distinct CTEs.
+    consumes_params_extra: [
+      'scoring_format_hash',
+      ...Object.keys(nfl_plays_column_params)
+    ],
     supported_rate_types: [
       'per_game',
       'per_team_half',

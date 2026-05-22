@@ -1,0 +1,55 @@
+{
+  "name": "two rush yards from plays columns diverge in yds_gained filter",
+  "description": "Regression for measure-batch group_key bug: two instances of the same play-stat column-def with different per-column filter params (yds_gained) must emit distinct rate_aggregate CTEs. Previously both columns batched into one CTE and the second column silently inherited the first's filter.",
+  "tags": ["plays", "parameters", "filters", "rate_type", "cte", "regression"],
+  "timeout_ms": 40000,
+  "request": {
+    "columns": [
+      "player_name",
+      {
+        "column_id": "player_rush_yards_from_plays",
+        "params": {
+          "year": [
+            2024
+          ],
+          "yds_gained": [
+            15,
+            99
+          ],
+          "rate_type": [
+            "per_game"
+          ]
+        }
+      },
+      {
+        "column_id": "player_rush_yards_from_plays",
+        "params": {
+          "year": [
+            2024
+          ],
+          "rate_type": [
+            "per_game"
+          ]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "RB"
+        ]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_rush_yards_from_plays",
+        "desc": true,
+        "column_index": 1
+      }
+    ],
+    "limit": 10
+  },
+  "expected_query": "with \"t3d2efe2602a05b1642021b304ba51fb2\" as materialized (select \"player_gamelogs_year_2024\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2024.tm) as teams from \"player_gamelogs_year_2024\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2024\".\"esbid\" where \"player_gamelogs_year_2024\".\"active\" = true and \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2024) group by \"player_gamelogs_year_2024\".\"pid\"), \"rate_aggregate_83a94558a51c\" as materialized (select nfl_plays.bc_pid AS pid, SUM(rush_yds) AS m_30e30c8bc773 from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"yds_gained\" between 15 and 99 group by nfl_plays.bc_pid), \"rate_aggregate_577ad02ec5d8\" as materialized (select nfl_plays.bc_pid AS pid, SUM(rush_yds) AS m_30e30c8bc773 from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') group by nfl_plays.bc_pid) select \"player\".\"pid\", player.fname, player.lname, CAST(MAX(rate_aggregate_83a94558a51c.m_30e30c8bc773) AS DECIMAL) / NULLIF(CAST(MAX(t3d2efe2602a05b1642021b304ba51fb2.rate_type_total_count) AS DECIMAL), 0) AS rush_yds_from_plays_0, CAST(MAX(rate_aggregate_577ad02ec5d8.m_30e30c8bc773) AS DECIMAL) / NULLIF(CAST(MAX(t3d2efe2602a05b1642021b304ba51fb2.rate_type_total_count) AS DECIMAL), 0) AS rush_yds_from_plays_1, \"player\".\"pos\" from \"player\" left join \"t3d2efe2602a05b1642021b304ba51fb2\" on \"t3d2efe2602a05b1642021b304ba51fb2\".\"pid\" = \"player\".\"pid\" left join \"rate_aggregate_83a94558a51c\" on \"rate_aggregate_83a94558a51c\".\"pid\" = \"player\".\"pid\" left join \"rate_aggregate_577ad02ec5d8\" on \"rate_aggregate_577ad02ec5d8\".\"pid\" = \"player\".\"pid\" where player.pos IN ('RB') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 10"
+}

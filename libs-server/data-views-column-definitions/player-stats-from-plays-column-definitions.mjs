@@ -14,6 +14,13 @@ import {
   derive_periods_from_rate_types
 } from '#libs-server/data-views/strip-outer-sum.mjs'
 
+// Every key apply_play_by_play_column_params_to_query may read from the
+// column's params. Declared as consumes_params_extra so the output-aggregator
+// group_key / cte_name hashes reflect per-column filter divergence (e.g.
+// two rush_yards_from_plays instances where only one carries yds_gained
+// must materialize into distinct CTEs rather than batching into one).
+const play_by_play_filter_param_keys = Object.keys(nfl_plays_column_params)
+
 const should_use_main_where = ({ params, has_numerator_denominator }) => {
   return (
     (params.year_offset &&
@@ -214,7 +221,12 @@ const player_stat_from_plays = ({
     ? { supports_output: final_supports_output, measure_source: 'plays' }
     : {}),
   ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
-  ...(final_apply_filters ? { apply_filters: final_apply_filters } : {}),
+  ...(final_apply_filters
+    ? {
+        apply_filters: final_apply_filters,
+        consumes_params_extra: play_by_play_filter_param_keys
+      }
+    : {}),
   get_cache_info: get_cache_info_for_fields_from_plays
   })
 }
