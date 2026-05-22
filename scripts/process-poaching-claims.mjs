@@ -29,7 +29,7 @@ const run = async () => {
     // check if currently between Saturday 6pm and Tuesday 3pm (EST)
     if (should_block_poach_processing(now)) {
       // do not process any claims during this window
-      return
+      return { shortfall: null }
     }
   }
 
@@ -62,6 +62,21 @@ const run = async () => {
         lid: claim.lid
       })
   }
+
+  // Oracle: verify no eligible-to-process claim remains pending after the run.
+  const remaining = await db('poaches')
+    .where('submitted', '<', cutoff)
+    .whereNull('processed')
+    .count('* as count')
+    .first()
+  const remaining_count = Number(remaining.count)
+  if (remaining_count > 0) {
+    return {
+      shortfall: `${remaining_count} eligible poaching claim(s) still pending after run`
+    }
+  }
+
+  return { shortfall: null }
 }
 
 export default run
@@ -69,7 +84,12 @@ export default run
 const main = async () => {
   let error
   try {
-    await run()
+    const result = await run()
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
   }
