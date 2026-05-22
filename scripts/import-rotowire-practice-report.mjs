@@ -7,7 +7,8 @@ import {
   is_main,
   find_player_row,
   report_job,
-  fetch_with_retry
+  fetch_with_retry,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -137,11 +138,7 @@ const main = async () => {
   let error
   try {
     const result = await run()
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     console.log(error)

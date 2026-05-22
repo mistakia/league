@@ -85,6 +85,7 @@ export { default as update_nfl_game } from './update-nfl-game.mjs'
 export * as betonline from './betonline.mjs'
 export { default as format_starting_hash } from './format-starting-hash.mjs'
 export { default as report_job } from './report-job.mjs'
+export { default as throw_if_shortfall } from './throw-if-shortfall.mjs'
 export {
   has_league_notification_been_sent,
   record_league_notification_sent

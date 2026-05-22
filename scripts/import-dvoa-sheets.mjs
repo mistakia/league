@@ -9,7 +9,7 @@ import { promisify } from 'util'
 import fetch from 'node-fetch'
 import dayjs from 'dayjs'
 
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam } from '#libs-shared'
@@ -1255,13 +1255,11 @@ const main = async () => {
         .where({ timestamp: result.timestamp })
         .count('* as cnt')
       const count = Number(row?.cnt || 0)
-      if (count < DVOA_HISTORY_FLOOR_PER_RUN) {
-        const err = new Error(
-          `dvoa_team_unit_seasonlogs_history row-count shortfall at timestamp=${result.timestamp} year=${result.year}: ${count} rows (floor=${DVOA_HISTORY_FLOOR_PER_RUN})`
-        )
-        err.row_count_shortfall = true
-        throw err
-      }
+      throw_if_shortfall(
+        count < DVOA_HISTORY_FLOOR_PER_RUN
+          ? `dvoa_team_unit_seasonlogs_history row-count shortfall at timestamp=${result.timestamp} year=${result.year}: ${count} rows (floor=${DVOA_HISTORY_FLOOR_PER_RUN})`
+          : null
+      )
     }
   } catch (err) {
     error = err
