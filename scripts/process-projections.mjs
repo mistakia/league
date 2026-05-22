@@ -667,11 +667,42 @@ const run = async ({ year = current_season.year } = {}) => {
   }
 }
 
+const check_oracle = async () => {
+  // Freshness oracle: every hosted, non-archived league must have been
+  // processed within the last 2 hours (4 missed 30-min cron cycles).
+  // leagues.processed_at is set to the script-start epoch at the end of
+  // process_league(), so a stale value means process_league() never completed
+  // for that league — a silent partial-success the cron would otherwise miss.
+  const two_hours_ago = Math.round(Date.now() / 1000) - 7200
+  const stale_leagues = await db('leagues')
+    .select('uid', 'processed_at')
+    .where({ hosted: true })
+    .whereNull('archived_at')
+    .where(function () {
+      this.whereNull('processed_at').orWhere('processed_at', '<', two_hours_ago)
+    })
+
+  if (stale_leagues.length > 0) {
+    const details = stale_leagues
+      .map((l) => `lid=${l.uid} processed_at=${l.processed_at ?? 'null'}`)
+      .join('; ')
+    const err = new Error(
+      `process-projections freshness oracle failed: ${details}`
+    )
+    err.shortfall = true
+    return err
+  }
+
+  return null
+}
+
 const main = async () => {
   debug.enable('process-projections,project-lineups,simulation:*')
   let error
   try {
     await run()
+    const shortfall = await check_oracle()
+    if (shortfall) throw shortfall
   } catch (err) {
     error = err
     console.log(error)
