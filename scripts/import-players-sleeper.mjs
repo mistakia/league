@@ -30,6 +30,7 @@ debug.enable(
 const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {
+  const run_start_timestamp = Math.round(Date.now() / 1000)
   const URL = 'https://api.sleeper.app/v1/players/nfl'
   const result = await fetch_with_retry({ url: URL, response_type: 'json' })
 
@@ -210,20 +211,39 @@ const run = async () => {
     await db('players_status').insert(statuses)
   }
 
-  return { fields }
+  // Freshness oracle: at least one players_status row must carry this run's
+  // timestamp, confirming the Sleeper API returned live data and the script
+  // processed it through to the DB. A silent empty/cached response leaves no
+  // new rows and surfaces as a shortfall.
+  const recent_row = await db('players_status')
+    .where('timestamp', '>=', run_start_timestamp)
+    .first()
+  if (!recent_row) {
+    return {
+      shortfall:
+        'no players_status rows written for this run — Sleeper API may have returned empty or fully-cached data'
+    }
+  }
+
+  return { fields, shortfall: null }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const { fields } = await run()
+    const { fields, shortfall } = await run()
     if (argv.fields) {
       log(`Complete field list: ${Object.keys(fields)}`)
     }
+    if (shortfall) {
+      const err = new Error(shortfall)
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
-    console.log(error)
+    log(error)
   }
 
   await report_job({
