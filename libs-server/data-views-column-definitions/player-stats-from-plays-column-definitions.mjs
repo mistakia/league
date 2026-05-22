@@ -759,7 +759,7 @@ export default {
     supported_rate_types: []
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
-    pid_columns: ['bc_pid'], // TODO should include bc_pid and trg_pid
+    pid_columns: ['bc_pid', 'trg_pid'],
     with_select_string: `SUM(mbt)`,
     stat_name: 'broken_tackles_from_plays'
   }),
