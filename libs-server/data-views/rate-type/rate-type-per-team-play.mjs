@@ -7,6 +7,11 @@ import get_rate_type_denominator_params, {
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
+import {
+  requires_wrap,
+  register_wrap,
+  get_wrap_cte_name
+} from './per-team-play-wrap.mjs'
 
 export const get_per_team_play_cte_table_name = ({
   params = {},
@@ -42,7 +47,8 @@ export const add_per_team_play_cte = ({
   group_by = null,
   team_unit = 'off',
   data_view_options = {},
-  query_context = null
+  query_context = null,
+  force_year_grain = false
 }) => {
   team_unit = params.team_unit || team_unit
 
@@ -78,14 +84,26 @@ export const add_per_team_play_cte = ({
     cte_query.whereIn('play_type', ['PASS', 'RUSH'])
   }
 
+  let year_grouped = false
   for (const split of splits) {
     if (split === 'year') {
       cte_query.select('nfl_plays.year')
       cte_query.groupBy('nfl_plays.year')
+      year_grouped = true
     } else if (split === 'week') {
       cte_query.select('nfl_plays.week')
       cte_query.groupBy('nfl_plays.week')
     }
+  }
+
+  // Wrap-mode requires (off, year) grain so the wrap CTE can join the
+  // year-of-stat to that year's team and that year's team-pass-play total.
+  // Without this the wrap collapses the per-year denominator to a single
+  // total-across-years number and the historical-team-mode attribution is
+  // lost. Idempotent against the splits-year branch above.
+  if (force_year_grain && !year_grouped) {
+    cte_query.select('nfl_plays.year')
+    cte_query.groupBy('nfl_plays.year')
   }
 
   const denominator_params = get_rate_type_denominator_params({ params })
@@ -284,9 +302,14 @@ export const add_cte = ({
   column_def,
   params,
   cte_name,
+  identity_id,
   dispatch_params = {}
 }) => {
+  // Idempotent: subsequent column instances sharing the same denominator
+  // CTE name skip re-materialization. The wrap CTE (registered per-column
+  // in join_cte) is independent of this dedup.
   if (query_context.applied_output_ctes.has(cte_name)) return
+  const wrap_mode = requires_wrap({ query_context, params, identity_id })
   add_per_team_play_cte({
     players_query: query_context.players_query,
     params,
@@ -295,7 +318,8 @@ export const add_cte = ({
     play_type: dispatch_params.play_type ?? null,
     group_by: dispatch_params.group_by ?? null,
     team_unit: resolve_team_unit(column_def, dispatch_params),
-    query_context
+    query_context,
+    force_year_grain: wrap_mode
   })
   query_context.applied_output_ctes.add(cte_name)
 }
@@ -308,13 +332,33 @@ export const join_cte = ({
   query_context,
   column_def,
   cte_name,
+  identity_id,
   params,
+  column_index,
   dispatch_params = {}
 }) => {
+  const effective_params = params ?? query_context.params
+  if (requires_wrap({ query_context, params: effective_params, identity_id })) {
+    // Wrap mode: skip the standard denom-on-team join entirely. The wrap
+    // CTE references the denom CTE internally per-(team, year); the only
+    // outer-query join we need is wrap -> player on pid, which join_wrap
+    // emits below. The wrap itself is materialized later by
+    // flush_per_team_play_wraps once measure batches settle.
+    join_wrap_cte({
+      query_context,
+      column_def,
+      cte_name,
+      params: effective_params,
+      identity_id,
+      column_index,
+      team_unit: resolve_team_unit(column_def, dispatch_params)
+    })
+    return
+  }
   join_per_team_play_cte({
     players_query: query_context.players_query,
     query_context,
-    params: params ?? query_context.params,
+    params: effective_params,
     rate_type_table_name: cte_name,
     splits: query_context.splits,
     team_unit: resolve_team_unit(column_def, dispatch_params),
@@ -322,12 +366,78 @@ export const join_cte = ({
   })
 }
 
-export const emit_outer_select = emit_rate_outer_select
+const join_wrap_cte = ({
+  query_context,
+  column_def,
+  cte_name,
+  params,
+  identity_id,
+  column_index,
+  team_unit
+}) => {
+  const wrap_cte_name = register_wrap({
+    query_context,
+    column_def,
+    params,
+    identity_id,
+    column_index,
+    rate_type_table_name: cte_name,
+    team_unit
+  })
+  // Forward reference to the wrap CTE -- knex defers SQL emission until the
+  // outer query's toString(), by which point flush_per_team_play_wraps has
+  // materialized the wrap via withMaterialized.
+  query_context.players_query.leftJoin(wrap_cte_name, function () {
+    this.on(
+      `${wrap_cte_name}.pid`,
+      '=',
+      query_context.data_view_options.pid_reference
+    )
+  })
+}
+
+export const emit_outer_select = (args) => {
+  const {
+    query_context,
+    column_def,
+    cte_name,
+    column_index,
+    params,
+    identity_id
+  } = args
+  if (requires_wrap({ query_context, params, identity_id })) {
+    const wrap_cte_name = get_wrap_cte_name({
+      column_def,
+      column_index,
+      rate_type_table_name: cte_name
+    })
+    if (!column_def.column_name) {
+      throw new Error(
+        `per_team_play wrap requires column_def.column_name (column_id=${column_def.column_id})`
+      )
+    }
+    const alias = `${column_def.column_name}_${column_index}`
+    return {
+      sql: `CAST(MAX(${wrap_cte_name}.numerator_sum) AS DECIMAL) / NULLIF(CAST(MAX(${wrap_cte_name}.denominator_sum) AS DECIMAL), 0) AS ${alias}`,
+      bindings: []
+    }
+  }
+  return emit_rate_outer_select(args)
+}
+
+// Skip the standard aggregator-rate numerator path when the wrap will
+// materialize its own per-(pid, year) numerator subquery internally.
+// `apply_output_aggregator` consults this hook to decide whether to invoke
+// `aggregator_rate.add_cte` / `aggregator_rate.join_cte` after the plugin's
+// own add_cte/join_cte run.
+export const handles_numerator = ({ query_context, params, identity_id }) =>
+  requires_wrap({ query_context, params, identity_id })
 
 export default {
   consumes_params,
   get_cte_name,
   add_cte,
   join_cte,
-  emit_outer_select
+  emit_outer_select,
+  handles_numerator
 }

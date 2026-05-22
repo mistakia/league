@@ -107,7 +107,8 @@ export const build_period_cte = ({
   period,
   query_context,
   identity_id,
-  params = {}
+  params = {},
+  force_year_grain = false
 }) => {
   if (measure_source === 'plays_role_union') {
     return build_role_union_period_cte({
@@ -116,7 +117,8 @@ export const build_period_cte = ({
       apply_filters,
       period,
       query_context,
-      params
+      params,
+      force_year_grain
     })
   }
   return build_batched_period_cte({
@@ -128,7 +130,8 @@ export const build_period_cte = ({
     period,
     query_context,
     identity_id,
-    params
+    params,
+    force_year_grain
   })
 }
 
@@ -138,7 +141,8 @@ const build_role_union_period_cte = ({
   apply_filters,
   period,
   query_context,
-  params
+  params,
+  force_year_grain = false
 }) => {
   // Preserved verbatim from the legacy role-union branch. Role-union sources
   // build a per-role UNION ALL and are not batchable; see measure-batch.mjs
@@ -179,7 +183,7 @@ const build_role_union_period_cte = ({
     .slice(1)
     .reduce((acc, sub) => acc.unionAll(sub), union_subs[0])
   const include_year =
-    !is_aggregate || query_context.splits.includes('year')
+    !is_aggregate || query_context.splits.includes('year') || force_year_grain
   const outer = db
     .from(inner_union.as('role_union'))
     .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
@@ -243,7 +247,8 @@ export const build_batched_period_cte = ({
   period,
   query_context,
   identity_id,
-  params = {}
+  params = {},
+  force_year_grain = false
 }) => {
   const is_team = identity_id.startsWith('team')
   const period_key = period_key_expr(period)
@@ -316,7 +321,7 @@ export const build_batched_period_cte = ({
   if (source.extra_join) source.extra_join(sub)
 
   const include_year =
-    !is_aggregate || query_context.splits.includes('year')
+    !is_aggregate || query_context.splits.includes('year') || force_year_grain
   sub.innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)
   if (include_year) sub.select('nfl_games.year')
   if (!is_aggregate) {

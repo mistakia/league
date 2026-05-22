@@ -24,7 +24,15 @@ const adapt = (plugin, dispatch_params) => ({
   add_cte: (args) => plugin.add_cte({ ...args, dispatch_params }),
   join_cte: (args) => plugin.join_cte({ ...args, dispatch_params }),
   emit_outer_select: (args) =>
-    plugin.emit_outer_select({ ...args, dispatch_params })
+    plugin.emit_outer_select({ ...args, dispatch_params }),
+  // Optional hook: when defined and returning true for the current dispatch,
+  // the standard aggregator_rate numerator path is skipped because the
+  // plugin's own CTE materialization owns the numerator (e.g.
+  // rate-type-per-team-play's multi-year-no-split wrap CTE inlines its own
+  // (pid, year) numerator subquery).
+  handles_numerator: plugin.handles_numerator
+    ? (args) => plugin.handles_numerator({ ...args, dispatch_params })
+    : null
 })
 
 // 19 (period, 'rate') tuples — module-keyed not token-keyed; dispatch params
@@ -178,8 +186,28 @@ export const apply_output_aggregator = async ({
     identity_id,
     period
   })
-  if (!query_context.joined_output_ctes.has(cte_name)) {
-    plugin.join_cte({ query_context, cte_name, identity_id, params, column_def })
+  // Plugin-owned numerator: when the plugin's `handles_numerator` hook
+  // returns true for this dispatch, the plugin materializes the numerator
+  // itself (e.g. inlined inside a wrap CTE) and the standard
+  // aggregator_rate numerator add_cte/join_cte pair would either duplicate
+  // work or, worse, attach a (pid, year)-grain numerator CTE to the outer
+  // query and cross-multiply player rows. Skip both.
+  const plugin_handles_numerator =
+    plugin.handles_numerator &&
+    plugin.handles_numerator({ query_context, params, identity_id })
+  // When the plugin handles its own numerator, each column instance needs
+  // its own outer join (the wrap CTE is per-column, even though the
+  // denominator CTE may be shared). Bypass the `joined_output_ctes` dedup
+  // so the plugin's join_cte runs once per column.
+  if (plugin_handles_numerator || !query_context.joined_output_ctes.has(cte_name)) {
+    plugin.join_cte({
+      query_context,
+      cte_name,
+      identity_id,
+      params,
+      column_def,
+      column_index
+    })
     query_context.joined_output_ctes.add(cte_name)
   }
   // Numerator CTE: legacy denominator-style plugins (per_game / per_player /
@@ -190,7 +218,7 @@ export const apply_output_aggregator = async ({
   // materialized numerator CTE; emit_rate_outer_select reads from it. Skipped
   // when the chosen plugin is aggregator_rate itself (it already materializes
   // the canonical period CTE).
-  if (plugin !== aggregator_rate && numerator_via_cte()) {
+  if (plugin !== aggregator_rate && numerator_via_cte() && !plugin_handles_numerator) {
     // period='aggregate' collapses the numerator CTE to (pid|team_code,
     // year) grain so it joins 1:1 with the outer query. Without this,
     // multi-column rate queries cross-multiply via per-period rows in each
@@ -222,6 +250,7 @@ export const apply_output_aggregator = async ({
     }
   }
   return plugin.emit_outer_select({
+    query_context,
     column_def,
     cte_name,
     column_index,

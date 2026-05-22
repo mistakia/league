@@ -30,6 +30,7 @@ import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
+import { flush_per_team_play_wraps } from '#libs-server/data-views/rate-type/per-team-play-wrap.mjs'
 import { build_batched_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
 import {
   get_identity,
@@ -1831,6 +1832,12 @@ export const get_data_view_results_query = async ({
   // one materialized CTE with N `SUM(...) AS m_<hash>` columns instead of
   // N separate single-SUM CTEs each rescanning the source table.
   flush_measure_batches({ query_context, build_batched_period_cte })
+
+  // Materialize per_team_play wrap CTEs (multi-year-no-split historical-team
+  // attribution). Must run after flush_measure_batches in case a future
+  // revision shares the batched numerator CTE; today each wrap inlines its
+  // own (pid, year) numerator subquery and is order-independent.
+  flush_per_team_play_wraps({ query_context })
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
     where,
