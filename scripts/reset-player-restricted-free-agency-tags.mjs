@@ -18,6 +18,12 @@ const run = async () => {
     })
     .whereNull('cancelled')
 
+  const protected_pids_by_tid = {}
+  for (const bid of restricted_free_agency_bids) {
+    if (!protected_pids_by_tid[bid.tid]) protected_pids_by_tid[bid.tid] = []
+    protected_pids_by_tid[bid.tid].push(bid.pid)
+  }
+
   // Get all teams for the league for the current year
   const teams = await db('teams')
     .where({
@@ -27,6 +33,27 @@ const run = async () => {
     .orderBy('uid')
 
   log(`Found ${teams.length} teams in the league`)
+
+  // Pre-flight: count eligible-to-reset rows (tag=RFA, no active bid protecting them)
+  // so the post-run oracle can confirm they were actually cleared.
+  let eligible_before = 0
+  for (const team of teams) {
+    const protected_pids = protected_pids_by_tid[team.uid] || []
+    const count_query = db('rosters_players')
+      .count({ n: '*' })
+      .where({
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY,
+        week: 0,
+        year: current_season.year,
+        tid: team.uid
+      })
+    if (protected_pids.length > 0) {
+      count_query.whereNotIn('pid', protected_pids)
+    }
+    const [{ n }] = await count_query
+    eligible_before += Number(n)
+  }
+  log(`Eligible-to-reset RFA tag rows before run: ${eligible_before}`)
 
   let total_updated = 0
 
@@ -42,11 +69,8 @@ const run = async () => {
         tid: team.uid
       })
 
-    const team_restricted_free_agency_bids = restricted_free_agency_bids.filter(
-      (bid) => bid.tid === team.uid
-    )
     const team_restricted_free_agency_pids =
-      team_restricted_free_agency_bids.map((bid) => bid.pid)
+      protected_pids_by_tid[team.uid] || []
 
     // Exclude players with bids for the current year
     if (team_restricted_free_agency_pids.length > 0) {
@@ -66,6 +90,42 @@ const run = async () => {
   log(
     `Total updated: ${total_updated} roster slots across ${teams.length} teams`
   )
+
+  // Oracle: if there were no eligible rows to reset this is a legitimate no-op.
+  if (eligible_before === 0) {
+    log('No eligible RFA tags to reset — no-op run, oracle satisfied')
+    return { shortfall: null }
+  }
+
+  // Post-run: recount eligible rows. Any survivors are uncleared tags — a bug.
+  let remaining = 0
+  for (const team of teams) {
+    const protected_pids = protected_pids_by_tid[team.uid] || []
+    const count_query = db('rosters_players')
+      .count({ n: '*' })
+      .where({
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY,
+        week: 0,
+        year: current_season.year,
+        tid: team.uid
+      })
+    if (protected_pids.length > 0) {
+      count_query.whereNotIn('pid', protected_pids)
+    }
+    const [{ n }] = await count_query
+    remaining += Number(n)
+  }
+
+  if (remaining > 0) {
+    return {
+      shortfall: `${remaining} unprotected RFA tag(s) still set after reset (eligible_before=${eligible_before}, year=${current_season.year}, lid=${lid})`
+    }
+  }
+
+  log(
+    `Oracle satisfied: all ${eligible_before} eligible RFA tag(s) cleared (total_updated=${total_updated})`
+  )
+  return { shortfall: null }
 }
 
 const main = async () => {
@@ -73,10 +133,15 @@ const main = async () => {
 
   let error
   try {
-    await run()
+    const result = await run()
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.oracle_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
-    console.log(error)
+    log(error)
   }
 
   await report_job({
