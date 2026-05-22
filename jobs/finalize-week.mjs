@@ -226,6 +226,56 @@ const finalize_week = async () => {
   return { success, results }
 }
 
+/**
+ * Verify matchup scores were written for the finalized week.
+ *
+ * process_matchups only populates scores during REG season (it caps at
+ * regularSeasonFinalWeek). Skip the check during POST to avoid false positives.
+ *
+ * Oracle: matchups WHERE lid=$lid AND year=$year AND week=$week AND hp IS NOT
+ * NULL AND ap IS NOT NULL must have at least floor(team_count / 2) rows.
+ *
+ * @param {object} params
+ * @param {number[]} params.league_ids
+ * @param {number} params.year
+ * @param {number} params.week  continuous week number (nfl_seas_week during REG)
+ * @param {string} params.seas_type
+ * @returns {Promise<string[]>} array of shortfall messages (empty = pass)
+ */
+const verify_matchup_scores = async ({ league_ids, year, week, seas_type }) => {
+  // process_matchups caps at regularSeasonFinalWeek; playoff weeks produce no
+  // new matchup score rows, so there is nothing to verify.
+  if (seas_type === 'POST') {
+    return []
+  }
+
+  const shortfalls = []
+
+  for (const lid of league_ids) {
+    const [scored_row, team_row] = await Promise.all([
+      db('matchups')
+        .where({ lid, year, week })
+        .whereNotNull('hp')
+        .whereNotNull('ap')
+        .count({ n: '*' })
+        .first(),
+      db('teams').where({ lid, year }).count({ n: '*' }).first()
+    ])
+
+    const scored = Number(scored_row?.n ?? 0)
+    const team_count = Number(team_row?.n ?? 0)
+    const floor = Math.floor(team_count / 2)
+
+    if (scored < floor) {
+      shortfalls.push(
+        `matchups oracle: lid=${lid} year=${year} week=${week} scored=${scored} < floor=${floor} (teams=${team_count})`
+      )
+    }
+  }
+
+  return shortfalls
+}
+
 const main = async () => {
   debug.enable('finalize-week')
   let error
@@ -238,13 +288,42 @@ const main = async () => {
     log(error)
   }
 
+  // External post-condition oracle: independent of finalize_result.success.
+  // Catches the silent case where internal success=true but scores were not
+  // actually written to the matchups table.
+  let oracle_shortfalls = []
+  if (finalize_result?.success) {
+    try {
+      const { week, year, seas_type } = finalize_result.results
+      const league_ids = await get_hosted_league_ids()
+      oracle_shortfalls = await verify_matchup_scores({
+        league_ids,
+        year,
+        week,
+        seas_type
+      })
+      if (oracle_shortfalls.length > 0) {
+        log(`matchups oracle FAILED: ${oracle_shortfalls.join('; ')}`)
+      }
+    } catch (oracle_err) {
+      log(`matchups oracle error: ${oracle_err.message}`)
+      oracle_shortfalls = [`oracle query failed: ${oracle_err.message}`]
+    }
+  }
+
+  const oracle_passed = oracle_shortfalls.length === 0
+  const internal_success = finalize_result?.success ?? false
+  const job_success = internal_success && oracle_passed
+
   await report_job({
     job_type: job_types.FINALIZE_WEEK,
     error,
-    succ: finalize_result?.success ?? false,
-    reason: finalize_result?.success
+    succ: job_success,
+    reason: job_success
       ? `Week finalized successfully`
-      : `Week finalization failed: ${error?.message || 'unknown error'}`
+      : oracle_shortfalls.length > 0
+        ? `Week finalization oracle failed: ${oracle_shortfalls.join('; ')}`
+        : `Week finalization failed: ${error?.message || 'unknown error'}`
   })
 
   process.exit()
