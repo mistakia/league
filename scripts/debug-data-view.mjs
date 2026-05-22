@@ -111,7 +111,8 @@ const debug_data_view = async ({
 
     // Step 3: Parse URL to table state
     const table_state = parse_url_to_table_state(full_url)
-    log('Parsed table state:', JSON.stringify(table_state, null, 2))
+    console.log('\n--- Parsed table state ---\n')
+    console.log(JSON.stringify(table_state, null, 2))
 
     // Step 4: Generate SQL using get_data_view_results_query
     const { query } = await get_data_view_results_query(table_state)
