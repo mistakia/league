@@ -270,7 +270,14 @@ const main = async () => {
             .join('; ')}`
         )
       }
-      throw_if_shortfall(parts.length ? parts.join(' | ') : null)
+      const has_failure = missing.length || !result.success
+      throw_if_shortfall(
+        has_failure
+          ? parts.length
+            ? parts.join(' | ')
+            : 'create_season_partitions reported failure with no detail'
+          : null
+      )
     }
   } catch (err) {
     error = err

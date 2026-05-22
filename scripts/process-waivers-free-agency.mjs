@@ -2,7 +2,7 @@ import { Errors } from '#libs-shared'
 import { waiver_types } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#libs-shared/constants/season-constants.mjs'
-import { report_job, get_waiver_by_id, throw_if_shortfall } from '#libs-server'
+import { report_job, get_waiver_by_id } from '#libs-server'
 import db from '#db'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -77,14 +77,11 @@ const run_active = async ({ daily = false }) => {
       }
     }
 
-    try {
-      throw_if_shortfall(
-        stuck_leagues.length > 0
-          ? `active free agency waivers remain unprocessed after run for league(s): ${stuck_leagues.join(', ')}`
-          : null
+    if (stuck_leagues.length > 0) {
+      shortfall_error = new Error(
+        `active free agency waivers remain unprocessed after run for league(s): ${stuck_leagues.join(', ')}`
       )
-    } catch (e) {
-      shortfall_error = e
+      shortfall_error.row_count_shortfall = true
     }
   }
 
@@ -160,14 +157,11 @@ const run_practice = async ({ daily = false }) => {
       }
     }
 
-    try {
-      throw_if_shortfall(
-        stuck_leagues.length > 0
-          ? `practice squad free agency waivers remain unprocessed after run for league(s): ${stuck_leagues.join(', ')}`
-          : null
+    if (stuck_leagues.length > 0) {
+      shortfall_error = new Error(
+        `practice squad free agency waivers remain unprocessed after run for league(s): ${stuck_leagues.join(', ')}`
       )
-    } catch (e) {
-      shortfall_error = e
+      shortfall_error.row_count_shortfall = true
     }
   }
 
