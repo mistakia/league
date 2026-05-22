@@ -7,7 +7,8 @@ import {
   report_job,
   sleeper,
   find_player_row,
-  batch_insert
+  batch_insert,
+  check_projections_index_floor
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -245,7 +246,7 @@ const import_sleeper_adp_and_projections = async ({
     }
 
     log('dry run, skipping insertion')
-    return
+    return { skipped: true }
   }
 
   if (adp_inserts.length) {
@@ -296,16 +297,27 @@ const import_sleeper_adp_and_projections = async ({
       }
     })
   }
+
+  return {
+    skipped: false,
+    year: current_season.year,
+    week: 0,
+    sourceid: external_data_sources.SLEEPER,
+    seas_type: 'REG'
+  }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await import_sleeper_adp_and_projections({
+    const result = await import_sleeper_adp_and_projections({
       ignore_cache: argv.ignore_cache,
       dry_run: argv.dry
     })
+    if (result && !result.skipped) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     log(error)

@@ -5,7 +5,12 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season, external_data_sources } from '#constants'
-import { is_main, find_player_row, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  check_projections_index_floor
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -27,11 +32,11 @@ const run = async ({ season = false, dry = false } = {}) => {
   const type = season ? 'season' : week
   // do not pull in any projections after the season has ended
   if (type !== 'season' && current_season.week > current_season.nflFinalWeek) {
-    return
+    return { skipped: true }
   }
 
   if (type === 'season' && current_season.week > 0) {
-    return
+    return { skipped: true }
   }
 
   const missing = []
@@ -168,16 +173,27 @@ const run = async ({ season = false, dry = false } = {}) => {
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
+
+  return {
+    skipped: false,
+    year,
+    week,
+    sourceid: external_data_sources.CBS,
+    seas_type: 'REG'
+  }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await run({
+    const result = await run({
       season: argv.season,
       dry: argv.dry
     })
+    if (result && !result.skipped && !argv.dry) {
+      await check_projections_index_floor(result)
+    }
   } catch (err) {
     error = err
     console.log(error)
