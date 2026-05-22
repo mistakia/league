@@ -4,6 +4,7 @@ import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-b
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
+import { requires_team_stats_wrap } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
@@ -58,6 +59,25 @@ const apply_team_stats_join = ({
   const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
   const join_year = splits.includes('year')
   const join_week = splits.includes('week')
+
+  // Wrap-mode `_team_stats` is keyed by pid (see
+  // add-team-stats-play-by-play-with-statement.mjs), not by nfl_team. Join
+  // on pid 1:1 and skip the team / year / week predicates.
+  const wrap_mode =
+    join_on_team &&
+    requires_team_stats_wrap({
+      query_context,
+      params,
+      force_player_active
+    })
+
+  if (wrap_mode) {
+    players_query[join_method](target, function () {
+      this.on(`${target}.pid`, '=', pid_reference)
+    })
+    return
+  }
+
   const team_join_target = join_on_team
     ? resolve_team_join_target({ query_context, params })
     : null

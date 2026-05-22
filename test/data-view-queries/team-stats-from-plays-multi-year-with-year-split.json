@@ -1,0 +1,50 @@
+{
+  "name": "team_pass_yards_from_plays on player view with year split (no wrap)",
+  "description": "Companion to team-stats-from-plays-multi-year-no-split: with a year split active, the existing (pid, year) row grain already correctly attributes each year's team-stat via player_year_teams. This fixture pins that the wrap pattern does NOT fire when a year split is active -- the `_team_stats` CTE stays at (nfl_team, year) grain (no pid in its select list) and the outer join binds on team AND year.",
+  "request": {
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "year": [
+            2023,
+            2024,
+            2025
+          ]
+        }
+      }
+    ],
+    "prefix_columns": [
+      "player_name"
+    ],
+    "splits": [
+      "year"
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "WR"
+        ]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023,2024,2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024, 2025) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_yds_from_plays) as team_pass_yds_from_plays, \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\" from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024, 2025) and \"player_gamelogs\".\"year\" in (2023, 2024, 2025) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"player\".\"pid\", player.fname, player.lname, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = \"player_years\".\"year\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.year = player_years.year where player.pos IN ('WR') group by player.fname, player.lname, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "team-stats-from-plays",
+    "cte",
+    "joins",
+    "historical-team",
+    "year-split"
+  ],
+  "timeout_ms": 40000
+}

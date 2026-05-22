@@ -2,6 +2,8 @@ import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import { requires_team_stats_wrap } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
+import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import {
   decompose_nfl_weeks,
   is_full_year_seas_type_coverage
@@ -25,6 +27,20 @@ export const add_team_stats_play_by_play_with_statement = ({
   const limit_to_player_active_games =
     params.limit_to_player_active_games || false
   const team_unit = params.team_unit || 'off'
+
+  // Wrap mode: team-variant team-stat column on a multi-year-no-split player
+  // view. The base CTE is forced to (nfl_team, year) grain and the
+  // `_team_stats` CTE is re-shaped to attribute via player_year_teams and
+  // sum back to pid. See team-stats-from-plays-wrap.mjs for the contract.
+  const query_context = data_view_options?.query_context
+  const wrap_mode =
+    query_context && !limit_to_player_active_games
+      ? requires_team_stats_wrap({
+          query_context,
+          params,
+          force_player_active: false
+        })
+      : false
 
   const with_query = db('nfl_plays')
     .select(`nfl_plays.${team_unit} as nfl_team`)
@@ -50,7 +66,9 @@ export const add_team_stats_play_by_play_with_statement = ({
   // Add groupBy clause before having
   with_query.groupBy(`nfl_plays.${team_unit}`)
 
-  if (splits.includes('year')) {
+  // In wrap mode, force year into the base CTE so each team-year is
+  // addressable for the wrap-CTE join even when no `year` split is active.
+  if (splits.includes('year') || wrap_mode) {
     with_query.select('nfl_plays.year')
     with_query.groupBy('nfl_plays.year')
   }
@@ -101,25 +119,48 @@ export const add_team_stats_play_by_play_with_statement = ({
   // CTE into a nested-loop that re-executes it per outer row.
   query.withMaterialized(with_table_name, with_query)
 
-  const stats_query = limit_to_player_active_games
-    ? create_player_team_stats_query({
-        with_table_name,
-        select_column_names,
-        rate_columns,
-        splits,
-        params,
-        having_clauses,
-        data_view_options
-      })
-    : create_team_stats_query({
-        with_table_name,
-        select_column_names,
-        rate_columns,
-        splits,
-        params,
-        having_clauses,
-        data_view_options
-      })
+  let stats_query
+  if (limit_to_player_active_games) {
+    stats_query = create_player_team_stats_query({
+      with_table_name,
+      select_column_names,
+      rate_columns,
+      splits,
+      params,
+      having_clauses,
+      data_view_options
+    })
+  } else if (wrap_mode) {
+    // Register `player_year_teams` BEFORE the `_team_stats` CTE that
+    // references it -- PostgreSQL forbids forward references between sibling
+    // CTEs. with_func runs before the dispatcher's join_func, so we must
+    // apply the bridge here ourselves; the later source-attach pass is a
+    // no-op thanks to apply_bridge's `applied_bridges` guard.
+    apply_bridge({
+      query_context,
+      from: 'player_year',
+      to: 'team_year',
+      mode: 'default',
+      params,
+      source: null
+    })
+    stats_query = create_player_year_team_stats_wrap_query({
+      with_table_name,
+      select_column_names,
+      rate_columns,
+      having_clauses
+    })
+  } else {
+    stats_query = create_team_stats_query({
+      with_table_name,
+      select_column_names,
+      rate_columns,
+      splits,
+      params,
+      having_clauses,
+      data_view_options
+    })
+  }
 
   const with_stats_table_postfix = limit_to_player_active_games
     ? '_player_team_stats'
@@ -154,6 +195,56 @@ export const add_team_stats_play_by_play_with_statement = ({
 
   // MATERIALIZED for the same reason as the base stats CTE above.
   query.withMaterialized(final_stats_table_name, stats_query)
+}
+
+// Wrap-mode team-stats CTE: re-shapes the (nfl_team, year)-grain base CTE so
+// each year's team-stat lands on the team the player actually played for
+// that year (via player_year_teams), then sums to pid. Output schema matches
+// the standard `_team_stats` CTE's stat columns so the column-defs'
+// `with_where` / main-select expressions reference the same names; only the
+// row key changes (pid instead of nfl_team).
+function create_player_year_team_stats_wrap_query({
+  with_table_name,
+  select_column_names,
+  rate_columns,
+  having_clauses
+}) {
+  const wrap_query = db(with_table_name)
+    .select('player_year_teams.pid')
+    .groupBy('player_year_teams.pid')
+    .innerJoin('player_year_teams', function () {
+      this.on('player_year_teams.team', '=', `${with_table_name}.nfl_team`)
+      this.andOn('player_year_teams.year', '=', `${with_table_name}.year`)
+    })
+
+  const unique_select_column_names = new Set(select_column_names)
+  for (const select_column_name of unique_select_column_names) {
+    if (rate_columns.includes(select_column_name)) {
+      // Carry numerator/denominator through to the outer query so
+      // `with_where` (`sum(num)/NULLIF(sum(denom),0)`) keeps working
+      // unchanged. The pre-aggregated rate would not be safely sum-able.
+      wrap_query.select(
+        db.raw(
+          `sum(${with_table_name}.${select_column_name}_numerator) as ${select_column_name}_numerator`
+        )
+      )
+      wrap_query.select(
+        db.raw(
+          `sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}_denominator`
+        )
+      )
+    } else {
+      wrap_query.select(
+        db.raw(
+          `sum(${with_table_name}.${select_column_name}) as ${select_column_name}`
+        )
+      )
+    }
+  }
+
+  add_having_clauses({ query: wrap_query, having_clauses })
+
+  return wrap_query
 }
 
 function create_team_stats_query({
