@@ -95,7 +95,7 @@ const debug_data_view = async ({
 }) => {
   try {
     if (debug_mode) {
-      debug.enabled('debug-data-view') || debug.enabled('*')
+      debug.enable('debug-data-view')
       log('Debug mode enabled')
     }
 
