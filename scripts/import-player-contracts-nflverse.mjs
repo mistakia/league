@@ -303,7 +303,10 @@ const process_contract_data = (parquet_file) =>
             contract_rows: unique_contract_rows
           })
 
-          resolve(unique_player_updates.length)
+          resolve({
+            players_updated: unique_player_updates.length,
+            contract_rows_saved: unique_contract_rows.length
+          })
         } catch (error) {
           reject(error)
         }
@@ -352,9 +355,25 @@ const import_player_contracts_nflverse = async ({ force_download = false }) => {
 
   // Process contract data and save to database
   const parquet_file = await asyncBufferFromFile(file_path)
-  const players_updated = await process_contract_data(parquet_file)
+  const { players_updated, contract_rows_saved } =
+    await process_contract_data(parquet_file)
 
-  log(`successfully updated contracts for ${players_updated} players`)
+  log(
+    `successfully updated contracts for ${players_updated} players with ${contract_rows_saved} yearly rows`
+  )
+
+  // Freshness oracle: after running, player_contracts row count must meet a
+  // minimum floor. A count below the floor means the upstream fetch returned
+  // empty or all rows were filtered out — silent partial-success.
+  const min_contract_rows = 50000
+  const count_row = await db('player_contracts').count('* as cnt').first()
+  const contract_row_count = Number(count_row?.cnt ?? 0)
+  if (contract_row_count < min_contract_rows) {
+    return {
+      shortfall: `player_contracts row count ${contract_row_count} is below floor ${min_contract_rows} after run`
+    }
+  }
+  return { shortfall: null }
 }
 
 const main = async () => {
@@ -362,7 +381,12 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const { force_download } = argv
-    await import_player_contracts_nflverse({ force_download })
+    const result = await import_player_contracts_nflverse({ force_download })
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     log(error)
