@@ -165,7 +165,7 @@ const calculate_historical_hit_rates = async ({
 
   if (prop_selections.length === 0) {
     log('No selections found to process')
-    return
+    return { shortfall: null }
   }
 
   // Get unique player IDs for gamelog fetching
@@ -487,19 +487,35 @@ const calculate_historical_hit_rates = async ({
   if (missing_gamelogs_pids.size > 0) {
     log(`Unique players with missing gamelogs: ${missing_gamelogs_pids.size}`)
   }
+
+  // Post-run oracle: if selections existed but none were processed, the run was a
+  // silent no-op (e.g. all gamelogs missing). Distinguish from legitimate empty
+  // year (prop_selections.length === 0 returned early above).
+  if (processed_count === 0) {
+    return {
+      shortfall: `processed 0 of ${prop_selections.length} selections for year=${year} (missing_gamelogs=${missing_gamelogs_count})`
+    }
+  }
+
+  return { shortfall: null }
 }
 
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await calculate_historical_hit_rates({
+    const result = await calculate_historical_hit_rates({
       year: argv.year,
       missing_only: argv.missing_only,
       current_week_only: argv.current_week_only,
       market_types: argv.market_types,
       batch_size: argv.batch_size
     })
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     log(`Error in hit rate calculation: ${error.message}`)
