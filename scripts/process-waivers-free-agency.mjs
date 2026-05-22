@@ -2,6 +2,7 @@ import { Errors } from '#libs-shared'
 import { waiver_types } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { report_job, get_waiver_by_id } from '#libs-server'
+import db from '#db'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
@@ -22,6 +23,15 @@ const initialize_cli = () => {
 }
 
 const run_active = async ({ daily = false }) => {
+  // Pre-snapshot: leagues with pending active waivers before the run
+  const pre_rows = await db('waivers')
+    .select('lid')
+    .whereNull('processed')
+    .whereNull('cancelled')
+    .where('type', waiver_types.FREE_AGENCY)
+    .groupBy('lid')
+  const pre_league_ids = new Set(pre_rows.map((r) => r.lid))
+
   let error
   try {
     await processActiveWaivers({ daily })
@@ -29,24 +39,71 @@ const run_active = async ({ daily = false }) => {
     error = err
   }
 
+  // Oracle: if the empty-queue sentinel was thrown, or if pre-snapshot showed
+  // nothing pending, this was a legitimate no-op — skip the shortfall check.
+  // Otherwise verify that every league that had pending waivers going in now
+  // has at least one waiver that transitioned out of unprocessed state.
+  let shortfall_error = null
+  const is_legitimate_noop =
+    error instanceof Errors.EmptyFreeAgencyWaivers ||
+    error instanceof Errors.NotRegularSeason ||
+    pre_league_ids.size === 0
+
+  if (!error && !is_legitimate_noop && pre_league_ids.size > 0) {
+    const post_rows = await db('waivers')
+      .select('lid')
+      .whereNull('processed')
+      .whereNull('cancelled')
+      .where('type', waiver_types.FREE_AGENCY)
+      .whereIn('lid', Array.from(pre_league_ids))
+      .groupBy('lid')
+    const post_league_ids = new Set(post_rows.map((r) => r.lid))
+
+    // Leagues where nothing moved: pre-count > 0 and post still has all pending
+    const stuck_leagues = []
+    for (const lid of pre_league_ids) {
+      if (post_league_ids.has(lid)) {
+        stuck_leagues.push(lid)
+      }
+    }
+
+    if (stuck_leagues.length > 0) {
+      shortfall_error = new Error(
+        `active free agency waivers remain unprocessed after run for league(s): ${stuck_leagues.join(', ')}`
+      )
+      shortfall_error.row_count_shortfall = true
+    }
+  }
+
+  const effective_error = shortfall_error || error
+
   const job_success = Boolean(
-    !error ||
-      error instanceof Errors.EmptyFreeAgencyWaivers ||
-      error instanceof Errors.NotRegularSeason
+    !effective_error ||
+      effective_error instanceof Errors.EmptyFreeAgencyWaivers ||
+      effective_error instanceof Errors.NotRegularSeason
   )
 
   if (!job_success) {
-    console.log(error)
+    console.log(effective_error)
   }
 
   await report_job({
     job_type: job_types.CLAIMS_WAIVERS_ACTIVE,
     job_success,
-    job_reason: error ? error.message : null
+    job_reason: effective_error ? effective_error.message : null
   })
 }
 
 const run_practice = async ({ daily = false }) => {
+  // Pre-snapshot: leagues with pending practice waivers before the run
+  const pre_rows = await db('waivers')
+    .select('lid')
+    .whereNull('processed')
+    .whereNull('cancelled')
+    .where('type', waiver_types.FREE_AGENCY_PRACTICE)
+    .groupBy('lid')
+  const pre_league_ids = new Set(pre_rows.map((r) => r.lid))
+
   let error = null
   try {
     await processPracticeWaivers({ daily })
@@ -54,18 +111,56 @@ const run_practice = async ({ daily = false }) => {
     error = err
   }
 
+  // Oracle: if the empty-queue sentinel was thrown, or if pre-snapshot showed
+  // nothing pending, this was a legitimate no-op — skip the shortfall check.
+  // Otherwise verify that every league that had pending waivers going in now
+  // has at least one waiver that transitioned out of unprocessed state.
+  let shortfall_error = null
+  const is_legitimate_noop =
+    error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers ||
+    pre_league_ids.size === 0
+
+  if (!error && !is_legitimate_noop && pre_league_ids.size > 0) {
+    const post_rows = await db('waivers')
+      .select('lid')
+      .whereNull('processed')
+      .whereNull('cancelled')
+      .where('type', waiver_types.FREE_AGENCY_PRACTICE)
+      .whereIn('lid', Array.from(pre_league_ids))
+      .groupBy('lid')
+    const post_league_ids = new Set(post_rows.map((r) => r.lid))
+
+    // Leagues where nothing moved: pre-count > 0 and post still has all pending
+    const stuck_leagues = []
+    for (const lid of pre_league_ids) {
+      if (post_league_ids.has(lid)) {
+        stuck_leagues.push(lid)
+      }
+    }
+
+    if (stuck_leagues.length > 0) {
+      shortfall_error = new Error(
+        `practice squad free agency waivers remain unprocessed after run for league(s): ${stuck_leagues.join(', ')}`
+      )
+      shortfall_error.row_count_shortfall = true
+    }
+  }
+
+  const effective_error = shortfall_error || error
+
   const job_success = Boolean(
-    !error || error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers
+    !effective_error ||
+      effective_error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers
   )
 
   if (!job_success) {
-    console.log(error)
+    console.log(effective_error)
   }
 
   await report_job({
     job_type: job_types.CLAIMS_WAIVERS_PRACTICE,
     job_success,
-    job_reason: error ? error.message : null
+    job_reason: effective_error ? effective_error.message : null
   })
 }
 
