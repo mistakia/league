@@ -6,7 +6,14 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
-import { is_main, wait, nfl, report_job, clean_string } from '#libs-server'
+import {
+  is_main,
+  wait,
+  nfl,
+  report_job,
+  clean_string,
+  throw_if_shortfall
+} from '#libs-server'
 import { finalize_game } from '#libs-server/finalize-game.mjs'
 import player_cache, {
   preload_active_players
@@ -785,6 +792,17 @@ const main = async () => {
     if (result) {
       console.log(
         `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nfl-v1', year: argv.year || 'current', week: argv.week || 'current', ...result })}`
+      )
+    }
+    // Cron oracle: when at least one game wasn't skipped, plays_processed
+    // should be non-zero. Catches wholesale silent-failure modes (e.g. NFL
+    // session-token expiry returning empty bodies). Bypassed in live PM2
+    // mode since the loop exits on all_games_skipped=true.
+    if (result && !result.all_games_skipped && !dry_run && !argv.live) {
+      throw_if_shortfall(
+        !result.plays_processed
+          ? `import-plays-nfl-v1: plays_processed=0 across non-skipped games (year=${argv.year || 'current'}, week=${argv.week || 'current'})`
+          : null
       )
     }
   } catch (err) {

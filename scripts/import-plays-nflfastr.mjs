@@ -15,7 +15,8 @@ import {
   readCSV,
   update_play,
   report_job,
-  fetch_with_retry
+  fetch_with_retry,
+  throw_if_shortfall
 } from '#libs-server'
 import {
   preload_plays,
@@ -1078,6 +1079,19 @@ const run = async ({
 // CLI Entry Point
 // ============================================================================
 
+// Per-year match-rate oracle. Catches wholesale matching regressions (e.g.
+// upstream schema drift breaking play resolution) while tolerating typical
+// 1-5% unmatched plays. Skipped when plays_processed=0 (no data available
+// for the year or filtered-to-empty by --esbid).
+const MATCH_RATE_FLOOR = 0.9
+
+const check_match_rate = ({ year, result }) => {
+  if (!result || !result.plays_processed) return null
+  const match_rate = result.plays_matched / result.plays_processed
+  if (match_rate >= MATCH_RATE_FLOOR) return null
+  return `year=${year}: plays_matched/plays_processed=${result.plays_matched}/${result.plays_processed}=${match_rate.toFixed(3)} (floor=${MATCH_RATE_FLOOR})`
+}
+
 const main = async () => {
   let error
   try {
@@ -1117,6 +1131,7 @@ const main = async () => {
     }
 
     let result
+    const match_rate_shortfalls = []
     if (all) {
       // Import all years from 1999 to current season
       for (
@@ -1135,6 +1150,8 @@ const main = async () => {
           overwrite_fields,
           log_conflicts
         })
+        const shortfall = check_match_rate({ year: import_year, result })
+        if (shortfall) match_rate_shortfalls.push(shortfall)
       }
     } else {
       // Import single year
@@ -1147,10 +1164,19 @@ const main = async () => {
         overwrite_fields,
         log_conflicts
       })
+      const shortfall = check_match_rate({ year, result })
+      if (shortfall) match_rate_shortfalls.push(shortfall)
     }
     if (result) {
       console.log(
         `=== SUMMARY === ${JSON.stringify({ script: 'import-plays-nflfastr', year: all ? 'all' : year, ...result })}`
+      )
+    }
+    if (!dry_mode) {
+      throw_if_shortfall(
+        match_rate_shortfalls.length
+          ? `nflfastr match-rate shortfall: ${match_rate_shortfalls.join('; ')}`
+          : null
       )
     }
   } catch (err) {
