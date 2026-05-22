@@ -13,6 +13,19 @@ import {
   get_wrap_cte_name
 } from './per-team-play-wrap.mjs'
 
+// Cache-key contract: the returned name is a within-query dedup identifier
+// (see `applied_output_ctes` in add_cte below), NOT a cross-query result-cache
+// key. The hash inputs are column-side params (team_unit, play_type, group_by,
+// matchup_opponent_type, output_column_params, and the year/seas_type/nfl_week
+// expansion via resolve_nfl_week_id_from_year_param). The actual CTE filter
+// is the intersection of column params and view scope -- computed at emit time
+// by apply_scope_to_query against query_context.nfl_week_ids -- which is not
+// reflected in the name. Within a single query the view scope is constant, so
+// two columns with the same column-side params always resolve to the same
+// effective scope; dedup is correct. Do NOT reuse this name as a result-cache
+// key across queries without first folding query_context.nfl_week_ids (or the
+// effective_scope from compute_effective_scope) into the hash, or the cached
+// result will leak across views with different view scopes.
 export const get_per_team_play_cte_table_name = ({
   params = {},
   play_type = null,
