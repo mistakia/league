@@ -20,7 +20,9 @@ const run = async () => {
   }
 
   // get list of hosted leagues
-  const leagues = await db('leagues').where('hosted', 1)
+  const leagues = await db('leagues').where('hosted', true)
+
+  const slice_failures = []
 
   const nextWeek = is_new_season ? 0 : current_season.week + 1
   const previousWeek = is_new_season
@@ -125,6 +127,33 @@ const run = async () => {
         }
       }
     }
+
+    // Post-write oracle: every team that had a source roster should appear in
+    // rosters_players for the new (lid, year, week) slice. A shortfall means
+    // some teams silently received no roster entries.
+    const source_team_count = rosters.length
+    if (source_team_count > 0) {
+      const written_row = await db('rosters_players')
+        .where({
+          lid: league.uid,
+          year: current_season.year,
+          week: nextWeek
+        })
+        .countDistinct({ written: 'tid' })
+        .first()
+      const written_count = Number(written_row?.written || 0)
+      if (written_count < source_team_count) {
+        slice_failures.push(
+          `row-count shortfall: written=${written_count} expected=${source_team_count} for (lid=${league.uid}, year=${current_season.year}, week=${nextWeek})`
+        )
+      }
+    }
+  }
+
+  if (slice_failures.length > 0) {
+    const err = new Error(slice_failures.join('; '))
+    err.row_count_shortfall = true
+    throw err
   }
 }
 
