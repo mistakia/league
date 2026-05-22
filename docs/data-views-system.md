@@ -908,24 +908,28 @@ join_rate_type_cte({
 
 **Solution**: A shared `player_year_teams` CTE (`pid → year → primary_team`) sourced from `player_gamelogs` joined to `nfl_games` where `seas_type = 'REG'`. Primary team per `(pid, year)` is selected by `(array_agg(tm ORDER BY game_count DESC, tm ASC))[1]` — most regular-season games, alphabetical tie-break.
 
-**Trigger** (`libs-server/data-views/historical-team-mode.mjs`):
+**Registration**: the CTE and its outer-query LEFT JOIN are encapsulated in the `player_year` -> `team_year` identity bridge (`libs-server/data-views/identity-bridges/player-year-to-team-year.mjs`). Consumers invoke it via `apply_bridge({ query_context, from: 'player_year', to: 'team_year', params, source })` (`libs-server/data-views/identity-bridge-registry.mjs`). `apply_bridge` is idempotent — `query_context.applied_bridges` keys on `"<from>-><to>|<mode>"`, so the second call from a different consumer no-ops. The retired `historical-team-mode.mjs` module previously gated bridge attachment on `has_year_filter(params) || splits.length > 0`; that predicate was retired in `f13f8300` once the bridge became always-on for the contexts that invoke it (the consumer decides whether to invoke based on its own predicate — e.g., `rate-type-per-team-play.mjs` invokes when the subject identity is `player` and there is no `matchup_opponent_type`). Source-attach rules in `libs-server/data-views/source-attach/` invoke the bridge automatically when a `team_year`-shaped source attaches to a `player`-shaped cell.
 
-```javascript
-is_historical_team_mode({ params, splits }) =
-  has_year_filter(params) || splits.length > 0
-```
+**Year resolution** (`resolve_year_range` in `player-year-to-team-year.mjs`): the year range used to materialize the CTE and to pin the join's `year =` clause follows a 4-step fallback so the bridge is robust in offseason / source-attach contexts where `query_context.year_range` is empty:
 
-This is intentionally **broader** than the `player_nfl_teams` column trigger in `player-team-column-definition.mjs` (which excludes the current-season year). The broader trigger is required to fix the Diggs 2025 current-season traded-player case; when the player has not changed teams, `player_year_teams.team` equals `player.current_nfl_team`, so rates are unchanged.
+1. `query_context.year_range` (year or week split present).
+2. `params.year` (explicit per-column override).
+3. `source.year_default(params)` (the attaching source's anchor year, e.g. ESPN team-stats defaults to `current_season.stats_season_year`).
+4. `[current_season.year]` (defensive last resort).
 
-**Decentralized registration**: each of the three consumer sites calls `add_player_year_teams_cte` and `ensure_player_year_teams_join` on demand. Both helpers are idempotent (guarded by `data_view_options.player_year_teams_cte_name` and `data_view_options.player_year_teams_joined`). Centralized registration was rejected because `join_on_team` lives inside closures on many affected column definitions (e.g., `team-stats-from-plays`), which cannot be introspected without executing the closure.
+Without step 3, attaching a `team_year` source on a player cell with no year split would have materialized `player_year_teams` for `current_season.year` (e.g. 2026 mid-offseason) and the source-attach join would find no rows, returning NULL for every active player.
 
-**Three consumer sites**:
+**Outer-query join year** (`join_cte`): when a `year` split is active, the join binds on `query_context.year_reference` so each (pid, year) row binds to that row's year. Otherwise the join pins to `max(year_range)`. The multi-year-no-split case (where this pinning misattributes traded players' stats) routes through the wrap CTEs described above, which INNER JOIN `player_year_teams` on (pid, year) instead.
 
-- `libs-server/data-views/data-view-join-function.mjs` — team-stat column joins (EPA, PROE, DVOA, team_pass_yards_from_plays, etc.)
-- `libs-server/data-views/rate-type/rate-type-per-team-play.mjs:join_per_team_play_cte`
-- `libs-server/data-views/rate-type/rate-type-per-game.mjs:join_team_per_game_cte` (NOT `join_player_per_game_cte`, which joins on `pid`)
+**Consumer sites** (non-exhaustive — every site that maps a player cell to a team-year scope routes through this bridge):
 
-Each site falls back to `player.current_nfl_team` when historical mode is inactive (no year filter AND no splits).
+- `libs-server/data-views/rate-type/rate-type-per-team-play.mjs:join_per_team_play_cte` (and the wrap path in `per-team-play-wrap.mjs`).
+- `libs-server/data-views/team-stats-from-plays-wrap.mjs` consumers (via `add_team_stats_play_by_play_with_statement.mjs`).
+- `libs-server/data-views/source-attach/rules/player-family-to-team-year.mjs` (auto-attached team-year sources on player cells).
+- `libs-server/data-views/output-aggregator/aggregator-rate.mjs` and `aggregator-count.mjs` (team-grain numerator/denominator joins for player subjects).
+- `libs-server/data-views/data-view-join-function.mjs` (legacy team-stat column join entry).
+
+Each site falls back to `player.current_nfl_team` only when the bridge is not applicable — typically when `matchup_opponent_type` is set (the column joins through the upstream opponents CTE) or when the subject identity is `team` (no player-to-team mapping needed).
 
 **Defensive-unit reasoning**: `rate-type-per-team-play.mjs` uses a single join expression regardless of `team_unit` ('off' or 'def'). `player_gamelogs.tm` stores the player's own team; for defensive players that equals the defensive team on `nfl_plays.def`, so no branch is needed.
 
