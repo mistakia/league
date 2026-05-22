@@ -2,6 +2,11 @@
 set -e
 set -x
 
+# Capture run start time so the post-tar oracle can confirm the output file
+# was produced by this run (rather than a stale artifact from a prior run
+# whose tar silently failed to overwrite).
+run_start_ts=$(date +%s)
+
 full=false
 logs=false
 stats=false
@@ -206,6 +211,26 @@ fi
 
 tar -vcf $gz_file $sql_file
 rm $sql_file
+
+# Output-file oracle: confirm the tar landed a non-empty file whose mtime is
+# from this run. set -e + the explicit pg_dump check earlier already cover
+# the throwing paths, but a silently-truncated tar (e.g. ENOSPC mid-write
+# that doesn't propagate) would leave an empty or stale .tar.gz behind. Exit
+# 2 so the job-wrapper reports the run failed and the file is preserved as
+# forensic state for the cleanup pass (the >7d find runs afterward).
+if [ ! -f "$gz_file" ]; then
+    echo "Error: backup output $gz_file missing after tar" >&2
+    exit 2
+fi
+if [ ! -s "$gz_file" ]; then
+    echo "Error: backup output $gz_file is empty" >&2
+    exit 2
+fi
+file_mtime=$(stat -c %Y "$gz_file")
+if [ "$file_mtime" -lt "$run_start_ts" ]; then
+    echo "Error: backup output $gz_file mtime ($file_mtime) predates run start ($run_start_ts) -- tar did not refresh the file" >&2
+    exit 2
+fi
 
 # Local retention: delete ALL time-series backups older than 7 days (any type).
 # Cleaning all types prevents stale files from other backup categories (which may
