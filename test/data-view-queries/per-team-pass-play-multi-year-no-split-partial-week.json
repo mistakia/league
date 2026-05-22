@@ -1,0 +1,55 @@
+{
+  "name": "per_team_pass_play multi-year-no-split with partial weeks per year (wrap-CTE partial-scope regression)",
+  "description": "Regression: when a player-cell view selects multiple years AND a partial week subset per year (weeks 1-4 of 2023 and 2024) without a year split, the multi-year-no-split wrap must propagate the nfl_week_id IN-list to BOTH the (off, year)-grain denominator CTE and the per-(pid, year) numerator subquery. The view-scope helper (apply_scope_to_query) emits nfl_week_id when the IN-list is narrower than full (year x seas_type) coverage; this test pins that the partial-week predicate reaches both arms of the wrap so the denominator does not silently sum weeks 5+ while the numerator scopes to 1-4. Companion to per-team-pass-play-multi-year-no-split.json (full-year wrap) and per-team-pass-play-partial-week-single-year.json (single-year partial, non-wrap).",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_receiving_yards_from_plays",
+        "params": {
+          "nfl_week_id": [
+            "2023_REG_WEEK_1",
+            "2023_REG_WEEK_2",
+            "2023_REG_WEEK_3",
+            "2023_REG_WEEK_4",
+            "2024_REG_WEEK_1",
+            "2024_REG_WEEK_2",
+            "2024_REG_WEEK_3",
+            "2024_REG_WEEK_4"
+          ],
+          "rate_type": [
+            "per_team_pass_play"
+          ]
+        }
+      }
+    ],
+    "prefix_columns": [
+      "player_name"
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "WR"
+        ]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_receiving_yards_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"ta5dca3756129e716384c738c83b9e691\" as materialized (select \"nfl_plays\".\"off\", COUNT(*) as rate_type_total_count, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" = 'PASS' and \"nfl_plays\".\"nfl_week_id\" in ('2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2024_REG_WEEK_1', '2024_REG_WEEK_2', '2024_REG_WEEK_3', '2024_REG_WEEK_4') and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024) and \"player_gamelogs\".\"year\" in (2023, 2024) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\"), \"per_team_play_wrap_td3e9a59c3e428d9f2c86da07586ae05c\" as materialized (select \"num_y\".\"pid\", SUM(num_y.measure_total) AS numerator_sum, SUM(ta5dca3756129e716384c738c83b9e691.rate_type_total_count) AS denominator_sum from (select \"nfl_games\".\"year\", nfl_plays.trg_pid AS pid, SUM(CASE WHEN nfl_plays.comp = true THEN nfl_plays.recv_yds ELSE 0 END) AS measure_total from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"nfl_week_id\" in ('2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2024_REG_WEEK_1', '2024_REG_WEEK_2', '2024_REG_WEEK_3', '2024_REG_WEEK_4') and \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_REG_WEEK_1', '2023_REG_WEEK_2', '2023_REG_WEEK_3', '2023_REG_WEEK_4', '2024_REG_WEEK_1', '2024_REG_WEEK_2', '2024_REG_WEEK_3', '2024_REG_WEEK_4') and \"nfl_plays\".\"seas_type\" in ('REG') group by nfl_plays.trg_pid, \"nfl_games\".\"year\") as \"num_y\" inner join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"num_y\".\"pid\" and \"player_year_teams\".\"year\" = \"num_y\".\"year\" inner join \"ta5dca3756129e716384c738c83b9e691\" on \"ta5dca3756129e716384c738c83b9e691\".\"off\" = \"player_year_teams\".\"team\" and \"ta5dca3756129e716384c738c83b9e691\".\"year\" = \"num_y\".\"year\" group by \"num_y\".\"pid\") select \"player\".\"pid\", player.fname, player.lname, CAST(MAX(per_team_play_wrap_td3e9a59c3e428d9f2c86da07586ae05c.numerator_sum) AS DECIMAL) / NULLIF(CAST(MAX(per_team_play_wrap_td3e9a59c3e428d9f2c86da07586ae05c.denominator_sum) AS DECIMAL), 0) AS rec_yds_from_plays_0, \"player\".\"pos\" from \"player\" left join \"per_team_play_wrap_td3e9a59c3e428d9f2c86da07586ae05c\" on \"per_team_play_wrap_td3e9a59c3e428d9f2c86da07586ae05c\".\"pid\" = \"player\".\"pid\" where player.pos IN ('WR') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "rate_type",
+    "cte",
+    "joins",
+    "historical-team",
+    "partial-week"
+  ],
+  "timeout_ms": 40000
+}
