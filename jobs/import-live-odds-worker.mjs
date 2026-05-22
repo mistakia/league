@@ -7,6 +7,8 @@ import {
   write_worker_heartbeat,
   is_main
 } from '#libs-server'
+import { create_logger } from '#libs-shared/log.mjs'
+import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { job as import_draftkings_odds } from '#scripts/import-draftkings-odds.mjs'
 import { job as import_pinnacle_odds } from '#scripts/import-pinnacle-odds.mjs'
@@ -14,6 +16,13 @@ import { job as import_prizepicks_odds } from '#scripts/import-prizepicks-odds.m
 
 const log = debug('import-live-odds-worker')
 debug.enable('import-live-odds-worker')
+
+install_process_handlers({
+  service_name: 'import-live-odds-worker',
+  logger: create_logger('import-live-odds-worker:process', {
+    service: 'import-live-odds-worker'
+  })
+})
 
 // ============================================================================
 // Configuration

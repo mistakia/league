@@ -3,10 +3,19 @@ import debug from 'debug'
 import db from '#db'
 import { current_season } from '#constants'
 import { wait, write_worker_heartbeat, is_main } from '#libs-server'
+import { create_logger } from '#libs-shared/log.mjs'
+import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 
 const log = debug('import-live-plays-worker')
 debug.enable('import-live-plays-worker')
+
+install_process_handlers({
+  service_name: 'import-live-plays-worker',
+  logger: create_logger('import-live-plays-worker:process', {
+    service: 'import-live-plays-worker'
+  })
+})
 
 const LOOP_INTERVAL_MS = 60_000 // active games: 1 minute between iterations
 const IDLE_INTERVAL_MS = 5 * 60_000 // REG season but no live games: 5 minutes

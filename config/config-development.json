@@ -58,5 +58,7 @@
     "opponent_allowed_tdrec_min": null,
     "opponent_allowed_tdr_min": null,
     "opponent_allowed_pa_min": null
-  }
+  },
+  "signals_api_url": "",
+  "signals_secret": ""
 }

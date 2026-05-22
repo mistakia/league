@@ -19,5 +19,7 @@
       "directory": "./db/fixtures/test",
       "loadExtensions": [".mjs"]
     }
-  }
+  },
+  "signals_api_url": "",
+  "signals_secret": ""
 }
