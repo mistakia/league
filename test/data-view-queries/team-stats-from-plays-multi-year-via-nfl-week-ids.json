@@ -1,0 +1,48 @@
+{
+  "name": "team_pass_yards_from_plays on player view with multi-year scope via nfl_week_id (no params.year)",
+  "description": "Regression: when the multi-year selection comes from column nfl_week_id (not params.year) and no year/week split is active, query_context.year_range is empty and the player_year_to_team_year bridge previously fell through to [current_season.year], stranding all 2023-2024 attribution and returning NULL for every player. The fix resolves the effective year range via compute_effective_scope and passes it through params.year to apply_bridge. This fixture pins that player_year_teams is built for years derived from the nfl_week_id scope (not current_season.year).",
+  "request": {
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "nfl_week_id": [
+            "2023_REG_WEEK_1",
+            "2023_REG_WEEK_2",
+            "2024_REG_WEEK_1",
+            "2024_REG_WEEK_2"
+          ]
+        }
+      }
+    ],
+    "prefix_columns": [
+      "player_name"
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "WR"
+        ]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t7c4d6dccc66ff70cbf98010d8157ec67\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"nfl_week_id\" in ('2023_REG_WEEK_1', '2023_REG_WEEK_2', '2024_REG_WEEK_1', '2024_REG_WEEK_2') and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024) and \"player_gamelogs\".\"year\" in (2023, 2024) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\"), \"t7c4d6dccc66ff70cbf98010d8157ec67_team_stats\" as materialized (select \"player_year_teams\".\"pid\", sum(t7c4d6dccc66ff70cbf98010d8157ec67.team_pass_yds_from_plays) as team_pass_yds_from_plays from \"t7c4d6dccc66ff70cbf98010d8157ec67\" inner join \"player_year_teams\" on \"player_year_teams\".\"team\" = \"t7c4d6dccc66ff70cbf98010d8157ec67\".\"nfl_team\" and \"player_year_teams\".\"year\" = \"t7c4d6dccc66ff70cbf98010d8157ec67\".\"year\" group by \"player_year_teams\".\"pid\"), \"base_years\" as (SELECT unnest(ARRAY[2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"t7c4d6dccc66ff70cbf98010d8157ec67_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = 2024 inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t7c4d6dccc66ff70cbf98010d8157ec67_team_stats\" on \"t7c4d6dccc66ff70cbf98010d8157ec67_team_stats\".\"pid\" = \"player\".\"pid\" where player.pos IN ('WR') group by player.fname, player.lname, \"t7c4d6dccc66ff70cbf98010d8157ec67_team_stats\".\"team_pass_yds_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "team-stats-from-plays",
+    "cte",
+    "joins",
+    "historical-team",
+    "nfl-week-id-scope"
+  ],
+  "timeout_ms": 40000
+}

@@ -2,7 +2,7 @@ import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
-import { requires_team_stats_wrap } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
+import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
 import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import {
   decompose_nfl_weeks,
@@ -28,19 +28,15 @@ export const add_team_stats_play_by_play_with_statement = ({
     params.limit_to_player_active_games || false
   const team_unit = params.team_unit || 'off'
 
-  // Wrap mode: team-variant team-stat column on a multi-year-no-split player
-  // view. The base CTE is forced to (nfl_team, year) grain and the
-  // `_team_stats` CTE is re-shaped to attribute via player_year_teams and
-  // sum back to pid. See team-stats-from-plays-wrap.mjs for the contract.
   const query_context = data_view_options?.query_context
-  const wrap_mode =
-    query_context && !limit_to_player_active_games
-      ? requires_team_stats_wrap({
-          query_context,
-          params,
-          force_player_active: false
-        })
-      : false
+  const wrap_decision = query_context
+    ? get_team_stats_wrap_decision({
+        query_context,
+        params,
+        force_player_active: limit_to_player_active_games
+      })
+    : { wrap_mode: false, years: null }
+  const wrap_mode = wrap_decision.wrap_mode
 
   const with_query = db('nfl_plays')
     .select(`nfl_plays.${team_unit} as nfl_team`)
@@ -133,15 +129,18 @@ export const add_team_stats_play_by_play_with_statement = ({
   } else if (wrap_mode) {
     // Register `player_year_teams` BEFORE the `_team_stats` CTE that
     // references it -- PostgreSQL forbids forward references between sibling
-    // CTEs. with_func runs before the dispatcher's join_func, so we must
-    // apply the bridge here ourselves; the later source-attach pass is a
-    // no-op thanks to apply_bridge's `applied_bridges` guard.
+    // CTEs. with_func runs before the dispatcher's join_func, so we apply
+    // the bridge here; the later source-attach pass is a no-op via
+    // `applied_bridges`. params.year is overridden with the wrap's resolved
+    // years so the bridge doesn't fall back to current_season.year when the
+    // multi-year scope came from view-level nfl_week_ids rather than from
+    // params.year.
     apply_bridge({
       query_context,
       from: 'player_year',
       to: 'team_year',
       mode: 'default',
-      params,
+      params: { ...params, year: wrap_decision.years },
       source: null
     })
     stats_query = create_player_year_team_stats_wrap_query({

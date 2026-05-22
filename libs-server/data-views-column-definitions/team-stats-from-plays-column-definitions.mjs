@@ -4,7 +4,7 @@ import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-b
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
-import { requires_team_stats_wrap } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
+import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
@@ -65,11 +65,11 @@ const apply_team_stats_join = ({
   // on pid 1:1 and skip the team / year / week predicates.
   const wrap_mode =
     join_on_team &&
-    requires_team_stats_wrap({
+    get_team_stats_wrap_decision({
       query_context,
       params,
       force_player_active
-    })
+    }).wrap_mode
 
   if (wrap_mode) {
     players_query[join_method](target, function () {

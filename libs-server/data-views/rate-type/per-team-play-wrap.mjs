@@ -34,8 +34,11 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { build_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
-import { compute_effective_scope } from '#libs-server/data-views/apply-scope-to-query.mjs'
 import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
+import {
+  resolve_effective_years,
+  extract_matchup_opponent_type
+} from '#libs-server/data-views/wrap-predicates.mjs'
 
 export const get_wrap_cte_name = ({
   column_def,
@@ -46,43 +49,17 @@ export const get_wrap_cte_name = ({
     `${column_def.column_id}_${column_index}_${rate_type_table_name}`
   )}`
 
-// Determine whether the per-team-play rate-type should route through the wrap.
-// Wrap requirements:
-//   - Player subject (team subject joins denominator-to-team directly).
-//   - Year range with 2+ distinct years.
-//   - No `year` split (with a year split, the standard (pid, year) row grain
-//     already lets the outer SUM aggregate per-year correctly).
-//   - No `matchup_opponent_type` (those use the current/next-week opponents
-//     CTE attached upstream; multi-year semantics aren't applicable).
-const resolve_effective_years = ({ query_context, params }) => {
-  // Source of truth is the column's effective time-scope (intersection of
-  // view-level nfl_week_ids with column params). This expands nfl_week_id
-  // selections that don't go through params.year (e.g. /u/795c12c... selects
-  // years via per-week IDs, which leaves query_context.year_range empty).
-  const effective_scope = compute_effective_scope({
-    query_context,
-    column_params: params
-  })
-  if (effective_scope.length) {
-    const { years } = decompose_nfl_weeks({ nfl_weeks: effective_scope })
-    return years
-  }
-  return Array.isArray(query_context.year_range) ? query_context.year_range : []
-}
-
+// Wrap fires only for player subjects with 2+ distinct effective years and
+// no `year` split (team-subjects and split row-grains already attribute
+// correctly). Matchup-opponent-typed columns use point-in-time opponent CTEs
+// attached upstream and aren't multi-year addressable.
 export const requires_wrap = ({ query_context, params, identity_id }) => {
   if (!identity_id || !identity_id.startsWith('player')) return false
   if (query_context.splits.includes('year')) return false
   const years = resolve_effective_years({ query_context, params })
   const distinct_years = new Set(years.map((y) => parseInt(y, 10)))
   if (distinct_years.size < 2) return false
-  const matchup = Array.isArray(params?.matchup_opponent_type)
-    ? params.matchup_opponent_type[0] &&
-      typeof params.matchup_opponent_type[0] === 'object'
-      ? null
-      : params.matchup_opponent_type[0]
-    : params?.matchup_opponent_type
-  if (matchup) return false
+  if (extract_matchup_opponent_type(params)) return false
   return true
 }
 
