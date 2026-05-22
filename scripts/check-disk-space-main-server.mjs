@@ -1,13 +1,14 @@
 import { execSync } from 'child_process'
-import fetch from 'node-fetch'
 import debug from 'debug'
 
 import { is_main, report_job } from '#libs-server'
-import config from '#config'
+import { create_logger } from '#libs-shared/log.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('check-disk-space')
 debug.enable('check-disk-space')
+
+const signal_log = create_logger('check-disk-space', { service: 'league-host' })
 
 const check_disk_space = async () => {
   const threshold = 1048576 // 1 GB in kilobytes
@@ -22,32 +23,23 @@ const check_disk_space = async () => {
 
   try {
     if (Number(available_space) < threshold) {
-      log(
-        'Available space is below threshold. Sending notification to Discord...'
-      )
+      log('Available space is below threshold. Emitting signal...')
 
-      const discord_webhook_url =
-        config.discord_sysadmin_alerts_channel_webhook_url
-      const message_data = {
-        content: `Warning: Low disk space. Available space: ${available_space} KB`
-      }
-
-      try {
-        const response = await fetch(discord_webhook_url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(message_data)
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+      const emitted = signal_log.error(
+        new Error(
+          `Low disk space on main server: ${available_space} KB available (threshold ${threshold} KB)`
+        ),
+        {
+          severity: 'high',
+          context: {
+            available_space_kb: Number(available_space),
+            threshold_kb: threshold,
+            mount: '/'
+          }
         }
-
-        log('Notification sent.')
-      } catch (error) {
-        log('Error sending notification:', error)
+      )
+      if (emitted?.promise) {
+        await emitted.promise
       }
     } else {
       log('Disk space is sufficient.')

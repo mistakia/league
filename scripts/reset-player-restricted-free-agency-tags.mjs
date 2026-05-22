@@ -2,8 +2,8 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season, player_tag_types } from '#constants'
-import { is_main } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { is_main, report_job } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('reset-player-restricted-free-agency-tags')
 
@@ -78,6 +78,11 @@ const main = async () => {
     error = err
     console.log(error)
   }
+
+  await report_job({
+    job_type: job_types.RESET_PLAYER_TAGS,
+    error
+  })
 
   process.exit()
 }
