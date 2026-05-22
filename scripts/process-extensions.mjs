@@ -133,6 +133,11 @@ const run = async ({ lid }) => {
 // rosters_players state (DELETE-then-INSERT); (2) the notification marker below
 // short-circuits subsequent cron firings; (3) the unique constraint on
 // (lid, year, notification_type, event_timestamp) guards against races.
+//
+// Returns { shortfall } where shortfall is null when there was no due work
+// (empty-queue) or all due leagues were successfully processed, and a
+// descriptive string when a league was due but its notification marker was not
+// written (silent partial-success).
 const process_extensions_for_due_leagues = async () => {
   const now = Math.round(Date.now() / 1000)
   const window_end = (ext_date) => ext_date + AUTO_PROCESS_WINDOW_DAYS * 86400
@@ -142,6 +147,10 @@ const process_extensions_for_due_leagues = async () => {
     .where({ 'seasons.year': current_season.year, 'leagues.hosted': true })
     .whereNotNull('seasons.ext_date')
     .select('seasons.lid', 'seasons.ext_date')
+
+  // Track leagues that are inside the processing window and not yet marked done
+  // before this run starts. These are the leagues we must successfully process.
+  const due_leagues = []
 
   for (const { lid, ext_date } of eligible) {
     if (now < ext_date) {
@@ -169,6 +178,8 @@ const process_extensions_for_due_leagues = async () => {
       continue
     }
 
+    due_leagues.push({ lid, ext_date })
+
     log(`league ${lid}: processing extensions (ext_date ${ext_date} reached)`)
     await run({ lid })
     await record_league_notification_sent({
@@ -180,6 +191,32 @@ const process_extensions_for_due_leagues = async () => {
       metadata: { ext_date, processed_at: now }
     })
   }
+
+  // Empty-queue: no leagues were due and unprocessed — nothing to verify.
+  if (due_leagues.length === 0) {
+    return { shortfall: null }
+  }
+
+  // Oracle: for every league we attempted to process, the notification marker
+  // must now exist. A missing marker means run() completed (no throw) but the
+  // record_league_notification_sent call was skipped or the script short-
+  // circuited before reaching it — silent partial-success.
+  const shortfalls = []
+  for (const { lid, ext_date } of due_leagues) {
+    const marker_written = await has_league_notification_been_sent({
+      lid,
+      year: current_season.year,
+      notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
+      event_timestamp: ext_date
+    })
+    if (!marker_written) {
+      shortfalls.push(
+        `league ${lid}: extensions due (ext_date=${ext_date}) but notification marker absent after run`
+      )
+    }
+  }
+
+  return { shortfall: shortfalls.length > 0 ? shortfalls.join('; ') : null }
 }
 
 const main = async () => {
@@ -191,7 +228,12 @@ const main = async () => {
       // Manual override: run immediately, no gating.
       await run({ lid })
     } else {
-      await process_extensions_for_due_leagues()
+      const { shortfall } = await process_extensions_for_due_leagues()
+      if (shortfall) {
+        const err = new Error(shortfall)
+        err.row_count_shortfall = true
+        throw err
+      }
     }
   } catch (err) {
     error = err
