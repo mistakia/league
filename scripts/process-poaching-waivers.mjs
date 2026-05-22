@@ -10,7 +10,8 @@ import {
   getTopPoachingWaiver,
   getLeague,
   report_job,
-  is_main
+  is_main,
+  throw_if_shortfall
 } from '#libs-server'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -142,11 +143,7 @@ const main = async () => {
     const argv = initialize_cli()
     const daily = argv.daily
     const result = await run({ daily })
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     if (!(error instanceof Errors.EmptyPoachingWaivers)) {

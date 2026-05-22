@@ -9,7 +9,8 @@ import {
   find_player_row,
   wait,
   report_job,
-  fantasypros
+  fantasypros,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -240,11 +241,7 @@ const main = async () => {
       dry_run: argv.dry,
       ignore_cache: argv.ignore_cache
     })
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     console.log(error)

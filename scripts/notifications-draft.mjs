@@ -8,7 +8,8 @@ import {
   getLeague,
   report_job,
   has_league_notification_been_sent,
-  record_league_notification_sent
+  record_league_notification_sent,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -132,11 +133,7 @@ const main = async () => {
   let error
   try {
     const result = await run()
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     console.log(error)

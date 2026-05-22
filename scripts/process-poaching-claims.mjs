@@ -4,7 +4,12 @@ import debug from 'debug'
 import db from '#db'
 import { Errors, should_block_poach_processing } from '#libs-shared'
 import { current_season } from '#constants'
-import { processPoach, report_job, is_main } from '#libs-server'
+import {
+  processPoach,
+  report_job,
+  is_main,
+  throw_if_shortfall
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process:claims')
@@ -85,11 +90,7 @@ const main = async () => {
   let error
   try {
     const result = await run()
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
   }

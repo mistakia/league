@@ -13,7 +13,8 @@ import {
   processRestrictedFreeAgencyBid,
   is_main,
   resetWaiverOrder,
-  report_job
+  report_job,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import yargs from 'yargs'
@@ -505,11 +506,7 @@ const main = async () => {
   try {
     const dry_run = argv.dry_run || false
     const result = await run({ dry_run })
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     log(error)

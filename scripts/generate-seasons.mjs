@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('generate-seasons')
@@ -93,11 +93,7 @@ const main = async () => {
   let error
   try {
     const result = await generate_seasons()
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     log(error)

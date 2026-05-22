@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import * as oddslib from 'oddslib'
 
 import db from '#db'
-import { is_main, report_job } from '#libs-server'
+import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
@@ -538,11 +538,7 @@ const main = async () => {
       dry_run: argv.dry_run,
       batch_size: argv.batch_size
     })
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     log(`Error in team hit rate calculation: ${error.message}`)

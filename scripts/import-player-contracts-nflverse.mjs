@@ -33,7 +33,8 @@ import {
   is_main,
   report_job,
   fetch_with_retry,
-  batch_insert
+  batch_insert,
+  throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
@@ -382,11 +383,7 @@ const main = async () => {
     const argv = initialize_cli()
     const { force_download } = argv
     const result = await import_player_contracts_nflverse({ force_download })
-    if (result?.shortfall) {
-      const err = new Error(result.shortfall)
-      err.row_count_shortfall = true
-      throw err
-    }
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
     log(error)
