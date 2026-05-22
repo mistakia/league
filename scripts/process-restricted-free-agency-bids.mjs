@@ -134,6 +134,7 @@ const run = async ({ dry_run = false } = {}) => {
   }
 
   const timestamp = Math.round(Date.now() / 1000)
+  let bids_processed = 0
 
   // Get current date in EST
   const current_date_est = dayjs().tz('America/New_York')
@@ -442,6 +443,7 @@ const run = async ({ dry_run = false } = {}) => {
             processed: timestamp
           })
           .where('uid', winning_bid.uid)
+        bids_processed += 1
       }
 
       // Get next bids to process for this league
@@ -453,6 +455,47 @@ const run = async ({ dry_run = false } = {}) => {
       )
     }
   }
+
+  if (!dry_run) {
+    // Oracle: no bid that was both announced and past its processing window
+    // should remain unprocessed after the run. A non-empty result means the
+    // loop silently skipped eligible bids — surface that as a shortfall.
+    const stuck_bids = await db('restricted_free_agency_bids as rfab')
+      .join('seasons', function () {
+        this.on('seasons.lid', 'rfab.lid').on(
+          'seasons.year',
+          db.raw('?', [current_season.year])
+        )
+      })
+      .join('leagues', 'leagues.uid', '=', 'rfab.lid')
+      .where('rfab.year', current_season.year)
+      .whereNull('rfab.processed')
+      .whereNull('rfab.cancelled')
+      .whereNotNull('rfab.announced')
+      .whereNotNull('seasons.tran_start')
+      .where('seasons.tran_start', '<=', timestamp)
+      .where('seasons.tran_end', '>=', timestamp)
+      .where(function () {
+        // bid meets the time-since-announcement requirement
+        this.whereRaw(
+          '? - rfab.announced >= (24 - COALESCE(leagues.restricted_free_agency_announcement_hour, ?) + COALESCE(leagues.restricted_free_agency_processing_hour, ?)) * 3600',
+          [
+            timestamp,
+            league_default_rfa_announcement_hour,
+            league_default_rfa_processing_hour
+          ]
+        )
+      })
+      .select('rfab.uid', 'rfab.lid', 'rfab.pid')
+
+    if (stuck_bids.length > 0) {
+      return {
+        shortfall: `${stuck_bids.length} eligible RFA bid(s) remain unprocessed after run: uids=${stuck_bids.map((b) => b.uid).join(',')}`
+      }
+    }
+  }
+
+  return { shortfall: null }
 }
 
 export default run
@@ -463,7 +506,12 @@ const main = async () => {
   let error
   try {
     const dry_run = argv.dry_run || false
-    await run({ dry_run })
+    const result = await run({ dry_run })
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.rfa_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     log(error)
