@@ -10,8 +10,17 @@ import {
   current_season,
   league_default_rfa_announcement_hour
 } from '#constants'
-import { is_main, sendNotifications, getLeague, report_job } from '#libs-server'
+import {
+  is_main,
+  sendNotifications,
+  getLeague,
+  report_job,
+  has_league_notification_been_sent,
+  record_league_notification_sent
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+
+const NOTIFICATION_TYPE_RFA_ANNOUNCED = 'rfa_announced'
 
 // Initialize dayjs plugins
 dayjs.extend(utc)
@@ -328,6 +337,19 @@ const announce_restricted_free_agent = async ({
         message
       })
 
+      await record_league_notification_sent({
+        lid,
+        year: current_season.year,
+        notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
+        event_timestamp: announcement_timestamp,
+        message,
+        metadata: {
+          tid: nominating_team.uid,
+          pid: restricted_free_agency_bid.pid,
+          bid_uid: restricted_free_agency_bid.uid
+        }
+      })
+
       const formatted_time = dayjs
         .unix(announcement_timestamp)
         .format('YYYY-MM-DD HH:mm:ss')
@@ -335,10 +357,26 @@ const announce_restricted_free_agent = async ({
       log(`Notification sent: ${message}`)
     }
   } else {
+    // No nominated player for today's slot: write a no-nomination marker so
+    // the oracle can confirm the slot was visited, not silently skipped.
+    if (!dry_run) {
+      await record_league_notification_sent({
+        lid,
+        year: current_season.year,
+        notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
+        event_timestamp: announcement_info.correct_timestamp,
+        message: `No RFA nomination pending for team ${nominating_team.uid} on slot ${announcement_info.correct_timestamp}`,
+        metadata: { tid: nominating_team.uid, no_nomination: true }
+      })
+    }
     log(`No unprocessed nominated player found for team ${nominating_team.uid}`)
   }
 }
 
+// Returns { shortfall } where shortfall is null when there was no due work
+// (empty-queue) or all due leagues were successfully processed, and a
+// descriptive string when a league was due but its notification marker was not
+// written (silent partial-success).
 const process_all_leagues = async ({
   dry_run = false,
   use_previous = false
@@ -347,23 +385,79 @@ const process_all_leagues = async ({
 
   if (!eligible_leagues.length) {
     log('No eligible leagues found for RFA announcements at the current hour')
-    return
+    // Empty-queue: legitimate no-op, no failure to surface.
+    return { shortfall: null }
   }
 
+  // Snapshot which leagues are not yet marked before this run so we know
+  // exactly which ones we are responsible for verifying.
+  const due_leagues = []
   for (const league of eligible_leagues) {
+    const announcement_timestamp =
+      league.announcement_info.correct_timestamp
+    if (dry_run) {
+      due_leagues.push({ lid: league.lid, announcement_timestamp })
+      continue
+    }
+    const already_sent = await has_league_notification_been_sent({
+      lid: league.lid,
+      year: current_season.year,
+      notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
+      event_timestamp: announcement_timestamp
+    })
+    if (already_sent) {
+      log(
+        `league ${league.lid}: RFA announcement already sent for slot ${announcement_timestamp}; skipping`
+      )
+      continue
+    }
+    due_leagues.push({ lid: league.lid, announcement_timestamp })
+  }
+
+  if (!due_leagues.length) {
+    log('All eligible leagues already announced for the current slot')
+    return { shortfall: null }
+  }
+
+  for (const { lid } of due_leagues) {
     try {
-      log(`Processing league ${league.lid} (${league.name || 'Unnamed'})`)
+      log(`Processing league ${lid}`)
       await announce_restricted_free_agent({
-        lid: league.lid,
+        lid,
         use_previous,
         dry_run
       })
     } catch (err) {
-      log(`Error processing league ${league.lid}: ${err.message}`)
+      log(`Error processing league ${lid}: ${err.message}`)
     }
   }
 
-  log(`Completed processing ${eligible_leagues.length} leagues`)
+  log(`Completed processing ${due_leagues.length} leagues`)
+
+  if (dry_run) {
+    return { shortfall: null }
+  }
+
+  // Oracle: for every due league, the notification marker must now exist.
+  // A missing marker means announce_restricted_free_agent completed without
+  // throwing but the record_league_notification_sent path was never reached —
+  // silent partial-success.
+  const shortfalls = []
+  for (const { lid, announcement_timestamp } of due_leagues) {
+    const marker_written = await has_league_notification_been_sent({
+      lid,
+      year: current_season.year,
+      notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
+      event_timestamp: announcement_timestamp
+    })
+    if (!marker_written) {
+      shortfalls.push(
+        `league ${lid}: RFA announcement due (slot=${announcement_timestamp}) but notification marker absent after run`
+      )
+    }
+  }
+
+  return { shortfall: shortfalls.length > 0 ? shortfalls.join('; ') : null }
 }
 
 const main = async () => {
@@ -377,7 +471,12 @@ const main = async () => {
       await announce_restricted_free_agent({ lid, tid, use_previous, dry_run })
     } else {
       // Process all eligible leagues
-      await process_all_leagues({ dry_run, use_previous })
+      const { shortfall } = await process_all_leagues({ dry_run, use_previous })
+      if (shortfall) {
+        const err = new Error(shortfall)
+        err.row_count_shortfall = true
+        throw err
+      }
     }
   } catch (err) {
     error = err
