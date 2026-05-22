@@ -37,7 +37,7 @@ const run = async ({ daily = false } = {}) => {
     log(
       `First 24 hours of regular season, a poaching sanctuary period, skipping poaching waivers`
     )
-    return
+    return { shortfall: null }
   }
 
   // get leagueIds with pending waivers
@@ -114,6 +114,24 @@ const run = async ({ daily = false } = {}) => {
       waiver = await getTopPoachingWaiver(lid)
     }
   }
+
+  // Oracle: no POACH waiver that was pending at run start should remain
+  // unprocessed. A non-empty result means the loop silently skipped eligible
+  // waivers — surface that as a shortfall.
+  const stuck_waivers = await db('waivers')
+    .select('uid', 'lid', 'pid')
+    .whereNull('processed')
+    .whereNull('cancelled')
+    .where('type', waiver_types.POACH)
+    .whereIn('lid', leagueIds)
+
+  if (stuck_waivers.length > 0) {
+    return {
+      shortfall: `${stuck_waivers.length} poaching waiver(s) remain unprocessed after run: uids=${stuck_waivers.map((w) => w.uid).join(',')}`
+    }
+  }
+
+  return { shortfall: null }
 }
 
 export default run
@@ -123,22 +141,22 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const daily = argv.daily
-    await run({ daily })
+    const result = await run({ daily })
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.poach_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
-  }
-
-  const job_success = Boolean(
-    !error || error instanceof Errors.EmptyPoachingWaivers
-  )
-  if (!job_success) {
-    console.log(error)
+    if (!(error instanceof Errors.EmptyPoachingWaivers)) {
+      console.log(error)
+    }
   }
 
   await report_job({
     job_type: job_types.CLAIMS_WAIVERS_POACH,
-    job_reason: error ? error.message : null,
-    job_success
+    error: error instanceof Errors.EmptyPoachingWaivers ? null : error
   })
 
   process.exit()
