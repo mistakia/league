@@ -269,8 +269,8 @@ const calculate_team_historical_hit_rates = async ({
   log(`Processing ${selections.length} team yardage selections`)
 
   if (selections.length === 0) {
-    log('No selections found to process')
-    return
+    log('No selections found to process — legitimate no-op (offseason or no data for year)')
+    return { shortfall: null }
   }
 
   const unique_teams = [...new Set(selections.map((s) => s.team))]
@@ -461,6 +461,36 @@ const calculate_team_historical_hit_rates = async ({
 
   log('Team historical hit rate calculation completed')
   log(`Total selections processed: ${processed_count}`)
+
+  if (dry_run) {
+    return { shortfall: null }
+  }
+
+  // Freshness oracle: after writes, no team-yardage selection for the target
+  // year should have a NULL overall_hit_rate_soft. Any remaining nulls indicate
+  // a silent partial-success (rows skipped due to missing play data, etc.).
+  const null_count_row = await db('prop_market_selections_index as pmsi')
+    .join('prop_markets_index as pmi', function () {
+      this.on('pmi.source_id', '=', 'pmsi.source_id').andOn(
+        'pmi.source_market_id',
+        '=',
+        'pmsi.source_market_id'
+      )
+    })
+    .whereIn('pmi.market_type', TEAM_YARDAGE_MARKET_TYPES)
+    .where('pmi.year', year)
+    .whereNull('pmsi.overall_hit_rate_soft')
+    .count({ null_count: 'pmsi.source_selection_id' })
+    .first()
+
+  const null_count = Number(null_count_row?.null_count ?? 0)
+  if (null_count > 0) {
+    return {
+      shortfall: `${null_count} team yardage selection(s) still have NULL overall_hit_rate_soft after run (year=${year})`
+    }
+  }
+
+  return { shortfall: null }
 }
 
 const initialize_cli = () => {
@@ -500,12 +530,17 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    await calculate_team_historical_hit_rates({
+    const result = await calculate_team_historical_hit_rates({
       year: argv.year,
       current_week_only: argv.current_week_only,
       dry_run: argv.dry_run,
       batch_size: argv.batch_size
     })
+    if (result?.shortfall) {
+      const err = new Error(result.shortfall)
+      err.row_count_shortfall = true
+      throw err
+    }
   } catch (err) {
     error = err
     log(`Error in team hit rate calculation: ${error.message}`)
