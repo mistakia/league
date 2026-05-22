@@ -3,8 +3,8 @@
 --
 
 
--- Dumped from database version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
--- Dumped by pg_dump version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
+-- Dumped from database version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
+-- Dumped by pg_dump version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -123,6 +123,7 @@ DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_pid_year_idx;
 DROP INDEX IF EXISTS public.idx_weekly_market_selections_analysis_cache_composite;
 DROP INDEX IF EXISTS public.idx_waivers_super_priority;
 DROP INDEX IF EXISTS public.idx_waivers_lid;
+DROP INDEX IF EXISTS public.idx_waivers_active_by_type_lid;
 DROP INDEX IF EXISTS public.idx_waiver_releases_waiverid;
 DROP INDEX IF EXISTS public.idx_users_sources_userid;
 DROP INDEX IF EXISTS public.idx_users_invite_code;
@@ -153,6 +154,7 @@ DROP INDEX IF EXISTS public.idx_rosters_tid;
 DROP INDEX IF EXISTS public.idx_rosters_players_year_week_lid_pid;
 DROP INDEX IF EXISTS public.idx_rosters_players_rid;
 DROP INDEX IF EXISTS public.idx_ros_projections_pid;
+DROP INDEX IF EXISTS public.idx_rfa_bids_lid_year_active;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_releases_bid_id;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_lid;
 DROP INDEX IF EXISTS public.idx_props_index_new_hits_soft;
@@ -29447,6 +29449,13 @@ CREATE INDEX idx_restricted_free_agency_releases_bid_id ON public.restricted_fre
 
 
 --
+-- Name: idx_rfa_bids_lid_year_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rfa_bids_lid_year_active ON public.restricted_free_agency_bids USING btree (lid, year) WHERE (cancelled IS NULL);
+
+
+--
 -- Name: idx_ros_projections_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29654,6 +29663,13 @@ CREATE INDEX idx_users_sources_userid ON public.users_sources USING btree (useri
 --
 
 CREATE INDEX idx_waiver_releases_waiverid ON public.waiver_releases USING btree (waiverid);
+
+
+--
+-- Name: idx_waivers_active_by_type_lid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_waivers_active_by_type_lid ON public.waivers USING btree (type, lid) WHERE ((processed IS NULL) AND (cancelled IS NULL));
 
 
 --
