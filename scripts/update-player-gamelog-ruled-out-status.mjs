@@ -394,6 +394,27 @@ const run = async ({
   }
 }
 
+// Oracle: players_status must have a recent row, otherwise this script has
+// no upstream data to evaluate ruled-out detection against and "succ=true"
+// would only mean "ran without throwing" — exactly the failure mode this
+// audit targets. Threshold is generous (7 days) because cron fires weekly
+// during NFL season and an ingestion gap of multiple days warrants alerting.
+const PLAYERS_STATUS_STALE_THRESHOLD_SECONDS = 7 * 86400
+
+const check_players_status_freshness = async () => {
+  const row = await db('players_status').max('timestamp as max_ts').first()
+  const max_ts = row?.max_ts ? Number(row.max_ts) : null
+  if (!max_ts) {
+    return 'players_status table has no rows; cannot detect ruled-out players'
+  }
+  const now = Math.round(Date.now() / 1000)
+  const age_seconds = now - max_ts
+  if (age_seconds > PLAYERS_STATUS_STALE_THRESHOLD_SECONDS) {
+    return `players_status freshness stale: latest timestamp ${max_ts} is ${Math.round(age_seconds / 86400)} days old (threshold ${PLAYERS_STATUS_STALE_THRESHOLD_SECONDS / 86400} days)`
+  }
+  return null
+}
+
 const main = async () => {
   let error
   try {
@@ -420,6 +441,15 @@ const main = async () => {
           .orderBy('week', 'asc'),
       seas_type: argv.seas_type || 'REG'
     })
+
+    if (!argv.dry) {
+      const freshness_shortfall = await check_players_status_freshness()
+      if (freshness_shortfall) {
+        const err = new Error(freshness_shortfall)
+        err.row_count_shortfall = true
+        throw err
+      }
+    }
   } catch (err) {
     error = err
     console.log(error)

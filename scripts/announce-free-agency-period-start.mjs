@@ -297,11 +297,17 @@ const announce_free_agency_period_notification = async ({
 }
 
 /**
- * Process all eligible leagues for free agency period notifications
+ * Process all eligible leagues for free agency period notifications.
+ *
+ * Returns { shortfall } where shortfall is null when there was no due work
+ * (empty-queue) or all due leagues were successfully processed, and a
+ * descriptive string when a league was due but its notification marker was
+ * not written (silent partial-success).
+ *
  * @param {Object} params - Parameters
  * @param {boolean} params.dry_run - Whether this is a dry run
  * @param {number} params.check_window_minutes - Check window in minutes
- * @returns {Promise<void>}
+ * @returns {Promise<{ shortfall: string | null }>}
  */
 const process_all_eligible_leagues = async ({
   dry_run = false,
@@ -315,26 +321,100 @@ const process_all_eligible_leagues = async ({
 
   if (!eligible_leagues.length) {
     log('No eligible leagues found for free agency period notifications')
-    return
+    return { shortfall: null }
   }
 
+  // Snapshot which leagues are not yet marked before this run so we know
+  // exactly which ones we are responsible for verifying.
+  const due_leagues = []
   for (const league of eligible_leagues) {
-    try {
-      const notice_type = league.free_agency_period_info?.notice_type || 'start'
-      log(
-        `Processing league ${league.lid} (${league.name || 'Unnamed'}) for ${notice_type} notification`
-      )
-      await announce_free_agency_period_notification({
+    const notice_type = league.free_agency_period_info?.notice_type || 'start'
+    const event_timestamp =
+      league.free_agency_period_info?.period_start_timestamp
+    const notification_type =
+      notice_type === 'advance'
+        ? NOTIFICATION_TYPE_FREE_AGENCY_PERIOD_START_ADVANCE
+        : NOTIFICATION_TYPE_FREE_AGENCY_PERIOD_START
+
+    if (dry_run) {
+      due_leagues.push({
         lid: league.lid,
+        notice_type,
+        notification_type,
+        event_timestamp
+      })
+      continue
+    }
+
+    const already_sent = await has_league_notification_been_sent({
+      lid: league.lid,
+      year: current_season.year,
+      notification_type,
+      event_timestamp
+    })
+    if (already_sent) {
+      log(
+        `league ${league.lid}: ${notice_type} notification already sent for event_timestamp ${event_timestamp}; skipping`
+      )
+      continue
+    }
+    due_leagues.push({
+      lid: league.lid,
+      notice_type,
+      notification_type,
+      event_timestamp
+    })
+  }
+
+  if (!due_leagues.length) {
+    log('All eligible leagues already announced for the current slot')
+    return { shortfall: null }
+  }
+
+  for (const { lid, notice_type } of due_leagues) {
+    try {
+      log(`Processing league ${lid} for ${notice_type} notification`)
+      await announce_free_agency_period_notification({
+        lid,
         notice_type,
         dry_run
       })
     } catch (error) {
-      log(`Error processing league ${league.lid}: ${error.message}`)
+      log(`Error processing league ${lid}: ${error.message}`)
     }
   }
 
-  log(`Completed processing ${eligible_leagues.length} leagues`)
+  log(`Completed processing ${due_leagues.length} leagues`)
+
+  if (dry_run) {
+    return { shortfall: null }
+  }
+
+  // Oracle: for every due league, the notification marker must now exist.
+  // A missing marker means announce_free_agency_period_notification completed
+  // without throwing but the record_league_notification_sent path was never
+  // reached — silent partial-success.
+  const shortfalls = []
+  for (const {
+    lid,
+    notice_type,
+    notification_type,
+    event_timestamp
+  } of due_leagues) {
+    const marker_written = await has_league_notification_been_sent({
+      lid,
+      year: current_season.year,
+      notification_type,
+      event_timestamp
+    })
+    if (!marker_written) {
+      shortfalls.push(
+        `league ${lid}: free agency ${notice_type} notification due (event_timestamp=${event_timestamp}) but notification marker absent after run`
+      )
+    }
+  }
+
+  return { shortfall: shortfalls.length > 0 ? shortfalls.join('; ') : null }
 }
 
 /**
@@ -362,7 +442,15 @@ const main = async () => {
       })
     } else {
       // Process all eligible leagues (will determine notice type automatically)
-      await process_all_eligible_leagues({ dry_run, check_window_minutes })
+      const { shortfall } = await process_all_eligible_leagues({
+        dry_run,
+        check_window_minutes
+      })
+      if (shortfall) {
+        const err = new Error(shortfall)
+        err.row_count_shortfall = true
+        throw err
+      }
     }
   } catch (err) {
     error = err

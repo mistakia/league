@@ -222,7 +222,60 @@ const main = async () => {
     const year = argv.year ? Number(argv.year) : current_season.year
     const dry_run = argv.dry || false
 
-    await create_season_partitions({ year, dry_run })
+    const result = await create_season_partitions({ year, dry_run })
+
+    if (!dry_run) {
+      // Oracle: every expected partition must be attached to its parent in
+      // pg_inherits. Confirms partitions are not only present in pg_class but
+      // actually attached (vs. orphaned tables left by a partially failed
+      // CREATE). Also surfaces collected per-table errors that the inner
+      // function intentionally swallows so all tables can be attempted.
+      const expected_partitions = PARTITIONED_TABLES.map(
+        ({ parent_table, partition_prefix }) => ({
+          parent_table,
+          partition_table: `${partition_prefix}${year}`
+        })
+      )
+      const partition_names = expected_partitions.map((p) => p.partition_table)
+      const attached_rows = await db.raw(
+        `
+        SELECT c.relname AS partition_table, p.relname AS parent_table
+        FROM pg_inherits i
+        JOIN pg_class c ON c.oid = i.inhrelid
+        JOIN pg_class p ON p.oid = i.inhparent
+        WHERE c.relname = ANY(?)
+      `,
+        [partition_names]
+      )
+      const attached = new Set(
+        attached_rows.rows.map((r) => `${r.parent_table}|${r.partition_table}`)
+      )
+      const missing = expected_partitions.filter(
+        ({ parent_table, partition_table }) =>
+          !attached.has(`${parent_table}|${partition_table}`)
+      )
+
+      if (missing.length || !result.success) {
+        const parts = []
+        if (missing.length) {
+          parts.push(
+            `expected partition(s) not attached in pg_inherits: ${missing
+              .map((m) => `${m.partition_table} -> ${m.parent_table}`)
+              .join(', ')}`
+          )
+        }
+        if (result.errors?.length) {
+          parts.push(
+            `partition creation errors: ${result.errors
+              .map((e) => `${e.partition_table} (${e.error})`)
+              .join('; ')}`
+          )
+        }
+        const err = new Error(parts.join(' | '))
+        err.row_count_shortfall = true
+        throw err
+      }
+    }
   } catch (err) {
     error = err
     log(error)

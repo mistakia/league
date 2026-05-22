@@ -15,37 +15,44 @@ const check_disk_space = async () => {
 
   log('Checking disk space...')
 
-  const available_space = execSync("df / | grep / | awk '{ print $4 }'")
+  const available_space_raw = execSync("df / | grep / | awk '{ print $4 }'")
     .toString()
     .trim()
 
-  log(`Available space: ${available_space} KB`)
+  // Oracle: assert df produced a positive integer KB reading. "Ran without
+  // throwing" is otherwise indistinguishable from df silently returning empty
+  // output (e.g., grep pattern miss after a mount-table reshape), which would
+  // make the threshold comparison always pass.
+  const available_space_kb = Number(available_space_raw)
+  if (!Number.isInteger(available_space_kb) || available_space_kb <= 0) {
+    throw new Error(
+      `df returned invalid disk space reading: ${JSON.stringify(available_space_raw)} (parsed as ${available_space_kb})`
+    )
+  }
 
-  try {
-    if (Number(available_space) < threshold) {
-      log('Available space is below threshold. Emitting signal...')
+  log(`Available space: ${available_space_kb} KB`)
 
-      const emitted = signal_log.error(
-        new Error(
-          `Low disk space on main server: ${available_space} KB available (threshold ${threshold} KB)`
-        ),
-        {
-          severity: 'high',
-          context: {
-            available_space_kb: Number(available_space),
-            threshold_kb: threshold,
-            mount: '/'
-          }
+  if (available_space_kb < threshold) {
+    log('Available space is below threshold. Emitting signal...')
+
+    const emitted = signal_log.error(
+      new Error(
+        `Low disk space on main server: ${available_space_kb} KB available (threshold ${threshold} KB)`
+      ),
+      {
+        severity: 'high',
+        context: {
+          available_space_kb,
+          threshold_kb: threshold,
+          mount: '/'
         }
-      )
-      if (emitted?.promise) {
-        await emitted.promise
       }
-    } else {
-      log('Disk space is sufficient.')
+    )
+    if (emitted?.promise) {
+      await emitted.promise
     }
-  } catch (error) {
-    log('Error checking disk space:', error)
+  } else {
+    log('Disk space is sufficient.')
   }
 }
 
