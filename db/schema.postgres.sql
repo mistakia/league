@@ -723,6 +723,7 @@ DROP TABLE IF EXISTS public.player_contracts;
 DROP TABLE IF EXISTS public.player_college_seasonlogs;
 DROP TABLE IF EXISTS public.player_college_careerlogs;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
+DROP TABLE IF EXISTS public.player_changelog_injury_status_snapshot_2026_05_23;
 DROP TABLE IF EXISTS public.player_changelog;
 DROP TABLE IF EXISTS public.player_archetypes;
 DROP TABLE IF EXISTS public.player_aliases;
@@ -18786,6 +18787,20 @@ CREATE TABLE public.player_changelog (
     prev character varying(400) NOT NULL,
     new character varying(400),
     "timestamp" integer NOT NULL
+);
+
+
+--
+-- Name: player_changelog_injury_status_snapshot_2026_05_23; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_changelog_injury_status_snapshot_2026_05_23 (
+    uid integer,
+    pid character varying(25),
+    prop character varying(100),
+    prev character varying(400),
+    new character varying(400),
+    "timestamp" integer
 );
 
 
@@ -54808,6 +54823,13 @@ GRANT SELECT ON TABLE public.player_archetypes TO league_readonly;
 --
 
 GRANT SELECT ON TABLE public.player_changelog TO league_readonly;
+
+
+--
+-- Name: TABLE player_changelog_injury_status_snapshot_2026_05_23; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.player_changelog_injury_status_snapshot_2026_05_23 TO league_readonly;
 
 
 --
