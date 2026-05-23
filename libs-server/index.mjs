@@ -77,6 +77,11 @@ export {
   get_data_view_results_query
 } from './get-data-view-results.mjs'
 export {
+  resolve_table_state_from_short_url,
+  parse_url_to_table_state,
+  extract_short_url_hash
+} from './data-views/resolve-table-state.mjs'
+export {
   default as get_plays_view_results,
   get_plays_view_results_query
 } from './plays-view/get-plays-view-results.mjs'

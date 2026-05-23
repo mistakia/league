@@ -1,6 +1,13 @@
 import express from 'express'
 import crypto from 'crypto'
-import { validators, get_data_view_results, redis_cache } from '#libs-server'
+import {
+  validators,
+  get_data_view_results,
+  get_data_view_results_query,
+  resolve_table_state_from_short_url,
+  format_sql,
+  redis_cache
+} from '#libs-server'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 import get_param_option_counts, {
   collect_other_params
@@ -978,6 +985,130 @@ router.post('/search/?', async (req, res) => {
     }
 
     res.send(data_view_results)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+/**
+ * @swagger
+ * /data-views/debug:
+ *   post:
+ *     tags:
+ *       - Data Views
+ *     summary: Generate and optionally execute a data view query for debugging
+ *     description: |
+ *       Returns the generated SQL, executed results, and metadata for a data view request.
+ *       Bypasses the redis cache. Accepts either an explicit `table_state` body or a `short_url`
+ *       (full URL, `/u/{hash}`, or a bare 32-character hash) which is resolved against the `urls`
+ *       table. Requires admin authentication (`userId === 1`) because the response exposes raw SQL
+ *       and schema details.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               table_state:
+ *                 type: object
+ *                 description: Explicit table state. Mutually exclusive with `short_url`.
+ *               short_url:
+ *                 type: string
+ *                 description: Short URL, `/u/{hash}` path, or bare 32-character hash.
+ *               execute:
+ *                 type: boolean
+ *                 default: true
+ *                 description: When false, return the generated SQL without executing it.
+ *               beautify:
+ *                 type: boolean
+ *                 default: true
+ *                 description: Format SQL output via prettier-sql.
+ *               limit_override:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 2000
+ *                 description: Override the table state's limit (useful for capping execution).
+ *     responses:
+ *       '200':
+ *         description: Generated query and (optionally) executed results.
+ *       '400':
+ *         description: Invalid request body or unresolvable short URL.
+ *       '401':
+ *         description: Admin authentication required.
+ *       '500':
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.post('/debug/?', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    if (!req.auth || req.auth.userId !== 1) {
+      return res.status(401).send({ error: 'Admin authentication required' })
+    }
+
+    const {
+      table_state: explicit_table_state,
+      short_url,
+      execute = true,
+      beautify = true,
+      limit_override
+    } = req.body || {}
+
+    if (!explicit_table_state && !short_url) {
+      return res
+        .status(400)
+        .send({ error: 'table_state or short_url required' })
+    }
+
+    let table_state
+    let source
+    if (explicit_table_state) {
+      table_state = explicit_table_state
+      source = { type: 'table_state' }
+    } else {
+      const resolved = await resolve_table_state_from_short_url(short_url)
+      table_state = resolved.table_state
+      source = { type: 'short_url', hash: resolved.hash, url: resolved.url }
+    }
+
+    if (limit_override) {
+      table_state = { ...table_state, limit: limit_override }
+    }
+
+    const generate_started_at = Date.now()
+    const { query, data_view_metadata } = await get_data_view_results_query(
+      table_state
+    )
+    let sql = query.toString()
+    const query_bindings = typeof query.toSQL === 'function'
+      ? query.toSQL().bindings
+      : null
+    if (beautify) {
+      sql = await format_sql(sql, { parser: 'sql', language: 'postgresql' })
+    }
+    const generate_ms = Date.now() - generate_started_at
+
+    let results = null
+    let execute_ms = null
+    if (execute) {
+      const execute_started_at = Date.now()
+      const { data_view_results } = await get_data_view_results(table_state)
+      execute_ms = Date.now() - execute_started_at
+      results = data_view_results
+    }
+
+    return res.send({
+      source,
+      table_state,
+      query: sql,
+      query_bindings,
+      metadata: data_view_metadata,
+      results,
+      timing: { generate_ms, execute_ms }
+    })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
