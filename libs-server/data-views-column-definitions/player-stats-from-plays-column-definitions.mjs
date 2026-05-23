@@ -681,6 +681,11 @@ export default {
     with_select_string: `SUM(CASE WHEN (bc_pid IS NOT NULL AND ydl_100 <= 10) OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END)`,
     stat_name: 'high_value_touches_from_plays'
   }),
+  player_touches_from_plays: player_stat_from_plays({
+    pid_columns: ['bc_pid', 'trg_pid'],
+    with_select_string: `SUM(CASE WHEN bc_pid IS NOT NULL OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END)`,
+    stat_name: 'touches_from_plays'
+  }),
 
   player_rush_attempts_share_from_plays: create_team_share_stat({
     column_name: 'rush_att_share_from_plays',

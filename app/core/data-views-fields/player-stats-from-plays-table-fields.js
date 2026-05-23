@@ -322,6 +322,16 @@ export default {
     header_label: 'HVT',
     player_value_path: 'high_value_touches_from_plays'
   }),
+  player_touches_from_plays: offensive_player_from_play_field({
+    column_title: 'Touches (By Play)',
+    column_groups: [
+      COLUMN_GROUPS.RUSHING,
+      COLUMN_GROUPS.RECEIVING,
+      COLUMN_GROUPS.OPPORTUNITY
+    ],
+    header_label: 'TCH',
+    player_value_path: 'touches_from_plays'
+  }),
   player_rush_attempts_share_from_plays: offensive_player_from_share_field({
     column_title: 'Share of Team Rushing Attempts (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
