@@ -18713,7 +18713,8 @@ COMMENT ON COLUMN public.player_adp_index.percent_drafted IS 'Percentage of draf
 
 CREATE TABLE public.player_aliases (
     pid character varying(25) NOT NULL,
-    formatted_alias character varying(100) NOT NULL
+    formatted_alias character varying(100) NOT NULL,
+    source character varying(32) DEFAULT 'manual'::character varying
 );
 
 
@@ -18786,7 +18787,8 @@ CREATE TABLE public.player_changelog (
     prop character varying(100) NOT NULL,
     prev character varying(400) NOT NULL,
     new character varying(400),
-    "timestamp" integer NOT NULL
+    "timestamp" integer NOT NULL,
+    source character varying(32) DEFAULT 'sleeper'::character varying
 );
 
 
@@ -19610,7 +19612,8 @@ CREATE TABLE public.player_gamelogs (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 )
 PARTITION BY RANGE (year);
 
@@ -19731,7 +19734,8 @@ CREATE TABLE public.player_gamelogs_default (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -19844,7 +19848,8 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -19957,7 +19962,8 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20070,7 +20076,8 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20183,7 +20190,8 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20296,7 +20304,8 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20409,7 +20418,8 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20522,7 +20532,8 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20635,7 +20646,8 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20748,7 +20760,8 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20861,7 +20874,8 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -20974,7 +20988,8 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21087,7 +21102,8 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21200,7 +21216,8 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21313,7 +21330,8 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21426,7 +21444,8 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21539,7 +21558,8 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21652,7 +21672,8 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21765,7 +21786,8 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21878,7 +21900,8 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -21991,7 +22014,8 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -22104,7 +22128,8 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -22217,7 +22242,8 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -22330,7 +22356,8 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -22443,7 +22470,8 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -22556,7 +22584,8 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -22669,7 +22698,8 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -22782,7 +22812,8 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     q3_snaps_def smallint,
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
-    q4_snaps_def_pct numeric(5,2)
+    q4_snaps_def_pct numeric(5,2),
+    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 );
 
 
@@ -23545,6 +23576,7 @@ CREATE TABLE public.practice (
     source_status character varying(100),
     seas_type character varying(10) NOT NULL,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    source character varying(32) DEFAULT 'rotowire'::character varying,
     CONSTRAINT practice_reg_week_bound CHECK ((NOT (((seas_type)::text = 'REG'::text) AND (week > 18))))
 );
 
