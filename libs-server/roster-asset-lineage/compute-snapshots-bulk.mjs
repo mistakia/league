@@ -3,6 +3,9 @@ import dayjs from 'dayjs'
 import db from '#db'
 import { roster_slot_types } from '#constants/roster-constants.mjs'
 import { keeptradecut_metric_types } from '#constants'
+import {
+  load_pick_ktc_indexes, ktc_pick_at
+} from '#libs-server/composite-market-value/ktc-pick-value-at.mjs'
 
 import { ASSET_TYPE, INITIAL_SLOT_TYPE, PS_SLOT_SUBTYPE } from './constants.mjs'
 
@@ -220,6 +223,10 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
     }
   }
 
+  // Pick KTC indexes (superflex qb-axis; matches the player-side query above).
+  // Loaded once across all picks the snapshot pass will touch.
+  idx.pick_ktc = await load_pick_ktc_indexes({ qb_axis: 2 })
+
   // league_player_seasonlogs: keyed `${pid}__${year}` -> {start_tid, salary}
   idx.seasonlogs = new Map()
   if (player_ids.length && years.length) {
@@ -407,7 +414,32 @@ const compute_snapshot_for_draft = ({
           idx.pick_values.get(`${draft.league_format_hash}__${rank}`) ?? null
       }
     }
-    // Pick market value, salary, realized: NULL/zero by design.
+    // Pick market value via ktc_pick_at: KTC pick rankings exist from
+    // 2023-09-08 onwards. The helper applies an analog-year fallback for
+    // pre-data picks (matching round, slot, and years-out-from-target-date)
+    // and returns null when neither path yields data.
+    const nt = idx.num_teams.get(draft.league_format_hash)
+    if (nt && draft.pick_year != null && draft.pick_round != null) {
+      result.composite_market_value_at_acquisition = ktc_pick_at({
+        pick_year: draft.pick_year,
+        pick_round: draft.pick_round,
+        pick_overall_position: draft.pick_draft_overall_position,
+        num_teams: nt,
+        target_unix: start_unix,
+        idx: idx.pick_ktc
+      })
+      if (end_unix) {
+        result.composite_market_value_at_termination = ktc_pick_at({
+          pick_year: draft.pick_year,
+          pick_round: draft.pick_round,
+          pick_overall_position: draft.pick_draft_overall_position,
+          num_teams: nt,
+          target_unix: end_unix,
+          idx: idx.pick_ktc
+        })
+      }
+    }
+    // Salary, realized: NULL/zero by design for picks.
     result.realized_pts_added_net_through_termination = null
     result.realized_pts_added_earned_through_termination = null
     result.realized_pts_added_net_in_active_slot = null
