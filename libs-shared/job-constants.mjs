@@ -140,7 +140,9 @@ export const job_types = {
   GENERATE_ROSTER_ASSET_LINEAGE: 116,
   CALIBRATE_COMPOSITE_MARKET_VALUE_SOURCES: 117,
   GENERATE_COMPOSITE_MARKET_VALUE: 118,
-  DETECT_PROJECTION_FORMAT_HASH_DRIFT: 119
+  DETECT_PROJECTION_FORMAT_HASH_DRIFT: 119,
+  IMPORT_NFLVERSE_WEEKLY_ROSTERS: 120,
+  IMPORT_NFLVERSE_INJURIES: 121
 }
 
 export const job_title_by_id = {
@@ -262,5 +264,7 @@ export const job_title_by_id = {
   116: 'Generate Roster Asset Lineage',
   117: 'Calibrate Composite Market Value Sources',
   118: 'Generate Composite Market Value',
-  119: 'Detect Projection Format Hash Drift'
+  119: 'Detect Projection Format Hash Drift',
+  120: 'Import NFLverse Weekly Rosters',
+  121: 'Import NFLverse Injuries'
 }
