@@ -143,7 +143,8 @@ export const job_types = {
   DETECT_PROJECTION_FORMAT_HASH_DRIFT: 119,
   IMPORT_NFLVERSE_WEEKLY_ROSTERS: 120,
   IMPORT_NFLVERSE_INJURIES: 121,
-  IMPORT_PLAYERS_NFL: 122
+  IMPORT_PLAYERS_NFL: 122,
+  GENERATE_HISTORICAL_INJURY_INDEX: 123
 }
 
 export const job_title_by_id = {
@@ -268,5 +269,6 @@ export const job_title_by_id = {
   119: 'Detect Projection Format Hash Drift',
   120: 'Import NFLverse Weekly Rosters',
   121: 'Import NFLverse Injuries',
-  122: 'Import Players (NFL FDL)'
+  122: 'Import Players (NFL FDL)',
+  123: 'Generate Historical Injury Index'
 }
