@@ -160,18 +160,31 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
     }
   }
 
-  // projections: keyed `${pid}__${format_hash}__${year}__ros` -> pts_added
+  // projections: keyed `${pid}__${format_hash}__${year}` -> pts_added.
+  //
+  // Uses week='0' (preseason rest-of-season) rather than week='ros'. The 'ros'
+  // rows are a current-state rollup that is only refreshed for the active
+  // year of each league_format_hash, so historical holdings never matched and
+  // projected_pts_added_at_acquisition stayed NULL across all 2020-2025 player
+  // holdings. week='0' is a per-year preseason ros snapshot that exists for
+  // every historical year and is the projection the market was looking at the
+  // start of the season -- the correct "what was knowable" oracle for the
+  // offseason/early-season acquisitions that dominate the holding population.
+  // The -999 sentinel indicates "no projection available" and is dropped.
   idx.projections = new Map()
   if (player_ids.length && format_hashes.length && years.length) {
     const proj_rows = await db('league_format_player_projection_values')
-      .select('pid', 'league_format_hash', 'year', 'week', 'pts_added')
+      .select('pid', 'league_format_hash', 'year', 'pts_added')
       .whereIn('pid', player_ids)
       .whereIn('league_format_hash', format_hashes)
       .whereIn('year', years)
-      .where('week', 'ros')
+      .where('week', '0')
     for (const r of proj_rows) {
+      if (r.pts_added == null) continue
+      const v = Number(r.pts_added)
+      if (v <= -900) continue
       const k = `${r.pid}__${r.league_format_hash}__${r.year}`
-      idx.projections.set(k, r.pts_added != null ? Number(r.pts_added) : null)
+      idx.projections.set(k, v)
     }
   }
 
