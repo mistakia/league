@@ -246,6 +246,27 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     })
   }
 
+  // Dedupe (esbid, pid, year): a player can have multiple status entries
+  // within a single week (e.g. promoted mid-week from DEV to ACT). Collapse
+  // to one row per key. Precedence: ACT > inactive (any ACT means the
+  // player dressed that game).
+  const dedup = new Map()
+  for (const ins of inserts) {
+    const key = `${ins.esbid}|${ins.pid}|${ins.year}`
+    const existing = dedup.get(key)
+    if (!existing || (ins.active && !existing.active)) {
+      dedup.set(key, ins)
+    }
+  }
+  const before_dedup = inserts.length
+  inserts.length = 0
+  inserts.push(...dedup.values())
+  if (before_dedup !== inserts.length) {
+    log(
+      `deduped ${before_dedup - inserts.length} (esbid,pid,year) duplicates -> ${inserts.length} rows`
+    )
+  }
+
   const total_attempted = candidate_rows.length
   const resolved = counts.resolved_gsis + counts.resolved_name
   const resolution_rate = resolved / total_attempted
@@ -267,6 +288,62 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     }
   }
 
+  // Diff preflight: classify each proposed insert against the existing
+  // table state so we can audit the blast radius BEFORE committing.
+  // Load all existing rows for this year (cheap: a partition scan) and
+  // build an in-memory index keyed on (esbid, pid).
+  const existing_rows = inserts.length
+    ? await db('player_gamelogs')
+        .select('esbid', 'pid', 'active')
+        .where({ year })
+    : []
+  const existing_by_key = new Map(
+    existing_rows.map((r) => [`${r.esbid}|${r.pid}`, r])
+  )
+  const diff = {
+    new_insert: 0,
+    no_change: 0,
+    active_null_to_true: 0,
+    active_null_to_false: 0,
+    flip_true_to_false: 0,
+    flip_false_to_true: 0
+  }
+  for (const ins of inserts) {
+    const existing = existing_by_key.get(`${ins.esbid}|${ins.pid}`)
+    if (!existing) {
+      diff.new_insert += 1
+      continue
+    }
+    if (existing.active === null && ins.active === true)
+      diff.active_null_to_true += 1
+    else if (existing.active === null && ins.active === false)
+      diff.active_null_to_false += 1
+    else if (existing.active === true && ins.active === false)
+      diff.flip_true_to_false += 1
+    else if (existing.active === false && ins.active === true)
+      diff.flip_false_to_true += 1
+    else diff.no_change += 1
+  }
+  log(`diff preflight for ${year}: ${JSON.stringify(diff)}`)
+
+  // Sanity floor on true->false flips: if we're flipping more than 10% of
+  // touched-existing rows from active=true to active=false, something is
+  // wrong (data corruption or wrong-year mismatch). Abort before writing.
+  const touched_existing =
+    diff.no_change +
+    diff.flip_true_to_false +
+    diff.flip_false_to_true +
+    diff.active_null_to_true +
+    diff.active_null_to_false
+  const true_to_false_pct =
+    touched_existing > 0 ? diff.flip_true_to_false / touched_existing : 0
+  if (true_to_false_pct > 0.1) {
+    return {
+      shortfall: `${year}: ${(true_to_false_pct * 100).toFixed(1)}% of touched rows flip active true->false (${diff.flip_true_to_false}/${touched_existing}) -- exceeds 10% sanity floor`,
+      inserts_written: 0
+    }
+  }
+
   if (dry_run) {
     log(`dry_run: would write ${inserts.length} rows for ${year}`)
     return { shortfall: null, inserts_written: 0 }
@@ -283,10 +360,15 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     items: inserts,
     batch_size: BATCH_SIZE,
     save: async (batch) => {
+      // Narrow merge to `active` only. Existing rows from other importers
+      // (gameday-rosters, stat builders) keep their source/pos/tm/opp -- we
+      // only assert authority over the boolean this importer exists to
+      // populate. New INSERTs still tag source='nflverse-weekly-rosters'
+      // for revert by sentinel.
       await db('player_gamelogs')
         .insert(batch)
         .onConflict(['esbid', 'pid', 'year'])
-        .merge(['tm', 'opp', 'pos', 'active', 'source'])
+        .merge(['active'])
     }
   })
   log(`wrote ${inserts.length} rows for ${year} with source=${SOURCE_SENTINEL}`)
