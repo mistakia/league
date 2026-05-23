@@ -31,6 +31,7 @@ debug.enable('generate-historical-injury-index')
 
 const BATCH_SIZE = 500
 const PARTITION_LOWER_BOUND = 2009
+const ORACLE_DEVIATION_THRESHOLD = 0.05
 
 const initialize_cli = () =>
   yargs(hideBin(process.argv))
@@ -40,8 +41,18 @@ const initialize_cli = () =>
     .option('pid', { type: 'string' })
     .option('dry_run', { type: 'boolean', default: false }).argv
 
+const get_existing_row_count = async ({ year }) => {
+  const rows = await db('historical_injury_index')
+    .where({ year })
+    .count({ c: '*' })
+  return Number(rows[0]?.c || 0)
+}
+
 const generate_for_year = async ({ year, pid, dry_run }) => {
   log(`processing year ${year}`)
+  const prior_count = await get_existing_row_count({ year })
+  log(`prior row count for year ${year}: ${prior_count}`)
+
   const select_result = await db.raw(rebuild_sql, {
     start_year: year,
     end_year: year
@@ -92,7 +103,27 @@ const generate_for_year = async ({ year, pid, dry_run }) => {
   })
   log(`upserted ${items.length} rows for ${year}`)
 
-  return { shortfall: null, rows_written: items.length }
+  // Output oracle: distinct from process exit code. Compares the
+  // post-rebuild row count against the prior count. First-run skip
+  // (prior_count == 0) handles initial backfill and new-season early
+  // weeks where no prior baseline exists.
+  let oracle_shortfall = null
+  if (!pid) {
+    const post_count = await get_existing_row_count({ year })
+    if (prior_count === 0) {
+      log(`oracle: year ${year} first run; baseline established at ${post_count}`)
+    } else {
+      const deviation = Math.abs(post_count - prior_count) / prior_count
+      log(
+        `oracle: year ${year} prior=${prior_count} post=${post_count} deviation=${(deviation * 100).toFixed(2)}%`
+      )
+      if (deviation > ORACLE_DEVIATION_THRESHOLD) {
+        oracle_shortfall = `historical_injury_index year ${year}: row count deviated ${(deviation * 100).toFixed(1)}% (prior=${prior_count}, post=${post_count}) -- exceeds ${ORACLE_DEVIATION_THRESHOLD * 100}% threshold`
+      }
+    }
+  }
+
+  return { shortfall: oracle_shortfall, rows_written: items.length }
 }
 
 const generate_historical_injury_index = async ({

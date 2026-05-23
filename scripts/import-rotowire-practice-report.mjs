@@ -131,6 +131,23 @@ const run = async () => {
       in_season: true
     }
   }
+
+  // E2 silence monitor: cross-run check that ANY Rotowire row landed in the
+  // last ~7 days. The per-run floor catches a single dead run; this catches
+  // a string of dead runs that each succeed in parsing but produce zero
+  // writes (silent upstream content stripping). Looks at current week +
+  // prior week as the trailing window.
+  const window_weeks = week > 1 ? [week, week - 1] : [week]
+  const [{ c: window_rows }] = await db('practice')
+    .where({ year, seas_type: current_season.nfl_seas_type, source: 'rotowire' })
+    .whereIn('week', window_weeks)
+    .count({ c: '*' })
+  if (Number(window_rows) === 0) {
+    return {
+      shortfall: `Rotowire silence monitor: zero practice rows across weeks ${window_weeks.join(',')} of ${year} -- 7d window dark`,
+      in_season: true
+    }
+  }
   return { shortfall: null, in_season: true }
 }
 

@@ -119,6 +119,17 @@ JOB_PROJECT=league
 ## 2020+ practice writes; nflverse practice backfill is pre-2020 only.
 0 7 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nflverse-injuries.mjs --force_download >> /var/log/league/import-nflverse-injuries.log 2>&1
 
+## Every Tuesday at 09:00 in January, February, and September through December.
+## Rebuilds the historical_injury_index for the current season. Runs after
+## update-player-gamelog-ruled-out-status (5am), import-gameday-rosters (5am),
+## import-nflverse-weekly-rosters (7:15am), and import-nflverse-injuries (7:00am)
+## so all upstream signals are fresh.
+##
+## January and February runs target the new calendar year and are intentionally
+## no-ops until Week 1 of the new season; the prior season's final refresh
+## happens in the previous December run.
+0 9 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-historical-injury-index.mjs --year $(date +\%Y) >> /var/log/league/generate-historical-injury-index.log 2>&1
+
 ## NFL.com FDL players (sources player_changelog.nfl_status: IR/PUP/SUSP/NFI/DID_NOT_REPORT)
 ## 3:30am daily plus game-day 12:15/17:10/20:00 in-season.  Mirrors Sleeper cadence.
 30 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1

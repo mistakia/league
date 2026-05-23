@@ -8,7 +8,7 @@ import {
   format_nfl_status,
   format_nfl_injury_status
 } from '#libs-shared'
-import { fantasy_positions } from '#constants'
+import { fantasy_positions, is_offseason } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -38,6 +38,7 @@ const run = async () => {
   const statuses = []
   const fields = {}
   let changeCount = 0
+  let players_with_injury_status = 0
 
   for (const sleeper_id in result) {
     const item = result[sleeper_id]
@@ -165,6 +166,7 @@ const run = async () => {
     }
 
     if (!player_row || !injury_status) continue
+    players_with_injury_status += 1
 
     const status_insert = {
       pid: player_row.pid,
@@ -222,6 +224,40 @@ const run = async () => {
       fields,
       shortfall:
         'Sleeper /players/nfl returned empty payload — API outage or cached empty response'
+    }
+  }
+
+  // In-season-only monitors. Both run after a successful API liveness check
+  // and emit shortfalls into the unified signal queue via throw_if_shortfall.
+  if (!is_offseason) {
+    // E3: value-level health canary. The 2022 Sleeper blackout kept the API
+    // shape intact (player objects returned with the same keys) but stripped
+    // injury_status content -- a key-hash canary would not have caught it.
+    // Threshold of 5 active injuries is comfortably above any plausible
+    // in-season floor; any in-season Tuesday-Sunday window normally
+    // carries hundreds.
+    if (players_with_injury_status < 5) {
+      return {
+        fields,
+        shortfall: `Sleeper value-level canary: only ${players_with_injury_status} players carry injury_status in this in-season run (floor 5) -- possible 2022-style content stripping`
+      }
+    }
+
+    // E1: blackout monitor. Zero injury_status changelog writes from the
+    // sleeper source in the last 48h during the in-season window means
+    // either the API stripped content (caught above) or our writer is
+    // broken upstream. The 2022 blackout ran 23 weeks undetected; this
+    // catches a recurrence on day 3.
+    const cutoff = timestamp - 48 * 3600
+    const [{ c: recent_writes }] = await db('player_changelog')
+      .where({ source: 'sleeper', prop: 'injury_status' })
+      .andWhere('timestamp', '>=', cutoff)
+      .count({ c: '*' })
+    if (Number(recent_writes) === 0) {
+      return {
+        fields,
+        shortfall: `Sleeper blackout monitor: zero source='sleeper' injury_status changelog writes in the last 48h during in-season -- 2022-style blackout suspected`
+      }
     }
   }
 
