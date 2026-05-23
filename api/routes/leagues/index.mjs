@@ -1,6 +1,9 @@
 import express from 'express'
 
-import { getLeague, validators } from '#libs-server'
+import { getLeague, validators, report_job, report_error } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
+import process_projections_for_scoring_format from '#scripts/process-projections-for-scoring-format.mjs'
+import process_projections_for_league_format from '#scripts/process-projections-for-league-format.mjs'
 import {
   require_auth,
   validate_and_get_league,
@@ -200,6 +203,27 @@ router.put('/:leagueId', async (req, res) => {
       await db('seasons')
         .update({ scoring_format_hash: scoring_format.scoring_format_hash })
         .where({ lid, year: current_season.year })
+
+      // Cascade: materialize projection points under the new hash so the
+      // lineage populator can join on (pid, scoring_format_hash, year, week=0).
+      // Known race: a concurrent league_format PUT can compute its hash from a
+      // stale `league` snapshot. Commish settings edits are sequential in
+      // practice; cross-bucket projector writes are disjoint by hash so this
+      // is a silent-stale-input bug, not corruption.
+      try {
+        await process_projections_for_scoring_format({
+          year: current_season.year,
+          scoring_format_hash: scoring_format.scoring_format_hash
+        })
+      } catch (err) {
+        const job_reason = `cascade_failed_scoring lid=${lid} year=${current_season.year} hash=${scoring_format.scoring_format_hash}`
+        await report_error({ job_type: job_types.PROCESS_PROJECTIONS, error: err })
+        await report_job({
+          job_type: job_types.PROCESS_PROJECTIONS,
+          job_success: false,
+          job_reason
+        })
+      }
     } else if (league_format_fields.includes(field)) {
       const league_format = generate_league_format_hash({
         ...league,
@@ -212,6 +236,21 @@ router.put('/:leagueId', async (req, res) => {
       await db('seasons')
         .update({ league_format_hash: league_format.league_format_hash })
         .where({ lid, year: current_season.year })
+
+      try {
+        await process_projections_for_league_format({
+          year: current_season.year,
+          league_format_hash: league_format.league_format_hash
+        })
+      } catch (err) {
+        const job_reason = `cascade_failed_league lid=${lid} year=${current_season.year} hash=${league_format.league_format_hash}`
+        await report_error({ job_type: job_types.PROCESS_PROJECTIONS, error: err })
+        await report_job({
+          job_type: job_types.PROCESS_PROJECTIONS,
+          job_success: false,
+          job_reason
+        })
+      }
     }
 
     // TODO create changelog

@@ -118,10 +118,7 @@ const process_projections_for_league_format = async ({
     years = projection_years.map((row) => row.year)
   }
 
-  // Remove current_season.year from years if present
-  years = years.filter((year) => year !== current_season.year)
-
-  if (!years.length) {
+  if (!years || !years.length) {
     throw new Error('No years to process')
   }
 
@@ -197,6 +194,22 @@ const main = async () => {
 
     if (!league_format_hash) {
       throw new Error('League format hash is required')
+    }
+
+    if (all && !year) {
+      const projection_years = await db('projections_index')
+        .distinct('year')
+        .orderBy('year', 'desc')
+      const years = projection_years
+        .map((row) => row.year)
+        .filter((y) => y !== current_season.year)
+      for (const process_year of years) {
+        await process_projections_for_league_format({
+          year: process_year,
+          league_format_hash
+        })
+      }
+      return
     }
 
     await process_projections_for_league_format({
