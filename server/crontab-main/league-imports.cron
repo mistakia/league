@@ -105,6 +105,12 @@ JOB_PROJECT=league
 ## At 04:00 in January, February and every month from September through December.
 0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nflverse-nfldata.mjs -d >> /var/log/league/league-import-nfl-games-nflverse-nfldata.log 2>&1
 
+## Every Tuesday at 07:15 in January, February, and September through December.
+## nflverse weekly_rosters releases land late Monday; this populates
+## player_gamelogs.active=false for game-day inactives and reserve-list members.
+## Restores the signal lost when commit 84c52f63 removed import-player-gamelogs.mjs.
+15 7 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nflverse-weekly-rosters.mjs --force_download >> /var/log/league/import-nflverse-weekly-rosters.log 2>&1
+
 
 
 # ESPN
