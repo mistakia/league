@@ -9,10 +9,12 @@ import {
   nfl,
   find_player_row,
   updatePlayer,
-  createPlayer
+  createPlayer,
+  report_job,
+  throw_if_shortfall
 } from '#libs-server'
-// import db from '#db'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { job_types } from '#libs-shared/job-constants.mjs'
+import { validate_response_shape } from './import-players-nfl.validate.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -34,6 +36,12 @@ const importPlayersNFL = async ({
 
   const pids = []
   const data = await nfl.getPlayers({ year, token, ignore_cache })
+
+  const shape = validate_response_shape({ edges: data })
+  log(
+    `preflight ok: ${shape.players} players; status tokens=${Object.keys(shape.status_counts).join('|')}`
+  )
+
   for (const { node } of data) {
     const name = node.person.displayName
     const pos = node.position
@@ -149,17 +157,8 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    // const setInactive = async (pids) => {
-    //   // set current_nfl_team to INA for pid not in pids
-    //   const player_rows = await db('player')
-    //     .whereNot('current_nfl_team', 'INA')
-    //     .whereNot('pos', 'DST')
-    //     .whereNotIn('pid', pids)
-    //   for (const player_row of player_rows) {
-    //     await updatePlayer({ player_row, update: { current_nfl_team: 'INA' } })
-    //   }
-    // }
 
+    let shortfall = null
     if (argv.all) {
       const token = await nfl.getToken()
       let year = argv.start || 1970
@@ -168,28 +167,32 @@ const main = async () => {
       }
     } else if (argv.year) {
       const pids = await importPlayersNFL({ year: argv.year })
-
       log(`processed ${pids.length} players from nfl`)
-
-      // if (argv.year === current_season.year) {
-      //   await setInactive(pids)
-      // }
+      if (pids.length === 0) {
+        shortfall = `import-players-nfl ${argv.year}: zero players processed`
+      }
     } else {
       const pids = await importPlayersNFL({
         year: current_season.year,
         ignore_cache: true
       })
-
       log(`processed ${pids.length} players from nfl`)
-
-      // await setInactive(pids)
+      if (pids.length === 0) {
+        shortfall = `import-players-nfl current season: zero players processed`
+      }
     }
+    throw_if_shortfall(shortfall)
   } catch (err) {
     error = err
     log(error)
   }
 
-  process.exit()
+  await report_job({
+    job_type: job_types.IMPORT_PLAYERS_NFL,
+    error
+  })
+
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {
