@@ -50,6 +50,7 @@ DROP INDEX IF EXISTS public.roster_asset_holding_player_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx;
 DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_off_personnel_counts_idx;
@@ -715,6 +716,7 @@ DROP TABLE IF EXISTS public.player_gamelogs_year_2002;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2001;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
 DROP TABLE IF EXISTS public.player_gamelogs_default;
+DROP TABLE IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_game_outcome_correlations;
 DROP TABLE IF EXISTS public.player_dfs_ownership;
@@ -19626,6 +19628,19 @@ COMMENT ON COLUMN public.player_gamelogs.ruled_out_in_game IS 'Indicates player 
 
 
 --
+-- Name: player_gamelogs_active_snapshot_2026_05_23; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_active_snapshot_2026_05_23 (
+    esbid integer,
+    pid character varying(25),
+    year smallint,
+    active boolean,
+    source character varying(32)
+);
+
+
+--
 -- Name: player_gamelogs_default; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -23577,6 +23592,7 @@ CREATE TABLE public.practice (
     seas_type character varying(10) NOT NULL,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     source character varying(32) DEFAULT 'rotowire'::character varying,
+    practice_status character varying(20),
     CONSTRAINT practice_reg_week_bound CHECK ((NOT (((seas_type)::text = 'REG'::text) AND (week > 18))))
 );
 
@@ -40211,6 +40227,13 @@ CREATE INDEX ngs_prospect_scores_history_pid_idx ON public.ngs_prospect_scores_h
 
 
 --
+-- Name: player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx ON public.player_gamelogs_active_snapshot_2026_05_23 USING btree (esbid, pid, year);
+
+
+--
 -- Name: player_gamelogs_default_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -54918,6 +54941,13 @@ GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_readonly
 --
 
 GRANT SELECT ON TABLE public.player_gamelogs TO league_readonly;
+
+
+--
+-- Name: TABLE player_gamelogs_active_snapshot_2026_05_23; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.player_gamelogs_active_snapshot_2026_05_23 TO league_readonly;
 
 
 --

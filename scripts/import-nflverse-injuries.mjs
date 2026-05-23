@@ -53,14 +53,42 @@ debug.enable('import-nflverse-injuries')
 
 const BATCH_SIZE = 500
 
-// Maps nflverse report_status (titlecased on the wire) to our canonical
-// SCREAMING enum. Anything else (DNP/LIMITED/FULL/etc.) returns null --
-// those values describe practice participation and belong in the practice
-// table (handled by B4), not in player_changelog.injury_status.
+// Maps nflverse report_status (titlecased on the wire) to the changelog
+// injury_status enum. Probable returns null here -- our injury_status enum
+// drops Probable (NFL retired the designation in 2016) -- but Probable IS
+// preserved in practice.game_designation via format_nflverse_report_status_for_practice.
 const format_nflverse_report_status = (raw) => {
   const s = (raw || '').toUpperCase().trim()
   if (s === 'OUT' || s === 'DOUBTFUL' || s === 'QUESTIONABLE') return s
   return null
+}
+
+// Practice.game_designation accepts the full pre-2016 enum including PROBABLE,
+// which is the dominant 2009-2015 value (~2,200-3,000 rows/year). Dropping it
+// would lose the bulk of the historical injury-report signal.
+const format_nflverse_report_status_for_practice = (raw) => {
+  const s = (raw || '').toUpperCase().trim()
+  if (s === 'OUT' || s === 'DOUBTFUL' || s === 'QUESTIONABLE' || s === 'PROBABLE')
+    return s
+  return null
+}
+
+// nflverse practice_status -> short token. "Out (Definitely Will Not Play)"
+// (2009-2015 only) collapses to DNP -- the player did not practice.
+const format_nflverse_practice_status = (raw) => {
+  const s = (raw || '').trim()
+  if (s === 'Did Not Participate In Practice') return 'DNP'
+  if (s === 'Limited Participation in Practice') return 'LP'
+  if (s === 'Full Participation in Practice') return 'FP'
+  if (s === 'Out (Definitely Will Not Play)') return 'DNP'
+  return null
+}
+
+const combine_injuries = (primary, secondary) => {
+  const p = (primary || '').trim()
+  const s = (secondary || '').trim()
+  if (p && s) return `${p} / ${s}`
+  return p || s || null
 }
 
 // Legacy team codes that pre-date our fixTeam table.
@@ -85,6 +113,13 @@ const initialize_cli = () =>
         'Source sentinel for inserted rows. Use "nflverse-backfill" for historical ' +
         'ingestion, "nflverse" for ongoing weekly poll.',
       default: 'nflverse'
+    })
+    .option('write_practice', {
+      type: 'boolean',
+      default: false,
+      describe:
+        'Also write rows to the practice table (pre-2020 backfill). Skip for ' +
+        'ongoing nflverse polls since Rotowire owns 2020+ practice writes.'
     })
     .option('dry_run', { type: 'boolean', default: false })
     .option('force_download', { type: 'boolean', default: false }).argv
@@ -182,7 +217,13 @@ const season_bounds = async ({ year }) => {
   return { start: min_ts - 14 * 86400, end: max_ts + 14 * 86400 }
 }
 
-const import_for_year = async ({ year, source_sentinel, dry_run, force_download }) => {
+const import_for_year = async ({
+  year,
+  source_sentinel,
+  write_practice,
+  dry_run,
+  force_download
+}) => {
   log(`processing year ${year}`)
   const file_path = await download_csv({ year, force_download })
   const rows = await parse_csv(file_path)
@@ -203,19 +244,31 @@ const import_for_year = async ({ year, source_sentinel, dry_run, force_download 
   const name_idx = await build_name_index()
   const game_idx = await build_game_index({ year })
 
-  const inserts = []
+  const changelog_inserts = []
+  const practice_inserts = []
   const counts = {
     resolved_gsis: 0,
     resolved_name: 0,
     unresolved_pid: 0,
     unresolved_game: 0,
-    skipped_no_status: 0
+    skipped_no_status: 0,
+    practice_skipped_empty: 0
   }
   const unresolved_pid_samples = []
 
   for (const row of reg_rows) {
-    const status = format_nflverse_report_status(row.report_status)
-    if (!status) {
+    const changelog_status = format_nflverse_report_status(row.report_status)
+    const practice_game_designation = format_nflverse_report_status_for_practice(
+      row.report_status
+    )
+    const practice_status = format_nflverse_practice_status(row.practice_status)
+    const inj_text = combine_injuries(
+      row.report_primary_injury,
+      row.report_secondary_injury
+    )
+
+    // Skip the whole row if nothing useful for either table.
+    if (!changelog_status && !practice_game_designation && !practice_status && !inj_text) {
       counts.skipped_no_status += 1
       continue
     }
@@ -250,28 +303,65 @@ const import_for_year = async ({ year, source_sentinel, dry_run, force_download 
       continue
     }
 
-    inserts.push({
-      pid: pid_match.pid,
-      prop: 'injury_status',
-      prev: '',
-      new: status,
-      timestamp: game.timestamp - 86400,
-      source: source_sentinel
-    })
+    if (changelog_status) {
+      changelog_inserts.push({
+        pid: pid_match.pid,
+        prop: 'injury_status',
+        prev: '',
+        new: changelog_status,
+        timestamp: game.timestamp - 86400,
+        source: source_sentinel
+      })
+    }
+
+    if (write_practice) {
+      // practice unique key is (pid, week, year, seas_type) -- no game_designation
+      // or other column carries the row identity. Skip rows where every practice
+      // field would be null (no signal to record).
+      if (!practice_game_designation && !practice_status && !inj_text) {
+        counts.practice_skipped_empty += 1
+      } else {
+        practice_inserts.push({
+          pid: pid_match.pid,
+          week: parseInt(row.week, 10),
+          year,
+          seas_type: 'REG',
+          inj: inj_text,
+          game_designation: practice_game_designation,
+          practice_status,
+          source: source_sentinel
+        })
+      }
+    }
   }
 
-  // Dedupe on (pid, timestamp) -- a player can appear on the report multiple
-  // times within a week (mid-week status change). Last write wins.
-  const dedup = new Map()
-  for (const ins of inserts) {
-    dedup.set(`${ins.pid}|${ins.timestamp}`, ins)
+  // Dedupe changelog inserts on (pid, timestamp).
+  const cl_dedup = new Map()
+  for (const ins of changelog_inserts) {
+    cl_dedup.set(`${ins.pid}|${ins.timestamp}`, ins)
   }
-  const before_dedup = inserts.length
-  inserts.length = 0
-  inserts.push(...dedup.values())
-  if (before_dedup !== inserts.length) {
+  const before_cl_dedup = changelog_inserts.length
+  changelog_inserts.length = 0
+  changelog_inserts.push(...cl_dedup.values())
+  if (before_cl_dedup !== changelog_inserts.length) {
     log(
-      `deduped ${before_dedup - inserts.length} (pid,timestamp) duplicates -> ${inserts.length} rows`
+      `deduped ${before_cl_dedup - changelog_inserts.length} changelog (pid,timestamp) duplicates -> ${changelog_inserts.length} rows`
+    )
+  }
+
+  // Dedupe practice inserts on (pid, week, year, seas_type) -- matches the
+  // table's unique constraint. Last write wins (covers mid-week team trade
+  // where a player appears under two team rows in the CSV).
+  const pr_dedup = new Map()
+  for (const ins of practice_inserts) {
+    pr_dedup.set(`${ins.pid}|${ins.week}|${ins.year}|${ins.seas_type}`, ins)
+  }
+  const before_pr_dedup = practice_inserts.length
+  practice_inserts.length = 0
+  practice_inserts.push(...pr_dedup.values())
+  if (before_pr_dedup !== practice_inserts.length) {
+    log(
+      `deduped ${before_pr_dedup - practice_inserts.length} practice (pid,week,year,seas_type) duplicates -> ${practice_inserts.length} rows`
     )
   }
 
@@ -285,7 +375,11 @@ const import_for_year = async ({ year, source_sentinel, dry_run, force_download 
   log(
     `resolution: ${resolved}/${total_with_status} (${(resolution_rate * 100).toFixed(1)}%) ` +
       `[gsis=${counts.resolved_gsis} name=${counts.resolved_name} unresolved=${counts.unresolved_pid} ` +
-      `no_game=${counts.unresolved_game} skipped_no_status=${counts.skipped_no_status}]`
+      `no_game=${counts.unresolved_game} skipped_no_status=${counts.skipped_no_status} ` +
+      `practice_skipped_empty=${counts.practice_skipped_empty}]`
+  )
+  log(
+    `prepared writes: changelog=${changelog_inserts.length} practice=${practice_inserts.length} (write_practice=${write_practice})`
   )
   if (counts.unresolved_pid && unresolved_pid_samples.length) {
     log(`unresolved-pid samples (showing up to 10):`)
@@ -300,11 +394,14 @@ const import_for_year = async ({ year, source_sentinel, dry_run, force_download 
   }
 
   if (dry_run) {
-    log(`dry_run: would write ${inserts.length} rows for ${year}`)
+    log(
+      `dry_run: would write changelog=${changelog_inserts.length} practice=${practice_inserts.length} rows for ${year}`
+    )
     return { shortfall: null, inserts_written: 0 }
   }
 
-  // Delete-then-insert scoped by (source, year-window).
+  // Delete-then-insert scoped by (source, year-window) for changelog,
+  // by (source, year) for practice. practice has a clean per-year filter.
   const bounds = await season_bounds({ year })
   if (!bounds) {
     return {
@@ -312,26 +409,51 @@ const import_for_year = async ({ year, source_sentinel, dry_run, force_download 
       inserts_written: 0
     }
   }
-  const deleted = await db('player_changelog')
+  const cl_deleted = await db('player_changelog')
     .where({ source: source_sentinel })
     .whereBetween('timestamp', [bounds.start, bounds.end])
     .del()
   log(
-    `deleted ${deleted} prior rows where source='${source_sentinel}' and timestamp in [${bounds.start}, ${bounds.end}]`
+    `deleted ${cl_deleted} prior changelog rows where source='${source_sentinel}' and timestamp in [${bounds.start}, ${bounds.end}]`
   )
 
   await batch_insert({
-    items: inserts,
+    items: changelog_inserts,
     batch_size: BATCH_SIZE,
     save: async (batch) => {
       await db('player_changelog').insert(batch)
     }
   })
   log(
-    `wrote ${inserts.length} rows for ${year} with source=${source_sentinel}`
+    `wrote ${changelog_inserts.length} changelog rows for ${year} with source=${source_sentinel}`
   )
 
-  return { shortfall: null, inserts_written: inserts.length }
+  let practice_written = 0
+  if (write_practice) {
+    const pr_deleted = await db('practice')
+      .where({ source: source_sentinel, year })
+      .del()
+    log(
+      `deleted ${pr_deleted} prior practice rows where source='${source_sentinel}' and year=${year}`
+    )
+
+    await batch_insert({
+      items: practice_inserts,
+      batch_size: BATCH_SIZE,
+      save: async (batch) => {
+        await db('practice').insert(batch)
+      }
+    })
+    practice_written = practice_inserts.length
+    log(
+      `wrote ${practice_written} practice rows for ${year} with source=${source_sentinel}`
+    )
+  }
+
+  return {
+    shortfall: null,
+    inserts_written: changelog_inserts.length + practice_written
+  }
 }
 
 const import_nflverse_injuries = async ({
@@ -339,6 +461,7 @@ const import_nflverse_injuries = async ({
   start_year,
   end_year,
   source_sentinel = 'nflverse',
+  write_practice = false,
   dry_run = false,
   force_download = false
 }) => {
@@ -358,6 +481,7 @@ const import_nflverse_injuries = async ({
     const { shortfall, inserts_written } = await import_for_year({
       year: y,
       source_sentinel,
+      write_practice,
       dry_run,
       force_download
     })
@@ -378,6 +502,7 @@ const main = async () => {
       start_year: argv.start_year,
       end_year: argv.end_year,
       source_sentinel: argv.source,
+      write_practice: argv.write_practice,
       dry_run: argv.dry_run,
       force_download: argv.force_download
     })
