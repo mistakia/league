@@ -142,7 +142,6 @@ export default {
   nfl_team_seasonlogs_twoptc: create_field_from_nfl_team_seasonlogs('twoptc'),
   nfl_team_seasonlogs_prtd: create_field_from_nfl_team_seasonlogs('prtd'),
   nfl_team_seasonlogs_krtd: create_field_from_nfl_team_seasonlogs('krtd'),
-  nfl_team_seasonlogs_snp: create_field_from_nfl_team_seasonlogs('snp'),
   nfl_team_seasonlogs_fgm: create_field_from_nfl_team_seasonlogs('fgm'),
   nfl_team_seasonlogs_fgy: create_field_from_nfl_team_seasonlogs('fgy'),
   nfl_team_seasonlogs_fg19: create_field_from_nfl_team_seasonlogs('fg19'),

@@ -22,8 +22,6 @@ export const base_fantasy_stats = [
   'rec_first_down', // receiving first downs
   'tdrec',
 
-  'snp',
-
   'twoptc',
 
   'prtd', // punt return touchdown
@@ -81,8 +79,6 @@ export const projected_base_stats = [
   'recy',
   'tdrec',
 
-  'snp',
-
   'twoptc',
 
   'prtd', // punt return touchdown
@@ -118,7 +114,6 @@ export const fantasy_stat_display_names = {
   recy: 'Receiving Yards',
   rec_first_down: 'Receiving First Downs',
   tdrec: 'Receiving TDs',
-  snp: 'Snaps',
   twoptc: 'Two Point Conversions',
   prtd: 'Punt Return Touchdowns',
   krtd: 'Kickoff Return Touchdowns',

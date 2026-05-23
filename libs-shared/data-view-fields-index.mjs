@@ -842,7 +842,6 @@ export default {
     'Longest Reception Generated/Allowed By Position',
   nfl_team_seasonlogs_recv_yards_15_plus_rate:
     'Reception Rate 15+ Yards Generated/Allowed By Position',
-  nfl_team_seasonlogs_snp: 'Snaps Generated/Allowed By Position',
 
   // Player Basic Info
   player_name: "The player's full name",

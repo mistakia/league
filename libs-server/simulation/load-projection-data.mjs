@@ -172,7 +172,6 @@ export async function load_player_projection_stats({ player_ids, week, year }) {
     'tdrec',
     'fuml',
     'twoptc',
-    'snp',
     'prtd',
     'krtd'
   ]

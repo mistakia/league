@@ -96,8 +96,6 @@ export default class PlayerSlot extends React.Component {
       recy: 'rec yds',
       tdrec: 'rec TD',
 
-      snp: 'snp',
-
       twoptc: 'twoptc'
     }
 

@@ -1823,12 +1823,6 @@ const options = {
               description: 'Career game number',
               example: 125
             },
-            snp: {
-              type: 'integer',
-              nullable: true,
-              description: 'Number of snaps played',
-              example: 65
-            },
             points: {
               type: 'number',
               nullable: true,

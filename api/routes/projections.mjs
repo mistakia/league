@@ -235,7 +235,7 @@ router.get('/:pid/?', async (req, res) => {
  *       - Passing: pa, pc, py, ints, tdp
  *       - Rushing: ra, ry, tdr, fuml
  *       - Receiving: trg, rec, recy, tdrec
- *       - Special: snp, twoptc, pts
+ *       - Special: twoptc, pts
  *       - Kicking: fga, fg, xpa, xpm
  *       - Defense: dint, dff, dtd, dsf, dblk, dya, dpa
  *
@@ -267,7 +267,7 @@ router.get('/:pid/?', async (req, res) => {
  *             properties:
  *               type:
  *                 type: string
- *                 enum: ['pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry', 'tdr', 'fuml', 'trg', 'rec', 'recy', 'tdrec', 'snp', 'twoptc', 'pts', 'fga', 'fg', 'xpa', 'xpm', 'dint', 'dff', 'dtd', 'dsf', 'dblk', 'dya', 'dpa']
+ *                 enum: ['pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry', 'tdr', 'fuml', 'trg', 'rec', 'recy', 'tdrec', 'twoptc', 'pts', 'fga', 'fg', 'xpa', 'xpm', 'dint', 'dff', 'dtd', 'dsf', 'dblk', 'dya', 'dpa']
  *                 description: Type of statistic to project
  *                 example: "py"
  *               week:
