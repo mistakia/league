@@ -62,6 +62,71 @@ const DB_CONSTRAINTS = {
   WEIGHTED_OPPORTUNITY_RATING_MAX: 999.99 // numeric(5,2)
 }
 
+// Map of nfl_play_stats statId to the role _pid column on nfl_plays that
+// identifies the player credited by that stat. Used to recover player identity
+// when the play_stat row itself carries empty gsisId / gsispid (e.g. when the
+// upstream feed never had a gsis ID for the player). statIds that do not
+// attribute a player (team-level rows, special-teams stats whose player
+// already lives in dedicated nfl_plays columns like kicker/punter/returner)
+// are intentionally omitted.
+const STAT_ID_TO_ROLE_PID_COLUMN = {
+  10: 'bc_pid',
+  11: 'bc_pid',
+  14: 'psr_pid',
+  15: 'psr_pid',
+  16: 'psr_pid',
+  19: 'psr_pid',
+  20: 'psr_pid',
+  21: 'trg_pid',
+  22: 'trg_pid',
+  25: 'intp_pid',
+  26: 'intp_pid',
+  52: 'player_fuml_pid',
+  53: 'player_fuml_pid',
+  54: 'player_fuml_pid',
+  106: 'player_fuml_pid',
+  111: 'psr_pid',
+  112: 'psr_pid',
+  113: 'trg_pid',
+  115: 'trg_pid'
+}
+
+const patch_play_stats_from_role_pid = async (playStats) => {
+  const needs_fallback = playStats.filter(
+    (ps) =>
+      !ps.gsispid &&
+      !ps.gsisId &&
+      STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]
+  )
+  if (!needs_fallback.length) return
+
+  const pids_set = new Set()
+  for (const ps of needs_fallback) {
+    const pid = ps[STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]]
+    if (pid) pids_set.add(pid)
+  }
+  if (!pids_set.size) return
+
+  const players = await db('player')
+    .select('pid', 'gsisid', 'gsispid')
+    .whereIn('pid', [...pids_set])
+  const player_by_pid = new Map(players.map((p) => [p.pid, p]))
+
+  let patched = 0
+  for (const ps of needs_fallback) {
+    const pid = ps[STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]]
+    if (!pid) continue
+    const player = player_by_pid.get(pid)
+    if (!player) continue
+    if (player.gsisid) ps.gsisId = player.gsisid
+    if (player.gsispid) ps.gsispid = player.gsispid
+    if (ps.gsisId || ps.gsispid) patched++
+  }
+  log(
+    `id fallback from nfl_plays._pid: patched ${patched}/${needs_fallback.length} play_stats`
+  )
+}
+
 /**
  * Calculate opponent team for a given team and game
  */
@@ -815,6 +880,15 @@ const generate_player_gamelogs = async ({
   log(`loaded play stats for ${unique_esbids.length} games`)
   log(unique_esbids.join(', '))
 
+  // Patch play_stats rows whose upstream-feed identifiers (gsispid, gsisId) are
+  // empty but whose sibling nfl_plays row has the role _pid resolved (via the
+  // sportradar supplemental pass on sportradar_id, or any other enrichment
+  // path). Without this, the per-player groupings below skip these rows and
+  // counters (ra, py, recv_yds, etc.) under-report for affected players. See
+  // user:text/league/data-quality-and-validation.md
+  // [plays_excess_residual_after_gsisid_backfill].
+  await patch_play_stats_from_role_pid(playStats)
+
   // Load supporting data
   const player_routes_by_game = await load_player_routes({
     unique_esbids,
@@ -929,7 +1003,7 @@ const main = async () => {
         dry_run: argv.dry,
         esbid: argv.esbid
       },
-      seas_type: argv.seas_type
+      seas_type: argv.seasType
     })
   } catch (err) {
     error = err
