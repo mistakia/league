@@ -308,9 +308,12 @@ const main = async () => {
     const argv = initialize_cli()
     const year = argv.year
     const week = argv.week
-    const seas_type = argv.seas_type || current_season.nfl_seas_type
+    // yargs exposes --seas-type as seasType; reading argv.seas_type was a silent
+    // bug that fell back to current_season.nfl_seas_type and produced 0 completed
+    // games for any backfill run outside the live REG window.
+    const seas_type = argv.seasType || current_season.nfl_seas_type
     const dry_run = argv.dry
-    const overwrite_existing = argv.overwrite_existing || argv.force
+    const overwrite_existing = argv.overwriteExisting || argv.force
     const skip_changelog = argv.skipChangelog
     const batch_size = argv.batchSize
     const all_players = argv.allPlayers
@@ -377,7 +380,7 @@ const main = async () => {
       await process_plays({
         year: argv.year,
         week: argv.week,
-        seas_type: argv.seas_type,
+        seas_type,
         esbid: argv.esbid,
         dry_run,
         overwrite_existing,

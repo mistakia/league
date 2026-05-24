@@ -37,18 +37,25 @@ export const enrich_player_identifications = (
   let skipped_count = 0
   const missing_gsis_ids = new Set()
 
-  // Helper function to map a single player role
+  // Helper function to map a single player role.
+  // Prefers play_stats-derived gsis but falls back to the existing nfl_plays
+  // column when play_stats lacks a row carrying that gsisid (e.g. NOPL penalty
+  // plays where the play_stat row is the penalty actor, PAT2 plays whose psr
+  // is not surfaced by play_stats, or sportradar-imported plays).
+  // See user:text/league/data-quality-and-validation.md.
   const map_player_field = (
     enriched_play,
     play_data,
     gsis_field,
     pid_field
   ) => {
-    if (!play_data[gsis_field]) return false
+    const gsis = play_data[gsis_field] || enriched_play[gsis_field]
+    if (!gsis) return false
+    if (enriched_play[pid_field]) return true
 
     // Include all players regardless of current status for historical play attribution
     const player = player_cache.find_player({
-      gsisid: play_data[gsis_field],
+      gsisid: gsis,
       ignore_free_agent: false,
       ignore_retired: false
     })
@@ -57,7 +64,7 @@ export const enrich_player_identifications = (
       return true
     }
 
-    missing_gsis_ids.add(play_data[gsis_field])
+    missing_gsis_ids.add(gsis)
     return false
   }
 
@@ -93,32 +100,32 @@ export const enrich_player_identifications = (
     return true
   }
 
+  // Single-player roles to map
+  const single_player_roles = [
+    { gsis: 'bc_gsis', pid: 'bc_pid' },
+    { gsis: 'psr_gsis', pid: 'psr_pid' },
+    { gsis: 'trg_gsis', pid: 'trg_pid' },
+    { gsis: 'intp_gsis', pid: 'intp_pid' },
+    { gsis: 'player_fuml_gsis', pid: 'player_fuml_pid' }
+  ]
+
   const enriched_plays = plays.map((play) => {
     const play_key = `${play.esbid}-${play.playId}`
     const stats_for_play = play_stats_by_play.get(play_key)
+    const has_stats = Boolean(stats_for_play && stats_for_play.length > 0)
 
-    if (!stats_for_play || stats_for_play.length === 0) {
-      skipped_count++
-      return play
-    }
-
-    // Use getPlayFromPlayStats to extract GSIS IDs and play data
-    const play_data = getPlayFromPlayStats({ playStats: stats_for_play })
+    // play_data carries play_stats-derived gsis values; empty when no
+    // play_stats exist for the play. Single-player role mapping still runs
+    // via play-row fallback in map_player_field.
+    const play_data = has_stats
+      ? getPlayFromPlayStats({ playStats: stats_for_play })
+      : {}
 
     // Create enriched play object with all existing fields
     const enriched_play = { ...play }
 
     // Track if we enriched any player field
     let has_player_data = false
-
-    // Single-player roles to map
-    const single_player_roles = [
-      { gsis: 'bc_gsis', pid: 'bc_pid' },
-      { gsis: 'psr_gsis', pid: 'psr_pid' },
-      { gsis: 'trg_gsis', pid: 'trg_pid' },
-      { gsis: 'intp_gsis', pid: 'intp_pid' },
-      { gsis: 'player_fuml_gsis', pid: 'player_fuml_pid' }
-    ]
 
     // Map all single-player roles
     for (const role of single_player_roles) {
@@ -127,33 +134,40 @@ export const enrich_player_identifications = (
       }
     }
 
-    // Map tackle arrays
-    if (
-      map_tackle_array(enriched_play, play_data.tacklers_solo, 'solo_tackle', 3)
-    ) {
-      has_player_data = true
-    }
+    // Map tackle arrays (only available from play_stats)
+    if (has_stats) {
+      if (
+        map_tackle_array(
+          enriched_play,
+          play_data.tacklers_solo,
+          'solo_tackle',
+          3
+        )
+      ) {
+        has_player_data = true
+      }
 
-    if (
-      map_tackle_array(
-        enriched_play,
-        play_data.tacklers_with_assisters,
-        'assisted_tackle',
-        2
-      )
-    ) {
-      has_player_data = true
-    }
+      if (
+        map_tackle_array(
+          enriched_play,
+          play_data.tacklers_with_assisters,
+          'assisted_tackle',
+          2
+        )
+      ) {
+        has_player_data = true
+      }
 
-    if (
-      map_tackle_array(
-        enriched_play,
-        play_data.tackle_assisters,
-        'tackle_assist',
-        4
-      )
-    ) {
-      has_player_data = true
+      if (
+        map_tackle_array(
+          enriched_play,
+          play_data.tackle_assisters,
+          'tackle_assist',
+          4
+        )
+      ) {
+        has_player_data = true
+      }
     }
 
     if (has_player_data) {
