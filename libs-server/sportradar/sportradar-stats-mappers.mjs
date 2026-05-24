@@ -366,6 +366,7 @@ export const map_penalty_stats = async ({
  */
 export const map_play_details = async ({
   details,
+  statistics = [],
   resolve_player,
   get_team_abbrev,
   def_team,
@@ -480,21 +481,26 @@ export const map_play_details = async ({
   }
 
   // Tackle for loss
-  const tackle_detail = details.find((d) => d.category === 'tackle')
-  if (tackle_detail?.loss && tackle_detail?.players) {
+  // Sportradar tags TFL credit on the defense statistic (stat_type='defense',
+  // tlost=1), not on the tackle_detail. Previous gate on tackle_detail.loss
+  // never fired because that field doesn't exist in the feed -- 1197 tfl=true
+  // plays in 2025 REG had no tackle_for_loss_*_pid written. Use statistics.
+  const tfl_stats = (statistics || []).filter(
+    (s) => s.stat_type === 'defense' && s.tlost === 1 && s.player
+  )
+  if (tfl_stats.length) {
     mapped.tfl = true
-    const tfl_players = tackle_detail.players.filter((p) => p.role === 'tackle')
-    for (let i = 0; i < Math.min(tfl_players.length, 2); i++) {
+    for (let i = 0; i < Math.min(tfl_stats.length, 2); i++) {
       const tackler = await resolve_player({
-        sportradar_player_id: tfl_players[i].id,
-        player_name: tfl_players[i].name,
-        player_team_alias: tackle_detail.team?.alias
+        sportradar_player_id: tfl_stats[i].player.id,
+        player_name: tfl_stats[i].player.name,
+        player_team_alias: tfl_stats[i].team?.alias
       })
       if (tackler) {
         const idx = i + 1
         mapped[`tackle_for_loss_${idx}_pid`] = tackler.pid
         mapped[`tackle_for_loss_${idx}_gsis`] = tackler.gsisid
-        mapped[`tackle_for_loss_${idx}_sportradar_id`] = tfl_players[i].id
+        mapped[`tackle_for_loss_${idx}_sportradar_id`] = tfl_stats[i].player.id
       }
     }
   }
