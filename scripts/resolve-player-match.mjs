@@ -143,6 +143,16 @@ const action_create_player = async (argv) => {
     throw new Error('--pos is required')
   }
 
+  // Warn (don't block) when DOB missing: the resulting stub pid
+  // (FFFF-LLLL-YEAR-0000-00-00) is the hijack vector that
+  // import-pff-seasonlogs and similar fall-back importers latch onto. Pass
+  // --dob whenever possible.
+  if (!dob || dob === '0000-00-00') {
+    log(
+      `WARNING: creating ${fname} ${lname} with no DOB. Stub pids are a known external-ID hijack risk -- pass --dob to mint a stable pid (see guideline/nfl/league/league-player-resolution.md).`
+    )
+  }
+
   const player_data = {
     fname,
     lname,

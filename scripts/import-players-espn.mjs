@@ -56,6 +56,19 @@ const importPlayersESPN = async () => {
           continue
         }
 
+        // Refuse silent overwrite of an existing different espn_id on the
+        // name-matched pid -- this lookup goes name+pos+team only, so a
+        // Jr/Sr name collision could otherwise hijack the wrong pid.
+        if (
+          player_row.espn_id != null &&
+          String(player_row.espn_id) !== String(espn_id)
+        ) {
+          log(
+            `SKIP espn_id overwrite: matched_pid=${player_row.pid} already has espn_id=${player_row.espn_id}, ESPN reports ${espn_id} for "${name}". Reconcile manually.`
+          )
+          continue
+        }
+
         const changes = await updatePlayer({
           player_row,
           update: {

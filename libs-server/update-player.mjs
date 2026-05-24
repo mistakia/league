@@ -116,6 +116,19 @@ const updatePlayer = async ({
         )
         continue
       }
+
+      // Refuse to silently overwrite the same pid's existing-non-null
+      // differing value -- guards against importers hijacking external IDs
+      // when a name-fallback match lands on the wrong relative.
+      if (
+        player_row[prop] != null &&
+        String(player_row[prop]) !== String(edit.rhs)
+      ) {
+        log(
+          `SKIP ${prop} overwrite on ${player_row.pid}: existing=${player_row[prop]} incoming=${edit.rhs}. Use allow_protected_props=true to force.`
+        )
+        continue
+      }
     }
 
     if (

@@ -54,9 +54,12 @@ const run = async () => {
     }
 
     let player_row
+    let matched_by_sleeper_id = false
     try {
       player_row = await find_player_row({ sleeper_id })
-      if (!player_row) {
+      if (player_row) {
+        matched_by_sleeper_id = true
+      } else {
         player_row = await find_player_row({
           name,
           pos,
@@ -70,6 +73,50 @@ const run = async () => {
       log({ name, pos, team, sleeper_id })
       log(item)
       continue
+    }
+
+    // Reused-name external ID hijack guard. When we fall through to
+    // name-based matching and Sleeper's rookie_year is materially newer than
+    // the matched pid's nfl_draft_year, we are almost certainly about to
+    // hijack the wrong pid (older relative). Skip rather than corrupt.
+    // Also refuse silent overwrite of an existing different sleeper_id /
+    // gsisid / espn_id on the name-matched pid.
+    if (player_row && !matched_by_sleeper_id) {
+      const source_draft_year =
+        Number(item.metadata?.rookie_year) || Number(start) || null
+      const matched_draft_year = Number(player_row.nfl_draft_year) || null
+      if (
+        source_draft_year &&
+        matched_draft_year &&
+        source_draft_year - matched_draft_year > 1
+      ) {
+        log(
+          `SKIP probable name-match hijack: sleeper_id=${sleeper_id} name="${name}" rookie_year=${source_draft_year} matched_pid=${player_row.pid} (draft_year=${matched_draft_year}).`
+        )
+        continue
+      }
+
+      const protected_collision = [
+        ['sleeper_id', sleeper_id, player_row.sleeper_id],
+        [
+          'gsisid',
+          item.gsis_id ? item.gsis_id.trim() : null,
+          player_row.gsisid
+        ],
+        ['espn_id', item.espn_id, player_row.espn_id]
+      ].find(
+        ([, incoming, existing]) =>
+          incoming != null &&
+          existing != null &&
+          String(incoming) !== String(existing)
+      )
+      if (protected_collision) {
+        const [field, incoming, existing] = protected_collision
+        log(
+          `SKIP ${field} overwrite: matched_pid=${player_row.pid} already has ${field}=${existing}, Sleeper reports ${incoming} for "${name}".`
+        )
+        continue
+      }
     }
 
     const {
