@@ -1,4 +1,4 @@
--- v_roster_asset_holding_current_salary
+-- view_roster_asset_holding_current_salary
 --
 -- `roster_asset_holding.salary_paid` follows the cap-attribution rule
 -- (`leagues.salary_attribution_rule = START_TEAM_BEARS`): only the team
@@ -18,7 +18,7 @@
 -- `current_salary` from this view. Cap-attribution consumers continue to
 -- read `roster_asset_holding.salary_paid` directly.
 
-CREATE OR REPLACE VIEW v_roster_asset_holding_current_salary AS
+CREATE OR REPLACE VIEW view_roster_asset_holding_current_salary AS
 WITH RECURSIVE chain AS (
   SELECT h.holding_id AS target_holding_id,
          h.holding_id AS walk_holding_id,
@@ -68,5 +68,5 @@ SELECT h.holding_id,
   LEFT JOIN best b ON b.target_holding_id = h.holding_id
  WHERE h.asset_type = 1;
 
-COMMENT ON VIEW v_roster_asset_holding_current_salary IS
+COMMENT ON VIEW view_roster_asset_holding_current_salary IS
   'Per-holding contract salary that carries forward across TRADE chains. Use current_salary for "what is this player''s salary while held by this team"; use roster_asset_holding.salary_paid directly for START_TEAM_BEARS cap attribution.';
