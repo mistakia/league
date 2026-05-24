@@ -1528,7 +1528,7 @@ const main = async () => {
     const game_id = argv['game-id'] || null
     const all = argv.all || false
     const dry = argv.dry || false
-    const overwrite_existing = argv.overwrite_existing || false
+    const overwrite_existing = argv.overwriteExisting || false
     const ignore_sportradar_field_conflicts =
       argv['ignore-sportradar-field-conflicts'] || false
     const ignore_cache = argv['ignore-cache'] || false
