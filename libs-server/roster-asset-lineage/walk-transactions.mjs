@@ -226,7 +226,7 @@ const walk_transactions = async ({ lid }) => {
       const cfg = PLAYER_ACQUISITION_TRANSACTION_TYPES[event.transaction_type]
       // Track any prior holding closed by this acquisition so the lineage edge
       // can carry its draft_id as source. Without this wiring the recursive
-      // v_roster_asset_lineage_walk stops at depth 0 on every intra-team
+      // view_roster_asset_lineage_walk stops at depth 0 on every intra-team
       // succession (extension, tag, same-team RFA, poach-from-other-team).
       let prior_closed = null
       // Acquisitions that mid-flight imply a termination on a prior owner:

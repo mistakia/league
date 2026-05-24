@@ -621,7 +621,8 @@ DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
 DROP TABLE IF EXISTS public.waivers;
 DROP TABLE IF EXISTS public.waiver_releases;
-DROP VIEW IF EXISTS public.v_roster_asset_lineage_walk;
+DROP VIEW IF EXISTS public.view_roster_asset_lineage_walk;
+DROP VIEW IF EXISTS public.view_roster_asset_holding_current_salary;
 DROP TABLE IF EXISTS public.users_teams;
 DROP TABLE IF EXISTS public.users_sources;
 DROP SEQUENCE IF EXISTS public.users_id_seq;
@@ -26039,10 +26040,65 @@ CREATE TABLE public.users_teams (
 
 
 --
--- Name: v_roster_asset_lineage_walk; Type: VIEW; Schema: public; Owner: -
+-- Name: view_roster_asset_holding_current_salary; Type: VIEW; Schema: public; Owner: -
 --
 
-CREATE VIEW public.v_roster_asset_lineage_walk AS
+CREATE VIEW public.view_roster_asset_holding_current_salary AS
+ WITH RECURSIVE chain AS (
+         SELECT h_1.holding_id AS target_holding_id,
+            h_1.holding_id AS walk_holding_id,
+            h_1.salary_paid AS walk_salary,
+            0 AS depth
+           FROM public.roster_asset_holding h_1
+          WHERE (h_1.asset_type = 1)
+        UNION ALL
+         SELECT c.target_holding_id,
+            t.source_holding_id,
+            prior.salary_paid,
+            (c.depth + 1)
+           FROM ((chain c
+             JOIN public.roster_asset_transformation t ON (((t.target_holding_id = c.walk_holding_id) AND (t.transformation_type = 1))))
+             JOIN public.roster_asset_holding prior ON ((prior.holding_id = t.source_holding_id)))
+          WHERE ((COALESCE(c.walk_salary, 0) = 0) AND (c.depth < 20))
+        ), best AS (
+         SELECT DISTINCT ON (chain.target_holding_id) chain.target_holding_id,
+            chain.walk_salary AS inherited_salary
+           FROM chain
+          WHERE ((chain.walk_salary IS NOT NULL) AND (chain.walk_salary > 0))
+          ORDER BY chain.target_holding_id, chain.depth
+        )
+ SELECT h.holding_id,
+    h.lid,
+    h.tid,
+    h.player_id,
+    h.period_start,
+    h.period_end,
+    h.salary_basis,
+    h.terminated_by,
+    h.salary_paid AS raw_salary_paid,
+    COALESCE(NULLIF(h.salary_paid, 0), b.inherited_salary, 0) AS current_salary,
+        CASE
+            WHEN ((h.salary_paid IS NOT NULL) AND (h.salary_paid > 0)) THEN 'self'::text
+            WHEN (b.inherited_salary IS NOT NULL) THEN 'trade_inherited'::text
+            ELSE 'zero'::text
+        END AS current_salary_source
+   FROM (public.roster_asset_holding h
+     LEFT JOIN best b ON ((b.target_holding_id = h.holding_id)))
+  WHERE (h.asset_type = 1);
+
+
+--
+-- Name: VIEW view_roster_asset_holding_current_salary; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.view_roster_asset_holding_current_salary IS 'Per-holding contract salary that carries forward across TRADE chains. Use current_salary for "what is this player''s salary while held by this team"; use roster_asset_holding.salary_paid directly for START_TEAM_BEARS cap attribution.';
+
+
+--
+-- Name: view_roster_asset_lineage_walk; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.view_roster_asset_lineage_walk AS
  WITH RECURSIVE walk AS (
          SELECT h.holding_id AS originating_holding_id,
             h.holding_id AS current_holding_id,
@@ -26079,10 +26135,10 @@ CREATE VIEW public.v_roster_asset_lineage_walk AS
 
 
 --
--- Name: VIEW v_roster_asset_lineage_walk; Type: COMMENT; Schema: public; Owner: -
+-- Name: VIEW view_roster_asset_lineage_walk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON VIEW public.v_roster_asset_lineage_walk IS 'Recursive walk anchored at salary-bearing holdings (root_kind=salary) and standings-endowed picks (root_kind=endowment). Composite edge weight along a path = product of target_share values along the chain (source_share is the same fraction one hop earlier; multiplying both double-counts). Depth capped at 20.';
+COMMENT ON VIEW public.view_roster_asset_lineage_walk IS 'Recursive walk anchored at salary-bearing holdings (root_kind=salary) and standings-endowed picks (root_kind=endowment). Composite edge weight along a path = product of target_share values along the chain (source_share is the same fraction one hop earlier; multiplying both double-counts). Depth capped at 20.';
 
 
 --
@@ -57344,10 +57400,17 @@ GRANT SELECT ON TABLE public.users_teams TO league_readonly;
 
 
 --
--- Name: TABLE v_roster_asset_lineage_walk; Type: ACL; Schema: public; Owner: -
+-- Name: TABLE view_roster_asset_holding_current_salary; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.v_roster_asset_lineage_walk TO league_readonly;
+GRANT SELECT ON TABLE public.view_roster_asset_holding_current_salary TO league_readonly;
+
+
+--
+-- Name: TABLE view_roster_asset_lineage_walk; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_readonly;
 
 
 --

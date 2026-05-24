@@ -12,7 +12,7 @@
 -- holding's own `salary_paid` when non-zero, otherwise walk back through
 -- TRADE transformations to the first salary-bearing source. Multi-hop
 -- chains (player traded N times mid-season) are handled by the recursive
--- CTE; the walk halts at depth 20 (matches v_roster_asset_lineage_walk).
+-- CTE; the walk halts at depth 20 (matches view_roster_asset_lineage_walk).
 --
 -- Consumers wanting "player's current contract salary" should read
 -- `current_salary` from this view. Cap-attribution consumers continue to
