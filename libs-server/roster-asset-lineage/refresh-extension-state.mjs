@@ -9,16 +9,17 @@ import { LAST_RESET_EVENT } from './constants.mjs'
 // recent reset event (RFA_WIN | RELEASE | TRADED_AWAY).
 //
 // Reset semantics: extension_count resets to 0 when a player is released or
-// changes teams via RFA win / trade. Subsequent extensions accumulate fresh.
+// loses a cross-team RFA bid. Trades do NOT reset the extension ladder per
+// league rule (matches the salary-carry-on-trade rule).
 
 // Reset semantics:
 //   ROSTER_RELEASE  -> reset on tid recorded in transactions (the releasing team).
 //   RESTRICTED_FREE_AGENCY_TAG -> reset only on the losing team (player_tid),
 //                                  and only when the win was cross-team
 //                                  (tid != player_tid). The new team starts fresh.
-//   TRADE                       -> the transactions ledger records the receiving
-//                                  team only; resets must be applied to the
-//                                  losing team, sourced from trades_players.tid.
+//   TRADE                       -> NOT a reset event. Extensions carry through
+//                                  trades per league rule; the receiving team
+//                                  inherits the player's accumulated count.
 const SIMPLE_RESET_TRANSACTION_TYPES = new Set([
   transaction_types.ROSTER_RELEASE
 ])
@@ -37,18 +38,6 @@ const refresh_extension_state = async ({ lid, affected_keys = null }) => {
     .select('pid', 'tid', 'player_tid', 'processed')
     .where({ lid, succ: true })
     .whereNotNull('processed')
-
-  // Trade legs: a player listed in trades_players with tid=losing team needs
-  // a TRADED_AWAY reset at the trade timestamp.
-  const trade_legs = await db('trades_players')
-    .join('trades', 'trades.uid', 'trades_players.tradeid')
-    .where('trades.lid', lid)
-    .whereNotNull('trades.accepted')
-    .select(
-      'trades_players.pid',
-      'trades_players.tid',
-      'trades.accepted as ts'
-    )
 
   // Build a unified reset stream keyed by ts so chronological ordering with
   // extension/tag accumulation matches reality.
@@ -71,14 +60,6 @@ const refresh_extension_state = async ({ lid, affected_keys = null }) => {
       tid: r.player_tid,
       pid: r.pid,
       event: LAST_RESET_EVENT.RFA_WIN
-    })
-  }
-  for (const t of trade_legs) {
-    reset_events.push({
-      ts: t.ts,
-      tid: t.tid,
-      pid: t.pid,
-      event: LAST_RESET_EVENT.TRADED_AWAY
     })
   }
   reset_events.sort((a, b) => a.ts - b.ts)
