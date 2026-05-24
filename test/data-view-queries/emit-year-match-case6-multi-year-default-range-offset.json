@@ -2,21 +2,13 @@
   "name": "emit_year_match case 6: multi-year year_default with range year_offset uses IN not BETWEEN",
   "description": "Verifies that a source with a multi-year year_default joined with a range year_offset emits an IN(...) predicate enumerating the cross-product rather than an over-inclusive BETWEEN. year=[2022,2023] + year_offset=[1,2] should produce IN(2023,2024,2025).",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_adp",
         "params": {
-          "year": [
-            2022,
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2022, 2023],
+          "year_offset": [1, 2]
         }
       }
     ],
@@ -24,23 +16,15 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "QB"
-        ]
+        "value": ["QB"]
       },
       {
         "column_id": "player_adp",
         "operator": ">=",
         "value": 10,
         "params": {
-          "year": [
-            2022,
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2022, 2023],
+          "year_offset": [1, 2]
         }
       }
     ]

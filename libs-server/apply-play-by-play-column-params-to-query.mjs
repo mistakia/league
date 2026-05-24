@@ -114,8 +114,9 @@ export default function ({
           const { years, seas_types } = decompose_nfl_weeks({
             nfl_weeks: column_values
           })
-          const covers_full_year_seas_type =
-            is_full_year_seas_type_coverage({ nfl_weeks: column_values })
+          const covers_full_year_seas_type = is_full_year_seas_type_coverage({
+            nfl_weeks: column_values
+          })
           if (!covers_full_year_seas_type) {
             query.whereIn(`${param_table}.${column_name}`, column_values)
           }

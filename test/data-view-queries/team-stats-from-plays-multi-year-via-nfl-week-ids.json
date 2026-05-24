@@ -15,16 +15,12 @@
         }
       }
     ],
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       }
     ],
     "sort": [

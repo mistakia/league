@@ -7,19 +7,12 @@
       {
         "column_id": "player_career_year",
         "params": {
-          "year": [
-            2020,
-            2021,
-            2022,
-            2023
-          ],
+          "year": [2020, 2021, 2022, 2023],
           "seas_type": "REG"
         }
       }
     ],
-    "splits": [
-      "year"
-    ],
+    "splits": ["year"],
     "where": [
       {
         "column_id": "player_career_year",

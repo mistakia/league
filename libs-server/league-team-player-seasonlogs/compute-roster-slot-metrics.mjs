@@ -61,8 +61,7 @@ export default async function compute_roster_slot_metrics({
     }
     existing[earned_key] =
       r.pts_added_earned == null ? null : Number(r.pts_added_earned)
-    existing[net_key] =
-      r.pts_added_net == null ? null : Number(r.pts_added_net)
+    existing[net_key] = r.pts_added_net == null ? null : Number(r.pts_added_net)
     out.set(k, existing)
   }
   return out

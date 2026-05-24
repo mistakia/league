@@ -7,7 +7,8 @@ import { register } from '../source-attach-registry.mjs'
 // rule emits only the team-key predicate against the appropriate opponents
 // CTE; year and any per-source discriminators flow through source.extra_predicates.
 
-const make_emit = (opponents_cte) =>
+const make_emit =
+  (opponents_cte) =>
   ({ source, table_alias, builder }) => {
     const ref = table_alias || source.table
     const key_columns = source.key_columns || {}

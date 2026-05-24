@@ -127,5 +127,4 @@ describe('Data View output parity', () => {
       })
     }
   })
-
 })

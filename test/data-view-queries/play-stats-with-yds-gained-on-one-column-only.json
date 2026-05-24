@@ -1,14 +1,7 @@
 {
   "name": "play stats with yds_gained filter on one column only does not leak to siblings",
   "description": "Regression for measure-batch group_key bug: when one play-stat column carries a per-column filter (yds_gained) and sibling play-stat columns sharing the same apply_filters source do not, the sibling columns must NOT inherit the filter. Previously they all batched into one CTE keyed by apply_filters.toString().",
-  "tags": [
-    "plays",
-    "parameters",
-    "filters",
-    "rate_type",
-    "cte",
-    "regression"
-  ],
+  "tags": ["plays", "parameters", "filters", "rate_type", "cte", "regression"],
   "timeout_ms": 40000,
   "request": {
     "columns": [
@@ -16,38 +9,23 @@
       {
         "column_id": "player_rush_yards_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "yds_gained": [
-            15,
-            99
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "year": [2024],
+          "yds_gained": [15, 99],
+          "rate_type": ["per_game"]
         }
       },
       {
         "column_id": "player_broken_tackles_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "year": [2024],
+          "rate_type": ["per_game"]
         }
       },
       {
         "column_id": "player_rush_attempts_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "year": [2024],
+          "rate_type": ["per_game"]
         }
       }
     ],
@@ -55,9 +33,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ],
     "sort": [

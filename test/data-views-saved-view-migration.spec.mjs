@@ -157,11 +157,15 @@ describe('data-views saved-view migrator', () => {
         subjects: ['player']
       })
       expect(result.changed).to.equal(true)
-      expect(result.table_state.columns[0].params.output.period).to.equal('game')
+      expect(result.table_state.columns[0].params.output.period).to.equal(
+        'game'
+      )
       expect(result.table_state.columns[1].column_id).to.equal(
         'player_team_pass_attempts_from_plays'
       )
-      expect(result.table_state.where[0].params).to.not.have.property('rate_type')
+      expect(result.table_state.where[0].params).to.not.have.property(
+        'rate_type'
+      )
       expect(result.table_state.where[0].operator).to.equal('>=')
       expect(result.table_state.where[0].value).to.equal(100)
     })

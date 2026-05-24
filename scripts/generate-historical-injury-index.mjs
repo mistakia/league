@@ -21,7 +21,12 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { is_main, report_job, batch_insert, throw_if_shortfall } from '#libs-server'
+import {
+  is_main,
+  report_job,
+  batch_insert,
+  throw_if_shortfall
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 import { rebuild_sql } from './historical-injury-index-sql.mjs'
@@ -84,7 +89,11 @@ const generate_for_year = async ({ year, pid, dry_run }) => {
       `deduped ${before_dedup - deduped.length} (pid,year,week,esbid) duplicates -> ${deduped.length} rows`
     )
   }
-  const items = deduped.map((r) => ({ ...r, inserted_at: now, updated_at: now }))
+  const items = deduped.map((r) => ({
+    ...r,
+    inserted_at: now,
+    updated_at: now
+  }))
 
   if (dry_run) {
     log(`dry_run: would upsert ${items.length} rows for ${year}`)
@@ -111,7 +120,9 @@ const generate_for_year = async ({ year, pid, dry_run }) => {
   if (!pid) {
     const post_count = await get_existing_row_count({ year })
     if (prior_count === 0) {
-      log(`oracle: year ${year} first run; baseline established at ${post_count}`)
+      log(
+        `oracle: year ${year} first run; baseline established at ${post_count}`
+      )
     } else {
       const deviation = Math.abs(post_count - prior_count) / prior_count
       log(

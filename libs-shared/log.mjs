@@ -102,10 +102,7 @@ export const create_logger = (namespace, { service } = {}) => {
       ? severity
       : 'medium'
     if (resolved_severity !== severity) {
-      debug_log(
-        'invalid severity %s; coerced to medium (caller bug)',
-        severity
-      )
+      debug_log('invalid severity %s; coerced to medium (caller bug)', severity)
     }
 
     const error_class = derive_error_class(message)

@@ -55,9 +55,7 @@ const generate_league_format_player_seasonlogs = async ({
     const points_added_earned = sum(
       player_gamelogs.map((g) => g.points_added_earned)
     )
-    const points_added_net = sum(
-      player_gamelogs.map((g) => g.points_added_net)
-    )
+    const points_added_net = sum(player_gamelogs.map((g) => g.points_added_net))
 
     // process / create inserts
     inserts.push({
@@ -69,9 +67,8 @@ const generate_league_format_player_seasonlogs = async ({
       points_added_earned_per_game: points_added_earned / games,
       points_added_net,
       points_added_net_per_game: points_added_net / games,
-      startable_games: player_gamelogs.filter(
-        (p) => p.points_added_earned > 0
-      ).length
+      startable_games: player_gamelogs.filter((p) => p.points_added_earned > 0)
+        .length
     })
   }
 

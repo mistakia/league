@@ -915,8 +915,7 @@ const build_event_stream = async ({ lid }) => {
     .select('year', 'rookie_draft_completed_at')
   const rookie_draft_completed_by_year = new Map()
   for (const s of seasons_rows) {
-    const ts =
-      s.rookie_draft_completed_at ?? max_selection_by_year.get(s.year)
+    const ts = s.rookie_draft_completed_at ?? max_selection_by_year.get(s.year)
     if (ts) rookie_draft_completed_by_year.set(s.year, Number(ts))
   }
   for (const [year, ts] of rookie_draft_completed_by_year) {

@@ -289,11 +289,7 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
             )
           )
         } else {
-          this.andOn(
-            `${table_alias}.seas_type`,
-            '=',
-            db.raw('?', [seas_type])
-          )
+          this.andOn(`${table_alias}.seas_type`, '=', db.raw('?', [seas_type]))
         }
       }
     })

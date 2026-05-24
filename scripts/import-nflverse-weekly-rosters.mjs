@@ -118,7 +118,12 @@ const build_player_index = async ({ gsis_ids }) => {
 }
 
 const build_name_year_index = async () => {
-  const rows = await db('player').select('pid', 'fname', 'lname', 'nfl_draft_year')
+  const rows = await db('player').select(
+    'pid',
+    'fname',
+    'lname',
+    'nfl_draft_year'
+  )
   const idx = new Map()
   for (const r of rows) {
     if (!r.fname || !r.lname) continue
@@ -184,9 +189,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
   )
 
   // Build resolution indexes.
-  const gsis_ids = new Set(
-    candidate_rows.map((r) => r.gsis_id).filter(Boolean)
-  )
+  const gsis_ids = new Set(candidate_rows.map((r) => r.gsis_id).filter(Boolean))
   const { by_gsis_id: player_by_gsis_id } = await build_player_index({
     gsis_ids
   })

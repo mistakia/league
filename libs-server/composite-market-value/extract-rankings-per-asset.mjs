@@ -1,6 +1,9 @@
 import db from '#db'
 
-import { median, load_pick_value_curve } from '#libs-server/composite-market-value/utils.mjs'
+import {
+  median,
+  load_pick_value_curve
+} from '#libs-server/composite-market-value/utils.mjs'
 
 // FantasyPros rankings: overall_rank converted via league_format_draft_pick_value
 // curve (same pattern as ADP per Topic 4 resolution). Median across present
@@ -19,11 +22,19 @@ export const extract_rankings_per_asset = async ({
   if (!player_ids.length) return result
 
   const rows = await db('player_rankings_history')
-    .select(db.raw("pid, TO_CHAR(TO_TIMESTAMP(timestamp), 'YYYY-MM-DD') AS date_iso, overall_rank, source_id"))
+    .select(
+      db.raw(
+        "pid, TO_CHAR(TO_TIMESTAMP(timestamp), 'YYYY-MM-DD') AS date_iso, overall_rank, source_id"
+      )
+    )
     .whereIn('pid', player_ids)
     .where('ranking_type', ranking_type)
     .where('timestamp', '>=', Math.floor(new Date(start_date).getTime() / 1000))
-    .where('timestamp', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
+    .where(
+      'timestamp',
+      '<=',
+      Math.floor(new Date(end_date).getTime() / 1000) + 86400
+    )
     .whereNotNull('overall_rank')
 
   const buckets = new Map()

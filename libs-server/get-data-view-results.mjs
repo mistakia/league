@@ -490,7 +490,9 @@ const get_year_range = (columns, where) => {
     const raw = params && params.year_offset
     if (raw == null) return []
     const arr = Array.isArray(raw) ? raw : [raw]
-    const nums = arr.map((n) => parseInt(n, 10)).filter((n) => Number.isFinite(n))
+    const nums = arr
+      .map((n) => parseInt(n, 10))
+      .filter((n) => Number.isFinite(n))
     if (!nums.length) return []
     const min = Math.min(...nums)
     const max = Math.max(...nums)
@@ -757,9 +759,8 @@ const get_from_table_config = ({
           return sort_based_from_table
         }
 
-        const grain_splits = derive_supported_splits_from_source(
-          column_definition
-        )
+        const grain_splits =
+          derive_supported_splits_from_source(column_definition)
         const supports_all_splits = splits.every((split) =>
           grain_splits.includes(split)
         )
@@ -977,21 +978,18 @@ const add_clauses_for_table = async ({
   const select_strings = []
   const group_by_strings = []
 
-  const make_source_join_func = (column_definition, column_id) => ({
-    query,
-    params,
-    join_type,
-    splits: arg_splits
-  }) =>
-    attach_source({
-      players_query: query,
-      query_context: data_view_options.query_context,
-      column_def: { ...column_definition, column_id },
-      params,
-      table_alias: table_name,
-      join_type,
-      splits: arg_splits ?? splits
-    })
+  const make_source_join_func =
+    (column_definition, column_id) =>
+    ({ query, params, join_type, splits: arg_splits }) =>
+      attach_source({
+        players_query: query,
+        query_context: data_view_options.query_context,
+        column_def: { ...column_definition, column_id },
+        params,
+        table_alias: table_name,
+        join_type,
+        splits: arg_splits ?? splits
+      })
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
   let pid_columns = null
@@ -1132,7 +1130,10 @@ const add_clauses_for_table = async ({
       column_definition.source &&
       (column_definition.source.table || column_definition.source.attach)
     ) {
-      join_func = make_source_join_func(column_definition, where_clause.column_id)
+      join_func = make_source_join_func(
+        column_definition,
+        where_clause.column_id
+      )
     } else if (!where_handled_by_aggregator && column_definition.join) {
       join_func = column_definition.join
     }
@@ -1210,10 +1211,7 @@ const add_clauses_for_table = async ({
         main_where_clause_strings.push(main_where_string)
       }
 
-      if (
-        !has_output_alias &&
-        column_definition.main_where_group_by
-      ) {
+      if (!has_output_alias && column_definition.main_where_group_by) {
         const main_where_group_by_string =
           column_definition.main_where_group_by({
             params: where_clause.params,
@@ -1423,7 +1421,6 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
 
   return grouped_by_splits
 }
-
 
 export const get_data_view_results_query = async ({
   splits = [],
@@ -1796,11 +1793,7 @@ export const get_data_view_results_query = async ({
     ...columns,
     ...where
   ].entries()) {
-    if (
-      typeof column !== 'object' ||
-      !column.params ||
-      !column.params.output
-    ) {
+    if (typeof column !== 'object' || !column.params || !column.params.output) {
       continue
     }
     const column_definition = data_views_column_definitions[column.column_id]

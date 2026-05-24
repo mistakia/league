@@ -3,29 +3,18 @@
   "name": "scoring_format_hash split by year on player-scoring-format-logs",
   "description": "Exercises the get_table_conditions vs extra_predicates path on scoring_format_player_seasonlogs with a year split active. When year split is active, the year predicate is dropped from get_table_conditions; only scoring_format_hash remains. Coverage gap (e).",
   "request": {
-    "splits": [
-      "year"
-    ],
-    "prefix_columns": [
-      "player_name"
-    ],
+    "splits": ["year"],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_fantasy_points_from_seasonlogs",
         "params": {
-          "year": [
-            2022,
-            2023
-          ]
+          "year": [2022, 2023]
         }
       }
     ]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"t7f074a6a223c6b25aa0ab11ab5c40539\".\"points\" AS \"points_from_seasonlogs_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"scoring_format_player_seasonlogs\" as \"t7f074a6a223c6b25aa0ab11ab5c40539\" on \"t7f074a6a223c6b25aa0ab11ab5c40539\".\"pid\" = \"player\".\"pid\" and \"t7f074a6a223c6b25aa0ab11ab5c40539\".\"year\" = \"player_years\".\"year\" and \"t7f074a6a223c6b25aa0ab11ab5c40539\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' group by player.fname, player.lname, \"t7f074a6a223c6b25aa0ab11ab5c40539\".\"points\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "scoring_format_hash",
-    "split",
-    "coverage-gap"
-  ],
+  "tags": ["scoring_format_hash", "split", "coverage-gap"],
   "timeout_ms": 60000
 }

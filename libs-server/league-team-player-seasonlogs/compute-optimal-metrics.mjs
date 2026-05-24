@@ -27,12 +27,7 @@ export default async function compute_optimal_metrics({
     .join('nfl_games as n', 'n.esbid', 'g.esbid')
     .where('n.year', year)
     .where('g.league_format_hash', league_format_hash)
-    .select(
-      'g.pid',
-      'n.week',
-      'g.points_added_earned',
-      'g.points_added_net'
-    )
+    .select('g.pid', 'n.week', 'g.points_added_earned', 'g.points_added_net')
 
   const gamelog_by_pid_week = new Map()
   for (const r of gamelog_rows) {
@@ -66,8 +61,7 @@ export default async function compute_optimal_metrics({
         }
         if (gl.points_added_net != null) {
           existing.pts_added_net_optimal =
-            (existing.pts_added_net_optimal || 0) +
-            Number(gl.points_added_net)
+            (existing.pts_added_net_optimal || 0) + Number(gl.points_added_net)
         }
         out.set(k, existing)
       }

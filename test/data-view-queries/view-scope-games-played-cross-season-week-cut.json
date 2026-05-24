@@ -2,25 +2,18 @@
   "name": "view scope games played cross season week cut",
   "description": "Auto-generated test case",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_games_played",
         "params": {
-          "nfl_week_id": [
-            "2023_REG_WEEK_18",
-            "2023_POST_WEEK_1"
-          ]
+          "nfl_week_id": ["2023_REG_WEEK_18", "2023_POST_WEEK_1"]
         }
       },
       {
         "column_id": "player_age",
         "params": {
-          "year": [
-            2023
-          ]
+          "year": [2023]
         }
       }
     ],
@@ -28,9 +21,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ],
     "sort": [

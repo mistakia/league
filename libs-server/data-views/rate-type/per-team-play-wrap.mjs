@@ -117,13 +117,8 @@ export const flush_per_team_play_wraps = ({ query_context }) => {
 }
 
 const build_wrap_cte_query = ({ query_context, entry }) => {
-  const {
-    column_def,
-    params,
-    identity_id,
-    rate_type_table_name,
-    team_unit
-  } = entry
+  const { column_def, params, identity_id, rate_type_table_name, team_unit } =
+    entry
 
   // Build the per-(pid, year) numerator subquery using the same scan
   // semantics as the batched aggregator path, with year grain forced on so

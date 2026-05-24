@@ -7,50 +7,17 @@
       {
         "column_id": "player_fantasy_points_from_plays",
         "params": {
-          "year": [
-            2023,
-            2022,
-            2021,
-            2020
-          ],
-          "rate_type": [
-            "per_game"
-          ],
-          "week": [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8
-          ]
+          "year": [2023, 2022, 2021, 2020],
+          "rate_type": ["per_game"],
+          "week": [1, 2, 3, 4, 5, 6, 7, 8]
         }
       },
       {
         "column_id": "player_fantasy_points_from_plays",
         "params": {
-          "year": [
-            2023,
-            2022,
-            2021,
-            2020
-          ],
-          "rate_type": [
-            "per_game"
-          ],
-          "week": [
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17
-          ]
+          "year": [2023, 2022, 2021, 2020],
+          "rate_type": ["per_game"],
+          "week": [9, 10, 11, 12, 13, 14, 15, 16, 17]
         }
       }
     ],
@@ -65,17 +32,11 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       }
     ],
-    "prefix_columns": [
-      "player_name"
-    ],
-    "splits": [
-      "year"
-    ]
+    "prefix_columns": ["player_name"],
+    "splits": ["year"]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t3226681689893daee7d0057c246c5b5a\" as materialized (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = true and \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2020, 2021, 2022, 2023) and \"player_gamelogs\".\"year\" in (2020, 2021, 2022, 2023) group by \"nfl_games\".\"year\", \"player_gamelogs\".\"pid\"), \"rate_aggregate_06b017930061\" as materialized (select \"role_union\".\"pid\" as \"pid\", SUM(role_union.pts) AS measure_total, \"nfl_games\".\"year\" from (select nfl_plays.bc_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6 AS pts from \"nfl_plays\" where nfl_plays.bc_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.psr_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1 AS pts from \"nfl_plays\" where nfl_plays.psr_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.trg_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1 AS pts from \"nfl_plays\" where nfl_plays.trg_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.player_fuml_pid AS pid, \"nfl_plays\".\"esbid\", -1 AS pts from \"nfl_plays\" where nfl_plays.player_fuml_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG')) as \"role_union\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"role_union\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2020, 2021, 2022, 2023) group by \"role_union\".\"pid\", \"nfl_games\".\"year\" having SUM(role_union.pts) > 0), \"rate_aggregate_49dd80ac0acf\" as materialized (select \"role_union\".\"pid\" as \"pid\", SUM(role_union.pts) AS measure_total, \"nfl_games\".\"year\" from (select nfl_plays.bc_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6 AS pts from \"nfl_plays\" where nfl_plays.bc_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.psr_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1 AS pts from \"nfl_plays\" where nfl_plays.psr_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.trg_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1 AS pts from \"nfl_plays\" where nfl_plays.trg_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.player_fuml_pid AS pid, \"nfl_plays\".\"esbid\", -1 AS pts from \"nfl_plays\" where nfl_plays.player_fuml_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG')) as \"role_union\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"role_union\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2020, 2021, 2022, 2023) group by \"role_union\".\"pid\", \"nfl_games\".\"year\" having SUM(role_union.pts) > 0) select \"tdbe64dafba7d186b6797b7756019b69f\".\"pid\", player.fname, player.lname, \"tdbe64dafba7d186b6797b7756019b69f\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", CAST(MAX(rate_aggregate_06b017930061.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(t3226681689893daee7d0057c246c5b5a.rate_type_total_count) AS DECIMAL), 0) AS fantasy_points_from_plays_0, CAST(MAX(rate_aggregate_49dd80ac0acf.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(t3226681689893daee7d0057c246c5b5a.rate_type_total_count) AS DECIMAL), 0) AS fantasy_points_from_plays_1, \"tdbe64dafba7d186b6797b7756019b69f\".\"year\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"tdbe64dafba7d186b6797b7756019b69f\" inner join \"player\" on \"player\".\"pid\" = \"tdbe64dafba7d186b6797b7756019b69f\".\"pid\" left join \"t3226681689893daee7d0057c246c5b5a\" on \"t3226681689893daee7d0057c246c5b5a\".\"pid\" = \"tdbe64dafba7d186b6797b7756019b69f\".\"pid\" and \"t3226681689893daee7d0057c246c5b5a\".\"year\" = \"tdbe64dafba7d186b6797b7756019b69f\".\"year\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"rate_aggregate_06b017930061\" on \"rate_aggregate_06b017930061\".\"pid\" = \"player\".\"pid\" and \"rate_aggregate_06b017930061\".\"year\" = \"player_years\".\"year\" left join \"rate_aggregate_49dd80ac0acf\" on \"rate_aggregate_49dd80ac0acf\".\"pid\" = \"player\".\"pid\" and \"rate_aggregate_49dd80ac0acf\".\"year\" = \"player_years\".\"year\" where \"tdbe64dafba7d186b6797b7756019b69f\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' and player.pos IN ('WR') group by player.fname, player.lname, \"tdbe64dafba7d186b6797b7756019b69f\".\"points_per_game\", \"tdbe64dafba7d186b6797b7756019b69f\".\"year\", \"tdbe64dafba7d186b6797b7756019b69f\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"tdbe64dafba7d186b6797b7756019b69f\".\"pid\" asc limit 500",
   "tags": [

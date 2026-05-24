@@ -6,26 +6,17 @@
       {
         "column_id": "team_pass_yards_from_plays",
         "params": {
-          "year": [
-            2023,
-            2024
-          ]
+          "year": [2023, 2024]
         }
       }
     ],
-    "prefix_columns": [
-      "player_name"
-    ],
-    "splits": [
-      "week"
-    ],
+    "prefix_columns": ["player_name"],
+    "splits": ["week"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       }
     ],
     "sort": [

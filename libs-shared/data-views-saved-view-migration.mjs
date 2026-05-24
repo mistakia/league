@@ -21,7 +21,9 @@ const migrate_params = (params) => {
     changed = true
   }
 
-  if (Object.prototype.hasOwnProperty.call(next, 'rate_type_match_column_params')) {
+  if (
+    Object.prototype.hasOwnProperty.call(next, 'rate_type_match_column_params')
+  ) {
     const { rate_type_match_column_params: value, ...rest } = next
     next = { ...rest, output_match_column_params: value }
     changed = true
@@ -79,7 +81,11 @@ const migrate_entries_array = ({ entries, rename_map }) => {
     }
     if (migrated.changed) {
       changed = true
-      return { ...entry, column_id: migrated.column_id, params: migrated.params }
+      return {
+        ...entry,
+        column_id: migrated.column_id,
+        params: migrated.params
+      }
     }
     return entry
   })
@@ -147,7 +153,10 @@ export const migrate_table_state = (table_state) => {
     changed = true
   }
 
-  if (!Array.isArray(table_state.subjects) || table_state.subjects.length === 0) {
+  if (
+    !Array.isArray(table_state.subjects) ||
+    table_state.subjects.length === 0
+  ) {
     next.subjects = ['player']
     changed = true
   }

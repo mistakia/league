@@ -83,7 +83,10 @@ export const emit_year_match = ({
       const in_op = is_first
         ? builder.onIn.bind(builder)
         : builder.andOnIn.bind(builder)
-      in_op(col, [...years].sort((a, b) => a - b))
+      in_op(
+        col,
+        [...years].sort((a, b) => a - b)
+      )
       return
     }
     const shifted = v.map(shift)

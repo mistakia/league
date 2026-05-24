@@ -68,7 +68,12 @@ const format_nflverse_report_status = (raw) => {
 // would lose the bulk of the historical injury-report signal.
 const format_nflverse_report_status_for_practice = (raw) => {
   const s = (raw || '').toUpperCase().trim()
-  if (s === 'OUT' || s === 'DOUBTFUL' || s === 'QUESTIONABLE' || s === 'PROBABLE')
+  if (
+    s === 'OUT' ||
+    s === 'DOUBTFUL' ||
+    s === 'QUESTIONABLE' ||
+    s === 'PROBABLE'
+  )
     return s
   return null
 }
@@ -258,9 +263,8 @@ const import_for_year = async ({
 
   for (const row of reg_rows) {
     const changelog_status = format_nflverse_report_status(row.report_status)
-    const practice_game_designation = format_nflverse_report_status_for_practice(
-      row.report_status
-    )
+    const practice_game_designation =
+      format_nflverse_report_status_for_practice(row.report_status)
     const practice_status = format_nflverse_practice_status(row.practice_status)
     const inj_text = combine_injuries(
       row.report_primary_injury,
@@ -268,7 +272,12 @@ const import_for_year = async ({
     )
 
     // Skip the whole row if nothing useful for either table.
-    if (!changelog_status && !practice_game_designation && !practice_status && !inj_text) {
+    if (
+      !changelog_status &&
+      !practice_game_designation &&
+      !practice_status &&
+      !inj_text
+    ) {
       counts.skipped_no_status += 1
       continue
     }
@@ -371,7 +380,8 @@ const import_for_year = async ({
     counts.unresolved_pid +
     counts.unresolved_game
   const resolved = counts.resolved_gsis + counts.resolved_name
-  const resolution_rate = total_with_status > 0 ? resolved / total_with_status : 0
+  const resolution_rate =
+    total_with_status > 0 ? resolved / total_with_status : 0
   log(
     `resolution: ${resolved}/${total_with_status} (${(resolution_rate * 100).toFixed(1)}%) ` +
       `[gsis=${counts.resolved_gsis} name=${counts.resolved_name} unresolved=${counts.unresolved_pid} ` +

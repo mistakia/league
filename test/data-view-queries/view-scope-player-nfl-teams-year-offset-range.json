@@ -2,33 +2,22 @@
   "name": "view scope player nfl teams year offset range",
   "description": "Locks player_nfl_teams + year_offset range (with year split) registers per-game CTE and emits array_agg(DISTINCT unnest(teams)) override",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_nfl_teams",
         "params": {
-          "year": [
-            2024
-          ],
-          "year_offset": [
-            1,
-            9
-          ]
+          "year": [2024],
+          "year_offset": [1, 9]
         }
       }
     ],
-    "splits": [
-      "year"
-    ],
+    "splits": ["year"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ],
     "sort": [
@@ -40,10 +29,6 @@
     ]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('RB')), \"t3d2efe2602a05b1642021b304ba51fb2\" as materialized (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = true and \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2025, 2026) and \"player_gamelogs\".\"year\" in (2025, 2026) group by \"nfl_games\".\"year\", \"player_gamelogs\".\"pid\") select \"player\".\"pid\", player.fname, player.lname, (SELECT array_agg(DISTINCT t) FROM (SELECT unnest(t3d2efe2602a05b1642021b304ba51fb2.teams) AS t FROM t3d2efe2602a05b1642021b304ba51fb2 WHERE t3d2efe2602a05b1642021b304ba51fb2.pid = player.pid AND t3d2efe2602a05b1642021b304ba51fb2.year BETWEEN player_years.year + 1 AND player_years.year + 9) sub) AS \"player_nfl_teams_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" where player.pos IN ('RB') group by player.fname, player.lname, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "year_offset",
-    "player_team",
-    "regression"
-  ],
+  "tags": ["year_offset", "player_team", "regression"],
   "timeout_ms": 35000
 }

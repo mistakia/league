@@ -31,8 +31,12 @@ describe('SCRIPTS /generate-historical-injury-index SQL string', function () {
     // Both the reg_games CTE (nfl_games) and the gl CTE (player_gamelogs)
     // must be bounded -- otherwise the index would silently scan every
     // season on every per-year rebuild.
-    expect(rebuild_sql).to.match(/nfl_games[\s\S]*?BETWEEN :start_year AND :end_year/)
-    expect(rebuild_sql).to.match(/player_gamelogs[\s\S]*?BETWEEN :start_year AND :end_year/)
+    expect(rebuild_sql).to.match(
+      /nfl_games[\s\S]*?BETWEEN :start_year AND :end_year/
+    )
+    expect(rebuild_sql).to.match(
+      /player_gamelogs[\s\S]*?BETWEEN :start_year AND :end_year/
+    )
   })
 
   it('keys schedule_spine on team via h/v varchar(3) columns', function () {

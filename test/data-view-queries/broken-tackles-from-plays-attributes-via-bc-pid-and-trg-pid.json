@@ -6,9 +6,7 @@
       {
         "column_id": "player_broken_tackles_from_plays",
         "params": {
-          "year": [
-            2025
-          ]
+          "year": [2025]
         }
       }
     ],
@@ -16,11 +14,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB",
-          "WR",
-          "TE"
-        ]
+        "value": ["RB", "WR", "TE"]
       }
     ],
     "sort": [
@@ -32,12 +26,6 @@
     "limit": 20
   },
   "expected_query": "with \"td3e58c9af2784a38918c4ab350c00288\" as materialized (select COALESCE(bc_pid, trg_pid) as pid, SUM(mbt) as broken_tackles_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2025) group by COALESCE(bc_pid, trg_pid)), \"base_years\" as (SELECT unnest(ARRAY[2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", \"td3e58c9af2784a38918c4ab350c00288\".\"broken_tackles_from_plays\" AS \"broken_tackles_from_plays_0\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"td3e58c9af2784a38918c4ab350c00288\" on \"td3e58c9af2784a38918c4ab350c00288\".\"pid\" = \"player\".\"pid\" where player.pos IN ('RB', 'WR', 'TE') group by \"td3e58c9af2784a38918c4ab350c00288\".\"broken_tackles_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 20",
-  "tags": [
-    "player",
-    "plays",
-    "parameters",
-    "cte",
-    "regression"
-  ],
+  "tags": ["player", "plays", "parameters", "cte", "regression"],
   "timeout_ms": 40000
 }

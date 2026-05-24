@@ -16,22 +16,16 @@
             "2024_REG_WEEK_3",
             "2024_REG_WEEK_4"
           ],
-          "rate_type": [
-            "per_team_pass_play"
-          ]
+          "rate_type": ["per_team_pass_play"]
         }
       }
     ],
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       }
     ],
     "sort": [

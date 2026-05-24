@@ -86,9 +86,7 @@ describe('API /leagues - format-hash cascade', function () {
       before_season.league_format_hash
     )
 
-    const projection_rows = await knex(
-      'league_format_player_projection_values'
-    )
+    const projection_rows = await knex('league_format_player_projection_values')
       .where({
         league_format_hash: after_season.league_format_hash,
         year: current_season.year

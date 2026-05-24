@@ -134,101 +134,101 @@ const player_stat_from_plays = ({
         })
       }
     : null
-  return ({
-  table_alias: ({ params }) =>
-    generate_table_alias({ type: 'play_by_play', params, pid_columns }),
-  column_name: stat_name,
-  with_select: ({ params = {} }) => {
-    if (
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator
-    ) {
-      return [
-        `${numerator_select} as ${stat_name}_numerator`,
-        `${denominator_select} as ${stat_name}_denominator`
-      ]
-    }
-    return [`${with_select_string} as ${stat_name}`]
-  },
-  has_numerator_denominator,
-  with_where: ({ params }) => {
-    if (should_use_main_where({ params, has_numerator_denominator })) {
-      return null // No where clause in the WITH statement when using year_offset range with numerator/denominator
-    }
-    return with_select_string
-  },
-  main_where: ({
-    params,
-    table_name,
-    column_id,
-    column_index,
-    rate_type_column_mapping
-  }) => {
-    if (should_use_main_where({ params, has_numerator_denominator })) {
-      if (params.rate_type && params.rate_type.includes('per_game')) {
+  return {
+    table_alias: ({ params }) =>
+      generate_table_alias({ type: 'play_by_play', params, pid_columns }),
+    column_name: stat_name,
+    with_select: ({ params = {} }) => {
+      if (
+        params.year_offset &&
+        Array.isArray(params.year_offset) &&
+        params.year_offset.length > 1 &&
+        has_numerator_denominator
+      ) {
+        return [
+          `${numerator_select} as ${stat_name}_numerator`,
+          `${denominator_select} as ${stat_name}_denominator`
+        ]
+      }
+      return [`${with_select_string} as ${stat_name}`]
+    },
+    has_numerator_denominator,
+    with_where: ({ params }) => {
+      if (should_use_main_where({ params, has_numerator_denominator })) {
+        return null // No where clause in the WITH statement when using year_offset range with numerator/denominator
+      }
+      return with_select_string
+    },
+    main_where: ({
+      params,
+      table_name,
+      column_id,
+      column_index,
+      rate_type_column_mapping
+    }) => {
+      if (should_use_main_where({ params, has_numerator_denominator })) {
+        if (params.rate_type && params.rate_type.includes('per_game')) {
+          const rate_type_table_name =
+            rate_type_column_mapping[`${column_id}_${column_index}`]
+          if (has_numerator_denominator) {
+            return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) ELSE 0 END`
+          } else {
+            return get_rate_type_sql({
+              table_name,
+              column_name: stat_name,
+              rate_type_table_name
+            })
+          }
+        } else {
+          // if there is no rate_type than it must have a numerator/denominator
+          return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) ELSE 0 END`
+        }
+      }
+      return null
+    },
+    main_where_group_by: ({
+      params,
+      table_name,
+      column_id,
+      column_index,
+      rate_type_column_mapping
+    }) => {
+      if (should_use_main_where({ params, has_numerator_denominator })) {
+        const group_by = []
         const rate_type_table_name =
           rate_type_column_mapping[`${column_id}_${column_index}`]
-        if (has_numerator_denominator) {
-          return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) ELSE 0 END`
-        } else {
-          return get_rate_type_sql({
-            table_name,
-            column_name: stat_name,
-            rate_type_table_name
-          })
+        if (rate_type_table_name) {
+          group_by.push(`${rate_type_table_name}.rate_type_total_count`)
         }
-      } else {
-        // if there is no rate_type than it must have a numerator/denominator
-        return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) ELSE 0 END`
-      }
-    }
-    return null
-  },
-  main_where_group_by: ({
-    params,
-    table_name,
-    column_id,
-    column_index,
-    rate_type_column_mapping
-  }) => {
-    if (should_use_main_where({ params, has_numerator_denominator })) {
-      const group_by = []
-      const rate_type_table_name =
-        rate_type_column_mapping[`${column_id}_${column_index}`]
-      if (rate_type_table_name) {
-        group_by.push(`${rate_type_table_name}.rate_type_total_count`)
-      }
 
-      if (has_numerator_denominator) {
-        group_by.push(`SUM(${table_name}.${stat_name}_numerator)`)
-        group_by.push(`SUM(${table_name}.${stat_name}_denominator)`)
-      } else {
-        group_by.push(`${table_name}.${stat_name}`)
-      }
+        if (has_numerator_denominator) {
+          group_by.push(`SUM(${table_name}.${stat_name}_numerator)`)
+          group_by.push(`SUM(${table_name}.${stat_name}_denominator)`)
+        } else {
+          group_by.push(`${table_name}.${stat_name}`)
+        }
 
-      return group_by
-    }
-    return []
-  },
-  pid_columns,
-  with: add_player_stats_play_by_play_with_statement,
-  source: plays_source,
-  use_having: true,
-  supported_rate_types,
-  ...(final_supports_output
-    ? { supports_output: final_supports_output, measure_source: 'plays' }
-    : {}),
-  ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
-  ...(final_apply_filters
-    ? {
-        apply_filters: final_apply_filters,
-        consumes_params_extra: play_by_play_filter_param_keys
+        return group_by
       }
-    : {}),
-  get_cache_info: get_cache_info_for_fields_from_plays
-  })
+      return []
+    },
+    pid_columns,
+    with: add_player_stats_play_by_play_with_statement,
+    source: plays_source,
+    use_having: true,
+    supported_rate_types,
+    ...(final_supports_output
+      ? { supports_output: final_supports_output, measure_source: 'plays' }
+      : {}),
+    ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
+    ...(final_apply_filters
+      ? {
+          apply_filters: final_apply_filters,
+          consumes_params_extra: play_by_play_filter_param_keys
+        }
+      : {}),
+    get_cache_info: get_cache_info_for_fields_from_plays
+  }
 }
 
 const create_team_share_stat = ({

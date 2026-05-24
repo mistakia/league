@@ -4,7 +4,8 @@ import db from '#db'
 import { roster_slot_types } from '#constants/roster-constants.mjs'
 import { keeptradecut_metric_types } from '#constants'
 import {
-  load_pick_ktc_indexes, ktc_pick_at
+  load_pick_ktc_indexes,
+  ktc_pick_at
 } from '#libs-server/composite-market-value/ktc-pick-value-at.mjs'
 
 import { ASSET_TYPE, INITIAL_SLOT_TYPE, PS_SLOT_SUBTYPE } from './constants.mjs'

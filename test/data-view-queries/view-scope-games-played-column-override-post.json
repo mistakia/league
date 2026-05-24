@@ -2,38 +2,27 @@
   "name": "view scope games played column override post",
   "description": "Auto-generated test case",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_games_played",
         "params": {
-          "seas_type": [
-            "POST"
-          ]
+          "seas_type": ["POST"]
         }
       },
       {
         "column_id": "player_age",
         "params": {
-          "year": [
-            2022,
-            2023
-          ]
+          "year": [2022, 2023]
         }
       }
     ],
-    "splits": [
-      "year"
-    ],
+    "splits": ["year"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ],
     "sort": [

@@ -83,7 +83,9 @@ export default {
       }
     },
     join: ({ query, table_name, params, splits, data_view_options }) => {
-      if (data_view_options.query_context?.applied_output_ctes?.has(table_name)) {
+      if (
+        data_view_options.query_context?.applied_output_ctes?.has(table_name)
+      ) {
         return
       }
       if (should_use_cte({ params, splits })) {

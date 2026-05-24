@@ -39,9 +39,7 @@ const find_scoring_format_gaps = async () => {
     .whereNotExists(function () {
       this.select(db.raw(1))
         .from('scoring_format_player_projection_points')
-        .whereRaw(
-          'scoring_format_player_projection_points.year = seasons.year'
-        )
+        .whereRaw('scoring_format_player_projection_points.year = seasons.year')
         .whereRaw(
           'scoring_format_player_projection_points.scoring_format_hash = seasons.scoring_format_hash'
         )
@@ -71,9 +69,7 @@ const find_league_format_gaps = async () => {
     .whereExists(function () {
       this.select(db.raw(1))
         .from('scoring_format_player_projection_points')
-        .whereRaw(
-          'scoring_format_player_projection_points.year = seasons.year'
-        )
+        .whereRaw('scoring_format_player_projection_points.year = seasons.year')
         .whereRaw(
           'scoring_format_player_projection_points.scoring_format_hash = league_formats.scoring_format_hash'
         )
@@ -133,8 +129,7 @@ const main = async () => {
 
   if (!error && total_gaps > 0) {
     await send_discord_message({
-      discord_webhook_url:
-        config.discord_sysadmin_alerts_channel_webhook_url,
+      discord_webhook_url: config.discord_sysadmin_alerts_channel_webhook_url,
       message: `projection-format-hash drift detected: ${job_reason}`
     })
   }

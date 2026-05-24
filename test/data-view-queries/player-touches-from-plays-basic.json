@@ -2,12 +2,8 @@
   "name": "player touches from plays — basic",
   "description": "Verifies the combined SQL aggregate for player_touches_from_plays (rush attempts + completed receptions) over nfl_plays. Spot-validated against 2024 REG-season top-10 RB/WR totals; delta vs (rush_attempts + receptions) = 0 for all rows.",
   "request": {
-    "columns": [
-      "player_touches_from_plays"
-    ],
-    "prefix_columns": [
-      "player_name"
-    ],
+    "columns": ["player_touches_from_plays"],
+    "prefix_columns": ["player_name"],
     "sort": [
       {
         "column_id": "player_touches_from_plays",
@@ -18,10 +14,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB",
-          "WR"
-        ]
+        "value": ["RB", "WR"]
       }
     ],
     "limit": 10

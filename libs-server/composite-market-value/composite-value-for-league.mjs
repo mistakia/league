@@ -30,8 +30,8 @@ export const composite_value_for_league = async ({
   if (asset_type === 1) q.where('player_id', player_id)
   else if (asset_type === 2)
     q.where('pick_year', pick_year)
-     .where('pick_round', pick_round)
-     .where('pick_original_owner_tid', pick_original_owner_tid)
+      .where('pick_round', pick_round)
+      .where('pick_original_owner_tid', pick_original_owner_tid)
   else return null
 
   return q.first()

@@ -7,29 +7,19 @@
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "year": [
-            2020,
-            2021,
-            2022,
-            2023,
-            2024
-          ]
+          "year": [2020, 2021, 2022, 2023, 2024]
         }
       },
       {
         "column_id": "player_nfl_teams"
       }
     ],
-    "splits": [
-      "year"
-    ],
+    "splits": ["year"],
     "where": [
       {
         "column_id": "player_nfl_teams",
         "operator": "IN",
-        "value": [
-          "CIN"
-        ]
+        "value": ["CIN"]
       }
     ],
     "sort": [

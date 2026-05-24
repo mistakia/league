@@ -1079,13 +1079,11 @@ router.post('/debug/?', async (req, res) => {
     }
 
     const generate_started_at = Date.now()
-    const { query, data_view_metadata } = await get_data_view_results_query(
-      table_state
-    )
+    const { query, data_view_metadata } =
+      await get_data_view_results_query(table_state)
     let sql = query.toString()
-    const query_bindings = typeof query.toSQL === 'function'
-      ? query.toSQL().bindings
-      : null
+    const query_bindings =
+      typeof query.toSQL === 'function' ? query.toSQL().bindings : null
     if (beautify) {
       sql = await format_sql(sql, { parser: 'sql', language: 'postgresql' })
     }

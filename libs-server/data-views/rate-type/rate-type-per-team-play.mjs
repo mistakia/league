@@ -159,7 +159,8 @@ export const join_per_team_play_cte = ({
   // historical-team-mode is structural rather than a runtime conditional.
   // Skipped for matchup_opponent_type (joins against upstream opponents CTE).
   const player_cell =
-    query_context && query_context.identity_id &&
+    query_context &&
+    query_context.identity_id &&
     query_context.identity_id.startsWith('player')
   if (player_cell && !matchup_opponent_type) {
     identity_bridge_registry.apply_bridge({

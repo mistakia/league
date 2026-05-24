@@ -91,7 +91,9 @@ const run_browser_task = async ({ year, ignore_cache = false }) => {
 
   const caller_label =
     process.env.CLOAKBROWSER_CALLER ||
-    (process.env.JOB_PROJECT ? `job:${process.env.JOB_PROJECT}` : 'import-team-rosters-pfr')
+    (process.env.JOB_PROJECT
+      ? `job:${process.env.JOB_PROJECT}`
+      : 'import-team-rosters-pfr')
 
   // Write URL list to a temp file to avoid shell arg length limits
   const url_file = path.join(tmp_dir, 'urls.txt')
@@ -102,23 +104,32 @@ const run_browser_task = async ({ year, ignore_cache = false }) => {
 
   const args = [
     BROWSER_TASK,
-    '--out-dir', tmp_dir,
-    '--url-file', url_file,
-    '--wait-between-ms', '5000',
-    '--caller-label', caller_label
+    '--out-dir',
+    tmp_dir,
+    '--url-file',
+    url_file,
+    '--wait-between-ms',
+    '5000',
+    '--caller-label',
+    caller_label
   ]
   if (ignore_cache) args.push('--ignore-cache')
 
   try {
-    log('spawning sandboxed browser task as _stealth-browser (%d roster URLs)', roster_urls.length)
+    log(
+      'spawning sandboxed browser task as _stealth-browser (%d roster URLs)',
+      roster_urls.length
+    )
     await new Promise((resolve, reject) => {
       const child = spawn(SANDBOX_WRAPPER, args, {
         stdio: ['ignore', 'inherit', 'inherit']
       })
       child.on('error', reject)
       child.on('exit', (code, signal) => {
-        if (signal) return reject(new Error(`browser-task killed by signal ${signal}`))
-        if (code !== 0) return reject(new Error(`browser-task exited with code ${code}`))
+        if (signal)
+          return reject(new Error(`browser-task killed by signal ${signal}`))
+        if (code !== 0)
+          return reject(new Error(`browser-task exited with code ${code}`))
         resolve()
       })
     })
@@ -149,7 +160,12 @@ const get_all_rosters = async ({ year, ignore_cache = false }) => {
     const page_result = pages.find((p) => p.url === url)
 
     if (!page_result || !page_result.html) {
-      log('failed to get roster page for %s %d: %s', team, year, page_result?.error || 'no HTML')
+      log(
+        'failed to get roster page for %s %d: %s',
+        team,
+        year,
+        page_result?.error || 'no HTML'
+      )
       continue
     }
 

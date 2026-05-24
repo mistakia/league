@@ -49,8 +49,10 @@ const expand_year_seas_type = ({ year, seas_type }) => {
 const resolve_params_contribution = (params) => {
   if (!params || typeof params !== 'object') return []
 
-  let nfl_week_ids = normalize_array(params.nfl_week_id)
-    .filter((id) => typeof id === 'string' && parse_nfl_week_identifier({ identifier: id }))
+  let nfl_week_ids = normalize_array(params.nfl_week_id).filter(
+    (id) =>
+      typeof id === 'string' && parse_nfl_week_identifier({ identifier: id })
+  )
 
   if (!nfl_week_ids.length) {
     nfl_week_ids = expand_year_seas_type({

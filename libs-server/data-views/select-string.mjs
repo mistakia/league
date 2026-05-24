@@ -8,7 +8,8 @@ import { is_year_offset_range } from './year-offset-range.mjs'
 // strings or unescaped quotes.
 const format_sql_literal = (value) => {
   if (value === null || value === undefined) return 'NULL'
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value)
   return `'${String(value).replace(/'/g, "''")}'`
 }
 
@@ -43,7 +44,9 @@ const format_extra_predicates_sql = (source, column_params, inner_table) => {
   return extras
     .map((p) => {
       const op = p.op || '='
-      const col = p.column.includes('.') ? p.column : `${inner_table}.${p.column}`
+      const col = p.column.includes('.')
+        ? p.column
+        : `${inner_table}.${p.column}`
       if (op === '=') return ` AND ${col} = ${format_sql_literal(p.value)}`
       if (op === 'in') {
         const list = (p.value || []).map(format_sql_literal).join(', ')

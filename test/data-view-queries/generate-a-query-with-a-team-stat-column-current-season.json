@@ -3,9 +3,7 @@
   "name": "should generate a query with a team stat column current season",
   "description": "Backward-compatibility: no year param, no splits -> historical mode NOT active; team stat joined on player.current_nfl_team; player_year_teams CTE NOT registered",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_target_share_from_plays"

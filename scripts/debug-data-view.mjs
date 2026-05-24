@@ -26,8 +26,11 @@ const debug_data_view = async ({
 
     log('Processing short URL:', short_url)
 
-    const { table_state, hash, url: full_url } =
-      await resolve_table_state_from_short_url(short_url)
+    const {
+      table_state,
+      hash,
+      url: full_url
+    } = await resolve_table_state_from_short_url(short_url)
     log('Extracted hash:', hash)
     log('Found full URL:', full_url)
 

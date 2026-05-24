@@ -58,9 +58,7 @@ describe('SCRIPTS /import-nflverse-weekly-rosters validator', function () {
 
   it('throws when no ACT entries present', function () {
     const rows = [make_row({ status: 'RES' }), make_row({ status: 'INA' })]
-    expect(() => validate_response_shape({ rows })).to.throw(
-      /zero ACT entries/
-    )
+    expect(() => validate_response_shape({ rows })).to.throw(/zero ACT entries/)
   })
 
   it('throws when every row is ACT (no reserves/inactives at all)', function () {

@@ -14,7 +14,9 @@ describe('data-views column-definition coverage', () => {
   it('every column carries granularity with known identity ids', () => {
     const missing = []
     const unknown = []
-    for (const [column_id, def] of Object.entries(data_views_column_definitions)) {
+    for (const [column_id, def] of Object.entries(
+      data_views_column_definitions
+    )) {
       if (!def || typeof def !== 'object') continue
       const granularity = derive_granularity(def)
       if (!granularity.length) {
@@ -25,7 +27,13 @@ describe('data-views column-definition coverage', () => {
         if (!known_identity_ids.has(g)) unknown.push(`${column_id}: ${g}`)
       }
     }
-    expect(missing, `columns missing granularity: ${missing.join(', ')}`).to.have.length(0)
-    expect(unknown, `columns referencing unknown identity ids: ${unknown.join(', ')}`).to.have.length(0)
+    expect(
+      missing,
+      `columns missing granularity: ${missing.join(', ')}`
+    ).to.have.length(0)
+    expect(
+      unknown,
+      `columns referencing unknown identity ids: ${unknown.join(', ')}`
+    ).to.have.length(0)
   })
 })

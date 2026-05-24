@@ -2,16 +2,12 @@
   "name": "should create a player receiving yards count-per-game with threshold query (output aggregator)",
   "description": "Phase C step 1 snapshot: native `output` param dispatch on player_receiving_yards_from_plays using aggregator-count (period=game, aggregation=count, threshold>=100). Exercises Outer SELECT dispatch + COALESCE(trg_pid) AS pid grouping in build_period_cte for plays-source columns.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "year": [
-            2023
-          ],
+          "year": [2023],
           "output": {
             "period": "game",
             "aggregation": "count",

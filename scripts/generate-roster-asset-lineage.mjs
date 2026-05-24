@@ -11,7 +11,10 @@ import compute_snapshots_bulk from '#libs-server/roster-asset-lineage/compute-sn
 import refresh_extension_state from '#libs-server/roster-asset-lineage/refresh-extension-state.mjs'
 import audit_corrections from '#libs-server/roster-asset-lineage/audit-corrections-seed.mjs'
 
-import { SALARY_ATTRIBUTION_RULE, TERMINATED_BY } from '#libs-server/roster-asset-lineage/constants.mjs'
+import {
+  SALARY_ATTRIBUTION_RULE,
+  TERMINATED_BY
+} from '#libs-server/roster-asset-lineage/constants.mjs'
 
 const log = debug('generate-roster-asset-lineage')
 debug.enable('generate-roster-asset-lineage')
@@ -59,9 +62,16 @@ const generate_roster_asset_lineage = async ({
     log(`league ${lid} not found`)
     return { coverage_warning: 'league_not_found' }
   }
-  if (league.salary_attribution_rule !== SALARY_ATTRIBUTION_RULE.START_TEAM_BEARS) {
-    log(`coverage_warning: salary_attribution_rule=${league.salary_attribution_rule} not implemented; skipping lid=${lid}`)
-    return { coverage_warning: 'unsupported_rule', rule: league.salary_attribution_rule }
+  if (
+    league.salary_attribution_rule !== SALARY_ATTRIBUTION_RULE.START_TEAM_BEARS
+  ) {
+    log(
+      `coverage_warning: salary_attribution_rule=${league.salary_attribution_rule} not implemented; skipping lid=${lid}`
+    )
+    return {
+      coverage_warning: 'unsupported_rule',
+      rule: league.salary_attribution_rule
+    }
   }
 
   if (rebuild) {
@@ -74,9 +84,13 @@ const generate_roster_asset_lineage = async ({
   const { holding_drafts, transformation_drafts, coverage_warnings } =
     await walk_transactions({ lid })
 
-  log(`walked ${holding_drafts.length} holding drafts, ${transformation_drafts.length} transformation drafts`)
+  log(
+    `walked ${holding_drafts.length} holding drafts, ${transformation_drafts.length} transformation drafts`
+  )
   if (Object.keys(coverage_warnings).length) {
-    log(`coverage_warnings (uncovered transaction_types): ${JSON.stringify(coverage_warnings)}`)
+    log(
+      `coverage_warnings (uncovered transaction_types): ${JSON.stringify(coverage_warnings)}`
+    )
   }
 
   const draft_to_year_format = new Map()
@@ -165,7 +179,9 @@ const generate_roster_asset_lineage = async ({
         const { __draft_id, ...rest } = r
         return rest
       })
-      const draft_ids = holding_rows.slice(i, i + BATCH_SIZE).map((r) => r.__draft_id)
+      const draft_ids = holding_rows
+        .slice(i, i + BATCH_SIZE)
+        .map((r) => r.__draft_id)
       const inserted = await db('roster_asset_holding')
         .insert(slice)
         .returning('holding_id')

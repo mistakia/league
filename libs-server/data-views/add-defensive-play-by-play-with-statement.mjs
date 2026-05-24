@@ -27,7 +27,12 @@ export const add_defensive_play_by_play_with_statement = ({
   // injects it into the outer filter params whenever `year` is provided
   // without an explicit nfl_week_id; the outer WHERE then references
   // defensive_plays.nfl_week_id, which must exist in the inner projection.
-  const base_columns = new Set(['play_type', 'seas_type', 'year', 'nfl_week_id'])
+  const base_columns = new Set([
+    'play_type',
+    'seas_type',
+    'year',
+    'nfl_week_id'
+  ])
   const stat_columns = new Set([])
 
   for (const param_name of Object.keys(params)) {

@@ -6,27 +6,17 @@
       {
         "column_id": "player_receiving_yards_from_plays",
         "params": {
-          "year": [
-            2023,
-            2024,
-            2025
-          ],
-          "rate_type": [
-            "per_team_pass_play"
-          ]
+          "year": [2023, 2024, 2025],
+          "rate_type": ["per_team_pass_play"]
         }
       }
     ],
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       }
     ],
     "sort": [
@@ -35,9 +25,7 @@
         "desc": true
       }
     ],
-    "splits": [
-      "year"
-    ]
+    "splits": ["year"]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023,2024,2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t21a5011d5affee915c2c2e34789a0f25\" as materialized (select \"nfl_plays\".\"off\", COUNT(*) as rate_type_total_count, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" = 'PASS' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024, 2025) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024, 2025) and \"player_gamelogs\".\"year\" in (2023, 2024, 2025) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\"), \"rate_aggregate_0bf0e2a56abd\" as materialized (select \"nfl_games\".\"year\", nfl_plays.trg_pid AS pid, SUM(CASE WHEN nfl_plays.comp = true THEN nfl_plays.recv_yds ELSE 0 END) AS m_eaf3b8abff50 from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024, 2025) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') group by nfl_plays.trg_pid, \"nfl_games\".\"year\") select \"player\".\"pid\", player.fname, player.lname, CAST(MAX(rate_aggregate_0bf0e2a56abd.m_eaf3b8abff50) AS DECIMAL) / NULLIF(CAST(MAX(t21a5011d5affee915c2c2e34789a0f25.rate_type_total_count) AS DECIMAL), 0) AS rec_yds_from_plays_0, \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = \"player_years\".\"year\" left join \"t21a5011d5affee915c2c2e34789a0f25\" on \"t21a5011d5affee915c2c2e34789a0f25\".\"off\" = \"player_year_teams\".\"team\" and \"t21a5011d5affee915c2c2e34789a0f25\".\"year\" = \"player_years\".\"year\" left join \"rate_aggregate_0bf0e2a56abd\" on \"rate_aggregate_0bf0e2a56abd\".\"pid\" = \"player\".\"pid\" and \"rate_aggregate_0bf0e2a56abd\".\"year\" = \"player_years\".\"year\" where player.pos IN ('WR') group by player.fname, player.lname, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": [

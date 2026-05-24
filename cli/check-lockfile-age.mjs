@@ -103,15 +103,25 @@ if (violations.length) {
   console.error(
     `Refusing ${lockfile}: ${violations.length} package(s) published in last ${days} days:`
   )
-  for (const v of violations) console.error(`  ${v.spec}  (published ${v.published})`)
-  console.error(`Override: add to ${allowFile} (one "pkg@version" per line) or rerun with --days N.`)
+  for (const v of violations)
+    console.error(`  ${v.spec}  (published ${v.published})`)
+  console.error(
+    `Override: add to ${allowFile} (one "pkg@version" per line) or rerun with --days N.`
+  )
   process.exit(1)
 }
 
-console.error(`OK: no package@version younger than ${days} days in ${lockfile} diff vs ${base}.`)
+console.error(
+  `OK: no package@version younger than ${days} days in ${lockfile} diff vs ${base}.`
+)
 
 function autoDetectLockfile() {
-  for (const f of ['yarn.lock', 'package-lock.json', 'bun.lock', 'pnpm-lock.yaml']) {
+  for (const f of [
+    'yarn.lock',
+    'package-lock.json',
+    'bun.lock',
+    'pnpm-lock.yaml'
+  ]) {
     if (existsSync(f)) return f
   }
   return null

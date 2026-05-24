@@ -139,7 +139,11 @@ const run = async () => {
   // prior week as the trailing window.
   const window_weeks = week > 1 ? [week, week - 1] : [week]
   const [{ c: window_rows }] = await db('practice')
-    .where({ year, seas_type: current_season.nfl_seas_type, source: 'rotowire' })
+    .where({
+      year,
+      seas_type: current_season.nfl_seas_type,
+      source: 'rotowire'
+    })
     .whereIn('week', window_weeks)
     .count({ c: '*' })
   if (Number(window_rows) === 0) {

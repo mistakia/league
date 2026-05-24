@@ -22,16 +22,16 @@ export const get_where_string = ({
   // where-clause must reference the underlying aggregate expression
   // directly. Extract it by stripping the trailing ` AS <alias>` from the
   // aggregator-emitted SQL.
-  const output_emitted =
-    is_main_select
-      ? output_select_mapping[`${where_clause.column_id}_${column_index}`]
-      : null
+  const output_emitted = is_main_select
+    ? output_select_mapping[`${where_clause.column_id}_${column_index}`]
+    : null
   const has_output = Boolean(output_emitted)
   const aggregator_expr = has_output
     ? output_emitted.sql.replace(/\s+AS\s+\S+\s*$/i, '')
     : null
   const where_func =
-    !has_output && (is_main_select
+    !has_output &&
+    (is_main_select
       ? column_definition.main_where
       : column_definition.with_where)
   const where_column = where_func

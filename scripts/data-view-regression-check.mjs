@@ -45,7 +45,11 @@ import { process_expected_query } from '#libs-server/process-expected-query.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const project_root = path.resolve(__dirname, '..')
-const worktree_root = path.join(project_root, '.cache', 'data-view-regression-worktree')
+const worktree_root = path.join(
+  project_root,
+  '.cache',
+  'data-view-regression-worktree'
+)
 
 const argv = yargs(hideBin(process.argv))
   .option('base-ref', { type: 'string', default: 'origin/main' })
@@ -123,7 +127,10 @@ const read_base_sql_stored_batch = (filenames) => {
     try {
       const j = JSON.parse(body)
       const raw = j.expected_query || null
-      result[fn] = { sql: raw ? process_expected_query(raw) : null, error: null }
+      result[fn] = {
+        sql: raw ? process_expected_query(raw) : null,
+        error: null
+      }
     } catch {
       result[fn] = { sql: null, error: null }
     }
@@ -148,7 +155,15 @@ const run_build_sql = ({ cwd, filenames }) =>
       if (code !== 0) {
         return reject(new Error(`build-sql exited ${code}: ${stderr.trim()}`))
       }
-      try { resolve(JSON.parse(stdout)) } catch (e) { reject(new Error(`build-sql JSON parse: ${e.message}\n${stdout.slice(0, 500)}`)) }
+      try {
+        resolve(JSON.parse(stdout))
+      } catch (e) {
+        reject(
+          new Error(
+            `build-sql JSON parse: ${e.message}\n${stdout.slice(0, 500)}`
+          )
+        )
+      }
     })
   })
 
@@ -158,14 +173,22 @@ const ensure_worktree = () => {
   const ref = argv['base-ref']
   if (argv['refresh-worktree'] && fs.existsSync(worktree_root)) {
     log(`[worktree] removing existing ${worktree_root}`)
-    execSync(`git worktree remove --force ${JSON.stringify(worktree_root)}`, { cwd: project_root })
+    execSync(`git worktree remove --force ${JSON.stringify(worktree_root)}`, {
+      cwd: project_root
+    })
   }
   if (!fs.existsSync(worktree_root)) {
     log(`[worktree] git worktree add ${worktree_root} ${ref}`)
     fs.mkdirSync(path.dirname(worktree_root), { recursive: true })
     // Route git stdout to our stderr to keep --json mode's stdout clean.
-    execSync(`git fetch --quiet`, { cwd: project_root, stdio: ['ignore', 2, 'inherit'] })
-    execSync(`git worktree add --detach ${JSON.stringify(worktree_root)} ${ref}`, { cwd: project_root, stdio: ['ignore', 2, 'inherit'] })
+    execSync(`git fetch --quiet`, {
+      cwd: project_root,
+      stdio: ['ignore', 2, 'inherit']
+    })
+    execSync(
+      `git worktree add --detach ${JSON.stringify(worktree_root)} ${ref}`,
+      { cwd: project_root, stdio: ['ignore', 2, 'inherit'] }
+    )
     // share node_modules with the main checkout -- avoids a second yarn install
     const link = path.join(worktree_root, 'node_modules')
     if (!fs.existsSync(link)) {
@@ -173,8 +196,14 @@ const ensure_worktree = () => {
     }
   } else {
     log(`[worktree] refreshing ${worktree_root} to ${ref}`)
-    execSync(`git fetch --quiet`, { cwd: project_root, stdio: ['ignore', 2, 'inherit'] })
-    execSync(`git reset --hard ${ref}`, { cwd: worktree_root, stdio: ['ignore', 2, 'inherit'] })
+    execSync(`git fetch --quiet`, {
+      cwd: project_root,
+      stdio: ['ignore', 2, 'inherit']
+    })
+    execSync(`git reset --hard ${ref}`, {
+      cwd: worktree_root,
+      stdio: ['ignore', 2, 'inherit']
+    })
     // git reset --hard may remove or replace node_modules if it was tracked at
     // the base ref. Re-create the symlink idempotently so the worktree always
     // shares the main checkout's node_modules without a separate yarn install.
@@ -184,7 +213,10 @@ const ensure_worktree = () => {
     if (!needs_symlink) {
       try {
         const stat = fs.lstatSync(refresh_link)
-        if (!stat.isSymbolicLink() || fs.realpathSync(refresh_link) !== fs.realpathSync(link_target)) {
+        if (
+          !stat.isSymbolicLink() ||
+          fs.realpathSync(refresh_link) !== fs.realpathSync(link_target)
+        ) {
           fs.rmSync(refresh_link, { recursive: true, force: true })
           needs_symlink = true
         }
@@ -236,7 +268,9 @@ let _db = null
 const get_db = async () => {
   if (_db) return _db
   if (!process.env.NODE_ENV) {
-    throw new Error('NODE_ENV must be set (production for live regression checks)')
+    throw new Error(
+      'NODE_ENV must be set (production for live regression checks)'
+    )
   }
   _db = (await import('#db')).default
   return _db
@@ -266,13 +300,16 @@ const execute_sql = async (sql) => {
 const map_with_concurrency = async (items, limit, fn) => {
   const results = new Array(items.length)
   let i = 0
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const idx = i++
-      if (idx >= items.length) return
-      results[idx] = await fn(items[idx], idx)
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (true) {
+        const idx = i++
+        if (idx >= items.length) return
+        results[idx] = await fn(items[idx], idx)
+      }
     }
-  })
+  )
   await Promise.all(workers)
   return results
 }
@@ -304,7 +341,12 @@ const main = async () => {
   log(`[sql] sourcing head SQL (${argv['regen-head'] ? 'regen' : 'stored'})`)
   const head_sql = argv['regen-head']
     ? await run_build_sql({ cwd: project_root, filenames })
-    : Object.fromEntries(filenames.map((fn) => [fn, { sql: read_head_sql_stored(fn), error: null }]))
+    : Object.fromEntries(
+        filenames.map((fn) => [
+          fn,
+          { sql: read_head_sql_stored(fn), error: null }
+        ])
+      )
 
   log(`[sql] sourcing base SQL (${argv['regen-base'] ? 'regen' : 'stored'})`)
   const base_sql = argv['regen-base']
@@ -312,93 +354,149 @@ const main = async () => {
     : read_base_sql_stored_batch(filenames)
 
   // Per-fixture classify + execute.
-  const entries = await map_with_concurrency(fixtures, argv.concurrency, async (fixture) => {
-    const fn = fixture.filename
-    const head = head_sql[fn] || { sql: null, error: 'missing in head set' }
-    const base = base_sql[fn] || { sql: null, error: null }
+  const entries = await map_with_concurrency(
+    fixtures,
+    argv.concurrency,
+    async (fixture) => {
+      const fn = fixture.filename
+      const head = head_sql[fn] || { sql: null, error: 'missing in head set' }
+      const base = base_sql[fn] || { sql: null, error: null }
 
-    if (head.error) return { fixture: fn, status: 'error_build_head', detail: head.error }
-    if (!head.sql) return { fixture: fn, status: 'error_build_head', detail: 'no SQL on head' }
-    if (!base.sql && !base.error) return { fixture: fn, status: 'new', detail: 'fixture absent on base ref' }
-    if (base.error) return { fixture: fn, status: 'error_build_base', detail: base.error }
+      if (head.error)
+        return { fixture: fn, status: 'error_build_head', detail: head.error }
+      if (!head.sql)
+        return {
+          fixture: fn,
+          status: 'error_build_head',
+          detail: 'no SQL on head'
+        }
+      if (!base.sql && !base.error)
+        return {
+          fixture: fn,
+          status: 'new',
+          detail: 'fixture absent on base ref'
+        }
+      if (base.error)
+        return { fixture: fn, status: 'error_build_base', detail: base.error }
 
-    if (head.sql === base.sql) {
-      if (!argv['smoke-execute-unchanged']) {
+      if (head.sql === base.sql) {
+        if (!argv['smoke-execute-unchanged']) {
+          return { fixture: fn, status: 'unchanged' }
+        }
+        // Latent-bug guard: execute HEAD SQL even when unchanged. Surfaces
+        // structural defects that pre-existed the diff window (correlated
+        // subqueries that reference an outer JOIN alias as a relation, missing
+        // tables, etc.). Result hashing is unnecessary -- we only assert it
+        // runs without a Postgres error.
+        try {
+          await execute_sql(head.sql)
+        } catch (e) {
+          return {
+            fixture: fn,
+            status: 'error_smoke',
+            detail: e.message,
+            head_sql: head.sql
+          }
+        }
         return { fixture: fn, status: 'unchanged' }
       }
-      // Latent-bug guard: execute HEAD SQL even when unchanged. Surfaces
-      // structural defects that pre-existed the diff window (correlated
-      // subqueries that reference an outer JOIN alias as a relation, missing
-      // tables, etc.). Result hashing is unnecessary -- we only assert it
-      // runs without a Postgres error.
+
+      // SQL differs: execute both, hash, compare.
+      let head_rows, base_rows
       try {
-        await execute_sql(head.sql)
+        head_rows = await execute_sql(head.sql)
       } catch (e) {
         return {
           fixture: fn,
-          status: 'error_smoke',
+          status: 'error_head',
           detail: e.message,
-          head_sql: head.sql
+          head_sql: head.sql,
+          base_sql: base.sql
         }
       }
-      return { fixture: fn, status: 'unchanged' }
-    }
+      try {
+        base_rows = await execute_sql(base.sql)
+      } catch (e) {
+        return {
+          fixture: fn,
+          status: 'error_base',
+          detail: e.message,
+          head_sql: head.sql,
+          base_sql: base.sql
+        }
+      }
 
-    // SQL differs: execute both, hash, compare.
-    let head_rows, base_rows
-    try { head_rows = await execute_sql(head.sql) } catch (e) {
-      return { fixture: fn, status: 'error_head', detail: e.message, head_sql: head.sql, base_sql: base.sql }
-    }
-    try { base_rows = await execute_sql(base.sql) } catch (e) {
-      return { fixture: fn, status: 'error_base', detail: e.message, head_sql: head.sql, base_sql: base.sql }
-    }
+      const head_h = hash_rows_with_meta(head_rows)
+      const base_h = hash_rows_with_meta(base_rows)
 
-    const head_h = hash_rows_with_meta(head_rows)
-    const base_h = hash_rows_with_meta(base_rows)
+      if (head_h.row_hash === base_h.row_hash) {
+        return {
+          fixture: fn,
+          status: 'equivalent',
+          row_count: head_h.row_count,
+          column_count: head_h.column_count
+        }
+      }
 
-    if (head_h.row_hash === base_h.row_hash) {
+      const { only_head, only_base } = sample_diff_rows(
+        head_h.rows,
+        base_h.rows,
+        argv['sample-rows']
+      )
       return {
         fixture: fn,
-        status: 'equivalent',
-        row_count: head_h.row_count,
-        column_count: head_h.column_count
+        status: 'regression',
+        head_row_count: head_h.row_count,
+        base_row_count: base_h.row_count,
+        head_row_hash: head_h.row_hash,
+        base_row_hash: base_h.row_hash,
+        sample_only_in_head: only_head,
+        sample_only_in_base: only_base
       }
     }
-
-    const { only_head, only_base } = sample_diff_rows(head_h.rows, base_h.rows, argv['sample-rows'])
-    return {
-      fixture: fn,
-      status: 'regression',
-      head_row_count: head_h.row_count,
-      base_row_count: base_h.row_count,
-      head_row_hash: head_h.row_hash,
-      base_row_hash: base_h.row_hash,
-      sample_only_in_head: only_head,
-      sample_only_in_base: only_base
-    }
-  })
+  )
 
   if (_db) await _db.destroy()
 
   // Report.
   const by_status = entries.reduce((acc, e) => {
-    (acc[e.status] = acc[e.status] || []).push(e)
+    ;(acc[e.status] = acc[e.status] || []).push(e)
     return acc
   }, {})
 
   if (argv.json) {
-    process.stdout.write(JSON.stringify({ base_ref: argv['base-ref'], entries }, null, 2) + '\n')
+    process.stdout.write(
+      JSON.stringify({ base_ref: argv['base-ref'], entries }, null, 2) + '\n'
+    )
   } else {
-    const order = ['regression', 'error_head', 'error_base', 'error_smoke', 'error_build_head', 'error_build_base', 'equivalent', 'new', 'unchanged']
+    const order = [
+      'regression',
+      'error_head',
+      'error_base',
+      'error_smoke',
+      'error_build_head',
+      'error_build_base',
+      'equivalent',
+      'new',
+      'unchanged'
+    ]
     for (const status of order) {
       const items = by_status[status] || []
       if (!items.length) continue
       log(`\n[${status}] ${items.length}`)
       for (const e of items) {
         if (status === 'regression') {
-          log(`  ${e.fixture}: rows ${e.base_row_count} -> ${e.head_row_count}, hash ${e.base_row_hash.slice(0, 12)} -> ${e.head_row_hash.slice(0, 12)}`)
-          if (e.sample_only_in_base.length) log(`    only in base (sample): ${JSON.stringify(e.sample_only_in_base).slice(0, 400)}`)
-          if (e.sample_only_in_head.length) log(`    only in head (sample): ${JSON.stringify(e.sample_only_in_head).slice(0, 400)}`)
+          log(
+            `  ${e.fixture}: rows ${e.base_row_count} -> ${e.head_row_count}, hash ${e.base_row_hash.slice(0, 12)} -> ${e.head_row_hash.slice(0, 12)}`
+          )
+          if (e.sample_only_in_base.length)
+            log(
+              `    only in base (sample): ${JSON.stringify(e.sample_only_in_base).slice(0, 400)}`
+            )
+          if (e.sample_only_in_head.length)
+            log(
+              `    only in head (sample): ${JSON.stringify(e.sample_only_in_head).slice(0, 400)}`
+            )
         } else if (status.startsWith('error')) {
           log(`  ${e.fixture}: ${e.detail}`)
         } else {
@@ -407,10 +505,15 @@ const main = async () => {
       }
     }
     const regressions = (by_status.regression || []).length
-    const errors = ['error_head', 'error_base', 'error_build_head', 'error_build_base'].reduce(
-      (n, k) => n + (by_status[k] || []).length, 0
+    const errors = [
+      'error_head',
+      'error_base',
+      'error_build_head',
+      'error_build_base'
+    ].reduce((n, k) => n + (by_status[k] || []).length, 0)
+    log(
+      `\nSummary: ${regressions} regression(s), ${errors} error(s), ${(by_status.equivalent || []).length} equivalent, ${(by_status.unchanged || []).length} unchanged, ${(by_status.new || []).length} new${os.EOL}`
     )
-    log(`\nSummary: ${regressions} regression(s), ${errors} error(s), ${(by_status.equivalent || []).length} equivalent, ${(by_status.unchanged || []).length} unchanged, ${(by_status.new || []).length} new${os.EOL}`)
     if (regressions || errors) process.exit(2)
   }
 }

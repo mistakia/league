@@ -9,7 +9,10 @@ import extract_ktc_per_asset from '#libs-server/composite-market-value/extract-k
 import extract_adp_per_asset from '#libs-server/composite-market-value/extract-adp-per-asset.mjs'
 import extract_rankings_per_asset from '#libs-server/composite-market-value/extract-rankings-per-asset.mjs'
 import extract_props_per_asset from '#libs-server/composite-market-value/extract-props-per-asset.mjs'
-import { load_fc_format_map, index_by_pid } from '#libs-server/composite-market-value/utils.mjs'
+import {
+  load_fc_format_map,
+  index_by_pid
+} from '#libs-server/composite-market-value/utils.mjs'
 import { run_cmv_script } from '#libs-server/composite-market-value/script-runner.mjs'
 
 // Nightly per-(source, format_category, date) linear calibration of native
@@ -32,9 +35,14 @@ const R_SQUARED_FLOOR = 0.5
 const ols = (xs, ys) => {
   const n = xs.length
   if (n < 2) return { scale: 1, intercept: 0, r2: null }
-  let sx = 0; let sy = 0; let sxx = 0; let sxy = 0; let syy = 0
+  let sx = 0
+  let sy = 0
+  let sxx = 0
+  let sxy = 0
+  let syy = 0
   for (let i = 0; i < n; i++) {
-    sx += xs[i]; sy += ys[i]
+    sx += xs[i]
+    sy += ys[i]
     sxx += xs[i] * xs[i]
     sxy += xs[i] * ys[i]
     syy += ys[i] * ys[i]
@@ -56,22 +64,39 @@ const latest_in_window = (pid_idx, pid) => {
 }
 
 const calibrate_for_date_and_category = async ({
-  date_iso, format_category, mapping, league_format_hash, scoring_format_hash, player_ids
+  date_iso,
+  format_category,
+  mapping,
+  league_format_hash,
+  scoring_format_hash,
+  player_ids
 }) => {
   const window_start = dayjs(date_iso).subtract(30, 'day').format('YYYY-MM-DD')
   const ktc = await extract_ktc_per_asset({
-    player_ids, ktc_qb_axis: mapping.ktc_qb_axis, start_date: window_start, end_date: date_iso
+    player_ids,
+    ktc_qb_axis: mapping.ktc_qb_axis,
+    start_date: window_start,
+    end_date: date_iso
   })
   const adp = await extract_adp_per_asset({
-    player_ids, adp_type: mapping.adp_type, league_format_hash,
-    start_date: window_start, end_date: date_iso
+    player_ids,
+    adp_type: mapping.adp_type,
+    league_format_hash,
+    start_date: window_start,
+    end_date: date_iso
   })
   const rankings = await extract_rankings_per_asset({
-    player_ids, ranking_type: mapping.ranking_type, league_format_hash,
-    start_date: window_start, end_date: date_iso
+    player_ids,
+    ranking_type: mapping.ranking_type,
+    league_format_hash,
+    start_date: window_start,
+    end_date: date_iso
   })
   const props = await extract_props_per_asset({
-    player_ids, scoring_format_hash, start_date: window_start, end_date: date_iso
+    player_ids,
+    scoring_format_hash,
+    start_date: window_start,
+    end_date: date_iso
   })
 
   const ktc_idx = index_by_pid(ktc)
@@ -85,14 +110,21 @@ const calibrate_for_date_and_category = async ({
     [SOURCES.RANKINGS, rank_idx],
     [SOURCES.PROPS, props_idx]
   ]) {
-    const xs = []; const ys = []
+    const xs = []
+    const ys = []
     for (const pid of player_ids) {
       const s = latest_in_window(source_idx, pid)
       const k = latest_in_window(ktc_idx, pid)
-      if (s != null && k != null) { xs.push(s); ys.push(k) }
+      if (s != null && k != null) {
+        xs.push(s)
+        ys.push(k)
+      }
     }
     const n = xs.length
-    let scale = 1; let intercept = 0; let r2 = null; let fallback = null
+    let scale = 1
+    let intercept = 0
+    let r2 = null
+    let fallback = null
     if (n < OVERLAP_FLOOR) {
       fallback = 'calibration_undersized'
     } else {
@@ -101,7 +133,9 @@ const calibrate_for_date_and_category = async ({
         fallback = 'calibration_low_r_squared'
         r2 = fit.r2
       } else {
-        scale = fit.scale; intercept = fit.intercept; r2 = fit.r2
+        scale = fit.scale
+        intercept = fit.intercept
+        r2 = fit.r2
       }
     }
     rows.push({
@@ -131,22 +165,31 @@ const calibrate_for_date_and_category = async ({
   return rows
 }
 
-const calibrate_composite_market_value_sources = async ({ start_date, end_date, rebuild = false }) => {
+const calibrate_composite_market_value_sources = async ({
+  start_date,
+  end_date,
+  rebuild = false
+}) => {
   log(`calibrating composite market value sources ${start_date} -> ${end_date}`)
 
-  const mappings = await db('format_category_signal_mapping').orderBy('format_category')
+  const mappings = await db('format_category_signal_mapping').orderBy(
+    'format_category'
+  )
   const fc_format = await load_fc_format_map()
 
-  const player_ids = (await db('keeptradecut_rankings')
-    .distinct('pid')
-    .where('d', '>=', Math.floor(new Date(start_date).getTime() / 1000))
-    .where('d', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
-    .where('pid', 'NOT LIKE', 'KTCPICK%')).map((r) => r.pid)
+  const player_ids = (
+    await db('keeptradecut_rankings')
+      .distinct('pid')
+      .where('d', '>=', Math.floor(new Date(start_date).getTime() / 1000))
+      .where('d', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
+      .where('pid', 'NOT LIKE', 'KTCPICK%')
+  ).map((r) => r.pid)
 
   if (rebuild) {
     await db('composite_market_value_calibration')
       .where('date', '>=', start_date)
-      .where('date', '<=', end_date).del()
+      .where('date', '<=', end_date)
+      .del()
   }
 
   let total = 0
@@ -158,16 +201,20 @@ const calibrate_composite_market_value_sources = async ({ start_date, end_date, 
       const fmt = fc_format.get(m.format_category)
       if (!fmt) continue
       const rows = await calibrate_for_date_and_category({
-        date_iso, format_category: m.format_category, mapping: m,
+        date_iso,
+        format_category: m.format_category,
+        mapping: m,
         league_format_hash: fmt.league_format_hash,
-        scoring_format_hash: fmt.scoring_format_hash, player_ids
+        scoring_format_hash: fmt.scoring_format_hash,
+        player_ids
       })
       await batch_insert({
         items: rows,
-        save: (items) => db('composite_market_value_calibration')
-          .insert(items)
-          .onConflict(['source', 'format_category', 'date'])
-          .merge(),
+        save: (items) =>
+          db('composite_market_value_calibration')
+            .insert(items)
+            .onConflict(['source', 'format_category', 'date'])
+            .merge(),
         batch_size: 1000
       })
       total += rows.length

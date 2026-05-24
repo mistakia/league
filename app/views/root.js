@@ -52,8 +52,7 @@ const truncate_stack = (stack) => {
 const dual_write_to_league_api = (event) => {
   try {
     const error = event?.originalError || event?.errors?.[0] || {}
-    const raw_stack =
-      error?.stack || event?.errors?.[0]?.stacktrace || null
+    const raw_stack = error?.stack || event?.errors?.[0]?.stacktrace || null
     fetch('/api/errors', {
       method: 'POST',
       credentials: 'same-origin',
@@ -62,12 +61,9 @@ const dual_write_to_league_api = (event) => {
       body: JSON.stringify({
         error: {
           message:
-            error?.message ||
-            event?.errors?.[0]?.errorMessage ||
-            'Unknown',
+            error?.message || event?.errors?.[0]?.errorMessage || 'Unknown',
           stack: truncate_stack(raw_stack),
-          name:
-            error?.name || event?.errors?.[0]?.errorClass || 'Error'
+          name: error?.name || event?.errors?.[0]?.errorClass || 'Error'
         }
       })
     }).catch(() => {})

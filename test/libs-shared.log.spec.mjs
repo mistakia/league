@@ -194,7 +194,9 @@ describe('libs-shared/log', function () {
       const { calls, fetch_stub } = make_fetch_recorder()
       globalThis.fetch = fetch_stub
       const log = create_logger('test:fpo', { service: 'unit-test' })
-      const result = log.error('whatever', { fingerprint_override: 'custom-fp' })
+      const result = log.error('whatever', {
+        fingerprint_override: 'custom-fp'
+      })
       await result.promise
       expect(calls[0].body.payload.error_fingerprint).to.equal('custom-fp')
     })

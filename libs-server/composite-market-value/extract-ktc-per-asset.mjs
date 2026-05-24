@@ -10,11 +10,18 @@ import { keeptradecut_metric_types } from '#constants'
 //
 // Returns: Map<`${pid}__${date_iso}`, numeric_value>
 
-export const extract_ktc_per_asset = async ({ player_ids, ktc_qb_axis, start_date, end_date }) => {
+export const extract_ktc_per_asset = async ({
+  player_ids,
+  ktc_qb_axis,
+  start_date,
+  end_date
+}) => {
   const result = new Map()
   if (!player_ids.length) return result
   const rows = await db('keeptradecut_rankings')
-    .select(db.raw("pid, TO_CHAR(TO_TIMESTAMP(d), 'YYYY-MM-DD') AS date_iso, v"))
+    .select(
+      db.raw("pid, TO_CHAR(TO_TIMESTAMP(d), 'YYYY-MM-DD') AS date_iso, v")
+    )
     .whereIn('pid', player_ids)
     .where('qb', ktc_qb_axis)
     .where('type', keeptradecut_metric_types.VALUE)

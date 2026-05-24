@@ -29,11 +29,7 @@ const REQUIRED_COLUMNS = [
   'practice_status'
 ]
 
-const REPORT_STATUS_TOKENS = new Set([
-  'OUT',
-  'DOUBTFUL',
-  'QUESTIONABLE'
-])
+const REPORT_STATUS_TOKENS = new Set(['OUT', 'DOUBTFUL', 'QUESTIONABLE'])
 
 export const validate_response_shape = ({ rows }) => {
   if (!Array.isArray(rows) || rows.length === 0) {

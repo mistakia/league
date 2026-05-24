@@ -1,5 +1,8 @@
 import db from '#db'
-import { has_bridge, resolve as resolve_bridge } from '../identity-bridge-registry.mjs'
+import {
+  has_bridge,
+  resolve as resolve_bridge
+} from '../identity-bridge-registry.mjs'
 import {
   compute_measure_alias,
   is_batchable,
@@ -195,9 +198,7 @@ const build_role_union_period_cte = ({
     outer.select('nfl_games.year').groupByRaw('"nfl_games"."year"')
   }
   if (!is_aggregate) {
-    outer
-      .select(db.raw(`${period_key} AS period_key`))
-      .groupByRaw(period_key)
+    outer.select(db.raw(`${period_key} AS period_key`)).groupByRaw(period_key)
   }
   apply_scope_to_query({
     query: outer,
@@ -219,14 +220,18 @@ const build_role_union_period_cte = ({
       this.andOn('player_seasonlogs.seas_type', '=', 'nfl_games.seas_type')
     })
     if (career_year) {
-      const arr = Array.isArray(career_year) ? career_year : [career_year, career_year]
+      const arr = Array.isArray(career_year)
+        ? career_year
+        : [career_year, career_year]
       outer.whereBetween(
         'player_seasonlogs.career_year',
         normalize_career_year_range(arr)
       )
     }
     if (career_game) {
-      const arr = Array.isArray(career_game) ? career_game : [career_game, career_game]
+      const arr = Array.isArray(career_game)
+        ? career_game
+        : [career_game, career_game]
       const [lo, hi] = normalize_career_year_range(arr)
       outer.whereBetween('player_seasonlogs.career_game', [lo, hi])
     }
@@ -329,11 +334,7 @@ export const build_batched_period_cte = ({
   }
 
   if (extra_player_join) {
-    sub.innerJoin(
-      'player',
-      'player.gsis_it_id',
-      `${source_table}.gsis_it_id`
-    )
+    sub.innerJoin('player', 'player.gsis_it_id', `${source_table}.gsis_it_id`)
   }
 
   if (is_team) {
@@ -492,8 +493,7 @@ export const add_period_cte = async ({
     role_attributions,
     pid_columns: column_def.pid_columns,
     apply_filters: column_def.apply_filters
-      ? ({ query }) =>
-          column_def.apply_filters({ query, params, identity_id })
+      ? ({ query }) => column_def.apply_filters({ query, params, identity_id })
       : null,
     period,
     query_context,

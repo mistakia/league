@@ -217,7 +217,10 @@ router.put('/:leagueId', async (req, res) => {
         })
       } catch (err) {
         const job_reason = `cascade_failed_scoring lid=${lid} year=${current_season.year} hash=${scoring_format.scoring_format_hash}`
-        await report_error({ job_type: job_types.PROCESS_PROJECTIONS, error: err })
+        await report_error({
+          job_type: job_types.PROCESS_PROJECTIONS,
+          error: err
+        })
         await report_job({
           job_type: job_types.PROCESS_PROJECTIONS,
           job_success: false,
@@ -244,7 +247,10 @@ router.put('/:leagueId', async (req, res) => {
         })
       } catch (err) {
         const job_reason = `cascade_failed_league lid=${lid} year=${current_season.year} hash=${league_format.league_format_hash}`
-        await report_error({ job_type: job_types.PROCESS_PROJECTIONS, error: err })
+        await report_error({
+          job_type: job_types.PROCESS_PROJECTIONS,
+          error: err
+        })
         await report_job({
           job_type: job_types.PROCESS_PROJECTIONS,
           job_success: false,

@@ -6,9 +6,7 @@
       {
         "column_id": "pff_team_grades_overall",
         "params": {
-          "year": [
-            2024
-          ]
+          "year": [2024]
         }
       }
     ],
@@ -22,9 +20,7 @@
       {
         "column_id": "player_position",
         "params": {},
-        "value": [
-          "TEAM"
-        ],
+        "value": ["TEAM"],
         "operator": "IN"
       }
     ],

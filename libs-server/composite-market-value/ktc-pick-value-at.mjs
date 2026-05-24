@@ -16,7 +16,8 @@ import db from '#db'
 export const PICK_SLOT = { EARLY: 1, MID: 2, LATE: 3 }
 
 export const slot_from_position = (overall_position, num_teams) => {
-  if (overall_position == null || num_teams == null || num_teams <= 0) return null
+  if (overall_position == null || num_teams == null || num_teams <= 0)
+    return null
   const third = num_teams / 3
   if (overall_position <= third) return PICK_SLOT.EARLY
   if (overall_position <= 2 * third) return PICK_SLOT.MID
@@ -33,7 +34,12 @@ export const load_pick_ktc_indexes = async ({ qb_axis }) => {
     pick_pid_meta: new Map(),
     ktc_picks: new Map()
   }
-  const pids_rows = await db('keeptradecut_pick').select('pid', 'year', 'round', 'slot')
+  const pids_rows = await db('keeptradecut_pick').select(
+    'pid',
+    'year',
+    'round',
+    'slot'
+  )
   for (const r of pids_rows) {
     const k = `${r.year}__${r.round}__${r.slot}`
     idx.pick_pid_by_yrs.set(k, r.pid)
@@ -84,13 +90,20 @@ const lookup_le = (rows, target_unix) => {
 //      month/day as target_unix.
 //   3) NULL.
 export const ktc_pick_at = ({
-  pick_year, pick_round, pick_overall_position, num_teams, target_unix, idx
+  pick_year,
+  pick_round,
+  pick_overall_position,
+  num_teams,
+  target_unix,
+  idx
 }) => {
   const slot = slot_from_position(pick_overall_position, num_teams)
   if (slot == null || pick_year == null || pick_round == null) return null
 
   // 1) Exact lookup
-  const exact_pid = idx.pick_pid_by_yrs.get(`${pick_year}__${pick_round}__${slot}`)
+  const exact_pid = idx.pick_pid_by_yrs.get(
+    `${pick_year}__${pick_round}__${slot}`
+  )
   if (exact_pid) {
     const rows = idx.ktc_picks.get(exact_pid)
     if (rows && rows.length && rows[0].d <= target_unix) {
@@ -115,8 +128,7 @@ export const ktc_pick_at = ({
     if (meta.round !== pick_round || meta.slot !== slot) continue
     const rows = idx.ktc_picks.get(pid)
     if (!rows || !rows.length) continue
-    const analog_target_unix =
-      unix_of_ymd(meta.year - years_out, md)
+    const analog_target_unix = unix_of_ymd(meta.year - years_out, md)
     if (analog_target_unix < rows[0].d) continue
     if (analog_target_unix > rows[rows.length - 1].d) continue
     const v = lookup_le(rows, analog_target_unix)

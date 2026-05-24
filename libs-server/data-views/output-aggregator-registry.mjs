@@ -199,7 +199,10 @@ export const apply_output_aggregator = async ({
   // its own outer join (the wrap CTE is per-column, even though the
   // denominator CTE may be shared). Bypass the `joined_output_ctes` dedup
   // so the plugin's join_cte runs once per column.
-  if (plugin_handles_numerator || !query_context.joined_output_ctes.has(cte_name)) {
+  if (
+    plugin_handles_numerator ||
+    !query_context.joined_output_ctes.has(cte_name)
+  ) {
     plugin.join_cte({
       query_context,
       cte_name,
@@ -218,7 +221,11 @@ export const apply_output_aggregator = async ({
   // materialized numerator CTE; emit_rate_outer_select reads from it. Skipped
   // when the chosen plugin is aggregator_rate itself (it already materializes
   // the canonical period CTE).
-  if (plugin !== aggregator_rate && numerator_via_cte() && !plugin_handles_numerator) {
+  if (
+    plugin !== aggregator_rate &&
+    numerator_via_cte() &&
+    !plugin_handles_numerator
+  ) {
     // period='aggregate' collapses the numerator CTE to (pid|team_code,
     // year) grain so it joins 1:1 with the outer query. Without this,
     // multi-column rate queries cross-multiply via per-period rows in each

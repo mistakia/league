@@ -9,27 +9,16 @@
       {
         "column_id": "player_rush_yards_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "yds_gained": [
-            15,
-            99
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "year": [2024],
+          "yds_gained": [15, 99],
+          "rate_type": ["per_game"]
         }
       },
       {
         "column_id": "player_rush_yards_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "year": [2024],
+          "rate_type": ["per_game"]
         }
       }
     ],
@@ -37,9 +26,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ],
     "sort": [

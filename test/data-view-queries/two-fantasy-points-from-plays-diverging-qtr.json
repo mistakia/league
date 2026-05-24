@@ -1,7 +1,15 @@
 {
   "name": "two fantasy points from plays columns diverge in qtr filter",
   "description": "Regression for role-union (non-batchable) CTE-name collision: two instances of player_fantasy_points_from_plays differing in a per-column play filter (qtr) must emit distinct CTEs. Previously the get_cte_name hash only included aggregator-declared consumes_params (year/week/seas_type/scoring_format_hash), so qtr did not differentiate the CTE name and the second column reused the first's CTE.",
-  "tags": ["plays", "parameters", "filters", "rate_type", "cte", "role_union", "regression"],
+  "tags": [
+    "plays",
+    "parameters",
+    "filters",
+    "rate_type",
+    "cte",
+    "role_union",
+    "regression"
+  ],
   "timeout_ms": 40000,
   "request": {
     "columns": [
@@ -9,32 +17,22 @@
       {
         "column_id": "player_fantasy_points_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
+          "year": [2024],
           "scoring_format_hash": [
             "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e"
           ],
-          "qtr": [
-            4
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "qtr": [4],
+          "rate_type": ["per_game"]
         }
       },
       {
         "column_id": "player_fantasy_points_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
+          "year": [2024],
           "scoring_format_hash": [
             "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e"
           ],
-          "rate_type": [
-            "per_game"
-          ]
+          "rate_type": ["per_game"]
         }
       }
     ],
@@ -42,9 +40,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ],
     "sort": [

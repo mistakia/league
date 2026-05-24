@@ -40,26 +40,35 @@ const run_browser_task = async ({ contest_ids = [] } = {}) => {
 
   const caller_label =
     process.env.CLOAKBROWSER_CALLER ||
-    (process.env.JOB_PROJECT ? `job:${process.env.JOB_PROJECT}` : 'import-draftkings-dfs-ownership')
+    (process.env.JOB_PROJECT
+      ? `job:${process.env.JOB_PROJECT}`
+      : 'import-draftkings-dfs-ownership')
 
   const args = [
     BROWSER_TASK,
-    '--out-dir', tmp_dir,
-    '--caller-label', caller_label
+    '--out-dir',
+    tmp_dir,
+    '--caller-label',
+    caller_label
   ]
   if (contest_ids.length) {
     args.push('--contest-ids', contest_ids.join(','))
   }
 
-  log('spawning sandboxed browser task as _stealth-browser (contests=%d)', contest_ids.length)
+  log(
+    'spawning sandboxed browser task as _stealth-browser (contests=%d)',
+    contest_ids.length
+  )
   await new Promise((resolve, reject) => {
     const child = spawn(SANDBOX_WRAPPER, args, {
       stdio: ['ignore', 'inherit', 'inherit']
     })
     child.on('error', reject)
     child.on('exit', (code, signal) => {
-      if (signal) return reject(new Error(`browser-task killed by signal ${signal}`))
-      if (code !== 0) return reject(new Error(`browser-task exited with code ${code}`))
+      if (signal)
+        return reject(new Error(`browser-task killed by signal ${signal}`))
+      if (code !== 0)
+        return reject(new Error(`browser-task exited with code ${code}`))
       resolve()
     })
   })
@@ -224,7 +233,10 @@ const import_ownership = async ({
   // land in the handoff tempdir as contest-<id>.csv; the orchestrator
   // reads them by name below.
   const contest_ids = contests.map((c) => c.source_contest_id)
-  log('capturing DraftKings session + downloading %d contest CSVs via sandboxed browser task', contest_ids.length)
+  log(
+    'capturing DraftKings session + downloading %d contest CSVs via sandboxed browser task',
+    contest_ids.length
+  )
   const { tmp_dir } = await run_browser_task({ contest_ids })
 
   let total_ownership_records = 0
@@ -241,7 +253,10 @@ const import_ownership = async ({
         contest.source_draft_group_id
       )
 
-      const csv_path = path.join(tmp_dir, `contest-${contest.source_contest_id}.csv`)
+      const csv_path = path.join(
+        tmp_dir,
+        `contest-${contest.source_contest_id}.csv`
+      )
       if (!fs.existsSync(csv_path)) {
         log(
           'no CSV produced by sandbox for contest %s -- skipping',

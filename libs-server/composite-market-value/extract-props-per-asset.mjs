@@ -27,14 +27,22 @@ const SEASON_MARKETS = [
 
 const scoring_multiplier = (market_type, scoring) => {
   switch (market_type) {
-    case 'SEASON_PASSING_YARDS':       return Number(scoring.py)    || 0
-    case 'SEASON_PASSING_TOUCHDOWNS':  return Number(scoring.tdp)   || 0
-    case 'SEASON_RUSHING_YARDS':       return Number(scoring.ry)    || 0
-    case 'SEASON_RUSHING_TOUCHDOWNS':  return Number(scoring.tdr)   || 0
-    case 'SEASON_RECEIVING_YARDS':     return Number(scoring.recy)  || 0
-    case 'SEASON_RECEIVING_TOUCHDOWNS':return Number(scoring.tdrec) || 0
-    case 'SEASON_RECEPTIONS':          return Number(scoring.rec)   || 0
-    default:                           return 0
+    case 'SEASON_PASSING_YARDS':
+      return Number(scoring.py) || 0
+    case 'SEASON_PASSING_TOUCHDOWNS':
+      return Number(scoring.tdp) || 0
+    case 'SEASON_RUSHING_YARDS':
+      return Number(scoring.ry) || 0
+    case 'SEASON_RUSHING_TOUCHDOWNS':
+      return Number(scoring.tdr) || 0
+    case 'SEASON_RECEIVING_YARDS':
+      return Number(scoring.recy) || 0
+    case 'SEASON_RECEIVING_TOUCHDOWNS':
+      return Number(scoring.tdrec) || 0
+    case 'SEASON_RECEPTIONS':
+      return Number(scoring.rec) || 0
+    default:
+      return 0
   }
 }
 
@@ -68,13 +76,24 @@ export const extract_props_per_asset = async ({
         .andOn('s.source_selection_id', '=', 'h.source_selection_id')
     })
     .innerJoin('prop_markets_index as m', function () {
-      this.on('m.source_id', '=', 'h.source_id')
-        .andOn('m.source_market_id', '=', 'h.source_market_id')
+      this.on('m.source_id', '=', 'h.source_id').andOn(
+        'm.source_market_id',
+        '=',
+        'h.source_market_id'
+      )
     })
     .whereIn('m.market_type', SEASON_MARKETS)
     .whereIn('s.selection_pid', player_ids)
-    .where('h.timestamp', '>=', Math.floor(new Date(start_date).getTime() / 1000))
-    .where('h.timestamp', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
+    .where(
+      'h.timestamp',
+      '>=',
+      Math.floor(new Date(start_date).getTime() / 1000)
+    )
+    .where(
+      'h.timestamp',
+      '<=',
+      Math.floor(new Date(end_date).getTime() / 1000) + 86400
+    )
     .whereNotNull('h.selection_metric_line')
 
   // Bucket by (pid, date, market_type) -> median line across books

@@ -43,7 +43,9 @@ const validate = async () => {
   // 2. Changelog coverage rate > 0 for 2021+.
   const cl_rates = await db('historical_injury_index')
     .select('year')
-    .avg({ r: db.raw('CASE WHEN changelog_injury_event THEN 1.0 ELSE 0.0 END') })
+    .avg({
+      r: db.raw('CASE WHEN changelog_injury_event THEN 1.0 ELSE 0.0 END')
+    })
     .where('year', '>=', 2021)
     .groupBy('year')
     .orderBy('year')
@@ -51,7 +53,9 @@ const validate = async () => {
     const rate = Number(r)
     log(`  changelog-event rate ${year}: ${(rate * 100).toFixed(1)}%`)
     if (rate <= 0)
-      failures.push(`year ${year}: changelog_injury_event rate = 0 (join not firing)`)
+      failures.push(
+        `year ${year}: changelog_injury_event rate = 0 (join not firing)`
+      )
   }
 
   // 3. Practice coverage > 100 distinct PIDs per year.
@@ -80,7 +84,9 @@ const validate = async () => {
     const avg = Number(a)
     log(`  mean source_concurrence on missed rows ${year}: ${avg.toFixed(2)}`)
     if (avg <= 1.0)
-      failures.push(`year ${year}: mean source_concurrence ${avg.toFixed(2)} <= 1.0`)
+      failures.push(
+        `year ${year}: mean source_concurrence ${avg.toFixed(2)} <= 1.0`
+      )
   }
 
   if (failures.length) {

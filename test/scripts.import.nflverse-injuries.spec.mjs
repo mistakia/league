@@ -35,7 +35,11 @@ describe('SCRIPTS /import-nflverse-injuries validator', function () {
     ]
     const result = validate_response_shape({ rows })
     expect(result.rows).to.equal(3)
-    expect(result.report_status_counts).to.include.keys('OUT', 'QUESTIONABLE', 'DOUBTFUL')
+    expect(result.report_status_counts).to.include.keys(
+      'OUT',
+      'QUESTIONABLE',
+      'DOUBTFUL'
+    )
   })
 
   it('passes on pre-2016 row set with Probable as the dominant value', function () {

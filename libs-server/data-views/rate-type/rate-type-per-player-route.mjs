@@ -96,7 +96,11 @@ export const add_per_player_route_cte = ({
 
   // nfl_plays_receiver carries year but not seas_type / nfl_week_id; mirror
   // the view-scope year predicate onto it explicitly.
-  if (query_context && query_context.nfl_week_ids && query_context.nfl_week_ids.length) {
+  if (
+    query_context &&
+    query_context.nfl_week_ids &&
+    query_context.nfl_week_ids.length
+  ) {
     apply_scope_to_query({
       query: cte_query,
       table_name: 'nfl_plays_receiver',

@@ -1,12 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import {
-  wait,
-  report_job,
-  write_worker_heartbeat,
-  is_main
-} from '#libs-server'
+import { wait, report_job, write_worker_heartbeat, is_main } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'

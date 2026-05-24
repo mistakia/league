@@ -3,34 +3,19 @@
   "name": "player_rush_yards_after_contact_per_attempt_from_plays year_offset range",
   "description": "Test case for player_rush_yards_after_contact_per_attempt_from_plays year_offset range",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_weighted_opportunity_rating_from_plays",
         "params": {
-          "year": [
-            2018,
-            2019,
-            2020,
-            2021
-          ]
+          "year": [2018, 2019, 2020, 2021]
         }
       },
       {
         "column_id": "player_weighted_opportunity_rating_from_plays",
         "params": {
-          "year": [
-            2018,
-            2019,
-            2020,
-            2021
-          ],
-          "year_offset": [
-            1,
-            3
-          ]
+          "year": [2018, 2019, 2020, 2021],
+          "year_offset": [1, 3]
         }
       }
     ],
@@ -41,16 +26,12 @@
         "desc": true
       }
     ],
-    "splits": [
-      "year"
-    ],
+    "splits": ["year"],
     "where": [
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       }
     ]
   },

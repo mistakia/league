@@ -35,9 +35,17 @@ const run_browser_task = async ({ urls, ignore_cache = false }) => {
 
   const caller_label =
     process.env.CLOAKBROWSER_CALLER ||
-    (process.env.JOB_PROJECT ? `job:${process.env.JOB_PROJECT}` : 'import-player-draft-position-pfr')
+    (process.env.JOB_PROJECT
+      ? `job:${process.env.JOB_PROJECT}`
+      : 'import-player-draft-position-pfr')
 
-  const args = [BROWSER_TASK, '--out-dir', tmp_dir, '--caller-label', caller_label]
+  const args = [
+    BROWSER_TASK,
+    '--out-dir',
+    tmp_dir,
+    '--caller-label',
+    caller_label
+  ]
   for (const url of urls) {
     args.push('--url', url)
   }
@@ -51,8 +59,10 @@ const run_browser_task = async ({ urls, ignore_cache = false }) => {
       })
       child.on('error', reject)
       child.on('exit', (code, signal) => {
-        if (signal) return reject(new Error(`browser-task killed by signal ${signal}`))
-        if (code !== 0) return reject(new Error(`browser-task exited with code ${code}`))
+        if (signal)
+          return reject(new Error(`browser-task killed by signal ${signal}`))
+        if (code !== 0)
+          return reject(new Error(`browser-task exited with code ${code}`))
         resolve()
       })
     })
@@ -112,7 +122,8 @@ const parse_draft_html = (html, year) => {
       row.querySelector('[data-stat="pro_bowls"]')?.textContent || 0
     )
     const years_as_primary_starter = Number(
-      row.querySelector('[data-stat="years_as_primary_starter"]')?.textContent || 0
+      row.querySelector('[data-stat="years_as_primary_starter"]')
+        ?.textContent || 0
     )
     const pfr_weighted_career_approximate_value = Number(
       row.querySelector('[data-stat="career_av"]')?.textContent || 0
@@ -161,7 +172,9 @@ const import_player_draft_position_pfr = async ({
 
   const page_result = pages.find((p) => p.url === draft_url)
   if (!page_result || !page_result.html) {
-    throw new Error(`browser-task failed to fetch draft page for ${year}: ${page_result?.error || 'no HTML'}`)
+    throw new Error(
+      `browser-task failed to fetch draft page for ${year}: ${page_result?.error || 'no HTML'}`
+    )
   }
 
   const draft_players = parse_draft_html(page_result.html, year)

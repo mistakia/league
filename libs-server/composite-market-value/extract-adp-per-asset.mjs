@@ -1,6 +1,9 @@
 import db from '#db'
 
-import { median, load_pick_value_curve } from '#libs-server/composite-market-value/utils.mjs'
+import {
+  median,
+  load_pick_value_curve
+} from '#libs-server/composite-market-value/utils.mjs'
 
 // ADP rank converted via league_format_draft_pick_value (format-aware empirical
 // rank -> pts-added/game curve) before calibration. Topic 4 resolution: the
@@ -20,11 +23,19 @@ export const extract_adp_per_asset = async ({
   if (!player_ids.length) return result
 
   const adp_rows = await db('player_adp_history')
-    .select(db.raw("pid, TO_CHAR(TO_TIMESTAMP(timestamp), 'YYYY-MM-DD') AS date_iso, adp, source_id"))
+    .select(
+      db.raw(
+        "pid, TO_CHAR(TO_TIMESTAMP(timestamp), 'YYYY-MM-DD') AS date_iso, adp, source_id"
+      )
+    )
     .whereIn('pid', player_ids)
     .where('adp_type', adp_type)
     .where('timestamp', '>=', Math.floor(new Date(start_date).getTime() / 1000))
-    .where('timestamp', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
+    .where(
+      'timestamp',
+      '<=',
+      Math.floor(new Date(end_date).getTime() / 1000) + 86400
+    )
     .whereNotNull('adp')
 
   const buckets = new Map()
