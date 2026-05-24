@@ -100,6 +100,35 @@ export const enrich_player_identifications = (
     return true
   }
 
+  // Resolve tackle slot _pid columns from existing _gsis columns on the play
+  // row. Used when play_stats does not carry a valid statId 79/80/82 row for
+  // this slot but the play row still has a gsis value from an earlier import.
+  const map_tackle_array_from_play_row = (
+    enriched_play,
+    field_prefix,
+    max_count
+  ) => {
+    let any = false
+    for (let i = 1; i <= max_count; i++) {
+      const gsis_field = `${field_prefix}_${i}_gsis`
+      const pid_field = `${field_prefix}_${i}_pid`
+      const gsis = enriched_play[gsis_field]
+      if (!gsis || enriched_play[pid_field]) continue
+      const player = player_cache.find_player({
+        gsisid: gsis,
+        ignore_free_agent: false,
+        ignore_retired: false
+      })
+      if (player) {
+        enriched_play[pid_field] = player.pid
+        any = true
+      } else {
+        missing_gsis_ids.add(gsis)
+      }
+    }
+    return any
+  }
+
   // Single-player roles to map
   const single_player_roles = [
     { gsis: 'bc_gsis', pid: 'bc_pid' },
@@ -135,40 +164,52 @@ export const enrich_player_identifications = (
       }
     }
 
-    // Map tackle arrays (only available from play_stats)
-    if (has_stats) {
-      if (
-        map_tackle_array(
-          enriched_play,
-          play_data.tacklers_solo,
-          'solo_tackle',
-          3
-        )
-      ) {
-        has_player_data = true
-      }
+    // Map tackle arrays. play_data carries the play_stats-derived gsis arrays
+    // (statId 79 -> tacklers_solo, statId 80 -> tacklers_with_assisters,
+    // statId 82 -> tackle_assisters); play-row fallback fills _pid from
+    // existing solo_tackle_N_gsis / assisted_tackle_N_gsis / tackle_assist_N_gsis
+    // columns when play_stats is silent (no row, or upstream marked statId 79
+    // valid=false after a solo->assist reclassification). Without the fallback,
+    // ~63 plays/year of 2024 REG show solo_tackle_1_gsis IS NOT NULL with
+    // solo_tackle_1_pid IS NULL. Caveat: when upstream reclassifies a tackle
+    // entirely to a different player (X solo -> Y solo), this fallback leaves
+    // the stale gsis on the play row -- proper redesign (enrichment fully
+    // owns role-attribution + clears on play_stats churn) is tracked under
+    // [tackle_fix_design_a] in user:text/league/data-quality-and-validation.md.
+    if (
+      map_tackle_array(
+        enriched_play,
+        play_data.tacklers_solo,
+        'solo_tackle',
+        3
+      ) ||
+      map_tackle_array_from_play_row(enriched_play, 'solo_tackle', 3)
+    ) {
+      has_player_data = true
+    }
 
-      if (
-        map_tackle_array(
-          enriched_play,
-          play_data.tacklers_with_assisters,
-          'assisted_tackle',
-          2
-        )
-      ) {
-        has_player_data = true
-      }
+    if (
+      map_tackle_array(
+        enriched_play,
+        play_data.tacklers_with_assisters,
+        'assisted_tackle',
+        2
+      ) ||
+      map_tackle_array_from_play_row(enriched_play, 'assisted_tackle', 2)
+    ) {
+      has_player_data = true
+    }
 
-      if (
-        map_tackle_array(
-          enriched_play,
-          play_data.tackle_assisters,
-          'tackle_assist',
-          4
-        )
-      ) {
-        has_player_data = true
-      }
+    if (
+      map_tackle_array(
+        enriched_play,
+        play_data.tackle_assisters,
+        'tackle_assist',
+        4
+      ) ||
+      map_tackle_array_from_play_row(enriched_play, 'tackle_assist', 4)
+    ) {
+      has_player_data = true
     }
 
     if (has_player_data) {
