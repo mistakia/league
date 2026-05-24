@@ -64,7 +64,7 @@
     "blakejs": "^1.2.1",
     "body-parser": "^1.20.3",
     "cheerio": "^1.0.0",
-    "cloakbrowser": "0.3.18",
+    "cloakbrowser": "^0.3.30",
     "compression": "^1.7.5",
     "dayjs": "1.11.13",
     "debug": "^4.4.0",
