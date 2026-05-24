@@ -72,7 +72,7 @@ const process_plays = async ({
   dry_run = false,
   skip_changelog = false,
   batch_size = 500,
-  all_players = false,
+  all_players = true,
   collector = null
 } = {}) => {
   const result = {
@@ -87,9 +87,13 @@ const process_plays = async ({
     seas_type
   })
 
-  // Filter to specific game if esbid provided
+  // Filter to specific game if esbid provided. Coerce both sides to string
+  // because completed_game_esbids returns integers from PG while CLI esbid is a string.
   if (esbid) {
-    completed_game_esbids = completed_game_esbids.filter((id) => id === esbid)
+    const esbid_str = String(esbid)
+    completed_game_esbids = completed_game_esbids.filter(
+      (id) => String(id) === esbid_str
+    )
   }
 
   log(
@@ -291,8 +295,9 @@ const initialize_cli = () => {
     })
     .option('all-players', {
       type: 'boolean',
-      default: false,
-      describe: 'Include all players (retired/free agents) in cache'
+      default: true,
+      describe:
+        'Include all players (retired/free agents) in cache. Default true to avoid silent NULL bc_pid/psr_pid/trg_pid on plays whose player is currently INA. See user:text/league/data-quality-and-validation.md.'
     })
     .parse()
 }
