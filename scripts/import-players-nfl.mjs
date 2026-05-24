@@ -49,6 +49,23 @@ const importPlayersNFL = async ({
     const gsisid = node.gsisId
     const esbid = node.esbId
 
+    const high_school = node.person.highSchool
+    const col = node.person.collegeName
+    const dpos = node.person.draftNumberOverall
+    const round = node.person.draftRound
+    let start = node.person.draftYear
+    const weight = node.weight
+    const current_nfl_team = node.currentTeam
+      ? node.currentTeam.abbreviation
+      : null
+    const jnum = node.jerseyNumber
+    const height = formatHeight(node.height)
+    const roster_status = format_nfl_status(node.person.status)
+
+    if (!start && node.nflExperience === 0) {
+      start = year
+    }
+
     let player_row
     let error
     if (gsisid) {
@@ -76,21 +93,21 @@ const importPlayersNFL = async ({
       }
     }
 
-    const high_school = node.person.highSchool
-    const col = node.person.collegeName
-    const dpos = node.person.draftNumberOverall
-    const round = node.person.draftRound
-    let start = node.person.draftYear
-    const weight = node.weight
-    const current_nfl_team = node.currentTeam
-      ? node.currentTeam.abbreviation
-      : null
-    const jnum = node.jerseyNumber
-    const height = formatHeight(node.height)
-    const roster_status = format_nfl_status(node.person.status)
-
-    if (!start && node.nflExperience === 0) {
-      start = year
+    // Fallback for KTC/sleeper-seeded rookie rows that have dob='0000-00-00'
+    // and have not yet been matched by gsisid/esbid. The dob-OR-0000 clause
+    // in find_player_row can throw MatchedMultiplePlayers on common names;
+    // scoping by nfl_draft_year recovers those rows without requiring dob.
+    if (!player_row && start) {
+      try {
+        player_row = await find_player_row({
+          name,
+          nfl_draft_year: start
+        })
+        if (player_row) error = undefined
+      } catch (err) {
+        error = err
+        log(err)
+      }
     }
 
     if (player_row) {
