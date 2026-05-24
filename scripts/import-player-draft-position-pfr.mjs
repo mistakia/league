@@ -10,7 +10,12 @@ import db from '#db'
 import { current_season } from '#constants'
 import { is_main, updatePlayer, find_player_row } from '#libs-server'
 import { fixTeam } from '#libs-shared'
+import { create_logger } from '#libs-shared/log.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
+
+const signal_log = create_logger('import-player-draft-position-pfr', {
+  service: 'league-imports'
+})
 
 const BROWSER_TASK = path.resolve(
   import.meta.dirname,
@@ -162,6 +167,33 @@ const import_player_draft_position_pfr = async ({
   const draft_players = parse_draft_html(page_result.html, year)
 
   log(`Importing ${draft_players.length} draft players for ${year}`)
+
+  // Oracle: zero parsed rows is indistinguishable from "PFR draft page not
+  // yet populated" (early-cycle) and "browser-task returned the Cloudflare
+  // challenge HTML instead of the page" (silent scrape failure). Treat any
+  // zero-row outcome on a year that should be drafted (year <= current_season.year)
+  // as an alertable failure. Callers re-running for a future-year board
+  // (year > current_season.year) can suppress via --allow-zero.
+  if (draft_players.length === 0 && !dry) {
+    const html_len = page_result.html ? page_result.html.length : 0
+    const message = `PFR draft scrape for ${year} parsed 0 rows (HTML ${html_len} bytes). Likely Cloudflare challenge returned unsolved; check browser-task selector / cloakbrowser version.`
+    if (year <= current_season.year) {
+      const emitted = signal_log.error(new Error(message), {
+        severity: 'high',
+        context: {
+          year,
+          html_bytes: html_len,
+          url: draft_url
+        }
+      })
+      if (emitted?.promise) {
+        await emitted.promise
+      }
+      throw new Error(message)
+    } else {
+      log(`zero-row outcome accepted for future year ${year}: ${message}`)
+    }
+  }
 
   // In dry run mode, output the first draft player and exit
   if (dry && draft_players.length > 0) {
