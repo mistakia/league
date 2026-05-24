@@ -106,7 +106,8 @@ export const enrich_player_identifications = (
     { gsis: 'psr_gsis', pid: 'psr_pid' },
     { gsis: 'trg_gsis', pid: 'trg_pid' },
     { gsis: 'intp_gsis', pid: 'intp_pid' },
-    { gsis: 'player_fuml_gsis', pid: 'player_fuml_pid' }
+    { gsis: 'player_fuml_gsis', pid: 'player_fuml_pid' },
+    { gsis: 'penalty_player_gsis', pid: 'penalty_player_pid' }
   ]
 
   const enriched_plays = plays.map((play) => {

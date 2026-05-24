@@ -30,6 +30,7 @@ const ENRICHED_FIELD_NAMES = [
   'trg_pid',
   'intp_pid',
   'player_fuml_pid',
+  'penalty_player_pid',
   'td_pid',
   'tdp_pid',
   'sk_pid',
