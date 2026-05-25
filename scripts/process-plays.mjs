@@ -39,17 +39,54 @@ const ENRICHED_FIELD_NAMES = [
   'tackle_assist_1_pid',
   'tackle_assist_2_pid',
   'tackle_assist_3_pid',
-  'tackle_assist_4_pid'
+  'tackle_assist_4_pid',
+  'solo_tackle_1_gsis',
+  'solo_tackle_2_gsis',
+  'solo_tackle_3_gsis',
+  'assisted_tackle_1_gsis',
+  'assisted_tackle_2_gsis',
+  'tackle_assist_1_gsis',
+  'tackle_assist_2_gsis',
+  'tackle_assist_3_gsis',
+  'tackle_assist_4_gsis'
 ]
 
+// Columns where enrichment is the authoritative writer and a null value is a
+// real clear (NULL-write + changelog entry). See compute_play_changes
+// clearable_fields contract and task/league/redesign-role-attribution-ownership.md.
+const tackle_clearable_fields = new Set([
+  'solo_tackle_1_pid',
+  'solo_tackle_1_gsis',
+  'solo_tackle_2_pid',
+  'solo_tackle_2_gsis',
+  'solo_tackle_3_pid',
+  'solo_tackle_3_gsis',
+  'assisted_tackle_1_pid',
+  'assisted_tackle_1_gsis',
+  'assisted_tackle_2_pid',
+  'assisted_tackle_2_gsis',
+  'tackle_assist_1_pid',
+  'tackle_assist_1_gsis',
+  'tackle_assist_2_pid',
+  'tackle_assist_2_gsis',
+  'tackle_assist_3_pid',
+  'tackle_assist_3_gsis',
+  'tackle_assist_4_pid',
+  'tackle_assist_4_gsis'
+])
+
 /**
- * Build update object from enriched play data
+ * Build update object from enriched play data.
+ *
+ * Semantic contract: enrichment expresses "no opinion" by omitting the field
+ * (undefined) and "clear" by setting it to null. Non-clearable fields with a
+ * null value reach compute_play_changes and are no-ops there.
  */
 const build_play_update_object = (enriched_play) => {
   const update = {}
 
   for (const field of ENRICHED_FIELD_NAMES) {
-    if (enriched_play[field]) {
+    if (enriched_play[field] !== undefined) {
       update[field] = enriched_play[field]
     }
   }
@@ -173,7 +210,8 @@ const process_plays = async ({
       compute_play_changes({
         play_row: current_play,
         update,
-        overwrite_existing
+        overwrite_existing,
+        clearable_fields: tackle_clearable_fields
       })
 
     if (changes_count > 0) {

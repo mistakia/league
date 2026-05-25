@@ -107,13 +107,17 @@ const should_overwrite_field = (
  * @param {Object} params.update - Fields to update
  * @param {boolean} params.overwrite_existing - Overwrite all existing values
  * @param {Array<string>} params.overwrite_fields - Specific fields to overwrite
+ * @param {Set<string>} params.clearable_fields - Fields where a `null` rhs is a real clear
+ *   (writes NULL + emits a changelog) when the existing `lhs` is a truthy, non-empty value.
+ *   For every other prop, null/undefined/'' continue to be skipped.
  * @returns {Object} { changelog_entries, field_updates, changes_count }
  */
 export const compute_play_changes = ({
   play_row,
   update,
   overwrite_existing = false,
-  overwrite_fields = []
+  overwrite_fields = [],
+  clearable_fields = new Set()
 }) => {
   const changelog_entries = []
   const field_updates = {}
@@ -143,13 +147,21 @@ export const compute_play_changes = ({
   for (const edit of edits) {
     const prop = edit.path[0]
 
-    // Skip null, undefined, or empty string values
-    if (edit.rhs === null || edit.rhs === undefined || edit.rhs === '') {
+    // Skip protected properties
+    if (excluded_props.includes(prop)) {
       continue
     }
 
-    // Skip protected properties
-    if (excluded_props.includes(prop)) {
+    const is_owned = clearable_fields.has(prop)
+    const is_clear = is_owned && edit.rhs === null && Boolean(edit.lhs)
+
+    // Skip null, undefined, or empty string values unless this is an opted-in
+    // clear on a truthy lhs. Empty-string lhs is treated as already-empty: no
+    // clear, no changelog.
+    if (
+      (edit.rhs === null || edit.rhs === undefined || edit.rhs === '') &&
+      !is_clear
+    ) {
       continue
     }
 
@@ -163,8 +175,12 @@ export const compute_play_changes = ({
       continue
     }
 
-    // Handle conflicts - when there's already a value in the database
-    if (edit.lhs) {
+    // Handle conflicts - when there's already a value in the database.
+    // Opting a prop into clearable_fields means enrichment owns the column:
+    // both clears (rhs=null) and overwrites (rhs=newValue, lhs=oldValue)
+    // bypass the overwrite gate. Default empty set preserves the prior
+    // skip-existing behavior for sportradar / manual-CLI callers.
+    if (edit.lhs && !is_owned) {
       const can_overwrite = should_overwrite_field(
         prop,
         overwrite_existing,
@@ -217,7 +233,8 @@ const update_play = async ({
   playId,
   update,
   overwrite_existing = false,
-  overwrite_fields = []
+  overwrite_fields = [],
+  clearable_fields = new Set()
 }) => {
   if (!play_row && esbid && playId) {
     const play_rows = await db('nfl_plays').where({ esbid, playId })
@@ -233,7 +250,8 @@ const update_play = async ({
       play_row,
       update,
       overwrite_existing,
-      overwrite_fields
+      overwrite_fields,
+      clearable_fields
     })
 
   if (changes_count === 0) {
