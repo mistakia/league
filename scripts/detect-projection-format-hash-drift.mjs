@@ -1,14 +1,47 @@
 import debug from 'debug'
 
 import db from '#db'
-import config from '#config'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, report_job } from '#libs-server'
-import send_discord_message from '#libs-server/send-discord-message.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('detect-projection-format-hash-drift')
 debug.enable('detect-projection-format-hash-drift')
+
+const SIGNAL_SOURCE = 'user:scheduled-command/league/detect-projection-format-hash-drift.md'
+const SIGNAL_DEDUP_FAILURE = 'pipeline_failure:league:detect-projection-format-hash-drift'
+
+const emit_signal = async ({ kind, severity, title, payload, dedup_key }) => {
+  const base_url = process.env.BASE_API_URL
+  const secret = process.env.BASE_SIGNAL_SECRET
+  if (!base_url || !secret) {
+    log('BASE_API_URL/BASE_SIGNAL_SECRET unset; signal NOT emitted: %s', title)
+    return
+  }
+  try {
+    const response = await fetch(`${base_url.replace(/\/$/, '')}/api/signals/`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-signal-secret': secret
+      },
+      body: JSON.stringify({
+        source: SIGNAL_SOURCE,
+        kind,
+        severity,
+        title,
+        payload,
+        dedup_key
+      }),
+      signal: AbortSignal.timeout(10000)
+    })
+    if (!response.ok) {
+      log('signal emit failed: %d %s', response.status, response.statusText)
+    }
+  } catch (err) {
+    log('signal emit threw: %s', err.message)
+  }
+}
 
 // Scope to (lid, year) pairs with non-zero roster_asset_holding rows so
 // dead-league hashes don't pollute the signal. `roster_asset_holding` has no
@@ -128,9 +161,15 @@ const main = async () => {
   })
 
   if (!error && total_gaps > 0) {
-    await send_discord_message({
-      discord_webhook_url: config.discord_sysadmin_alerts_channel_webhook_url,
-      message: `projection-format-hash drift detected: ${job_reason}`
+    await emit_signal({
+      kind: 'pipeline_failure',
+      severity: 'medium',
+      title: `projection-format-hash drift detected: ${job_reason}`,
+      payload: {
+        scoring_gaps: result.scoring_gaps,
+        league_gaps: result.league_gaps
+      },
+      dedup_key: SIGNAL_DEDUP_FAILURE
     })
   }
 
