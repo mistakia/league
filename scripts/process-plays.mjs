@@ -48,13 +48,21 @@ const ENRICHED_FIELD_NAMES = [
   'tackle_assist_1_gsis',
   'tackle_assist_2_gsis',
   'tackle_assist_3_gsis',
-  'tackle_assist_4_gsis'
+  'tackle_assist_4_gsis',
+  'bc_gsis',
+  'psr_gsis',
+  'trg_gsis',
+  'intp_gsis',
+  'player_fuml_gsis'
 ]
 
 // Columns where enrichment is the authoritative writer and a null value is a
 // real clear (NULL-write + changelog entry). See compute_play_changes
 // clearable_fields contract and task/league/redesign-role-attribution-ownership.md.
-const tackle_clearable_fields = new Set([
+// Penalty columns are excluded: getPlayFromPlayStats case 93 is empty so
+// penalty_player_gsis has no play_stats source; penalty role stays on the
+// legacy OR-fallback path in player-identification-enrichment.
+const role_clearable_fields = new Set([
   'solo_tackle_1_pid',
   'solo_tackle_1_gsis',
   'solo_tackle_2_pid',
@@ -72,7 +80,17 @@ const tackle_clearable_fields = new Set([
   'tackle_assist_3_pid',
   'tackle_assist_3_gsis',
   'tackle_assist_4_pid',
-  'tackle_assist_4_gsis'
+  'tackle_assist_4_gsis',
+  'bc_pid',
+  'bc_gsis',
+  'psr_pid',
+  'psr_gsis',
+  'trg_pid',
+  'trg_gsis',
+  'intp_pid',
+  'intp_gsis',
+  'player_fuml_pid',
+  'player_fuml_gsis'
 ])
 
 /**
@@ -211,7 +229,7 @@ const process_plays = async ({
         play_row: current_play,
         update,
         overwrite_existing,
-        clearable_fields: tackle_clearable_fields
+        clearable_fields: role_clearable_fields
       })
 
     if (changes_count > 0) {

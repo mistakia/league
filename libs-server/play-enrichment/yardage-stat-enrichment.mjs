@@ -84,16 +84,9 @@ export const enrich_yardage_stats = (plays, play_stats) => {
     if (stats_data.yards_after_catch != null)
       enrichment_data.yards_after_catch = stats_data.yards_after_catch
 
-    // Player GSIS IDs
-    if (stats_data.bc_gsis != null) enrichment_data.bc_gsis = stats_data.bc_gsis
-    if (stats_data.psr_gsis != null)
-      enrichment_data.psr_gsis = stats_data.psr_gsis
-    if (stats_data.trg_gsis != null)
-      enrichment_data.trg_gsis = stats_data.trg_gsis
-    if (stats_data.intp_gsis != null)
-      enrichment_data.intp_gsis = stats_data.intp_gsis
-    if (stats_data.player_fuml_gsis != null)
-      enrichment_data.player_fuml_gsis = stats_data.player_fuml_gsis
+    // _gsis writes moved to player-identification-enrichment so that {_gsis,
+    // _pid} pairs write/clear in lockstep under the owned-family model. See
+    // task/league/redesign-role-attribution-ownership.md Phase B.
 
     // Scoring team
     if (stats_data.td_tm != null) enrichment_data.td_tm = stats_data.td_tm

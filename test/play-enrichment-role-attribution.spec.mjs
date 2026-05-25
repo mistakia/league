@@ -221,3 +221,167 @@ describe('enrich_player_identifications tackle family ownership', function () {
   })
 })
 
+describe('enrich_player_identifications single-player family ownership', function () {
+  const esbid = 1
+  const playId = 100
+
+  it('bc family: statId 10 attributes bc_gsis/bc_pid; no overwrite gate', () => {
+    // Existing stale bc_pid on the play row; new play_stats names a
+    // different ball-carrier. Owned writer must overwrite, not short-circuit.
+    const play_row = { esbid, playId, bc_gsis: 'GSIS_OLD', bc_pid: 'PID_OLD' }
+    const stats = [play_stat({ esbid, playId, statId: 10, gsisId: 'GSIS_NEW' })]
+    const cache = make_player_cache({
+      GSIS_OLD: 'PID_OLD',
+      GSIS_NEW: 'PID_NEW'
+    })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.bc_gsis).to.equal('GSIS_NEW')
+    expect(enriched.bc_pid).to.equal('PID_NEW')
+  })
+
+  it('psr family: family-owned NULL-clear when play has stats but no statId 14/15/16', () => {
+    // Play has only a tackle stat (statId 79); psr family is owned but
+    // empty -> NULL-clear stale psr columns from a prior import.
+    const play_row = {
+      esbid,
+      playId,
+      psr_gsis: 'GSIS_QB',
+      psr_pid: 'PID_QB'
+    }
+    const stats = [play_stat({ esbid, playId, statId: 79, gsisId: 'GSIS_T' })]
+    const cache = make_player_cache({ GSIS_QB: 'PID_QB', GSIS_T: 'PID_T' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.psr_gsis).to.equal(null)
+    expect(enriched.psr_pid).to.equal(null)
+  })
+
+  it('trg / intp / fuml gating by statId set', () => {
+    // statId 21 (trg), 25 (intp), 52 (fuml) each attribute their family.
+    const play_row = { esbid, playId }
+    const stats = [
+      play_stat({ esbid, playId, statId: 21, gsisId: 'GSIS_TRG' }),
+      play_stat({ esbid, playId, statId: 25, gsisId: 'GSIS_INTP' }),
+      play_stat({ esbid, playId, statId: 52, gsisId: 'GSIS_FUML' })
+    ]
+    const cache = make_player_cache({
+      GSIS_TRG: 'PID_TRG',
+      GSIS_INTP: 'PID_INTP',
+      GSIS_FUML: 'PID_FUML'
+    })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.trg_gsis).to.equal('GSIS_TRG')
+    expect(enriched.trg_pid).to.equal('PID_TRG')
+    expect(enriched.intp_gsis).to.equal('GSIS_INTP')
+    expect(enriched.intp_pid).to.equal('PID_INTP')
+    expect(enriched.player_fuml_gsis).to.equal('GSIS_FUML')
+    expect(enriched.player_fuml_pid).to.equal('PID_FUML')
+    // bc family is owned (has_any_play_stats) but no statId 10/11 -> cleared.
+    expect(enriched.bc_gsis).to.equal(null)
+    expect(enriched.bc_pid).to.equal(null)
+  })
+
+  it('sportradar interaction: sportradar-written psr_pid is overwritten when play_stats lands a different passer', () => {
+    // Sportradar wrote {psr_gsis: GSIS_SR, psr_pid: PID_SR} before play_stats
+    // imported. play_stats arrives with a different passer (statId 14).
+    // Owned writer overwrites both columns without --overwrite-existing.
+    const play_row = {
+      esbid,
+      playId,
+      psr_gsis: 'GSIS_SR',
+      psr_pid: 'PID_SR'
+    }
+    const stats = [
+      play_stat({ esbid, playId, statId: 14, gsisId: 'GSIS_REAL' })
+    ]
+    const cache = make_player_cache({
+      GSIS_SR: 'PID_SR',
+      GSIS_REAL: 'PID_REAL'
+    })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.psr_gsis).to.equal('GSIS_REAL')
+    expect(enriched.psr_pid).to.equal('PID_REAL')
+  })
+
+  it('penalty family remains on legacy OR-fallback path (unchanged)', () => {
+    // Penalty has no play_stats source. Existing play-row penalty_player_gsis
+    // is preserved and resolved to a pid via the legacy mapper.
+    const play_row = {
+      esbid,
+      playId,
+      penalty_player_gsis: 'GSIS_PEN'
+    }
+    const stats = [play_stat({ esbid, playId, statId: 79, gsisId: 'GSIS_T' })]
+    const cache = make_player_cache({ GSIS_PEN: 'PID_PEN', GSIS_T: 'PID_T' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    // Penalty pid resolved from existing play-row gsis -- not cleared.
+    expect(enriched.penalty_player_gsis).to.equal('GSIS_PEN')
+    expect(enriched.penalty_player_pid).to.equal('PID_PEN')
+  })
+
+  it('live-game window: zero play_stats leaves single-player columns untouched', () => {
+    const play_row = {
+      esbid,
+      playId,
+      bc_gsis: 'GSIS_BC',
+      bc_pid: 'PID_BC',
+      psr_gsis: 'GSIS_QB',
+      psr_pid: 'PID_QB'
+    }
+    const cache = make_player_cache({ GSIS_BC: 'PID_BC', GSIS_QB: 'PID_QB' })
+
+    const [enriched] = enrich_player_identifications([play_row], [], cache)
+
+    expect(enriched.bc_gsis).to.equal('GSIS_BC')
+    expect(enriched.bc_pid).to.equal('PID_BC')
+    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.psr_pid).to.equal('PID_QB')
+  })
+})
+
+describe('compute_play_changes defensive: lhs undefined on clearable prop', function () {
+  it('rhs null with lhs undefined (Knex never-set column) is a no-op', () => {
+    // deep-diff emits kind:N for new keys with rhs:null when lhs is
+    // undefined. compute_play_changes filters to kind:E only, so this is
+    // silently dropped -- which is the correct behavior because there's
+    // no prior value to clear.
+    const { changes_count, field_updates } = compute_play_changes({
+      play_row: { esbid: 1, playId: 100 },
+      update: { solo_tackle_1_pid: null },
+      clearable_fields: new Set(['solo_tackle_1_pid'])
+    })
+
+    expect(changes_count).to.equal(0)
+    expect(field_updates).to.deep.equal({})
+  })
+})
+
+describe('yardage-stat-enrichment _gsis emission contract', function () {
+  it('emits no _gsis fields after Phase B Task 11 migration', async () => {
+    const { enrich_yardage_stats } = await import(
+      '#libs-server/play-enrichment/yardage-stat-enrichment.mjs'
+    )
+    const esbid = 1
+    const playId = 100
+    // statId 11 is rushing yards (bc). Pre-Task-11 this would have emitted bc_gsis.
+    const stat = play_stat({ esbid, playId, statId: 11, gsisId: 'GSIS_BC' })
+    stat.yards = 5
+
+    const [enriched] = enrich_yardage_stats([{ esbid, playId }], [stat])
+
+    expect(enriched).to.not.have.property('bc_gsis')
+    expect(enriched).to.not.have.property('psr_gsis')
+    expect(enriched).to.not.have.property('trg_gsis')
+    expect(enriched).to.not.have.property('intp_gsis')
+    expect(enriched).to.not.have.property('player_fuml_gsis')
+  })
+})

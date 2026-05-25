@@ -37,12 +37,9 @@ export const enrich_player_identifications = (
   let skipped_count = 0
   const missing_gsis_ids = new Set()
 
-  // Helper function to map a single player role.
-  // Prefers play_stats-derived gsis but falls back to the existing nfl_plays
-  // column when play_stats lacks a row carrying that gsisid (e.g. NOPL penalty
-  // plays where the play_stat row is the penalty actor, PAT2 plays whose psr
-  // is not surfaced by play_stats, or sportradar-imported plays).
-  // See user:text/league/data-quality-and-validation.md.
+  // Legacy mapper for penalty role only: getPlayFromPlayStats case 93 is
+  // empty so penalty_player_gsis has no play_stats source, and we keep the
+  // play-row OR-fallback + pid early-return. See user:text/league/data-quality-and-validation.md.
   const map_player_field = (
     enriched_play,
     play_data,
@@ -53,7 +50,6 @@ export const enrich_player_identifications = (
     if (!gsis) return false
     if (enriched_play[pid_field]) return true
 
-    // Include all players regardless of current status for historical play attribution
     const player = player_cache.find_player({
       gsisid: gsis,
       ignore_free_agent: false,
@@ -66,6 +62,36 @@ export const enrich_player_identifications = (
 
     missing_gsis_ids.add(gsis)
     return false
+  }
+
+  // Owned single-player writer for bc/psr/trg/intp/fuml. Writes _gsis and
+  // _pid in lockstep strictly from play_data (no fallback to existing play
+  // row values, no early-return when _pid already set -- the reattribution
+  // clear path depends on overwriting whatever was there).
+  const map_owned_player_field = (
+    enriched_play,
+    play_data,
+    gsis_field,
+    pid_field
+  ) => {
+    const gsisid = play_data[gsis_field] || null
+    if (gsisid) {
+      enriched_play[gsis_field] = gsisid
+      const player = player_cache.find_player({
+        gsisid,
+        ignore_free_agent: false,
+        ignore_retired: false
+      })
+      if (player) {
+        enriched_play[pid_field] = player.pid
+      } else {
+        enriched_play[pid_field] = null
+        missing_gsis_ids.add(gsisid)
+      }
+    } else {
+      enriched_play[gsis_field] = null
+      enriched_play[pid_field] = null
+    }
   }
 
   // Owned-family tackle slot writer. Always returns true so callers count
@@ -104,14 +130,21 @@ export const enrich_player_identifications = (
     return true
   }
 
-  // Single-player roles to map
-  const single_player_roles = [
-    { gsis: 'bc_gsis', pid: 'bc_pid' },
-    { gsis: 'psr_gsis', pid: 'psr_pid' },
-    { gsis: 'trg_gsis', pid: 'trg_pid' },
-    { gsis: 'intp_gsis', pid: 'intp_pid' },
-    { gsis: 'player_fuml_gsis', pid: 'player_fuml_pid' },
-    { gsis: 'penalty_player_gsis', pid: 'penalty_player_pid' }
+  // Owned single-player families: each entry's statIds gate ownership.
+  // When has_any_play_stats is true, the family is owned: if any statId in
+  // the set is present, write {_gsis, _pid} from play_data; otherwise
+  // NULL-clear both. Penalty is excluded because getPlayFromPlayStats case
+  // 93 is empty -- it stays on the legacy map_player_field path below.
+  const owned_single_player_families = [
+    { gsis: 'bc_gsis', pid: 'bc_pid', stat_ids: [10, 11] },
+    { gsis: 'psr_gsis', pid: 'psr_pid', stat_ids: [14, 15, 16] },
+    { gsis: 'trg_gsis', pid: 'trg_pid', stat_ids: [21, 22] },
+    { gsis: 'intp_gsis', pid: 'intp_pid', stat_ids: [25, 26] },
+    {
+      gsis: 'player_fuml_gsis',
+      pid: 'player_fuml_pid',
+      stat_ids: [52, 53, 54, 106]
+    }
   ]
 
   const enriched_plays = plays.map((play) => {
@@ -121,9 +154,6 @@ export const enrich_player_identifications = (
       stats_for_play && stats_for_play.length > 0
     )
 
-    // play_data carries play_stats-derived gsis values; empty when no
-    // play_stats exist for the play. Single-player role mapping still runs
-    // via play-row fallback in map_player_field.
     const play_data = has_any_play_stats
       ? getPlayFromPlayStats({ playStats: stats_for_play })
       : {}
@@ -134,17 +164,25 @@ export const enrich_player_identifications = (
     // Track if we enriched any player field
     let has_player_data = false
 
-    for (const role of single_player_roles) {
-      if (map_player_field(enriched_play, play_data, role.gsis, role.pid)) {
-        has_player_data = true
-      }
+    // Penalty (legacy path): play-stats has no penalty_player_gsis source,
+    // so the OR-fallback against the play row stays.
+    if (
+      map_player_field(
+        enriched_play,
+        play_data,
+        'penalty_player_gsis',
+        'penalty_player_pid'
+      )
+    ) {
+      has_player_data = true
     }
 
-    // Tackle family is owned only when the play has play_stats; zero
-    // play_stats is the live-game window where we must not clear stale
-    // attribution. statId 79 -> tacklers_solo, 80 -> tacklers_with_assisters,
-    // 82 -> tackle_assisters.
+    // Owned single-player and tackle families are gated on has_any_play_stats:
+    // zero play_stats is the live-game window where we must not clear stale
+    // attribution.
     if (has_any_play_stats) {
+      // statId 79 -> tacklers_solo, 80 -> tacklers_with_assisters,
+      // 82 -> tackle_assisters.
       map_owned_tackle_array(
         enriched_play,
         play_data.tacklers_solo,
@@ -163,6 +201,23 @@ export const enrich_player_identifications = (
         'tackle_assist',
         4
       )
+
+      // Single-player owned families: per-family stat-id presence drives
+      // whether play_data carries the role's gsis. When absent, the owned
+      // writer NULL-clears both _gsis and _pid.
+      for (const family of owned_single_player_families) {
+        const has_family_stats = stats_for_play.some((s) =>
+          family.stat_ids.includes(s.statId)
+        )
+        const family_play_data = has_family_stats ? play_data : {}
+        map_owned_player_field(
+          enriched_play,
+          family_play_data,
+          family.gsis,
+          family.pid
+        )
+      }
+
       has_player_data = true
     }
 
