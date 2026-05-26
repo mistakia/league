@@ -82,7 +82,7 @@ const load_draftkings_wagers = async ({
 
   log(`loaded ${wagers.length} wagers`)
 
-  await fs.mkdir((data_path), { recursive: true })
+  await fs.mkdir(data_path, { recursive: true })
   const json_file_path = `${data_path}/draftkings_wagers_${placed_after.format(
     'YYYY'
   )}_${placed_after.format('MM')}_${placed_after.format('DD')}.json`

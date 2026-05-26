@@ -34,7 +34,7 @@ const export_league_league_team_seasonlogs = async () => {
   const json_file_path = `${data_path}/league/league_team_seasonlogs.json`
   const csv_file_path = `${data_path}/league/league_team_seasonlogs.csv`
 
-  await fs.mkdir((`${data_path}/league`), { recursive: true })
+  await fs.mkdir(`${data_path}/league`, { recursive: true })
   await fs.writeFile(json_file_path, JSON.stringify(data, null, 2))
   log(`wrote json to ${json_file_path}`)
 

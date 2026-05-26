@@ -376,7 +376,7 @@ const export_data_nfl_plays = async ({
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convert_to_csv(csv_data_string)
 
-  await fs.mkdir((`${data_path}/nfl/plays/${year}`), { recursive: true })
+  await fs.mkdir(`${data_path}/nfl/plays/${year}`, { recursive: true })
 
   // const json_file_path = `${data_path}/${year}.json`
   const csv_file_path = `${data_path}/nfl/plays/${year}/${seas_type}.csv`

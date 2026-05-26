@@ -98,7 +98,7 @@ const load_fanatics_wagers = async ({
 
   log(`loaded ${wagers.length} wagers after ${placed_after.format()}`)
 
-  await fs.mkdir((data_path), { recursive: true })
+  await fs.mkdir(data_path, { recursive: true })
   const json_file_path = `${data_path}/fanatics_wagers_${placed_after.format('YYYY_MM_DD')}.json`
   await fs.writeFile(json_file_path, JSON.stringify(wagers, null, 2))
   log(`saved wagers to ${json_file_path}`)

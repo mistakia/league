@@ -143,7 +143,7 @@ const export_data_player_gamelogs = async ({ collector = null } = {}) => {
     const year_csv_data_string = JSON.stringify(year_csv_data)
     const year_csv = convert_to_csv(year_csv_data_string)
 
-    await fs.mkdir((`${data_path}/nfl/player_gamelogs`), { recursive: true })
+    await fs.mkdir(`${data_path}/nfl/player_gamelogs`, { recursive: true })
     await fs.writeFile(year_json_file_path, JSON.stringify(year_data, null, 2))
     log(`wrote json to ${year_json_file_path}`)
 

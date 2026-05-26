@@ -8,8 +8,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 const log = debug('detect-projection-format-hash-drift')
 debug.enable('detect-projection-format-hash-drift')
 
-const SIGNAL_SOURCE = 'user:scheduled-command/league/detect-projection-format-hash-drift.md'
-const SIGNAL_DEDUP_FAILURE = 'pipeline_failure:league:detect-projection-format-hash-drift'
+const SIGNAL_SOURCE =
+  'user:scheduled-command/league/detect-projection-format-hash-drift.md'
+const SIGNAL_DEDUP_FAILURE =
+  'pipeline_failure:league:detect-projection-format-hash-drift'
 
 const emit_signal = async ({ kind, severity, title, payload, dedup_key }) => {
   const base_url = process.env.BASE_API_URL
@@ -19,22 +21,25 @@ const emit_signal = async ({ kind, severity, title, payload, dedup_key }) => {
     return
   }
   try {
-    const response = await fetch(`${base_url.replace(/\/$/, '')}/api/signals/`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-signal-secret': secret
-      },
-      body: JSON.stringify({
-        source: SIGNAL_SOURCE,
-        kind,
-        severity,
-        title,
-        payload,
-        dedup_key
-      }),
-      signal: AbortSignal.timeout(10000)
-    })
+    const response = await fetch(
+      `${base_url.replace(/\/$/, '')}/api/signals/`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-signal-secret': secret
+        },
+        body: JSON.stringify({
+          source: SIGNAL_SOURCE,
+          kind,
+          severity,
+          title,
+          payload,
+          dedup_key
+        }),
+        signal: AbortSignal.timeout(10000)
+      }
+    )
     if (!response.ok) {
       log('signal emit failed: %d %s', response.status, response.statusText)
     }

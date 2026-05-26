@@ -825,7 +825,7 @@ const main = async () => {
       ? argv.outputDir
       : path.join(process.cwd(), argv.outputDir)
     const output_dir = path.join(base_dir, String(argv.year), `week-${week}`)
-    await fs.mkdir((output_dir), { recursive: true })
+    await fs.mkdir(output_dir, { recursive: true })
     log(`Created output directory: ${output_dir}`)
 
     const query_results = []

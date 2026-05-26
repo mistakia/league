@@ -20,8 +20,12 @@ const update_glossary_from_coverage_report = async () => {
   const players_json_file_path = `${data_path}/nfl/players-coverage-report.json`
   const markdown_path = path.join(__dirname, '../docs/glossary.md')
 
-  const plays_coverage_data = JSON.parse(await fs.readFile(plays_json_file_path, 'utf8'))
-  const players_coverage_data = JSON.parse(await fs.readFile(players_json_file_path, 'utf8'))
+  const plays_coverage_data = JSON.parse(
+    await fs.readFile(plays_json_file_path, 'utf8')
+  )
+  const players_coverage_data = JSON.parse(
+    await fs.readFile(players_json_file_path, 'utf8')
+  )
 
   log(`Loaded plays coverage data from ${plays_json_file_path}`)
   log(`Loaded players coverage data from ${players_json_file_path}`)

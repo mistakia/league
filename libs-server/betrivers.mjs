@@ -1,4 +1,3 @@
-
 import { wait } from '#libs-server'
 
 const BETRIVERS_API_URL = 'https://md.betrivers.com/api'

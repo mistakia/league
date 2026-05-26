@@ -28,7 +28,7 @@ const export_league_matchups = async () => {
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convert_to_csv(csv_data_string)
 
-  await fs.mkdir((`${data_path}/league`), { recursive: true })
+  await fs.mkdir(`${data_path}/league`, { recursive: true })
   const json_file_path = `${data_path}/league/matchups.json`
   const csv_file_path = `${data_path}/league/matchups.csv`
 

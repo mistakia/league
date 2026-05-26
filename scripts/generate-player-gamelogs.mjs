@@ -93,10 +93,7 @@ const STAT_ID_TO_ROLE_PID_COLUMN = {
 
 const patch_play_stats_from_role_pid = async (playStats) => {
   const needs_fallback = playStats.filter(
-    (ps) =>
-      !ps.gsispid &&
-      !ps.gsisId &&
-      STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]
+    (ps) => !ps.gsispid && !ps.gsisId && STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]
   )
   if (!needs_fallback.length) return
 
