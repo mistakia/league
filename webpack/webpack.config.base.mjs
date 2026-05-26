@@ -17,7 +17,7 @@ export default {
       minSize: 20000,
       cacheGroups: {
         react: {
-          test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|react-redux|redux|redux-saga|reselect)[\\/]/,
+          test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|@remix-run[\\/]router|redux-first-history|scheduler|react-redux|redux|redux-saga|@redux-saga[\\/]core|reselect|history)[\\/]/,
           name: 'vendor-react',
           priority: 40,
           reuseExistingChunk: true
@@ -25,6 +25,7 @@ export default {
         mui: {
           test: /[\\/]node_modules[\\/](@mui|@emotion)[\\/]/,
           name: 'vendor-mui',
+          chunks: 'initial',
           priority: 35,
           reuseExistingChunk: true
         },
@@ -57,9 +58,18 @@ export default {
         vendor: {
           test: /[\\/]node_modules[\\/](?!@bugsnag[\\/])/,
           name: 'vendor',
+          chunks: 'initial',
           priority: 10,
           reuseExistingChunk: true,
           minChunks: 1
+        },
+        async_vendor: {
+          test: /[\\/]node_modules[\\/](?!@bugsnag[\\/])/,
+          name: 'async-vendor',
+          chunks: 'async',
+          priority: 5,
+          reuseExistingChunk: true,
+          minChunks: 2
         },
         default: {
           minChunks: 2,

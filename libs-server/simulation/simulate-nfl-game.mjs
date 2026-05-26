@@ -5,7 +5,7 @@
 
 import debug from 'debug'
 
-import { simulation } from '#libs-shared'
+import * as simulation from '#libs-shared/simulation/index.mjs'
 
 const log = debug('simulation:simulate-nfl-game')
 

@@ -2,7 +2,7 @@
 
 import * as chai from 'chai'
 
-import { simulation } from '#libs-shared'
+import * as simulation from '#libs-shared/simulation/index.mjs'
 
 chai.should()
 const expect = chai.expect
