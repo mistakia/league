@@ -1,5 +1,6 @@
 /* global IS_DEV, APP_VERSION */
 import React from 'react'
+import PropTypes from 'prop-types'
 
 const KEEPALIVE_STACK_LIMIT = 16000
 const BUGSNAG_API_KEY = '183fca706d9f94c00a661167bf8cfc5d'
@@ -148,4 +149,9 @@ export class ErrorBoundary extends React.Component {
     }
     return this.props.children
   }
+}
+
+ErrorBoundary.propTypes = {
+  FallbackComponent: PropTypes.elementType,
+  children: PropTypes.node
 }

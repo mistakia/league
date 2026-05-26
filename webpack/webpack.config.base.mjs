@@ -35,9 +35,11 @@ export default {
           reuseExistingChunk: true
         },
         bugsnag: {
-          test: /[\\/]node_modules[\\/]@?bugsnag[\\/]/,
+          test: /[\\/]node_modules[\\/]@bugsnag[\\/]/,
           name: 'vendor-bugsnag',
+          chunks: 'async',
           priority: 35,
+          enforce: true,
           reuseExistingChunk: true
         },
         immutable: {
@@ -53,7 +55,7 @@ export default {
           reuseExistingChunk: true
         },
         vendor: {
-          test: /[\\/]node_modules[\\/]/,
+          test: /[\\/]node_modules[\\/](?!@bugsnag[\\/])/,
           name: 'vendor',
           priority: 10,
           reuseExistingChunk: true,

@@ -11,17 +11,17 @@ import { localStorageAdapter } from '@core/utils'
 import Confirmation from '@components/confirmation'
 import Notification from '@components/notification'
 
-const SelectedPlayer = lazy(() => import('@components/selected-player'))
-const AuctionControls = lazy(() => import('@components/auction-controls'))
-const AuctionCommissionerControls = lazy(() =>
-  import('@components/auction-commissioner-controls')
-)
-
 import 'normalize.css'
 import '@simonwep/pickr/dist/themes/nano.min.css'
 import '@styles/normalize.css'
 import '@styles/index.styl'
 import './app.styl'
+
+const SelectedPlayer = lazy(() => import('@components/selected-player'))
+const AuctionControls = lazy(() => import('@components/auction-controls'))
+const AuctionCommissionerControls = lazy(() =>
+  import('@components/auction-commissioner-controls')
+)
 
 hotkeys('control+command+w', () => {
   document.body.classList.toggle('hide-watchlist')
