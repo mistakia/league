@@ -24,8 +24,24 @@ import {
   api_delete_data_view_tag
 } from '@core/api'
 import { api, api_request } from '@core/api/service'
-import { nfl_plays_column_params } from '#libs-shared'
 import { send } from '@core/ws'
+
+// nfl_plays_column_params is 51 KiB of static metadata used only inside the
+// collect_object_preset_params helper below. Defer it to its own chunk so it
+// doesn't ride in the main bundle for users who never hit the data-views
+// param-option-counts path.
+let _nfl_plays_column_params_cache = null
+function* load_nfl_plays_column_params() {
+  if (_nfl_plays_column_params_cache) return _nfl_plays_column_params_cache
+  const mod = yield call(
+    () =>
+      import(
+        /* webpackChunkName: "nfl-plays-column-params" */ '#libs-shared/nfl-plays-column-params.mjs'
+      )
+  )
+  _nfl_plays_column_params_cache = mod.default
+  return _nfl_plays_column_params_cache
+}
 import {
   get_app,
   get_selected_data_view,
@@ -391,7 +407,7 @@ export function* handle_clear_local_view_cache() {
 
 const TABLE_DATA_TYPES_OBJECT_PRESET = 9
 
-const collect_object_preset_params = (table_state) => {
+const collect_object_preset_params = (table_state, column_params) => {
   const where = Array.isArray(table_state?.where) ? table_state.where : []
   const param_names = new Set()
   const signature_parts = []
@@ -400,7 +416,7 @@ const collect_object_preset_params = (table_state) => {
     if (!where_params || typeof where_params !== 'object') continue
     const keys = Object.keys(where_params)
       .filter((k) => {
-        const def = nfl_plays_column_params[k]
+        const def = column_params[k]
         return def && def.data_type === TABLE_DATA_TYPES_OBJECT_PRESET
       })
       .sort()
@@ -441,7 +457,11 @@ export function* maybe_fetch_param_option_counts() {
   if (!table_state) return
 
   const view_id = data_view.view_id
-  const { param_names, signature } = collect_object_preset_params(table_state)
+  const column_params = yield call(load_nfl_plays_column_params)
+  const { param_names, signature } = collect_object_preset_params(
+    table_state,
+    column_params
+  )
 
   const last_signatures = yield select((state) =>
     state.getIn(['data_view_request', 'param_option_counts_signatures'])
