@@ -12,15 +12,18 @@ export default class TeamImage extends React.Component {
     const { team } = this.props
     const url = team.image
 
-    const style = url
-      ? {
-          backgroundImage: `url("${url}")`
-        }
-      : {}
-
     return (
       <div className='team__image'>
-        <div className='team__image-img' style={style} />
+        {url ? (
+          <img
+            className='team__image-img'
+            src={url}
+            alt={team.name || ''}
+            loading='lazy'
+            decoding='async'
+            onError={this.handleError}
+          />
+        ) : null}
       </div>
     )
   }

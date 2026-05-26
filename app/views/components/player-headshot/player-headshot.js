@@ -16,6 +16,7 @@ export default function PlayerHeadshot({
 }) {
   const height = Math.round((width * 70) / 96)
   const src = get_player_image_url({ player_map, width, height })
+  const alt = player_map?.get('pname') || player_map?.get('formatted') || ''
 
   const classNames = ['player__headshot']
   const style = {
@@ -36,7 +37,15 @@ export default function PlayerHeadshot({
     style.margin = `0 ${diff}px`
   }
 
-  return <Avatar src={src} className={classNames.join(' ')} style={style} />
+  return (
+    <Avatar
+      src={src}
+      alt={alt}
+      className={classNames.join(' ')}
+      style={style}
+      imgProps={{ loading: 'lazy', decoding: 'async' }}
+    />
+  )
 }
 
 PlayerHeadshot.propTypes = {

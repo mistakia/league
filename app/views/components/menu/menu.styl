@@ -1,11 +1,76 @@
 $hoverBackground = rgba(255, 255, 255, 0.8)
 $menuBackgroundColor = darken($backgroundColor, 5%)
+$primaryColor = #1976d2
+$primaryColorDark = #115293
 
 .main__menu
   absolute left 0 right 0 top 0 bottom 0
   overflow-y scroll
   display flex
   flex-direction column
+
+.menu__icon
+  display inline-block
+  fill currentColor
+  vertical-align middle
+
+.main__menu-button
+  position fixed
+  display inline-flex
+  align-items center
+  gap 8px
+  height 48px
+  padding 0 20px
+  border none
+  border-radius 24px
+  background $primaryColor
+  color #fff
+  font-family inherit
+  font-size 14px
+  font-weight 500
+  letter-spacing 0.02857em
+  text-transform uppercase
+  cursor pointer
+  z-index 1100
+  box-shadow 0 3px 5px -1px rgba(0,0,0,0.2), 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12)
+  transition background-color 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1)
+  &:hover
+    background $primaryColorDark
+  &:focus-visible
+    outline 2px solid $primaryColorDark
+    outline-offset 2px
+
+.menu__icon-button
+  display inline-flex
+  align-items center
+  justify-content center
+  width 24px
+  height 24px
+  padding 0
+  margin 0 0 0 4px
+  border none
+  background transparent
+  color inherit
+  cursor pointer
+  border-radius 50%
+  &:hover
+    background rgba(0, 0, 0, 0.04)
+
+.menu__collapse-button
+  display inline-flex
+  align-items center
+  justify-content center
+  width 40px
+  height 40px
+  border none
+  border-radius 50%
+  background $primaryColor
+  color #fff
+  cursor pointer
+  box-shadow 0 3px 5px -1px rgba(0,0,0,0.2), 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12)
+  transition background-color 250ms cubic-bezier(0.4, 0, 0.2, 1)
+  &:hover
+    background $primaryColorDark
 
 .league__menu
   display flex
@@ -33,13 +98,40 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   padding 14px
   font-family 'Inter', sans-serif
 
-.MuiDrawer-paper.MuiPaper-root.menu__drawer
-  background $menuBackgroundColor
+.menu__backdrop
+  position fixed
+  inset 0
+  background rgba(0, 0, 0, 0.5)
+  z-index 1200
+  -webkit-tap-highlight-color transparent
+
+.menu__drawer
+  position fixed
+  top 0
+  bottom 0
   width $menuWidth
+  background $menuBackgroundColor
+  z-index 1300
+  overflow hidden
+  display flex
+  flex-direction column
+  transition transform 225ms cubic-bezier(0, 0, 0.2, 1)
   .menu__sections
     max-width 1100px
     margin 0 auto
     padding 16px 24px
+
+.menu__drawer--persistent
+  left 0
+  transform translateX(-100%)
+  &.menu__drawer--open
+    transform translateX(0)
+
+.menu__drawer--temporary
+  transform translateX(100%)
+  right 0
+  &.menu__drawer--open
+    transform translateX(0)
 
 .menu__section
   border-radius 4px
@@ -82,7 +174,7 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   margin 48px auto 32px
   transition color $smooth_transition,box-shadow $smooth_transition
 
-.menu__open .main__menu-button.MuiFab-root
+.menu__open .main__menu-button
   display none
 
 .league__warning
@@ -93,26 +185,22 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   padding 6px
   font-size 10px
 
-  .MuiSvgIcon-root
-    width 15px
-    height 15px
-
 @media (min-width 800px)
-  .MuiDrawer-paper.MuiPaper-root.menu__drawer
+  .menu__drawer--persistent
     border-right 1px solid lighten($borderColor, 30%)
 
-  .auction__live .main__menu-button.MuiFab-root
+  .auction__live .main__menu-button
     bottom $auctionHeightDesktop + 8px
 
 @media (max-width 799px)
-  .auction__live .main__menu-button.MuiFab-root
+  .auction__live .main__menu-button
     bottom $auctionHeightMobile + 8px
 
 @media (pointer: fine)
   .menu__links a:hover
   a.menu__text:hover
     color red
-  .main__menu .MuiToolbar-root a:hover
+  .main__menu a:hover
     background-color rgba(0,0,0,0.08)
   .menu__section:hover
     border-color rgba(0, 0, 0, 0.23)

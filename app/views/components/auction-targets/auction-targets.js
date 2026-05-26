@@ -18,6 +18,7 @@ import PlayerName from '@components/player-name'
 import SearchFilter from '@components/search-filter'
 import AuctionLeagueStats from '@components/auction-league-stats'
 
+import 'react-virtualized-compat/styles.css'
 import './auction-targets.styl'
 
 export default function AuctionTargets({

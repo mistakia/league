@@ -11,6 +11,7 @@ import TransactionRow from '@components/transaction-row'
 import TransactionTypeFilter from '@components/transaction-type-filter'
 import TransactionTeamFilter from '@components/transaction-team-filter'
 
+import 'react-virtualized-compat/styles.css'
 import './transactions.styl'
 
 const layout_breakpoint = 700

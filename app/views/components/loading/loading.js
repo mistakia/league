@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import CircularProgress from '@mui/material/CircularProgress'
 
 import './loading.styl'
 
@@ -8,7 +7,7 @@ const Loading = ({ loading }) => {
   if (loading) {
     return (
       <div className='loading'>
-        <CircularProgress />
+        <div className='loading__spinner' role='progressbar' aria-label='loading' />
       </div>
     )
   }

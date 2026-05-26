@@ -8,6 +8,7 @@ import List from 'react-virtualized-compat/dist/es/List'
 
 import ScoreboardPlay from '@components/scoreboard-play'
 
+import 'react-virtualized-compat/styles.css'
 import './scoreboard-play-by-play.styl'
 
 export default function ScoreboardPlayByPlay({ plays, mid }) {

@@ -14,6 +14,7 @@ import PlayerAge from '@components/player-age'
 import DraftPick from '@components/draft-pick'
 import Position from '@components/position'
 
+import 'react-virtualized-compat/styles.css'
 import './draft.styl'
 import { current_season, fantasy_positions } from '@constants'
 

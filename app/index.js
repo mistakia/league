@@ -3,8 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { current_season } from '@constants'
 import Root from '@views/root'
 
-import 'react-virtualized-compat/styles.css'
-
 document.addEventListener('DOMContentLoaded', () => {
   const root_element = document.getElementById('root')
   const root = createRoot(root_element)

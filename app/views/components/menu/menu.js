@@ -1,20 +1,39 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { NavLink, useLocation } from 'react-router-dom'
-import MenuIcon from '@mui/icons-material/Menu'
-import SwipeableDrawer from '@mui/material/SwipeableDrawer'
-import Fab from '@mui/material/Fab'
-import Tooltip from '@mui/material/Tooltip'
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
-import NavigateNextIcon from '@mui/icons-material/NavigateNext'
-import IconButton from '@mui/material/IconButton'
-import InfoIcon from '@mui/icons-material/Info'
 
 import { DISCORD_URL } from '@core/constants'
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
 
 import './menu.styl'
+
+const Icon = ({ d, label, size = 24 }) => (
+  <svg
+    className='menu__icon'
+    width={size}
+    height={size}
+    viewBox='0 0 24 24'
+    fill='currentColor'
+    aria-hidden={label ? undefined : true}
+    aria-label={label}
+    role={label ? 'img' : undefined}
+  >
+    <path d={d} />
+  </svg>
+)
+
+Icon.propTypes = {
+  d: PropTypes.string,
+  label: PropTypes.string,
+  size: PropTypes.number
+}
+
+const ICON_MENU = 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z'
+const ICON_INFO =
+  'M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'
+const ICON_NAV_BEFORE = 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z'
+const ICON_NAV_NEXT = 'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z'
 
 export default function AppMenu({
   menu_open,
@@ -30,30 +49,50 @@ export default function AppMenu({
   const isAuction = location.pathname === '/auction'
   const isMobile = window.innerWidth < 800
   const is_hosted = Boolean(league.hosted)
+  const drawer_ref = useRef(null)
 
-  const sx = isMobile ? { right: 16 } : { left: 16 }
+  useEffect(() => {
+    if (!menu_open || !isMobile) return
+    const on_key = (e) => {
+      if (e.key === 'Escape') set_menu_open(false)
+    }
+    window.addEventListener('keydown', on_key)
+    return () => window.removeEventListener('keydown', on_key)
+  }, [menu_open, isMobile, set_menu_open])
+
+  const button_style = {
+    bottom: isAuction ? 204 : 16,
+    [isMobile ? 'right' : 'left']: 16
+  }
+
+  const drawer_classes = ['menu__drawer']
+  if (isMobile) drawer_classes.push('menu__drawer--temporary')
+  else drawer_classes.push('menu__drawer--persistent')
+  if (menu_open) drawer_classes.push('menu__drawer--open')
+  if (isMobile) drawer_classes.push(isMobile ? 'menu__drawer--right' : 'menu__drawer--left')
 
   return (
     <>
-      <Fab
-        sx={{ position: 'fixed', bottom: isAuction ? 204 : 16, ...sx }}
-        color='primary'
-        variant='extended'
+      <button
+        type='button'
         className='main__menu-button'
+        style={button_style}
         onClick={() => set_menu_open(true)}
       >
-        <MenuIcon sx={{ mr: 1 }} />
-        Menu
-      </Fab>
-      <SwipeableDrawer
-        variant={isMobile ? 'temporary' : 'persistent'}
-        anchor={isMobile ? 'right' : 'left'}
-        open={menu_open}
-        onOpen={() => set_menu_open(true)}
-        onClose={() => set_menu_open(false)}
-        classes={{
-          paper: 'menu__drawer'
-        }}
+        <Icon d={ICON_MENU} size={20} />
+        <span>Menu</span>
+      </button>
+      {isMobile && menu_open && (
+        <div
+          className='menu__backdrop'
+          onClick={() => set_menu_open(false)}
+          aria-hidden='true'
+        />
+      )}
+      <aside
+        ref={drawer_ref}
+        className={drawer_classes.join(' ')}
+        aria-hidden={!menu_open}
       >
         <div className='main__menu'>
           <div className='menu__sections'>
@@ -63,23 +102,14 @@ export default function AppMenu({
               ) : (
                 <div className='league__warning'>
                   League not connected
-                  <Tooltip
-                    PopperProps={{ className: 'multiline' }}
-                    title={
-                      <span>
-                        Using the default 12 team half-ppr superflex league
-                        settings.
-                        <br />
-                        <br />
-                        Account needed to view league connected pages and player
-                        views.
-                      </span>
-                    }
+                  <button
+                    type='button'
+                    className='menu__icon-button'
+                    title='Using the default 12 team half-ppr superflex league settings. Account needed to view league connected pages and player views.'
+                    aria-label='League info'
                   >
-                    <IconButton size='small'>
-                      <InfoIcon />
-                    </IconButton>
-                  </Tooltip>
+                    <Icon d={ICON_INFO} size={15} />
+                  </button>
                 </div>
               )}
               {Boolean(league.uid) && <LeagueSchedule />}
@@ -190,8 +220,6 @@ export default function AppMenu({
                 onClick={() => isMobile && set_menu_open(false)}
               >
                 <NavLink to='/about'>About</NavLink>
-                {/* <NavLink to='/props'>Props</NavLink> */}
-                {/* <NavLink to='/status'>Status</NavLink> */}
                 <a
                   href='https://github.com/mistakia/league'
                   target='_blank'
@@ -216,13 +244,17 @@ export default function AppMenu({
           </div>
         </div>
         <div className='menu__collapse'>
-          <Tooltip title='Collapse Menu'>
-            <Fab color='primary' onClick={() => set_menu_open(false)}>
-              {isMobile ? <NavigateNextIcon /> : <NavigateBeforeIcon />}
-            </Fab>
-          </Tooltip>
+          <button
+            type='button'
+            className='menu__collapse-button'
+            title='Collapse Menu'
+            aria-label='Collapse Menu'
+            onClick={() => set_menu_open(false)}
+          >
+            <Icon d={isMobile ? ICON_NAV_NEXT : ICON_NAV_BEFORE} />
+          </button>
         </div>
-      </SwipeableDrawer>
+      </aside>
     </>
   )
 }
