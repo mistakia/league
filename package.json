@@ -55,7 +55,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",
-    "@sendgrid/mail": "^7.7.0",
     "@trashman/ed25519-blake2b": "0.0.8",
     "@tsmx/secure-config": "^2.3.0",
     "ajv": "^8.18.0",
@@ -88,6 +87,7 @@
     "node-xlsx": "^0.24.0",
     "pg": "^8.13.1",
     "playwright-core": "1.58.2",
+    "resend": "^6.12.4",
     "simple-statistics": "^7.8.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

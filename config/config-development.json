@@ -7,7 +7,6 @@
   "bidTimer": 15000,
   "email": {
     "resend_api_key": "",
-    "admin": "",
     "from": ""
   },
   "league_api_auth_token": "",

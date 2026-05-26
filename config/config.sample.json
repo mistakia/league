@@ -7,7 +7,6 @@
   "bidTimer": 14000,
   "email": {
     "resend_api_key": "ENCRYPTED|<iv>|<encrypted-value>",
-    "admin": "admin@example.com",
     "from": "noreply@example.com"
   },
   "league_api_auth_token": "ENCRYPTED|<iv>|<encrypted-value>",

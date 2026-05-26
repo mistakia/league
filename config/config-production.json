@@ -9,8 +9,7 @@
   "bidTimer": 14000,
   "email": {
     "resend_api_key": "ENCRYPTED|13bbb25f7f20616ead0a7bb62db7930d|d574f6370b0f59097000dea1dc67bfa799f0e0fb1437b366cc92ac5e289f934591e2b1841f68e653e715fb5d1edc0d3f",
-    "admin": "teflonleague@gmail.com",
-    "from": "teflonleague@gmail.com"
+    "from": "noreply@xo.football"
   },
   "league_api_auth_token": "ENCRYPTED|8266a739037e72fff10c427e0cfcfae5|5e40700c0dc7e630dbc211e38f97c8c2566a25493f3519bb0032ac9076b4f256948dbfdb29d888b4052b94b658eba08744823f5734aac4ff35cdfefade6c98eab4560b4ed0e9d3eea2f92ece899e0de04fb9a73c08f47cac9734fac92d5c823348b45388c092c4357d682d43a8e95e71cc2bf1c4f8dedbee0958e48b69d8e2c7",
   "jwt": {

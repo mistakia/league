@@ -1,17 +1,17 @@
-import sgMail from '@sendgrid/mail'
+import { Resend } from 'resend'
 import config from '#config'
 
-if (config.email && config.email.api) {
-  sgMail.setApiKey(config.email.api)
-}
+const resend =
+  config.email && config.email.resend_api_key
+    ? new Resend(config.email.resend_api_key)
+    : null
 
 export default async function ({ to, subject, message }) {
-  if (!config.email || !config.email.api) return
-  const msg = {
-    to,
+  if (!resend) return
+  await resend.emails.send({
     from: config.email.from,
+    to,
     subject,
     text: message
-  }
-  await sgMail.send(msg)
+  })
 }
