@@ -25,13 +25,14 @@ export default {
         mui: {
           test: /[\\/]node_modules[\\/](@mui|@emotion)[\\/]/,
           name: 'vendor-mui',
-          chunks: 'initial',
+          chunks: 'async',
           priority: 35,
           reuseExistingChunk: true
         },
         highcharts: {
           test: /[\\/]node_modules[\\/](highcharts|highcharts-react-official|highcharts-custom-events)[\\/]/,
           name: 'vendor-highcharts',
+          chunks: 'async',
           priority: 35,
           reuseExistingChunk: true
         },
@@ -52,6 +53,34 @@ export default {
         dataviz: {
           test: /[\\/]node_modules[\\/](d3-.*|recharts|victory.*)[\\/]/,
           name: 'vendor-dataviz',
+          priority: 30,
+          reuseExistingChunk: true
+        },
+        react_table: {
+          test: /[\\/]node_modules[\\/]react-table[\\/]/,
+          name: 'vendor-react-table',
+          chunks: 'async',
+          priority: 30,
+          reuseExistingChunk: true
+        },
+        react_virtualized: {
+          test: /[\\/]node_modules[\\/]react-virtualized-compat[\\/]/,
+          name: 'vendor-react-virtualized',
+          chunks: 'async',
+          priority: 30,
+          reuseExistingChunk: true
+        },
+        dnd_kit: {
+          test: /[\\/]node_modules[\\/]@dnd-kit[\\/]/,
+          name: 'vendor-dnd-kit',
+          chunks: 'async',
+          priority: 30,
+          reuseExistingChunk: true
+        },
+        ajv: {
+          test: /[\\/]node_modules[\\/]ajv[\\/]/,
+          name: 'vendor-ajv',
+          chunks: 'async',
           priority: 30,
           reuseExistingChunk: true
         },
