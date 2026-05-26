@@ -1,7 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import * as oddslib from 'oddslib'
+import oddslib from '#libs-server/odds-conversions.mjs'
 import db from '#db'
 import { groupBy, get_blake2b_hash } from '#libs-shared'
 import { current_season } from '#constants'

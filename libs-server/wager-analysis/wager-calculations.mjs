@@ -1,4 +1,4 @@
-import * as oddslib from 'oddslib'
+import oddslib from '#libs-server/odds-conversions.mjs'
 
 // Helper to check if two props are equal
 // Note: We don't compare market_id because FanDuel can assign different market IDs

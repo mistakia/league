@@ -1,9 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { current_season } from '@constants'
-// import 'abortcontroller-polyfill/dist/polyfill-patch-fetch'
-import 'whatwg-fetch'
-
 import Root from '@views/root'
 
 import 'react-virtualized-compat/styles.css'

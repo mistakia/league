@@ -1,4 +1,4 @@
-import fetchCheerioObject from 'fetch-cheerio-object'
+import fetch_cheerio from '#libs-server/fetch-cheerio.mjs'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -30,7 +30,7 @@ const run = async ({ dry = false } = {}) => {
   const week = Math.max(current_season.week, 1)
   const year = current_season.year
 
-  const $ = await fetchCheerioObject(
+  const $ = await fetch_cheerio(
     'https://www.numberfire.com/nfl/fantasy/fantasy-football-projections'
   )
 

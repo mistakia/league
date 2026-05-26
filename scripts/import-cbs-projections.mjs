@@ -1,4 +1,4 @@
-import fetchCheerioObject from 'fetch-cheerio-object'
+import fetch_cheerio from '#libs-server/fetch-cheerio.mjs'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -44,7 +44,7 @@ const run = async ({ season = false, dry = false } = {}) => {
   for (const position of positions) {
     const url = getUrl(position, type)
     log(url)
-    const $ = await fetchCheerioObject(url)
+    const $ = await fetch_cheerio(url)
     $('main table tbody tr').each((i, el) => {
       const name = $(el, 'td')
         .eq(0)

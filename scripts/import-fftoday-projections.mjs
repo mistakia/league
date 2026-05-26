@@ -1,4 +1,4 @@
-import fetchCheerioObject from 'fetch-cheerio-object'
+import fetch_cheerio from '#libs-server/fetch-cheerio.mjs'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -146,7 +146,7 @@ const run = async ({
         week
       })
       log(url)
-      const $ = await fetchCheerioObject(url)
+      const $ = await fetch_cheerio(url)
       count = $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').length
       $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').each(
         (i, el) => {

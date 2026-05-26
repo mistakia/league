@@ -6,16 +6,13 @@ import path, { dirname } from 'path'
 
 import WebSocket from 'ws'
 import express from 'express'
-import morgan from 'morgan-debug'
-import bodyParser from 'body-parser'
+import morgan from 'morgan'
 import compression from 'compression'
-import extend from 'deep-extend'
 import debug from 'debug'
 
 import jwt from 'jsonwebtoken'
 import { expressjwt } from 'express-jwt'
 import slowDown from 'express-slow-down'
-import favicon from 'serve-favicon'
 
 import config from '#config'
 import cache from './cache.mjs'
@@ -26,9 +23,21 @@ import { create_logger } from '#libs-shared/log.mjs'
 import { create_error_handler } from '#libs-server/middleware/error-handler.mjs'
 
 const logger = debug('api')
-const defaults = {}
-const options = extend(defaults, config)
+const morgan_logger = debug('api')
+const options = config
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+const favicon_path = path.join(__dirname, '../', 'static', 'favicon.ico')
+const favicon_buffer = fs.readFileSync(favicon_path)
+const favicon_max_age_seconds = 604800
+const favicon_middleware = (req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next()
+  if (req.url !== '/favicon.ico') return next()
+  res.set('Cache-Control', `public, max-age=${favicon_max_age_seconds}`)
+  res.set('Content-Type', 'image/x-icon')
+  res.set('Content-Length', favicon_buffer.length)
+  res.end(favicon_buffer)
+}
 
 const api = express()
 
@@ -40,14 +49,14 @@ api.locals.cache = cache
 api.enable('etag')
 api.disable('x-powered-by')
 api.use(compression())
-api.use(morgan('api', 'combined'))
-api.use(bodyParser.json({ limit: '150mb' }))
-
 api.use(
-  favicon(path.join(__dirname, '../', 'static', 'favicon.ico'), {
-    maxAge: '604800'
+  morgan('combined', {
+    stream: { write: (message) => morgan_logger(message.trim()) }
   })
 )
+api.use(express.json({ limit: '150mb' }))
+
+api.use(favicon_middleware)
 api.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || config.url)
   res.set('Access-Control-Allow-Credentials', 'true')

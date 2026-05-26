@@ -1,4 +1,4 @@
-import fetchCheerioObject from 'fetch-cheerio-object'
+import fetch_cheerio from '#libs-server/fetch-cheerio.mjs'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -39,7 +39,7 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
   while (lastProjection > 0) {
     const url = getURL(week, items.length)
     log(url)
-    const $ = await fetchCheerioObject(url)
+    const $ = await fetch_cheerio(url)
     $('table.tableType-player tbody tr').each((i, el) => {
       const name = $(el, 'td')
         .eq(0)
