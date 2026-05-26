@@ -1,5 +1,4 @@
 import debug from 'debug'
-import fetch from 'node-fetch'
 import diff from 'deep-diff'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'

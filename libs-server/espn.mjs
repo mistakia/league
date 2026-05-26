@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import { fetch as fetch_http2 } from 'fetch-h2'
 

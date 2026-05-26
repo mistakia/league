@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import queryString from 'query-string'
 import dayjs from 'dayjs'
 import debug from 'debug'

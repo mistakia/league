@@ -1,5 +1,4 @@
 import { ProxyAgent, fetch as undiciFetch } from 'undici'
-import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'

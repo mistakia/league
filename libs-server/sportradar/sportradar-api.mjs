@@ -1,5 +1,3 @@
-import PQueue from 'p-queue'
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -9,7 +7,36 @@ import { wait } from '#libs-server'
 import is_main from '#libs-server/is-main.mjs'
 import * as cache from '#libs-server/cache.mjs'
 
-const queue = new PQueue({ concurrency: 1 })
+const create_serial_queue = () => {
+  let chain = Promise.resolve()
+  let pending_count = 0
+  let running_count = 0
+
+  return {
+    get size() {
+      return pending_count
+    },
+    get pending() {
+      return running_count
+    },
+    add(task) {
+      pending_count += 1
+      const result = chain.then(async () => {
+        pending_count -= 1
+        running_count += 1
+        try {
+          return await task()
+        } finally {
+          running_count -= 1
+        }
+      })
+      chain = result.catch(() => {})
+      return result
+    }
+  }
+}
+
+const queue = create_serial_queue()
 let last_request
 
 const log = debug('sportradar')

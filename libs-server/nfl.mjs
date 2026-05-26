@@ -1,4 +1,3 @@
-import fetch, { FormData } from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'

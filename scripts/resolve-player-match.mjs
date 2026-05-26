@@ -4,7 +4,6 @@ import { hideBin } from 'yargs/helpers'
 import fs from 'fs/promises'
 import path from 'path'
 import os from 'os'
-import fetch from 'node-fetch'
 
 import db from '#db'
 import {

@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import { JSDOM } from 'jsdom'
 import dayjs from 'dayjs'
 import debug from 'debug'

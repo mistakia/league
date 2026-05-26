@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 
 export default async function ({ discord_webhook_url, message }) {
   // prevent notifications in development environment

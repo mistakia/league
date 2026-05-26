@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'

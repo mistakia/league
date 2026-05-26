@@ -6,7 +6,6 @@ import fs from 'fs'
 import os from 'os'
 import { pipeline } from 'stream'
 import { promisify } from 'util'
-import fetch from 'node-fetch'
 import dayjs from 'dayjs'
 
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
