@@ -1,6 +1,6 @@
 import debug from 'debug'
 import merge from 'deepmerge'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import config from '#config'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'

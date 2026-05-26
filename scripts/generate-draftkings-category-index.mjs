@@ -1,5 +1,5 @@
 import debug from 'debug'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import { fileURLToPath } from 'url'
 import path, { dirname } from 'path'
 // import yargs from 'yargs'

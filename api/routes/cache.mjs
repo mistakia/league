@@ -1,6 +1,6 @@
 import express from 'express'
 import os from 'os'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import path from 'path'
 
 const router = express.Router()

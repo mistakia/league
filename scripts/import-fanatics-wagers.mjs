@@ -1,7 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import dayjs from 'dayjs'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hideBin } from 'yargs/helpers'

@@ -1,9 +1,8 @@
 import debug from 'debug'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import os from 'os'
-import fetch from 'node-fetch'
 
 import db from '#db'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'

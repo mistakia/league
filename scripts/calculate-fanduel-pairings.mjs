@@ -1,6 +1,6 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 // import * as oddslib from 'oddslib'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'

@@ -1,7 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 
 import db from '#db'
 import { current_season } from '#constants'

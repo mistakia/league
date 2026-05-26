@@ -1,7 +1,7 @@
 import debug from 'debug'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import dayjs from 'dayjs'
-import oddslib from 'oddslib'
+import oddslib from '#libs-server/odds-conversions.mjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 

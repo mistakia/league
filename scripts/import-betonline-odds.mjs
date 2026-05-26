@@ -1,9 +1,9 @@
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import debug from 'debug'
 import yargs from 'yargs'
 import dayjs from 'dayjs'
 import { hideBin } from 'yargs/helpers'
-import oddslib from 'oddslib'
+import oddslib from '#libs-server/odds-conversions.mjs'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'

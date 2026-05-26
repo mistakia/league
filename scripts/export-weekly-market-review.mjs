@@ -3,7 +3,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import fs from 'fs-extra'
+import fs from '#libs-server/fs.mjs'
 import path from 'path'
 
 import db from '#db'
