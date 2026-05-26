@@ -21,21 +21,17 @@ const { createReduxHistory, routerMiddleware, routerReducer } =
     selectRouterState: (state) => state.get('router')
   })
 
-// ======================================================
-// Middleware Configuration
-// ======================================================
 const middlewares = [sagaMiddleware, routerMiddleware]
-
-// ======================================================
-// Store Enhancers
-// ======================================================
 const enhancers = [applyMiddleware(...middlewares)]
 
-// ======================================================
-// Store Instantiation and HMR Setup
-// ======================================================
+const dynamic_reducers = {}
+const injected_saga_keys = new Set()
+
+const build_reducer = () =>
+  rootReducer(routerReducer, dynamic_reducers)
+
 export const store = createStore(
-  rootReducer(routerReducer),
+  build_reducer(),
   fromJS(initialState),
   composeEnhancers(...enhancers)
 )
@@ -44,11 +40,29 @@ sagaMiddleware.run(rootSaga)
 store.close = () => store.dispatch(END)
 
 if (module.hot) {
-  // Enable webpack hot module replacement for reducers
   module.hot.accept('./reducers', () => {
-    const nextReducers = rootReducer(history)
-    store.replaceReducer(nextReducers)
+    store.replaceReducer(build_reducer())
   })
 }
 
 export const history = createReduxHistory(store)
+
+/**
+ * Register a reducer at runtime. Lazy-route modules call this at top level
+ * so their slice exists before the route renders.
+ */
+export const inject_reducer = (key, reducer) => {
+  if (dynamic_reducers[key]) return
+  dynamic_reducers[key] = reducer
+  store.replaceReducer(build_reducer())
+}
+
+/**
+ * Register a saga at runtime. `key` makes injection idempotent across
+ * remounts and hot reloads.
+ */
+export const inject_saga = (key, saga) => {
+  if (injected_saga_keys.has(key)) return
+  injected_saga_keys.add(key)
+  sagaMiddleware.run(saga)
+}

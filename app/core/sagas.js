@@ -26,10 +26,11 @@ import { draft_pick_value_sagas } from './draft-pick-value'
 import { seasonlog_sagas } from './seasonlogs'
 import { percentile_sagas } from './percentiles'
 import { league_team_daily_values_sagas } from './league-team-daily-values'
-import { data_views_sagas } from './data-views'
-import { plays_views_sagas } from './plays-view'
 import { league_careerlogs_sagas } from './league-careerlogs'
 import { seasons_sagas } from './seasons'
+
+// data_views_sagas and plays_views_sagas are lazy-injected by their route
+// modules (data-views, plays, short-url-resolver) via inject_saga().
 
 export default function* rootSaga() {
   yield all([
@@ -59,8 +60,6 @@ export default function* rootSaga() {
     ...seasonlog_sagas,
     ...percentile_sagas,
     ...league_team_daily_values_sagas,
-    ...data_views_sagas,
-    ...plays_views_sagas,
     ...league_careerlogs_sagas,
     ...seasons_sagas
   ])

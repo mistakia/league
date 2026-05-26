@@ -1,10 +1,23 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
+import { all } from 'redux-saga/effects'
 
-import { plays_views_actions } from '@core/plays-view'
+import { inject_reducer, inject_saga } from '@core/store'
+import {
+  plays_views_actions,
+  plays_views_reducer,
+  plays_views_sagas
+} from '@core/plays-view'
+import { plays_view_request_reducer } from '@core/plays-view-request/reducer'
 import plays_view_fields from '@core/plays-view-fields'
 
 import PlaysPage from './plays'
+
+inject_reducer('plays_views', plays_views_reducer)
+inject_reducer('plays_view_request', plays_view_request_reducer)
+inject_saga('plays_views', function* root_plays_views_saga() {
+  yield all(plays_views_sagas)
+})
 
 const get_plays_views = (state) => state.get('plays_views')
 

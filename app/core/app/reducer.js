@@ -8,11 +8,10 @@ import { current_season, league_defaults } from '@constants'
 import { roster_actions } from '@core/rosters'
 import { team_actions } from '@core/teams'
 import { matchups_actions } from '@core/matchups'
-import { data_views_actions, default_data_view_view_id } from '@core/data-views'
-import {
-  plays_views_actions,
-  default_plays_view_view_id
-} from '@core/plays-view'
+import { data_views_actions } from '@core/data-views/actions'
+import { default_data_view_view_id } from '@core/data-views/default-data-views'
+import { plays_views_actions } from '@core/plays-view/actions'
+import { default_plays_view_view_id } from '@core/plays-view/default-plays-views'
 import { create_user_record, User } from './user'
 
 const initialState = new Record({

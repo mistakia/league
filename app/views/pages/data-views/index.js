@@ -1,7 +1,9 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
+import { all } from 'redux-saga/effects'
 import { notify as bugsnag_notify } from '@core/bugsnag'
 
+import { inject_reducer, inject_saga } from '@core/store'
 import {
   get_stats_state,
   get_selected_data_view,
@@ -9,7 +11,13 @@ import {
   get_data_views,
   get_has_unsaved_local_edits_map
 } from '@core/selectors'
-import { data_views_actions } from '@core/data-views'
+import {
+  data_views_actions,
+  data_views_reducer,
+  data_view_organization_reducer,
+  data_views_sagas
+} from '@core/data-views'
+import { data_view_request_reducer } from '@core/data-view-request/reducer'
 import {
   get_enriched_data_views_fields,
   get_data_view_organization_props_for_table_view_controller
@@ -19,6 +27,13 @@ import { calculatePercentiles } from '@libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import DataViewsPage from './data-views'
+
+inject_reducer('data_views', data_views_reducer)
+inject_reducer('data_view_organization', data_view_organization_reducer)
+inject_reducer('data_view_request', data_view_request_reducer)
+inject_saga('data_views', function* root_data_views_saga() {
+  yield all(data_views_sagas)
+})
 
 const get_players_percentiles = createSelector(
   (state) => state.getIn(['data_view_request', 'result']),
