@@ -1,7 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import dayjs from 'dayjs'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hideBin } from 'yargs/helpers'
@@ -164,7 +164,7 @@ const load_fanduel_wagers = async ({
   placed_before
 }) => {
   if (filename) {
-    return fs.readJson(`${data_path}/${filename}`)
+    return JSON.parse(await fs.readFile(`${data_path}/${filename}`, 'utf8'))
   }
 
   if (!authorization) {
@@ -197,13 +197,13 @@ const load_fanduel_wagers = async ({
 
   log(`loaded ${wagers.length} wagers`)
 
-  await fs.ensureDir(data_path)
+  await fs.mkdir((data_path), { recursive: true })
   const json_file_path = `${data_path}/fanduel_wagers_${placed_after.format(
     'YYYY'
   )}_${placed_after.format('MM')}_${placed_after.format('DD')}_${
     placed_before ? placed_before.format('YYYY_MM_DD') : 'present'
   }.json`
-  await fs.writeJson(json_file_path, wagers, { spaces: 2 })
+  await fs.writeFile(json_file_path, JSON.stringify(wagers, null, 2))
   log(`saved wagers to ${json_file_path}`)
 
   return wagers

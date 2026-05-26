@@ -1,7 +1,7 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
 import yargs from 'yargs'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'

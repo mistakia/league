@@ -1,6 +1,6 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 // import * as oddslib from 'oddslib'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -21,7 +21,7 @@ const data_path = path.join(__dirname, '../tmp')
 
 const analyze_fanduel_wagers = async () => {
   const json_file_path = `${data_path}/fanduel_wagers.json`
-  const wagers = await fs.readJson(json_file_path)
+  const wagers = JSON.parse(await fs.readFile(json_file_path, 'utf8'))
 
   const placed_after = dayjs('2022-12-22', 'YYYY-MM-DD')
 

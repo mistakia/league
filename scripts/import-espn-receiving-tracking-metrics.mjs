@@ -1,5 +1,5 @@
 import debug from 'debug'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import os from 'os'
@@ -37,10 +37,10 @@ const import_espn_receiving_tracking_metrics = async ({
     if (!response.ok)
       throw new Error(`unexpected response ${response.statusText}`)
     json_data = await response.json()
-    fs.writeJsonSync(path, json_data)
+    fs.writeFileSync(path, JSON.stringify(json_data))
   } else {
     log(`file exists: ${path}`)
-    json_data = fs.readJsonSync(path)
+    json_data = JSON.parse(fs.readFileSync(path, 'utf8'))
   }
 
   let single_season_data = json_data.filter(

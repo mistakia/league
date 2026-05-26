@@ -1,4 +1,4 @@
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -30,8 +30,8 @@ export const load_wagers_from_files = async ({
 
   if (fanduel_filename) {
     try {
-      const fanduel_wagers = await fs.readJson(
-        `${data_path}/${fanduel_filename}`
+      const fanduel_wagers = JSON.parse(
+        await fs.readFile(`${data_path}/${fanduel_filename}`, 'utf8')
       )
       wagers = wagers.concat(
         fanduel_wagers.flatMap((wager) =>
@@ -58,8 +58,8 @@ export const load_wagers_from_files = async ({
 
   if (draftkings_filename) {
     try {
-      const draftkings_wagers = await fs.readJson(
-        `${data_path}/${draftkings_filename}`
+      const draftkings_wagers = JSON.parse(
+        await fs.readFile(`${data_path}/${draftkings_filename}`, 'utf8')
       )
       wagers = wagers.concat(
         draftkings_wagers.flatMap((wager) =>
@@ -79,8 +79,8 @@ export const load_wagers_from_files = async ({
 
   if (fanatics_filename) {
     try {
-      const fanatics_wagers = await fs.readJson(
-        `${data_path}/${fanatics_filename}`
+      const fanatics_wagers = JSON.parse(
+        await fs.readFile(`${data_path}/${fanatics_filename}`, 'utf8')
       )
       wagers = wagers.concat(
         fanatics_wagers.flatMap((wager) =>

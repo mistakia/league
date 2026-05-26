@@ -1,7 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import dayjs from 'dayjs'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { hideBin } from 'yargs/helpers'
@@ -56,7 +56,7 @@ const load_fanatics_wagers = async ({
   placed_after
 }) => {
   if (filename) {
-    return fs.readJson(`${data_path}/${filename}`)
+    return JSON.parse(await fs.readFile(`${data_path}/${filename}`, 'utf8'))
   }
 
   if (!session_token) {
@@ -98,9 +98,9 @@ const load_fanatics_wagers = async ({
 
   log(`loaded ${wagers.length} wagers after ${placed_after.format()}`)
 
-  await fs.ensureDir(data_path)
+  await fs.mkdir((data_path), { recursive: true })
   const json_file_path = `${data_path}/fanatics_wagers_${placed_after.format('YYYY_MM_DD')}.json`
-  await fs.writeJson(json_file_path, wagers, { spaces: 2 })
+  await fs.writeFile(json_file_path, JSON.stringify(wagers, null, 2))
   log(`saved wagers to ${json_file_path}`)
 
   return wagers

@@ -1,6 +1,6 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import oddslib from '#libs-server/odds-conversions.mjs'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -174,7 +174,7 @@ const analyze_fanduel_wagers = async ({
 
   const json_file_path = `${data_path}/${filename}`
   log(`loading wagers from ${json_file_path}`)
-  const wagers = await fs.readJson(json_file_path)
+  const wagers = JSON.parse(await fs.readFile(json_file_path, 'utf8'))
 
   for (const wager of wagers) {
     wager.week = dayjs(wager.settledDate)

@@ -1,5 +1,5 @@
 import debug from 'debug'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -48,7 +48,7 @@ const player_coverage_report = async ({ table_name = 'player' }) => {
   const data_path = path.join(__dirname, '../data')
   const json_file_path = `${data_path}/nfl/players-coverage-report.json`
 
-  await fs.writeJson(json_file_path, results_index, { spaces: 2 })
+  await fs.writeFile(json_file_path, JSON.stringify(results_index, null, 2))
   log(`wrote json to ${json_file_path}`)
 }
 

@@ -3,7 +3,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import path from 'path'
 
 import db from '#db'
@@ -825,7 +825,7 @@ const main = async () => {
       ? argv.outputDir
       : path.join(process.cwd(), argv.outputDir)
     const output_dir = path.join(base_dir, String(argv.year), `week-${week}`)
-    await fs.ensureDir(output_dir)
+    await fs.mkdir((output_dir), { recursive: true })
     log(`Created output directory: ${output_dir}`)
 
     const query_results = []

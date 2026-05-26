@@ -1,6 +1,6 @@
 import express from 'express'
 import os from 'os'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import path from 'path'
 
 const router = express.Router()
@@ -91,7 +91,10 @@ router.get('/:cache_key(*)', async (req, res) => {
     const sanitized_cache_key = cache_key.replace(/(\.\.\/|\.\/)/g, '')
 
     const full_path = path.join(cache_path, sanitized_cache_key)
-    const path_exists = await fs.pathExists(full_path)
+    const path_exists = await fs.access(full_path).then(
+      () => true,
+      () => false
+    )
 
     // Check if the full_path is within the cache_path directory to prevent accessing files outside of it
     const relative_path = path.relative(cache_path, full_path)
@@ -113,7 +116,7 @@ router.get('/:cache_key(*)', async (req, res) => {
         }
       }
 
-      const value = await fs.readJson(full_path)
+      const value = JSON.parse(await fs.readFile(full_path, 'utf8'))
       return res.status(200).send({ key: cache_key, value })
     }
 
@@ -258,8 +261,8 @@ router.post('/:cache_key(*)', async (req, res) => {
     }
 
     const full_path = path.join(cache_path, cache_key)
-    await fs.ensureFile(full_path)
-    await fs.writeJson(full_path, body, { spaces: 2 })
+    await fs.mkdir(path.dirname(full_path), { recursive: true })
+    await fs.writeFile(full_path, JSON.stringify(body, null, 2))
 
     return res.status(200).send({ key: cache_key, value: body })
   } catch (error) {

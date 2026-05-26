@@ -1,6 +1,6 @@
 import debug from 'debug'
 import merge from 'deepmerge'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import config from '#config'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -727,7 +727,7 @@ const filter_prop_pairings = async ({
 
   const summary_stats = calculate_summary_stats(filtered)
   const filtered_prop_sets_path = `${data_path}/prop_sets_filtered.json`
-  await fs.writeJson(filtered_prop_sets_path, filtered, { spaces: 2 })
+  await fs.writeFile(filtered_prop_sets_path, JSON.stringify(filtered, null, 2))
 
   log(`Plays: ${filtered.length}`)
   log(`Completed: ${summary_stats.completed}`)

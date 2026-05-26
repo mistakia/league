@@ -1,5 +1,5 @@
 import debug from 'debug'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 // import yargs from 'yargs'
@@ -28,11 +28,11 @@ const export_league_matchups = async () => {
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convert_to_csv(csv_data_string)
 
-  await fs.ensureDir(`${data_path}/league`)
+  await fs.mkdir((`${data_path}/league`), { recursive: true })
   const json_file_path = `${data_path}/league/matchups.json`
   const csv_file_path = `${data_path}/league/matchups.csv`
 
-  await fs.writeJson(json_file_path, data, { spaces: 2 })
+  await fs.writeFile(json_file_path, JSON.stringify(data, null, 2))
   log(`wrote json to ${json_file_path}`)
 
   await fs.writeFile(csv_file_path, csv)

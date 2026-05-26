@@ -1,5 +1,5 @@
 import debug from 'debug'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import dayjs from 'dayjs'
 import oddslib from '#libs-server/odds-conversions.mjs'
 import yargs from 'yargs'

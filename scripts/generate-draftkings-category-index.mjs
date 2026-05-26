@@ -1,5 +1,5 @@
 import debug from 'debug'
-import fs from '#libs-server/fs.mjs'
+import fs from 'node:fs/promises'
 import { fileURLToPath } from 'url'
 import path, { dirname } from 'path'
 // import yargs from 'yargs'
@@ -66,7 +66,7 @@ const generate_draftkings_category_index = async () => {
   const filepath = path.join(__dirname, '../tmp/draftkings-index.json')
   log(`writing ${filepath}`)
 
-  await fs.writeJson(filepath, draftkings_index, { spaces: 2 })
+  await fs.writeFile(filepath, JSON.stringify(draftkings_index, null, 2))
 }
 
 const main = async () => {
