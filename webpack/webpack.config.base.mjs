@@ -129,6 +129,10 @@ export default {
         }
       },
       {
+        test: /[\\/]libs-shared[\\/].*\.mjs$/,
+        sideEffects: false
+      },
+      {
         test: /\.css$/,
         use: [
           {
