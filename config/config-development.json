@@ -6,7 +6,7 @@
   "nominationTimer": 30000,
   "bidTimer": 15000,
   "email": {
-    "api": "",
+    "resend_api_key": "",
     "admin": "",
     "from": ""
   },

@@ -6,7 +6,7 @@
   "nominationTimer": 45000,
   "bidTimer": 14000,
   "email": {
-    "api": "ENCRYPTED|<iv>|<encrypted-value>",
+    "resend_api_key": "ENCRYPTED|<iv>|<encrypted-value>",
     "admin": "admin@example.com",
     "from": "noreply@example.com"
   },
