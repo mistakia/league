@@ -34,6 +34,8 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 Deploy targets (SSH hosts): `league` (main: API + frontend), `league-worker-1` (odds/plays import workers)
 
+**Submodule policy:** Only `private` is initialized on the production servers. The `data` submodule is **dev-only** — it is a large git-lfs reference dataset and git-lfs is not installed on production. Never run plain `git submodule update --init` (without an explicit path) on a production server; always target `private` specifically. The `pre-deploy` hook in `server.pm2.config.js` defensively runs `git submodule deinit -f data` before pulling so that any accidental prior initialization is undone before the pull tries to fetch its refs. The same rule applies to the `load:main`, `load:worker1`, and `load:logrotate:main` scripts — they use `--init private` for this reason.
+
 **Testing:**
 
 - Individual tests: `yarn test --reporter min test/auth.spec.mjs`

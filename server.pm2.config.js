@@ -22,7 +22,13 @@ module.exports = {
       repo: 'git@github.com:mistakia/league.git',
       path: '/root/league',
       ssh_options: 'ForwardAgent=yes',
-      'pre-deploy': 'git pull',
+      // The `data` submodule must NEVER be loaded on the production server.
+      // It is dev-only (large git-lfs reference dataset; git-lfs is not installed
+      // on prod). If it ever gets accidentally initialized, the deinit step
+      // below removes it so subsequent `git pull` operations do not fail
+      // trying to fetch its refs.
+      'pre-deploy':
+        'git submodule deinit -f data 2>/dev/null || true; git pull',
       'pre-deploy-local': '',
       'post-deploy': [
         'source /root/.bash_profile',
