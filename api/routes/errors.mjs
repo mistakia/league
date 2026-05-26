@@ -1,7 +1,5 @@
 import express from 'express'
 
-import config from '#config'
-import { sendEmail } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 
 const router = express.Router()
@@ -204,52 +202,33 @@ router.post('/?', async (req, res) => {
     const { leagueId, teamId, userId, error } = req.body
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
     const user_agent = req.headers['user-agent']
-    const message = {
-      leagueId,
-      teamId,
-      userId,
-      error,
-      ip,
-      userAgent: user_agent
-    }
-    logger(message)
-    // Dual-write to base's unified signal queue during Bugsnag retirement
-    // soak. Best-effort, non-blocking; failures do not affect the response.
-    if (config.signals_api_url) {
-      try {
-        const error_class = error?.name || 'Error'
-        const severity = HIGH_SEVERITY_ERROR_CLASSES.has(error_class)
-          ? 'high'
-          : 'medium'
-        const synthetic = new Error(error?.message || 'Unknown client error')
-        synthetic.name = error_class
-        if (error?.stack) synthetic.stack = error.stack
-        route_logger.error(synthetic, {
-          severity,
-          context: {
-            league_id: leagueId || null,
-            team_id: teamId || null,
-            user_id: userId || null,
-            ip: ip || null,
-            user_agent: user_agent || null,
-            filename: error?.filename || null,
-            lineno: error?.lineno ?? null,
-            colno: error?.colno ?? null
-          }
-        })
-      } catch (_dual_write_error) {
-        // swallow
+    logger({ leagueId, teamId, userId, error, ip, userAgent: user_agent })
+
+    const error_class = error?.name || 'Error'
+    const severity = HIGH_SEVERITY_ERROR_CLASSES.has(error_class)
+      ? 'high'
+      : 'medium'
+    const synthetic = new Error(error?.message || 'Unknown client error')
+    synthetic.name = error_class
+    if (error?.stack) synthetic.stack = error.stack
+    route_logger.error(synthetic, {
+      severity,
+      context: {
+        league_id: leagueId || null,
+        team_id: teamId || null,
+        user_id: userId || null,
+        ip: ip || null,
+        user_agent: user_agent || null,
+        filename: error?.filename || null,
+        lineno: error?.lineno ?? null,
+        colno: error?.colno ?? null
       }
-    }
-    await sendEmail({
-      to: config.email.admin,
-      subject: `client error: ${error.message}`,
-      message: JSON.stringify(message, null, 2)
     })
+
     res.send({ success: true })
-  } catch (error) {
-    logger(error)
-    res.status(500).send({ error: error.toString() })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
   }
 })
 
