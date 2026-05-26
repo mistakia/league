@@ -582,6 +582,8 @@ export function* watch_clear_local_view_cache() {
 
 // Load organization data after views are fetched (hydrate favorites + tags)
 export function* handle_get_views_fulfilled_load_organization() {
+  const { token } = yield select(get_app)
+  if (!token) return
   yield call(api_get_data_view_organization)
 }
 
