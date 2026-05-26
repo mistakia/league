@@ -28,7 +28,8 @@ export default merge(baseConfig, {
     // Use '/' for webpack serve, '/dist/' for builds (can be overridden via --public-path)
     publicPath: process.env.WEBPACK_SERVE ? '/' : '/dist/',
     filename: '[name].[contenthash:8].js',
-    chunkFilename: '[name].[contenthash:8].chunk.js'
+    chunkFilename: '[name].[contenthash:8].chunk.js',
+    clean: true
   },
 
   module: {
@@ -61,6 +62,8 @@ export default merge(baseConfig, {
 
   optimization: {
     minimize: true,
+    moduleIds: 'deterministic',
+    chunkIds: 'deterministic',
     minimizer: process.env.E2E_BUILD
       ? []
       : [

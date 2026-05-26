@@ -15,7 +15,7 @@
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "analyze": "cross-env OPEN_ANALYZER=true NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",
     "deploy": "pm2 deploy server.pm2.config.js production --force && yarn load:main && yarn load:worker1",
-    "deploy:dist": "rsync -av --exclude 'stats.html' dist/ league:/root/league/source/dist",
+    "deploy:dist": "rsync -av --delete --exclude 'stats.html' --exclude '*.map' dist/ league:/root/league/source/dist",
     "todo": "grep -rni todo app api common scripts",
     "count:lines": "git ls-files -- ':!:yarn.lock' ':!:./data' | xargs wc -l | tail -n 1",
     "load:main": "ssh -A league 'export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && cd /root/league && git pull && git submodule update --init private && yarn install'",
@@ -169,7 +169,7 @@
     "react-redux": "^9.2.0",
     "react-router": "^6.28.1",
     "react-router-dom": "^6.28.1",
-    "react-table": "mistakia/react-table#6fb11a0d8d8c645b229ee6a7c3a0077f1b3402d6",
+    "react-table": "mistakia/react-table#64e345925aa1234f9b6d66863870b5b6b87e958c",
     "react-virtualized-compat": "^2.0.0",
     "redux": "^5.0.1",
     "redux-first-history": "^5.2.0",
@@ -195,5 +195,19 @@
   "resolutions": {
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   },
-  "packageManager": "yarn@4.5.1"
+  "packageManager": "yarn@4.5.1",
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "last 2 versions",
+      "not dead",
+      "not op_mini all",
+      "not ie 11"
+    ],
+    "development": [
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version"
+    ]
+  }
 }

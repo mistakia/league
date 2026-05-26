@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
-import Bugsnag from '@bugsnag/js'
+import { notify as bugsnag_notify } from '@core/bugsnag'
 
 import {
   get_stats_state,
@@ -47,7 +47,7 @@ const get_players_percentiles = createSelector(
 
       if (!field) {
         console.log(`Field not found for column_id: ${column_id}`)
-        Bugsnag.notify(
+        bugsnag_notify(
           new Error(`Field not found for column_id: ${column_id}`),
           (event) => {
             event.addMetadata('field_info', {

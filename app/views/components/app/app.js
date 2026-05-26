@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from 'react'
+import React, { useEffect, useState, Suspense, lazy } from 'react'
 import { useMatch } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import hotkeys from 'hotkeys-js'
@@ -10,9 +10,12 @@ import ContextMenu from '@components/context-menu'
 import { localStorageAdapter } from '@core/utils'
 import Confirmation from '@components/confirmation'
 import Notification from '@components/notification'
-import SelectedPlayer from '@components/selected-player'
-import AuctionControls from '@components/auction-controls'
-import AuctionCommissionerControls from '@components/auction-commissioner-controls'
+
+const SelectedPlayer = lazy(() => import('@components/selected-player'))
+const AuctionControls = lazy(() => import('@components/auction-controls'))
+const AuctionCommissionerControls = lazy(() =>
+  import('@components/auction-commissioner-controls')
+)
 
 import 'normalize.css'
 import '@simonwep/pickr/dist/themes/nano.min.css'
@@ -68,11 +71,13 @@ export default function App({
       <ContextMenu />
       <Confirmation />
       <Notification />
-      <SelectedPlayer />
-      {is_auction_live && <AuctionControls />}
-      {is_auction_live && isCommish && is_hosted && (
-        <AuctionCommissionerControls />
-      )}
+      <Suspense fallback={null}>
+        <SelectedPlayer />
+        {is_auction_live && <AuctionControls />}
+        {is_auction_live && isCommish && is_hosted && (
+          <AuctionCommissionerControls />
+        )}
+      </Suspense>
     </main>
   )
 }

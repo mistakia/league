@@ -12,7 +12,59 @@ export default {
 
   optimization: {
     splitChunks: {
-      chunks: 'all'
+      chunks: 'all',
+      maxInitialRequests: 25,
+      minSize: 20000,
+      cacheGroups: {
+        react: {
+          test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|react-redux|redux|redux-saga|reselect)[\\/]/,
+          name: 'vendor-react',
+          priority: 40,
+          reuseExistingChunk: true
+        },
+        mui: {
+          test: /[\\/]node_modules[\\/](@mui|@emotion)[\\/]/,
+          name: 'vendor-mui',
+          priority: 35,
+          reuseExistingChunk: true
+        },
+        highcharts: {
+          test: /[\\/]node_modules[\\/](highcharts|highcharts-react-official|highcharts-custom-events)[\\/]/,
+          name: 'vendor-highcharts',
+          priority: 35,
+          reuseExistingChunk: true
+        },
+        bugsnag: {
+          test: /[\\/]node_modules[\\/]@?bugsnag[\\/]/,
+          name: 'vendor-bugsnag',
+          priority: 35,
+          reuseExistingChunk: true
+        },
+        immutable: {
+          test: /[\\/]node_modules[\\/]immutable[\\/]/,
+          name: 'vendor-immutable',
+          priority: 35,
+          reuseExistingChunk: true
+        },
+        dataviz: {
+          test: /[\\/]node_modules[\\/](d3-.*|recharts|victory.*)[\\/]/,
+          name: 'vendor-dataviz',
+          priority: 30,
+          reuseExistingChunk: true
+        },
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendor',
+          priority: 10,
+          reuseExistingChunk: true,
+          minChunks: 1
+        },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
     },
     moduleIds: 'named'
   },
@@ -31,7 +83,6 @@ export default {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env'],
             cacheDirectory: true
           }
         }

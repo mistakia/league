@@ -1,7 +1,7 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Highcharts from 'highcharts'
+import Highcharts from '@core/highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
 import { current_season, fantasy_weeks } from '@constants'

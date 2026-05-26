@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
-import Highcharts from 'highcharts'
+import Highcharts from '@core/highcharts'
 import HighchartsCustomEvents from 'highcharts-custom-events'
 import HighchartsReact from 'highcharts-react-official'
 

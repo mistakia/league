@@ -1,5 +1,5 @@
 import { Record, List } from 'immutable'
-import Bugsnag from '@bugsnag/js'
+import { set_user as bugsnag_set_user } from '@core/bugsnag'
 
 import { app_actions } from './actions'
 import { setting_actions } from '@core/settings'
@@ -72,7 +72,7 @@ export function app_reducer(state = initialState(), { payload, type }) {
       })
 
     case app_actions.AUTH_FULFILLED:
-      Bugsnag.setUser(payload.data.user.id, payload.data.user.email)
+      bugsnag_set_user(payload.data.user.id, payload.data.user.email)
       return state.withMutations((state) => {
         const currentLeagueId = state.get('leagueId')
         const leagueNotSet = !currentLeagueId

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Highcharts from 'highcharts'
+import Highcharts from '@core/highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import 'highcharts/modules/broken-axis'
 import Autocomplete from '@mui/material/Autocomplete'

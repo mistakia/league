@@ -4,7 +4,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
 
-import Highcharts from 'highcharts'
+import Highcharts from '@core/highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import 'highcharts/modules/series-label'
 

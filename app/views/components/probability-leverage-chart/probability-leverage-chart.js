@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Highcharts from 'highcharts'
+import Highcharts from '@core/highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import 'highcharts/highcharts-more'
 import { ToggleButtonGroup, ToggleButton } from '@mui/material'

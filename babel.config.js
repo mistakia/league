@@ -20,8 +20,15 @@ module.exports = (api) => {
 
   return {
     presets: [
-      // @babel/preset-env will automatically target browserslist (package.json) targets
-      require('@babel/preset-env'),
+      // @babel/preset-env automatically targets browserslist (package.json) targets
+      [
+        require('@babel/preset-env'),
+        {
+          bugfixes: true,
+          useBuiltIns: false,
+          modules: false
+        }
+      ],
       [require('@babel/preset-react'), { development, runtime: 'automatic' }]
     ],
     plugins: [
