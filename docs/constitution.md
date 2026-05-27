@@ -422,15 +422,17 @@ xiv. 10-13 points allowed (2)
 
 **Extensions.**
 
-1. At the beginning of each year, Team’s can keep any combination of players whose combined values are under $200. Player values increase by a set amount on each extension:
+1. At the beginning of each year, Team’s can keep any combination of players whose combined values are under $200. Player values increase on each extension by +$5 per consumed extension step, applied as `new_value = current_value + (extensions + 1) * $5`:
 
 (a) 1st extension: +$5
 
 (b) 2nd extension: +$10
 
-(c\) 3rd extension: +$20
+(c\) 3rd extension: +$15
 
-(d) 4th+ extension: +$35
+(d) 4th extension: +$20
+
+(e) 5th+ extension: +$5 additional per subsequent extension
 
 2. Extension counts are reset when a player changes Teams through Free Agency or on a successful Restricted Free Agency acquisition.
 
