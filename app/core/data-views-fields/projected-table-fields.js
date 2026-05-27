@@ -1,9 +1,43 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { common_column_params } from '@libs-shared'
+import {
+  common_column_params,
+  named_scoring_formats,
+  named_league_formats,
+  DEFAULT_SCORING_FORMAT_HASH,
+  DEFAULT_LEAGUE_FORMAT_HASH
+} from '@libs-shared'
 import { current_season } from '@constants'
 
 const { single_year, nfl_week_id } = common_column_params
+
+const scoring_format_hash_param = {
+  label: 'Scoring Format',
+  values: Object.entries(named_scoring_formats).map(([key, format]) => ({
+    value: format.hash,
+    label: format.label
+  })),
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  default_value: DEFAULT_SCORING_FORMAT_HASH,
+  single: true
+}
+
+const league_format_hash_param = {
+  label: 'League Format',
+  values: Object.entries(named_league_formats).map(([key, format]) => ({
+    value: format.hash,
+    label: format.label
+  })),
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  default_value: DEFAULT_LEAGUE_FORMAT_HASH,
+  single: true
+}
+
+const extra_column_params_by_base_name = {
+  points: { scoring_format_hash: scoring_format_hash_param },
+  points_added: { league_format_hash: league_format_hash_param },
+  market_salary: { league_format_hash: league_format_hash_param }
+}
 
 // Generate projection years dynamically from 2020 to current year
 const get_projection_years = () => {
@@ -70,20 +104,23 @@ export default function ({ week }) {
           ? ['year', 'week']
           : undefined,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-    column_params:
-      period === 'Season'
-        ? {
-            year: {
-              ...single_year,
-              default_value: current_season.year,
-              values: projection_years
-            }
-          }
-        : period === 'Week'
-          ? {
-              nfl_week_id
-            }
-          : undefined
+    column_params: (() => {
+      const extras = extra_column_params_by_base_name[base_name]
+      if (period === 'Season') {
+        return {
+          year: {
+            ...single_year,
+            default_value: current_season.year,
+            values: projection_years
+          },
+          ...extras
+        }
+      }
+      if (period === 'Week') {
+        return { nfl_week_id, ...extras }
+      }
+      return extras
+    })()
   })
 
   return {

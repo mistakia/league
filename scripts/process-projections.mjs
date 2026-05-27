@@ -12,7 +12,9 @@ import {
   calculateValues,
   calculatePrices,
   calculateBaselines,
-  calculatePlayerValuesRestOfSeason
+  calculatePlayerValuesRestOfSeason,
+  named_scoring_formats,
+  named_league_formats
 } from '#libs-shared'
 import {
   current_season,
@@ -626,7 +628,6 @@ const process_league = async ({ year, lid }) => {
 const run = async ({ year = current_season.year } = {}) => {
   const league_formats = {}
   const scoring_formats = {}
-  const lids = [0, 1]
   const leagues_cache = {}
 
   const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
@@ -639,12 +640,34 @@ const run = async ({ year = current_season.year } = {}) => {
   const player_rows = await process_average_projections({ year })
   const projection_pids = player_rows.map((p) => p.pid)
 
-  // register league and scoring formats to process
+  // Resolve the league set whose state must be processed end-to-end (rosters,
+  // matchup projections, season forecast, leagues.processed_at). lid=0 is the
+  // synthetic logged-out default league. The remainder is every currently
+  // active, hosted league derived from the leagues table.
+  const hosted_league_rows = await db('leagues')
+    .select('uid')
+    .where({ hosted: true })
+    .whereNull('archived_at')
+  const lids = [0, ...hosted_league_rows.map((row) => row.uid)]
+
+  // Register the scoring/league formats actually used by those leagues so the
+  // standard process_league path stays self-consistent.
   for (const lid of lids) {
     const league = await getLeague({ lid, year })
     leagues_cache[lid] = league
     league_formats[league.league_format_hash] = true
     scoring_formats[league.scoring_format_hash] = true
+  }
+
+  // Additionally project under every named catalog scoring/league format so
+  // the data-view analysis surface (e.g. DraftKings/FanDuel/PPR/etc.) has
+  // current-year coverage. These named formats are not tied to any league;
+  // they exist as analysis presets.
+  for (const named of Object.values(named_scoring_formats)) {
+    scoring_formats[named.hash] = true
+  }
+  for (const named of Object.values(named_league_formats)) {
+    league_formats[named.hash] = true
   }
 
   // calculate player points for each scoring format
