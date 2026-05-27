@@ -34,6 +34,7 @@ import nfl_team_seasonlogs_column_definitions from './nfl-team-seasonlogs-column
 import pff_team_grades_column_definitions from './pff-team-grades-column-definitions.mjs'
 import player_pfr_season_value_column_definitions from './player-pfr-season-value-column-definitions.mjs'
 import player_seasonlogs_column_definitions from './player-seasonlogs-column-definitions.mjs'
+import player_extended_salary_column_definitions from './player-extended-salary-column-definitions.mjs'
 
 // TODO include RESERVE_LONG_TERM
 const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${roster_slot_types.RESERVE_SHORT_TERM} THEN 'injured_reserve' WHEN rosters_players.slot = ${roster_slot_types.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
@@ -68,6 +69,7 @@ export default {
   ...pff_team_grades_column_definitions,
   ...player_pfr_season_value_column_definitions,
   ...player_seasonlogs_column_definitions,
+  ...player_extended_salary_column_definitions,
 
   player_league_roster_status: {
     table_name: 'rosters_players',

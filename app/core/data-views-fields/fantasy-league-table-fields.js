@@ -33,6 +33,15 @@ export default function ({ week, is_logged_in }) {
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
 
+    player_league_extended_salary: {
+      column_title: 'Player Extended Salary',
+      column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
+      header_label: 'Ext Salary',
+      player_value_path: 'extended_salary',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    },
+
     player_week_projected_market_salary: {
       column_title: 'Projected Market Salary',
       column_groups: [
