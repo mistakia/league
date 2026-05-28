@@ -789,6 +789,7 @@ const check_oracle = async ({ seas_type }) => {
 
 const SIGNAL_SOURCE = 'user:scheduled-command/league/process-projections.md'
 const SIGNAL_DEDUP_FAILURE = 'pipeline_failure:league:process-projections'
+const SIGNAL_DEDUP_SUCCESS = 'pipeline_success:league:process-projections'
 
 const main = async () => {
   debug.enable('process-projections,project-lineups,simulation:*')
@@ -841,14 +842,14 @@ const main = async () => {
       dedup_key: SIGNAL_DEDUP_FAILURE
     })
   } else {
-    // Self-resolve: a clean tick closes any open pipeline_failure for this
-    // source. The signal API treats this as a no-op when nothing is open.
+    // Recovery: pipeline_success auto-resolves the matching open
+    // pipeline_failure:<source> on insert. See user:text/base/signal-system.md.
     await emit_signal({
       source: SIGNAL_SOURCE,
       kind: 'pipeline_success',
       severity: 'low',
       title: 'process-projections succeeded',
-      dedup_key: SIGNAL_DEDUP_FAILURE
+      dedup_key: SIGNAL_DEDUP_SUCCESS
     })
   }
 
