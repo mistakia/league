@@ -7,6 +7,7 @@ import {
   DEFAULT_SCORING_FORMAT_HASH,
   DEFAULT_LEAGUE_FORMAT_HASH
 } from '@libs-shared'
+import { league_format_pricing_models } from '@libs-shared/league-format-definitions.mjs'
 import { current_season } from '@constants'
 
 const { single_year, nfl_week_id } = common_column_params
@@ -33,10 +34,23 @@ const league_format_hash_param = {
   single: true
 }
 
+// market_salary is auction-only: DFS formats publish per-player salaries
+// externally (player_salaries) and write NULL into the projection table.
+// Restrict the picker so the UI doesn't surface a column that would always
+// be empty for the selected format.
+const auction_league_format_hash_param = {
+  ...league_format_hash_param,
+  values: Object.entries(named_league_formats)
+    .filter(
+      ([name]) => (league_format_pricing_models[name] || 'auction') === 'auction'
+    )
+    .map(([, format]) => ({ value: format.hash, label: format.label }))
+}
+
 const extra_column_params_by_base_name = {
   points: { scoring_format_hash: scoring_format_hash_param },
   points_added: { league_format_hash: league_format_hash_param },
-  market_salary: { league_format_hash: league_format_hash_param }
+  market_salary: { league_format_hash: auction_league_format_hash_param }
 }
 
 // Generate projection years dynamically from 2020 to current year

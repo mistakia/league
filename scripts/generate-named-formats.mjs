@@ -152,11 +152,25 @@ const process_league_formats = (processed_scoring_formats) => {
       continue
     }
 
+    // Pricing model gates the auction-pricing pipeline in
+    // process_league_format. 'auction' (default) runs calculatePrices to
+    // derive market_salary from a num_teams*cap budget. 'dfs_fixed' skips
+    // calculatePrices because the contest operator publishes per-player
+    // salaries externally (stored in player_salaries).
+    const pricing_model = format.pricing_model || 'auction'
+    if (pricing_model !== 'auction' && pricing_model !== 'dfs_fixed') {
+      errors.push(
+        `Invalid pricing_model "${pricing_model}" for league format "${name}" - must be 'auction' or 'dfs_fixed'`
+      )
+      continue
+    }
+
     processed[name] = {
       hash,
       label: format.label,
       description: format.description || '',
-      scoring_format: format.scoring_format || null
+      scoring_format: format.scoring_format || null,
+      pricing_model
     }
   }
 
@@ -193,6 +207,10 @@ const generate_file_content = (type, formats) => {
 
     if (type === 'league' && format.scoring_format) {
       content += `,\n    scoring_format: '${format.scoring_format}'`
+    }
+
+    if (type === 'league' && format.pricing_model) {
+      content += `,\n    pricing_model: '${format.pricing_model}'`
     }
 
     content += '\n  },\n'
@@ -266,9 +284,10 @@ This document shows the configuration for each named format in the system.
     for (const [name, format] of league_entries) {
       content += `### ${name}
 
-**Label:** ${format.label}  
-**Description:** ${format.description || 'No description'}  
+**Label:** ${format.label}
+**Description:** ${format.description || 'No description'}
 **Hash:** \`${format.hash}\`
+**Pricing Model:** \`${format.pricing_model}\`
 
 `
 

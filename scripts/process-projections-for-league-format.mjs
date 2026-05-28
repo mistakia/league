@@ -12,6 +12,8 @@ import {
 } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert, get_league_format } from '#libs-server'
+import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
+import { league_format_pricing_models } from '#libs-shared/league-format-definitions.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -21,13 +23,25 @@ const initialize_cli = () => {
 const log = debug('process-projections-for-league-format')
 debug.enable('process-projections-for-league-format')
 
+const resolve_pricing_model = (league_format_hash) => {
+  for (const [name, named] of Object.entries(named_league_formats)) {
+    if (named.hash === league_format_hash) {
+      return league_format_pricing_models[name] || 'auction'
+    }
+  }
+  return 'auction'
+}
+
 const process_league_format_year = async ({
   year,
   league_format,
   player_rows
 }) => {
   const { league_format_hash } = league_format
-  log(`processing league format ${league_format_hash} for year ${year}`)
+  const pricing_model = resolve_pricing_model(league_format_hash)
+  log(
+    `processing league format ${league_format_hash} for year ${year} (${pricing_model})`
+  )
 
   const { num_teams, cap, min_bid } = league_format
   const league_roster_size = getRosterSize(league_format)
@@ -48,7 +62,6 @@ const process_league_format_year = async ({
     : current_season.nflFinalWeek
 
   for (; week <= final_week; week++) {
-    // baselines
     const baseline = calculateBaselines({
       players: player_rows,
       league: league_format,
@@ -56,19 +69,23 @@ const process_league_format_year = async ({
     })
     baselines[week] = baseline
 
-    // calculate values
     const total_pts_added = calculateValues({
       players: player_rows,
       baselines: baseline,
       week,
       league: league_format
     })
-    calculatePrices({
-      cap: league_total_salary_cap,
-      total_pts_added,
-      players: player_rows,
-      week
-    })
+
+    // See scripts/process-projections.mjs: DFS formats (dfs_fixed) skip
+    // auction pricing because DK/FD publish per-player salaries externally.
+    if (pricing_model === 'auction') {
+      calculatePrices({
+        cap: league_total_salary_cap,
+        total_pts_added,
+        players: player_rows,
+        week
+      })
+    }
   }
 
   const value_inserts = []
@@ -80,7 +97,10 @@ const process_league_format_year = async ({
         league_format_hash,
         week,
         pts_added,
-        market_salary: player_row.market_salary[week]
+        market_salary:
+          pricing_model === 'auction'
+            ? player_row.market_salary[week]
+            : null
       }
 
       value_inserts.push(params)

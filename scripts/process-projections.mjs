@@ -38,6 +38,7 @@ import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { league_format_pricing_models } from '#libs-shared/league-format-definitions.mjs'
 
 dayjs.extend(dayOfYear)
 
@@ -350,9 +351,10 @@ const process_scoring_format = async ({
 const process_league_format = async ({
   projection_pids,
   year,
-  league_format_hash
+  league_format_hash,
+  pricing_model = 'auction'
 }) => {
-  log(`processing league format ${league_format_hash}`)
+  log(`processing league format ${league_format_hash} (${pricing_model})`)
   const league_format = await get_league_format({ league_format_hash })
   if (!league_format) {
     throw new Error(`league format ${league_format_hash} not found`)
@@ -372,7 +374,6 @@ const process_league_format = async ({
   const baselines = {}
   let week = year === current_season.year ? current_season.week : 0
   for (; week <= current_season.nflFinalWeek; week++) {
-    // baselines
     const baseline = calculateBaselines({
       players: player_rows,
       league: league_format,
@@ -380,24 +381,31 @@ const process_league_format = async ({
     })
     baselines[week] = baseline
 
-    // calculate values
     const total_pts_added = calculateValues({
       players: player_rows,
       baselines: baseline,
       week,
       league: league_format
     })
-    calculatePrices({
-      cap: league_total_salary_cap,
-      total_pts_added,
-      players: player_rows,
-      week
-    })
+
+    // Auction-pricing only. DFS contests (pricing_model='dfs_fixed') publish
+    // per-player salaries externally (player_salaries table); deriving a
+    // market_salary from a contest-entry cap and num_teams=1 is meaningless
+    // and overflows the column. pts_added stays meaningful for any format.
+    if (pricing_model === 'auction') {
+      calculatePrices({
+        cap: league_total_salary_cap,
+        total_pts_added,
+        players: player_rows,
+        week
+      })
+    }
   }
 
   calculatePlayerValuesRestOfSeason({
     players: player_rows,
-    league: league_format
+    league: league_format,
+    pricing_model
   })
 
   const valueInserts = []
@@ -409,7 +417,10 @@ const process_league_format = async ({
         league_format_hash,
         week,
         pts_added,
-        market_salary: player_row.market_salary[week]
+        market_salary:
+          pricing_model === 'auction'
+            ? player_row.market_salary[week]
+            : null
       }
 
       valueInserts.push(params)
@@ -650,12 +661,13 @@ const run = async ({ year = current_season.year } = {}) => {
     .whereNull('archived_at')
   const lids = [0, ...hosted_league_rows.map((row) => row.uid)]
 
-  // Register the scoring/league formats actually used by those leagues so the
-  // standard process_league path stays self-consistent.
+  // league_formats values carry the pricing_model so process_league_format
+  // can gate calculatePrices. Hosted leagues default to 'auction'; named
+  // catalog entries supply their own pricing_model.
   for (const lid of lids) {
     const league = await getLeague({ lid, year })
     leagues_cache[lid] = league
-    league_formats[league.league_format_hash] = true
+    league_formats[league.league_format_hash] = 'auction'
     scoring_formats[league.scoring_format_hash] = true
   }
 
@@ -666,18 +678,24 @@ const run = async ({ year = current_season.year } = {}) => {
   for (const named of Object.values(named_scoring_formats)) {
     scoring_formats[named.hash] = true
   }
-  for (const named of Object.values(named_league_formats)) {
-    league_formats[named.hash] = true
+  for (const [name, named] of Object.entries(named_league_formats)) {
+    league_formats[named.hash] =
+      league_format_pricing_models[name] || 'auction'
   }
 
-  // calculate player points for each scoring format
   for (const scoring_format_hash of Object.keys(scoring_formats)) {
     await process_scoring_format({ year, scoring_format_hash, player_rows })
   }
 
-  // calculate player market values for each league format
-  for (const league_format_hash of Object.keys(league_formats)) {
-    await process_league_format({ year, league_format_hash, projection_pids })
+  for (const [league_format_hash, pricing_model] of Object.entries(
+    league_formats
+  )) {
+    await process_league_format({
+      year,
+      league_format_hash,
+      projection_pids,
+      pricing_model
+    })
   }
 
   // calculate league specific player values for each league

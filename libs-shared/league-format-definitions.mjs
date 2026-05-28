@@ -620,9 +620,14 @@ export const league_formats = {
       'Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions'
   },
 
-  // DraftKings DFS format
+  // DraftKings DFS format. pricing_model: 'dfs_fixed' — DK assigns
+  // per-player salaries externally (loaded into player_salaries), so the
+  // auction-pricing pipeline must skip calculatePrices and write
+  // league_format_player_projection_values.market_salary as NULL. The
+  // roster shape and scoring still produce meaningful pts_added.
   draftkings_classic: {
     label: 'DraftKings Classic DFS',
+    pricing_model: 'dfs_fixed',
     config: {
       num_teams: 1, // single entry (DFS)
       sqb: 1, // starting QB
@@ -875,4 +880,17 @@ export const league_formats = {
   }
 }
 
-// No additional exports needed
+// Derived map: league-format name -> pricing_model. Sourced from the
+// definitions above; consumers look up by name (resolve hash -> name via
+// named_league_formats). Auction is the default for formats that omit the
+// field. The generated catalog file (named-league-formats-generated.mjs)
+// does not carry this field today because its hash inputs have drifted from
+// production; routing pricing_model through this derived map avoids forcing
+// a catalog regeneration that would invalidate every projection row in the
+// database.
+export const league_format_pricing_models = Object.fromEntries(
+  Object.entries(league_formats).map(([name, format]) => [
+    name,
+    format.pricing_model || 'auction'
+  ])
+)
