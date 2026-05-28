@@ -4,6 +4,8 @@ import db from '#db'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
+import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
 
 const log = debug('detect-projection-format-hash-drift')
 debug.enable('detect-projection-format-hash-drift')
@@ -125,14 +127,56 @@ const find_league_format_gaps = async () => {
   return rows
 }
 
+// Current-year coverage contract from scripts/process-projections.mjs: every
+// named scoring/league format must have rows in the current year's
+// projection tables. The historical scans above exclude current_season.year,
+// so this catalog check is the only guard for the live coverage set.
+const find_current_year_named_scoring_format_gaps = async () => {
+  const hashes = Object.values(named_scoring_formats).map((f) => f.hash)
+  if (!hashes.length) return []
+  const present = await db('scoring_format_player_projection_points')
+    .distinct('scoring_format_hash')
+    .where('year', current_season.year)
+    .whereIn('scoring_format_hash', hashes)
+  const present_set = new Set(present.map((r) => r.scoring_format_hash))
+  return hashes
+    .filter((h) => !present_set.has(h))
+    .map((scoring_format_hash) => ({
+      year: current_season.year,
+      scoring_format_hash
+    }))
+}
+
+const find_current_year_named_league_format_gaps = async () => {
+  const hashes = Object.values(named_league_formats).map((f) => f.hash)
+  if (!hashes.length) return []
+  const present = await db('league_format_player_projection_values')
+    .distinct('league_format_hash')
+    .where('year', current_season.year)
+    .whereIn('league_format_hash', hashes)
+  const present_set = new Set(present.map((r) => r.league_format_hash))
+  return hashes
+    .filter((h) => !present_set.has(h))
+    .map((league_format_hash) => ({
+      year: current_season.year,
+      league_format_hash
+    }))
+}
+
 const detect_projection_format_hash_drift = async () => {
-  const scoring_gaps = await find_scoring_format_gaps()
+  const scoring_gaps = [
+    ...(await find_scoring_format_gaps()),
+    ...(await find_current_year_named_scoring_format_gaps())
+  ]
   log(`scoring-format gaps: ${scoring_gaps.length}`)
   for (const gap of scoring_gaps) {
     log(`  year=${gap.year} scoring_format_hash=${gap.scoring_format_hash}`)
   }
 
-  const league_gaps = await find_league_format_gaps()
+  const league_gaps = [
+    ...(await find_league_format_gaps()),
+    ...(await find_current_year_named_league_format_gaps())
+  ]
   log(`league-format gaps: ${league_gaps.length}`)
   for (const gap of league_gaps) {
     log(`  year=${gap.year} league_format_hash=${gap.league_format_hash}`)
