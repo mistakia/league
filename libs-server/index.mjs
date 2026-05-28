@@ -90,6 +90,7 @@ export { default as update_nfl_game } from './update-nfl-game.mjs'
 export * as betonline from './betonline.mjs'
 export { default as format_starting_hash } from './format-starting-hash.mjs'
 export { default as report_job } from './report-job.mjs'
+export { default as emit_signal } from './emit-signal.mjs'
 export { default as throw_if_shortfall } from './throw-if-shortfall.mjs'
 export { default as check_projections_index_floor } from './check-projections-index-floor.mjs'
 export {

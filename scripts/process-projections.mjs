@@ -32,7 +32,7 @@ import {
   batch_insert,
   report_job,
   simulation,
-  throw_if_shortfall
+  emit_signal
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
@@ -683,30 +683,78 @@ const run = async ({ year = current_season.year } = {}) => {
       league_format_pricing_models[name] || 'auction'
   }
 
+  // Per-format try/catch: one broken format must not abort processing of the
+  // remaining ~20+. Failures are collected and returned so the caller can
+  // surface them as a single pipeline_failure signal with per-format detail.
+  const per_format_failures = []
+
   for (const scoring_format_hash of Object.keys(scoring_formats)) {
-    await process_scoring_format({ year, scoring_format_hash, player_rows })
+    const t0 = Date.now()
+    try {
+      await process_scoring_format({ year, scoring_format_hash, player_rows })
+      log(
+        `scoring_format=${scoring_format_hash} duration_ms=${Date.now() - t0}`
+      )
+    } catch (err) {
+      per_format_failures.push({
+        stage: 'process_scoring_format',
+        scoring_format_hash,
+        duration_ms: Date.now() - t0,
+        message: err.message
+      })
+      log(
+        `scoring_format=${scoring_format_hash} FAILED duration_ms=${Date.now() - t0} error=${err.message}`
+      )
+    }
   }
 
   for (const [league_format_hash, pricing_model] of Object.entries(
     league_formats
   )) {
-    await process_league_format({
-      year,
-      league_format_hash,
-      projection_pids,
-      pricing_model
-    })
+    const t0 = Date.now()
+    try {
+      await process_league_format({
+        year,
+        league_format_hash,
+        projection_pids,
+        pricing_model
+      })
+      log(
+        `league_format=${league_format_hash} pricing_model=${pricing_model} duration_ms=${Date.now() - t0}`
+      )
+    } catch (err) {
+      per_format_failures.push({
+        stage: 'process_league_format',
+        league_format_hash,
+        pricing_model,
+        duration_ms: Date.now() - t0,
+        message: err.message
+      })
+      log(
+        `league_format=${league_format_hash} FAILED duration_ms=${Date.now() - t0} error=${err.message}`
+      )
+    }
   }
 
-  // calculate league specific player values for each league
   for (const lid of lids) {
     const league = leagues_cache[lid]
     if (!league.hosted) {
       continue
     }
 
-    await process_league({ year, lid })
+    try {
+      await process_league({ year, lid })
+    } catch (err) {
+      per_format_failures.push({
+        stage: 'process_league',
+        lid,
+        message: err.message
+      })
+      log(`process_league lid=${lid} FAILED error=${err.message}`)
+    }
   }
+
+  return { per_format_failures }
 }
 
 const check_oracle = async ({ seas_type }) => {
@@ -739,23 +787,70 @@ const check_oracle = async ({ seas_type }) => {
   return null
 }
 
+const SIGNAL_SOURCE = 'user:scheduled-command/league/process-projections.md'
+const SIGNAL_DEDUP_FAILURE = 'pipeline_failure:league:process-projections'
+
 const main = async () => {
   debug.enable('process-projections,project-lineups,simulation:*')
+  const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
   let error
+  let per_format_failures = []
+  let shortfall = null
+
   try {
-    const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
-    await run()
-    const shortfall = await check_oracle({ seas_type })
-    throw_if_shortfall(shortfall)
+    const result = await run()
+    per_format_failures = result?.per_format_failures || []
   } catch (err) {
     error = err
     console.log(error)
   }
 
+  // Always run the oracle, even when run() threw. A throw means some formats
+  // crashed; the oracle still tells us which hosted leagues didn't process.
+  try {
+    shortfall = await check_oracle({ seas_type })
+  } catch (err) {
+    log(`check_oracle threw: ${err.message}`)
+  }
+
   await report_job({
     job_type: job_types.PROCESS_PROJECTIONS,
-    error
+    error: error || (shortfall ? new Error(shortfall) : null)
   })
+
+  const has_failures =
+    Boolean(error) || per_format_failures.length > 0 || Boolean(shortfall)
+
+  if (has_failures) {
+    const severity = error ? 'high' : 'medium'
+    const title = error
+      ? `process-projections threw: ${error.message}`
+      : per_format_failures.length > 0
+        ? `process-projections partial: ${per_format_failures.length} format(s) failed`
+        : `process-projections oracle shortfall`
+    await emit_signal({
+      source: SIGNAL_SOURCE,
+      kind: 'pipeline_failure',
+      severity,
+      title,
+      payload: {
+        error_message: error?.message,
+        shortfall,
+        per_format_failures
+      },
+      dedup_key: SIGNAL_DEDUP_FAILURE
+    })
+  } else {
+    // Self-resolve: a clean tick closes any open pipeline_failure for this
+    // source. The signal API treats this as a no-op when nothing is open.
+    await emit_signal({
+      source: SIGNAL_SOURCE,
+      kind: 'pipeline_success',
+      severity: 'low',
+      title: 'process-projections succeeded',
+      dedup_key: SIGNAL_DEDUP_FAILURE
+    })
+  }
 
   process.exit()
 }
