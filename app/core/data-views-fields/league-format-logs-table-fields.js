@@ -11,8 +11,8 @@ const { single_year, single_year_offset } = common_column_params
 
 const league_format_id_param = {
   label: 'League Format',
-  values: Object.entries(named_league_formats).map(([key, format]) => ({
-    value: format.hash,
+  values: Object.values(named_league_formats).map((format) => ({
+    value: format.id,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,

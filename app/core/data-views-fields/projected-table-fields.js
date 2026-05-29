@@ -7,15 +7,14 @@ import {
   DEFAULT_SCORING_FORMAT_ID,
   DEFAULT_LEAGUE_FORMAT_ID
 } from '@libs-shared'
-import { league_format_pricing_models } from '@libs-shared/league-format-definitions.mjs'
 import { current_season } from '@constants'
 
 const { single_year, nfl_week_id } = common_column_params
 
 const scoring_format_id_param = {
   label: 'Scoring Format',
-  values: Object.entries(named_scoring_formats).map(([key, format]) => ({
-    value: format.hash,
+  values: Object.values(named_scoring_formats).map((format) => ({
+    value: format.id,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
@@ -25,8 +24,8 @@ const scoring_format_id_param = {
 
 const league_format_id_param = {
   label: 'League Format',
-  values: Object.entries(named_league_formats).map(([key, format]) => ({
-    value: format.hash,
+  values: Object.values(named_league_formats).map((format) => ({
+    value: format.id,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
@@ -40,11 +39,9 @@ const league_format_id_param = {
 // be empty for the selected format.
 const auction_league_format_id_param = {
   ...league_format_id_param,
-  values: Object.entries(named_league_formats)
-    .filter(
-      ([name]) => (league_format_pricing_models[name] || 'auction') === 'auction'
-    )
-    .map(([, format]) => ({ value: format.hash, label: format.label }))
+  values: Object.values(named_league_formats)
+    .filter((format) => (format.pricing_model || 'auction') === 'auction')
+    .map((format) => ({ value: format.id, label: format.label }))
 }
 
 const extra_column_params_by_base_name = {
