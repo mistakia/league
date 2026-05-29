@@ -41,7 +41,6 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       column_values: [
-        { value: 'TEAM', label: 'TEAM', group: null },
         { value: 'QB', label: 'QB', group: 'Offense' },
         { value: 'RB', label: 'RB', group: 'Offense' },
         { value: 'WR', label: 'WR', group: 'Offense' },
