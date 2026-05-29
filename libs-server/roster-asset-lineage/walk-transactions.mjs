@@ -639,6 +639,7 @@ const build_event_stream = async ({ lid }) => {
         player_id: tran.pid,
         occurred_at: ts,
         year: tran.year,
+        value: tran.value,
         transaction_id: tran.uid
       })
       continue

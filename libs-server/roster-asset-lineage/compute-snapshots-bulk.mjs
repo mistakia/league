@@ -33,10 +33,6 @@ const detect_format_column = async (table_name) => {
 // (or carried forward across trade legs). This pass does not touch it; cap
 // attribution (START_TEAM_BEARS) is the concern of separate queries that
 // sum holdings per (tid, year), not of the holding row itself.
-//
-// Replaces the per-holding sequential-query approach in the four
-// compute-*-snapshot.mjs helpers when invoked from the generator. The helpers
-// remain useful for ad-hoc one-off lookups.
 
 const PS_SLOT_SET = new Set([
   roster_slot_types.PS,
@@ -270,7 +266,7 @@ const ktc_at = (idx, pid, target_unix) => {
   return rows[0].v
 }
 
-const compute_snapshot_for_draft = ({ draft, lid, idx }) => {
+const compute_snapshot_for_draft = ({ draft, idx }) => {
   const period_start = draft.period_start
   const period_end = draft.period_end
   const start_unix = Math.floor(period_start.getTime() / 1000)
@@ -442,7 +438,7 @@ const compute_snapshots_bulk = async ({ lid, holding_drafts }) => {
   for (const draft of holding_drafts) {
     snapshots.push({
       draft_id: draft.draft_id,
-      snapshot: compute_snapshot_for_draft({ draft, lid, idx })
+      snapshot: compute_snapshot_for_draft({ draft, idx })
     })
   }
   return snapshots
