@@ -27,6 +27,7 @@ import {
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
+import validate_subject_compatibility from '#libs-server/data-views/validate-subject-compatibility.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
@@ -1449,17 +1450,29 @@ export const get_data_view_results_query = async ({
     prefix_columns,
     sort,
     offset,
-    limit
+    limit,
+    subjects
   })
-  if (validator_result !== true) {
-    const error_messages = validator_result.map((error) => {
-      if (error.field && error.field.startsWith('where[')) {
-        const index = error.field.match(/\d+/)[0]
-        return `${error.message} (${where[index]?.column_id}, ${where[index]?.operator}, ${where[index]?.value})`
-      }
-      return error.message
-    })
-    throw new Error(error_messages.join('\n'))
+  const schema_errors =
+    validator_result === true
+      ? []
+      : validator_result.map((error) => {
+          if (error.field && error.field.startsWith('where[')) {
+            const index = error.field.match(/\d+/)[0]
+            return `${error.message} (${where[index]?.column_id}, ${where[index]?.operator}, ${where[index]?.value})`
+          }
+          return error.message
+        })
+  const subject_errors = validate_subject_compatibility({
+    subjects,
+    prefix_columns,
+    columns,
+    where,
+    defs: data_views_column_definitions
+  })
+  const all_errors = [...schema_errors, ...subject_errors]
+  if (all_errors.length) {
+    throw new Error(all_errors.join('\n'))
   }
 
   // filter where and remove any where clauses that have a value of null, undefined, empty string, or empty array
