@@ -67,8 +67,8 @@ const calibrate_for_date_and_category = async ({
   date_iso,
   format_category,
   mapping,
-  league_format_hash,
-  scoring_format_hash,
+  league_format_id,
+  scoring_format_id,
   player_ids
 }) => {
   const window_start = dayjs(date_iso).subtract(30, 'day').format('YYYY-MM-DD')
@@ -81,20 +81,20 @@ const calibrate_for_date_and_category = async ({
   const adp = await extract_adp_per_asset({
     player_ids,
     adp_type: mapping.adp_type,
-    league_format_hash,
+    league_format_id,
     start_date: window_start,
     end_date: date_iso
   })
   const rankings = await extract_rankings_per_asset({
     player_ids,
     ranking_type: mapping.ranking_type,
-    league_format_hash,
+    league_format_id,
     start_date: window_start,
     end_date: date_iso
   })
   const props = await extract_props_per_asset({
     player_ids,
-    scoring_format_hash,
+    scoring_format_id,
     start_date: window_start,
     end_date: date_iso
   })
@@ -204,8 +204,8 @@ const calibrate_composite_market_value_sources = async ({
         date_iso,
         format_category: m.format_category,
         mapping: m,
-        league_format_hash: fmt.league_format_hash,
-        scoring_format_hash: fmt.scoring_format_hash,
+        league_format_id: fmt.league_format_id,
+        scoring_format_id: fmt.scoring_format_id,
         player_ids
       })
       await batch_insert({

@@ -377,7 +377,7 @@ router.post('/?', async (req, res) => {
           pid,
           week: 0,
           year: current_season.year,
-          league_format_hash: league.league_format_hash
+          league_format_id: league.league_format_id
         })
         .first()
 
@@ -890,7 +890,7 @@ router.put('/?', async (req, res) => {
           pid,
           week: 0,
           year: current_season.year,
-          league_format_hash: league.league_format_hash
+          league_format_id: league.league_format_id
         })
         .first()
 

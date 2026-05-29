@@ -99,14 +99,14 @@ export function merge_market_stats_with_traditional({
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @param {string} params.scoring_format_hash - Scoring format hash for point calculation
+ * @param {string} params.scoring_format_id - Scoring format hash for point calculation
  * @returns {Promise<Map>} Map of pid -> projected_points
  */
 export async function load_player_projections({
   player_ids,
   week,
   year,
-  scoring_format_hash
+  scoring_format_id
 }) {
   if (!player_ids.length) {
     return new Map()
@@ -123,7 +123,7 @@ export async function load_player_projections({
     .where({
       year,
       week: String(week),
-      scoring_format_hash
+      scoring_format_id
     })
     .select('pid', 'total')
 

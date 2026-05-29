@@ -1,16 +1,13 @@
 import debug from 'debug'
 
-import {
-  generate_league_format_hash,
-  generate_scoring_format_hash
-} from '#libs-shared'
-
 const log = debug('external:league-config-mapper')
 
 /**
  * League configuration mapper
- * Maps external platform league settings (scoring, roster, league rules) to internal format hashes
- * Generates league_format_hash and scoring_format_hash for league matching and compatibility
+ * Pure transform from external platform league settings (scoring, roster,
+ * league rules) to internal format parameter objects. Identity assignment
+ * (find-or-create -> opaque id) is performed by the caller via the
+ * find_or_create_* helpers; this class does no DB I/O.
  */
 export default class LeagueConfigMapper {
   constructor() {
@@ -139,10 +136,8 @@ export default class LeagueConfigMapper {
    * @param {Object} params.scoring_config - External scoring configuration (points per stat)
    * @param {Object} params.roster_config - External roster configuration (position counts)
    * @returns {Object} Object containing:
-   *   - league_format: Full league format object with hash
-   *   - scoring_format: Full scoring format object with hash
-   *   - league_format_hash: Hash string for league format matching
-   *   - scoring_format_hash: Hash string for scoring format matching
+   *   - scoring_params: Mapped scoring parameters (config-tuple fields)
+   *   - league_params: Mapped league parameters (roster + cap fields)
    */
   map_league_config({
     platform,
@@ -151,37 +146,20 @@ export default class LeagueConfigMapper {
     roster_config
   }) {
     try {
-      // Map scoring settings
       const scoring_params = this.map_scoring_config({
         platform,
         scoring_config
       })
-      const scoring_format = generate_scoring_format_hash(scoring_params)
 
-      // Map roster and league settings
       const league_params = this.map_roster_config({
         platform,
         roster_config,
         league_config
       })
 
-      // Add scoring format hash to league params
-      league_params.scoring_format_hash = scoring_format.scoring_format_hash
+      log(`Mapped ${platform} league config`)
 
-      // Generate league format hash
-      const league_format = generate_league_format_hash(league_params)
-
-      log(`Mapped ${platform} league config to format hashes`, {
-        scoring_format_hash: scoring_format.scoring_format_hash,
-        league_format_hash: league_format.league_format_hash
-      })
-
-      return {
-        league_format,
-        scoring_format,
-        league_format_hash: league_format.league_format_hash,
-        scoring_format_hash: scoring_format.scoring_format_hash
-      }
+      return { scoring_params, league_params }
     } catch (error) {
       log(`Error mapping league config for ${platform}: ${error.message}`)
       throw error
@@ -361,6 +339,7 @@ export default class LeagueConfigMapper {
       fuml: 0,
       prtd: 0,
       krtd: 0,
+      fum_ret_td: 0,
       trg: 0,
       exclude_qb_kneels: false
     }
@@ -386,6 +365,7 @@ export default class LeagueConfigMapper {
       bench: 0,
       ps: 0,
       ir: 0,
+      reserve_short_term_limit: 0,
       cap: 0,
       min_bid: 0
     }
@@ -398,34 +378,30 @@ export default class LeagueConfigMapper {
    * @param {Object} params.scoring_format - Mapped scoring format
    * @returns {boolean} True if valid
    */
-  validate_mapped_config({ league_format, scoring_format }) {
-    // Validate scoring format has required fields
-    if (!scoring_format || !scoring_format.scoring_format_hash) {
-      log('Invalid scoring format: missing hash')
+  validate_mapped_config({ league_params, scoring_params }) {
+    if (!scoring_params) {
+      log('Invalid scoring params: missing')
+      return false
+    }
+    if (!league_params) {
+      log('Invalid league params: missing')
       return false
     }
 
-    // Validate league format has required fields
-    if (!league_format || !league_format.league_format_hash) {
-      log('Invalid league format: missing hash')
-      return false
-    }
-
-    // Validate roster has at least some starters
     const total_starters =
-      league_format.sqb +
-      league_format.srb +
-      league_format.swr +
-      league_format.ste +
-      league_format.srbwr +
-      league_format.srbwrte +
-      league_format.sqbrbwrte +
-      league_format.swrte +
-      league_format.sdst +
-      league_format.sk
+      league_params.sqb +
+      league_params.srb +
+      league_params.swr +
+      league_params.ste +
+      league_params.srbwr +
+      league_params.srbwrte +
+      league_params.sqbrbwrte +
+      league_params.swrte +
+      league_params.sdst +
+      league_params.sk
 
     if (total_starters === 0) {
-      log('Invalid league format: no starting roster positions')
+      log('Invalid league params: no starting roster positions')
       return false
     }
 

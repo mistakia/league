@@ -28,7 +28,7 @@ const log = debug('simulation:load-data-with-fallback')
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - Target NFL week
  * @param {number} params.year - NFL year
- * @param {string} params.scoring_format_hash - Scoring format hash
+ * @param {string} params.scoring_format_id - Scoring format hash
  * @param {number} [params.fallback_week] - Week to use if target week has no data
  * @returns {Promise<Object>} { projections, fallback_count }
  */
@@ -36,7 +36,7 @@ export async function load_projections_with_fallback({
   player_ids,
   week,
   year,
-  scoring_format_hash,
+  scoring_format_id,
   fallback_week
 }) {
   if (!player_ids.length) {
@@ -52,7 +52,7 @@ export async function load_projections_with_fallback({
     player_ids,
     week,
     year,
-    scoring_format_hash
+    scoring_format_id
   })
 
   // If no fallback needed or no fallback_week provided, return as-is
@@ -72,7 +72,7 @@ export async function load_projections_with_fallback({
     player_ids: missing_pids,
     week: fallback_week,
     year,
-    scoring_format_hash
+    scoring_format_id
   })
 
   // Merge projections
@@ -104,7 +104,7 @@ export async function load_projections_with_fallback({
  * @param {number} params.week - Target NFL week
  * @param {number} params.year - NFL year
  * @param {string[]} params.starter_pids - PIDs of starting players to exclude
- * @param {string} params.scoring_format_hash - Scoring format hash
+ * @param {string} params.scoring_format_id - Scoring format hash
  * @param {number} [params.fallback_week] - Week to use for projections if missing
  * @param {boolean} [params.include_practice_squad=false] - Include practice squad players
  * @param {boolean} [params.include_reserve=false] - Include short-term reserve (IR) players
@@ -116,7 +116,7 @@ export async function load_bench_players_with_fallback({
   week,
   year,
   starter_pids,
-  scoring_format_hash,
+  scoring_format_id,
   fallback_week,
   include_practice_squad = false,
   include_reserve = false
@@ -152,8 +152,8 @@ export async function load_bench_players_with_fallback({
         )
         .andOn(
           db.raw(
-            'scoring_format_player_projection_points.scoring_format_hash = ?',
-            [scoring_format_hash]
+            'scoring_format_player_projection_points.scoring_format_id = ?',
+            [scoring_format_id]
           )
         )
     })
@@ -188,7 +188,7 @@ export async function load_bench_players_with_fallback({
         .where({
           week: String(fallback_week),
           year,
-          scoring_format_hash
+          scoring_format_id
         })
         .select('pid', 'total as projection')
 

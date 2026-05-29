@@ -119,14 +119,14 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
       .select(
         'pid',
         'esbid',
-        'league_format_hash',
+        'league_format_id',
         'points_added_net',
         'points_added_earned'
       )
       .whereIn('pid', player_ids)
-      .whereIn('league_format_hash', format_hashes)
+      .whereIn('league_format_id', format_hashes)
     for (const r of gl_rows) {
-      const k = `${r.pid}__${r.league_format_hash}`
+      const k = `${r.pid}__${r.league_format_id}`
       if (!idx.gamelogs.has(k)) idx.gamelogs.set(k, new Map())
       idx.gamelogs.get(k).set(r.esbid, {
         net: r.points_added_net != null ? Number(r.points_added_net) : 0,
@@ -168,7 +168,7 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   //
   // Uses week='0' (preseason rest-of-season) rather than week='ros'. The 'ros'
   // rows are a current-state rollup that is only refreshed for the active
-  // year of each league_format_hash, so historical holdings never matched and
+  // year of each league_format_id, so historical holdings never matched and
   // projected_pts_added_at_acquisition stayed NULL across all 2020-2025 player
   // holdings. week='0' is a per-year preseason ros snapshot that exists for
   // every historical year and is the projection the market was looking at the
@@ -178,16 +178,16 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   idx.projections = new Map()
   if (player_ids.length && format_hashes.length && years.length) {
     const proj_rows = await db('league_format_player_projection_values')
-      .select('pid', 'league_format_hash', 'year', 'pts_added')
+      .select('pid', 'league_format_id', 'year', 'pts_added')
       .whereIn('pid', player_ids)
-      .whereIn('league_format_hash', format_hashes)
+      .whereIn('league_format_id', format_hashes)
       .whereIn('year', years)
       .where('week', '0')
     for (const r of proj_rows) {
       if (r.pts_added == null) continue
       const v = Number(r.pts_added)
       if (v <= -900) continue
-      const k = `${r.pid}__${r.league_format_hash}__${r.year}`
+      const k = `${r.pid}__${r.league_format_id}__${r.year}`
       idx.projections.set(k, v)
     }
   }
@@ -197,13 +197,13 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   if (format_hashes.length) {
     const pv_rows = await db('league_format_draft_pick_value')
       .select(
-        'league_format_hash',
+        'league_format_id',
         'rank',
         'median_best_season_points_added_per_game'
       )
-      .whereIn('league_format_hash', format_hashes)
+      .whereIn('league_format_id', format_hashes)
     for (const r of pv_rows) {
-      const k = `${r.league_format_hash}__${r.rank}`
+      const k = `${r.league_format_id}__${r.rank}`
       idx.pick_values.set(
         k,
         r.median_best_season_points_added_per_game != null
@@ -213,14 +213,14 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
     }
   }
 
-  // num_teams per format_hash
+  // num_teams per league_format_id
   idx.num_teams = new Map()
   if (format_hashes.length) {
     const f_rows = await db('league_formats')
-      .select('league_format_hash', 'num_teams')
-      .whereIn('league_format_hash', format_hashes)
+      .select('id', 'num_teams')
+      .whereIn('id', format_hashes)
     for (const r of f_rows) {
-      idx.num_teams.set(r.league_format_hash, r.num_teams)
+      idx.num_teams.set(r.id, r.num_teams)
     }
   }
 
@@ -319,8 +319,8 @@ const compute_snapshot_for_draft = ({
         end_unix
       )
 
-    if (draft.league_format_hash) {
-      const proj_key = `${draft.player_id}__${draft.league_format_hash}__${draft.year}`
+    if (draft.league_format_id) {
+      const proj_key = `${draft.player_id}__${draft.league_format_id}__${draft.year}`
       result.projected_pts_added_at_acquisition =
         idx.projections.get(proj_key) ?? null
     }
@@ -356,9 +356,9 @@ const compute_snapshot_for_draft = ({
         if (STARTING_SLOT_SET.has(slot)) result.weeks_started++
 
         // gamelog lookup
-        if (draft.league_format_hash) {
+        if (draft.league_format_id) {
           const gl = idx.gamelogs.get(
-            `${draft.player_id}__${draft.league_format_hash}`
+            `${draft.player_id}__${draft.league_format_id}`
           )
           if (gl) {
             // find esbid(s) for (y, r.week)
@@ -404,22 +404,22 @@ const compute_snapshot_for_draft = ({
     }
   } else if (draft.asset_type === ASSET_TYPE.PICK) {
     // Pick projection: by rank if known else median of round.
-    if (draft.league_format_hash) {
+    if (draft.league_format_id) {
       let rank = draft.pick_draft_overall_position
       if (rank == null && draft.pick_round != null) {
-        const nt = idx.num_teams.get(draft.league_format_hash)
+        const nt = idx.num_teams.get(draft.league_format_id)
         if (nt) rank = (draft.pick_round - 1) * nt + Math.ceil(nt / 2)
       }
       if (rank != null) {
         result.projected_pts_added_at_acquisition =
-          idx.pick_values.get(`${draft.league_format_hash}__${rank}`) ?? null
+          idx.pick_values.get(`${draft.league_format_id}__${rank}`) ?? null
       }
     }
     // Pick market value via ktc_pick_at: KTC pick rankings exist from
     // 2023-09-08 onwards. The helper applies an analog-year fallback for
     // pre-data picks (matching round, slot, and years-out-from-target-date)
     // and returns null when neither path yields data.
-    const nt = idx.num_teams.get(draft.league_format_hash)
+    const nt = idx.num_teams.get(draft.league_format_id)
     if (nt && draft.pick_year != null && draft.pick_round != null) {
       result.composite_market_value_at_acquisition = ktc_pick_at({
         pick_year: draft.pick_year,
@@ -459,7 +459,7 @@ const compute_snapshots_bulk = async ({ lid, holding_drafts }) => {
   const format_hashes_set = new Set()
   for (const d of holding_drafts) {
     if (d.year) years_set.add(d.year)
-    if (d.league_format_hash) format_hashes_set.add(d.league_format_hash)
+    if (d.league_format_id) format_hashes_set.add(d.league_format_id)
   }
   const years = Array.from(years_set)
   const format_hashes = Array.from(format_hashes_set)

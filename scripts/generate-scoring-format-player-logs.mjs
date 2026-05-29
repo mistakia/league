@@ -23,14 +23,14 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const scoring_format_hash = argv.scoring_format_hash
+    const scoring_format_id = argv.scoring_format_id
 
-    if (!scoring_format_hash) {
-      throw new Error('scoring_format_hash is required')
+    if (!scoring_format_id) {
+      throw new Error('scoring_format_id is required')
     }
 
     if (argv.all) {
-      log('Generating all logs for scoring format', scoring_format_hash)
+      log('Generating all logs for scoring format', scoring_format_id)
       const results = await db('player_gamelogs')
         .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
         .select('nfl_games.year')
@@ -45,7 +45,7 @@ const main = async () => {
 
       for (const year of years) {
         log(
-          `Generating all logs for scoring format ${scoring_format_hash} for year ${year}`
+          `Generating all logs for scoring format ${scoring_format_id} for year ${year}`
         )
         const weeks = await db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
@@ -58,19 +58,19 @@ const main = async () => {
           await generate_scoring_format_player_gamelogs({
             year,
             week,
-            scoring_format_hash
+            scoring_format_id
           })
         }
         await generate_scoring_format_player_seasonlogs({
           year,
-          scoring_format_hash
+          scoring_format_id
         })
       }
 
-      await generate_scoring_format_player_careerlogs({ scoring_format_hash })
+      await generate_scoring_format_player_careerlogs({ scoring_format_id })
     } else if (argv.year) {
       log(
-        `Generating all logs for scoring format ${scoring_format_hash} for year ${argv.year}`
+        `Generating all logs for scoring format ${scoring_format_id} for year ${argv.year}`
       )
       const weeks = await db('player_gamelogs')
         .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
@@ -83,25 +83,25 @@ const main = async () => {
         await generate_scoring_format_player_gamelogs({
           year: argv.year,
           week,
-          scoring_format_hash
+          scoring_format_id
         })
       }
       await generate_scoring_format_player_seasonlogs({
         year: argv.year,
-        scoring_format_hash
+        scoring_format_id
       })
-      await generate_scoring_format_player_careerlogs({ scoring_format_hash })
+      await generate_scoring_format_player_careerlogs({ scoring_format_id })
     } else if (argv.week) {
       await generate_scoring_format_player_gamelogs({
         year: argv.year,
         week: argv.week,
-        scoring_format_hash
+        scoring_format_id
       })
       await generate_scoring_format_player_seasonlogs({
         year: argv.year,
-        scoring_format_hash
+        scoring_format_id
       })
-      await generate_scoring_format_player_careerlogs({ scoring_format_hash })
+      await generate_scoring_format_player_careerlogs({ scoring_format_id })
     } else {
       throw new Error('Missing one of --all, --year, or --week')
     }

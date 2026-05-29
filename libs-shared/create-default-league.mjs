@@ -1,6 +1,12 @@
-import generate_league_format_hash from './generate-league-format-hash.mjs'
-import generate_scoring_format_hash from './generate-scoring-format-hash.mjs'
+import {
+  DEFAULT_SCORING_FORMAT_ID,
+  DEFAULT_LEAGUE_FORMAT_ID
+} from './default-format-ids.mjs'
 
+// Default league params for the synthetic lid=0 league and as the seed
+// payload for new-league creation. Format identities default to the named
+// catalog's canonical default IDs; create_league() overrides them via
+// find-or-create against the actual config tuple.
 const create_default_league = ({ commishid = 0 } = {}) => {
   const league_params = {
     commishid,
@@ -59,14 +65,10 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     b_TE: 7.8,
     b_K: 9.7,
     b_DST: 7.2,
-    processed_at: null
+    processed_at: null,
+    scoring_format_id: DEFAULT_SCORING_FORMAT_ID,
+    league_format_id: DEFAULT_LEAGUE_FORMAT_ID
   }
-
-  const scoring_format = generate_scoring_format_hash(league_params)
-  league_params.scoring_format_hash = scoring_format.scoring_format_hash
-
-  const league_format = generate_league_format_hash(league_params)
-  league_params.league_format_hash = league_format.league_format_hash
 
   return league_params
 }

@@ -19,14 +19,14 @@ debug.enable('generate-league-player-seasonlogs')
 const generate_league_player_seasonlogs = async ({
   year = current_season.year,
   lid,
-  league_format_hash
+  league_format_id
 }) => {
   if (!lid) {
     throw new Error('lid required')
   }
 
-  if (!league_format_hash) {
-    throw new Error('league_format_hash required')
+  if (!league_format_id) {
+    throw new Error('league_format_id required')
   }
 
   log(`generating player seasonlogs for leagueId ${lid} in ${year}`)
@@ -38,7 +38,7 @@ const generate_league_player_seasonlogs = async ({
     .select('league_format_player_gamelogs.*', 'player.pos')
     .join('player', 'player.pid', 'league_format_player_gamelogs.pid')
     .join('nfl_games', 'league_format_player_gamelogs.esbid', 'nfl_games.esbid')
-    .where({ year, seas_type: 'REG', league_format_hash })
+    .where({ year, seas_type: 'REG', league_format_id })
 
   log(`loaded ${gamelogs.length} gamelogs`)
 
@@ -139,7 +139,7 @@ const main = async () => {
     const argv = initialize_cli()
     const lid = argv.lid || 1
     const league = await getLeague({ lid })
-    const { league_format_hash } = league
+    const { league_format_id } = league
 
     await handle_season_args_for_script({
       argv,
@@ -156,12 +156,12 @@ const main = async () => {
           .select('nfl_games.year')
           .where('nfl_games.seas_type', seas_type)
           .where(
-            'league_format_player_gamelogs.league_format_hash',
-            league_format_hash
+            'league_format_player_gamelogs.league_format_id',
+            league_format_id
           )
           .groupBy('nfl_games.year')
           .orderBy('nfl_games.year', 'asc'),
-      script_args: { lid, league_format_hash }
+      script_args: { lid, league_format_id }
     })
   } catch (err) {
     error = err

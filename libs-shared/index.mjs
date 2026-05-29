@@ -58,8 +58,6 @@ export { default as median } from './median.mjs'
 export { default as team_aliases } from './team-aliases.mjs'
 export { default as convert_to_csv } from './convert-to-csv.mjs'
 export { default as formatPosition } from './format-position.mjs'
-export { default as generate_league_format_hash } from './generate-league-format-hash.mjs'
-export { default as generate_scoring_format_hash } from './generate-scoring-format-hash.mjs'
 export { default as is_league_post_season_week } from './is-league-post-season-week.mjs'
 export { default as get_string_from_object } from './get-string-from-object.mjs'
 export { default as format_nfl_status } from './format-nfl-status.mjs'
@@ -84,16 +82,17 @@ export { default as league_has_starting_position } from './league-has-starting-p
 export { default as nfl_plays_team_column_params } from './nfl-plays-team-column-params.mjs'
 export { default as get_restricted_free_agency_nomination_info } from './get-restricted-free-agency-nomination-info.mjs'
 export { default as get_blake2b_hash } from './get-blake2b-hash.mjs'
-export { named_scoring_formats } from './named-scoring-formats-generated.mjs'
-export { named_league_formats } from './named-league-formats-generated.mjs'
+export {
+  named_scoring_formats,
+  named_league_formats
+} from './named-format-catalog.mjs'
 export * as penalty_utils from './penalty-utils.mjs'
 export { nfl_team_colors, get_team_color } from './nfl-team-colors.mjs'
 export { get_position_color } from './position-colors.mjs'
 export {
-  DEFAULT_SCORING_FORMAT_HASH,
-  DEFAULT_LEAGUE_FORMAT_HASH,
-  default_format_hashes
-} from './default-format-hashes.mjs'
+  DEFAULT_SCORING_FORMAT_ID,
+  DEFAULT_LEAGUE_FORMAT_ID
+} from './default-format-ids.mjs'
 
 export const uniqBy = (a, key) => {
   const seen = new Set()

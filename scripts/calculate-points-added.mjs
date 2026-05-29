@@ -60,8 +60,8 @@ const calculate_points_added = async ({
     .where('nfl_games.seas_type', 'REG')
     .whereIn('player.pos', fantasy_positions) // TODO - filter using player_gamelogs.pos
     .where(
-      'scoring_format_player_gamelogs.scoring_format_hash',
-      league.scoring_format_hash
+      'scoring_format_player_gamelogs.scoring_format_id',
+      league.scoring_format_id
     )
 
   if (week !== 'ALL') {
@@ -74,7 +74,7 @@ const calculate_points_added = async ({
   const pos_rnk_query = db('scoring_format_player_seasonlogs')
     .select('pid', 'points_pos_rnk')
     .where('year', year)
-    .where('scoring_format_hash', league.scoring_format_hash)
+    .where('scoring_format_id', league.scoring_format_id)
 
   const pos_rnk_rows = await pos_rnk_query
   const pos_rnk_map = pos_rnk_rows.reduce((acc, row) => {

@@ -17,7 +17,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
   })
 
   describe('map_league_config', function () {
-    it('produces league_format_hash and scoring_format_hash for the real Sleeper fixture', function () {
+    it('produces scoring_params and league_params for the real Sleeper fixture', function () {
       const league = sleeper_fixture.data.league
       const result = mapper.map_league_config({
         platform: 'sleeper',
@@ -26,12 +26,10 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
         roster_config: league.roster_positions
       })
 
-      result.should.have.property('league_format')
-      result.should.have.property('scoring_format')
-      result.should.have.property('league_format_hash').that.is.a('string')
-      result.should.have.property('scoring_format_hash').that.is.a('string')
-      result.league_format_hash.should.have.length.above(0)
-      result.scoring_format_hash.should.have.length.above(0)
+      result.should.have.property('scoring_params').that.is.an('object')
+      result.should.have.property('league_params').that.is.an('object')
+      result.scoring_params.should.have.property('py')
+      result.league_params.should.have.property('num_teams')
     })
 
     it('throws for an unsupported platform', function () {
@@ -47,7 +45,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
         .to.throw(/Unsupported platform/i)
     })
 
-    it('produces stable hashes across repeated mappings of the same input', function () {
+    it('produces stable params across repeated mappings of the same input', function () {
       const league = sleeper_fixture.data.league
       const args = {
         platform: 'sleeper',
@@ -57,8 +55,12 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
       }
       const a = mapper.map_league_config(args)
       const b = mapper.map_league_config(args)
-      a.league_format_hash.should.equal(b.league_format_hash)
-      a.scoring_format_hash.should.equal(b.scoring_format_hash)
+      JSON.stringify(a.scoring_params).should.equal(
+        JSON.stringify(b.scoring_params)
+      )
+      JSON.stringify(a.league_params).should.equal(
+        JSON.stringify(b.league_params)
+      )
     })
   })
 

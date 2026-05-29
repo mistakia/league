@@ -39,24 +39,24 @@ export const get_format_hashes = async () => {
   const default_league = create_default_league()
   const league_ids = await get_hosted_league_ids()
 
-  const scoring_format_hashes = new Set([default_league.scoring_format_hash])
-  // Map league_format_hash -> lid (for gamelogs that need lid)
+  const scoring_format_ides = new Set([default_league.scoring_format_id])
+  // Map league_format_id -> lid (for gamelogs that need lid)
   const league_formats = new Map([
-    [default_league.league_format_hash, { lid: 0 }]
+    [default_league.league_format_id, { lid: 0 }]
   ])
 
   for (const lid of league_ids) {
     const league = await getLeague({ lid })
-    scoring_format_hashes.add(league.scoring_format_hash)
-    if (!league_formats.has(league.league_format_hash)) {
-      league_formats.set(league.league_format_hash, { lid })
+    scoring_format_ides.add(league.scoring_format_id)
+    if (!league_formats.has(league.league_format_id)) {
+      league_formats.set(league.league_format_id, { lid })
     }
   }
 
   return {
     default_league,
-    scoring_format_hashes: Array.from(scoring_format_hashes),
-    league_formats // Map of league_format_hash -> { lid }
+    scoring_format_ides: Array.from(scoring_format_ides),
+    league_formats // Map of league_format_id -> { lid }
   }
 }
 
@@ -114,11 +114,11 @@ export const run_step = async ({
  * @returns {Promise<void>}
  */
 export const process_all_scoring_format_gamelogs = async ({ week }) => {
-  const { scoring_format_hashes } = await get_format_hashes()
+  const { scoring_format_ides } = await get_format_hashes()
 
-  for (const scoring_format_hash of scoring_format_hashes) {
-    log(`Processing scoring format gamelogs: ${scoring_format_hash}`)
-    await generate_scoring_format_player_gamelogs({ week, scoring_format_hash })
+  for (const scoring_format_id of scoring_format_ides) {
+    log(`Processing scoring format gamelogs: ${scoring_format_id}`)
+    await generate_scoring_format_player_gamelogs({ week, scoring_format_id })
   }
 }
 
@@ -131,14 +131,14 @@ export const process_all_scoring_format_gamelogs = async ({ week }) => {
 export const process_all_league_format_gamelogs = async ({ week }) => {
   const { league_formats } = await get_format_hashes()
 
-  for (const [league_format_hash, { lid }] of league_formats) {
+  for (const [league_format_id, { lid }] of league_formats) {
     log(
-      `Processing league format gamelogs: ${league_format_hash} (lid: ${lid})`
+      `Processing league format gamelogs: ${league_format_id} (lid: ${lid})`
     )
     await generate_league_format_player_gamelogs({
       week,
       lid,
-      league_format_hash
+      league_format_id
     })
   }
 }
@@ -159,12 +159,12 @@ export const process_all_format_gamelogs = async ({ week }) => {
  * @returns {Promise<void>}
  */
 export const process_all_scoring_format_aggregates = async () => {
-  const { scoring_format_hashes } = await get_format_hashes()
+  const { scoring_format_ides } = await get_format_hashes()
 
-  for (const scoring_format_hash of scoring_format_hashes) {
-    log(`Processing scoring format aggregates: ${scoring_format_hash}`)
-    await generate_scoring_format_player_seasonlogs({ scoring_format_hash })
-    await generate_scoring_format_player_careerlogs({ scoring_format_hash })
+  for (const scoring_format_id of scoring_format_ides) {
+    log(`Processing scoring format aggregates: ${scoring_format_id}`)
+    await generate_scoring_format_player_seasonlogs({ scoring_format_id })
+    await generate_scoring_format_player_careerlogs({ scoring_format_id })
   }
 }
 
@@ -175,10 +175,10 @@ export const process_all_scoring_format_aggregates = async () => {
 export const process_all_league_format_aggregates = async () => {
   const { league_formats } = await get_format_hashes()
 
-  for (const [league_format_hash] of league_formats) {
-    log(`Processing league format aggregates: ${league_format_hash}`)
-    await generate_league_format_player_seasonlogs({ league_format_hash })
-    await generate_league_format_player_careerlogs({ league_format_hash })
+  for (const [league_format_id] of league_formats) {
+    log(`Processing league format aggregates: ${league_format_id}`)
+    await generate_league_format_player_seasonlogs({ league_format_id })
+    await generate_league_format_player_careerlogs({ league_format_id })
   }
 }
 

@@ -1,6 +1,6 @@
 /**
  * Compute pts_added_{earned,net}_optimal per (tid, pid) for a given
- * (lid, year, league_format_hash) slice using an actuals-based LP solve.
+ * (lid, year, league_format_id) slice using an actuals-based LP solve.
  *
  * For each fantasy week in the season, the actuals optimal lineup is
  * computed per team. A player is credited for the week iff their pid is
@@ -16,7 +16,7 @@ import { compute_actuals_optimal_lineups_for_teams } from '#libs-server/simulati
 export default async function compute_optimal_metrics({
   lid,
   year,
-  league_format_hash,
+  league_format_id,
   league_format_record
 }) {
   const team_rows = await db('teams').where({ lid, year }).select('uid')
@@ -26,7 +26,7 @@ export default async function compute_optimal_metrics({
   const gamelog_rows = await db('league_format_player_gamelogs as g')
     .join('nfl_games as n', 'n.esbid', 'g.esbid')
     .where('n.year', year)
-    .where('g.league_format_hash', league_format_hash)
+    .where('g.league_format_id', league_format_id)
     .select('g.pid', 'n.week', 'g.points_added_earned', 'g.points_added_net')
 
   const gamelog_by_pid_week = new Map()

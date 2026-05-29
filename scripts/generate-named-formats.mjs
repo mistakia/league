@@ -8,155 +8,119 @@ import {
   scoring_formats,
   league_formats
 } from '#libs-shared/league-format-definitions.mjs'
-import generate_scoring_format_hash from '#libs-shared/generate-scoring-format-hash.mjs'
-import generate_league_format_hash from '#libs-shared/generate-league-format-hash.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const project_root = path.join(__dirname, '..')
 
-// Validate format name follows snake_case convention
-const validate_format_name = (name) => {
-  const valid_pattern = /^[a-z0-9_]+$/
-  return valid_pattern.test(name)
+const validate_slug = (name) => /^[a-z0-9_]+$/.test(name)
+
+const stable_stringify = (value) => {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value)
+  if (Array.isArray(value)) {
+    return '[' + value.map(stable_stringify).join(',') + ']'
+  }
+  const keys = Object.keys(value).sort()
+  return (
+    '{' +
+    keys.map((k) => JSON.stringify(k) + ':' + stable_stringify(value[k])).join(',') +
+    '}'
+  )
 }
 
-// Generate scoring format hash using the existing utility
-const generate_scoring_hash = (config) => {
-  const result = generate_scoring_format_hash(config)
-  return result.scoring_format_hash
+// Group entries by deep-equality on the DB's unique-constraint tuple and pick
+// the alphabetical-first slug as the canonical id for the group. All source
+// keys in the group emit id = canonical. The unique tuple is supplied by the
+// caller because it differs between scoring_formats (config only) and
+// league_formats (config + scoring_format + pricing_model -- a roster config
+// with two different scorings is two distinct DB rows).
+const build_canonical_id_map = (formats, build_unique_tuple) => {
+  const groups = new Map()
+  for (const name of Object.keys(formats).sort()) {
+    const tuple = build_unique_tuple(formats[name])
+    if (tuple === null) continue
+    const key = stable_stringify(tuple)
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(name)
+  }
+  const canonical_by_source = {}
+  for (const members of groups.values()) {
+    const sorted = members.slice().sort()
+    const canonical = sorted[0]
+    for (const member of sorted) canonical_by_source[member] = canonical
+  }
+  return canonical_by_source
 }
 
-// Generate league format hash using the existing utility
-const generate_league_hash = (config, scoring_format_hash) => {
-  const result = generate_league_format_hash({
-    ...config,
-    scoring_format_hash
-  })
-  return result.league_format_hash
-}
-
-// Process scoring formats
 const process_scoring_formats = () => {
-  const processed = {}
   const errors = []
+  const canonical_by_source = build_canonical_id_map(
+    scoring_formats,
+    (entry) => entry.config || null
+  )
+  const processed = {}
 
   for (const [name, format] of Object.entries(scoring_formats)) {
-    // Validate name
-    if (!validate_format_name(name)) {
-      errors.push(`Invalid format name: "${name}" - must be snake_case`)
+    if (!validate_slug(name)) {
+      errors.push(`Invalid scoring format slug: "${name}" - must be snake_case`)
       continue
     }
-
-    // Validate required fields
     if (!format.label) {
-      errors.push(`Missing label for format: "${name}"`)
+      errors.push(`Missing label for scoring format: "${name}"`)
       continue
     }
-
-    // Determine hash
-    let hash
-    if (format.hash) {
-      // Direct hash provided
-      if (!/^[a-f0-9]{64}$/i.test(format.hash)) {
-        errors.push(
-          `Invalid hash format for "${name}" - must be 64-character hex string`
-        )
-        continue
-      }
-      hash = format.hash
-    } else if (format.config) {
-      // Generate hash from config
-      hash = generate_scoring_hash(format.config)
-    } else {
-      errors.push(`Format "${name}" must have either 'hash' or 'config' field`)
+    if (!format.config) {
+      errors.push(`Scoring format "${name}" must have a 'config' field`)
       continue
     }
-
     processed[name] = {
-      hash,
+      id: canonical_by_source[name],
       label: format.label,
       description: format.description || ''
     }
   }
 
-  return { processed, errors }
+  return { processed, errors, canonical_by_source }
 }
 
-// Process league formats
-const process_league_formats = (processed_scoring_formats) => {
-  const processed = {}
+const process_league_formats = (scoring_canonical_by_source, scoring_processed) => {
   const errors = []
+  const canonical_by_source = build_canonical_id_map(league_formats, (entry) => {
+    if (!entry.config) return null
+    const scoring_id =
+      entry.scoring_format && scoring_canonical_by_source[entry.scoring_format]
+    if (!scoring_id) return null
+    return {
+      config: entry.config,
+      scoring_format_id: scoring_id,
+      pricing_model: entry.pricing_model || 'auction'
+    }
+  })
+  const processed = {}
 
   for (const [name, format] of Object.entries(league_formats)) {
-    // Validate name
-    if (!validate_format_name(name)) {
-      errors.push(`Invalid format name: "${name}" - must be snake_case`)
+    if (!validate_slug(name)) {
+      errors.push(`Invalid league format slug: "${name}" - must be snake_case`)
       continue
     }
-
-    // Validate required fields
     if (!format.label) {
-      errors.push(`Missing label for format: "${name}"`)
+      errors.push(`Missing label for league format: "${name}"`)
       continue
     }
-
-    // Determine hash and resolve scoring format
-    let hash
-    let scoring_format_hash = null
-
-    if (format.hash) {
-      // Direct hash provided
-      if (!/^[a-f0-9]{64}$/i.test(format.hash)) {
-        errors.push(
-          `Invalid hash format for "${name}" - must be 64-character hex string`
-        )
-        continue
-      }
-      hash = format.hash
-    } else if (format.config) {
-      // Generate hash from config
-
-      // Resolve scoring format hash
-      if (format.scoring_format) {
-        if (processed_scoring_formats[format.scoring_format]) {
-          scoring_format_hash =
-            processed_scoring_formats[format.scoring_format].hash
-        } else {
-          errors.push(
-            `Scoring format "${format.scoring_format}" not found for league format "${name}"`
-          )
-          continue
-        }
-      } else {
-        errors.push(
-          `League format "${name}" with config must specify scoring_format`
-        )
-        continue
-      }
-
-      hash = generate_league_hash(format.config, scoring_format_hash)
-    } else {
-      errors.push(`Format "${name}" must have either 'hash' or 'config' field`)
+    if (!format.config) {
+      errors.push(`League format "${name}" must have a 'config' field`)
       continue
     }
-
-    // Validate scoring format reference (for non-config formats)
-    if (
-      format.scoring_format &&
-      !format.config &&
-      !processed_scoring_formats[format.scoring_format]
-    ) {
+    if (!format.scoring_format) {
+      errors.push(`League format "${name}" must specify scoring_format`)
+      continue
+    }
+    if (!scoring_processed[format.scoring_format]) {
       errors.push(
         `Invalid scoring_format reference "${format.scoring_format}" for league format "${name}"`
       )
       continue
     }
 
-    // Pricing model gates the auction-pricing pipeline in
-    // process_league_format. 'auction' (default) runs calculatePrices to
-    // derive market_salary from a num_teams*cap budget. 'dfs_fixed' skips
-    // calculatePrices because the contest operator publishes per-player
-    // salaries externally (stored in player_salaries).
     const pricing_model = format.pricing_model || 'auction'
     if (pricing_model !== 'auction' && pricing_model !== 'dfs_fixed') {
       errors.push(
@@ -166,10 +130,10 @@ const process_league_formats = (processed_scoring_formats) => {
     }
 
     processed[name] = {
-      hash,
+      id: canonical_by_source[name],
       label: format.label,
       description: format.description || '',
-      scoring_format: format.scoring_format || null,
+      scoring_format: scoring_canonical_by_source[format.scoring_format],
       pricing_model
     }
   }
@@ -177,282 +141,192 @@ const process_league_formats = (processed_scoring_formats) => {
   return { processed, errors }
 }
 
-// Generate file content
-const generate_file_content = (type, formats) => {
-  const timestamp = new Date().toISOString()
+const emit_catalog_object = (entries, indent, extra_fields) => {
+  const sorted = Object.entries(entries).sort((a, b) => a[0].localeCompare(b[0]))
+  let out = ''
+  for (const [name, entry] of sorted) {
+    out += `${indent}${name}: {\n`
+    out += `${indent}  id: '${entry.id}',\n`
+    out += `${indent}  label: ${JSON.stringify(entry.label)},\n`
+    out += `${indent}  description: ${JSON.stringify(entry.description)}`
+    for (const field of extra_fields) {
+      if (entry[field] !== undefined && entry[field] !== null) {
+        out += `,\n${indent}  ${field}: '${entry[field]}'`
+      }
+    }
+    out += `\n${indent}},\n`
+  }
+  return out.slice(0, -2) + '\n'
+}
 
-  let content = `// Auto-generated named ${type} format constants
+const generate_catalog_content = (scoring, league) => {
+  const timestamp = new Date().toISOString()
+  let content = `// Auto-generated named format catalog
 // Generated at: ${timestamp}
 // DO NOT EDIT THIS FILE MANUALLY
 // To make changes, edit libs-shared/league-format-definitions.mjs and run: yarn generate:formats
 
+export const named_scoring_formats = {
 `
+  content += emit_catalog_object(scoring, '  ', [])
+  content += `}
 
-  if (type === 'scoring') {
-    content += 'export const named_scoring_formats = {\n'
-  } else {
-    content += 'export const named_league_formats = {\n'
-  }
-
-  // Sort formats by name for consistent output
-  const sorted_entries = Object.entries(formats).sort((a, b) =>
-    a[0].localeCompare(b[0])
-  )
-
-  for (const [name, format] of sorted_entries) {
-    content += `  ${name}: {\n`
-    content += `    hash: '${format.hash}',\n`
-    content += `    label: '${format.label}',\n`
-    content += `    description: '${format.description}'`
-
-    if (type === 'league' && format.scoring_format) {
-      content += `,\n    scoring_format: '${format.scoring_format}'`
-    }
-
-    if (type === 'league' && format.pricing_model) {
-      content += `,\n    pricing_model: '${format.pricing_model}'`
-    }
-
-    content += '\n  },\n'
-  }
-
-  // Remove trailing comma and close
-  content = content.slice(0, -2) + '\n}\n'
-
+export const named_league_formats = {
+`
+  content += emit_catalog_object(league, '  ', ['scoring_format', 'pricing_model'])
+  content += `}\n`
   return content
 }
 
-// Generate markdown documentation
-const generate_markdown_documentation = (
-  scoring_formats_processed,
-  league_formats_processed
-) => {
-  const timestamp = new Date().toISOString()
+const group_by_id = (entries) => {
+  const groups = new Map()
+  for (const [name, entry] of Object.entries(entries)) {
+    if (!groups.has(entry.id)) groups.set(entry.id, [])
+    groups.get(entry.id).push(name)
+  }
+  return groups
+}
 
+const generate_markdown_documentation = (scoring_processed, league_processed) => {
+  const timestamp = new Date().toISOString()
   let content = `# Named Scoring and League Formats
 
 *Generated at: ${timestamp}*
 
-This document shows the configuration for each named format in the system.
+This document shows the configuration for each named format in the system. Identities are stable opaque IDs; multiple source keys may share an ID when their configs are byte-identical (the alphabetical-first slug wins).
 
 `
 
-  // League format summary
-  const league_entries = Object.entries(league_formats_processed).sort((a, b) =>
+  const league_entries = Object.entries(league_processed).sort((a, b) =>
     a[0].localeCompare(b[0])
   )
   if (league_entries.length > 0) {
     content += `## League Format Summary
 
-| Name | Description | Details |
-|------|-------------|---------|
+| Source Key | ID | Description |
+|------------|----|-------------|
 `
-
-    for (const [name, format] of league_entries) {
-      const description = format.description || 'No description'
-      content += `| \`${name}\` | ${description} | [View Details](#${name}) |\n`
+    for (const [name, entry] of league_entries) {
+      content += `| \`${name}\` | \`${entry.id}\` | ${entry.description || 'No description'} |\n`
     }
-
     content += '\n'
   }
 
-  // Scoring format summary
-  const scoring_entries = Object.entries(scoring_formats_processed).sort(
-    (a, b) => a[0].localeCompare(b[0])
+  const scoring_entries = Object.entries(scoring_processed).sort((a, b) =>
+    a[0].localeCompare(b[0])
   )
   if (scoring_entries.length > 0) {
     content += `## Scoring Format Summary
 
-| Name | Description | Details |
-|------|-------------|---------|
+| Source Key | ID | Description |
+|------------|----|-------------|
 `
-
-    for (const [name, format] of scoring_entries) {
-      const description = format.description || 'No description'
-      content += `| \`${name}\` | ${description} | [View Details](#${name}) |\n`
+    for (const [name, entry] of scoring_entries) {
+      content += `| \`${name}\` | \`${entry.id}\` | ${entry.description || 'No description'} |\n`
     }
-
     content += '\n'
   }
 
-  // League format details
+  const scoring_groups = group_by_id(scoring_processed)
+  const league_groups = group_by_id(league_processed)
+
   if (league_entries.length > 0) {
-    content += `## League Format Details
-
-`
-
-    for (const [name, format] of league_entries) {
-      content += `### ${name}
-
-**Label:** ${format.label}
-**Description:** ${format.description || 'No description'}
-**Hash:** \`${format.hash}\`
-**Pricing Model:** \`${format.pricing_model}\`
-
-`
-
-      // Get actual format properties from the original input
-      const input_format = league_formats[name]
-      if (input_format && input_format.config) {
-        content += `**Configuration:**
-| Property | Value | Description |
-|----------|-------|-------------|
-`
-        const config = input_format.config
-        const property_descriptions = {
-          num_teams: 'Number of teams in the league',
-          sqb: 'Starting QB positions',
-          srb: 'Starting RB positions',
-          swr: 'Starting WR positions',
-          ste: 'Starting TE positions',
-          srbwr: 'Starting RB/WR flex positions',
-          srbwrte: 'Starting RB/WR/TE flex positions',
-          sqbrbwrte: 'Starting superflex (QB/RB/WR/TE) positions',
-          swrte: 'Starting WR/TE flex positions',
-          sdst: 'Starting D/ST positions',
-          sk: 'Starting K positions',
-          bench: 'Bench positions',
-          ps: 'Practice squad positions',
-          reserve_short_term_limit: 'Short term reserve limit',
-          cap: 'Salary cap',
-          min_bid: 'Minimum bid amount'
-        }
-
-        for (const [prop, value] of Object.entries(config)) {
-          const desc = property_descriptions[prop] || prop
-          content += `| \`${prop}\` | ${value} | ${desc} |\n`
-        }
-
-        if (format.scoring_format) {
-          content += `\n**Scoring Format:** [\`${format.scoring_format}\`](#${format.scoring_format})
-
-`
-        }
+    content += `## League Format Details\n\n`
+    for (const [id, members] of [...league_groups.entries()].sort()) {
+      const canonical = members.slice().sort()[0]
+      const entry = league_processed[canonical]
+      content += `### ${id}\n\n`
+      if (members.length > 1) {
+        content += `**Source Keys:** ${members.map((m) => `\`${m}\``).join(', ')} (collapsed to canonical \`${id}\`)\n`
       } else {
-        content += `*Hash-based format - configuration not available*
-
-`
+        content += `**Source Key:** \`${canonical}\`\n`
       }
+      content += `**Label:** ${entry.label}\n`
+      content += `**Description:** ${entry.description || 'No description'}\n`
+      content += `**Scoring Format:** \`${entry.scoring_format}\`\n`
+      content += `**Pricing Model:** \`${entry.pricing_model}\`\n\n`
+      const config = league_formats[canonical].config
+      content += `**Configuration:**\n\n| Property | Value |\n|----------|-------|\n`
+      for (const [prop, value] of Object.entries(config)) {
+        content += `| \`${prop}\` | ${value} |\n`
+      }
+      content += '\n'
     }
   }
 
-  // Scoring format details
   if (scoring_entries.length > 0) {
-    content += `## Scoring Format Details
-
-`
-
-    for (const [name, format] of scoring_entries) {
-      content += `### ${name}
-
-**Label:** ${format.label}  
-**Description:** ${format.description || 'No description'}  
-**Hash:** \`${format.hash}\`
-
-`
-
-      // Get actual format properties from the original input
-      const input_format = scoring_formats[name]
-      if (input_format && input_format.config) {
-        content += `**Configuration:**
-| Property | Value | Description |
-|----------|-------|-------------|
-`
-        const config = input_format.config
-        const property_descriptions = {
-          pa: 'Points per passing attempt',
-          pc: 'Points per passing completion',
-          py: 'Points per passing yard',
-          ints: 'Points per interception thrown',
-          tdp: 'Points per passing touchdown',
-          ra: 'Points per rushing attempt',
-          ry: 'Points per rushing yard',
-          tdr: 'Points per rushing touchdown',
-          rec: 'Points per reception',
-          rbrec: 'Points per RB reception',
-          wrrec: 'Points per WR reception',
-          terec: 'Points per TE reception',
-          recy: 'Points per receiving yard',
-          tdrec: 'Points per receiving touchdown',
-          twoptc: 'Points per two-point conversion',
-          fuml: 'Points per fumble lost',
-          prtd: 'Points per punt return touchdown',
-          krtd: 'Points per kick return touchdown'
-        }
-
-        for (const [prop, value] of Object.entries(config)) {
-          const desc = property_descriptions[prop] || prop
-          content += `| \`${prop}\` | ${value} | ${desc} |\n`
-        }
-
-        content += '\n'
+    content += `## Scoring Format Details\n\n`
+    for (const [id, members] of [...scoring_groups.entries()].sort()) {
+      const canonical = members.slice().sort()[0]
+      const entry = scoring_processed[canonical]
+      content += `### ${id}\n\n`
+      if (members.length > 1) {
+        content += `**Source Keys:** ${members.map((m) => `\`${m}\``).join(', ')} (collapsed to canonical \`${id}\`)\n`
       } else {
-        content += `*Hash-based format - configuration not available*
-
-`
+        content += `**Source Key:** \`${canonical}\`\n`
       }
+      content += `**Label:** ${entry.label}\n`
+      content += `**Description:** ${entry.description || 'No description'}\n\n`
+      const config = scoring_formats[canonical].config
+      content += `**Configuration:**\n\n| Property | Value |\n|----------|-------|\n`
+      for (const [prop, value] of Object.entries(config)) {
+        content += `| \`${prop}\` | ${value} |\n`
+      }
+      content += '\n'
     }
   }
 
   return content
 }
 
-// Main generation function
 const main = async () => {
-  console.log('Generating named format constants...')
+  console.log('Generating named format catalog...')
 
   const all_errors = []
 
-  // Process scoring formats
-  console.log('\nProcessing scoring formats...')
-  const { processed: scoring, errors: scoring_errors } =
-    process_scoring_formats()
+  const {
+    processed: scoring,
+    errors: scoring_errors,
+    canonical_by_source: scoring_canonical
+  } = process_scoring_formats()
   all_errors.push(...scoring_errors)
-  console.log(`- Processed ${Object.keys(scoring).length} scoring formats`)
+  const scoring_unique_ids = new Set(Object.values(scoring).map((e) => e.id)).size
+  console.log(
+    `- Processed ${Object.keys(scoring).length} scoring source keys -> ${scoring_unique_ids} unique IDs`
+  )
 
-  // Process league formats
-  console.log('\nProcessing league formats...')
-  const { processed: league, errors: league_errors } =
-    process_league_formats(scoring)
+  const { processed: league, errors: league_errors } = process_league_formats(
+    scoring_canonical,
+    scoring
+  )
   all_errors.push(...league_errors)
-  console.log(`- Processed ${Object.keys(league).length} league formats`)
+  const league_unique_ids = new Set(Object.values(league).map((e) => e.id)).size
+  console.log(
+    `- Processed ${Object.keys(league).length} league source keys -> ${league_unique_ids} unique IDs`
+  )
 
-  // Check for errors
   if (all_errors.length > 0) {
     console.error('\nErrors found:')
     all_errors.forEach((error) => console.error(`- ${error}`))
     process.exit(1)
   }
 
-  // Generate output files
   const libs_dir = path.join(project_root, 'libs-shared')
   const docs_dir = path.join(project_root, 'docs')
 
-  // Generate scoring formats file
-  const scoring_content = generate_file_content('scoring', scoring)
-  const scoring_path = path.join(
-    libs_dir,
-    'named-scoring-formats-generated.mjs'
-  )
-  await fs.writeFile(scoring_path, scoring_content, 'utf8')
-  console.log(`\nGenerated: ${path.relative(project_root, scoring_path)}`)
+  const catalog_content = generate_catalog_content(scoring, league)
+  const catalog_path = path.join(libs_dir, 'named-format-catalog.mjs')
+  await fs.writeFile(catalog_path, catalog_content, 'utf8')
+  console.log(`\nGenerated: ${path.relative(project_root, catalog_path)}`)
 
-  // Generate league formats file
-  const league_content = generate_file_content('league', league)
-  const league_path = path.join(libs_dir, 'named-league-formats-generated.mjs')
-  await fs.writeFile(league_path, league_content, 'utf8')
-  console.log(`Generated: ${path.relative(project_root, league_path)}`)
-
-  // Generate markdown documentation
   const markdown_content = generate_markdown_documentation(scoring, league)
   const markdown_path = path.join(docs_dir, 'named-formats.md')
   await fs.writeFile(markdown_path, markdown_content, 'utf8')
   console.log(`Generated: ${path.relative(project_root, markdown_path)}`)
 
-  console.log('\nFormat generation completed successfully!')
+  console.log('\nFormat generation completed successfully.')
 }
 
-// Run if called directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
     console.error('Generation failed:', error)

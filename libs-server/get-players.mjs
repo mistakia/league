@@ -21,8 +21,8 @@ export default async function ({
   textSearch,
   teamId,
   leagueId,
-  scoring_format_hash,
-  league_format_hash,
+  scoring_format_id,
+  league_format_id,
   columns = [],
   pids = [],
   include_all_active_players = false,
@@ -35,12 +35,12 @@ export default async function ({
   const projectionLeagueId = leagueId || league_defaults.LEAGUE_ID
   const league = await getLeague({ lid: projectionLeagueId })
 
-  if (!league_format_hash) {
-    league_format_hash = league.league_format_hash
+  if (!league_format_id) {
+    league_format_id = league.league_format_id
   }
 
-  if (!scoring_format_hash) {
-    scoring_format_hash = league.scoring_format_hash
+  if (!scoring_format_id) {
+    scoring_format_id = league.scoring_format_id
   }
 
   if (teamId) {
@@ -283,7 +283,7 @@ export default async function ({
     query.whereIn('player.pid', league_roster_player_ids)
   }
 
-  if (league_format_hash) {
+  if (league_format_id) {
     const league_format_player_seasonlogs_selects = [
       'league_format_player_seasonlogs.startable_games',
       'league_format_player_seasonlogs.points_added_earned',
@@ -301,7 +301,7 @@ export default async function ({
         this.andOn('league_format_player_seasonlogs.year', year)
         this.andOn(
           db.raw(
-            `league_format_player_seasonlogs.league_format_hash = '${league_format_hash}'`
+            `league_format_player_seasonlogs.league_format_id = '${league_format_id}'`
           )
         )
       })
@@ -309,7 +309,7 @@ export default async function ({
       .groupBy(db.raw(league_format_player_seasonlogs_selects.join(',')))
   }
 
-  if (scoring_format_hash) {
+  if (scoring_format_id) {
     const scoring_format_player_seasonlogs_selects = [
       'scoring_format_player_seasonlogs.points',
       'scoring_format_player_seasonlogs.points_per_game',
@@ -325,7 +325,7 @@ export default async function ({
         this.andOn('scoring_format_player_seasonlogs.year', year)
         this.andOn(
           db.raw(
-            `scoring_format_player_seasonlogs.scoring_format_hash = '${scoring_format_hash}'`
+            `scoring_format_player_seasonlogs.scoring_format_id = '${scoring_format_id}'`
           )
         )
       })
@@ -372,11 +372,11 @@ export default async function ({
     }
   }
 
-  if (scoring_format_hash) {
+  if (scoring_format_id) {
     // include projected fantasy point values
     const leaguePointsProj = await db('scoring_format_player_projection_points')
       .where({
-        scoring_format_hash,
+        scoring_format_id,
         year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
@@ -387,13 +387,13 @@ export default async function ({
     }
   }
 
-  if (league_format_hash) {
+  if (league_format_id) {
     // include points added and market salary
     const league_format_values = await db(
       'league_format_player_projection_values'
     )
       .where({
-        league_format_hash,
+        league_format_id,
         year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)

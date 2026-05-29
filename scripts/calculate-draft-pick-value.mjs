@@ -11,13 +11,13 @@ import { is_main, getLeague } from '#libs-server'
 const log = debug('calculate-draft-pick-value')
 debug.enable('calculate-draft-pick-value')
 
-const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
-  if (!league_format_hash) {
-    throw new Error('missing league_format_hash')
+const calculateDraftPickValue = async ({ league_format_id } = {}) => {
+  if (!league_format_id) {
+    throw new Error('missing league_format_id')
   }
 
   log(
-    `calculating draft pick value for league format hash: ${league_format_hash}`
+    `calculating draft pick value for league format hash: ${league_format_id}`
   )
 
   const inserts = []
@@ -25,7 +25,7 @@ const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
   const league_format_player_careerlogs = await db(
     'league_format_player_careerlogs'
   )
-    .where({ league_format_hash })
+    .where({ league_format_id })
     .where('draft_rank', '>=', 1)
 
   const league_format_player_careerlogs_by_draft_rank = groupBy(
@@ -35,7 +35,7 @@ const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
   for (const rank in league_format_player_careerlogs_by_draft_rank) {
     const players = league_format_player_careerlogs_by_draft_rank[rank]
     inserts.push({
-      league_format_hash,
+      league_format_id,
       rank: Number(rank),
       median_best_season_points_added_per_game: median(
         players.map((p) => p.best_season_points_added_earned_per_game)
@@ -50,7 +50,7 @@ const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
     log(`updated ${inserts.length} draft pick values`)
     await db('league_format_draft_pick_value')
       .insert(inserts)
-      .onConflict(['rank', 'league_format_hash'])
+      .onConflict(['rank', 'league_format_id'])
       .merge()
   }
 }
@@ -60,8 +60,8 @@ const main = async () => {
   try {
     const lid = 1
     const league = await getLeague({ lid })
-    const { league_format_hash } = league
-    await calculateDraftPickValue({ league_format_hash })
+    const { league_format_id } = league
+    await calculateDraftPickValue({ league_format_id })
   } catch (err) {
     error = err
     log(error)

@@ -41,7 +41,7 @@ const empty_metrics = () => ({
 const build_rows_for_slice = async ({
   lid,
   year,
-  league_format_hash,
+  league_format_id,
   league_format_record,
   with_optimal
 }) => {
@@ -59,14 +59,14 @@ const build_rows_for_slice = async ({
   const rostered = await compute_roster_slot_metrics({
     lid,
     year,
-    league_format_hash,
+    league_format_id,
     slots: active_roster_slots,
     suffix: 'rostered'
   })
   const started = await compute_roster_slot_metrics({
     lid,
     year,
-    league_format_hash,
+    league_format_id,
     slots: starting_lineup_slots,
     suffix: 'started'
   })
@@ -74,7 +74,7 @@ const build_rows_for_slice = async ({
     ? await compute_optimal_metrics({
         lid,
         year,
-        league_format_hash,
+        league_format_id,
         league_format_record
       })
     : new Map()
@@ -141,7 +141,7 @@ const build_rows_for_slice = async ({
       tid,
       pid,
       year,
-      league_format_hash,
+      league_format_id,
       weeks_rostered: m.weeks_rostered,
       weeks_started: m.weeks_started,
       pts_added_earned_rostered: m.pts_added_earned_rostered,
@@ -169,32 +169,32 @@ export const generate_league_team_player_seasonlogs = async ({
     .modify((q) => {
       if (year) q.where({ year })
     })
-    .distinct('year', 'league_format_hash')
+    .distinct('year', 'league_format_id')
     .orderBy('year', 'asc')
 
   const slice_failures = []
 
-  for (const { year: y, league_format_hash } of year_hash_pairs) {
-    log(`processing lid=${lid} year=${y} hash=${league_format_hash}`)
+  for (const { year: y, league_format_id } of year_hash_pairs) {
+    log(`processing lid=${lid} year=${y} hash=${league_format_id}`)
 
     const league_format_record = await db('league_formats')
-      .where({ league_format_hash })
+      .where({ id: league_format_id })
       .first()
     if (!league_format_record) {
-      log(`skipping ${league_format_hash}: missing league_formats row`)
+      log(`skipping ${league_format_id}: missing league_formats row`)
       continue
     }
 
     const rows = await build_rows_for_slice({
       lid,
       year: y,
-      league_format_hash,
+      league_format_id,
       league_format_record,
       with_optimal
     })
 
     // Floor oracle: every team that fielded a roster in (lid, y) should be
-    // represented by at least one row. `seasons` carries one league_format_hash
+    // represented by at least one row. `seasons` carries one league_format_id
     // per (lid, y), so the cross-hash tid count equals the per-hash floor.
     const floor_row = await db('rosters_players')
       .where({ lid, year: y })
@@ -202,13 +202,13 @@ export const generate_league_team_player_seasonlogs = async ({
       .first()
     const floor = Number(floor_row?.floor || 0)
     if (rows.length < floor) {
-      const reason = `row-count shortfall: actual=${rows.length} floor=${floor} for (lid=${lid}, year=${y}, hash=${league_format_hash})`
+      const reason = `row-count shortfall: actual=${rows.length} floor=${floor} for (lid=${lid}, year=${y}, hash=${league_format_id})`
       log(reason)
       slice_failures.push(reason)
     }
 
     await db('league_team_player_seasonlogs')
-      .where({ lid, year: y, league_format_hash })
+      .where({ lid, year: y, league_format_id })
       .del()
 
     if (rows.length > 0) {
@@ -218,12 +218,12 @@ export const generate_league_team_player_seasonlogs = async ({
         save: async (batch) =>
           db('league_team_player_seasonlogs')
             .insert(batch)
-            .onConflict(['lid', 'tid', 'pid', 'year', 'league_format_hash'])
+            .onConflict(['lid', 'tid', 'pid', 'year', 'league_format_id'])
             .merge()
       })
     }
     log(
-      `wrote ${rows.length} rows for lid=${lid} year=${y} hash=${league_format_hash}`
+      `wrote ${rows.length} rows for lid=${lid} year=${y} hash=${league_format_id}`
     )
   }
 

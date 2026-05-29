@@ -28,13 +28,13 @@ export default async function ({ lid, year = current_season.year } = {}) {
     })
     .leftJoin(
       'league_formats',
-      'seasons.league_format_hash',
-      'league_formats.league_format_hash'
+      'seasons.league_format_id',
+      'league_formats.id'
     )
     .leftJoin(
       'league_scoring_formats',
-      'seasons.scoring_format_hash',
-      'league_scoring_formats.scoring_format_hash'
+      'seasons.scoring_format_id',
+      'league_scoring_formats.id'
     )
     .where('leagues.uid', lid)
     .first()

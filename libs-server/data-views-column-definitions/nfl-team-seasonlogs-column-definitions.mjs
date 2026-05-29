@@ -2,7 +2,7 @@ import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
-// TODO should use scoring_format_hash instead of league_id
+// TODO should use scoring_format_id instead of league_id
 const default_league_id = 1
 
 const get_default_params = ({ params = {} } = {}) => {

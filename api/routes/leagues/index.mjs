@@ -1,6 +1,13 @@
 import express from 'express'
 
-import { getLeague, validators, report_job, report_error } from '#libs-server'
+import {
+  getLeague,
+  validators,
+  report_job,
+  report_error,
+  find_or_create_scoring_format,
+  find_or_create_league_format
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import process_projections_for_scoring_format from '#scripts/process-projections-for-scoring-format.mjs'
 import process_projections_for_league_format from '#scripts/process-projections-for-league-format.mjs'
@@ -10,10 +17,6 @@ import {
   require_commissioner,
   handle_error
 } from './middleware.mjs'
-import {
-  generate_league_format_hash,
-  generate_scoring_format_hash
-} from '#libs-shared'
 import { current_season } from '#constants'
 import {
   league_fields,
@@ -192,31 +195,25 @@ router.put('/:leagueId', async (req, res) => {
         .update({ [field]: value })
         .where({ lid, year: current_season.year })
     } else if (league_scoring_format_fields.includes(field)) {
-      const scoring_format = generate_scoring_format_hash({
-        ...league,
-        [field]: value
-      })
-      await db('league_scoring_formats')
-        .insert(scoring_format)
-        .onConflict('scoring_format_hash')
-        .ignore()
+      // Find-or-create inline. The DB unique index on the full scoring config
+      // tuple is the dedup oracle; identity (id) is opaque. The DO UPDATE
+      // returns the existing row's id on conflict -- DO NOTHING would not.
+      const scoring_config = { ...league, [field]: value }
+      const scoring_format_id = await find_or_create_scoring_format(
+        db,
+        scoring_config
+      )
       await db('seasons')
-        .update({ scoring_format_hash: scoring_format.scoring_format_hash })
+        .update({ scoring_format_id })
         .where({ lid, year: current_season.year })
 
-      // Cascade: materialize projection points under the new hash so the
-      // lineage populator can join on (pid, scoring_format_hash, year, week=0).
-      // Known race: a concurrent league_format PUT can compute its hash from a
-      // stale `league` snapshot. Commish settings edits are sequential in
-      // practice; cross-bucket projector writes are disjoint by hash so this
-      // is a silent-stale-input bug, not corruption.
       try {
         await process_projections_for_scoring_format({
           year: current_season.year,
-          scoring_format_hash: scoring_format.scoring_format_hash
+          scoring_format_id
         })
       } catch (err) {
-        const job_reason = `cascade_failed_scoring lid=${lid} year=${current_season.year} hash=${scoring_format.scoring_format_hash}`
+        const job_reason = `cascade_failed_scoring lid=${lid} year=${current_season.year} id=${scoring_format_id}`
         await report_error({
           job_type: job_types.PROCESS_PROJECTIONS,
           error: err
@@ -228,25 +225,22 @@ router.put('/:leagueId', async (req, res) => {
         })
       }
     } else if (league_format_fields.includes(field)) {
-      const league_format = generate_league_format_hash({
-        ...league,
-        [field]: value
-      })
-      await db('league_formats')
-        .insert(league_format)
-        .onConflict('league_format_hash')
-        .ignore()
+      const league_config = { ...league, [field]: value }
+      const league_format_id = await find_or_create_league_format(
+        db,
+        league_config
+      )
       await db('seasons')
-        .update({ league_format_hash: league_format.league_format_hash })
+        .update({ league_format_id })
         .where({ lid, year: current_season.year })
 
       try {
         await process_projections_for_league_format({
           year: current_season.year,
-          league_format_hash: league_format.league_format_hash
+          league_format_id
         })
       } catch (err) {
-        const job_reason = `cascade_failed_league lid=${lid} year=${current_season.year} hash=${league_format.league_format_hash}`
+        const job_reason = `cascade_failed_league lid=${lid} year=${current_season.year} id=${league_format_id}`
         await report_error({
           job_type: job_types.PROCESS_PROJECTIONS,
           error: err
@@ -382,8 +376,8 @@ router.get('/:leagueId/?', async (req, res) => {
  *               reserve_short_term_limit: 3
  *               cap: 200
  *               faab: 200
- *               league_format_hash: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"
- *               scoring_format_hash: "eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756"
+ *               league_format_id: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"
+ *               scoring_format_id: "eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756"
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *         description: Invalid league ID or year

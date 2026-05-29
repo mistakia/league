@@ -39,7 +39,7 @@ const log = debug('simulation:load-team-rosters')
  * @param {number} params.week - Target week to get starters for
  * @param {number} params.year - NFL year
  * @param {number} params.current_week - The actual current week (for determining actual vs optimal)
- * @param {string} params.scoring_format_hash - Scoring format hash for projections
+ * @param {string} params.scoring_format_id - Scoring format hash for projections
  * @param {Object} params.league - League settings for optimizer constraints
  * @returns {Promise<Object>} { team_id, player_ids: string[] }
  */
@@ -49,7 +49,7 @@ export async function load_team_starters({
   week,
   year,
   current_week,
-  scoring_format_hash,
+  scoring_format_id,
   league
 }) {
   // Validate current_week to prevent undefined comparison issues
@@ -76,7 +76,7 @@ export async function load_team_starters({
       roster_week: current_week,
       projection_week: week,
       year,
-      scoring_format_hash,
+      scoring_format_id,
       league
     })
     return { team_id, player_ids }
@@ -108,7 +108,7 @@ export async function load_teams_starters({
   log(`Loading starters for ${team_ids.length} teams, week ${week}`)
 
   // Load league context for scoring format and optimizer constraints
-  const { league, scoring_format_hash } = await load_simulation_context({
+  const { league, scoring_format_id } = await load_simulation_context({
     league_id,
     year
   })
@@ -122,7 +122,7 @@ export async function load_teams_starters({
         week,
         year,
         current_week,
-        scoring_format_hash,
+        scoring_format_id,
         league
       })
     )
@@ -172,7 +172,7 @@ export async function load_all_teams_starters({
   const team_ids = teams.map((t) => t.team_id)
 
   // Load league context
-  const { league, scoring_format_hash } = await load_simulation_context({
+  const { league, scoring_format_id } = await load_simulation_context({
     league_id,
     year
   })
@@ -186,7 +186,7 @@ export async function load_all_teams_starters({
         week,
         year,
         current_week,
-        scoring_format_hash,
+        scoring_format_id,
         league
       })
     )
@@ -239,7 +239,7 @@ async function load_actual_starters({ league_id, team_id, week, year }) {
  * @param {number} params.roster_week - Week to get roster pool from (usually current week)
  * @param {number} params.projection_week - Week to get projections for
  * @param {number} params.year - NFL year
- * @param {string} params.scoring_format_hash - Scoring format hash
+ * @param {string} params.scoring_format_id - Scoring format hash
  * @param {Object} params.league - League settings for optimizer
  * @returns {Promise<string[]>} Array of optimal starter player IDs
  */
@@ -249,7 +249,7 @@ async function calculate_optimal_starters({
   roster_week,
   projection_week,
   year,
-  scoring_format_hash,
+  scoring_format_id,
   league
 }) {
   log(
@@ -280,7 +280,7 @@ async function calculate_optimal_starters({
       player_ids: roster_pids,
       week: projection_week,
       year,
-      scoring_format_hash
+      scoring_format_id
     }),
     load_player_info({ player_ids: roster_pids })
   ])
@@ -345,7 +345,7 @@ export async function load_teams_starters_by_week({
   )
 
   // Load league context once
-  const { league, scoring_format_hash } = await load_simulation_context({
+  const { league, scoring_format_id } = await load_simulation_context({
     league_id,
     year
   })
@@ -361,7 +361,7 @@ export async function load_teams_starters_by_week({
             week,
             year,
             current_week,
-            scoring_format_hash,
+            scoring_format_id,
             league
           })
         )

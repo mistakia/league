@@ -30,20 +30,20 @@ const initialize_cli = () =>
 
 const BATCH_SIZE = 1000
 
-const resolve_league_format_hash = async ({ lid, year }) => {
+const resolve_league_format_id = async ({ lid, year }) => {
   const seasons_row = await db('seasons')
-    .select('league_format_hash')
+    .select('league_format_id')
     .where({ lid, year })
     .first()
-  if (seasons_row?.league_format_hash) return seasons_row.league_format_hash
+  if (seasons_row?.league_format_id) return seasons_row.league_format_id
   // Fall back to the most-recent seasons row for this league.
   const latest = await db('seasons')
-    .select('league_format_hash')
+    .select('league_format_id')
     .where('lid', lid)
-    .whereNotNull('league_format_hash')
+    .whereNotNull('league_format_id')
     .orderBy('year', 'desc')
     .first()
-  return latest?.league_format_hash || null
+  return latest?.league_format_id || null
 }
 
 const generate_roster_asset_lineage = async ({
@@ -97,10 +97,10 @@ const generate_roster_asset_lineage = async ({
   for (const draft of holding_drafts) {
     const draft_year = draft.year
     if (!draft_to_year_format.has(draft_year)) {
-      const hash = await resolve_league_format_hash({ lid, year: draft_year })
+      const hash = await resolve_league_format_id({ lid, year: draft_year })
       draft_to_year_format.set(draft_year, hash)
     }
-    draft.league_format_hash = draft_to_year_format.get(draft_year)
+    draft.league_format_id = draft_to_year_format.get(draft_year)
   }
 
   // Snapshot computation: bulk-loaded reference indexes + in-memory iteration.
@@ -133,7 +133,7 @@ const generate_roster_asset_lineage = async ({
       pick_draft_overall_position: draft.pick_draft_overall_position || null,
       period_start: draft.period_start,
       period_end: draft.period_end,
-      league_format_hash: draft.league_format_hash,
+      league_format_id: draft.league_format_id,
       salary_paid: snap.salary_paid != null ? snap.salary_paid : null,
       salary_basis: draft.salary_basis,
       initial_slot_type: snap.initial_slot_type ?? null,

@@ -59,13 +59,13 @@ export async function simulate_playoff_weeks_correlated({
     `Running correlated playoff simulation for ${team_ids.length} teams, weeks ${weeks.join(',')}`
   )
 
-  const { scoring_format_hash } = await load_simulation_context({
+  const { scoring_format_id } = await load_simulation_context({
     league_id,
     year
   })
 
   // Load scoring format settings for market projection calculation
-  const league_settings = await load_scoring_format({ scoring_format_hash })
+  const league_settings = await load_scoring_format({ scoring_format_id })
 
   // Load schedules for all weeks
   const schedules = await load_nfl_schedules_for_weeks({ year, weeks })
@@ -112,7 +112,7 @@ export async function simulate_playoff_weeks_correlated({
     load_player_variance({
       player_ids: all_player_ids,
       year: year - 1,
-      scoring_format_hash
+      scoring_format_id
     }),
     // NOTE: Game outcome correlation loaders use current year (not year - 1) because
     // they have built-in fallback logic that queries both current and prior year,
@@ -174,13 +174,13 @@ export async function simulate_playoff_weeks_correlated({
       load_actual_player_points({
         player_ids: locked_player_ids,
         esbids: [...completed_esbids],
-        scoring_format_hash
+        scoring_format_id
       }),
       load_player_projections({
         player_ids: pending_player_ids,
         week,
         year,
-        scoring_format_hash
+        scoring_format_id
       }),
       load_market_projections({
         player_ids: pending_player_ids,

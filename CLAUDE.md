@@ -80,7 +80,7 @@ Deploy targets (SSH hosts): `league` (main: API + frontend), `league-worker-1` (
 - Business logic: `roster.mjs`, `calculate-points.mjs`, `calculate-values.mjs`
 - Constants: `constants/` subdirectory with season, roster, transaction constants
 - Data view field definitions: `data-view-fields-index.mjs`
-- League format utilities: `generate-league-format-hash.mjs`, `generate-scoring-format-hash.mjs`
+- League format catalog: `named-format-catalog.mjs`, `default-format-ids.mjs` (server-side find-or-create lives in `libs-server/find-or-create-format.mjs`)
 
 **`libs-server/`** - Server-only code:
 
@@ -105,6 +105,8 @@ Deploy targets (SSH hosts): `league` (main: API + frontend), `league-worker-1` (
 3. Export the updated schema using `yarn export:schema`
 4. Commit both the adhoc file (audit trail) and the schema diff
 5. The exported schema file (`db/schema.postgres.sql`) is the source of truth; `db/adhoc/` is the append-only history of how it got there
+
+Format identities (`league_scoring_formats.id`, `league_formats.id`) are opaque -- snake_case slugs for the named catalog, `gen_random_uuid()` for the long tail. Dedup is enforced by a `UNIQUE` index across the full config-field tuple on each table. Adding a new scoring or roster metric is a normal additive `ALTER TABLE ADD COLUMN` plus an index rebuild; existing identities are untouched. Never reintroduce a content-derived hash as an identifier -- see `user:guideline/schema/avoid-content-derived-identity.md`.
 
 ## Key Documentation
 

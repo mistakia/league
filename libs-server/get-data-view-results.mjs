@@ -160,17 +160,17 @@ const resolve_format_hash = ({ format_value, format_type }) => {
 
   // Try to resolve named format
   if (
-    format_type === 'scoring_format_hash' &&
+    format_type === 'scoring_format_id' &&
     named_scoring_formats[format_value]
   ) {
-    return named_scoring_formats[format_value].hash
+    return named_scoring_formats[format_value].id
   }
 
   if (
-    format_type === 'league_format_hash' &&
+    format_type === 'league_format_id' &&
     named_league_formats[format_value]
   ) {
-    return named_league_formats[format_value].hash
+    return named_league_formats[format_value].id
   }
 
   // Return original value if no match found
@@ -195,8 +195,8 @@ const process_dynamic_params = (params) => {
 
         // Resolve format hashes
         if (
-          param_key === 'scoring_format_hash' ||
-          param_key === 'league_format_hash'
+          param_key === 'scoring_format_id' ||
+          param_key === 'league_format_id'
         ) {
           return resolve_format_hash({
             format_value: processed_item,
@@ -221,8 +221,8 @@ const process_dynamic_params = (params) => {
 
     // Resolve format hashes
     if (
-      param_key === 'scoring_format_hash' ||
-      param_key === 'league_format_hash'
+      param_key === 'scoring_format_id' ||
+      param_key === 'league_format_id'
     ) {
       processed_value = resolve_format_hash({
         format_value: processed_value,

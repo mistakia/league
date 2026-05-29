@@ -16,19 +16,19 @@ const log = debug('generate-league-format-player-careerlogs')
 debug.enable('generate-league-format-player-careerlogs')
 
 const generate_league_format_player_careerlogs = async ({
-  league_format_hash,
+  league_format_id,
   dry = false
 } = {}) => {
-  if (!league_format_hash) {
-    throw new Error('missing league_format_hash')
+  if (!league_format_id) {
+    throw new Error('missing league_format_id')
   }
 
-  log(`generating league_format_player_careerlogs for ${league_format_hash}`)
+  log(`generating league_format_player_careerlogs for ${league_format_id}`)
 
   const inserts = []
 
   const player_seasons = await db('league_format_player_seasonlogs').where({
-    league_format_hash
+    league_format_id
   })
 
   // Partial-backfill guard: abort if any seasonlog row has the earned column
@@ -40,7 +40,7 @@ const generate_league_format_player_careerlogs = async ({
   ).length
   if (partial_backfill_count > 0) {
     throw new Error(
-      `cannot generate careerlogs for ${league_format_hash}: ${partial_backfill_count} seasonlog rows have points_added_earned populated but points_added_net NULL. Re-run the seasonlog generator first.`
+      `cannot generate careerlogs for ${league_format_id}: ${partial_backfill_count} seasonlog rows have points_added_earned populated but points_added_net NULL. Re-run the seasonlog generator first.`
     )
   }
 
@@ -53,7 +53,7 @@ const generate_league_format_player_careerlogs = async ({
   // the gamelog source. REG-only matches the upstream scope.
   const game_count_rows = await db('league_format_player_gamelogs as g')
     .join('nfl_games as ng', 'ng.esbid', 'g.esbid')
-    .where('g.league_format_hash', league_format_hash)
+    .where('g.league_format_id', league_format_id)
     .where('ng.seas_type', 'REG')
     .select('g.pid')
     .count('* as games')
@@ -104,7 +104,7 @@ const generate_league_format_player_careerlogs = async ({
 
     inserts.push({
       pid,
-      league_format_hash,
+      league_format_id,
 
       draft_rank,
 
@@ -168,13 +168,13 @@ const generate_league_format_player_careerlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('league_format_player_careerlogs')
-      .where({ league_format_hash })
+      .where({ league_format_id })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess league player rows`)
 
     log(
-      `updating ${inserts.length} league players for league_format ${league_format_hash}`
+      `updating ${inserts.length} league players for league_format ${league_format_id}`
     )
     // 23 columns per row * thousands of players exceeds Postgres' 65535
     // bind-parameter wire-protocol limit on a single insert; batch.
@@ -183,7 +183,7 @@ const generate_league_format_player_careerlogs = async ({
       save: (items) =>
         db('league_format_player_careerlogs')
           .insert(items)
-          .onConflict(['pid', 'league_format_hash'])
+          .onConflict(['pid', 'league_format_id'])
           .merge(),
       batch_size: 1000
     })
@@ -195,16 +195,16 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     // Use CLI argument if provided, otherwise fall back to league lookup
-    let league_format_hash = argv.league_format_hash
+    let league_format_id = argv.league_format_id
 
-    if (!league_format_hash) {
+    if (!league_format_id) {
       const lid = argv.lid || 1
       const league = await getLeague({ lid })
-      league_format_hash = league.league_format_hash
+      league_format_id = league.league_format_id
     }
 
     await generate_league_format_player_careerlogs({
-      league_format_hash,
+      league_format_id,
       dry: argv.dry
     })
   } catch (err) {

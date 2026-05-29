@@ -1,7 +1,7 @@
 import db from '#db'
 import {
   nfl_plays_column_params,
-  DEFAULT_SCORING_FORMAT_HASH
+  DEFAULT_SCORING_FORMAT_ID
 } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
@@ -52,23 +52,23 @@ const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(`fantasy_points_from_plays_${key}`)
 }
 
-// Get scoring format from database if scoring_format_hash is provided
-const get_scoring_format = async (scoring_format_hash) => {
-  if (!scoring_format_hash) {
+// Get scoring format from database if scoring_format_id is provided
+const get_scoring_format = async (scoring_format_id) => {
+  if (!scoring_format_id) {
     return null
   }
 
   // Handle array format (take first element)
-  const hash = Array.isArray(scoring_format_hash)
-    ? scoring_format_hash[0]
-    : scoring_format_hash
+  const hash = Array.isArray(scoring_format_id)
+    ? scoring_format_id[0]
+    : scoring_format_id
 
   if (!hash) {
     return null
   }
 
   const format = await db('league_scoring_formats')
-    .where('scoring_format_hash', hash)
+    .where('id', hash)
     .first()
 
   if (!format) {
@@ -115,7 +115,7 @@ const fantasy_points_from_plays_with = async ({
   const { seas_type } = get_play_by_play_default_params({ params })
 
   // Scoring format should be processed by parameter processor before reaching this point
-  const scoring_format = await get_scoring_format(params.scoring_format_hash)
+  const scoring_format = await get_scoring_format(params.scoring_format_id)
 
   // Determine if we need position data based on scoring format (must be before other processing)
   const requires_position_data = needs_position_data(scoring_format)
@@ -421,7 +421,7 @@ const fantasy_points_from_plays_with = async ({
 // Per-row passing scoring inner expression (no SUM / ROUND wrapper).
 const generate_passing_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
-    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
+    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
       return 'COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE("int"::int, 0) * -1'
     }
@@ -439,7 +439,7 @@ const generate_passing_scoring_sql = async (scoring_format) =>
 
 const generate_rushing_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
-    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
+    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
       return 'COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6'
     }
@@ -459,7 +459,7 @@ const generate_rushing_scoring_inner = async (scoring_format) => {
   if (rufd) {
     const is_sleeper_sfb =
       scoring_format &&
-      scoring_format.scoring_format_hash ===
+      scoring_format.scoring_format_id ===
         'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
     if (is_sleeper_sfb) {
       sql += ` + (CASE WHEN first_down = true AND play_type = 'RUSH' AND COALESCE(rush_td::int, 0) = 0 THEN ${rufd} ELSE 0 END)`
@@ -479,7 +479,7 @@ const generate_receiving_scoring_inner = async (
   has_position_data = false
 ) => {
   if (!scoring_format) {
-    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
+    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
       return 'COALESCE(comp::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6'
     }
@@ -509,7 +509,7 @@ const generate_receiving_scoring_inner = async (
   if (recfd) {
     const is_sleeper_sfb =
       scoring_format &&
-      scoring_format.scoring_format_hash ===
+      scoring_format.scoring_format_id ===
         'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
     if (is_sleeper_sfb) {
       sql += ` + (CASE WHEN first_down = true AND play_type = 'PASS' AND COALESCE(pass_td::int, 0) = 0 THEN ${recfd} ELSE 0 END)`
@@ -531,7 +531,7 @@ const generate_receiving_scoring_sql = async (
 // to the recoverer (different pid) and would require joining nfl_play_stats.
 const generate_fumble_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
-    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_HASH)
+    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
       return '-1'
     }
@@ -558,11 +558,11 @@ const should_use_main_where = ({ params }) => {
 // aggregator's SUM wraps it). Position-aware receiving (rbrec/wrrec/terec)
 // is intentionally NOT enabled here: it requires a leftJoin on `player`
 // inside the role_union inner sub, which the build_period_cte role_union
-// path does not yet support. All three production scoring_format_hashes
+// path does not yet support. All three production scoring_format_ides
 // in baseline.json have uniform `rec` values, so this is parity-safe.
 // SFB format `ed9c2daa...` would diverge -- track as a follow-up.
 const fp_role_attributions = async ({ params }) => {
-  const scoring_format = await get_scoring_format(params.scoring_format_hash)
+  const scoring_format = await get_scoring_format(params.scoring_format_id)
   const rushing_inner = await generate_rushing_scoring_inner(scoring_format)
   const passing_inner = await generate_passing_scoring_inner(scoring_format)
   const receiving_inner = await generate_receiving_scoring_inner(
@@ -594,7 +594,7 @@ const fp_apply_filters = ({ query, params }) => {
   // consumes_params_extra) that apply_play_by_play_column_params_to_query
   // does not understand. Explicitly removing them documents that they are
   // intentionally excluded from the play-filter path.
-  delete filtered_params.scoring_format_hash
+  delete filtered_params.scoring_format_id
 
   query.whereNotIn('nfl_plays.play_type', ['NOPL'])
   apply_play_by_play_column_params_to_query({
@@ -651,14 +651,14 @@ export default {
       periods: FP_OUTPUT_PERIODS,
       aggregations: ['rate', 'count']
     },
-    // scoring_format_hash is consumed by the role-attribution computation;
+    // scoring_format_id is consumed by the role-attribution computation;
     // the play-filter keys are consumed by fp_apply_filters via
     // apply_play_by_play_column_params_to_query. Both surfaces must
     // differentiate the CTE-name hash so two fantasy-points columns whose
     // per-column filter params diverge (e.g. one has qtr, one does not)
     // materialize into distinct CTEs.
     consumes_params_extra: [
-      'scoring_format_hash',
+      'scoring_format_id',
       ...Object.keys(nfl_plays_column_params)
     ],
     supported_rate_types: [

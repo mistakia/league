@@ -29,7 +29,7 @@ const log = debug('simulation:compute-actuals-optimal-lineup')
  * @param {number} params.year - NFL year
  * @param {Object} params.league_format_record - Full league_formats row.
  *   Required by getOptimizerPositionConstraints (slot counts) and to
- *   resolve the scoring_format_hash that keys scoring_format_player_gamelogs.
+ *   resolve the scoring_format_id that keys scoring_format_player_gamelogs.
  * @returns {Promise<{starter_pids: string[], total_points: number}>}
  */
 export async function compute_actuals_optimal_lineup({
@@ -39,7 +39,7 @@ export async function compute_actuals_optimal_lineup({
   year,
   league_format_record
 }) {
-  const { scoring_format_hash } = league_format_record
+  const { scoring_format_id } = league_format_record
 
   const roster_rows = await db('rosters_players')
     .where({ lid, tid, week, year })
@@ -54,7 +54,7 @@ export async function compute_actuals_optimal_lineup({
 
   const points_rows = await db('scoring_format_player_gamelogs as g')
     .join('nfl_games as n', 'n.esbid', 'g.esbid')
-    .where('g.scoring_format_hash', scoring_format_hash)
+    .where('g.scoring_format_id', scoring_format_id)
     .where('n.year', year)
     .where('n.week', week)
     .whereIn('g.pid', roster_pids)

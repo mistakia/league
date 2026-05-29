@@ -5,17 +5,17 @@ import {
   nfl_plays_column_params,
   rate_type_column_param,
   named_scoring_formats,
-  DEFAULT_SCORING_FORMAT_HASH
+  DEFAULT_SCORING_FORMAT_ID
 } from '@libs-shared'
 
-const scoring_format_hash_param = {
+const scoring_format_id_param = {
   label: 'Scoring Format',
   values: Object.entries(named_scoring_formats).map(([key, format]) => ({
     value: format.hash,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: DEFAULT_SCORING_FORMAT_HASH,
+  default_value: DEFAULT_SCORING_FORMAT_ID,
   single: true
 }
 
@@ -23,7 +23,7 @@ export default {
   player_fantasy_points_from_plays: {
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params: {
-      scoring_format_hash: scoring_format_hash_param,
+      scoring_format_id: scoring_format_id_param,
       rate_type: rate_type_column_param.offensive_player_rate_type_param,
       ...nfl_plays_column_params
     },

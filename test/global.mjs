@@ -19,6 +19,11 @@ export async function mochaGlobalSetup() {
     await knex.raw(`DROP TABLE IF EXISTS "${tablename}" CASCADE`)
   }
 
+  // pgcrypto must be present before the schema loads -- the schema relies on
+  // gen_random_uuid() defaults (connection_id, job_id) and the find-or-create
+  // upsert path for league_scoring_formats / league_formats.
+  await knex.raw('CREATE EXTENSION IF NOT EXISTS pgcrypto')
+
   // Load and execute the schema file
   const sql = await fs.readFile(schema_file, 'utf8')
   await knex.raw(sql)

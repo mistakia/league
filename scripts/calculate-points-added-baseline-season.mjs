@@ -256,7 +256,7 @@ if (is_main(import.meta.url)) {
       log(update)
       await db('league_formats')
         .update(update)
-        .where({ league_format_hash: league.league_format_hash })
+        .where({ id: league.league_format_id })
     }
 
     process.exit()

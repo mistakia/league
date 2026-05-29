@@ -6,7 +6,6 @@ import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -17,11 +16,11 @@ debug.enable('process-projections-for-scoring-format')
 
 const process_scoring_format_year = async ({
   year,
-  scoring_format_hash,
+  scoring_format_id,
   player_rows
 }) => {
   const league_scoring_format = await db('league_scoring_formats')
-    .where({ scoring_format_hash })
+    .where({ id: scoring_format_id })
     .first()
 
   const points_inserts = []
@@ -38,7 +37,7 @@ const process_scoring_format_year = async ({
       points_inserts.push({
         pid: player_row.pid,
         year,
-        scoring_format_hash,
+        scoring_format_id,
         week,
         ...calculatePoints({
           stats: projection,
@@ -48,25 +47,12 @@ const process_scoring_format_year = async ({
         })
       })
     }
-
-    // points_inserts.push({
-    //   pid: player_row.pid,
-    //   year,
-    //   scoring_format_hash,
-    //   week: 'ros',
-    //   ...calculatePoints({
-    //     stats: player_row.projection.ros,
-    //     position: player_row.pos,
-    //     league: league_scoring_format,
-    //     use_projected_stats: true
-    //   })
-    // })
   }
 
   if (points_inserts.length) {
     await db('scoring_format_player_projection_points')
       .del()
-      .where({ scoring_format_hash, year })
+      .where({ scoring_format_id, year })
     await batch_insert({
       items: points_inserts,
       save: (items) =>
@@ -81,7 +67,7 @@ const process_scoring_format_year = async ({
 
 const process_projections_for_scoring_format = async ({
   year,
-  scoring_format_hash,
+  scoring_format_id,
   all = false
 }) => {
   let years
@@ -99,7 +85,6 @@ const process_projections_for_scoring_format = async ({
   }
 
   for (const process_year of years) {
-    // Get averaged projections for the given year
     const projections = await db('projections_index').where({
       year: process_year,
       sourceid: external_data_sources.AVERAGE,
@@ -109,10 +94,8 @@ const process_projections_for_scoring_format = async ({
     const projections_by_pid = groupBy(projections, 'pid')
     const projection_pids = Object.keys(projections_by_pid)
 
-    // Get players based on the projections that exist
     const players = await db('player').whereIn('pid', projection_pids)
 
-    // Construct player_rows
     const player_rows = players.map((player) => {
       const player_projections = projections_by_pid[player.pid] || []
       const projection = {}
@@ -130,7 +113,7 @@ const process_projections_for_scoring_format = async ({
 
     await process_scoring_format_year({
       year: process_year,
-      scoring_format_hash,
+      scoring_format_id,
       player_rows
     })
   }
@@ -140,17 +123,17 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const scoring_format_hash = argv.scoring_format_hash
+    const scoring_format_id = argv.scoring_format_id
     const year = argv.year ? Number(argv.year) : null
     const all = argv.all
 
-    if (!scoring_format_hash) {
-      throw new Error('Scoring format hash is required')
+    if (!scoring_format_id) {
+      throw new Error('scoring_format_id is required')
     }
 
     await process_projections_for_scoring_format({
       year,
-      scoring_format_hash,
+      scoring_format_id,
       all
     })
   } catch (err) {

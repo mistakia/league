@@ -16,13 +16,13 @@ debug.enable('calculate-player-variance')
  */
 const calculate_player_variance = async ({
   year,
-  scoring_format_hash
+  scoring_format_id
 } = {}) => {
   if (!year) {
     throw new Error('year is required')
   }
-  if (!scoring_format_hash) {
-    throw new Error('scoring_format_hash is required')
+  if (!scoring_format_id) {
+    throw new Error('scoring_format_id is required')
   }
 
   log(`Calculating player variance for year ${year}`)
@@ -37,8 +37,8 @@ const calculate_player_variance = async ({
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
     .where(
-      'scoring_format_player_gamelogs.scoring_format_hash',
-      scoring_format_hash
+      'scoring_format_player_gamelogs.scoring_format_id',
+      scoring_format_id
     )
     .select(
       'scoring_format_player_gamelogs.pid',
@@ -87,7 +87,7 @@ const calculate_player_variance = async ({
     variance_records.push({
       pid,
       year,
-      scoring_format_hash,
+      scoring_format_id,
       games_played: n,
       mean_points: mean.toFixed(2),
       standard_deviation: std_dev.toFixed(2),
@@ -108,7 +108,7 @@ const calculate_player_variance = async ({
       save: async (batch) => {
         await db('player_variance')
           .insert(batch)
-          .onConflict(['pid', 'year', 'scoring_format_hash'])
+          .onConflict(['pid', 'year', 'scoring_format_id'])
           .merge()
       }
     })
@@ -122,21 +122,21 @@ const main = async () => {
   let error
   try {
     const year = argv.year || current_season.year - 1
-    const scoring_format_hash = argv.scoring_format_hash
+    const scoring_format_id = argv.scoring_format_id
 
-    if (!scoring_format_hash) {
+    if (!scoring_format_id) {
       // Get default scoring format from league 1
       const league = await db('seasons').where({ lid: 1 }).first()
       if (league) {
         await calculate_player_variance({
           year,
-          scoring_format_hash: league.scoring_format_hash
+          scoring_format_id: league.scoring_format_id
         })
       } else {
-        throw new Error('No scoring_format_hash provided and no default found')
+        throw new Error('No scoring_format_id provided and no default found')
       }
     } else {
-      await calculate_player_variance({ year, scoring_format_hash })
+      await calculate_player_variance({ year, scoring_format_id })
     }
   } catch (err) {
     error = err

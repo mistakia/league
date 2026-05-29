@@ -89,7 +89,7 @@ export async function calculate_optimal_lineup({
   log(`Calculating optimal lineup for team ${team_id}, week ${week}`)
 
   // Load league context for scoring format
-  const { league, scoring_format_hash } = await load_simulation_context({
+  const { league, scoring_format_id } = await load_simulation_context({
     league_id,
     year
   })
@@ -114,7 +114,7 @@ export async function calculate_optimal_lineup({
       player_ids: all_roster_pids,
       week,
       year,
-      scoring_format_hash
+      scoring_format_id
     }),
     load_player_info({ player_ids: all_roster_pids })
   ])

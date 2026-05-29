@@ -185,15 +185,15 @@ router.get('/gamelogs/players', async (req, res) => {
         )
         .where(function () {
           this.where(
-            'scoring_format_player_gamelogs.scoring_format_hash',
-            league.scoring_format_hash
-          ).orWhereNull('scoring_format_player_gamelogs.scoring_format_hash')
+            'scoring_format_player_gamelogs.scoring_format_id',
+            league.scoring_format_id
+          ).orWhereNull('scoring_format_player_gamelogs.scoring_format_id')
         })
         .where(function () {
           this.where(
-            'league_format_player_gamelogs.league_format_hash',
-            league.league_format_hash
-          ).orWhereNull('league_format_player_gamelogs.league_format_hash')
+            'league_format_player_gamelogs.league_format_id',
+            league.league_format_id
+          ).orWhereNull('league_format_player_gamelogs.league_format_id')
         })
     }
 

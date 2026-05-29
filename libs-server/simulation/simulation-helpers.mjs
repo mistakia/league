@@ -16,7 +16,7 @@ const log = debug('simulation:helpers')
  * @param {Object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.year - NFL year
- * @returns {Promise<Object>} { league, scoring_format_hash }
+ * @returns {Promise<Object>} { league, scoring_format_id }
  */
 export async function load_simulation_context({ league_id, year }) {
   const league = await getLeague({ lid: league_id })
@@ -31,7 +31,7 @@ export async function load_simulation_context({ league_id, year }) {
 
   return {
     league,
-    scoring_format_hash: season.scoring_format_hash
+    scoring_format_id: season.scoring_format_id
   }
 }
 

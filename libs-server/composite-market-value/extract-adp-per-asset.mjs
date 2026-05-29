@@ -15,7 +15,7 @@ import {
 export const extract_adp_per_asset = async ({
   player_ids,
   adp_type,
-  league_format_hash,
+  league_format_id,
   start_date,
   end_date
 }) => {
@@ -45,7 +45,7 @@ export const extract_adp_per_asset = async ({
     buckets.get(key).push(Number(r.adp))
   }
 
-  const pv_curve = await load_pick_value_curve({ league_format_hash })
+  const pv_curve = await load_pick_value_curve({ league_format_id })
 
   for (const [key, ranks] of buckets) {
     const median_rank = Math.round(median(ranks))

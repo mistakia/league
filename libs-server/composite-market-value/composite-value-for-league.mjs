@@ -5,13 +5,13 @@ import resolve_format_category from '#libs-server/composite-market-value/resolve
 // Read-time helper: returns the composite market value for an asset on a date
 // in the format category the given league belongs to.
 //
-// v1 is a pass-through: resolves format_category from league_format_hash and
+// v1 is a pass-through: resolves format_category from league_format_id and
 // reads the base row. Per-league scoring modifiers (TEP, exotic-format) are
 // deferred until the first such league imports; the helper exists as the
 // stable abstraction boundary so consumers do not need rewriting later.
 
 export const composite_value_for_league = async ({
-  league_format_hash,
+  league_format_id,
   asset_type,
   player_id,
   pick_year,
@@ -19,7 +19,7 @@ export const composite_value_for_league = async ({
   pick_original_owner_tid,
   date
 }) => {
-  const format_category = await resolve_format_category({ league_format_hash })
+  const format_category = await resolve_format_category({ league_format_id })
   if (!format_category) return null
 
   const q = db('composite_market_value_daily')

@@ -3,28 +3,30 @@
 
 import db from '#db'
 import { current_season } from '#constants'
-import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
-import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
+import {
+  named_scoring_formats,
+  named_league_formats
+} from '#libs-shared/named-format-catalog.mjs'
 
 import { generation_scripts, SCRIPT_CONFIG } from './config.mjs'
 
 /**
  * Check if a format exists in the database
  * @param {Object} params - Parameters object
- * @param {string} params.format_hash - Hash of the format to check
+ * @param {string} params.format_id - Hash of the format to check
  * @param {string} params.format_type - Type of format ('scoring' or 'league')
  * @returns {Promise<boolean>}
  */
-export const check_format_exists = async ({ format_hash, format_type }) => {
+export const check_format_exists = async ({ format_id, format_type }) => {
   try {
     if (format_type === 'scoring') {
       const result = await db('league_scoring_formats')
-        .where('scoring_format_hash', format_hash)
+        .where('id', format_id)
         .first()
       return !!result
     } else if (format_type === 'league') {
       const result = await db('league_formats')
-        .where('league_format_hash', format_hash)
+        .where('id', format_id)
         .first()
       return !!result
     }
@@ -62,13 +64,13 @@ export const build_step_query_conditions = ({ query, step_name }) => {
 /**
  * Check if data exists for a format in a specific table
  * @param {Object} params - Parameters object
- * @param {string} params.format_hash - Hash of the format
+ * @param {string} params.format_id - Hash of the format
  * @param {string} params.format_type - Type of format ('scoring' or 'league')
  * @param {string} params.step_name - Name of the generation step
  * @returns {Promise<boolean>}
  */
 export const check_format_data_exists = async ({
-  format_hash,
+  format_id,
   format_type,
   step_name
 }) => {
@@ -81,10 +83,10 @@ export const check_format_data_exists = async ({
     // Check the primary table for this step
     const table_name = config.tables[0]
     const hash_column =
-      format_type === 'scoring' ? 'scoring_format_hash' : 'league_format_hash'
+      format_type === 'scoring' ? 'scoring_format_id' : 'league_format_id'
 
     // Build base query and apply step-specific conditions
-    let query = db(table_name).where(hash_column, format_hash)
+    let query = db(table_name).where(hash_column, format_id)
     query = build_step_query_conditions({ query, step_name })
 
     const result = await query.first()
@@ -101,12 +103,12 @@ export const check_format_data_exists = async ({
 /**
  * Check if format data removal is safe
  * @param {Object} params - Parameters object
- * @param {string} params.format_hash - Format hash to check
+ * @param {string} params.format_id - Format hash to check
  * @returns {Promise<boolean>}
  */
-export const check_removal_safety = async ({ format_hash }) => {
+export const check_removal_safety = async ({ format_id }) => {
   const active_season_count = await db('seasons')
-    .where('league_format_hash', format_hash)
+    .where('league_format_id', format_id)
     .count('* as count')
     .first()
 
@@ -116,16 +118,16 @@ export const check_removal_safety = async ({ format_hash }) => {
 /**
  * Check if a scoring format can be safely removed
  * @param {Object} params - Parameters object
- * @param {string} params.format_hash - Scoring format hash to check
+ * @param {string} params.format_id - Scoring format hash to check
  * @returns {Promise<{safe: boolean, reasons: string[]}>} Safety check result
  */
-export const check_scoring_format_removal_safety = async ({ format_hash }) => {
+export const check_scoring_format_removal_safety = async ({ format_id }) => {
   const reasons = []
 
   // Check if it's a named format
   if (named_scoring_formats) {
     const is_named = Object.values(named_scoring_formats).some(
-      (f) => f.hash === format_hash
+      (f) => f.id === format_id
     )
     if (is_named) reasons.push('Format is a named scoring format')
   }
@@ -133,7 +135,7 @@ export const check_scoring_format_removal_safety = async ({ format_hash }) => {
   // Check if used by league formats
   try {
     const league_format_usage = await db('league_formats')
-      .where('scoring_format_hash', format_hash)
+      .where('scoring_format_id', format_id)
       .count('* as count')
       .first()
     if (league_format_usage && league_format_usage.count > 0) {
@@ -146,7 +148,7 @@ export const check_scoring_format_removal_safety = async ({ format_hash }) => {
   // Check if used in active seasons
   try {
     const season_usage = await db('seasons')
-      .where('scoring_format_hash', format_hash)
+      .where('scoring_format_id', format_id)
       .count('* as count')
       .first()
     if (season_usage && season_usage.count > 0) {
@@ -165,16 +167,16 @@ export const check_scoring_format_removal_safety = async ({ format_hash }) => {
 /**
  * Check if a league format can be safely removed
  * @param {Object} params - Parameters object
- * @param {string} params.format_hash - League format hash to check
+ * @param {string} params.format_id - League format hash to check
  * @returns {Promise<{safe: boolean, reasons: string[]}>} Safety check result
  */
-export const check_league_format_removal_safety = async ({ format_hash }) => {
+export const check_league_format_removal_safety = async ({ format_id }) => {
   const reasons = []
 
   // Check if it's a named format
   if (named_league_formats) {
     const is_named = Object.values(named_league_formats).some(
-      (f) => f.hash === format_hash
+      (f) => f.id === format_id
     )
     if (is_named) reasons.push('Format is a named league format')
   }
@@ -182,7 +184,7 @@ export const check_league_format_removal_safety = async ({ format_hash }) => {
   // Check if used in active seasons
   try {
     const season_usage = await db('seasons')
-      .where('league_format_hash', format_hash)
+      .where('league_format_id', format_id)
       .count('* as count')
       .first()
     if (season_usage && season_usage.count > 0) {

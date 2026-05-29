@@ -1,11 +1,11 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
+import { create_default_league } from '#libs-shared'
 import {
-  create_default_league,
-  generate_league_format_hash,
-  generate_scoring_format_hash
-} from '#libs-shared'
+  find_or_create_scoring_format,
+  find_or_create_league_format
+} from './find-or-create-format.mjs'
 import { current_season } from '#constants'
 
 export default async function ({ lid, commishid, ...params } = {}) {
@@ -43,29 +43,21 @@ export default async function ({ lid, commishid, ...params } = {}) {
   const leagues = await db('leagues').insert(league).returning('uid')
   const leagueId = leagues[0].uid
 
-  const scoring_format = generate_scoring_format_hash(league_params)
-  const league_format = generate_league_format_hash({
-    scoring_format_hash: scoring_format.scoring_format_hash,
-    ...league_params
+  const scoring_format_id = await find_or_create_scoring_format(
+    db,
+    league_params
+  )
+  const league_format_id = await find_or_create_league_format(db, {
+    ...league_params,
+    scoring_format_id
   })
-
-  league_format.scoring_format_hash = scoring_format.scoring_format_hash
-
-  await db('league_formats')
-    .insert(league_format)
-    .onConflict('league_format_hash')
-    .ignore()
-  await db('league_scoring_formats')
-    .insert(scoring_format)
-    .onConflict('scoring_format_hash')
-    .ignore()
 
   await db('seasons').insert({
     lid: leagueId,
     year: current_season.year,
 
-    league_format_hash: league_format.league_format_hash,
-    scoring_format_hash: scoring_format.scoring_format_hash,
+    league_format_id,
+    scoring_format_id,
 
     mqb: league_params.mqb,
     mrb: league_params.mrb,

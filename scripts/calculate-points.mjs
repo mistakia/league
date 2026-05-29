@@ -19,7 +19,7 @@ debug.enable('calculate-points')
 const calculate_points = async ({
   year,
   lid,
-  scoring_format_hash,
+  scoring_format_id,
   week = 'ALL'
 }) => {
   if (!Number.isInteger(year)) {
@@ -30,14 +30,14 @@ const calculate_points = async ({
 
   if (lid) {
     league = await getLeague(lid)
-  } else if (scoring_format_hash) {
+  } else if (scoring_format_id) {
     league = await db('league_scoring_formats')
-      .where('scoring_format_hash', scoring_format_hash)
+      .where('id', scoring_format_id)
       .first()
   }
 
   if (!league) {
-    throw new Error(`${lid} or ${scoring_format_hash} is missing or invalid`)
+    throw new Error(`${lid} or ${scoring_format_id} is missing or invalid`)
   }
 
   log(`calculating Points for ${year}`)
@@ -133,7 +133,7 @@ const main = async () => {
     const result = await calculate_points({
       year: argv.year,
       lid: argv.lid,
-      scoring_format_hash: argv.scoring_format_hash,
+      scoring_format_id: argv.scoring_format_id,
       week: argv.week
     })
 

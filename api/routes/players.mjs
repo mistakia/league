@@ -750,15 +750,15 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       )
       .where(function () {
         this.where(
-          'scoring_format_player_gamelogs.scoring_format_hash',
-          league.scoring_format_hash
-        ).orWhereNull('scoring_format_player_gamelogs.scoring_format_hash')
+          'scoring_format_player_gamelogs.scoring_format_id',
+          league.scoring_format_id
+        ).orWhereNull('scoring_format_player_gamelogs.scoring_format_id')
       })
       .where(function () {
         this.where(
-          'league_format_player_gamelogs.league_format_hash',
-          league.league_format_hash
-        ).orWhereNull('league_format_player_gamelogs.league_format_hash')
+          'league_format_player_gamelogs.league_format_id',
+          league.league_format_id
+        ).orWhereNull('league_format_player_gamelogs.league_format_id')
       })
 
     if (include_rushing) {
@@ -1148,9 +1148,9 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
             'player_seasonlogs.year'
           )
           .andOn(
-            'scoring_format_player_seasonlogs.scoring_format_hash',
+            'scoring_format_player_seasonlogs.scoring_format_id',
             '=',
-            db.raw('?', [league.scoring_format_hash])
+            db.raw('?', [league.scoring_format_id])
           )
       })
       .leftJoin('league_format_player_seasonlogs', function () {
@@ -1165,9 +1165,9 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
             'player_seasonlogs.year'
           )
           .andOn(
-            'league_format_player_seasonlogs.league_format_hash',
+            'league_format_player_seasonlogs.league_format_id',
             '=',
-            db.raw('?', [league.league_format_hash])
+            db.raw('?', [league.league_format_id])
           )
       })
       .select(

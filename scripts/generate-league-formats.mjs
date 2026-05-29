@@ -1,29 +1,22 @@
 import debug from 'debug'
-// import yargs from 'yargs'
-// import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import {
-  generate_league_format_hash,
-  generate_scoring_format_hash
-} from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
+import {
+  find_or_create_scoring_format,
+  find_or_create_league_format
+} from '#libs-server/find-or-create-format.mjs'
 import {
   scoring_formats as named_scoring_formats,
   league_formats as named_league_formats
 } from '#libs-shared/league-format-definitions.mjs'
-// import { job_types } from '#libs-shared/job-constants.mjs'
 
-// const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-league-formats')
-debug.enable(
-  'generate-league-formats,generate-league-format-hash,generate-scoring-format-hash'
-)
+debug.enable('generate-league-formats')
 
 const generate_scoring_format_title = (scoring_format) => {
   const parts = []
 
-  // Reception points
   if (scoring_format.rec === 1) {
     parts.push('PPR')
   } else if (scoring_format.rec === 0.5) {
@@ -32,23 +25,16 @@ const generate_scoring_format_title = (scoring_format) => {
     parts.push('Standard')
   }
 
-  // Tight End Premium
   if (scoring_format.terec > scoring_format.rec) {
     parts.push(`TE+${scoring_format.terec - scoring_format.rec}`)
   }
 
-  // Passing TD points
   parts.push(`${scoring_format.tdp}PTD`)
-
-  // Interception points
   parts.push(`${scoring_format.ints}INT`)
 
-  // Passing yards (if different from standard)
   if (scoring_format.py !== 0.04) {
     parts.push(`${scoring_format.py}PY`)
   }
-
-  // Fumbles lost (if different from standard -2)
   if (scoring_format.fuml !== -2) {
     parts.push(`${scoring_format.fuml}FUM`)
   }
@@ -95,9 +81,6 @@ const generate_league_formats = async () => {
     min_bid: [0]
   }
 
-  const league_formats = []
-  const scoring_formats_map = new Map()
-
   const keys = Object.keys(options)
   const combinations = keys.reduce(
     (acc, key) => {
@@ -125,156 +108,138 @@ const generate_league_formats = async () => {
 
   log(`Generated ${combinations.length} combinations`)
 
-  combinations.forEach((combination) => {
-    const scoring_format = {
-      pa: combination.pa,
-      pc: combination.pc,
-      py: combination.py,
-      ints: combination.ints,
-      tdp: combination.tdp,
-      ra: combination.ra,
-      ry: combination.ry,
-      tdr: combination.tdr,
-      rec: combination.rec,
-      rbrec: combination.rec,
-      wrrec: combination.rec,
-      terec: combination.rec,
-      recy: combination.recy,
-      twoptc: combination.twoptc,
-      tdrec: combination.tdrec,
-      fuml: combination.fuml,
-      prtd: combination.prtd,
-      krtd: combination.krtd,
-      trg: combination.trg,
-      rush_first_down: combination.rush_first_down,
-      rec_first_down: combination.rec_first_down,
-      exclude_qb_kneels: combination.exclude_qb_kneels
-    }
+  const extract_scoring = (c) => ({
+    pa: c.pa,
+    pc: c.pc,
+    py: c.py,
+    ints: c.ints,
+    tdp: c.tdp,
+    ra: c.ra,
+    ry: c.ry,
+    tdr: c.tdr,
+    rec: c.rec,
+    rbrec: c.rec,
+    wrrec: c.rec,
+    terec: c.rec,
+    recy: c.recy,
+    twoptc: c.twoptc,
+    tdrec: c.tdrec,
+    fuml: c.fuml,
+    prtd: c.prtd,
+    krtd: c.krtd,
+    trg: c.trg,
+    rush_first_down: c.rush_first_down,
+    rec_first_down: c.rec_first_down,
+    exclude_qb_kneels: c.exclude_qb_kneels
+  })
 
-    const { scoring_format_hash } = generate_scoring_format_hash(scoring_format)
-    const scoring_format_title = generate_scoring_format_title(scoring_format)
-    scoring_formats_map.set(scoring_format_hash, {
-      scoring_format_hash,
-      scoring_format_title,
-      ...scoring_format
-    })
-
-    const league_format = {
-      scoring_format_hash,
-      num_teams: combination.num_teams,
-      sqb: combination.sqb,
-      srb: combination.srb,
-      swr: combination.swr,
-      ste: combination.ste,
-      srbwr: combination.srbwr,
-      srbwrte: combination.srbwrte,
-      sqbrbwrte: combination.sqbrbwrte,
-      swrte: combination.swrte,
-      sdst: combination.sdst,
-      sk: combination.sk,
-      bench: combination.bench,
-      ps: combination.ps,
-      reserve_short_term_limit: combination.reserve_short_term_limit,
-      cap: combination.cap,
-      min_bid: combination.min_bid
-    }
-
-    const { league_format_hash } = generate_league_format_hash(league_format)
-    league_formats.push({
-      league_format_hash,
-      scoring_format_hash,
-      ...league_format
-    })
+  const extract_league = (c) => ({
+    num_teams: c.num_teams,
+    sqb: c.sqb,
+    srb: c.srb,
+    swr: c.swr,
+    ste: c.ste,
+    srbwr: c.srbwr,
+    srbwrte: c.srbwrte,
+    sqbrbwrte: c.sqbrbwrte,
+    swrte: c.swrte,
+    sdst: c.sdst,
+    sk: c.sk,
+    bench: c.bench,
+    ps: c.ps,
+    reserve_short_term_limit: c.reserve_short_term_limit,
+    cap: c.cap,
+    min_bid: c.min_bid
   })
 
   const default_league = await getLeague({ lid: 0 })
-  const default_league_scoring_format =
-    generate_scoring_format_hash(default_league)
-  scoring_formats_map.set(default_league_scoring_format.scoring_format_hash, {
-    scoring_format_hash: default_league_scoring_format.scoring_format_hash,
-    scoring_format_title: generate_scoring_format_title(default_league),
-    ...default_league_scoring_format
-  })
-  league_formats.push(generate_league_format_hash(default_league))
+  const all_combinations = [...combinations, default_league]
 
-  // Add named format definitions
+  // Dedupe scoring tuples in-memory so each unique tuple incurs one find_or_create RTT.
+  const unique_scoring = new Map()
+  for (const combination of all_combinations) {
+    const scoring_format = extract_scoring(combination)
+    const key = JSON.stringify(scoring_format)
+    if (!unique_scoring.has(key)) {
+      unique_scoring.set(key, scoring_format)
+    }
+  }
+
+  const scoring_id_by_key = new Map()
+  for (const [key, scoring_format] of unique_scoring) {
+    const scoring_format_id = await find_or_create_scoring_format(
+      db,
+      scoring_format
+    )
+    scoring_id_by_key.set(key, scoring_format_id)
+    // title is not part of the unique tuple; refresh it for any new/existing row
+    await db('league_scoring_formats')
+      .where({ id: scoring_format_id })
+      .update({
+        scoring_format_title: generate_scoring_format_title(scoring_format)
+      })
+  }
+  const scoring_inserts = unique_scoring.size
+
+  // Dedupe league tuples + scoring_format_id in-memory.
+  const unique_league = new Map()
+  for (const combination of all_combinations) {
+    const scoring_key = JSON.stringify(extract_scoring(combination))
+    const scoring_format_id = scoring_id_by_key.get(scoring_key)
+    const league_format = {
+      ...extract_league(combination),
+      scoring_format_id
+    }
+    const key = JSON.stringify(league_format)
+    if (!unique_league.has(key)) {
+      unique_league.set(key, league_format)
+    }
+  }
+
+  for (const league_format of unique_league.values()) {
+    await find_or_create_league_format(db, league_format)
+  }
+  const league_inserts = unique_league.size
+
   log('Processing named format definitions...')
 
-  // Process named scoring formats
-  Object.entries(named_scoring_formats).forEach(([key, format_def]) => {
-    const { scoring_format_hash } = generate_scoring_format_hash(
+  for (const [, format_def] of Object.entries(named_scoring_formats)) {
+    const scoring_format_id = await find_or_create_scoring_format(
+      db,
       format_def.config
     )
-    scoring_formats_map.set(scoring_format_hash, {
-      scoring_format_hash,
-      scoring_format_title: format_def.label,
-      ...format_def.config
-    })
-  })
+    await db('league_scoring_formats')
+      .where({ id: scoring_format_id })
+      .update({ scoring_format_title: format_def.label })
+  }
 
-  // Process named league formats
-  Object.entries(named_league_formats).forEach(([key, format_def]) => {
-    // Get the scoring format config
+  for (const [key, format_def] of Object.entries(named_league_formats)) {
     const scoring_format_config =
       named_scoring_formats[format_def.scoring_format]?.config
     if (!scoring_format_config) {
       log(
         `Warning: Scoring format '${format_def.scoring_format}' not found for league format '${key}'`
       )
-      return
+      continue
     }
-
-    const { scoring_format_hash } = generate_scoring_format_hash(
+    const scoring_format_id = await find_or_create_scoring_format(
+      db,
       scoring_format_config
     )
-
-    const league_format = {
-      scoring_format_hash,
-      ...format_def.config
-    }
-
-    const { league_format_hash } = generate_league_format_hash(league_format)
-    league_formats.push({
-      league_format_hash,
-      scoring_format_hash,
-      ...league_format
+    await find_or_create_league_format(db, {
+      ...format_def.config,
+      scoring_format_id,
+      pricing_model: format_def.pricing_model || 'auction'
     })
-  })
+  }
 
   log(
     `Added ${Object.keys(named_scoring_formats).length} named scoring formats`
   )
   log(`Added ${Object.keys(named_league_formats).length} named league formats`)
-
-  // delete league formats not in `league_formats` array or in `seasons` table
-  const league_format_hashes = league_formats.map(
-    ({ league_format_hash }) => league_format_hash
+  log(
+    `Combinations: ${scoring_inserts} new scoring rows, ${league_inserts} league upserts`
   )
-  const delete_query = await db('league_formats')
-    .whereNotExists(function () {
-      this.select('*')
-        .from('seasons')
-        .whereRaw(
-          'seasons.league_format_hash = league_formats.league_format_hash'
-        )
-    })
-    .whereNotIn('league_formats.league_format_hash', league_format_hashes)
-    .del()
-
-  log(`Deleted ${delete_query} stale league formats`)
-
-  await db('league_formats')
-    .insert(league_formats)
-    .onConflict('league_format_hash')
-    .ignore()
-  log(`Inserted ${league_formats.length} league formats`)
-
-  const scoring_formats = Array.from(scoring_formats_map.values())
-  await db('league_scoring_formats')
-    .insert(scoring_formats)
-    .onConflict('scoring_format_hash')
-    .merge() // update title
-  log(`Inserted ${scoring_formats.length} scoring formats`)
 }
 
 const main = async () => {

@@ -64,13 +64,13 @@ export async function simulate_league_week({
   )
 
   // Load league and scoring format
-  const { scoring_format_hash } = await load_simulation_context({
+  const { scoring_format_id } = await load_simulation_context({
     league_id,
     year
   })
 
   // Load scoring format settings for market projection calculation
-  const league_settings = await load_scoring_format({ scoring_format_hash })
+  const league_settings = await load_scoring_format({ scoring_format_id })
 
   // Load matchups and rosters in parallel
   // Rosters use unified loader: actual starters for current/past weeks,
@@ -120,7 +120,7 @@ export async function simulate_league_week({
       player_ids: player_ids_array,
       week,
       year,
-      scoring_format_hash
+      scoring_format_id
     }),
     load_market_projections({
       player_ids: player_ids_array,
@@ -140,7 +140,7 @@ export async function simulate_league_week({
     load_player_variance({
       player_ids: player_ids_array,
       year: year - 1,
-      scoring_format_hash
+      scoring_format_id
     }),
     load_position_ranks({
       player_ids: player_ids_array,
@@ -210,7 +210,7 @@ export async function simulate_league_week({
   const actual_points = await load_actual_player_points({
     player_ids: locked_player_ids,
     esbids: completed_esbids,
-    scoring_format_hash
+    scoring_format_id
   })
 
   log(

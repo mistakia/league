@@ -12,9 +12,6 @@ import {
 } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert, get_league_format } from '#libs-server'
-import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
-import { league_format_pricing_models } from '#libs-shared/league-format-definitions.mjs'
-// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -23,13 +20,14 @@ const initialize_cli = () => {
 const log = debug('process-projections-for-league-format')
 debug.enable('process-projections-for-league-format')
 
-const resolve_pricing_model = (league_format_hash) => {
-  for (const [name, named] of Object.entries(named_league_formats)) {
-    if (named.hash === league_format_hash) {
-      return league_format_pricing_models[name] || 'auction'
-    }
-  }
-  return 'auction'
+// Resolve pricing_model from the table. league_formats.pricing_model is a
+// regular column (added by the format-id migration); no derived-map lookup.
+const resolve_pricing_model = async (league_format_id) => {
+  const row = await db('league_formats')
+    .select('pricing_model')
+    .where({ id: league_format_id })
+    .first()
+  return row?.pricing_model || 'auction'
 }
 
 const process_league_format_year = async ({
@@ -37,10 +35,10 @@ const process_league_format_year = async ({
   league_format,
   player_rows
 }) => {
-  const { league_format_hash } = league_format
-  const pricing_model = resolve_pricing_model(league_format_hash)
+  const league_format_id = league_format.id
+  const pricing_model = league_format.pricing_model || 'auction'
   log(
-    `processing league format ${league_format_hash} for year ${year} (${pricing_model})`
+    `processing league format ${league_format_id} for year ${year} (${pricing_model})`
   )
 
   const { num_teams, cap, min_bid } = league_format
@@ -51,7 +49,6 @@ const process_league_format_year = async ({
   const baselines = {}
   let week = 0
 
-  // Get the final week for the given season
   const final_week_result = await db('nfl_games')
     .where({ year, seas_type: 'REG' })
     .max('week as final_week')
@@ -76,8 +73,6 @@ const process_league_format_year = async ({
       league: league_format
     })
 
-    // See scripts/process-projections.mjs: DFS formats (dfs_fixed) skip
-    // auction pricing because DK/FD publish per-player salaries externally.
     if (pricing_model === 'auction') {
       calculatePrices({
         cap: league_total_salary_cap,
@@ -94,7 +89,7 @@ const process_league_format_year = async ({
       const params = {
         pid: player_row.pid,
         year,
-        league_format_hash,
+        league_format_id,
         week,
         pts_added,
         market_salary:
@@ -110,7 +105,7 @@ const process_league_format_year = async ({
   if (value_inserts.length) {
     await db('league_format_player_projection_values')
       .del()
-      .where({ league_format_hash, year })
+      .where({ league_format_id, year })
     await batch_insert({
       items: value_inserts,
       save: (items) =>
@@ -125,7 +120,7 @@ const process_league_format_year = async ({
 
 const process_projections_for_league_format = async ({
   year,
-  league_format_hash,
+  league_format_id,
   all = false
 }) => {
   let years
@@ -142,13 +137,12 @@ const process_projections_for_league_format = async ({
     throw new Error('No years to process')
   }
 
-  const league_format = await get_league_format({ league_format_hash })
+  const league_format = await get_league_format({ league_format_id })
   if (!league_format) {
-    throw new Error(`league format ${league_format_hash} not found`)
+    throw new Error(`league format ${league_format_id} not found`)
   }
 
   for (const process_year of years) {
-    // Get averaged projections for the given year
     const projections = await db('projections_index').where({
       year: process_year,
       sourceid: external_data_sources.AVERAGE,
@@ -158,22 +152,19 @@ const process_projections_for_league_format = async ({
     const projections_by_pid = groupBy(projections, 'pid')
     const projection_pids = Object.keys(projections_by_pid)
 
-    // Get players based on the projections that exist
     const players = await db('player').whereIn('pid', projection_pids)
 
-    // Get scoring format points for the given year and league format
     const scoring_format_points = await db(
       'scoring_format_player_projection_points'
     )
       .where({
         year: process_year,
-        scoring_format_hash: league_format.scoring_format_hash
+        scoring_format_id: league_format.scoring_format_id
       })
       .whereIn('pid', projection_pids)
 
     const points_by_pid = groupBy(scoring_format_points, 'pid')
 
-    // Construct player_rows
     const player_rows = players.map((player) => {
       const player_projections = projections_by_pid[player.pid] || []
       const projection = {}
@@ -204,16 +195,18 @@ const process_projections_for_league_format = async ({
   }
 }
 
+export { resolve_pricing_model }
+
 const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const league_format_hash = argv.league_format_hash
+    const league_format_id = argv.league_format_id
     const year = argv.year ? Number(argv.year) : null
     const all = argv.all
 
-    if (!league_format_hash) {
-      throw new Error('League format hash is required')
+    if (!league_format_id) {
+      throw new Error('league_format_id is required')
     }
 
     if (all && !year) {
@@ -226,7 +219,7 @@ const main = async () => {
       for (const process_year of years) {
         await process_projections_for_league_format({
           year: process_year,
-          league_format_hash
+          league_format_id
         })
       }
       return
@@ -234,7 +227,7 @@ const main = async () => {
 
     await process_projections_for_league_format({
       year,
-      league_format_hash,
+      league_format_id,
       all
     })
   } catch (err) {

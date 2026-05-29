@@ -25,6 +25,10 @@ export { default as getRoster } from './get-roster.mjs'
 export { default as get_player_projections } from './get-projections.mjs'
 export { default as getLeague } from './get-league.mjs'
 export { default as createLeague } from './create-league.mjs'
+export {
+  find_or_create_scoring_format,
+  find_or_create_league_format
+} from './find-or-create-format.mjs'
 export { default as resetWaiverOrder } from './reset-waiver-order.mjs'
 export { default as getTopPoachingWaiver } from './get-top-poaching-waiver.mjs'
 export { default as getTopFreeAgencyWaiver } from './get-top-free-agency-waiver.mjs'

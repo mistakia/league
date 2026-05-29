@@ -37,11 +37,6 @@
 ## Process extensions at ext_date (check every 5 minutes in May; self-gating fires once per league per ext_date via league_notifications marker)
 */5 * * 5 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-extensions.mjs >> /var/log/league/process-extensions.log 2>&1
 
-## Detect projection format-hash drift (every Sunday at 4:00AM)
-0 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/detect-projection-format-hash-drift.mjs >> /var/log/league/detect-projection-format-hash-drift.log 2>&1
-
-
-
 # League Each Season Week
 
 ## At 23:55 on Monday during the NFL Season

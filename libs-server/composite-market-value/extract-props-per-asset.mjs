@@ -48,7 +48,7 @@ const scoring_multiplier = (market_type, scoring) => {
 
 export const extract_props_per_asset = async ({
   player_ids,
-  scoring_format_hash,
+  scoring_format_id,
   start_date,
   end_date
 }) => {
@@ -56,7 +56,7 @@ export const extract_props_per_asset = async ({
   if (!player_ids.length) return result
 
   const scoring = await db('league_scoring_formats')
-    .where('scoring_format_hash', scoring_format_hash)
+    .where('id', scoring_format_id)
     .first()
   if (!scoring) return result
 

@@ -1,4 +1,4 @@
-import { DEFAULT_LEAGUE_FORMAT_HASH } from '#libs-shared'
+import { DEFAULT_LEAGUE_FORMAT_ID } from '#libs-shared'
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import {
@@ -6,7 +6,7 @@ import {
   create_static_cache_info,
   CACHE_TTL
 } from '#libs-server/data-views/cache-info-utils.mjs'
-import { get_league_format_hash } from '#libs-server/data-views/index.mjs'
+import { get_league_format_id } from '#libs-server/data-views/index.mjs'
 
 // TODO career_year
 
@@ -28,7 +28,7 @@ const get_cache_info_for_league_format_careerlogs = create_static_cache_info({
 })
 
 const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
-  const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
+  const { league_format_id = DEFAULT_LEAGUE_FORMAT_ID } = params
   let year = params.year || [current_season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
@@ -40,7 +40,7 @@ const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   }
 
   return get_table_hash(
-    `league_format_player_seasonlogs_${year.join('_')}_${league_format_hash}_year_offset_${year_offset_single}`
+    `league_format_player_seasonlogs_${year.join('_')}_${league_format_id}_year_offset_${year_offset_single}`
   )
 }
 
@@ -58,13 +58,13 @@ const league_format_player_seasonlogs_source = {
   key_columns: { pid: 'pid', year: 'year' },
   year_default: league_format_seasonlogs_year_default,
   extra_predicates: (params) => [
-    { column: 'league_format_hash', value: get_league_format_hash(params) }
+    { column: 'league_format_id', value: get_league_format_id(params) }
   ]
 }
 
 const league_format_seasonlogs_conditions = ({ params, splits = [] }) => {
   const conditions = [
-    { column: 'league_format_hash', value: get_league_format_hash(params) }
+    { column: 'league_format_id', value: get_league_format_id(params) }
   ]
 
   // Add year filter when no year splits are active
@@ -89,8 +89,8 @@ const create_field_from_league_format_player_seasonlogs = (column_name) => ({
 })
 
 const league_format_player_careerlogs_table_alias = ({ params = {} }) => {
-  const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
-  return get_table_hash(`league_format_player_careerlogs_${league_format_hash}`)
+  const { league_format_id = DEFAULT_LEAGUE_FORMAT_ID } = params
+  return get_table_hash(`league_format_player_careerlogs_${league_format_id}`)
 }
 
 const league_format_player_careerlogs_source = {
@@ -98,7 +98,7 @@ const league_format_player_careerlogs_source = {
   grain: 'player',
   key_columns: { pid: 'pid' },
   extra_predicates: (params) => [
-    { column: 'league_format_hash', value: get_league_format_hash(params) }
+    { column: 'league_format_id', value: get_league_format_id(params) }
   ]
 }
 

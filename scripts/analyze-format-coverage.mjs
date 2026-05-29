@@ -6,8 +6,10 @@ import { fileURLToPath } from 'url'
 
 import db from '#db'
 import { is_main } from '#libs-server'
-import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
-import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
+import {
+  named_scoring_formats,
+  named_league_formats
+} from '#libs-shared/named-format-catalog.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -16,7 +18,7 @@ const FORMAT_TABLES = {
   // Core format definition tables
   scoring_format_definitions: {
     table: 'league_scoring_formats',
-    hash_column: 'scoring_format_hash',
+    hash_column: 'scoring_format_id',
     type: 'scoring',
     description: 'Core scoring format definitions',
     time_columns: []
@@ -24,27 +26,27 @@ const FORMAT_TABLES = {
 
   league_format_definitions: {
     table: 'league_formats',
-    hash_column: 'league_format_hash',
+    hash_column: 'league_format_id',
     type: 'league',
     description: 'Core league format definitions',
     time_columns: [],
-    additional_columns: ['scoring_format_hash']
+    additional_columns: ['scoring_format_id']
   },
 
   // Season configuration
   seasons: {
     table: 'seasons',
-    hash_column: 'league_format_hash',
+    hash_column: 'league_format_id',
     type: 'league',
     description: 'Season configurations by league and year',
     time_columns: ['year'],
-    additional_columns: ['lid', 'scoring_format_hash']
+    additional_columns: ['lid', 'scoring_format_id']
   },
 
   // League format player data tables
   league_format_player_seasonlogs: {
     table: 'league_format_player_seasonlogs',
-    hash_column: 'league_format_hash',
+    hash_column: 'league_format_id',
     type: 'league',
     description: 'Player season statistics by league format',
     time_columns: ['year'],
@@ -53,7 +55,7 @@ const FORMAT_TABLES = {
 
   league_format_player_careerlogs: {
     table: 'league_format_player_careerlogs',
-    hash_column: 'league_format_hash',
+    hash_column: 'league_format_id',
     type: 'league',
     description: 'Player career statistics by league format',
     time_columns: [],
@@ -62,7 +64,7 @@ const FORMAT_TABLES = {
 
   league_format_player_gamelogs: {
     table: 'league_format_player_gamelogs',
-    hash_column: 'league_format_hash',
+    hash_column: 'league_format_id',
     type: 'league',
     description: 'Player game-by-game statistics by league format',
     time_columns: [],
@@ -71,7 +73,7 @@ const FORMAT_TABLES = {
 
   league_format_player_projection_values: {
     table: 'league_format_player_projection_values',
-    hash_column: 'league_format_hash',
+    hash_column: 'league_format_id',
     type: 'league',
     description: 'Player projections and market values by league format',
     time_columns: ['week', 'year'],
@@ -80,7 +82,7 @@ const FORMAT_TABLES = {
 
   league_format_draft_pick_value: {
     table: 'league_format_draft_pick_value',
-    hash_column: 'league_format_hash',
+    hash_column: 'league_format_id',
     type: 'league',
     description: 'Draft pick value analysis by league format',
     time_columns: [],
@@ -90,7 +92,7 @@ const FORMAT_TABLES = {
   // Scoring format player data tables
   scoring_format_player_seasonlogs: {
     table: 'scoring_format_player_seasonlogs',
-    hash_column: 'scoring_format_hash',
+    hash_column: 'scoring_format_id',
     type: 'scoring',
     description: 'Player season statistics by scoring format',
     time_columns: ['year'],
@@ -99,7 +101,7 @@ const FORMAT_TABLES = {
 
   scoring_format_player_careerlogs: {
     table: 'scoring_format_player_careerlogs',
-    hash_column: 'scoring_format_hash',
+    hash_column: 'scoring_format_id',
     type: 'scoring',
     description: 'Player career statistics by scoring format',
     time_columns: [],
@@ -108,7 +110,7 @@ const FORMAT_TABLES = {
 
   scoring_format_player_gamelogs: {
     table: 'scoring_format_player_gamelogs',
-    hash_column: 'scoring_format_hash',
+    hash_column: 'scoring_format_id',
     type: 'scoring',
     description: 'Player game-by-game points by scoring format',
     time_columns: [],
@@ -117,7 +119,7 @@ const FORMAT_TABLES = {
 
   scoring_format_player_projection_points: {
     table: 'scoring_format_player_projection_points',
-    hash_column: 'scoring_format_hash',
+    hash_column: 'scoring_format_id',
     type: 'scoring',
     description: 'Player projections by scoring format',
     time_columns: ['week', 'year'],

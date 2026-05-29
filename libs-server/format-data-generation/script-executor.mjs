@@ -71,8 +71,8 @@ export const script_exists = async ({ script_name }) => {
  */
 export const prepare_script_args = ({ args, format_hash }) => {
   return args.map((arg) => {
-    if (arg === '{scoring_format_hash}') return format_hash
-    if (arg === '{league_format_hash}') return format_hash
+    if (arg === '{scoring_format_id}') return format_hash
+    if (arg === '{league_format_id}') return format_hash
     return arg
   })
 }

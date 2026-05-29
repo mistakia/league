@@ -52,16 +52,16 @@ export async function load_player_info({ player_ids }) {
  * Load scoring format by hash.
  *
  * @param {Object} params
- * @param {string} params.scoring_format_hash - Scoring format hash
+ * @param {string} params.scoring_format_id - Scoring format hash
  * @returns {Promise<Object>} Scoring format configuration
  */
-export async function load_scoring_format({ scoring_format_hash }) {
+export async function load_scoring_format({ scoring_format_id }) {
   const scoring_format = await db('league_scoring_formats')
-    .where({ scoring_format_hash })
+    .where({ id: scoring_format_id })
     .first()
 
   if (!scoring_format) {
-    throw new Error(`Scoring format not found: ${scoring_format_hash}`)
+    throw new Error(`Scoring format not found: ${scoring_format_id}`)
   }
 
   return scoring_format
@@ -74,13 +74,13 @@ export async function load_scoring_format({ scoring_format_hash }) {
  * @param {Object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number[]} params.esbids - Array of completed game esbids
- * @param {string} params.scoring_format_hash - Scoring format hash
+ * @param {string} params.scoring_format_id - Scoring format hash
  * @returns {Promise<Map>} Map of pid -> actual_points
  */
 export async function load_actual_player_points({
   player_ids,
   esbids,
-  scoring_format_hash
+  scoring_format_id
 }) {
   if (!player_ids.length || !esbids.length) {
     return new Map()
@@ -93,7 +93,7 @@ export async function load_actual_player_points({
   const rows = await db('scoring_format_player_gamelogs')
     .whereIn('pid', player_ids)
     .whereIn('esbid', esbids)
-    .where('scoring_format_hash', scoring_format_hash)
+    .where('scoring_format_id', scoring_format_id)
     .select('pid', 'points')
 
   const points_map = new Map()
@@ -115,14 +115,14 @@ export async function load_actual_player_points({
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @param {string} params.scoring_format_hash - Scoring format hash
+ * @param {string} params.scoring_format_id - Scoring format hash
  * @returns {Promise<Map>} Map of pid -> { points, is_actual, source }
  */
 export async function load_player_points_with_game_status({
   player_ids,
   week,
   year,
-  scoring_format_hash
+  scoring_format_id
 }) {
   // Import market projections loader dynamically to avoid circular dependency
   const { load_market_projections } = await import(
@@ -181,7 +181,7 @@ export async function load_player_points_with_game_status({
     const actual_rows = await db('scoring_format_player_gamelogs')
       .whereIn('pid', completed_players)
       .whereIn('esbid', [...completed_esbids])
-      .where('scoring_format_hash', scoring_format_hash)
+      .where('scoring_format_id', scoring_format_id)
       .select('pid', 'points')
 
     for (const row of actual_rows) {
@@ -191,7 +191,7 @@ export async function load_player_points_with_game_status({
 
   // Load scoring format for market projection calculation
   const league_settings = await db('league_scoring_formats')
-    .where({ scoring_format_hash })
+    .where({ scoring_format_id })
     .first()
 
   // Import merge helper dynamically to avoid circular dependency
@@ -231,7 +231,7 @@ export async function load_player_points_with_game_status({
     player_ids: pending_players,
     week,
     year,
-    scoring_format_hash
+    scoring_format_id
   })
 
   // Merge projections: market stats override traditional stats where available

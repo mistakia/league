@@ -4,19 +4,19 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import {
   common_column_params,
   named_league_formats,
-  DEFAULT_LEAGUE_FORMAT_HASH
+  DEFAULT_LEAGUE_FORMAT_ID
 } from '@libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 
-const league_format_hash_param = {
+const league_format_id_param = {
   label: 'League Format',
   values: Object.entries(named_league_formats).map(([key, format]) => ({
     value: format.hash,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: DEFAULT_LEAGUE_FORMAT_HASH,
+  default_value: DEFAULT_LEAGUE_FORMAT_ID,
   single: true
 }
 
@@ -32,7 +32,7 @@ const from_league_format_seasonlogs = (field) => ({
   column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE, COLUMN_GROUPS.SEASON],
   column_params: {
     year: single_year,
-    league_format_hash: league_format_hash_param,
+    league_format_id: league_format_id_param,
     year_offset: single_year_offset
   },
   splits: ['year']
@@ -42,7 +42,7 @@ const from_league_format_careerlogs = (field) => ({
   ...from_format_player_logs(field),
   column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE, COLUMN_GROUPS.CAREER],
   column_params: {
-    league_format_hash: league_format_hash_param
+    league_format_id: league_format_id_param
   }
 })
 

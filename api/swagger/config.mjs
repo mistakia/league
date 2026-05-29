@@ -333,13 +333,13 @@ const options = {
               description: 'Fleaflicker league ID for integration',
               example: null
             },
-            league_format_hash: {
+            league_format_id: {
               type: 'string',
               description: 'Hash identifying league format configuration',
               example:
                 'b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342'
             },
-            scoring_format_hash: {
+            scoring_format_id: {
               type: 'string',
               description: 'Hash identifying scoring format configuration',
               example:

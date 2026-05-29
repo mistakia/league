@@ -133,8 +133,8 @@ const create_player_name_cache = () => {
 const load_scoring_format = async ({ league_id, year }) => {
   const season = await db('seasons')
     .where({ lid: league_id, year })
-    .first('scoring_format_hash')
-  return season?.scoring_format_hash
+    .first('scoring_format_id')
+  return season?.scoring_format_id
 }
 
 /**
@@ -160,7 +160,7 @@ const load_week_actual_scores = async ({
   team_ids,
   weeks,
   year,
-  scoring_format_hash
+  scoring_format_id
 }) => {
   const week_actual_scores = new Map() // Map<week, Map<team_id, actual_points>>
 
@@ -182,8 +182,8 @@ const load_week_actual_scores = async ({
         'nfl_games.esbid'
       )
       .where({
-        'scoring_format_player_gamelogs.scoring_format_hash':
-          scoring_format_hash,
+        'scoring_format_player_gamelogs.scoring_format_id':
+          scoring_format_id,
         'nfl_games.week': week,
         'nfl_games.year': year
       })
@@ -722,7 +722,7 @@ const generate_formatted_output = async ({
   week_actual_scores,
   optimal_weeks,
   optimal_lineups_by_week,
-  scoring_format_hash,
+  scoring_format_id,
   include_practice_squad,
   include_reserve
 }) => {
@@ -769,7 +769,7 @@ const generate_formatted_output = async ({
           player_ids: analysis.current_starters,
           week,
           year,
-          scoring_format_hash
+          scoring_format_id
         })
 
       await format_lineup_analysis({
@@ -865,7 +865,7 @@ const main = async () => {
 
     // Load data
     const team_name_map = await load_team_names({ team_ids: all_team_ids })
-    const scoring_format_hash = await load_scoring_format({ league_id, year })
+    const scoring_format_id = await load_scoring_format({ league_id, year })
 
     // Run championship simulation
     const { championship_results, optimal_weeks, optimal_lineups_by_week } =
@@ -886,7 +886,7 @@ const main = async () => {
       team_ids: all_team_ids,
       weeks,
       year,
-      scoring_format_hash
+      scoring_format_id
     })
 
     // Generate output
@@ -914,7 +914,7 @@ const main = async () => {
         week_actual_scores,
         optimal_weeks,
         optimal_lineups_by_week,
-        scoring_format_hash,
+        scoring_format_id,
         include_practice_squad,
         include_reserve
       })

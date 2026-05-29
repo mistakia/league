@@ -1,6 +1,9 @@
 // League format definitions
-// This file defines the source data for generating named format constants
-// Supports both direct hash mappings and configuration objects
+// Source of truth for the named format catalog. Each entry carries a label,
+// description, and config object; league formats additionally carry a
+// scoring_format reference and optional pricing_model (defaults to 'auction').
+// Identities are opaque slugs assigned by the generator (alphabetical-first
+// within any config-equal group); there are no content-derived hashes.
 
 export const scoring_formats = {
   standard: {
@@ -879,18 +882,3 @@ export const league_formats = {
       'Genesis League 10-team superflex format with no kicker - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX'
   }
 }
-
-// Derived map: league-format name -> pricing_model. Sourced from the
-// definitions above; consumers look up by name (resolve hash -> name via
-// named_league_formats). Auction is the default for formats that omit the
-// field. The generated catalog file (named-league-formats-generated.mjs)
-// does not carry this field today because its hash inputs have drifted from
-// production; routing pricing_model through this derived map avoids forcing
-// a catalog regeneration that would invalidate every projection row in the
-// database.
-export const league_format_pricing_models = Object.fromEntries(
-  Object.entries(league_formats).map(([name, format]) => [
-    name,
-    format.pricing_model || 'auction'
-  ])
-)

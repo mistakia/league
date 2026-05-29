@@ -3,8 +3,10 @@
 
 import db from '#db'
 import getLeague from '#libs-server/get-league.mjs'
-import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
-import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
+import {
+  named_scoring_formats,
+  named_league_formats
+} from '#libs-shared/named-format-catalog.mjs'
 
 /**
  * Resolve format hash from various input types (hash, league ID, or named format)
@@ -21,14 +23,14 @@ export const resolve_format_hash = async ({ hash, lid, format, year }) => {
   if (hash) {
     // Check if it's a league or scoring format
     const league_format = await db('league_formats')
-      .where('league_format_hash', hash)
+      .where('id', hash)
       .first()
     if (league_format) {
       return { hash, name: `hash-${hash.slice(0, 8)}`, type: 'league' }
     }
 
     const scoring_format = await db('league_scoring_formats')
-      .where('scoring_format_hash', hash)
+      .where('id', hash)
       .first()
     if (scoring_format) {
       return { hash, name: `hash-${hash.slice(0, 8)}`, type: 'scoring' }
@@ -40,11 +42,11 @@ export const resolve_format_hash = async ({ hash, lid, format, year }) => {
   // League ID provided
   if (lid !== undefined) {
     const league = await getLeague({ lid, year })
-    if (!league || !league.league_format_hash) {
+    if (!league || !league.league_format_id) {
       throw new Error(`No league format found for league ID ${lid}`)
     }
     return {
-      hash: league.league_format_hash,
+      hash: league.league_format_id,
       name: `league-${lid}`,
       type: 'league'
     }
@@ -55,7 +57,7 @@ export const resolve_format_hash = async ({ hash, lid, format, year }) => {
     // Check league formats first
     if (named_league_formats[format]) {
       return {
-        hash: named_league_formats[format].hash,
+        hash: named_league_formats[format].id,
         name: format,
         type: 'league'
       }
@@ -64,7 +66,7 @@ export const resolve_format_hash = async ({ hash, lid, format, year }) => {
     // Check scoring formats
     if (named_scoring_formats[format]) {
       return {
-        hash: named_scoring_formats[format].hash,
+        hash: named_scoring_formats[format].id,
         name: format,
         type: 'scoring'
       }

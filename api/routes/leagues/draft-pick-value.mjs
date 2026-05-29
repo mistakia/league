@@ -125,7 +125,7 @@ router.get('/?', async (req, res) => {
         'median_best_season_points_added_per_game',
         'median_career_points_added_per_game'
       )
-      .where({ league_format_hash: league.league_format_hash })
+      .where({ league_format_id: league.league_format_id })
     res.send(data)
   } catch (err) {
     logger(err)

@@ -10,9 +10,7 @@ import { is_main } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('seed-nfl-teams')
-debug.enable(
-  'seed-nfl-teams,generate-league-format-hash,generate-scoring-format-hash'
-)
+debug.enable('seed-nfl-teams')
 
 const seed_nfl_teams = async () => {
   // get all tables with pid columns

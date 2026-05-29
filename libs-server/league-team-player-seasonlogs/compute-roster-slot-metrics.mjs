@@ -1,6 +1,6 @@
 /**
  * Compute weeks-count and pts_added_{earned,net} per (tid, pid) for a given
- * (lid, year, league_format_hash) slice, parameterized by which roster slot
+ * (lid, year, league_format_id) slice, parameterized by which roster slot
  * family to count.
  *
  * Used for both the rostered lens (`active_roster_slots`, suffix `rostered`)
@@ -12,7 +12,7 @@ import db from '#db'
 export default async function compute_roster_slot_metrics({
   lid,
   year,
-  league_format_hash,
+  league_format_id,
   slots,
   suffix
 }) {
@@ -36,7 +36,7 @@ export default async function compute_roster_slot_metrics({
     })
     .where('r.lid', lid)
     .where('n.year', year)
-    .where('g.league_format_hash', league_format_hash)
+    .where('g.league_format_id', league_format_id)
     .whereIn('r.slot', slots)
     .groupBy('r.tid', 'g.pid')
     .select('r.tid', 'g.pid')

@@ -4,33 +4,33 @@ import {
   common_column_params,
   named_scoring_formats,
   named_league_formats,
-  DEFAULT_SCORING_FORMAT_HASH,
-  DEFAULT_LEAGUE_FORMAT_HASH
+  DEFAULT_SCORING_FORMAT_ID,
+  DEFAULT_LEAGUE_FORMAT_ID
 } from '@libs-shared'
 import { league_format_pricing_models } from '@libs-shared/league-format-definitions.mjs'
 import { current_season } from '@constants'
 
 const { single_year, nfl_week_id } = common_column_params
 
-const scoring_format_hash_param = {
+const scoring_format_id_param = {
   label: 'Scoring Format',
   values: Object.entries(named_scoring_formats).map(([key, format]) => ({
     value: format.hash,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: DEFAULT_SCORING_FORMAT_HASH,
+  default_value: DEFAULT_SCORING_FORMAT_ID,
   single: true
 }
 
-const league_format_hash_param = {
+const league_format_id_param = {
   label: 'League Format',
   values: Object.entries(named_league_formats).map(([key, format]) => ({
     value: format.hash,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: DEFAULT_LEAGUE_FORMAT_HASH,
+  default_value: DEFAULT_LEAGUE_FORMAT_ID,
   single: true
 }
 
@@ -38,8 +38,8 @@ const league_format_hash_param = {
 // externally (player_salaries) and write NULL into the projection table.
 // Restrict the picker so the UI doesn't surface a column that would always
 // be empty for the selected format.
-const auction_league_format_hash_param = {
-  ...league_format_hash_param,
+const auction_league_format_id_param = {
+  ...league_format_id_param,
   values: Object.entries(named_league_formats)
     .filter(
       ([name]) => (league_format_pricing_models[name] || 'auction') === 'auction'
@@ -48,9 +48,9 @@ const auction_league_format_hash_param = {
 }
 
 const extra_column_params_by_base_name = {
-  points: { scoring_format_hash: scoring_format_hash_param },
-  points_added: { league_format_hash: league_format_hash_param },
-  market_salary: { league_format_hash: auction_league_format_hash_param }
+  points: { scoring_format_id: scoring_format_id_param },
+  points_added: { league_format_id: league_format_id_param },
+  market_salary: { league_format_id: auction_league_format_id_param }
 }
 
 // Generate projection years dynamically from 2020 to current year

@@ -16,19 +16,19 @@ const log = debug('generate-scoring-format-player-careerlogs')
 debug.enable('generate-scoring-format-player-careerlogs')
 
 const generate_scoring_format_player_careerlogs = async ({
-  scoring_format_hash,
+  scoring_format_id,
   dry = false
 } = {}) => {
-  if (!scoring_format_hash) {
-    throw new Error('missing scoring_format_hash')
+  if (!scoring_format_id) {
+    throw new Error('missing scoring_format_id')
   }
 
-  log(`generating scoring_format_player_careerlogs for ${scoring_format_hash}`)
+  log(`generating scoring_format_player_careerlogs for ${scoring_format_id}`)
 
   const inserts = []
 
   const player_seasons = await db('scoring_format_player_seasonlogs').where({
-    scoring_format_hash
+    scoring_format_id
   })
   const seasons_by_pid = groupBy(player_seasons, 'pid')
   const pids = Object.keys(seasons_by_pid)
@@ -72,7 +72,7 @@ const generate_scoring_format_player_careerlogs = async ({
 
     inserts.push({
       pid,
-      scoring_format_hash,
+      scoring_format_id,
 
       draft_rank,
 
@@ -105,17 +105,17 @@ const generate_scoring_format_player_careerlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('scoring_format_player_careerlogs')
-      .where({ scoring_format_hash })
+      .where({ scoring_format_id })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess scoring player rows`)
 
     log(
-      `updating ${inserts.length} scoring players for scoring_format ${scoring_format_hash}`
+      `updating ${inserts.length} scoring players for scoring_format ${scoring_format_id}`
     )
     await db('scoring_format_player_careerlogs')
       .insert(inserts)
-      .onConflict(['pid', 'scoring_format_hash'])
+      .onConflict(['pid', 'scoring_format_id'])
       .merge()
   }
 }
@@ -125,16 +125,16 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     // Use CLI argument if provided, otherwise fall back to league lookup
-    let scoring_format_hash = argv.scoring_format_hash
+    let scoring_format_id = argv.scoring_format_id
 
-    if (!scoring_format_hash) {
+    if (!scoring_format_id) {
       const lid = argv.lid || 1
       const league = await getLeague({ lid })
-      scoring_format_hash = league.scoring_format_hash
+      scoring_format_id = league.scoring_format_id
     }
 
     await generate_scoring_format_player_careerlogs({
-      scoring_format_hash,
+      scoring_format_id,
       dry: argv.dry
     })
   } catch (err) {

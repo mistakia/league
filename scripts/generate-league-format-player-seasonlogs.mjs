@@ -17,21 +17,21 @@ debug.enable('generate-league-format-player-seasonlogs')
 
 const generate_league_format_player_seasonlogs = async ({
   year = current_season.year,
-  league_format_hash,
+  league_format_id,
   dry = false
 }) => {
-  if (!league_format_hash) {
-    throw new Error('league_format_hash required')
+  if (!league_format_id) {
+    throw new Error('league_format_id required')
   }
   log(
-    `generating player seasonlogs for league_format ${league_format_hash} in ${year}`
+    `generating player seasonlogs for league_format ${league_format_id} in ${year}`
   )
   const league_format = await db('league_formats')
-    .where({ league_format_hash })
+    .where({ id: league_format_id })
     .first()
 
   if (!league_format) {
-    throw new Error(`league_format ${league_format_hash} not found`)
+    throw new Error(`league_format ${league_format_id} not found`)
   }
 
   // get league player gamelogs for season
@@ -39,7 +39,7 @@ const generate_league_format_player_seasonlogs = async ({
     .select('league_format_player_gamelogs.*', 'player.pos')
     .join('player', 'player.pid', 'league_format_player_gamelogs.pid')
     .join('nfl_games', 'league_format_player_gamelogs.esbid', 'nfl_games.esbid')
-    .where({ year, seas_type: 'REG', league_format_hash })
+    .where({ year, seas_type: 'REG', league_format_id })
 
   log(`loaded ${gamelogs.length} gamelogs`)
 
@@ -61,7 +61,7 @@ const generate_league_format_player_seasonlogs = async ({
     inserts.push({
       pid,
       year,
-      league_format_hash,
+      league_format_id,
       pos,
       points_added_earned,
       points_added_earned_per_game: points_added_earned / games,
@@ -142,7 +142,7 @@ const generate_league_format_player_seasonlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('league_format_player_seasonlogs')
-      .where({ league_format_hash, year })
+      .where({ league_format_id, year })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess player seasonlogs`)
@@ -150,7 +150,7 @@ const generate_league_format_player_seasonlogs = async ({
     log(`Updating ${inserts.length} player regular seasons`)
     await db('league_format_player_seasonlogs')
       .insert(inserts)
-      .onConflict(['pid', 'year', 'league_format_hash'])
+      .onConflict(['pid', 'year', 'league_format_id'])
       .merge()
   }
 }
@@ -160,12 +160,12 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     // Use CLI argument if provided, otherwise fall back to league lookup
-    let league_format_hash = argv.league_format_hash
+    let league_format_id = argv.league_format_id
 
-    if (!league_format_hash) {
+    if (!league_format_id) {
       const lid = argv.lid || 1
       const league = await getLeague({ lid })
-      league_format_hash = league.league_format_hash
+      league_format_id = league.league_format_id
     }
 
     await handle_season_args_for_script({
@@ -182,12 +182,12 @@ const main = async () => {
           .select('nfl_games.year')
           .where('nfl_games.seas_type', seas_type)
           .where(
-            'league_format_player_gamelogs.league_format_hash',
-            league_format_hash
+            'league_format_player_gamelogs.league_format_id',
+            league_format_id
           )
           .groupBy('nfl_games.year')
           .orderBy('nfl_games.year', 'asc'),
-      script_args: { league_format_hash, dry: argv.dry },
+      script_args: { league_format_id, dry: argv.dry },
       season_only: true // This script processes entire seasons, not individual weeks
     })
   } catch (err) {

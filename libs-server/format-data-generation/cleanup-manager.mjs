@@ -2,8 +2,10 @@
 // Handle orphaned data cleanup functionality
 
 import db from '#db'
-import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
-import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
+import {
+  named_scoring_formats,
+  named_league_formats
+} from '#libs-shared/named-format-catalog.mjs'
 
 import {
   check_scoring_format_removal_safety,
@@ -19,7 +21,7 @@ import {
 const get_format_tables = ({ format_type }) => {
   if (format_type === 'league') {
     return {
-      hash_column: 'league_format_hash',
+      hash_column: 'league_format_id',
       tables: [
         'league_format_draft_pick_value',
         'league_format_player_projection_values',
@@ -30,7 +32,7 @@ const get_format_tables = ({ format_type }) => {
     }
   } else {
     return {
-      hash_column: 'scoring_format_hash',
+      hash_column: 'scoring_format_id',
       tables: [
         'scoring_format_player_projection_points',
         'scoring_format_player_careerlogs',
@@ -111,9 +113,9 @@ export const discover_all_format_hashes = async () => {
   for (const table of scoring_tables) {
     try {
       const hashes = await db(table)
-        .distinct('scoring_format_hash')
-        .whereNotNull('scoring_format_hash')
-        .pluck('scoring_format_hash')
+        .distinct('scoring_format_id')
+        .whereNotNull('scoring_format_id')
+        .pluck('scoring_format_id')
       hashes.forEach((hash) => scoring_hashes.add(hash))
     } catch (error) {
       console.warn(`Could not scan table ${table}: ${error.message}`)
@@ -124,9 +126,9 @@ export const discover_all_format_hashes = async () => {
   for (const table of league_tables) {
     try {
       const hashes = await db(table)
-        .distinct('league_format_hash')
-        .whereNotNull('league_format_hash')
-        .pluck('league_format_hash')
+        .distinct('league_format_id')
+        .whereNotNull('league_format_id')
+        .pluck('league_format_id')
       hashes.forEach((hash) => league_hashes.add(hash))
     } catch (error) {
       console.warn(`Could not scan table ${table}: ${error.message}`)
@@ -145,12 +147,12 @@ export const discover_all_format_hashes = async () => {
 export const check_active_usage = async ({ league_hashes }) => {
   const active_in_seasons = new Set()
 
-  // Check active seasons - leagues table doesn't have league_format_hash
+  // Check active seasons - leagues table doesn't have league_format_id
   try {
     const active_seasons = await db('seasons')
-      .whereIn('league_format_hash', Array.from(league_hashes))
-      .whereNotNull('league_format_hash')
-      .pluck('league_format_hash')
+      .whereIn('league_format_id', Array.from(league_hashes))
+      .whereNotNull('league_format_id')
+      .pluck('league_format_id')
     active_seasons.forEach((hash) => active_in_seasons.add(hash))
   } catch (error) {
     console.warn(`Could not check seasons table: ${error.message}`)
@@ -168,7 +170,7 @@ export const check_active_usage = async ({ league_hashes }) => {
 const is_scoring_format_referenced = async ({ scoring_hash }) => {
   try {
     const referenced = await db('league_formats')
-      .where('scoring_format_hash', scoring_hash)
+      .where('scoring_format_id', scoring_hash)
       .first()
     return !!referenced
   } catch (error) {
@@ -187,10 +189,10 @@ export const classify_format_orphans = async () => {
 
   // Get named formats (fresh lookup)
   const named_scoring_hashes = new Set(
-    Object.values(named_scoring_formats).map((f) => f.hash)
+    Object.values(named_scoring_formats).map((f) => f.id)
   )
   const named_league_hashes = new Set(
-    Object.values(named_league_formats).map((f) => f.hash)
+    Object.values(named_league_formats).map((f) => f.id)
   )
 
   // Check active usage

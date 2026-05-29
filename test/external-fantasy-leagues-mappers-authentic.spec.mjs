@@ -20,7 +20,6 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
   let sleeper_transactions_fixture
   let sleeper_players_fixture
 
-  let league_config_expected
   let transaction_mappings_expected
   let player_mappings_expected
 
@@ -36,7 +35,6 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
     )
     sleeper_players_fixture = await load_platform_response('sleeper', 'players')
 
-    league_config_expected = await load_expected_output('sleeper-league-config')
     transaction_mappings_expected = await load_expected_output(
       'sleeper-transaction-mappings'
     )
@@ -46,22 +44,6 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
   })
 
   describe('LeagueConfigMapper.map_league_config', function () {
-    it('reproduces baseline format hashes for the real Sleeper fixture', function () {
-      const mapper = new LeagueConfigMapper()
-      const result = mapper.map_league_config(league_config_expected.input)
-
-      const expected = league_config_expected.expected_output
-      result.league_format_hash.should.equal(expected.league_format_hash)
-      result.scoring_format_hash.should.equal(expected.scoring_format_hash)
-
-      Object.entries(expected.league_format).forEach(([key, value]) => {
-        result.league_format.should.have.property(key, value)
-      })
-      Object.entries(expected.scoring_format).forEach(([key, value]) => {
-        result.scoring_format.should.have.property(key, value)
-      })
-    })
-
     it('matches the real superflex league shape (1QB/2RB/3WR/1TE/2FLEX/15BN)', function () {
       const mapper = new LeagueConfigMapper()
       const league = sleeper_league_fixture.data.league
@@ -72,19 +54,15 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
         roster_config: league.roster_positions
       })
 
-      result.league_format.should.have.property(
-        'num_teams',
-        league_config_expected.expected_output.league_format.num_teams
-      )
-      result.league_format.should.have.property('sqb', 1)
-      result.league_format.should.have.property('srb', 2)
-      result.league_format.should.have.property('swr', 3)
-      result.league_format.should.have.property('ste', 1)
-      result.league_format.should.have.property('srbwr', 2)
-      result.league_format.should.have.property('sqbrbwrte', 1)
-      result.league_format.should.have.property('sdst', 0)
-      result.league_format.should.have.property('sk', 0)
-      result.league_format.should.have.property('bench', 15)
+      result.league_params.should.have.property('sqb', 1)
+      result.league_params.should.have.property('srb', 2)
+      result.league_params.should.have.property('swr', 3)
+      result.league_params.should.have.property('ste', 1)
+      result.league_params.should.have.property('srbwr', 2)
+      result.league_params.should.have.property('sqbrbwrte', 1)
+      result.league_params.should.have.property('sdst', 0)
+      result.league_params.should.have.property('sk', 0)
+      result.league_params.should.have.property('bench', 15)
     })
   })
 

@@ -1,6 +1,6 @@
 import {
-  DEFAULT_SCORING_FORMAT_HASH,
-  DEFAULT_LEAGUE_FORMAT_HASH
+  DEFAULT_SCORING_FORMAT_ID,
+  DEFAULT_LEAGUE_FORMAT_ID
 } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
 import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
@@ -42,10 +42,10 @@ const get_default_params = ({ params = {} }) => {
     nfl_week = null
   }
 
-  const scoring_format_hash =
-    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
-  const league_format_hash =
-    params.league_format_hash || DEFAULT_LEAGUE_FORMAT_HASH
+  const scoring_format_id =
+    params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
+  const league_format_id =
+    params.league_format_id || DEFAULT_LEAGUE_FORMAT_ID
   const league_id = params.league_id || 1
 
   return {
@@ -53,8 +53,8 @@ const get_default_params = ({ params = {} }) => {
     week,
     seas_type,
     nfl_week,
-    scoring_format_hash,
-    league_format_hash,
+    scoring_format_id,
+    league_format_id,
     league_id
   }
 }
@@ -89,7 +89,7 @@ const scoring_format_player_projection_points_table_alias = ({
 }) => {
   const p = get_default_params({ params })
   return get_table_hash(
-    `scoring_format_player_projection_points_${get_alias_key(p)}_${p.scoring_format_hash}`
+    `scoring_format_player_projection_points_${get_alias_key(p)}_${p.scoring_format_id}`
   )
 }
 
@@ -105,7 +105,7 @@ const league_format_player_projection_values_table_alias = ({
 }) => {
   const p = get_default_params({ params })
   return get_table_hash(
-    `league_format_player_projection_values_${get_alias_key(p)}_${p.league_format_hash}`
+    `league_format_player_projection_values_${get_alias_key(p)}_${p.league_format_id}`
   )
 }
 
@@ -207,7 +207,7 @@ const make_league_format_player_projection_source = ({
 } = {}) => ({
   grain: 'player',
   attach: ({ query_context, params, table_alias, join_type }) => {
-    const { league_format_hash } = get_default_params({ params })
+    const { league_format_id } = get_default_params({ params })
     apply_projected_join({
       query_context,
       params,
@@ -218,9 +218,9 @@ const make_league_format_player_projection_source = ({
       join_week: !is_rest_of_season,
       additional_conditions() {
         this.andOn(
-          `${table_alias}.league_format_hash`,
+          `${table_alias}.league_format_id`,
           '=',
-          db.raw('?', [league_format_hash])
+          db.raw('?', [league_format_id])
         )
         if (is_rest_of_season) {
           this.andOn(`${table_alias}.week`, '=', db.raw('?', ['ros']))
@@ -235,7 +235,7 @@ const make_scoring_format_player_projection_source = ({
 } = {}) => ({
   grain: 'player',
   attach: ({ query_context, params, table_alias, join_type }) => {
-    const { scoring_format_hash } = get_default_params({ params })
+    const { scoring_format_id } = get_default_params({ params })
     apply_projected_join({
       query_context,
       params,
@@ -247,9 +247,9 @@ const make_scoring_format_player_projection_source = ({
       cast_join_week_to_string: true,
       additional_conditions() {
         this.andOn(
-          `${table_alias}.scoring_format_hash`,
+          `${table_alias}.scoring_format_id`,
           '=',
-          db.raw('?', [scoring_format_hash])
+          db.raw('?', [scoring_format_id])
         )
         if (is_rest_of_season) {
           this.andOn(`${table_alias}.week`, '=', db.raw('?', ['ros']))

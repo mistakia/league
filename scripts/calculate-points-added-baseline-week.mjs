@@ -16,10 +16,10 @@ const log = debug('calculate-points-added-baseline-week')
 debug.enable('calculate-points-added-baseline-week')
 
 const calculate_points_added_baseline_week = async ({
-  league_format_hash,
+  league_format_id,
   save = false
 }) => {
-  const league_format = await get_league_format({ league_format_hash })
+  const league_format = await get_league_format({ league_format_id })
   const years = 2
   let year = current_season.year - years
 
@@ -50,7 +50,7 @@ const calculate_points_added_baseline_week = async ({
 
   if (save) {
     log(update)
-    await db('league_formats').update(update).where({ league_format_hash })
+    await db('league_formats').update(update).where({ id: league_format_id })
   }
 }
 
@@ -64,18 +64,18 @@ const main = async () => {
       if (!league) {
         throw new Error(`League ${argv.lid} not found`)
       }
-      const { league_format_hash } = league
+      const { league_format_id } = league
       await calculate_points_added_baseline_week({
-        league_format_hash,
+        league_format_id,
         save: argv.save
       })
     } else {
       const league_formats = await db('league_formats')
       log(`calculating baseline for ${league_formats.length} league formats`)
       for (const league_format of league_formats) {
-        const { league_format_hash } = league_format
+        const { league_format_id } = league_format
         await calculate_points_added_baseline_week({
-          league_format_hash,
+          league_format_id,
           save: argv.save
         })
       }

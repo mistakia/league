@@ -1,4 +1,4 @@
-import { DEFAULT_SCORING_FORMAT_HASH } from '#libs-shared'
+import { DEFAULT_SCORING_FORMAT_ID } from '#libs-shared'
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import {
@@ -6,7 +6,7 @@ import {
   create_static_cache_info,
   CACHE_TTL
 } from '#libs-server/data-views/cache-info-utils.mjs'
-import { get_scoring_format_hash } from '#libs-server/data-views/index.mjs'
+import { get_scoring_format_id } from '#libs-server/data-views/index.mjs'
 
 // TODO career_year
 
@@ -28,10 +28,10 @@ const get_cache_info_for_scoring_format_careerlogs = create_static_cache_info({
 })
 
 const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
-  let scoring_format_hash =
-    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
-  if (Array.isArray(scoring_format_hash)) {
-    scoring_format_hash = scoring_format_hash[0]
+  let scoring_format_id =
+    params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
+  if (Array.isArray(scoring_format_id)) {
+    scoring_format_id = scoring_format_id[0]
   }
 
   let year = params.year || [current_season.stats_season_year]
@@ -49,7 +49,7 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   }
 
   return get_table_hash(
-    `scoring_format_player_seasonlogs_${year.join('_')}_${scoring_format_hash}_year_offset_${year_offset_single}`
+    `scoring_format_player_seasonlogs_${year.join('_')}_${scoring_format_id}_year_offset_${year_offset_single}`
   )
 }
 
@@ -62,7 +62,7 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
 // FROM, AND ON via player-family-to-player-year emit_year_match when measure.
 const scoring_format_seasonlogs_conditions = ({ params, splits = [] }) => {
   const conditions = [
-    { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
+    { column: 'scoring_format_id', value: get_scoring_format_id(params) }
   ]
 
   if (!splits.includes('year') && params.year) {
@@ -81,19 +81,19 @@ const scoring_format_player_seasonlogs_source = {
   key_columns: { pid: 'pid', year: 'year' },
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => [
-    { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
+    { column: 'scoring_format_id', value: get_scoring_format_id(params) }
   ]
 }
 
 const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {
-  let scoring_format_hash =
-    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
-  if (Array.isArray(scoring_format_hash)) {
-    scoring_format_hash = scoring_format_hash[0]
+  let scoring_format_id =
+    params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
+  if (Array.isArray(scoring_format_id)) {
+    scoring_format_id = scoring_format_id[0]
   }
 
   return get_table_hash(
-    `scoring_format_player_careerlogs_${scoring_format_hash}`
+    `scoring_format_player_careerlogs_${scoring_format_id}`
   )
 }
 
@@ -102,7 +102,7 @@ const scoring_format_player_careerlogs_source = {
   grain: 'player',
   key_columns: { pid: 'pid' },
   extra_predicates: (params) => [
-    { column: 'scoring_format_hash', value: get_scoring_format_hash(params) }
+    { column: 'scoring_format_id', value: get_scoring_format_id(params) }
   ]
 }
 

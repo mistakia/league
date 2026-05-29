@@ -99,7 +99,7 @@ export async function analyze_lineup_decisions({
 
   // Get scoring format hash for projection lookup
   const season = await db('seasons').where({ lid: league_id, year }).first()
-  const scoring_format_hash = season?.scoring_format_hash
+  const scoring_format_id = season?.scoring_format_id
 
   // Load bench players for potential swaps (only those with valid projections)
   // Use roster_week as fallback to match how starters are loaded for future weeks
@@ -109,7 +109,7 @@ export async function analyze_lineup_decisions({
     week,
     year,
     starter_pids: my_roster.player_ids,
-    scoring_format_hash,
+    scoring_format_id,
     fallback_week: roster_week,
     include_practice_squad,
     include_reserve

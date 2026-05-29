@@ -1,6 +1,6 @@
 import {
-  DEFAULT_SCORING_FORMAT_HASH,
-  DEFAULT_LEAGUE_FORMAT_HASH
+  DEFAULT_SCORING_FORMAT_ID,
+  DEFAULT_LEAGUE_FORMAT_ID
 } from '#libs-shared'
 
 /**
@@ -53,10 +53,10 @@ export const get_single_value = (value, default_value) => {
  * @param {Object} params - Column parameters object
  * @returns {string} Scoring format hash
  */
-export const get_scoring_format_hash = (params = {}) => {
+export const get_scoring_format_id = (params = {}) => {
   return get_single_value(
-    params.scoring_format_hash,
-    DEFAULT_SCORING_FORMAT_HASH
+    params.scoring_format_id,
+    DEFAULT_SCORING_FORMAT_ID
   )
 }
 
@@ -65,6 +65,6 @@ export const get_scoring_format_hash = (params = {}) => {
  * @param {Object} params - Column parameters object
  * @returns {string} League format hash
  */
-export const get_league_format_hash = (params = {}) => {
-  return get_single_value(params.league_format_hash, DEFAULT_LEAGUE_FORMAT_HASH)
+export const get_league_format_id = (params = {}) => {
+  return get_single_value(params.league_format_id, DEFAULT_LEAGUE_FORMAT_ID)
 }

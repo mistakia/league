@@ -22,16 +22,16 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    let league_format_hash = argv.league_format_hash
+    let league_format_id = argv.league_format_id
 
-    if (!league_format_hash) {
+    if (!league_format_id) {
       const lid = argv.lid || 1
       const league = await getLeague({ lid })
-      league_format_hash = league.league_format_hash
+      league_format_id = league.league_format_id
     }
 
-    if (!league_format_hash) {
-      throw new Error('league_format_hash is required')
+    if (!league_format_id) {
+      throw new Error('league_format_id is required')
     }
 
     await handle_season_args_for_script({
@@ -53,15 +53,15 @@ const main = async () => {
           .where('nfl_games.year', year)
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc'),
-      script_args: { league_format_hash },
-      post_year_function: async ({ year, league_format_hash }) => {
+      script_args: { league_format_id },
+      post_year_function: async ({ year, league_format_id }) => {
         await generate_league_format_player_seasonlogs({
           year,
-          league_format_hash
+          league_format_id
         })
       },
-      post_all_function: async ({ league_format_hash }) => {
-        await generate_league_format_player_careerlogs({ league_format_hash })
+      post_all_function: async ({ league_format_id }) => {
+        await generate_league_format_player_careerlogs({ league_format_id })
       }
     })
   } catch (err) {

@@ -25,13 +25,13 @@ const MIN_GAMES_PER_STATE_FULL_CONFIDENCE = 5
  */
 const calculate_player_game_outcome_correlations = async ({
   year,
-  scoring_format_hash
+  scoring_format_id
 } = {}) => {
   if (!year) {
     throw new Error('year is required')
   }
-  if (!scoring_format_hash) {
-    throw new Error('scoring_format_hash is required')
+  if (!scoring_format_id) {
+    throw new Error('scoring_format_id is required')
   }
 
   log(`Calculating player game outcome correlations for year ${year}`)
@@ -48,8 +48,8 @@ const calculate_player_game_outcome_correlations = async ({
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
     .where(
-      'scoring_format_player_gamelogs.scoring_format_hash',
-      scoring_format_hash
+      'scoring_format_player_gamelogs.scoring_format_id',
+      scoring_format_id
     )
     .whereNotNull('player_gamelogs.snaps_leading')
     .whereNotNull('player_gamelogs.snaps_trailing')
@@ -202,23 +202,23 @@ const main = async () => {
   let error
   try {
     const year = argv.year || current_season.year - 1
-    const scoring_format_hash = argv.scoring_format_hash
+    const scoring_format_id = argv.scoring_format_id
 
-    if (!scoring_format_hash) {
+    if (!scoring_format_id) {
       // Get default scoring format from league 1
       const league = await db('seasons').where({ lid: 1 }).first()
       if (league) {
         await calculate_player_game_outcome_correlations({
           year,
-          scoring_format_hash: league.scoring_format_hash
+          scoring_format_id: league.scoring_format_id
         })
       } else {
-        throw new Error('No scoring_format_hash provided and no default found')
+        throw new Error('No scoring_format_id provided and no default found')
       }
     } else {
       await calculate_player_game_outcome_correlations({
         year,
-        scoring_format_hash
+        scoring_format_id
       })
     }
   } catch (err) {

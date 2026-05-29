@@ -6,8 +6,10 @@ import { hideBin } from 'yargs/helpers'
 
 import is_main from '#libs-server/is-main.mjs'
 import { current_season } from '#constants'
-import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
-import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
+import {
+  named_scoring_formats,
+  named_league_formats
+} from '#libs-shared/named-format-catalog.mjs'
 
 import {
   SCRIPT_CONFIG,

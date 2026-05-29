@@ -35,7 +35,7 @@ export const generation_scripts = {
   scoring_format_gamelogs: {
     script: 'generate-scoring-format-player-gamelogs.mjs',
     description: 'Generate scoring format player gamelogs',
-    args: ['--scoring_format_hash', '{scoring_format_hash}', '--all'],
+    args: ['--scoring_format_id', '{scoring_format_id}', '--all'],
     dependencies: [],
     tables: ['scoring_format_player_gamelogs'],
     per_format: 'scoring'
@@ -44,7 +44,7 @@ export const generation_scripts = {
   scoring_format_seasonlogs: {
     script: 'generate-scoring-format-player-seasonlogs.mjs',
     description: 'Generate scoring format player seasonlogs',
-    args: ['--scoring_format_hash', '{scoring_format_hash}', '--all'],
+    args: ['--scoring_format_id', '{scoring_format_id}', '--all'],
     dependencies: ['scoring_format_gamelogs'],
     tables: ['scoring_format_player_seasonlogs'],
     per_format: 'scoring'
@@ -53,7 +53,7 @@ export const generation_scripts = {
   scoring_format_careerlogs: {
     script: 'generate-scoring-format-player-careerlogs.mjs',
     description: 'Generate scoring format player careerlogs',
-    args: ['--scoring_format_hash', '{scoring_format_hash}'],
+    args: ['--scoring_format_id', '{scoring_format_id}'],
     dependencies: ['scoring_format_seasonlogs'],
     tables: ['scoring_format_player_careerlogs'],
     per_format: 'scoring'
@@ -62,7 +62,7 @@ export const generation_scripts = {
   scoring_format_projections: {
     script: 'process-projections-for-scoring-format.mjs',
     description: 'Process projections for scoring format',
-    args: ['--scoring_format_hash', '{scoring_format_hash}', '--all'],
+    args: ['--scoring_format_id', '{scoring_format_id}', '--all'],
     dependencies: [],
     tables: ['scoring_format_player_projection_points'],
     per_format: 'scoring'
@@ -72,7 +72,7 @@ export const generation_scripts = {
   league_format_gamelogs: {
     script: 'generate-league-format-player-gamelogs.mjs',
     description: 'Generate league format player gamelogs',
-    args: ['--league_format_hash', '{league_format_hash}', '--all'],
+    args: ['--league_format_id', '{league_format_id}', '--all'],
     dependencies: [
       'scoring_format_gamelogs',
       'scoring_format_seasonlogs',
@@ -85,7 +85,7 @@ export const generation_scripts = {
   league_format_seasonlogs: {
     script: 'generate-league-format-player-seasonlogs.mjs',
     description: 'Generate league format player seasonlogs',
-    args: ['--league_format_hash', '{league_format_hash}', '--all'],
+    args: ['--league_format_id', '{league_format_id}', '--all'],
     dependencies: ['league_format_gamelogs'],
     tables: ['league_format_player_seasonlogs'],
     per_format: 'league'
@@ -94,7 +94,7 @@ export const generation_scripts = {
   league_format_careerlogs: {
     script: 'generate-league-format-player-careerlogs.mjs',
     description: 'Generate league format player careerlogs',
-    args: ['--league_format_hash', '{league_format_hash}'],
+    args: ['--league_format_id', '{league_format_id}'],
     dependencies: ['league_format_seasonlogs'],
     tables: ['league_format_player_careerlogs'],
     per_format: 'league'
@@ -103,7 +103,7 @@ export const generation_scripts = {
   league_format_projections: {
     script: 'process-projections-for-league-format.mjs',
     description: 'Process projections for league format',
-    args: ['--league_format_hash', '{league_format_hash}', '--all'],
+    args: ['--league_format_id', '{league_format_id}', '--all'],
     dependencies: ['scoring_format_projections'],
     tables: ['league_format_player_projection_values'],
     per_format: 'league'
@@ -112,7 +112,7 @@ export const generation_scripts = {
   league_format_draft_values: {
     script: 'calculate-draft-pick-value.mjs',
     description: 'Calculate draft pick values for league format',
-    args: ['--league_format_hash', '{league_format_hash}'],
+    args: ['--league_format_id', '{league_format_id}'],
     dependencies: ['league_format_careerlogs'],
     tables: ['league_format_draft_pick_value'],
     per_format: 'league'

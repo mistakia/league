@@ -15,13 +15,13 @@ const log = debug('simulation:load-player-variance')
  * @param {Object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - Year for variance data (typically prior year)
- * @param {string} params.scoring_format_hash - Scoring format hash
+ * @param {string} params.scoring_format_id - Scoring format hash
  * @returns {Promise<Map>} Map of pid -> { mean_points, std_points, coefficient_of_variation, games_played }
  */
 export async function load_player_variance({
   player_ids,
   year,
-  scoring_format_hash
+  scoring_format_id
 }) {
   if (!player_ids.length) {
     return new Map()
@@ -32,7 +32,7 @@ export async function load_player_variance({
   // First try player_variance table
   const cached_variance = await db('player_variance')
     .whereIn('pid', player_ids)
-    .where({ year, scoring_format_hash })
+    .where({ year, scoring_format_id })
 
   const variance_map = new Map()
   const found_pids = new Set()
@@ -63,8 +63,8 @@ export async function load_player_variance({
       .whereIn('scoring_format_player_gamelogs.pid', missing_pids)
       .where('nfl_games.year', year)
       .where(
-        'scoring_format_player_gamelogs.scoring_format_hash',
-        scoring_format_hash
+        'scoring_format_player_gamelogs.scoring_format_id',
+        scoring_format_id
       )
       .select(
         'scoring_format_player_gamelogs.pid',

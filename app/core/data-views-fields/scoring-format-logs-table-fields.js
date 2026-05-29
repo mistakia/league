@@ -5,19 +5,19 @@ import from_format_player_logs from './from-format-player-logs'
 import {
   common_column_params,
   named_scoring_formats,
-  DEFAULT_SCORING_FORMAT_HASH
+  DEFAULT_SCORING_FORMAT_ID
 } from '@libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 
-const scoring_format_hash_param = {
+const scoring_format_id_param = {
   label: 'Scoring Format',
   values: Object.entries(named_scoring_formats).map(([key, format]) => ({
     value: format.hash,
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: DEFAULT_SCORING_FORMAT_HASH,
+  default_value: DEFAULT_SCORING_FORMAT_ID,
   single: true
 }
 
@@ -27,7 +27,7 @@ const from_scoring_format_seasonlogs = (field) => ({
   column_params: {
     year: single_year,
     year_offset: single_year_offset,
-    scoring_format_hash: scoring_format_hash_param
+    scoring_format_id: scoring_format_id_param
   },
   splits: ['year']
 })
@@ -36,7 +36,7 @@ const from_scoring_format_careerlogs = (field) => ({
   ...from_format_player_logs(field),
   column_groups: [COLUMN_GROUPS.FANTASY_POINTS, COLUMN_GROUPS.CAREER],
   column_params: {
-    scoring_format_hash: scoring_format_hash_param
+    scoring_format_id: scoring_format_id_param
   }
 })
 

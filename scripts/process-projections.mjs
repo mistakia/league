@@ -38,7 +38,6 @@ import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { league_format_pricing_models } from '#libs-shared/league-format-definitions.mjs'
 
 dayjs.extend(dayOfYear)
 
@@ -283,11 +282,11 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
 
 const process_scoring_format = async ({
   year,
-  scoring_format_hash,
+  scoring_format_id,
   player_rows
 }) => {
   const league_scoring_format = await db('league_scoring_formats')
-    .where({ scoring_format_hash })
+    .where({ id: scoring_format_id })
     .first()
 
   const points_inserts = []
@@ -300,7 +299,7 @@ const process_scoring_format = async ({
       points_inserts.push({
         pid: player_row.pid,
         year: current_season.year,
-        scoring_format_hash,
+        scoring_format_id,
         week,
         ...calculatePoints({
           stats: projection,
@@ -314,7 +313,7 @@ const process_scoring_format = async ({
     points_inserts.push({
       pid: player_row.pid,
       year: current_season.year,
-      scoring_format_hash,
+      scoring_format_id,
       week: 'ros',
       ...calculatePoints({
         stats: player_row.projection.ros,
@@ -326,9 +325,8 @@ const process_scoring_format = async ({
   }
 
   if (points_inserts.length) {
-    // Delete only current week, future weeks, and ROS projections
     await db('scoring_format_player_projection_points')
-      .where({ scoring_format_hash, year })
+      .where({ scoring_format_id, year })
       .where(function () {
         this.where('week', 'ros').orWhere(function () {
           this.whereNot('week', 'ros').andWhere(
@@ -351,13 +349,13 @@ const process_scoring_format = async ({
 const process_league_format = async ({
   projection_pids,
   year,
-  league_format_hash,
+  league_format_id,
   pricing_model = 'auction'
 }) => {
-  log(`processing league format ${league_format_hash} (${pricing_model})`)
-  const league_format = await get_league_format({ league_format_hash })
+  log(`processing league format ${league_format_id} (${pricing_model})`)
+  const league_format = await get_league_format({ league_format_id })
   if (!league_format) {
-    throw new Error(`league format ${league_format_hash} not found`)
+    throw new Error(`league format ${league_format_id} not found`)
   }
 
   const { num_teams, cap, min_bid } = league_format
@@ -367,8 +365,8 @@ const process_league_format = async ({
 
   const player_rows = await getPlayers({
     pids: projection_pids,
-    league_format_hash: league_format.league_format_hash,
-    scoring_format_hash: league_format.scoring_format_hash
+    league_format_id: league_format.league_format_id,
+    scoring_format_id: league_format.scoring_format_id
   })
 
   const baselines = {}
@@ -414,7 +412,7 @@ const process_league_format = async ({
       const params = {
         pid: player_row.pid,
         year: current_season.year,
-        league_format_hash,
+        league_format_id,
         week,
         pts_added,
         market_salary:
@@ -430,7 +428,7 @@ const process_league_format = async ({
   if (valueInserts.length) {
     await db('league_format_player_projection_values')
       .del()
-      .where({ league_format_hash })
+      .where({ league_format_id })
     await batch_insert({
       items: valueInserts,
       save: (items) =>
@@ -485,7 +483,7 @@ const process_league = async ({ year, lid }) => {
   const player_rows = await getPlayers({
     pids: projection_pids.concat(rostered_pids),
     leagueId: lid,
-    scoring_format_hash: league.scoring_format_hash
+    scoring_format_id: league.scoring_format_id
   })
 
   const transactions = await get_player_transactions({
@@ -667,20 +665,19 @@ const run = async ({ year = current_season.year } = {}) => {
   for (const lid of lids) {
     const league = await getLeague({ lid, year })
     leagues_cache[lid] = league
-    league_formats[league.league_format_hash] = 'auction'
-    scoring_formats[league.scoring_format_hash] = true
+    league_formats[league.league_format_id] = 'auction'
+    scoring_formats[league.scoring_format_id] = true
   }
 
   // Additionally project under every named catalog scoring/league format so
   // the data-view analysis surface (e.g. DraftKings/FanDuel/PPR/etc.) has
   // current-year coverage. These named formats are not tied to any league;
-  // they exist as analysis presets.
+  // they exist as analysis presets. pricing_model rides on each named entry.
   for (const named of Object.values(named_scoring_formats)) {
-    scoring_formats[named.hash] = true
+    scoring_formats[named.id] = true
   }
-  for (const [name, named] of Object.entries(named_league_formats)) {
-    league_formats[named.hash] =
-      league_format_pricing_models[name] || 'auction'
+  for (const named of Object.values(named_league_formats)) {
+    league_formats[named.id] = named.pricing_model || 'auction'
   }
 
   // Per-format try/catch: one broken format must not abort processing of the
@@ -688,50 +685,50 @@ const run = async ({ year = current_season.year } = {}) => {
   // surface them as a single pipeline_failure signal with per-format detail.
   const per_format_failures = []
 
-  for (const scoring_format_hash of Object.keys(scoring_formats)) {
+  for (const scoring_format_id of Object.keys(scoring_formats)) {
     const t0 = Date.now()
     try {
-      await process_scoring_format({ year, scoring_format_hash, player_rows })
+      await process_scoring_format({ year, scoring_format_id, player_rows })
       log(
-        `scoring_format=${scoring_format_hash} duration_ms=${Date.now() - t0}`
+        `scoring_format=${scoring_format_id} duration_ms=${Date.now() - t0}`
       )
     } catch (err) {
       per_format_failures.push({
         stage: 'process_scoring_format',
-        scoring_format_hash,
+        scoring_format_id,
         duration_ms: Date.now() - t0,
         message: err.message
       })
       log(
-        `scoring_format=${scoring_format_hash} FAILED duration_ms=${Date.now() - t0} error=${err.message}`
+        `scoring_format=${scoring_format_id} FAILED duration_ms=${Date.now() - t0} error=${err.message}`
       )
     }
   }
 
-  for (const [league_format_hash, pricing_model] of Object.entries(
+  for (const [league_format_id, pricing_model] of Object.entries(
     league_formats
   )) {
     const t0 = Date.now()
     try {
       await process_league_format({
         year,
-        league_format_hash,
+        league_format_id,
         projection_pids,
         pricing_model
       })
       log(
-        `league_format=${league_format_hash} pricing_model=${pricing_model} duration_ms=${Date.now() - t0}`
+        `league_format=${league_format_id} pricing_model=${pricing_model} duration_ms=${Date.now() - t0}`
       )
     } catch (err) {
       per_format_failures.push({
         stage: 'process_league_format',
-        league_format_hash,
+        league_format_id,
         pricing_model,
         duration_ms: Date.now() - t0,
         message: err.message
       })
       log(
-        `league_format=${league_format_hash} FAILED duration_ms=${Date.now() - t0} error=${err.message}`
+        `league_format=${league_format_id} FAILED duration_ms=${Date.now() - t0} error=${err.message}`
       )
     }
   }
