@@ -10,10 +10,29 @@ import {
 
 import { ASSET_TYPE, INITIAL_SLOT_TYPE, PS_SLOT_SUBTYPE } from './constants.mjs'
 
+// Tolerate the in-flight format-id migration: until
+// db/adhoc/2026-05-28-format-id-migration.sql is applied to prod the
+// physical column on the format-keyed tables is still `league_format_hash`.
+// Detect once per call; remove this shim after the migration lands.
+const detect_format_column = async (table_name) => {
+  const row = await db('information_schema.columns')
+    .select('column_name')
+    .where({ table_name })
+    .whereIn('column_name', ['league_format_id', 'league_format_hash'])
+    .first()
+  return row?.column_name || 'league_format_id'
+}
+
 // Bulk snapshot computation. Pre-loads all reference data the per-holding
 // snapshots need (KTC rankings, gamelogs, rosters_players, projection values,
-// league_player_seasonlogs, draft_pick_value, esbid->week, league_formats),
-// then iterates the holding drafts in-memory.
+// draft_pick_value, esbid->week, league_formats), then iterates the holding
+// drafts in-memory.
+//
+// Contract salary (`salary_paid`) is set at acquisition time in
+// walk-transactions.mjs from the originating finalized transaction value
+// (or carried forward across trade legs). This pass does not touch it; cap
+// attribution (START_TEAM_BEARS) is the concern of separate queries that
+// sum holdings per (tid, year), not of the holding row itself.
 //
 // Replaces the per-holding sequential-query approach in the four
 // compute-*-snapshot.mjs helpers when invoked from the generator. The helpers
@@ -115,16 +134,17 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   // gamelogs: keyed `${pid}__${format_hash}` -> Map(esbid -> {net, earned})
   idx.gamelogs = new Map()
   if (player_ids.length && format_hashes.length) {
+    const gl_col = await detect_format_column('league_format_player_gamelogs')
     const gl_rows = await db('league_format_player_gamelogs')
       .select(
         'pid',
         'esbid',
-        'league_format_id',
+        `${gl_col} as league_format_id`,
         'points_added_net',
         'points_added_earned'
       )
       .whereIn('pid', player_ids)
-      .whereIn('league_format_id', format_hashes)
+      .whereIn(gl_col, format_hashes)
     for (const r of gl_rows) {
       const k = `${r.pid}__${r.league_format_id}`
       if (!idx.gamelogs.has(k)) idx.gamelogs.set(k, new Map())
@@ -177,10 +197,13 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   // The -999 sentinel indicates "no projection available" and is dropped.
   idx.projections = new Map()
   if (player_ids.length && format_hashes.length && years.length) {
+    const proj_col = await detect_format_column(
+      'league_format_player_projection_values'
+    )
     const proj_rows = await db('league_format_player_projection_values')
-      .select('pid', 'league_format_id', 'year', 'pts_added')
+      .select('pid', `${proj_col} as league_format_id`, 'year', 'pts_added')
       .whereIn('pid', player_ids)
-      .whereIn('league_format_id', format_hashes)
+      .whereIn(proj_col, format_hashes)
       .whereIn('year', years)
       .where('week', '0')
     for (const r of proj_rows) {
@@ -195,13 +218,14 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   // draft_pick_value: keyed `${format_hash}__${rank}` -> value
   idx.pick_values = new Map()
   if (format_hashes.length) {
+    const pv_col = await detect_format_column('league_format_draft_pick_value')
     const pv_rows = await db('league_format_draft_pick_value')
       .select(
-        'league_format_id',
+        `${pv_col} as league_format_id`,
         'rank',
         'median_best_season_points_added_per_game'
       )
-      .whereIn('league_format_id', format_hashes)
+      .whereIn(pv_col, format_hashes)
     for (const r of pv_rows) {
       const k = `${r.league_format_id}__${r.rank}`
       idx.pick_values.set(
@@ -216,9 +240,11 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   // num_teams per league_format_id
   idx.num_teams = new Map()
   if (format_hashes.length) {
+    const lf_col = await detect_format_column('league_formats')
+    const lf_id_col = lf_col === 'league_format_hash' ? lf_col : 'id'
     const f_rows = await db('league_formats')
-      .select('id', 'num_teams')
-      .whereIn('id', format_hashes)
+      .select(`${lf_id_col} as id`, 'num_teams')
+      .whereIn(lf_id_col, format_hashes)
     for (const r of f_rows) {
       idx.num_teams.set(r.id, r.num_teams)
     }
@@ -227,38 +253,6 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   // Pick KTC indexes (superflex qb-axis; matches the player-side query above).
   // Loaded once across all picks the snapshot pass will touch.
   idx.pick_ktc = await load_pick_ktc_indexes({ qb_axis: 2 })
-
-  // league_player_seasonlogs: keyed `${pid}__${year}` -> {start_tid, salary}
-  idx.seasonlogs = new Map()
-  if (player_ids.length && years.length) {
-    const sl_rows = await db('league_player_seasonlogs')
-      .select('pid', 'year', 'start_tid', 'salary')
-      .where('lid', lid)
-      .whereIn('pid', player_ids)
-      .whereIn('year', years)
-    for (const r of sl_rows) {
-      idx.seasonlogs.set(`${r.pid}__${r.year}`, {
-        start_tid: r.start_tid,
-        salary: r.salary
-      })
-    }
-  }
-
-  // AUCTION_PROCESSED fallback: keyed `${pid}__${year}` -> {tid, value}
-  idx.auction_salary = new Map()
-  if (player_ids.length) {
-    const a_rows = await db('transactions')
-      .select('pid', 'year', 'tid', 'value')
-      .where('lid', lid)
-      .where('type', 7)
-      .whereIn('pid', player_ids)
-    for (const r of a_rows) {
-      idx.auction_salary.set(`${r.pid}__${r.year}`, {
-        tid: r.tid,
-        value: r.value
-      })
-    }
-  }
 
   return idx
 }
@@ -276,12 +270,7 @@ const ktc_at = (idx, pid, target_unix) => {
   return rows[0].v
 }
 
-const compute_snapshot_for_draft = ({
-  draft,
-  lid,
-  idx,
-  salary_eligible_draft_ids
-}) => {
+const compute_snapshot_for_draft = ({ draft, lid, idx }) => {
   const period_start = draft.period_start
   const period_end = draft.period_end
   const start_unix = Math.floor(period_start.getTime() / 1000)
@@ -302,8 +291,7 @@ const compute_snapshot_for_draft = ({
     realized_pts_added_net_in_practice_squad_slot: 0,
     projected_pts_added_at_acquisition: null,
     composite_market_value_at_acquisition: null,
-    composite_market_value_at_termination: null,
-    salary_paid: null
+    composite_market_value_at_termination: null
   }
 
   if (draft.asset_type === ASSET_TYPE.PLAYER && draft.player_id) {
@@ -385,23 +373,6 @@ const compute_snapshot_for_draft = ({
       result.initial_slot_type = initial_slot_family(first_row.slot)
       result.ps_slot_subtype = ps_subtype(first_row.slot)
     }
-
-    // salary attribution (START_TEAM_BEARS): credit only the earliest holding
-    // per (tid, pid, year) so re-acquisitions within the same season don't
-    // double-count the season's cap hit.
-    const is_eligible = salary_eligible_draft_ids.has(draft.draft_id)
-    if (!is_eligible) {
-      result.salary_paid = 0
-    } else {
-      const sl = idx.seasonlogs.get(`${draft.player_id}__${draft.year}`)
-      if (sl) {
-        result.salary_paid = sl.start_tid === draft.tid ? sl.salary : 0
-      } else {
-        const a = idx.auction_salary.get(`${draft.player_id}__${draft.year}`)
-        if (a) result.salary_paid = a.tid === draft.tid ? a.value : 0
-        else result.salary_paid = 0
-      }
-    }
   } else if (draft.asset_type === ASSET_TYPE.PICK) {
     // Pick projection: by rank if known else median of round.
     if (draft.league_format_id) {
@@ -440,7 +411,8 @@ const compute_snapshot_for_draft = ({
         })
       }
     }
-    // Salary, realized: NULL/zero by design for picks.
+    // Realized: NULL by design for picks (salary_paid stays NULL via the
+    // draft, since open_pick_holding never sets it).
     result.realized_pts_added_net_through_termination = null
     result.realized_pts_added_earned_through_termination = null
     result.realized_pts_added_net_in_active_slot = null
@@ -466,31 +438,11 @@ const compute_snapshots_bulk = async ({ lid, holding_drafts }) => {
 
   const idx = await load_indexes({ lid, player_ids, years, format_hashes })
 
-  // Pre-compute salary-credit eligibility: the earliest holding per
-  // (tid, player_id, year) is the salary-bearing one under START_TEAM_BEARS.
-  const earliest_by_key = new Map()
-  for (const d of holding_drafts) {
-    if (d.asset_type !== ASSET_TYPE.PLAYER || !d.player_id) continue
-    const key = `${d.tid}__${d.player_id}__${d.year}`
-    const prior = earliest_by_key.get(key)
-    if (!prior || d.period_start < prior.period_start) {
-      earliest_by_key.set(key, d)
-    }
-  }
-  const salary_eligible_draft_ids = new Set(
-    Array.from(earliest_by_key.values()).map((d) => d.draft_id)
-  )
-
   const snapshots = []
   for (const draft of holding_drafts) {
     snapshots.push({
       draft_id: draft.draft_id,
-      snapshot: compute_snapshot_for_draft({
-        draft,
-        lid,
-        idx,
-        salary_eligible_draft_ids
-      })
+      snapshot: compute_snapshot_for_draft({ draft, lid, idx })
     })
   }
   return snapshots

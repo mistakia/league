@@ -114,6 +114,7 @@ const walk_transactions = async ({ lid }) => {
     player_id,
     occurred_at,
     salary_basis,
+    salary_paid = null,
     year
   }) => {
     const draft_id = `p__${tid}__${player_id}__${occurred_at.getTime()}`
@@ -135,6 +136,7 @@ const walk_transactions = async ({ lid }) => {
       period_start: occurred_at,
       period_end: null,
       salary_basis,
+      salary_paid,
       year,
       terminated_by: TERMINATED_BY.STILL_HELD,
       is_rookie_tag: false,
@@ -273,6 +275,7 @@ const walk_transactions = async ({ lid }) => {
         player_id: event.player_id,
         occurred_at: event.occurred_at,
         salary_basis: cfg.salary_basis,
+        salary_paid: event.value ?? null,
         year: event.year
       })
       if (event.transaction_type === transaction_types.ROOKIE_TAG) {
@@ -328,6 +331,7 @@ const walk_transactions = async ({ lid }) => {
         player_id: event.player_id,
         occurred_at: event.occurred_at,
         salary_basis: SALARY_BASIS.PS_SALARY,
+        salary_paid: event.value ?? released?.salary_paid ?? null,
         year: event.year
       })
       emit_edge({
@@ -369,6 +373,7 @@ const walk_transactions = async ({ lid }) => {
         player_id: event.player_id,
         occurred_at: event.occurred_at,
         salary_basis: SALARY_BASIS.RFA,
+        salary_paid: event.bid ?? null,
         year: event.year
       })
       emit_edge({
@@ -508,6 +513,7 @@ const apply_trade = ({
         player_id: leg.player_id,
         occurred_at: event.occurred_at,
         salary_basis: closed?.salary_basis || null,
+        salary_paid: closed?.salary_paid ?? null,
         year: event.year
       })
       source_drafts.push(closed?.draft_id || null)
@@ -704,7 +710,7 @@ const build_event_stream = async ({ lid }) => {
 
   // 3. RFA cross-team wins.
   const rfa = await db('restricted_free_agency_bids')
-    .select('pid', 'tid', 'player_tid', 'processed', 'year')
+    .select('pid', 'tid', 'player_tid', 'processed', 'year', 'bid')
     .where({ lid, succ: true })
     .whereNotNull('processed')
   for (const r of rfa) {
@@ -716,6 +722,7 @@ const build_event_stream = async ({ lid }) => {
       player_id: r.pid,
       from_tid: r.player_tid,
       to_tid: r.tid,
+      bid: r.bid,
       occurred_at: new Date(r.processed * 1000),
       year: r.year
     })

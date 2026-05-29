@@ -1,6 +1,7 @@
 import db from '#db'
 
 import { current_season, player_tag_types, roster_slot_types } from '#constants'
+import { ASSET_TYPE } from '#libs-server/roster-asset-lineage/constants.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
@@ -40,7 +41,7 @@ const player_extended_salary_join = ({
       'rp.pid',
       db.raw(
         `CASE
-          WHEN rp.slot IN (${ps_slot_list}) THEN COALESCE(s.current_salary, 0)
+          WHEN rp.slot IN (${ps_slot_list}) THEN COALESCE(s.salary_paid, 0)
           WHEN rp.tag = ${player_tag_types.FRANCHISE} THEN
             CASE rp.pos
               WHEN 'QB' THEN COALESCE(ssn.fqb, 0)
@@ -49,17 +50,18 @@ const player_extended_salary_join = ({
               WHEN 'TE' THEN COALESCE(ssn.fte, 0)
               ELSE 0
             END
-          WHEN rp.tag = ${player_tag_types.ROOKIE} THEN COALESCE(s.current_salary, 0)
-          WHEN rp.tag = ${player_tag_types.RESTRICTED_FREE_AGENCY} THEN COALESCE(s.current_salary, 0)
-          ELSE COALESCE(s.current_salary, 0) + (COALESCE(rp.extensions, 0) + 1) * 5
+          WHEN rp.tag = ${player_tag_types.ROOKIE} THEN COALESCE(s.salary_paid, 0)
+          WHEN rp.tag = ${player_tag_types.RESTRICTED_FREE_AGENCY} THEN COALESCE(s.salary_paid, 0)
+          ELSE COALESCE(s.salary_paid, 0) + (COALESCE(rp.extensions, 0) + 1) * 5
         END AS extended_salary`
       )
     )
     .from('rosters_players as rp')
-    .leftJoin('view_roster_asset_holding_current_salary as s', function () {
+    .leftJoin('roster_asset_holding as s', function () {
       this.on('s.player_id', '=', 'rp.pid')
         .andOn('s.lid', '=', 'rp.lid')
         .andOn('s.tid', '=', 'rp.tid')
+        .andOn('s.asset_type', '=', db.raw('?', [ASSET_TYPE.PLAYER]))
         .andOnNull('s.period_end')
     })
     .leftJoin('seasons as ssn', function () {
