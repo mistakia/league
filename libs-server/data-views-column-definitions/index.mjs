@@ -9,6 +9,7 @@ import player_projected_column_definitions from './player-projected-column-defin
 import player_espn_score_column_definitions from './player-espn-score-column-definitions.mjs'
 import player_betting_market_column_definitions from './player-betting-market-column-definitions.mjs'
 import player_table_column_definitions from './player-table-column-definitions.mjs'
+import team_table_column_definitions from './team-table-column-definitions.mjs'
 import player_league_format_logs_column_definitions from './player-league-format-logs-column-definitions.mjs'
 import player_scoring_format_logs_column_definitions from './player-scoring-format-logs-column-definitions.mjs'
 import player_stats_from_plays_column_definitions from './player-stats-from-plays-column-definitions.mjs'
@@ -44,6 +45,7 @@ export default {
   ...player_espn_score_column_definitions,
   ...player_betting_market_column_definitions,
   ...player_table_column_definitions,
+  ...team_table_column_definitions,
   ...player_league_format_logs_column_definitions,
   ...player_scoring_format_logs_column_definitions,
   ...player_stats_from_plays_column_definitions,

@@ -1,9 +1,4 @@
-import { nfl_team_abbreviations } from '#libs-shared/constants/nfl-teams-constants.mjs'
-
-const team_values_cte_sql = () => {
-  const tuples = nfl_team_abbreviations.map((code) => `('${code}')`).join(',')
-  return `SELECT team_code FROM (VALUES ${tuples}) AS t(team_code)`
-}
+import { team_values_cte_sql } from '#libs-server/data-views/team-values-cte.mjs'
 
 const base_years_sql = ({ year_range }) => {
   if (!Array.isArray(year_range) || year_range.length === 0) {

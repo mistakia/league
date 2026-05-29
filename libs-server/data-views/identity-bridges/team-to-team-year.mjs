@@ -1,5 +1,5 @@
 import db from '#db'
-import { nfl_team_abbreviations } from '#libs-shared/constants/nfl-teams-constants.mjs'
+import { team_values_cte_sql } from '#libs-server/data-views/team-values-cte.mjs'
 
 export const from = 'team'
 export const to = 'team_year'
@@ -10,11 +10,6 @@ const base_years_sql = (year_range) => {
     throw new Error('team-to-team-year bridge requires non-empty year_range')
   }
   return `SELECT unnest(ARRAY[${year_range.join(',')}]) as year`
-}
-
-const team_values_cte_sql = () => {
-  const tuples = nfl_team_abbreviations.map((code) => `('${code}')`).join(',')
-  return `SELECT team_code FROM (VALUES ${tuples}) AS t(team_code)`
 }
 
 const register_cte = (query_context, name, raw_sql) => {

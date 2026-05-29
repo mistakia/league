@@ -1,19 +1,25 @@
 {
-  "skip_query_match": true,
   "name": "team subject no splits with team_pass_attempts_from_plays",
   "description": "Team subject FROM-source dispatch with no splits",
   "request": {
-    "subjects": ["team"],
+    "subjects": [
+      "team"
+    ],
     "columns": [
       {
         "column_id": "team_pass_attempts_from_plays",
         "params": {
-          "year": [2023]
+          "year": [
+            2023
+          ]
         }
       }
     ]
   },
-  "expected_query": "with \"team\" as (SELECT team_code FROM (VALUES ('ARI'),('ATL'),('BAL'),('BUF'),('CAR'),('CHI'),('CIN'),('CLE'),('DAL'),('DEN'),('DET'),('GB'),('HOU'),('IND'),('JAX'),('KC'),('LA'),('LAC'),('LV'),('MIA'),('MIN'),('NE'),('NO'),('NYG'),('NYJ'),('PHI'),('PIT'),('SEA'),('SF'),('TB'),('TEN'),('WAS')) AS t(team_code)), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) AS team_pass_att_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023) group by \"nfl_plays\".\"off\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_att_from_plays) as team_pass_att_from_plays from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\") select \"team\".\"team_code\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_att_from_plays\" AS \"team_pass_att_from_plays_0\" from \"team\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"team\".\"team_code\" group by \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_att_from_plays\", \"team\".\"team_code\" order by \"team\".\"team_code\" asc limit 500",
-  "tags": ["team-subject", "identity"],
+  "expected_query": "with \"team\" as (SELECT team_code, team_name, team_conference, team_division FROM (VALUES ('ARI','Arizona Cardinals','NFC','NFC West'),('ATL','Atlanta Falcons','NFC','NFC South'),('BAL','Baltimore Ravens','AFC','AFC North'),('BUF','Buffalo Bills','AFC','AFC East'),('CAR','Carolina Panthers','NFC','NFC South'),('CHI','Chicago Bears','NFC','NFC North'),('CIN','Cincinnati Bengals','AFC','AFC North'),('CLE','Cleveland Browns','AFC','AFC North'),('DAL','Dallas Cowboys','NFC','NFC East'),('DEN','Denver Broncos','AFC','AFC West'),('DET','Detroit Lions','NFC','NFC North'),('GB','Green Bay Packers','NFC','NFC North'),('HOU','Houston Texans','AFC','AFC South'),('IND','Indianapolis Colts','AFC','AFC South'),('JAX','Jacksonville Jaguars','AFC','AFC South'),('KC','Kansas City Chiefs','AFC','AFC West'),('LA','Los Angeles Rams','NFC','NFC West'),('LAC','Los Angeles Chargers','AFC','AFC West'),('LV','Las Vegas Raiders','AFC','AFC West'),('MIA','Miami Dolphins','AFC','AFC East'),('MIN','Minnesota Vikings','NFC','NFC North'),('NE','New England Patriots','AFC','AFC East'),('NO','New Orleans Saints','NFC','NFC South'),('NYG','New York Giants','NFC','NFC East'),('NYJ','New York Jets','AFC','AFC East'),('PHI','Philadelphia Eagles','NFC','NFC East'),('PIT','Pittsburgh Steelers','AFC','AFC North'),('SEA','Seattle Seahawks','NFC','NFC West'),('SF','San Francisco 49ers','NFC','NFC West'),('TB','Tampa Bay Buccaneers','NFC','NFC South'),('TEN','Tennessee Titans','AFC','AFC South'),('WAS','Washington Commanders','NFC','NFC East')) AS t(team_code, team_name, team_conference, team_division)), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) AS team_pass_att_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023) group by \"nfl_plays\".\"off\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_att_from_plays) as team_pass_att_from_plays from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\") select \"team\".\"team_code\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_att_from_plays\" AS \"team_pass_att_from_plays_0\" from \"team\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"team\".\"team_code\" group by \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_att_from_plays\", \"team\".\"team_code\" order by \"team\".\"team_code\" asc limit 500",
+  "tags": [
+    "team-subject",
+    "identity"
+  ],
   "timeout_ms": 40000
 }

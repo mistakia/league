@@ -815,7 +815,10 @@ const setup_from_table_and_player_joins = ({
   // Team-identity FROM-source dispatch: register the team identity's CTEs
   // (team VALUES, team_years, team_years_weeks per active splits), FROM the
   // identity's canonical table, SELECT team_code instead of pid, skip the
-  // player inner join.
+  // player inner join. When FROM is a bridge CTE (team_years /
+  // team_years_weeks) inner-join the base `team` CTE so team-table column
+  // defs (team_name, team_conference, team_division) remain reachable at
+  // every split level; symmetric to the player-subject inner-join below.
   if (subject_id === 'team') {
     const identity = get_identity(query_context.identity_id)
     const from_source = identity.from_source({
@@ -828,6 +831,13 @@ const setup_from_table_and_player_joins = ({
     }
     players_query.from(from_source.table)
     players_query.select(`${from_source.table}.team_code`)
+    if (from_source.table !== 'team') {
+      players_query.innerJoin(
+        'team',
+        'team.team_code',
+        `${from_source.table}.team_code`
+      )
+    }
     log(`Set up team-identity from table: ${from_source.table}`)
     return
   }
