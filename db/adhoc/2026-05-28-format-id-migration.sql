@@ -235,6 +235,105 @@ ALTER TABLE public.league_formats
 --                            → add FK → recreate indexes
 -- =====================================================================
 
+-- ----- (a0) Tier-1 cleanup: drop orphan (lid, year) data -----
+--
+-- 127 seasons rows reference league_format_hashes that no longer exist in
+-- league_formats (residue from a past league_formats cleanup that didn't
+-- cascade-nullify back-references). Investigation: zero downstream/computed
+-- rows are tagged with any of the 11 orphan hashes (league_format_player_*,
+-- league_team_player_seasonlogs, league_format_draft_pick_value all empty);
+-- the only collateral is the rosters/rosters_players/transactions belonging
+-- to those exact (lid, year) pairs (all 2021-2022, ~884 rows total). All 115
+-- affected lids are dormant since 2022 except lid 4 (last visit 2025-06-12)
+-- which keeps its non-orphan years.
+--
+-- See user:task/league/migrate-league-formats-to-stable-ids.md for the
+-- decision rationale.
+
+DO $$
+DECLARE
+  r record;
+  orphan_pairs_count integer;
+  rp_deleted integer;
+  tx_deleted integer;
+  r_deleted integer;
+  s_deleted integer;
+BEGIN
+  CREATE TEMP TABLE orphan_pairs ON COMMIT DROP AS
+    SELECT s.lid, s.year, s.league_format_hash
+    FROM public.seasons s
+    LEFT JOIN public.league_formats lf
+      ON lf.league_format_hash = s.league_format_hash
+    WHERE s.league_format_hash IS NOT NULL
+      AND lf.league_format_hash IS NULL;
+
+  SELECT COUNT(*) INTO orphan_pairs_count FROM orphan_pairs;
+  RAISE NOTICE 'orphan (lid, year) pairs to clean: %', orphan_pairs_count;
+
+  FOR r IN SELECT lid, year, league_format_hash FROM orphan_pairs ORDER BY lid, year LOOP
+    RAISE NOTICE '  lid=% year=% hash=%', r.lid, r.year, r.league_format_hash;
+  END LOOP;
+
+  DELETE FROM public.rosters_players rp
+    USING orphan_pairs o
+    WHERE rp.lid = o.lid AND rp.year = o.year;
+  GET DIAGNOSTICS rp_deleted = ROW_COUNT;
+
+  DELETE FROM public.transactions t
+    USING orphan_pairs o
+    WHERE t.lid = o.lid AND t.year = o.year;
+  GET DIAGNOSTICS tx_deleted = ROW_COUNT;
+
+  DELETE FROM public.rosters rs
+    USING orphan_pairs o
+    WHERE rs.lid = o.lid AND rs.year = o.year;
+  GET DIAGNOSTICS r_deleted = ROW_COUNT;
+
+  DELETE FROM public.seasons s
+    USING orphan_pairs o
+    WHERE s.lid = o.lid AND s.year = o.year;
+  GET DIAGNOSTICS s_deleted = ROW_COUNT;
+
+  RAISE NOTICE 'tier-1 cleanup: deleted rosters_players=%, transactions=%, rosters=%, seasons=%',
+    rp_deleted, tx_deleted, r_deleted, s_deleted;
+END $$;
+
+-- ----- (a1) Tier-1 cleanup: drop orphan precomputed format-keyed analytics -----
+--
+-- league_format_player_projection_values and league_format_draft_pick_value
+-- carry rows tagged with league_format_hashes that no longer exist in
+-- league_formats (same residue class as the seasons orphans but in computed
+-- tables rather than user data). These are precomputed by scripts/process-
+-- projections.mjs and scripts/calculate-draft-pick-value.mjs respectively
+-- and are inert without a parent format. Survey at authoring time:
+--   league_format_player_projection_values: 1,262,708 rows / 21 hashes (2021-2025)
+--   league_format_draft_pick_value:         87 rows / 1 hash
+
+DO $$
+DECLARE
+  ppv_deleted bigint;
+  dpv_deleted bigint;
+BEGIN
+  DELETE FROM public.league_format_player_projection_values t
+    WHERE t.league_format_hash IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM public.league_formats lf
+        WHERE lf.league_format_hash = t.league_format_hash
+      );
+  GET DIAGNOSTICS ppv_deleted = ROW_COUNT;
+
+  DELETE FROM public.league_format_draft_pick_value t
+    WHERE t.league_format_hash IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM public.league_formats lf
+        WHERE lf.league_format_hash = t.league_format_hash
+      );
+  GET DIAGNOSTICS dpv_deleted = ROW_COUNT;
+
+  RAISE NOTICE 'tier-1 cleanup (computed): deleted league_format_player_projection_values=%, league_format_draft_pick_value=%',
+    ppv_deleted, dpv_deleted;
+END $$;
+
 -- ----- (a) Add new id columns on every referencing table -----
 
 -- league_formats also has a scoring_format_hash referencing column.

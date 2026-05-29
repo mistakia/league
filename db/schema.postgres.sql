@@ -18,11 +18,25 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_scoring_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_format_player_seasonlogs DROP CONSTRAINT IF EXISTS scoring_format_player_seasonlogs_scoring_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_format_player_projection_points DROP CONSTRAINT IF EXISTS scoring_format_player_projection_points_scoring_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_format_player_gamelogs DROP CONSTRAINT IF EXISTS scoring_format_player_gamelogs_scoring_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_format_player_careerlogs DROP CONSTRAINT IF EXISTS scoring_format_player_careerlogs_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_target_holding_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_source_holding_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_scoring_format_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_formats DROP CONSTRAINT IF EXISTS league_formats_scoring_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_format_player_seasonlogs DROP CONSTRAINT IF EXISTS league_format_player_seasonlogs_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_format_player_projection_values DROP CONSTRAINT IF EXISTS league_format_player_projection_values_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_format_player_gamelogs DROP CONSTRAINT IF EXISTS league_format_player_gamelogs_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_format_player_careerlogs DROP CONSTRAINT IF EXISTS league_format_player_careerlogs_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_format_draft_pick_value DROP CONSTRAINT IF EXISTS league_format_draft_pick_value_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_index DROP CONSTRAINT IF EXISTS fk_combination_odds_index_combination;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTRAINT IF EXISTS fk_combination_odds_history_combination;
@@ -146,10 +160,11 @@ DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_combination;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_lookup;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_esbid;
 DROP INDEX IF EXISTS public.idx_selection_combination_definitions_active;
-DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
+DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_id;
+DROP INDEX IF EXISTS public.idx_scoring_format_player_projection_points_pid_id_week_year;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_projection_points_pid;
-DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
-DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
+DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_id;
+DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_id;
 DROP INDEX IF EXISTS public.idx_rosters_tid_week_year;
 DROP INDEX IF EXISTS public.idx_rosters_tid;
 DROP INDEX IF EXISTS public.idx_rosters_players_year_week_lid_pid;
@@ -299,7 +314,12 @@ DROP INDEX IF EXISTS public.idx_league_notifications_type;
 DROP INDEX IF EXISTS public.idx_league_notifications_sent_timestamp;
 DROP INDEX IF EXISTS public.idx_league_notifications_lid_year;
 DROP INDEX IF EXISTS public.idx_league_notifications_event_timestamp;
+DROP INDEX IF EXISTS public.idx_league_format_player_seasonlogs_pid_year_id;
+DROP INDEX IF EXISTS public.idx_league_format_player_projection_values_pid_id_week_year;
 DROP INDEX IF EXISTS public.idx_league_format_player_projection_values_pid;
+DROP INDEX IF EXISTS public.idx_league_format_player_gamelogs_pid_esbid_id;
+DROP INDEX IF EXISTS public.idx_league_format_player_careerlogs_pid_id;
+DROP INDEX IF EXISTS public.idx_league_format_draft_pick_value_rank_id;
 DROP INDEX IF EXISTS public.idx_league_cutlist_tid;
 DROP INDEX IF EXISTS public.idx_league_cutlist_pid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
@@ -347,7 +367,6 @@ DROP INDEX IF EXISTS public.idx_25085_pid;
 DROP INDEX IF EXISTS public.idx_25075_team_year;
 DROP INDEX IF EXISTS public.idx_25029_team;
 DROP INDEX IF EXISTS public.idx_25012_season;
-DROP INDEX IF EXISTS public.idx_25009_player_league_points;
 DROP INDEX IF EXISTS public.idx_25004_gid;
 DROP INDEX IF EXISTS public.idx_24999_player_team;
 DROP INDEX IF EXISTS public.idx_24999_pid;
@@ -398,16 +417,9 @@ DROP INDEX IF EXISTS public.idx_24683_contribution;
 DROP INDEX IF EXISTS public.idx_24680_contribution;
 DROP INDEX IF EXISTS public.idx_24677_team_forecast_day;
 DROP INDEX IF EXISTS public.idx_24674_league_team;
-DROP INDEX IF EXISTS public.idx_24671_scoring_format_hash;
 DROP INDEX IF EXISTS public.idx_24668_pid;
 DROP INDEX IF EXISTS public.idx_24665_player_value;
 DROP INDEX IF EXISTS public.idx_24662_league_stat;
-DROP INDEX IF EXISTS public.idx_24647_league_format_hash;
-DROP INDEX IF EXISTS public.idx_24644_pid;
-DROP INDEX IF EXISTS public.idx_24641_player_value;
-DROP INDEX IF EXISTS public.idx_24638_pid;
-DROP INDEX IF EXISTS public.idx_24635_pid;
-DROP INDEX IF EXISTS public.idx_24632_pick;
 DROP INDEX IF EXISTS public.idx_24629_tid_pid;
 DROP INDEX IF EXISTS public.idx_24626_baseline;
 DROP INDEX IF EXISTS public.idx_24623_player_value;
@@ -527,8 +539,12 @@ ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXIS
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_scoring_formats DROP CONSTRAINT IF EXISTS league_scoring_formats_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_scoring_formats DROP CONSTRAINT IF EXISTS league_scoring_formats_config_unique;
 ALTER TABLE IF EXISTS ONLY public.league_notifications DROP CONSTRAINT IF EXISTS league_notifications_unique;
 ALTER TABLE IF EXISTS ONLY public.league_notifications DROP CONSTRAINT IF EXISTS league_notifications_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_formats DROP CONSTRAINT IF EXISTS league_formats_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_formats DROP CONSTRAINT IF EXISTS league_formats_config_unique;
 ALTER TABLE IF EXISTS ONLY public.league_divisions DROP CONSTRAINT IF EXISTS league_divisions_pkey;
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_pick DROP CONSTRAINT IF EXISTS keeptradecut_pick_pkey;
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_pick DROP CONSTRAINT IF EXISTS keeptradecut_pick_ktc_player_id_key;
@@ -622,7 +638,6 @@ DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
 DROP TABLE IF EXISTS public.waivers;
 DROP TABLE IF EXISTS public.waiver_releases;
 DROP VIEW IF EXISTS public.view_roster_asset_lineage_walk;
-DROP VIEW IF EXISTS public.view_roster_asset_holding_current_salary;
 DROP TABLE IF EXISTS public.users_teams;
 DROP TABLE IF EXISTS public.users_sources;
 DROP SEQUENCE IF EXISTS public.users_id_seq;
@@ -971,6 +986,21 @@ DROP TYPE IF EXISTS public.dfs_source_id;
 DROP TYPE IF EXISTS public.coverage_type;
 DROP TYPE IF EXISTS public.adp_type;
 DROP TYPE IF EXISTS public.adp_source_id;
+DROP EXTENSION IF EXISTS pgcrypto;
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
 --
 -- Name: adp_source_id; Type: TYPE; Schema: public; Owner: -
 --
@@ -1581,7 +1611,7 @@ CREATE FUNCTION public.cmv_classify_league_format() RETURNS trigger
 DECLARE
   rec_val numeric;
 BEGIN
-  SELECT rec INTO rec_val FROM league_scoring_formats WHERE scoring_format_hash = NEW.scoring_format_hash;
+  SELECT rec INTO rec_val FROM league_scoring_formats WHERE id = NEW.scoring_format_id;
   NEW.format_category := cmv_derive_format_category(NEW.sqb, NEW.sqbrbwrte, rec_val);
   RETURN NEW;
 END;
@@ -3735,10 +3765,10 @@ CREATE TABLE public.league_divisions (
 --
 
 CREATE TABLE public.league_format_draft_pick_value (
-    league_format_hash character varying(64) NOT NULL,
     rank smallint NOT NULL,
     median_best_season_points_added_per_game numeric(3,1),
-    median_career_points_added_per_game numeric(3,1)
+    median_career_points_added_per_game numeric(3,1),
+    league_format_id text NOT NULL
 );
 
 
@@ -3748,7 +3778,6 @@ CREATE TABLE public.league_format_draft_pick_value (
 
 CREATE TABLE public.league_format_player_careerlogs (
     pid character varying(25) NOT NULL,
-    league_format_hash character varying(64) NOT NULL,
     draft_rank smallint,
     startable_games smallint,
     points_added_earned numeric(6,1),
@@ -3770,7 +3799,8 @@ CREATE TABLE public.league_format_player_careerlogs (
     points_added_net_third_season numeric(6,1),
     points_added_net_first_three_seasons numeric(6,1),
     points_added_net_first_four_seasons numeric(6,1),
-    points_added_net_first_five_seasons numeric(6,1)
+    points_added_net_first_five_seasons numeric(6,1),
+    league_format_id text NOT NULL
 );
 
 
@@ -3781,9 +3811,9 @@ CREATE TABLE public.league_format_player_careerlogs (
 CREATE TABLE public.league_format_player_gamelogs (
     pid character varying(25) NOT NULL,
     esbid integer NOT NULL,
-    league_format_hash character varying(64) NOT NULL,
     points_added_earned numeric(4,1),
-    points_added_net numeric(4,1)
+    points_added_net numeric(4,1),
+    league_format_id text NOT NULL
 );
 
 
@@ -3795,9 +3825,9 @@ CREATE TABLE public.league_format_player_projection_values (
     pid character varying(25) NOT NULL,
     week character varying(10) NOT NULL,
     year smallint NOT NULL,
-    league_format_hash character varying(64) NOT NULL,
     pts_added numeric(7,2),
-    market_salary numeric(6,2)
+    market_salary numeric(6,2),
+    league_format_id text NOT NULL
 );
 
 
@@ -3808,7 +3838,6 @@ CREATE TABLE public.league_format_player_projection_values (
 CREATE TABLE public.league_format_player_seasonlogs (
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
-    league_format_hash character varying(64) NOT NULL,
     startable_games smallint,
     points_added_earned numeric(4,1),
     points_added_earned_per_game numeric(3,1),
@@ -3818,7 +3847,8 @@ CREATE TABLE public.league_format_player_seasonlogs (
     points_added_earned_per_game_rank smallint,
     points_added_earned_per_game_position_rank smallint,
     points_added_net numeric(5,1),
-    points_added_net_per_game numeric(3,1)
+    points_added_net_per_game numeric(3,1),
+    league_format_id text NOT NULL
 );
 
 
@@ -3827,8 +3857,6 @@ CREATE TABLE public.league_format_player_seasonlogs (
 --
 
 CREATE TABLE public.league_formats (
-    league_format_hash character varying(64) NOT NULL,
-    scoring_format_hash character varying(64) NOT NULL,
     num_teams smallint NOT NULL,
     sqb smallint NOT NULL,
     srb smallint NOT NULL,
@@ -3844,7 +3872,7 @@ CREATE TABLE public.league_formats (
     ps smallint NOT NULL,
     reserve_short_term_limit smallint NOT NULL,
     cap integer NOT NULL,
-    min_bid smallint DEFAULT '0'::smallint,
+    min_bid smallint DEFAULT '0'::smallint NOT NULL,
     pts_base_week_qb numeric(3,1),
     pts_base_week_rb numeric(3,1),
     pts_base_week_wr numeric(3,1),
@@ -3857,7 +3885,11 @@ CREATE TABLE public.league_formats (
     pts_base_season_te numeric(3,1),
     pts_base_season_k numeric(3,1),
     pts_base_season_dst numeric(3,1),
-    format_category smallint
+    format_category smallint,
+    id text NOT NULL,
+    pricing_model text DEFAULT 'auction'::text NOT NULL,
+    scoring_format_id text NOT NULL,
+    CONSTRAINT league_formats_pricing_model_check CHECK ((pricing_model = ANY (ARRAY['auction'::text, 'dfs_fixed'::text])))
 );
 
 
@@ -4098,7 +4130,6 @@ CREATE TABLE public.league_player_seasonlogs (
 --
 
 CREATE TABLE public.league_scoring_formats (
-    scoring_format_hash character varying(64) NOT NULL,
     pa numeric(3,2) NOT NULL,
     pc numeric(3,2) NOT NULL,
     py numeric(3,2) NOT NULL,
@@ -4122,7 +4153,8 @@ CREATE TABLE public.league_scoring_formats (
     rush_first_down numeric(2,1) DEFAULT 0 NOT NULL,
     rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
     exclude_qb_kneels boolean DEFAULT false NOT NULL,
-    fum_ret_td numeric DEFAULT 0
+    fum_ret_td numeric DEFAULT 0 NOT NULL,
+    id text NOT NULL
 );
 
 
@@ -4282,7 +4314,6 @@ CREATE TABLE public.league_team_player_seasonlogs (
     tid integer NOT NULL,
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
-    league_format_hash character varying(64) NOT NULL,
     weeks_rostered smallint DEFAULT 0 NOT NULL,
     weeks_started smallint DEFAULT 0 NOT NULL,
     pts_added_earned_rostered numeric(5,1),
@@ -4294,7 +4325,8 @@ CREATE TABLE public.league_team_player_seasonlogs (
     salary_paid integer,
     acquisition_type smallint,
     is_start_team boolean NOT NULL,
-    is_end_team boolean NOT NULL
+    is_end_team boolean NOT NULL,
+    league_format_id text NOT NULL
 );
 
 
@@ -23987,14 +24019,14 @@ COMMENT ON TABLE public.player_team_extension_state IS 'Denormalized extension/t
 CREATE TABLE public.player_variance (
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
-    scoring_format_hash character varying(64) NOT NULL,
     games_played smallint NOT NULL,
     mean_points numeric(6,3),
     standard_deviation numeric(6,3),
     min_points numeric(6,3),
     max_points numeric(6,3),
     calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    coefficient_of_variation numeric(5,4)
+    coefficient_of_variation numeric(5,4),
+    scoring_format_id text NOT NULL
 );
 
 
@@ -24003,13 +24035,6 @@ CREATE TABLE public.player_variance (
 --
 
 COMMENT ON TABLE public.player_variance IS 'Historical player variance per scoring format for distribution fitting';
-
-
---
--- Name: COLUMN player_variance.scoring_format_hash; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.player_variance.scoring_format_hash IS 'Variance is scoring-format-specific since fantasy points depend on scoring rules';
 
 
 --
@@ -25192,7 +25217,6 @@ CREATE TABLE public.roster_asset_holding (
     pick_draft_overall_position smallint,
     period_start timestamp without time zone NOT NULL,
     period_end timestamp without time zone,
-    league_format_hash character varying(64) NOT NULL,
     salary_paid integer,
     salary_basis smallint,
     initial_slot_type smallint,
@@ -25219,7 +25243,8 @@ CREATE TABLE public.roster_asset_holding (
     super_priority_until timestamp without time zone,
     audit_corrected boolean DEFAULT false NOT NULL,
     correction_note text,
-    terminated_by smallint
+    terminated_by smallint,
+    league_format_id text NOT NULL
 );
 
 
@@ -25432,7 +25457,6 @@ CREATE TABLE public.schedule (
 
 CREATE TABLE public.scoring_format_player_careerlogs (
     pid character varying(25) NOT NULL,
-    scoring_format_hash character varying(64) NOT NULL,
     draft_rank smallint,
     points numeric(6,1),
     points_per_game numeric(3,1),
@@ -25442,7 +25466,8 @@ CREATE TABLE public.scoring_format_player_careerlogs (
     top_12 smallint,
     top_24 smallint,
     top_36 smallint,
-    top_1 smallint
+    top_1 smallint,
+    scoring_format_id text NOT NULL
 );
 
 
@@ -25453,9 +25478,9 @@ CREATE TABLE public.scoring_format_player_careerlogs (
 CREATE TABLE public.scoring_format_player_gamelogs (
     pid character varying(25) NOT NULL,
     esbid integer NOT NULL,
-    scoring_format_hash character varying(64) NOT NULL,
     points numeric(6,3),
-    pos_rnk smallint
+    pos_rnk smallint,
+    scoring_format_id text NOT NULL
 );
 
 
@@ -25467,7 +25492,6 @@ CREATE TABLE public.scoring_format_player_projection_points (
     pid character varying(25) NOT NULL,
     week character varying(3) NOT NULL,
     year smallint NOT NULL,
-    scoring_format_hash character varying(64) NOT NULL,
     total numeric(5,2),
     pa numeric(5,1),
     pc numeric(5,1),
@@ -25503,7 +25527,8 @@ CREATE TABLE public.scoring_format_player_projection_points (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    scoring_format_id text NOT NULL
 );
 
 
@@ -25514,14 +25539,14 @@ CREATE TABLE public.scoring_format_player_projection_points (
 CREATE TABLE public.scoring_format_player_seasonlogs (
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
-    scoring_format_hash character varying(64) NOT NULL,
     points numeric(4,1),
     points_per_game numeric(3,1),
     games smallint,
     points_rnk smallint,
     points_pos_rnk smallint,
     points_per_game_rnk smallint,
-    points_per_game_pos_rnk smallint
+    points_per_game_pos_rnk smallint,
+    scoring_format_id text NOT NULL
 );
 
 
@@ -25533,8 +25558,6 @@ CREATE TABLE public.seasons (
     lid integer NOT NULL,
     year smallint NOT NULL,
     season_started_at bigint,
-    league_format_hash character varying(64) NOT NULL,
-    scoring_format_hash character varying(64) NOT NULL,
     fqb integer,
     frb integer,
     fwr integer,
@@ -25572,7 +25595,9 @@ CREATE TABLE public.seasons (
     restricted_free_agency_processing_hour smallint DEFAULT 0 NOT NULL,
     rookie_draft_completed_at bigint,
     free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
-    season_finalized_at bigint
+    season_finalized_at bigint,
+    scoring_format_id text NOT NULL,
+    league_format_id text NOT NULL
 );
 
 
@@ -26037,61 +26062,6 @@ CREATE TABLE public.users_teams (
     tid integer NOT NULL,
     year smallint NOT NULL
 );
-
-
---
--- Name: view_roster_asset_holding_current_salary; Type: VIEW; Schema: public; Owner: -
---
-
-CREATE VIEW public.view_roster_asset_holding_current_salary AS
- WITH RECURSIVE chain AS (
-         SELECT h_1.holding_id AS target_holding_id,
-            h_1.holding_id AS walk_holding_id,
-            h_1.salary_paid AS walk_salary,
-            0 AS depth
-           FROM public.roster_asset_holding h_1
-          WHERE (h_1.asset_type = 1)
-        UNION ALL
-         SELECT c.target_holding_id,
-            t.source_holding_id,
-            prior.salary_paid,
-            (c.depth + 1)
-           FROM ((chain c
-             JOIN public.roster_asset_transformation t ON (((t.target_holding_id = c.walk_holding_id) AND (t.transformation_type = 1))))
-             JOIN public.roster_asset_holding prior ON ((prior.holding_id = t.source_holding_id)))
-          WHERE ((COALESCE(c.walk_salary, 0) = 0) AND (c.depth < 20))
-        ), best AS (
-         SELECT DISTINCT ON (chain.target_holding_id) chain.target_holding_id,
-            chain.walk_salary AS inherited_salary
-           FROM chain
-          WHERE ((chain.walk_salary IS NOT NULL) AND (chain.walk_salary > 0))
-          ORDER BY chain.target_holding_id, chain.depth
-        )
- SELECT h.holding_id,
-    h.lid,
-    h.tid,
-    h.player_id,
-    h.period_start,
-    h.period_end,
-    h.salary_basis,
-    h.terminated_by,
-    h.salary_paid AS raw_salary_paid,
-    COALESCE(NULLIF(h.salary_paid, 0), b.inherited_salary, 0) AS current_salary,
-        CASE
-            WHEN ((h.salary_paid IS NOT NULL) AND (h.salary_paid > 0)) THEN 'self'::text
-            WHEN (b.inherited_salary IS NOT NULL) THEN 'trade_inherited'::text
-            ELSE 'zero'::text
-        END AS current_salary_source
-   FROM (public.roster_asset_holding h
-     LEFT JOIN best b ON ((b.target_holding_id = h.holding_id)))
-  WHERE (h.asset_type = 1);
-
-
---
--- Name: VIEW view_roster_asset_holding_current_salary; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON VIEW public.view_roster_asset_holding_current_salary IS 'Per-holding contract salary that carries forward across TRADE chains. Use current_salary for "what is this player''s salary while held by this team"; use roster_asset_holding.salary_paid directly for START_TEAM_BEARS cap attribution.';
 
 
 --
@@ -27679,6 +27649,22 @@ ALTER TABLE ONLY public.league_divisions
 
 
 --
+-- Name: league_formats league_formats_config_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_formats
+    ADD CONSTRAINT league_formats_config_unique UNIQUE (num_teams, sqb, srb, swr, ste, srbwr, srbwrte, sqbrbwrte, swrte, sdst, sk, bench, ps, reserve_short_term_limit, cap, min_bid, scoring_format_id, pricing_model);
+
+
+--
+-- Name: league_formats league_formats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_formats
+    ADD CONSTRAINT league_formats_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: league_notifications league_notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -27695,6 +27681,22 @@ ALTER TABLE ONLY public.league_notifications
 
 
 --
+-- Name: league_scoring_formats league_scoring_formats_config_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_scoring_formats
+    ADD CONSTRAINT league_scoring_formats_config_unique UNIQUE (pa, pc, py, ints, tdp, ra, ry, tdr, rec, rbrec, wrrec, terec, recy, twoptc, tdrec, fuml, prtd, krtd, fum_ret_td, trg, rush_first_down, rec_first_down, exclude_qb_kneels);
+
+
+--
+-- Name: league_scoring_formats league_scoring_formats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_scoring_formats
+    ADD CONSTRAINT league_scoring_formats_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: league_team_careerlogs league_team_careerlogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -27707,7 +27709,7 @@ ALTER TABLE ONLY public.league_team_careerlogs
 --
 
 ALTER TABLE ONLY public.league_team_player_seasonlogs
-    ADD CONSTRAINT league_team_player_seasonlogs_pkey PRIMARY KEY (lid, tid, pid, year, league_format_hash);
+    ADD CONSTRAINT league_team_player_seasonlogs_pkey PRIMARY KEY (lid, tid, pid, year, league_format_id);
 
 
 --
@@ -28347,7 +28349,7 @@ ALTER TABLE ONLY public.player_team_extension_state
 --
 
 ALTER TABLE ONLY public.player_variance
-    ADD CONSTRAINT player_variance_pkey PRIMARY KEY (pid, year, scoring_format_hash);
+    ADD CONSTRAINT player_variance_pkey PRIMARY KEY (pid, year, scoring_format_id);
 
 
 --
@@ -28872,48 +28874,6 @@ CREATE UNIQUE INDEX idx_24629_tid_pid ON public.league_cutlist USING btree (tid,
 
 
 --
--- Name: idx_24632_pick; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24632_pick ON public.league_format_draft_pick_value USING btree (rank, league_format_hash);
-
-
---
--- Name: idx_24635_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24635_pid ON public.league_format_player_careerlogs USING btree (pid, league_format_hash);
-
-
---
--- Name: idx_24638_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24638_pid ON public.league_format_player_gamelogs USING btree (pid, esbid, league_format_hash);
-
-
---
--- Name: idx_24641_player_value; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24641_player_value ON public.league_format_player_projection_values USING btree (pid, league_format_hash, week, year);
-
-
---
--- Name: idx_24644_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24644_pid ON public.league_format_player_seasonlogs USING btree (pid, year, league_format_hash);
-
-
---
--- Name: idx_24647_league_format_hash; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24647_league_format_hash ON public.league_formats USING btree (league_format_hash);
-
-
---
 -- Name: idx_24662_league_stat; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28932,13 +28892,6 @@ CREATE UNIQUE INDEX idx_24665_player_value ON public.league_player_projection_va
 --
 
 CREATE UNIQUE INDEX idx_24668_pid ON public.league_player_seasonlogs USING btree (pid, year, lid);
-
-
---
--- Name: idx_24671_scoring_format_hash; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24671_scoring_format_hash ON public.league_scoring_formats USING btree (scoring_format_hash);
 
 
 --
@@ -29292,13 +29245,6 @@ CREATE UNIQUE INDEX idx_25004_gid ON public.schedule USING btree (gid);
 
 
 --
--- Name: idx_25009_player_league_points; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_25009_player_league_points ON public.scoring_format_player_projection_points USING btree (pid, scoring_format_hash, week, year);
-
-
---
 -- Name: idx_25012_season; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29628,10 +29574,45 @@ CREATE INDEX idx_league_cutlist_tid ON public.league_cutlist USING btree (tid);
 
 
 --
+-- Name: idx_league_format_draft_pick_value_rank_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_league_format_draft_pick_value_rank_id ON public.league_format_draft_pick_value USING btree (rank, league_format_id);
+
+
+--
+-- Name: idx_league_format_player_careerlogs_pid_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_league_format_player_careerlogs_pid_id ON public.league_format_player_careerlogs USING btree (pid, league_format_id);
+
+
+--
+-- Name: idx_league_format_player_gamelogs_pid_esbid_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_league_format_player_gamelogs_pid_esbid_id ON public.league_format_player_gamelogs USING btree (pid, esbid, league_format_id);
+
+
+--
 -- Name: idx_league_format_player_projection_values_pid; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_league_format_player_projection_values_pid ON public.league_format_player_projection_values USING btree (pid);
+
+
+--
+-- Name: idx_league_format_player_projection_values_pid_id_week_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_league_format_player_projection_values_pid_id_week_year ON public.league_format_player_projection_values USING btree (pid, league_format_id, week, year);
+
+
+--
+-- Name: idx_league_format_player_seasonlogs_pid_year_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_league_format_player_seasonlogs_pid_year_id ON public.league_format_player_seasonlogs USING btree (pid, year, league_format_id);
 
 
 --
@@ -30678,17 +30659,17 @@ CREATE INDEX idx_rosters_tid_week_year ON public.rosters USING btree (tid, week,
 
 
 --
--- Name: idx_scoring_format_player_careerlogs_pid_hash; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_scoring_format_player_careerlogs_pid_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_scoring_format_player_careerlogs_pid_hash ON public.scoring_format_player_careerlogs USING btree (pid, scoring_format_hash);
+CREATE UNIQUE INDEX idx_scoring_format_player_careerlogs_pid_id ON public.scoring_format_player_careerlogs USING btree (pid, scoring_format_id);
 
 
 --
--- Name: idx_scoring_format_player_gamelogs_pid_esbid_hash; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_scoring_format_player_gamelogs_pid_esbid_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_scoring_format_player_gamelogs_pid_esbid_hash ON public.scoring_format_player_gamelogs USING btree (pid, esbid, scoring_format_hash);
+CREATE UNIQUE INDEX idx_scoring_format_player_gamelogs_pid_esbid_id ON public.scoring_format_player_gamelogs USING btree (pid, esbid, scoring_format_id);
 
 
 --
@@ -30699,10 +30680,17 @@ CREATE INDEX idx_scoring_format_player_projection_points_pid ON public.scoring_f
 
 
 --
--- Name: idx_scoring_format_player_seasonlogs_pid_year_hash; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_scoring_format_player_projection_points_pid_id_week_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_hash);
+CREATE UNIQUE INDEX idx_scoring_format_player_projection_points_pid_id_week_year ON public.scoring_format_player_projection_points USING btree (pid, scoring_format_id, week, year);
+
+
+--
+-- Name: idx_scoring_format_player_seasonlogs_pid_year_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_id ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_id);
 
 
 --
@@ -55160,7 +55148,7 @@ CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON publi
 -- Name: league_formats trg_cmv_classify_league_format; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF sqb, sqbrbwrte, scoring_format_hash ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
+CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF sqb, sqbrbwrte, scoring_format_id ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
 
 
 --
@@ -55256,6 +55244,62 @@ ALTER TABLE ONLY public.invite_codes
 
 
 --
+-- Name: league_format_draft_pick_value league_format_draft_pick_value_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_format_draft_pick_value
+    ADD CONSTRAINT league_format_draft_pick_value_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: league_format_player_careerlogs league_format_player_careerlogs_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_format_player_careerlogs
+    ADD CONSTRAINT league_format_player_careerlogs_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: league_format_player_gamelogs league_format_player_gamelogs_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_format_player_gamelogs
+    ADD CONSTRAINT league_format_player_gamelogs_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: league_format_player_projection_values league_format_player_projection_values_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_format_player_projection_values
+    ADD CONSTRAINT league_format_player_projection_values_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: league_format_player_seasonlogs league_format_player_seasonlogs_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_format_player_seasonlogs
+    ADD CONSTRAINT league_format_player_seasonlogs_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: league_formats league_formats_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_formats
+    ADD CONSTRAINT league_formats_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: league_team_player_seasonlogs league_team_player_seasonlogs_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_team_player_seasonlogs
+    ADD CONSTRAINT league_team_player_seasonlogs_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
 -- Name: ngs_prospect_scores_history ngs_prospect_scores_history_pid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -55276,7 +55320,15 @@ ALTER TABLE ONLY public.ngs_prospect_scores_index
 --
 
 ALTER TABLE ONLY public.player_variance
-    ADD CONSTRAINT player_variance_scoring_format_fkey FOREIGN KEY (scoring_format_hash) REFERENCES public.league_scoring_formats(scoring_format_hash);
+    ADD CONSTRAINT player_variance_scoring_format_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: roster_asset_holding roster_asset_holding_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_holding
+    ADD CONSTRAINT roster_asset_holding_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
 
 
 --
@@ -55293,6 +55345,54 @@ ALTER TABLE ONLY public.roster_asset_transformation
 
 ALTER TABLE ONLY public.roster_asset_transformation
     ADD CONSTRAINT roster_asset_transformation_target_holding_id_fkey FOREIGN KEY (target_holding_id) REFERENCES public.roster_asset_holding(holding_id);
+
+
+--
+-- Name: scoring_format_player_careerlogs scoring_format_player_careerlogs_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scoring_format_player_careerlogs
+    ADD CONSTRAINT scoring_format_player_careerlogs_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: scoring_format_player_gamelogs scoring_format_player_gamelogs_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scoring_format_player_gamelogs
+    ADD CONSTRAINT scoring_format_player_gamelogs_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: scoring_format_player_projection_points scoring_format_player_projection_points_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scoring_format_player_projection_points
+    ADD CONSTRAINT scoring_format_player_projection_points_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: scoring_format_player_seasonlogs scoring_format_player_seasonlogs_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scoring_format_player_seasonlogs
+    ADD CONSTRAINT scoring_format_player_seasonlogs_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: seasons seasons_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.seasons
+    ADD CONSTRAINT seasons_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: seasons seasons_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.seasons
+    ADD CONSTRAINT seasons_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
 
 
 --
@@ -57397,13 +57497,6 @@ GRANT SELECT ON TABLE public.users_sources TO league_readonly;
 --
 
 GRANT SELECT ON TABLE public.users_teams TO league_readonly;
-
-
---
--- Name: TABLE view_roster_asset_holding_current_salary; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.view_roster_asset_holding_current_salary TO league_readonly;
 
 
 --
