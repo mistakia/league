@@ -3,7 +3,9 @@
   "name": "should create a query showing career gamelogs with a where filter on first game receiving yards",
   "description": "Test case for should create a query showing career gamelogs with a where filter on first game receiving yards",
   "request": {
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       "player_fantasy_top_1_seasons_from_careerlogs",
       "player_fantasy_top_3_seasons_from_careerlogs",
@@ -22,13 +24,21 @@
         "operator": ">=",
         "value": 15,
         "params": {
-          "career_game": [1, 1]
+          "career_game": [
+            1,
+            1
+          ]
         }
       }
     ]
   },
-  "expected_query": "with \"t04486fb95b32d996fc7e3509353cd45f\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"pg\".\"career_game\" between 1 and 1 group by \"pg\".\"pid\" having ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) >= '15'), \"base_years\" as (SELECT unnest(ARRAY[2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"t6a3ea799cf4673fd745d965239ff7044\".\"top_1\" AS \"top_1_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_3\" AS \"top_3_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_6\" AS \"top_6_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_12\" AS \"top_12_from_careerlogs_0\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"t04486fb95b32d996fc7e3509353cd45f\" on \"t04486fb95b32d996fc7e3509353cd45f\".\"pid\" = \"player\".\"pid\" left join \"scoring_format_player_careerlogs\" as \"t6a3ea799cf4673fd745d965239ff7044\" on \"t6a3ea799cf4673fd745d965239ff7044\".\"pid\" = \"player\".\"pid\" and \"t6a3ea799cf4673fd745d965239ff7044\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' group by player.fname, player.lname, \"t6a3ea799cf4673fd745d965239ff7044\".\"top_1\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_3\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_6\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_12\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": ["games", "filters", "sorting", "cte"],
+  "expected_query": "with \"t04486fb95b32d996fc7e3509353cd45f\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"pg\".\"career_game\" between 1 and 1 group by \"pg\".\"pid\" having ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) >= '15'), \"base_years\" as (SELECT unnest(ARRAY[2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_1\" AS \"top_1_from_careerlogs_0\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_3\" AS \"top_3_from_careerlogs_0\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_6\" AS \"top_6_from_careerlogs_0\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_12\" AS \"top_12_from_careerlogs_0\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"t04486fb95b32d996fc7e3509353cd45f\" on \"t04486fb95b32d996fc7e3509353cd45f\".\"pid\" = \"player\".\"pid\" left join \"scoring_format_player_careerlogs\" as \"tc7d9f44547f502d36c6b00d12e8c055d\" on \"tc7d9f44547f502d36c6b00d12e8c055d\".\"pid\" = \"player\".\"pid\" and \"tc7d9f44547f502d36c6b00d12e8c055d\".\"scoring_format_id\" = 'draftkings' group by player.fname, player.lname, \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_1\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_3\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_6\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_12\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "games",
+    "filters",
+    "sorting",
+    "cte"
+  ],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "six_hours",

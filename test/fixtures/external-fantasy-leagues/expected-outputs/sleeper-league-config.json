@@ -2,7 +2,7 @@
   "mapper": "LeagueConfigMapper.map_league_config",
   "platform": "sleeper",
   "source_fixture": "platform-responses/sleeper/league-config.json",
-  "generated_at": "2026-05-09T03:25:23.289Z",
+  "generated_at": "2026-05-30T00:59:02.855Z",
   "input": {
     "platform": "sleeper",
     "league_config": {
@@ -82,28 +82,7 @@
     ]
   },
   "expected_output": {
-    "league_format": {
-      "league_format_hash": "f186fe87533ce4a67088b34a282c364f0ddd8d52ce05e224f31c5115df096fbf",
-      "scoring_format_hash": "453eabe1495d97152b191a6055a4aefcd7375709b01ccdeff8a76a433c337c11",
-      "num_teams": 12,
-      "sqb": 1,
-      "srb": 2,
-      "swr": 3,
-      "ste": 1,
-      "srbwr": 2,
-      "srbwrte": 0,
-      "sqbrbwrte": 1,
-      "swrte": 0,
-      "sdst": 0,
-      "sk": 0,
-      "bench": 15,
-      "ps": 0,
-      "reserve_short_term_limit": 0,
-      "cap": 0,
-      "min_bid": 0
-    },
-    "scoring_format": {
-      "scoring_format_hash": "453eabe1495d97152b191a6055a4aefcd7375709b01ccdeff8a76a433c337c11",
+    "scoring_params": {
       "pa": 0,
       "pc": 0,
       "py": 4,
@@ -128,7 +107,24 @@
       "trg": 0,
       "exclude_qb_kneels": false
     },
-    "league_format_hash": "f186fe87533ce4a67088b34a282c364f0ddd8d52ce05e224f31c5115df096fbf",
-    "scoring_format_hash": "453eabe1495d97152b191a6055a4aefcd7375709b01ccdeff8a76a433c337c11"
+    "league_params": {
+      "num_teams": 12,
+      "sqb": 1,
+      "srb": 2,
+      "swr": 3,
+      "ste": 1,
+      "srbwr": 2,
+      "srbwrte": 0,
+      "sqbrbwrte": 1,
+      "swrte": 0,
+      "sdst": 0,
+      "sk": 0,
+      "bench": 15,
+      "ps": 0,
+      "ir": 0,
+      "reserve_short_term_limit": 0,
+      "cap": 0,
+      "min_bid": 0
+    }
   }
 }

@@ -2,7 +2,9 @@
   "name": "should create a query with fantasy points from seasonlogs",
   "description": "Test case for should create a query with fantasy points from seasonlogs",
   "request": {
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       {
         "column_id": "player_fantasy_points_from_seasonlogs",
@@ -36,8 +38,11 @@
       }
     ]
   },
-  "expected_query": "select \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\", player.fname, player.lname, \"t7e2e75ff9aa5325620aefc4868e65270\".\"points\" AS \"points_from_seasonlogs_0\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"points_rnk\" AS \"points_rnk_from_seasonlogs_0\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"points_pos_rnk\" AS \"points_pos_rnk_from_seasonlogs_0\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"t7e2e75ff9aa5325620aefc4868e65270\" inner join \"player\" on \"player\".\"pid\" = \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\" where \"t7e2e75ff9aa5325620aefc4868e65270\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' and \"t7e2e75ff9aa5325620aefc4868e65270\".\"year\" = 2022 group by player.fname, player.lname, \"t7e2e75ff9aa5325620aefc4868e65270\".\"points\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"points_per_game\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"points_rnk\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"points_pos_rnk\", \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"t7e2e75ff9aa5325620aefc4868e65270\".\"pid\" asc limit 500",
-  "tags": ["parameters", "sorting"],
+  "expected_query": "select \"tee00e671538393408c797cda707dfd30\".\"pid\", player.fname, player.lname, \"tee00e671538393408c797cda707dfd30\".\"points\" AS \"points_from_seasonlogs_0\", \"tee00e671538393408c797cda707dfd30\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", \"tee00e671538393408c797cda707dfd30\".\"points_rnk\" AS \"points_rnk_from_seasonlogs_0\", \"tee00e671538393408c797cda707dfd30\".\"points_pos_rnk\" AS \"points_pos_rnk_from_seasonlogs_0\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"tee00e671538393408c797cda707dfd30\" inner join \"player\" on \"player\".\"pid\" = \"tee00e671538393408c797cda707dfd30\".\"pid\" where \"tee00e671538393408c797cda707dfd30\".\"scoring_format_id\" = 'draftkings' and \"tee00e671538393408c797cda707dfd30\".\"year\" = 2022 group by player.fname, player.lname, \"tee00e671538393408c797cda707dfd30\".\"points\", \"tee00e671538393408c797cda707dfd30\".\"points_per_game\", \"tee00e671538393408c797cda707dfd30\".\"points_rnk\", \"tee00e671538393408c797cda707dfd30\".\"points_pos_rnk\", \"tee00e671538393408c797cda707dfd30\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"tee00e671538393408c797cda707dfd30\".\"pid\" asc limit 500",
+  "tags": [
+    "parameters",
+    "sorting"
+  ],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "one_week",

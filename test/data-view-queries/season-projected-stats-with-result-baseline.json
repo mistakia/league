@@ -3,23 +3,33 @@
   "name": "season projected stats wired into result-equivalence",
   "description": "Promotes a projected fixture into the result-equivalence harness so the projected path has at least one baselined fixture. Coverage gap (f).",
   "request": {
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       {
         "column_id": "player_season_projected_rush_atts",
         "params": {
-          "year": [2024]
+          "year": [
+            2024
+          ]
         }
       },
       {
         "column_id": "player_season_projected_points_added",
         "params": {
-          "year": [2024]
+          "year": [
+            2024
+          ]
         }
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"ra\" AS \"season_projected_rush_atts_0\", \"t169612f2f9c5b165df17cc54ec1639d9\".\"pts_added\" AS \"season_projected_points_added_0\", \"player\".\"pos\" from \"player\" left join \"projections_index\" as \"tfe8bc3231f8cad3ddc2080cbe07c5716\" on \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"pid\" = \"player\".\"pid\" and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"year\" = 2024 and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"week\" = '0' and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"sourceid\" = 18 and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"seas_type\" = 'REG' left join \"league_format_player_projection_values\" as \"t169612f2f9c5b165df17cc54ec1639d9\" on \"t169612f2f9c5b165df17cc54ec1639d9\".\"pid\" = \"player\".\"pid\" and \"t169612f2f9c5b165df17cc54ec1639d9\".\"year\" = 2024 and \"t169612f2f9c5b165df17cc54ec1639d9\".\"week\" = '0' and \"t169612f2f9c5b165df17cc54ec1639d9\".\"league_format_hash\" = 'a54416be9596b2a3dbdac2c5fd40d0bea908cd74b84e16416713bbaf45c6bfc5' group by player.fname, player.lname, \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"ra\", \"t169612f2f9c5b165df17cc54ec1639d9\".\"pts_added\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
-  "tags": ["projected", "result-baseline", "coverage-gap"],
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"ra\" AS \"season_projected_rush_atts_0\", \"t98ceb6f7bd93e81c737177a140a3a5f8\".\"pts_added\" AS \"season_projected_points_added_0\", \"player\".\"pos\" from \"player\" left join \"projections_index\" as \"tfe8bc3231f8cad3ddc2080cbe07c5716\" on \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"pid\" = \"player\".\"pid\" and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"year\" = 2024 and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"week\" = '0' and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"sourceid\" = 18 and \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"seas_type\" = 'REG' left join \"league_format_player_projection_values\" as \"t98ceb6f7bd93e81c737177a140a3a5f8\" on \"t98ceb6f7bd93e81c737177a140a3a5f8\".\"pid\" = \"player\".\"pid\" and \"t98ceb6f7bd93e81c737177a140a3a5f8\".\"year\" = 2024 and \"t98ceb6f7bd93e81c737177a140a3a5f8\".\"week\" = '0' and \"t98ceb6f7bd93e81c737177a140a3a5f8\".\"league_format_id\" = 'genesis_10_team' group by player.fname, player.lname, \"tfe8bc3231f8cad3ddc2080cbe07c5716\".\"ra\", \"t98ceb6f7bd93e81c737177a140a3a5f8\".\"pts_added\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "projected",
+    "result-baseline",
+    "coverage-gap"
+  ],
   "timeout_ms": 60000
 }
