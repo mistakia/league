@@ -239,42 +239,50 @@ export default function DataViewsPage({
       }
       snapshots_by_view[view_id] = view_snapshots
 
+      const is_compatible = (column_id) => {
+        const field = data_views_fields[column_id]
+        if (!field || !Array.isArray(field.row_grains)) return true
+        return field.row_grains.includes(next_row_grain)
+      }
+      const item_column_id = (item) =>
+        typeof item === 'string' ? item : item?.column_id
+      const filter_items = (items) =>
+        (items || []).filter((item) => is_compatible(item_column_id(item)))
+
+      const row_grain_defaults = ROW_GRAIN_DEFAULTS[next_row_grain]
+      const default_prefix = row_grain_defaults
+        ? row_grain_defaults.prefix_columns
+        : []
+
       const restored = view_snapshots[next_row_grain]
 
-      let next_table_state
+      let next_prefix_columns
       if (restored) {
-        next_table_state = {
-          ...prev_table_state,
-          row_grain: [next_row_grain],
-          prefix_columns: restored.prefix_columns,
-          columns: restored.columns,
-          where: restored.where,
-          sort: restored.sort
-        }
+        // Restore-path: drop any prefix entries that aren't compatible with the
+        // grain we're switching into (handles schema drift and stale snapshots
+        // produced before a column's row_grains were tightened). Fall back to
+        // the grain defaults if nothing valid remains.
+        const validated = filter_items(restored.prefix_columns)
+        next_prefix_columns = validated.length ? validated : default_prefix
       } else {
-        const row_grain_defaults = ROW_GRAIN_DEFAULTS[next_row_grain]
-        const next_prefix_columns = row_grain_defaults
-          ? row_grain_defaults.prefix_columns
+        next_prefix_columns = default_prefix.length
+          ? default_prefix
           : prev_table_state.prefix_columns
+      }
 
-        const is_compatible = (column_id) => {
-          const field = data_views_fields[column_id]
-          if (!field || !Array.isArray(field.row_grains)) return true
-          return field.row_grains.includes(next_row_grain)
-        }
-        const item_column_id = (item) =>
-          typeof item === 'string' ? item : item?.column_id
-        const filter_items = (items) =>
-          (items || []).filter((item) => is_compatible(item_column_id(item)))
-
-        next_table_state = {
-          ...prev_table_state,
-          row_grain: [next_row_grain],
-          prefix_columns: next_prefix_columns,
-          columns: filter_items(prev_table_state.columns),
-          where: filter_items(prev_table_state.where),
-          sort: filter_items(prev_table_state.sort)
-        }
+      const next_table_state = {
+        ...prev_table_state,
+        row_grain: [next_row_grain],
+        prefix_columns: next_prefix_columns,
+        columns: restored
+          ? filter_items(restored.columns)
+          : filter_items(prev_table_state.columns),
+        where: restored
+          ? filter_items(restored.where)
+          : filter_items(prev_table_state.where),
+        sort: restored
+          ? filter_items(restored.sort)
+          : filter_items(prev_table_state.sort)
       }
       on_view_change(
         { ...selected_data_view, table_state: next_table_state },
@@ -324,34 +332,38 @@ export default function DataViewsPage({
     return null
   }
 
-  // adjust the table state to remove the player_league_roster_status column if the leagueId is not set
-  const filtered_table_state = useMemo(() => {
-    if (leagueId && leagueId > 0) {
-      return selected_data_view.table_state
-    }
+  // Derive the league roster-status prefix column at render time rather than
+  // mutating canonical view state on auth. It belongs in the prefix only when
+  // the user is in a league AND viewing under player row_grain, and only if
+  // not already present (saved views may include it explicitly).
+  const apply_prefix_overlay = useCallback(
+    (table_state) => {
+      if (!table_state) return table_state
+      const prefix_columns = table_state.prefix_columns || []
+      const row_grain = (table_state.row_grain || ['player'])[0]
+      const should_add =
+        leagueId &&
+        leagueId > 0 &&
+        row_grain === 'player' &&
+        !prefix_columns.includes('player_league_roster_status')
+      if (!should_add) return table_state
+      return {
+        ...table_state,
+        prefix_columns: [...prefix_columns, 'player_league_roster_status']
+      }
+    },
+    [leagueId]
+  )
 
-    return {
-      ...selected_data_view.table_state,
-      prefix_columns:
-        selected_data_view.table_state?.prefix_columns?.filter(
-          (column) => column !== 'player_league_roster_status'
-        ) || []
-    }
-  }, [selected_data_view.table_state, leagueId])
+  const filtered_table_state = useMemo(
+    () => apply_prefix_overlay(selected_data_view.table_state),
+    [selected_data_view.table_state, apply_prefix_overlay]
+  )
 
-  const filtered_saved_table_state = useMemo(() => {
-    if (leagueId && leagueId > 0) {
-      return selected_data_view.saved_table_state
-    }
-
-    return {
-      ...selected_data_view.saved_table_state,
-      prefix_columns:
-        selected_data_view.saved_table_state?.prefix_columns?.filter(
-          (column) => column !== 'player_league_roster_status'
-        ) || []
-    }
-  }, [selected_data_view.saved_table_state, leagueId])
+  const filtered_saved_table_state = useMemo(
+    () => apply_prefix_overlay(selected_data_view.saved_table_state),
+    [selected_data_view.saved_table_state, apply_prefix_overlay]
+  )
 
   const point_color_mode =
     filtered_table_state.scatter_plot_options?.point_color_mode

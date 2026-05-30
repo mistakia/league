@@ -71,45 +71,12 @@ export function data_views_reducer(
       return state.delete(view_id)
     }
 
-    case app_actions.AUTH_FULFILLED: {
-      const leagueId = payload.data.leagues.length
-        ? payload.data.leagues[0].uid
-        : undefined
-      if (!leagueId) return state
-
-      const is_player_grain = (table_state) => {
-        const row_grain = table_state?.get
-          ? table_state.get('row_grain')
-          : table_state?.row_grain
-        const grain =
-          row_grain && row_grain.get ? row_grain.get(0) : row_grain?.[0]
-        return !grain || grain === 'player'
-      }
-
-      const add_roster_status = (columns) =>
-        columns && columns.includes('player_league_roster_status')
-          ? columns
-          : (columns || List()).push('player_league_roster_status')
-
-      return state.withMutations((state) => {
-        state.forEach((view, key) => {
-          let updated_view = view
-          if (is_player_grain(view.get('table_state'))) {
-            updated_view = updated_view.updateIn(
-              ['table_state', 'prefix_columns'],
-              add_roster_status
-            )
-          }
-          if (is_player_grain(view.get('saved_table_state'))) {
-            updated_view = updated_view.updateIn(
-              ['saved_table_state', 'prefix_columns'],
-              add_roster_status
-            )
-          }
-          if (updated_view !== view) state.set(key, updated_view)
-        })
-      })
-    }
+    case app_actions.AUTH_FULFILLED:
+      // The league roster-status prefix column is now derived at render time
+      // in data-views.js (filtered_table_state) from row_grain + leagueId.
+      // Keeping it out of canonical state avoids mutating saved/persisted
+      // views on every auth event.
+      return state
 
     case data_views_actions.RESTORE_DATA_VIEW_TABLE_STATE: {
       const { view_id, table_state } = payload
