@@ -137,7 +137,9 @@ const get_select_string = ({
         params: column_params,
         column_index,
         rate_type_table_name,
-        splits
+        splits,
+        data_view_options,
+        query_context
       }),
       group_by:
         is_main_select && column_definition.main_group_by
@@ -146,7 +148,9 @@ const get_select_string = ({
               params: column_params,
               column_index,
               rate_type_table_name,
-              splits
+              splits,
+              data_view_options,
+              query_context
             })
           : []
     }

@@ -924,9 +924,19 @@ const is_year_offset_range = (params) =>
   params.year_offset.length > 1 &&
   params.year_offset[0] !== params.year_offset[1]
 
-const get_table_name = ({ column_definition, column_params, splits }) => {
+const get_table_name = ({
+  column_definition,
+  column_params,
+  splits,
+  data_view_options = null
+}) => {
   if (column_definition.table_alias) {
-    return column_definition.table_alias({ params: column_params, splits })
+    return column_definition.table_alias({
+      params: column_params,
+      splits,
+      data_view_options,
+      query_context: data_view_options?.query_context || null
+    })
   }
   return column_definition.table_name || column_definition.source?.table
 }
@@ -1320,6 +1330,24 @@ const add_clauses_for_table = async ({
         main_where_clause_strings.length ||
         main_having_clause_strings.length)
     ) {
+      // Fail fast when a team-grain column without a player-subject
+      // resolver is invoked under player row_grain: the legacy
+      // `LEFT JOIN team ON team.pid = player.pid` fallback both joins on
+      // the wrong key and (for `team`) references a non-existent
+      // relation. Surface the gap at query-build time instead of letting
+      // Postgres reject the generated SQL.
+      const team_grain_legacy_id = [...legacy_column_ids].find((id) => {
+        const def = data_views_column_definitions[id]
+        return def && is_team_column_definition(def)
+      })
+      if (
+        team_grain_legacy_id &&
+        data_view_options?.query_context?.row_grain_id !== 'team'
+      ) {
+        throw new Error(
+          `Column ${team_grain_legacy_id} is team-grain but has no player-subject resolver attached; cannot reach ${table_name} under row_grain=player.`
+        )
+      }
       players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
     }
   } else {
@@ -1333,7 +1361,8 @@ const get_grouped_clauses_by_table = ({
   where: where_clauses,
   table_columns,
   data_views_column_definitions,
-  splits
+  splits,
+  data_view_options = null
 }) => {
   const grouped_clauses_by_table = {}
   const tables_seeded_by_column = new Set()
@@ -1348,7 +1377,8 @@ const get_grouped_clauses_by_table = ({
     const table_name = get_table_name({
       column_definition,
       column_params,
-      splits
+      splits,
+      data_view_options
     })
 
     if (!grouped_clauses_by_table[table_name]) {
@@ -1380,7 +1410,8 @@ const get_grouped_clauses_by_table = ({
     const table_name = get_table_name({
       column_definition,
       column_params,
-      splits
+      splits,
+      data_view_options
     })
 
     if (!grouped_clauses_by_table[table_name]) {
@@ -1859,7 +1890,8 @@ export const get_data_view_results_query = async ({
     where,
     table_columns,
     data_views_column_definitions,
-    splits
+    splits,
+    data_view_options
   })
 
   const grouped_by_splits = group_tables_by_supported_splits(
@@ -1996,7 +2028,8 @@ export const get_data_view_results_query = async ({
     const table_name = get_table_name({
       column_definition,
       column_params,
-      splits
+      splits,
+      data_view_options
     })
 
     // Find column name for sorting through various methods
