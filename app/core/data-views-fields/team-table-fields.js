@@ -1,3 +1,6 @@
+import React from 'react'
+
+import TeamCodeColumn from '@components/team-code-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { build_nfl_team_values, nfl_team_value_groups } from '@constants'
@@ -12,7 +15,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     player_value_path: 'team_code',
     column_groups: [COLUMN_GROUPS.NFL_TEAM],
-    sticky: true,
+    component: React.memo(TeamCodeColumn),
     column_values: team_code_column_values,
     column_value_groups: nfl_team_value_groups,
     operators: [

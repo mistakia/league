@@ -1,0 +1,23 @@
+.team-code-column
+  display flex
+  align-items center
+  gap 4px
+  min-width 0
+  overflow hidden
+
+  &__logos
+    display flex
+    align-items center
+    flex 0 0 auto
+
+    .nfl__team-logo
+      border 1px solid white
+
+    .nfl__team-logo + .nfl__team-logo
+      margin-left -8px
+
+  &__label
+    font-size 11px
+    text-overflow ellipsis
+    overflow hidden
+    white-space nowrap

@@ -15,7 +15,6 @@ export default function ({ week, is_logged_in }) {
       size: 50,
       component: React.memo(PlayerRowStatusColumn),
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      sticky: true,
       column_values: [
         'free_agent',
         'active_roster',

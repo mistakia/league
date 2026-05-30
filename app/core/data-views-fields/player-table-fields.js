@@ -32,7 +32,6 @@ export default function ({ is_logged_in }) {
       component: React.memo(PlayerRowNameColumn),
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       player_value_path: 'name',
-      sticky: true,
       accessorFn: ({ row }) => `${row.fname} ${row.lname}`
     },
     player_position: {
