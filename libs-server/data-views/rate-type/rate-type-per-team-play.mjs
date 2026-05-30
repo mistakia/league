@@ -7,6 +7,7 @@ import get_rate_type_denominator_params, {
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
+import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
 import {
   requires_wrap,
   register_wrap,
@@ -185,31 +186,11 @@ export const join_per_team_play_cte = ({
       typeof year_offset === 'number')
 
   players_query.leftJoin(rate_type_table_name, function () {
-    if (matchup_opponent_type) {
-      switch (matchup_opponent_type) {
-        case 'current_week_opponent_total':
-          this.on(
-            `${rate_type_table_name}.${team_unit}`,
-            'current_week_opponents.opponent'
-          )
-          break
-        case 'next_week_opponent_total':
-          this.on(
-            `${rate_type_table_name}.${team_unit}`,
-            'next_week_opponents.opponent'
-          )
-          break
-
-        default:
-          console.log(`Unknown matchup_opponent_type: ${matchup_opponent_type}`)
-          break
-      }
-    } else {
-      const team_join_target = player_cell
-        ? 'player_year_teams.team'
-        : 'player.current_nfl_team'
-      this.on(`${rate_type_table_name}.${team_unit}`, team_join_target)
-    }
+    const team_join_target = resolve_team_join_target({
+      query_context,
+      params
+    })
+    this.on(`${rate_type_table_name}.${team_unit}`, team_join_target)
 
     if (splits.includes('year')) {
       if (has_year_offset_range) {
