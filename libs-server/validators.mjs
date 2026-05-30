@@ -226,7 +226,7 @@ const splits_schema = {
   optional: true
 }
 
-const subjects_schema = {
+const row_grain_schema = {
   type: 'array',
   items: { type: 'string', enum: ['player', 'team'] },
   min: 1,
@@ -242,7 +242,7 @@ const table_state_schema = {
   columns: columns_schema,
   where: where_schema,
   splits: splits_schema,
-  subjects: subjects_schema
+  row_grain: row_grain_schema
 }
 export const table_state_validator = v.compile(table_state_schema)
 

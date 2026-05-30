@@ -712,10 +712,10 @@ const get_from_table_config = ({
   columns,
   prefix_columns,
   splits,
-  subjects = ['player'],
+  row_grain = ['player'],
   data_views_column_definitions
 }) => {
-  const row_grain_id = subjects[0]
+  const row_grain_id = row_grain[0]
   const sort_based_from_table = determine_from_table({
     sort,
     columns,
@@ -1441,7 +1441,7 @@ export const get_data_view_results_query = async ({
   sort = [],
   offset = 0,
   limit = 500,
-  subjects = ['player']
+  row_grain = ['player']
 } = {}) => {
   const validator_result = validators.table_state_validator({
     splits,
@@ -1451,7 +1451,7 @@ export const get_data_view_results_query = async ({
     sort,
     offset,
     limit,
-    subjects
+    row_grain
   })
   const schema_errors =
     validator_result === true
@@ -1464,7 +1464,7 @@ export const get_data_view_results_query = async ({
           return error.message
         })
   const row_grain_errors = validate_row_grain_compatibility({
-    subjects,
+    row_grain,
     prefix_columns,
     columns,
     where,
@@ -1516,7 +1516,7 @@ export const get_data_view_results_query = async ({
     columns,
     prefix_columns,
     splits,
-    subjects,
+    row_grain,
     data_views_column_definitions
   })
 
@@ -1551,7 +1551,7 @@ export const get_data_view_results_query = async ({
   })
 
   const query_context = build_query_context({
-    subjects,
+    row_grain,
     splits,
     year_range: [],
     nfl_week_ids,
@@ -2118,7 +2118,7 @@ export default async function ({
   limit = 500,
   timeout = null,
   calculate_total_count = true,
-  subjects = ['player']
+  row_grain = ['player']
 } = {}) {
   const { query, data_view_metadata } = await get_data_view_results_query({
     splits,
@@ -2128,7 +2128,7 @@ export default async function ({
     sort,
     offset,
     limit,
-    subjects
+    row_grain
   })
 
   const data_view_query_string = query.toString()

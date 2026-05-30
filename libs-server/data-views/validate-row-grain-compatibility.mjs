@@ -31,13 +31,13 @@ const check_item = ({ item, field, row_grain_id, defs, errors }) => {
 }
 
 export default function validate_row_grain_compatibility({
-  subjects = ['player'],
+  row_grain = ['player'],
   prefix_columns = [],
   columns = [],
   where = [],
   defs
 }) {
-  const row_grain_id = subjects[0]
+  const row_grain_id = row_grain[0]
   const errors = []
   prefix_columns.forEach((item, i) =>
     check_item({ item, field: `prefix_columns[${i}]`, row_grain_id, defs, errors })

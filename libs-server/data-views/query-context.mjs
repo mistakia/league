@@ -7,7 +7,7 @@ import {
 import { identity_for } from './row-grain-registry.mjs'
 
 export const build_query_context = ({
-  subjects = ['player'],
+  row_grain = ['player'],
   splits = [],
   year_range = [],
   nfl_week_ids = [],
@@ -16,7 +16,7 @@ export const build_query_context = ({
   players_query,
   position_filter_sql = null
 }) => {
-  const row_grain_id = subjects[0]
+  const row_grain_id = row_grain[0]
   const identity_id = identity_for({ row_grain_id, splits })
   const identity = get_identity(identity_id)
 
@@ -25,7 +25,7 @@ export const build_query_context = ({
     players_query,
     identity_id,
     row_grain_id,
-    subjects,
+    row_grain,
     splits,
     year_range,
     nfl_week_ids,
