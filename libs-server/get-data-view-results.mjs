@@ -27,7 +27,7 @@ import {
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
-import validate_subject_compatibility from '#libs-server/data-views/validate-subject-compatibility.mjs'
+import validate_row_grain_compatibility from '#libs-server/data-views/validate-row-grain-compatibility.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
 import { flush as flush_measure_batches } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
@@ -715,7 +715,7 @@ const get_from_table_config = ({
   subjects = ['player'],
   data_views_column_definitions
 }) => {
-  const subject_id = subjects[0]
+  const row_grain_id = subjects[0]
   const sort_based_from_table = determine_from_table({
     sort,
     columns,
@@ -751,7 +751,7 @@ const get_from_table_config = ({
     ) {
       const grain = column_definition.source?.grain
       const identity_compatible =
-        grain && get_identity(grain).subject === subject_id
+        grain && get_identity(grain).row_grain === row_grain_id
 
       if (identity_compatible) {
         // Use sort-based from table if available and no splits are configured
@@ -773,9 +773,9 @@ const get_from_table_config = ({
     }
   }
 
-  // Fall back to the subject's canonical FROM table -- the identity's
-  // canonical from_source.table for the active subject + splits.
-  if (subject_id === 'team') {
+  // Fall back to the row_grain's canonical FROM table -- the identity's
+  // canonical from_source.table for the active row_grain + splits.
+  if (row_grain_id === 'team') {
     if (splits.includes('week')) {
       return { from_table_name: 'team_years_weeks', from_table_type: 'table' }
     }
@@ -811,7 +811,7 @@ const setup_from_table_and_player_joins = ({
 
   log(`Setting up from table: ${from_table_name} (type: ${from_table_type})`)
 
-  const subject_id = query_context.subject_id
+  const row_grain_id = query_context.row_grain_id
 
   // Team-identity FROM-source dispatch: register the team identity's CTEs
   // (team VALUES, team_years, team_years_weeks per active splits), FROM the
@@ -819,8 +819,8 @@ const setup_from_table_and_player_joins = ({
   // player inner join. When FROM is a bridge CTE (team_years /
   // team_years_weeks) inner-join the base `team` CTE so team-table column
   // defs (team_name, team_conference, team_division) remain reachable at
-  // every split level; symmetric to the player-subject inner-join below.
-  if (subject_id === 'team') {
+  // every split level; symmetric to the player-row_grain inner-join below.
+  if (row_grain_id === 'team') {
     const identity = get_identity(query_context.identity_id)
     const from_source = identity.from_source({
       year_range: query_context.year_range
@@ -1463,14 +1463,14 @@ export const get_data_view_results_query = async ({
           }
           return error.message
         })
-  const subject_errors = validate_subject_compatibility({
+  const row_grain_errors = validate_row_grain_compatibility({
     subjects,
     prefix_columns,
     columns,
     where,
     defs: data_views_column_definitions
   })
-  const all_errors = [...schema_errors, ...subject_errors]
+  const all_errors = [...schema_errors, ...row_grain_errors]
   if (all_errors.length) {
     throw new Error(all_errors.join('\n'))
   }
@@ -1667,7 +1667,7 @@ export const get_data_view_results_query = async ({
     data_view_options.year_range = year_range
     query_context.year_range = year_range
 
-    if (query_context.subject_id === 'team') {
+    if (query_context.row_grain_id === 'team') {
       const team_year_bridge = resolve_bridge('team', 'team_year')
       team_year_bridge.add_cte({ query_context })
       query_context.applied_bridges.add('team->team_year')
@@ -2083,7 +2083,7 @@ export const get_data_view_results_query = async ({
     }
   }
 
-  if (query_context.subject_id === 'team') {
+  if (query_context.row_grain_id === 'team') {
     players_query.orderBy(data_view_options.team_reference, 'asc')
     players_query.groupBy(data_view_options.team_reference)
   } else {

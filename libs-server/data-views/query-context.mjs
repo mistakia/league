@@ -4,7 +4,7 @@ import {
   is_team_identity,
   resolve_references
 } from './identities.mjs'
-import { identity_for } from './subject-registry.mjs'
+import { identity_for } from './row-grain-registry.mjs'
 
 export const build_query_context = ({
   subjects = ['player'],
@@ -16,15 +16,15 @@ export const build_query_context = ({
   players_query,
   position_filter_sql = null
 }) => {
-  const subject_id = subjects[0]
-  const identity_id = identity_for({ subject_id, splits })
+  const row_grain_id = subjects[0]
+  const identity_id = identity_for({ row_grain_id, splits })
   const identity = get_identity(identity_id)
 
   return {
     db,
     players_query,
     identity_id,
-    subject_id,
+    row_grain_id,
     subjects,
     splits,
     year_range,

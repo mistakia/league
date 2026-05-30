@@ -402,8 +402,8 @@ const ensure_split_bridge_joined = ({ query_context, from, to }) => {
 
 const ensure_split_bridges = ({ query_context, identity_id }) => {
   if (identity_id.startsWith('team')) return
-  const { subject_id, splits } = query_context
-  if (subject_id !== 'player') return
+  const { row_grain_id, splits } = query_context
+  if (row_grain_id !== 'player') return
   if (splits.includes('year') && has_bridge('player', 'player_year')) {
     ensure_split_bridge_joined({
       query_context,

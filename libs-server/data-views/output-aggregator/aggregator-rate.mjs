@@ -87,7 +87,7 @@ export const add_cte = (args) => {
 // source.year_default when neither query_context.year_range nor params.year
 // is set (e.g. team-stat columns in offseason).
 const resolve_team_join_target = ({ query_context, params, source }) => {
-  if (query_context.subject_id === 'team') return query_context.team_reference
+  if (query_context.row_grain_id === 'team') return query_context.team_reference
   const raw = params?.matchup_opponent_type
   const matchup = Array.isArray(raw)
     ? raw[0] && typeof raw[0] === 'object'

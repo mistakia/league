@@ -1,8 +1,8 @@
-import derive_column_subjects from './derive-column-subjects.mjs'
+import derive_column_row_grains from './derive-column-row-grains.mjs'
 
 // Runtime check: every column_id referenced by prefix_columns, columns, or
-// where must declare compatibility with the active subject. A def with no
-// derivable subjects (no explicit `subjects`, no grain) is treated as
+// where must declare compatibility with the active row_grain. A def with no
+// derivable row_grains (no explicit `row_grains`, no grain) is treated as
 // compatible -- the column-coverage spec is the gate for missing
 // declarations, not the runtime path.
 //
@@ -16,37 +16,37 @@ const item_column_id = (item) => {
   return null
 }
 
-const check_item = ({ item, field, subject, defs, errors }) => {
+const check_item = ({ item, field, row_grain_id, defs, errors }) => {
   const column_id = item_column_id(item)
   if (!column_id) return
   const def = defs[column_id]
   if (!def) return
-  const allowed = derive_column_subjects(def)
+  const allowed = derive_column_row_grains(def)
   if (!allowed.length) return
-  if (allowed.includes(subject)) return
+  if (allowed.includes(row_grain_id)) return
   errors.push(
-    `ColumnSubjectMismatch: column '${column_id}' (${field}) requires subject ` +
-      `${JSON.stringify(allowed)} but active subject is '${subject}'`
+    `ColumnRowGrainMismatch: column '${column_id}' (${field}) requires row_grain ` +
+      `${JSON.stringify(allowed)} but active row_grain is '${row_grain_id}'`
   )
 }
 
-export default function validate_subject_compatibility({
+export default function validate_row_grain_compatibility({
   subjects = ['player'],
   prefix_columns = [],
   columns = [],
   where = [],
   defs
 }) {
-  const subject = subjects[0]
+  const row_grain_id = subjects[0]
   const errors = []
   prefix_columns.forEach((item, i) =>
-    check_item({ item, field: `prefix_columns[${i}]`, subject, defs, errors })
+    check_item({ item, field: `prefix_columns[${i}]`, row_grain_id, defs, errors })
   )
   columns.forEach((item, i) =>
-    check_item({ item, field: `columns[${i}]`, subject, defs, errors })
+    check_item({ item, field: `columns[${i}]`, row_grain_id, defs, errors })
   )
   where.forEach((item, i) =>
-    check_item({ item, field: `where[${i}]`, subject, defs, errors })
+    check_item({ item, field: `where[${i}]`, row_grain_id, defs, errors })
   )
   return errors
 }

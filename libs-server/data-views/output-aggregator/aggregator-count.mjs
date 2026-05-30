@@ -52,7 +52,7 @@ export const get_cte_name = ({ column_def, params, identity_id, period }) => {
 export const add_cte = add_period_cte
 
 const resolve_team_join_target = ({ query_context, params, source }) => {
-  if (query_context.subject_id === 'team') return query_context.team_reference
+  if (query_context.row_grain_id === 'team') return query_context.team_reference
   const raw = params?.matchup_opponent_type
   const matchup = Array.isArray(raw)
     ? raw[0] && typeof raw[0] === 'object'

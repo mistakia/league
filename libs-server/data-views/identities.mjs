@@ -26,7 +26,7 @@ const team_years_weeks_sql = ({ year_range }) => {
 export const identities = {
   player: {
     id: 'player',
-    subject: 'player',
+    row_grain: 'player',
     splits: [],
     key_columns: ['pid'],
     pid_column: 'player.pid',
@@ -38,7 +38,7 @@ export const identities = {
 
   player_year: {
     id: 'player_year',
-    subject: 'player',
+    row_grain: 'player',
     splits: ['year'],
     key_columns: ['pid', 'year'],
     pid_column: 'player.pid',
@@ -62,7 +62,7 @@ export const identities = {
 
   player_year_week: {
     id: 'player_year_week',
-    subject: 'player',
+    row_grain: 'player',
     splits: ['year', 'week'],
     key_columns: ['pid', 'year', 'week'],
     pid_column: 'player.pid',
@@ -94,7 +94,7 @@ export const identities = {
 
   team: {
     id: 'team',
-    subject: 'team',
+    row_grain: 'team',
     splits: [],
     key_columns: ['team_code'],
     pid_column: null,
@@ -109,7 +109,7 @@ export const identities = {
 
   team_year: {
     id: 'team_year',
-    subject: 'team',
+    row_grain: 'team',
     splits: ['year'],
     key_columns: ['team_code', 'year'],
     pid_column: null,
@@ -131,7 +131,7 @@ export const identities = {
 
   team_year_week: {
     id: 'team_year_week',
-    subject: 'team',
+    row_grain: 'team',
     splits: ['year', 'week'],
     key_columns: ['team_code', 'year', 'week'],
     pid_column: null,
@@ -168,13 +168,13 @@ export const is_team_identity = (identity_id) => identity_id.startsWith('team')
 // setup_central_references.
 //
 // Contract:
-//   - Team subject: references always come from the team identity's canonical
+//   - Team row_grain: references always come from the team identity's canonical
 //     columns. setup_from_table_and_player_joins guarantees the canonical CTEs
 //     (team, team_years, team_years_weeks) are attached via identity.from_source.
-//   - Player subject, canonical FROM (`player`): use identity's canonical
+//   - Player row_grain, canonical FROM (`player`): use identity's canonical
 //     columns. Bridges (player_years, player_years_weeks) are attached by
 //     setup_from_table_and_player_joins when from_table_name === 'player'.
-//   - Player subject, fact-table FROM: by data-model convention, every
+//   - Player row_grain, fact-table FROM: by data-model convention, every
 //     identity-compatible fact table (gated by get_from_table_config via
 //     column-def `granularity`) exposes columns named `pid`, `year`, `week`.
 //     Use those directly; bridges are not attached (would multiply rows
@@ -189,7 +189,7 @@ export const is_team_identity = (identity_id) => identity_id.startsWith('team')
 export const resolve_references = ({ identity_id, from_table_name }) => {
   const identity = get_identity(identity_id)
 
-  if (identity.subject === 'team') {
+  if (identity.row_grain === 'team') {
     return {
       pid_reference: identity.team_column,
       team_reference: identity.team_column,
