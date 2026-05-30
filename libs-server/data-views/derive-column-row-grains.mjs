@@ -22,5 +22,10 @@ export default function derive_column_row_grains(def) {
     const match = ROW_GRAIN_BY_PREFIX.find(({ prefix }) => g.startsWith(prefix))
     if (match) row_grains.add(match.row_grain)
   }
+  // Team columns are dual-grain: every player has a team, so any team-level
+  // value resolves cleanly under player grain (repeated for each player on
+  // that team). The reverse is not true -- player columns under team grain
+  // require aggregation and stay single-grain.
+  if (row_grains.has('team')) row_grains.add('player')
   return [...row_grains]
 }
