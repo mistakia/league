@@ -28,7 +28,7 @@ export const parse_url_to_table_state = (full_url) => {
     limit: 500
   }
 
-  const json_params = ['columns', 'prefix_columns', 'where', 'sort', 'splits']
+  const json_params = ['columns', 'prefix_columns', 'where', 'sort', 'splits', 'row_grain']
   for (const param of json_params) {
     if (params.has(param)) {
       try {
