@@ -30,7 +30,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
     },
     description: 'Standard scoring with no PPR and 4-point passing touchdowns'
   },
@@ -59,7 +60,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Half point per reception scoring with 4-point passing touchdowns'
@@ -89,7 +91,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Full point per reception scoring with 4-point passing touchdowns'
@@ -119,7 +122,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns
       trg: 1, // targets (1 point per target in SFB)
       rush_first_down: 1, // rushing first downs (1 point in SFB)
-      rec_first_down: 1 // receiving first downs (1 point in SFB)
+      rec_first_down: 1, // receiving first downs (1 point in SFB)
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties'
@@ -149,7 +153,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in SFB Sleeper)
       rush_first_down: 1, // rushing first downs (1 point in SFB)
-      rec_first_down: 1 // receiving first downs (1 point in SFB)
+      rec_first_down: 1, // receiving first downs (1 point in SFB)
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
@@ -179,7 +184,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns (6 points)
       trg: 0, // targets (no points in FanDuel)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
       // TODO: Add support for unsupported FanDuel scoring:
       // - 100+ rushing yard bonus (3 points)
       // - 100+ receiving yard bonus (3 points)
@@ -218,7 +224,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns (6 points)
       trg: 0, // targets (no points in DraftKings)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
       // TODO: Add support for unsupported DraftKings scoring:
       // - 300+ passing yard bonus (3 points)
       // - 100+ rushing yard bonus (3 points)
@@ -253,7 +260,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Half PPR with lower turnover penalties: -1 INT, -1 fumble lost'
@@ -283,7 +291,8 @@ export const scoring_formats = {
       fum_ret_td: 6, // fumble return touchdowns
       trg: 0, // targets (no points in standard)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Full PPR with lower turnover penalties: -1 INT, -1 fumble lost'
