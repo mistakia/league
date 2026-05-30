@@ -1,6 +1,5 @@
 import Immutable, { Map, Set as ImmutableSet, List } from 'immutable'
 
-import { app_actions } from '@core/app/actions'
 import { data_views_actions } from './index'
 import { default_data_views } from './default-data-views'
 import { data_view_request_actions } from '@core/data-view-request/actions'
@@ -70,13 +69,6 @@ export function data_views_reducer(
       const { view_id } = payload.opts
       return state.delete(view_id)
     }
-
-    case app_actions.AUTH_FULFILLED:
-      // The league roster-status prefix column is now derived at render time
-      // in data-views.js (filtered_table_state) from row_grain + leagueId.
-      // Keeping it out of canonical state avoids mutating saved/persisted
-      // views on every auth event.
-      return state
 
     case data_views_actions.RESTORE_DATA_VIEW_TABLE_STATE: {
       const { view_id, table_state } = payload

@@ -198,14 +198,10 @@ export default function DataViewsPage({
     player.className = get_string_from_object(class_params)
   }
 
-  const new_prefix_columns = [
-    'player_name',
-    'player_nfl_teams',
-    'player_position'
-  ]
-  if (isLoggedIn && leagueId) {
-    new_prefix_columns.push('player_league_roster_status')
-  }
+  // New views seed with the canonical player-grain prefix. The conditional
+  // player_league_roster_status column is layered on at render time via
+  // apply_prefix_overlay -- not baked into persisted state.
+  const new_prefix_columns = ROW_GRAIN_DEFAULTS.player.prefix_columns
 
   const on_view_change = (data_view, view_change_params = {}) => {
     if (view_change_params.is_new_view) {

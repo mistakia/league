@@ -1,4 +1,7 @@
 import { current_season } from '@constants'
+import { ROW_GRAIN_DEFAULTS } from '@libs-shared/row-grain-defaults.mjs'
+
+const player_prefix_columns = ROW_GRAIN_DEFAULTS.player.prefix_columns
 
 // system_view_ids_set is available from @libs-shared/view-organization/system-data-view-ids.mjs
 // for server-side and CLI consumers that need the stable ID list without loading this module.
@@ -24,7 +27,7 @@ export const default_data_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
+      prefix_columns: player_prefix_columns,
       columns: [
         {
           column_id: 'player_points_added_earned_from_seasonlogs',
@@ -102,7 +105,7 @@ export const default_data_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
+      prefix_columns: player_prefix_columns,
       columns: [
         current_season.isOffseason
           ? 'player_season_projected_points_added'
@@ -161,7 +164,7 @@ export const default_data_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
+      prefix_columns: player_prefix_columns,
       columns: [
         'player_pass_yards_from_plays',
         'player_pass_touchdowns_from_plays',
@@ -200,7 +203,7 @@ export const default_data_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
+      prefix_columns: player_prefix_columns,
       columns: [
         // fantasy_points
         'player_rush_yards_from_plays',
@@ -236,7 +239,7 @@ export const default_data_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
+      prefix_columns: player_prefix_columns,
       columns: [
         // fantasy points
         'player_receiving_yards_from_plays',
