@@ -10,19 +10,6 @@ import {
 
 import { ASSET_TYPE, INITIAL_SLOT_TYPE, PS_SLOT_SUBTYPE } from './constants.mjs'
 
-// Tolerate the in-flight format-id migration: until
-// db/adhoc/2026-05-28-format-id-migration.sql is applied to prod the
-// physical column on the format-keyed tables is still `league_format_hash`.
-// Detect once per call; remove this shim after the migration lands.
-const detect_format_column = async (table_name) => {
-  const row = await db('information_schema.columns')
-    .select('column_name')
-    .where({ table_name })
-    .whereIn('column_name', ['league_format_id', 'league_format_hash'])
-    .first()
-  return row?.column_name || 'league_format_id'
-}
-
 // Bulk snapshot computation. Pre-loads all reference data the per-holding
 // snapshots need (KTC rankings, gamelogs, rosters_players, projection values,
 // draft_pick_value, esbid->week, league_formats), then iterates the holding
@@ -92,7 +79,7 @@ const ps_subtype = (slot) => {
   return null
 }
 
-const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
+const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
   const idx = {}
 
   // KTC: keyed pid -> sorted array of {d, v}
@@ -127,20 +114,19 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
     }
   }
 
-  // gamelogs: keyed `${pid}__${format_hash}` -> Map(esbid -> {net, earned})
+  // gamelogs: keyed `${pid}__${format_id}` -> Map(esbid -> {net, earned})
   idx.gamelogs = new Map()
-  if (player_ids.length && format_hashes.length) {
-    const gl_col = await detect_format_column('league_format_player_gamelogs')
+  if (player_ids.length && format_ids.length) {
     const gl_rows = await db('league_format_player_gamelogs')
       .select(
         'pid',
         'esbid',
-        `${gl_col} as league_format_id`,
+        'league_format_id',
         'points_added_net',
         'points_added_earned'
       )
       .whereIn('pid', player_ids)
-      .whereIn(gl_col, format_hashes)
+      .whereIn('league_format_id', format_ids)
     for (const r of gl_rows) {
       const k = `${r.pid}__${r.league_format_id}`
       if (!idx.gamelogs.has(k)) idx.gamelogs.set(k, new Map())
@@ -180,7 +166,7 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
     }
   }
 
-  // projections: keyed `${pid}__${format_hash}__${year}` -> pts_added.
+  // projections: keyed `${pid}__${format_id}__${year}` -> pts_added.
   //
   // Uses week='0' (preseason rest-of-season) rather than week='ros'. The 'ros'
   // rows are a current-state rollup that is only refreshed for the active
@@ -192,14 +178,11 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
   // offseason/early-season acquisitions that dominate the holding population.
   // The -999 sentinel indicates "no projection available" and is dropped.
   idx.projections = new Map()
-  if (player_ids.length && format_hashes.length && years.length) {
-    const proj_col = await detect_format_column(
-      'league_format_player_projection_values'
-    )
+  if (player_ids.length && format_ids.length && years.length) {
     const proj_rows = await db('league_format_player_projection_values')
-      .select('pid', `${proj_col} as league_format_id`, 'year', 'pts_added')
+      .select('pid', 'league_format_id', 'year', 'pts_added')
       .whereIn('pid', player_ids)
-      .whereIn(proj_col, format_hashes)
+      .whereIn('league_format_id', format_ids)
       .whereIn('year', years)
       .where('week', '0')
     for (const r of proj_rows) {
@@ -211,17 +194,16 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
     }
   }
 
-  // draft_pick_value: keyed `${format_hash}__${rank}` -> value
+  // draft_pick_value: keyed `${format_id}__${rank}` -> value
   idx.pick_values = new Map()
-  if (format_hashes.length) {
-    const pv_col = await detect_format_column('league_format_draft_pick_value')
+  if (format_ids.length) {
     const pv_rows = await db('league_format_draft_pick_value')
       .select(
-        `${pv_col} as league_format_id`,
+        'league_format_id',
         'rank',
         'median_best_season_points_added_per_game'
       )
-      .whereIn(pv_col, format_hashes)
+      .whereIn('league_format_id', format_ids)
     for (const r of pv_rows) {
       const k = `${r.league_format_id}__${r.rank}`
       idx.pick_values.set(
@@ -235,12 +217,10 @@ const load_indexes = async ({ lid, player_ids, years, format_hashes }) => {
 
   // num_teams per league_format_id
   idx.num_teams = new Map()
-  if (format_hashes.length) {
-    const lf_col = await detect_format_column('league_formats')
-    const lf_id_col = lf_col === 'league_format_hash' ? lf_col : 'id'
+  if (format_ids.length) {
     const f_rows = await db('league_formats')
-      .select(`${lf_id_col} as id`, 'num_teams')
-      .whereIn(lf_id_col, format_hashes)
+      .select('id', 'num_teams')
+      .whereIn('id', format_ids)
     for (const r of f_rows) {
       idx.num_teams.set(r.id, r.num_teams)
     }
@@ -424,15 +404,15 @@ const compute_snapshots_bulk = async ({ lid, holding_drafts }) => {
     new Set(holding_drafts.filter((d) => d.player_id).map((d) => d.player_id))
   )
   const years_set = new Set()
-  const format_hashes_set = new Set()
+  const format_ids_set = new Set()
   for (const d of holding_drafts) {
     if (d.year) years_set.add(d.year)
-    if (d.league_format_id) format_hashes_set.add(d.league_format_id)
+    if (d.league_format_id) format_ids_set.add(d.league_format_id)
   }
   const years = Array.from(years_set)
-  const format_hashes = Array.from(format_hashes_set)
+  const format_ids = Array.from(format_ids_set)
 
-  const idx = await load_indexes({ lid, player_ids, years, format_hashes })
+  const idx = await load_indexes({ lid, player_ids, years, format_ids })
 
   const snapshots = []
   for (const draft of holding_drafts) {

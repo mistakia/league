@@ -383,7 +383,8 @@ const walk_transactions = async ({ lid }) => {
         source_draft_id: closed?.draft_id || null,
         target_draft_id: opened.draft_id,
         source_share: closed ? 1.0 : null,
-        target_share: 1.0
+        target_share: 1.0,
+        transaction_id: event.transaction_id ?? null
       })
     } else if (event.kind === 'trade') {
       apply_trade({
@@ -601,6 +602,12 @@ const build_event_stream = async ({ lid }) => {
   const cross_team_rfa_key_set = new Set(
     cross_team_rfa_wins.map((r) => `${r.tid}__${r.pid}__${r.year}`)
   )
+  // Pair each suppressed transactions row (RESTRICTED_FREE_AGENCY_TAG) with
+  // its bid event so the rfa_cross_team_win emitter can carry the
+  // transactions.uid forward on the RFA_WIN edge. Without this the 42-of-95
+  // cross-team RFA_WIN transformations stayed at transaction_id=NULL,
+  // breaking the (edge -> transaction value) audit path.
+  const cross_team_rfa_transaction_id_by_key = new Map()
 
   // 2. Player transactions (excluding those that resolve via a trade).
   const transactions = await db('transactions')
@@ -650,7 +657,13 @@ const build_event_stream = async ({ lid }) => {
     ) {
       // Cross-team RFA win: the rfa_cross_team_win event from
       // restricted_free_agency_bids handles open/close. Skip the transactions
-      // row to avoid emitting a duplicate holding with the same draft_id.
+      // row to avoid emitting a duplicate holding with the same draft_id,
+      // but remember its uid so the bid emitter can link the RFA_WIN edge
+      // back to this transaction.
+      cross_team_rfa_transaction_id_by_key.set(
+        `${tran.tid}__${tran.pid}__${tran.year}`,
+        tran.uid
+      )
       events.push({
         sort_ts: tran.timestamp,
         sort_priority: 5,
@@ -725,7 +738,10 @@ const build_event_stream = async ({ lid }) => {
       to_tid: r.tid,
       bid: r.bid,
       occurred_at: new Date(r.processed * 1000),
-      year: r.year
+      year: r.year,
+      transaction_id: cross_team_rfa_transaction_id_by_key.get(
+        `${r.tid}__${r.pid}__${r.year}`
+      )
     })
   }
 

@@ -31,38 +31,19 @@ const initialize_cli = () =>
 const BATCH_SIZE = 1000
 
 const resolve_league_format_id = async ({ lid, year }) => {
-  // Tolerates the pre-format-id-migration schema (column is league_format_hash)
-  // so a lineage rebuild can complete in either state. Once
-  // db/adhoc/2026-05-28-format-id-migration.sql lands on prod the catch path
-  // becomes dead code; remove it then.
-  try {
-    const seasons_row = await db('seasons')
-      .select('league_format_id')
-      .where({ lid, year })
-      .first()
-    if (seasons_row?.league_format_id) return seasons_row.league_format_id
-    const latest = await db('seasons')
-      .select('league_format_id')
-      .where('lid', lid)
-      .whereNotNull('league_format_id')
-      .orderBy('year', 'desc')
-      .first()
-    return latest?.league_format_id || null
-  } catch (err) {
-    if (!/league_format_id.*does not exist/i.test(err.message)) throw err
-  }
   const seasons_row = await db('seasons')
-    .select('league_format_hash')
+    .select('league_format_id')
     .where({ lid, year })
     .first()
-  if (seasons_row?.league_format_hash) return seasons_row.league_format_hash
+  if (seasons_row?.league_format_id) return seasons_row.league_format_id
+  // Fall back to the most-recent seasons row for this league.
   const latest = await db('seasons')
-    .select('league_format_hash')
+    .select('league_format_id')
     .where('lid', lid)
-    .whereNotNull('league_format_hash')
+    .whereNotNull('league_format_id')
     .orderBy('year', 'desc')
     .first()
-  return latest?.league_format_hash || null
+  return latest?.league_format_id || null
 }
 
 const generate_roster_asset_lineage = async ({
