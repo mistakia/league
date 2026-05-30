@@ -51,6 +51,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     fuml: -1,
     krtd: 6,
     prtd: 6,
+    fum_ret_td: 6,
     trg: 0.0,
     rush_first_down: 0.0,
     rec_first_down: 0.0,
