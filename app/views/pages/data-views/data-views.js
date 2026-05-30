@@ -426,8 +426,8 @@ export default function DataViewsPage({
         metadata={data_view_request.metadata}
         on_view_change={on_view_change}
         on_save_view={save_data_view}
-        subject_options={ROW_GRAIN_OPTIONS}
-        on_subject_change={on_row_grain_change}
+        row_grain_options={ROW_GRAIN_OPTIONS}
+        on_row_grain_change={on_row_grain_change}
         table_state={filtered_table_state}
         saved_table_state={filtered_saved_table_state}
         on_revert_view={revert_data_view}

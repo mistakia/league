@@ -15,15 +15,10 @@ export default function parse_table_state_from_url(search_params) {
     where: migrate_entries_array(table_state.where),
     sort: migrate_sort_array(table_state.sort),
     splits: table_state.splits,
-    // Legacy ?subjects= back-compat: new ?row_grain= wins; fall back to
-    // legacy if present; default to ['player'] otherwise. Carry both names
-    // through one release cycle then drop the subjects branch.
     row_grain:
       Array.isArray(table_state.row_grain) && table_state.row_grain.length
         ? table_state.row_grain
-        : Array.isArray(table_state.subjects) && table_state.subjects.length
-          ? table_state.subjects
-          : ['player'],
+        : ['player'],
     q: table_state.q,
     rank_aggregation: table_state.rank_aggregation,
     scatter_plot_options: table_state.scatter_plot_options,
