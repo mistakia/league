@@ -5,7 +5,11 @@
 // the most stable axis for row-grain membership.
 
 export const PLAYER_ROW_GRAINS = ['player']
-export const TEAM_ROW_GRAINS = ['team']
+// Team columns are dual-grain: every player has a team, so a team-level
+// value resolves cleanly under player row_grain (repeated across each
+// player on that team). The reverse is not true -- player columns under
+// team grain require aggregation and stay single-grain.
+export const TEAM_ROW_GRAINS = ['player', 'team']
 
 // Returns a new fields object with each entry shallow-cloned and tagged
 // with the given `row_grains` array. Pure: does not mutate the source.

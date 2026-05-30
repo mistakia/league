@@ -16,3 +16,6 @@ export const ROW_GRAIN_OPTIONS = [
   { value: 'player', label: 'Player' },
   { value: 'team', label: 'Team' }
 ]
+
+export const ROW_GRAIN_TOOLTIP =
+  'What each row in the table represents. Switching prunes columns, filters, and sorts to those compatible with the selected grain.'

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback, useState } from 'react'
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
@@ -24,7 +24,8 @@ import DataViewFilterChips from '@components/data-view-filter-chips'
 import DataViewNotices from '@components/data-view-notices'
 import {
   ROW_GRAIN_DEFAULTS,
-  ROW_GRAIN_OPTIONS
+  ROW_GRAIN_OPTIONS,
+  ROW_GRAIN_TOOLTIP
 } from '@core/data-views/row-grain-defaults'
 
 import './data-views.styl'
@@ -217,32 +218,63 @@ export default function DataViewsPage({
     'player'
   ])[0]
 
+  // Session-scoped per-grain snapshot keyed by view_id. Toggling grain stashes
+  // the current grain's selections; toggling back restores them so the user
+  // doesn't lose work when flipping between Player and Team.
+  const row_grain_snapshots_ref = useRef({})
+
   const on_row_grain_change = useCallback(
     (next_row_grain) => {
       if (next_row_grain === current_row_grain) return
       const prev_table_state = selected_data_view.table_state
-      const row_grain_defaults = ROW_GRAIN_DEFAULTS[next_row_grain]
-      const next_prefix_columns = row_grain_defaults
-        ? row_grain_defaults.prefix_columns
-        : prev_table_state.prefix_columns
+      const view_id = selected_data_view.view_id
+      const snapshots_by_view = row_grain_snapshots_ref.current
+      const view_snapshots = snapshots_by_view[view_id] || {}
 
-      const is_compatible = (column_id) => {
-        const field = data_views_fields[column_id]
-        if (!field || !Array.isArray(field.row_grains)) return true
-        return field.row_grains.includes(next_row_grain)
+      view_snapshots[current_row_grain] = {
+        columns: prev_table_state.columns || [],
+        where: prev_table_state.where || [],
+        sort: prev_table_state.sort || [],
+        prefix_columns: prev_table_state.prefix_columns || []
       }
-      const item_column_id = (item) =>
-        typeof item === 'string' ? item : item?.column_id
-      const filter_items = (items) =>
-        (items || []).filter((item) => is_compatible(item_column_id(item)))
+      snapshots_by_view[view_id] = view_snapshots
 
-      const next_table_state = {
-        ...prev_table_state,
-        row_grain: [next_row_grain],
-        prefix_columns: next_prefix_columns,
-        columns: filter_items(prev_table_state.columns),
-        where: filter_items(prev_table_state.where),
-        sort: filter_items(prev_table_state.sort)
+      const restored = view_snapshots[next_row_grain]
+
+      let next_table_state
+      if (restored) {
+        next_table_state = {
+          ...prev_table_state,
+          row_grain: [next_row_grain],
+          prefix_columns: restored.prefix_columns,
+          columns: restored.columns,
+          where: restored.where,
+          sort: restored.sort
+        }
+      } else {
+        const row_grain_defaults = ROW_GRAIN_DEFAULTS[next_row_grain]
+        const next_prefix_columns = row_grain_defaults
+          ? row_grain_defaults.prefix_columns
+          : prev_table_state.prefix_columns
+
+        const is_compatible = (column_id) => {
+          const field = data_views_fields[column_id]
+          if (!field || !Array.isArray(field.row_grains)) return true
+          return field.row_grains.includes(next_row_grain)
+        }
+        const item_column_id = (item) =>
+          typeof item === 'string' ? item : item?.column_id
+        const filter_items = (items) =>
+          (items || []).filter((item) => is_compatible(item_column_id(item)))
+
+        next_table_state = {
+          ...prev_table_state,
+          row_grain: [next_row_grain],
+          prefix_columns: next_prefix_columns,
+          columns: filter_items(prev_table_state.columns),
+          where: filter_items(prev_table_state.where),
+          sort: filter_items(prev_table_state.sort)
+        }
       }
       on_view_change(
         { ...selected_data_view, table_state: next_table_state },
@@ -428,6 +460,7 @@ export default function DataViewsPage({
         on_save_view={save_data_view}
         row_grain_options={ROW_GRAIN_OPTIONS}
         on_row_grain_change={on_row_grain_change}
+        row_grain_tooltip={ROW_GRAIN_TOOLTIP}
         table_state={filtered_table_state}
         saved_table_state={filtered_saved_table_state}
         on_revert_view={revert_data_view}
