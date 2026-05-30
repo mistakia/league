@@ -62,6 +62,10 @@ const resolve_year_range = ({ query_context, params, source }) => {
 
 export const add_cte = ({ query_context, params = {}, source = null }) => {
   const { players_query } = query_context
+  if (query_context.registered_ctes.has(CTE_NAME)) {
+    query_context.player_year_teams_cte_name = CTE_NAME
+    return
+  }
   const year_range = resolve_year_range({ query_context, params, source })
 
   const inner_query = db('player_gamelogs')
@@ -85,6 +89,7 @@ export const add_cte = ({ query_context, params = {}, source = null }) => {
     .groupBy('pid', 'year')
 
   players_query.withMaterialized(CTE_NAME, cte_query)
+  query_context.registered_ctes.add(CTE_NAME)
   query_context.player_year_teams_cte_name = CTE_NAME
   query_context.player_year_teams_year_range = year_range
 }
