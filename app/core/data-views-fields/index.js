@@ -34,11 +34,11 @@ import nfl_team_seasonlogs_table_fields from './nfl-team-seasonlogs-table-fields
 import player_pfr_season_value_table_fields from './player-pfr-season-value-table-fields'
 import pff_team_grades_table_fields from './pff-team-grades-table-fields'
 import {
-  with_subjects,
-  with_subjects_by_prefix,
-  PLAYER_SUBJECT,
-  TEAM_SUBJECT
-} from './subjects'
+  with_row_grains,
+  with_row_grains_by_prefix,
+  PLAYER_ROW_GRAINS,
+  TEAM_ROW_GRAINS
+} from './row-grains'
 
 // Player Column Fields
 // header_label - string, required
@@ -94,42 +94,42 @@ export function PlayerTableFields({
   // nfl_team_schedule
 }) {
   const fields = {
-    ...with_subjects(
+    ...with_row_grains(
       fantasy_league_table_fields({ week, is_logged_in }),
-      PLAYER_SUBJECT
+      PLAYER_ROW_GRAINS
     ),
-    ...with_subjects(
+    ...with_row_grains(
       player_pff_seasonlogs_table_fields({ is_logged_in }),
-      PLAYER_SUBJECT
+      PLAYER_ROW_GRAINS
     ),
-    ...with_subjects(player_seasonlogs_table_fields(), PLAYER_SUBJECT),
+    ...with_row_grains(player_seasonlogs_table_fields(), PLAYER_ROW_GRAINS),
 
-    ...with_subjects(projected_table_fields({ week }), PLAYER_SUBJECT),
-    ...with_subjects(player_table_fields({ is_logged_in }), PLAYER_SUBJECT),
-    ...with_subjects(team_table_fields, TEAM_SUBJECT),
+    ...with_row_grains(projected_table_fields({ week }), PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_table_fields({ is_logged_in }), PLAYER_ROW_GRAINS),
+    ...with_row_grains(team_table_fields, TEAM_ROW_GRAINS),
 
-    ...with_subjects(scoring_format_logs_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(league_format_logs_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(player_stats_from_plays_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(betting_market_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(espn_score_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(fantasy_points_from_plays_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(team_stats_from_plays_table_fields, TEAM_SUBJECT),
-    ...with_subjects(keeptradecut_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(player_games_played_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(player_contract_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(player_rankings_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(player_adp_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(player_dfs_salaries_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(practice_table_fields, PLAYER_SUBJECT),
-    ...with_subjects_by_prefix(espn_line_win_rates_table_fields),
-    ...with_subjects(game_table_fields, TEAM_SUBJECT),
-    ...with_subjects(player_snaps_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(player_routes_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(team_dvoa_table_fields, TEAM_SUBJECT),
-    ...with_subjects(nfl_team_seasonlogs_table_fields, TEAM_SUBJECT),
-    ...with_subjects(player_pfr_season_value_table_fields, PLAYER_SUBJECT),
-    ...with_subjects(pff_team_grades_table_fields, TEAM_SUBJECT)
+    ...with_row_grains(scoring_format_logs_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(league_format_logs_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_stats_from_plays_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(betting_market_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(espn_score_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(fantasy_points_from_plays_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(team_stats_from_plays_table_fields, TEAM_ROW_GRAINS),
+    ...with_row_grains(keeptradecut_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_games_played_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_contract_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_rankings_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_adp_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_dfs_salaries_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(practice_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains_by_prefix(espn_line_win_rates_table_fields),
+    ...with_row_grains(game_table_fields, TEAM_ROW_GRAINS),
+    ...with_row_grains(player_snaps_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(player_routes_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(team_dvoa_table_fields, TEAM_ROW_GRAINS),
+    ...with_row_grains(nfl_team_seasonlogs_table_fields, TEAM_ROW_GRAINS),
+    ...with_row_grains(player_pfr_season_value_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(pff_team_grades_table_fields, TEAM_ROW_GRAINS)
   }
 
   for (const [key, value] of Object.entries(fields)) {

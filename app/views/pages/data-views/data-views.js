@@ -23,9 +23,9 @@ import { API_URL } from '@core/constants'
 import DataViewFilterChips from '@components/data-view-filter-chips'
 import DataViewNotices from '@components/data-view-notices'
 import {
-  SUBJECT_DEFAULTS,
-  SUBJECT_OPTIONS
-} from '@core/data-views/subject-defaults'
+  ROW_GRAIN_DEFAULTS,
+  ROW_GRAIN_OPTIONS
+} from '@core/data-views/row-grain-defaults'
 
 import './data-views.styl'
 
@@ -116,7 +116,7 @@ export default function DataViewsPage({
         where,
         sort,
         splits,
-        subjects,
+        row_grain,
         q,
         rank_aggregation,
         scatter_plot_options,
@@ -143,7 +143,7 @@ export default function DataViewsPage({
           where,
           prefix_columns,
           splits,
-          subjects,
+          row_grain,
           q,
           rank_aggregation,
           scatter_plot_options,
@@ -213,23 +213,23 @@ export default function DataViewsPage({
     data_view_changed(data_view, view_change_params)
   }
 
-  const current_subject = (selected_data_view.table_state.subjects || [
+  const current_row_grain = (selected_data_view.table_state.row_grain || [
     'player'
   ])[0]
 
-  const on_subject_change = useCallback(
-    (next_subject) => {
-      if (next_subject === current_subject) return
+  const on_row_grain_change = useCallback(
+    (next_row_grain) => {
+      if (next_row_grain === current_row_grain) return
       const prev_table_state = selected_data_view.table_state
-      const subject_defaults = SUBJECT_DEFAULTS[next_subject]
-      const next_prefix_columns = subject_defaults
-        ? subject_defaults.prefix_columns
+      const row_grain_defaults = ROW_GRAIN_DEFAULTS[next_row_grain]
+      const next_prefix_columns = row_grain_defaults
+        ? row_grain_defaults.prefix_columns
         : prev_table_state.prefix_columns
 
       const is_compatible = (column_id) => {
         const field = data_views_fields[column_id]
-        if (!field || !Array.isArray(field.subjects)) return true
-        return field.subjects.includes(next_subject)
+        if (!field || !Array.isArray(field.row_grains)) return true
+        return field.row_grains.includes(next_row_grain)
       }
       const item_column_id = (item) =>
         typeof item === 'string' ? item : item?.column_id
@@ -238,7 +238,7 @@ export default function DataViewsPage({
 
       const next_table_state = {
         ...prev_table_state,
-        subjects: [next_subject],
+        row_grain: [next_row_grain],
         prefix_columns: next_prefix_columns,
         columns: filter_items(prev_table_state.columns),
         where: filter_items(prev_table_state.where),
@@ -250,7 +250,7 @@ export default function DataViewsPage({
       )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [current_subject, selected_data_view, data_views_fields, data_view_changed]
+    [current_row_grain, selected_data_view, data_views_fields, data_view_changed]
   )
 
   const on_select_view = (args) => {
@@ -426,8 +426,8 @@ export default function DataViewsPage({
         metadata={data_view_request.metadata}
         on_view_change={on_view_change}
         on_save_view={save_data_view}
-        subject_options={SUBJECT_OPTIONS}
-        on_subject_change={on_subject_change}
+        subject_options={ROW_GRAIN_OPTIONS}
+        on_subject_change={on_row_grain_change}
         table_state={filtered_table_state}
         saved_table_state={filtered_saved_table_state}
         on_revert_view={revert_data_view}
