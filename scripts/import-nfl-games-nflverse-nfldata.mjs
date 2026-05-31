@@ -76,6 +76,7 @@ const format_game = (game) => ({
 
   stad: game.stadium?.trim() || null,
 
+  // nfl_games.{home,away}_play_caller are owned by scripts/import-nfl-coaches.mjs (samhoppen source) -- do not add them here.
   away_coach: game.away_coach?.trim() || null,
   home_coach: game.home_coach?.trim() || null,
 
