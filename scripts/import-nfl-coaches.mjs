@@ -387,10 +387,19 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
       .first()
     const matched = Number(matched_row?.matched || 0)
     const year_unresolved = unresolved.filter((u) => Number(u.season) === year).length
+    const unresolved_rate = bridge_total ? year_unresolved / bridge_total : 0
     console.log(
-      `[import-nfl-coaches] year=${year} games_csv=${games_csv} games_matched=${matched} populated=${populated_total} coaches=${coaches_upserted} unresolved=${year_unresolved}`
+      `[import-nfl-coaches] year=${year} games_csv=${games_csv} games_matched=${matched} populated=${populated_total} coaches=${coaches_upserted} unresolved=${year_unresolved} unresolved_rate=${unresolved_rate.toFixed(3)}`
     )
-    year_results.push({ year, games_csv, bridge: bridge_total, populated: populated_total, matched })
+    year_results.push({
+      year,
+      games_csv,
+      bridge: bridge_total,
+      populated: populated_total,
+      matched,
+      unresolved: year_unresolved,
+      unresolved_rate
+    })
   }
 
   write_unresolved(unresolved)
@@ -398,6 +407,20 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
   if (!total_bridge) {
     throw new Error(
       `Zero nfl_game_coaches rows ingested across ${target_years.length} target years`
+    )
+  }
+
+  // Current-year regression detector. Floor on resolution quality for
+  // the season the weekly `--since current` run is actually populating.
+  // > 10% unresolved-cell-to-bridge-row ratio means the resolver has
+  // drifted (new name alias, history-row team mis-attribution, etc.)
+  // and downstream consumers will see materially gappy data.
+  const current_year_result = year_results.find(
+    (r) => r.year === current_season.year
+  )
+  if (current_year_result && current_year_result.bridge > 0 && current_year_result.unresolved_rate > 0.1) {
+    throw new Error(
+      `pipeline_failure: current-year (${current_season.year}) unresolved_rate=${current_year_result.unresolved_rate.toFixed(3)} exceeds 0.10 threshold (${current_year_result.unresolved} unresolved cells / ${current_year_result.bridge} bridge rows)`
     )
   }
 
