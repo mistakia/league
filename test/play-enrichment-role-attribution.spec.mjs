@@ -348,6 +348,48 @@ describe('enrich_player_identifications single-player family ownership', functio
   })
 })
 
+describe('enrich_player_identifications psr family sack-row attribution', function () {
+  const esbid = 1
+  const playId = 100
+
+  it('statId 20 alone (sack row, 2023+ feed shape) attributes psr to the QB', () => {
+    // 2023+ upstream feed: sack rows omit statIds 14/15/16. statId 20 (Pass
+    // Sack) is charged to the QB. statIds 110/120 name the sacker, not the QB.
+    const play_row = { esbid, playId, sk: true }
+    const stats = [
+      play_stat({ esbid, playId, statId: 20, gsisId: 'GSIS_QB' }),
+      play_stat({ esbid, playId, statId: 79, gsisId: 'GSIS_SACKER' }),
+      play_stat({ esbid, playId, statId: 110, gsisId: 'GSIS_SACKER' }),
+      play_stat({ esbid, playId, statId: 120, gsisId: 'GSIS_SACKER' })
+    ]
+    const cache = make_player_cache({
+      GSIS_QB: 'PID_QB',
+      GSIS_SACKER: 'PID_SACKER'
+    })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.psr_pid).to.equal('PID_QB')
+  })
+
+  it('normal pass completion (statIds 14/15/16) still resolves psr correctly', () => {
+    // Regression guard: legacy non-sack pass-completion shape unaffected.
+    const play_row = { esbid, playId }
+    const stats = [
+      play_stat({ esbid, playId, statId: 15, gsisId: 'GSIS_QB' }),
+      play_stat({ esbid, playId, statId: 16, gsisId: 'GSIS_QB' }),
+      play_stat({ esbid, playId, statId: 21, gsisId: 'GSIS_WR' })
+    ]
+    const cache = make_player_cache({ GSIS_QB: 'PID_QB', GSIS_WR: 'PID_WR' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.psr_pid).to.equal('PID_QB')
+  })
+})
+
 describe('compute_play_changes defensive: lhs undefined on clearable prop', function () {
   it('rhs null with lhs undefined (Knex never-set column) is a no-op', () => {
     // deep-diff emits kind:N for new keys with rhs:null when lhs is

@@ -137,7 +137,8 @@ export const enrich_player_identifications = (
   // 93 is empty -- it stays on the legacy map_player_field path below.
   const owned_single_player_families = [
     { gsis: 'bc_gsis', pid: 'bc_pid', stat_ids: [10, 11] },
-    { gsis: 'psr_gsis', pid: 'psr_pid', stat_ids: [14, 15, 16] },
+    // statId 20 (Pass Sack) covers sack rows where the upstream feed omits 14/15/16 (2023+).
+    { gsis: 'psr_gsis', pid: 'psr_pid', stat_ids: [14, 15, 16, 20] },
     { gsis: 'trg_gsis', pid: 'trg_pid', stat_ids: [21, 22] },
     { gsis: 'intp_gsis', pid: 'intp_pid', stat_ids: [25, 26] },
     {
