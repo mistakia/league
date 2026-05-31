@@ -120,6 +120,19 @@ const NAME_ALIASES = {
   'Jim L. Mora': 'Jim Mora'
 }
 
+// Manual (name -> {pfr_coach_id, full_name}) overrides for coaches that
+// have a /coaches/ page on PFR but are absent from samhoppen's
+// yearly_coaching_history.csv (typically new hires PFR has indexed but
+// samhoppen has not yet published). Each entry is verified by a direct
+// PFR /coaches/<id>.htm lookup. Used as the final fallback in
+// resolve_coach and pre-seeded into the nfl_coaches upsert so the
+// override coach is present as an FK target.
+const NAME_OVERRIDES = {
+  // PFR spells him "Zak Kuhr"; samhoppen all_playcallers writes "Zac Kuhr".
+  // NE 2025 mid-season DC after Terrell Williams.
+  'Zac Kuhr': { pfr_coach_id: 'KuhrZa0', full_name: 'Zak Kuhr' }
+}
+
 const canonicalize_name = (s) => {
   if (!s) return ''
   let n = s.trim()
@@ -223,6 +236,11 @@ const resolve_coach = ({ name, team, season, role, game_id, week, resolution, un
   if (name_set && name_set.size === 1) {
     fallback_stats.name_only++
     return [...name_set][0]
+  }
+  const override = NAME_OVERRIDES[trimmed]
+  if (override) {
+    fallback_stats.name_override++
+    return override.pfr_coach_id
   }
   unresolved.push({
     season,
@@ -406,9 +424,13 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
     `resolution map: ${resolution.team_season_map.size} (name,team,season) triples; ${resolution.name_map.size} canonical names; ${coaches.size} distinct coaches`
   )
 
+  // Merge in NAME_OVERRIDES so override pfr_coach_ids exist as FK targets.
+  for (const { pfr_coach_id, full_name } of Object.values(NAME_OVERRIDES)) {
+    if (!coaches.has(pfr_coach_id)) coaches.set(pfr_coach_id, full_name)
+  }
   // Upsert nfl_coaches up front (single transaction across the whole run).
   const coaches_upserted = await upsert_coaches(coaches)
-  const fallback_stats = { name_season: 0, name_only: 0 }
+  const fallback_stats = { name_season: 0, name_only: 0, name_override: 0 }
 
   const unresolved = []
   let total_bridge = 0
@@ -462,7 +484,7 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
 
   write_unresolved(unresolved)
   log(
-    `fallback resolutions: name_season=${fallback_stats.name_season} name_only=${fallback_stats.name_only}`
+    `fallback resolutions: name_season=${fallback_stats.name_season} name_only=${fallback_stats.name_only} name_override=${fallback_stats.name_override}`
   )
 
   if (!total_bridge) {
