@@ -104,14 +104,39 @@ const parse_csv = (text, expected_headers) =>
       })
   })
 
+// Explicit alias map for known spellings where all_playcallers.csv
+// diverges from yearly_coaching_history.csv (and PFR). Keep small and
+// only add entries after confirming the same person from both sides.
+const NAME_ALIASES = {
+  'Billy Davis': 'Bill Davis'
+}
+
+const canonicalize_name = (s) => {
+  if (!s) return ''
+  let n = s.trim()
+  if (NAME_ALIASES[n]) n = NAME_ALIASES[n]
+  // Strip honorific suffixes like "Jr.", "Sr.", "II", "III", "IV"
+  // (samhoppen all_playcallers writes "Joe Whitt Jr." while
+  // yearly_coaching_history writes "Joe Whitt" for the same coach).
+  n = n.replace(/[\s,]+(Jr|Sr|II|III|IV)\.?$/i, '')
+  return n.replace(/\s+/g, ' ').trim()
+}
+
 const build_resolution_map = (history_rows) => {
-  // Key: `${name}|${current_abbrev}|${season}` -> pfr_coach_id
-  // Also collect distinct (pfr_coach_id, name) for nfl_coaches upsert.
-  const map = new Map()
+  // Primary key: `${canonical_name}|${current_abbrev}|${season}` -> id.
+  // Fallback indexes handle two upstream-quirk failure modes:
+  //   - team mis-attribution: history row pegs the coach to a team
+  //     he didn't actually play-call for that season (Olson 2014 LVR vs
+  //     actual JAX). Resolved by (canonical_name, season).
+  //   - team + season mis-attribution: rarer; resolved by canonical_name
+  //     alone when there is no ambiguity across all of history.
+  const team_season_map = new Map()
+  const name_season_map = new Map()
+  const name_map = new Map()
   const coaches = new Map()
   const unknown_long_names = new Set()
   for (const row of history_rows) {
-    const coach = row.coach?.trim()
+    const raw_coach = row.coach?.trim()
     // PFR IDs in this source sometimes carry a leading path component like
     // /coaches/ or /executives/ (head coaches who also held GM roles).
     // The stable identifier is the trailing basename (e.g. BeliBi0).
@@ -119,21 +144,28 @@ const build_resolution_map = (history_rows) => {
     const coach_id = raw_id ? raw_id.split('/').pop() : null
     const team_name = row.team_name?.trim()
     const season = row.season?.trim()
-    if (!coach || !coach_id || !team_name || !season) continue
+    if (!raw_coach || !coach_id || !team_name || !season) continue
+    const coach = canonicalize_name(raw_coach)
     const abbrev = LONG_NAME_TO_ABBREV[team_name]
     if (!abbrev) {
       unknown_long_names.add(team_name)
       continue
     }
-    map.set(`${coach}|${abbrev}|${season}`, coach_id)
-    if (!coaches.has(coach_id)) coaches.set(coach_id, coach)
+    team_season_map.set(`${coach}|${abbrev}|${season}`, coach_id)
+    const ns_key = `${coach}|${season}`
+    if (!name_season_map.has(ns_key)) name_season_map.set(ns_key, new Set())
+    name_season_map.get(ns_key).add(coach_id)
+    if (!name_map.has(coach)) name_map.set(coach, new Set())
+    name_map.get(coach).add(coach_id)
+    // Preserve the original (un-canonicalized) name for nfl_coaches.full_name.
+    if (!coaches.has(coach_id)) coaches.set(coach_id, raw_coach)
   }
   if (unknown_long_names.size) {
     log(
       `WARN: ${unknown_long_names.size} unknown long_names in yearly_coaching_history.csv: ${Array.from(unknown_long_names).join(', ')}`
     )
   }
-  return { map, coaches }
+  return { team_season_map, name_season_map, name_map, coaches }
 }
 
 const assert_abbrev_coverage = (playcaller_rows, years) => {
@@ -167,24 +199,36 @@ const write_unresolved = (entries) => {
   log(`wrote ${entries.length} unresolved rows to ${UNRESOLVED_LOG_PATH}`)
 }
 
-const resolve_coach = ({ name, team, season, role, game_id, week, resolution_map, unresolved }) => {
+const resolve_coach = ({ name, team, season, role, game_id, week, resolution, unresolved, fallback_stats }) => {
   if (!name || !name.trim()) return null
   const trimmed = name.trim()
-  const key = `${trimmed}|${team}|${season}`
-  const pfr_id = resolution_map.get(key)
-  if (!pfr_id) {
-    unresolved.push({
-      season,
-      week,
-      team,
-      game_id,
-      name: trimmed,
-      role,
-      reason: 'no_pfr_coach_id_for_triple'
-    })
-    return null
+  const canonical = canonicalize_name(trimmed)
+  const primary = resolution.team_season_map.get(`${canonical}|${team}|${season}`)
+  if (primary) return primary
+  const ns_set = resolution.name_season_map.get(`${canonical}|${season}`)
+  if (ns_set && ns_set.size === 1) {
+    fallback_stats.name_season++
+    return [...ns_set][0]
   }
-  return pfr_id
+  const name_set = resolution.name_map.get(canonical)
+  if (name_set && name_set.size === 1) {
+    fallback_stats.name_only++
+    return [...name_set][0]
+  }
+  unresolved.push({
+    season,
+    week,
+    team,
+    game_id,
+    name: trimmed,
+    role,
+    reason: ns_set && ns_set.size > 1
+      ? 'name_season_ambiguous'
+      : name_set && name_set.size > 1
+        ? 'name_only_ambiguous'
+        : 'no_pfr_coach_id_for_name'
+  })
+  return null
 }
 
 const upsert_coaches = async (coaches) => {
@@ -201,13 +245,13 @@ const upsert_coaches = async (coaches) => {
   return rows.length
 }
 
-const process_week = async ({ year, week, rows, resolution_map, unresolved }) => {
+const process_week = async ({ year, week, rows, resolution, unresolved, fallback_stats }) => {
   const bridge_rows = []
   for (const row of rows) {
     const game_id = row.game_id?.trim()
     const team = row.team?.trim()
     if (!game_id || !team) continue
-    const ctx = { season: year, week, team, game_id, resolution_map, unresolved }
+    const ctx = { season: year, week, team, game_id, resolution, unresolved, fallback_stats }
     bridge_rows.push({
       nflverse_game_id: game_id,
       team,
@@ -347,11 +391,15 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
 
   assert_abbrev_coverage(playcaller_rows, target_years)
 
-  const { map: resolution_map, coaches } = build_resolution_map(history_rows)
-  log(`resolution map: ${resolution_map.size} (name,team,season) triples; ${coaches.size} distinct coaches`)
+  const resolution = build_resolution_map(history_rows)
+  const { coaches } = resolution
+  log(
+    `resolution map: ${resolution.team_season_map.size} (name,team,season) triples; ${resolution.name_map.size} canonical names; ${coaches.size} distinct coaches`
+  )
 
   // Upsert nfl_coaches up front (single transaction across the whole run).
   const coaches_upserted = await upsert_coaches(coaches)
+  const fallback_stats = { name_season: 0, name_only: 0 }
 
   const unresolved = []
   let total_bridge = 0
@@ -372,8 +420,9 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
         year,
         week,
         rows,
-        resolution_map,
-        unresolved
+        resolution,
+        unresolved,
+        fallback_stats
       })
       bridge_total += bridge
       populated_total += populated
@@ -403,6 +452,9 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
   }
 
   write_unresolved(unresolved)
+  log(
+    `fallback resolutions: name_season=${fallback_stats.name_season} name_only=${fallback_stats.name_only}`
+  )
 
   if (!total_bridge) {
     throw new Error(
@@ -424,7 +476,12 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
     )
   }
 
-  return { years: year_results, coaches: coaches_upserted, unresolved: unresolved.length }
+  return {
+    years: year_results,
+    coaches: coaches_upserted,
+    unresolved: unresolved.length,
+    fallback: fallback_stats
+  }
 }
 
 const main = async () => {
