@@ -30,6 +30,9 @@ ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_scoring_format_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_off_play_caller_pfr_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_head_coach_pfr_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_def_play_caller_pfr_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_formats DROP CONSTRAINT IF EXISTS league_formats_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_format_player_seasonlogs DROP CONSTRAINT IF EXISTS league_format_player_seasonlogs_league_format_id_fkey;
@@ -133,6 +136,7 @@ DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_dl_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_db_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_counts_idx;
 DROP INDEX IF EXISTS public.nfl_games_sportradar_game_id_idx;
+DROP INDEX IF EXISTS public.nfl_game_coaches_team;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_tid_year_idx;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_pid_year_idx;
 DROP INDEX IF EXISTS public.idx_weekly_market_selections_analysis_cache_composite;
@@ -535,6 +539,8 @@ ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS n
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl_plays_player_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_passer DROP CONSTRAINT IF EXISTS nfl_plays_passer_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_matchup_stats DROP CONSTRAINT IF EXISTS nfl_matchup_stats_pkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_pkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_pkey;
@@ -853,8 +859,10 @@ DROP TABLE IF EXISTS public.nfl_play_stats;
 DROP TABLE IF EXISTS public.nfl_matchup_stats;
 DROP TABLE IF EXISTS public.nfl_games_changelog;
 DROP TABLE IF EXISTS public.nfl_games;
+DROP TABLE IF EXISTS public.nfl_game_coaches;
 DROP TABLE IF EXISTS public.nfl_draft_rankings_index;
 DROP TABLE IF EXISTS public.nfl_draft_rankings_history;
+DROP TABLE IF EXISTS public.nfl_coaches;
 DROP SEQUENCE IF EXISTS public.matchups_uid_seq;
 DROP TABLE IF EXISTS public.matchups;
 DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
@@ -4536,6 +4544,17 @@ ALTER SEQUENCE public.matchups_uid_seq OWNED BY public.matchups.uid;
 
 
 --
+-- Name: nfl_coaches; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_coaches (
+    pfr_coach_id character varying(16) NOT NULL,
+    full_name character varying(80) NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: nfl_draft_rankings_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4564,6 +4583,20 @@ CREATE TABLE public.nfl_draft_rankings_index (
     "position" character varying(4),
     "timestamp" bigint NOT NULL,
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL
+);
+
+
+--
+-- Name: nfl_game_coaches; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_game_coaches (
+    nflverse_game_id character varying(15) NOT NULL,
+    team character varying(3) NOT NULL,
+    head_coach_pfr_id character varying(16),
+    off_play_caller_pfr_id character varying(16),
+    def_play_caller_pfr_id character varying(16),
+    ingested_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -27729,6 +27762,22 @@ ALTER TABLE ONLY public.league_user_careerlogs
 
 
 --
+-- Name: nfl_coaches nfl_coaches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_coaches
+    ADD CONSTRAINT nfl_coaches_pkey PRIMARY KEY (pfr_coach_id);
+
+
+--
+-- Name: nfl_game_coaches nfl_game_coaches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_game_coaches
+    ADD CONSTRAINT nfl_game_coaches_pkey PRIMARY KEY (nflverse_game_id, team);
+
+
+--
 -- Name: nfl_matchup_stats nfl_matchup_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -30880,6 +30929,13 @@ CREATE INDEX league_team_player_seasonlogs_lid_pid_year_idx ON public.league_tea
 --
 
 CREATE INDEX league_team_player_seasonlogs_lid_tid_year_idx ON public.league_team_player_seasonlogs USING btree (lid, tid, year);
+
+
+--
+-- Name: nfl_game_coaches_team; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_game_coaches_team ON public.nfl_game_coaches USING btree (team);
 
 
 --
@@ -55300,6 +55356,30 @@ ALTER TABLE ONLY public.league_team_player_seasonlogs
 
 
 --
+-- Name: nfl_game_coaches nfl_game_coaches_def_play_caller_pfr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_game_coaches
+    ADD CONSTRAINT nfl_game_coaches_def_play_caller_pfr_id_fkey FOREIGN KEY (def_play_caller_pfr_id) REFERENCES public.nfl_coaches(pfr_coach_id);
+
+
+--
+-- Name: nfl_game_coaches nfl_game_coaches_head_coach_pfr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_game_coaches
+    ADD CONSTRAINT nfl_game_coaches_head_coach_pfr_id_fkey FOREIGN KEY (head_coach_pfr_id) REFERENCES public.nfl_coaches(pfr_coach_id);
+
+
+--
+-- Name: nfl_game_coaches nfl_game_coaches_off_play_caller_pfr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_game_coaches
+    ADD CONSTRAINT nfl_game_coaches_off_play_caller_pfr_id_fkey FOREIGN KEY (off_play_caller_pfr_id) REFERENCES public.nfl_coaches(pfr_coach_id);
+
+
+--
 -- Name: ngs_prospect_scores_history ngs_prospect_scores_history_pid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -55977,6 +56057,13 @@ GRANT SELECT ON SEQUENCE public.matchups_uid_seq TO league_readonly;
 
 
 --
+-- Name: TABLE nfl_coaches; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.nfl_coaches TO league_readonly;
+
+
+--
 -- Name: TABLE nfl_draft_rankings_history; Type: ACL; Schema: public; Owner: -
 --
 
@@ -55988,6 +56075,13 @@ GRANT SELECT ON TABLE public.nfl_draft_rankings_history TO league_readonly;
 --
 
 GRANT SELECT ON TABLE public.nfl_draft_rankings_index TO league_readonly;
+
+
+--
+-- Name: TABLE nfl_game_coaches; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.nfl_game_coaches TO league_readonly;
 
 
 --
