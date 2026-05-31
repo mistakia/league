@@ -70,14 +70,26 @@ const fetch_csv = async (filename) => {
 const parse_csv = (text, expected_headers) =>
   new Promise((resolve, reject) => {
     const rows = []
-    let headers_checked = false
-    Readable.from(text)
-      .pipe(csv())
+    let settled = false
+    const stream = Readable.from(text).pipe(csv())
+    const fail = (err) => {
+      if (settled) return
+      settled = true
+      stream.destroy()
+      reject(err)
+    }
+    const succeed = (value) => {
+      if (settled) return
+      settled = true
+      resolve(value)
+    }
+    let saw_headers = false
+    stream
       .on('headers', (headers) => {
-        headers_checked = true
+        saw_headers = true
         const missing = expected_headers.filter((h) => !headers.includes(h))
         if (missing.length) {
-          reject(
+          fail(
             new Error(
               `CSV header drift: missing ${JSON.stringify(missing)} (got ${JSON.stringify(headers)})`
             )
@@ -85,13 +97,10 @@ const parse_csv = (text, expected_headers) =>
         }
       })
       .on('data', (row) => rows.push(row))
-      .on('error', reject)
+      .on('error', fail)
       .on('end', () => {
-        if (!headers_checked) {
-          reject(new Error('CSV had no headers'))
-        } else {
-          resolve(rows)
-        }
+        if (!saw_headers) fail(new Error('CSV had no headers'))
+        else succeed(rows)
       })
   })
 
@@ -306,8 +315,14 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
       since === 'current' || since == null
         ? current_season.year
         : Number(since)
-    if (Number.isNaN(start)) {
-      throw new Error(`Invalid --since value: ${since}`)
+    if (
+      !Number.isInteger(start) ||
+      start < 1990 ||
+      start > current_season.year + 1
+    ) {
+      throw new Error(
+        `Invalid --since value: ${since} (expected integer year between 1990 and ${current_season.year + 1}, or 'current')`
+      )
     }
     target_years = all_years.filter((y) => y >= start)
   }
@@ -327,7 +342,8 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
   const coaches_upserted = await upsert_coaches(coaches)
 
   const unresolved = []
-  const per_year_summary = []
+  let total_bridge = 0
+  const year_results = []
 
   for (const year of target_years) {
     const year_rows = playcaller_rows.filter((r) => Number(r.season) === year)
@@ -350,39 +366,30 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
       bridge_total += bridge
       populated_total += populated
     }
+    total_bridge += bridge_total
 
-    // Post-import verification: matched games for this year via JOIN.
     const matched_row = await db('nfl_game_coaches as gc')
       .join('nfl_games as g', 'g.nflverse_game_id', 'gc.nflverse_game_id')
       .where('g.year', year)
       .countDistinct('gc.nflverse_game_id as matched')
       .first()
     const matched = Number(matched_row?.matched || 0)
-
-    per_year_summary.push({ year, games_csv, bridge: bridge_total, populated: populated_total, matched })
-    log(
-      `[import-nfl-coaches] year=${year} games_csv=${games_csv} games_matched=${matched} populated=${populated_total} coaches=${coaches_upserted} unresolved=${unresolved.filter((u) => u.season == year).length}`
+    const year_unresolved = unresolved.filter((u) => Number(u.season) === year).length
+    console.log(
+      `[import-nfl-coaches] year=${year} games_csv=${games_csv} games_matched=${matched} populated=${populated_total} coaches=${coaches_upserted} unresolved=${year_unresolved}`
     )
+    year_results.push({ year, games_csv, bridge: bridge_total, populated: populated_total, matched })
   }
 
   write_unresolved(unresolved)
 
-  // Final-line summary for log scraping (one line per requested year).
-  for (const s of per_year_summary) {
-    console.log(
-      `[import-nfl-coaches] year=${s.year} games_csv=${s.games_csv} games_matched=${s.matched} populated=${s.populated} coaches=${coaches_upserted} unresolved=${unresolved.filter((u) => Number(u.season) === s.year).length}`
-    )
-  }
-
-  // Zero-row guard.
-  const total_bridge = per_year_summary.reduce((acc, s) => acc + s.bridge, 0)
   if (!total_bridge) {
     throw new Error(
       `Zero nfl_game_coaches rows ingested across ${target_years.length} target years`
     )
   }
 
-  return { years: per_year_summary, coaches: coaches_upserted, unresolved: unresolved.length }
+  return { years: year_results, coaches: coaches_upserted, unresolved: unresolved.length }
 }
 
 const main = async () => {
@@ -401,6 +408,7 @@ const main = async () => {
     console.error(err)
     exit_code = 1
   }
+  await db.destroy()
   process.exit(exit_code)
 }
 

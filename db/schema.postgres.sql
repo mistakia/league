@@ -136,6 +136,7 @@ DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_dl_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_db_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_counts_idx;
 DROP INDEX IF EXISTS public.nfl_games_sportradar_game_id_idx;
+DROP INDEX IF EXISTS public.nfl_games_nflverse_game_id;
 DROP INDEX IF EXISTS public.nfl_game_coaches_team;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_tid_year_idx;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_pid_year_idx;
@@ -30936,6 +30937,13 @@ CREATE INDEX league_team_player_seasonlogs_lid_tid_year_idx ON public.league_tea
 --
 
 CREATE INDEX nfl_game_coaches_team ON public.nfl_game_coaches USING btree (team);
+
+
+--
+-- Name: nfl_games_nflverse_game_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_games_nflverse_game_id ON public.nfl_games USING btree (nflverse_game_id);
 
 
 --
