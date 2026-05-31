@@ -307,6 +307,18 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
     new Set(playcaller_rows.map((r) => Number(r.season)).filter((y) => !Number.isNaN(y)))
   ).sort((a, b) => a - b)
 
+  // Stale-feed guard. The header check catches structural drift and the
+  // zero-bridge guard at the end catches total failure, but a feed that
+  // silently stops updating mid-life (samhoppen has done this before)
+  // sails past both. If the newest season in the feed is older than last
+  // year, treat it as stale.
+  const max_year = all_years[all_years.length - 1]
+  if (max_year != null && max_year < current_season.year - 1) {
+    throw new Error(
+      `samhoppen feed appears stale: max season in all_playcallers.csv is ${max_year}, expected >= ${current_season.year - 1}`
+    )
+  }
+
   let target_years
   if (backfill) {
     target_years = all_years
