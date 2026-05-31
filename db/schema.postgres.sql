@@ -4551,7 +4551,8 @@ ALTER SEQUENCE public.matchups_uid_seq OWNED BY public.matchups.uid;
 CREATE TABLE public.nfl_coaches (
     pfr_coach_id character varying(16) NOT NULL,
     full_name character varying(80) NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT nfl_coaches_pfr_coach_id_basename CHECK (((pfr_coach_id)::text ~ '^[A-Za-z][A-Za-z0-9'']*[0-9]$'::text))
 );
 
 
