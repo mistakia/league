@@ -1,3 +1,5 @@
+// League chat content only (transaction notifications to the league
+// Discord channel). Operational alerts must go through `base signal emit`.
 export default async function ({ discord_webhook_url, message }) {
   // prevent notifications in development environment
   if (
