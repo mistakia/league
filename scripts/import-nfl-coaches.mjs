@@ -108,7 +108,16 @@ const parse_csv = (text, expected_headers) =>
 // diverges from yearly_coaching_history.csv (and PFR). Keep small and
 // only add entries after confirming the same person from both sides.
 const NAME_ALIASES = {
-  'Billy Davis': 'Bill Davis'
+  'Billy Davis': 'Bill Davis',
+  'Mike Shannahan': 'Mike Shanahan',
+  'Don Beraux': 'Don Breaux',
+  'Johnnie Lynn': 'Johnny Lynn',
+  // "Jim L. Mora" is Jim Mora Jr (middle name Lee); SF DC 1999-2003
+  // per yearly_coaching_history. Aliasing to "Jim Mora" routes the
+  // team_season_map lookup to MoraJi1 via the (name, team, season)
+  // key, which correctly distinguishes him from his father MoraJi0
+  // (whose 1999-2001 IND HC entries also key as "Jim Mora").
+  'Jim L. Mora': 'Jim Mora'
 }
 
 const canonicalize_name = (s) => {
