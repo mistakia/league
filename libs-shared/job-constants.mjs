@@ -145,7 +145,10 @@ export const job_types = {
   IMPORT_NFLVERSE_INJURIES: 121,
   IMPORT_PLAYERS_NFL: 122,
   GENERATE_HISTORICAL_INJURY_INDEX: 123,
-  IMPORT_PLAYERS_NFLVERSE: 124
+  IMPORT_PLAYERS_NFLVERSE: 124,
+
+  ARCHIVE_NFL_GAMEBOOKS: 125,
+  IMPORT_NFL_GAMEBOOK_STARTERS: 126
 }
 
 export const job_title_by_id = {
@@ -272,5 +275,7 @@ export const job_title_by_id = {
   121: 'Import NFLverse Injuries',
   122: 'Import Players (NFL FDL)',
   123: 'Generate Historical Injury Index',
-  124: 'Import Players (NFLverse)'
+  124: 'Import Players (NFLverse)',
+  125: 'Archive NFL Gamebooks',
+  126: 'Import NFL Gamebook Starters'
 }
