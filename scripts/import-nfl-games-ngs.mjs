@@ -40,6 +40,9 @@ const getWeek = (week, week_type) => {
     case 'SB':
       return 4
 
+    case 'PRO':
+      return week
+
     default:
       throw new Error(`invalid week_type: ${week_type}`)
   }
