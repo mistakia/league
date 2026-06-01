@@ -541,7 +541,8 @@ ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_passer DROP CONSTRAINT IF EXISTS nfl_plays_passer_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_matchup_stats DROP CONSTRAINT IF EXISTS nfl_matchup_stats_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_pkey;
-ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pfr_coach_id_unique;
+ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_coach_id_unique;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_pkey;
@@ -4549,9 +4550,12 @@ ALTER SEQUENCE public.matchups_uid_seq OWNED BY public.matchups.uid;
 --
 
 CREATE TABLE public.nfl_coaches (
-    pfr_coach_id character varying(16) NOT NULL,
+    pfr_coach_id character varying(16),
     full_name character varying(80) NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    coach_id character varying(32),
+    dob date,
+    CONSTRAINT nfl_coaches_coach_id_format CHECK (((coach_id)::text ~ '^[A-Z]{1,4}-[A-Z]{1,4}-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{2})?$'::text)),
     CONSTRAINT nfl_coaches_pfr_coach_id_basename CHECK (((pfr_coach_id)::text ~ '^[A-Za-z][A-Za-z0-9'']*[0-9]$'::text))
 );
 
@@ -4598,7 +4602,10 @@ CREATE TABLE public.nfl_game_coaches (
     head_coach_pfr_id character varying(16),
     off_play_caller_pfr_id character varying(16),
     def_play_caller_pfr_id character varying(16),
-    ingested_at timestamp with time zone DEFAULT now() NOT NULL
+    ingested_at timestamp with time zone DEFAULT now() NOT NULL,
+    head_coach_id character varying(32),
+    off_play_caller_id character varying(32),
+    def_play_caller_id character varying(32)
 );
 
 
@@ -27764,11 +27771,19 @@ ALTER TABLE ONLY public.league_user_careerlogs
 
 
 --
--- Name: nfl_coaches nfl_coaches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: nfl_coaches nfl_coaches_coach_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.nfl_coaches
-    ADD CONSTRAINT nfl_coaches_pkey PRIMARY KEY (pfr_coach_id);
+    ADD CONSTRAINT nfl_coaches_coach_id_unique UNIQUE (coach_id);
+
+
+--
+-- Name: nfl_coaches nfl_coaches_pfr_coach_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_coaches
+    ADD CONSTRAINT nfl_coaches_pfr_coach_id_unique UNIQUE (pfr_coach_id);
 
 
 --

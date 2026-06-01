@@ -111,3 +111,23 @@ Structured JSON to stdout, one line per view:
 {"view_id":"...","user_id":130,"view_name":"Air Yards by week","tags":["weekly-split","air-yards-share"],"duration_ms":1234,"status":"ok"}
 {"view_id":"...","user_id":1,"view_name":"KTC Values","error":"Expected 1-4 tags, got 0","duration_ms":800,"status":"failed"}
 ```
+
+---
+
+## scrape-pfr-coaches.mjs
+
+Acquires the canonical `{full_name, dob, first_season_pfr}` for each `nfl_coaches.pfr_coach_id` from Pro-Football-Reference's `/coaches/<id>.htm` pages. Output is `static-data/pfr-coaches.json`, the source-of-record fixture for the DOB-anchored own-id coach identity (see `nfl_coaches.coach_id` derivation).
+
+Run before the `nfl_coaches` importer when new `pfr_coach_id` values appear in samhoppen's unresolved log (the importer raises `pipeline_failure` if a samhoppen row names a coach without a PFR-fixture match). Outputs to `static-data/pfr-coaches.json`; existing rows are merged so incremental rescrapes are non-destructive.
+
+### CLI Invocation
+
+```bash
+# Full scrape (all pfr_coach_ids currently in nfl_coaches; ~40-100 min)
+NODE_ENV=production node scripts/scrape-pfr-coaches.mjs
+
+# Incremental rescrape of a specific subset
+NODE_ENV=production node scripts/scrape-pfr-coaches.mjs --ids BeliBi0,MoraJi1
+```
+
+Uses the sandboxed PFR browser-task at `private/scripts/browser-tasks/pro-football-reference.mjs` via the `_stealth-browser` UID sandbox (`/usr/local/bin/run-as-stealth-browser-node`). PFR blocks default User-Agents (403); the CloakBrowser-backed sandbox resolves Cloudflare challenges and returns raw HTML, which this script parses with JSDOM. Rate-limited at `--wait-between-ms 5000` (12 req/min).

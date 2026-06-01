@@ -1,0 +1,2834 @@
+[
+  {
+    "pfr_coach_id": "AbraDa0",
+    "full_name": "Danny Abramowicz",
+    "dob": "1945-07-13",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "AdamKl0",
+    "full_name": "Klayton Adams",
+    "dob": "1983-02-13",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "AdolDa0",
+    "full_name": "Dave Adolph",
+    "dob": "1937-06-06",
+    "first_season_pfr": 1963
+  },
+  {
+    "pfr_coach_id": "AlleDe0",
+    "full_name": "Dennis Allen",
+    "dob": "1972-09-22",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "AnarLo0",
+    "full_name": "Lou Anarumo",
+    "dob": "1966-08-18",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "AndeKe0",
+    "full_name": "Ken Anderson",
+    "dob": "1949-02-15",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "AnslDe0",
+    "full_name": "Derrick Ansley",
+    "dob": "1981-12-11",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "AriaBr0",
+    "full_name": "Bruce Arians",
+    "dob": "1952-10-03",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "AtkiDa0",
+    "full_name": "Dave Atkins",
+    "dob": "1949-05-18",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "AustTe0",
+    "full_name": "Teryl Austin",
+    "dob": "1965-03-03",
+    "first_season_pfr": 1991
+  },
+  {
+    "pfr_coach_id": "BabiBo0",
+    "full_name": "Bob Babich",
+    "dob": "1961-02-20",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "BabiBo1",
+    "full_name": "Bobby Babich",
+    "dob": "1983-07-30",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "BankMa0",
+    "full_name": "Mark Banker",
+    "dob": "1956-01-15",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "BarrJo0",
+    "full_name": "Joe Barry",
+    "dob": "1970-07-05",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "BateJe0",
+    "full_name": "Jeremy Bates",
+    "dob": "1976-08-27",
+    "first_season_pfr": 2002
+  },
+  {
+    "pfr_coach_id": "BateJi0",
+    "full_name": "Jim Bates",
+    "dob": "1946-05-31",
+    "first_season_pfr": 1968
+  },
+  {
+    "pfr_coach_id": "BeatCh0",
+    "full_name": "Chris Beatty",
+    "dob": "1973-06-19",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "BeigLa0",
+    "full_name": "Larry Beightol",
+    "dob": "1942-11-21",
+    "first_season_pfr": 1977
+  },
+  {
+    "pfr_coach_id": "BeliBi0",
+    "full_name": "Bill Belichick",
+    "dob": "1952-04-16",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "BennEd0",
+    "full_name": "Edgar Bennett",
+    "dob": "1969-02-15",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "BettJa0",
+    "full_name": "James Bettcher",
+    "dob": "1978-05-27",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "BeveDa0",
+    "full_name": "Darrell Bevell",
+    "dob": "1970-01-06",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "BiblDa0",
+    "full_name": "Dana Bible",
+    "dob": "1953-10-30",
+    "first_season_pfr": 1976
+  },
+  {
+    "pfr_coach_id": "BienEr0",
+    "full_name": "Eric Bieniemy",
+    "dob": "1969-08-15",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "BillBr0",
+    "full_name": "Brian Billick",
+    "dob": "1954-02-28",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "BisaRi0",
+    "full_name": "Rich Bisaccia",
+    "dob": "1960-06-03",
+    "first_season_pfr": 1983
+  },
+  {
+    "pfr_coach_id": "BlacDo0",
+    "full_name": "Don Blackmon",
+    "dob": "1958-03-14",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "BlacGr0",
+    "full_name": "Greg Blache",
+    "dob": "1949-03-09",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "BoraRo0",
+    "full_name": "Rob Boras",
+    "dob": "1970-09-30",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "BoweSh0",
+    "full_name": "Shane Bowen",
+    "dob": "1986-12-09",
+    "first_season_pfr": 2009
+  },
+  {
+    "pfr_coach_id": "BowlTo0",
+    "full_name": "Todd Bowles",
+    "dob": "1963-11-18",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "BoyeJo0",
+    "full_name": "Josh Boyer",
+    "dob": "1977-01-21",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "BradGu0",
+    "full_name": "Gus Bradley",
+    "dob": "1966-07-05",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "BradJo0",
+    "full_name": "Joe Brady",
+    "dob": "1989-09-23",
+    "first_season_pfr": 2013
+  },
+  {
+    "pfr_coach_id": "BradMa0",
+    "full_name": "Marcus Brady",
+    "dob": "1979-09-24",
+    "first_season_pfr": 2009
+  },
+  {
+    "pfr_coach_id": "BratBo0",
+    "full_name": "Bob Bratkowski",
+    "dob": "1955-12-02",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "BrazDa0",
+    "full_name": "Dave Brazil",
+    "dob": "1936-03-25",
+    "first_season_pfr": 1968
+  },
+  {
+    "pfr_coach_id": "BreaDo0",
+    "full_name": "Don Breaux",
+    "dob": "1940-08-03",
+    "first_season_pfr": 1966
+  },
+  {
+    "pfr_coach_id": "BresCh0",
+    "full_name": "Chuck Bresnahan",
+    "dob": "1960-09-08",
+    "first_season_pfr": 1983
+  },
+  {
+    "pfr_coach_id": "BrooRi0",
+    "full_name": "Rich Brooks",
+    "dob": "1941-08-10",
+    "first_season_pfr": 1965
+  },
+  {
+    "pfr_coach_id": "BrowKi0",
+    "full_name": "Kippy Brown",
+    "dob": "1955-03-06",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "BrowTh0",
+    "full_name": "Thomas Brown",
+    "dob": "1986-05-15",
+    "first_season_pfr": 2011
+  },
+  {
+    "pfr_coach_id": "BugeJo0",
+    "full_name": "Joe Bugel",
+    "dob": "1940-03-10",
+    "first_season_pfr": 1964
+  },
+  {
+    "pfr_coach_id": "BurkMa0",
+    "full_name": "Matt Burke",
+    "dob": "1976-03-25",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "BurnJa0",
+    "full_name": "Jack Burns",
+    "dob": "1949-01-03",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "BushFr0",
+    "full_name": "Frank Bush",
+    "dob": "1963-01-10",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "ButlKe0",
+    "full_name": "Keith Butler",
+    "dob": "1956-05-16",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "CablTo0",
+    "full_name": "Tom Cable",
+    "dob": "1964-11-26",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "CaldJi0",
+    "full_name": "Jim Caldwell",
+    "dob": "1955-01-16",
+    "first_season_pfr": 1977
+  },
+  {
+    "pfr_coach_id": "CaldMi0",
+    "full_name": "Mike Caldwell",
+    "dob": "1971-08-31",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "CaleNi0",
+    "full_name": "Nick Caley",
+    "dob": "1983-01-22",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "CalhTr0",
+    "full_name": "Troy Calhoun",
+    "dob": "1966-09-26",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "CallBi0",
+    "full_name": "Bill Callahan",
+    "dob": "1956-07-31",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "CallBr0",
+    "full_name": "Brian Callahan",
+    "dob": "1984-06-10",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "CameCa0",
+    "full_name": "Cam Cameron",
+    "dob": "1961-02-06",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "CampAn0",
+    "full_name": "Anthony Campanile",
+    "dob": "1982-08-18",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "CampDa0",
+    "full_name": "Dave Campo",
+    "dob": "1947-07-18",
+    "first_season_pfr": 1971
+  },
+  {
+    "pfr_coach_id": "CampDa1",
+    "full_name": "Dan Campbell",
+    "dob": "1976-04-13",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "CanaDa0",
+    "full_name": "Dave Canales",
+    "dob": "1981-05-07",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "CanaMa0",
+    "full_name": "Matt Canada",
+    "dob": "1972-01-19",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "CapeDo0",
+    "full_name": "Dom Capers",
+    "dob": "1950-08-07",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "CarmPe0",
+    "full_name": "Pete Carmichael",
+    "dob": "1971-10-06",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "CarmPe1",
+    "full_name": "Pete Carmichael",
+    "dob": "1941-03-04",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "CarrPe0",
+    "full_name": "Pete Carroll",
+    "dob": "1951-09-15",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "CartMa0",
+    "full_name": "Maurice Carthon",
+    "dob": "1961-04-24",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "CastJu0",
+    "full_name": "Juan Castillo",
+    "dob": "1953-10-08",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "CavaMa0",
+    "full_name": "Matt Cavanaugh",
+    "dob": "1956-10-27",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "CeciCh0",
+    "full_name": "Chuck Cecil",
+    "dob": "1964-11-08",
+    "first_season_pfr": 2001
+  },
+  {
+    "pfr_coach_id": "ChilBr0",
+    "full_name": "Brad Childress",
+    "dob": "1956-06-27",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "ChowNo0",
+    "full_name": "Norm Chow",
+    "dob": "1946-05-03",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "ChriCl0",
+    "full_name": "Clyde Christensen",
+    "dob": "1956-01-28",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "ChryGe0",
+    "full_name": "Geep Chryst",
+    "dob": "1962-06-25",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "ChudRo0",
+    "full_name": "Rob Chudzinski",
+    "dob": "1968-05-12",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "CignFr0",
+    "full_name": "Frank Cignetti",
+    "dob": "1965-10-04",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "ClemTo0",
+    "full_name": "Tom Clements",
+    "dob": "1953-06-18",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "CoenLi0",
+    "full_name": "Liam Coen",
+    "dob": "1985-11-08",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "CollJi0",
+    "full_name": "Jim Colletto",
+    "dob": "1944-10-04",
+    "first_season_pfr": 1967
+  },
+  {
+    "pfr_coach_id": "CootJi0",
+    "full_name": "Jim Bob Cooter",
+    "dob": "1984-07-03",
+    "first_season_pfr": 2007
+  },
+  {
+    "pfr_coach_id": "CoreWa0",
+    "full_name": "Walt Corey",
+    "dob": "1938-05-09",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "CoslBr0",
+    "full_name": "Bruce Coslet",
+    "dob": "1946-08-05",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "CottTe0",
+    "full_name": "Ted Cottrell",
+    "dob": "1947-06-13",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "CougTo0",
+    "full_name": "Tom Coughlin",
+    "dob": "1946-08-31",
+    "first_season_pfr": 1969
+  },
+  {
+    "pfr_coach_id": "CoviDe0",
+    "full_name": "DeMarcus Covington",
+    "dob": "1989-03-30",
+    "first_season_pfr": 2012
+  },
+  {
+    "pfr_coach_id": "CowhBi0",
+    "full_name": "Bill Cowher",
+    "dob": "1957-05-08",
+    "first_season_pfr": 1985
+  },
+  {
+    "pfr_coach_id": "CoyeLa0",
+    "full_name": "Larry Coyer",
+    "dob": "1943-04-19",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "CoylKe0",
+    "full_name": "Kevin Coyle",
+    "dob": "1956-01-14",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "CrenRo0",
+    "full_name": "Romeo Crennel",
+    "dob": "1947-06-18",
+    "first_season_pfr": 1970
+  },
+  {
+    "pfr_coach_id": "CrooSy0",
+    "full_name": "Sylvester Croom",
+    "dob": "1954-09-25",
+    "first_season_pfr": 1976
+  },
+  {
+    "pfr_coach_id": "CrosSt0",
+    "full_name": "Steve Crosby",
+    "dob": "1950-07-03",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "CrowGa0",
+    "full_name": "Gary Crowton",
+    "dob": "1957-06-14",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "CullDa0",
+    "full_name": "David Culley",
+    "dob": "1955-09-17",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "CullJo0",
+    "full_name": "Joe Cullen",
+    "dob": "1967-12-15",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "CunnGu0",
+    "full_name": "Gunther Cunningham",
+    "dob": "1946-06-19",
+    "first_season_pfr": 1969
+  },
+  {
+    "pfr_coach_id": "DaboBr0",
+    "full_name": "Brian Daboll",
+    "dob": "1975-04-14",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "DaviBi0",
+    "full_name": "Bill Davis",
+    "dob": "1965-11-05",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "DaviBu0",
+    "full_name": "Butch Davis",
+    "dob": "1951-11-17",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "DaviJe0",
+    "full_name": "Jeff Davidson",
+    "dob": "1967-10-03",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "DeFiJo0",
+    "full_name": "John DeFilippo",
+    "dob": "1978-04-12",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "DelRJa0",
+    "full_name": "Jack Del Rio",
+    "dob": "1963-04-04",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "DennRi0",
+    "full_name": "Rick Dennison",
+    "dob": "1958-06-22",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "DesaSe0",
+    "full_name": "Sean Desai",
+    "dob": "1983-04-21",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "DitkMi0",
+    "full_name": "Mike Ditka",
+    "dob": "1939-10-18",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "DonaEd0",
+    "full_name": "Ed Donatell",
+    "dob": "1957-02-04",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "DorsKe0",
+    "full_name": "Ken Dorsey",
+    "dob": "1981-04-22",
+    "first_season_pfr": 2011
+  },
+  {
+    "pfr_coach_id": "DowhRo0",
+    "full_name": "Rod Dowhower",
+    "dob": "1943-04-15",
+    "first_season_pfr": 1966
+  },
+  {
+    "pfr_coach_id": "DownTo0",
+    "full_name": "Todd Downing",
+    "dob": "1980-07-22",
+    "first_season_pfr": 1999
+  },
+  {
+    "pfr_coach_id": "DoylDe0",
+    "full_name": "Declan Doyle",
+    "dob": null,
+    "first_season_pfr": 2016
+  },
+  {
+    "pfr_coach_id": "DuffMa0",
+    "full_name": "Mark Duffner",
+    "dob": "1953-07-19",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "DungTo0",
+    "full_name": "Tony Dungy",
+    "dob": "1955-10-06",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "DurdAd0",
+    "full_name": "Aden Durde",
+    "dob": "1979-07-10",
+    "first_season_pfr": 2011
+  },
+  {
+    "pfr_coach_id": "DyerGe0",
+    "full_name": "George Dyer",
+    "dob": "1940-05-04",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "EberMa0",
+    "full_name": "Matt Eberflus",
+    "dob": "1970-05-17",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "EdwaGe0",
+    "full_name": "George Edwards",
+    "dob": "1967-01-16",
+    "first_season_pfr": 1991
+  },
+  {
+    "pfr_coach_id": "EdwaHe0",
+    "full_name": "Herm Edwards",
+    "dob": "1954-04-27",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "EngsTa0",
+    "full_name": "Tanner Engstrand",
+    "dob": "1982-06-18",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "EricDe0",
+    "full_name": "Dennis Erickson",
+    "dob": "1947-03-24",
+    "first_season_pfr": 1969
+  },
+  {
+    "pfr_coach_id": "EverEj0",
+    "full_name": "Ejiro Evero",
+    "dob": "1981-01-06",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "FairSt0",
+    "full_name": "Steve Fairchild",
+    "dob": "1958-06-21",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "FangVi0",
+    "full_name": "Vic Fangio",
+    "dob": "1958-08-22",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "FassJi0",
+    "full_name": "Jim Fassel",
+    "dob": "1949-08-31",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "FassJo0",
+    "full_name": "John Fassel",
+    "dob": "1974-01-10",
+    "first_season_pfr": 1999
+  },
+  {
+    "pfr_coach_id": "FaulEd0",
+    "full_name": "Eddie Faulkner",
+    "dob": "1977-10-20",
+    "first_season_pfr": 2002
+  },
+  {
+    "pfr_coach_id": "FaziFo0",
+    "full_name": "Foge Fazio",
+    "dob": "1938-02-28",
+    "first_season_pfr": 1965
+  },
+  {
+    "pfr_coach_id": "FewePe0",
+    "full_name": "Perry Fewell",
+    "dob": "1962-09-07",
+    "first_season_pfr": 1985
+  },
+  {
+    "pfr_coach_id": "FichRa0",
+    "full_name": "Randy Fichtner",
+    "dob": "1963-11-07",
+    "first_season_pfr": 1986
+  },
+  {
+    "pfr_coach_id": "FiscJe0",
+    "full_name": "Jedd Fisch",
+    "dob": "1976-05-05",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "FishJe0",
+    "full_name": "Jeff Fisher",
+    "dob": "1958-02-25",
+    "first_season_pfr": 1986
+  },
+  {
+    "pfr_coach_id": "FlajKe0",
+    "full_name": "Ken Flajole",
+    "dob": "1954-10-04",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "FlorBr0",
+    "full_name": "Brian Flores",
+    "dob": "1981-02-24",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "FoerCh0",
+    "full_name": "Chris Foerster",
+    "dob": "1961-10-12",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "FootLa0",
+    "full_name": "Larry Foote",
+    "dob": "1980-06-12",
+    "first_season_pfr": 2015
+  },
+  {
+    "pfr_coach_id": "FoxxJo0",
+    "full_name": "John Fox",
+    "dob": "1955-02-08",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "FrazLe0",
+    "full_name": "Leslie Frazier",
+    "dob": "1959-04-03",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "GailCh0",
+    "full_name": "Chan Gailey",
+    "dob": "1952-01-05",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "GannJo0",
+    "full_name": "Jonathan Gannon",
+    "dob": "1983-04-04",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "GanzFr0",
+    "full_name": "Frank Gansz",
+    "dob": "1938-11-22",
+    "first_season_pfr": 1964
+  },
+  {
+    "pfr_coach_id": "GarrJa0",
+    "full_name": "Jason Garrett",
+    "dob": "1966-03-28",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "GaseAd0",
+    "full_name": "Adam Gase",
+    "dob": "1978-03-29",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "GetsLu0",
+    "full_name": "Luke Getsy",
+    "dob": "1984-02-16",
+    "first_season_pfr": 2007
+  },
+  {
+    "pfr_coach_id": "GibbGa0",
+    "full_name": "Gary Gibbs",
+    "dob": "1952-08-13",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "GibbJo0",
+    "full_name": "Joe Gibbs",
+    "dob": "1940-11-25",
+    "first_season_pfr": 1964
+  },
+  {
+    "pfr_coach_id": "GilbKe0",
+    "full_name": "Kevin Gilbride",
+    "dob": "1951-08-27",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "GiunPe0",
+    "full_name": "Peter Giunta",
+    "dob": "1956-08-11",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "GlenAa0",
+    "full_name": "Aaron Glenn",
+    "dob": "1972-07-16",
+    "first_season_pfr": 2014
+  },
+  {
+    "pfr_coach_id": "GodsGe0",
+    "full_name": "George Godsey",
+    "dob": "1979-01-01",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "GoldAl0",
+    "full_name": "Al Golden",
+    "dob": "1969-07-04",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "GoodHa0",
+    "full_name": "Harold Goodwin",
+    "dob": "1973-11-14",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "GrabDo0",
+    "full_name": "Doug Graber",
+    "dob": "1944-09-26",
+    "first_season_pfr": 1966
+  },
+  {
+    "pfr_coach_id": "GrahPa0",
+    "full_name": "Patrick Graham",
+    "dob": "1979-01-24",
+    "first_season_pfr": 2002
+  },
+  {
+    "pfr_coach_id": "GranTo0",
+    "full_name": "Todd Grantham",
+    "dob": "1966-09-13",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "GrayJe0",
+    "full_name": "Jerry Gray",
+    "dob": "1962-12-16",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "GreeDe0",
+    "full_name": "Dennis Green",
+    "dob": "1949-02-17",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "GrizJo0",
+    "full_name": "Josh Grizzard",
+    "dob": "1990-06-11",
+    "first_season_pfr": 2012
+  },
+  {
+    "pfr_coach_id": "GrohAl0",
+    "full_name": "Al Groh",
+    "dob": "1944-07-13",
+    "first_season_pfr": 1967
+  },
+  {
+    "pfr_coach_id": "GrohMi0",
+    "full_name": "Mike Groh",
+    "dob": "1971-12-19",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "GrubRy0",
+    "full_name": "Ryan Grubb",
+    "dob": "1976-04-16",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "GrudJa0",
+    "full_name": "Jay Gruden",
+    "dob": "1967-03-04",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "GrudJo0",
+    "full_name": "Jon Gruden",
+    "dob": "1963-08-17",
+    "first_season_pfr": 1986
+  },
+  {
+    "pfr_coach_id": "GuenPa0",
+    "full_name": "Paul Guenther",
+    "dob": "1971-11-22",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "HackNa0",
+    "full_name": "Nathaniel Hackett",
+    "dob": "1979-12-19",
+    "first_season_pfr": 2002
+  },
+  {
+    "pfr_coach_id": "HackPa0",
+    "full_name": "Paul Hackett",
+    "dob": "1947-07-05",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "HaflJe0",
+    "full_name": "Jeff Hafley",
+    "dob": "1979-04-04",
+    "first_season_pfr": 2001
+  },
+  {
+    "pfr_coach_id": "HaleTo0",
+    "full_name": "Todd Haley",
+    "dob": "1967-02-28",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "HamiPe0",
+    "full_name": "Pep Hamilton",
+    "dob": "1974-09-19",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "HaniJi0",
+    "full_name": "Jim Hanifan",
+    "dob": "1933-09-21",
+    "first_season_pfr": 1959
+  },
+  {
+    "pfr_coach_id": "HarbJi0",
+    "full_name": "Jim Harbaugh",
+    "dob": "1963-12-23",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "HarbJo0",
+    "full_name": "John Harbaugh",
+    "dob": "1962-09-23",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "HardBo0",
+    "full_name": "Bo Hardegree",
+    "dob": "1984-07-05",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "HarrCh0",
+    "full_name": "Chick Harris",
+    "dob": "1945-09-21",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "HaskGi0",
+    "full_name": "Gil Haskell",
+    "dob": "1943-09-24",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "HaslJi0",
+    "full_name": "Jim Haslett",
+    "dob": "1955-12-09",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "HeimMi0",
+    "full_name": "Mike Heimerdinger",
+    "dob": "1952-10-13",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "HelfMa0",
+    "full_name": "Mark Helfrich",
+    "dob": "1973-10-28",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "HendDo0",
+    "full_name": "Donnie Henderson",
+    "dob": "1957-05-17",
+    "first_season_pfr": 1983
+  },
+  {
+    "pfr_coach_id": "HennDa0",
+    "full_name": "Dan Henning",
+    "dob": "1942-06-21",
+    "first_season_pfr": 1968
+  },
+  {
+    "pfr_coach_id": "HensGe0",
+    "full_name": "George Henshaw",
+    "dob": "1948-01-22",
+    "first_season_pfr": 1970
+  },
+  {
+    "pfr_coach_id": "HillGe0",
+    "full_name": "George Hill",
+    "dob": "1933-04-28",
+    "first_season_pfr": 1960
+  },
+  {
+    "pfr_coach_id": "HillRe0",
+    "full_name": "Renaldo Hill",
+    "dob": "1978-11-12",
+    "first_season_pfr": 2012
+  },
+  {
+    "pfr_coach_id": "HolcAl0",
+    "full_name": "Al Holcomb",
+    "dob": "1970-10-22",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "HolmMi0",
+    "full_name": "Mike Holmgren",
+    "dob": "1948-06-15",
+    "first_season_pfr": 1971
+  },
+  {
+    "pfr_coach_id": "HolzNi0",
+    "full_name": "Nick Holz",
+    "dob": "1984-03-26",
+    "first_season_pfr": 2007
+  },
+  {
+    "pfr_coach_id": "HortRa0",
+    "full_name": "Ray Horton",
+    "dob": "1960-04-12",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "HostJi0",
+    "full_name": "Jim Hostler",
+    "dob": "1966-11-11",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "HufnJo0",
+    "full_name": "John Hufnagel",
+    "dob": "1951-09-13",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "HuntHa1",
+    "full_name": "Hal Hunter",
+    "dob": "1959-07-08",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "HurtCl0",
+    "full_name": "Clint Hurtt",
+    "dob": "1978-11-07",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "IdziBr0",
+    "full_name": "Brad Idzik",
+    "dob": "1991-10-20",
+    "first_season_pfr": 2014
+  },
+  {
+    "pfr_coach_id": "JackBo0",
+    "full_name": "Bobby Jackson",
+    "dob": "1940-02-16",
+    "first_season_pfr": 1965
+  },
+  {
+    "pfr_coach_id": "JackHu0",
+    "full_name": "Hue Jackson",
+    "dob": "1965-10-22",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "JackMi0",
+    "full_name": "Milt Jackson",
+    "dob": "1943-10-16",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "JagoJe0",
+    "full_name": "Jeff Jagodzinski",
+    "dob": "1963-10-12",
+    "first_season_pfr": 1985
+  },
+  {
+    "pfr_coach_id": "JaurDi0",
+    "full_name": "Dick Jauron",
+    "dob": "1950-10-07",
+    "first_season_pfr": 1985
+  },
+  {
+    "pfr_coach_id": "JohnBe0",
+    "full_name": "Ben Johnson",
+    "dob": "1986-05-11",
+    "first_season_pfr": 2009
+  },
+  {
+    "pfr_coach_id": "JohnBr0",
+    "full_name": "Brian Johnson",
+    "dob": "1987-02-16",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "JohnJi0",
+    "full_name": "Jimmy Johnson",
+    "dob": "1943-07-16",
+    "first_season_pfr": 1965
+  },
+  {
+    "pfr_coach_id": "JohnJi1",
+    "full_name": "Jim Johnson",
+    "dob": "1941-05-26",
+    "first_season_pfr": 1977
+  },
+  {
+    "pfr_coach_id": "JoneRo0",
+    "full_name": "Ronnie Jones",
+    "dob": "1955-10-17",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "JoseVa0",
+    "full_name": "Vance Joseph",
+    "dob": "1972-09-20",
+    "first_season_pfr": 1999
+  },
+  {
+    "pfr_coach_id": "JudgJo0",
+    "full_name": "Joe Judge",
+    "dob": "1981-12-31",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "KafkMi0",
+    "full_name": "Mike Kafka",
+    "dob": "1987-07-25",
+    "first_season_pfr": 2016
+  },
+  {
+    "pfr_coach_id": "KellCh0",
+    "full_name": "Chip Kelly",
+    "dob": "1963-11-25",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "KellTi0",
+    "full_name": "Tim Kelly",
+    "dob": "1986-08-17",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "KiffLa0",
+    "full_name": "Lane Kiffin",
+    "dob": "1975-05-09",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "KiffMo0",
+    "full_name": "Monte Kiffin",
+    "dob": "1940-02-29",
+    "first_season_pfr": 1966
+  },
+  {
+    "pfr_coach_id": "KingKl0",
+    "full_name": "Kliff Kingsbury",
+    "dob": "1979-08-09",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "KitcFr0",
+    "full_name": "Freddie Kitchens",
+    "dob": "1974-11-29",
+    "first_season_pfr": 1999
+  },
+  {
+    "pfr_coach_id": "KnapGr0",
+    "full_name": "Greg Knapp",
+    "dob": "1963-03-05",
+    "first_season_pfr": 1986
+  },
+  {
+    "pfr_coach_id": "KoetDi0",
+    "full_name": "Dirk Koetter",
+    "dob": "1959-02-05",
+    "first_season_pfr": 1983
+  },
+  {
+    "pfr_coach_id": "KromAa0",
+    "full_name": "Aaron Kromer",
+    "dob": "1967-04-30",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "KrucMi0",
+    "full_name": "Mike Kruczek",
+    "dob": "1953-03-15",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "KubiGa0",
+    "full_name": "Gary Kubiak",
+    "dob": "1961-08-15",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "KubiKl0",
+    "full_name": "Klint Kubiak",
+    "dob": "1987-02-17",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "KubiKl1",
+    "full_name": "Klay Kubiak",
+    "dob": null,
+    "first_season_pfr": 2013
+  },
+  {
+    "pfr_coach_id": "KuhlHa0",
+    "full_name": "Hank Kuhlmann",
+    "dob": "1937-10-06",
+    "first_season_pfr": 1962
+  },
+  {
+    "pfr_coach_id": "KuhrZa0",
+    "full_name": "Zak Kuhr",
+    "dob": "1988-04-19",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "LaFlMa0",
+    "full_name": "Matt LaFleur",
+    "dob": "1979-11-03",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "LaFlMi0",
+    "full_name": "Mike LaFleur",
+    "dob": null,
+    "first_season_pfr": 2009
+  },
+  {
+    "pfr_coach_id": "LakeJi0",
+    "full_name": "Jimmy Lake",
+    "dob": "1976-09-17",
+    "first_season_pfr": 1999
+  },
+  {
+    "pfr_coach_id": "LawrDo0",
+    "full_name": "Don Lawrence",
+    "dob": "1937-06-04",
+    "first_season_pfr": 1964
+  },
+  {
+    "pfr_coach_id": "LazoBi0",
+    "full_name": "Bill Lazor",
+    "dob": "1972-06-14",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "LeBeDi0",
+    "full_name": "Dick LeBeau",
+    "dob": "1937-09-09",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "LeftBy0",
+    "full_name": "Byron Leftwich",
+    "dob": "1980-01-14",
+    "first_season_pfr": 2016
+  },
+  {
+    "pfr_coach_id": "LevrJo0",
+    "full_name": "John Levra",
+    "dob": "1937-10-02",
+    "first_season_pfr": 1966
+  },
+  {
+    "pfr_coach_id": "LewiMa0",
+    "full_name": "Marvin Lewis",
+    "dob": "1958-09-23",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "LewiSh0",
+    "full_name": "Sherman Lewis",
+    "dob": "1942-06-29",
+    "first_season_pfr": 1969
+  },
+  {
+    "pfr_coach_id": "LewiTi0",
+    "full_name": "Tim Lewis",
+    "dob": "1961-12-18",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "LindDa0",
+    "full_name": "Dale Lindsey",
+    "dob": "1943-01-18",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "LindJi0",
+    "full_name": "Jim Lind",
+    "dob": "1947-11-11",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "LineSc0",
+    "full_name": "Scott Linehan",
+    "dob": "1963-09-17",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "LoggDo0",
+    "full_name": "Dowell Loggains",
+    "dob": "1980-10-01",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "LombJo0",
+    "full_name": "Joe Lombardi",
+    "dob": "1971-06-06",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "LombMi1",
+    "full_name": "Mick Lombardi",
+    "dob": "1988-10-01",
+    "first_season_pfr": 2009
+  },
+  {
+    "pfr_coach_id": "LoneSt0",
+    "full_name": "Steve Loney",
+    "dob": "1952-04-26",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "LynnAn0",
+    "full_name": "Anthony Lynn",
+    "dob": "1968-12-21",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "LynnJo0",
+    "full_name": "Johnny Lynn",
+    "dob": "1956-12-19",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "LynnRo0",
+    "full_name": "Ron Lynn",
+    "dob": "1944-12-06",
+    "first_season_pfr": 1967
+  },
+  {
+    "pfr_coach_id": "MacdMi0",
+    "full_name": "Mike Macdonald",
+    "dob": "1987-06-26",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "MangEr0",
+    "full_name": "Eric Mangini",
+    "dob": "1971-01-19",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "MangPe0",
+    "full_name": "Pete Mangurian",
+    "dob": "1955-06-17",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "ManuGr0",
+    "full_name": "Greg Manusky",
+    "dob": "1966-08-12",
+    "first_season_pfr": 2001
+  },
+  {
+    "pfr_coach_id": "ManuMa0",
+    "full_name": "Marquand Manuel",
+    "dob": "1979-07-11",
+    "first_season_pfr": 2012
+  },
+  {
+    "pfr_coach_id": "MariRo0",
+    "full_name": "Rod Marinelli",
+    "dob": "1949-07-13",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "MariSt0",
+    "full_name": "Steve Mariucci",
+    "dob": "1955-11-04",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "MarmLa0",
+    "full_name": "Larry Marmie",
+    "dob": "1942-10-17",
+    "first_season_pfr": 1985
+  },
+  {
+    "pfr_coach_id": "MarrDo0",
+    "full_name": "Doug Marrone",
+    "dob": "1964-07-25",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "MarsJo0",
+    "full_name": "John Marshall",
+    "dob": "1945-10-02",
+    "first_season_pfr": 1967
+  },
+  {
+    "pfr_coach_id": "MartDo0",
+    "full_name": "Don Martindale",
+    "dob": "1963-05-19",
+    "first_season_pfr": 1986
+  },
+  {
+    "pfr_coach_id": "MartMi0",
+    "full_name": "Mike Martz",
+    "dob": "1951-05-13",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "MattGr0",
+    "full_name": "Greg Mattison",
+    "dob": "1949-11-15",
+    "first_season_pfr": 1971
+  },
+  {
+    "pfr_coach_id": "MayoJe0",
+    "full_name": "Jerod Mayo",
+    "dob": "1986-02-23",
+    "first_season_pfr": 2019
+  },
+  {
+    "pfr_coach_id": "McAdBe0",
+    "full_name": "Ben McAdoo",
+    "dob": "1977-07-09",
+    "first_season_pfr": 2001
+  },
+  {
+    "pfr_coach_id": "McCaMi0",
+    "full_name": "Mike McCarthy",
+    "dob": "1963-11-10",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "McCoMi1",
+    "full_name": "Mike McCoy",
+    "dob": "1972-04-01",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "McDaJo0",
+    "full_name": "Josh McDaniels",
+    "dob": "1976-04-22",
+    "first_season_pfr": 1999
+  },
+  {
+    "pfr_coach_id": "McDaMi0",
+    "full_name": "Mike McDaniel",
+    "dob": "1983-03-06",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "McDeSe0",
+    "full_name": "Sean McDermott",
+    "dob": "1974-03-21",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "McGiDa0",
+    "full_name": "Dave McGinnis",
+    "dob": "1951-08-07",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "McMaGr0",
+    "full_name": "Greg McMackin",
+    "dob": "1945-04-24",
+    "first_season_pfr": 1968
+  },
+  {
+    "pfr_coach_id": "McVaSe0",
+    "full_name": "Sean McVay",
+    "dob": "1986-01-24",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "MeekRo0",
+    "full_name": "Ron Meeks",
+    "dob": "1954-08-27",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "MeyeUr0",
+    "full_name": "Urban Meyer",
+    "dob": "1964-07-10",
+    "first_season_pfr": 1985
+  },
+  {
+    "pfr_coach_id": "MichJa0",
+    "full_name": "Jason Michael",
+    "dob": "1978-10-15",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "MillKe0",
+    "full_name": "Keith Millard",
+    "dob": "1962-03-18",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "MillMi0",
+    "full_name": "Mike Miller",
+    "dob": "1970-04-09",
+    "first_season_pfr": 1999
+  },
+  {
+    "pfr_coach_id": "MintJe0",
+    "full_name": "Jesse Minter",
+    "dob": "1983-05-09",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "ModkCu0",
+    "full_name": "Curtis Modkins",
+    "dob": "1970-11-15",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "MoelGa0",
+    "full_name": "Gary Moeller",
+    "dob": "1941-01-26",
+    "first_season_pfr": 1967
+  },
+  {
+    "pfr_coach_id": "MonaTe0",
+    "full_name": "Ted Monachino",
+    "dob": "1966-10-15",
+    "first_season_pfr": 1991
+  },
+  {
+    "pfr_coach_id": "MonkTo0",
+    "full_name": "Todd Monken",
+    "dob": "1966-02-05",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "MoorKe0",
+    "full_name": "Kellen Moore",
+    "dob": "1989-07-12",
+    "first_season_pfr": 2018
+  },
+  {
+    "pfr_coach_id": "MoorTo0",
+    "full_name": "Tom Moore",
+    "dob": "1938-11-07",
+    "first_season_pfr": 1961
+  },
+  {
+    "pfr_coach_id": "MoraJi0",
+    "full_name": "Jim Mora",
+    "dob": "1935-05-24",
+    "first_season_pfr": 1961
+  },
+  {
+    "pfr_coach_id": "MoraJi1",
+    "full_name": "Jim Mora",
+    "dob": "1961-11-19",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "MornMa0",
+    "full_name": "Marty Mornhinweg",
+    "dob": "1962-03-29",
+    "first_season_pfr": 1985
+  },
+  {
+    "pfr_coach_id": "MorrRa0",
+    "full_name": "Raheem Morris",
+    "dob": "1976-09-03",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "MortJo0",
+    "full_name": "John Morton",
+    "dob": "1969-09-24",
+    "first_season_pfr": 2002
+  },
+  {
+    "pfr_coach_id": "MuirBi0",
+    "full_name": "Bill Muir",
+    "dob": "1942-10-26",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "MulaMi0",
+    "full_name": "Mike Mularkey",
+    "dob": "1961-11-19",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "MuncMi0",
+    "full_name": "Mike Munchak",
+    "dob": "1960-03-05",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "MusgBi0",
+    "full_name": "Bill Musgrave",
+    "dob": "1967-11-11",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "NagyMa0",
+    "full_name": "Matt Nagy",
+    "dob": "1978-04-24",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "NeuhRi0",
+    "full_name": "Rick Neuheisel",
+    "dob": "1961-02-07",
+    "first_season_pfr": 1986
+  },
+  {
+    "pfr_coach_id": "NielRy0",
+    "full_name": "Ryan Nielsen",
+    "dob": "1979-03-20",
+    "first_season_pfr": 2002
+  },
+  {
+    "pfr_coach_id": "NixoJe0",
+    "full_name": "Jeff Nixon",
+    "dob": "1974-10-16",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "NolaMi0",
+    "full_name": "Mike Nolan",
+    "dob": "1959-03-07",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "NortKe0",
+    "full_name": "Ken Norton Jr.",
+    "dob": "1966-09-29",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "NussDo0",
+    "full_name": "Doug Nussmeier",
+    "dob": "1970-12-11",
+    "first_season_pfr": 2001
+  },
+  {
+    "pfr_coach_id": "O'LeGe0",
+    "full_name": "George O'Leary",
+    "dob": "1946-08-17",
+    "first_season_pfr": 1968
+  },
+  {
+    "pfr_coach_id": "OBriBi0",
+    "full_name": "Bill O'Brien",
+    "dob": "1969-10-23",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "OConKe0",
+    "full_name": "Kevin O'Connell",
+    "dob": "1985-05-25",
+    "first_season_pfr": 2015
+  },
+  {
+    "pfr_coach_id": "OlivTo0",
+    "full_name": "Tom Olivadotti",
+    "dob": "1945-09-22",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "OlsoGr0",
+    "full_name": "Greg Olson",
+    "dob": "1963-03-01",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "OlsoRi0",
+    "full_name": "Rich Olson",
+    "dob": "1948-07-07",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "ONeiJi0",
+    "full_name": "Jim O'Neil",
+    "dob": "1978-10-26",
+    "first_season_pfr": 2001
+  },
+  {
+    "pfr_coach_id": "OrrxZa0",
+    "full_name": "Zach Orr",
+    "dob": "1992-06-09",
+    "first_season_pfr": 2017
+  },
+  {
+    "pfr_coach_id": "OSheCh0",
+    "full_name": "Chad O'Shea",
+    "dob": "1972-12-18",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "OuttJu0",
+    "full_name": "Justin Outten",
+    "dob": "1983-10-26",
+    "first_season_pfr": 2007
+  },
+  {
+    "pfr_coach_id": "PagaCh0",
+    "full_name": "Chuck Pagano",
+    "dob": "1960-10-02",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "PagaFr0",
+    "full_name": "Fred Pagac",
+    "dob": "1952-04-26",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "PagaJo0",
+    "full_name": "John Pagano",
+    "dob": "1967-03-30",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "PalmCh0",
+    "full_name": "Chris Palmer",
+    "dob": "1949-09-23",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "ParcBi0",
+    "full_name": "Bill Parcells",
+    "dob": "1941-08-22",
+    "first_season_pfr": 1964
+  },
+  {
+    "pfr_coach_id": "PascJo0",
+    "full_name": "Joe Pascale",
+    "dob": "1946-04-17",
+    "first_season_pfr": 1976
+  },
+  {
+    "pfr_coach_id": "PasqPa0",
+    "full_name": "Paul Pasqualoni",
+    "dob": "1949-08-16",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "PatrMa0",
+    "full_name": "Matt Patricia",
+    "dob": "1974-09-13",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "PattAn0",
+    "full_name": "Andre Patterson",
+    "dob": "1960-06-12",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "PatuKe0",
+    "full_name": "Kevin Patullo",
+    "dob": "1981-07-14",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "PaytSe0",
+    "full_name": "Sean Payton",
+    "dob": "1963-12-29",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "PeasJo0",
+    "full_name": "John Pease",
+    "dob": "1943-10-14",
+    "first_season_pfr": 1968
+  },
+  {
+    "pfr_coach_id": "PeccLa0",
+    "full_name": "Larry Peccatiello",
+    "dob": "1935-12-21",
+    "first_season_pfr": 1961
+  },
+  {
+    "pfr_coach_id": "PedeDo0",
+    "full_name": "Doug Pederson",
+    "dob": "1968-01-31",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "PeesDe0",
+    "full_name": "Dean Pees",
+    "dob": "1949-09-04",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "PendCl0",
+    "full_name": "Clancy Pendergast",
+    "dob": "1967-11-29",
+    "first_season_pfr": 1991
+  },
+  {
+    "pfr_coach_id": "PendJo0",
+    "full_name": "Joe Pendry",
+    "dob": "1947-08-05",
+    "first_season_pfr": 1970
+  },
+  {
+    "pfr_coach_id": "PerkRa0",
+    "full_name": "Ray Perkins",
+    "dob": "1941-11-06",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "PetrBo0",
+    "full_name": "Bobby Petrino",
+    "dob": "1961-03-10",
+    "first_season_pfr": 1983
+  },
+  {
+    "pfr_coach_id": "PettMi0",
+    "full_name": "Mike Pettine",
+    "dob": "1966-09-25",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "PetzDr0",
+    "full_name": "Drew Petzing",
+    "dob": "1987-03-12",
+    "first_season_pfr": 2009
+  },
+  {
+    "pfr_coach_id": "PhilJo0",
+    "full_name": "Joe Philbin",
+    "dob": "1961-07-02",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "PhilWa0",
+    "full_name": "Wade Phillips",
+    "dob": "1947-06-21",
+    "first_season_pfr": 1969
+  },
+  {
+    "pfr_coach_id": "PhilWe0",
+    "full_name": "Wes Phillips",
+    "dob": "1979-02-17",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "PierAn0",
+    "full_name": "Antonio Pierce",
+    "dob": "1978-10-26",
+    "first_season_pfr": 2014
+  },
+  {
+    "pfr_coach_id": "PiolSc0",
+    "full_name": "Scott Pioli",
+    "dob": null,
+    "first_season_pfr": null
+  },
+  {
+    "pfr_coach_id": "PitcDa0",
+    "full_name": "Dan Pitcher",
+    "dob": "1987-01-13",
+    "first_season_pfr": 2012
+  },
+  {
+    "pfr_coach_id": "PopeMi0",
+    "full_name": "Mike Pope",
+    "dob": "1942-03-14",
+    "first_season_pfr": 1983
+  },
+  {
+    "pfr_coach_id": "QuinDa0",
+    "full_name": "Dan Quinn",
+    "dob": "1970-09-11",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "RagoDa0",
+    "full_name": "Dave Ragone",
+    "dob": "1979-10-03",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "RallNi0",
+    "full_name": "Nick Rallis",
+    "dob": "1993-07-13",
+    "first_season_pfr": 2017
+  },
+  {
+    "pfr_coach_id": "RayeJi0",
+    "full_name": "Jimmy Raye",
+    "dob": "1946-03-26",
+    "first_season_pfr": 1971
+  },
+  {
+    "pfr_coach_id": "ReesTo0",
+    "full_name": "Tommy Rees",
+    "dob": "1992-05-22",
+    "first_season_pfr": 2015
+  },
+  {
+    "pfr_coach_id": "ReevDa0",
+    "full_name": "Dan Reeves",
+    "dob": "1944-01-19",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "ReicFr0",
+    "full_name": "Frank Reich",
+    "dob": "1961-12-04",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "ReidAn0",
+    "full_name": "Andy Reid",
+    "dob": "1958-03-19",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "ReilJa0",
+    "full_name": "Jack Reilly",
+    "dob": "1946-05-22",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "RhodRa0",
+    "full_name": "Ray Rhodes",
+    "dob": "1950-10-20",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "RhomJe0",
+    "full_name": "Jerry Rhome",
+    "dob": "1942-03-06",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "RhulMa0",
+    "full_name": "Matt Rhule",
+    "dob": "1975-01-31",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "RichKr0",
+    "full_name": "Kris Richard",
+    "dob": "1978-10-28",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "RileMi0",
+    "full_name": "Mike Riley",
+    "dob": "1953-07-06",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "RiveRo0",
+    "full_name": "Ron Rivera",
+    "dob": "1962-01-07",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "RizzDa0",
+    "full_name": "Darren Rizzi",
+    "dob": "1970-07-21",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "RobiGr0",
+    "full_name": "Greg Robinson",
+    "dob": "1951-10-09",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "RobiTe0",
+    "full_name": "Terry Robiskie",
+    "dob": "1954-11-12",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "RobiWi0",
+    "full_name": "Willy Robinson",
+    "dob": "1956-02-10",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "RobiZa0",
+    "full_name": "Zac Robinson",
+    "dob": "1986-09-29",
+    "first_season_pfr": 2019
+  },
+  {
+    "pfr_coach_id": "RodgKa0",
+    "full_name": "Kacy Rodgers",
+    "dob": "1969-06-24",
+    "first_season_pfr": 1994
+  },
+  {
+    "pfr_coach_id": "RomaGr0",
+    "full_name": "Greg Roman",
+    "dob": "1972-08-19",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "RosbJe0",
+    "full_name": "Jerry Rosburg",
+    "dob": "1955-11-24",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "RossBo0",
+    "full_name": "Bobby Ross",
+    "dob": "1935-12-23",
+    "first_season_pfr": 1965
+  },
+  {
+    "pfr_coach_id": "RossTo0",
+    "full_name": "Tom Rossley",
+    "dob": "1946-08-09",
+    "first_season_pfr": 1976
+  },
+  {
+    "pfr_coach_id": "RoweKe0",
+    "full_name": "Keith Rowen",
+    "dob": "1952-09-02",
+    "first_season_pfr": 1977
+  },
+  {
+    "pfr_coach_id": "RustRo0",
+    "full_name": "Rod Rust",
+    "dob": "1928-08-02",
+    "first_season_pfr": 1960
+  },
+  {
+    "pfr_coach_id": "RyanDe0",
+    "full_name": "DeMeco Ryans",
+    "dob": "1984-07-28",
+    "first_season_pfr": 2017
+  },
+  {
+    "pfr_coach_id": "RyanRe0",
+    "full_name": "Rex Ryan",
+    "dob": "1962-12-13",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "RyanRo0",
+    "full_name": "Rob Ryan",
+    "dob": "1962-12-13",
+    "first_season_pfr": 1987
+  },
+  {
+    "pfr_coach_id": "SabaNi0",
+    "full_name": "Nick Saban",
+    "dob": "1951-10-31",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "SaleRo0",
+    "full_name": "Robert Saleh",
+    "dob": "1979-01-31",
+    "first_season_pfr": 2002
+  },
+  {
+    "pfr_coach_id": "SandBo0",
+    "full_name": "Bob Sanders",
+    "dob": "1953-12-05",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "SarkSt0",
+    "full_name": "Steve Sarkisian",
+    "dob": "1974-03-08",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "SatuJe0",
+    "full_name": "Jeff Saturday",
+    "dob": "1975-06-18",
+    "first_season_pfr": 2017
+  },
+  {
+    "pfr_coach_id": "SaunAl0",
+    "full_name": "Al Saunders",
+    "dob": "1947-02-01",
+    "first_season_pfr": 1970
+  },
+  {
+    "pfr_coach_id": "ScanRi0",
+    "full_name": "Rich Scangarello",
+    "dob": "1972-04-15",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "SchiGr0",
+    "full_name": "Greg Schiano",
+    "dob": "1966-06-01",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "SchoBr0",
+    "full_name": "Brian Schottenheimer",
+    "dob": "1973-10-16",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "SchoKu0",
+    "full_name": "Kurt Schottenheimer",
+    "dob": "1949-10-01",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "SchoMa0",
+    "full_name": "Marty Schottenheimer",
+    "dob": "1943-09-23",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "SchoTu0",
+    "full_name": "Turk Schonert",
+    "dob": "1957-01-15",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "SchwJi0",
+    "full_name": "Jim Schwartz",
+    "dob": "1966-06-02",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "SefcGe0",
+    "full_name": "George Sefcik",
+    "dob": "1939-12-27",
+    "first_season_pfr": 1964
+  },
+  {
+    "pfr_coach_id": "SeifGe0",
+    "full_name": "George Seifert",
+    "dob": "1940-01-22",
+    "first_season_pfr": 1964
+  },
+  {
+    "pfr_coach_id": "ShanKy0",
+    "full_name": "Kyle Shanahan",
+    "dob": "1979-12-14",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "ShanMi0",
+    "full_name": "Mike Shanahan",
+    "dob": "1952-08-24",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "ShawWi0",
+    "full_name": "Willie Shaw",
+    "dob": "1944-01-11",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "SheaTe0",
+    "full_name": "Terry Shea",
+    "dob": "1946-06-12",
+    "first_season_pfr": 1968
+  },
+  {
+    "pfr_coach_id": "ShelAr0",
+    "full_name": "Art Shell",
+    "dob": "1946-11-26",
+    "first_season_pfr": 1983
+  },
+  {
+    "pfr_coach_id": "ShelCl0",
+    "full_name": "Clarence Shelmon",
+    "dob": "1952-09-17",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "ShepKe0",
+    "full_name": "Kelvin Sheppard",
+    "dob": "1988-01-02",
+    "first_season_pfr": 2021
+  },
+  {
+    "pfr_coach_id": "ShepMi0",
+    "full_name": "Mike Sheppard",
+    "dob": "1951-10-29",
+    "first_season_pfr": 1977
+  },
+  {
+    "pfr_coach_id": "SherBi0",
+    "full_name": "Bill Sheridan",
+    "dob": "1959-01-27",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "SherMi0",
+    "full_name": "Mike Sherman",
+    "dob": "1954-12-19",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "SherRa0",
+    "full_name": "Ray Sherman",
+    "dob": "1951-11-27",
+    "first_season_pfr": 1974
+  },
+  {
+    "pfr_coach_id": "ShooJo0",
+    "full_name": "John Shoop",
+    "dob": "1969-08-01",
+    "first_season_pfr": 1991
+  },
+  {
+    "pfr_coach_id": "ShulCh0",
+    "full_name": "Chris Shula",
+    "dob": "1986-02-05",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "ShulMi0",
+    "full_name": "Mike Shula",
+    "dob": "1965-06-03",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "ShurPa0",
+    "full_name": "Pat Shurmur",
+    "dob": "1965-04-14",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "SidwSt0",
+    "full_name": "Steve Sidwell",
+    "dob": "1944-08-30",
+    "first_season_pfr": 1966
+  },
+  {
+    "pfr_coach_id": "SingMi0",
+    "full_name": "Mike Singletary",
+    "dob": "1958-10-09",
+    "first_season_pfr": 2003
+  },
+  {
+    "pfr_coach_id": "SiriNi0",
+    "full_name": "Nick Sirianni",
+    "dob": "1981-06-15",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "SkipJi0",
+    "full_name": "Jim Skipper",
+    "dob": "1949-01-23",
+    "first_season_pfr": 1977
+  },
+  {
+    "pfr_coach_id": "SlowBo0",
+    "full_name": "Bob Slowik",
+    "dob": "1954-05-16",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "SlowBo1",
+    "full_name": "Bobby Slowik",
+    "dob": "1987-06-09",
+    "first_season_pfr": 2011
+  },
+  {
+    "pfr_coach_id": "SmitAr0",
+    "full_name": "Arthur Smith",
+    "dob": "1982-05-27",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "SmitCa0",
+    "full_name": "Carl Smith",
+    "dob": "1948-04-26",
+    "first_season_pfr": 1971
+  },
+  {
+    "pfr_coach_id": "SmitFr0",
+    "full_name": "Frank Smith",
+    "dob": "1981-02-21",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "SmitGi0",
+    "full_name": "Giff Smith",
+    "dob": null,
+    "first_season_pfr": 1991
+  },
+  {
+    "pfr_coach_id": "SmitLo0",
+    "full_name": "Lovie Smith",
+    "dob": "1958-05-08",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "SmitMi0",
+    "full_name": "Mike Smith",
+    "dob": "1959-06-13",
+    "first_season_pfr": 1982
+  },
+  {
+    "pfr_coach_id": "SmitRi0",
+    "full_name": "Richard Smith",
+    "dob": "1955-10-17",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "SmitSh0",
+    "full_name": "Sherman Smith",
+    "dob": "1954-11-01",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "SnowPh0",
+    "full_name": "Phil Snow",
+    "dob": "1955-12-22",
+    "first_season_pfr": 1976
+  },
+  {
+    "pfr_coach_id": "SolaMi0",
+    "full_name": "Mike Solari",
+    "dob": "1955-01-16",
+    "first_season_pfr": 1986
+  },
+  {
+    "pfr_coach_id": "SoreNi0",
+    "full_name": "Nick Sorensen",
+    "dob": "1978-07-31",
+    "first_season_pfr": 2012
+  },
+  {
+    "pfr_coach_id": "SpagSt0",
+    "full_name": "Steve Spagnuolo",
+    "dob": "1959-12-21",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "SparTo0",
+    "full_name": "Tony Sparano",
+    "dob": "1961-10-07",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "SpurSt0",
+    "full_name": "Steve Spurrier",
+    "dob": "1945-04-20",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "StalBr0",
+    "full_name": "Brandon Staley",
+    "dob": "1982-12-10",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "StecLe0",
+    "full_name": "Les Steckel",
+    "dob": "1946-07-01",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "StefKe0",
+    "full_name": "Kevin Stefanski",
+    "dob": "1982-05-08",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "SteiSh0",
+    "full_name": "Shane Steichen",
+    "dob": "1985-05-11",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "StenAd0",
+    "full_name": "Adam Stenavich",
+    "dob": "1983-03-11",
+    "first_season_pfr": 2012
+  },
+  {
+    "pfr_coach_id": "StevGa0",
+    "full_name": "Gary Stevens",
+    "dob": "1943-03-19",
+    "first_season_pfr": 1976
+  },
+  {
+    "pfr_coach_id": "StewBr0",
+    "full_name": "Brian Stewart",
+    "dob": "1964-12-04",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "StudEr0",
+    "full_name": "Eric Studesville",
+    "dob": "1967-05-29",
+    "first_season_pfr": 1991
+  },
+  {
+    "pfr_coach_id": "SullJe0",
+    "full_name": "Jerry Sullivan",
+    "dob": "1944-07-13",
+    "first_season_pfr": 1971
+  },
+  {
+    "pfr_coach_id": "SullMi0",
+    "full_name": "Mike Sullivan",
+    "dob": "1967-01-28",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "SuttBo0",
+    "full_name": "Bob Sutton",
+    "dob": "1951-01-28",
+    "first_season_pfr": 1972
+  },
+  {
+    "pfr_coach_id": "TaboCh0",
+    "full_name": "Chris Tabor",
+    "dob": "1971-03-04",
+    "first_season_pfr": 1993
+  },
+  {
+    "pfr_coach_id": "TarvJa0",
+    "full_name": "Jason Tarver",
+    "dob": "1974-08-28",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "TaylPr0",
+    "full_name": "Press Taylor",
+    "dob": "1988-01-13",
+    "first_season_pfr": 2011
+  },
+  {
+    "pfr_coach_id": "TaylZa0",
+    "full_name": "Zac Taylor",
+    "dob": "1983-05-10",
+    "first_season_pfr": 2008
+  },
+  {
+    "pfr_coach_id": "TedfJe0",
+    "full_name": "Jeff Tedford",
+    "dob": "1961-11-02",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "ThomEm0",
+    "full_name": "Emmitt Thomas",
+    "dob": "1943-06-03",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "ThurDe0",
+    "full_name": "Dennis Thurman",
+    "dob": "1956-04-13",
+    "first_season_pfr": 1988
+  },
+  {
+    "pfr_coach_id": "TiceMi0",
+    "full_name": "Mike Tice",
+    "dob": "1959-02-02",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "TillRu0",
+    "full_name": "Rusty Tillman",
+    "dob": "1946-02-27",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "TobiVi0",
+    "full_name": "Vince Tobin",
+    "dob": "1943-09-29",
+    "first_season_pfr": 1965
+  },
+  {
+    "pfr_coach_id": "TollTe0",
+    "full_name": "Ted Tollner",
+    "dob": "1940-05-29",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "TomlMi0",
+    "full_name": "Mike Tomlin",
+    "dob": "1972-03-15",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "TomsJi0",
+    "full_name": "Jim Tomsula",
+    "dob": "1968-04-14",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "TresMa0",
+    "full_name": "Marc Trestman",
+    "dob": "1956-01-15",
+    "first_season_pfr": 1981
+  },
+  {
+    "pfr_coach_id": "TrgoMi0",
+    "full_name": "Mike Trgovac",
+    "dob": "1959-02-27",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "TuckMe0",
+    "full_name": "Mel Tucker",
+    "dob": "1972-01-04",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "TurnNo0",
+    "full_name": "Norv Turner",
+    "dob": "1952-05-17",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "TurnRo0",
+    "full_name": "Ron Turner",
+    "dob": "1953-12-05",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "TurnSc0",
+    "full_name": "Scott Turner",
+    "dob": "1982-08-07",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "UdinGr0",
+    "full_name": "Grant Udinski",
+    "dob": null,
+    "first_season_pfr": 2019
+  },
+  {
+    "pfr_coach_id": "UlbrJe0",
+    "full_name": "Jeff Ulbrich",
+    "dob": "1977-02-17",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "UndlCo0",
+    "full_name": "Cory Undlin",
+    "dob": "1971-06-29",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "VanGBr0",
+    "full_name": "Brian VanGorder",
+    "dob": "1959-04-17",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "VanPAl0",
+    "full_name": "Alex Van Pelt",
+    "dob": "1970-05-01",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "VechJi0",
+    "full_name": "Jim Vechiarella",
+    "dob": "1937-02-20",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "VentRi0",
+    "full_name": "Rick Venturi",
+    "dob": "1946-02-23",
+    "first_season_pfr": 1973
+  },
+  {
+    "pfr_coach_id": "VermDi0",
+    "full_name": "Dick Vermeil",
+    "dob": "1936-10-30",
+    "first_season_pfr": 1969
+  },
+  {
+    "pfr_coach_id": "VittJo0",
+    "full_name": "Joe Vitt",
+    "dob": "1954-08-23",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "VrabMi0",
+    "full_name": "Mike Vrabel",
+    "dob": "1975-08-14",
+    "first_season_pfr": 2011
+  },
+  {
+    "pfr_coach_id": "WaldSh0",
+    "full_name": "Shane Waldron",
+    "dob": "1979-08-17",
+    "first_season_pfr": 2005
+  },
+  {
+    "pfr_coach_id": "WalsTo0",
+    "full_name": "Tom Walsh",
+    "dob": "1949-04-16",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "WaltTi0",
+    "full_name": "Tim Walton",
+    "dob": "1971-03-11",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "WannDa0",
+    "full_name": "Dave Wannstedt",
+    "dob": "1952-05-21",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "WashEr0",
+    "full_name": "Eric Washington",
+    "dob": "1969-10-29",
+    "first_season_pfr": 1997
+  },
+  {
+    "pfr_coach_id": "WashTo0",
+    "full_name": "Todd Wash",
+    "dob": "1968-07-19",
+    "first_season_pfr": 1996
+  },
+  {
+    "pfr_coach_id": "WeavAn0",
+    "full_name": "Anthony Weaver",
+    "dob": "1980-08-28",
+    "first_season_pfr": 2010
+  },
+  {
+    "pfr_coach_id": "WeisCh0",
+    "full_name": "Charlie Weis",
+    "dob": "1956-03-30",
+    "first_season_pfr": 1980
+  },
+  {
+    "pfr_coach_id": "WhisKe0",
+    "full_name": "Ken Whisenhunt",
+    "dob": "1962-02-28",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "WhitJo0",
+    "full_name": "Joe Whitt Jr.",
+    "dob": "1978-07-19",
+    "first_season_pfr": 2000
+  },
+  {
+    "pfr_coach_id": "WhitMi0",
+    "full_name": "Mike White",
+    "dob": "1936-01-04",
+    "first_season_pfr": 1958
+  },
+  {
+    "pfr_coach_id": "WilkSt0",
+    "full_name": "Steve Wilks",
+    "dob": "1969-08-08",
+    "first_season_pfr": 1995
+  },
+  {
+    "pfr_coach_id": "WillAl0",
+    "full_name": "Alan Williams",
+    "dob": "1969-11-04",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "WillGr0",
+    "full_name": "Gregg Williams",
+    "dob": "1958-07-15",
+    "first_season_pfr": 1984
+  },
+  {
+    "pfr_coach_id": "WillRi0",
+    "full_name": "Richard Williamson",
+    "dob": "1941-04-13",
+    "first_season_pfr": 1963
+  },
+  {
+    "pfr_coach_id": "WillTe0",
+    "full_name": "Terrell Williams",
+    "dob": "1974-06-19",
+    "first_season_pfr": 1998
+  },
+  {
+    "pfr_coach_id": "WilsDe0",
+    "full_name": "Dennard Wilson",
+    "dob": "1982-03-21",
+    "first_season_pfr": 2004
+  },
+  {
+    "pfr_coach_id": "WoodAl0",
+    "full_name": "Alex Wood",
+    "dob": "1955-03-14",
+    "first_season_pfr": 1989
+  },
+  {
+    "pfr_coach_id": "WoodJo0",
+    "full_name": "Joe Woods",
+    "dob": "1970-06-25",
+    "first_season_pfr": 1992
+  },
+  {
+    "pfr_coach_id": "WychSa0",
+    "full_name": "Sam Wyche",
+    "dob": "1945-01-05",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "YaraZa0",
+    "full_name": "Zaven Yaralian",
+    "dob": "1952-02-05",
+    "first_season_pfr": 1975
+  },
+  {
+    "pfr_coach_id": "ZampEr0",
+    "full_name": "Ernie Zampese",
+    "dob": "1936-03-12",
+    "first_season_pfr": 1962
+  },
+  {
+    "pfr_coach_id": "ZampKe0",
+    "full_name": "Ken Zampese",
+    "dob": "1967-07-19",
+    "first_season_pfr": 1990
+  },
+  {
+    "pfr_coach_id": "ZimmAd0",
+    "full_name": "Adam Zimmer",
+    "dob": "1984-01-13",
+    "first_season_pfr": 2006
+  },
+  {
+    "pfr_coach_id": "ZimmMi0",
+    "full_name": "Mike Zimmer",
+    "dob": "1956-06-05",
+    "first_season_pfr": 1979
+  },
+  {
+    "pfr_coach_id": "ZookRo0",
+    "full_name": "Ron Zook",
+    "dob": "1954-04-28",
+    "first_season_pfr": 1978
+  },
+  {
+    "pfr_coach_id": "ZornJi0",
+    "full_name": "Jim Zorn",
+    "dob": "1953-05-10",
+    "first_season_pfr": 1988
+  }
+]
