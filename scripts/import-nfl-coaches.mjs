@@ -56,13 +56,141 @@ const LONG_NAME_TO_ABBREV = {
 }
 
 const UNRESOLVED_LOG_PATH = 'tmp/import-nfl-coaches-unresolved.csv'
+const PFR_FIXTURE_PATH = 'static-data/pfr-coaches.json'
+
+// Seeds for the 8 PFR-unindexed interim coordinators that close the 47 NULL
+// bridge cells. DOBs sourced from public bios; sentinel '0000-00-00' used
+// where DOB is not publicly findable. Pre-seeded into the dim upsert AND
+// the resolution map so re-ingesting samhoppen does not re-NULL the
+// (team, season, role) slots the Phase 1 adhoc backfilled.
+const INTERIM_COORDINATOR_SEEDS = [
+  {
+    coach_id: 'WILL-BLAK-1984-12-30',
+    full_name: 'Blake Williams',
+    dob: '1984-12-30',
+    team: 'LA',
+    season: 2012,
+    role: 'def_play_caller'
+  },
+  {
+    coach_id: 'JOHN-MIKE-1967-05-02',
+    full_name: 'Mike Johnson',
+    dob: '1967-05-02',
+    team: 'SF',
+    season: 2010,
+    role: 'off_play_caller'
+  },
+  {
+    coach_id: 'FRAZ-PARK-1991-11-20',
+    full_name: 'Parks Frazier',
+    dob: '1991-11-20',
+    team: 'IND',
+    season: 2022,
+    role: 'off_play_caller'
+  },
+  {
+    coach_id: 'MURP-MIKE-1944-09-25',
+    full_name: 'Mike Murphy',
+    dob: '1944-09-25',
+    team: 'IND',
+    season: 2011,
+    role: 'def_play_caller'
+  },
+  {
+    coach_id: 'MILA-SCOT-1973-01-25',
+    full_name: 'Scott Milanovich',
+    dob: '1973-01-25',
+    team: 'JAX',
+    season: 2018,
+    role: 'off_play_caller'
+  },
+  {
+    coach_id: 'WHIP-SPEN-1989-03-18',
+    full_name: 'Spencer Whipple',
+    dob: '1989-03-18',
+    team: 'ARI',
+    season: 2021,
+    role: 'off_play_caller'
+  },
+  {
+    // Evan Rothstein DOB not publicly findable as of 2026-05-31. Sentinel-DOB
+    // collision discriminator suffix not needed (no other ROTH-EVAN sentinel).
+    coach_id: 'ROTH-EVAN-0000-00-00',
+    full_name: 'Evan Rothstein',
+    dob: '0000-00-00',
+    team: 'DET',
+    season: 2020,
+    role: 'off_play_caller'
+  }
+  // DET 2020 DC week-16 NULL is intentionally NOT seeded with Sean Ryan
+  // (initial plan draft). Bridge data shows Cory Undlin (UndlCo0) as DC weeks
+  // 1-15 and 17; week 16 is a PFR data gap, not a real role change. The
+  // Phase 1 adhoc backfills that single cell with Cory Undlin's coach_id
+  // directly. See task observation 2026-05-31 for full rationale.
+]
+
+// Derive the deterministic own-id from canonical name + DOB.
+// Format: LNAM-FNAM-YYYY-MM-DD (last 4 / first 4 / ISO date).
+// Sentinel-DOB ('0000-00-00') rows can carry an optional -NN discriminator
+// when multiple coaches share LNAM-FNAM with unknown DOB; that path is
+// handled at seed-authoring time, not derived here.
+const derive_coach_id = (full_name, dob) => {
+  if (!full_name || !dob) return null
+  const parts = full_name.trim().split(/\s+/)
+  if (parts.length < 2) return null
+  const first = parts[0]
+  let last = parts[parts.length - 1]
+  last = last.replace(/(Jr|Sr|II|III|IV)\.?$/i, '').trim()
+  if (!last) {
+    // Suffix was the entire last token; fall back to the second-to-last.
+    if (parts.length < 3) return null
+    last = parts[parts.length - 2]
+  }
+  // Strip non-alpha (apostrophe, hyphen, etc.) before slicing so the LNAM/FNAM
+  // segments satisfy the CHECK regex [A-Z]{1,4}. E.g. "O'Leary" -> "OLEA",
+  // not "O'LE" (the latter would fail the constraint and abort the txn).
+  const lnam = last.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 4)
+  const fnam = first.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 4)
+  if (!lnam || !fnam) return null
+  // Accept either an ISO 'YYYY-MM-DD' string or a Date.
+  const dob_text =
+    typeof dob === 'string' ? dob : dob.toISOString().slice(0, 10)
+  return `${lnam}-${fnam}-${dob_text}`
+}
+
+const load_pfr_fixture = () => {
+  if (!fs.existsSync(PFR_FIXTURE_PATH)) {
+    throw new Error(
+      `PFR fixture missing at ${PFR_FIXTURE_PATH} -- run scripts/scrape-pfr-coaches.mjs and commit static-data/pfr-coaches.json before running this importer`
+    )
+  }
+  const rows = JSON.parse(fs.readFileSync(PFR_FIXTURE_PATH, 'utf-8'))
+  const pfr_to_coach_id = new Map()
+  const dim_rows = []
+  for (const r of rows) {
+    if (!r.pfr_coach_id) continue
+    if (!r.dob || !r.full_name) continue
+    const coach_id = derive_coach_id(r.full_name, r.dob)
+    if (!coach_id) continue
+    pfr_to_coach_id.set(r.pfr_coach_id, coach_id)
+    dim_rows.push({
+      coach_id,
+      pfr_coach_id: r.pfr_coach_id,
+      full_name: r.full_name,
+      dob: r.dob
+    })
+  }
+  return { pfr_to_coach_id, dim_rows }
+}
 
 const fetch_csv = async (filename) => {
   const url = `${SOURCE_BASE}/${filename}`
   log(`fetching ${url}`)
   const response = await fetch(url)
   if (!response.ok) {
-    throw new Error(`fetch ${filename} failed: ${response.status} ${response.statusText}`)
+    throw new Error(
+      `fetch ${filename} failed: ${response.status} ${response.statusText}`
+    )
   }
   return response.text()
 }
@@ -112,25 +240,11 @@ const NAME_ALIASES = {
   'Mike Shannahan': 'Mike Shanahan',
   'Don Beraux': 'Don Breaux',
   'Johnnie Lynn': 'Johnny Lynn',
-  // "Jim L. Mora" is Jim Mora Jr (middle name Lee); SF DC 1999-2003
-  // per yearly_coaching_history. Aliasing to "Jim Mora" routes the
-  // team_season_map lookup to MoraJi1 via the (name, team, season)
-  // key, which correctly distinguishes him from his father MoraJi0
-  // (whose 1999-2001 IND HC entries also key as "Jim Mora").
+  // "Jim L. Mora" is Jim Mora Jr (middle name Lee). DOB-keyed identity
+  // does the disambiguation now (MoraJi0 1935-05-24 vs MoraJi1 1961-11-19),
+  // but the alias remains useful for samhoppen-string normalization so the
+  // canonical-name lookup hits.
   'Jim L. Mora': 'Jim Mora'
-}
-
-// Manual (name -> {pfr_coach_id, full_name}) overrides for coaches that
-// have a /coaches/ page on PFR but are absent from samhoppen's
-// yearly_coaching_history.csv (typically new hires PFR has indexed but
-// samhoppen has not yet published). Each entry is verified by a direct
-// PFR /coaches/<id>.htm lookup. Used as the final fallback in
-// resolve_coach and pre-seeded into the nfl_coaches upsert so the
-// override coach is present as an FK target.
-const NAME_OVERRIDES = {
-  // PFR spells him "Zak Kuhr"; samhoppen all_playcallers writes "Zac Kuhr".
-  // NE 2025 mid-season DC after Terrell Williams.
-  'Zac Kuhr': { pfr_coach_id: 'KuhrZa0', full_name: 'Zak Kuhr' }
 }
 
 const canonicalize_name = (s) => {
@@ -144,29 +258,39 @@ const canonicalize_name = (s) => {
   return n.replace(/\s+/g, ' ').trim()
 }
 
-const build_resolution_map = (history_rows) => {
-  // Primary key: `${canonical_name}|${current_abbrev}|${season}` -> id.
+const build_resolution_map = (history_rows, pfr_to_coach_id) => {
+  // Primary key: `${canonical_name}|${current_abbrev}|${season}` -> coach_id.
   // Fallback indexes handle two upstream-quirk failure modes:
-  //   - team mis-attribution: history row pegs the coach to a team
-  //     he didn't actually play-call for that season (Olson 2014 LVR vs
-  //     actual JAX). Resolved by (canonical_name, season).
-  //   - team + season mis-attribution: rarer; resolved by canonical_name
-  //     alone when there is no ambiguity across all of history.
+  //   - team mis-attribution (Olson 2014 LVR vs actual JAX): (name, season).
+  //   - team + season mis-attribution: name alone when unambiguous.
   const team_season_map = new Map()
   const name_season_map = new Map()
   const name_map = new Map()
-  const coaches = new Map()
   const unknown_long_names = new Set()
+  const missing_pfr_to_coach_id = new Set()
+
+  // Pre-seed the (team, season, role) -> coach_id index for the 8 interim
+  // coordinators. Looked up in process_week when samhoppen resolves to NULL.
+  const seed_index = new Map()
+  for (const s of INTERIM_COORDINATOR_SEEDS) {
+    seed_index.set(`${s.team}|${s.season}|${s.role}`, s.coach_id)
+  }
+
   for (const row of history_rows) {
     const raw_coach = row.coach?.trim()
+    const raw_id = row.coach_id?.trim()
     // PFR IDs in this source sometimes carry a leading path component like
     // /coaches/ or /executives/ (head coaches who also held GM roles).
     // The stable identifier is the trailing basename (e.g. BeliBi0).
-    const raw_id = row.coach_id?.trim()
-    const coach_id = raw_id ? raw_id.split('/').pop() : null
+    const pfr_coach_id = raw_id ? raw_id.split('/').pop() : null
     const team_name = row.team_name?.trim()
     const season = row.season?.trim()
-    if (!raw_coach || !coach_id || !team_name || !season) continue
+    if (!raw_coach || !pfr_coach_id || !team_name || !season) continue
+    const coach_id = pfr_to_coach_id.get(pfr_coach_id)
+    if (!coach_id) {
+      missing_pfr_to_coach_id.add(pfr_coach_id)
+      continue
+    }
     const coach = canonicalize_name(raw_coach)
     const abbrev = LONG_NAME_TO_ABBREV[team_name]
     if (!abbrev) {
@@ -179,15 +303,18 @@ const build_resolution_map = (history_rows) => {
     name_season_map.get(ns_key).add(coach_id)
     if (!name_map.has(coach)) name_map.set(coach, new Set())
     name_map.get(coach).add(coach_id)
-    // Preserve the original (un-canonicalized) name for nfl_coaches.full_name.
-    if (!coaches.has(coach_id)) coaches.set(coach_id, raw_coach)
   }
   if (unknown_long_names.size) {
     log(
       `WARN: ${unknown_long_names.size} unknown long_names in yearly_coaching_history.csv: ${Array.from(unknown_long_names).join(', ')}`
     )
   }
-  return { team_season_map, name_season_map, name_map, coaches }
+  if (missing_pfr_to_coach_id.size) {
+    throw new Error(
+      `pipeline_failure: ${missing_pfr_to_coach_id.size} pfr_coach_ids in samhoppen's yearly_coaching_history.csv are not in static-data/pfr-coaches.json -- re-run scripts/scrape-pfr-coaches.mjs --ids ${Array.from(missing_pfr_to_coach_id).join(',')} and recommit the fixture`
+    )
+  }
+  return { team_season_map, name_season_map, name_map, seed_index }
 }
 
 const assert_abbrev_coverage = (playcaller_rows, years) => {
@@ -221,11 +348,33 @@ const write_unresolved = (entries) => {
   log(`wrote ${entries.length} unresolved rows to ${UNRESOLVED_LOG_PATH}`)
 }
 
-const resolve_coach = ({ name, team, season, role, game_id, week, resolution, unresolved, fallback_stats }) => {
-  if (!name || !name.trim()) return null
+const resolve_coach = ({
+  name,
+  team,
+  season,
+  role,
+  game_id,
+  week,
+  resolution,
+  unresolved,
+  fallback_stats
+}) => {
+  if (!name || !name.trim()) {
+    // Samhoppen left this (team, season, role) cell blank. If a seed covers
+    // this slot, use it -- prevents the 47 backfilled cells from re-NULLing
+    // when the cron re-ingests the same upstream rows.
+    const seed_id = resolution.seed_index.get(`${team}|${season}|${role}`)
+    if (seed_id) {
+      fallback_stats.seed++
+      return seed_id
+    }
+    return null
+  }
   const trimmed = name.trim()
   const canonical = canonicalize_name(trimmed)
-  const primary = resolution.team_season_map.get(`${canonical}|${team}|${season}`)
+  const primary = resolution.team_season_map.get(
+    `${canonical}|${team}|${season}`
+  )
   if (primary) return primary
   const ns_set = resolution.name_season_map.get(`${canonical}|${season}`)
   if (ns_set && ns_set.size === 1) {
@@ -237,11 +386,6 @@ const resolve_coach = ({ name, team, season, role, game_id, week, resolution, un
     fallback_stats.name_only++
     return [...name_set][0]
   }
-  const override = NAME_OVERRIDES[trimmed]
-  if (override) {
-    fallback_stats.name_override++
-    return override.pfr_coach_id
-  }
   unresolved.push({
     season,
     week,
@@ -249,50 +393,89 @@ const resolve_coach = ({ name, team, season, role, game_id, week, resolution, un
     game_id,
     name: trimmed,
     role,
-    reason: ns_set && ns_set.size > 1
-      ? 'name_season_ambiguous'
-      : name_set && name_set.size > 1
-        ? 'name_only_ambiguous'
-        : 'no_pfr_coach_id_for_name'
+    reason:
+      ns_set && ns_set.size > 1
+        ? 'name_season_ambiguous'
+        : name_set && name_set.size > 1
+          ? 'name_only_ambiguous'
+          : 'no_coach_id_for_name'
   })
   return null
 }
 
-const upsert_coaches = async (coaches) => {
-  if (!coaches.size) return 0
-  const rows = Array.from(coaches.entries()).map(([pfr_coach_id, full_name]) => ({
-    pfr_coach_id,
-    full_name,
+const upsert_coaches_dim = async ({ dim_rows, dry_run }) => {
+  // Idempotent upsert of the PFR-sourced dim rows plus the 8 interim seed
+  // rows. Phase 1 SQL already loaded these from static-data/pfr-coaches.json into
+  // nfl_coaches, but the importer re-asserts on each run so that a newly
+  // scraped pfr_coach_id (added to the fixture and re-committed) is picked
+  // up without an out-of-band SQL apply.
+  const rows = dim_rows.map((r) => ({
+    coach_id: r.coach_id,
+    pfr_coach_id: r.pfr_coach_id,
+    full_name: r.full_name,
+    dob: r.dob,
     updated_at: db.fn.now()
   }))
+  for (const s of INTERIM_COORDINATOR_SEEDS) {
+    rows.push({
+      coach_id: s.coach_id,
+      pfr_coach_id: null,
+      full_name: s.full_name,
+      // Sentinel '0000-00-00' is not a valid PostgreSQL date; store
+      // 1900-01-01 as the storage sentinel (the coach_id text carries
+      // the '0000-00-00' marker for sentinel-aware consumers).
+      dob: s.dob === '0000-00-00' ? '1900-01-01' : s.dob,
+      updated_at: db.fn.now()
+    })
+  }
+  if (dry_run) {
+    log(`[dry-run] would upsert ${rows.length} nfl_coaches dim rows`)
+    return rows.length
+  }
   await db('nfl_coaches')
     .insert(rows)
-    .onConflict('pfr_coach_id')
-    .merge(['full_name', 'updated_at'])
+    .onConflict('coach_id')
+    .merge(['pfr_coach_id', 'full_name', 'dob', 'updated_at'])
   return rows.length
 }
 
-const process_week = async ({ year, week, rows, resolution, unresolved, fallback_stats }) => {
+const process_week = async ({
+  year,
+  week,
+  rows,
+  resolution,
+  unresolved,
+  fallback_stats,
+  dry_run
+}) => {
   const bridge_rows = []
   for (const row of rows) {
     const game_id = row.game_id?.trim()
     const team = row.team?.trim()
     if (!game_id || !team) continue
-    const ctx = { season: year, week, team, game_id, resolution, unresolved, fallback_stats }
+    const ctx = {
+      season: year,
+      week,
+      team,
+      game_id,
+      resolution,
+      unresolved,
+      fallback_stats
+    }
     bridge_rows.push({
       nflverse_game_id: game_id,
       team,
-      head_coach_pfr_id: resolve_coach({
+      head_coach_id: resolve_coach({
         ...ctx,
         name: row.head_coach,
         role: 'head_coach'
       }),
-      off_play_caller_pfr_id: resolve_coach({
+      off_play_caller_id: resolve_coach({
         ...ctx,
         name: row.off_play_caller,
         role: 'off_play_caller'
       }),
-      def_play_caller_pfr_id: resolve_coach({
+      def_play_caller_id: resolve_coach({
         ...ctx,
         name: row.def_play_caller,
         role: 'def_play_caller'
@@ -302,26 +485,35 @@ const process_week = async ({ year, week, rows, resolution, unresolved, fallback
   }
   if (!bridge_rows.length) return { bridge: 0, populated: 0 }
 
-  // One transaction per (year, week) for bridge upsert + nfl_games cache update.
+  if (dry_run) {
+    log(
+      `[dry-run] year=${year} week=${week} would upsert ${bridge_rows.length} bridge rows`
+    )
+    return { bridge: bridge_rows.length, populated: 0 }
+  }
+
   let populated = 0
   await db.transaction(async (trx) => {
     await trx('nfl_game_coaches')
       .insert(bridge_rows)
       .onConflict(['nflverse_game_id', 'team'])
       .merge([
-        'head_coach_pfr_id',
-        'off_play_caller_pfr_id',
-        'def_play_caller_pfr_id',
+        'head_coach_id',
+        'off_play_caller_id',
+        'def_play_caller_id',
         'ingested_at'
       ])
 
-    // Update denormalized name strings on nfl_games for this batch.
-    const game_ids = Array.from(new Set(bridge_rows.map((r) => r.nflverse_game_id)))
+    // Denormalize the offensive play-caller name into nfl_games for this
+    // batch. Joins via the new *_coach_id FK.
+    const game_ids = Array.from(
+      new Set(bridge_rows.map((r) => r.nflverse_game_id))
+    )
     const home_update = await trx.raw(
       `UPDATE nfl_games AS g
        SET home_play_caller = c.full_name
        FROM nfl_game_coaches gc
-       JOIN nfl_coaches c ON c.pfr_coach_id = gc.off_play_caller_pfr_id
+       JOIN nfl_coaches c ON c.coach_id = gc.off_play_caller_id
        WHERE gc.nflverse_game_id = g.nflverse_game_id
          AND gc.team = g.h
          AND g.nflverse_game_id = ANY(?)`,
@@ -331,7 +523,7 @@ const process_week = async ({ year, week, rows, resolution, unresolved, fallback
       `UPDATE nfl_games AS g
        SET away_play_caller = c.full_name
        FROM nfl_game_coaches gc
-       JOIN nfl_coaches c ON c.pfr_coach_id = gc.off_play_caller_pfr_id
+       JOIN nfl_coaches c ON c.coach_id = gc.off_play_caller_id
        WHERE gc.nflverse_game_id = g.nflverse_game_id
          AND gc.team = g.v
          AND g.nflverse_game_id = ANY(?)`,
@@ -343,7 +535,11 @@ const process_week = async ({ year, week, rows, resolution, unresolved, fallback
   return { bridge: bridge_rows.length, populated }
 }
 
-const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
+const import_nfl_coaches = async ({
+  backfill = false,
+  since = null,
+  dry_run = false
+} = {}) => {
   const playcaller_headers = [
     'season',
     'week',
@@ -363,6 +559,9 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
     'def_scheme'
   ]
 
+  const { pfr_to_coach_id, dim_rows } = load_pfr_fixture()
+  log(`loaded PFR fixture: ${dim_rows.length} indexed coaches`)
+
   const [playcaller_text, history_text] = await Promise.all([
     fetch_csv('all_playcallers.csv'),
     fetch_csv('yearly_coaching_history.csv')
@@ -375,14 +574,14 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
 
   // Determine year range.
   const all_years = Array.from(
-    new Set(playcaller_rows.map((r) => Number(r.season)).filter((y) => !Number.isNaN(y)))
+    new Set(
+      playcaller_rows
+        .map((r) => Number(r.season))
+        .filter((y) => !Number.isNaN(y))
+    )
   ).sort((a, b) => a - b)
 
-  // Stale-feed guard. The header check catches structural drift and the
-  // zero-bridge guard at the end catches total failure, but a feed that
-  // silently stops updating mid-life (samhoppen has done this before)
-  // sails past both. If the newest season in the feed is older than last
-  // year, treat it as stale.
+  // Stale-feed guard.
   const max_year = all_years[all_years.length - 1]
   if (max_year != null && max_year < current_season.year - 1) {
     throw new Error(
@@ -395,9 +594,7 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
     target_years = all_years
   } else {
     const start =
-      since === 'current' || since == null
-        ? current_season.year
-        : Number(since)
+      since === 'current' || since == null ? current_season.year : Number(since)
     if (
       !Number.isInteger(start) ||
       start < 1990 ||
@@ -414,23 +611,17 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
       `No target years selected (backfill=${backfill}, since=${since}, csv years=${all_years[0]}..${all_years[all_years.length - 1]})`
     )
   }
-  log(`target years: ${target_years.join(',')}`)
+  log(`target years: ${target_years.join(',')}${dry_run ? ' [dry-run]' : ''}`)
 
   assert_abbrev_coverage(playcaller_rows, target_years)
 
-  const resolution = build_resolution_map(history_rows)
-  const { coaches } = resolution
+  const resolution = build_resolution_map(history_rows, pfr_to_coach_id)
   log(
-    `resolution map: ${resolution.team_season_map.size} (name,team,season) triples; ${resolution.name_map.size} canonical names; ${coaches.size} distinct coaches`
+    `resolution map: ${resolution.team_season_map.size} (name,team,season) triples; ${resolution.name_map.size} canonical names; ${resolution.seed_index.size} (team,season,role) seeds`
   )
 
-  // Merge in NAME_OVERRIDES so override pfr_coach_ids exist as FK targets.
-  for (const { pfr_coach_id, full_name } of Object.values(NAME_OVERRIDES)) {
-    if (!coaches.has(pfr_coach_id)) coaches.set(pfr_coach_id, full_name)
-  }
-  // Upsert nfl_coaches up front (single transaction across the whole run).
-  const coaches_upserted = await upsert_coaches(coaches)
-  const fallback_stats = { name_season: 0, name_only: 0, name_override: 0 }
+  const coaches_upserted = await upsert_coaches_dim({ dim_rows, dry_run })
+  const fallback_stats = { name_season: 0, name_only: 0, seed: 0 }
 
   const unresolved = []
   let total_bridge = 0
@@ -453,23 +644,29 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
         rows,
         resolution,
         unresolved,
-        fallback_stats
+        fallback_stats,
+        dry_run
       })
       bridge_total += bridge
       populated_total += populated
     }
     total_bridge += bridge_total
 
-    const matched_row = await db('nfl_game_coaches as gc')
-      .join('nfl_games as g', 'g.nflverse_game_id', 'gc.nflverse_game_id')
-      .where('g.year', year)
-      .countDistinct('gc.nflverse_game_id as matched')
-      .first()
-    const matched = Number(matched_row?.matched || 0)
-    const year_unresolved = unresolved.filter((u) => Number(u.season) === year).length
+    let matched = 0
+    if (!dry_run) {
+      const matched_row = await db('nfl_game_coaches as gc')
+        .join('nfl_games as g', 'g.nflverse_game_id', 'gc.nflverse_game_id')
+        .where('g.year', year)
+        .countDistinct('gc.nflverse_game_id as matched')
+        .first()
+      matched = Number(matched_row?.matched || 0)
+    }
+    const year_unresolved = unresolved.filter(
+      (u) => Number(u.season) === year
+    ).length
     const unresolved_rate = bridge_total ? year_unresolved / bridge_total : 0
     console.log(
-      `[import-nfl-coaches] year=${year} games_csv=${games_csv} games_matched=${matched} populated=${populated_total} coaches=${coaches_upserted} unresolved=${year_unresolved} unresolved_rate=${unresolved_rate.toFixed(3)}`
+      `[import-nfl-coaches] year=${year} games_csv=${games_csv} games_matched=${matched} populated=${populated_total} coaches=${coaches_upserted} unresolved=${year_unresolved} unresolved_rate=${unresolved_rate.toFixed(3)}${dry_run ? ' [dry-run]' : ''}`
     )
     year_results.push({
       year,
@@ -484,7 +681,7 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
 
   write_unresolved(unresolved)
   log(
-    `fallback resolutions: name_season=${fallback_stats.name_season} name_only=${fallback_stats.name_only} name_override=${fallback_stats.name_override}`
+    `fallback resolutions: name_season=${fallback_stats.name_season} name_only=${fallback_stats.name_only} seed=${fallback_stats.seed}`
   )
 
   if (!total_bridge) {
@@ -495,13 +692,14 @@ const import_nfl_coaches = async ({ backfill = false, since = null } = {}) => {
 
   // Current-year regression detector. Floor on resolution quality for
   // the season the weekly `--since current` run is actually populating.
-  // > 10% unresolved-cell-to-bridge-row ratio means the resolver has
-  // drifted (new name alias, history-row team mis-attribution, etc.)
-  // and downstream consumers will see materially gappy data.
   const current_year_result = year_results.find(
     (r) => r.year === current_season.year
   )
-  if (current_year_result && current_year_result.bridge > 0 && current_year_result.unresolved_rate > 0.1) {
+  if (
+    current_year_result &&
+    current_year_result.bridge > 0 &&
+    current_year_result.unresolved_rate > 0.1
+  ) {
     throw new Error(
       `pipeline_failure: current-year (${current_season.year}) unresolved_rate=${current_year_result.unresolved_rate.toFixed(3)} exceeds 0.10 threshold (${current_year_result.unresolved} unresolved cells / ${current_year_result.bridge} bridge rows)`
     )
@@ -521,11 +719,16 @@ const main = async () => {
     const argv = yargs(hideBin(process.argv))
       .option('backfill', { type: 'boolean', default: false })
       .option('since', { type: 'string' })
+      .option('dry-run', { type: 'boolean', default: false })
       .parse()
     if (argv.backfill && argv.since) {
       throw new Error('Pass either --backfill or --since, not both')
     }
-    await import_nfl_coaches({ backfill: argv.backfill, since: argv.since })
+    await import_nfl_coaches({
+      backfill: argv.backfill,
+      since: argv.since,
+      dry_run: argv['dry-run'] || argv.dryRun
+    })
   } catch (err) {
     console.log(`ERROR: ${err.message}`)
     console.error(err)
