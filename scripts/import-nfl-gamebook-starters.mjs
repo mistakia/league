@@ -260,13 +260,16 @@ const parse_gamebook_lineups = async ({ pdf_path }) => {
     }
   }
 
-  // Quadrant row count is usually 11 but gamebooks legitimately list 10-12 in
-  // edge cases (jumbo packages, occasional FB-as-skill-slot variance). Anything
-  // outside 9-12 indicates a parse error.
+  // Quadrant row count is usually 11. Edge cases:
+  //   - 10 or 12 in modern gamebooks (jumbo packages, occasional FB variance)
+  //   - 20-22 in 2003-era PDFs where the defensive lineup is listed both
+  //     interleaved with offense and as a separate continuation block.
+  //     dedup-by-pid downstream collapses the duplicates.
+  // Anything under 9 or over 24 indicates a real parse error.
   for (let i = 0; i < 4; i++) {
-    if (quadrants[i].length < 9 || quadrants[i].length > 12) {
+    if (quadrants[i].length < 9 || quadrants[i].length > 24) {
       throw new Error(
-        `quadrant ${i} has ${quadrants[i].length} rows, expected 9-12`
+        `quadrant ${i} has ${quadrants[i].length} rows, expected 9-24`
       )
     }
   }
@@ -283,6 +286,13 @@ const last_name_of = (name) => {
   const last = dot >= 0 ? name.slice(dot + 1) : name
   return last.trim().toLowerCase()
 }
+
+// nflverse CSV uses (game_type, week) where week increments through POST:
+// 17-game era: REG 1-17, WC 18, DIV 19, CON 20, SB 21
+// 18-week era: REG 1-18, WC 19, DIV 20, CON 21, SB 22
+// Our DB uses (seas_type, week) where POST week resets to 1/2/3/4.
+const GAME_TYPE_TO_SEAS_TYPE = { REG: 'REG', WC: 'POST', DIV: 'POST', CON: 'POST', CONF: 'POST', SB: 'POST' }
+const POST_GAME_TYPE_WEEK = { WC: 1, DIV: 2, CON: 3, CONF: 3, SB: 4 }
 
 const build_jersey_to_pid_index = async ({ year, force_download }) => {
   const csv_path = await download_csv({ year, force_download })
@@ -310,8 +320,10 @@ const build_jersey_to_pid_index = async ({ year, force_download }) => {
     .whereIn('gsisid', gsis_ids)
   const pid_by_gsis = new Map(player_rows.map((p) => [p.gsisid, p.pid]))
 
-  const by_jersey = new Map() // `${team}-${week}-${jnum}` -> pid
-  const by_lastname = new Map() // `${team}-${week}-${lastname}` -> pid
+  // Keys are `${team}-${seas_type}-${week}-${jnum}` (and lastname variant) so
+  // REG W1 and POST W1 (Wild Card) don't collide.
+  const by_jersey = new Map()
+  const by_lastname = new Map()
 
   for (const r of candidates) {
     const pid = pid_by_gsis.get(r.gsis_id)
@@ -323,13 +335,21 @@ const build_jersey_to_pid_index = async ({ year, force_download }) => {
     } catch {
       continue
     }
-    const week = Number(r.week)
+
+    const seas_type = GAME_TYPE_TO_SEAS_TYPE[r.game_type]
+    if (!seas_type) continue
+    const week =
+      seas_type === 'POST'
+        ? POST_GAME_TYPE_WEEK[r.game_type]
+        : Number(r.week)
+
+    const key_prefix = `${team}-${seas_type}-${week}`
     if (r.jersey_number) {
-      by_jersey.set(`${team}-${week}-${Number(r.jersey_number)}`, pid)
+      by_jersey.set(`${key_prefix}-${Number(r.jersey_number)}`, pid)
     }
     const lname = (r.last_name || '').trim().toLowerCase()
     if (lname) {
-      by_lastname.set(`${team}-${week}-${lname}`, pid)
+      by_lastname.set(`${key_prefix}-${lname}`, pid)
     }
   }
 
@@ -339,14 +359,24 @@ const build_jersey_to_pid_index = async ({ year, force_download }) => {
   return { by_jersey, by_lastname }
 }
 
-const resolve_player = ({ team, week, jnum, name, index }) => {
-  const j_key = `${team}-${week}-${jnum}`
-  const j_hit = index.by_jersey.get(j_key)
+const resolve_player = ({ team, seas_type, week, jnum, name, index }) => {
+  // Primary: exact seas_type / week match.
+  const lname = last_name_of(name)
+  const prefix = `${team}-${seas_type}-${week}`
+  const j_hit = index.by_jersey.get(`${prefix}-${jnum}`)
   if (j_hit) return { pid: j_hit, via: 'jersey' }
-
-  const l_key = `${team}-${week}-${last_name_of(name)}`
-  const l_hit = index.by_lastname.get(l_key)
+  const l_hit = index.by_lastname.get(`${prefix}-${lname}`)
   if (l_hit) return { pid: l_hit, via: 'lastname' }
+
+  // PRE games have no nflverse CSV coverage (CSV omits PRE entirely);
+  // fall back to REG W1 since the active 53 is largely the same roster.
+  if (seas_type === 'PRE') {
+    const reg_prefix = `${team}-REG-1`
+    const j_hit_pre = index.by_jersey.get(`${reg_prefix}-${jnum}`)
+    if (j_hit_pre) return { pid: j_hit_pre, via: 'jersey_pre_fallback' }
+    const l_hit_pre = index.by_lastname.get(`${reg_prefix}-${lname}`)
+    if (l_hit_pre) return { pid: l_hit_pre, via: 'lastname_pre_fallback' }
+  }
 
   return null
 }
@@ -365,9 +395,19 @@ const process_game = async ({ game, index, dry_run }) => {
     return { skipped: 'parse_fail', starters_written: 0 }
   }
 
-  // Map the PDF's left/right teams to the DB's (h, v). If neither matches,
-  // skip the game (e.g., Pro Bowl AFC/NFC).
-  const game_teams = new Set([game.h, game.v])
+  // Map the PDF's left/right teams to the DB's (h, v). Normalize both sides
+  // through fixTeam so pre-relocation codes (SD/OAK/STL) match modern PDF
+  // labels (LAC/LV/LA). If neither matches, skip the game (e.g., Pro Bowl
+  // AFC/NFC).
+  let h_abbr
+  let v_abbr
+  try {
+    h_abbr = fixTeam(game.h)
+    v_abbr = fixTeam(game.v)
+  } catch {
+    return { skipped: 'team_mismatch', starters_written: 0 }
+  }
+  const game_teams = new Set([h_abbr, v_abbr])
   if (!game_teams.has(parsed.left.abbr) || !game_teams.has(parsed.right.abbr)) {
     log(
       `team-mismatch esbid=${game.esbid} pdf=[${parsed.left.abbr},${parsed.right.abbr}] db=[${game.h},${game.v}]`
@@ -384,6 +424,7 @@ const process_game = async ({ game, index, dry_run }) => {
       attempted += 1
       const match = resolve_player({
         team: side.abbr,
+        seas_type: game.seas_type,
         week: game.week,
         jnum: slot.jnum,
         name: slot.name,
@@ -418,25 +459,38 @@ const process_game = async ({ game, index, dry_run }) => {
     return { starters_written: final_rows.length, resolved, attempted }
   }
 
-  await batch_insert({
-    items: final_rows,
-    batch_size: BATCH_SIZE,
-    save: async (batch) => {
-      await db('player_gamelogs')
-        .insert(batch)
-        .onConflict(['esbid', 'pid', 'year'])
-        .merge(['started'])
-    }
-  })
+  // UPDATE only -- never INSERT. The gamebook importer adds `started` to
+  // player_gamelogs rows created by the rosters importers (which populate
+  // tm/opp/pos/active and satisfy player_gamelogs.opp NOT NULL). If no
+  // matching row exists for (esbid, pid, year), the starter is silently
+  // dropped -- count these to surface upstream rosters-importer gaps.
+  let updated_count = 0
+  for (const r of final_rows) {
+    // Skip rows mistakenly tagged tm='INA' by upstream rosters importers --
+    // 'INA' is a roster-status code (inactive), not a team. The (esbid, pid)
+    // resolves to a row whose `tm` is wrong; setting started=true there would
+    // produce nonsense team-level aggregates.
+    const n = await db('player_gamelogs')
+      .where({ esbid: r.esbid, pid: r.pid, year: r.year })
+      .whereNot({ tm: 'INA' })
+      .update({ started: r.started })
+    updated_count += n
+  }
 
-  // Sweep remainder of the dressed roster to started=false.
+  // Sweep remainder of the dressed roster to started=false. Same INA guard.
   await db('player_gamelogs')
     .where({ esbid: game.esbid })
     .whereNull('started')
+    .whereNot({ tm: 'INA' })
     .andWhere((q) => q.where('active', true).orWhereNull('active'))
     .update({ started: false })
 
-  return { starters_written: final_rows.length, resolved, attempted }
+  return {
+    starters_written: updated_count,
+    starters_attempted_write: final_rows.length,
+    resolved,
+    attempted
+  }
 }
 
 const import_for_year = async ({ year, week, seas_type, force_download, dry_run }) => {
@@ -460,7 +514,8 @@ const import_for_year = async ({ year, week, seas_type, force_download, dry_run 
     games_parse_fail: 0,
     games_team_mismatch: 0,
     games_floor_breach: 0,
-    starter_rows_written: 0
+    starter_rows_written: 0,
+    starters_no_gamelog_row: 0
   }
 
   for (const game of games) {
@@ -472,7 +527,9 @@ const import_for_year = async ({ year, week, seas_type, force_download, dry_run 
     else if (result.skipped === 'floor_breach') counts.games_floor_breach += 1
     else {
       counts.games_written += 1
-      counts.starter_rows_written += result.starters_written
+      counts.starter_rows_written += result.starters_written || 0
+      counts.starters_no_gamelog_row +=
+        (result.starters_attempted_write || 0) - (result.starters_written || 0)
     }
   }
 
@@ -506,7 +563,8 @@ const import_nfl_gamebook_starters = async ({
     games_parse_fail: 0,
     games_team_mismatch: 0,
     games_floor_breach: 0,
-    starter_rows_written: 0
+    starter_rows_written: 0,
+    starters_no_gamelog_row: 0
   }
   for (const y of years) {
     const c = await import_for_year({
