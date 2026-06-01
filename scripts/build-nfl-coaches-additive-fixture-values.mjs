@@ -37,6 +37,11 @@ const SENTINEL_KEEP = {
   DoylDe0: 'Declan Doyle',
   KubiKl1: 'Klay Kubiak',
   LaFlMi0: 'Mike LaFleur',
+  // Scott Pioli appears in samhoppen yearly_coaching_history.csv as
+  // /executives/PiolSc0 (Asst. Director of Player Personnel, NE 2000); the
+  // importer strips the leading path component before lookup, so PiolSc0
+  // must resolve. Kept with sentinel rather than dropped.
+  PiolSc0: 'Scott Pioli',
   SmitGi0: 'Giff Smith',
   UdinGr0: 'Grant Udinski'
 }

@@ -58,6 +58,21 @@ const LONG_NAME_TO_ABBREV = {
 const UNRESOLVED_LOG_PATH = 'tmp/import-nfl-coaches-unresolved.csv'
 const PFR_FIXTURE_PATH = 'static-data/pfr-coaches.json'
 
+// PFR coaches whose PFR page lacks a parseable DOB but who are bridge-
+// referenced or appear in samhoppen YCH (including under /executives/);
+// kept with sentinel '0000-00-00' so the importer can resolve them. Mirrors
+// SENTINEL_KEEP in scripts/build-nfl-coaches-additive-fixture-values.mjs.
+// Storage convention: coach_id text carries '0000-00-00', dob column stores
+// '1900-01-01' (PostgreSQL date type rejects 0000-00-00).
+const SENTINEL_PFR_COACHES = {
+  DoylDe0: 'Declan Doyle',
+  KubiKl1: 'Klay Kubiak',
+  LaFlMi0: 'Mike LaFleur',
+  PiolSc0: 'Scott Pioli',
+  SmitGi0: 'Giff Smith',
+  UdinGr0: 'Grant Udinski'
+}
+
 // Seeds for the 8 PFR-unindexed interim coordinators that close the 47 NULL
 // bridge cells. DOBs sourced from public bios; sentinel '0000-00-00' used
 // where DOB is not publicly findable. Pre-seeded into the dim upsert AND
@@ -115,18 +130,26 @@ const INTERIM_COORDINATOR_SEEDS = [
   {
     // Evan Rothstein DOB not publicly findable as of 2026-05-31. Sentinel-DOB
     // collision discriminator suffix not needed (no other ROTH-EVAN sentinel).
+    // Per samhoppen all_playcallers, Rothstein was DET 2020 week 16 DC
+    // (not OC -- the initial plan draft had Rothstein and Ryan swapped).
     coach_id: 'ROTH-EVAN-0000-00-00',
     full_name: 'Evan Rothstein',
     dob: '0000-00-00',
     team: 'DET',
     season: 2020,
+    role: 'def_play_caller'
+  },
+  {
+    // Per samhoppen all_playcallers, Sean Ryan was DET 2020 week 17 OC.
+    // (Public bios list him as QB coach; samhoppen is the authoritative
+    // source for the importer's role attribution.)
+    coach_id: 'RYAN-SEAN-1972-05-01',
+    full_name: 'Sean Ryan',
+    dob: '1972-05-01',
+    team: 'DET',
+    season: 2020,
     role: 'off_play_caller'
   }
-  // DET 2020 DC week-16 NULL is intentionally NOT seeded with Sean Ryan
-  // (initial plan draft). Bridge data shows Cory Undlin (UndlCo0) as DC weeks
-  // 1-15 and 17; week 16 is a PFR data gap, not a real role change. The
-  // Phase 1 adhoc backfills that single cell with Cory Undlin's coach_id
-  // directly. See task observation 2026-05-31 for full rationale.
 ]
 
 // Derive the deterministic own-id from canonical name + DOB.
@@ -169,15 +192,29 @@ const load_pfr_fixture = () => {
   const dim_rows = []
   for (const r of rows) {
     if (!r.pfr_coach_id) continue
-    if (!r.dob || !r.full_name) continue
-    const coach_id = derive_coach_id(r.full_name, r.dob)
+    if (r.dob && r.full_name) {
+      const coach_id = derive_coach_id(r.full_name, r.dob)
+      if (!coach_id) continue
+      pfr_to_coach_id.set(r.pfr_coach_id, coach_id)
+      dim_rows.push({
+        coach_id,
+        pfr_coach_id: r.pfr_coach_id,
+        full_name: r.full_name,
+        dob: r.dob
+      })
+      continue
+    }
+    // Null-DOB row: keep if in the sentinel disposition map.
+    const sentinel_name = SENTINEL_PFR_COACHES[r.pfr_coach_id]
+    if (!sentinel_name) continue
+    const coach_id = derive_coach_id(sentinel_name, '0000-00-00')
     if (!coach_id) continue
     pfr_to_coach_id.set(r.pfr_coach_id, coach_id)
     dim_rows.push({
       coach_id,
       pfr_coach_id: r.pfr_coach_id,
-      full_name: r.full_name,
-      dob: r.dob
+      full_name: sentinel_name,
+      dob: '0000-00-00'
     })
   }
   return { pfr_to_coach_id, dim_rows }
@@ -405,15 +442,18 @@ const resolve_coach = ({
 
 const upsert_coaches_dim = async ({ dim_rows, dry_run }) => {
   // Idempotent upsert of the PFR-sourced dim rows plus the 8 interim seed
-  // rows. Phase 1 SQL already loaded these from static-data/pfr-coaches.json into
-  // nfl_coaches, but the importer re-asserts on each run so that a newly
-  // scraped pfr_coach_id (added to the fixture and re-committed) is picked
-  // up without an out-of-band SQL apply.
+  // rows. Phase 1 SQL already loaded these from static-data/pfr-coaches.json
+  // into nfl_coaches, but the importer re-asserts on each run so that a
+  // newly scraped pfr_coach_id (added to the fixture and re-committed) is
+  // picked up without an out-of-band SQL apply.
   const rows = dim_rows.map((r) => ({
     coach_id: r.coach_id,
     pfr_coach_id: r.pfr_coach_id,
     full_name: r.full_name,
-    dob: r.dob,
+    // Sentinel '0000-00-00' is not a valid PostgreSQL date; store
+    // 1900-01-01 for sentinel rows (the coach_id text carries the
+    // '0000-00-00' marker for sentinel-aware consumers).
+    dob: r.dob === '0000-00-00' ? '1900-01-01' : r.dob,
     updated_at: db.fn.now()
   }))
   for (const s of INTERIM_COORDINATOR_SEEDS) {
