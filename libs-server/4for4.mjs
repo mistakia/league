@@ -1,4 +1,5 @@
 import debug from 'debug'
+import { Readable } from 'node:stream'
 import csv from 'csv-parser'
 
 import db from '#db'
@@ -45,7 +46,7 @@ export const get_4for4_projections = async ({
     (res) =>
       new Promise((resolve, reject) => {
         const results = []
-        res.body
+        Readable.fromWeb(res.body)
           .pipe(csv())
           .on('data', (data) => results.push(data))
           .on('error', (error) => reject(error))
