@@ -152,6 +152,20 @@ const rate_stats = [
   'team_target_share'
 ]
 
+// Passing-context stats only meaningfully aggregate when the rolled-up
+// position is QB -- otherwise the only contributions come from rare
+// edge cases (non-QB pids that happened to also have a passing gamelog,
+// e.g. trick plays) and produce misleadingly sparse values. Null them
+// on non-QB stat_keys so consumers see explicit N/A instead of partial.
+const sanitize_passing_stats_for_position = (stats, position) => {
+  if (position === 'QB') return stats
+  const cleaned = { ...stats }
+  for (const field of passing_stats) {
+    cleaned[field] = null
+  }
+  return cleaned
+}
+
 const copy = ({ opp, tm }) => ({ opp, tm })
 const sum = (items = [], keys = [], fixed_weight) => {
   const r = copy(items[0])
@@ -461,7 +475,7 @@ const generate_seasonlogs = async ({
           stat_key,
           tm: opp,
           year,
-          ...stats
+          ...sanitize_passing_stats_for_position(stats, position)
         })
       }
 
@@ -493,7 +507,7 @@ const generate_seasonlogs = async ({
           stat_key,
           tm,
           year,
-          ...stats
+          ...sanitize_passing_stats_for_position(stats, position)
         })
       }
 
