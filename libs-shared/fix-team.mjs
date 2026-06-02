@@ -136,6 +136,7 @@ export default function (team) {
     case 'LAR':
     case 'LA':
     case 'STL':
+    case 'SL':
     case 'RAM':
     case 'LAR RAMS':
     case 'LA RAMS':
