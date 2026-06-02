@@ -13,7 +13,11 @@ import {
   all_fantasy_stats,
   nfl_team_abbreviations
 } from '#constants'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
 import { is_main, getLeague, batch_insert } from '#libs-server'
+import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('generate-nfl-team-seasonlogs')
@@ -596,24 +600,47 @@ const generate_seasonlogs = async ({
   }
 }
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
-    const year = current_season.year
-    const week = current_season.week
+    await handle_season_args_for_script({
+      argv,
+      script_name: 'generate-nfl-team-seasonlogs',
+      script_function: async ({ year }) => {
+        await generate_seasonlogs({ year })
+      },
+      year_query: () =>
+        db('nfl_games')
+          .select('year')
+          .where({ seas_type: 'REG' })
+          .groupBy('year')
+          .orderBy('year', 'asc'),
+      season_only: true
+    })
 
-    await generate_seasonlogs({ year })
+    // Rolling-window variants only apply to the live current season; their
+    // weeks are derived from `current_season.week`, so they are nonsensical
+    // for historical years. Skip them whenever a specific year was requested.
+    if (!argv.year && !argv.all) {
+      const year = current_season.year
+      const week = current_season.week
 
-    if (week > 3) {
-      await generate_seasonlogs({ year, seasonlogs_type: 'LAST_THREE' })
-    }
+      if (week > 3) {
+        await generate_seasonlogs({ year, seasonlogs_type: 'LAST_THREE' })
+      }
 
-    if (week > 4) {
-      await generate_seasonlogs({ year, seasonlogs_type: 'LAST_FOUR' })
-    }
+      if (week > 4) {
+        await generate_seasonlogs({ year, seasonlogs_type: 'LAST_FOUR' })
+      }
 
-    if (week > 8) {
-      await generate_seasonlogs({ year, seasonlogs_type: 'LAST_EIGHT' })
+      if (week > 8) {
+        await generate_seasonlogs({ year, seasonlogs_type: 'LAST_EIGHT' })
+      }
     }
   } catch (err) {
     error = err
