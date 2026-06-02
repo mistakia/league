@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { existsSync, readFileSync } from 'fs'
 import debug from 'debug'
 
 import config from '#config'
@@ -67,16 +68,25 @@ const derive_message_text = (message) => {
 
 const first_line = (text) => String(text ?? '').split('\n')[0]
 
-const post_signal_via_fetch = async ({
-  signals_api_url,
-  signals_secret,
-  body
-}) => {
+const MACHINE_TOKEN_TTL_MS = 30 * 1000
+
+const sign_machine_token = ({ slug, key_path }) => {
+  if (!slug || !key_path || !existsSync(key_path)) return null
+  const private_key = crypto.createPrivateKey(readFileSync(key_path, 'utf8'))
+  const exp = Date.now() + MACHINE_TOKEN_TTL_MS
+  const payload = `${slug}.${exp}`
+  const sig = crypto
+    .sign(null, Buffer.from(payload), private_key)
+    .toString('base64url')
+  return `${payload}.${sig}`
+}
+
+const post_signal_via_fetch = async ({ signals_api_url, token, body }) => {
   const response = await fetch(`${signals_api_url}/api/signals`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'x-signal-secret': signals_secret || ''
+      authorization: `Machine ${token}`
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(TRANSPORT_TIMEOUT_MS)
@@ -117,10 +127,32 @@ export const create_logger = (namespace, { service } = {}) => {
     }
 
     const signals_api_url = config?.signals_api_url
-    const signals_secret = config?.signals_secret
+    const slug = process.env.BASE_MACHINE_SLUG
+    const key_path = process.env.BASE_INSTANCE_KEY_FILE
     if (!signals_api_url) {
       debug_log(
         'signals_api_url not configured; log_error not emitted (fingerprint=%s)',
+        fingerprint
+      )
+      return null
+    }
+    if (!slug || !key_path) {
+      debug_log(
+        'BASE_MACHINE_SLUG/BASE_INSTANCE_KEY_FILE unset; log_error not emitted (fingerprint=%s)',
+        fingerprint
+      )
+      return null
+    }
+    let token
+    try {
+      token = sign_machine_token({ slug, key_path })
+    } catch (sign_error) {
+      debug_log('machine token sign failed: %s', sign_error.message)
+      return null
+    }
+    if (!token) {
+      debug_log(
+        'machine token unavailable (missing key file); log_error not emitted (fingerprint=%s)',
         fingerprint
       )
       return null
@@ -152,9 +184,7 @@ export const create_logger = (namespace, { service } = {}) => {
     }
 
     const promise = Promise.resolve()
-      .then(() =>
-        post_signal_via_fetch({ signals_api_url, signals_secret, body })
-      )
+      .then(() => post_signal_via_fetch({ signals_api_url, token, body }))
       .catch((transport_error) => {
         debug_log('signal POST failed: %s', transport_error.message)
       })

@@ -1,4 +1,8 @@
 /* global describe, it, beforeEach, afterEach */
+import crypto from 'crypto'
+import { mkdtempSync, writeFileSync, rmSync } from 'fs'
+import { join } from 'path'
+import { tmpdir } from 'os'
 import { expect } from 'chai'
 
 import config from '#config'
@@ -25,31 +29,55 @@ const make_fetch_recorder = () => {
 
 describe('libs-shared/log', function () {
   let original_signals_api_url
-  let original_signals_secret
   let original_log_error
   let original_service_env
+  let original_machine_slug
+  let original_key_file
   let original_fetch
+  let key_dir
+  let key_path
 
   beforeEach(() => {
     original_signals_api_url = config.signals_api_url
-    original_signals_secret = config.signals_secret
     original_log_error = config.log_error
     original_service_env = process.env.SERVICE_NAME
+    original_machine_slug = process.env.BASE_MACHINE_SLUG
+    original_key_file = process.env.BASE_INSTANCE_KEY_FILE
     original_fetch = globalThis.fetch
     config.signals_api_url = 'http://localhost:9999'
-    config.signals_secret = 'test-secret'
+
+    key_dir = mkdtempSync(join(tmpdir(), 'log-spec-'))
+    key_path = join(key_dir, 'instance-private.key')
+    const { privateKey } = crypto.generateKeyPairSync('ed25519')
+    writeFileSync(
+      key_path,
+      privateKey.export({ format: 'pem', type: 'pkcs8' }),
+      { mode: 0o600 }
+    )
+    process.env.BASE_MACHINE_SLUG = 'unit-test-slug'
+    process.env.BASE_INSTANCE_KEY_FILE = key_path
   })
 
   afterEach(() => {
     config.signals_api_url = original_signals_api_url
-    config.signals_secret = original_signals_secret
     config.log_error = original_log_error
     if (original_service_env === undefined) {
       delete process.env.SERVICE_NAME
     } else {
       process.env.SERVICE_NAME = original_service_env
     }
+    if (original_machine_slug === undefined) {
+      delete process.env.BASE_MACHINE_SLUG
+    } else {
+      process.env.BASE_MACHINE_SLUG = original_machine_slug
+    }
+    if (original_key_file === undefined) {
+      delete process.env.BASE_INSTANCE_KEY_FILE
+    } else {
+      process.env.BASE_INSTANCE_KEY_FILE = original_key_file
+    }
     globalThis.fetch = original_fetch
+    rmSync(key_dir, { recursive: true, force: true })
   })
 
   describe('compute_fingerprint', () => {
@@ -110,7 +138,9 @@ describe('libs-shared/log', function () {
       expect(calls).to.have.lengthOf(1)
       const call = calls[0]
       expect(call.url).to.equal('http://localhost:9999/api/signals')
-      expect(call.headers['x-signal-secret']).to.equal('test-secret')
+      expect(call.headers.authorization).to.match(
+        /^Machine unit-test-slug\.\d+\.[A-Za-z0-9_-]+$/
+      )
       expect(call.body.kind).to.equal('log_error')
       expect(call.body.severity).to.equal('low')
       expect(call.body.source).to.equal('unit-test')
@@ -177,6 +207,27 @@ describe('libs-shared/log', function () {
     it('is a no-op when signals_api_url is not configured', () => {
       config.signals_api_url = undefined
       const log = create_logger('test:no-url', { service: 'unit-test' })
+      const result = log.error('boom')
+      expect(result).to.equal(null)
+    })
+
+    it('is a no-op when BASE_MACHINE_SLUG is unset', () => {
+      delete process.env.BASE_MACHINE_SLUG
+      const log = create_logger('test:no-slug', { service: 'unit-test' })
+      const result = log.error('boom')
+      expect(result).to.equal(null)
+    })
+
+    it('is a no-op when BASE_INSTANCE_KEY_FILE is unset', () => {
+      delete process.env.BASE_INSTANCE_KEY_FILE
+      const log = create_logger('test:no-key', { service: 'unit-test' })
+      const result = log.error('boom')
+      expect(result).to.equal(null)
+    })
+
+    it('is a no-op when the key file does not exist on disk', () => {
+      process.env.BASE_INSTANCE_KEY_FILE = join(key_dir, 'absent-key')
+      const log = create_logger('test:missing-key', { service: 'unit-test' })
       const result = log.error('boom')
       expect(result).to.equal(null)
     })
