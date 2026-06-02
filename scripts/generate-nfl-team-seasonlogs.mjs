@@ -278,11 +278,16 @@ const generate_seasonlogs = async ({
   year = current_season.year,
   seasonlogs_type
 } = {}) => {
+  // tm='INA' is the nflverse placeholder for inactive game-day players, not a
+  // real team. Excluding it prevents a phantom 33rd team row in every position
+  // rollup.
   const gamelogs_query = db('player_gamelogs')
     .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
+    .whereNot('player_gamelogs.tm', 'INA')
+    .whereNot('player_gamelogs.opp', 'INA')
 
   const query_weeks = []
 
