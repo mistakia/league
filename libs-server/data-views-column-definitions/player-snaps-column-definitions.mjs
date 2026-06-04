@@ -24,7 +24,8 @@ const apply_player_snaps_attach = ({
     params,
     rate_type_table_name: table_alias,
     splits,
-    data_view_options
+    data_view_options,
+    query_context
   })
 
   join_per_player_play_cte({
