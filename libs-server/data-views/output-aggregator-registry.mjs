@@ -112,6 +112,16 @@ register(
   'rate',
   adapt(plugin_per_player, { stat_type: 'reception' })
 )
+register(
+  'player_touch',
+  'rate',
+  adapt(plugin_per_player, { stat_type: 'touch' })
+)
+register(
+  'player_opportunity',
+  'rate',
+  adapt(plugin_per_player, { stat_type: 'opportunity' })
+)
 
 register('player_play', 'rate', adapt(plugin_per_player_play, {}))
 register(

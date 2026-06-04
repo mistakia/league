@@ -63,6 +63,26 @@ export const add_per_player_cte = ({
       cte_query.select('nfl_plays.trg_pid as pid')
       cte_query.groupBy('nfl_plays.trg_pid')
       break
+    case 'touch':
+      cte_query.crossJoin(
+        db.raw(
+          'LATERAL (VALUES (nfl_plays.bc_pid), (CASE WHEN nfl_plays.comp = true THEN nfl_plays.trg_pid END)) AS t(pid)'
+        )
+      )
+      cte_query.whereRaw('t.pid IS NOT NULL')
+      cte_query.select('t.pid as pid')
+      cte_query.groupBy('t.pid')
+      break
+    case 'opportunity':
+      cte_query.crossJoin(
+        db.raw(
+          'LATERAL (VALUES (CASE WHEN nfl_plays.sk IS NULL OR nfl_plays.sk = false THEN nfl_plays.psr_pid END), (nfl_plays.bc_pid), (nfl_plays.trg_pid)) AS t(pid)'
+        )
+      )
+      cte_query.whereRaw('t.pid IS NOT NULL')
+      cte_query.select('t.pid as pid')
+      cte_query.groupBy('t.pid')
+      break
   }
 
   cte_query.select(db.raw(`${count_expression} as rate_type_total_count`))

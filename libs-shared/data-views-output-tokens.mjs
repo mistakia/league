@@ -26,6 +26,11 @@ export const RATE_TYPE_TO_OUTPUT = {
     aggregation: 'rate'
   },
   per_player_reception: { period: 'player_reception', aggregation: 'rate' },
+  per_player_touch: { period: 'player_touch', aggregation: 'rate' },
+  per_player_opportunity: {
+    period: 'player_opportunity',
+    aggregation: 'rate'
+  },
   per_player_play: { period: 'player_play', aggregation: 'rate' },
   per_player_pass_play: { period: 'player_pass_play', aggregation: 'rate' },
   per_player_rush_play: { period: 'player_rush_play', aggregation: 'rate' },
