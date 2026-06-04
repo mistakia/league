@@ -687,6 +687,12 @@ export default {
     stat_name: 'touches_from_plays'
   }),
 
+  player_opportunities_from_plays: player_stat_from_plays({
+    pid_columns: ['bc_pid', 'trg_pid', 'psr_pid'],
+    with_select_string: `SUM(CASE WHEN bc_pid IS NOT NULL OR trg_pid IS NOT NULL OR (psr_pid IS NOT NULL AND (sk IS NULL OR sk = false)) THEN 1 ELSE 0 END)`,
+    stat_name: 'opportunities_from_plays'
+  }),
+
   player_rush_attempts_share_from_plays: create_team_share_stat({
     column_name: 'rush_att_share_from_plays',
     pid_columns: ['bc_pid'],

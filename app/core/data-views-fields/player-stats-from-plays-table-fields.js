@@ -332,6 +332,17 @@ export default {
     header_label: 'TCH',
     player_value_path: 'touches_from_plays'
   }),
+  player_opportunities_from_plays: offensive_player_from_play_field({
+    column_title: 'Opportunities (By Play)',
+    column_groups: [
+      COLUMN_GROUPS.PASSING,
+      COLUMN_GROUPS.RUSHING,
+      COLUMN_GROUPS.RECEIVING,
+      COLUMN_GROUPS.OPPORTUNITY
+    ],
+    header_label: 'OPP',
+    player_value_path: 'opportunities_from_plays'
+  }),
   player_rush_attempts_share_from_plays: offensive_player_from_share_field({
     column_title: 'Share of Team Rushing Attempts (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
