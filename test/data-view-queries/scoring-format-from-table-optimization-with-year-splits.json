@@ -1,6 +1,6 @@
 {
   "name": "should use scoring_format_player_seasonlogs as FROM table when sorting by fantasy points from seasonlogs with year splits",
-  "description": "Tests from-table optimization for scoring format columns with year splits - query should start from scoring_format_player_seasonlogs table with scoring_format_hash in WHERE clause",
+  "description": "Tests from-table optimization for scoring format columns with year splits - query should start from scoring_format_player_seasonlogs table with scoring_format_id in WHERE clause",
   "request": {
     "prefix_columns": [
       "player_name"

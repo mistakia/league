@@ -49,9 +49,9 @@ export const get_single_value = (value, default_value) => {
 }
 
 /**
- * Extracts the scoring format hash from params with proper default handling
+ * Extracts the scoring format id from params with proper default handling
  * @param {Object} params - Column parameters object
- * @returns {string} Scoring format hash
+ * @returns {string} Scoring format id
  */
 export const get_scoring_format_id = (params = {}) => {
   return get_single_value(
@@ -61,9 +61,9 @@ export const get_scoring_format_id = (params = {}) => {
 }
 
 /**
- * Extracts the league format hash from params with proper default handling
+ * Extracts the league format id from params with proper default handling
  * @param {Object} params - Column parameters object
- * @returns {string} League format hash
+ * @returns {string} League format id
  */
 export const get_league_format_id = (params = {}) => {
   return get_single_value(params.league_format_id, DEFAULT_LEAGUE_FORMAT_ID)

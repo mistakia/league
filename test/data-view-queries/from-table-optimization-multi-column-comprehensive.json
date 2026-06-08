@@ -1,6 +1,6 @@
 {
   "name": "should use from-table optimization with 7 columns from multiple sources",
-  "description": "Tests from-table optimization with scoring format seasonlogs as FROM table, joining league format seasonlogs, weighted opportunity CTE, and player seasonlogs. Verifies scoring_format_hash and year conditions appear in WHERE clause.",
+  "description": "Tests from-table optimization with scoring format seasonlogs as FROM table, joining league format seasonlogs, weighted opportunity CTE, and player seasonlogs. Verifies scoring_format_id and year conditions appear in WHERE clause.",
   "request": {
     "prefix_columns": [
       "player_name"
