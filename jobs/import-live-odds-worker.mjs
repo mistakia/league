@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { wait, report_job, is_main } from '#libs-server'
+import { wait, report_job, report_run_outcome, is_main } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -53,6 +53,19 @@ const BOOKMAKER_CONFIG = {
 
 // Main loop interval - determines how often we check if imports should run
 const LOOP_INTERVAL_MS = 30000 // 30 seconds
+
+const RUN_SOURCE = 'service:league-import-live-odds-worker'
+const ALIVE_BATCH_INTERVAL_MS = 60_000
+let last_alive_tick_at = 0
+
+const emit_alive_tick = async () => {
+  const now = Date.now()
+  if (now - last_alive_tick_at < ALIVE_BATCH_INTERVAL_MS) return
+  // Advance only on successful emit so a transient reporter failure does not
+  // silently suppress the next 60s of alive ticks.
+  const ok = await report_run_outcome({ source: RUN_SOURCE, outcome: 'alive' })
+  if (ok) last_alive_tick_at = now
+}
 
 // Default timeout for individual import operations (fallback if not specified per bookmaker)
 const DEFAULT_IMPORT_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
@@ -220,6 +233,7 @@ const import_live_odds_worker = async () => {
     const throttle_timer = wait(LOOP_INTERVAL_MS)
 
     loop_count += 1
+    await emit_alive_tick()
 
     const results = await run_import_iteration()
 
@@ -254,9 +268,17 @@ if (is_main(import.meta.url) || process.env.PM2_HOME) {
       log('Worker finished')
       process.exit(0)
     })
-    .catch((error) => {
+    .catch(async (error) => {
       log(`Worker fatal error: ${error.message}`)
       console.error(error)
+      try {
+        await report_run_outcome({
+          source: RUN_SOURCE,
+          outcome: 'failure',
+          reason: error.message,
+          exit_code: 1
+        })
+      } catch {}
       process.exit(1)
     })
 }

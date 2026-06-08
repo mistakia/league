@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { wait, is_main } from '#libs-server'
+import { wait, report_run_outcome, is_main } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
@@ -22,6 +22,17 @@ const IDLE_INTERVAL_MS = 5 * 60_000 // REG season but no live games: 5 minutes
 const OFFSEASON_INTERVAL_MS = 60 * 60_000 // not in REG season: 1 hour
 const SHUTDOWN_CHECK_INTERVAL_MS = 30_000 // chunk size for interruptible sleep so SIGINT is honored within 30s
 const ITERATION_TIMEOUT_MS = 300_000 // 5 minutes max per iteration
+
+const RUN_SOURCE = 'service:league-import-live-plays-worker'
+const ALIVE_BATCH_INTERVAL_MS = 60_000
+let last_alive_tick_at = 0
+
+const emit_alive_tick = async () => {
+  const now = Date.now()
+  if (now - last_alive_tick_at < ALIVE_BATCH_INTERVAL_MS) return
+  const ok = await report_run_outcome({ source: RUN_SOURCE, outcome: 'alive' })
+  if (ok) last_alive_tick_at = now
+}
 
 // Use object to allow modification detection by linter
 const state = { should_exit: false }
@@ -109,12 +120,14 @@ const import_live_plays_worker = async () => {
       log(
         `Not in regular season (current: ${current_season.nfl_seas_type}), sleeping ${OFFSEASON_INTERVAL_MS / 1000}s`
       )
+      await emit_alive_tick()
       await interruptible_wait(OFFSEASON_INTERVAL_MS)
       continue
     }
 
     loop_count += 1
     log(`Running import iteration ${loop_count}`)
+    await emit_alive_tick()
     const all_games_skipped = await run_import_iteration()
     if (state.should_exit) break
 
@@ -139,9 +152,17 @@ if (is_main(import.meta.url) || process.env.PM2_HOME) {
       log('Worker finished')
       process.exit(0)
     })
-    .catch((error) => {
+    .catch(async (error) => {
       log(`Worker fatal error: ${error.message}`)
       console.error(error)
+      try {
+        await report_run_outcome({
+          source: RUN_SOURCE,
+          outcome: 'failure',
+          reason: error.message,
+          exit_code: 1
+        })
+      } catch {}
       process.exit(1)
     })
 }
