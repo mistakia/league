@@ -153,11 +153,21 @@ export const migrate_table_state = (table_state) => {
     changed = true
   }
 
-  if (
-    !Array.isArray(table_state.subjects) ||
-    table_state.subjects.length === 0
-  ) {
-    next.subjects = ['player']
+  if (Object.prototype.hasOwnProperty.call(next, 'subjects')) {
+    const legacy = next.subjects
+    delete next.subjects
+    if (
+      !Array.isArray(next.row_grain) &&
+      Array.isArray(legacy) &&
+      legacy.length > 0
+    ) {
+      next.row_grain = legacy
+    }
+    changed = true
+  }
+
+  if (!Array.isArray(next.row_grain) || next.row_grain.length === 0) {
+    next.row_grain = ['player']
     changed = true
   }
 

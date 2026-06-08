@@ -2,7 +2,7 @@
   "name": "team subject year split with multiple team stat columns",
   "description": "Team subject + year split + multiple team-stat columns",
   "request": {
-    "subjects": [
+    "row_grain": [
       "team"
     ],
     "splits": [

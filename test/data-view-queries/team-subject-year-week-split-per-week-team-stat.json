@@ -2,7 +2,7 @@
   "name": "team subject year and week splits with per-week team column",
   "description": "Team subject + year+week split + per-week team column",
   "request": {
-    "subjects": [
+    "row_grain": [
       "team"
     ],
     "splits": [

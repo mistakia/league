@@ -116,21 +116,31 @@ describe('data-views saved-view migrator', () => {
   })
 
   describe('migrate_table_state', () => {
-    it('wraps missing subjects with the default player subject', () => {
+    it('wraps missing row_grain with the default player row_grain', () => {
       const result = migrate_table_state({
         columns: [{ column_id: 'player_name' }]
       })
       expect(result.changed).to.equal(true)
-      expect(result.table_state.subjects).to.deep.equal(['player'])
+      expect(result.table_state.row_grain).to.deep.equal(['player'])
     })
 
-    it('preserves an existing non-empty subjects array', () => {
+    it('preserves an existing non-empty row_grain array', () => {
+      const result = migrate_table_state({
+        columns: [{ column_id: 'player_name' }],
+        row_grain: ['team']
+      })
+      expect(result.changed).to.equal(false)
+      expect(result.table_state.row_grain).to.deep.equal(['team'])
+    })
+
+    it('migrates a legacy subjects field into row_grain', () => {
       const result = migrate_table_state({
         columns: [{ column_id: 'player_name' }],
         subjects: ['team']
       })
-      expect(result.changed).to.equal(false)
-      expect(result.table_state.subjects).to.deep.equal(['team'])
+      expect(result.changed).to.equal(true)
+      expect(result.table_state).to.not.have.property('subjects')
+      expect(result.table_state.row_grain).to.deep.equal(['team'])
     })
 
     it('migrates columns, prefix_columns, and where in one pass', () => {
@@ -154,7 +164,7 @@ describe('data-views saved-view migrator', () => {
             params: { rate_type: ['per_game'] }
           }
         ],
-        subjects: ['player']
+        row_grain: ['player']
       })
       expect(result.changed).to.equal(true)
       expect(result.table_state.columns[0].params.output.period).to.equal(
@@ -197,7 +207,7 @@ describe('data-views saved-view migrator', () => {
         ],
         sort: [{ column_id: 'team_pass_attempts_from_plays', desc: true }]
       })
-      expect(result.changed).to.equal(true) // subjects default applied
+      expect(result.changed).to.equal(true) // row_grain default applied
       expect(result.table_state.sort[0].column_id).to.equal(
         'team_pass_attempts_from_plays'
       )

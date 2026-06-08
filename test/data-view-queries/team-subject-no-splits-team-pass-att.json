@@ -2,7 +2,7 @@
   "name": "team subject no splits with team_pass_attempts_from_plays",
   "description": "Team subject FROM-source dispatch with no splits",
   "request": {
-    "subjects": [
+    "row_grain": [
       "team"
     ],
     "columns": [
