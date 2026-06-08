@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { wait, report_job, write_worker_heartbeat, is_main } from '#libs-server'
+import { wait, report_job, is_main } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -215,29 +215,11 @@ const import_live_odds_worker = async () => {
   setup_signal_handlers()
 
   let loop_count = 0
-  let last_status = 'starting'
-  let last_detail = null
-
-  const write_heartbeat = async () => {
-    try {
-      await write_worker_heartbeat({
-        worker_name: 'import-live-odds-worker',
-        status: last_status,
-        detail: last_detail,
-        loop_count
-      })
-    } catch (err) {
-      log(`heartbeat write failed: ${err.message}`)
-    }
-  }
 
   while (!state.should_exit) {
     const throttle_timer = wait(LOOP_INTERVAL_MS)
 
     loop_count += 1
-    // Refresh heartbeat at top of loop so freshness reflects loop liveness,
-    // not completion of multi-minute imports.
-    await write_heartbeat()
 
     const results = await run_import_iteration()
 
@@ -246,18 +228,6 @@ const import_live_odds_worker = async () => {
         `Iteration ${loop_count}: ${results.imports_succeeded}/${results.imports_attempted} imports succeeded`
       )
     }
-
-    if (results.imports_attempted === 0) {
-      last_status = 'idle'
-    } else if (results.imports_failed === 0) {
-      last_status = 'success'
-    } else if (results.imports_succeeded === 0) {
-      last_status = 'failure'
-    } else {
-      last_status = 'partial'
-    }
-    last_detail = `attempted=${results.imports_attempted} succeeded=${results.imports_succeeded} failed=${results.imports_failed}`
-    await write_heartbeat()
 
     // Wait for remaining throttle time unless we're exiting
     if (!state.should_exit) {

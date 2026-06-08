@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { wait, write_worker_heartbeat, is_main } from '#libs-server'
+import { wait, is_main } from '#libs-server'
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
@@ -104,27 +104,10 @@ const import_live_plays_worker = async () => {
 
   let loop_count = 0
 
-  const write_heartbeat = async (status, detail) => {
-    try {
-      await write_worker_heartbeat({
-        worker_name: 'import-live-plays-worker',
-        status,
-        detail,
-        loop_count
-      })
-    } catch (err) {
-      log(`heartbeat write failed: ${err.message}`)
-    }
-  }
-
   while (!state.should_exit) {
     if (current_season.nfl_seas_type !== 'REG') {
       log(
         `Not in regular season (current: ${current_season.nfl_seas_type}), sleeping ${OFFSEASON_INTERVAL_MS / 1000}s`
-      )
-      await write_heartbeat(
-        'offseason',
-        `nfl_seas_type=${current_season.nfl_seas_type}`
       )
       await interruptible_wait(OFFSEASON_INTERVAL_MS)
       continue
@@ -139,7 +122,6 @@ const import_live_plays_worker = async () => {
     if (all_games_skipped) {
       log(`No active games, sleeping ${sleep_ms / 1000}s`)
     }
-    await write_heartbeat(all_games_skipped ? 'idle' : 'active', null)
     await interruptible_wait(sleep_ms)
   }
 

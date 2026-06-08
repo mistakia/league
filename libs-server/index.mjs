@@ -116,7 +116,6 @@ export * as rts from './rts.mjs'
 export { default as mergePlayer } from './merge-player.mjs'
 export * as pinnacle from './pinnacle.mjs'
 export { default as report_error } from './report-error.mjs'
-export { default as write_worker_heartbeat } from './write-worker-heartbeat.mjs'
 export * as selection_result from './selection-result.mjs'
 export * as fanatics from './fanatics.mjs'
 export {
