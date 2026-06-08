@@ -339,7 +339,7 @@ export default class LeagueConfigMapper {
       fuml: 0,
       prtd: 0,
       krtd: 0,
-      fum_ret_td: 0,
+      fum_ret_td: 6,
       trg: 0,
       exclude_qb_kneels: false
     }
