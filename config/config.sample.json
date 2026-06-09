@@ -38,10 +38,6 @@
     "market_odds_max_threshold": null,
     "historical_rate_min_threshold": 0.7
   },
-  "job_tracker": {
-    "api_url": "https://storage-server:8081",
-    "api_key": "ENCRYPTED|<iv>|<encrypted-value>"
-  },
   "signals_api_url": "https://base.example.com",
   "signals_secret": "ENCRYPTED|<iv>|<encrypted-value>"
 }
