@@ -1,10 +1,13 @@
 import os from 'os'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
 
 import db from '#db'
-import config from '#config'
 
 import report_error from './report-error.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+
+const exec_file = promisify(execFile)
 
 const build_job_type_to_id = () => {
   const map = {}
@@ -25,10 +28,7 @@ export default async function report_job({
   job_type,
   job_success = true,
   job_reason = null,
-  error = null,
-  duration_ms = null,
-  schedule = null,
-  schedule_type = null
+  error = null
 }) {
   if (!job_type) {
     throw new Error('job_type is required')
@@ -57,37 +57,43 @@ export default async function report_job({
     return
   }
 
-  const { api_url, api_key } = config.job_tracker || {}
-  if (!api_url || !api_key) {
+  const api_url = process.env.BASE_API_URL
+  if (!api_url) {
     return
   }
 
-  const effective_duration_ms =
-    duration_ms ?? Math.round(process.uptime() * 1000)
+  const source = process.env.JOB_SCHEDULE_ENTITY_URI || `service:${job_id}`
+  const outcome = job_success ? 'success' : 'failure'
 
   try {
-    const response = await fetch(`${api_url}/api/jobs/report`, {
+    const { stdout } = await exec_file('base', ['instance', 'sign-token'], {
+      timeout: 3000
+    })
+    const token = stdout.trim()
+    if (!token) {
+      console.error('run report failed: empty machine token')
+      return
+    }
+
+    const response = await fetch(`${api_url.replace(/\/$/, '')}/api/runs/report`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${api_key}`
+        Authorization: `Machine ${token}`
       },
       body: JSON.stringify({
-        job_id,
-        success: job_success,
-        reason: job_reason,
-        duration_ms: effective_duration_ms,
-        project: 'league',
-        server: os.hostname(),
-        schedule,
-        schedule_type
+        source,
+        host: os.hostname().split('.')[0],
+        outcome,
+        exit_code: job_success ? 0 : 1,
+        reason: job_reason
       }),
       signal: AbortSignal.timeout(3000)
     })
     if (!response.ok) {
-      console.error(`job tracker report failed: HTTP ${response.status}`)
+      console.error(`run report failed: HTTP ${response.status}`)
     }
   } catch (err) {
-    console.error(`job tracker report failed: ${err.message}`)
+    console.error(`run report failed: ${err.message}`)
   }
 }
