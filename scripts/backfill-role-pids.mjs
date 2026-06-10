@@ -58,7 +58,7 @@ const backfill_week = async ({ year, week, seas_type, dry_run }) => {
   }
 
   if (!dry_run && updates.length) {
-    for (const part of chunk_array(updates, 500)) {
+    for (const part of chunk_array({ items: updates, chunk_size: 500 })) {
       await db.transaction(async (trx) => {
         for (const u of part) {
           await trx('nfl_plays')
