@@ -81,27 +81,27 @@ export const load_fc_format_map = async () => {
   )
   for (const m of mappings) {
     const rows = await db('league_formats as lf')
-      .select('lf.league_format_id', 'lf.scoring_format_id')
+      .select('lf.id as league_format_id', 'lf.scoring_format_id')
       .select(
         db.raw(
           '(SELECT COUNT(*) FROM league_format_draft_pick_value pv ' +
-            'WHERE pv.league_format_id = lf.league_format_id) AS pv_rows'
+            'WHERE pv.league_format_id = lf.id) AS pv_rows'
         )
       )
       .select(
         db.raw(
           '(SELECT COUNT(*) FROM league_format_player_careerlogs c ' +
-            'WHERE c.league_format_id = lf.league_format_id ' +
+            'WHERE c.league_format_id = lf.id ' +
             'AND c.draft_rank >= 1) AS careerlog_rows'
         )
       )
       .where('lf.format_category', m.format_category)
       .orderByRaw(
         '(SELECT COUNT(*) FROM league_format_draft_pick_value pv ' +
-          'WHERE pv.league_format_id = lf.league_format_id) > 0 DESC, ' +
+          'WHERE pv.league_format_id = lf.id) > 0 DESC, ' +
           '(SELECT COUNT(*) FROM league_format_player_careerlogs c ' +
-          'WHERE c.league_format_id = lf.league_format_id ' +
-          'AND c.draft_rank >= 1) DESC, lf.league_format_id ASC'
+          'WHERE c.league_format_id = lf.id ' +
+          'AND c.draft_rank >= 1) DESC, lf.id ASC'
       )
       .limit(1)
     const row = rows[0]
