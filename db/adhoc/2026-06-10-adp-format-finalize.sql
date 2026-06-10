@@ -45,20 +45,25 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
--- Gate 2: data-level injectivity. The decode map must not have collapsed
--- distinct adp_type values onto a shared adp_format_id, which would make the
--- narrowed unique constraint drop rows. Checked while adp_type still exists.
+-- Gate 2: data-level injectivity. No adp_format_id may be shared by more than
+-- one adp_type -- such a collision would let the narrowed unique constraint
+-- (year, source_id, adp_format_id, pid) drop rows. A direct collision check
+-- (rather than count-equality, which only holds while the mapping is a clean
+-- function) catches anomalous rows too. Checked while adp_type still exists.
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
-    n_type integer;
-    n_format integer;
+    collision record;
 BEGIN
-    SELECT count(DISTINCT adp_type), count(DISTINCT adp_format_id)
-    INTO n_type, n_format
-    FROM public.player_adp_index;
-    IF n_type <> n_format THEN
-        RAISE EXCEPTION 'injectivity violated in player_adp_index: % distinct adp_type vs % distinct adp_format_id', n_type, n_format;
+    SELECT adp_format_id, count(DISTINCT adp_type) AS n_types
+    INTO collision
+    FROM public.player_adp_index
+    WHERE adp_format_id IS NOT NULL
+    GROUP BY adp_format_id
+    HAVING count(DISTINCT adp_type) > 1
+    LIMIT 1;
+    IF FOUND THEN
+        RAISE EXCEPTION 'injectivity violated: adp_format_id % is shared by % distinct adp_type values', collision.adp_format_id, collision.n_types;
     END IF;
 END $$;
 

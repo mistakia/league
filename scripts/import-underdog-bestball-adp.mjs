@@ -27,7 +27,9 @@ const BATCH_SIZE = 500
 const SKIP_SLATE_KEYWORDS = ['Eliminator', 'Weekly Winners']
 
 const jittered_delay = () =>
-  new Promise((resolve) => setTimeout(resolve, 500 + Math.floor(timestamp % 500)))
+  new Promise((resolve) =>
+    setTimeout(resolve, 500 + Math.floor(Math.random() * 500))
+  )
 
 // num_qb is carried by the slate, not the scoring type: the same half-PPR
 // scoring_type_id returns 2QB-premium ADP for a Superflex slate (validated:
