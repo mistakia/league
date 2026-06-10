@@ -135,11 +135,23 @@ export const enrich_player_identifications = (
   // the set is present, write {_gsis, _pid} from play_data; otherwise
   // NULL-clear both. Penalty is excluded because getPlayFromPlayStats case
   // 93 is empty -- it stays on the legacy map_player_field path below.
+  // Each family's stat_ids gate MUST mirror the full set of statIds that
+  // getPlayFromPlayStats uses to populate the family's _gsis field. A gate
+  // narrower than that set silently NULL-clears the role on plays whose only
+  // evidence is an omitted statId (see below). Keep these in lockstep with
+  // libs-shared/get-play-from-play-stats.mjs.
   const owned_single_player_families = [
     { gsis: 'bc_gsis', pid: 'bc_pid', stat_ids: [10, 11] },
-    // statId 20 (Pass Sack) covers sack rows where the upstream feed omits 14/15/16 (2023+).
-    { gsis: 'psr_gsis', pid: 'psr_pid', stat_ids: [14, 15, 16, 20] },
-    { gsis: 'trg_gsis', pid: 'trg_pid', stat_ids: [21, 22] },
+    // psr_gsis is set by statIds 14/15/16 (incomplete/complete/TD passes), 19
+    // (interception), 20 (sack, 2023+ feed omits 14/15/16), and 111/112 (air
+    // yards complete/incomplete). Omitting 19 wiped the passer on every
+    // interception; omitting 111/112 wiped air-yards-only pass rows.
+    { gsis: 'psr_gsis', pid: 'psr_pid', stat_ids: [14, 15, 16, 19, 20, 111, 112] },
+    // trg_gsis is set by statIds 21/22 (reception/TD), 113 (yards after catch),
+    // and 115 (target/intended receiver -- the ONLY target stat present on
+    // incompletions). Omitting 113/115 collapsed targets-from-plays to
+    // receptions, since incomplete-pass targets carry only statId 115.
+    { gsis: 'trg_gsis', pid: 'trg_pid', stat_ids: [21, 22, 113, 115] },
     { gsis: 'intp_gsis', pid: 'intp_pid', stat_ids: [25, 26] },
     {
       gsis: 'player_fuml_gsis',

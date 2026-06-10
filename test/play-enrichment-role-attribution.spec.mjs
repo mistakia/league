@@ -286,6 +286,55 @@ describe('enrich_player_identifications single-player family ownership', functio
     expect(enriched.bc_pid).to.equal(null)
   })
 
+  it('trg family: statId 115 (target) attributes trg_pid on an incomplete pass', () => {
+    // Regression: incomplete passes carry the intended receiver ONLY via
+    // statId 115 (no 21/22). A gate of [21,22] NULL-cleared every incomplete
+    // target, collapsing targets-from-plays to receptions. statId 115 must
+    // attribute trg_pid.
+    const play_row = { esbid, playId }
+    const stats = [play_stat({ esbid, playId, statId: 115, gsisId: 'GSIS_TRG' })]
+    const cache = make_player_cache({ GSIS_TRG: 'PID_TRG' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.trg_gsis).to.equal('GSIS_TRG')
+    expect(enriched.trg_pid).to.equal('PID_TRG')
+  })
+
+  it('trg family: statId 113 (yards after catch) attributes trg_pid', () => {
+    const play_row = { esbid, playId }
+    const stats = [play_stat({ esbid, playId, statId: 113, gsisId: 'GSIS_TRG' })]
+    const cache = make_player_cache({ GSIS_TRG: 'PID_TRG' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.trg_pid).to.equal('PID_TRG')
+  })
+
+  it('psr family: statId 19 (interception) attributes psr_pid', () => {
+    // Regression: interception plays credit the passer ONLY via statId 19
+    // (no 14/15/16/20). A gate of [14,15,16,20] NULL-cleared the passer on
+    // every interception. statId 19 must attribute psr_pid.
+    const play_row = { esbid, playId }
+    const stats = [play_stat({ esbid, playId, statId: 19, gsisId: 'GSIS_QB' })]
+    const cache = make_player_cache({ GSIS_QB: 'PID_QB' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.psr_pid).to.equal('PID_QB')
+  })
+
+  it('psr family: statId 112 (air yards incomplete) attributes psr_pid', () => {
+    const play_row = { esbid, playId }
+    const stats = [play_stat({ esbid, playId, statId: 112, gsisId: 'GSIS_QB' })]
+    const cache = make_player_cache({ GSIS_QB: 'PID_QB' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.psr_pid).to.equal('PID_QB')
+  })
+
   it('sportradar interaction: sportradar-written psr_pid is overwritten when play_stats lands a different passer', () => {
     // Sportradar wrote {psr_gsis: GSIS_SR, psr_pid: PID_SR} before play_stats
     // imported. play_stats arrives with a different passer (statId 14).
