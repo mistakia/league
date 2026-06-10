@@ -49,6 +49,15 @@ const import_underdog_bestball_adp = async ({
 
   const summary = []
 
+  // Phase 1 (browser-bound): fetch every slate payload up front while the
+  // CloakBrowser session is warm, then tear the session down. Player matching
+  // against the league DB (Phase 2) issues one query per appearance and can run
+  // for minutes when the DB is reached over a remote tunnel (e.g. the storage
+  // server's autossh tunnel to league prod) -- long enough for the idle headless
+  // context to be reaped, which would make every slate after the first fail its
+  // fetch with "Target page... has been closed". Fetching all payloads back to
+  // back keeps the browser session short-lived and independent of slow DB work.
+  const slate_payloads = []
   for (const slate of best_ball_slates) {
     const title = slate.description || slate.title || ''
     if (SKIP_SLATE_KEYWORDS.some((kw) => title.includes(kw))) {
@@ -58,6 +67,25 @@ const import_underdog_bestball_adp = async ({
     }
 
     const num_qb = num_qb_for_slate(title)
+    log(`fetching slate "${title}" (${slate.id}) as num_qb=${num_qb}`)
+
+    await jittered_delay()
+    const appearances = await underdog.get_underdog_appearances({
+      slate_id: slate.id
+    })
+    await jittered_delay()
+    const players = await underdog.get_underdog_slate_players({
+      slate_id: slate.id
+    })
+
+    slate_payloads.push({ slate, title, num_qb, appearances, players })
+  }
+
+  // Release the headless browser before the multi-minute DB matching phase.
+  await underdog.cleanup_underdog_session()
+
+  // Phase 2 (DB-bound): resolve adp_format, match players, insert.
+  for (const { slate, title, num_qb, appearances, players } of slate_payloads) {
     log(`ingesting slate "${title}" (${slate.id}) as num_qb=${num_qb}`)
 
     const adp_format_id = await find_or_create_adp_format(db, {
@@ -70,14 +98,6 @@ const import_underdog_bestball_adp = async ({
       contest_style: 'BEST_BALL'
     })
 
-    await jittered_delay()
-    const appearances = await underdog.get_underdog_appearances({
-      slate_id: slate.id
-    })
-    await jittered_delay()
-    const players = await underdog.get_underdog_slate_players({
-      slate_id: slate.id
-    })
     const player_by_id = new Map(players.map((player) => [player.id, player]))
 
     const adp_inserts = []
