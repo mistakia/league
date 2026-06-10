@@ -36,7 +36,8 @@ const protected_props = [
   'fanduel_id',
   'draftkings_id',
   'fantasylabs_id',
-  'cfbref_id'
+  'cfbref_id',
+  'underdog_id'
 ]
 
 const combine_protected_props = ['height', 'weight']
