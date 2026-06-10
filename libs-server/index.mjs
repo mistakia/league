@@ -29,6 +29,7 @@ export {
   find_or_create_scoring_format,
   find_or_create_league_format
 } from './find-or-create-format.mjs'
+export { find_or_create_adp_format } from './find-or-create-adp-format.mjs'
 export { default as resetWaiverOrder } from './reset-waiver-order.mjs'
 export { default as getTopPoachingWaiver } from './get-top-poaching-waiver.mjs'
 export { default as getTopFreeAgencyWaiver } from './get-top-free-agency-waiver.mjs'

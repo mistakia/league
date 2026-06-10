@@ -1,8 +1,15 @@
-/* global describe it */
+/* global describe it before */
 
 import * as chai from 'chai'
+import fs from 'fs/promises'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
 
+import db from '#db'
 import { adp_format } from '#libs-shared'
+import { find_or_create_adp_format } from '#libs-server'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const {
   SCORING_CLASS,
@@ -91,5 +98,93 @@ describe('LIBS-SHARED adp-format decode map', function () {
     const a = decode_adp_type('PPR_REDRAFT')
     a.num_qb = 999
     decode_adp_type('PPR_REDRAFT').num_qb.should.equal(1)
+  })
+})
+
+describe('LIBS-SERVER find_or_create_adp_format', function () {
+  // The non-destructive dimension DDL is not yet in the canonical schema dump
+  // (it lands there only via the gated export:schema from prod), so load it
+  // here when the table is absent. Guarded so the test still works after the
+  // export step lands adp_format in db/schema.postgres.sql.
+  before(async function () {
+    // The adp_format unique index uses NULLS NOT DISTINCT (PG 15+). Prod is
+    // 16.14; a pre-15 local DB cannot parse the DDL, and a COALESCE-shimmed
+    // index would not faithfully exercise the helper's plain-column ON CONFLICT.
+    // Skip there -- decode-map injectivity is already covered by the pure tests
+    // above; this block runs on any PG 15+ DB (CI / prod-version).
+    const version = await db.raw('show server_version_num')
+    if (parseInt(version.rows[0].server_version_num, 10) < 150000) {
+      this.skip()
+    }
+    const has_table = await db.schema.hasTable('adp_format')
+    if (!has_table) {
+      const ddl = await fs.readFile(
+        path.resolve(__dirname, '../db/adhoc/2026-06-10-adp-format-dimension.sql'),
+        'utf8'
+      )
+      await db.raw(ddl)
+    }
+  })
+
+  const base_axes = {
+    scoring_class: 'PPR',
+    scoring_format_id: null,
+    num_qb: 1,
+    num_teams: null,
+    duration: 'REDRAFT',
+    draft_pool: 'ALL',
+    contest_style: 'MANAGED'
+  }
+
+  it('returns the same id for identical axes (idempotent)', async () => {
+    const a = await find_or_create_adp_format(db, base_axes)
+    const b = await find_or_create_adp_format(db, { ...base_axes })
+    a.should.be.a('string')
+    a.should.equal(b)
+  })
+
+  it('returns a new id when an axis differs', async () => {
+    const a = await find_or_create_adp_format(db, base_axes)
+    const superflex = await find_or_create_adp_format(db, {
+      ...base_axes,
+      num_qb: 2
+    })
+    superflex.should.not.equal(a)
+    const bestball = await find_or_create_adp_format(db, {
+      ...base_axes,
+      contest_style: 'BEST_BALL'
+    })
+    bestball.should.not.equal(a)
+    bestball.should.not.equal(superflex)
+  })
+
+  it('treats null tuple columns as equal (NULLS NOT DISTINCT)', async () => {
+    // both calls leave scoring_format_id and num_teams null; the index must
+    // collapse them to one row rather than minting a fresh id each time.
+    const a = await find_or_create_adp_format(db, {
+      scoring_class: 'HALF_PPR',
+      num_qb: 1,
+      duration: 'REDRAFT',
+      draft_pool: 'ALL',
+      contest_style: 'BEST_BALL'
+    })
+    const b = await find_or_create_adp_format(db, {
+      scoring_class: 'HALF_PPR',
+      num_qb: 1,
+      duration: 'REDRAFT',
+      draft_pool: 'ALL',
+      contest_style: 'BEST_BALL'
+    })
+    a.should.equal(b)
+  })
+
+  it('resolves every decoded legacy adp_type to a distinct id', async () => {
+    const ids = new Set()
+    for (const adp_type of LEGACY_ADP_TYPES) {
+      const id = await find_or_create_adp_format(db, decode_adp_type(adp_type))
+      ids.add(id)
+    }
+    // injective decode map -> one distinct adp_format row per legacy literal
+    ids.size.should.equal(LEGACY_ADP_TYPES.length)
   })
 })
