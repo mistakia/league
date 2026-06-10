@@ -36,7 +36,7 @@ import { asyncBufferFromFile, parquetRead } from 'hyparquet'
 
 import db from '#db'
 import { format_nfl_status } from '#libs-shared'
-import { current_season } from '#constants'
+import { current_season, is_offseason } from '#constants'
 import {
   is_main,
   report_job,
@@ -218,7 +218,7 @@ const import_players_nflverse = async ({
   const parquet_file = await asyncBufferFromFile(file_path)
   const data = await read_parquet_rows(parquet_file)
 
-  const preflight = validate_response_shape({ rows: data })
+  const preflight = validate_response_shape({ rows: data, is_offseason })
   log(
     `preflight ok: ${preflight.rows} rows; status_counts=${JSON.stringify(preflight.status_counts)}`
   )

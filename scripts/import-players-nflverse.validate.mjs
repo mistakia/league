@@ -16,7 +16,7 @@ const REQUIRED_COLUMNS = [
 
 const MIN_ROWS = 10000
 
-export const validate_response_shape = ({ rows }) => {
+export const validate_response_shape = ({ rows, is_offseason = false }) => {
   if (!Array.isArray(rows) || rows.length === 0) {
     throw new Error('validate_response_shape: rows missing or empty')
   }
@@ -43,17 +43,22 @@ export const validate_response_shape = ({ rows }) => {
     status_counts.set(s, (status_counts.get(s) || 0) + 1)
   }
 
+  // UFA enum-rename guard: a zero-UFA payload during the season indicates
+  // upstream renamed the free-agent flag. In offseason the UFA distribution
+  // can legitimately collapse to zero after free agency settles, so the
+  // guard only throws in-season.
   const ufa_count = status_counts.get('UFA') || 0
-  if (ufa_count === 0) {
+  if (ufa_count === 0 && !is_offseason) {
     throw new Error(
       `validate_response_shape: zero UFA entries across ${rows.length} rows -- ` +
-        'offseason free-agent flag missing, enum likely renamed upstream.'
+        'in-season free-agent flag missing, enum likely renamed upstream.'
     )
   }
 
   return {
     rows: rows.length,
-    status_counts: Object.fromEntries(status_counts)
+    status_counts: Object.fromEntries(status_counts),
+    ufa_zero_in_offseason: ufa_count === 0 && is_offseason
   }
 }
 
