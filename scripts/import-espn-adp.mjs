@@ -9,10 +9,12 @@ import {
   report_job,
   batch_insert,
   updatePlayer,
+  find_or_create_adp_format,
   espn
 } from '#libs-server'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { adp_format } from '#libs-shared'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -31,6 +33,11 @@ const import_espn_adp = async ({
   dry_run = false
 } = {}) => {
   const data = await espn.get_espn_adp({ year })
+
+  const adp_format_id = await find_or_create_adp_format(
+    db,
+    adp_format.decode_adp_type('PPR_REDRAFT')
+  )
 
   const players = data.players.map((player) => ({
     espn_id: player.id,
@@ -75,7 +82,7 @@ const import_espn_adp = async ({
         sample_size: null,
         percent_drafted: player.percent_owned,
         source_id: 'ESPN',
-        adp_type: 'PPR_REDRAFT'
+        adp_format_id
       })
     } else {
       unmatched_players.push(player)
@@ -130,7 +137,7 @@ const import_espn_adp = async ({
         sample_size: null,
         percent_drafted: player.percent_owned,
         source_id: 'ESPN',
-        adp_type: 'PPR_REDRAFT'
+        adp_format_id
       })
     }
   }
@@ -149,7 +156,7 @@ const import_espn_adp = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'source_id', 'adp_type', 'pid'])
+          .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
           .merge()
       }
     })

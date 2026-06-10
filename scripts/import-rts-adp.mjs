@@ -10,10 +10,12 @@ import {
   report_job,
   batch_insert,
   updatePlayer,
+  find_or_create_adp_format,
   rts
 } from '#libs-server'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { adp_format } from '#libs-shared'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -62,6 +64,11 @@ const import_rts_adp = async ({
   for (const { url, ranking_type } of adp_types) {
     const players = await fetch_rts_data(url)
 
+    const adp_format_id = await find_or_create_adp_format(
+      db,
+      adp_format.decode_adp_type(ranking_type)
+    )
+
     log(`Processing ${ranking_type} data`)
 
     const adp_inserts = []
@@ -92,7 +99,7 @@ const import_rts_adp = async ({
           sample_size: null,
           percent_drafted: null,
           source_id: 'RTS',
-          adp_type: ranking_type
+          adp_format_id
         })
       } else {
         unmatched_players.push(player)
@@ -147,7 +154,7 @@ const import_rts_adp = async ({
           sample_size: null,
           percent_drafted: null,
           source_id: 'RTS',
-          adp_type: ranking_type
+          adp_format_id
         })
       } else {
         log(
@@ -172,7 +179,7 @@ const import_rts_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['year', 'source_id', 'adp_type', 'pid'])
+            .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
             .merge()
         }
       })

@@ -8,10 +8,12 @@ import {
   sleeper,
   find_player_row,
   batch_insert,
-  check_projections_index_floor
+  check_projections_index_floor,
+  find_or_create_adp_format
 } from '#libs-server'
 import { current_season, external_data_sources } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { adp_format } from '#libs-shared'
 
 import db from '#db'
 
@@ -55,30 +57,32 @@ const format_projection = (projection_item) => ({
     (projection_item.stats.rush_2pt || 0)
 })
 
-const create_adp_entries = ({ player_row, adp }) => {
-  const adp_types = [
-    { type: 'STANDARD_REDRAFT', adp_key: 'adp_std' },
-    { type: 'PPR_REDRAFT', adp_key: 'adp_ppr' },
-    { type: 'HALF_PPR_REDRAFT', adp_key: 'adp_half_ppr' },
-    { type: 'STANDARD_SUPERFLEX_REDRAFT', adp_key: 'adp_2qb' },
-    { type: 'PPR_SUPERFLEX_REDRAFT', adp_key: 'adp_2qb' },
-    { type: 'HALF_PPR_SUPERFLEX_REDRAFT', adp_key: 'adp_2qb' },
-    { type: 'STANDARD_DYNASTY', adp_key: 'adp_dynasty_std' },
-    { type: 'PPR_DYNASTY', adp_key: 'adp_dynasty_ppr' },
-    { type: 'HALF_PPR_DYNASTY', adp_key: 'adp_dynasty_half_ppr' },
-    { type: 'STANDARD_SUPERFLEX_DYNASTY', adp_key: 'adp_dynasty_2qb' },
-    { type: 'PPR_SUPERFLEX_DYNASTY', adp_key: 'adp_dynasty_2qb' },
-    { type: 'HALF_PPR_SUPERFLEX_DYNASTY', adp_key: 'adp_dynasty_2qb' },
-    { type: 'STANDARD_ROOKIE', adp_key: 'adp_rookie' },
-    { type: 'PPR_ROOKIE', adp_key: 'adp_rookie' },
-    { type: 'HALF_PPR_ROOKIE', adp_key: 'adp_rookie' },
-    { type: 'STANDARD_SUPERFLEX_ROOKIE', adp_key: 'adp_rookie' },
-    { type: 'PPR_SUPERFLEX_ROOKIE', adp_key: 'adp_rookie' },
-    { type: 'HALF_PPR_SUPERFLEX_ROOKIE', adp_key: 'adp_rookie' }
-  ]
+// Sleeper's projection feed carries a flat ADP value per legacy adp_type.
+// Each maps to an adp_format row resolved once up front (SLEEPER_ADP_FORMAT_IDS)
+// and written via adp_format_id.
+const SLEEPER_ADP_TYPES = [
+  { type: 'STANDARD_REDRAFT', adp_key: 'adp_std' },
+  { type: 'PPR_REDRAFT', adp_key: 'adp_ppr' },
+  { type: 'HALF_PPR_REDRAFT', adp_key: 'adp_half_ppr' },
+  { type: 'STANDARD_SUPERFLEX_REDRAFT', adp_key: 'adp_2qb' },
+  { type: 'PPR_SUPERFLEX_REDRAFT', adp_key: 'adp_2qb' },
+  { type: 'HALF_PPR_SUPERFLEX_REDRAFT', adp_key: 'adp_2qb' },
+  { type: 'STANDARD_DYNASTY', adp_key: 'adp_dynasty_std' },
+  { type: 'PPR_DYNASTY', adp_key: 'adp_dynasty_ppr' },
+  { type: 'HALF_PPR_DYNASTY', adp_key: 'adp_dynasty_half_ppr' },
+  { type: 'STANDARD_SUPERFLEX_DYNASTY', adp_key: 'adp_dynasty_2qb' },
+  { type: 'PPR_SUPERFLEX_DYNASTY', adp_key: 'adp_dynasty_2qb' },
+  { type: 'HALF_PPR_SUPERFLEX_DYNASTY', adp_key: 'adp_dynasty_2qb' },
+  { type: 'STANDARD_ROOKIE', adp_key: 'adp_rookie' },
+  { type: 'PPR_ROOKIE', adp_key: 'adp_rookie' },
+  { type: 'HALF_PPR_ROOKIE', adp_key: 'adp_rookie' },
+  { type: 'STANDARD_SUPERFLEX_ROOKIE', adp_key: 'adp_rookie' },
+  { type: 'PPR_SUPERFLEX_ROOKIE', adp_key: 'adp_rookie' },
+  { type: 'HALF_PPR_SUPERFLEX_ROOKIE', adp_key: 'adp_rookie' }
+]
 
-  return adp_types
-    .filter(({ adp_key }) => adp[adp_key] != null) // Only include if ADP value exists
+const create_adp_entries = ({ player_row, adp, format_id_by_type }) => {
+  return SLEEPER_ADP_TYPES.filter(({ adp_key }) => adp[adp_key] != null) // Only include if ADP value exists
     .map(({ type, adp_key }) => ({
       pid: player_row.pid,
       pos: player_row.pos,
@@ -90,7 +94,7 @@ const create_adp_entries = ({ player_row, adp }) => {
       sample_size: null,
       percent_drafted: null,
       source_id: 'SLEEPER',
-      adp_type: type
+      adp_format_id: format_id_by_type[type]
     }))
 }
 
@@ -98,7 +102,8 @@ const process_matched_player = ({
   player_row,
   projection,
   adp_inserts,
-  projection_inserts
+  projection_inserts,
+  format_id_by_type
 }) => {
   const adp = format_adp(projection)
   const proj = format_projection(projection)
@@ -106,7 +111,8 @@ const process_matched_player = ({
   // Create multiple ADP entries
   const adp_entries = create_adp_entries({
     player_row,
-    adp
+    adp,
+    format_id_by_type
   })
   adp_inserts.push(...adp_entries)
 
@@ -142,6 +148,15 @@ const import_sleeper_adp_and_projections = async ({
   log(`Game IDs: ${distinct_values.game_id.join(', ')}`)
   log(`Weeks: ${distinct_values.week.join(', ')}`)
 
+  // Resolve an adp_format_id for each legacy Sleeper adp_type once up front.
+  const format_id_by_type = {}
+  for (const { type } of SLEEPER_ADP_TYPES) {
+    format_id_by_type[type] = await find_or_create_adp_format(
+      db,
+      adp_format.decode_adp_type(type)
+    )
+  }
+
   const adp_inserts = []
   const projection_inserts = []
   const matched_sleeper_ids = new Set()
@@ -168,7 +183,8 @@ const import_sleeper_adp_and_projections = async ({
         player_row,
         projection,
         adp_inserts,
-        projection_inserts
+        projection_inserts,
+        format_id_by_type
       })
     } else {
       unmatched_projections.push(projection)
@@ -206,7 +222,8 @@ const import_sleeper_adp_and_projections = async ({
         player_row,
         projection,
         adp_inserts,
-        projection_inserts
+        projection_inserts,
+        format_id_by_type
       })
     }
   }
@@ -257,7 +274,7 @@ const import_sleeper_adp_and_projections = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'source_id', 'adp_type', 'pid'])
+          .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
           .merge()
       }
     })

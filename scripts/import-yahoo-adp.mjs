@@ -9,10 +9,12 @@ import {
   report_job,
   batch_insert,
   updatePlayer,
+  find_or_create_adp_format,
   yahoo
 } from '#libs-server'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { adp_format } from '#libs-shared'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -45,6 +47,11 @@ const import_yahoo_adp = async ({
   const raw_data = await yahoo.get_yahoo_adp()
   const players = parse_yahoo_data(raw_data)
 
+  const adp_format_id = await find_or_create_adp_format(
+    db,
+    adp_format.decode_adp_type('HALF_PPR_REDRAFT')
+  )
+
   log(`Processing Yahoo ADP data for ${year}`)
 
   const adp_inserts = []
@@ -74,7 +81,7 @@ const import_yahoo_adp = async ({
         sample_size: null,
         percent_drafted: player.percent_drafted,
         source_id: 'YAHOO',
-        adp_type: 'HALF_PPR_REDRAFT'
+        adp_format_id
       })
     } else {
       unmatched_players.push(player)
@@ -128,7 +135,7 @@ const import_yahoo_adp = async ({
         sample_size: null,
         percent_drafted: player.percent_drafted,
         source_id: 'YAHOO',
-        adp_type: 'HALF_PPR_REDRAFT'
+        adp_format_id
       })
     } else {
       log(
@@ -151,7 +158,7 @@ const import_yahoo_adp = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'source_id', 'adp_type', 'pid'])
+          .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
           .merge()
       }
     })

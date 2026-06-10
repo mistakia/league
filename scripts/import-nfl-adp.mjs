@@ -10,10 +10,12 @@ import {
   is_main,
   report_job,
   batch_insert,
-  updatePlayer
+  updatePlayer,
+  find_or_create_adp_format
 } from '#libs-server'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { adp_format } from '#libs-shared'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -108,6 +110,11 @@ const import_nfl_adp = async ({
   const html = await fetch_nfl_data(url)
   const players = parse_nfl_data(html)
 
+  const adp_format_id = await find_or_create_adp_format(
+    db,
+    adp_format.decode_adp_type('PPR_REDRAFT')
+  )
+
   log(`Processing NFL ADP data`)
 
   const adp_inserts = []
@@ -143,7 +150,7 @@ const import_nfl_adp = async ({
         sample_size: null,
         percent_drafted: null,
         source_id: 'NFL',
-        adp_type: 'PPR_REDRAFT'
+        adp_format_id
       })
     } else {
       unmatched_players.push(player)
@@ -195,7 +202,7 @@ const import_nfl_adp = async ({
         sample_size: null,
         percent_drafted: null,
         source_id: 'NFL',
-        adp_type: 'PPR_REDRAFT'
+        adp_format_id
       })
     } else {
       log(`Unmatched player: ${player.name} (${player.pos}, ${player.team})`)
@@ -216,7 +223,7 @@ const import_nfl_adp = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'source_id', 'adp_type', 'pid'])
+          .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
           .merge()
       }
     })

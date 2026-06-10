@@ -7,11 +7,13 @@ import {
   find_player_row,
   is_main,
   report_job,
-  batch_insert
+  batch_insert,
+  find_or_create_adp_format
   // updatePlayer
 } from '#libs-server'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { adp_format } from '#libs-shared'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -51,6 +53,11 @@ const import_mfl_adp = async ({
 
   for (const { url, ranking_type } of adp_types) {
     const players = await fetch_mfl_data(url)
+
+    const adp_format_id = await find_or_create_adp_format(
+      db,
+      adp_format.decode_adp_type(ranking_type)
+    )
 
     const formatted_players = players.map((p) => ({
       id: Number(p.id),
@@ -92,7 +99,7 @@ const import_mfl_adp = async ({
           sample_size: player.drafts_selected_in,
           percent_drafted: player.draft_sel_pct,
           source_id: 'MFL',
-          adp_type: ranking_type
+          adp_format_id
         })
       } else {
         unmatched_players.push(player)
@@ -167,7 +174,7 @@ const import_mfl_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['year', 'source_id', 'adp_type', 'pid'])
+            .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
             .merge()
         }
       })
