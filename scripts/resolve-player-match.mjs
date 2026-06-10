@@ -107,7 +107,8 @@ const external_id_columns = [
   'keeptradecut_id',
   'fantasy_data_id',
   'rts_id',
-  'fleaflicker_id'
+  'fleaflicker_id',
+  'underdog_id'
 ]
 
 const get_external_id_from_argv = (argv) => {

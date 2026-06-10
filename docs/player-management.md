@@ -142,6 +142,7 @@ NODE_ENV=production node scripts/resolve-player-match.mjs update \
 | `cbs_id`          | CBS Sports      | `--cbs-id`          |
 | `keeptradecut_id` | KeepTradeCut    | `--keeptradecut-id` |
 | `fleaflicker_id`  | Fleaflicker     | `--fleaflicker-id`  |
+| `underdog_id`     | Underdog        | `--underdog-id`     |
 
 ### Analytics IDs
 
