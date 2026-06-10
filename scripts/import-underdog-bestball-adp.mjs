@@ -106,8 +106,13 @@ const import_underdog_bestball_adp = async ({
     let no_adp = 0
 
     for (const appearance of appearances) {
-      const adp = appearance?.projection?.adp
-      if (adp == null) {
+      // Underdog returns the string "-" for undrafted players (no ADP), and
+      // Number('-') is NaN -- which slipped past a bare null check and poisoned
+      // the numeric adp column. Guard on a finite number so "-" (and any null or
+      // future placeholder) is counted as no-adp and skipped. This also makes
+      // with_adp/match_rate measure real-ADP players, not the full deep slate.
+      const adp = Number(appearance?.projection?.adp)
+      if (!Number.isFinite(adp)) {
         no_adp += 1
         continue
       }
@@ -153,7 +158,7 @@ const import_underdog_bestball_adp = async ({
         pid: player_row.pid,
         pos: player_row.pos,
         year,
-        adp: Number(adp),
+        adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,
