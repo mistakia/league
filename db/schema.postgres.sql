@@ -28,6 +28,8 @@ ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_source_holding_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_scoring_format_fkey;
+ALTER TABLE IF EXISTS ONLY public.player_adp_index DROP CONSTRAINT IF EXISTS player_adp_index_adp_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.player_adp_history DROP CONSTRAINT IF EXISTS player_adp_history_adp_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_off_play_caller_id_fkey;
@@ -41,6 +43,7 @@ ALTER TABLE IF EXISTS ONLY public.league_format_player_gamelogs DROP CONSTRAINT 
 ALTER TABLE IF EXISTS ONLY public.league_format_player_careerlogs DROP CONSTRAINT IF EXISTS league_format_player_careerlogs_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_format_draft_pick_value DROP CONSTRAINT IF EXISTS league_format_draft_pick_value_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.format_category_signal_mapping DROP CONSTRAINT IF EXISTS format_category_signal_mapping_adp_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_index DROP CONSTRAINT IF EXISTS fk_combination_odds_index_combination;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTRAINT IF EXISTS fk_combination_odds_history_combination;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_lid_fkey;
@@ -48,6 +51,7 @@ ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_connection_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_lid_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_created_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.adp_format DROP CONSTRAINT IF EXISTS adp_format_scoring_format_id_fkey;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS trigger_update_selection_combination_definitions_updated_at ON public.selection_combination_definitions;
 DROP TRIGGER IF EXISTS trigger_external_league_import_jobs_updated_at ON public.external_league_import_jobs;
@@ -66,6 +70,7 @@ DROP INDEX IF EXISTS public.roster_asset_holding_team_period_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_player_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
+DROP INDEX IF EXISTS public.player_underdog_id_unique;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx;
 DROP INDEX IF EXISTS public.pff_unresolved_players_year_idx;
@@ -250,10 +255,10 @@ DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_adp_index_year;
-DROP INDEX IF EXISTS public.idx_player_adp_index_source_type;
+DROP INDEX IF EXISTS public.idx_player_adp_index_source_format;
 DROP INDEX IF EXISTS public.idx_player_adp_index_pid;
 DROP INDEX IF EXISTS public.idx_player_adp_history_timestamp;
-DROP INDEX IF EXISTS public.idx_player_adp_history_source_type;
+DROP INDEX IF EXISTS public.idx_player_adp_history_source_format;
 DROP INDEX IF EXISTS public.idx_player_adp_history_pid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_userid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_selections;
@@ -446,6 +451,7 @@ DROP INDEX IF EXISTS public.cmv_pick_unique_idx;
 DROP INDEX IF EXISTS public.cmv_pick_date_idx;
 DROP INDEX IF EXISTS public.cmv_date_category_type_idx;
 DROP INDEX IF EXISTS public.cmv_blend_weights_category_effective_idx;
+DROP INDEX IF EXISTS public.adp_format_axis_unique;
 ALTER TABLE IF EXISTS ONLY public.worker_heartbeat DROP CONSTRAINT IF EXISTS worker_heartbeat_pkey;
 ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
@@ -625,6 +631,7 @@ ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_un
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_daily DROP CONSTRAINT IF EXISTS composite_market_value_daily_pkey;
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_calibration DROP CONSTRAINT IF EXISTS composite_market_value_calibration_pkey;
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_blend_weights DROP CONSTRAINT IF EXISTS composite_market_value_blend_weights_pkey;
+ALTER TABLE IF EXISTS ONLY public.adp_format DROP CONSTRAINT IF EXISTS adp_format_pkey;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
@@ -963,6 +970,7 @@ DROP TABLE IF EXISTS public.composite_market_value_daily;
 DROP TABLE IF EXISTS public.composite_market_value_calibration;
 DROP SEQUENCE IF EXISTS public.composite_market_value_blend_weights_version_id_seq;
 DROP TABLE IF EXISTS public.composite_market_value_blend_weights;
+DROP TABLE IF EXISTS public.adp_format;
 DROP FUNCTION IF EXISTS public.update_selection_combination_definitions_updated_at();
 DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying);
@@ -1010,7 +1018,6 @@ DROP TYPE IF EXISTS public.espn_win_rate_type;
 DROP TYPE IF EXISTS public.draft_ranking_type;
 DROP TYPE IF EXISTS public.dfs_source_id;
 DROP TYPE IF EXISTS public.coverage_type;
-DROP TYPE IF EXISTS public.adp_type;
 DROP TYPE IF EXISTS public.adp_source_id;
 DROP EXTENSION IF EXISTS pgcrypto;
 --
@@ -1041,33 +1048,6 @@ CREATE TYPE public.adp_source_id AS ENUM (
     'UNDERDOG',
     'DRAFTKINGS',
     'RTS'
-);
-
-
---
--- Name: adp_type; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.adp_type AS ENUM (
-    'STANDARD_REDRAFT',
-    'PPR_REDRAFT',
-    'HALF_PPR_REDRAFT',
-    'STANDARD_SUPERFLEX_REDRAFT',
-    'PPR_SUPERFLEX_REDRAFT',
-    'HALF_PPR_SUPERFLEX_REDRAFT',
-    'STANDARD_DYNASTY',
-    'PPR_DYNASTY',
-    'HALF_PPR_DYNASTY',
-    'STANDARD_SUPERFLEX_DYNASTY',
-    'PPR_SUPERFLEX_DYNASTY',
-    'HALF_PPR_SUPERFLEX_DYNASTY',
-    'STANDARD_ROOKIE',
-    'PPR_ROOKIE',
-    'HALF_PPR_ROOKIE',
-    'STANDARD_SUPERFLEX_ROOKIE',
-    'PPR_SUPERFLEX_ROOKIE',
-    'HALF_PPR_SUPERFLEX_ROOKIE',
-    'BESTBALL'
 );
 
 
@@ -1873,6 +1853,27 @@ $$;
 
 
 SET default_table_access_method = heap;
+
+--
+-- Name: adp_format; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.adp_format (
+    id text DEFAULT (gen_random_uuid())::text NOT NULL,
+    scoring_class text,
+    scoring_format_id text,
+    num_qb smallint DEFAULT 1 NOT NULL,
+    num_teams smallint,
+    duration text,
+    draft_pool text DEFAULT 'ALL'::text NOT NULL,
+    contest_style text DEFAULT 'MANAGED'::text NOT NULL,
+    CONSTRAINT adp_format_contest_style_check CHECK ((contest_style = ANY (ARRAY['MANAGED'::text, 'BEST_BALL'::text]))),
+    CONSTRAINT adp_format_draft_pool_check CHECK ((draft_pool = ANY (ARRAY['ALL'::text, 'ROOKIE'::text]))),
+    CONSTRAINT adp_format_duration_check CHECK ((duration = ANY (ARRAY['REDRAFT'::text, 'DYNASTY'::text]))),
+    CONSTRAINT adp_format_num_qb_check CHECK ((num_qb >= 1)),
+    CONSTRAINT adp_format_scoring_class_check CHECK ((scoring_class = ANY (ARRAY['STANDARD'::text, 'PPR'::text, 'HALF_PPR'::text])))
+);
+
 
 --
 -- Name: composite_market_value_blend_weights; Type: TABLE; Schema: public; Owner: -
@@ -3082,9 +3083,9 @@ CREATE TABLE public.footballoutsiders (
 CREATE TABLE public.format_category_signal_mapping (
     format_category smallint NOT NULL,
     ktc_qb_axis smallint NOT NULL,
-    adp_type text NOT NULL,
     ranking_type text NOT NULL,
-    props_scoring_formula_template text
+    props_scoring_formula_template text,
+    adp_format_id text
 );
 
 
@@ -19119,7 +19120,8 @@ CREATE TABLE public.player (
     combine_attendance boolean,
     hometown character varying(100),
     sumer_id character varying(36),
-    fantasylabs_id integer
+    fantasylabs_id integer,
+    underdog_id character varying(36)
 );
 
 
@@ -19426,7 +19428,7 @@ CREATE TABLE public.player_adp_history (
     percent_drafted numeric(5,2),
     "timestamp" integer NOT NULL,
     source_id public.adp_source_id,
-    adp_type public.adp_type NOT NULL
+    adp_format_id text NOT NULL
 );
 
 
@@ -19452,7 +19454,7 @@ CREATE TABLE public.player_adp_index (
     sample_size integer,
     percent_drafted numeric(5,2),
     source_id public.adp_source_id NOT NULL,
-    adp_type public.adp_type NOT NULL
+    adp_format_id text NOT NULL
 );
 
 
@@ -27335,6 +27337,14 @@ ALTER TABLE ONLY public.waivers ALTER COLUMN uid SET DEFAULT nextval('public.wai
 
 
 --
+-- Name: adp_format adp_format_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.adp_format
+    ADD CONSTRAINT adp_format_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: composite_market_value_blend_weights composite_market_value_blend_weights_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -28075,7 +28085,7 @@ ALTER TABLE ONLY public.pff_unresolved_players
 --
 
 ALTER TABLE ONLY public.player_adp_index
-    ADD CONSTRAINT player_adp_index_unique UNIQUE (year, source_id, adp_type, pid);
+    ADD CONSTRAINT player_adp_index_unique UNIQUE (year, source_id, adp_format_id, pid);
 
 
 --
@@ -28764,6 +28774,13 @@ ALTER TABLE ONLY public.weekly_market_selections_analysis_cache
 
 ALTER TABLE ONLY public.worker_heartbeat
     ADD CONSTRAINT worker_heartbeat_pkey PRIMARY KEY (worker_name);
+
+
+--
+-- Name: adp_format_axis_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX adp_format_axis_unique ON public.adp_format USING btree (scoring_class, scoring_format_id, num_qb, num_teams, duration, draft_pool, contest_style) NULLS NOT DISTINCT;
 
 
 --
@@ -30349,10 +30366,10 @@ CREATE INDEX idx_player_adp_history_pid ON public.player_adp_history USING btree
 
 
 --
--- Name: idx_player_adp_history_source_type; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_adp_history_source_format; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_adp_history_source_type ON public.player_adp_history USING btree (source_id, adp_type);
+CREATE INDEX idx_player_adp_history_source_format ON public.player_adp_history USING btree (source_id, adp_format_id);
 
 
 --
@@ -30370,10 +30387,10 @@ CREATE INDEX idx_player_adp_index_pid ON public.player_adp_index USING btree (pi
 
 
 --
--- Name: idx_player_adp_index_source_type; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_adp_index_source_format; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_adp_index_source_type ON public.player_adp_index USING btree (source_id, adp_type);
+CREATE INDEX idx_player_adp_index_source_format ON public.player_adp_index USING btree (source_id, adp_format_id);
 
 
 --
@@ -43061,6 +43078,13 @@ CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vect
 
 
 --
+-- Name: player_underdog_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_underdog_id_unique ON public.player USING btree (underdog_id);
+
+
+--
 -- Name: projections_index_default_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -55472,6 +55496,14 @@ CREATE TRIGGER update_config_modtime BEFORE UPDATE ON public.config FOR EACH ROW
 
 
 --
+-- Name: adp_format adp_format_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.adp_format
+    ADD CONSTRAINT adp_format_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
 -- Name: external_league_connections external_league_connections_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -55525,6 +55557,14 @@ ALTER TABLE ONLY public.selection_combination_odds_history
 
 ALTER TABLE ONLY public.selection_combination_odds_index
     ADD CONSTRAINT fk_combination_odds_index_combination FOREIGN KEY (combination_id) REFERENCES public.selection_combination_definitions(combination_id) ON DELETE CASCADE;
+
+
+--
+-- Name: format_category_signal_mapping format_category_signal_mapping_adp_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.format_category_signal_mapping
+    ADD CONSTRAINT format_category_signal_mapping_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
 
 
 --
@@ -55632,6 +55672,22 @@ ALTER TABLE ONLY public.ngs_prospect_scores_index
 
 
 --
+-- Name: player_adp_history player_adp_history_adp_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_adp_history
+    ADD CONSTRAINT player_adp_history_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+
+
+--
+-- Name: player_adp_index player_adp_index_adp_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_adp_index
+    ADD CONSTRAINT player_adp_index_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+
+
+--
 -- Name: player_variance player_variance_scoring_format_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -55716,6 +55772,13 @@ ALTER TABLE ONLY public.seasons
 --
 
 GRANT USAGE ON SCHEMA public TO league_readonly;
+
+
+--
+-- Name: TABLE adp_format; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.adp_format TO league_readonly;
 
 
 --
