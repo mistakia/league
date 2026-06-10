@@ -12,6 +12,11 @@
 --
 -- yarn db:exec db/adhoc/2026-06-10-adp-format-backfill.sql
 
+-- The history backfill rewrites ~11.4M rows in this one maintenance transaction,
+-- which exceeds the default per-statement timeout. Lift it for this transaction
+-- only (crons are paused; player_adp_history is append-only, no contending writers).
+SET LOCAL statement_timeout = 0;
+
 CREATE TEMP TABLE adp_decode (
     adp_type text PRIMARY KEY,
     scoring_class text NOT NULL,
@@ -46,7 +51,7 @@ INSERT INTO adp_decode (adp_type, scoring_class, num_qb, duration, draft_pool, c
 INSERT INTO public.adp_format
     (scoring_class, scoring_format_id, num_qb, num_teams, duration, draft_pool, contest_style)
 SELECT DISTINCT
-    d.scoring_class, NULL, d.num_qb, NULL, d.duration, d.draft_pool, d.contest_style
+    d.scoring_class, NULL::text, d.num_qb, NULL::smallint, d.duration, d.draft_pool, d.contest_style
 FROM adp_decode d
 WHERE d.adp_type IN (
     SELECT adp_type::text FROM public.player_adp_index
