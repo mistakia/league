@@ -115,7 +115,7 @@ export const getPlayers = async ({ year, token, ignore_cache = false }) => {
   const api_url = nfl_config.api_url
 
   if (!token) {
-    token = await getToken()
+    token = await get_session_token_v3()
   }
 
   let results = []

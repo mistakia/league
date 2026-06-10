@@ -1,4 +1,5 @@
 import db from '#db'
+import { is_offseason } from '#constants'
 
 import throw_if_shortfall from './throw-if-shortfall.mjs'
 
@@ -6,6 +7,12 @@ import throw_if_shortfall from './throw-if-shortfall.mjs'
 // for the (year, week, sourceid|sourceids, seas_type) tuple and surfaces a
 // shortfall through throw_if_shortfall when below the floor. Default floor
 // is 50 for season totals (week=0) and 30 for weekly.
+//
+// Offseason short-circuit: during offseason (week=0) season-total projections
+// are legitimately absent from most sources — sources only publish preseason
+// outlooks once training camps open. Skip the floor check to avoid false
+// positives. Matches the ESPN seasonal-import guard (§891) and the nflverse
+// zero-UFA in-season-only guard (league 56ee6942).
 export default async function check_projections_index_floor({
   year,
   week,
@@ -14,6 +21,10 @@ export default async function check_projections_index_floor({
   seas_type,
   floor
 }) {
+  if (is_offseason) {
+    return
+  }
+
   const query = db('projections_index').where({ year, week, seas_type })
   if (sourceids) query.whereIn('sourceid', sourceids)
   else query.where({ sourceid })
