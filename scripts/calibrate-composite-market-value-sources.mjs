@@ -80,7 +80,7 @@ const calibrate_for_date_and_category = async ({
   })
   const adp = await extract_adp_per_asset({
     player_ids,
-    adp_type: mapping.adp_type,
+    adp_format_id: mapping.adp_format_id,
     league_format_id,
     start_date: window_start,
     end_date: date_iso

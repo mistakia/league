@@ -14,7 +14,7 @@ import {
 
 export const extract_adp_per_asset = async ({
   player_ids,
-  adp_type,
+  adp_format_id,
   league_format_id,
   start_date,
   end_date
@@ -29,7 +29,7 @@ export const extract_adp_per_asset = async ({
       )
     )
     .whereIn('pid', player_ids)
-    .where('adp_type', adp_type)
+    .where('adp_format_id', adp_format_id)
     .where('timestamp', '>=', Math.floor(new Date(start_date).getTime() / 1000))
     .where(
       'timestamp',

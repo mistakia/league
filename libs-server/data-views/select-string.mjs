@@ -37,7 +37,7 @@ const compute_year_in_list = (source, column_params, min_off, max_off) => {
 // the inner FROM relation. Needed because the correlated SUM subquery is
 // re-scanned from the underlying table (not the outer JOIN alias), so the
 // alias's discriminator predicates must be re-emitted to avoid summing across
-// every source_id / adp_type / etc.
+// every source_id / adp_format_id / etc.
 const format_extra_predicates_sql = (source, column_params, inner_table) => {
   if (typeof source?.extra_predicates !== 'function') return ''
   const extras = source.extra_predicates(column_params) || []
