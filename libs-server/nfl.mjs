@@ -7,6 +7,18 @@ import * as cache from './cache.mjs'
 const log = debug('nfl')
 debug.enable('nfl')
 
+const fetch_json_with_context = async (url, response) => {
+  const body = await response.text()
+  try {
+    return JSON.parse(body)
+  } catch (err) {
+    const snippet = body.slice(0, 500)
+    throw new Error(
+      `nfl fetch JSON parse failed: ${err.message} | url=${url} | status=${response.status} | body[0:500]=${snippet}`
+    )
+  }
+}
+
 // Cached config from database
 let nfl_api_config_cache = null
 
@@ -61,7 +73,7 @@ export const get_session_token_v3 = async () => {
     }
   })
 
-  const data = await response.json()
+  const data = await fetch_json_with_context(session_url, response)
   log(data)
   return data.accessToken
 }
@@ -72,7 +84,8 @@ export const getToken = async () => {
 
   const form = new FormData()
   form.set('grant_type', 'client_credentials')
-  const data = await fetch(`${api_url}/v1/reroute`, {
+  const token_url = `${api_url}/v1/reroute`
+  const token_response = await fetch(token_url, {
     method: 'POST',
     body: form,
     headers: {
@@ -82,7 +95,8 @@ export const getToken = async () => {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36',
       'x-domain-id': '100'
     }
-  }).then((res) => res.json())
+  })
+  const data = await fetch_json_with_context(token_url, token_response)
 
   return data.access_token
 }
@@ -183,7 +197,7 @@ query {
         authorization: `Bearer ${token}`
       }
     })
-    data = await res.json()
+    data = await fetch_json_with_context(url, res)
 
     if (data && data.data) {
       after = data.data.viewer.players.pageInfo.endCursor
@@ -235,7 +249,7 @@ export const getGames = async ({
     }
   })
 
-  const data = await res.json()
+  const data = await fetch_json_with_context(url, res)
 
   if (data && data.games.length) {
     await cache.set({ key: cache_key, value: data })
@@ -269,7 +283,7 @@ export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
     }
   })
 
-  const data = await res.json()
+  const data = await fetch_json_with_context(url, res)
 
   if (
     data &&
@@ -312,7 +326,7 @@ export const get_combine_profiles = async ({
       authorization: `Bearer ${token}`
     }
   })
-  const data = await res.json()
+  const data = await fetch_json_with_context(url, res)
 
   if (res.ok) {
     await cache.set({ key: cache_key, value: data })
