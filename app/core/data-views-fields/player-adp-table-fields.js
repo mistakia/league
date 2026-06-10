@@ -32,32 +32,40 @@ const create_player_adp_field = (props) => ({
       default_value: 'SLEEPER',
       label: 'ADP Source'
     },
-    adp_type: {
-      values: [
-        'STANDARD_REDRAFT',
-        'PPR_REDRAFT',
-        'HALF_PPR_REDRAFT',
-        'STANDARD_SUPERFLEX_REDRAFT',
-        'PPR_SUPERFLEX_REDRAFT',
-        'HALF_PPR_SUPERFLEX_REDRAFT',
-        'STANDARD_DYNASTY',
-        'PPR_DYNASTY',
-        'HALF_PPR_DYNASTY',
-        'STANDARD_SUPERFLEX_DYNASTY',
-        'PPR_SUPERFLEX_DYNASTY',
-        'HALF_PPR_SUPERFLEX_DYNASTY',
-        'STANDARD_ROOKIE',
-        'PPR_ROOKIE',
-        'HALF_PPR_ROOKIE',
-        'STANDARD_SUPERFLEX_ROOKIE',
-        'PPR_SUPERFLEX_ROOKIE',
-        'HALF_PPR_SUPERFLEX_ROOKIE',
-        'BESTBALL'
-      ],
+    contest_style: {
+      values: ['MANAGED', 'BEST_BALL'],
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       single: true,
-      default_value: 'PPR_REDRAFT',
-      label: 'ADP Type'
+      default_value: 'MANAGED',
+      label: 'Contest Style'
+    },
+    scoring_class: {
+      values: ['STANDARD', 'PPR', 'HALF_PPR'],
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      single: true,
+      default_value: 'PPR',
+      label: 'Scoring'
+    },
+    num_qb: {
+      values: [1, 2],
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      single: true,
+      default_value: 1,
+      label: 'QB Count'
+    },
+    duration: {
+      values: ['REDRAFT', 'DYNASTY'],
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      single: true,
+      default_value: 'REDRAFT',
+      label: 'Duration'
+    },
+    draft_pool: {
+      values: ['ALL', 'ROOKIE'],
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      single: true,
+      default_value: 'ALL',
+      label: 'Draft Pool'
     }
   },
   splits: ['year']
