@@ -8,7 +8,11 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const exec_file = promisify(execFile)
 
-const BASE_CLI = process.env.BASE_CLI_PATH || 'base'
+// Resolve base by absolute path, not bare `base` on PATH: the pm2 worker process
+// env does not include ~/.base/bin, so a bare `base` spawn ENOENTs and every run
+// report is silently lost. Mirrors report-run-outcome.mjs and the base
+// job-wrapper.sh absolute-path resolution. See user:text/base/machine-token-auth.md.
+const BASE_CLI = process.env.BASE_CLI_PATH || '/root/.base/bin/base'
 
 const build_job_type_to_id = () => {
   const map = {}
