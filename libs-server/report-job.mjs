@@ -1,4 +1,3 @@
-import os from 'os'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 
@@ -8,6 +7,8 @@ import report_error from './report-error.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const exec_file = promisify(execFile)
+
+const BASE_CLI = process.env.BASE_CLI_PATH || 'base'
 
 const build_job_type_to_id = () => {
   const map = {}
@@ -65,34 +66,24 @@ export default async function report_job({
   const source = process.env.JOB_SCHEDULE_ENTITY_URI || `service:${job_id}`
   const outcome = job_success ? 'success' : 'failure'
 
-  try {
-    const { stdout } = await exec_file('base', ['instance', 'sign-token'], {
-      timeout: 3000
-    })
-    const token = stdout.trim()
-    if (!token) {
-      console.error('run report failed: empty machine token')
-      return
-    }
+  // Single canonical client: `base run report` owns transport + machine-token
+  // auth + host identity. The local jobs-table insert and Slack error report
+  // above are league-specific side effects and stay. No hand-rolled
+  // sign-token+curl. See user:text/base/machine-token-auth.md.
+  const args = [
+    'run',
+    'report',
+    '--source',
+    source,
+    '--outcome',
+    outcome,
+    '--exit-code',
+    job_success ? '0' : '1'
+  ]
+  if (job_reason) args.push('--reason', job_reason)
 
-    const response = await fetch(`${api_url.replace(/\/$/, '')}/api/runs/report`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Machine ${token}`
-      },
-      body: JSON.stringify({
-        source,
-        host: os.hostname().split('.')[0],
-        outcome,
-        exit_code: job_success ? 0 : 1,
-        reason: job_reason
-      }),
-      signal: AbortSignal.timeout(3000)
-    })
-    if (!response.ok) {
-      console.error(`run report failed: HTTP ${response.status}`)
-    }
+  try {
+    await exec_file(BASE_CLI, args, { timeout: 5000 })
   } catch (err) {
     console.error(`run report failed: ${err.message}`)
   }
