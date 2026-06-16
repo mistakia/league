@@ -34,6 +34,8 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 Deploy targets (SSH hosts): `league` (main: API + frontend), `league-worker-1` (odds/plays import workers)
 
+**Deploy tree topology (important):** the main host has **two** independent git checkouts. `/root/league/source` (`current` → it) is the **pm2-deploy** tree updated by `pm2 deploy` — the long-lived PM2 app runs here. `/root/league` is a **standalone clone** updated by `yarn load:main` — **all scheduled scripts run from here** (the crontab invokes `/root/league/scripts/*.mjs`; SSH-in wrappers `cd /root/league`). `yarn deploy` chains `pm2 deploy && yarn load:main && yarn load:worker1`, so a full deploy syncs both trees to `origin/master`. Running only one (e.g. `yarn load:main` alone, or `pm2 deploy` alone) is a **partial deploy** that leaves the other tree on stale code — when hand-deploying a fix that cron jobs need, run full `yarn deploy` or `git pull` both trees. Full topology: `user:text/league/league-server.md` (Deployment Topology).
+
 **Submodule policy:** Only `private` is initialized on the production servers. The `data` submodule is **dev-only** — it is a large git-lfs reference dataset and git-lfs is not installed on production. Never run plain `git submodule update --init` (without an explicit path) on a production server; always target `private` specifically. The `pre-deploy` hook in `server.pm2.config.js` defensively runs `git submodule deinit -f data` before pulling so that any accidental prior initialization is undone before the pull tries to fetch its refs. The same rule applies to the `load:main`, `load:worker1`, and `load:logrotate:main` scripts — they use `--init private` for this reason.
 
 **Testing:**
