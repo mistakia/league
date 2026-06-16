@@ -8,7 +8,7 @@ import path from 'path'
 
 import db from '#db'
 import { is_main } from '#libs-server'
-import { current_season } from '#constants'
+import { current_season, is_offseason } from '#constants'
 
 const log = debug('import-nfl-coaches')
 debug.enable('import-nfl-coaches')
@@ -598,6 +598,26 @@ const import_nfl_coaches = async ({
     'off_scheme',
     'def_scheme'
   ]
+
+  // Offseason short-circuit. samhoppen's all_playcallers.csv carries no rows
+  // for the current season until games are actually played, so a weekly
+  // `--since current` run in the offseason legitimately resolves zero bridge
+  // rows and would trip the "Zero nfl_game_coaches rows ingested" guard below
+  // (signal #113494). The scheduled-command is intentionally year-round and
+  // expected to no-op out of season; make that explicit here. Mirrors the ESPN
+  // seasonal-import guard (commit 79bf137e) and the league 89bea137 is_offseason
+  // short-circuit. An explicit --backfill or --since <year> still runs
+  // year-round so manual backfills are never gated.
+  if (!backfill && (since == null || since === 'current') && is_offseason) {
+    log('Skipping -- NFL offseason; no current-season playcaller data to ingest')
+    return {
+      skipped: true,
+      years: [],
+      coaches: 0,
+      unresolved: 0,
+      fallback: { name_season: 0, name_only: 0, seed: 0 }
+    }
+  }
 
   const { pfr_to_coach_id, dim_rows } = load_pfr_fixture()
   log(`loaded PFR fixture: ${dim_rows.length} indexed coaches`)
