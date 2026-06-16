@@ -8,7 +8,7 @@ import path from 'path'
 
 import db from '#db'
 import { is_main } from '#libs-server'
-import { current_season, is_offseason } from '#constants'
+import { current_season } from '#constants'
 
 const log = debug('import-nfl-coaches')
 debug.enable('import-nfl-coaches')
@@ -607,16 +607,18 @@ const import_nfl_coaches = async ({
   // expected to no-op out of season; make that explicit here. Mirrors the ESPN
   // seasonal-import guard (commit 79bf137e) and the league 89bea137 is_offseason
   // short-circuit. An explicit --backfill or --since <year> still runs
-  // year-round so manual backfills are never gated.
-  if (!backfill && (since == null || since === 'current') && is_offseason) {
-    log('Skipping -- NFL offseason; no current-season playcaller data to ingest')
-    return {
-      skipped: true,
-      years: [],
-      coaches: 0,
-      unresolved: 0,
-      fallback: { name_season: 0, name_only: 0, seed: 0 }
-    }
+  // year-round so manual backfills are never gated. current_season.isOffseason
+  // is read live (not the static is_offseason snapshot) for consistency with the
+  // rest of this file and to stay correct if ever run from a long-lived process.
+  if (
+    !backfill &&
+    (since == null || since === 'current') &&
+    current_season.isOffseason
+  ) {
+    log(
+      'Skipping -- NFL offseason; no current-season playcaller data to ingest'
+    )
+    return { skipped: true }
   }
 
   const { pfr_to_coach_id, dim_rows } = load_pfr_fixture()

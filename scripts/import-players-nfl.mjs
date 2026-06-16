@@ -31,7 +31,7 @@ const importPlayersNFL = async ({
   log(`loading players for year: ${year}`)
 
   if (!token) {
-    token = await nfl.getToken()
+    token = await nfl.get_session_token_v3()
   }
 
   const pids = []
@@ -177,7 +177,7 @@ const main = async () => {
 
     let shortfall = null
     if (argv.all) {
-      const token = await nfl.getToken()
+      const token = await nfl.get_session_token_v3()
       let year = argv.start || 1970
       for (; year < current_season.year; year++) {
         await importPlayersNFL({ year, token })

@@ -78,20 +78,6 @@ export const get_session_token_v3 = async () => {
   return data.accessToken
 }
 
-// The legacy client_credentials token endpoint (api.nfl.com/v1/reroute) was
-// retired upstream and now returns 404 (signals #4627, #113461/#113249). Every
-// NFL API surface this codebase consumes -- /v3/shield (players) and
-// /experience/v1 (games, gamedetails) -- accepts the session access token, so
-// getToken now delegates to the working session-token path. Commit 89bea137
-// swapped getPlayers' internal fallback but left these direct call sites
-// (import-players, import-players-nfl, import-nfl-games-nfl historical
-// backfill) hitting the dead endpoint; delegating here fixes the whole class.
-// If NFL restores a client_credentials reroute endpoint, reintroduce the
-// direct fetch here.
-export const getToken = async () => {
-  return get_session_token_v3()
-}
-
 export const getPlayers = async ({ year, token, ignore_cache = false }) => {
   const cache_key = `/nfl/players/${year}.json`
   if (!ignore_cache) {

@@ -219,7 +219,7 @@ const main = async () => {
       const start = argv.start || 1970
       const end = argv.end || 2002
       for (let year = start; year < end; year++) {
-        const token = await nfl.getToken()
+        const token = await nfl.get_session_token_v3()
 
         for (let week = 0; week < 5; week++) {
           await run({ year, week, seas_type: 'PRE', token, ignore_cache })

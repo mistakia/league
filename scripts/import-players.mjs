@@ -20,7 +20,7 @@ const run = async () => {
   const missing = []
   const nfl_config = await get_nfl_api_config()
   const api_url = nfl_config.api_url
-  const token = await nfl.getToken()
+  const token = await nfl.get_session_token_v3()
 
   log('fetching team ids')
   // get team ids
