@@ -169,6 +169,17 @@ Format identities (`league_scoring_formats.id`, `league_formats.id`) are opaque 
 - MockDate for time-dependent tests
 - Environment: `NODE_ENV=test`, timezone: `America/New_York`
 
+**Local test database requires Postgres >= 15.** `db/schema.postgres.sql` uses `NULLS NOT DISTINCT` (Postgres 15+); loading it against an older server fails in `test/global.mjs` with `syntax error at or near "NULLS"`. `config/config-test.json` connects to `127.0.0.1:5432`; `db/index.mjs` honors `LEAGUE_DB_HOST`/`LEAGUE_DB_PORT`/`LEAGUE_DB_USER`/`LEAGUE_DB_PASSWORD`/`LEAGUE_DB_DATABASE` overrides (note: the `yarn test` script blanks `LEAGUE_DB_HOST`/`LEAGUE_DB_PORT`, so to target a non-default port invoke mocha directly rather than through `yarn test`). If your local default Postgres is < 15, run a throwaway PG16 on another port:
+
+```
+docker run -d --name league-test-pg -e POSTGRES_USER=league_test -e POSTGRES_PASSWORD=league_test -e POSTGRES_DB=league_test -p 5433:5432 postgres:16
+# the schema GRANTs to roles that the official image does not create; add them once:
+docker exec league-test-pg psql -U league_test -d league_test -c "CREATE ROLE postgres SUPERUSER; CREATE ROLE league_user; CREATE ROLE league_readonly;"
+# then run mocha directly with the port override and the standard requires:
+LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=5433 TZ=America/New_York NODE_ENV=test TEST=all \
+  node_modules/.bin/mocha --exit --require test/setup-encryption-key.mjs --require test/global.mjs --reporter min test/<file>.spec.mjs
+```
+
 ### League Context
 
 Most operations occur within league context (`/leagues/:lid/`). Check user permissions for team operations using helper functions from `libs-server/verify-user-team.mjs` and related utilities.
