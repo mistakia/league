@@ -10,12 +10,13 @@ This document provides comprehensive documentation of the data views system, foc
 4. [Request Schema and API](#request-schema-and-api)
 5. [Core Functions and Processing](#core-functions-and-processing)
 6. [Table Grouping and Split System](#table-grouping-and-split-system)
-7. [Rate Type System](#rate-type-system)
-8. [Performance Optimization Strategies](#performance-optimization-strategies)
-9. [State Management and Data Flow](#state-management-and-data-flow)
-10. [Error Handling and Edge Cases](#error-handling-and-edge-cases)
-11. [Performance Improvement Opportunities](#performance-improvement-opportunities)
-12. [Related Documentation](#related-documentation)
+7. [Measure-First Column Contract](#measure-first-column-contract)
+8. [Rate Type System](#rate-type-system)
+9. [Performance Optimization Strategies](#performance-optimization-strategies)
+10. [State Management and Data Flow](#state-management-and-data-flow)
+11. [Error Handling and Edge Cases](#error-handling-and-edge-cases)
+12. [Performance Improvement Opportunities](#performance-improvement-opportunities)
+13. [Related Documentation](#related-documentation)
 
 ## System Overview
 
@@ -641,6 +642,37 @@ const sorted_grouped_by_splits = Object.entries(grouped_by_splits).sort(
 2. **Year-only tables second**: Set up year-based joins
 3. **Year+week tables last**: Leverage previously established joins
 
+## Measure-First Column Contract
+
+The two single-aggregate from-plays factories (`player-stats-from-plays-column-definitions.mjs` and `team-stats-from-plays-column-definitions.mjs`) declare each rate-capable column's per-row measure once, and `libs-server/data-views/measure-contract.mjs` (`derive_measure`) derives every downstream artifact from that single source of truth — the season-total render, the numerator measure expression the rate engine re-materializes, the period-CTE aggregate selector, the advertised `supports_output` periods, and the rounding. This replaced an earlier heuristic that parsed the season-render string to recover the measure and silently dropped rate types for `ROUND(SUM(...))`, `AVG(...)`, and `COUNT(DISTINCT ...)` shapes.
+
+### The `measure` declaration
+
+```javascript
+measure: { kind: 'additive' | 'distinct_count', expr: '<sql>', decimals: <int|null> }
+```
+
+- `kind` is a closed set of two snake_case literals.
+- `expr` is the per-row SQL fragment, scanned against `nfl_plays` in the numerator CTE (qualify ambiguous columns, e.g. `nfl_plays.esbid`, because that CTE joins `nfl_games`).
+- `decimals` defaults `null`.
+
+### Kind → behavior
+
+| kind             | season render                                  | numerator aggregate        | rate render                  |
+| ---------------- | ---------------------------------------------- | -------------------------- | ---------------------------- |
+| `additive`       | `SUM(expr)`, or `ROUND(SUM(expr), decimals)`   | `SUM(expr)`                | rounds iff `decimals` set    |
+| `distinct_count` | `COUNT(DISTINCT expr)` (always bare integer)   | `COUNT(DISTINCT expr)`     | `ROUND(.../games, decimals)`, decimals default 2 |
+
+`decimals` semantics: `null` wraps neither season nor rate in `ROUND` (preserving exact parity for bare-`SUM` integer columns and today's unrounded rate emit). When set it rounds the additive season render and both kinds' rate render. The `aggregate` selector (`'sum'` | `'count_distinct'`) is spread onto the column-def and read by `build-period-cte.mjs` so a `count_distinct` numerator emits `COUNT(DISTINCT ...)` while co-locating in the same batched period CTE as `sum` measures.
+
+### Carve-outs
+
+Averages (`AVG(...)`, `CAST(ROUND(AVG(...)))`, `AVG(x)*100`), compound ratios (`CASE WHEN SUM>0 THEN ROUND(100.0*SUM/...)`), and `has_numerator_denominator` year-offset ratios are NOT routed through the deriver. They keep their raw `with_select_string` and declare `supported_rate_types: []` (an average has no meaningful per-period rate). The 8 `create_team_share_stat` columns are a separate factory, non-rate by construction.
+
+### Fail-fast invariant
+
+Scoped inside the two migrated factories: a column that advertises any rate type MUST declare a `measure`; a column left on a raw `with_select_string` MUST pass `supported_rate_types: []`. Violations throw at module load, making the silent-rate-drop regression class structurally impossible. The `role_attributions` / explicit-`supports_output` factories (defensive, fantasy-points) never call `derive_measure` and are exempt by construction — a global registry sweep would wrongly throw for them.
+
 ## Rate Type System
 
 ### Plugin Architecture for Performance
@@ -1085,16 +1117,9 @@ const process_cache_info = ({ cache_info, data_view_metadata }) => {
 }
 ```
 
-#### `rate_type_column_mapping` - CTE Reference Tracking
+#### `rate_type_column_mapping` (removed)
 
-```javascript
-const rate_type_column_mapping = {
-  player_fantasy_points_from_plays_0: 'rate_type_per_game_2024_REG',
-  player_rushing_yards_from_plays_1: 'rate_type_per_play_2023_2024'
-}
-```
-
-**Key Generation and Reuse**: `${column_id}_${column_index}` pattern enables precise CTE mapping while supporting multiple instances of the same column.
+This mapping and its `get_rate_type_sql` emitter were the pre-output-aggregator rate-type dispatch. They became permanently dead once `normalize_output_param` began rewriting `params.rate_type` into `params.output` before any consumer ran (the mapping stayed `{}`, so every read yielded `undefined`). The declaration, its threading through `select-string.mjs` / `where-string.mjs` / the from-plays factories, and `get_rate_type_sql` were retired in the measure-first refactor. Rate output now flows exclusively through the output aggregator (`output-aggregator-registry.mjs` → the `rate-type/` plugins and `output-aggregator/`).
 
 ## Error Handling and Edge Cases
 

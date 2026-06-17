@@ -5,6 +5,8 @@ This directory contains the CTE builders that back data-view columns. Builders f
 - **Rate-type denominator CTEs** -- `rate-type/` subdirectory. One CTE per `rate_type` grain. See `rate-type/ABOUT.md`.
 - **Stat-column CTEs** -- `add-player-stats-play-by-play-with-statement.mjs`, `add-team-stats-play-by-play-with-statement.mjs`, `add-defensive-play-by-play-with-statement.mjs`. One CTE per `fields-from-plays` column group. Also `player-fantasy-points-from-plays-column-definitions.mjs` and the `create_team_share_stat` builder in `player-stats-from-plays-column-definitions.mjs`, which register their own stat CTEs.
 
+The single-aggregate from-plays factories (player-stats, team-stats) declare each rate-capable column's per-row measure via `measure: { kind, expr, decimals }`; `measure-contract.mjs` (`derive_measure`) converts it into the season render, numerator measure expression, period-CTE `aggregate` selector (`sum` | `count_distinct`), `supports_output`, and rounding, and fails loud at module load when a column advertises rate types without a measure. See `docs/data-views-system.md` "Measure-First Column Contract". (This replaced the `strip-outer-sum.mjs` measure-inference heuristic, now removed.)
+
 ## Invariants for Authors
 
 ### Year Pushdown Contract
