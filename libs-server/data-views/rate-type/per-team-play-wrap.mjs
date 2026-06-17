@@ -34,7 +34,6 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { build_period_cte } from '#libs-server/data-views/output-aggregator/build-period-cte.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
-import { decompose_nfl_weeks } from '#libs-shared/nfl-week-identifier.mjs'
 import {
   resolve_effective_years,
   extract_matchup_opponent_type
