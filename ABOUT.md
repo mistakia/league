@@ -25,12 +25,38 @@ observations:
     [testing] 2026-06-17 Local test suite needs Postgres >= 15 (schema uses NULLS NOT DISTINCT); the
     official postgres image also lacks the postgres/league_user/league_readonly roles the schema
     GRANTs to. Recipe documented in repo CLAUDE.md Testing section.
+  - >-
+    [bug] player_adp and its sibling columns (adp_min/max/stddev/sample_size/percent_drafted)
+    silently returned base-year ADP for any year_offset after the adp_type -> adp_format CTE-attach
+    migration, because player_adp_source.attach() filtered the CTE to params.year and correlated the
+    join to the unshifted year_reference; the anchored range-offset case additionally emitted
+    invalid SQL referencing an unregistered CTE.
+  - >-
+    [fix] Commit a45281ab threads year_offset through the player_adp CTE-attach bridge by
+    offset-expanding the CTE year filter (new offset_expanded_years helper), correlating the join
+    through the offset via the existing emit_year_match primitive, decoupling CTE registration from
+    join emission via register_ctes (so range-offset-with-no-where still materializes the CTE), and
+    adding a declarative range_offset_aggregate per column (adp/percent_drafted AVG, min_pick MIN,
+    max_pick MAX, sample_size SUM); verified against production (base-2024 +1 returns 2025 ADP,
+    range [1,2] returns AVG not SUM).
+  - >-
+    [architecture] year_offset handling in data-views is duplicated across 8+ emitters
+    (is_year_offset_range reimplemented inline, resolve_year_offset_range used in only 2 sites) with
+    select-string trusting an un-asserted "CTE pre-filtered itself" contract; the long-term shape is
+    one shared offset-correlation primitive consumed by every year-grained source plus a declarative
+    per-column range aggregate, with the silent-loss-prone empty-year_predicate branch removed.
+  - >-
+    [followup] The same year_offset-drop bug class affects other CTE-attach year-grained sources not
+    yet fixed -- player_projected_* and keeptradecut (range offset) silently drop the offset, and
+    dozens of rate/rank/grade columns (PFF grades, rankings, nfl_team_seasonlogs rate stats, cpoe,
+    time_to_throw) are summed across the offset window instead of averaged; each needs migration
+    onto the offset primitive and a declared range_offset_aggregate, gated by result-equivalence.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-17T04:53:15.847Z'
+updated_at: '2026-06-17T05:57:06.141Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
