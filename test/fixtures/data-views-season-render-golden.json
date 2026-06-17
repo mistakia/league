@@ -1,0 +1,381 @@
+{
+  "player_pass_yards_from_plays": [
+    "SUM(pass_yds) as pass_yds_from_plays"
+  ],
+  "player_pass_attempts_from_plays": [
+    "SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) as pass_atts_from_plays"
+  ],
+  "player_pass_touchdowns_from_plays": [
+    "SUM(CASE WHEN td = true THEN 1 ELSE 0 END) as pass_tds_from_plays"
+  ],
+  "player_pass_interceptions_from_plays": [
+    "SUM(CASE WHEN int = true THEN 1 ELSE 0 END) as pass_ints_from_plays"
+  ],
+  "player_pass_first_downs_from_plays": [
+    "SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) as pass_first_downs_from_plays"
+  ],
+  "player_dropped_passing_yards_from_plays": [
+    "SUM(CASE WHEN dropped_pass = true THEN dot ELSE 0 END) as drop_pass_yds_from_plays"
+  ],
+  "player_pass_completion_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END as pass_comp_pct_from_plays"
+  ],
+  "player_completion_percentage_over_expected_from_plays": [
+    "AVG(cpoe) as pass_comp_pct_over_expected_from_plays"
+  ],
+  "player_expected_completion_percentage_from_plays": [
+    "AVG(cp) * 100 as expected_pass_comp_pct_from_plays"
+  ],
+  "player_pass_touchdown_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN td = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN td = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END as pass_td_pct_from_plays"
+  ],
+  "player_pass_interception_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN int = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN int = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END as pass_int_pct_from_plays"
+  ],
+  "player_pass_interception_worthy_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN int_worthy = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN int_worthy = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END as pass_int_worthy_pct_from_plays"
+  ],
+  "player_pass_yards_after_catch_from_plays": [
+    "SUM(yards_after_catch) as pass_yds_after_catch_from_plays"
+  ],
+  "player_pass_yards_after_catch_per_completion_from_plays": [
+    "CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_catch) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as pass_yds_after_catch_per_comp_from_plays"
+  ],
+  "player_pass_yards_per_pass_attempt_from_plays": [
+    "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(pass_yds) / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as pass_yds_per_att_from_plays"
+  ],
+  "player_pass_depth_per_pass_attempt_from_plays": [
+    "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot) / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as pass_depth_per_att_from_plays"
+  ],
+  "player_pass_air_yards_from_plays": [
+    "SUM(dot) as pass_air_yds_from_plays"
+  ],
+  "player_completed_air_yards_per_completion_from_plays": [
+    "CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as comp_air_yds_per_comp_from_plays"
+  ],
+  "player_passing_air_conversion_ratio_from_plays": [
+    "CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN dot ELSE 0 END) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) ELSE 0 END as pass_air_conv_ratio_from_plays"
+  ],
+  "player_sacked_from_plays": [
+    "SUM(CASE WHEN sk = true THEN 1 ELSE 0 END) as sacked_from_plays"
+  ],
+  "player_sacked_yards_from_plays": [
+    "SUM(CASE WHEN sk = true THEN yds_gained ELSE 0 END) as sacked_yds_from_plays"
+  ],
+  "player_sacked_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN sk = true THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as sacked_pct_from_plays"
+  ],
+  "player_quarterback_hits_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hit = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as qb_hit_pct_from_plays"
+  ],
+  "player_quarterback_pressures_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_pressure = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as qb_press_pct_from_plays"
+  ],
+  "player_quarterback_hurries_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hurry = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as qb_hurry_pct_from_plays"
+  ],
+  "player_pass_net_yards_per_attempt_from_plays": [
+    "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND((SUM(pass_yds) - SUM(CASE WHEN sk = true THEN yds_gained ELSE 0 END))::decimal / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as pass_net_yds_per_att_from_plays"
+  ],
+  "player_rush_yards_from_plays": [
+    "SUM(rush_yds) as rush_yds_from_plays"
+  ],
+  "player_rush_touchdowns_from_plays": [
+    "SUM(CASE WHEN td = true THEN 1 ELSE 0 END) as rush_tds_from_plays"
+  ],
+  "player_rush_yds_per_attempt_from_plays": [
+    "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(rush_yds)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rush_yds_per_att_from_plays"
+  ],
+  "player_rush_attempts_from_plays": [
+    "COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays"
+  ],
+  "player_average_box_defenders_per_rush_attempt_from_plays": [
+    "CAST(ROUND(AVG(CASE WHEN bc_pid IS NOT NULL THEN box_defenders ELSE NULL END)::decimal, 2) AS decimal) as average_box_defenders_per_rush_att_from_plays"
+  ],
+  "player_rush_first_downs_from_plays": [
+    "SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) as rush_first_downs_from_plays"
+  ],
+  "player_positive_rush_attempts_from_plays": [
+    "SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END) as positive_rush_atts_from_plays"
+  ],
+  "player_rush_yards_after_contact_from_plays": [
+    "SUM(yards_after_any_contact) as rush_yds_after_contact_from_plays"
+  ],
+  "player_rush_yards_after_contact_per_attempt_from_plays": [
+    "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_any_contact)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rush_yds_after_contact_per_att_from_plays"
+  ],
+  "player_rush_first_down_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as rush_first_down_pct_from_plays"
+  ],
+  "player_weighted_opportunity_from_plays": [
+    "ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays"
+  ],
+  "player_high_value_touches_from_plays": [
+    "SUM(CASE WHEN (bc_pid IS NOT NULL AND ydl_100 <= 10) OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END) as high_value_touches_from_plays"
+  ],
+  "player_touches_from_plays": [
+    "SUM(CASE WHEN bc_pid IS NOT NULL OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END) as touches_from_plays"
+  ],
+  "player_opportunities_from_plays": [
+    "SUM(CASE WHEN bc_pid IS NOT NULL OR trg_pid IS NOT NULL OR (psr_pid IS NOT NULL AND (sk IS NULL OR sk = false)) THEN 1 ELSE 0 END) as opportunities_from_plays"
+  ],
+  "player_rush_attempts_share_from_plays": null,
+  "player_rush_yards_share_from_plays": null,
+  "player_rush_first_down_share_from_plays": null,
+  "player_opportunity_share_from_plays": null,
+  "player_fumbles_from_plays": [
+    "SUM(CASE WHEN player_fuml_pid IS NOT NULL THEN 1 ELSE 0 END) as fumbles_from_plays"
+  ],
+  "player_fumbles_lost_from_plays": [
+    "SUM(CASE WHEN player_fuml_pid IS NOT NULL AND fuml = true THEN 1 ELSE 0 END) as fumbles_lost_from_plays"
+  ],
+  "player_fumble_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as fumble_pct_from_plays"
+  ],
+  "player_positive_rush_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as positive_rush_pct_from_plays"
+  ],
+  "player_successful_rush_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as succ_rush_pct_from_plays"
+  ],
+  "player_broken_tackles_from_plays": [
+    "SUM(mbt) as broken_tackles_from_plays"
+  ],
+  "player_broken_tackles_per_rush_attempt_from_plays": [
+    "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(mbt)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as broken_tackles_per_rush_att_from_plays"
+  ],
+  "player_receptions_from_plays": [
+    "SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) as recs_from_plays"
+  ],
+  "player_receiving_yards_from_plays": [
+    "SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays"
+  ],
+  "player_receiving_touchdowns_from_plays": [
+    "SUM(CASE WHEN comp = true AND td = true THEN 1 ELSE 0 END) as rec_tds_from_plays"
+  ],
+  "player_receiving_or_rushing_touchdowns_from_plays": [
+    "SUM(CASE WHEN td = true THEN 1 ELSE 0 END) as rec_or_rush_tds_from_plays"
+  ],
+  "player_drops_from_plays": [
+    "SUM(CASE WHEN dropped_pass = true THEN 1 ELSE 0 END) as drops_from_plays"
+  ],
+  "player_dropped_receiving_yards_from_plays": [
+    "SUM(CASE WHEN dropped_pass = true THEN dot ELSE 0 END) as drop_rec_yds_from_plays"
+  ],
+  "player_targets_from_plays": [
+    "SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays"
+  ],
+  "player_deep_targets_from_plays": [
+    "SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) as deep_trg_from_plays"
+  ],
+  "player_deep_targets_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as deep_trg_pct_from_plays"
+  ],
+  "player_air_yards_per_target_from_plays": [
+    "CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as air_yds_per_trg_from_plays"
+  ],
+  "player_air_yards_from_plays": [
+    "SUM(dot) as air_yds_from_plays"
+  ],
+  "player_receiving_first_down_from_plays": [
+    "SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) as recv_first_down_from_plays"
+  ],
+  "player_receiving_first_down_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as recv_first_down_pct_from_plays"
+  ],
+  "player_air_yards_share_from_plays": null,
+  "player_target_share_from_plays": null,
+  "player_weighted_opportunity_rating_from_plays": null,
+  "player_receiving_first_down_share_from_plays": null,
+  "player_receiving_yards_after_catch_from_plays": [
+    "SUM(CASE WHEN comp = true THEN yards_after_catch ELSE 0 END) as rec_yds_after_catch_from_plays"
+  ],
+  "player_receiver_air_conversion_ratio_from_plays": [
+    "CASE WHEN SUM(dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) / NULLIF(SUM(dot), 0), 4) ELSE 0 END as rec_air_conv_ratio_from_plays"
+  ],
+  "player_receiving_yards_per_reception_from_plays": [
+    "CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_rec_from_plays"
+  ],
+  "player_receiving_yards_per_target_from_plays": [
+    "CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_trg_from_plays"
+  ],
+  "player_receiving_yards_after_catch_per_reception_from_plays": [
+    "CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN comp = true THEN yards_after_catch ELSE 0 END)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_after_catch_per_rec_from_plays"
+  ],
+  "player_yards_created_from_plays": [
+    "SUM(yards_created) as yards_created_from_plays"
+  ],
+  "player_yards_blocked_from_plays": [
+    "SUM(yards_blocked) as yards_blocked_from_plays"
+  ],
+  "player_successful_passing_play_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END as successful_passing_play_pct_from_plays"
+  ],
+  "player_successful_rushing_and_receiving_play_percentage_from_plays": [
+    "CASE WHEN SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN bc_pid IS NOT NULL OR trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END as successful_rushing_and_receiving_play_pct_from_plays"
+  ],
+  "player_total_expected_points_added_from_plays": [
+    "SUM(epa) as total_expected_points_added_from_plays"
+  ],
+  "player_passing_expected_points_added_from_plays": [
+    "SUM(epa) as passing_expected_points_added_from_plays"
+  ],
+  "player_rushing_and_receiving_expected_points_added_from_plays": [
+    "SUM(epa) as rushing_and_receiving_expected_points_added_from_plays"
+  ],
+  "player_quarterback_epa_from_plays": [
+    "SUM(qb_epa) as quarterback_epa_from_plays"
+  ],
+  "player_quarterback_pressures_from_plays": [
+    "SUM(CASE WHEN qb_pressure_tracking = true OR qb_pressure = true THEN 1 ELSE 0 END) as quarterback_pressures_from_plays"
+  ],
+  "player_time_to_throw_from_plays": [
+    "AVG(CASE WHEN time_to_throw IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw ELSE NULL END) as time_to_throw_from_plays"
+  ],
+  "team_pass_yards_from_plays": [
+    "SUM(pass_yds) AS team_pass_yds_from_plays"
+  ],
+  "player_team_pass_yards_from_plays": [
+    "SUM(pass_yds) AS team_pass_yds_from_plays"
+  ],
+  "team_pass_rate_over_expected_from_plays": [
+    "AVG(pass_oe) AS team_pass_rate_over_expected_from_plays"
+  ],
+  "player_team_pass_rate_over_expected_from_plays": [
+    "AVG(pass_oe) AS team_pass_rate_over_expected_from_plays"
+  ],
+  "team_completion_percentage_over_expected_from_plays": [
+    "AVG(cpoe) AS team_completion_percentage_over_expected_from_plays"
+  ],
+  "player_team_completion_percentage_over_expected_from_plays": [
+    "AVG(cpoe) AS team_completion_percentage_over_expected_from_plays"
+  ],
+  "team_pass_attempts_from_plays": [
+    "SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) AS team_pass_att_from_plays"
+  ],
+  "player_team_pass_attempts_from_plays": [
+    "SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) AS team_pass_att_from_plays"
+  ],
+  "team_pass_completions_from_plays": [
+    "SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) AS team_pass_comp_from_plays"
+  ],
+  "player_team_pass_completions_from_plays": [
+    "SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) AS team_pass_comp_from_plays"
+  ],
+  "team_pass_touchdowns_from_plays": [
+    "SUM(CASE WHEN pass_td = true THEN 1 ELSE 0 END) AS team_pass_td_from_plays"
+  ],
+  "player_team_pass_touchdowns_from_plays": [
+    "SUM(CASE WHEN pass_td = true THEN 1 ELSE 0 END) AS team_pass_td_from_plays"
+  ],
+  "team_pass_air_yards_from_plays": [
+    "SUM(dot) AS team_pass_air_yds_from_plays"
+  ],
+  "player_team_pass_air_yards_from_plays": [
+    "SUM(dot) AS team_pass_air_yds_from_plays"
+  ],
+  "team_yards_after_catch_from_plays": [
+    "SUM(yards_after_catch) AS team_yards_after_catch_from_plays"
+  ],
+  "player_team_yards_after_catch_from_plays": [
+    "SUM(yards_after_catch) AS team_yards_after_catch_from_plays"
+  ],
+  "team_rush_yards_from_plays": [
+    "SUM(rush_yds) AS team_rush_yds_from_plays"
+  ],
+  "player_team_rush_yards_from_plays": [
+    "SUM(rush_yds) AS team_rush_yds_from_plays"
+  ],
+  "team_rush_attempts_from_plays": [
+    "COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) AS team_rush_att_from_plays"
+  ],
+  "player_team_rush_attempts_from_plays": [
+    "COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) AS team_rush_att_from_plays"
+  ],
+  "team_rush_touchdowns_from_plays": [
+    "SUM(CASE WHEN rush_td = true THEN 1 ELSE 0 END) AS team_rush_td_from_plays"
+  ],
+  "player_team_rush_touchdowns_from_plays": [
+    "SUM(CASE WHEN rush_td = true THEN 1 ELSE 0 END) AS team_rush_td_from_plays"
+  ],
+  "team_expected_points_added_from_plays": [
+    "SUM(epa) AS team_ep_added_from_plays"
+  ],
+  "player_team_expected_points_added_from_plays": [
+    "SUM(epa) AS team_ep_added_from_plays"
+  ],
+  "team_win_percentage_added_from_plays": [
+    "SUM(wpa) AS team_wp_added_from_plays"
+  ],
+  "player_team_win_percentage_added_from_plays": [
+    "SUM(wpa) AS team_wp_added_from_plays"
+  ],
+  "team_success_rate_from_plays": [
+    "SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator",
+    "COUNT(*) as team_success_rate_from_plays_denominator"
+  ],
+  "player_team_success_rate_from_plays": [
+    "SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator",
+    "COUNT(*) as team_success_rate_from_plays_denominator"
+  ],
+  "team_expected_points_success_rate_from_plays": [
+    "SUM(CASE WHEN ep_succ = true THEN 1 ELSE 0 END) as team_expected_points_success_rate_from_plays_numerator",
+    "COUNT(*) as team_expected_points_success_rate_from_plays_denominator"
+  ],
+  "player_team_expected_points_success_rate_from_plays": [
+    "SUM(CASE WHEN ep_succ = true THEN 1 ELSE 0 END) as team_expected_points_success_rate_from_plays_numerator",
+    "COUNT(*) as team_expected_points_success_rate_from_plays_denominator"
+  ],
+  "team_explosive_play_rate_from_plays": [
+    "SUM(CASE WHEN pass_yds >= 20 OR rush_yds >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator",
+    "COUNT(*) as team_explosive_play_rate_from_plays_denominator"
+  ],
+  "player_team_explosive_play_rate_from_plays": [
+    "SUM(CASE WHEN pass_yds >= 20 OR rush_yds >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator",
+    "COUNT(*) as team_explosive_play_rate_from_plays_denominator"
+  ],
+  "team_play_count_from_plays": [
+    "COUNT(*) AS team_play_count_from_plays"
+  ],
+  "player_team_play_count_from_plays": [
+    "COUNT(*) AS team_play_count_from_plays"
+  ],
+  "team_series_count_from_plays": [
+    "COUNT(DISTINCT CONCAT(esbid, '_', series_seq)) AS team_series_count_from_plays"
+  ],
+  "player_team_series_count_from_plays": [
+    "COUNT(DISTINCT CONCAT(esbid, '_', series_seq)) AS team_series_count_from_plays"
+  ],
+  "team_drive_count_from_plays": [
+    "COUNT(DISTINCT CONCAT(esbid, '_', drive_seq)) AS team_drive_count_from_plays"
+  ],
+  "player_team_drive_count_from_plays": [
+    "COUNT(DISTINCT CONCAT(esbid, '_', drive_seq)) AS team_drive_count_from_plays"
+  ],
+  "team_offensive_play_count_from_plays": [
+    "COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END) AS team_offensive_play_count_from_plays"
+  ],
+  "player_team_offensive_play_count_from_plays": [
+    "COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END) AS team_offensive_play_count_from_plays"
+  ],
+  "team_yards_created_from_plays": [
+    "SUM(yards_created) AS team_yards_created_from_plays"
+  ],
+  "player_team_yards_created_from_plays": [
+    "SUM(yards_created) AS team_yards_created_from_plays"
+  ],
+  "team_yards_blocked_from_plays": [
+    "SUM(yards_blocked) AS team_yards_blocked_from_plays"
+  ],
+  "player_team_yards_blocked_from_plays": [
+    "SUM(yards_blocked) AS team_yards_blocked_from_plays"
+  ],
+  "team_series_conversion_rate_from_plays": [
+    "COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator",
+    "COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator"
+  ],
+  "player_team_series_conversion_rate_from_plays": [
+    "COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator",
+    "COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator"
+  ]
+}
