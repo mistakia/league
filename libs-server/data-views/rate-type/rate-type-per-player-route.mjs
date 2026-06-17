@@ -1,4 +1,8 @@
 import db from '#db'
+import {
+  resolve_year_offset_range,
+  emit_year_match
+} from '#libs-server/data-views/param-utils.mjs'
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
@@ -125,39 +129,25 @@ export const join_per_player_route_cte = ({
   group_by = null,
   data_view_options = {}
 }) => {
-  const year_offset = params.year_offset
-  const has_year_offset_range =
-    year_offset &&
-    Array.isArray(year_offset) &&
-    year_offset.length > 1 &&
-    year_offset[0] !== year_offset[1]
-  const has_single_year_offset =
-    year_offset &&
-    ((Array.isArray(year_offset) &&
-      (year_offset.length === 1 || year_offset[0] === year_offset[1])) ||
-      typeof year_offset === 'number')
-
   players_query.leftJoin(rate_type_table_name, function () {
     this.on(`${rate_type_table_name}.gsis_id`, 'player.gsisid')
 
     if (splits.includes('year')) {
-      if (has_year_offset_range) {
-        const min_offset = Math.min(...year_offset)
-        const max_offset = Math.max(...year_offset)
-        this.on(
-          db.raw(
-            `${rate_type_table_name}.year BETWEEN ${data_view_options.year_reference} + ? AND ${data_view_options.year_reference} + ?`,
-            [min_offset, max_offset]
-          )
-        )
-      } else if (has_single_year_offset) {
-        const offset = Array.isArray(year_offset) ? year_offset[0] : year_offset
-        this.on(
-          db.raw(
-            `${rate_type_table_name}.year = ${data_view_options.year_reference} + ?`,
-            [offset]
-          )
-        )
+      const offset_range = resolve_year_offset_range(params)
+      if (offset_range) {
+        // Correlate the rate-type table year to the base-year anchor THROUGH
+        // the offset via the shared primitive (single `= ref+k`, range
+        // BETWEEN) -- replaces the inline has_year_offset_range /
+        // has_single_year_offset reimplementation.
+        emit_year_match({
+          builder: this,
+          db,
+          year_reference: data_view_options.year_reference,
+          source: {},
+          key_columns: { year: 'year' },
+          params,
+          ref: rate_type_table_name
+        })
       } else {
         const single_year_param_set =
           params.year &&
