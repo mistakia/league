@@ -87,7 +87,7 @@
     "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(rush_yds)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rush_yds_per_att_from_plays"
   ],
   "player_rush_attempts_from_plays": [
-    "COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays"
+    "SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) as rush_atts_from_plays"
   ],
   "player_average_box_defenders_per_rush_attempt_from_plays": [
     "CAST(ROUND(AVG(CASE WHEN bc_pid IS NOT NULL THEN box_defenders ELSE NULL END)::decimal, 2) AS decimal) as average_box_defenders_per_rush_att_from_plays"

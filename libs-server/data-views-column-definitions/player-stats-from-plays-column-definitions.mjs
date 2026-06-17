@@ -9,10 +9,7 @@ import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/ge
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
-import {
-  strip_outer_sum,
-  derive_periods_from_rate_types
-} from '#libs-server/data-views/strip-outer-sum.mjs'
+import { derive_measure } from '#libs-server/data-views/measure-contract.mjs'
 
 // Every key apply_play_by_play_column_params_to_query may read from the
 // column's params. Declared as consumes_params_extra so the output-aggregator
@@ -64,7 +61,7 @@ const player_stat_from_plays = ({
   numerator_select,
   denominator_select,
   has_numerator_denominator = false,
-  supports_output = null,
+  measure = null,
   measure_expr = null,
   supported_rate_types = [
     'per_game',
@@ -89,38 +86,41 @@ const player_stat_from_plays = ({
     'per_player_rush_play'
   ]
 }) => {
-  const auto_inner = strip_outer_sum(with_select_string)
-  const can_auto_derive =
-    !has_numerator_denominator &&
-    auto_inner !== null &&
-    supported_rate_types &&
-    supported_rate_types.length > 0
-  const derived_supports_output = can_auto_derive
-    ? {
-        periods: [
-          'game',
-          'season',
-          ...derive_periods_from_rate_types(supported_rate_types)
-        ],
-        aggregations: ['rate', 'count']
-      }
+  // Measure-first contract: a rate-capable single-aggregate column declares an
+  // explicit `measure: { kind, expr, decimals }`; derive_measure produces the
+  // season render, numerator measure_expr, period aggregate, supports_output,
+  // and decimals rounding from it. Non-rate columns (averages, compound ratios,
+  // numerator/denominator ratios) declare no measure, keep their raw
+  // with_select_string, and pass supported_rate_types: [].
+  const derived = measure
+    ? derive_measure({ stat_name, measure, supported_rate_types })
     : null
-  // Auto-derive closure accepts `{ table_name }` to match the explicit-
-  // override contract used by hand-written measure_expr functions. Today
-  // every auto-derived column references stat columns that exist only on
-  // `nfl_plays` (no overlap with `nfl_games`), so the inner expression is
-  // unambiguous unprefixed -- but the contract is honored so future
-  // explicit overrides and auto-derived columns coexist symmetrically.
-  const derived_measure_expr = can_auto_derive
-    ? ({ table_name } = {}) => auto_inner
-    : null
-  const final_supports_output = supports_output || derived_supports_output
-  const final_measure_expr = measure_expr || derived_measure_expr
+
+  // Fail-fast invariant (scoped to this factory): a column advertising any rate
+  // type MUST declare a measure; a column left on a raw with_select_string MUST
+  // pass supported_rate_types: []. Throws at module load, making the
+  // silent-rate-drop class (e.g. time_to_throw) structurally impossible.
+  if (!derived && supported_rate_types && supported_rate_types.length > 0) {
+    throw new Error(
+      `player_stat_from_plays: '${stat_name}' advertises rate types but declares no measure -- declare measure: { kind, expr } or set supported_rate_types: []`
+    )
+  }
+
+  // The season render is the deriver's with_select for measure columns, else
+  // the raw string (carve-outs and numerator/denominator ratios).
+  const season_select = derived ? derived.with_select : with_select_string
+  const final_supports_output = derived ? derived.supports_output : null
+  // An explicit table-qualified measure_expr override (e.g.
+  // player_receiving_yards_from_plays) wins over the deriver's default.
+  const final_measure_expr =
+    measure_expr || (derived ? derived.measure_expr : null)
+  const final_aggregate = derived ? derived.aggregate : null
+  const final_decimals = derived ? derived.decimals : null
   // Mirror `add_player_stats_play_by_play_with_statement` filtering against
   // the aggregator-rate / aggregator-count CTE so cross-period totals match
-  // legacy parity. Auto-derived only -- columns with hand-supplied
+  // legacy parity. Measure columns only -- columns with hand-supplied
   // `apply_filters` (e.g. fantasy points) keep their own bypass.
-  const final_apply_filters = can_auto_derive
+  const final_apply_filters = derived
     ? ({ query, params }) => {
         const defaults = get_play_by_play_default_params({ params })
         const filtered_params = { ...defaults }
@@ -150,14 +150,14 @@ const player_stat_from_plays = ({
           `${denominator_select} as ${stat_name}_denominator`
         ]
       }
-      return [`${with_select_string} as ${stat_name}`]
+      return [`${season_select} as ${stat_name}`]
     },
     has_numerator_denominator,
     with_where: ({ params }) => {
       if (should_use_main_where({ params, has_numerator_denominator })) {
         return null // No where clause in the WITH statement when using year_offset range with numerator/denominator
       }
-      return with_select_string
+      return season_select
     },
     main_where: ({
       params,
@@ -221,6 +221,8 @@ const player_stat_from_plays = ({
       ? { supports_output: final_supports_output, measure_source: 'plays' }
       : {}),
     ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
+    ...(final_aggregate ? { aggregate: final_aggregate } : {}),
+    ...(final_decimals != null ? { decimals: final_decimals } : {}),
     ...(final_apply_filters
       ? {
           apply_filters: final_apply_filters,
@@ -399,12 +401,15 @@ const create_team_share_stat = ({
 export default {
   player_pass_yards_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(pass_yds)`,
+    measure: { kind: 'additive', expr: `pass_yds` },
     stat_name: 'pass_yds_from_plays'
   }),
   player_pass_attempts_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END`
+    },
     stat_name: 'pass_atts_from_plays'
   }),
   // TODO prevent from applying rate_type to this
@@ -416,22 +421,34 @@ export default {
   // }),
   player_pass_touchdowns_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN td = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN td = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'pass_tds_from_plays'
   }),
   player_pass_interceptions_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN int = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN int = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'pass_ints_from_plays'
   }),
   player_pass_first_downs_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN first_down = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'pass_first_downs_from_plays'
   }),
   player_dropped_passing_yards_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN dropped_pass = true THEN dot ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN dropped_pass = true THEN dot ELSE 0 END`
+    },
     stat_name: 'drop_pass_yds_from_plays'
   }),
   player_pass_completion_percentage_from_plays: player_stat_from_plays({
@@ -488,7 +505,7 @@ export default {
   ),
   player_pass_yards_after_catch_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(yards_after_catch)`,
+    measure: { kind: 'additive', expr: `yards_after_catch` },
     stat_name: 'pass_yds_after_catch_from_plays'
   }),
   player_pass_yards_after_catch_per_completion_from_plays:
@@ -521,7 +538,7 @@ export default {
   }),
   player_pass_air_yards_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(dot)`,
+    measure: { kind: 'additive', expr: `dot` },
     stat_name: 'pass_air_yds_from_plays'
   }),
   player_completed_air_yards_per_completion_from_plays: player_stat_from_plays({
@@ -546,12 +563,18 @@ export default {
   }),
   player_sacked_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN sk = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN sk = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'sacked_from_plays'
   }),
   player_sacked_yards_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN sk = true THEN yds_gained ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN sk = true THEN yds_gained ELSE 0 END`
+    },
     stat_name: 'sacked_yds_from_plays'
   }),
   player_sacked_percentage_from_plays: player_stat_from_plays({
@@ -605,12 +628,15 @@ export default {
 
   player_rush_yards_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `SUM(rush_yds)`,
+    measure: { kind: 'additive', expr: `rush_yds` },
     stat_name: 'rush_yds_from_plays'
   }),
   player_rush_touchdowns_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `SUM(CASE WHEN td = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN td = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'rush_tds_from_plays'
   }),
   player_rush_yds_per_attempt_from_plays: player_stat_from_plays({
@@ -624,7 +650,10 @@ export default {
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END`
+    },
     stat_name: 'rush_atts_from_plays'
   }),
   player_average_box_defenders_per_rush_attempt_from_plays:
@@ -639,17 +668,23 @@ export default {
     }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN first_down = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'rush_first_downs_from_plays'
   }),
   player_positive_rush_attempts_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END`
+    },
     stat_name: 'positive_rush_atts_from_plays'
   }),
   player_rush_yards_after_contact_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `SUM(yards_after_any_contact)`,
+    measure: { kind: 'additive', expr: `yards_after_any_contact` },
     stat_name: 'rush_yds_after_contact_from_plays'
   }),
   player_rush_yards_after_contact_per_attempt_from_plays:
@@ -673,23 +708,36 @@ export default {
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid'],
-    with_select_string: `ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END`,
+      decimals: 2
+    },
     stat_name: 'weighted_opportunity_from_plays'
   }),
   player_high_value_touches_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid'],
-    with_select_string: `SUM(CASE WHEN (bc_pid IS NOT NULL AND ydl_100 <= 10) OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN (bc_pid IS NOT NULL AND ydl_100 <= 10) OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END`
+    },
     stat_name: 'high_value_touches_from_plays'
   }),
   player_touches_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid'],
-    with_select_string: `SUM(CASE WHEN bc_pid IS NOT NULL OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN bc_pid IS NOT NULL OR (trg_pid IS NOT NULL AND comp = true) THEN 1 ELSE 0 END`
+    },
     stat_name: 'touches_from_plays'
   }),
 
   player_opportunities_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid', 'psr_pid'],
-    with_select_string: `SUM(CASE WHEN bc_pid IS NOT NULL OR trg_pid IS NOT NULL OR (psr_pid IS NOT NULL AND (sk IS NULL OR sk = false)) THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN bc_pid IS NOT NULL OR trg_pid IS NOT NULL OR (psr_pid IS NOT NULL AND (sk IS NULL OR sk = false)) THEN 1 ELSE 0 END`
+    },
     stat_name: 'opportunities_from_plays'
   }),
 
@@ -732,13 +780,19 @@ export default {
 
   player_fumbles_from_plays: player_stat_from_plays({
     pid_columns: ['player_fuml_pid'],
-    with_select_string: `SUM(CASE WHEN player_fuml_pid IS NOT NULL THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN player_fuml_pid IS NOT NULL THEN 1 ELSE 0 END`
+    },
     stat_name: 'fumbles_from_plays'
   }),
 
   player_fumbles_lost_from_plays: player_stat_from_plays({
     pid_columns: ['player_fuml_pid'],
-    with_select_string: `SUM(CASE WHEN player_fuml_pid IS NOT NULL AND fuml = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN player_fuml_pid IS NOT NULL AND fuml = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'fumbles_lost_from_plays'
   }),
 
@@ -771,7 +825,7 @@ export default {
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid'],
-    with_select_string: `SUM(mbt)`,
+    measure: { kind: 'additive', expr: `mbt` },
     stat_name: 'broken_tackles_from_plays'
   }),
   player_broken_tackles_per_rush_attempt_from_plays: player_stat_from_plays({
@@ -785,44 +839,68 @@ export default {
   }),
   player_receptions_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN comp = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'recs_from_plays'
   }),
   player_receiving_yards_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN comp = true THEN recv_yds ELSE 0 END`
+    },
     stat_name: 'rec_yds_from_plays',
     measure_expr: ({ table_name }) =>
       `CASE WHEN ${table_name}.comp = true THEN ${table_name}.recv_yds ELSE 0 END`
   }),
   player_receiving_touchdowns_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN comp = true AND td = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN comp = true AND td = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'rec_tds_from_plays'
   }),
   player_receiving_or_rushing_touchdowns_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid', 'bc_pid'],
-    with_select_string: `SUM(CASE WHEN td = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN td = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'rec_or_rush_tds_from_plays'
   }),
   player_drops_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN dropped_pass = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN dropped_pass = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'drops_from_plays'
   }),
   player_dropped_receiving_yards_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN dropped_pass = true THEN dot ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN dropped_pass = true THEN dot ELSE 0 END`
+    },
     stat_name: 'drop_rec_yds_from_plays'
   }),
   player_targets_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END`
+    },
     stat_name: 'trg_from_plays'
   }),
   player_deep_targets_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN dot >= 20 THEN 1 ELSE 0 END`
+    },
     stat_name: 'deep_trg_from_plays'
   }),
   player_deep_targets_percentage_from_plays: player_stat_from_plays({
@@ -845,12 +923,15 @@ export default {
   }),
   player_air_yards_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(dot)`,
+    measure: { kind: 'additive', expr: `dot` },
     stat_name: 'air_yds_from_plays'
   }),
   player_receiving_first_down_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN first_down = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'recv_first_down_from_plays'
   }),
   player_receiving_first_down_percentage_from_plays: player_stat_from_plays({
@@ -904,7 +985,10 @@ export default {
   }),
   player_receiving_yards_after_catch_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `SUM(CASE WHEN comp = true THEN yards_after_catch ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN comp = true THEN yards_after_catch ELSE 0 END`
+    },
     stat_name: 'rec_yds_after_catch_from_plays'
   }),
 
@@ -949,13 +1033,13 @@ export default {
 
   player_yards_created_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid'],
-    with_select_string: `SUM(yards_created)`,
+    measure: { kind: 'additive', expr: `yards_created` },
     stat_name: 'yards_created_from_plays'
   }),
 
   player_yards_blocked_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `SUM(yards_blocked)`,
+    measure: { kind: 'additive', expr: `yards_blocked` },
     stat_name: 'yards_blocked_from_plays'
   }),
   player_successful_passing_play_percentage_from_plays: player_stat_from_plays({
@@ -975,38 +1059,42 @@ export default {
 
   player_total_expected_points_added_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid', 'bc_pid', 'trg_pid'],
-    with_select_string: `SUM(epa)`,
+    measure: { kind: 'additive', expr: `epa` },
     stat_name: 'total_expected_points_added_from_plays'
   }),
 
   player_passing_expected_points_added_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(epa)`,
+    measure: { kind: 'additive', expr: `epa` },
     stat_name: 'passing_expected_points_added_from_plays'
   }),
 
   player_rushing_and_receiving_expected_points_added_from_plays:
     player_stat_from_plays({
       pid_columns: ['bc_pid', 'trg_pid'],
-      with_select_string: `SUM(epa)`,
+      measure: { kind: 'additive', expr: `epa` },
       stat_name: 'rushing_and_receiving_expected_points_added_from_plays'
     }),
 
   player_quarterback_epa_from_plays: player_stat_from_plays({
     pid_columns: ['qb_pid'],
-    with_select_string: `SUM(qb_epa)`,
+    measure: { kind: 'additive', expr: `qb_epa` },
     stat_name: 'quarterback_epa_from_plays'
   }),
 
   player_quarterback_pressures_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN qb_pressure_tracking = true OR qb_pressure = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN qb_pressure_tracking = true OR qb_pressure = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'quarterback_pressures_from_plays'
   }),
 
   player_time_to_throw_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
     with_select_string: `AVG(CASE WHEN time_to_throw IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw ELSE NULL END)`,
-    stat_name: 'time_to_throw_from_plays'
+    stat_name: 'time_to_throw_from_plays',
+    supported_rate_types: []
   })
 }
