@@ -431,6 +431,12 @@ export default {
       pid_columns: ['psr_pid'],
       with_select_string: `AVG(cpoe)`,
       stat_name: 'pass_comp_pct_over_expected_from_plays',
+      // CPOE is a per-dropback mean; a range year_offset must pool the summed
+      // cpoe over the summed qualifying-dropback count, not SUM the per-season
+      // averages.
+      numerator_select: `SUM(cpoe)`,
+      denominator_select: `SUM(CASE WHEN cpoe IS NOT NULL THEN 1 ELSE 0 END)`,
+      has_numerator_denominator: true,
       supported_rate_types: []
     }
   ),
@@ -914,7 +920,13 @@ export default {
     column_name: 'air_yds_share_from_plays',
     pid_columns: ['trg_pid'],
     with_select_string:
-      'CASE WHEN SUM(nfl_plays.dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0), 2) ELSE 0 END'
+      'CASE WHEN SUM(nfl_plays.dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0), 2) ELSE 0 END',
+    // A share is a ratio, not additive: a range year_offset must recombine the
+    // summed player air yards over the summed team air yards, not SUM the
+    // per-season share percentages. Mirrors player_target_share_from_plays.
+    numerator_select: `SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END)`,
+    denominator_select: `SUM(nfl_plays.dot)`,
+    has_numerator_denominator: true
   }),
   player_target_share_from_plays: create_team_share_stat({
     column_name: 'trg_share_from_plays',
@@ -1061,6 +1073,12 @@ export default {
     pid_columns: ['psr_pid'],
     with_select_string: `AVG(CASE WHEN time_to_throw IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw ELSE NULL END)`,
     stat_name: 'time_to_throw_from_plays',
+    // Time-to-throw is a per-dropback mean; a range year_offset must pool the
+    // summed time over the summed qualifying-dropback count, not SUM the
+    // per-season averages.
+    numerator_select: `SUM(CASE WHEN time_to_throw IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw ELSE 0 END)`,
+    denominator_select: `SUM(CASE WHEN time_to_throw IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
+    has_numerator_denominator: true,
     supported_rate_types: []
   })
 }
