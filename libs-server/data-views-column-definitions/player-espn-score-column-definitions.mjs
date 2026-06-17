@@ -41,9 +41,13 @@ const espn_score_source = {
   }
 }
 
+// ESPN open/catch/overall/yac scores are 0-100 route/separation grades, not
+// additive; a range year_offset must AVG across the window, not SUM (the
+// select-string default).
 const create_espn_score_columns = (column_name) => ({
   column_name,
   source: espn_score_source,
+  range_offset_aggregate: 'AVG',
   get_cache_info: get_cache_info_for_espn_score
 })
 

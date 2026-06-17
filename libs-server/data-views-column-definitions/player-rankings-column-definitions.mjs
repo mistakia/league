@@ -54,11 +54,26 @@ const player_season_rankings_source = {
   }
 }
 
+// Range year_offset reduction per column (select-string defaults to SUM).
+// Rankings are not additive: the consensus/overall/position ranks and the
+// dispersion (std) average across the window; min is the best (lowest) rank
+// seen in the window -> MIN, max the worst -> MAX. Summing ranks across years
+// is meaningless.
+const SEASON_RANKINGS_RANGE_OFFSET_AGGREGATE = {
+  avg: 'AVG',
+  overall_rank: 'AVG',
+  position_rank: 'AVG',
+  std: 'AVG',
+  min: 'MIN',
+  max: 'MAX'
+}
+
 const create_player_season_rankings_field = (field, select_as) => ({
   column_name: field,
   select_as: () => select_as,
   table_alias: generate_season_table_alias,
   source: player_season_rankings_source,
+  range_offset_aggregate: SEASON_RANKINGS_RANGE_OFFSET_AGGREGATE[field],
   granularity: ['player_year'],
   get_cache_info: get_season_cache_info
 })

@@ -66,11 +66,19 @@ const dvoa_team_source = {
   }
 }
 
+// DVOA, adjusted line yards, power success / stuffed rate, and second-level /
+// open-field yards are all per-carry rates or percentages, not additive; a
+// range year_offset must AVG across the window, not SUM (the select-string
+// default). (team_unit_dvoa spreads this but renders via a custom main_select,
+// so the correlated-aggregate path -- and this field -- never fires for it; the
+// range-offset handling for that column is tracked with the Stage 4 join-skip
+// fix.)
 const create_dvoa_team_unit_field = (column_name) => ({
   column_name,
   table_name: 'dvoa_team_unit_seasonlogs_index',
   table_alias: dvoa_team_unit_seasonlogs_table_alias,
   source: dvoa_team_source,
+  range_offset_aggregate: 'AVG',
   get_cache_info
 })
 

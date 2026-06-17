@@ -103,12 +103,81 @@ const get_cache_info = create_season_cache_info({
   }
 })
 
+// Range year_offset reduction per column (select-string defaults to SUM).
+// Rates, ratios, per-attempt/per-route/per-target/per-reception averages,
+// percentages, passer ratings, cpoe, EPA-per-unit, time-to averages, and
+// team-share fractions are NOT additive across a multi-year window -- they
+// must AVG. Longest rush/reception take the window MAX. Everything else (raw
+// yard/EPA/attempt/reception/drop/td counts) is additive and keeps the SUM
+// default.
+const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
+  'pass_rating',
+  'pass_yards_per_attempt',
+  'pass_comp_pct',
+  'expected_pass_comp',
+  'cpoe',
+  'pass_epa_per_db',
+  'avg_time_to_throw',
+  'avg_time_to_pressure',
+  'avg_time_to_sack',
+  'pressure_rate_against',
+  'blitz_rate',
+  'drop_rate',
+  'pass_yards_after_catch_pct',
+  'air_yards_per_pass_att',
+  'avg_target_separation',
+  'deep_pass_att_pct',
+  'tight_window_pct',
+  'play_action_pct',
+  'rush_epa_per_attempt',
+  'expected_rush_yards_per_attempt',
+  'rush_yards_over_expected_per_attempt',
+  'rush_yards_after_contact_per_attempt',
+  'rush_yards_before_contact_per_attempt',
+  'rush_success_rate',
+  'rush_avg_time_to_line_of_scrimmage',
+  'rush_attempts_inside_tackles_pct',
+  'rush_attempts_stacked_box_pct',
+  'rush_attempts_under_center_pct',
+  'rush_yards_per_attempt',
+  'rush_yards_10_plus_rate',
+  'receiving_passer_rating',
+  'catch_rate',
+  'expected_catch_rate',
+  'catch_rate_over_expected',
+  'recv_yards_per_reception',
+  'recv_yards_per_route',
+  'recv_epa_per_target',
+  'recv_epa_per_route',
+  'recv_drop_rate',
+  'recv_yards_after_catch_per_reception',
+  'recv_avg_target_separation',
+  'recv_air_yards_per_target',
+  'target_rate',
+  'avg_route_depth',
+  'team_target_share',
+  'team_air_yard_share',
+  'recv_deep_target_pct',
+  'recv_tight_window_pct',
+  'recv_yards_15_plus_rate'
+]
+
+const NFL_TEAM_SEASONLOGS_RANGE_OFFSET_AGGREGATE = {
+  ...Object.fromEntries(
+    NFL_TEAM_SEASONLOGS_AVG_COLUMNS.map((column_name) => [column_name, 'AVG'])
+  ),
+  longest_rush: 'MAX',
+  longest_reception: 'MAX'
+}
+
 const create_field_from_nfl_team_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `nfl_team_seasonlogs_${column_name}`,
   table_name: 'nfl_team_seasonlogs',
   table_alias: nfl_team_seasonlogs_table_alias,
   source: nfl_team_source,
+  range_offset_aggregate:
+    NFL_TEAM_SEASONLOGS_RANGE_OFFSET_AGGREGATE[column_name],
   get_cache_info
 })
 
@@ -118,6 +187,9 @@ const create_field_from_league_nfl_team_seasonlogs = (column_name) => ({
   table_name: 'league_nfl_team_seasonlogs',
   table_alias: league_nfl_team_seasonlogs_table_alias,
   source: league_nfl_team_source,
+  // rnk is a league rank (AVG across the window); pts is additive fantasy
+  // points (SUM default).
+  range_offset_aggregate: column_name === 'rnk' ? 'AVG' : undefined,
   get_cache_info
 })
 

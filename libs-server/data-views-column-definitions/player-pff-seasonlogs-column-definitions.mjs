@@ -71,11 +71,43 @@ const pff_player_source = {
   }
 }
 
+// Range year_offset reduction per column (select-string's correlated-aggregate
+// path defaults to SUM). PFF grades and positional ranks are 0-100 ratings /
+// ranks, not additive, so a multi-year window must AVG, not SUM. Physical
+// measurements (height/weight) likewise AVG. Snap counts, ranked/meets-minimum
+// flags accumulate (SUM, left as the default). String metadata columns
+// (position/grade_position/unit) are intentionally absent -- neither SUM nor AVG
+// is valid for text, so they keep the default (pre-existing) behavior.
+const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
+  offense: 'AVG',
+  defense: 'AVG',
+  special_teams: 'AVG',
+  pass: 'AVG',
+  run: 'AVG',
+  run_block: 'AVG',
+  pass_block: 'AVG',
+  pass_rush: 'AVG',
+  run_defense: 'AVG',
+  coverage: 'AVG',
+  receiving: 'AVG',
+  punter: 'AVG',
+  fg_ep_kicker: 'AVG',
+  kickoff_kicker: 'AVG',
+  speed: 'AVG',
+  offense_rank: 'AVG',
+  defense_rank: 'AVG',
+  special_teams_rank: 'AVG',
+  punter_rank: 'AVG',
+  height: 'AVG',
+  weight: 'AVG'
+}
+
 const create_field_from_pff_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `pff_${column_name}`,
   table_alias: pff_player_seasonlogs_table_alias,
   source: pff_player_source,
+  range_offset_aggregate: PFF_PLAYER_RANGE_OFFSET_AGGREGATE[column_name],
   column_params: {
     year,
     career_year
