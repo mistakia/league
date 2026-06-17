@@ -6,6 +6,37 @@ import {
   format_nfl_week_identifier,
   parse_nfl_week_identifier
 } from '#libs-shared/nfl-week-identifier.mjs'
+import { resolve_year_offset_range } from '#libs-server/data-views/param-utils.mjs'
+import { emit_year_match } from '#libs-server/data-views/source-attach/rules/player-family-to-player-year.mjs'
+
+// Expand a base nfl_week_id list by a year_offset range: for each base
+// identifier, shift its year component by every offset in [min..max] (keeping
+// seas_type + week), returning the sorted, deduped union. The game CTE must
+// contain the offset-shifted weeks so the offset-correlated join can read them;
+// without this it filtered to the base year and silently returned the base-year
+// opponent.
+const offset_expand_nfl_weeks = (nfl_week, offset_range) => {
+  if (!offset_range) return nfl_week
+  const [min_off, max_off] = offset_range
+  const out = new Set()
+  for (const id of nfl_week) {
+    const parsed = parse_nfl_week_identifier({ identifier: id })
+    if (!parsed) {
+      out.add(id)
+      continue
+    }
+    for (let off = min_off; off <= max_off; off++) {
+      out.add(
+        format_nfl_week_identifier({
+          year: parsed.year + off,
+          seas_type: parsed.seas_type,
+          week: parsed.week
+        })
+      )
+    }
+  }
+  return [...out].sort()
+}
 
 const get_params = ({ params = {} }) => {
   if (params.nfl_week_id) {
@@ -80,7 +111,9 @@ const game_source = {
     // column's intended audience is player-family cells.
     if (!query_context.player_year_teams_cte_name) return
 
-    const { nfl_week } = get_params({ params })
+    const { nfl_week: base_nfl_week } = get_params({ params })
+    const offset_range = resolve_year_offset_range(params)
+    const nfl_week = offset_expand_nfl_weeks(base_nfl_week, offset_range)
     const { players_query } = query_context
     const cte_name = table_alias
 
@@ -109,11 +142,24 @@ const game_source = {
 
     const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
     players_query[join_method](cte_name, function () {
-      this.on(`${cte_name}.nfl_team`, '=', 'player_year_teams.team').andOn(
-        `${cte_name}.year`,
-        '=',
-        'player_year_teams.year'
-      )
+      this.on(`${cte_name}.nfl_team`, '=', 'player_year_teams.team')
+      if (offset_range) {
+        // Correlate the offset-expanded game year to the player's base-year
+        // team mapping THROUGH the offset (single `= ref+k`, range BETWEEN):
+        // next-year opponent for the player's base-year team. Mirrors the
+        // player_adp offset-correlation primitive.
+        emit_year_match({
+          builder: this,
+          db,
+          year_reference: 'player_year_teams.year',
+          source: { year_default: () => null },
+          key_columns: { year: 'year' },
+          params,
+          ref: cte_name
+        })
+      } else {
+        this.andOn(`${cte_name}.year`, '=', 'player_year_teams.year')
+      }
     })
   }
 }
