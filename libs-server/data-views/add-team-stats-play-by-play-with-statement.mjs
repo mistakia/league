@@ -2,6 +2,7 @@ import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
 import { apply_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import {
@@ -87,13 +88,8 @@ export const add_team_stats_play_by_play_with_statement = ({
     // so the pre-aggregate sees the right data; otherwise the CTE is restricted
     // to params.year only and offset windows beyond the explicit year are empty.
     const year_offset = params.year_offset
-    const has_year_offset_range =
-      year_offset &&
-      Array.isArray(year_offset) &&
-      year_offset.length > 1 &&
-      year_offset[0] !== year_offset[1]
     if (
-      has_year_offset_range &&
+      is_year_offset_range(params) &&
       !splits.includes('year') &&
       effective_years.length
     ) {
