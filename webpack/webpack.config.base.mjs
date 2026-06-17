@@ -203,10 +203,6 @@ export default {
         __dirname,
         '../node_modules/@mui/x-date-pickers'
       ),
-      '@emotion/react': path.resolve(
-        __dirname,
-        '../node_modules/@emotion/react'
-      ),
       'highcharts-react-official': path.resolve(
         __dirname,
         '../node_modules/highcharts-react-official'
