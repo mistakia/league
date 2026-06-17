@@ -7,12 +7,30 @@ description: >-
 base_uri: user:repository/active/league/ABOUT.md
 created_at: '2026-05-13T16:05:02.284Z'
 entity_id: fad7fc09-ef9c-4eba-b891-f81f7a4159f9
+observations:
+  - >-
+    [bug] 2026-06-17 Data-views had a year_offset double-shift: resolve_nfl_week_params baked the
+    offset into an explicit nfl_week_id list AND resolve-view-scope.mjs re-applied it, shifting the
+    source window to base+2*offset while the outer join shifted by 1*offset, silently blanking the
+    bottom offset-cohort of base years (e.g. a 2020-rookie WR lost their 2021 next-year value).
+  - >-
+    [fix] 2026-06-17 Fixed the year_offset double-shift via a single-application invariant:
+    resolve_nfl_week_params sets year_offset_applied_to_nfl_week_id; resolve-view-scope.mjs
+    re-applies the offset only to lists lacking that marker. Shipped in commit d46440cc, deployed to
+    API.
+  - >-
+    [verification] 2026-06-17 Confirmed live on xo.football: Tee Higgins 2020 WR row now shows 15.58
+    in the year_offset+1 DraftKings PPG column (was blank); CeeDee Lamb populated too.
+  - >-
+    [testing] 2026-06-17 Local test suite needs Postgres >= 15 (schema uses NULLS NOT DISTINCT); the
+    official postgres image also lacks the postgres/league_user/league_readonly roles the schema
+    GRANTs to. Recipe documented in repo CLAUDE.md Testing section.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-05-13T16:05:02.284Z'
+updated_at: '2026-06-17T04:53:15.847Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
