@@ -1,0 +1,36 @@
+# Throwaway Postgres 16 for the local test suite. See CLAUDE.md "Testing".
+#
+# db/schema.postgres.sql uses NULLS NOT DISTINCT (Postgres 15+), so the test DB
+# must be >= 15. This service listens on host :5433 to avoid clashing with a
+# local default Postgres on :5432. The init script creates the roles the schema
+# GRANTs to (postgres/league_user/league_readonly), which the official image
+# does not provide.
+#
+# Usage:
+#   yarn test:db:up     # start (waits until healthy)
+#   yarn test:local     # start DB + run the full suite against :5433
+#   yarn test:db:down   # stop and remove the container (keeps the data volume)
+#
+# test/global.mjs drops all tables and reloads the schema on every run, so the
+# persisted volume only needs to carry the roles forward across restarts.
+services:
+  league-test-pg:
+    image: postgres:16
+    container_name: league-test-pg
+    environment:
+      POSTGRES_USER: league_test
+      POSTGRES_PASSWORD: league_test
+      POSTGRES_DB: league_test
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./db/test/init-roles.sql:/docker-entrypoint-initdb.d/10-init-roles.sql:ro
+      - league-test-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U league_test -d league_test']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  league-test-pgdata:
