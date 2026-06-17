@@ -63,8 +63,11 @@ export const compute_group_key = ({
 }
 
 // Within-batch measure alias. Stable across calls for the same
-// (column_id, rendered measure_expr) pair; two columns whose measure_expr
-// renders to the same SQL fragment dedupe to the same alias.
+// (column_id, rendered measure_expr, aggregate) triple; two columns whose
+// measure_expr renders to the same SQL fragment under the same aggregate
+// dedupe to the same alias. `aggregate` is part of the identity so a `sum` and
+// a `count_distinct` of the same (column_id, expr) never collide-and-dedup
+// into one CTE column (which would emit one and silently drop the other).
 export const compute_measure_alias = ({ column_def, params, identity_id }) => {
   if (!column_def.measure_expr) {
     // Role-union path uses its own materialization; this helper should not
@@ -78,7 +81,8 @@ export const compute_measure_alias = ({ column_def, params, identity_id }) => {
     params,
     identity_id
   })
-  return `m_${h12(JSON.stringify({ column_id: column_def.column_id, expr }))}`
+  const aggregate = column_def.aggregate ?? 'sum'
+  return `m_${h12(JSON.stringify({ column_id: column_def.column_id, expr, aggregate }))}`
 }
 
 const SOURCE_TABLES = {
@@ -104,6 +108,7 @@ export const register_measure = ({
   cte_name,
   measure_alias,
   measure_expr,
+  aggregate = 'sum',
   common
 }) => {
   if (!query_context.measure_batches) {
@@ -115,7 +120,10 @@ export const register_measure = ({
     query_context.measure_batches.set(group_key, batch)
   }
   if (!batch.measures.has(measure_alias)) {
-    batch.measures.set(measure_alias, measure_expr)
+    // VALUE carries both the rendered expression and its aggregate selector so
+    // flush can emit COUNT(DISTINCT ...) for distinct-count measures while
+    // SUM(...) measures co-locate in the same CTE.
+    batch.measures.set(measure_alias, { measure_expr, aggregate })
   }
   return { cte_name, measure_alias }
 }
@@ -129,10 +137,13 @@ export const flush = ({ query_context, build_batched_period_cte }) => {
     if (query_context.applied_output_ctes.has(batch.cte_name)) continue
     const sub = build_batched_period_cte({
       ...batch.common,
-      measures: [...batch.measures.entries()].map(([alias, expr]) => ({
-        alias,
-        measure_expr: expr
-      })),
+      measures: [...batch.measures.entries()].map(
+        ([alias, { measure_expr, aggregate }]) => ({
+          alias,
+          measure_expr,
+          aggregate
+        })
+      ),
       query_context
     })
     query_context.players_query.withMaterialized(batch.cte_name, sub)

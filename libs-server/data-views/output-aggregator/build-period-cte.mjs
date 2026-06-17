@@ -111,6 +111,7 @@ export const build_period_cte = ({
   query_context,
   identity_id,
   params = {},
+  aggregate = 'sum',
   force_year_grain = false
 }) => {
   if (measure_source === 'plays_role_union') {
@@ -129,7 +130,7 @@ export const build_period_cte = ({
     measure_predicate,
     pid_columns,
     apply_filters,
-    measures: [{ alias: 'measure_total', measure_expr }],
+    measures: [{ alias: 'measure_total', measure_expr, aggregate }],
     period,
     query_context,
     identity_id,
@@ -343,12 +344,20 @@ export const build_batched_period_cte = ({
     sub.select(db.raw(`${pid_expr} AS pid`))
   }
 
-  // One SUM(...) AS <alias> per measure. Single-measure callers pass one
+  // One aggregate(...) AS <alias> per measure. Single-measure callers pass one
   // entry with alias='measure_total' (legacy shape); batched callers pass
   // N entries with alias='m_<hash>' each. Identifiers in `alias` are
-  // generated from md5 hashes and are safe to embed via db.raw.
-  for (const { alias, measure_expr: m_expr } of measures) {
-    sub.select(db.raw(`SUM(${m_expr}) AS ${alias}`))
+  // generated from md5 hashes and are safe to embed via db.raw. `aggregate`
+  // selects the per-measure aggregate: 'count_distinct' emits COUNT(DISTINCT
+  // expr) (for distinct-count measures like series/drive counts); anything
+  // else (default 'sum') emits SUM(expr). A count_distinct and a sum measure
+  // can co-locate in one CTE -- both are valid aggregates over the same scan.
+  for (const { alias, measure_expr: m_expr, aggregate } of measures) {
+    if (aggregate === 'count_distinct') {
+      sub.select(db.raw(`COUNT(DISTINCT ${m_expr}) AS ${alias}`))
+    } else {
+      sub.select(db.raw(`SUM(${m_expr}) AS ${alias}`))
+    }
   }
   sub.groupByRaw(is_team ? `${source_table}.${source.team_col}` : pid_expr)
   if (!is_aggregate) sub.groupByRaw(period_key)
@@ -473,6 +482,7 @@ export const add_period_cte = async ({
       cte_name,
       measure_alias,
       measure_expr,
+      aggregate: column_def.aggregate ?? 'sum',
       common
     })
     return
