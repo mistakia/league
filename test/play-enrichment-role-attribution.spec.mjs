@@ -397,6 +397,132 @@ describe('enrich_player_identifications single-player family ownership', functio
   })
 })
 
+describe('enrich_player_identifications snap-roster fallback (source NULL gsisId)', function () {
+  const esbid = 2025110204
+  const playId = 1130
+
+  // A role stat row the NFL feed emitted with playerName + clubCode but a NULL
+  // gsisId (the Jennings failure mode).
+  const named_stat = ({ statId, playerName, clubCode = 'NE', gsisId = null }) => ({
+    esbid,
+    playId,
+    statId,
+    gsisId,
+    playerName,
+    clubCode
+  })
+
+  // esbid -> Map(normalized name -> [{ pid, gsisid }])
+  const make_roster = (by_name) => {
+    const inner = new Map(Object.entries(by_name))
+    return new Map([[esbid, inner]])
+  }
+
+  it('recovers bc_pid from the snap roster when statId 10 gsisId is NULL', () => {
+    const play_row = { esbid, playId }
+    const stats = [named_stat({ statId: 10, playerName: 'T.Jennings' })]
+    const cache = make_player_cache({ '00-0039757': 'TERR-JENN' })
+    const roster = make_roster({
+      't.jennings': [{ pid: 'TERR-JENN', gsisid: '00-0039757' }]
+    })
+
+    const [enriched] = enrich_player_identifications(
+      [play_row],
+      stats,
+      cache,
+      roster
+    )
+
+    expect(enriched.bc_gsis).to.equal('00-0039757')
+    expect(enriched.bc_pid).to.equal('TERR-JENN')
+  })
+
+  it('abstains when two snap participants share the name (never guesses)', () => {
+    const play_row = { esbid, playId }
+    const stats = [named_stat({ statId: 10, playerName: 'T.Jennings' })]
+    const cache = make_player_cache({
+      '00-0039757': 'TERR-JENN',
+      '00-0099999': 'TREY-JENN'
+    })
+    const roster = make_roster({
+      't.jennings': [
+        { pid: 'TERR-JENN', gsisid: '00-0039757' },
+        { pid: 'TREY-JENN', gsisid: '00-0099999' }
+      ]
+    })
+
+    const [enriched] = enrich_player_identifications(
+      [play_row],
+      stats,
+      cache,
+      roster
+    )
+
+    expect(enriched.bc_gsis).to.equal(null)
+    expect(enriched.bc_pid).to.equal(null)
+  })
+
+  it('abstains when the stat-row name is not in the game roster', () => {
+    const play_row = { esbid, playId }
+    const stats = [named_stat({ statId: 10, playerName: 'T.Jennings' })]
+    const cache = make_player_cache({ '00-0039757': 'TERR-JENN' })
+    const roster = make_roster({
+      'd.maye': [{ pid: 'DRAK-MAYE', gsisid: '00-0039999' }]
+    })
+
+    const [enriched] = enrich_player_identifications(
+      [play_row],
+      stats,
+      cache,
+      roster
+    )
+
+    expect(enriched.bc_pid).to.equal(null)
+  })
+
+  it('no roster arg: source NULL gsisId stays NULL-cleared (legacy behavior)', () => {
+    const play_row = {
+      esbid,
+      playId,
+      bc_gsis: 'GSIS_STALE',
+      bc_pid: 'PID_STALE'
+    }
+    const stats = [named_stat({ statId: 10, playerName: 'T.Jennings' })]
+    const cache = make_player_cache({ '00-0039757': 'TERR-JENN' })
+
+    const [enriched] = enrich_player_identifications([play_row], stats, cache)
+
+    expect(enriched.bc_gsis).to.equal(null)
+    expect(enriched.bc_pid).to.equal(null)
+  })
+
+  it('feed-provided gsisId takes precedence over the fallback', () => {
+    const play_row = { esbid, playId }
+    // Feed gave the real gsisId; the roster holds a different (wrong) name match.
+    // The primary path must win and the fallback must not fire.
+    const stats = [
+      named_stat({ statId: 10, playerName: 'T.Jennings', gsisId: '00-0039757' })
+    ]
+    const cache = make_player_cache({
+      '00-0039757': 'TERR-JENN',
+      '00-0011111': 'WRONG'
+    })
+    const roster = make_roster({
+      't.jennings': [{ pid: 'WRONG', gsisid: '00-0011111' }]
+    })
+
+    const [enriched] = enrich_player_identifications(
+      [play_row],
+      stats,
+      cache,
+      roster
+    )
+
+    expect(enriched.bc_gsis).to.equal('00-0039757')
+    expect(enriched.bc_pid).to.equal('TERR-JENN')
+  })
+})
+
 describe('enrich_player_identifications psr family sack-row attribution', function () {
   const esbid = 1
   const playId = 100

@@ -33,6 +33,7 @@ export const enrich_plays = async ({
   play_stats = [],
   games_map = {},
   player_cache = null,
+  snap_roster_by_esbid = null,
   options = {}
 }) => {
   // Default options - enable all enrichments by default
@@ -113,7 +114,8 @@ export const enrich_plays = async ({
         enriched_plays = enrich_player_identifications(
           enriched_plays,
           play_stats,
-          player_cache
+          player_cache,
+          snap_roster_by_esbid
         )
       } catch (error) {
         log(`Player identification enrichment failed: ${error.message}`)

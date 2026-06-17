@@ -21,12 +21,17 @@ const log = debug('play-enrichment:player-identification')
  * @param {Array} plays - Array of play objects with esbid and playId
  * @param {Array} play_stats - Array of play stat objects with GSIS IDs
  * @param {Object} player_cache - Player cache instance with find_player method
+ * @param {Map} [snap_roster_by_esbid] - Optional week-accurate participation
+ *   index: esbid -> Map(normalized player name -> [{ pid, gsisid }]) built from
+ *   nfl_snaps (who was on the field that game). Enables the source-NULL-gsisId
+ *   fallback below.
  * @returns {Array} Plays with all player _pid fields populated
  */
 export const enrich_player_identifications = (
   plays,
   play_stats,
-  player_cache
+  player_cache,
+  snap_roster_by_esbid = null
 ) => {
   // Group play_stats by play for efficient lookup
   const play_stats_by_play = group_play_stats_by_play(play_stats)
@@ -35,7 +40,38 @@ export const enrich_player_identifications = (
 
   let enriched_count = 0
   let skipped_count = 0
+  let fallback_resolved_count = 0
   const missing_gsis_ids = new Set()
+
+  const normalize_name = (value) =>
+    (value || '').toString().trim().toLowerCase()
+
+  // Source-NULL-gsisId fallback: the NFL feed sometimes emits a role stat row
+  // (e.g. statId 10/11 for the ball carrier) carrying playerName + clubCode but
+  // a NULL gsisId, so play_data has no gsis to map. Recover the actor from the
+  // week-accurate snap roster: the player who (a) was on the field in this exact
+  // game and (b) whose name matches the stat row's playerName. Unique-or-abstain
+  // -- a name shared by two snap participants resolves to nothing rather than
+  // guessing. This writes only the owned nfl_plays._gsis/_pid columns; it never
+  // mutates the NFL-owned nfl_play_stats row. See
+  // user:text/league/data-quality-and-validation.md.
+  const resolve_role_gsis_via_snap_roster = (stats_for_play, stat_ids, esbid) => {
+    if (!snap_roster_by_esbid) return null
+    const roster = snap_roster_by_esbid.get(esbid)
+    if (!roster) return null
+    const stat = stats_for_play.find(
+      (s) =>
+        stat_ids.includes(s.statId) &&
+        s.playerName &&
+        s.playerName.trim() !== ''
+    )
+    if (!stat) return null
+    const candidates = roster.get(normalize_name(stat.playerName)) || []
+    const gsisids = [
+      ...new Set(candidates.map((c) => c.gsisid).filter(Boolean))
+    ]
+    return gsisids.length === 1 ? gsisids[0] : null
+  }
 
   // Legacy mapper for penalty role only: getPlayFromPlayStats case 93 is
   // empty so penalty_player_gsis has no play_stats source, and we keep the
@@ -222,7 +258,31 @@ export const enrich_player_identifications = (
         const has_family_stats = stats_for_play.some((s) =>
           family.stat_ids.includes(s.statId)
         )
-        const family_play_data = has_family_stats ? play_data : {}
+        let family_play_data = has_family_stats ? play_data : {}
+
+        // The feed gave us a role stat row but omitted its gsisId: try the
+        // week-accurate snap-roster fallback before the owned writer would
+        // NULL-clear the role. Inject the recovered gsis into a shallow copy
+        // so pid resolution + missing-gsis tracking proceed unchanged.
+        if (
+          has_family_stats &&
+          !family_play_data[family.gsis] &&
+          snap_roster_by_esbid
+        ) {
+          const fallback_gsis = resolve_role_gsis_via_snap_roster(
+            stats_for_play,
+            family.stat_ids,
+            play.esbid
+          )
+          if (fallback_gsis) {
+            family_play_data = {
+              ...family_play_data,
+              [family.gsis]: fallback_gsis
+            }
+            fallback_resolved_count++
+          }
+        }
+
         map_owned_player_field(
           enriched_play,
           family_play_data,
@@ -244,7 +304,10 @@ export const enrich_player_identifications = (
   })
 
   log(
-    `Player identification enrichment: ${enriched_count} enriched, ${skipped_count} skipped`
+    `Player identification enrichment: ${enriched_count} enriched, ${skipped_count} skipped` +
+      (fallback_resolved_count
+        ? `, ${fallback_resolved_count} resolved via snap-roster fallback (source NULL gsisId)`
+        : '')
   )
 
   if (missing_gsis_ids.size > 0) {

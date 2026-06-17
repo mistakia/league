@@ -21,6 +21,38 @@ import populate_qb_pid from './populate-qb-pid.mjs'
 const log = debug('process-plays')
 debug.enable('process-plays')
 
+// Build a week-accurate participation roster for the given games from nfl_snaps
+// (who was actually on the field), keyed esbid -> Map(normalized player name ->
+// [{ pid, gsisid }]). Consumed by enrich_player_identifications to recover the
+// actor on role stat rows whose gsisId the NFL feed left NULL, without mutating
+// the NFL-owned nfl_play_stats table. See
+// user:text/league/data-quality-and-validation.md.
+const build_snap_roster_by_esbid = async (esbids) => {
+  const roster_by_esbid = new Map()
+  if (!esbids || esbids.length === 0) return roster_by_esbid
+
+  const rows = await db('nfl_snaps as s')
+    .join('player as p', 'p.gsis_it_id', 's.gsis_it_id')
+    .whereIn('s.esbid', esbids)
+    .whereNotNull('p.gsisid')
+    .distinct('s.esbid', 'p.pid', 'p.gsisid', 'p.pname')
+
+  for (const row of rows) {
+    const name_key = (row.pname || '').toString().trim().toLowerCase()
+    if (!name_key) continue
+    let by_name = roster_by_esbid.get(row.esbid)
+    if (!by_name) {
+      by_name = new Map()
+      roster_by_esbid.set(row.esbid, by_name)
+    }
+    const list = by_name.get(name_key) || []
+    list.push({ pid: row.pid, gsisid: row.gsisid })
+    by_name.set(name_key, list)
+  }
+
+  return roster_by_esbid
+}
+
 const ENRICHED_FIELD_NAMES = [
   'off',
   'def',
@@ -188,6 +220,15 @@ const process_plays = async ({
     games_map[game.esbid] = game
   }
 
+  // Build the week-accurate snap-participation roster for these games so
+  // enrichment can recover ball-carrier/passer/etc. identity on rows where the
+  // NFL feed emitted the role stat with a NULL gsisId. esbid -> Map(normalized
+  // player name -> [{ pid, gsisid }]). See
+  // user:text/league/data-quality-and-validation.md.
+  const snap_roster_by_esbid = await build_snap_roster_by_esbid(
+    completed_game_esbids
+  )
+
   log(`Enriching ${plays.length} plays using enrichment modules`)
 
   // Enrich plays using the new enrichment system
@@ -195,7 +236,8 @@ const process_plays = async ({
     plays,
     play_stats: filtered_play_stats,
     games_map,
-    player_cache
+    player_cache,
+    snap_roster_by_esbid
   })
 
   // Build lookup map from already-fetched plays (eliminates N+1 queries)
