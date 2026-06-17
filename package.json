@@ -59,7 +59,7 @@
     "@tsmx/secure-config": "^2.3.0",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "blakejs": "^1.2.1",
     "cheerio": "^1.0.0",
     "cloakbrowser": "^0.3.30",
@@ -148,7 +148,7 @@
     "history": "^5.3.0",
     "html-webpack-inline-source-plugin": "^1.0.0-beta.2",
     "html-webpack-plugin": "^5.6.3",
-    "immutable": "4.3.7",
+    "immutable": "4.3.8",
     "javascript-lp-solver": "^0.4.24",
     "mini-css-extract-plugin": "^2.9.2",
     "mocha": "11.0.1",
@@ -194,7 +194,10 @@
     "yargs": "17.7.2"
   },
   "resolutions": {
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
+    "shell-quote": "1.8.4",
+    "serialize-javascript": "7.0.5",
+    "tar": "7.5.16"
   },
   "packageManager": "yarn@4.5.1",
   "browserslist": {
