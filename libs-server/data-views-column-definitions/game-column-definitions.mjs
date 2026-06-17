@@ -6,8 +6,10 @@ import {
   format_nfl_week_identifier,
   parse_nfl_week_identifier
 } from '#libs-shared/nfl-week-identifier.mjs'
-import { resolve_year_offset_range } from '#libs-server/data-views/param-utils.mjs'
-import { emit_year_match } from '#libs-server/data-views/source-attach/rules/player-family-to-player-year.mjs'
+import {
+  resolve_year_offset_range,
+  emit_year_match
+} from '#libs-server/data-views/param-utils.mjs'
 
 // Expand a base nfl_week_id list by a year_offset range: for each base
 // identifier, shift its year component by every offset in [min..max] (keeping

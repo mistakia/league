@@ -2,9 +2,9 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import {
   resolve_year_offset_range,
-  offset_expanded_years
+  offset_expanded_years,
+  emit_year_match
 } from '#libs-server/data-views/param-utils.mjs'
-import { emit_year_match } from '#libs-server/data-views/source-attach/rules/player-family-to-player-year.mjs'
 import { current_season } from '#constants'
 
 // Defaults reproduce the legacy adp_type 'PPR_REDRAFT' (managed) so existing

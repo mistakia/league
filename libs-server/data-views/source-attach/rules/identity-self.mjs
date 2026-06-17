@@ -1,5 +1,5 @@
 import { register } from '../source-attach-registry.mjs'
-import { emit_year_match } from './player-family-to-player-year.mjs'
+import { emit_year_match } from '../../param-utils.mjs'
 
 // (X, X, default) for every identity. The cell row already carries the
 // canonical reference columns; the source row joins by direct key equality

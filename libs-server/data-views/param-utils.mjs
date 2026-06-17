@@ -46,6 +46,118 @@ export const offset_expanded_years = (years, offset_range) => {
 }
 
 /**
+ * Canonical year-offset correlation primitive. Emits the join/where predicate
+ * that correlates a source's year column to a base-year anchor THROUGH a
+ * year_offset:
+ *  - anchored (year_reference present): `col = ref + k` for a single offset,
+ *    `col BETWEEN ref + min AND ref + max` for a range;
+ *  - no anchor: the offset-shifted source.year_default (a single shifted year,
+ *    or, for a range against a multi-year default, the `{base x offset}`
+ *    cross-product IN-list -- a BETWEEN would over-include unreachable years).
+ * Lives here (the neutral offset-utils module) rather than in a source-attach
+ * rule so every year-grained source -- CTE-attach bridges, direct joins, the
+ * rate-type joiners -- can share one implementation. `is_first` selects
+ * builder.on/onIn (first predicate in a join) vs andOn/andOnIn.
+ * @param {Object} args
+ * @param {Object} args.builder - knex join/where builder
+ * @param {Object} args.db - knex instance
+ * @param {string|null} args.year_reference - SQL fragment for the base-year anchor
+ * @param {Object} args.source - source descriptor (reads source.year_default)
+ * @param {Object} args.key_columns - { year: '<source year column>' }
+ * @param {Object} args.params - column params (reads params.year_offset)
+ * @param {string} args.ref - source relation alias/name to qualify the year column
+ * @param {boolean} [args.is_first=false] - emit as the first ON predicate
+ */
+export const emit_year_match = ({
+  builder,
+  db,
+  year_reference,
+  source,
+  key_columns,
+  params,
+  ref,
+  is_first = false
+}) => {
+  if (!key_columns.year) return
+  const col = `${ref}.${key_columns.year}`
+  const eq = is_first ? builder.on.bind(builder) : builder.andOn.bind(builder)
+  const offset_range = resolve_year_offset_range(params)
+  if (year_reference) {
+    if (offset_range) {
+      const [min_off, max_off] = offset_range
+      if (min_off === max_off) {
+        eq(db.raw(`${col} = ${year_reference} + ?`, [min_off]))
+      } else {
+        eq(
+          db.raw(
+            `${col} BETWEEN ${year_reference} + ? AND ${year_reference} + ?`,
+            [min_off, max_off]
+          )
+        )
+      }
+      return
+    }
+    eq(col, '=', year_reference)
+    return
+  }
+  if (typeof source.year_default !== 'function') return
+  const v = source.year_default(params)
+  if (v == null) return
+  // Apply year_offset to the literal default year when no year_reference is
+  // available. The default is treated as the anchor "base year"; an offset
+  // shifts that base.
+  const shift = (n) =>
+    offset_range && offset_range[0] === offset_range[1]
+      ? Number(n) + offset_range[0]
+      : Number(n)
+  if (Array.isArray(v)) {
+    if (offset_range && offset_range[0] !== offset_range[1]) {
+      // Range offset against a multi-year default: enumerate the full
+      // cross-product of {year_default values} x {offset range values}
+      // into an IN (...) list so that only combinations actually in the
+      // cross-product are matched. A BETWEEN over [min_anchor+min_off,
+      // max_anchor+max_off] over-includes years that fall in the range
+      // but are not reachable by any (anchor, offset) pair.
+      const [min_off, max_off] = offset_range
+      const years = new Set()
+      for (const anchor of v.map(Number)) {
+        for (let off = min_off; off <= max_off; off++) {
+          years.add(anchor + off)
+        }
+      }
+      const in_op = is_first
+        ? builder.onIn.bind(builder)
+        : builder.andOnIn.bind(builder)
+      in_op(
+        col,
+        [...years].sort((a, b) => a - b)
+      )
+      return
+    }
+    const shifted = v.map(shift)
+    if (shifted.length === 1) {
+      eq(col, '=', db.raw('?', [shifted[0]]))
+    } else if (shifted.length > 1) {
+      const in_op = is_first
+        ? builder.onIn.bind(builder)
+        : builder.andOnIn.bind(builder)
+      in_op(col, shifted)
+    }
+    return
+  }
+  if (offset_range && offset_range[0] !== offset_range[1]) {
+    eq(
+      db.raw(`${col} BETWEEN ? AND ?`, [
+        Number(v) + offset_range[0],
+        Number(v) + offset_range[1]
+      ])
+    )
+    return
+  }
+  eq(col, '=', db.raw('?', [shift(v)]))
+}
+
+/**
  * Normalise a career_year or career_game param (which arrives as a 2-element
  * array [lo, hi] in any order) into a guaranteed [lo, hi] pair where lo <=
  * hi. Used by the three play-by-play with-statement builders.

@@ -27,6 +27,7 @@ import {
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
+import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import validate_row_grain_compatibility from '#libs-server/data-views/validate-row-grain-compatibility.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
@@ -918,12 +919,6 @@ const setup_from_table_and_player_joins = ({
     `Set up from table: ${actual_table_name}${actual_table_name !== from_table_name ? ` as ${from_table_name}` : ''}`
   )
 }
-
-const is_year_offset_range = (params) =>
-  params.year_offset &&
-  Array.isArray(params.year_offset) &&
-  params.year_offset.length > 1 &&
-  params.year_offset[0] !== params.year_offset[1]
 
 const get_table_name = ({
   column_definition,

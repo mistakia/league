@@ -1,5 +1,5 @@
 import { register } from '../source-attach-registry.mjs'
-import { emit_year_match } from './player-family-to-player-year.mjs'
+import { emit_year_match } from '../../param-utils.mjs'
 
 // Cross-grain pairings on the team side. Direct team-key equality (no
 // player_year_teams orphan). Bridges are chained only when the cell row
