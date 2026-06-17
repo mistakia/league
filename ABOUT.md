@@ -51,12 +51,48 @@ observations:
     dozens of rate/rank/grade columns (PFF grades, rankings, nfl_team_seasonlogs rate stats, cpoe,
     time_to_throw) are summed across the offset window instead of averaged; each needs migration
     onto the offset primitive and a declared range_offset_aggregate, gated by result-equivalence.
+  - >-
+    [verification] 2026-06-17 Deployed Stage 1 (player_adp year_offset CTE-attach fix,
+    a45281ab/21acc4ab) to production: yarn deploy pulled origin/master cab220f3, pm2 server process
+    reloaded online, load:main + worker-1 trees synced.
+  - >-
+    [security] 2026-06-17 Remediated Dependabot 1 critical + 8 high alerts (commit 01959ea, pushed
+    origin/master): bcrypt 5.1.1->6.0.0 drops @mapbox/node-pre-gyp and its tar@6.2.1, clearing all 6
+    high node-tar path-traversal advisories at once; immutable 4.3.7->4.3.8 (prototype pollution);
+    resolutions pin shell-quote 1.8.4 (critical), serialize-javascript 7.0.5, tar 7.5.16.
+  - >-
+    [security] Dependabot tar/shell-quote/serialize-javascript advisories are install/build-time
+    only (node-gyp/node-pre-gyp archive extraction, concurrently dev tool, webpack terser cache) and
+    not reachable from API/workers/SPA runtime; immutable is the only runtime-reachable fix (SPA
+    Redux state).
+  - >-
+    [gotcha] Dependency usage scans must include forked git-deps compiled from source (react-table,
+    workerize-loader) whose src/ webpack bundles -- their imports count as real usage; an app/-only
+    grep nearly dropped @mui/x-date-pickers (peer-imported by the react-table fork), caught only by
+    a failing production build.
+  - >-
+    [completed] 2026-06-17 year_offset unification Stages 2-5:
+    player_projected/game_source/keeptradecut offset fixes (bf703720/1d53f94c/622b2f63),
+    range_offset_aggregate + has_numerator_denominator across
+    pff/rankings/nfl_team_seasonlogs/dvoa/espn/from-plays (2a746f5b/96ba01b9), emit_year_match
+    extracted to param-utils + rate-type joiners consolidated (92884467/2bc96d3b/3b3a36e5), and the
+    result-equivalence harness (5c9392ce). All zero-regression vs the 27 measure-first baseline
+    reds.
+  - >-
+    [followup] 2026-06-17 year_offset unification remainders: (1) pff_team_grades + team_unit_dvoa
+    range offset still emit invalid SQL -- custom main_select reads the alias that
+    get-data-view-results skip_join_for_offset_range drops; fix needs a bespoke
+    main_select_string_year_offset_range (AVG over the team-grained window, like keeptradecut). (2)
+    game_opponent range wants fanout (multiple opponents), so it needs the join NOT skipped for
+    plain-main_select columns. (3) select-string's empty-year_predicate trust-the-CTE branch can't
+    be deleted until player_adp's range-no-split path stops depending on it (needs explicit year IN
+    via source.year_default).
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-17T05:57:06.141Z'
+updated_at: '2026-06-17T16:40:28.272Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
