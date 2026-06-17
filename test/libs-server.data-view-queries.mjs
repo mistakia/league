@@ -102,7 +102,8 @@ describe('Data View', () => {
             // diverges (orphan-CTE drops, direct team-subject joins, dispatcher
             // re-routed bridges) flag skip_query_match. The harness logs the
             // diff for hand review; result-set equivalence is gated by the
-            // separate data-view-queries-result-equivalence.spec.mjs harness.
+            // separate libs-server.data-view-queries-result-equivalence.mjs
+            // harness (fixtures opt in with a `result_equivalence` block).
             if (data_view_test_query.skip_query_match) {
               if (actual_query !== expected_query) {
                 log_sql_diff(
