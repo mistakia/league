@@ -11,7 +11,7 @@ import {
   is_batchable
 } from './measure-batch.mjs'
 import * as identity_bridge_registry from '../identity-bridge-registry.mjs'
-import { resolve_year_offset_range } from '../param-utils.mjs'
+import { emit_year_match } from '../param-utils.mjs'
 
 // consumes_params drives both CTE name hashing (so distinct param sets emit
 // distinct CTEs) and consumed_params_signature for cache keys. `week` and
@@ -125,7 +125,6 @@ export const join_cte = ({
         source: column_def?.source || null
       })
     : null
-  const offset_range = resolve_year_offset_range(params)
   players_query.leftJoin(cte_name, function () {
     if (is_team) {
       this.on(`${cte_name}.team_code`, '=', team_target)
@@ -133,23 +132,18 @@ export const join_cte = ({
       this.on(`${cte_name}.pid`, '=', pid_reference)
     }
     if (splits.includes('year') && year_reference) {
-      if (offset_range) {
-        const [min_off, max_off] = offset_range
-        if (min_off === max_off) {
-          this.andOn(
-            db.raw(`${cte_name}.year = ${year_reference} + ?`, [min_off])
-          )
-        } else {
-          this.andOn(
-            db.raw(
-              `${cte_name}.year BETWEEN ${year_reference} + ? AND ${year_reference} + ?`,
-              [min_off, max_off]
-            )
-          )
-        }
-      } else {
-        this.andOn(`${cte_name}.year`, '=', year_reference)
-      }
+      // Correlate the aggregator CTE year to the base-year anchor THROUGH the
+      // offset via the shared primitive (single `= ref+k`, range BETWEEN, or
+      // `= ref` with no offset) -- replaces the inline offset branch.
+      emit_year_match({
+        builder: this,
+        db,
+        year_reference,
+        source: {},
+        key_columns: { year: 'year' },
+        params,
+        ref: cte_name
+      })
     }
   })
 }

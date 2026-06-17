@@ -1,4 +1,8 @@
 import db from '#db'
+import {
+  resolve_year_offset_range,
+  emit_year_match
+} from '#libs-server/data-views/param-utils.mjs'
 
 // Shared source.attach helper for column-defs whose `with` callback builds a
 // pid+year(+week) CTE off `nfl_plays`. Accepts an optional `extra_conditions`
@@ -21,12 +25,14 @@ export const apply_plays_join = ({
   const pid_reference = dv.pid_reference ?? query_context.pid_reference
   const year_reference = dv.year_reference ?? query_context.year_reference
   const week_reference = dv.week_reference ?? query_context.week_reference
-  const year_offset_param = params.year_offset
-  const year_offset_range = Array.isArray(year_offset_param)
-    ? year_offset_param
-    : [year_offset_param || 0, year_offset_param || 0]
-  const min_year_offset = Math.min(...year_offset_range)
-  const max_year_offset = Math.max(...year_offset_range)
+  // A non-zero year_offset routes through the shared primitive; a zero/absent
+  // offset keeps the existing no-shift correlation (single-year pin or
+  // year_reference + IN). resolve_year_offset_range returns [0,0] for an
+  // explicit 0, which must NOT emit `year = ref + 0`.
+  const offset_range = resolve_year_offset_range(params)
+  const has_offset = Boolean(
+    offset_range && (offset_range[0] !== 0 || offset_range[1] !== 0)
+  )
   const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
   const join_year = splits.includes('year')
   const join_week = splits.includes('week')
@@ -35,21 +41,18 @@ export const apply_plays_join = ({
     this.on(`${table_alias}.pid`, '=', pid_reference)
 
     if (join_year && year_reference) {
-      if (min_year_offset !== 0 || max_year_offset !== 0) {
-        if (min_year_offset === max_year_offset) {
-          this.andOn(
-            db.raw(`${table_alias}.year = ${year_reference} + ?`, [
-              min_year_offset
-            ])
-          )
-        } else {
-          this.andOn(
-            db.raw(
-              `${table_alias}.year BETWEEN ${year_reference} + ? AND ${year_reference} + ?`,
-              [min_year_offset, max_year_offset]
-            )
-          )
-        }
+      if (has_offset) {
+        // Correlate the CTE year to the base-year anchor THROUGH the offset
+        // via the shared primitive (single `= ref+k`, range BETWEEN).
+        emit_year_match({
+          builder: this,
+          db,
+          year_reference,
+          source: {},
+          key_columns: { year: 'year' },
+          params,
+          ref: table_alias
+        })
       } else {
         const single_year_param_set =
           params.year &&
