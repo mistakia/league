@@ -135,7 +135,6 @@
     "eslint-config-standard-react": "^13.0.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-n": "^17.15.1",
-    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
@@ -194,7 +193,10 @@
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
     "shell-quote": "1.8.4",
     "serialize-javascript": "7.0.5",
-    "tar": "7.5.16"
+    "tar": "7.5.16",
+    "form-data@^3.0.0": "3.0.5",
+    "form-data@^4.0.0": "4.0.6",
+    "form-data@^4.0.5": "4.0.6"
   },
   "packageManager": "yarn@4.5.1",
   "browserslist": {
