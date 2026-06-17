@@ -1,0 +1,18 @@
+{
+  "name": "player_season_projected_points single year_offset shifts the projection year",
+  "description": "player_season_projected_points with year=[2023] + single year_offset=[1] correlates the projection join on year=2024 (base+1) via the shared emit_year_match primitive, returning the offset-year projection instead of silently returning the base-year value.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_season_projected_points",
+        "params": {
+          "year": [2023],
+          "year_offset": [1]
+        }
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, \"t3bbf1d9c941eda2597574bd44af9f16e\".\"total\" AS \"season_projected_points_0\", \"player\".\"pos\" from \"player\" left join \"scoring_format_player_projection_points\" as \"t3bbf1d9c941eda2597574bd44af9f16e\" on \"t3bbf1d9c941eda2597574bd44af9f16e\".\"pid\" = \"player\".\"pid\" and \"t3bbf1d9c941eda2597574bd44af9f16e\".\"year\" = 2024 and \"t3bbf1d9c941eda2597574bd44af9f16e\".\"week\" = '0' and \"t3bbf1d9c941eda2597574bd44af9f16e\".\"scoring_format_id\" = 'draftkings' group by player.fname, player.lname, \"t3bbf1d9c941eda2597574bd44af9f16e\".\"total\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": ["year_offset", "projected", "regression"]
+}

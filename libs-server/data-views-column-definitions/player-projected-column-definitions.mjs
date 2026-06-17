@@ -9,6 +9,8 @@ import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-n
 
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
+import { resolve_year_offset_range } from '#libs-server/data-views/param-utils.mjs'
+import { emit_year_match } from '#libs-server/data-views/source-attach/rules/player-family-to-player-year.mjs'
 
 // TODO career_year
 
@@ -44,8 +46,7 @@ const get_default_params = ({ params = {} }) => {
 
   const scoring_format_id =
     params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
-  const league_format_id =
-    params.league_format_id || DEFAULT_LEAGUE_FORMAT_ID
+  const league_format_id = params.league_format_id || DEFAULT_LEAGUE_FORMAT_ID
   const league_id = params.league_id || 1
 
   return {
@@ -133,7 +134,26 @@ const apply_projected_join = ({
     this.on(`${table_alias}.pid`, '=', pid_reference)
 
     if (join_year) {
-      if (year_reference) {
+      const offset_range = resolve_year_offset_range(params)
+      if (offset_range) {
+        // year_offset present: correlate the projection year to the base-year
+        // anchor THROUGH the offset (single `= ref+k`, range `BETWEEN`, or the
+        // offset-shifted default when no year_reference) via the shared
+        // emit_year_match primitive. The prior code pinned to the unshifted
+        // year and silently returned the base-year projection (mirrors the
+        // player_adp CTE-attach year_offset-drop bug).
+        emit_year_match({
+          builder: this,
+          db,
+          year_reference,
+          source: {
+            year_default: () => (Array.isArray(year) ? year[0] : year)
+          },
+          key_columns: { year: 'year' },
+          params,
+          ref: table_alias
+        })
+      } else if (year_reference) {
         this.andOn(db.raw(`${table_alias}.year = ${year_reference}`))
         if (params.year) {
           const year_array = Array.isArray(year) ? year : [year]
@@ -183,8 +203,28 @@ const apply_projected_join = ({
   })
 }
 
+// year_offset RANGE columns are reduced by select-string's correlated-aggregate
+// subquery, which re-scans source.table directly (outer JOIN aliases are not
+// visible as relations inside a subquery). Declaring table / year_default /
+// extra_predicates lets that path emit valid SQL pinned to the offset-expanded
+// year window plus the same discriminators (lid / format id / scoring format /
+// week / source) the JOIN enforces. Without these the subquery referenced an
+// undefined relation and dropped the year filter entirely. attach_owns_join
+// tells the dispatcher NOT to also emit a primary join (this source's custom
+// `attach` owns the entire join, including the week dimension the bridge cannot
+// express) -- otherwise the alias is joined twice.
 const make_league_player_projection_source = () => ({
   grain: 'player',
+  table: 'league_player_projection_values',
+  attach_owns_join: true,
+  year_default: (params) => [get_default_params({ params }).year],
+  extra_predicates: (params) => {
+    const { league_id, week } = get_default_params({ params })
+    return [
+      { column: 'lid', value: league_id },
+      { column: 'week', value: String(week) }
+    ]
+  },
   attach: ({ query_context, params, table_alias, join_type }) => {
     const { league_id } = get_default_params({ params })
     apply_projected_join({
@@ -206,6 +246,16 @@ const make_league_format_player_projection_source = ({
   is_rest_of_season = false
 } = {}) => ({
   grain: 'player',
+  table: 'league_format_player_projection_values',
+  attach_owns_join: true,
+  year_default: (params) => [get_default_params({ params }).year],
+  extra_predicates: (params) => {
+    const { league_format_id, week } = get_default_params({ params })
+    return [
+      { column: 'league_format_id', value: league_format_id },
+      { column: 'week', value: is_rest_of_season ? 'ros' : String(week) }
+    ]
+  },
   attach: ({ query_context, params, table_alias, join_type }) => {
     const { league_format_id } = get_default_params({ params })
     apply_projected_join({
@@ -234,6 +284,16 @@ const make_scoring_format_player_projection_source = ({
   is_rest_of_season = false
 } = {}) => ({
   grain: 'player',
+  table: 'scoring_format_player_projection_points',
+  attach_owns_join: true,
+  year_default: (params) => [get_default_params({ params }).year],
+  extra_predicates: (params) => {
+    const { scoring_format_id, week } = get_default_params({ params })
+    return [
+      { column: 'scoring_format_id', value: scoring_format_id },
+      { column: 'week', value: is_rest_of_season ? 'ros' : String(week) }
+    ]
+  },
   attach: ({ query_context, params, table_alias, join_type }) => {
     const { scoring_format_id } = get_default_params({ params })
     apply_projected_join({
@@ -261,6 +321,23 @@ const make_scoring_format_player_projection_source = ({
 
 const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   grain: 'player',
+  table: is_rest_of_season ? 'ros_projections' : 'projections_index',
+  attach_owns_join: true,
+  year_default: (params) => [get_default_params({ params }).year],
+  extra_predicates: (params) => {
+    // ros_projections carries no sourceid/seas_type/week discriminator (the
+    // JOIN pins none for the rest-of-season case).
+    if (is_rest_of_season) return []
+    const { seas_type, week } = get_default_params({ params })
+    // projections_index.week is smallint (numeric); seas_type is an enum. The
+    // offset-expanded year window plus seas_type + week is sufficient to
+    // discriminate the AVERAGE source even when the JOIN used nfl_week_id.
+    return [
+      { column: 'sourceid', value: external_data_sources.AVERAGE },
+      { column: 'week', value: week },
+      { column: 'seas_type', value: seas_type }
+    ]
+  },
   attach: ({ query_context, params, table_alias, join_type }) => {
     const { seas_type, nfl_week } = get_default_params({ params })
     const join_table_clause = is_rest_of_season

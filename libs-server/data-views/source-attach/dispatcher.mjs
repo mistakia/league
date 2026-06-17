@@ -101,7 +101,15 @@ export const attach_source = ({
     })
   }
 
-  if (source.table) {
+  // A source may declare `table` purely so select-string's correlated-aggregate
+  // (year_offset range) path can re-scan a real relation, while still owning its
+  // entire join via a custom `attach` (e.g. projections, whose join correlates a
+  // week dimension and week-splits the bridge emit_predicate cannot express).
+  // Such a source sets `attach_owns_join` so the dispatcher does NOT also emit a
+  // primary join here -- otherwise the same alias is joined twice ("table name
+  // specified more than once"). Sources where `attach` only adds secondary joins
+  // (e.g. pff_player_source's career_year filter) leave the flag unset.
+  if (source.table && !source.attach_owns_join) {
     const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
     const target =
       table_alias && table_alias !== source.table
