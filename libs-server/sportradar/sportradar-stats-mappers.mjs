@@ -10,6 +10,17 @@ import {
 import { normalize_penalty_type } from '#libs-shared/penalty-utils.mjs'
 
 /**
+ * Map a Sportradar 0/1 flag to a boolean while preserving null for absent
+ * values. Sportradar charts some flags sparsely (e.g. catchable, dropped) and
+ * FTN charting is the authoritative source for them. Collapsing an absent value
+ * to `false` (via `value === 1`) would let a re-import — especially one run with
+ * `overwrite_existing` — clobber authoritative FTN data, since `update_play`
+ * skips a null rhs but treats a concrete `false` as a real change. Returning
+ * null for absent values keeps "no data" distinct from a genuine false.
+ */
+const map_sportradar_flag = (value) => (value == null ? null : value === 1)
+
+/**
  * Map passing statistics to play fields
  */
 export const map_passing_stats = async ({
@@ -95,8 +106,8 @@ export const map_receiving_stats = async ({
   mapped.broken_tackles_rec = receive_stats.broken_tackles || 0
   mapped.td = receive_stats.touchdown === 1
   mapped.first_down_pass = receive_stats.firstdown === 1
-  mapped.catchable_ball = receive_stats.catchable === 1
-  mapped.dropped_pass = receive_stats.dropped === 1
+  mapped.catchable_ball = map_sportradar_flag(receive_stats.catchable)
+  mapped.dropped_pass = map_sportradar_flag(receive_stats.dropped)
 
   // Goal to go
   if (receive_stats.goaltogo === 1) {
