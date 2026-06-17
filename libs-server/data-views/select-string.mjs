@@ -232,7 +232,13 @@ const get_select_string = ({
           data_view_options
         })
     } else {
-      final_select_expression = `(SELECT SUM(${inner_table}.${column_definition.column_name}) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
+      // Reduce the offset window with the column's declared aggregate (default
+      // SUM). Non-additive season statistics (means, mins, maxes, ranks)
+      // override this so a multi-year window is not silently summed -- see
+      // player-adp-column-definitions range_offset_aggregate.
+      const range_offset_aggregate =
+        column_definition.range_offset_aggregate || 'SUM'
+      final_select_expression = `(SELECT ${range_offset_aggregate}(${inner_table}.${column_definition.column_name}) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
     }
 
     if (rate_type_table_name) {

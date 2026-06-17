@@ -21,6 +21,31 @@ export const resolve_year_offset_range = (params) => {
 }
 
 /**
+ * Expand a set of base years by a year_offset range into the sorted, deduped
+ * set of target years actually reachable by some (base_year, offset) pair.
+ * `{ base_year + off : base_year in years, off in [min..max] }`. A single
+ * offset [k,k] collapses to `{ y + k }`. Mirrors the cross-product the
+ * source-attach `emit_year_match` no-anchor branch and select-string's
+ * `compute_year_in_list` already build, so CTE-backed sources can scope their
+ * own year filter to the same set the correlation predicate will reference.
+ * @param {Array<number>} years - base/anchor years
+ * @param {[number, number]|null} offset_range - from resolve_year_offset_range
+ * @returns {Array<number>} sorted unique target years (base years unchanged when offset_range is null)
+ */
+export const offset_expanded_years = (years, offset_range) => {
+  const base = (Array.isArray(years) ? years : [years])
+    .map(Number)
+    .filter((n) => Number.isFinite(n))
+  if (!offset_range) return base
+  const [min_off, max_off] = offset_range
+  const out = new Set()
+  for (const y of base) {
+    for (let off = min_off; off <= max_off; off++) out.add(y + off)
+  }
+  return [...out].sort((a, b) => a - b)
+}
+
+/**
  * Normalise a career_year or career_game param (which arrives as a 2-element
  * array [lo, hi] in any order) into a guaranteed [lo, hi] pair where lo <=
  * hi. Used by the three play-by-play with-statement builders.
@@ -54,10 +79,7 @@ export const get_single_value = (value, default_value) => {
  * @returns {string} Scoring format id
  */
 export const get_scoring_format_id = (params = {}) => {
-  return get_single_value(
-    params.scoring_format_id,
-    DEFAULT_SCORING_FORMAT_ID
-  )
+  return get_single_value(params.scoring_format_id, DEFAULT_SCORING_FORMAT_ID)
 }
 
 /**
