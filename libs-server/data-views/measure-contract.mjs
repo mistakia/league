@@ -6,10 +6,10 @@
 // render (`with_select`), the numerator measure expression (`measure_expr`),
 // the period-CTE aggregate selector (`aggregate`), the advertised
 // `supports_output` periods, the echoed `supported_rate_types`, and the
-// rate/season rounding (`decimals`). This replaces the fragile
-// `strip_outer_sum` heuristic, which inferred the measure by parsing the
-// season-render string (and silently dropped rate types for `ROUND(SUM(...))`,
-// `AVG(...)`, and `COUNT(DISTINCT ...)`).
+// rate/season rounding (`decimals`). This replaces the fragile prior heuristic
+// that inferred the measure by parsing the season-render string (and silently
+// dropped rate types for `ROUND(SUM(...))`, `AVG(...)`, and
+// `COUNT(DISTINCT ...)`).
 //
 // Two kinds only (closed set):
 //   additive       -- season `SUM(expr)` (or `ROUND(SUM(expr), decimals)` when
@@ -58,8 +58,7 @@ const assert_measure_rate_capability = ({ stat_name, measure }) => {
 }
 
 // Translate the legacy `per_<period>` rate-type tokens into the canonical
-// period names consumed by the output-aggregator registry. Moved here from
-// strip-outer-sum.mjs (which is deleted by this refactor).
+// period names consumed by the output-aggregator registry.
 export const derive_periods_from_rate_types = (rate_types) =>
   rate_types.map((t) => t.replace(/^per_/, ''))
 
