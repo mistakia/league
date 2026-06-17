@@ -63,8 +63,11 @@ export const map_passing_stats = async ({
 
   // Flags
   mapped.first_down_pass = pass_stats.firstdown === 1
-  mapped.qb_hit = pass_stats.knockdown === 1
-  mapped.qb_hurry = pass_stats.hurry === 1
+  // knockdown/hurry are charted sparsely by Sportradar and are co-owned with
+  // import-charted-plays-from-csv; preserve null for absent so a re-import
+  // can't collapse "not charted" into a spurious false (see map_sportradar_flag).
+  mapped.qb_hit = map_sportradar_flag(pass_stats.knockdown)
+  mapped.qb_hurry = map_sportradar_flag(pass_stats.hurry)
 
   // Goal to go
   if (pass_stats.goaltogo === 1) {

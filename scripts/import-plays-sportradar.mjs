@@ -11,6 +11,7 @@ import { is_main, report_job, update_play, updatePlayer } from '#libs-server'
 import { get_game_play_by_play } from '#libs-server/sportradar/sportradar-api.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { SPORTRADAR_EXCLUSIVE_FIELDS } from '#libs-server/sportradar/sportradar-exclusive-fields.mjs'
+import { SPORTRADAR_PROTECTED_FIELDS } from '#libs-server/sportradar/sportradar-protected-fields.mjs'
 import { add_personnel_counts_to_play_data } from '#libs-server/parse-personnel.mjs'
 import {
   preload_plays,
@@ -1192,7 +1193,11 @@ const process_play = async ({
           ...(stats.ignore_sportradar_field_conflicts
             ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
             : [])
-        ]
+        ],
+        // Authority blocklist: FTN/nflfastR-owned fields Sportradar may fill
+        // when empty but must never overwrite, even under --overwrite_existing.
+        // Structural backstop for the 2026-05-24 catchable_ball incident.
+        protected_fields: SPORTRADAR_PROTECTED_FIELDS
       })
       const update_time = Date.now() - update_start_time
       if (update_time > PERFORMANCE_THRESHOLD_MS) {

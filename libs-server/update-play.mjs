@@ -110,6 +110,12 @@ const should_overwrite_field = (
  * @param {Set<string>} params.clearable_fields - Fields where a `null` rhs is a real clear
  *   (writes NULL + emits a changelog) when the existing `lhs` is a truthy, non-empty value.
  *   For every other prop, null/undefined/'' continue to be skipped.
+ * @param {Set<string>} params.protected_fields - Fields owned by a more-authoritative
+ *   source that the caller must never overwrite. A protected field may still be FILLED
+ *   while empty, but an existing truthy value is never overwritten — even when
+ *   `overwrite_existing` is true or the field is listed in `overwrite_fields`. Used by
+ *   the Sportradar importer to protect FTN/nflfastR-owned fields. Default empty set
+ *   preserves prior behavior for every other caller.
  * @returns {Object} { changelog_entries, field_updates, changes_count }
  */
 export const compute_play_changes = ({
@@ -117,7 +123,8 @@ export const compute_play_changes = ({
   update,
   overwrite_existing = false,
   overwrite_fields = [],
-  clearable_fields = new Set()
+  clearable_fields = new Set(),
+  protected_fields = new Set()
 }) => {
   const changelog_entries = []
   const field_updates = {}
@@ -181,6 +188,14 @@ export const compute_play_changes = ({
     // bypass the overwrite gate. Default empty set preserves the prior
     // skip-existing behavior for sportradar / manual-CLI callers.
     if (edit.lhs && !is_owned) {
+      // Authority blocklist: a field owned by a more-authoritative source is
+      // never overwritten once it holds a value — this takes precedence over
+      // overwrite_existing AND overwrite_fields. Filling an empty field still
+      // proceeds (the `edit.lhs` guard above is falsy in that case).
+      if (protected_fields.has(prop)) {
+        continue
+      }
+
       const can_overwrite = should_overwrite_field(
         prop,
         overwrite_existing,
@@ -215,7 +230,8 @@ export const compute_play_changes = ({
  * Update play data in the database with conflict resolution
  *
  * Conflict Resolution Priority:
- * 1. overwrite_existing=true → Overwrites ALL fields
+ * 0. protected_fields → NEVER overwritten once set (beats 1 and 2 below)
+ * 1. overwrite_existing=true → Overwrites ALL non-protected fields
  * 2. overwrite_fields=['field1', 'field2'] → Overwrites ONLY specified fields
  * 3. Default → Skip updates for fields with existing values
  *
@@ -225,6 +241,8 @@ export const compute_play_changes = ({
  * @param {Object} update - Field updates to apply
  * @param {boolean} overwrite_existing - If true, overwrite all existing values
  * @param {Array<string>} overwrite_fields - Specific fields to overwrite (e.g., ['game_clock_end', 'sec_rem_qtr'])
+ * @param {Set<string>} protected_fields - Fields a more-authoritative source owns; never
+ *   overwritten once set, even under overwrite_existing/overwrite_fields (fill-when-empty still allowed)
  * @returns {number} Number of fields changed
  */
 const update_play = async ({
@@ -234,7 +252,8 @@ const update_play = async ({
   update,
   overwrite_existing = false,
   overwrite_fields = [],
-  clearable_fields = new Set()
+  clearable_fields = new Set(),
+  protected_fields = new Set()
 }) => {
   if (!play_row && esbid && playId) {
     const play_rows = await db('nfl_plays').where({ esbid, playId })
@@ -251,7 +270,8 @@ const update_play = async ({
       update,
       overwrite_existing,
       overwrite_fields,
-      clearable_fields
+      clearable_fields,
+      protected_fields
     })
 
   if (changes_count === 0) {
