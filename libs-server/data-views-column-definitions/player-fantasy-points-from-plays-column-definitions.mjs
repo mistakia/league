@@ -6,7 +6,6 @@ import {
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import { apply_plays_join } from '#libs-server/data-views/source-attach/apply-plays-join.mjs'
-import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
@@ -67,9 +66,7 @@ const get_scoring_format = async (scoring_format_id) => {
     return null
   }
 
-  const format = await db('league_scoring_formats')
-    .where('id', hash)
-    .first()
+  const format = await db('league_scoring_formats').where('id', hash).first()
 
   if (!format) {
     // In test environment, fallback to default scoring instead of throwing error
@@ -546,10 +543,9 @@ const generate_fumble_scoring_sql = async (scoring_format) =>
 
 const should_use_main_where = ({ params }) => {
   return (
-    (params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1) ||
-    (params.rate_type && params.rate_type.length > 0)
+    params.year_offset &&
+    Array.isArray(params.year_offset) &&
+    params.year_offset.length > 1
   )
 }
 
@@ -612,23 +608,8 @@ export default {
       }
       return 'fantasy_points_from_plays'
     },
-    main_where: ({
-      params,
-      table_name,
-      column_id,
-      column_index,
-      rate_type_column_mapping
-    }) => {
+    main_where: ({ params, table_name }) => {
       if (should_use_main_where({ params })) {
-        if (params.rate_type && params.rate_type.includes('per_game')) {
-          const rate_type_table_name =
-            rate_type_column_mapping[`${column_id}_${column_index}`]
-          return get_rate_type_sql({
-            table_name,
-            column_name: 'fantasy_points_from_plays',
-            rate_type_table_name
-          })
-        }
         return `SUM(${table_name}.fantasy_points_from_plays)`
       }
       // Return null to use default column handling when no special aggregation needed

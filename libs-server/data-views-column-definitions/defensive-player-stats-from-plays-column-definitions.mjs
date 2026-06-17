@@ -2,7 +2,6 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { add_defensive_play_by_play_with_statement } from '#libs-server/data-views/add-defensive-play-by-play-with-statement.mjs'
 import { apply_plays_join } from '#libs-server/data-views/source-attach/apply-plays-join.mjs'
-import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 
@@ -79,33 +78,8 @@ const defensive_player_stat_from_plays = ({
     aggregations: ['rate', 'count']
   },
   with_select: () => [`${select_string} AS ${stat_name}`],
-  with_where: ({ params }) => {
-    // should be handled in main where
-    if (params.rate_type && params.rate_type.length) {
-      return null
-    }
-
-    return select_string
-  },
-  main_where: ({
-    table_name,
-    params,
-    column_id,
-    column_index,
-    rate_type_column_mapping
-  }) => {
-    if (params.rate_type && params.rate_type.length) {
-      const rate_type_table_name =
-        rate_type_column_mapping[`${column_id}_${column_index}`]
-      return get_rate_type_sql({
-        table_name,
-        column_name: stat_name,
-        rate_type_table_name
-      })
-    }
-
-    return null
-  },
+  with_where: () => select_string,
+  main_where: () => null,
   source: defensive_plays_source,
   pid_columns,
   supported_rate_types: [

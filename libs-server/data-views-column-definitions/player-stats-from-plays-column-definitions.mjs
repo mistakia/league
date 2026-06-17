@@ -4,7 +4,6 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import { add_player_stats_play_by_play_with_statement } from '#libs-server/data-views/add-player-stats-play-by-play-with-statement.mjs'
 import { apply_plays_join } from '#libs-server/data-views/source-attach/apply-plays-join.mjs'
-import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
@@ -20,11 +19,10 @@ const play_by_play_filter_param_keys = Object.keys(nfl_plays_column_params)
 
 const should_use_main_where = ({ params, has_numerator_denominator }) => {
   return (
-    (params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator) ||
-    (params.rate_type && params.rate_type.length > 0)
+    params.year_offset &&
+    Array.isArray(params.year_offset) &&
+    params.year_offset.length > 1 &&
+    has_numerator_denominator
   )
 }
 
@@ -159,48 +157,16 @@ const player_stat_from_plays = ({
       }
       return season_select
     },
-    main_where: ({
-      params,
-      table_name,
-      column_id,
-      column_index,
-      rate_type_column_mapping
-    }) => {
+    main_where: ({ params, table_name }) => {
       if (should_use_main_where({ params, has_numerator_denominator })) {
-        if (params.rate_type && params.rate_type.includes('per_game')) {
-          const rate_type_table_name =
-            rate_type_column_mapping[`${column_id}_${column_index}`]
-          if (has_numerator_denominator) {
-            return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) ELSE 0 END`
-          } else {
-            return get_rate_type_sql({
-              table_name,
-              column_name: stat_name,
-              rate_type_table_name
-            })
-          }
-        } else {
-          // if there is no rate_type than it must have a numerator/denominator
-          return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) ELSE 0 END`
-        }
+        // LIVE year-offset numerator/denominator assembly.
+        return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) ELSE 0 END`
       }
       return null
     },
-    main_where_group_by: ({
-      params,
-      table_name,
-      column_id,
-      column_index,
-      rate_type_column_mapping
-    }) => {
+    main_where_group_by: ({ params, table_name }) => {
       if (should_use_main_where({ params, has_numerator_denominator })) {
         const group_by = []
-        const rate_type_table_name =
-          rate_type_column_mapping[`${column_id}_${column_index}`]
-        if (rate_type_table_name) {
-          group_by.push(`${rate_type_table_name}.rate_type_total_count`)
-        }
-
         if (has_numerator_denominator) {
           group_by.push(`SUM(${table_name}.${stat_name}_numerator)`)
           group_by.push(`SUM(${table_name}.${stat_name}_denominator)`)

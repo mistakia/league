@@ -6,7 +6,6 @@ export const get_where_string = ({
   column_index = 0,
   is_main_select = false,
   params = {},
-  rate_type_column_mapping,
   output_select_mapping = {},
   splits,
   data_view_options = {}
@@ -39,7 +38,6 @@ export const get_where_string = ({
         table_name,
         case_insensitive: where_clause.operator === 'ILIKE',
         params,
-        rate_type_column_mapping,
         column_id: where_clause.column_id,
         column_index,
         splits,

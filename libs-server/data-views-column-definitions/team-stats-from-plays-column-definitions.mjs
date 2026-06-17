@@ -5,7 +5,6 @@ import get_play_by_play_default_params from '#libs-server/data-views/get-play-by
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
 import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
-import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import {
@@ -180,41 +179,14 @@ const team_stat_from_plays = ({
     column_name: stat_name,
     with_select: () =>
       is_rate ? rate_with_selects : [`${season_select} AS ${stat_name}`],
-    with_where: ({ table_name, params }) => {
+    with_where: ({ table_name }) => {
       if (is_rate) {
         return `sum(${table_name}.${stat_name}_numerator) / NULLIF(sum(${table_name}.${stat_name}_denominator), 0)`
       }
 
-      // should be handled in main where
-      if (params.rate_type && params.rate_type.length) {
-        return null
-      }
-
       return `sum(${table_name}.${stat_name})`
     },
-    main_where: ({
-      table_name,
-      params,
-      column_id,
-      column_index,
-      rate_type_column_mapping
-    }) => {
-      if (is_rate) {
-        return null
-      }
-
-      if (params.rate_type && params.rate_type.length) {
-        const rate_type_table_name =
-          rate_type_column_mapping[`${column_id}_${column_index}`]
-        return get_rate_type_sql({
-          table_name: `${table_name}_player_team_stats`,
-          column_name: stat_name,
-          rate_type_table_name
-        })
-      }
-
-      return null
-    },
+    main_where: () => null,
     with: force_player_active
       ? (args) =>
           add_team_stats_play_by_play_with_statement({

@@ -60,20 +60,12 @@ const format_extra_predicates_sql = (source, column_params, inner_table) => {
     .join('')
 }
 
-export const get_rate_type_sql = ({
-  table_name,
-  column_name,
-  rate_type_table_name
-}) =>
-  `CAST(${table_name}.${column_name} AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
-
 const get_select_string = ({
   column_id,
   column_params,
   column_index,
   column_definition,
   table_name,
-  rate_type_column_mapping,
   output_select_mapping = {},
   splits,
   is_main_select = false,
@@ -96,32 +88,18 @@ const get_select_string = ({
     }
   }
 
-  const rate_type_table_name =
-    rate_type_column_mapping[`${column_id}_${column_index}`]
   const join_table_name =
     is_main_select && column_definition.join_table_name
       ? column_definition.join_table_name({
           table_name,
           params: column_params,
           column_index,
-          rate_type_table_name,
           splits
         })
       : !is_main_select && column_definition.table_name
         ? column_definition.table_name
         : table_name
   const column_value = `"${join_table_name}"."${column_definition.column_name}"`
-
-  const get_select_expression = () => {
-    if (rate_type_table_name) {
-      return get_rate_type_sql({
-        table_name: join_table_name,
-        column_name: column_definition.column_name,
-        rate_type_table_name
-      })
-    }
-    return column_value
-  }
 
   const select_func = is_main_select
     ? column_definition.main_select
@@ -136,7 +114,6 @@ const get_select_string = ({
         table_name,
         params: column_params,
         column_index,
-        rate_type_table_name,
         splits,
         data_view_options,
         query_context
@@ -147,7 +124,6 @@ const get_select_string = ({
               table_name,
               params: column_params,
               column_index,
-              rate_type_table_name,
               splits,
               data_view_options,
               query_context
@@ -156,7 +132,7 @@ const get_select_string = ({
     }
   }
 
-  const select_expression = get_select_expression()
+  const select_expression = column_value
   const select_as =
     is_main_select && column_definition.select_as
       ? column_definition.select_as({ params: column_params })
@@ -240,26 +216,12 @@ const get_select_string = ({
         column_definition.range_offset_aggregate || 'SUM'
       final_select_expression = `(SELECT ${range_offset_aggregate}(${inner_table}.${column_definition.column_name}) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
     }
-
-    if (rate_type_table_name) {
-      const rate_year_predicate = year_clause
-        ? ` AND ${rate_type_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
-        : ''
-      final_select_expression = `${final_select_expression} / NULLIF((SELECT CAST(SUM(${rate_type_table_name}.rate_type_total_count) AS DECIMAL) FROM ${rate_type_table_name} WHERE ${rate_type_table_name}.${correlation_key} = ${correlation_ref}${rate_year_predicate}), 0)`
-    }
   } else {
     final_select_expression = select_expression
   }
 
   const group_by =
-    !is_main_select || has_year_offset_range
-      ? []
-      : [
-          column_value,
-          rate_type_table_name
-            ? `${rate_type_table_name}.rate_type_total_count`
-            : null
-        ]
+    !is_main_select || has_year_offset_range ? [] : [column_value]
 
   // TODO unused currently
   // if (is_main_select && column_definition.main_group_by) {

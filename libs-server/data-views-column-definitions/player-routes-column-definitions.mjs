@@ -5,7 +5,6 @@ import {
   join_per_player_route_cte
 } from '#libs-server/data-views/rate-type/rate-type-per-player-route.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
-import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 
 const apply_player_routes_attach = ({
   query_context,
@@ -69,33 +68,16 @@ export default {
       ],
       aggregations: ['rate', 'count']
     },
-    main_select: ({ table_name, column_index, rate_type_table_name }) => {
-      const select_expression = rate_type_table_name
-        ? get_rate_type_sql({
-            table_name,
-            column_name: 'rate_type_total_count',
-            rate_type_table_name
-          })
-        : `${table_name}.rate_type_total_count`
-      return [db.raw(`${select_expression} as player_routes_${column_index}`)]
-    },
-    main_group_by: ({ table_name, rate_type_table_name }) => {
-      const group_bys = [db.raw(`${table_name}.rate_type_total_count`)]
-      if (rate_type_table_name) {
-        group_bys.push(db.raw(`${rate_type_table_name}.rate_type_total_count`))
-      }
-      return group_bys
-    },
-    main_where: ({ table_name, rate_type_table_name }) => {
-      const where_expression = rate_type_table_name
-        ? get_rate_type_sql({
-            table_name,
-            column_name: 'rate_type_total_count',
-            rate_type_table_name
-          })
-        : `${table_name}.rate_type_total_count`
-      return db.raw(where_expression)
-    },
+    main_select: ({ table_name, column_index }) => [
+      db.raw(
+        `${table_name}.rate_type_total_count as player_routes_${column_index}`
+      )
+    ],
+    main_group_by: ({ table_name }) => [
+      db.raw(`${table_name}.rate_type_total_count`)
+    ],
+    main_where: ({ table_name }) =>
+      db.raw(`${table_name}.rate_type_total_count`),
     get_cache_info: get_cache_info_for_fields_from_plays,
     supported_rate_types: [
       'per_game',

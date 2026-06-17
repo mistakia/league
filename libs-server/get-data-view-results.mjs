@@ -990,7 +990,6 @@ const add_clauses_for_table = async ({
   table_name,
   group_column_params = {},
   splits = [],
-  rate_type_column_mapping = {},
   output_select_mapping = {},
   data_view_options,
   data_view_metadata
@@ -1068,7 +1067,6 @@ const add_clauses_for_table = async ({
       column_index,
       column_definition,
       table_name,
-      rate_type_column_mapping,
       output_select_mapping,
       splits,
       data_view_options,
@@ -1105,7 +1103,6 @@ const add_clauses_for_table = async ({
         column_index,
         column_definition,
         table_name,
-        rate_type_column_mapping,
         splits,
         data_view_options,
         query_context: data_view_options.query_context
@@ -1171,7 +1168,6 @@ const add_clauses_for_table = async ({
         table_name,
         column_index: 0,
         params: where_clause.params,
-        rate_type_column_mapping,
         splits,
         data_view_options
       })
@@ -1186,7 +1182,6 @@ const add_clauses_for_table = async ({
           column_index: 0,
           column_definition,
           table_name,
-          rate_type_column_mapping,
           splits,
           data_view_options,
           query_context: data_view_options.query_context
@@ -1212,7 +1207,6 @@ const add_clauses_for_table = async ({
       table_name,
       column_index: 0,
       params: where_clause.params,
-      rate_type_column_mapping,
       output_select_mapping,
       splits,
       data_view_options
@@ -1239,8 +1233,7 @@ const add_clauses_for_table = async ({
             params: where_clause.params,
             table_name,
             column_id: where_clause.column_id,
-            column_index: 0,
-            rate_type_column_mapping
+            column_index: 0
           })
         if (main_where_group_by_string) {
           group_by_strings.push(main_where_group_by_string)
@@ -1556,7 +1549,6 @@ export const get_data_view_results_query = async ({
   const players_query = db.queryBuilder()
 
   const table_columns = []
-  const rate_type_column_mapping = {}
   const output_select_mapping = {}
   const data_view_options = {
     opening_days_joined: false,
@@ -1840,9 +1832,7 @@ export const get_data_view_results_query = async ({
   // native or translated from legacy `params.rate_type` by
   // normalize-output-param) and `supports_output` on its column-def routes
   // through apply_output_aggregator, which materializes the CTE(s), joins
-  // them, and emits the outer SELECT into `output_select_mapping`. The
-  // legacy `rate_type_tables` / `rate_type_column_mapping` dispatch loop
-  // was retired here.
+  // them, and emits the outer SELECT into `output_select_mapping`.
   for (const [index, column] of [
     ...prefix_columns,
     ...columns,
@@ -1942,7 +1932,6 @@ export const get_data_view_results_query = async ({
         table_name,
         group_column_params,
         splits: available_splits,
-        rate_type_column_mapping,
         output_select_mapping,
         data_view_options,
         data_view_metadata

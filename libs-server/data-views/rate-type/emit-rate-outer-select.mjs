@@ -62,7 +62,7 @@ export const emit_rate_outer_select = ({
   // Postgres accepts the expression alongside the outer query's SELECT-
   // driven GROUP BY -- since the join is 1:1, MAX returns the single
   // value. CAST to DECIMAL avoids integer division truncation (legacy
-  // get_rate_type_sql had the same CAST).
+  // the legacy rate emitter had the same CAST).
   //
   // Batched numerator CTEs name each measure `m_<hash>`; role-union retains
   // the legacy singleton `measure_total` column.
