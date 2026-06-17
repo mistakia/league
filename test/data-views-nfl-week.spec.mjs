@@ -16,6 +16,7 @@ import {
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import { common_column_params } from '#libs-shared'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
 
 chai.should()
 const expect = chai.expect
@@ -138,6 +139,58 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
         nfl_weeks: expanded
       })
       expect(expanded_years).to.have.members([2023, 2024])
+    })
+  })
+
+  describe('resolve_view_scope year_offset application', function () {
+    // Regression: year_offset must be applied exactly once. Explicit
+    // nfl_week_id lists are pre-shifted upstream by resolve_nfl_week_params, so
+    // re-shifting them here would double-shift the source window (base +
+    // 2*offset) while the outer join only shifts by 1*offset -- silently
+    // dropping the bottom offset-cohort of base years.
+    it('does not re-shift an explicit nfl_week_id list by year_offset', () => {
+      const scope = resolve_view_scope({
+        columns: [
+          {
+            column_id: 'player_fantasy_points_from_plays',
+            params: {
+              nfl_week_id: ['2020_REG_WEEK_5', '2020_REG_WEEK_6'],
+              year_offset: [1, 1],
+              // Pre-shifted upstream by resolve_nfl_week_params, which sets this
+              // marker; resolve_view_scope must not re-apply the offset.
+              year_offset_applied_to_nfl_week_id: true
+            }
+          }
+        ]
+      })
+      const { years } = decompose_nfl_weeks({ nfl_weeks: scope })
+      expect(years).to.deep.equal([2020])
+    })
+
+    it('applies year_offset once on the year-derived branch', () => {
+      const scope = resolve_view_scope({
+        columns: [
+          {
+            column_id: 'player_fantasy_points_from_plays',
+            params: { year: [2020], year_offset: [1, 1] }
+          }
+        ]
+      })
+      const { years } = decompose_nfl_weeks({ nfl_weeks: scope })
+      expect(years).to.deep.equal([2021])
+    })
+
+    it('applies a year_offset range once on the year-derived branch', () => {
+      const scope = resolve_view_scope({
+        columns: [
+          {
+            column_id: 'player_fantasy_points_from_plays',
+            params: { year: [2020], year_offset: [0, 1] }
+          }
+        ]
+      })
+      const { years } = decompose_nfl_weeks({ nfl_weeks: scope })
+      expect(years).to.have.members([2020, 2021])
     })
   })
 

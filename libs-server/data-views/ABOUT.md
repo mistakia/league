@@ -35,6 +35,10 @@ Rule for column-definition authors:
 - Sources declared with `source.table` (real-table joins like `player_adp_index`) are re-scanned inside the subquery directly from `source.table`. The discriminator predicates the outer JOIN applies (year-set from `source.year_default` x `year_offset`, plus `source.extra_predicates`) are reapplied inside the subquery -- the alias's predicates are not visible to the inner scope. If you add a new discriminator (year-tag, format-hash, etc.), wire it through `source.extra_predicates` or `source.year_default` so the emitter reapplies it; don't bolt it onto the outer JOIN via a custom `source.attach` and assume the inner subquery inherits it.
 - Sources declared with `source.attach` (CTE-backed) keep the outer relation name in the inner `FROM`. CTE names are visible throughout the WITH block, so this is well-defined; the CTE builder must have already restricted to the offset year range upstream (Year Pushdown Contract above).
 
+### year_offset Single-Application Invariant
+
+`year_offset` is applied to a given `nfl_week_id` list exactly once. `resolve_nfl_week_params` (`get-data-view-results.mjs`) bakes the offset into an explicit list and sets `params.year_offset_applied_to_nfl_week_id`; `resolve-view-scope.mjs` re-applies `year_offset` only to lists lacking that marker (year-derived and internally-built lists, which arrive unshifted). Re-applying to an already-shifted list double-shifts the window to `base + 2*offset` while the outer join shifts by `1*offset`, silently dropping the bottom offset-cohort of base years. See `docs/data-views-system.md` "Single-application invariant".
+
 ### Materialization Invariant
 
 Every stat or rate-type aggregation CTE MUST be registered via `query.withMaterialized(...)`, never `query.with(...)`. Predicates are always pushed at construction time in the builder, so the planner's predicate push-into-CTE is not needed. `withMaterialized` also prevents the planner from inlining the CTE into nested-loop plans that re-execute it per outer row (measured: 114x re-execution of a single stat CTE on a year-split view consumed ~6s before this invariant was established).

@@ -221,10 +221,7 @@ const process_dynamic_params = (params) => {
     }
 
     // Resolve format hashes
-    if (
-      param_key === 'scoring_format_id' ||
-      param_key === 'league_format_id'
-    ) {
+    if (param_key === 'scoring_format_id' || param_key === 'league_format_id') {
       processed_value = resolve_format_hash({
         format_value: processed_value,
         format_type: param_key
@@ -431,6 +428,10 @@ const resolve_nfl_week_params = (params) => {
       nfl_weeks: params.nfl_week_id,
       year_offset: params.year_offset
     })
+    // Mark the list as already offset-shifted so view-scope resolution
+    // (resolve-view-scope.mjs) does not re-apply year_offset and double-shift
+    // the source window.
+    params.year_offset_applied_to_nfl_week_id = true
   }
 }
 

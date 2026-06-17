@@ -1,0 +1,85 @@
+{
+  "name": "nfl_week_id column with year_offset applies the offset once",
+  "description": "Regression for the year_offset double-shift: a column that specifies an explicit nfl_week_id list (base 2022-2024) with year_offset +1 and a year split must produce a source window floored at base+offset (2023), not base+2*offset (2024). The outer join shifts by +1; double-shifting the window silently dropped the bottom offset-cohort of base years (e.g. a 2020-rookie WR lost their 2021 next-year value).",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "scoring_format_id": ["draftkings"],
+          "rate_type": ["per_game"],
+          "nfl_week_id": [
+            "2022_REG_WEEK_1",
+            "2022_REG_WEEK_2",
+            "2022_REG_WEEK_3",
+            "2022_REG_WEEK_4",
+            "2022_REG_WEEK_5",
+            "2022_REG_WEEK_6",
+            "2022_REG_WEEK_7",
+            "2022_REG_WEEK_8",
+            "2022_REG_WEEK_9",
+            "2022_REG_WEEK_10",
+            "2022_REG_WEEK_11",
+            "2022_REG_WEEK_12",
+            "2022_REG_WEEK_13",
+            "2022_REG_WEEK_14",
+            "2022_REG_WEEK_15",
+            "2022_REG_WEEK_16",
+            "2022_REG_WEEK_17",
+            "2022_REG_WEEK_18",
+            "2023_REG_WEEK_1",
+            "2023_REG_WEEK_2",
+            "2023_REG_WEEK_3",
+            "2023_REG_WEEK_4",
+            "2023_REG_WEEK_5",
+            "2023_REG_WEEK_6",
+            "2023_REG_WEEK_7",
+            "2023_REG_WEEK_8",
+            "2023_REG_WEEK_9",
+            "2023_REG_WEEK_10",
+            "2023_REG_WEEK_11",
+            "2023_REG_WEEK_12",
+            "2023_REG_WEEK_13",
+            "2023_REG_WEEK_14",
+            "2023_REG_WEEK_15",
+            "2023_REG_WEEK_16",
+            "2023_REG_WEEK_17",
+            "2023_REG_WEEK_18",
+            "2024_REG_WEEK_1",
+            "2024_REG_WEEK_2",
+            "2024_REG_WEEK_3",
+            "2024_REG_WEEK_4",
+            "2024_REG_WEEK_5",
+            "2024_REG_WEEK_6",
+            "2024_REG_WEEK_7",
+            "2024_REG_WEEK_8",
+            "2024_REG_WEEK_9",
+            "2024_REG_WEEK_10",
+            "2024_REG_WEEK_11",
+            "2024_REG_WEEK_12",
+            "2024_REG_WEEK_13",
+            "2024_REG_WEEK_14",
+            "2024_REG_WEEK_15",
+            "2024_REG_WEEK_16",
+            "2024_REG_WEEK_17",
+            "2024_REG_WEEK_18"
+          ],
+          "year_offset": [1, 1]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["WR"]
+      }
+    ],
+    "splits": ["year"],
+    "limit": 1000
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023,2024,2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t253a487733030c8eb6ca67f997e32161\" as materialized (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"active\" = true and \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024, 2025) and \"player_gamelogs\".\"year\" in (2023, 2024, 2025) group by \"nfl_games\".\"year\", \"player_gamelogs\".\"pid\"), \"rate_aggregate_5283cfe60e29\" as materialized (select \"role_union\".\"pid\" as \"pid\", SUM(role_union.pts) AS measure_total, \"nfl_games\".\"year\" from (select nfl_plays.bc_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6 AS pts from \"nfl_plays\" where nfl_plays.bc_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024, 2025) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.psr_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1 AS pts from \"nfl_plays\" where nfl_plays.psr_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024, 2025) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.trg_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1 AS pts from \"nfl_plays\" where nfl_plays.trg_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024, 2025) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG') union all select nfl_plays.player_fuml_pid AS pid, \"nfl_plays\".\"esbid\", -1 AS pts from \"nfl_plays\" where nfl_plays.player_fuml_pid IS NOT NULL and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024, 2025) and \"nfl_plays\".\"play_type\" not in ('NOPL') and \"nfl_plays\".\"seas_type\" in ('REG')) as \"role_union\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"role_union\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024, 2025) group by \"role_union\".\"pid\", \"nfl_games\".\"year\" having SUM(role_union.pts) > 0) select \"player\".\"pid\", player.fname, player.lname, CAST(MAX(rate_aggregate_5283cfe60e29.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(t253a487733030c8eb6ca67f997e32161.rate_type_total_count) AS DECIMAL), 0) AS fantasy_points_from_plays_0, \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t253a487733030c8eb6ca67f997e32161\" on \"t253a487733030c8eb6ca67f997e32161\".\"pid\" = \"player\".\"pid\" and t253a487733030c8eb6ca67f997e32161.year = player_years.year + 1 left join \"rate_aggregate_5283cfe60e29\" on \"rate_aggregate_5283cfe60e29\".\"pid\" = \"player\".\"pid\" and rate_aggregate_5283cfe60e29.year = player_years.year + 1 where player.pos IN ('WR') group by player.fname, player.lname, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 1000",
+  "tags": ["data-views", "year_offset", "nfl_week_id", "regression"],
+  "timeout_ms": 40000
+}

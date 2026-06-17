@@ -298,7 +298,9 @@ The same transformation runs in the browser on localStorage snapshot restoration
 1. Migrates legacy `params.nfl_week` to `params.nfl_week_id` for backward compatibility
 2. Resolves dynamic nfl_week_id values to concrete identifier strings
 3. Decomposes nfl_week_id array into `params.year`, `params.week`, `params.seas_type` (pre-offset base values for join function compatibility)
-4. Applies `year_offset` expansion to produce final `params.nfl_week_id` array (post-offset, used for all WHERE clauses)
+4. Applies `year_offset` expansion to produce final `params.nfl_week_id` array (post-offset, used for all WHERE clauses), and sets `params.year_offset_applied_to_nfl_week_id` to mark the list as already shifted
+
+**Single-application invariant:** `year_offset` must be applied to a given `nfl_week_id` list exactly once. Step 4 bakes it into an explicit list and sets the `year_offset_applied_to_nfl_week_id` marker; view-scope resolution (`resolve-view-scope.mjs`) re-applies `year_offset` only to lists that lack the marker (year-derived and internally-built week lists, which arrive unshifted). Re-applying to an already-shifted list double-shifts the source window to `base + 2*offset` while the outer join shifts by only `1*offset`, silently dropping the bottom offset-cohort of base years (e.g. a 2020-rookie WR loses their 2021 next-year value).
 
 **Season-Level Parameters** (retained for seasonlogs, ESPN scores, team seasonlogs):
 

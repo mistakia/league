@@ -1,7 +1,8 @@
 // View-level scope resolution. Walks all per-column and where-clause params,
 // collects explicit nfl_week_id (and year + seas_type expansions), applies
-// year_offset shifts, and returns a single canonical nfl_week_id list that
-// defines the entire result-set scope.
+// year_offset shifts once (skipping lists already pre-shifted upstream, marked
+// with year_offset_applied_to_nfl_week_id), and returns a single canonical
+// nfl_week_id list that defines the entire result-set scope.
 //
 // The REG-only default lives here, in one place. Columns/where with no
 // explicit nfl_week_id and no explicit seas_type inherit ['REG']. Columns
@@ -44,8 +45,8 @@ const expand_year_seas_type = ({ year, seas_type }) => {
 }
 
 // Resolve a params object's contribution to the view scope. nfl_week_id is
-// canonical; year+seas_type is the secondary form; year_offset is applied
-// after to expand the set.
+// canonical; year+seas_type is the secondary form; year_offset is applied once
+// (see the year_offset comment below).
 const resolve_params_contribution = (params) => {
   if (!params || typeof params !== 'object') return []
 
@@ -63,7 +64,18 @@ const resolve_params_contribution = (params) => {
 
   if (!nfl_week_ids.length) return []
 
-  if (params.year_offset != null) {
+  // year_offset is applied exactly once. resolve_nfl_week_params
+  // (get-data-view-results.mjs) bakes the offset into an explicit nfl_week_id
+  // list upstream and sets year_offset_applied_to_nfl_week_id; re-applying it
+  // here would double-shift the source window to base + 2*offset while the
+  // outer join shifts by only 1*offset, silently dropping the bottom
+  // offset-cohort of base years. Apply the offset only when it has not already
+  // been baked into this nfl_week_id list (year-derived and internally-built
+  // week lists arrive unshifted and still need it).
+  if (
+    params.year_offset != null &&
+    !params.year_offset_applied_to_nfl_week_id
+  ) {
     nfl_week_ids = apply_year_offset_to_nfl_weeks({
       nfl_weeks: nfl_week_ids,
       year_offset: params.year_offset
