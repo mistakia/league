@@ -287,10 +287,10 @@
     "SUM(rush_yds) AS team_rush_yds_from_plays"
   ],
   "team_rush_attempts_from_plays": [
-    "COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) AS team_rush_att_from_plays"
+    "SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) AS team_rush_att_from_plays"
   ],
   "player_team_rush_attempts_from_plays": [
-    "COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) AS team_rush_att_from_plays"
+    "SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) AS team_rush_att_from_plays"
   ],
   "team_rush_touchdowns_from_plays": [
     "SUM(CASE WHEN rush_td = true THEN 1 ELSE 0 END) AS team_rush_td_from_plays"
@@ -335,28 +335,28 @@
     "COUNT(*) as team_explosive_play_rate_from_plays_denominator"
   ],
   "team_play_count_from_plays": [
-    "COUNT(*) AS team_play_count_from_plays"
+    "SUM(1) AS team_play_count_from_plays"
   ],
   "player_team_play_count_from_plays": [
-    "COUNT(*) AS team_play_count_from_plays"
+    "SUM(1) AS team_play_count_from_plays"
   ],
   "team_series_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(esbid, '_', series_seq)) AS team_series_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', series_seq)) AS team_series_count_from_plays"
   ],
   "player_team_series_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(esbid, '_', series_seq)) AS team_series_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', series_seq)) AS team_series_count_from_plays"
   ],
   "team_drive_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(esbid, '_', drive_seq)) AS team_drive_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', drive_seq)) AS team_drive_count_from_plays"
   ],
   "player_team_drive_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(esbid, '_', drive_seq)) AS team_drive_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', drive_seq)) AS team_drive_count_from_plays"
   ],
   "team_offensive_play_count_from_plays": [
-    "COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END) AS team_offensive_play_count_from_plays"
+    "SUM(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE 0 END) AS team_offensive_play_count_from_plays"
   ],
   "player_team_offensive_play_count_from_plays": [
-    "COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END) AS team_offensive_play_count_from_plays"
+    "SUM(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE 0 END) AS team_offensive_play_count_from_plays"
   ],
   "team_yards_created_from_plays": [
     "SUM(yards_created) AS team_yards_created_from_plays"

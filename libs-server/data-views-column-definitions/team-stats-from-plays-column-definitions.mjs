@@ -12,10 +12,7 @@ import {
   nfl_plays_team_column_params,
   nfl_plays_column_params
 } from '#libs-shared'
-import {
-  strip_outer_sum,
-  derive_periods_from_rate_types
-} from '#libs-server/data-views/strip-outer-sum.mjs'
+import { derive_measure } from '#libs-server/data-views/measure-contract.mjs'
 
 // Every key apply_play_by_play_column_params_to_query may read from the
 // column's params. Declared as consumes_params_extra so the output-aggregator
@@ -113,7 +110,7 @@ const team_stat_from_plays = ({
   is_rate = false,
   rate_with_selects,
   force_player_active = false,
-  supports_output = null,
+  measure = null,
   measure_expr = null,
   supported_rate_types = [
     'per_game',
@@ -133,28 +130,37 @@ const team_stat_from_plays = ({
   const resolve_active = (params) =>
     force_player_active || params?.limit_to_player_active_games || false
 
-  const auto_inner = is_rate ? null : strip_outer_sum(select_string)
-  const can_auto_derive =
+  // Measure-first contract: a rate-capable single-aggregate column declares an
+  // explicit `measure: { kind, expr, decimals }`; derive_measure produces the
+  // season render, numerator measure_expr, period aggregate (sum or
+  // count_distinct), supports_output, and decimals rounding from it. is_rate
+  // numerator/denominator columns and AVG carve-outs declare no measure and
+  // pass supported_rate_types: [].
+  const derived = measure
+    ? derive_measure({ stat_name, measure, supported_rate_types })
+    : null
+
+  // Fail-fast invariant (scoped to this factory): a non-rate column advertising
+  // any rate type MUST declare a measure; an is_rate or raw-select column MUST
+  // pass supported_rate_types: []. Throws at module load.
+  if (
     !is_rate &&
-    auto_inner !== null &&
+    !derived &&
     supported_rate_types &&
     supported_rate_types.length > 0
-  const derived_supports_output = can_auto_derive
-    ? {
-        periods: [
-          'game',
-          'season',
-          ...derive_periods_from_rate_types(supported_rate_types)
-        ],
-        aggregations: ['rate', 'count']
-      }
-    : null
-  const derived_measure_expr = can_auto_derive
-    ? ({ table_name } = {}) => auto_inner
-    : null
-  const final_supports_output = supports_output || derived_supports_output
-  const final_measure_expr = measure_expr || derived_measure_expr
-  const final_apply_filters = can_auto_derive
+  ) {
+    throw new Error(
+      `team_stat_from_plays: '${stat_name}' advertises rate types but declares no measure -- declare measure: { kind, expr } or set supported_rate_types: []`
+    )
+  }
+
+  const season_select = derived ? derived.with_select : select_string
+  const final_supports_output = derived ? derived.supports_output : null
+  const final_measure_expr =
+    measure_expr || (derived ? derived.measure_expr : null)
+  const final_aggregate = derived ? derived.aggregate : null
+  const final_decimals = derived ? derived.decimals : null
+  const final_apply_filters = derived
     ? ({ query, params }) => {
         const defaults = get_play_by_play_default_params({ params })
         const filtered_params = { ...defaults }
@@ -173,7 +179,7 @@ const team_stat_from_plays = ({
     table_alias: generate_table_alias,
     column_name: stat_name,
     with_select: () =>
-      is_rate ? rate_with_selects : [`${select_string} AS ${stat_name}`],
+      is_rate ? rate_with_selects : [`${season_select} AS ${stat_name}`],
     with_where: ({ table_name, params }) => {
       if (is_rate) {
         return `sum(${table_name}.${stat_name}_numerator) / NULLIF(sum(${table_name}.${stat_name}_denominator), 0)`
@@ -264,6 +270,8 @@ const team_stat_from_plays = ({
       ? { supports_output: final_supports_output, measure_source: 'plays' }
       : {}),
     ...(final_measure_expr ? { measure_expr: final_measure_expr } : {}),
+    ...(final_aggregate ? { aggregate: final_aggregate } : {}),
+    ...(final_decimals != null ? { decimals: final_decimals } : {}),
     ...(final_apply_filters
       ? {
           apply_filters: final_apply_filters,
@@ -291,7 +299,7 @@ const team_stat_from_plays = ({
 //                                       saved entries onto the new id.
 const stat_specs = {
   team_pass_yards_from_plays: {
-    select_string: `SUM(pass_yds)`,
+    measure: { kind: 'additive', expr: `pass_yds` },
     stat_name: 'team_pass_yds_from_plays'
   },
   team_pass_rate_over_expected_from_plays: {
@@ -305,43 +313,58 @@ const stat_specs = {
     supported_rate_types: []
   },
   team_pass_attempts_from_plays: {
-    select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END`
+    },
     stat_name: 'team_pass_att_from_plays'
   },
   team_pass_completions_from_plays: {
-    select_string: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN comp = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'team_pass_comp_from_plays'
   },
   team_pass_touchdowns_from_plays: {
-    select_string: `SUM(CASE WHEN pass_td = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN pass_td = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'team_pass_td_from_plays'
   },
   team_pass_air_yards_from_plays: {
-    select_string: `SUM(dot)`,
+    measure: { kind: 'additive', expr: `dot` },
     stat_name: 'team_pass_air_yds_from_plays'
   },
   team_yards_after_catch_from_plays: {
-    select_string: `SUM(yards_after_catch)`,
+    measure: { kind: 'additive', expr: `yards_after_catch` },
     stat_name: 'team_yards_after_catch_from_plays'
   },
   team_rush_yards_from_plays: {
-    select_string: `SUM(rush_yds)`,
+    measure: { kind: 'additive', expr: `rush_yds` },
     stat_name: 'team_rush_yds_from_plays'
   },
   team_rush_attempts_from_plays: {
-    select_string: `COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END`
+    },
     stat_name: 'team_rush_att_from_plays'
   },
   team_rush_touchdowns_from_plays: {
-    select_string: `SUM(CASE WHEN rush_td = true THEN 1 ELSE 0 END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN rush_td = true THEN 1 ELSE 0 END`
+    },
     stat_name: 'team_rush_td_from_plays'
   },
   team_expected_points_added_from_plays: {
-    select_string: `SUM(epa)`,
+    measure: { kind: 'additive', expr: `epa` },
     stat_name: 'team_ep_added_from_plays'
   },
   team_win_percentage_added_from_plays: {
-    select_string: `SUM(wpa)`,
+    measure: { kind: 'additive', expr: `wpa` },
     stat_name: 'team_wp_added_from_plays'
   },
   team_success_rate_from_plays: {
@@ -372,27 +395,40 @@ const stat_specs = {
     supported_rate_types: []
   },
   team_play_count_from_plays: {
-    select_string: `COUNT(*)`,
+    measure: { kind: 'additive', expr: `1` },
     stat_name: 'team_play_count_from_plays'
   },
   team_series_count_from_plays: {
-    select_string: `COUNT(DISTINCT CONCAT(esbid, '_', series_seq))`,
+    // esbid is qualified because the numerator CTE scans nfl_plays JOIN
+    // nfl_games (both carry esbid); bare esbid is ambiguous there. nfl_plays is
+    // present in the season with-CTE too, so the qualified ref is valid in both
+    // the season render and the numerator.
+    measure: {
+      kind: 'distinct_count',
+      expr: `CONCAT(nfl_plays.esbid, '_', series_seq)`
+    },
     stat_name: 'team_series_count_from_plays'
   },
   team_drive_count_from_plays: {
-    select_string: `COUNT(DISTINCT CONCAT(esbid, '_', drive_seq))`,
+    measure: {
+      kind: 'distinct_count',
+      expr: `CONCAT(nfl_plays.esbid, '_', drive_seq)`
+    },
     stat_name: 'team_drive_count_from_plays'
   },
   team_offensive_play_count_from_plays: {
-    select_string: `COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END)`,
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE 0 END`
+    },
     stat_name: 'team_offensive_play_count_from_plays'
   },
   team_yards_created_from_plays: {
-    select_string: `SUM(yards_created)`,
+    measure: { kind: 'additive', expr: `yards_created` },
     stat_name: 'team_yards_created_from_plays'
   },
   team_yards_blocked_from_plays: {
-    select_string: `SUM(yards_blocked)`,
+    measure: { kind: 'additive', expr: `yards_blocked` },
     stat_name: 'team_yards_blocked_from_plays'
   },
   team_series_conversion_rate_from_plays: {
