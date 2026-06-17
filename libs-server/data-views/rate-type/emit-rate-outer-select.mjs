@@ -69,8 +69,17 @@ export const emit_rate_outer_select = ({
   const measure_alias = is_batchable({ column_def })
     ? compute_measure_alias({ column_def, params, identity_id })
     : 'measure_total'
+  // Round the rate value to column_def.decimals when declared, so rate render
+  // matches the column's season-total rounding. decimals null (the default for
+  // bare-SUM integer columns) leaves the division unwrapped, preserving today's
+  // unrounded rate emit.
+  const division = `CAST(MAX(${num_cte}.${measure_alias}) AS DECIMAL) / NULLIF(CAST(MAX(${cte_name}.rate_type_total_count) AS DECIMAL), 0)`
+  const value =
+    column_def.decimals != null
+      ? `ROUND(${division}, ${column_def.decimals})`
+      : division
   return {
-    sql: `CAST(MAX(${num_cte}.${measure_alias}) AS DECIMAL) / NULLIF(CAST(MAX(${cte_name}.rate_type_total_count) AS DECIMAL), 0) AS ${alias}`,
+    sql: `${value} AS ${alias}`,
     bindings: []
   }
 }
