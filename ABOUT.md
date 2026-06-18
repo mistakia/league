@@ -87,12 +87,35 @@ observations:
     plain-main_select columns. (3) select-string's empty-year_predicate trust-the-CTE branch can't
     be deleted until player_adp's range-no-split path stops depending on it (needs explicit year IN
     via source.year_default).
+  - >-
+    [completed] 2026-06-17 year_offset range remainders fully resolved and deployed (pushed
+    origin/master, yarn deploy, prod server pm2 online): pff_team_grades + team_unit_dvoa range
+    offset now emit a self-contained correlated AVG/SUM subquery via a shared
+    team_year_offset_range_select helper consumed as main_select_string_year_offset_range (grades
+    AVG, record/scoring counts SUM, dvoa dynamic column, query_context passed to the override);
+    game_opponent range no longer skips the source join for plain-main_select columns so it fans out
+    (verified on prod with multiple opponents per player); select-string trust-the-CTE
+    empty-year_predicate branch removed -- the CTE-backed path emits an explicit year IN from
+    source.year_default crossed with the offset (player_adp gained year_default), and
+    year_default-less from-plays CTEs yield no predicate by explicit contract.
+  - >-
+    [bug] 2026-06-17 Two latent year_offset bugs only executed-result parity (not SQL-snapshot)
+    surfaced, fixed with the remainders: generic team-grain correlation hardcoded nfl_team (broke
+    tm/team-keyed sources) -> now source.key_columns.team; extra_predicates gate keyed on
+    inner_qualifies_via_alias dropped seas_type for real-table no-table_alias sources
+    (player-espn-score) -> now source.table. Verified on prod.
+  - >-
+    [testing] 2026-06-17 Result-equivalence harness grown 1 -> 8 seeded fixtures
+    (nfl_team_seasonlogs catch_rate, team_unit_dvoa, espn REG-only, player_projected single+range,
+    rankings MIN/MAX, cpoe num/denom). keeptradecut range left snapshot-only (opening_days is a WITH
+    NO DATA matview, unseedable in a rolled-back txn); game_opponent fanout snapshot-only but
+    verified end-to-end on prod. Zero regression vs the 27 baseline.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-17T16:40:28.272Z'
+updated_at: '2026-06-18T00:12:37.813Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
