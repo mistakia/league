@@ -1,0 +1,51 @@
+{
+  "name": "pff_team_grades range year_offset averages grades but sums wins (executed-result parity)",
+  "description": "Seed team ZZZ with 2024 (grades_offense 60, wins 4) and 2025 (grades_offense 80, wins 12) pff_team_seasonlogs plus an out-of-window 2023 distractor (grades 10, wins 1), then run pff_team_grades_offense AND pff_team_wins together with year=[2023] + year_offset=[1,2]. Both columns render through a custom main_select gated by team_year_offset_range_select, so the range path emits a self-contained correlated subquery (the dropped-join alias case). Grades are 0-100 quality scores reduced by AVG (70.00); wins are an additive count reduced by SUM (16). Proves the helper applies the correct per-column reduction across the offset window and excludes the base-year row.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "pff_team_grades_offense",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      },
+      {
+        "column_id": "pff_team_wins",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["ZZ"]
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(pff_team_seasonlogs.grades_offense) FROM pff_team_seasonlogs WHERE pff_team_seasonlogs.nfl_team = player.current_nfl_team AND pff_team_seasonlogs.year IN (2024,2025)) AS \"pff_team_grades_offense_0\", (SELECT SUM(pff_team_seasonlogs.wins) FROM pff_team_seasonlogs WHERE pff_team_seasonlogs.nfl_team = player.current_nfl_team AND pff_team_seasonlogs.year IN (2024,2025)) AS \"pff_team_wins_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-PFF-2000-2000-01-01', 'Test', 'Pff', 'T.Pff', 'Test Pff', 'ZZ', 'ZZ', '2000-01-01', 2020, 'ZZZ')",
+      "INSERT INTO pff_team_seasonlogs (nfl_team, year, grades_offense, wins) VALUES ('ZZZ', 2023, 10.00, 1)",
+      "INSERT INTO pff_team_seasonlogs (nfl_team, year, grades_offense, wins) VALUES ('ZZZ', 2024, 60.00, 4)",
+      "INSERT INTO pff_team_seasonlogs (nfl_team, year, grades_offense, wins) VALUES ('ZZZ', 2025, 80.00, 12)"
+    ],
+    "reference_sql": "SELECT AVG(grades_offense) AS pff_team_grades_offense_0, SUM(wins) AS pff_team_wins_0 FROM pff_team_seasonlogs WHERE nfl_team = 'ZZZ' AND year IN (2024, 2025)",
+    "compare_columns": [
+      "pff_team_grades_offense_0",
+      "pff_team_wins_0"
+    ]
+  },
+  "tags": [
+    "year_offset",
+    "pff_team_grades",
+    "range",
+    "range_offset_aggregate",
+    "result-equivalence"
+  ]
+}

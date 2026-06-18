@@ -1,0 +1,44 @@
+{
+  "name": "player_keeptradecut_value range year_offset averages the offset-window snapshots (executed-result parity)",
+  "description": "keeptradecut_rankings is date-grained (no year column), so a range year_offset resolves the snapshot epochs from opening_day(base_year) + k years. Seed a 2023 REG game (so opening_days has a 2023 row), REFRESH the opening_days matview inside the rolled-back transaction, then seed three ktc snapshots for the player: at opening_day+1yr (v=4000), opening_day+2yr (v=4160), and an out-of-window distractor at opening_day+0 (v=9999). Run player_keeptradecut_value with year=[2023] + year_offset=[1,2]. The bespoke main_select_string_year_offset_range must AVG only the two in-window snapshots (4080) and exclude the base-year distractor -- proving it neither collapses to year_offset[0] nor widens the window. The oracle re-derives the AVG via an independent value threshold (v < 9000) rather than the date-window logic.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["ZZ"]
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(ktc_o.v) FROM keeptradecut_rankings ktc_o JOIN opening_days od_o ON od_o.year = 2023 WHERE ktc_o.pid = player.pid AND ktc_o.qb = 2 AND ktc_o.type = 1 AND ktc_o.d IN (EXTRACT(EPOCH FROM (date_trunc('day', od_o.opening_day) + interval '1 year'))::integer, EXTRACT(EPOCH FROM (date_trunc('day', od_o.opening_day) + interval '2 year'))::integer)) AS \"player_keeptradecut_value_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTC-2000-2000-01-01', 'Test', 'Ktc', 'T.Ktc', 'Test Ktc', 'ZZ', 'ZZ', '2000-01-01', 2020, 'ZZA')",
+      "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h, date) VALUES (970301, 2023, 1, 'REG', 'ZZA', 'ZZX', '2023-09-07')",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_rankings (pid, qb, type, d, v) SELECT 'TEST-KTC-2000-2000-01-01', 2, 1, EXTRACT(EPOCH FROM (date_trunc('day', opening_day) + interval '1 year'))::integer, 4000 FROM opening_days WHERE year = 2023",
+      "INSERT INTO keeptradecut_rankings (pid, qb, type, d, v) SELECT 'TEST-KTC-2000-2000-01-01', 2, 1, EXTRACT(EPOCH FROM (date_trunc('day', opening_day) + interval '2 year'))::integer, 4160 FROM opening_days WHERE year = 2023",
+      "INSERT INTO keeptradecut_rankings (pid, qb, type, d, v) SELECT 'TEST-KTC-2000-2000-01-01', 2, 1, EXTRACT(EPOCH FROM date_trunc('day', opening_day))::integer, 9999 FROM opening_days WHERE year = 2023"
+    ],
+    "reference_sql": "SELECT AVG(v) AS player_keeptradecut_value_0 FROM keeptradecut_rankings WHERE pid = 'TEST-KTC-2000-2000-01-01' AND qb = 2 AND type = 1 AND v < 9000",
+    "compare_columns": [
+      "player_keeptradecut_value_0"
+    ]
+  },
+  "tags": [
+    "year_offset",
+    "keeptradecut",
+    "range",
+    "result-equivalence"
+  ]
+}
