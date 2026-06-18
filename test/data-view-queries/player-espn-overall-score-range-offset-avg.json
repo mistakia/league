@@ -2,17 +2,29 @@
   "name": "player_espn_overall_score range year_offset averages the grade window",
   "description": "ESPN overall score is a 0-100 grade; a range year_offset reduces with AVG, not SUM.",
   "request": {
-    "prefix_columns": ["player_name"],
+    "prefix_columns": [
+      "player_name"
+    ],
     "columns": [
       {
         "column_id": "player_espn_overall_score",
         "params": {
-          "year": [2023],
-          "year_offset": [1, 2]
+          "year": [
+            2023
+          ],
+          "year_offset": [
+            1,
+            2
+          ]
         }
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(player_seasonlogs.espn_overall_score) FROM player_seasonlogs WHERE player_seasonlogs.pid = player.pid) AS \"espn_overall_score_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
-  "tags": ["year_offset", "espn", "range", "range_offset_aggregate"]
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(player_seasonlogs.espn_overall_score) FROM player_seasonlogs WHERE player_seasonlogs.pid = player.pid AND player_seasonlogs.year IN (2024,2025) AND player_seasonlogs.seas_type = 'REG') AS \"espn_overall_score_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "year_offset",
+    "espn",
+    "range",
+    "range_offset_aggregate"
+  ]
 }

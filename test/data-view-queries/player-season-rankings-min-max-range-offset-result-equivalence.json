@@ -1,0 +1,68 @@
+{
+  "name": "player_season min/max ranking range year_offset take the window MIN/MAX (executed-result parity)",
+  "description": "Seed one player with 2024 (min 5, max 20) and 2025 (min 2, max 30) rankings, then run player_season_min_ranking + player_season_max_ranking with year=[2023] + year_offset=[1,2]. min_rank must equal the window MIN (2) and max_rank the window MAX (30) -- proving ranks reduce with MIN/MAX, never SUM.",
+  "request": {
+    "prefix_columns": [
+      "player_name"
+    ],
+    "columns": [
+      {
+        "column_id": "player_season_min_ranking",
+        "params": {
+          "year": [
+            2023
+          ],
+          "year_offset": [
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "column_id": "player_season_max_ranking",
+        "params": {
+          "year": [
+            2023
+          ],
+          "year_offset": [
+            1,
+            2
+          ]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": [
+          "ZZ"
+        ]
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT MIN(player_rankings_index.min) FROM player_rankings_index WHERE player_rankings_index.pid = player.pid AND player_rankings_index.year IN (2024,2025) AND player_rankings_index.source_id IN ('FANTASYPROS') AND player_rankings_index.ranking_type IN ('PPR_REDRAFT')) AS \"min_rank_0\", (SELECT MAX(player_rankings_index.max) FROM player_rankings_index WHERE player_rankings_index.pid = player.pid AND player_rankings_index.year IN (2024,2025) AND player_rankings_index.source_id IN ('FANTASYPROS') AND player_rankings_index.ranking_type IN ('PPR_REDRAFT')) AS \"max_rank_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-RANK-2000-2000-01-01', 'Test', 'Rank', 'T.Rank', 'Test Rank', 'ZZ', 'ZZ', '2000-01-01', 2020)",
+      "INSERT INTO player_rankings_index (pid, pos, year, min, max, avg, std, overall_rank, position_rank, source_id, ranking_type) VALUES ('TEST-RANK-2000-2000-01-01', 'ZZ', 2024, 5, 20, 12.00, 1.00, 50, 10, 'FANTASYPROS', 'PPR_REDRAFT')",
+      "INSERT INTO player_rankings_index (pid, pos, year, min, max, avg, std, overall_rank, position_rank, source_id, ranking_type) VALUES ('TEST-RANK-2000-2000-01-01', 'ZZ', 2025, 2, 30, 15.00, 1.00, 40, 8, 'FANTASYPROS', 'PPR_REDRAFT')"
+    ],
+    "expected_rows": [
+      {
+        "min_rank_0": 2,
+        "max_rank_0": 30
+      }
+    ],
+    "compare_columns": [
+      "min_rank_0",
+      "max_rank_0"
+    ]
+  },
+  "tags": [
+    "year_offset",
+    "rankings",
+    "range",
+    "result-equivalence"
+  ]
+}

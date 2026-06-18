@@ -1,0 +1,18 @@
+{
+  "name": "pff_team_wins range year_offset sums the additive count window",
+  "description": "pff_team_wins is an additive season count (not a grade), so its range year_offset reduces with SUM rather than AVG, while still emitting the self-contained subquery the dropped join alias requires.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "pff_team_wins",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT SUM(pff_team_seasonlogs.wins) FROM pff_team_seasonlogs WHERE pff_team_seasonlogs.nfl_team = player.current_nfl_team AND pff_team_seasonlogs.year IN (2024,2025)) AS \"pff_team_wins_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": ["year_offset", "pff_team_grades", "range", "range_offset_aggregate"]
+}
