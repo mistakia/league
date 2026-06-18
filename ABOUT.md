@@ -114,12 +114,18 @@ observations:
     [testing] Closed the three deferred year_offset range result-parity gaps (keeptradecut AVG,
     game_opponent fanout, pff grades-AVG-vs-wins-SUM) with seeded fixtures; non-CONCURRENT REFRESH
     of opening_days works inside the rolled-back fixture txn, no harness change (league 9fca8aae).
+  - >-
+    [testing] Cleared the 27-fixture SQL-snapshot baseline: all were stale from the 2026-06-17
+    measure-first from-plays refactor (2024bbf9 aggregate-in-alias hash + count-expr SUM-vs-COUNT),
+    not regenerated. Validated equivalent (25 byte-identical post token-remap, 2 count-expr proven
+    equal by execution) and regenerated expected_query only; data-view-queries suite now 197
+    passing, 0 failing (league 93c33a34).
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-18T14:05:10.072Z'
+updated_at: '2026-06-18T14:34:46.579Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
