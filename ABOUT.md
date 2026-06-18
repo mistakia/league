@@ -110,12 +110,16 @@ observations:
     rankings MIN/MAX, cpoe num/denom). keeptradecut range left snapshot-only (opening_days is a WITH
     NO DATA matview, unseedable in a rolled-back txn); game_opponent fanout snapshot-only but
     verified end-to-end on prod. Zero regression vs the 27 baseline.
+  - >-
+    [testing] Closed the three deferred year_offset range result-parity gaps (keeptradecut AVG,
+    game_opponent fanout, pff grades-AVG-vs-wins-SUM) with seeded fixtures; non-CONCURRENT REFRESH
+    of opening_days works inside the rolled-back fixture txn, no harness change (league 9fca8aae).
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-18T00:12:37.813Z'
+updated_at: '2026-06-18T14:05:10.072Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
