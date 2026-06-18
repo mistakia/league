@@ -1298,8 +1298,31 @@ const add_clauses_for_table = async ({
 
   // Enhanced join handling with adaptive system
   // Skip join entirely if this table is the same as the from table (prevents self-join)
+  //
+  // A range year_offset with no where-clause normally skips the source join: the
+  // offset window is reduced by a self-contained correlated subquery (or a
+  // bespoke main_select_string_year_offset_range override) that re-scans the
+  // source table directly, so the JOIN alias would be unused. But a column that
+  // renders through a plain main_select (game_opponent, which legitimately fans
+  // out to multiple opponents across the window) reads the JOIN alias and has no
+  // self-contained override -- skipping the join there leaves a dangling alias
+  // and invalid SQL. Keep the join whenever any column in the group needs the
+  // alias; correlated-aggregate columns (no main_select) and override-backed
+  // columns (pff/dvoa team grades) still skip it.
+  const group_needs_join_alias = select_columns.some(
+    ({ column_id, column_params = {} }) => {
+      const def = data_views_column_definitions[column_id]
+      if (!def || !def.main_select) return false
+      return !(
+        is_year_offset_range(column_params) &&
+        def.main_select_string_year_offset_range
+      )
+    }
+  )
   const skip_join_for_offset_range =
-    is_year_offset_range(group_column_params) && !where_clauses.length
+    is_year_offset_range(group_column_params) &&
+    !where_clauses.length &&
+    !group_needs_join_alias
   if (table_name !== data_view_options.from_table_name) {
     if (join_func && !skip_join_for_offset_range) {
       await join_func({

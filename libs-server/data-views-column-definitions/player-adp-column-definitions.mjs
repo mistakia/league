@@ -123,6 +123,12 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
 
 const player_adp_source = {
   grain: 'player_year',
+  // The offset-base year(s) the CTE is built around. select-string's
+  // correlated-aggregate path crosses these with the year_offset range to emit
+  // an explicit `year IN (...)` predicate on the subquery -- matching the
+  // offset-expanded year filter register_player_adp_cte already applies to the
+  // CTE -- instead of trusting the CTE to have pre-filtered itself.
+  year_default: (params) => get_default_params({ params }).year,
   attach: ({ query_context, params, table_alias, join_type }) => {
     const { db, players_query, pid_reference, year_reference } = query_context
     const { year } = get_default_params({ params })

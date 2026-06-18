@@ -1,6 +1,7 @@
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_aggregate_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import { team_year_offset_range_select } from '#libs-server/data-views/param-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || [current_season.stats_season_year]
@@ -35,16 +36,42 @@ const pff_team_source = {
   year_default: (params) => [get_default_params({ params }).year[0]]
 }
 
-const create_pff_team_field = (column_name, display_name) => ({
+// PFF grades are 0-100 quality scores; record/scoring counts (wins, losses,
+// ties, points) accumulate. A range year_offset AVGs the grades across the
+// window and SUMs the counts. The custom main_select reads the source JOIN
+// alias, which get-data-view-results drops for a range offset with no
+// where-clause, so the offset path needs a self-contained subquery instead;
+// select_as makes the offset alias match the non-offset display name.
+const create_pff_team_field = (
+  column_name,
+  display_name,
+  range_offset_aggregate = 'AVG'
+) => ({
   column_name,
   table_name: 'pff_team_seasonlogs',
   table_alias: pff_team_seasonlogs_table_alias,
   source: pff_team_source,
+  range_offset_aggregate,
+  select_as: () => display_name,
   get_cache_info,
   main_select: ({ table_name, column_index }) => [
     `${table_name}.${column_name} as ${display_name}_${column_index}`
   ],
-  main_group_by: ({ table_name }) => [`${table_name}.${column_name}`]
+  main_group_by: ({ table_name }) => [`${table_name}.${column_name}`],
+  main_select_string_year_offset_range: ({
+    params,
+    data_view_options,
+    query_context
+  }) =>
+    team_year_offset_range_select({
+      table: 'pff_team_seasonlogs',
+      column: column_name,
+      source: pff_team_source,
+      params,
+      data_view_options,
+      query_context,
+      aggregate: range_offset_aggregate
+    })
 })
 
 export default {
@@ -102,16 +129,19 @@ export default {
     'pff_team_grades_pass_route'
   ),
 
-  // Team record and scoring stats
-  pff_team_wins: create_pff_team_field('wins', 'pff_team_wins'),
-  pff_team_losses: create_pff_team_field('losses', 'pff_team_losses'),
-  pff_team_ties: create_pff_team_field('ties', 'pff_team_ties'),
+  // Team record and scoring stats -- additive counts, so a range year_offset
+  // SUMs across the window rather than averaging.
+  pff_team_wins: create_pff_team_field('wins', 'pff_team_wins', 'SUM'),
+  pff_team_losses: create_pff_team_field('losses', 'pff_team_losses', 'SUM'),
+  pff_team_ties: create_pff_team_field('ties', 'pff_team_ties', 'SUM'),
   pff_team_points_scored: create_pff_team_field(
     'points_scored',
-    'pff_team_points_scored'
+    'pff_team_points_scored',
+    'SUM'
   ),
   pff_team_points_allowed: create_pff_team_field(
     'points_allowed',
-    'pff_team_points_allowed'
+    'pff_team_points_allowed',
+    'SUM'
   )
 }

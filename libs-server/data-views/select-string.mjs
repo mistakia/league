@@ -148,14 +148,21 @@ const get_select_string = ({
 
     // Use centralized references
     const year_clause = data_view_options.year_reference
-    // Team-grained sources have nfl_team, not pid; the correlated subquery
-    // must use the same projection target that apply_team_stats_join would
-    // use in the non-offset-range JOIN path (matchup opponent, per-season
-    // team, or current_nfl_team).
+    // Team-grained sources correlate on their team column, not pid; the
+    // correlated subquery must use the same projection target that
+    // apply_team_stats_join would use in the non-offset-range JOIN path
+    // (matchup opponent, per-season team, or current_nfl_team). The team
+    // column is source-specific (nfl_team_seasonlogs uses `tm`,
+    // espn_team_win_rates_index uses `team`, the dvoa/pff seasonlogs use
+    // `nfl_team`) -- read it from source.key_columns.team rather than assuming
+    // `nfl_team`, which emitted a non-existent column for the `tm`/`team`
+    // sources (invalid SQL the snapshot harness could not catch).
     const is_team_grain =
       typeof column_definition.source?.grain === 'string' &&
       column_definition.source.grain.startsWith('team')
-    const correlation_key = is_team_grain ? 'nfl_team' : 'pid'
+    const correlation_key = is_team_grain
+      ? column_definition.source?.key_columns?.team || 'nfl_team'
+      : 'pid'
     const correlation_ref = is_team_grain
       ? resolve_team_join_target({
           query_context: query_context || { data_view_options },
@@ -175,12 +182,20 @@ const get_select_string = ({
     // throughout the WITH block.
     const source = column_definition.source
     const inner_table = source?.table || join_table_name
-    const inner_qualifies_via_alias = inner_table !== join_table_name
 
+    // Anchored offset (year split): correlate to the year_reference through the
+    // range. Otherwise emit the explicit `year IN (...)` list produced by
+    // crossing source.year_default with the offset range. A source that
+    // declares no year_default yields no predicate -- these are CTE-backed
+    // sources (e.g. the from-plays CTEs) whose own builder already restricts
+    // the relation to the offset-expanded years; the year basis is an explicit
+    // source contract (year_default present -> emit it) rather than the prior
+    // un-asserted "the CTE pre-filtered itself" trust branch, which silently
+    // dropped the year filter for any CTE source that had NOT pre-filtered.
     let year_predicate
     if (year_clause) {
       year_predicate = ` AND ${inner_table}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
-    } else if (inner_qualifies_via_alias) {
+    } else {
       const in_list = compute_year_in_list(
         source,
         column_params,
@@ -188,13 +203,19 @@ const get_select_string = ({
         max_year_offset
       )
       year_predicate = in_list ? ` AND ${inner_table}.year IN (${in_list})` : ''
-    } else {
-      // CTE-backed source: the CTE builder already restricted to the offset
-      // year range upstream, so no per-row year anchor is needed here.
-      year_predicate = ''
     }
 
-    const extra_predicates_sql = inner_qualifies_via_alias
+    // Reapply source.extra_predicates whenever the subquery re-scans a real
+    // source table (source.table set), not just when the inner relation name
+    // differs from the outer alias. `inner_qualifies_via_alias` was a leaky
+    // proxy: a real-table source with no table_alias has table_name ===
+    // source.table, so it read false and silently dropped its discriminators
+    // (e.g. player-espn-score averaging across every seas_type). Match the
+    // documented intent -- "source declares a real table -> reapply the
+    // discriminators the outer JOIN normally enforces" -- by keying on
+    // source.table. CTE-backed sources (no source.table) carry their
+    // discriminators in the CTE and need none here.
+    const extra_predicates_sql = source?.table
       ? format_extra_predicates_sql(source, column_params, inner_table)
       : ''
 
@@ -205,7 +226,8 @@ const get_select_string = ({
         column_definition.main_select_string_year_offset_range({
           table_name: join_table_name,
           params: column_params,
-          data_view_options
+          data_view_options,
+          query_context
         })
     } else {
       // Reduce the offset window with the column's declared aggregate (default

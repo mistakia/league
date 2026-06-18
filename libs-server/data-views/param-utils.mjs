@@ -2,6 +2,17 @@ import {
   DEFAULT_SCORING_FORMAT_ID,
   DEFAULT_LEAGUE_FORMAT_ID
 } from '#libs-shared'
+import { resolve_team_join_target } from './resolve-team-join-target.mjs'
+
+// Escape a scalar for inline SQL emission. Mirrors select-string's
+// format_sql_literal so the team-grain offset subquery quotes discriminator
+// values the same way the generic correlated-aggregate path does.
+const format_sql_literal = (value) => {
+  if (value === null || value === undefined) return 'NULL'
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value)
+  return `'${String(value).replace(/'/g, "''")}'`
+}
 
 /**
  * Resolve params.year_offset into [min, max]. Returns null when no offset is
@@ -155,6 +166,74 @@ export const emit_year_match = ({
     return
   }
   eq(col, '=', db.raw('?', [shift(v)]))
+}
+
+/**
+ * Emit a self-contained correlated subquery that reduces a team-grained,
+ * year-grained source column across a year_offset range. Mirrors the generic
+ * team-grain correlated-aggregate path in select-string (same year predicate --
+ * anchored BETWEEN when a year_reference exists, the offset-expanded year IN
+ * list otherwise -- the same resolve_team_join_target correlation, and the same
+ * discriminator predicates) but is consumed as a column's
+ * `main_select_string_year_offset_range` override.
+ *
+ * Team-grain columns that render through a custom `main_select` (a dynamic
+ * column name like team_unit_dvoa, or a hardcoded display alias like the PFF
+ * team grades) never reach the generic path: select-string returns the custom
+ * main_select first, which reads the source JOIN alias that
+ * get-data-view-results drops for a range offset with no where-clause
+ * (skip_join_for_offset_range) -- a dangling alias and invalid SQL. This rebuilds
+ * the value from the underlying table so the override is self-contained.
+ * @param {Object} args
+ * @param {string} args.table - real source table (NOT the JOIN alias)
+ * @param {string} args.column - resolved real column to aggregate
+ * @param {Object} args.source - source descriptor (key_columns.team, year_default)
+ * @param {Object} args.params - column params (reads year_offset / year)
+ * @param {Object} [args.data_view_options] - reads year_reference
+ * @param {Object} [args.query_context] - passed to resolve_team_join_target
+ * @param {string} [args.aggregate='AVG'] - window reduction (grades/rates AVG)
+ * @param {Array<{column:string,value:*}>} [args.extra_predicates] - discriminators
+ * @returns {string} parenthesised scalar subquery expression
+ */
+export const team_year_offset_range_select = ({
+  table,
+  column,
+  source,
+  params,
+  data_view_options = {},
+  query_context = null,
+  aggregate = 'AVG',
+  extra_predicates = []
+}) => {
+  const offset_range = resolve_year_offset_range(params)
+  const [min_off, max_off] = offset_range
+  const team_column = source?.key_columns?.team || 'nfl_team'
+  const team_ref = resolve_team_join_target({
+    query_context: query_context || { data_view_options },
+    params
+  })
+
+  const year_clause = data_view_options.year_reference
+  let year_predicate
+  if (year_clause) {
+    year_predicate = ` AND ${table}.year BETWEEN ${year_clause} + ${min_off} AND ${year_clause} + ${max_off}`
+  } else {
+    const years = offset_expanded_years(
+      typeof source?.year_default === 'function'
+        ? source.year_default(params)
+        : [],
+      offset_range
+    )
+    year_predicate = years.length
+      ? ` AND ${table}.year IN (${years.join(',')})`
+      : ''
+  }
+
+  const extras = extra_predicates
+    .map((p) => ` AND ${table}.${p.column} = ${format_sql_literal(p.value)}`)
+    .join('')
+
+  return `(SELECT ${aggregate}(${table}.${column}) FROM ${table} WHERE ${table}.${team_column} = ${team_ref}${year_predicate}${extras})`
 }
 
 /**

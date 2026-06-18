@@ -1,6 +1,7 @@
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_aggregate_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import { team_year_offset_range_select } from '#libs-server/data-views/param-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || [current_season.stats_season_year]
@@ -89,8 +90,16 @@ const get_dvoa_column_name = ({ params }) => {
   return column_name
 }
 
+// team_unit_dvoa renders via a custom main_select because its column is
+// dynamic (dvoa_type param -> total_dvoa / total_dvoa_rank / ...), so it never
+// reaches the generic correlated-aggregate path and its range-offset main_select
+// read the JOIN alias get-data-view-results drops (dangling alias, invalid SQL).
+// The bespoke override resolves the dynamic column and AVGs it across the
+// offset-expanded window, scoped to the same team_unit discriminator the JOIN
+// applies. select_as makes the offset alias match the non-offset projection.
 const create_dvoa_team_unit_dvoa_field = () => ({
   ...create_dvoa_team_unit_field('team_unit_dvoa'),
+  select_as: () => 'team_unit_dvoa',
   main_select: ({ params, table_name, column_index }) => {
     const column_name = get_dvoa_column_name({ params })
     return [`${table_name}.${column_name} as team_unit_dvoa_${column_index}`]
@@ -98,6 +107,23 @@ const create_dvoa_team_unit_dvoa_field = () => ({
   main_group_by: ({ params, table_name }) => {
     const column_name = get_dvoa_column_name({ params })
     return [`${table_name}.${column_name}`]
+  },
+  main_select_string_year_offset_range: ({
+    params,
+    data_view_options,
+    query_context
+  }) => {
+    const { team_unit } = get_default_params({ params })
+    return team_year_offset_range_select({
+      table: 'dvoa_team_unit_seasonlogs_index',
+      column: get_dvoa_column_name({ params }),
+      source: dvoa_team_source,
+      params,
+      data_view_options,
+      query_context,
+      aggregate: 'AVG',
+      extra_predicates: [{ column: 'team_unit', value: team_unit }]
+    })
   }
 })
 
