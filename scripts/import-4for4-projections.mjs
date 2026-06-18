@@ -75,7 +75,12 @@ const run = async ({
 
   const first_item = data[0]
 
-  if (!first_item.Week) {
+  // Weekly projections include a Week column; season-long projections (week 0)
+  // legitimately do not, and item.Week is unused for season inserts. Only
+  // enforce the guard for weekly imports -- otherwise --season always throws
+  // 'No Week column found in data' on valid season CSV (regression from 594f7824
+  // which turned this log-and-continue check into a throw).
+  if (!is_regular_season_projection && !first_item?.Week) {
     throw new Error('No Week column found in data')
   }
 
