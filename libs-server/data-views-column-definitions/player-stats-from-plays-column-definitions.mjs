@@ -483,7 +483,7 @@ export default {
   player_pass_yards_after_catch_per_completion_from_plays:
     player_stat_from_plays({
       pid_columns: ['psr_pid'],
-      with_select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_catch) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+      with_select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_catch)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
       stat_name: 'pass_yds_after_catch_per_comp_from_plays',
       numerator_select: `SUM(yards_after_catch)`,
       denominator_select: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
@@ -492,7 +492,7 @@ export default {
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(pass_yds) / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(pass_yds)::decimal / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'pass_yds_per_att_from_plays',
     numerator_select: `SUM(pass_yds)`,
     denominator_select: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
@@ -501,7 +501,7 @@ export default {
   }),
   player_pass_depth_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::numeric / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'pass_depth_per_att_from_plays',
     numerator_select: `SUM(dot)`,
     denominator_select: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
@@ -515,7 +515,7 @@ export default {
   }),
   player_completed_air_yards_per_completion_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'comp_air_yds_per_comp_from_plays',
     numerator_select: `SUM(dot)`,
     denominator_select: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
