@@ -1,0 +1,37 @@
+{
+  "name": "team_success_rate_from_plays multi-year LIST wrap projects bare pooled rate",
+  "description": "Regression (non-offset multi-year year LIST, player subject -> wrap mode): wrap collapses _team_stats to pid-grain and carries num/den, but the non-offset main-select reads the bare _team_stats.team_success_rate_from_plays via the column_value path, which the wrap CTE never emitted -> `column ..._team_stats.team_success_rate_from_plays does not exist`. The fix has the wrap CTE also project sum(num)/NULLIF(sum(den),0) as <stat> (raw fraction, no x100) outside an offset range. AVG carve-outs and additive measures were unaffected (wrap projects their bare sum). The num/den remain for the with_where/HAVING filter path.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_success_rate_from_plays",
+        "params": {
+          "year": [2023, 2024]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["QB"]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_success_rate_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator, COUNT(*) as team_success_rate_from_plays_denominator, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2023, 2024) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2023, 2024) and \"player_gamelogs\".\"year\" in (2023, 2024) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"player_year_teams\".\"pid\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_success_rate_from_plays_numerator) as team_success_rate_from_plays_numerator, sum(t5a2b2569de6127331d06ab399f9f3dd7.team_success_rate_from_plays_denominator) as team_success_rate_from_plays_denominator, sum(t5a2b2569de6127331d06ab399f9f3dd7.team_success_rate_from_plays_numerator) / NULLIF(sum(t5a2b2569de6127331d06ab399f9f3dd7.team_success_rate_from_plays_denominator), 0) as team_success_rate_from_plays from \"t5a2b2569de6127331d06ab399f9f3dd7\" inner join \"player_year_teams\" on \"player_year_teams\".\"team\" = \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\" and \"player_year_teams\".\"year\" = \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\" group by \"player_year_teams\".\"pid\"), \"base_years\" as (SELECT unnest(ARRAY[2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_success_rate_from_plays\" AS \"team_success_rate_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = 2024 inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"pid\" = \"player\".\"pid\" where player.pos IN ('QB') group by player.fname, player.lname, \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_success_rate_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "from_plays",
+    "team_stats",
+    "wrap",
+    "multi-year",
+    "numerator_denominator"
+  ]
+}

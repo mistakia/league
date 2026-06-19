@@ -84,23 +84,24 @@ export const add_team_stats_play_by_play_with_statement = ({
   // Add groupBy clause before having
   with_query.groupBy(`nfl_plays.${team_unit}`)
 
-  // The player variant joins this base CTE to nfl_games on (year, week), so a
-  // multi-year year_offset RANGE needs year AND week projected even with no
-  // year/week split -- otherwise the join references columns the GROUP BY
-  // off-only CTE never emitted (invalid SQL). The team variant in a range goes
-  // through wrap mode (which forces year just below) or stays team-grained and
-  // pools across the window with no year projection.
-  const offset_range_player_projection =
-    is_year_offset_range(params) && limit_to_player_active_games
+  // The player variant ALWAYS joins this base CTE to nfl_games on (year, week)
+  // in create_player_team_stats_query, so year AND week must be projected onto
+  // the base CTE for the player variant in EVERY path -- single-year no-split,
+  // multi-year LIST, and offset range alike -- otherwise the join references
+  // columns the GROUP BY off-only CTE never emitted (invalid SQL: `column
+  // t<hash>.year does not exist`). The team variant in a range goes through
+  // wrap mode (which forces year just below) or stays team-grained and pools
+  // across the window with no year projection.
+  const player_variant_projection = limit_to_player_active_games
 
   // In wrap mode, force year into the base CTE so each team-year is
   // addressable for the wrap-CTE join even when no `year` split is active.
-  if (splits.includes('year') || wrap_mode || offset_range_player_projection) {
+  if (splits.includes('year') || wrap_mode || player_variant_projection) {
     with_query.select('nfl_plays.year')
     with_query.groupBy('nfl_plays.year')
   }
 
-  if (splits.includes('week') || offset_range_player_projection) {
+  if (splits.includes('week') || player_variant_projection) {
     with_query.select('nfl_plays.week')
     with_query.groupBy('nfl_plays.week')
   }
@@ -163,7 +164,8 @@ export const add_team_stats_play_by_play_with_statement = ({
       with_table_name,
       select_column_names,
       rate_columns,
-      having_clauses
+      having_clauses,
+      params
     })
   } else {
     stats_query = create_team_stats_query({
@@ -222,8 +224,18 @@ function create_player_year_team_stats_wrap_query({
   with_table_name,
   select_column_names,
   rate_columns,
-  having_clauses
+  having_clauses,
+  params = {}
 }) {
+  // In a year_offset range the displayed rate is produced by the column's
+  // self-contained `main_select_string_year_offset_range` correlated subquery,
+  // which re-pools SUM(num)/NULLIF(SUM(den),0) off the carried components, so
+  // the wrap CTE must NOT also emit a bare pre-pooled rate there (it would add
+  // an unused column and drift the deployed range-wrap snapshots). Outside a
+  // range the non-offset main-select reads the bare `_team_stats.<stat>`
+  // column_value, so the wrap CTE must project it.
+  const emit_bare_rate = !is_year_offset_range(params)
+
   const wrap_query = db(with_table_name)
     .select('player_year_teams.pid')
     .groupBy('player_year_teams.pid')
@@ -248,6 +260,18 @@ function create_player_year_team_stats_wrap_query({
           `sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}_denominator`
         )
       )
+      // Outside a year_offset range, also project the bare pooled rate (raw
+      // fraction, matching the season render scale -- no x100) so the
+      // non-offset main-select `column_value` path resolves. sum() of the
+      // bigint components is numeric, so this is true division, not integer
+      // truncation.
+      if (emit_bare_rate) {
+        wrap_query.select(
+          db.raw(
+            `sum(${with_table_name}.${select_column_name}_numerator) / NULLIF(sum(${with_table_name}.${select_column_name}_denominator), 0) as ${select_column_name}`
+          )
+        )
+      }
     } else {
       wrap_query.select(
         db.raw(
