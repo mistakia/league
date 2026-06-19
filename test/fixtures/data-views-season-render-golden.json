@@ -24,7 +24,7 @@
     "AVG(cpoe) as pass_comp_pct_over_expected_from_plays"
   ],
   "player_expected_completion_percentage_from_plays": [
-    "AVG(cp) * 100 as expected_pass_comp_pct_from_plays"
+    "CASE WHEN SUM(CASE WHEN cp IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(cp) / NULLIF(SUM(CASE WHEN cp IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END as expected_pass_comp_pct_from_plays"
   ],
   "player_pass_touchdown_percentage_from_plays": [
     "CASE WHEN SUM(CASE WHEN td = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN td = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END as pass_td_pct_from_plays"

@@ -495,8 +495,17 @@ export default {
   ),
   player_expected_completion_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `AVG(cp) * 100`,
+    // Expected completion % = mean completion probability x 100. Expressed as
+    // SUM(cp)/COUNT(cp) x 100 (mathematically identical to AVG(cp) * 100) so it
+    // can pool across a multi-year year_offset range via numerator/denominator
+    // instead of summing per-season means; rounded to 2 decimals to match the
+    // sibling percentage columns.
+    with_select_string: `CASE WHEN SUM(CASE WHEN cp IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(cp) / NULLIF(SUM(CASE WHEN cp IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END`,
     stat_name: 'expected_pass_comp_pct_from_plays',
+    numerator_select: `SUM(cp)`,
+    denominator_select: `SUM(CASE WHEN cp IS NOT NULL THEN 1 ELSE 0 END)`,
+    has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
@@ -1092,6 +1101,12 @@ export default {
     pid_columns: ['psr_pid'],
     with_select_string: `CASE WHEN SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END`,
     stat_name: 'successful_passing_play_pct_from_plays',
+    // Pool numerator/denominator across a multi-year year_offset range instead
+    // of summing per-season percentages (the latent SUM-of-percentages bug).
+    numerator_select: `SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END)`,
+    denominator_select: `SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
+    has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
 
@@ -1100,6 +1115,12 @@ export default {
       pid_columns: ['bc_pid', 'trg_pid'],
       with_select_string: `CASE WHEN SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN bc_pid IS NOT NULL OR trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END`,
       stat_name: 'successful_rushing_and_receiving_play_pct_from_plays',
+      // Pool numerator/denominator across a multi-year year_offset range instead
+      // of summing per-season percentages (the latent SUM-of-percentages bug).
+      numerator_select: `SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END)`,
+      denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL OR trg_pid IS NOT NULL THEN 1 ELSE 0 END)`,
+      has_numerator_denominator: true,
+      is_percentage: true,
       supported_rate_types: []
     }),
 
