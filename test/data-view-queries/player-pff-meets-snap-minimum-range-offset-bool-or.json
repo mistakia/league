@@ -1,0 +1,18 @@
+{
+  "name": "player_pff_meets_snap_minimum range year_offset reduces with BOOL_OR (not SUM)",
+  "description": "meets_snap_minimum is boolean; SUM(boolean) errors. A range year_offset reduces with BOOL_OR -- met the snap minimum in ANY in-window season.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_pff_meets_snap_minimum",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT BOOL_OR(pff_player_seasonlogs.meets_snap_minimum) FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025)) AS \"pff_meets_snap_minimum_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": ["year_offset", "pff", "range", "boolean", "bool_or"]
+}

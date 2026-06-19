@@ -1,0 +1,18 @@
+{
+  "name": "player_pff_offense_ranked range year_offset averages the positional rank (not SUM)",
+  "description": "offense_ranked is a positional-rank integer (verified on prod in [1,133], not a 0/1 flag), so a multi-year window must AVG like offense_rank, not SUM the ranks.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_pff_offense_ranked",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(pff_player_seasonlogs.offense_ranked) FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025)) AS \"pff_offense_ranked_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": ["year_offset", "pff", "range", "range_offset_aggregate", "rank"]
+}

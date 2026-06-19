@@ -1,6 +1,7 @@
 import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import { player_year_offset_range_select } from '#libs-server/data-views/param-utils.mjs'
 import { career_year, year } from '#libs-shared/common-column-params.mjs'
 
 const get_pff_params = ({ params = {} }) => {
@@ -72,12 +73,17 @@ const pff_player_source = {
 }
 
 // Range year_offset reduction per column (select-string's correlated-aggregate
-// path defaults to SUM). PFF grades and positional ranks are 0-100 ratings /
-// ranks, not additive, so a multi-year window must AVG, not SUM. Physical
-// measurements (height/weight) likewise AVG. Snap counts, ranked/meets-minimum
-// flags accumulate (SUM, left as the default). String metadata columns
-// (position/grade_position/unit) are intentionally absent -- neither SUM nor AVG
-// is valid for text, so they keep the default (pre-existing) behavior.
+// path defaults to SUM, which errors on text/boolean and mis-sums ranks). PFF
+// grades are 0-100 ratings and the positional columns (offense_rank/defense_rank
+// AND offense_ranked/defense_ranked -- the latter are NOT 0/1 flags but rank /
+// positional-group integers in [1,133], verified on prod: Mahomes
+// offense_ranked 38/42 across 2024/2025, so SUM=80 is meaningless) are
+// non-additive, so a multi-year window must AVG, not SUM. Physical measurements
+// (height/weight) likewise AVG. meets_snap_minimum is a boolean -- SUM(boolean)
+// errors -- and reduces with BOOL_OR (met the snap minimum in ANY season of the
+// window). Snap counts accumulate (SUM, left as the default). String metadata
+// columns (position/grade_position/unit) cannot SUM or AVG; they render the
+// most-recent (anchor) season's value via a latest_by_year override below.
 const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
   offense: 'AVG',
   defense: 'AVG',
@@ -98,22 +104,49 @@ const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
   defense_rank: 'AVG',
   special_teams_rank: 'AVG',
   punter_rank: 'AVG',
+  offense_ranked: 'AVG',
+  defense_ranked: 'AVG',
+  meets_snap_minimum: 'BOOL_OR',
   height: 'AVG',
   weight: 'AVG'
 }
 
-const create_field_from_pff_player_seasonlogs = (column_name) => ({
-  column_name,
-  select_as: () => `pff_${column_name}`,
-  table_alias: pff_player_seasonlogs_table_alias,
-  source: pff_player_source,
-  range_offset_aggregate: PFF_PLAYER_RANGE_OFFSET_AGGREGATE[column_name],
-  column_params: {
-    year,
-    career_year
-  },
-  get_cache_info
-})
+// varchar metadata: neither SUM nor AVG is defined for text. A multi-year window
+// renders the most-recent season's value (ORDER BY year DESC LIMIT 1) rather
+// than an aggregate.
+const PFF_PLAYER_TEXT_COLUMNS = new Set(['grade_position', 'position', 'unit'])
+
+const create_field_from_pff_player_seasonlogs = (column_name) => {
+  const field = {
+    column_name,
+    select_as: () => `pff_${column_name}`,
+    table_alias: pff_player_seasonlogs_table_alias,
+    source: pff_player_source,
+    range_offset_aggregate: PFF_PLAYER_RANGE_OFFSET_AGGREGATE[column_name],
+    column_params: {
+      year,
+      career_year
+    },
+    get_cache_info
+  }
+
+  if (PFF_PLAYER_TEXT_COLUMNS.has(column_name)) {
+    field.main_select_string_year_offset_range = ({
+      params,
+      data_view_options
+    }) =>
+      player_year_offset_range_select({
+        table: 'pff_player_seasonlogs',
+        column: column_name,
+        source: pff_player_source,
+        params,
+        data_view_options,
+        latest_by_year: true
+      })
+  }
+
+  return field
+}
 
 export default {
   player_pff_fg_ep_kicker:

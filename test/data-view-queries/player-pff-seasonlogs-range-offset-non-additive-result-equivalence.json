@@ -1,0 +1,56 @@
+{
+  "name": "player_pff_seasonlogs range year_offset: ranked AVG, meets_snap_minimum BOOL_OR, text latest-season (executed-result parity)",
+  "description": "Seed one player with PFF 2024 (offense_ranked=10, meets_snap_minimum=false, unit=defense, position=CB) and 2025 (offense_ranked=30, meets_snap_minimum=true, unit=offense, position=S), then run the four columns with year=[2023] + year_offset=[1,2]. offense_ranked must AVG to 20 (not SUM to 40), meets_snap_minimum must BOOL_OR to true, and unit/position must render the latest in-window season (2025 -> offense / S). Proves the invalid-SQL (SUM of boolean/varchar) and silent-mis-aggregation (SUM of ranks) classes are both resolved.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_pff_offense_ranked",
+        "params": { "year": [2023], "year_offset": [1, 2] }
+      },
+      {
+        "column_id": "player_pff_meets_snap_minimum",
+        "params": { "year": [2023], "year_offset": [1, 2] }
+      },
+      {
+        "column_id": "player_pff_unit",
+        "params": { "year": [2023], "year_offset": [1, 2] }
+      },
+      {
+        "column_id": "player_pff_position",
+        "params": { "year": [2023], "year_offset": [1, 2] }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["ZZ"]
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(pff_player_seasonlogs.offense_ranked) FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025)) AS \"pff_offense_ranked_0\", (SELECT BOOL_OR(pff_player_seasonlogs.meets_snap_minimum) FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025)) AS \"pff_meets_snap_minimum_0\", (SELECT pff_player_seasonlogs.unit FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025) ORDER BY pff_player_seasonlogs.year DESC LIMIT 1) AS \"pff_unit_0\", (SELECT pff_player_seasonlogs.position FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025) ORDER BY pff_player_seasonlogs.year DESC LIMIT 1) AS \"pff_position_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-PFFX-2000-2000-01-01', 'Test', 'Pffx', 'T.Pffx', 'Test Pffx', 'ZZ', 'ZZ', '2000-01-01', 2020)",
+      "INSERT INTO pff_player_seasonlogs (pid, year, offense_ranked, meets_snap_minimum, unit, \"position\") VALUES ('TEST-PFFX-2000-2000-01-01', 2024, 10, false, 'defense', 'CB')",
+      "INSERT INTO pff_player_seasonlogs (pid, year, offense_ranked, meets_snap_minimum, unit, \"position\") VALUES ('TEST-PFFX-2000-2000-01-01', 2025, 30, true, 'offense', 'S')"
+    ],
+    "reference_sql": "SELECT AVG(offense_ranked) AS pff_offense_ranked_0, BOOL_OR(meets_snap_minimum) AS pff_meets_snap_minimum_0, (array_agg(unit ORDER BY year DESC))[1] AS pff_unit_0, (array_agg(\"position\" ORDER BY year DESC))[1] AS pff_position_0 FROM pff_player_seasonlogs WHERE pid = 'TEST-PFFX-2000-2000-01-01' AND year IN (2024,2025)",
+    "compare_columns": [
+      "pff_offense_ranked_0",
+      "pff_meets_snap_minimum_0",
+      "pff_unit_0",
+      "pff_position_0"
+    ]
+  },
+  "tags": [
+    "year_offset",
+    "pff",
+    "range",
+    "range_offset_aggregate",
+    "bool_or",
+    "latest-season",
+    "result-equivalence"
+  ]
+}

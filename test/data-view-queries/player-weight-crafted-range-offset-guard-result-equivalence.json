@@ -1,0 +1,37 @@
+{
+  "name": "player_weight crafted year_offset range returns each player's own weight, not the cross-player SUM (executed-result parity)",
+  "description": "Seed two players (weights 200 and 300). Before the year-less-source guard, a crafted year_offset:[1,2] on the base-player column emitted (SELECT SUM(player.weight) FROM player WHERE player.pid = player.pid) -- a self-join tautology summing weight over EVERY player (so both rows showed the same giant total). The guard renders the plain per-row value, so each player shows its own weight.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_weight",
+        "params": { "year": [2023], "year_offset": [1, 2] }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["ZZ"]
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, \"player\".\"weight\" AS \"weight_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"weight\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, weight) VALUES ('TEST-WGTA-2000-2000-01-01', 'Test', 'Wgta', 'T.Wgta', 'Test Wgta', 'ZZ', 'ZZ', '2000-01-01', 2020, 200)",
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, weight) VALUES ('TEST-WGTB-2000-2000-01-01', 'Test', 'Wgtb', 'T.Wgtb', 'Test Wgtb', 'ZZ', 'ZZ', '2000-01-01', 2020, 300)"
+    ],
+    "reference_sql": "SELECT weight AS weight_0 FROM player WHERE pos = 'ZZ'",
+    "compare_columns": ["weight_0"]
+  },
+  "tags": [
+    "year_offset",
+    "range",
+    "year-less-guard",
+    "player-table",
+    "crafted-url",
+    "result-equivalence"
+  ]
+}

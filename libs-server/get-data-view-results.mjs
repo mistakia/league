@@ -27,7 +27,10 @@ import {
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
 import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
-import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
+import {
+  is_year_offset_range,
+  year_offset_range_applies
+} from '#libs-server/data-views/year-offset-range.mjs'
 import validate_row_grain_compatibility from '#libs-server/data-views/validate-row-grain-compatibility.mjs'
 import { normalize_columns } from '#libs-server/data-views/normalize-output-param.mjs'
 import { apply_output_aggregator } from '#libs-server/data-views/output-aggregator-registry.mjs'
@@ -1327,10 +1330,26 @@ const add_clauses_for_table = async ({
       )
     }
   )
+  // Only drop the source join when the offset-range path (correlated aggregate
+  // or a main_select_string_year_offset_range override) will actually replace it
+  // for EVERY column in the group. Year-less sources (grain 'player' / 'team'
+  // with no override) ignore a crafted year_offset range and render through
+  // their normal single-value join; dropping it would leave their plain
+  // column_value pointing at a vanished alias (invalid SQL) or -- for base
+  // `player` columns -- collapse to a `pid = pid` SUM over every player. Keep
+  // the join whenever any such column needs the alias.
+  const group_offset_range_applies =
+    select_columns.length > 0 &&
+    select_columns.every(({ column_id, column_params = {} }) =>
+      year_offset_range_applies(
+        data_views_column_definitions[column_id],
+        column_params
+      )
+    )
   const skip_join_for_offset_range =
-    is_year_offset_range(group_column_params) &&
     !where_clauses.length &&
-    !group_needs_join_alias
+    !group_needs_join_alias &&
+    group_offset_range_applies
   if (table_name !== data_view_options.from_table_name) {
     if (join_func && !skip_join_for_offset_range) {
       await join_func({

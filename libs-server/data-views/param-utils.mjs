@@ -237,6 +237,70 @@ export const team_year_offset_range_select = ({
 }
 
 /**
+ * Player-grain twin of team_year_offset_range_select. Emits a self-contained
+ * correlated subquery that reduces a player-year source column across a
+ * year_offset range, correlating on pid with the same anchored-BETWEEN /
+ * offset-expanded-IN year predicate the generic select-string path uses.
+ *
+ * Two modes:
+ *  - aggregate (default): `(SELECT AGG(col) FROM table WHERE pid = ref AND ...)`.
+ *  - latest_by_year: `(SELECT col FROM table WHERE pid = ref AND ... ORDER BY
+ *    year DESC LIMIT 1)` -- for year-less metadata (text positional / unit
+ *    columns) where neither SUM nor AVG is defined and the meaningful window
+ *    reduction is the most-recent (anchor) season's value.
+ * @param {Object} args
+ * @param {string} args.table - real source table (NOT the JOIN alias)
+ * @param {string} args.column - resolved real column to render
+ * @param {Object} args.source - source descriptor (key_columns.pid, year_default)
+ * @param {Object} args.params - column params (reads year_offset / year)
+ * @param {Object} [args.data_view_options] - reads year_reference / pid_reference
+ * @param {string} [args.aggregate='AVG'] - window reduction (ignored when latest_by_year)
+ * @param {boolean} [args.latest_by_year=false] - render the most-recent season's value
+ * @param {Array<{column:string,value:*}>} [args.extra_predicates] - discriminators
+ * @returns {string} parenthesised scalar subquery expression
+ */
+export const player_year_offset_range_select = ({
+  table,
+  column,
+  source,
+  params,
+  data_view_options = {},
+  aggregate = 'AVG',
+  latest_by_year = false,
+  extra_predicates = []
+}) => {
+  const offset_range = resolve_year_offset_range(params)
+  const [min_off, max_off] = offset_range
+  const pid_column = source?.key_columns?.pid || 'pid'
+  const pid_ref = data_view_options.pid_reference
+
+  const year_clause = data_view_options.year_reference
+  let year_predicate
+  if (year_clause) {
+    year_predicate = ` AND ${table}.year BETWEEN ${year_clause} + ${min_off} AND ${year_clause} + ${max_off}`
+  } else {
+    const years = offset_expanded_years(
+      typeof source?.year_default === 'function'
+        ? source.year_default(params)
+        : [],
+      offset_range
+    )
+    year_predicate = years.length
+      ? ` AND ${table}.year IN (${years.join(',')})`
+      : ''
+  }
+
+  const extras = extra_predicates
+    .map((p) => ` AND ${table}.${p.column} = ${format_sql_literal(p.value)}`)
+    .join('')
+
+  if (latest_by_year) {
+    return `(SELECT ${table}.${column} FROM ${table} WHERE ${table}.${pid_column} = ${pid_ref}${year_predicate}${extras} ORDER BY ${table}.year DESC LIMIT 1)`
+  }
+  return `(SELECT ${aggregate}(${table}.${column}) FROM ${table} WHERE ${table}.${pid_column} = ${pid_ref}${year_predicate}${extras})`
+}
+
+/**
  * Normalise a career_year or career_game param (which arrives as a 2-element
  * array [lo, hi] in any order) into a guaranteed [lo, hi] pair where lo <=
  * hi. Used by the three play-by-play with-statement builders.

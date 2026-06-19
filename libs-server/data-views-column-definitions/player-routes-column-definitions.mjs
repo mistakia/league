@@ -23,7 +23,13 @@ const apply_player_routes_attach = ({
     params,
     rate_type_table_name: table_alias,
     splits,
-    data_view_options
+    data_view_options,
+    // Without query_context the CTE's view-scope year predicate
+    // (apply_scope_to_query, gated on query_context.nfl_week_ids) never fires,
+    // so the route count is taken over EVERY season -- year-agnostic, and under
+    // a year_offset range the range is silently ignored. Mirror the snaps attach
+    // which threads query_context through for exactly this scoping.
+    query_context
   })
 
   join_per_player_route_cte({
