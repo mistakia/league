@@ -59,6 +59,14 @@ const player_stat_from_plays = ({
   numerator_select,
   denominator_select,
   has_numerator_denominator = false,
+  // Distinguishes a percentage rate (×100 scaling, e.g. completion %) from a
+  // plain ratio (×1, e.g. Y/A, aDOT). The season render bakes `100.0 *` in by
+  // hand for percentages and omits it for ratios; the generic year-offset
+  // paths (main_where here, and the correlated subquery in select-string.mjs)
+  // cannot tell them apart from has_numerator_denominator alone, so this flag
+  // threads the distinction through. A consistency invariant below fails fast
+  // if the flag disagrees with the season render's scaling.
+  is_percentage = false,
   measure = null,
   measure_expr = null,
   supported_rate_types = [
@@ -107,6 +115,27 @@ const player_stat_from_plays = ({
   // The season render is the deriver's with_select for measure columns, else
   // the raw string (carve-outs and numerator/denominator ratios).
   const season_select = derived ? derived.with_select : with_select_string
+
+  // Fail-fast invariant: for numerator/denominator columns, the is_percentage
+  // flag MUST agree with the season render's scaling. A percentage column bakes
+  // `100.0 *` into its with_select_string; a ratio column does not. If they
+  // disagree, the year-offset paths would mis-scale by 100x (the latent bug
+  // this flag fixes), so catch the misclassification at module load.
+  if (has_numerator_denominator) {
+    const season_has_percentage_scale = /100\.0\s*\*/.test(
+      String(season_select)
+    )
+    if (season_has_percentage_scale !== Boolean(is_percentage)) {
+      throw new Error(
+        `player_stat_from_plays: '${stat_name}' is_percentage=${Boolean(
+          is_percentage
+        )} disagrees with its season render (${
+          season_has_percentage_scale ? 'has' : 'lacks'
+        } 100.0 * scaling) -- set is_percentage to match the with_select_string`
+      )
+    }
+  }
+
   const final_supports_output = derived ? derived.supports_output : null
   // An explicit table-qualified measure_expr override (e.g.
   // player_receiving_yards_from_plays) wins over the deriver's default.
@@ -151,6 +180,10 @@ const player_stat_from_plays = ({
       return [`${season_select} as ${stat_name}`]
     },
     has_numerator_denominator,
+    // Surfaced on the column definition so the generic year-offset correlated
+    // subquery path in select-string.mjs can scale percentages by 100 and
+    // leave ratios at 1, consistently with main_where above.
+    is_percentage,
     with_where: ({ params }) => {
       if (should_use_main_where({ params, has_numerator_denominator })) {
         return null // No where clause in the WITH statement when using year_offset range with numerator/denominator
@@ -159,8 +192,16 @@ const player_stat_from_plays = ({
     },
     main_where: ({ params, table_name }) => {
       if (should_use_main_where({ params, has_numerator_denominator })) {
-        // LIVE year-offset numerator/denominator assembly.
-        return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) ELSE 0 END`
+        // LIVE year-offset numerator/denominator assembly. Percentage columns
+        // scale by 100 (matching their season render); ratio columns do not,
+        // and must cast to decimal so the bigint/bigint quotient is not
+        // truncated by integer division.
+        const num_sum = `SUM(${table_name}.${stat_name}_numerator)`
+        const den_sum = `SUM(${table_name}.${stat_name}_denominator)`
+        const rate_expr = is_percentage
+          ? `ROUND(100.0 * ${num_sum} / NULLIF(${den_sum}, 0), 2)`
+          : `ROUND(${num_sum}::decimal / NULLIF(${den_sum}, 0), 2)`
+        return `CASE WHEN ${den_sum} > 0 THEN ${rate_expr} ELSE 0 END`
       }
       return null
     },
@@ -206,6 +247,11 @@ const create_team_share_stat = ({
   numerator_select,
   denominator_select,
   has_numerator_denominator = false,
+  // Team shares are percentages (their season render bakes in `100.0 *`), so
+  // this defaults true. Threaded through main_where and onto the column
+  // definition so the year-offset paths scale consistently with the season
+  // render -- see the matching flag in player_stat_from_plays.
+  is_percentage = true,
   with_select_string_year_offset_range,
   main_select_string_year_offset_range
 }) => ({
@@ -330,6 +376,7 @@ const create_team_share_stat = ({
     generate_table_alias({ type: column_name, params, pid_columns }),
   source: plays_source,
   has_numerator_denominator,
+  is_percentage,
   main_select_string_year_offset_range,
   with_where: ({ params }) => {
     if (
@@ -350,7 +397,12 @@ const create_team_share_stat = ({
       params.year_offset.length > 1
     ) {
       if (has_numerator_denominator) {
-        return `CASE WHEN SUM(${table_name}.${column_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${column_name}_numerator) / NULLIF(SUM(${table_name}.${column_name}_denominator), 0), 2) ELSE 0 END`
+        const num_sum = `SUM(${table_name}.${column_name}_numerator)`
+        const den_sum = `SUM(${table_name}.${column_name}_denominator)`
+        const rate_expr = is_percentage
+          ? `ROUND(100.0 * ${num_sum} / NULLIF(${den_sum}, 0), 2)`
+          : `ROUND(${num_sum}::decimal / NULLIF(${den_sum}, 0), 2)`
+        return `CASE WHEN ${den_sum} > 0 THEN ${rate_expr} ELSE 0 END`
       } else if (main_select_string_year_offset_range) {
         return main_select_string_year_offset_range({
           table_name,
@@ -424,6 +476,7 @@ export default {
     numerator_select: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_completion_percentage_over_expected_from_plays: player_stat_from_plays(
@@ -453,6 +506,7 @@ export default {
     numerator_select: `SUM(CASE WHEN td = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_pass_interception_percentage_from_plays: player_stat_from_plays({
@@ -462,6 +516,7 @@ export default {
     numerator_select: `SUM(CASE WHEN int = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_pass_interception_worthy_percentage_from_plays: player_stat_from_plays(
@@ -472,6 +527,7 @@ export default {
       numerator_select: `SUM(CASE WHEN int_worthy = true THEN 1 ELSE 0 END)`,
       denominator_select: `SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
+      is_percentage: true,
       supported_rate_types: []
     }
   ),
@@ -531,6 +587,7 @@ export default {
     numerator_select: `SUM(CASE WHEN comp = true THEN dot ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_sacked_from_plays: player_stat_from_plays({
@@ -556,6 +613,7 @@ export default {
     numerator_select: `SUM(CASE WHEN sk = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_quarterback_hits_percentage_from_plays: player_stat_from_plays({
@@ -565,6 +623,7 @@ export default {
     numerator_select: `SUM(CASE WHEN qb_hit = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_quarterback_pressures_percentage_from_plays: player_stat_from_plays({
@@ -574,6 +633,7 @@ export default {
     numerator_select: `SUM(CASE WHEN qb_pressure = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_quarterback_hurries_percentage_from_plays: player_stat_from_plays({
@@ -583,6 +643,7 @@ export default {
     numerator_select: `SUM(CASE WHEN qb_hurry = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
 
@@ -676,6 +737,7 @@ export default {
     numerator_select: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
@@ -775,6 +837,7 @@ export default {
     numerator_select: `SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
@@ -784,6 +847,7 @@ export default {
     numerator_select: `SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
@@ -793,6 +857,7 @@ export default {
     numerator_select: `SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
@@ -882,6 +947,7 @@ export default {
     numerator_select: `SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_air_yards_per_target_from_plays: player_stat_from_plays({
@@ -913,6 +979,7 @@ export default {
     numerator_select: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
 
@@ -978,6 +1045,7 @@ export default {
     numerator_select: `SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)`,
     denominator_select: `SUM(dot)`,
     has_numerator_denominator: true,
+    is_percentage: true,
     supported_rate_types: []
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({

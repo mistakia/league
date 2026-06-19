@@ -220,7 +220,17 @@ const get_select_string = ({
       : ''
 
     if (column_definition.has_numerator_denominator) {
-      final_select_expression = `(SELECT SUM(${inner_table}.${select_as}_numerator) / NULLIF(SUM(${inner_table}.${select_as}_denominator), 0) FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
+      // Percentage columns (completion %, INT %, share %, ...) scale by 100 and
+      // round to match their season render; ratio columns (Y/A, aDOT, YAC/C,
+      // ...) keep the raw pooled quotient. The double-SUM here sums per-year
+      // bigint sub-totals, which Postgres promotes to numeric, so the ratio
+      // quotient is not subject to integer-division truncation.
+      const num_sum = `SUM(${inner_table}.${select_as}_numerator)`
+      const den_sum = `NULLIF(SUM(${inner_table}.${select_as}_denominator), 0)`
+      const rate_expr = column_definition.is_percentage
+        ? `ROUND(100.0 * ${num_sum} / ${den_sum}, 2)`
+        : `${num_sum} / ${den_sum}`
+      final_select_expression = `(SELECT ${rate_expr} FROM ${inner_table} WHERE ${inner_table}.${correlation_key} = ${correlation_ref}${year_predicate}${extra_predicates_sql})`
     } else if (column_definition.main_select_string_year_offset_range) {
       final_select_expression =
         column_definition.main_select_string_year_offset_range({
