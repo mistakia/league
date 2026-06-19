@@ -155,7 +155,7 @@ export default {
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'DOT',
       player_value_path: 'pass_depth_per_att_from_plays',
-      fixed: 1
+      fixed: 2
     }),
   player_pass_air_yards_from_plays: offensive_player_from_play_field({
     column_title: 'Passing Air Yards (By Play)',
