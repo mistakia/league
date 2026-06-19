@@ -78,12 +78,30 @@ const league_format_seasonlogs_conditions = ({ params, splits = [] }) => {
   return conditions
 }
 
+// Range year_offset reduction per column (select-string's correlated-aggregate
+// path defaults to SUM). Counting/accumulating season fields are additive (SUM
+// default): startable_games, earned_salary, points_added_earned,
+// points_added_net. Per-game averages and season/position ranks are not -- a
+// multi-year window must AVG them rather than sum them. Careerlog fields are
+// single-row-per-player and carry no year dimension, so year_offset never
+// produces a multi-row window for them -- they keep the SUM default untouched.
+const LEAGUE_FORMAT_SEASONLOGS_RANGE_OFFSET_AGGREGATE = {
+  points_added_earned_per_game: 'AVG',
+  points_added_earned_rank: 'AVG',
+  points_added_earned_position_rank: 'AVG',
+  points_added_earned_per_game_rank: 'AVG',
+  points_added_earned_per_game_position_rank: 'AVG',
+  points_added_net_per_game: 'AVG'
+}
+
 const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: league_format_player_seasonlogs_table_alias,
   source: league_format_player_seasonlogs_source,
+  range_offset_aggregate:
+    LEAGUE_FORMAT_SEASONLOGS_RANGE_OFFSET_AGGREGATE[column_name],
   get_cache_info: get_cache_info_for_league_format_seasonlogs,
   get_table_conditions: league_format_seasonlogs_conditions
 })

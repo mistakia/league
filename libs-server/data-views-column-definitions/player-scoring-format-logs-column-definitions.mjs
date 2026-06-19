@@ -28,8 +28,7 @@ const get_cache_info_for_scoring_format_careerlogs = create_static_cache_info({
 })
 
 const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
-  let scoring_format_id =
-    params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
+  let scoring_format_id = params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
   if (Array.isArray(scoring_format_id)) {
     scoring_format_id = scoring_format_id[0]
   }
@@ -86,15 +85,12 @@ const scoring_format_player_seasonlogs_source = {
 }
 
 const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {
-  let scoring_format_id =
-    params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
+  let scoring_format_id = params.scoring_format_id || DEFAULT_SCORING_FORMAT_ID
   if (Array.isArray(scoring_format_id)) {
     scoring_format_id = scoring_format_id[0]
   }
 
-  return get_table_hash(
-    `scoring_format_player_careerlogs_${scoring_format_id}`
-  )
+  return get_table_hash(`scoring_format_player_careerlogs_${scoring_format_id}`)
 }
 
 const scoring_format_player_careerlogs_source = {
@@ -106,12 +102,28 @@ const scoring_format_player_careerlogs_source = {
   ]
 }
 
+// Range year_offset reduction per column (select-string's correlated-aggregate
+// path defaults to SUM). Season fantasy points are additive (SUM default);
+// per-game averages and season ranks are not -- a multi-year window must AVG
+// them, else summing two ~17 PPG seasons renders as ~34. Careerlog fields are
+// single-row-per-player and carry no year dimension, so year_offset never
+// produces a multi-row window for them -- they keep the SUM default untouched.
+const SCORING_FORMAT_SEASONLOGS_RANGE_OFFSET_AGGREGATE = {
+  points_per_game: 'AVG',
+  points_rnk: 'AVG',
+  points_pos_rnk: 'AVG',
+  points_per_game_rnk: 'AVG',
+  points_per_game_pos_rnk: 'AVG'
+}
+
 const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: scoring_format_player_seasonlogs_table_alias,
   source: scoring_format_player_seasonlogs_source,
+  range_offset_aggregate:
+    SCORING_FORMAT_SEASONLOGS_RANGE_OFFSET_AGGREGATE[column_name],
   get_cache_info: get_cache_info_for_scoring_format_seasonlogs,
   get_table_conditions: scoring_format_seasonlogs_conditions
 })
