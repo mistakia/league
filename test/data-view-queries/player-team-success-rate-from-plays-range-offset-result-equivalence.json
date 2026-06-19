@@ -1,0 +1,47 @@
+{
+  "name": "player_team success rate range year_offset pools over window (executed-result parity)",
+  "description": "Seed team ZZ plays across 2024 (2 of 3 successful) and 2025 (1 of 1), with the test player on ZZ both years. The player variant pools the team's plays in the player's games over the offset window = 3/4 = 0.75, proving the pid-keyed gamelogs join projects year+week and recombines num/den across both offset years.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_team_success_rate_from_plays",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["ZZ"]
+      }
+    ]
+  },
+  "expected_query": "with \"tb174774c7624eae6a5465f76aeb3601a\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator, COUNT(*) as team_success_rate_from_plays_denominator, \"nfl_plays\".\"year\", \"nfl_plays\".\"week\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2024, 2025) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\", \"nfl_plays\".\"week\"), \"tb174774c7624eae6a5465f76aeb3601a_player_team_stats\" as materialized (select \"player_gamelogs\".\"pid\", sum(tb174774c7624eae6a5465f76aeb3601a.team_success_rate_from_plays_numerator) as team_success_rate_from_plays_numerator, sum(tb174774c7624eae6a5465f76aeb3601a.team_success_rate_from_plays_denominator) as team_success_rate_from_plays_denominator from \"player_gamelogs\" inner join \"nfl_games\" on \"player_gamelogs\".\"esbid\" = \"nfl_games\".\"esbid\" inner join \"tb174774c7624eae6a5465f76aeb3601a\" on \"player_gamelogs\".\"tm\" = \"tb174774c7624eae6a5465f76aeb3601a\".\"nfl_team\" and \"nfl_games\".\"year\" = \"tb174774c7624eae6a5465f76aeb3601a\".\"year\" and \"nfl_games\".\"week\" = \"tb174774c7624eae6a5465f76aeb3601a\".\"week\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2024, 2025) and \"player_gamelogs\".\"year\" in (2024, 2025) group by \"player_gamelogs\".\"pid\") select \"player\".\"pid\", player.fname, player.lname, (SELECT SUM(tb174774c7624eae6a5465f76aeb3601a_player_team_stats.team_success_rate_from_plays_numerator) / NULLIF(SUM(tb174774c7624eae6a5465f76aeb3601a_player_team_stats.team_success_rate_from_plays_denominator), 0) FROM tb174774c7624eae6a5465f76aeb3601a_player_team_stats WHERE tb174774c7624eae6a5465f76aeb3601a_player_team_stats.pid = player.pid) AS \"team_success_rate_from_plays_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-TMSR-2000-2000-01-01','Test','Tmsr','T.Tmsr','Test Tmsr','ZZ','ZZ','2000-01-01',2020,'ZZ')",
+      "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (990301, 2024, 1, 'REG', 'ZZ', 'OP')",
+      "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (990302, 2025, 1, 'REG', 'ZZ', 'OP')",
+      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rush_first_down, rec_first_down, ry_excluding_kneels) VALUES (990301, 'TEST-TMSR-2000-2000-01-01', 'OP', 'ZZ', 'ZZ', 2024, 0, 0, 0)",
+      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rush_first_down, rec_first_down, ry_excluding_kneels) VALUES (990302, 'TEST-TMSR-2000-2000-01-01', 'OP', 'ZZ', 'ZZ', 2025, 0, 0, 0)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, successful_play) VALUES (990301,1,2024,1,0,'REG','PASS','ZZ',true)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, successful_play) VALUES (990301,2,2024,1,0,'REG','PASS','ZZ',true)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, successful_play) VALUES (990301,3,2024,1,0,'REG','RUSH','ZZ',false)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, successful_play) VALUES (990302,1,2025,1,0,'REG','PASS','ZZ',true)"
+    ],
+    "reference_sql": "SELECT SUM(CASE WHEN successful_play THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(*),0) AS team_success_rate_from_plays_0 FROM nfl_plays WHERE off='ZZ' AND year IN (2024,2025) AND seas_type='REG' AND play_type <> 'NOPL'",
+    "compare_columns": ["team_success_rate_from_plays_0"]
+  },
+  "tags": [
+    "year_offset",
+    "from_plays",
+    "range",
+    "team_stats",
+    "numerator_denominator",
+    "result-equivalence"
+  ]
+}

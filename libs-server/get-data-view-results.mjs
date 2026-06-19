@@ -1245,7 +1245,15 @@ const add_clauses_for_table = async ({
       const column_definition = data_views_column_definitions[column_id]
       // TODO maybe use column_index here
       select_column_names.push(column_definition.column_name)
-      if (column_definition.is_rate) {
+      // AVG carve-outs (PROE / CPOE) declare requires_numerator_denominator_in_year_offset:
+      // they pool as SUM(num)/SUM(den) only in a multi-year year_offset range, so
+      // the team-stats CTE builder must project their summed num/den components
+      // there (and only there). is_rate columns carry num/den in every path.
+      if (
+        column_definition.is_rate ||
+        (column_definition.requires_numerator_denominator_in_year_offset &&
+          is_year_offset_range(group_column_params))
+      ) {
         rate_columns.push(column_definition.column_name)
       }
     }

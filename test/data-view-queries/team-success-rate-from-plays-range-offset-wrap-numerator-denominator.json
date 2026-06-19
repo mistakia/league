@@ -1,0 +1,25 @@
+{
+  "name": "team success rate from plays range year_offset pools numerator/denominator (wrap)",
+  "description": "Team variant: a multi-year player-subject view enters wrap mode, so the _team_stats CTE collapses to pid-grain via player_year_teams. The range correlated subquery correlates on pid (not nfl_team) and pools SUM(num)/SUM(den) over the offset window.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_success_rate_from_plays",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ]
+  },
+  "expected_query": "with \"tb174774c7624eae6a5465f76aeb3601a\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator, COUNT(*) as team_success_rate_from_plays_denominator, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2024, 2025) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2024, 2025) and \"player_gamelogs\".\"year\" in (2024, 2025) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\"), \"tb174774c7624eae6a5465f76aeb3601a_team_stats\" as materialized (select \"player_year_teams\".\"pid\", sum(tb174774c7624eae6a5465f76aeb3601a.team_success_rate_from_plays_numerator) as team_success_rate_from_plays_numerator, sum(tb174774c7624eae6a5465f76aeb3601a.team_success_rate_from_plays_denominator) as team_success_rate_from_plays_denominator from \"tb174774c7624eae6a5465f76aeb3601a\" inner join \"player_year_teams\" on \"player_year_teams\".\"team\" = \"tb174774c7624eae6a5465f76aeb3601a\".\"nfl_team\" and \"player_year_teams\".\"year\" = \"tb174774c7624eae6a5465f76aeb3601a\".\"year\" group by \"player_year_teams\".\"pid\") select \"player\".\"pid\", player.fname, player.lname, (SELECT SUM(tb174774c7624eae6a5465f76aeb3601a_team_stats.team_success_rate_from_plays_numerator) / NULLIF(SUM(tb174774c7624eae6a5465f76aeb3601a_team_stats.team_success_rate_from_plays_denominator), 0) FROM tb174774c7624eae6a5465f76aeb3601a_team_stats WHERE tb174774c7624eae6a5465f76aeb3601a_team_stats.pid = player.pid) AS \"team_success_rate_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = 2025 group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "year_offset",
+    "from_plays",
+    "range",
+    "team_stats",
+    "wrap",
+    "numerator_denominator"
+  ]
+}

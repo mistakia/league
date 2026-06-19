@@ -5,6 +5,7 @@ import get_play_by_play_default_params from '#libs-server/data-views/get-play-by
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
 import { get_team_stats_wrap_decision } from '#libs-server/data-views/team-stats-from-plays-wrap.mjs'
+import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import {
@@ -108,6 +109,15 @@ const team_stat_from_plays = ({
   stat_name,
   is_rate = false,
   rate_with_selects,
+  // Non-is_rate columns that are nonetheless pooled as a quotient in a
+  // multi-year year_offset RANGE (the AVG carve-outs PROE / CPOE). They keep
+  // their raw `select_string` season render (e.g. AVG(cpoe)) in every
+  // non-range path, and only emit numerator/denominator selects when the
+  // request is a year_offset range so the window can pool SUM(num)/SUM(den)
+  // instead of summing per-season means. is_rate columns already carry their
+  // num/den as rate_with_selects in all paths and ignore these.
+  numerator_select = null,
+  denominator_select = null,
   force_player_active = false,
   measure = null,
   measure_expr = null,
@@ -174,11 +184,76 @@ const team_stat_from_plays = ({
       }
     : null
 
+  // A column whose multi-year year_offset RANGE value is a pooled quotient:
+  // is_rate columns (num/den in every path) or AVG carve-outs that supply an
+  // explicit numerator/denominator pair (num/den only in the range path).
+  const has_numerator_denominator_pair = Boolean(
+    numerator_select && denominator_select
+  )
+  const uses_numerator_denominator = is_rate || has_numerator_denominator_pair
+
   return {
     table_alias: generate_table_alias,
     column_name: stat_name,
-    with_select: () =>
-      is_rate ? rate_with_selects : [`${season_select} AS ${stat_name}`],
+    with_select: ({ params = {} } = {}) => {
+      if (is_rate) {
+        return rate_with_selects
+      }
+      // AVG carve-out in a year_offset range: emit the numerator/denominator
+      // pair so the base CTE carries the components the range correlated
+      // subquery pools, instead of a per-season mean that cannot be re-pooled.
+      if (has_numerator_denominator_pair && is_year_offset_range(params)) {
+        return [
+          `${numerator_select} as ${stat_name}_numerator`,
+          `${denominator_select} as ${stat_name}_denominator`
+        ]
+      }
+      return [`${season_select} AS ${stat_name}`]
+    },
+    // Consumed by add_clauses_for_table to fold the AVG carve-outs into
+    // rate_columns when (and only when) the request is a year_offset range, so
+    // the team-stats CTE builder projects their summed num/den components.
+    // is_rate columns are already in rate_columns via column_definition.is_rate.
+    ...(has_numerator_denominator_pair
+      ? { requires_numerator_denominator_in_year_offset: true }
+      : {}),
+    // Self-contained year_offset-range correlated subquery for the displayed
+    // value. The final stats CTE collapses to pid-grain for the player variant
+    // (`_player_team_stats`) and for the team variant whenever wrap mode fires
+    // (multi-year player-subject view); only a team-subject view stays
+    // nfl_team-grained. Correlate on the matching key and pool num/den
+    // (raw quotient, matching the raw-fraction season render) or SUM the
+    // additive measure across the window.
+    main_select_string_year_offset_range: ({
+      table_name,
+      params = {},
+      data_view_options = {},
+      query_context = null
+    }) => {
+      const active = resolve_active(params)
+      const wrap_mode =
+        !active && query_context
+          ? get_team_stats_wrap_decision({
+              query_context,
+              params,
+              force_player_active: false
+            }).wrap_mode
+          : false
+      const pid_keyed = active || wrap_mode
+      const correlation_key = pid_keyed ? 'pid' : 'nfl_team'
+      const correlation_ref = pid_keyed
+        ? (data_view_options.pid_reference ?? query_context?.pid_reference)
+        : resolve_team_join_target({
+            query_context: query_context || { data_view_options },
+            params
+          })
+
+      if (uses_numerator_denominator) {
+        return `(SELECT SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0) FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref})`
+      }
+
+      return `(SELECT SUM(${table_name}.${stat_name}) FROM ${table_name} WHERE ${table_name}.${correlation_key} = ${correlation_ref})`
+    },
     with_where: ({ table_name }) => {
       if (is_rate) {
         return `sum(${table_name}.${stat_name}_numerator) / NULLIF(sum(${table_name}.${stat_name}_denominator), 0)`
@@ -276,11 +351,18 @@ const stat_specs = {
   },
   team_pass_rate_over_expected_from_plays: {
     select_string: `AVG(pass_oe)`,
+    // AVG(pass_oe) re-expressed as SUM(pass_oe)/COUNT(non-null) so a multi-year
+    // year_offset range pools the dropbacks rather than averaging per-season
+    // means. Only emitted in the range path; the season render stays AVG.
+    numerator_select: `SUM(pass_oe)`,
+    denominator_select: `SUM(CASE WHEN pass_oe IS NOT NULL THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_rate_over_expected_from_plays',
     supported_rate_types: []
   },
   team_completion_percentage_over_expected_from_plays: {
     select_string: `AVG(cpoe)`,
+    numerator_select: `SUM(cpoe)`,
+    denominator_select: `SUM(CASE WHEN cpoe IS NOT NULL THEN 1 ELSE 0 END)`,
     stat_name: 'team_completion_percentage_over_expected_from_plays',
     supported_rate_types: []
   },

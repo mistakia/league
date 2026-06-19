@@ -10,6 +10,27 @@ import {
   is_full_year_seas_type_coverage
 } from '#libs-shared/nfl-week-identifier.mjs'
 
+// Cross the resolved year basis with a year_offset range to the explicit
+// year-set the range covers: (min(year)+min(offset)) .. (max(year)+max(offset)).
+// Used to keep the base play-by-play CTE and the downstream player_team_stats
+// gamelogs join filtered to the same window. A no-op outside a range or when a
+// year split is active (the split anchors each row's year individually).
+const expand_years_for_offset_range = ({ years, params, splits }) => {
+  if (
+    !is_year_offset_range(params) ||
+    splits.includes('year') ||
+    !years.length
+  ) {
+    return years
+  }
+  const year_offset = params.year_offset
+  const min_y = Math.min(...years) + Math.min(...year_offset)
+  const max_y = Math.max(...years) + Math.max(...year_offset)
+  const expanded = []
+  for (let y = min_y; y <= max_y; y++) expanded.push(y)
+  return expanded
+}
+
 export const add_team_stats_play_by_play_with_statement = ({
   query,
   params = {},
@@ -63,14 +84,23 @@ export const add_team_stats_play_by_play_with_statement = ({
   // Add groupBy clause before having
   with_query.groupBy(`nfl_plays.${team_unit}`)
 
+  // The player variant joins this base CTE to nfl_games on (year, week), so a
+  // multi-year year_offset RANGE needs year AND week projected even with no
+  // year/week split -- otherwise the join references columns the GROUP BY
+  // off-only CTE never emitted (invalid SQL). The team variant in a range goes
+  // through wrap mode (which forces year just below) or stays team-grained and
+  // pools across the window with no year projection.
+  const offset_range_player_projection =
+    is_year_offset_range(params) && limit_to_player_active_games
+
   // In wrap mode, force year into the base CTE so each team-year is
   // addressable for the wrap-CTE join even when no `year` split is active.
-  if (splits.includes('year') || wrap_mode) {
+  if (splits.includes('year') || wrap_mode || offset_range_player_projection) {
     with_query.select('nfl_plays.year')
     with_query.groupBy('nfl_plays.year')
   }
 
-  if (splits.includes('week')) {
+  if (splits.includes('week') || offset_range_player_projection) {
     with_query.select('nfl_plays.week')
     with_query.groupBy('nfl_plays.week')
   }
@@ -80,27 +110,17 @@ export const add_team_stats_play_by_play_with_statement = ({
     data_view_options.query_context.nfl_week_ids &&
     data_view_options.query_context.nfl_week_ids.length
   if (!params.nfl_week_id && !view_scope_emitted) {
-    let effective_years = get_effective_years({ params, data_view_options })
     // When year_offset spans a range and the data view has no year split,
     // the outer correlated subquery in select-string.mjs cannot anchor a per-
     // row year reference, so it collapses across the offset range. Expand the
     // CTE's year filter to cover (min(year)+min(offset)) .. (max(year)+max(offset))
     // so the pre-aggregate sees the right data; otherwise the CTE is restricted
     // to params.year only and offset windows beyond the explicit year are empty.
-    const year_offset = params.year_offset
-    if (
-      is_year_offset_range(params) &&
-      !splits.includes('year') &&
-      effective_years.length
-    ) {
-      const min_off = Math.min(...year_offset)
-      const max_off = Math.max(...year_offset)
-      const min_y = Math.min(...effective_years) + min_off
-      const max_y = Math.max(...effective_years) + max_off
-      const expanded = []
-      for (let y = min_y; y <= max_y; y++) expanded.push(y)
-      effective_years = expanded
-    }
+    const effective_years = expand_years_for_offset_range({
+      years: get_effective_years({ params, data_view_options }),
+      params,
+      splits
+    })
     if (effective_years.length) {
       with_query.whereIn('nfl_plays.year', effective_years)
     }
@@ -259,7 +279,8 @@ function create_team_stats_query({
     query: team_stats_query,
     with_table_name,
     select_column_names,
-    rate_columns
+    rate_columns,
+    emit_numerator_denominator: is_year_offset_range(params)
   })
   add_splits({ query: team_stats_query, with_table_name, splits })
   add_having_clauses({ query: team_stats_query, having_clauses })
@@ -305,7 +326,15 @@ function create_player_team_stats_query({
     )
   }
 
-  const effective_years = get_effective_years({ params, data_view_options })
+  // Match the base CTE's offset-range year window (above) so the gamelogs join
+  // selects the same seasons the pre-aggregate covers; without this the games
+  // filter stays pinned to params.year and the join is empty for the shifted
+  // window.
+  const effective_years = expand_years_for_offset_range({
+    years: get_effective_years({ params, data_view_options }),
+    params,
+    splits
+  })
   if (effective_years.length) {
     player_team_stats_query.whereIn('nfl_games.year', effective_years)
     player_team_stats_query.whereIn('player_gamelogs.year', effective_years)
@@ -315,7 +344,8 @@ function create_player_team_stats_query({
     query: player_team_stats_query,
     with_table_name,
     select_column_names,
-    rate_columns
+    rate_columns,
+    emit_numerator_denominator: is_year_offset_range(params)
   })
   add_splits({ query: player_team_stats_query, with_table_name, splits })
   add_having_clauses({ query: player_team_stats_query, having_clauses })
@@ -327,16 +357,35 @@ function add_select_columns({
   query,
   with_table_name,
   select_column_names,
-  rate_columns
+  rate_columns,
+  // In a year_offset range the displayed value is produced by the correlated
+  // subquery in select-string.mjs, which pools SUM(num)/SUM(den) itself. Carry
+  // the summed numerator/denominator components through (matching the wrap CTE
+  // shape) instead of collapsing to a pre-pooled quotient the subquery cannot
+  // re-pool across the window.
+  emit_numerator_denominator = false
 }) {
   const unique_select_column_names = new Set(select_column_names)
   for (const select_column_name of unique_select_column_names) {
     if (rate_columns.includes(select_column_name)) {
-      query.select(
-        db.raw(
-          `sum(${with_table_name}.${select_column_name}_numerator) / sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}`
+      if (emit_numerator_denominator) {
+        query.select(
+          db.raw(
+            `sum(${with_table_name}.${select_column_name}_numerator) as ${select_column_name}_numerator`
+          )
         )
-      )
+        query.select(
+          db.raw(
+            `sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}_denominator`
+          )
+        )
+      } else {
+        query.select(
+          db.raw(
+            `sum(${with_table_name}.${select_column_name}_numerator) / sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}`
+          )
+        )
+      }
     } else {
       query.select(
         db.raw(

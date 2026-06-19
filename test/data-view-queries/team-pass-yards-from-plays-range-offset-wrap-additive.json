@@ -1,0 +1,25 @@
+{
+  "name": "team pass yards from plays range year_offset sums additive measure over window (wrap)",
+  "description": "Additive team measure, team variant under wrap mode: the range correlated subquery correlates on pid (the wrap _team_stats CTE is pid-keyed) and SUMs the additive measure across the offset window.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "year": [2023],
+          "year_offset": [1, 2]
+        }
+      }
+    ]
+  },
+  "expected_query": "with \"tb174774c7624eae6a5465f76aeb3601a\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2024, 2025) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"nfl_games\".\"year\" in (2024, 2025) and \"player_gamelogs\".\"year\" in (2024, 2025) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"year\", \"player_gamelogs\".\"tm\") as \"player_year_team_counts\" group by \"pid\", \"year\"), \"tb174774c7624eae6a5465f76aeb3601a_team_stats\" as materialized (select \"player_year_teams\".\"pid\", sum(tb174774c7624eae6a5465f76aeb3601a.team_pass_yds_from_plays) as team_pass_yds_from_plays from \"tb174774c7624eae6a5465f76aeb3601a\" inner join \"player_year_teams\" on \"player_year_teams\".\"team\" = \"tb174774c7624eae6a5465f76aeb3601a\".\"nfl_team\" and \"player_year_teams\".\"year\" = \"tb174774c7624eae6a5465f76aeb3601a\".\"year\" group by \"player_year_teams\".\"pid\") select \"player\".\"pid\", player.fname, player.lname, (SELECT SUM(tb174774c7624eae6a5465f76aeb3601a_team_stats.team_pass_yds_from_plays) FROM tb174774c7624eae6a5465f76aeb3601a_team_stats WHERE tb174774c7624eae6a5465f76aeb3601a_team_stats.pid = player.pid) AS \"team_pass_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = 2025 group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "year_offset",
+    "from_plays",
+    "range",
+    "team_stats",
+    "wrap",
+    "additive"
+  ]
+}
