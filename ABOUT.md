@@ -131,12 +131,16 @@ observations:
     JSON.parse (commit 3d32e6db, deployed to /root/league); import-players-nfl is the sole
     /v3/shield consumer and player rows are redundantly fed by nflverse/sleeper/espn, so impact is a
     degraded offseason feed that auto-resolves via runs oracle once NFL restores the backend.
+  - >-
+    [decision] 2026-06-20 demoted import-players-nfl from cron (commented 4 schedules) pending NFL
+    /v3/shield restoration; sleeper + nflverse cover player rows. Gated re-enable/teardown owned by
+    user:task/league/retire-or-reenable-nfl-shield-player-import.md.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-20T14:54:41.024Z'
+updated_at: '2026-06-20T15:40:23.295Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
