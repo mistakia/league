@@ -135,12 +135,17 @@ observations:
     [decision] 2026-06-20 demoted import-players-nfl from cron (commented 4 schedules) pending NFL
     /v3/shield restoration; sleeper + nflverse cover player rows. Gated re-enable/teardown owned by
     user:task/league/retire-or-reenable-nfl-shield-player-import.md.
+  - >-
+    [friction] 2026-06-20 `yarn prettier` runs prettier in --write mode across the whole repo;
+    invoking it (even as `yarn prettier --check <file>`) silently reformatted 88 files. For
+    verification use `npx prettier --check <file>` directly, or scope explicitly. Hardening (add a
+    check-only script / narrow the write glob) is unwired — candidate sibling task.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-20T15:40:23.295Z'
+updated_at: '2026-06-20T15:43:41.654Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
