@@ -796,20 +796,27 @@ WITH rate_type_per_game_2024_REG AS (
 
 **Team Version**:
 
+Games per team are counted from `nfl_games` (~7K rows for 24 years), not via `COUNT(DISTINCT esbid)` over `nfl_plays` (~1.3M rows). Every game appears as both home (`h`) and away (`v`) exactly once, so a `UNION ALL` of the two sides with `COUNT(*)` per team yields the same denominator far more cheaply (measured 5.8s → 2.3s on a year-split column set):
+
 ```sql
-WITH rate_type_per_team_game_off_2024_REG AS (
-  SELECT off_team as team, COUNT(DISTINCT esbid) as rate_type_total_count
-  FROM nfl_plays
-  WHERE seas_type = 'REG' AND year = 2024
-  GROUP BY off_team
+WITH rate_type_per_team_game_off_2023_2024_2025_REG AS (
+  SELECT team, COUNT(*) as rate_type_total_count
+  FROM (
+    SELECT h as team FROM nfl_games WHERE seas_type = 'REG' AND year IN (2023, 2024, 2025)
+    UNION ALL
+    SELECT v as team FROM nfl_games WHERE seas_type = 'REG' AND year IN (2023, 2024, 2025)
+  ) g
+  GROUP BY team
 )
 ```
 
+**Year-conditional grain (invariant)**: `year` is added to the `SELECT`/`GROUP BY` **only when a year split is active**, matching the established rate-CTE invariant (`build-period-cte`'s `include_year`, and the player per-game denominator above). Without a year split this yields one row per team (full-window game count, e.g. 51 over 2023-2025 REG); with a year split it yields one row per `(team, year)` for a year-correlated 1:1 join. Grouping by year unconditionally would fan the denominator into one row per `(team, year)` while the numerator stays a full multi-year total, and the outer `MAX()` would then collapse to a single season's game count — inflating every team per-game rate by ~N (N = years in the window). This was the 2026-06-20 grain bug (commit cbcfb8c4).
+
 **Optimizations**:
 
-- Uses year-specific tables when possible
-- Filters inactive players
-- Handles career spans efficiently
+- Counts games from `nfl_games` (home/away `UNION ALL`) rather than `DISTINCT esbid` over `nfl_plays`
+- Year-conditional partitioning keeps the denominator team-invariant when unsplit
+- Player version uses year-specific tables when possible and filters inactive players
 
 ---
 
