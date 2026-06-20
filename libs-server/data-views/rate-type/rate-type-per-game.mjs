@@ -12,6 +12,7 @@ import {
 } from '#libs-server/data-views/param-utils.mjs'
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import { is_team_identity } from '#libs-server/data-views/identities.mjs'
+import { resolve_team_join_target as resolve_team_rate_join_target } from '#libs-server/data-views/output-aggregator/aggregator-rate.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   const nfl_week = resolve_nfl_week_id_from_year_param(params)
@@ -314,37 +315,31 @@ export const join_team_per_game_cte = ({
   rate_type_table_name,
   splits,
   params,
+  query_context,
+  column_def = null,
   data_view_options = {}
 }) => {
+  // Project the denominator onto the team via the SAME resolver the numerator
+  // (aggregator-rate) uses: it routes the default player-cell case through the
+  // player_year->team_year identity bridge and returns player_year_teams.team.
+  // Previously this branch hardcoded player.current_nfl_team while the numerator
+  // resolved through that bridge -- so for an offseason team-changer the volume
+  // (numerator) and games (denominator) came from DIFFERENT teams, and free
+  // agents (current_nfl_team='INA') lost the column entirely (no nfl_games row).
+  // Sharing one resolver makes them project onto the same team by construction
+  // and folds in team_reference / matchup_opponent_type precedence (replacing
+  // the duplicated matchup switch this branch carried). apply_bridge is
+  // idempotent, so resolving here (the denominator join fires first) and again
+  // in the numerator join no-ops the second time. Resolved OUTSIDE the leftJoin
+  // callback because the resolver emits the bridge CTE + join on players_query.
+  const ctx = query_context ?? data_view_options.query_context
+  const team_join_target = resolve_team_rate_join_target({
+    query_context: ctx,
+    params,
+    source: column_def?.source || null
+  })
   players_query.leftJoin(rate_type_table_name, function () {
-    const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
-      ? params.matchup_opponent_type[0] &&
-        typeof params.matchup_opponent_type[0] === 'object'
-        ? null
-        : params.matchup_opponent_type[0]
-      : params.matchup_opponent_type
-
-    if (matchup_opponent_type) {
-      switch (matchup_opponent_type) {
-        case 'current_week_opponent_total':
-          this.on(
-            `${rate_type_table_name}.team`,
-            'current_week_opponents.opponent'
-          )
-          break
-        case 'next_week_opponent_total':
-          this.on(
-            `${rate_type_table_name}.team`,
-            'next_week_opponents.opponent'
-          )
-          break
-        default:
-          console.log(`Unknown matchup_opponent_type: ${matchup_opponent_type}`)
-          break
-      }
-    } else {
-      this.on(`${rate_type_table_name}.team`, 'player.current_nfl_team')
-    }
+    this.on(`${rate_type_table_name}.team`, team_join_target)
 
     if (splits.includes('year')) {
       const offset_range = resolve_year_offset_range(params)
@@ -401,6 +396,8 @@ export const join_per_game_cte = ({
   splits,
   params,
   is_team = false,
+  query_context,
+  column_def = null,
   data_view_options = {}
 }) => {
   if (is_team) {
@@ -409,6 +406,8 @@ export const join_per_game_cte = ({
       rate_type_table_name,
       splits,
       params,
+      query_context,
+      column_def,
       data_view_options
     })
   } else {
@@ -455,7 +454,13 @@ export const add_cte = ({ query_context, params, cte_name, identity_id }) => {
   query_context.applied_output_ctes.add(cte_name)
 }
 
-export const join_cte = ({ query_context, cte_name, identity_id, params }) => {
+export const join_cte = ({
+  query_context,
+  cte_name,
+  identity_id,
+  params,
+  column_def
+}) => {
   const is_team = is_team_identity(identity_id)
   join_per_game_cte({
     players_query: query_context.players_query,
@@ -463,6 +468,8 @@ export const join_cte = ({ query_context, cte_name, identity_id, params }) => {
     splits: query_context.splits,
     params: params ?? query_context.params,
     is_team,
+    query_context,
+    column_def,
     data_view_options: query_context.data_view_options
   })
 }

@@ -58,4 +58,25 @@ describe('data-views team per-game denominator grain', () => {
     expect(sql).to.match(/select "h" as "team", "year" from "nfl_games"/)
     expect(sql).to.match(/group by "team", "year"/)
   })
+
+  // Regression for trap #2: the numerator (aggregator-rate) projects the team
+  // through the player_year->team_year bridge (player_year_teams.team), but the
+  // per_game denominator join previously hardcoded player.current_nfl_team -- so
+  // for an offseason team-changer the volume and games came from DIFFERENT teams,
+  // and free agents (current_nfl_team='INA', no nfl_games row) lost the column.
+  // Both halves must now project onto player_year_teams.team via the SAME shared
+  // resolver.
+  it('joins the per_game denominator on the SAME bridge team as the numerator (not current_nfl_team)', async () => {
+    const { query } = await get_data_view_results_query(
+      team_per_game_request({ year: [2023, 2024, 2025] })
+    )
+    const sql = query.toString()
+
+    // numerator (rate aggregate) projects via the bridge -- "...team_code" = player_year_teams.team
+    expect(sql).to.match(/"team_code" = "player_year_teams"\."team"/)
+    // denominator (games CTE) now projects via the SAME bridge -- "...team" = player_year_teams.team
+    expect(sql).to.match(/"team" = "player_year_teams"\."team"/)
+    // and crucially NO LONGER joins the denominator on player.current_nfl_team
+    expect(sql).to.not.match(/"team" = "player"\."current_nfl_team"/)
+  })
 })
