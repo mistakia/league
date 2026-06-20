@@ -34,6 +34,15 @@ const FP_OUTPUT_PERIODS = [
 
 const plays_source = {
   grain: 'player_year',
+  // Grain narrowed to player_year (not player_year_week) so the
+  // player_year->player_year_week bridge path isn't exercised by week splits.
+  // The `with` builder (fantasy_points_from_plays_with) projects year AND week
+  // onto the CTE, and apply_plays_join emits the week join predicate; declare
+  // supports_splits so the dispatcher forwards both splits to those funcs
+  // instead of intersecting against grain's ['year'] and dropping week -- which
+  // collapses the CTE to a season total repeated at every per-week row. Mirrors
+  // player_stats_from_plays / team_stats_from_plays / defensive_player_stats.
+  supports_splits: ['year', 'week'],
   attach: apply_plays_join
 }
 
