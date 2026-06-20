@@ -149,10 +149,14 @@ JOB_PROJECT=league
 
 ## NFL.com FDL players (sources player_changelog.nfl_status: IR/PUP/SUSP/NFI/DID_NOT_REPORT)
 ## 3:30am daily plus game-day 12:15/17:10/20:00 in-season.  Mirrors Sleeper cadence.
-30 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
-15 12 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
-10 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
-0 20 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
+## DISABLED 2026-06-20 pending NFL /v3/shield restoration: upstream returns HTTP 500
+## "Fastly error: unknown domain shield-jarvis-api.nfl.com" (CDN backend deregistered).
+## Player rows stay covered by import-players-sleeper + nflverse. Gated re-enable/teardown:
+## see user:task/league/retire-or-reenable-nfl-shield-player-import.md
+# 30 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
+# 15 12 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
+# 10 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
+# 0 20 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
 
 
 
