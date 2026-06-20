@@ -9,6 +9,22 @@ debug.enable('nfl')
 
 const fetch_json_with_context = async (url, response) => {
   const body = await response.text()
+
+  // Guard non-OK HTTP responses before attempting JSON.parse. Upstream NFL
+  // endpoints sit behind Fastly/Varnish, which return HTML error pages (e.g. a
+  // 500 "unknown domain" edge error when a backend origin is unmapped, or a 401
+  // auth page) on failure. Parsing those throws a misleading
+  // "Unexpected token '<'" message; lead with the HTTP status and content-type
+  // instead so the real failure is legible. See the 2026-06-20
+  // shield-jarvis-api.nfl.com upstream outage.
+  if (!response.ok) {
+    const content_type = response.headers.get('content-type') || ''
+    const snippet = body.replace(/\s+/g, ' ').trim().slice(0, 300)
+    throw new Error(
+      `nfl fetch HTTP ${response.status} (non-OK) | url=${url} | content-type="${content_type}" | body[0:300]=${snippet}`
+    )
+  }
+
   try {
     return JSON.parse(body)
   } catch (err) {
