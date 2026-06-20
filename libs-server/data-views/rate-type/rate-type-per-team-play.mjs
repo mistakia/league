@@ -145,7 +145,6 @@ export const join_per_team_play_cte = ({
   params,
   rate_type_table_name,
   splits,
-  group_by = null,
   team_unit = 'off',
   data_view_options = {}
 }) => {
@@ -230,31 +229,11 @@ export const join_per_team_play_cte = ({
       )
     }
 
-    // TODO review this
-
-    if (group_by) {
-      switch (group_by) {
-        case 'half':
-          this.on(
-            db.raw(
-              `${rate_type_table_name}.half = CASE WHEN player_games.qtr <= 2 THEN 1 ELSE 2 END`
-            )
-          )
-          break
-        case 'quarter':
-          this.on(`${rate_type_table_name}.qtr`, 'player_games.qtr')
-          break
-        case 'drive':
-          this.on(`${rate_type_table_name}.drive_seq`, 'player_games.drive_seq')
-          break
-        case 'series':
-          this.on(
-            `${rate_type_table_name}.series_seq`,
-            'player_games.series_seq'
-          )
-          break
-      }
-    }
+    // No group_by correlation here by design: a group_by period
+    // (half/quarter/drive/series) is encapsulated in the denominator's
+    // COUNT(DISTINCT CONCAT(esbid, <dim>)) expression in add_per_team_play_cte,
+    // which keeps the CTE at team grain. There is no per-dimension column to
+    // join against, and correlating one would fan the denominator out.
   })
 }
 
@@ -309,10 +288,11 @@ export const add_cte = ({
   query_context.applied_output_ctes.add(cte_name)
 }
 
-// Legacy parity: rate_type_handlers wired join_cte directly to
-// join_per_team_play_cte without dispatch params; the group_by-branch join
-// conditions (drive_seq / series_seq / qtr / half) were never emitted on the
-// JOIN even though add_cte emits them on the CTE.
+// dispatch_params (play_type / group_by) intentionally not threaded into the
+// standard join: both affect only the CTE body (the play filter and the
+// COUNT(DISTINCT) denominator), never the join correlation, which is the team
+// unit (+ year/week split). See join_per_team_play_cte. team_unit is the lone
+// dispatch field the join needs, and it is resolved explicitly below.
 export const join_cte = ({
   query_context,
   column_def,
