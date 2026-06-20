@@ -588,15 +588,14 @@ export default {
     supported_rate_types: []
   }),
 
-  // completed air yards / total air yards
+  // completed air yards / total air yards (a unitless ratio, not a percentage)
   player_passing_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN dot ELSE 0 END) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(dot) > 0 THEN CAST(ROUND(SUM(CASE WHEN comp = true THEN dot ELSE 0 END)::decimal / NULLIF(SUM(dot), 0), 4) AS decimal) ELSE 0 END`,
     stat_name: 'pass_air_conv_ratio_from_plays',
     numerator_select: `SUM(CASE WHEN comp = true THEN dot ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
+    denominator_select: `SUM(dot)`,
     has_numerator_denominator: true,
-    is_percentage: true,
     supported_rate_types: []
   }),
   player_sacked_from_plays: player_stat_from_plays({
@@ -1046,15 +1045,14 @@ export default {
     stat_name: 'rec_yds_after_catch_from_plays'
   }),
 
-  // receiving yards / air yards
+  // receiving yards / air yards (a unitless ratio, not a percentage)
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `CASE WHEN SUM(dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) / NULLIF(SUM(dot), 0), 4) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(dot) > 0 THEN CAST(ROUND(SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)::decimal / NULLIF(SUM(dot), 0), 4) AS decimal) ELSE 0 END`,
     stat_name: 'rec_air_conv_ratio_from_plays',
     numerator_select: `SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)`,
     denominator_select: `SUM(dot)`,
     has_numerator_denominator: true,
-    is_percentage: true,
     supported_rate_types: []
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({

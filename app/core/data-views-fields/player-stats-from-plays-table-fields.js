@@ -176,7 +176,7 @@ export default {
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'PACR',
       player_value_path: 'pass_air_conv_ratio_from_plays',
-      fixed: 1
+      fixed: 2
     }),
   player_sacked_from_plays: offensive_player_from_play_field({
     column_title: 'Sacks (By Play)',
