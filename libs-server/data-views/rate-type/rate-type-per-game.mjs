@@ -174,15 +174,29 @@ const add_team_per_game_cte = ({
   // so UNION ALL of {home, away} → COUNT(*) per (team, year[, week]) yields
   // the same denominator as DISTINCT esbid per (off, year[, week]) on plays.
   // Measured: 5.8s → 2.3s on year-splits-with-a-column-set-to-a-specific-year.
-  const select_cols = ['team', 'year']
-  const group_cols = ['team', 'year']
+  // Partition the denominator by year ONLY when a year split is active, matching
+  // the established rate-CTE invariant (build-period-cte's `include_year` and the
+  // player per-game denominator below). The join only correlates on year under a
+  // year split (join_team_per_game_cte), so grouping by year unconditionally fans
+  // the denominator into one row per (team, year); with no year split the outer
+  // MAX() then collapses to a single season's game count while the numerator is a
+  // full multi-year total -- inflating every team per-game rate by ~N (N = years
+  // in the window). Keeping year conditional yields one row per team (full-window
+  // game count) when unsplit, and a year-correlated 1:1 join when split.
+  const select_cols = ['team']
+  const group_cols = ['team']
+  if (splits.includes('year')) {
+    select_cols.push('year')
+    group_cols.push('year')
+  }
   if (splits.includes('week')) {
     select_cols.push('week')
     group_cols.push('week')
   }
 
   const make_side = (team_col) => {
-    const sub = db('nfl_games').select(`${team_col} as team`, 'year')
+    const sub = db('nfl_games').select(`${team_col} as team`)
+    if (splits.includes('year')) sub.select('year')
     if (splits.includes('week')) sub.select('week')
     apply_scope_to_query({
       query: sub,
