@@ -120,12 +120,23 @@ observations:
     not regenerated. Validated equivalent (25 byte-identical post token-remap, 2 count-expr proven
     equal by execution) and regenerated expected_query only; data-view-queries suite now 197
     passing, 0 failing (league 93c33a34).
+  - >-
+    [incident] 2026-06-20 import-players-nfl failed because api.nfl.com/v3/shield returned HTTP 500
+    "Fastly error: unknown domain shield-jarvis-api.nfl.com" — an upstream NFL CDN backend
+    deregistration, not an auth or cursor bug (session token valid with full roles, and the sibling
+    experience/v1/games endpoint on the same host still returned 200 JSON); the after:"null" cursor
+    is a red herring since the request dies at the Fastly edge before reaching GraphQL.
+  - >-
+    [refinement] 2026-06-20 hardened nfl.mjs fetch_json_with_context to throw on non-OK HTTP before
+    JSON.parse (commit 3d32e6db, deployed to /root/league); import-players-nfl is the sole
+    /v3/shield consumer and player rows are redundantly fed by nflverse/sleeper/espn, so impact is a
+    degraded offseason feed that auto-resolves via runs oracle once NFL restores the backend.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-18T14:34:46.579Z'
+updated_at: '2026-06-20T14:54:41.024Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
