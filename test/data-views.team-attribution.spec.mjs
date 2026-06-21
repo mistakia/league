@@ -294,4 +294,68 @@ describe('data-views team_attribution', () => {
       expect(historical).to.not.equal(current)
     })
   })
+
+  describe('counting columns honor team_attribution', () => {
+    // team-stats-from-plays COUNTING columns (no rate aggregation) route their
+    // team join through the same passive resolver as the rate types, so they
+    // honor team_attribution identically once the param is declared on the
+    // field. 'historical' is the default; an unset param resolves through the
+    // player_year->team_year bridge exactly as before this extension, so saved
+    // views (which carry no team_attribution) are unchanged. 'current'
+    // attributes the team stat to player.current_nfl_team. SQL-shape asserts;
+    // population value checks run at live verification (AJ Brown, 2025: PHI
+    // historical vs NE current).
+    const counting_column = ({ year, team_attribution }) => {
+      const params = { year }
+      if (team_attribution) params.team_attribution = team_attribution
+      return { column_id: 'team_pass_attempts_from_plays', params }
+    }
+
+    it('default (no param) joins via the bridge, not current_nfl_team -- existing views unchanged', async () => {
+      const { query } = await get_data_view_results_query(
+        view([counting_column({ year: [2024] })])
+      )
+      const sql = query.toString()
+      expect(sql).to.match(/"nfl_team" = "player_year_teams"\."team"/)
+      expect(sql).to.not.match(/"player"\."current_nfl_team"/)
+    })
+
+    it('historical (explicit) resolves the same team expression as the default', async () => {
+      const { query } = await get_data_view_results_query(
+        view([counting_column({ year: [2024], team_attribution: 'historical' })])
+      )
+      const sql = query.toString()
+      expect(sql).to.match(/"nfl_team" = "player_year_teams"\."team"/)
+      expect(sql).to.not.match(/"player"\."current_nfl_team"/)
+    })
+
+    it('current: team stat joins on current_nfl_team, not the historical bridge', async () => {
+      const { query } = await get_data_view_results_query(
+        view([counting_column({ year: [2024], team_attribution: 'current' })])
+      )
+      const sql = query.toString()
+      // the team_stats join attributes to current_nfl_team and NOT to
+      // player_year_teams.team -- the value is current-team volume. (The
+      // player_year_teams CTE may still be materialized as a dead LEFT JOIN in
+      // current-only mode because the counting-column join path applies the
+      // bridge ungated; that is a harmless perf wart tracked as a follow-up on
+      // extend-team-attribution-to-counting-columns, not a correctness issue.)
+      expect(sql).to.match(/"nfl_team" = "player"\."current_nfl_team"/)
+      expect(sql).to.not.match(/"nfl_team" = "player_year_teams"\."team"/)
+    })
+
+    it('cross-column non-leak: one historical + one current resolve to DIFFERENT teams', async () => {
+      const { query } = await get_data_view_results_query(
+        view([
+          counting_column({ year: [2024] }),
+          counting_column({ year: [2024], team_attribution: 'current' })
+        ])
+      )
+      const sql = query.toString()
+      // both join targets coexist -- the current column is not dragged onto the
+      // sibling's bridge, and the historical column keeps it
+      expect(sql).to.match(/"nfl_team" = "player_year_teams"\."team"/)
+      expect(sql).to.match(/"nfl_team" = "player"\."current_nfl_team"/)
+    })
+  })
 })
