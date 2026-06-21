@@ -432,7 +432,8 @@ export const consumes_params = [
   'career_game',
   'matchup_opponent_type',
   'output_column_params',
-  'rate_type_column_params'
+  'rate_type_column_params',
+  'team_attribution'
 ]
 
 export const get_cte_name = ({ params, identity_id }) => {

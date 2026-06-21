@@ -11,7 +11,10 @@ import get_rate_type_denominator_params, {
 } from '#libs-shared/get-rate-type-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
-import { resolve_team_join_target } from '#libs-server/data-views/resolve-team-join-target.mjs'
+import {
+  resolve_team_join_target,
+  get_team_attribution
+} from '#libs-server/data-views/resolve-team-join-target.mjs'
 import {
   requires_wrap,
   register_wrap,
@@ -49,10 +52,18 @@ export const get_per_team_play_cte_table_name = ({
     ? `_${matchup_opponent_type}`
     : ''
 
+  // team_attribution changes the CTE BODY, not just the join: 'current' forces
+  // the flat (no-wrap) denominator, while 'historical' multi-year-no-split takes
+  // the year-grain wrap path (force_year_grain). Two columns differing only in
+  // team_attribution must therefore NOT share this CTE. Suffix is empty for the
+  // 'historical' default so existing CTE names stay byte-identical.
+  const team_attribution_suffix =
+    get_team_attribution(params) === 'current' ? '_team_attribution_current' : ''
+
   const play_level_params_suffix = get_play_level_params_hash_suffix({ params })
 
   return get_table_hash(
-    `per_team_play${play_type_suffix}${group_by_suffix}${team_type_suffix}${matchup_opponent_suffix}${play_level_params_suffix}_nfl_week_${nfl_week.join('_')}`
+    `per_team_play${play_type_suffix}${group_by_suffix}${team_type_suffix}${matchup_opponent_suffix}${team_attribution_suffix}${play_level_params_suffix}_nfl_week_${nfl_week.join('_')}`
   )
 }
 
@@ -161,12 +172,18 @@ export const join_per_team_play_cte = ({
   // (pid, year) being aggregated, not their current_nfl_team. Bridge
   // player_year->team_year materializes player_year_teams unconditionally so
   // historical-team-mode is structural rather than a runtime conditional.
-  // Skipped for matchup_opponent_type (joins against upstream opponents CTE).
+  // Skipped for matchup_opponent_type (joins against upstream opponents CTE)
+  // and for team_attribution='current' (the in-closure resolver then returns
+  // player.current_nfl_team instead of player_year_teams.team).
   const player_cell =
     query_context &&
     query_context.identity_id &&
     query_context.identity_id.startsWith('player')
-  if (player_cell && !matchup_opponent_type) {
+  if (
+    player_cell &&
+    !matchup_opponent_type &&
+    get_team_attribution(params) !== 'current'
+  ) {
     identity_bridge_registry.apply_bridge({
       query_context,
       from: 'player_year',
@@ -247,7 +264,8 @@ export const consumes_params = [
   'matchup_opponent_type',
   'team_unit',
   'output_column_params',
-  'rate_type_column_params'
+  'rate_type_column_params',
+  'team_attribution'
 ]
 
 const resolve_team_unit = (column_def, dispatch_params) =>

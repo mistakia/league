@@ -12,6 +12,7 @@ import {
 } from './measure-batch.mjs'
 import * as identity_bridge_registry from '../identity-bridge-registry.mjs'
 import { emit_year_match } from '../param-utils.mjs'
+import { get_team_attribution } from '../resolve-team-join-target.mjs'
 
 // consumes_params drives both CTE name hashing (so distinct param sets emit
 // distinct CTEs) and consumed_params_signature for cache keys. `week` and
@@ -26,7 +27,8 @@ export const consumes_params = [
   'week',
   'nfl_week_id',
   'seas_type',
-  'matchup_opponent_type'
+  'matchup_opponent_type',
+  'team_attribution'
 ]
 
 export const get_cte_name = ({ column_def, params, identity_id, period }) => {
@@ -102,6 +104,12 @@ export const resolve_team_join_target = ({ query_context, params, source }) => {
     return 'current_week_opponents.opponent'
   if (matchup === 'next_week_opponent_total')
     return 'next_week_opponents.opponent'
+  // team_attribution selects which team a player-cell team rate stat attaches
+  // to. 'current' (forward-looking projection) joins on player.current_nfl_team
+  // WITHOUT registering the player_year->team_year bridge; 'historical' (default)
+  // routes through the bridge below.
+  if (get_team_attribution(params) === 'current')
+    return 'player.current_nfl_team'
   identity_bridge_registry.apply_bridge({
     query_context,
     from: 'player_year',

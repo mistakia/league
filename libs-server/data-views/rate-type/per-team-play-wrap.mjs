@@ -38,6 +38,7 @@ import {
   resolve_effective_years,
   extract_matchup_opponent_type
 } from '#libs-server/data-views/wrap-predicates.mjs'
+import { get_team_attribution } from '#libs-server/data-views/resolve-team-join-target.mjs'
 
 export const get_wrap_cte_name = ({
   column_def,
@@ -54,6 +55,11 @@ export const get_wrap_cte_name = ({
 // attached upstream and aren't multi-year addressable.
 export const requires_wrap = ({ query_context, params, identity_id }) => {
   if (!identity_id || !identity_id.startsWith('player')) return false
+  // 'current' attribution attaches all volume to player.current_nfl_team
+  // regardless of year, so there is no per-(pid, year) team to reattribute --
+  // the wrap's entire purpose. Skip it; the plain non-wrap join then correlates
+  // on current_nfl_team via resolve_team_join_target.
+  if (get_team_attribution(params) === 'current') return false
   if (query_context.splits.includes('year')) return false
   const years = resolve_effective_years({ query_context, params })
   const distinct_years = new Set(years.map((y) => parseInt(y, 10)))
