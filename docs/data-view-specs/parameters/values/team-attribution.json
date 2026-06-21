@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/team-attribution.json",
+  "title": "Team Attribution Values",
+  "description": "Valid team_attribution values controlling which team a player-cell team RATE stat attaches to",
+  "version": "1.0.0",
+
+  "_source_reference": {
+    "file": "libs-shared/nfl-plays-team-column-params.mjs",
+    "resolver": "libs-server/data-views/resolve-team-join-target.mjs",
+    "helper": "get_team_attribution(params)",
+    "note": "The source file (param definition) and resolver (get_team_attribution) remain the authoritative implementation."
+  },
+
+  "parameter": "team_attribution",
+  "default": "historical",
+  "team_attribution_values": ["historical", "current"],
+
+  "applies_to": {
+    "families": ["team_stats_from_plays"],
+    "rate_types": ["per_game", "per_team_play"],
+    "note": "Honored only for the two team RATE types. Counting columns and other rate types do not declare the param and are unchanged (see deferred extension below)."
+  },
+
+  "value_semantics": {
+    "historical": {
+      "label": "Historical (team of record)",
+      "description": "The player's per-year team of record, resolved through the player_year -> team_year identity bridge (player_year_teams.team).",
+      "mechanism": "Routes through the player_year_teams CTE; primary team per (pid, year) by most regular-season games.",
+      "use_case": "Backward-looking analysis where a stat belongs to the team the player actually played for that season.",
+      "default": true
+    },
+    "current": {
+      "label": "Current Team",
+      "description": "The player's current NFL team (player.current_nfl_team), skipping the bridge entirely.",
+      "mechanism": "Joins directly on player.current_nfl_team; the bridge is not materialized.",
+      "use_case": "Forward-looking projection — a mover's NEW team's volume, e.g. a 2026 redraft view."
+    }
+  },
+
+  "consistency_invariant": {
+    "description": "Numerator and denominator of a rate ALWAYS resolve to the same team; flipping team_attribution flips both halves together.",
+    "enforced_by": "test/data-views.team-attribution.spec.mjs"
+  },
+
+  "edge_cases": {
+    "free_agent_current": {
+      "condition": "current_nfl_team = 'INA' with team_attribution = 'current'",
+      "behavior": "Blanks both halves consistently. No last-team fallback (out of scope)."
+    },
+    "year_split_current": {
+      "condition": "year split active with team_attribution = 'current'",
+      "behavior": "The single current-team snapshot repeats across year rows. Well-defined projection, not an error."
+    },
+    "rookie_historical": {
+      "condition": "No prior gamelogs with team_attribution = 'historical'",
+      "behavior": "Blank numerator (no bridge row); 'current' covers them."
+    }
+  },
+
+  "caveats": {
+    "cache_ttl_bug": "A value change from flipping this param will not surface until the affected view's cache is manually invalidated/warmed (see task/league/data-views/fix-data-view-socket-cache-ttl-unit.md)."
+  },
+
+  "deferred_extension": {
+    "description": "team-stats-from-plays COUNTING columns and the select-string year-offset branch do not yet honor this param.",
+    "task": "task/league/data-views/extend-team-attribution-to-counting-columns.md"
+  }
+}

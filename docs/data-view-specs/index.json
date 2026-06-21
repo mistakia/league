@@ -131,7 +131,8 @@
     },
     "parameter_values": {
       "rate_types": "./parameters/values/rate-types.json",
-      "market_types": "./parameters/values/market-types.json"
+      "market_types": "./parameters/values/market-types.json",
+      "team_attribution": "./parameters/values/team-attribution.json"
     }
   },
 

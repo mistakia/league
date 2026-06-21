@@ -8,5 +8,14 @@
   "_source_reference": {
     "file": "libs-shared/nfl-plays-team-column-params.mjs",
     "note": "This schema documents parameters defined in the source file. The source file remains the authoritative implementation."
+  },
+
+  "properties": {
+    "team_attribution": {
+      "type": "string",
+      "enum": ["historical", "current"],
+      "default": "historical",
+      "description": "Which team a player-cell team RATE stat (per_game / per_team_play) attaches to. 'historical' (default) uses the per-year team of record via the player_year -> team_year bridge; 'current' uses player.current_nfl_team. Honored only for team_stats_from_plays rate columns. See ./../values/team-attribution.json for full value semantics, edge cases, and the deferred counting-column extension."
+    }
   }
 }
