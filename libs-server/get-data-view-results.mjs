@@ -1817,7 +1817,15 @@ export const get_data_view_results_query = async ({
 
   // sanitize parameters
 
-  // if splits week is enabled — delete all per_game rate_type column params
+  // if splits week is enabled — delete all per_game rate_type column params.
+  // At week granularity a player has exactly one game per (year, week), so the
+  // per-game denominator is always 1 and the division is a no-op: stripping
+  // rate_type lets the column emit the plain weekly value instead of building a
+  // redundant games_played denominator CTE. Verified against production: every
+  // weekly row for a multi-week player reports games_that_week = 1 (bye weeks
+  // are absent, not zero-game rows). Only per_game is affected; other rate
+  // types (per_team_play, per_player_*) have non-unit week-level divisors and
+  // still route through the aggregator division path under a week split.
   if (splits.includes('week')) {
     columns = columns.map((column) => {
       if (
