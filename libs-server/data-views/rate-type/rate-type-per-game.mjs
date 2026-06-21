@@ -55,6 +55,15 @@ export const get_per_game_cte_table_name = ({
     ? `_${matchup_opponent_type}`
     : ''
 
+  // team_attribution is deliberately NOT folded into this name. The per_game
+  // denominator counts games per (pid | team[, year]) and is team-attribution
+  // agnostic -- the body is identical whether the stat attaches to the player's
+  // historical team-of-record or current_nfl_team; only the JOIN target differs,
+  // and that is resolved per-column at assembly time (join_team_per_game_cte ->
+  // resolve_team_rate_join_target). So a 'historical' and a 'current' column can
+  // safely SHARE one denominator CTE. This is unlike per_team_play, whose CTE
+  // body differs by mode (year-grain wrap vs flat) and therefore carries a
+  // team_attribution suffix in get_per_team_play_cte_table_name.
   return get_table_hash(
     `${prefix}_games_played${matchup_opponent_suffix}_nfl_week_${nfl_week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
   )
@@ -432,8 +441,11 @@ export const consumes_params = [
   'career_game',
   'matchup_opponent_type',
   'output_column_params',
-  'rate_type_column_params',
-  'team_attribution'
+  'rate_type_column_params'
+  // team_attribution is intentionally NOT listed: it does not affect the
+  // per_game denominator CTE (see get_per_game_cte_table_name) -- only the
+  // join target, resolved per-column at assembly time. Contrast per_team_play,
+  // whose CTE body differs by mode and so declares it.
 ]
 
 export const get_cte_name = ({ params, identity_id }) => {

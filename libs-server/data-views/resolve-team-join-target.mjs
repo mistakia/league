@@ -49,17 +49,19 @@ export const resolve_team_join_target = ({ query_context, params = {} }) => {
   return 'player.current_nfl_team'
 }
 
-// Single source of truth for the team_attribution param: a closed set
-// ('historical' | 'current') defaulting to 'historical'. Array-unwrapped at
-// read time (params arrive as single values or 1-element arrays). Kept here --
+// Single source of truth for the team_attribution param: always returns one of
+// the closed set ('historical' | 'current'), defaulting to 'historical'.
+// Array-unwrapped at read time (params arrive as single values or 1-element
+// arrays). Anything other than 'current' (unset, unknown string, malformed
+// array) normalises to 'historical' -- no validation throw, matching the rest
+// of the param surface, but the return value is guaranteed to be one of the two
+// canonical tokens so callers may safely compare against either. Kept here --
 // the canonical "where does a team stat attach" module -- and self-contained
 // (no param-utils import) because param-utils imports THIS module, so the
-// reverse dependency would be circular. Unknown values normalise to historical
-// by falling through every `=== 'current'` check (no validation throw, matching
-// the rest of the param surface).
+// reverse dependency would be circular.
 export const get_team_attribution = (params = {}) => {
   const raw = Array.isArray(params.team_attribution)
     ? params.team_attribution[0]
     : params.team_attribution
-  return raw ?? 'historical'
+  return raw === 'current' ? 'current' : 'historical'
 }

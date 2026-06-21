@@ -256,10 +256,13 @@ describe('data-views team_attribution', () => {
       expect(get_team_attribution({ team_attribution: ['current'] })).to.equal(
         'current'
       )
-      // unknown values normalize to historical by falling through every
-      // `=== 'current'` check (no validation throw)
+      // unknown / malformed values normalize to the closed set's 'historical'
+      // default (no validation throw); the return is always one of the two tokens
       expect(get_team_attribution({ team_attribution: 'bogus' })).to.equal(
-        'bogus'
+        'historical'
+      )
+      expect(get_team_attribution({ team_attribution: [] })).to.equal(
+        'historical'
       )
     })
 
