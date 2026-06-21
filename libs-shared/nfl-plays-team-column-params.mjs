@@ -33,5 +33,20 @@ export default {
       },
       { label: 'Next Week Opponent', value: 'next_week_opponent_total' }
     ]
+  },
+  // Which team a player-cell team RATE stat (per_game / per_team_play) attaches
+  // to. 'historical' (default) routes through the player_year -> team_year bridge
+  // (per-year team of record); 'current' attaches to player.current_nfl_team
+  // (forward-looking projection). Inert on non-rate columns, which do not declare
+  // the param server-side. See docs/data-views-system.md "Team-Scoped Joins".
+  team_attribution: {
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    label: 'Team Attribution',
+    single: true,
+    default_value: 'historical',
+    values: [
+      { label: 'Historical (team of record)', value: 'historical' },
+      { label: 'Current Team', value: 'current' }
+    ]
   }
 }
