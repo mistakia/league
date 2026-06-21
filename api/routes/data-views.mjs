@@ -974,8 +974,12 @@ router.post('/search/?', async (req, res) => {
       })
 
     if (data_view_results && data_view_results.length) {
-      const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
-      await redis_cache.set(cache_key, data_view_results, cache_ttl)
+      const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
+      await redis_cache.set(
+        cache_key,
+        data_view_results,
+        Math.round(cache_ttl / 1000) // redis EX is seconds; cache_ttl is ms
+      )
       if (data_view_metadata.cache_expire_at) {
         await redis_cache.expire_at(
           cache_key,
@@ -1261,14 +1265,14 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
 
       // Cache the unformatted results
       if (data_view_results && data_view_results.length && !limit) {
-        const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
+        const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
         await redis_cache.set(
           cache_key,
           {
             data_view_results,
             data_view_metadata
           },
-          cache_ttl
+          Math.round(cache_ttl / 1000) // redis EX is seconds; cache_ttl is ms
         )
 
         if (data_view_metadata.cache_expire_at) {
@@ -1388,7 +1392,7 @@ router.post('/param-option-counts', async (req, res) => {
     })
 
     if (result && result.counts && Object.keys(result.counts).length > 0) {
-      await redis_cache.set(cache_key, result, 1000 * 600)
+      await redis_cache.set(cache_key, result, 600) // 10 minutes (redis EX is seconds)
     }
 
     res.send(result)

@@ -156,14 +156,14 @@ class DataViewQueue {
         })
 
       if (data_view_results && data_view_results.length) {
-        const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
+        const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
         await redis_cache.set(
           cache_key,
           {
             data_view_results,
             data_view_metadata
           },
-          cache_ttl
+          Math.round(cache_ttl / 1000) // redis EX is seconds; cache_ttl is ms
         )
 
         if (data_view_metadata.cache_expire_at) {
