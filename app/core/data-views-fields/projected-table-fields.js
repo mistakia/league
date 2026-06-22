@@ -51,11 +51,12 @@ const extra_column_params_by_base_name = {
   market_salary: { league_format_id: auction_league_format_id_param }
 }
 
-// The computed columns are derived into scoring_format_*/league_format_*/league_*
-// tables that carry no sourceid dimension. Every other projection column reads a
-// raw stat from projections_index/ros_projections and so accepts a source picker.
+// These columns are derived into league_format_*/league_* valuation tables that
+// carry no sourceid dimension, so they accept no source picker. `points` is NOT
+// among them: it is now computed in-query from projections_index/ros_projections
+// (see player-projected-column-definitions.mjs) and so accepts a source picker
+// alongside its scoring-format picker, like every raw-stat projection column.
 const computed_base_names = new Set([
-  'points',
   'points_added',
   'market_salary',
   'salary_adjusted_points_added'

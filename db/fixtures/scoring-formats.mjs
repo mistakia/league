@@ -36,4 +36,37 @@ export default async function (knex) {
     })
     .onConflict('id')
     .ignore()
+
+  // A TE-premium (non-uniform reception) format so tests can exercise the
+  // position CASE in the projected-points in-query scorer (terec != rec). Config
+  // mirrors the sfb15_mfl entry in libs-shared/league-format-definitions.mjs.
+  await knex('league_scoring_formats')
+    .insert({
+      id: 'sfb15_mfl',
+      pa: 0,
+      pc: 0,
+      py: 0.04,
+      ints: 0,
+      tdp: 6,
+      ra: 0.5,
+      ry: 0.1,
+      tdr: 6,
+      rec: 1,
+      rbrec: 1,
+      wrrec: 1,
+      terec: 2,
+      recy: 0.1,
+      tdrec: 6,
+      twoptc: 2,
+      fuml: 0,
+      prtd: 6,
+      krtd: 6,
+      fum_ret_td: 6,
+      trg: 1,
+      rush_first_down: 1,
+      rec_first_down: 1,
+      exclude_qb_kneels: false
+    })
+    .onConflict('id')
+    .ignore()
 }

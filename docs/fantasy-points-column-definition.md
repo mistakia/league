@@ -4,6 +4,8 @@
 
 The `player_fantasy_points_from_plays` column definition is one of the most complex column definitions in the data views system. It calculates fantasy football points from individual NFL plays based on configurable scoring formats.
 
+> **Related: projected fantasy points.** A sibling in-query scorer lives in `libs-server/data-views-column-definitions/player-projected-column-definitions.mjs` (`projection_fantasy_points_sql`), which scores the `player_{week,season,rest_of_season}_projected_points` columns from `projections_index`/`ros_projections` rows. It mirrors `calculatePoints({ use_projected_stats: true })` at the per-row grain (no `SUM` over plays) and is source-selectable via the `sourceid` param. Unlike this from-plays column, the projection scorer is deliberately **not** value-identical to the legacy precomputed `scoring_format_player_projection_points` total: that table and `projections_index` are independently-timed snapshots that drift, so computing in-query keeps projected points consistent with the projected raw-stat columns. See `docs/data-views-system.md` § "Projection `sourceid` param".
+
 ## Key Features
 
 ### 1. Multi-Player Point Attribution

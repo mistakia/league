@@ -2,7 +2,11 @@ import {
   DEFAULT_SCORING_FORMAT_ID,
   DEFAULT_LEAGUE_FORMAT_ID
 } from '#libs-shared'
-import { current_season, external_data_sources } from '#constants'
+import {
+  current_season,
+  external_data_sources,
+  projected_base_stats
+} from '#constants'
 import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
@@ -100,15 +104,6 @@ const projections_index_table_alias = ({ params = {} }) => {
   // JOIN (which could carry only one sourceid predicate).
   return get_table_hash(
     `projections_index_${get_alias_key(p)}_source_${p.sourceid}`
-  )
-}
-
-const scoring_format_player_projection_points_table_alias = ({
-  params = {}
-}) => {
-  const p = get_default_params({ params })
-  return get_table_hash(
-    `scoring_format_player_projection_points_${get_alias_key(p)}_${p.scoring_format_id}`
   )
 }
 
@@ -298,45 +293,6 @@ const make_league_format_player_projection_source = ({
   }
 })
 
-const make_scoring_format_player_projection_source = ({
-  is_rest_of_season = false
-} = {}) => ({
-  grain: 'player',
-  table: 'scoring_format_player_projection_points',
-  attach_owns_join: true,
-  year_default: (params) => [get_default_params({ params }).year],
-  extra_predicates: (params) => {
-    const { scoring_format_id, week } = get_default_params({ params })
-    return [
-      { column: 'scoring_format_id', value: scoring_format_id },
-      { column: 'week', value: is_rest_of_season ? 'ros' : String(week) }
-    ]
-  },
-  attach: ({ query_context, params, table_alias, join_type }) => {
-    const { scoring_format_id } = get_default_params({ params })
-    apply_projected_join({
-      query_context,
-      params,
-      table_alias,
-      join_type,
-      join_table_clause: `scoring_format_player_projection_points as ${table_alias}`,
-      join_year: true,
-      join_week: !is_rest_of_season,
-      cast_join_week_to_string: true,
-      additional_conditions() {
-        this.andOn(
-          `${table_alias}.scoring_format_id`,
-          '=',
-          db.raw('?', [scoring_format_id])
-        )
-        if (is_rest_of_season) {
-          this.andOn(`${table_alias}.week`, '=', db.raw('?', ['ros']))
-        }
-      }
-    })
-  }
-})
-
 const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   grain: 'player',
   table: is_rest_of_season ? 'ros_projections' : 'projections_index',
@@ -391,6 +347,187 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   }
 })
 
+// --- Projected fantasy points in-query scorer ------------------------------
+//
+// player_projected_points computes its value from the projections_index /
+// ros_projections raw-stat row using the selected scoring format's weights,
+// faithfully mirroring calculatePoints({ use_projected_stats: true }) in
+// #libs-shared/calculate-points.mjs. Single consumer, so the scorer is inlined
+// here rather than extracted into a module. It is intentionally NOT
+// value-identical to the legacy precomputed scoring_format_player_projection_points
+// total (the two are independently-timed snapshots that drift); the gate is
+// faithfulness to calculatePoints, validated at population scale.
+
+// player.pos is a correlatable outer column under the canonical `FROM player`
+// query; the receiving-position CASE and the year_offset subquery both read it.
+const PROJECTION_POSITION_REFERENCE = 'player.pos'
+
+const resolve_scoring_format_id = ({ params = {} }) => {
+  const raw = Array.isArray(params.scoring_format_id)
+    ? params.scoring_format_id[0]
+    : params.scoring_format_id
+  return raw || DEFAULT_SCORING_FORMAT_ID
+}
+
+// Look up a scoring-format row, falling back to the default format and then to
+// null (test environments with no formats seeded), mirroring the from-plays
+// column's get_scoring_format. A null format yields zero offense weights.
+const load_scoring_format = async (scoring_format_id) => {
+  let format = await db('league_scoring_formats')
+    .where({ id: scoring_format_id })
+    .first()
+  if (!format && scoring_format_id !== DEFAULT_SCORING_FORMAT_ID) {
+    format = await db('league_scoring_formats')
+      .where({ id: DEFAULT_SCORING_FORMAT_ID })
+      .first()
+  }
+  return format || null
+}
+
+// register_ctes hook: resolve and memoize the scoring-format weights on
+// data_view_options before the synchronous select / group-by / where emit reads
+// them back. Idempotent per scoring_format_id; runs for both select and where
+// usage of the column.
+const register_projection_scoring_format = async ({
+  params = {},
+  data_view_options = {}
+}) => {
+  const scoring_format_id = resolve_scoring_format_id({ params })
+  if (!data_view_options.projection_scoring_formats) {
+    data_view_options.projection_scoring_formats = new Map()
+  }
+  if (!data_view_options.projection_scoring_formats.has(scoring_format_id)) {
+    data_view_options.projection_scoring_formats.set(
+      scoring_format_id,
+      await load_scoring_format(scoring_format_id)
+    )
+  }
+}
+
+const get_projection_scoring_format = ({
+  params = {},
+  data_view_options = {}
+}) =>
+  data_view_options.projection_scoring_formats?.get(
+    resolve_scoring_format_id({ params })
+  ) || null
+
+// Build the per-row fantasy-points SQL expression for a projection row.
+// column_ref(name) returns the qualified column reference (a JOIN alias for the
+// normal path, the bare table name for the re-scanned year_offset subquery).
+const projection_fantasy_points_sql = ({
+  scoring_format,
+  column_ref,
+  position_reference
+}) => {
+  const weight = (key) => Number(scoring_format?.[key]) || 0
+  const stat = (name) => `COALESCE(${column_ref(name)}, 0)`
+
+  const rec = weight('rec')
+  const rbrec = Number(scoring_format?.rbrec) || rec
+  const wrrec = Number(scoring_format?.wrrec) || rec
+  const terec = Number(scoring_format?.terec) || rec
+  const non_uniform_rec = rbrec !== rec || wrrec !== rec || terec !== rec
+
+  const terms = []
+  for (const projected_stat of projected_base_stats) {
+    if (projected_stat === 'rec') {
+      // calculatePoints: factor = league[`${pos}rec`] || league.rec. The CASE
+      // is only needed when a position weight differs from the base rec weight.
+      terms.push(
+        non_uniform_rec
+          ? `${stat('rec')} * (CASE ${position_reference} WHEN 'RB' THEN ${rbrec} WHEN 'WR' THEN ${wrrec} WHEN 'TE' THEN ${terec} ELSE ${rec} END)`
+          : `${stat('rec')} * ${rec}`
+      )
+      continue
+    }
+    terms.push(`${stat(projected_stat)} * ${weight(projected_stat)}`)
+  }
+
+  // Extra points, then field goals via the distance buckets. projections_index
+  // never populates fgy, so calculatePoints takes the bucket branch and fgm is
+  // excluded from the total.
+  terms.push(`${stat('xpm')} * 1`)
+  terms.push(`${stat('fg19')} * 3`)
+  terms.push(`${stat('fg29')} * 3`)
+  terms.push(`${stat('fg39')} * 3`)
+  terms.push(`${stat('fg49')} * 4`)
+  terms.push(`${stat('fg50')} * 5`)
+
+  // DST block (calculatePoints runs it unconditionally). Points/yards-against
+  // are clipped with GREATEST. DST rows are absent from the projection tables,
+  // so these terms evaluate to 0 for offense/kicker rows.
+  terms.push(`${stat('dsk')} * 1`)
+  terms.push(`${stat('dint')} * 2`)
+  terms.push(`${stat('dff')} * 1`)
+  terms.push(`${stat('drf')} * 1`)
+  terms.push(`${stat('dtno')} * 1`)
+  terms.push(`${stat('dfds')} * 1`)
+  terms.push(`GREATEST(${stat('dpa')} - 20, 0) * -0.4`)
+  terms.push(`GREATEST(${stat('dya')} - 300, 0) * -0.02`)
+  terms.push(`${stat('dblk')} * 3`)
+  terms.push(`${stat('dsf')} * 2`)
+  terms.push(`${stat('dtpr')} * 2`)
+  terms.push(`${stat('dtd')} * 6`)
+
+  return `ROUND((${terms.join(' + ')}), 2)`
+}
+
+// year_offset RANGE path: the generic SUM(column_name) reducer cannot sum a
+// computed expression, so hand-emit the correlated subquery that re-scans the
+// projection table directly (outer JOIN aliases are not visible inside a
+// subquery), summing the scorer over the offset-expanded year window scoped to
+// the same source / week / seas_type discriminators the JOIN enforces.
+const projection_points_year_offset_range_sql = ({
+  params = {},
+  data_view_options = {},
+  is_rest_of_season = false
+}) => {
+  const [min_offset, max_offset] = resolve_year_offset_range(params)
+  const { seas_type, week, sourceid, year } = get_default_params({ params })
+  const scoring_format = get_projection_scoring_format({
+    params,
+    data_view_options
+  })
+  const inner_table = is_rest_of_season
+    ? 'ros_projections'
+    : 'projections_index'
+
+  const expression = projection_fantasy_points_sql({
+    scoring_format,
+    column_ref: (name) => `${inner_table}.${name}`,
+    position_reference: PROJECTION_POSITION_REFERENCE
+  })
+
+  // Mirror select-string's generic correlated-aggregate year basis: correlate
+  // to year_reference through the range when a year split exposes it, otherwise
+  // cross the source's year_default (params.year) with the offset range.
+  const year_reference = data_view_options.year_reference
+  let year_predicate
+  if (year_reference) {
+    year_predicate = `${inner_table}.year BETWEEN ${year_reference} + ${min_offset} AND ${year_reference} + ${max_offset}`
+  } else {
+    const years = []
+    for (let offset = min_offset; offset <= max_offset; offset++) {
+      years.push(Number(year) + offset)
+    }
+    year_predicate = `${inner_table}.year IN (${years.join(',')})`
+  }
+
+  const predicates = [
+    `${inner_table}.pid = ${data_view_options.pid_reference}`,
+    year_predicate,
+    `${inner_table}.sourceid = ${sourceid}`
+  ]
+  // ros_projections carries no week / seas_type discriminator.
+  if (!is_rest_of_season) {
+    predicates.push(`${inner_table}.week = ${week}`)
+    predicates.push(`${inner_table}.seas_type = '${seas_type}'`)
+  }
+
+  return `(SELECT SUM(${expression}) FROM ${inner_table} WHERE ${predicates.join(' AND ')})`
+}
+
 const player_projected_points_added = {
   column_name: 'pts_added',
   table_alias: league_format_player_projection_values_table_alias,
@@ -409,10 +546,71 @@ const player_projected_salary_adjusted_points_added = {
   source_factory: make_league_player_projection_source
 }
 
+// Projected fantasy points are computed in-query from the projections_index /
+// ros_projections raw-stat row (reusing the sourceid-keyed alias + source built
+// for the raw-stat columns), so points honor the sourceid projection-source
+// param and stay self-consistent with the raw-stat columns. See task
+// projected-points-in-query-scoring-source-selection.
 const player_projected_points = {
-  column_name: 'total',
-  table_alias: scoring_format_player_projection_points_table_alias,
-  source_factory: make_scoring_format_player_projection_source
+  table_alias: projections_index_table_alias,
+  source_factory: make_projections_index_source,
+  // Resolve scoring-format weights asynchronously before the (synchronous)
+  // select / group-by / where emit; memoized on data_view_options.
+  register_ctes: register_projection_scoring_format,
+  // Bound per prefix by create_projected_stat: main_select needs the
+  // prefix-correct select alias; the year_offset override needs the
+  // prefix-correct table (projections_index vs ros_projections).
+  method_factories: {
+    main_select:
+      ({ select_as }) =>
+      ({ table_name, params, column_index, data_view_options = {} }) => {
+        const expression = projection_fantasy_points_sql({
+          scoring_format: get_projection_scoring_format({
+            params,
+            data_view_options
+          }),
+          column_ref: (name) => `"${table_name}"."${name}"`,
+          position_reference: PROJECTION_POSITION_REFERENCE
+        })
+        return [`${expression} AS "${select_as()}_${column_index}"`]
+      },
+    // The scorer references the joined projection alias's non-aggregated stat
+    // columns, so group by the whole expression to satisfy Postgres (the
+    // projection join is 1:1 per player, so this never splits a row).
+    main_group_by:
+      () =>
+      ({ table_name, params, data_view_options = {} }) => [
+        projection_fantasy_points_sql({
+          scoring_format: get_projection_scoring_format({
+            params,
+            data_view_options
+          }),
+          column_ref: (name) => `"${table_name}"."${name}"`,
+          position_reference: PROJECTION_POSITION_REFERENCE
+        })
+      ],
+    // Preserve filter support: a where/having clause on projected points emits
+    // the scorer expression (the legacy column filtered on its `total` column).
+    main_where:
+      () =>
+      ({ table_name, params, data_view_options = {} }) =>
+        projection_fantasy_points_sql({
+          scoring_format: get_projection_scoring_format({
+            params,
+            data_view_options
+          }),
+          column_ref: (name) => `"${table_name}"."${name}"`,
+          position_reference: PROJECTION_POSITION_REFERENCE
+        }),
+    main_select_string_year_offset_range:
+      ({ is_rest_of_season }) =>
+      ({ params = {}, data_view_options = {} }) =>
+        projection_points_year_offset_range_sql({
+          params,
+          data_view_options,
+          is_rest_of_season
+        })
+  }
 }
 
 const projections_index_base = (column_name) => ({
@@ -422,16 +620,26 @@ const projections_index_base = (column_name) => ({
 })
 
 const create_projected_stat = (base, stat_name) => {
-  const { source_factory, ...rest } = base
+  const { source_factory, method_factories, ...rest } = base
   const prefixes = ['week', 'season', 'rest_of_season']
   return prefixes.reduce((acc, prefix) => {
     const is_rest_of_season = prefix === 'rest_of_season'
-    acc[`player_${prefix}_projected_${stat_name}`] = {
+    const select_as = () => `${prefix}_projected_${stat_name}`
+    const definition = {
       ...rest,
-      select_as: () => `${prefix}_projected_${stat_name}`,
+      select_as,
       source: source_factory({ is_rest_of_season }),
       get_cache_info: get_cache_info_for_player_projected_stats
     }
+    // Columns that emit prefix-aware methods (player_projected_points) bind them
+    // here so each prefix gets the right select alias / projection table. Other
+    // stats declare no method_factories and are unaffected.
+    if (method_factories) {
+      for (const [method, factory] of Object.entries(method_factories)) {
+        definition[method] = factory({ select_as, is_rest_of_season })
+      }
+    }
+    acc[`player_${prefix}_projected_${stat_name}`] = definition
     return acc
   }, {})
 }

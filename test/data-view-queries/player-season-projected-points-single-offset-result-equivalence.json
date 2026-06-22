@@ -1,20 +1,14 @@
 {
-  "name": "player_season_projected_points single year_offset returns the offset-year projection (executed-result parity)",
-  "description": "Seed one player with distinct 2024 (100) and 2025 (200) season projected points, then run player_season_projected_points with year=[2023] + year_offset=[1]. The executed value must equal the 2024 projection (100), proving the single offset shifts the join year and does not return the base or some other year.",
+  "name": "player_season_projected_points single year_offset returns the offset-year in-query score (executed-result parity)",
+  "description": "Seed one player with distinct 2024 (py 250, tdp 2) and 2025 (py 300) projections_index rows, then run player_season_projected_points with year=[2023] + year_offset=[1]. The executed value must equal the in-query draftkings score of the 2024 row (250*0.04 + 2*4 = 18.00), proving the single offset shifts the join year and the points are computed in-query (NOT read from the precomputed scoring_format_player_projection_points total).",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_season_projected_points",
         "params": {
-          "year": [
-            2023
-          ],
-          "year_offset": [
-            1
-          ]
+          "year": [2023],
+          "year_offset": [1]
         }
       }
     ],
@@ -22,28 +16,19 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "ZZ"
-        ]
+        "value": ["ZZ"]
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, \"t3bbf1d9c941eda2597574bd44af9f16e\".\"total\" AS \"season_projected_points_0\", \"player\".\"pos\" from \"player\" left join \"scoring_format_player_projection_points\" as \"t3bbf1d9c941eda2597574bd44af9f16e\" on \"t3bbf1d9c941eda2597574bd44af9f16e\".\"pid\" = \"player\".\"pid\" and \"t3bbf1d9c941eda2597574bd44af9f16e\".\"year\" = 2024 and \"t3bbf1d9c941eda2597574bd44af9f16e\".\"week\" = '0' and \"t3bbf1d9c941eda2597574bd44af9f16e\".\"scoring_format_id\" = 'draftkings' where player.pos IN ('ZZ') group by player.fname, player.lname, \"t3bbf1d9c941eda2597574bd44af9f16e\".\"total\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, ROUND((COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"pa\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"pc\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"py\", 0) * 0.04 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"ints\", 0) * -1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"tdp\", 0) * 4 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"ra\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"ry\", 0) * 0.1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"tdr\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fuml\", 0) * -1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"trg\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"rec\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"recy\", 0) * 0.1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"tdrec\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"twoptc\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"prtd\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"krtd\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"xpm\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg19\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg29\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg39\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg49\", 0) * 4 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg50\", 0) * 5 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dsk\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dint\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dff\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"drf\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dtno\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dfds\", 0) * 1 + GREATEST(COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dpa\", 0) - 20, 0) * -0.4 + GREATEST(COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dya\", 0) - 300, 0) * -0.02 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dblk\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dsf\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dtpr\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dtd\", 0) * 6), 2) AS \"season_projected_points_0\", \"player\".\"pos\" from \"player\" left join \"projections_index\" as \"tfa9ad4fefaaff6fc46749bf31097437a\" on \"tfa9ad4fefaaff6fc46749bf31097437a\".\"pid\" = \"player\".\"pid\" and \"tfa9ad4fefaaff6fc46749bf31097437a\".\"year\" = 2024 and \"tfa9ad4fefaaff6fc46749bf31097437a\".\"week\" = '0' and \"tfa9ad4fefaaff6fc46749bf31097437a\".\"sourceid\" = 18 and \"tfa9ad4fefaaff6fc46749bf31097437a\".\"seas_type\" = 'REG' where player.pos IN ('ZZ') group by player.fname, player.lname, ROUND((COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"pa\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"pc\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"py\", 0) * 0.04 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"ints\", 0) * -1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"tdp\", 0) * 4 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"ra\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"ry\", 0) * 0.1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"tdr\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fuml\", 0) * -1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"trg\", 0) * 0 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"rec\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"recy\", 0) * 0.1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"tdrec\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"twoptc\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"prtd\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"krtd\", 0) * 6 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"xpm\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg19\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg29\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg39\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg49\", 0) * 4 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"fg50\", 0) * 5 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dsk\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dint\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dff\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"drf\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dtno\", 0) * 1 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dfds\", 0) * 1 + GREATEST(COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dpa\", 0) - 20, 0) * -0.4 + GREATEST(COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dya\", 0) - 300, 0) * -0.02 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dblk\", 0) * 3 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dsf\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dtpr\", 0) * 2 + COALESCE(\"tfa9ad4fefaaff6fc46749bf31097437a\".\"dtd\", 0) * 6), 2), \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-PROJ-2000-2000-01-01', 'Test', 'Proj', 'T.Proj', 'Test Proj', 'ZZ', 'ZZ', '2000-01-01', 2020)",
-      "INSERT INTO scoring_format_player_projection_points (pid, week, year, total, scoring_format_id) VALUES ('TEST-PROJ-2000-2000-01-01', '0', 2024, 100.00, 'draftkings')",
-      "INSERT INTO scoring_format_player_projection_points (pid, week, year, total, scoring_format_id) VALUES ('TEST-PROJ-2000-2000-01-01', '0', 2025, 200.00, 'draftkings')"
+      "INSERT INTO projections_index (pid, sourceid, week, year, seas_type, py, tdp) VALUES ('TEST-PROJ-2000-2000-01-01', 18, 0, 2024, 'REG', 250, 2)",
+      "INSERT INTO projections_index (pid, sourceid, week, year, seas_type, py, tdp) VALUES ('TEST-PROJ-2000-2000-01-01', 18, 0, 2025, 'REG', 300, 0)"
     ],
-    "reference_sql": "SELECT total AS season_projected_points_0 FROM scoring_format_player_projection_points WHERE pid = 'TEST-PROJ-2000-2000-01-01' AND year = 2024 AND week = '0' AND scoring_format_id = 'draftkings'",
-    "compare_columns": [
-      "season_projected_points_0"
-    ]
+    "reference_sql": "SELECT ROUND(py * 0.04 + tdp * 4, 2) AS season_projected_points_0 FROM projections_index WHERE pid = 'TEST-PROJ-2000-2000-01-01' AND year = 2024 AND sourceid = 18 AND week = 0 AND seas_type = 'REG'",
+    "compare_columns": ["season_projected_points_0"]
   },
-  "tags": [
-    "year_offset",
-    "player_projected",
-    "single",
-    "result-equivalence"
-  ]
+  "tags": ["year_offset", "player_projected", "single", "result-equivalence"]
 }
