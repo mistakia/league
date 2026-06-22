@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
-import { current_season, external_data_sources } from '#constants'
+import { external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 
 const initialize_cli = () => {
@@ -14,34 +14,81 @@ const initialize_cli = () => {
 const log = debug('process-projections-for-scoring-format')
 debug.enable('process-projections-for-scoring-format')
 
-const process_scoring_format_year = async ({
+// Re-derive scoring_format_player_projection_points for one (scoring_format,
+// year) slice entirely from the authoritative projections_index /
+// ros_projections AVERAGE rows. This is the SINGLE source-of-truth path shared
+// by the 30-min process-projections cron and the ad-hoc / reconciliation
+// backfill, so the precomputed cache can never silently drift from
+// projections_index: delete the whole (format, year) slice and reinsert every
+// numeric REG week plus the rest-of-season row, scored by calculatePoints (the
+// exact arithmetic the in-query data-view scorer mirrors). Settled weeks are
+// re-read from projections_index each run, so the cache tracks the frozen
+// as-of-gametime projection instead of freezing at whenever-it-was-last-current.
+// See task projected-points-in-query-scoring-source-selection.
+export const process_scoring_format_year = async ({
   year,
-  scoring_format_id,
-  player_rows
+  scoring_format_id
 }) => {
   const league_scoring_format = await db('league_scoring_formats')
     .where({ id: scoring_format_id })
     .first()
 
+  const projections = await db('projections_index').where({
+    year,
+    sourceid: external_data_sources.AVERAGE,
+    seas_type: 'REG'
+  })
+  const ros_projections = await db('ros_projections').where({
+    year,
+    sourceid: external_data_sources.AVERAGE
+  })
+
+  const projections_by_pid = groupBy(projections, 'pid')
+  const ros_by_pid = groupBy(ros_projections, 'pid')
+  const pids = Array.from(
+    new Set([...Object.keys(projections_by_pid), ...Object.keys(ros_by_pid)])
+  )
+
+  if (!pids.length) {
+    return 0
+  }
+
+  const players = await db('player').whereIn('pid', pids)
+  const players_by_pid = groupBy(players, 'pid')
+
   const points_inserts = []
+  for (const pid of pids) {
+    const player = (players_by_pid[pid] || [])[0]
+    if (!player) {
+      continue
+    }
 
-  for (const player_row of player_rows) {
-    let week = 0
-    for (; week <= current_season.nflFinalWeek; week++) {
-      const projection = player_row.projection[week]
-
-      if (!projection) {
-        continue
-      }
-
+    for (const proj of projections_by_pid[pid] || []) {
+      const { week, ...stats } = proj
       points_inserts.push({
-        pid: player_row.pid,
+        pid,
         year,
         scoring_format_id,
         week,
         ...calculatePoints({
-          stats: projection,
-          position: player_row.pos,
+          stats,
+          position: player.pos,
+          league: league_scoring_format,
+          use_projected_stats: true
+        })
+      })
+    }
+
+    const ros_row = (ros_by_pid[pid] || [])[0]
+    if (ros_row) {
+      points_inserts.push({
+        pid,
+        year,
+        scoring_format_id,
+        week: 'ros',
+        ...calculatePoints({
+          stats: ros_row,
+          position: player.pos,
           league: league_scoring_format,
           use_projected_stats: true
         })
@@ -60,9 +107,11 @@ const process_scoring_format_year = async ({
       batch_size: 100
     })
     log(
-      `processed and saved ${points_inserts.length} player points for year ${year}`
+      `re-derived ${points_inserts.length} ${scoring_format_id} points for year ${year}`
     )
   }
+
+  return points_inserts.length
 }
 
 const process_projections_for_scoring_format = async ({
@@ -80,41 +129,14 @@ const process_projections_for_scoring_format = async ({
     years = projection_years.map((row) => row.year)
   }
 
-  if (!years.length) {
+  if (!years || !years.length) {
     throw new Error('No years to process')
   }
 
   for (const process_year of years) {
-    const projections = await db('projections_index').where({
-      year: process_year,
-      sourceid: external_data_sources.AVERAGE,
-      seas_type: 'REG'
-    })
-
-    const projections_by_pid = groupBy(projections, 'pid')
-    const projection_pids = Object.keys(projections_by_pid)
-
-    const players = await db('player').whereIn('pid', projection_pids)
-
-    const player_rows = players.map((player) => {
-      const player_projections = projections_by_pid[player.pid] || []
-      const projection = {}
-
-      for (const proj of player_projections) {
-        const { week, ...stats } = proj
-        projection[week] = stats
-      }
-
-      return {
-        ...player,
-        projection
-      }
-    })
-
     await process_scoring_format_year({
       year: process_year,
-      scoring_format_id,
-      player_rows
+      scoring_format_id
     })
   }
 }

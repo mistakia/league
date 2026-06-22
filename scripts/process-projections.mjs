@@ -8,7 +8,6 @@ import {
   Roster,
   getRosterSize,
   weightProjections,
-  calculatePoints,
   calculateValues,
   calculatePrices,
   calculateBaselines,
@@ -37,6 +36,7 @@ import {
 import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
+import { process_scoring_format_year } from './process-projections-for-scoring-format.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(dayOfYear)
@@ -280,72 +280,6 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   return player_rows
 }
 
-const process_scoring_format = async ({
-  year,
-  scoring_format_id,
-  player_rows
-}) => {
-  const league_scoring_format = await db('league_scoring_formats')
-    .where({ id: scoring_format_id })
-    .first()
-
-  const points_inserts = []
-  const current_week = year === current_season.year ? current_season.week : 0
-
-  for (const player_row of player_rows) {
-    for (let week = current_week; week <= current_season.nflFinalWeek; week++) {
-      const projection = player_row.projection[week]
-
-      points_inserts.push({
-        pid: player_row.pid,
-        year: current_season.year,
-        scoring_format_id,
-        week,
-        ...calculatePoints({
-          stats: projection,
-          position: player_row.pos,
-          league: league_scoring_format,
-          use_projected_stats: true
-        })
-      })
-    }
-
-    points_inserts.push({
-      pid: player_row.pid,
-      year: current_season.year,
-      scoring_format_id,
-      week: 'ros',
-      ...calculatePoints({
-        stats: player_row.projection.ros,
-        position: player_row.pos,
-        league: league_scoring_format,
-        use_projected_stats: true
-      })
-    })
-  }
-
-  if (points_inserts.length) {
-    await db('scoring_format_player_projection_points')
-      .where({ scoring_format_id, year })
-      .where(function () {
-        this.where('week', 'ros').orWhere(function () {
-          this.whereNot('week', 'ros').andWhere(
-            db.raw('CAST(week AS INTEGER) >= ?', [current_week])
-          )
-        })
-      })
-      .del()
-
-    await batch_insert({
-      items: points_inserts,
-      save: (items) =>
-        db('scoring_format_player_projection_points').insert(items),
-      batch_size: 100
-    })
-    log(`processed and saved ${points_inserts.length} player points`)
-  }
-}
-
 const process_league_format = async ({
   projection_pids,
   year,
@@ -416,9 +350,7 @@ const process_league_format = async ({
         week,
         pts_added,
         market_salary:
-          pricing_model === 'auction'
-            ? player_row.market_salary[week]
-            : null
+          pricing_model === 'auction' ? player_row.market_salary[week] : null
       }
 
       valueInserts.push(params)
@@ -688,10 +620,8 @@ const run = async ({ year = current_season.year } = {}) => {
   for (const scoring_format_id of Object.keys(scoring_formats)) {
     const t0 = Date.now()
     try {
-      await process_scoring_format({ year, scoring_format_id, player_rows })
-      log(
-        `scoring_format=${scoring_format_id} duration_ms=${Date.now() - t0}`
-      )
+      await process_scoring_format_year({ year, scoring_format_id })
+      log(`scoring_format=${scoring_format_id} duration_ms=${Date.now() - t0}`)
     } catch (err) {
       per_format_failures.push({
         stage: 'process_scoring_format',

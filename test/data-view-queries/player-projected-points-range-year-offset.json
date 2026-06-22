@@ -1,6 +1,6 @@
 {
   "name": "player_season_projected_points range year_offset reduces over the offset window via a valid table re-scan",
-  "description": "player_season_projected_points with year=[2023] + range year_offset=[1,2] reduces the offset window with a correlated-aggregate subquery that re-scans scoring_format_player_projection_points directly (source.table), pinned to year IN (2024,2025) plus the scoring_format_id/week discriminators. Previously emitted invalid SQL referencing an unjoined alias.",
+  "description": "player_season_projected_points with year=[2023] + range year_offset=[1,2] reduces the offset window with a correlated-aggregate subquery that re-scans projections_index directly (source.table) and scores it in-query, pinned to year IN (2024,2025) plus the sourceid/week/seas_type discriminators. Previously emitted invalid SQL referencing an unjoined alias.",
   "request": {
     "prefix_columns": ["player_name"],
     "columns": [

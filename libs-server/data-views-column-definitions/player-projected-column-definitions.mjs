@@ -352,11 +352,22 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
 // player_projected_points computes its value from the projections_index /
 // ros_projections raw-stat row using the selected scoring format's weights,
 // faithfully mirroring calculatePoints({ use_projected_stats: true }) in
-// #libs-shared/calculate-points.mjs. Single consumer, so the scorer is inlined
-// here rather than extracted into a module. It is intentionally NOT
-// value-identical to the legacy precomputed scoring_format_player_projection_points
-// total (the two are independently-timed snapshots that drift); the gate is
-// faithfulness to calculatePoints, validated at population scale.
+// #libs-shared/calculate-points.mjs.
+//
+// projections_index AVERAGE is the AUTHORITATIVE, as-of-gametime frozen
+// consensus projection: it retains the correct per-week starter projection
+// (validated against the per-source frozen history — e.g. Joe Flacco 2025 wk9
+// is 242.5 pass yds in projections_index, matching all ~10 sources; a week
+// that reads 0 is a real bye/inactive, not a dropped row). The legacy
+// precomputed scoring_format_player_projection_points is a per-format derived
+// cache regenerated from this same projections_index (via process-projections /
+// process-projections-for-scoring-format), so where the two disagreed the cache
+// was the STALE store and this in-query value is the correct one. The pipeline
+// re-derives that cache FROM projections_index every run (NEVER the reverse), so
+// the two stay in lockstep. See task
+// projected-points-in-query-scoring-source-selection.
+//
+// Single consumer, so the scorer is inlined here rather than extracted.
 
 // player.pos is a correlatable outer column under the canonical `FROM player`
 // query; the receiving-position CASE and the year_offset subquery both read it.
