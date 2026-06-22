@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
-import { external_data_sources } from '#constants'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 
 const initialize_cli = () => {
@@ -123,10 +123,17 @@ const process_projections_for_scoring_format = async ({
   if (year) {
     years = [year]
   } else if (all) {
+    // --all reconciles PAST years only. The current year is owned by the 30-min
+    // process-projections cron (which re-derives it in full every run via the
+    // shared process_scoring_format_year), so excluding it here avoids a
+    // concurrent del+reinsert race on the same (format, year) slice. Pass an
+    // explicit --year to force a single year.
     const projection_years = await db('projections_index')
       .distinct('year')
       .orderBy('year', 'desc')
-    years = projection_years.map((row) => row.year)
+    years = projection_years
+      .map((row) => row.year)
+      .filter((y) => y !== current_season.year)
   }
 
   if (!years || !years.length) {
