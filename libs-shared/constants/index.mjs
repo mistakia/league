@@ -106,6 +106,7 @@ export {
   external_data_sources,
   external_data_source_keys,
   external_data_source_display_names,
+  projection_data_source_ids,
   keeptradecut_metric_types,
   default_points_added,
   team_id_regex,

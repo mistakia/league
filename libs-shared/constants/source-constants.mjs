@@ -71,6 +71,33 @@ export const external_data_source_display_names = {
   29: 'Charting Data'
 }
 
+// The ordered set of sources that populate player stat projections in
+// `projections_index` (every `scripts/import-*-projections.mjs` writer plus the
+// computed AVERAGE consensus from `scripts/process-projections.mjs`). AVERAGE is
+// first so it reads as the default. This is the single source of truth for
+// "which sources are selectable projection providers" — consumed by the
+// data-view projection-source column param.
+export const projection_data_source_ids = [
+  external_data_sources.AVERAGE,
+  external_data_sources.FANTASY_SHARKS,
+  external_data_sources.CBS,
+  external_data_sources.ESPN,
+  external_data_sources.NFL,
+  external_data_sources.FFTODAY,
+  external_data_sources.FBG_CONSENSUS,
+  external_data_sources.FBG_DAVID_DODDS,
+  external_data_sources.FBG_BOB_HENRY,
+  external_data_sources.FBG_JASON_WOOD,
+  external_data_sources.FBG_MAURILE_TREMBLAY,
+  external_data_sources.FBG_SIGMUND_BLOOM,
+  external_data_sources.FANTASY_FOOTBALL_NERD,
+  external_data_sources.NUMBERFIRE,
+  external_data_sources['4FOR4'],
+  external_data_sources.FANTASYLIFE,
+  external_data_sources.FANTASYLIFE_DWAIN_MCFARLAND,
+  external_data_sources.SLEEPER
+]
+
 export const keeptradecut_metric_types = {
   VALUE: 1,
   POSITION_RANK: 2,

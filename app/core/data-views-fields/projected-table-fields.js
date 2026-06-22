@@ -4,6 +4,7 @@ import {
   common_column_params,
   named_scoring_formats,
   named_league_formats,
+  projection_source_param,
   DEFAULT_SCORING_FORMAT_ID,
   DEFAULT_LEAGUE_FORMAT_ID
 } from '@libs-shared'
@@ -49,6 +50,23 @@ const extra_column_params_by_base_name = {
   points_added: { league_format_id: league_format_id_param },
   market_salary: { league_format_id: auction_league_format_id_param }
 }
+
+// The computed columns are derived into scoring_format_*/league_format_*/league_*
+// tables that carry no sourceid dimension. Every other projection column reads a
+// raw stat from projections_index/ros_projections and so accepts a source picker.
+const computed_base_names = new Set([
+  'points',
+  'points_added',
+  'market_salary',
+  'salary_adjusted_points_added'
+])
+
+const get_extra_column_params = (base_name) => ({
+  ...(computed_base_names.has(base_name)
+    ? {}
+    : { sourceid: projection_source_param }),
+  ...extra_column_params_by_base_name[base_name]
+})
 
 // Generate projection years dynamically from 2020 to current year
 const get_projection_years = () => {
@@ -116,7 +134,7 @@ export default function ({ week }) {
           : undefined,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params: (() => {
-      const extras = extra_column_params_by_base_name[base_name]
+      const extras = get_extra_column_params(base_name)
       if (period === 'Season') {
         return {
           year: {

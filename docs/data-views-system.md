@@ -274,6 +274,10 @@ Weekly data-view columns use one of three param flavors, picked by the data's na
 
 Fields that exist at both grains are split into explicit season and week variants. Projections expose six `player_season_projected_*` fields (keyed on `single_year`) and six `player_week_projected_*` fields (keyed on `single_nfl_week_id`). Rankings are season-only — six `player_season_*_ranking` fields keyed on `single_year`; the underlying `player_rankings_index` and `player_rankings_history` tables hold no week-level data and the week variant has been retired.
 
+#### Projection `sourceid` param
+
+The raw-stat projection columns (`player_{week,season,rest_of_season}_projected_{pass_atts,pass_yds,…,rec_tds}`) read per-source rows from `projections_index` (`ros_projections` for rest-of-season), which carries a row per projection provider. They accept a `sourceid` param selecting the provider, defaulting to `external_data_sources.AVERAGE` (the consensus) so a column with no `sourceid` is byte-identical to the pre-param behavior. The selectable set is the single source of truth `projection_data_source_ids` in `libs-shared/constants/source-constants.mjs`, surfaced in the UI by `projection_source_param` (`libs-shared/projection-source-column-param.mjs`). `sourceid` is part of the `projections_index` table-alias hash, so the same column requested twice with different sources resolves to two independent joins rather than collapsing into one. The four computed projection columns (`points`, `points_added`, `market_salary`, `salary_adjusted_points_added`) are derived into `scoring_format_*`/`league_format_*`/`league_*` tables that carry no `sourceid` dimension and do **not** accept the param. `ros_projections` selection is wired but currently inert — only the AVERAGE source is materialized there today.
+
 #### Saved-View Migration
 
 The `scripts/migrate-data-views-single-nfl-week.mjs` script performs column-scoped rewrites on `user_data_views.table_state` and `user_plays_views.table_state` rows:
