@@ -878,18 +878,19 @@ router.post('/views', async (req, res) => {
       return res.status(400).send({ error: 'invalid table_state' })
     }
 
+    // Resolve to an in-place update of the requester's own saved view, or a
+    // "save as new" (fork). A view_id that does not resolve to a row owned by
+    // the requester -- a never-persisted client-generated id carried by a
+    // shared /u/<hash> short URL, or another user's shared view -- is forked
+    // into a new view owned by the requester rather than rejected with
+    // "invalid view_id". Saving an opened share link always yields a view the
+    // requester owns.
+    const existing_view = view_id
+      ? await db('user_plays_views').where({ view_id }).first()
+      : null
+
     let result_view_id
-    if (view_id) {
-      const view = await db('user_plays_views').where({ view_id }).first()
-
-      if (!view) {
-        return res.status(400).send({ error: 'invalid view_id' })
-      }
-
-      if (view.user_id !== user_id) {
-        return res.status(401).send({ error: 'invalid userId' })
-      }
-
+    if (existing_view && existing_view.user_id === user_id) {
       await db('user_plays_views')
         .where({ view_id, user_id })
         .update({

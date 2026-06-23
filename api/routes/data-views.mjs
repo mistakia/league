@@ -724,21 +724,19 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid table_state' })
     }
 
-    if (view_id) {
-      const view = await db('user_data_views')
-        .where({
-          view_id
-        })
-        .first()
+    // Resolve to an in-place update of the requester's own saved view, or a
+    // "save as new" (fork). A view_id that does not resolve to a row owned by
+    // the requester -- a never-persisted client-generated id carried by a
+    // shared /u/<hash> short URL, or another user's shared view -- is forked
+    // into a new view owned by the requester rather than rejected with
+    // "invalid view_id". Saving an opened share link always yields a view the
+    // requester owns.
+    const existing_view = view_id
+      ? await db('user_data_views').where({ view_id }).first()
+      : null
 
-      if (!view) {
-        return res.status(400).send({ error: 'invalid view_id' })
-      }
-
-      if (view.user_id !== user_id) {
-        return res.status(401).send({ error: 'invalid userId' })
-      }
-
+    let result_view_id
+    if (existing_view && existing_view.user_id === user_id) {
       await db('user_data_views')
         .where({
           view_id,
@@ -749,11 +747,12 @@ router.post('/?', async (req, res) => {
           view_description,
           table_state: JSON.stringify(table_state)
         })
+      result_view_id = view_id
     } else {
-      const view_id = crypto.randomUUID()
+      result_view_id = crypto.randomUUID()
 
       await db('user_data_views').insert({
-        view_id,
+        view_id: result_view_id,
         view_name,
         view_description,
         table_state: JSON.stringify(table_state),
@@ -763,8 +762,7 @@ router.post('/?', async (req, res) => {
 
     const view = await db('user_data_views')
       .where({
-        view_name,
-        user_id
+        view_id: result_view_id
       })
       .first()
 
