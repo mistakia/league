@@ -214,7 +214,7 @@ const route_logger = create_logger('api:errors', { service: 'league-client' })
 router.post('/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const { leagueId, teamId, userId, error } = req.body
+    const { leagueId, teamId, userId, error, metadata } = req.body
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
     const user_agent = req.headers['user-agent']
     logger({ leagueId, teamId, userId, error, ip, userAgent: user_agent })
@@ -240,7 +240,12 @@ router.post('/?', async (req, res) => {
         user_agent: user_agent || null,
         filename: error?.filename || null,
         lineno: error?.lineno ?? null,
-        colno: error?.colno ?? null
+        colno: error?.colno ?? null,
+        // Client-supplied metadata (capture surface, component stack, request
+        // options, field info, user) — previously only captured by Bugsnag.
+        handler: metadata?.handler || null,
+        component_stack: metadata?.componentStack || null,
+        metadata: metadata || null
       }
     })
 
