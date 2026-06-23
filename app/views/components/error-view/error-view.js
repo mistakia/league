@@ -7,7 +7,7 @@ import { DISCORD_URL } from '@core/constants'
 import './error-view.styl'
 import '@styles/button.styl'
 
-// This component is designed to work with Bugsnag's ErrorBoundary as a FallbackComponent
+// This component is the FallbackComponent rendered by the app ErrorBoundary
 const ErrorView = ({ error, info }) => {
   const [copy_success, set_copy_success] = useState(false)
 

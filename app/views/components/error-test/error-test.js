@@ -8,7 +8,7 @@ const ErrorTest = () => {
   const [should_crash, set_should_crash] = useState(false)
 
   if (should_crash) {
-    // This will trigger the Bugsnag ErrorBoundary
+    // This will trigger the ErrorBoundary
     throw new Error('This is a test error from ErrorTest component')
   }
 
@@ -20,7 +20,7 @@ const ErrorTest = () => {
     <div className='error_test_container'>
       <h2>Error Boundary Test Page</h2>
       <p>
-        This page allows you to test the Bugsnag ErrorBoundary with our custom
+        This page allows you to test the ErrorBoundary with our custom
         FallbackComponent.
       </p>
 

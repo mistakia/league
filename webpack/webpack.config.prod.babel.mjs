@@ -117,10 +117,6 @@ export default merge(baseConfig, {
       openAnalyzer: process.env.OPEN_ANALYZER === 'true'
     })
     // new Visualizer()
-    /* new BugsnagSourceMapUploaderPlugin({
-     *   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
-     *   appVersion: VERSION
-     * }) */
   ],
 
   // Add devServer config for serving production builds locally

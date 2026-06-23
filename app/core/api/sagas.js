@@ -1,5 +1,5 @@
 import { call, put, cancelled, select } from 'redux-saga/effects'
-import { notify as bugsnag_notify } from '@core/bugsnag'
+import { notify as report_error } from '@core/bugsnag'
 
 import { api, api_request } from '@core/api/service'
 import { get_draft_pick_value_actions } from '@core/draft-pick-value/actions'
@@ -149,9 +149,7 @@ function* fetch_api(api_function, actions, opts = {}) {
       }
 
       yield put(notification_actions.show({ severity: 'error', message }))
-      bugsnag_notify(err, (event) => {
-        event.addMetadata('options', opts)
-      })
+      report_error(err, { options: opts })
     }
     yield put(actions.failed({ opts, error: err.toString() }))
   } finally {

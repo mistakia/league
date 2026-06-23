@@ -4,15 +4,15 @@ import { HistoryRouter as Router } from 'redux-first-history/rr6'
 
 import { store, history } from '@core/store.js'
 import storeRegistry from '@core/store-registry'
-import { ErrorBoundary, init_bugsnag } from '@core/bugsnag'
+import { ErrorBoundary, init_error_reporting } from '@core/bugsnag'
 import App from '@components/app'
 import ErrorView from '@components/error-view'
 
 storeRegistry.register(store)
 
-// Defer Bugsnag SDK off the critical path. The local ErrorBoundary captures
-// boundary errors synchronously and dual-writes to /api/errors regardless.
-init_bugsnag()
+// Install global error/rejection handlers. The ErrorBoundary additionally
+// captures React render errors synchronously and reports to /api/errors.
+init_error_reporting()
 
 const Root = () => (
   <ErrorBoundary FallbackComponent={ErrorView}>

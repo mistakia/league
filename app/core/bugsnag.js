@@ -1,9 +1,20 @@
-/* global IS_DEV, APP_VERSION */
+/* global IS_DEV */
 import React from 'react'
 import PropTypes from 'prop-types'
 
+// Client error reporting.
+//
+// Errors are POSTed to /api/errors, which symbolicates the stack against the
+// build's private sourcemaps and emits a log_error signal to the base signal
+// queue. This replaced Bugsnag on 2026-06-23 once server-side symbolication
+// reached parity; the file name is retained to avoid churning import sites.
+//
+// Capture surfaces (parity with Bugsnag autoDetectErrors):
+//   - React render/lifecycle errors via ErrorBoundary.componentDidCatch
+//   - uncaught errors via window 'error'
+//   - unhandled promise rejections via window 'unhandledrejection'
+
 const KEEPALIVE_STACK_LIMIT = 16000
-const BUGSNAG_API_KEY = '183fca706d9f94c00a661167bf8cfc5d'
 
 const truncate_stack = (stack) => {
   if (typeof stack !== 'string') return stack
@@ -14,8 +25,20 @@ const truncate_stack = (stack) => {
   )
 }
 
+// Only auto-report uncaught errors/rejections in production, matching the
+// release-stage gate Bugsnag previously enforced. The ErrorBoundary path
+// reports unconditionally (its dual-write was always on).
+const should_report = () =>
+  typeof window !== 'undefined' && typeof IS_DEV !== 'undefined' && !IS_DEV
+
+let current_user = null
+
 const post_to_league_api = (err, metadata) => {
   try {
+    const enriched =
+      current_user && typeof current_user === 'object'
+        ? { ...(metadata || {}), user: current_user }
+        : metadata
     fetch('/api/errors', {
       method: 'POST',
       credentials: 'same-origin',
@@ -27,103 +50,49 @@ const post_to_league_api = (err, metadata) => {
           stack: truncate_stack(err?.stack),
           name: err?.name || 'Error'
         },
-        metadata
+        metadata: enriched
       })
     }).catch(() => {})
   } catch (_send_error) {
-    // never let dual-write block
+    // never let error reporting throw
   }
 }
 
-const dual_write_on_error = (event) => {
-  try {
-    const error = event?.originalError || event?.errors?.[0] || {}
-    const raw_stack = error?.stack || event?.errors?.[0]?.stacktrace || null
-    fetch('/api/errors', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      keepalive: true,
-      body: JSON.stringify({
-        error: {
-          message:
-            error?.message || event?.errors?.[0]?.errorMessage || 'Unknown',
-          stack: truncate_stack(raw_stack),
-          name: error?.name || event?.errors?.[0]?.errorClass || 'Error'
-        }
-      })
-    }).catch(() => {})
-  } catch (_send_error) {
-    // never let dual-write block Bugsnag delivery
-  }
-  return true
+export const init_error_reporting = () => {
+  if (typeof window === 'undefined' || !should_report()) return
+
+  window.addEventListener('error', (event) => {
+    // Ignore resource-load errors (img/script 404s) — they target the element,
+    // not the window, and carry no Error object.
+    if (event?.target && event.target !== window) return
+    const error =
+      event?.error instanceof Error
+        ? event.error
+        : new Error(event?.message || 'Uncaught error')
+    post_to_league_api(error, { handler: 'window.onerror' })
+  })
+
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event?.reason
+    const error =
+      reason instanceof Error
+        ? reason
+        : new Error(
+            typeof reason === 'string' ? reason : 'Unhandled promise rejection'
+          )
+    post_to_league_api(error, { handler: 'unhandledrejection' })
+  })
 }
 
-let bugsnag_instance = null
-let bugsnag_load_promise = null
-const pending_notifies = []
-const pending_user = { id: null, email: null, set: false }
-
-const should_load_bugsnag = () =>
-  typeof window !== 'undefined' && typeof IS_DEV !== 'undefined' && !IS_DEV
-
-const load_bugsnag = () => {
-  if (bugsnag_load_promise) return bugsnag_load_promise
-  if (!should_load_bugsnag()) return Promise.resolve(null)
-  bugsnag_load_promise = Promise.all([
-    import(/* webpackChunkName: "vendor-bugsnag" */ '@bugsnag/js'),
-    import(/* webpackChunkName: "vendor-bugsnag" */ '@bugsnag/plugin-react')
-  ])
-    .then(([{ default: Bugsnag }, { default: BugsnagPluginReact }]) => {
-      Bugsnag.start({
-        apiKey: BUGSNAG_API_KEY,
-        autoDetectErrors: true,
-        appVersion: APP_VERSION,
-        plugins: [new BugsnagPluginReact()],
-        enabledReleaseStages: ['production'],
-        onError: dual_write_on_error
-      })
-      bugsnag_instance = Bugsnag
-      if (pending_user.set) {
-        Bugsnag.setUser(pending_user.id, pending_user.email)
-      }
-      for (const [err, cb] of pending_notifies) {
-        Bugsnag.notify(err, cb)
-      }
-      pending_notifies.length = 0
-      return Bugsnag
-    })
-    .catch(() => null)
-  return bugsnag_load_promise
-}
-
-export const init_bugsnag = () => {
-  if (!should_load_bugsnag()) return
-  const kickoff = () => load_bugsnag()
-  if (typeof window.requestIdleCallback === 'function') {
-    window.requestIdleCallback(kickoff, { timeout: 3000 })
-  } else {
-    setTimeout(kickoff, 2000)
-  }
-}
-
-export const notify = (err, cb) => {
-  post_to_league_api(err)
-  if (bugsnag_instance) {
-    bugsnag_instance.notify(err, cb)
-    return
-  }
-  if (should_load_bugsnag()) {
-    pending_notifies.push([err, cb])
-    load_bugsnag()
-  }
+export const notify = (err, metadata) => {
+  post_to_league_api(err, metadata)
 }
 
 export const set_user = (id, email) => {
-  pending_user.id = id
-  pending_user.email = email
-  pending_user.set = true
-  if (bugsnag_instance) bugsnag_instance.setUser(id, email)
+  current_user =
+    id != null || email != null
+      ? { id: id ?? null, email: email ?? null }
+      : null
 }
 
 export class ErrorBoundary extends React.Component {
@@ -131,15 +100,11 @@ export class ErrorBoundary extends React.Component {
   static getDerivedStateFromError(error) {
     return { hasError: true, error }
   }
+
   componentDidCatch(error, info) {
     post_to_league_api(error, { componentStack: info?.componentStack })
-    if (bugsnag_instance) {
-      bugsnag_instance.notify(error)
-    } else if (should_load_bugsnag()) {
-      pending_notifies.push([error, null])
-      load_bugsnag()
-    }
   }
+
   render() {
     if (this.state.hasError) {
       const Fallback = this.props.FallbackComponent

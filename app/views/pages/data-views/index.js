@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { all } from 'redux-saga/effects'
-import { notify as bugsnag_notify } from '@core/bugsnag'
+import { notify as report_error } from '@core/bugsnag'
 
 import { inject_reducer, inject_saga } from '@core/store'
 import {
@@ -62,16 +62,13 @@ const get_players_percentiles = createSelector(
 
       if (!field) {
         console.log(`Field not found for column_id: ${column_id}`)
-        bugsnag_notify(
-          new Error(`Field not found for column_id: ${column_id}`),
-          (event) => {
-            event.addMetadata('field_info', {
-              column_id,
-              index,
-              data_view: selected_data_view
-            })
+        report_error(new Error(`Field not found for column_id: ${column_id}`), {
+          field_info: {
+            column_id,
+            index,
+            data_view: selected_data_view
           }
-        )
+        })
         continue
       }
 
