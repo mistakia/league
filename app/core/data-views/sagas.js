@@ -148,12 +148,19 @@ export function* save_data_view({ payload }) {
 
   const { userId } = yield select(get_app)
   const view = yield select(get_data_view_by_id, { view_id })
-  if (userId !== view.get('user_id')) {
-    console.warn('User does not have permission to save this view')
-    return
-  }
 
-  if (view.get('saved_table_state')) {
+  // Update in place only when this is the requester's own persisted view.
+  // Any other view -- a draft, or one hydrated from a shared /u/<hash> link
+  // (no user_id, or a foreign owner) -- is saved as a new view via
+  // client_generated_view_id so the server forks it (see api/routes/
+  // data-views.mjs) and POST_DATA_VIEW_FULFILLED re-keys local state from the
+  // client id to the server-assigned id. Never silently drop the save.
+  const is_own_saved_view =
+    Boolean(view) &&
+    view.get('user_id') === userId &&
+    Boolean(view.get('saved_table_state'))
+
+  if (is_own_saved_view) {
     params.view_id = view_id
   } else {
     params.client_generated_view_id = view_id
