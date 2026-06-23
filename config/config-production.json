@@ -71,5 +71,6 @@
     "api_key": "ENCRYPTED|f74f1f4858d9cecfd84f211ecfb094ea|93cb356fc580a8287a12a293cc6bb103db3a7184b4df30a55382ae7e22754a958f3fde55b0eba17180453a45f6c7197c1d41b55fb418ebc69c46c212d561039dab3e73c68fd47eb381a8a69033e1cd3c"
   },
   "signals_api_url": "https://base.tint.space",
-  "signals_secret": ""
+  "signals_secret": "",
+  "sourcemap_dir": "/root/league/sourcemaps"
 }

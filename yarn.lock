@@ -11076,6 +11076,7 @@ __metadata:
     reselect: "npm:^5.1.1"
     resend: "npm:^6.12.4"
     simple-statistics: "npm:^7.8.7"
+    source-map: "npm:^0.7.6"
     style-loader: "npm:^4.0.0"
     styled-components: "npm:^6.1.14"
     stylus: "npm:^0.64.0"
@@ -11574,7 +11575,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map@npm:^0.7.3":
+"source-map@npm:^0.7.3, source-map@npm:^0.7.6":
   version: 0.7.6
   resolution: "source-map@npm:0.7.6"
   checksum: 10/c8d2da7c57c14f3fd7568f764b39ad49bbf9dd7632b86df3542b31fed117d4af2fb74a4f886fc06baf7a510fee68e37998efc3080aacdac951c36211dc29a7a3

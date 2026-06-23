@@ -1,8 +1,23 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import express from 'express'
 
+import config from '#config'
 import { create_logger } from '#libs-shared/log.mjs'
+import { symbolicate_stack } from '#libs-server/symbolicate-stack.mjs'
 
 const router = express.Router()
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Where the build's *.js.map files live for server-side symbolication. In
+// production these are rsynced to a PRIVATE path on the league host (never the
+// public dist/); locally they default to the repo-root dist/ produced by
+// `yarn build`. Resolution is best-effort — an unset/missing dir leaves stacks
+// minified rather than failing the report.
+const SOURCEMAP_DIR =
+  config?.sourcemap_dir || path.join(__dirname, '..', '..', 'dist')
 
 const HIGH_SEVERITY_ERROR_CLASSES = new Set([
   'TypeError',
@@ -210,7 +225,11 @@ router.post('/?', async (req, res) => {
       : 'medium'
     const synthetic = new Error(error?.message || 'Unknown client error')
     synthetic.name = error_class
-    if (error?.stack) synthetic.stack = error.stack
+    if (error?.stack) {
+      synthetic.stack = await symbolicate_stack(error.stack, {
+        sourcemap_dir: SOURCEMAP_DIR
+      })
+    }
     route_logger.error(synthetic, {
       severity,
       context: {
