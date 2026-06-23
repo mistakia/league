@@ -35,14 +35,15 @@ const route_logger = create_logger('api:errors', { service: 'league-client' })
  *   post:
  *     summary: Report client error
  *     description: |
- *       Report a client-side error to the server for logging and admin notification.
+ *       Report a client-side error to the server for logging and monitoring.
  *       This endpoint allows clients to report JavaScript errors, API failures, or other
  *       client-side issues to help with debugging and system monitoring.
  *
  *       The error report includes contextual information like league ID, team ID, user ID,
  *       and client details (IP address, user agent) to help administrators investigate issues.
  *
- *       An email notification is sent to the admin email address configured in the system.
+ *       The minified stack is symbolicated server-side against the build's private sourcemaps,
+ *       then emitted as a `log_error` signal (service `league-client`) to the base signal queue.
  *     tags:
  *       - Error Reporting
  *     requestBody:
@@ -101,6 +102,15 @@ const route_logger = create_logger('api:errors', { service: 'league-client' })
  *                   filename: "PlayerList.js"
  *                   lineno: 45
  *                   colno: 12
+ *               metadata:
+ *                 type: object
+ *                 description: >-
+ *                   Optional client context preserved in the signal payload — the capture surface
+ *                   (`handler`: window.onerror / unhandledrejection), React `componentStack`, request
+ *                   options, data-view field info, and user identity.
+ *                 example:
+ *                   handler: "window.onerror"
+ *                   componentStack: "\n    at PlayerList\n    at App"
  *             required:
  *               - error
  *             example:
