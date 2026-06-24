@@ -96,7 +96,7 @@ const drop_conflicting_constraints_and_indexes = async ({ dump_sql_path }) => {
   }
 }
 
-const STORAGE_BACKUP_PATH = '/mnt/md0/backups/servers/league-production/backups'
+const STORAGE_BACKUP_PATH = '/storage/backups/servers/league-production/backups'
 const LOCAL_BACKUP_PATH = '/root/backups'
 
 const select_backup_file_by_type = async ({ type }) => {
@@ -115,7 +115,7 @@ const select_backup_file_by_type = async ({ type }) => {
 
   log('Searching storage server backups via SSH')
   const { stdout } = cp.execSync(
-    `ssh storage 'ls -t ${STORAGE_BACKUP_PATH}/*.tar.gz 2>/dev/null || true'`,
+    `ssh base-storage 'ls -t ${STORAGE_BACKUP_PATH}/*.tar.gz 2>/dev/null || true'`,
     { encoding: 'utf8' }
   )
   const files = stdout.trim().split('\n').filter(Boolean)
@@ -130,7 +130,7 @@ const fetch_backup_file = ({ file }) => {
   }
   const local_dest = path.join(os.tmpdir(), file.name)
   log('Downloading %s from storage via scp', file.name)
-  cp.execSync(`scp storage:${file.remote_path} "${local_dest}"`, {
+  cp.execSync(`scp base-storage:${file.remote_path} "${local_dest}"`, {
     stdio: 'inherit'
   })
   return local_dest

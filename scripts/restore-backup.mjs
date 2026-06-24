@@ -212,7 +212,7 @@ DO UPDATE SET value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}'
   return output_file
 }
 
-const STORAGE_BACKUP_PATH = '/mnt/md0/backups/servers/league-production/backups'
+const STORAGE_BACKUP_PATH = '/storage/backups/servers/league-production/backups'
 const LOCAL_BACKUP_PATH = '/root/backups'
 
 /**
@@ -239,13 +239,13 @@ const find_backup_file = async ({ query }) => {
 
   log('Searching storage server backups via SSH')
   const { stdout } = await exec(
-    `ssh storage 'ls -t ${STORAGE_BACKUP_PATH}/*.tar.gz 2>/dev/null || true'`
+    `ssh base-storage 'ls -t ${STORAGE_BACKUP_PATH}/*.tar.gz 2>/dev/null || true'`
   )
   const files = stdout.trim().split('\n').filter(Boolean)
   const match = files.find((f) => path.basename(f).includes(query))
   if (!match) {
     throw new Error(
-      `No backup files found matching "${query}" on storage:${STORAGE_BACKUP_PATH}`
+      `No backup files found matching "${query}" on base-storage:${STORAGE_BACKUP_PATH}`
     )
   }
   return { name: path.basename(match), remote_path: match }
@@ -262,7 +262,7 @@ const download_file = async ({ file }) => {
   }
   const local_dest = `./${file.name}`
   log('Downloading %s from storage via scp', file.name)
-  await exec(`scp storage:${file.remote_path} ${local_dest}`)
+  await exec(`scp base-storage:${file.remote_path} ${local_dest}`)
   log('Download complete: %s', file.name)
   return local_dest
 }
