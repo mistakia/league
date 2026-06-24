@@ -77,10 +77,17 @@ class ProxyPool {
       return null
     }
 
-    // If all proxies failed, reset them and add exponential backoff
+    // If all proxies failed, reset them and add exponential backoff. The
+    // delay is capped so a long-lived worker whose proxy pool stays down does
+    // not accumulate unbounded sleeps (retry_count only resets on a successful
+    // fetch); without the cap, base_delay * 2^n reached tens of minutes and was
+    // a primary contributor to import-live-odds-worker's 45-min job timeouts.
     if (this.all_proxies_failed()) {
       this.retry_count++
-      const delay = this.base_delay * Math.pow(2, this.retry_count - 1)
+      const delay = Math.min(
+        this.base_delay * Math.pow(2, this.retry_count - 1),
+        ProxyPool.MAX_BACKOFF_MS
+      )
       log(
         `[${this.name}] All proxies failed. Waiting ${delay}ms before retry #${this.retry_count}`
       )
@@ -127,6 +134,9 @@ class ProxyPool {
     return { total, failed, working: total - failed }
   }
 }
+
+// Ceiling for the all-proxies-failed exponential backoff (5 minutes).
+ProxyPool.MAX_BACKOFF_MS = 5 * 60 * 1000
 
 // ProxyManager manages multiple proxy pools
 class ProxyManager {
@@ -316,7 +326,8 @@ export async function fetch_with_retry({
   max_delay = 10000,
   use_proxy = false,
   proxy_pool = 'default',
-  response_type
+  response_type,
+  timeout_ms = 30000
 } = {}) {
   if (!url) {
     throw new Error('url is required')
@@ -329,6 +340,13 @@ export async function fetch_with_retry({
   if (headers) fetch_options.headers = headers
   if (body) fetch_options.body = body
 
+  // Per-attempt request timeout. undici's fetch has no bounded overall timeout
+  // (headersTimeout defaults to 5 min), so a stalled proxy connection hung each
+  // attempt for minutes; across 4 attempts x a 10-matchup concurrent batch this
+  // was the root cause of import-live-odds-worker walling at its 45-min outer
+  // timeout. A fresh AbortSignal.timeout per attempt bounds each network call so
+  // failures surface fast and rotate to the next proxy instead of hanging.
+
   let last_error
   let current_proxy = null
   const proxies_tried = []
@@ -336,6 +354,10 @@ export async function fetch_with_retry({
   for (let attempt = 0; attempt <= max_retries; attempt++) {
     try {
       let response
+      const attempt_options = {
+        ...fetch_options,
+        signal: AbortSignal.timeout(timeout_ms)
+      }
 
       if (use_proxy) {
         // Get a working proxy from the specified pool (rotates on failure)
@@ -349,7 +371,7 @@ export async function fetch_with_retry({
           proxies_tried.push(current_proxy.key)
           const proxyAgent = new ProxyAgent(current_proxy.connection_string)
           response = await undiciFetch(url, {
-            ...fetch_options,
+            ...attempt_options,
             dispatcher: proxyAgent
           })
         } else {
@@ -357,11 +379,11 @@ export async function fetch_with_retry({
           retry_log(
             `Attempt ${attempt + 1}/${max_retries + 1} for ${url} (no proxy available in pool '${proxy_pool}', using direct)`
           )
-          response = await fetch(url, fetch_options)
+          response = await fetch(url, attempt_options)
         }
       } else {
         retry_log(`Attempt ${attempt + 1}/${max_retries + 1} for ${url}`)
-        response = await fetch(url, fetch_options)
+        response = await fetch(url, attempt_options)
       }
 
       if (!response.ok) {
