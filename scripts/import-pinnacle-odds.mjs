@@ -51,6 +51,27 @@ const is_timeout_abort = (error, signal) =>
   error?.name === 'TimeoutError' ||
   error?.name === 'AbortError'
 
+// The matchups-list endpoint is a single GET that resolves in ~10s on a healthy
+// proxy. Give it its own tight budget, independent of the 43-min run deadline.
+// The pinnacle proxy pool is a SINGLE proxy, so any transient failure trips
+// all_proxies_failed() immediately and every get_working_proxy cycle eats the
+// 5-min MAX_BACKOFF in proxy-manager; across get_nfl_matchups's four retries
+// that compounds to ~20 min (observed in production: 1208213ms). Bounding the
+// fetch makes a degraded pool abort in ~2 min and fall through to the clean
+// no-data return below, instead of a long stall that risks orphaning against the
+// worker's 45-min outer timeout. The overall deadline still applies via
+// AbortSignal.any.
+const MATCHUPS_FETCH_BUDGET_MS = 2 * 60 * 1000 // 2 minutes
+
+// A single matchups-fetch timeout is silenced as a self-healing no-data run, but
+// a proxy pool that stays down across cycles would otherwise import no odds
+// indefinitely with no signal. The job wrapper counts consecutive no-data-timeout
+// runs (module scope persists across the worker's 4-hourly job() calls) and
+// surfaces a real error once a sustained outage is likely, then resets so the
+// escalation re-fires at most once per this many cycles.
+const NO_DATA_ESCALATION_THRESHOLD = 3 // ~12h of no odds at the 4h cadence
+let consecutive_no_data_runs = 0
+
 const DEBUG_MODULES =
   'import-pinnacle-odds,pinnacle,get-player,insert-prop-markets,insert-prop-market-selections'
 
@@ -797,19 +818,26 @@ const import_pinnacle_odds = async ({
     // separately. Non-timeout errors still propagate to report_error + exit 1.
     let pinnacle_matchups
     try {
+      // Combine the overall deadline with the tight per-fetch budget; whichever
+      // fires first aborts the matchups fetch (and its proxy backoffs).
+      const matchups_signal = AbortSignal.any([
+        signal,
+        AbortSignal.timeout(MATCHUPS_FETCH_BUDGET_MS)
+      ])
       pinnacle_matchups = await pinnacle.get_nfl_matchups({
         ignore_cache,
-        signal
+        signal: matchups_signal
       })
     } catch (error) {
       if (is_timeout_abort(error, signal)) {
         log(
-          `WARNING: could not fetch Pinnacle matchups within the time budget ` +
-            `(${error.message}); skipping this run with no data committed. ` +
-            `Recurring occurrences indicate a degraded proxy pool or slow ` +
-            `upstream — investigate if it persists.`
+          `WARNING: could not fetch Pinnacle matchups within the ` +
+            `${MATCHUPS_FETCH_BUDGET_MS / 1000}s budget (${error.message}); ` +
+            `skipping this run with no data committed. Recurring occurrences ` +
+            `indicate a degraded proxy pool or slow upstream — investigate if it ` +
+            `persists.`
         )
-        return
+        return { outcome: 'no_data_timeout' }
       }
       throw error
     }
@@ -821,7 +849,10 @@ const import_pinnacle_odds = async ({
     // the mid-run partial timeout handled below.
     if (!pinnacle_matchups || pinnacle_matchups.length === 0) {
       log('no matchups returned — nothing to import, exiting early')
-      return
+      // A genuinely empty slate (offseason / no scheduled games) is a successful
+      // no-op, not an outage — distinct from no_data_timeout, so it does not feed
+      // the sustained-outage escalation.
+      return { outcome: 'empty' }
     }
 
     // Collect unique values for analysis
@@ -905,6 +936,11 @@ const import_pinnacle_odds = async ({
         `${dry_run ? 'Processing' : 'Database insertion'} completed in ${insert_duration}s`
       )
     }
+
+    return {
+      outcome: timed_out ? 'partial' : 'ok',
+      markets: formatted_markets.length
+    }
   } finally {
     clearTimeout(deadline_timer)
     console.timeEnd('import-pinnacle-odds')
@@ -927,8 +963,9 @@ export const job = async ({
   save = false
 } = {}) => {
   let error
+  let result
   try {
-    await import_pinnacle_odds({
+    result = await import_pinnacle_odds({
       dry_run,
       ignore_cache,
       ignore_wait,
@@ -937,6 +974,30 @@ export const job = async ({
   } catch (err) {
     error = err
     console.log(error)
+  }
+
+  // Sustained-outage escalation. A single no_data_timeout is a silenced
+  // transient, but if the proxy pool stays down across cycles the import would
+  // quietly stop committing odds. Count consecutive no-data runs and, once a
+  // sustained outage is likely, surface a real error (report_error + failure
+  // outcome) so it is not masked. Any non-error run that did reach upstream
+  // resets the streak. Reset on escalation too, so it re-fires at most once per
+  // NO_DATA_ESCALATION_THRESHOLD cycles rather than every cycle.
+  if (!error) {
+    if (result?.outcome === 'no_data_timeout') {
+      consecutive_no_data_runs += 1
+      if (consecutive_no_data_runs >= NO_DATA_ESCALATION_THRESHOLD) {
+        error = new Error(
+          `Pinnacle import fetched no matchups for ` +
+            `${NO_DATA_ESCALATION_THRESHOLD}+ consecutive runs — the pinnacle ` +
+            `proxy pool is likely down (per-run timeouts are otherwise silenced ` +
+            `as transient).`
+        )
+        consecutive_no_data_runs = 0
+      }
+    } else {
+      consecutive_no_data_runs = 0
+    }
   }
 
   await report_job({
