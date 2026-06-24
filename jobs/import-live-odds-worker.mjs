@@ -35,7 +35,15 @@ const BOOKMAKER_CONFIG = {
   },
   pinnacle: {
     name: 'Pinnacle',
-    import_fn: () => import_pinnacle_odds({ ignore_cache: true }),
+    // max_runtime_ms is the import's own wall-clock budget, kept under the 45-min
+    // with_timeout below so it aborts in-flight work and returns a clean partial
+    // success before the hard outer timeout rejects (which would log an error and
+    // orphan the still-running import). See import-pinnacle-odds.mjs.
+    import_fn: () =>
+      import_pinnacle_odds({
+        ignore_cache: true,
+        max_runtime_ms: 43 * 60 * 1000
+      }),
     job_type: job_types.IMPORT_PINNACLE_ODDS,
     interval_ms: 4 * 60 * 60 * 1000, // 4 hours
     timeout_ms: 45 * 60 * 1000, // 45 minutes (Super Bowl week has 200+ matchups)

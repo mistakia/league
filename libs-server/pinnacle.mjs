@@ -213,7 +213,10 @@ export const get_market_type = ({
   }
 }
 
-export const get_nfl_matchups = async ({ ignore_cache = false } = {}) => {
+export const get_nfl_matchups = async ({
+  ignore_cache = false,
+  signal
+} = {}) => {
   const cache_key = `/pinnacle/nfl_matchups/${current_season.year}/${current_season.week}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
@@ -236,7 +239,8 @@ export const get_nfl_matchups = async ({ ignore_cache = false } = {}) => {
     proxy_pool: 'pinnacle',
     initial_delay: 1000,
     max_delay: 10000,
-    response_type: 'json'
+    response_type: 'json',
+    signal
   })
 
   if (data) {
@@ -248,7 +252,8 @@ export const get_nfl_matchups = async ({ ignore_cache = false } = {}) => {
 
 export const get_market_odds = async ({
   matchup_id,
-  ignore_cache = false
+  ignore_cache = false,
+  signal
 } = {}) => {
   if (!matchup_id) {
     throw new Error('matchup_id is required')
@@ -276,7 +281,8 @@ export const get_market_odds = async ({
     proxy_pool: 'pinnacle',
     initial_delay: 1000,
     max_delay: 10000,
-    response_type: 'json'
+    response_type: 'json',
+    signal
   })
 
   if (data) {

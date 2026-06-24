@@ -26,6 +26,15 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 // Constants
 const CONCURRENCY_LIMIT = 10
 const BATCH_WAIT_TIME = 5000
+
+// Overall wall-clock budget for a single import run. The live-odds worker wraps
+// this call in a 45-min with_timeout that REJECTS as an unrecoverable error and
+// leaves the orphaned import still running (a primary cause of the recurring
+// 45-min timeout signals). This internal deadline fires first: it aborts
+// in-flight fetches and proxy backoffs via AbortSignal and returns whatever
+// markets were gathered as a clean partial success. Kept safely under the
+// 45-min outer timeout so a normal run (~25 min in the offseason) is unaffected.
+const DEFAULT_MAX_RUNTIME_MS = 43 * 60 * 1000 // 43 minutes
 const DEBUG_MODULES =
   'import-pinnacle-odds,pinnacle,get-player,insert-prop-markets,insert-prop-market-selections'
 
@@ -482,7 +491,8 @@ const process_single_matchup = async ({
   unmatched_markets,
   unmatched_combinations,
   ignore_cache,
-  unique_odds_types
+  unique_odds_types,
+  signal
 }) => {
   const matchup_type_label =
     pinnacle_matchup.type === 'special'
@@ -496,7 +506,8 @@ const process_single_matchup = async ({
   try {
     const pinnacle_markets = await pinnacle.get_market_odds({
       matchup_id: pinnacle_matchup.id,
-      ignore_cache
+      ignore_cache,
+      signal
     })
 
     if (!pinnacle_markets || pinnacle_markets.length === 0) {
@@ -553,11 +564,14 @@ const process_matchup_batches = async ({
   unmatched_combinations,
   ignore_cache,
   ignore_wait,
-  unique_odds_types
+  unique_odds_types,
+  deadline,
+  signal
 }) => {
   const formatted_markets = []
   const all_matchups_with_markets = []
   const batch_start_time = Date.now()
+  let timed_out = false
 
   const process_batch = async (matchup_batch) => {
     const batch_promises = matchup_batch.map(async (pinnacle_matchup) => {
@@ -568,7 +582,8 @@ const process_matchup_batches = async ({
         unmatched_markets,
         unmatched_combinations,
         ignore_cache,
-        unique_odds_types
+        unique_odds_types,
+        signal
       })
     })
 
@@ -595,6 +610,23 @@ const process_matchup_batches = async ({
     chunk_size: CONCURRENCY_LIMIT
   })
   for (const [batch_index, batch] of matchup_batches.entries()) {
+    // Stop before starting a new batch once the overall time budget is spent.
+    // This bounds total wall-clock: each per-request fetch and proxy backoff is
+    // already capped, but nothing previously bounded their cumulative sum across
+    // every batch, so a degraded proxy pool walked the run to the 45-min ceiling.
+    if (signal?.aborted || (deadline && Date.now() >= deadline)) {
+      const processed = batch_index
+      const skipped_batches = matchup_batches.length - processed
+      const skipped_matchups = pinnacle_matchups.length - processed * CONCURRENCY_LIMIT
+      log(
+        `Time budget exhausted after ${processed}/${matchup_batches.length} batches — ` +
+          `skipping ${skipped_batches} remaining batches (~${skipped_matchups} matchups). ` +
+          `Proceeding with ${formatted_markets.length} markets gathered so far (partial run).`
+      )
+      timed_out = true
+      break
+    }
+
     await process_batch(batch)
 
     // Log progress with timing
@@ -606,14 +638,18 @@ const process_matchup_batches = async ({
       `Batch ${current_batch}/${total_batches} complete (${markets_so_far} markets, ${elapsed_seconds}s elapsed)`
     )
 
-    // Add delay between batches if not ignoring wait
+    // Add delay between batches if not ignoring wait. Skip the throttle when it
+    // would push us past the deadline — no point sleeping into the budget.
     if (!ignore_wait && batch_index + 1 < matchup_batches.length) {
+      if (deadline && Date.now() + BATCH_WAIT_TIME >= deadline) {
+        continue
+      }
       log(`Waiting ${BATCH_WAIT_TIME / 1000} seconds before next batch...`)
       await wait(BATCH_WAIT_TIME)
     }
   }
 
-  return { formatted_markets, all_matchups_with_markets }
+  return { formatted_markets, all_matchups_with_markets, timed_out }
 }
 
 /**
@@ -700,97 +736,139 @@ const import_pinnacle_odds = async ({
   dry_run = false,
   ignore_cache = false,
   ignore_wait = false,
-  save = false
+  save = false,
+  max_runtime_ms = DEFAULT_MAX_RUNTIME_MS
 } = {}) => {
   console.time('import-pinnacle-odds')
 
-  // Initialize player cache for fast lookups
-  log('Initializing player cache...')
-  try {
-    await preload_active_players()
-    log('Player cache initialization completed')
-  } catch (error) {
-    log(`Player cache initialization failed: ${error.message}`)
-    throw error
-  }
-
-  const timestamp = Math.round(Date.now() / 1000)
-  const nfl_games = await db('nfl_games').where({ year: current_season.year })
-  const pinnacle_matchups = await pinnacle.get_nfl_matchups({ ignore_cache })
-
-  // Collect unique values for analysis
-  const unique_values = collect_unique_values(pinnacle_matchups)
-
-  // Track unmatched markets
-  const unmatched_markets = new Set()
-  const unmatched_combinations = new Map()
-
-  log(`found ${pinnacle_matchups.length} matchups to process`)
-
-  // Process matchups in batches
-  const { formatted_markets, all_matchups_with_markets } =
-    await process_matchup_batches({
-      pinnacle_matchups,
-      timestamp,
-      nfl_games,
-      unmatched_markets,
-      unmatched_combinations,
-      ignore_cache,
-      ignore_wait,
-      unique_odds_types: unique_values.unique_odds_types
-    })
-
-  // Save data files if requested
-  if (save) {
-    await save_data_files({
-      timestamp,
-      all_matchups_with_markets,
-      formatted_markets
-    })
-  }
-
-  // Log summary information
-  log_summary({ unique_values, unmatched_markets, unmatched_combinations })
-
-  if (formatted_markets.length) {
-    // Show market stats
-    const markets_with_type = formatted_markets.filter((m) => m.market_type)
-    const markets_without_type = formatted_markets.filter((m) => !m.market_type)
-    const total_selections = formatted_markets.reduce(
-      (sum, m) => sum + (m.selections?.length || 0),
-      0
+  // Overall wall-clock deadline. The timer aborts the controller, which cancels
+  // in-flight fetches and proxy backoffs (threaded down as `signal`) and lets
+  // the batch loop stop cleanly with a partial result before the worker's hard
+  // 45-min outer timeout fires.
+  const deadline = Date.now() + max_runtime_ms
+  const abort_controller = new AbortController()
+  const deadline_timer = setTimeout(() => {
+    abort_controller.abort(
+      new Error(`Pinnacle import time budget of ${max_runtime_ms}ms exhausted`)
     )
+  }, max_runtime_ms)
+  // Don't let the pending timer keep the event loop alive after a fast run.
+  if (typeof deadline_timer.unref === 'function') deadline_timer.unref()
+  const { signal } = abort_controller
 
-    log('\n=== MARKET SUMMARY ===')
-    log(`Total markets: ${formatted_markets.length}`)
-    log(`  - With market_type: ${markets_with_type.length}`)
-    log(`  - Without market_type (unmatched): ${markets_without_type.length}`)
-    log(`Total selections: ${total_selections}`)
+  try {
+    // Initialize player cache for fast lookups
+    log('Initializing player cache...')
+    try {
+      await preload_active_players()
+      log('Player cache initialization completed')
+    } catch (error) {
+      log(`Player cache initialization failed: ${error.message}`)
+      throw error
+    }
 
-    if (dry_run) {
-      log(`\nSample markets (first 5):`)
+    const timestamp = Math.round(Date.now() / 1000)
+    const nfl_games = await db('nfl_games').where({ year: current_season.year })
+    const pinnacle_matchups = await pinnacle.get_nfl_matchups({
+      ignore_cache,
+      signal
+    })
+
+    log(`found ${pinnacle_matchups?.length || 0} matchups to process`)
+
+    // Nothing to do — exit cleanly rather than spinning batches and proxy
+    // retries on an empty work set. This is a successful no-op, distinct from
+    // the mid-run partial timeout handled below.
+    if (!pinnacle_matchups || pinnacle_matchups.length === 0) {
+      log('no matchups returned — nothing to import, exiting early')
+      return
+    }
+
+    // Collect unique values for analysis
+    const unique_values = collect_unique_values(pinnacle_matchups)
+
+    // Track unmatched markets
+    const unmatched_markets = new Set()
+    const unmatched_combinations = new Map()
+
+    // Process matchups in batches
+    const { formatted_markets, all_matchups_with_markets, timed_out } =
+      await process_matchup_batches({
+        pinnacle_matchups,
+        timestamp,
+        nfl_games,
+        unmatched_markets,
+        unmatched_combinations,
+        ignore_cache,
+        ignore_wait,
+        unique_odds_types: unique_values.unique_odds_types,
+        deadline,
+        signal
+      })
+
+    if (timed_out) {
       log(
-        formatted_markets.slice(0, 5).map((m) => ({
-          market_type: m.market_type,
-          source_market_id: m.source_market_id,
-          esbid: m.esbid,
-          selection_count: m.selections?.length
-        }))
+        'WARNING: Pinnacle import hit its time budget and stopped early; ' +
+          'inserting partial results. Recurring partial runs usually indicate ' +
+          'a degraded proxy pool or slow upstream — investigate if it persists.'
       )
     }
 
-    const insert_start = Date.now()
-    log(
-      `\n${dry_run ? '[DRY RUN] Processing' : 'Inserting'} ${formatted_markets.length} markets...`
-    )
-    await insert_prop_markets(formatted_markets, { dry_run })
-    const insert_duration = ((Date.now() - insert_start) / 1000).toFixed(1)
-    log(
-      `${dry_run ? 'Processing' : 'Database insertion'} completed in ${insert_duration}s`
-    )
-  }
+    // Save data files if requested
+    if (save) {
+      await save_data_files({
+        timestamp,
+        all_matchups_with_markets,
+        formatted_markets
+      })
+    }
 
-  console.timeEnd('import-pinnacle-odds')
+    // Log summary information
+    log_summary({ unique_values, unmatched_markets, unmatched_combinations })
+
+    if (formatted_markets.length) {
+      // Show market stats
+      const markets_with_type = formatted_markets.filter((m) => m.market_type)
+      const markets_without_type = formatted_markets.filter(
+        (m) => !m.market_type
+      )
+      const total_selections = formatted_markets.reduce(
+        (sum, m) => sum + (m.selections?.length || 0),
+        0
+      )
+
+      log('\n=== MARKET SUMMARY ===')
+      log(`Total markets: ${formatted_markets.length}`)
+      log(`  - With market_type: ${markets_with_type.length}`)
+      log(`  - Without market_type (unmatched): ${markets_without_type.length}`)
+      log(`Total selections: ${total_selections}`)
+
+      if (dry_run) {
+        log(`\nSample markets (first 5):`)
+        log(
+          formatted_markets.slice(0, 5).map((m) => ({
+            market_type: m.market_type,
+            source_market_id: m.source_market_id,
+            esbid: m.esbid,
+            selection_count: m.selections?.length
+          }))
+        )
+      }
+
+      const insert_start = Date.now()
+      log(
+        `\n${dry_run ? '[DRY RUN] Processing' : 'Inserting'} ${formatted_markets.length} markets...`
+      )
+      await insert_prop_markets(formatted_markets, { dry_run })
+      const insert_duration = ((Date.now() - insert_start) / 1000).toFixed(1)
+      log(
+        `${dry_run ? 'Processing' : 'Database insertion'} completed in ${insert_duration}s`
+      )
+    }
+  } finally {
+    clearTimeout(deadline_timer)
+    console.timeEnd('import-pinnacle-odds')
+  }
 }
 
 /**

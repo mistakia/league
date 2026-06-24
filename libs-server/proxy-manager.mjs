@@ -5,6 +5,27 @@ import db from '#db'
 
 const log = debug('proxy-manager')
 
+// Abortable sleep. A plain setTimeout cannot be interrupted, so an overall
+// import deadline (passed down as an AbortSignal) could not cut short the
+// all-proxies-failed backoff below — a single sleep would run to completion even
+// after the budget was spent. Rejecting on abort lets the caller stop promptly.
+const sleep = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason ?? new Error('Aborted'))
+      return
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', on_abort)
+      resolve()
+    }, ms)
+    const on_abort = () => {
+      clearTimeout(timer)
+      reject(signal.reason ?? new Error('Aborted'))
+    }
+    signal?.addEventListener('abort', on_abort, { once: true })
+  })
+
 // Parse proxy strings into proxy URLs
 // Format: host:port or host:port:username:password
 // Uses http:// protocol for proxy connection (standard for HTTP proxies)
@@ -71,7 +92,7 @@ class ProxyPool {
     return Array.from(this.proxies.values()).every((p) => p.failed)
   }
 
-  async get_working_proxy() {
+  async get_working_proxy(signal) {
     if (this.proxies.size === 0) {
       log(`[${this.name}] No proxies available`)
       return null
@@ -91,7 +112,7 @@ class ProxyPool {
       log(
         `[${this.name}] All proxies failed. Waiting ${delay}ms before retry #${this.retry_count}`
       )
-      await new Promise((resolve) => setTimeout(resolve, delay))
+      await sleep(delay, signal)
       this.reset_failed_proxies()
     }
 
@@ -190,7 +211,7 @@ class ProxyManager {
     return this.pools.get(pool_name)
   }
 
-  async get_working_proxy(pool_name = 'default') {
+  async get_working_proxy(pool_name = 'default', signal) {
     await this.initialize()
 
     const pool = this.pools.get(pool_name)
@@ -201,10 +222,10 @@ class ProxyManager {
         log('No default pool available')
         return null
       }
-      return default_pool.get_working_proxy()
+      return default_pool.get_working_proxy(signal)
     }
 
-    return pool.get_working_proxy()
+    return pool.get_working_proxy(signal)
   }
 
   mark_proxy_failed(proxy_config) {
@@ -327,7 +348,8 @@ export async function fetch_with_retry({
   use_proxy = false,
   proxy_pool = 'default',
   response_type,
-  timeout_ms = 30000
+  timeout_ms = 30000,
+  signal
 } = {}) {
   if (!url) {
     throw new Error('url is required')
@@ -354,15 +376,20 @@ export async function fetch_with_retry({
   for (let attempt = 0; attempt <= max_retries; attempt++) {
     try {
       let response
+      // Per-attempt request timeout, combined with any caller-supplied overall
+      // deadline signal so a request aborts on whichever fires first.
+      const timeout_signal = AbortSignal.timeout(timeout_ms)
       const attempt_options = {
         ...fetch_options,
-        signal: AbortSignal.timeout(timeout_ms)
+        signal: signal
+          ? AbortSignal.any([signal, timeout_signal])
+          : timeout_signal
       }
 
       if (use_proxy) {
         // Get a working proxy from the specified pool (rotates on failure)
         await proxy_manager.initialize()
-        current_proxy = await proxy_manager.get_working_proxy(proxy_pool)
+        current_proxy = await proxy_manager.get_working_proxy(proxy_pool, signal)
 
         if (current_proxy) {
           retry_log(
@@ -408,6 +435,13 @@ export async function fetch_with_retry({
       return response
     } catch (error) {
       last_error = error
+
+      // If the caller's overall deadline fired, stop immediately — further
+      // attempts and backoff sleeps would only burn time past the budget.
+      if (signal?.aborted) {
+        throw signal.reason ?? error
+      }
+
       const proxy_info = current_proxy
         ? ` via proxy ${current_proxy.key} (pool: ${current_proxy.pool_name})`
         : ' (direct)'
@@ -437,10 +471,10 @@ export async function fetch_with_retry({
         throw error
       }
 
-      // Exponential backoff delay
+      // Exponential backoff delay (abortable via the overall deadline signal)
       const delay = Math.min(initial_delay * Math.pow(2, attempt), max_delay)
       retry_log(`Waiting ${delay}ms before retry...`)
-      await new Promise((resolve) => setTimeout(resolve, delay))
+      await sleep(delay, signal)
     }
   }
 
