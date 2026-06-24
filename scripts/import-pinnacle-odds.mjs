@@ -35,6 +35,22 @@ const BATCH_WAIT_TIME = 5000
 // markets were gathered as a clean partial success. Kept safely under the
 // 45-min outer timeout so a normal run (~25 min in the offseason) is unaffected.
 const DEFAULT_MAX_RUNTIME_MS = 43 * 60 * 1000 // 43 minutes
+
+// Classify an error as a bounded timeout/abort rather than a genuine code fault.
+// Two shapes reach the import as a transient: (1) the per-request
+// AbortSignal.timeout (proxy-manager.mjs) exhausting all retries throws a
+// DOMException named 'TimeoutError' with message
+// "The operation was aborted due to timeout"; (2) the overall wall-clock
+// deadline firing aborts `signal`, whose reason is our own budget Error. Either
+// way the upstream/proxy was too slow this run — a self-healing condition, not a
+// bug — so we log a WARNING and return cleanly instead of firing a
+// high-severity log_error every time. Genuine errors (DB, parse, etc.) still
+// propagate to report_error + non-zero exit unchanged.
+const is_timeout_abort = (error, signal) =>
+  Boolean(signal?.aborted) ||
+  error?.name === 'TimeoutError' ||
+  error?.name === 'AbortError'
+
 const DEBUG_MODULES =
   'import-pinnacle-odds,pinnacle,get-player,insert-prop-markets,insert-prop-market-selections'
 
@@ -769,10 +785,34 @@ const import_pinnacle_odds = async ({
 
     const timestamp = Math.round(Date.now() / 1000)
     const nfl_games = await db('nfl_games').where({ year: current_season.year })
-    const pinnacle_matchups = await pinnacle.get_nfl_matchups({
-      ignore_cache,
-      signal
-    })
+
+    // The initial matchups fetch is the one network call NOT inside the batch
+    // loop's per-matchup allSettled/try-catch, so its failures are the only ones
+    // that escape uncaught. When a degraded proxy pool makes this fetch exhaust
+    // all retries on the per-request AbortSignal.timeout (or the overall deadline
+    // fires here), treat it like the zero-matchup early-exit below: a clean,
+    // self-healing no-data run, not a hard job failure. This stops the chronic
+    // 'The operation was aborted due to timeout' log_error re-fire (signals
+    // 115028/115038) — the genuine upstream-performance work is tracked
+    // separately. Non-timeout errors still propagate to report_error + exit 1.
+    let pinnacle_matchups
+    try {
+      pinnacle_matchups = await pinnacle.get_nfl_matchups({
+        ignore_cache,
+        signal
+      })
+    } catch (error) {
+      if (is_timeout_abort(error, signal)) {
+        log(
+          `WARNING: could not fetch Pinnacle matchups within the time budget ` +
+            `(${error.message}); skipping this run with no data committed. ` +
+            `Recurring occurrences indicate a degraded proxy pool or slow ` +
+            `upstream — investigate if it persists.`
+        )
+        return
+      }
+      throw error
+    }
 
     log(`found ${pinnacle_matchups?.length || 0} matchups to process`)
 
