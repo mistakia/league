@@ -12276,7 +12276,7 @@ __metadata:
 
 "workerize-loader@mistakia/workerize-loader#464a90a7ccdd4853d1afaf10cef78588899e11d4":
   version: 1.3.0
-  resolution: "workerize-loader@git+ssh://git@github.com/mistakia/workerize-loader.git#commit=464a90a7ccdd4853d1afaf10cef78588899e11d4"
+  resolution: "workerize-loader@https://github.com/mistakia/workerize-loader.git#commit=464a90a7ccdd4853d1afaf10cef78588899e11d4"
   dependencies:
     loader-utils: "npm:^2.0.0"
   peerDependencies:
