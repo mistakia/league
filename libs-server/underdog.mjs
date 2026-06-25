@@ -1,8 +1,20 @@
 import debug from 'debug'
 
-import { underdog_session_manager } from '#private/libs-server/underdog/underdog-session-manager.mjs'
-
 const log = debug('underdog')
+
+// Defer the #private session manager to a lazy import so this module (re-exported
+// from the #libs-server barrel) loads even when the private submodule is absent
+// — e.g. in CI, which does not check out private. Matches the lazy-#private
+// convention already used by get-data-view-results.mjs and fanduel/index.mjs.
+let _underdog_session_manager = null
+const load_underdog_session_manager = async () => {
+  if (!_underdog_session_manager) {
+    ;({ underdog_session_manager: _underdog_session_manager } = await import(
+      '#private/libs-server/underdog/underdog-session-manager.mjs'
+    ))
+  }
+  return _underdog_session_manager
+}
 
 // Underdog Fantasy stats API wrapper. The host stats.underdogfantasy.com is
 // fully public (unauthenticated requests return 200) but Cloudflare-fronted, so
@@ -22,7 +34,7 @@ export const UNDERDOG_HALF_PPR_SCORING_TYPE_ID =
 // All NFL best-ball slates for the fantasy product. Each slate carries
 // id, title (via description), best_ball, sport_id.
 export const get_underdog_nfl_slates = async () => {
-  const data = await underdog_session_manager.get_underdog_json({
+  const data = await (await load_underdog_session_manager()).get_underdog_json({
     path: '/v1/sports/nfl/slates?product=fantasy'
   })
   const slates = data?.slates || []
@@ -34,7 +46,7 @@ export const get_underdog_nfl_slates = async () => {
 // team_id (can be null for deep players).
 export const get_underdog_slate_players = async ({ slate_id }) => {
   if (!slate_id) throw new Error('slate_id is required')
-  const data = await underdog_session_manager.get_underdog_json({
+  const data = await (await load_underdog_session_manager()).get_underdog_json({
     path: `/v1/slates/${slate_id}/players?product=fantasy`
   })
   return data?.players || []
@@ -43,7 +55,7 @@ export const get_underdog_slate_players = async ({ slate_id }) => {
 // All teams across sports; filter sport_id === 'NFL' for the 32 NFL teams
 // (id -> abbr, standard NFL abbreviations).
 export const get_underdog_teams = async () => {
-  const data = await underdog_session_manager.get_underdog_json({
+  const data = await (await load_underdog_session_manager()).get_underdog_json({
     path: '/v1/teams'
   })
   const teams = data?.teams || []
@@ -59,12 +71,12 @@ export const get_underdog_appearances = async ({
   scoring_type_id = UNDERDOG_HALF_PPR_SCORING_TYPE_ID
 }) => {
   if (!slate_id) throw new Error('slate_id is required')
-  const data = await underdog_session_manager.get_underdog_json({
+  const data = await (await load_underdog_session_manager()).get_underdog_json({
     path: `/v1/slates/${slate_id}/scoring_types/${scoring_type_id}/appearances?product=fantasy`
   })
   return data?.appearances || []
 }
 
 export const cleanup_underdog_session = async () => {
-  await underdog_session_manager.cleanup()
+  await (await load_underdog_session_manager()).cleanup()
 }
