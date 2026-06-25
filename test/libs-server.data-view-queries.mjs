@@ -6,6 +6,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import * as chai from 'chai'
 import { fileURLToPath } from 'node:url'
+import { execFileSync } from 'node:child_process'
 
 import {
   get_data_view_results_query,
@@ -21,11 +22,54 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // `skip_query_match: true`; the harness logs the diff to the working-tier slug
 // for hand review and continues to assert metadata. Toggle SBA_LOG_SQL_DIFFS=0
 // to silence the catalog write.
-const SQL_DIFF_CATALOG_PATH = path.resolve(
-  __dirname,
-  '../../../../scratch/league/source-bridge-architecture/sql-diff-catalog.md'
-)
-const sql_diff_catalog_enabled = process.env.SBA_LOG_SQL_DIFFS !== '0'
+//
+// Resolve the user-base root WITHOUT a fragile relative climb. The old
+// `path.resolve(__dirname, '../../../../scratch/...')` assumed exactly four
+// levels above repository/active/league/test -- correct for the canonical
+// submodule checkout but off-by-one from a worktree
+// (repository/active/league-worktrees/<branch>/test), which silently wrote the
+// catalog into repository/active/scratch/ instead of the user-base root. league
+// exposes no import alias outside its own tree, so anchor on the git
+// superproject working tree, which resolves to the user-base root from a
+// canonical OR worktree checkout.
+const resolve_user_base_root = () => {
+  if (process.env.USER_BASE_DIRECTORY) return process.env.USER_BASE_DIRECTORY
+  try {
+    const root = execFileSync(
+      'git',
+      ['rev-parse', '--show-superproject-working-tree'],
+      { cwd: __dirname, encoding: 'utf8' }
+    ).trim()
+    if (root) return root
+  } catch {
+    // standalone clone (not a submodule) -- no superproject to anchor on
+  }
+  // A submodule worktree (repository/active/league-worktrees/<branch>) does not
+  // resolve a superproject link, so walk up to the user-base root by marker
+  // instead of a hard-coded depth.
+  let dir = __dirname
+  while (dir !== path.dirname(dir)) {
+    if (
+      fs.existsSync(path.join(dir, 'CLAUDE.md')) &&
+      fs.existsSync(path.join(dir, 'scratch')) &&
+      fs.existsSync(path.join(dir, 'repository', 'active'))
+    ) {
+      return dir
+    }
+    dir = path.dirname(dir)
+  }
+  return null
+}
+
+const user_base_root = resolve_user_base_root()
+const SQL_DIFF_CATALOG_PATH = user_base_root
+  ? path.join(
+      user_base_root,
+      'scratch/league/source-bridge-architecture/sql-diff-catalog.md'
+    )
+  : null
+const sql_diff_catalog_enabled =
+  process.env.SBA_LOG_SQL_DIFFS !== '0' && SQL_DIFF_CATALOG_PATH !== null
 let sql_diff_catalog_initialized = false
 
 const log_sql_diff = (filename, actual, expected) => {
