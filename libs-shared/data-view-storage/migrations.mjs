@@ -34,8 +34,10 @@ const v1_to_v2 = (snapshot) => {
 }
 
 const v2_to_v3 = (snapshot) => {
-  const { splits, ...rest_table_state } = snapshot.table_state
-  const next_table_state = { ...rest_table_state, row_axes: splits }
+  const { splits, ...rest } = snapshot.table_state
+  const next_table_state = 'splits' in snapshot.table_state
+    ? { ...rest, row_axes: splits }
+    : rest
   return { ...snapshot, table_state: next_table_state, version: 3 }
 }
 
