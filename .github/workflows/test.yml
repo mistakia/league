@@ -51,8 +51,12 @@ jobs:
           PGUSER: league_test
           PGPASSWORD: league_test
         run: |
-          # Create postgres role if it doesn't exist (needed for schema GRANT statements)
-          psql -c "CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'postgres';" || true
+          # Create the roles db/schema.postgres.sql GRANTs to (postgres,
+          # league_user, league_readonly) using the same canonical, idempotent
+          # init script compose.test.yaml mounts locally — the inline version
+          # below only created postgres, so the schema's 315 GRANTs to
+          # league_readonly aborted the load with "role does not exist".
+          psql -v ON_ERROR_STOP=1 -f db/test/init-roles.sql
           # Ensure league_test role has necessary permissions
           psql -c "GRANT ALL PRIVILEGES ON DATABASE league_test TO league_test;" || true
 
