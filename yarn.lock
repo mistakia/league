@@ -10473,6 +10473,11 @@ __metadata:
     workerize-loader: "mistakia/workerize-loader#464a90a7ccdd4853d1afaf10cef78588899e11d4"
     ws: "npm:^7.5.10"
     yargs: "npm:17.7.2"
+  dependenciesMeta:
+    "@trashman/ed25519-blake2b":
+      built: true
+    bcrypt:
+      built: true
   languageName: unknown
   linkType: soft
 
