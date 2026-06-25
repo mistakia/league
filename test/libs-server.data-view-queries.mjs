@@ -6,7 +6,6 @@ import fs from 'node:fs'
 import path from 'node:path'
 import * as chai from 'chai'
 import { fileURLToPath } from 'node:url'
-import { execFileSync } from 'node:child_process'
 
 import {
   get_data_view_results_query,
@@ -28,25 +27,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // levels above repository/active/league/test -- correct for the canonical
 // submodule checkout but off-by-one from a worktree
 // (repository/active/league-worktrees/<branch>/test), which silently wrote the
-// catalog into repository/active/scratch/ instead of the user-base root. league
-// exposes no import alias outside its own tree, so anchor on the git
-// superproject working tree, which resolves to the user-base root from a
-// canonical OR worktree checkout.
+// catalog into repository/active/scratch/ instead of the user-base root. Walk up
+// to the user-base root by marker instead; this resolves both the canonical and
+// the worktree checkout (and any future depth change) without a hard-coded depth
+// or a subprocess. Returns null off a standalone clone (no user-base above), in
+// which case the catalog write is skipped.
 const resolve_user_base_root = () => {
   if (process.env.USER_BASE_DIRECTORY) return process.env.USER_BASE_DIRECTORY
-  try {
-    const root = execFileSync(
-      'git',
-      ['rev-parse', '--show-superproject-working-tree'],
-      { cwd: __dirname, encoding: 'utf8' }
-    ).trim()
-    if (root) return root
-  } catch {
-    // standalone clone (not a submodule) -- no superproject to anchor on
-  }
-  // A submodule worktree (repository/active/league-worktrees/<branch>) does not
-  // resolve a superproject link, so walk up to the user-base root by marker
-  // instead of a hard-coded depth.
   let dir = __dirname
   while (dir !== path.dirname(dir)) {
     if (
