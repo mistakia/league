@@ -3,7 +3,7 @@
   "name": "team stats from plays with force_player_active and year+week splits",
   "description": "Exercises the force_player_active=true player-keyed CTE path on a team-stats-from-plays column with year+week splits. Coverage gap (b).",
   "request": {
-    "splits": ["year", "week"],
+    "row_axes": ["year", "week"],
     "prefix_columns": ["player_name"],
     "columns": [
       {

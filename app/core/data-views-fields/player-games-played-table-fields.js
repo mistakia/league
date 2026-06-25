@@ -15,6 +15,6 @@ export default {
       year_offset,
       career_year
     },
-    splits: ['year']
+    row_axes: ['year']
   }
 }

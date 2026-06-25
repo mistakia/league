@@ -20,7 +20,7 @@ const from_play_field = (field) => ({
   },
   size: 70,
   fixed: 2,
-  splits: ['year', 'week'],
+  row_axes: ['year', 'week'],
   ...field
 })
 

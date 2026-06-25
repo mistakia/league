@@ -11,7 +11,7 @@ const offensive_player_from_play_field = (field) => ({
   },
   size: 70,
   fixed: 2,
-  splits: ['year', 'week'],
+  row_axes: ['year', 'week'],
   ...field
 })
 
@@ -27,7 +27,7 @@ const offensive_player_from_share_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: nfl_plays_column_params,
   size: 70,
-  splits: ['year', 'week'],
+  row_axes: ['year', 'week'],
   ...field
 })
 

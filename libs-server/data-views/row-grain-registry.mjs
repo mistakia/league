@@ -11,9 +11,9 @@ export const resolve_row_grain = (row_grain_id) => {
   return row_grain
 }
 
-const identity_for_row_grain_splits = (row_grain_id, splits) => {
-  const has_year = splits.includes('year')
-  const has_week = splits.includes('week')
+const identity_for_row_grain_row_axes = (row_grain_id, row_axes) => {
+  const has_year = row_axes.includes('year')
+  const has_week = row_axes.includes('week')
   if (row_grain_id === 'player') {
     if (has_week) return 'player_year_week'
     if (has_year) return 'player_year'
@@ -27,7 +27,7 @@ const identity_for_row_grain_splits = (row_grain_id, splits) => {
   throw new Error(`Unknown row_grain: ${row_grain_id}`)
 }
 
-export const identity_for = ({ row_grain_id, splits = [] }) =>
-  identity_for_row_grain_splits(row_grain_id, splits)
+export const identity_for = ({ row_grain_id, row_axes = [] }) =>
+  identity_for_row_grain_row_axes(row_grain_id, row_axes)
 
 export { row_grains }

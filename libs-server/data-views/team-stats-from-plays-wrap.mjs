@@ -25,11 +25,11 @@ export const requires_team_stats_wrap = ({
 
   const identity_id = query_context.identity_id
   if (!identity_id || !identity_id.startsWith('player')) return false
-  if (query_context.splits.includes('year')) return false
+  if (query_context.row_axes.includes('year')) return false
   // The wrap CTE collapses to (pid)-grain (no week); a week split would
   // fan that single value across every per-week outer row. The standard
   // (with-year-split-style) shape is required for week-split views.
-  if (query_context.splits.includes('week')) return false
+  if (query_context.row_axes.includes('week')) return false
 
   if (extract_matchup_opponent_type(params)) return false
 

@@ -68,7 +68,7 @@ const create_player_adp_field = (props) => ({
       label: 'Draft Pool'
     }
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 export default {

@@ -12,7 +12,7 @@ const extract_rate_type = (rate_type) => {
   return rate_type
 }
 
-export const normalize_output_param = ({ column, splits = [] }) => {
+export const normalize_output_param = ({ column, row_axes = [] }) => {
   if (!column || typeof column !== 'object') return column
   const params = column.params || {}
   let next_params = params
@@ -31,22 +31,22 @@ export const normalize_output_param = ({ column, splits = [] }) => {
 
   if (next_params.output) {
     const { period, aggregation } = next_params.output
-    const has_week_split = splits.includes('week')
+    const has_week_row_axis = row_axes.includes('week')
 
-    if (has_week_split && aggregation === 'rate' && period === 'game') {
+    if (has_week_row_axis && aggregation === 'rate' && period === 'game') {
       log(
-        `Dropping output={period:game,aggregation:rate} under week split for ${column.column_id}`
+        `Dropping output={period:game,aggregation:rate} under week row_axis for ${column.column_id}`
       )
       const { output: _drop, ...rest } = next_params
       next_params = rest
       mutated = true
     } else if (
-      has_week_split &&
+      has_week_row_axis &&
       aggregation === 'count' &&
       period === 'season'
     ) {
       throw new Error(
-        `output={period:season,aggregation:count} is invalid under week split (column ${column.column_id})`
+        `output={period:season,aggregation:count} is invalid under week row_axis (column ${column.column_id})`
       )
     }
   }
@@ -57,9 +57,9 @@ export const normalize_output_param = ({ column, splits = [] }) => {
   return column
 }
 
-export const normalize_columns = ({ columns, splits = [] }) =>
+export const normalize_columns = ({ columns, row_axes = [] }) =>
   columns.map((column) =>
     typeof column === 'object'
-      ? normalize_output_param({ column, splits })
+      ? normalize_output_param({ column, row_axes })
       : column
   )

@@ -39,7 +39,7 @@ export const add_per_player_route_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits,
+  row_axes,
   group_by = null,
   data_view_options = {},
   query_context = null
@@ -77,11 +77,11 @@ export const add_per_player_route_cte = ({
 
   cte_query.select(db.raw(`${count_expression} as rate_type_total_count`))
 
-  for (const split of splits) {
-    if (split === 'year') {
+  for (const row_axis of row_axes) {
+    if (row_axis === 'year') {
       cte_query.select('nfl_plays.year')
       cte_query.groupBy('nfl_plays.year')
-    } else if (split === 'week') {
+    } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
       cte_query.groupBy('nfl_plays.week')
     }
@@ -125,13 +125,13 @@ export const join_per_player_route_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits,
+  row_axes,
   data_view_options = {}
 }) => {
   players_query.leftJoin(rate_type_table_name, function () {
     this.on(`${rate_type_table_name}.gsis_id`, 'player.gsisid')
 
-    if (splits.includes('year')) {
+    if (row_axes.includes('year')) {
       const offset_range = resolve_year_offset_range(params)
       if (offset_range) {
         // Correlate the rate-type table year to the base-year anchor THROUGH
@@ -169,7 +169,7 @@ export const join_per_player_route_cte = ({
       }
     }
 
-    if (splits.includes('week')) {
+    if (row_axes.includes('week')) {
       this.on(
         `${rate_type_table_name}.week`,
         '=',
@@ -214,7 +214,7 @@ export const add_cte = ({
     players_query: query_context.players_query,
     params,
     rate_type_table_name: cte_name,
-    splits: query_context.splits,
+    row_axes: query_context.row_axes,
     group_by: dispatch_params.group_by ?? null,
     query_context
   })
@@ -230,7 +230,7 @@ export const join_cte = ({ query_context, cte_name, params }) => {
     players_query: query_context.players_query,
     params: params ?? query_context.params,
     rate_type_table_name: cte_name,
-    splits: query_context.splits,
+    row_axes: query_context.row_axes,
     data_view_options: query_context.data_view_options
   })
 }

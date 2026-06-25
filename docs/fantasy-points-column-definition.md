@@ -222,7 +222,7 @@ const table_alias = get_table_hash(`fantasy_points_from_plays_${key}`)
 ```javascript
 {
   columns: [{ column_id: 'player_fantasy_points_from_plays' }],
-  splits: ['week'],
+  row_axes: ['week'],
   params: {
     year: [2024],
     seas_type: ['REG'],
@@ -279,7 +279,7 @@ When this column is used for sorting, the query builder automatically detects it
 
 ## Supported Features
 
-- **Splits**: `year`, `week`
+- **Row Axes**: `year`, `week`
 - **Rate Types**: All standard rate types (per_game, per_play, etc.)
 - **Caching**: Full support with parameter-based cache keys
 - **Having Clause**: Filters out zero-point results

@@ -59,12 +59,12 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
 // emits WHERE on the from-table alias; measure path emits AND ON during the
 // LEFT JOIN. The year predicate is handled symmetrically: WHERE here when
 // FROM, AND ON via player-family-to-player-year emit_year_match when measure.
-const scoring_format_seasonlogs_conditions = ({ params, splits = [] }) => {
+const scoring_format_seasonlogs_conditions = ({ params, row_axes = [] }) => {
   const conditions = [
     { column: 'scoring_format_id', value: get_scoring_format_id(params) }
   ]
 
-  if (!splits.includes('year') && params.year) {
+  if (!row_axes.includes('year') && params.year) {
     const year = Array.isArray(params.year) ? params.year[0] : params.year
     if (year !== undefined && year !== null) {
       conditions.push({ column: 'year', value: year })

@@ -3,7 +3,7 @@
   "name": "should create a splits query — year",
   "description": "Test case for should create a splits query — year",
   "request": {
-    "splits": ["year"],
+    "row_axes": ["year"],
     "prefix_columns": ["player_name"],
     "columns": [
       {

@@ -15,7 +15,7 @@ const parse_url_to_table_state = (full_url) => {
     prefix_columns: [],
     where: [],
     sort: [],
-    splits: [],
+    row_axes: [],
     offset: 0,
     limit: 500
   }
@@ -24,7 +24,7 @@ const parse_url_to_table_state = (full_url) => {
     'prefix_columns',
     'where',
     'sort',
-    'splits'
+    'row_axes'
   ]) {
     if (params.has(param)) {
       try {

@@ -21,7 +21,7 @@
       "description": "Player's full name (first + last)",
       "parameters": ["case_insensitive"],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -29,7 +29,7 @@
       "description": "Player's primary position",
       "parameters": ["case_insensitive"],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string",
       "common_values": ["QB", "RB", "FB", "WR", "TE", "K", "DEF"]
     },
@@ -38,7 +38,7 @@
       "description": "Player's height in inches",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     },
 
@@ -46,7 +46,7 @@
       "description": "Player's weight in pounds",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     },
 
@@ -54,7 +54,7 @@
       "description": "Player's current age in years",
       "parameters": ["year"],
       "supported_rate_types": [],
-      "supported_splits": ["year"],
+      "supported_row_axes": ["year"],
       "data_type": "number"
     },
 
@@ -62,7 +62,7 @@
       "description": "NFL draft round (1-7)",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     },
 
@@ -70,7 +70,7 @@
       "description": "Overall draft pick number",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     },
 
@@ -78,7 +78,7 @@
       "description": "College attended",
       "parameters": ["case_insensitive"],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -86,7 +86,7 @@
       "description": "Current NFL team abbreviation",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -94,7 +94,7 @@
       "description": "Years of professional experience",
       "parameters": ["year"],
       "supported_rate_types": [],
-      "supported_splits": ["year"],
+      "supported_row_axes": ["year"],
       "data_type": "number"
     }
   },
@@ -104,7 +104,7 @@
       "description": "Official NFL player identifier",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -112,7 +112,7 @@
       "description": "ESPN player identifier",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -120,7 +120,7 @@
       "description": "NFL GSIS player identifier",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -128,7 +128,7 @@
       "description": "Sleeper platform player identifier",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -136,7 +136,7 @@
       "description": "ESPN fantasy player identifier",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     },
 
@@ -144,7 +144,7 @@
       "description": "Yahoo fantasy player identifier",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "string"
     }
   },
@@ -154,7 +154,7 @@
       "description": "Body Mass Index calculated from height and weight",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     },
 
@@ -162,7 +162,7 @@
       "description": "Speed score metric combining weight and 40-yard dash",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     },
 
@@ -170,7 +170,7 @@
       "description": "Speed score adjusted for position-specific height",
       "parameters": [],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     }
   },

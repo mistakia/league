@@ -3,7 +3,7 @@
   "name": "scoring_format_id split by year on player-scoring-format-logs",
   "description": "Exercises the get_table_conditions vs extra_predicates path on scoring_format_player_seasonlogs with a year split active. When year split is active, the year predicate is dropped from get_table_conditions; only scoring_format_id remains. Coverage gap (e).",
   "request": {
-    "splits": [
+    "row_axes": [
       "year"
     ],
     "prefix_columns": [

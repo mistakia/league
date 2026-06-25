@@ -23,7 +23,7 @@ describe('parse_table_state_from_url', function () {
         { column_id: 'player_position', operator: '=', value: 'QB' }
       ]),
       sort: JSON.stringify([{ column_id: 'player_name', desc: false }]),
-      splits: JSON.stringify(['year']),
+      row_axes: JSON.stringify(['year']),
       view_name: 'My View',
       view_search_column_id: 'player_name',
       view_description: 'Notes'
@@ -40,7 +40,7 @@ describe('parse_table_state_from_url', function () {
     })
     out.sort.should.have.length(1)
     out.sort[0].column_id.should.equal('player_name')
-    out.splits.should.deep.equal(['year'])
+    out.row_axes.should.deep.equal(['year'])
     out.view_name.should.equal('My View')
     out.view_search_column_id.should.equal('player_name')
     out.view_description.should.equal('Notes')
@@ -61,7 +61,7 @@ describe('parse_table_state_from_url', function () {
     out.prefix_columns.should.deep.equal([])
     out.where.should.deep.equal([])
     out.sort.should.deep.equal([])
-    out.splits.should.deep.equal([])
+    out.row_axes.should.deep.equal([])
     out.q.should.equal('')
     out.rank_aggregation.should.deep.equal({})
     out.scatter_plot_options.should.deep.equal({})
@@ -103,14 +103,14 @@ describe('parse_table_state_from_url', function () {
       prefix_columns: 'null',
       where: 'null',
       sort: 'null',
-      splits: 'null'
+      row_axes: 'null'
     })
     const out = parse_table_state_from_url(sp)
     out.columns.should.deep.equal([])
     out.prefix_columns.should.deep.equal([])
     out.where.should.deep.equal([])
     out.sort.should.deep.equal([])
-    out.splits.should.deep.equal([])
+    out.row_axes.should.deep.equal([])
   })
 
   it('applies migrate_entries_array to columns (legacy single-week column gets nfl_week_id)', () => {
@@ -189,7 +189,7 @@ describe('parse_table_state_from_url', function () {
       sort: JSON.stringify([
         { column_id: 'player_pass_yds_from_plays_0', desc: true }
       ]),
-      splits: JSON.stringify(['year']),
+      row_axes: JSON.stringify(['year']),
       view_name: 'Pass yds 22-24'
     })
     const out = parse_table_state_from_url(sp)
@@ -199,7 +199,7 @@ describe('parse_table_state_from_url', function () {
     out.columns[0].params.rate_type.should.deep.equal(['per_team_pass_play'])
     out.prefix_columns.should.deep.equal(['player_name', 'player_nfl_teams'])
     out.sort[0].column_id.should.equal('player_pass_yds_from_plays_0')
-    out.splits.should.deep.equal(['year'])
+    out.row_axes.should.deep.equal(['year'])
     out.view_name.should.equal('Pass yds 22-24')
   })
 })

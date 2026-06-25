@@ -1,1 +1,1 @@
-export const split_params = ['year', 'week']
+export const row_axis_params = ['year', 'week']

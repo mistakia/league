@@ -73,7 +73,7 @@ const add_player_per_game_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits = [],
+  row_axes = [],
   query_context
 }) => {
   const { career_year, career_game } = get_default_params({ params })
@@ -100,12 +100,12 @@ const add_player_per_game_cte = ({
     .where(`${player_gamelogs_table}.active`, true)
 
   // nfl_games join is required whenever the view has scoped weeks (the common
-  // case after view-scope unification) or career filters / splits are active.
+  // case after view-scope unification) or career filters / row_axes are active.
   const needs_nfl_games =
     effective_scope.length > 0 ||
     career_year.length > 0 ||
-    splits.includes('year') ||
-    splits.includes('week')
+    row_axes.includes('year') ||
+    row_axes.includes('week')
 
   if (needs_nfl_games) {
     cte_query.leftJoin(
@@ -151,13 +151,13 @@ const add_player_per_game_cte = ({
     ])
   }
 
-  for (const split of splits) {
-    if (split === 'year') {
+  for (const row_axis of row_axes) {
+    if (row_axis === 'year') {
       cte_query.select('nfl_games.year')
       cte_query.groupBy('nfl_games.year')
     }
 
-    if (split === 'week') {
+    if (row_axis === 'week') {
       cte_query.select('nfl_games.week')
       cte_query.groupBy('nfl_games.week')
     }
@@ -175,7 +175,7 @@ const add_team_per_game_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits = [],
+  row_axes = [],
   query_context
 }) => {
   // Count games per team from nfl_games (~7K rows for 24 years) instead of
@@ -195,19 +195,19 @@ const add_team_per_game_cte = ({
   // game count) when unsplit, and a year-correlated 1:1 join when split.
   const select_cols = ['team']
   const group_cols = ['team']
-  if (splits.includes('year')) {
+  if (row_axes.includes('year')) {
     select_cols.push('year')
     group_cols.push('year')
   }
-  if (splits.includes('week')) {
+  if (row_axes.includes('week')) {
     select_cols.push('week')
     group_cols.push('week')
   }
 
   const make_side = (team_col) => {
     const sub = db('nfl_games').select(`${team_col} as team`)
-    if (splits.includes('year')) sub.select('year')
-    if (splits.includes('week')) sub.select('week')
+    if (row_axes.includes('year')) sub.select('year')
+    if (row_axes.includes('week')) sub.select('week')
     apply_scope_to_query({
       query: sub,
       table_name: 'nfl_games',
@@ -235,7 +235,7 @@ export const add_per_game_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits = [],
+  row_axes = [],
   is_team = false,
   query_context
 }) => {
@@ -244,7 +244,7 @@ export const add_per_game_cte = ({
       players_query,
       params,
       rate_type_table_name,
-      splits,
+      row_axes,
       query_context
     })
   } else {
@@ -252,7 +252,7 @@ export const add_per_game_cte = ({
       players_query,
       params,
       rate_type_table_name,
-      splits,
+      row_axes,
       query_context
     })
   }
@@ -261,7 +261,7 @@ export const add_per_game_cte = ({
 export const join_player_per_game_cte = ({
   players_query,
   rate_type_table_name,
-  splits,
+  row_axes,
   params,
   is_team = false,
   data_view_options = {}
@@ -270,7 +270,7 @@ export const join_player_per_game_cte = ({
     // Use centralized player PID reference
     this.on(`${rate_type_table_name}.pid`, data_view_options.pid_reference)
 
-    if (splits.includes('year')) {
+    if (row_axes.includes('year')) {
       const offset_range = resolve_year_offset_range(params)
       if (offset_range) {
         // Correlate the rate-type table year to the base-year anchor THROUGH
@@ -309,7 +309,7 @@ export const join_player_per_game_cte = ({
     }
 
     // Add week join condition if 'week' split is enabled - use centralized reference
-    if (splits.includes('week')) {
+    if (row_axes.includes('week')) {
       this.andOn(
         `${rate_type_table_name}.week`,
         '=',
@@ -322,7 +322,7 @@ export const join_player_per_game_cte = ({
 export const join_team_per_game_cte = ({
   players_query,
   rate_type_table_name,
-  splits,
+  row_axes,
   params,
   query_context,
   column_def = null,
@@ -350,7 +350,7 @@ export const join_team_per_game_cte = ({
   players_query.leftJoin(rate_type_table_name, function () {
     this.on(`${rate_type_table_name}.team`, team_join_target)
 
-    if (splits.includes('year')) {
+    if (row_axes.includes('year')) {
       const offset_range = resolve_year_offset_range(params)
       if (offset_range) {
         // Correlate the rate-type table year to the base-year anchor THROUGH
@@ -389,7 +389,7 @@ export const join_team_per_game_cte = ({
     }
 
     // Add week join condition if 'week' split is enabled - use centralized reference
-    if (splits.includes('week')) {
+    if (row_axes.includes('week')) {
       this.andOn(
         `${rate_type_table_name}.week`,
         '=',
@@ -402,7 +402,7 @@ export const join_team_per_game_cte = ({
 export const join_per_game_cte = ({
   players_query,
   rate_type_table_name,
-  splits,
+  row_axes,
   params,
   is_team = false,
   query_context,
@@ -413,7 +413,7 @@ export const join_per_game_cte = ({
     join_team_per_game_cte({
       players_query,
       rate_type_table_name,
-      splits,
+      row_axes,
       params,
       query_context,
       column_def,
@@ -423,7 +423,7 @@ export const join_per_game_cte = ({
     join_player_per_game_cte({
       players_query,
       rate_type_table_name,
-      splits,
+      row_axes,
       params,
       data_view_options
     })
@@ -460,7 +460,7 @@ export const add_cte = ({ query_context, params, cte_name, identity_id }) => {
     players_query: query_context.players_query,
     params,
     rate_type_table_name: cte_name,
-    splits: query_context.splits,
+    row_axes: query_context.row_axes,
     is_team,
     query_context
   })
@@ -478,7 +478,7 @@ export const join_cte = ({
   join_per_game_cte({
     players_query: query_context.players_query,
     rate_type_table_name: cte_name,
-    splits: query_context.splits,
+    row_axes: query_context.row_axes,
     params: params ?? query_context.params,
     is_team,
     query_context,

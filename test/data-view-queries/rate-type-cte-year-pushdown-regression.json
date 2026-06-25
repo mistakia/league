@@ -2,7 +2,7 @@
   "name": "rate-type CTE year pushdown regression (reported short URL shape)",
   "description": "Locks in the year pushdown and MATERIALIZED contract for rate-type CTEs. Mirrors the reported short URL b2444f674a4ea609679e002dfdcc6fa1: year splits 2020-2025, espn scores with career_year filter, and a rate-type column whose effective_years come solely from data_view_options.year_range (no column-level params.year or nfl_week_id on player_nfl_teams).",
   "request": {
-    "splits": ["year"],
+    "row_axes": ["year"],
     "year_range": [2020, 2021, 2022, 2023, 2024, 2025],
     "prefix_columns": [
       "player_name",

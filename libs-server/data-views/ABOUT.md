@@ -49,7 +49,7 @@ Split CTEs (`base_years`, `player_years`, `player_years_weeks`) remain inlineabl
 
 ### Forwarding data_view_options
 
-Every `with:` handler (whether the direct builders in this directory or the inline `with:` functions on column definitions) MUST accept `data_view_options` and forward it into the `effective_years` computation. The dispatcher in `libs-server/get-data-view-results.mjs` already passes `data_view_options` to `with_func`; omitting it from the handler signature silently disables year pushdown for columns whose year signal comes only from splits.
+Every `with:` handler (whether the direct builders in this directory or the inline `with:` functions on column definitions) MUST accept `data_view_options` and forward it into the `effective_years` computation. The dispatcher in `libs-server/get-data-view-results.mjs` already passes `data_view_options` to `with_func`; omitting it from the handler signature silently disables year pushdown for columns whose year signal comes only from row_axes.
 
 ### Granularity Declaration
 

@@ -106,7 +106,7 @@ const create_seasonlog_field = ({
     stat_type: stat_type_param,
     time_type: time_type_param
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 // league_nfl_team_seasonlogs only contains defense/against stats (fantasy points allowed)
@@ -131,7 +131,7 @@ const create_league_seasonlog_field = ({
     stat_type: defense_only_stat_type_param,
     time_type: time_type_param
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 export default {

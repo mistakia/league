@@ -42,7 +42,7 @@ const create_dvoa_field = ({
         }
       : {})
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 export default {

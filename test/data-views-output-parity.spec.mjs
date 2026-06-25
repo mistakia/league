@@ -15,20 +15,20 @@ const assert_output_parity = async ({
   column_id,
   params_legacy,
   params_native,
-  splits = [],
+  row_axes = [],
   where = []
 }) => {
   const legacy_request = {
     columns: [{ column_id, params: params_legacy }],
     sort: [],
     where,
-    splits
+    row_axes
   }
   const native_request = {
     columns: [{ column_id, params: params_native }],
     sort: [],
     where,
-    splits
+    row_axes
   }
 
   const { query: legacy_query } =
@@ -111,7 +111,7 @@ describe('Data View output parity', () => {
         rate_type,
         output,
         params,
-        splits = [],
+        row_axes = [],
         where = []
       } = fixture
       const name = `[${family}] ${column_id} :: rate_type=${rate_type} ↔ output=${output.period}/${output.aggregation}`
@@ -121,7 +121,7 @@ describe('Data View output parity', () => {
           column_id,
           params_legacy: { ...params, rate_type: [rate_type] },
           params_native: { ...params, output },
-          splits,
+          row_axes,
           where
         })
       })

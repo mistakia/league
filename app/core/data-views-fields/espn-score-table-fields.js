@@ -23,7 +23,7 @@ function create_espn_score_field({ score_type, label }) {
       },
       career_year
     },
-    splits: ['year']
+    row_axes: ['year']
   }
 }
 

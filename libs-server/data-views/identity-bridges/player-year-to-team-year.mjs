@@ -95,11 +95,12 @@ export const add_cte = ({ query_context, params = {}, source = null }) => {
 }
 
 export const join_cte = ({ query_context, params = {}, source = null }) => {
-  const { players_query, splits, pid_reference, year_reference } = query_context
+  const { players_query, row_axes, pid_reference, year_reference } =
+    query_context
   const year_range = resolve_year_range({ query_context, params, source })
   players_query.leftJoin(CTE_NAME, function () {
     this.on(`${CTE_NAME}.pid`, '=', pid_reference)
-    if (splits.includes('year') && year_reference) {
+    if (row_axes.includes('year') && year_reference) {
       this.andOn(`${CTE_NAME}.year`, '=', year_reference)
     } else {
       const join_year =

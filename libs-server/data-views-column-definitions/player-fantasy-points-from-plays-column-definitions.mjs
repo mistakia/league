@@ -35,14 +35,14 @@ const FP_OUTPUT_PERIODS = [
 const plays_source = {
   grain: 'player_year',
   // Grain narrowed to player_year (not player_year_week) so the
-  // player_year->player_year_week bridge path isn't exercised by week splits.
+  // player_year->player_year_week bridge path isn't exercised by week row_axes.
   // The `with` builder (fantasy_points_from_plays_with) projects year AND week
   // onto the CTE, and apply_plays_join emits the week join predicate; declare
-  // supports_splits so the dispatcher forwards both splits to those funcs
+  // supports_row_axes so the dispatcher forwards both row_axes to those funcs
   // instead of intersecting against grain's ['year'] and dropping week -- which
   // collapses the CTE to a season total repeated at every per-week row. Mirrors
   // player_stats_from_plays / team_stats_from_plays / defensive_player_stats.
-  supports_splits: ['year', 'week'],
+  supports_row_axes: ['year', 'week'],
   attach: apply_plays_join
 }
 
@@ -115,7 +115,7 @@ const fantasy_points_from_plays_with = async ({
   params = {},
   with_table_name,
   having_clauses = [],
-  splits = [],
+  row_axes = [],
   data_view_options = {}
 }) => {
   const { seas_type } = get_play_by_play_default_params({ params })
@@ -130,16 +130,16 @@ const fantasy_points_from_plays_with = async ({
   const base_columns = new Set(['seas_type', 'year', 'week'])
 
   // Columns that should be in the final output (grouping columns)
-  // Start with just seas_type, add splits as needed
+  // Start with just seas_type, add row_axes as needed
   const output_columns = new Set(['seas_type'])
 
-  // Only add year to output if year splits are active
-  if (splits.includes('year')) {
+  // Only add year to output if year row_axes are active
+  if (row_axes.includes('year')) {
     output_columns.add('year')
   }
 
-  // Only add week to output if week splits are active
-  if (splits.includes('week')) {
+  // Only add week to output if week row_axes are active
+  if (row_axes.includes('week')) {
     output_columns.add('week')
   }
 

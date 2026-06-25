@@ -11,7 +11,7 @@
       }
     ],
     "prefix_columns": ["player_name"],
-    "splits": ["week"],
+    "row_axes": ["week"],
     "where": [
       {
         "column_id": "player_position",

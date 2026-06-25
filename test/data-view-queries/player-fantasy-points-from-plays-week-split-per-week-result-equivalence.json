@@ -25,7 +25,7 @@
         "desc": true
       }
     ],
-    "splits": ["year", "week"]
+    "row_axes": ["year", "week"]
   },
   "skip_query_match": true,
   "result_equivalence": {

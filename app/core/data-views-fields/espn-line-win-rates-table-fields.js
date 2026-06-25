@@ -43,7 +43,7 @@ const create_espn_line_field = ({
     },
     career_year
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 const create_team_espn_line_field = ({
@@ -65,7 +65,7 @@ const create_team_espn_line_field = ({
     matchup_opponent_type,
     career_year
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 export default {

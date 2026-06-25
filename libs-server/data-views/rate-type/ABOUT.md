@@ -30,7 +30,7 @@ Every builder MUST register its CTE via `players_query.withMaterialized(...)`, n
 
 ### Forwarding data_view_options
 
-Column definitions that call these builders directly (rather than via `add_rate_type_cte`) MUST forward `data_view_options` into the builder call. The builder depends on `data_view_options.year_range` to compute `effective_years` in the split-driven case; omitting it silently disables year pushdown for columns whose year signal comes only from splits.
+Column definitions that call these builders directly (rather than via `add_rate_type_cte`) MUST forward `data_view_options` into the builder call. The builder depends on `data_view_options.year_range` to compute `effective_years` in the row-axis-driven case; omitting it silently disables year pushdown for columns whose year signal comes only from row_axes.
 
 ## See Also
 

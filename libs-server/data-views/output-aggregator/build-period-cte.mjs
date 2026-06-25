@@ -187,7 +187,7 @@ const build_role_union_period_cte = ({
     .slice(1)
     .reduce((acc, sub) => acc.unionAll(sub), union_subs[0])
   const include_year =
-    !is_aggregate || query_context.splits.includes('year') || force_year_grain
+    !is_aggregate || query_context.row_axes.includes('year') || force_year_grain
   const outer = db
     .from(inner_union.as('role_union'))
     .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
@@ -327,7 +327,7 @@ export const build_batched_period_cte = ({
   if (source.extra_join) source.extra_join(sub)
 
   const include_year =
-    !is_aggregate || query_context.splits.includes('year') || force_year_grain
+    !is_aggregate || query_context.row_axes.includes('year') || force_year_grain
   sub.innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)
   if (include_year) sub.select('nfl_games.year')
   if (!is_aggregate) {
@@ -411,9 +411,9 @@ const ensure_split_bridge_joined = ({ query_context, from, to }) => {
 
 const ensure_split_bridges = ({ query_context, identity_id }) => {
   if (identity_id.startsWith('team')) return
-  const { row_grain_id, splits } = query_context
+  const { row_grain_id, row_axes } = query_context
   if (row_grain_id !== 'player') return
-  if (splits.includes('year') && has_bridge('player', 'player_year')) {
+  if (row_axes.includes('year') && has_bridge('player', 'player_year')) {
     ensure_split_bridge_joined({
       query_context,
       from: 'player',
@@ -421,7 +421,7 @@ const ensure_split_bridges = ({ query_context, identity_id }) => {
     })
   }
   if (
-    splits.includes('week') &&
+    row_axes.includes('week') &&
     has_bridge('player_year', 'player_year_week')
   ) {
     ensure_split_bridge_joined({

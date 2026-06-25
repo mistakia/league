@@ -27,7 +27,7 @@
       "items": { "$ref": "#/definitions/SortClause" },
       "maxItems": 5
     },
-    "splits": {
+    "row_axes": {
       "type": "array",
       "items": {
         "type": "string",

@@ -29,12 +29,12 @@ const should_use_main_where = ({ params, has_numerator_denominator }) => {
 const plays_source = {
   grain: 'player_year',
   // Grain narrowed to player_year (not player_year_week) so the team-to-
-  // team-year bridge path doesn't get exercised by week splits. The `with`
+  // team-year bridge path doesn't get exercised by week row_axes. The `with`
   // builder (add_player_stats_play_by_play_with_statement) projects year
-  // AND week onto the CTE; declare supports_splits so the dispatcher
+  // AND week onto the CTE; declare supports_row_axes so the dispatcher
   // forwards both to with_func instead of intersecting against grain's
   // ['year'] and dropping week.
-  supports_splits: ['year', 'week'],
+  supports_row_axes: ['year', 'week'],
   attach: apply_plays_join
 }
 
@@ -260,7 +260,7 @@ const create_team_share_stat = ({
     with_table_name,
     params,
     having_clauses = [],
-    splits = [],
+    row_axes = [],
     data_view_options = {}
   }) => {
     const { seas_type } = get_play_by_play_default_params({ params })
@@ -301,15 +301,15 @@ const create_team_share_stat = ({
       with_query.select(db.raw(`${with_select_string} as ${column_name}`))
     }
 
-    for (const split of splits) {
-      if (data_views_constants.split_params.includes(split)) {
-        const column_param_definition = nfl_plays_column_params[split]
+    for (const row_axis of row_axes) {
+      if (data_views_constants.row_axis_params.includes(row_axis)) {
+        const column_param_definition = nfl_plays_column_params[row_axis]
         const table_name =
           (column_param_definition && column_param_definition.table) ||
           'nfl_plays'
-        const split_statement = `${table_name}.${split}`
-        with_query.select(split_statement)
-        with_query.groupBy(split_statement)
+        const row_axis_statement = `${table_name}.${row_axis}`
+        with_query.select(row_axis_statement)
+        with_query.groupBy(row_axis_statement)
       }
     }
 

@@ -15,10 +15,10 @@ import {
 // Used to keep the base play-by-play CTE and the downstream player_team_stats
 // gamelogs join filtered to the same window. A no-op outside a range or when a
 // year split is active (the split anchors each row's year individually).
-const expand_years_for_offset_range = ({ years, params, splits }) => {
+const expand_years_for_offset_range = ({ years, params, row_axes }) => {
   if (
     !is_year_offset_range(params) ||
-    splits.includes('year') ||
+    row_axes.includes('year') ||
     !years.length
   ) {
     return years
@@ -37,7 +37,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   with_table_name,
   having_clauses = [],
   select_strings = [],
-  splits = [],
+  row_axes = [],
   select_column_names = [],
   rate_columns = [],
   data_view_options
@@ -96,12 +96,12 @@ export const add_team_stats_play_by_play_with_statement = ({
 
   // In wrap mode, force year into the base CTE so each team-year is
   // addressable for the wrap-CTE join even when no `year` split is active.
-  if (splits.includes('year') || wrap_mode || player_variant_projection) {
+  if (row_axes.includes('year') || wrap_mode || player_variant_projection) {
     with_query.select('nfl_plays.year')
     with_query.groupBy('nfl_plays.year')
   }
 
-  if (splits.includes('week') || player_variant_projection) {
+  if (row_axes.includes('week') || player_variant_projection) {
     with_query.select('nfl_plays.week')
     with_query.groupBy('nfl_plays.week')
   }
@@ -120,7 +120,7 @@ export const add_team_stats_play_by_play_with_statement = ({
     const effective_years = expand_years_for_offset_range({
       years: get_effective_years({ params, data_view_options }),
       params,
-      splits
+      row_axes
     })
     if (effective_years.length) {
       with_query.whereIn('nfl_plays.year', effective_years)
@@ -138,7 +138,7 @@ export const add_team_stats_play_by_play_with_statement = ({
       with_table_name,
       select_column_names,
       rate_columns,
-      splits,
+      row_axes,
       params,
       having_clauses,
       data_view_options
@@ -172,7 +172,7 @@ export const add_team_stats_play_by_play_with_statement = ({
       with_table_name,
       select_column_names,
       rate_columns,
-      splits,
+      row_axes,
       params,
       having_clauses,
       data_view_options
@@ -185,23 +185,23 @@ export const add_team_stats_play_by_play_with_statement = ({
   const final_stats_table_name = `${with_table_name}${with_stats_table_postfix}`
 
   // TODO review this code
-  // Check if this final table is the from table - if so, make sure it has pid and split columns
+  // Check if this final table is the from table - if so, make sure it has pid and row-axis columns
   if (
     data_view_options &&
     final_stats_table_name === data_view_options.from_table_name
   ) {
-    // Ensure the stats query includes pid and split columns for from table compatibility
+    // Ensure the stats query includes pid and row-axis columns for from table compatibility
     if (limit_to_player_active_games) {
       // Player team stats already includes pid
       if (
-        splits.includes('year') &&
+        row_axes.includes('year') &&
         !stats_query.toString().includes(`${with_table_name}.year`)
       ) {
         stats_query.select(`${with_table_name}.year`)
         stats_query.groupBy(`${with_table_name}.year`)
       }
       if (
-        splits.includes('week') &&
+        row_axes.includes('week') &&
         !stats_query.toString().includes(`${with_table_name}.week`)
       ) {
         stats_query.select(`${with_table_name}.week`)
@@ -290,7 +290,7 @@ function create_team_stats_query({
   with_table_name,
   select_column_names,
   rate_columns,
-  splits,
+  row_axes,
   params,
   having_clauses,
   data_view_options
@@ -306,7 +306,7 @@ function create_team_stats_query({
     rate_columns,
     emit_numerator_denominator: is_year_offset_range(params)
   })
-  add_splits({ query: team_stats_query, with_table_name, splits })
+  add_row_axes({ query: team_stats_query, with_table_name, row_axes })
   add_having_clauses({ query: team_stats_query, having_clauses })
 
   return team_stats_query
@@ -316,7 +316,7 @@ function create_player_team_stats_query({
   with_table_name,
   select_column_names,
   rate_columns,
-  splits,
+  row_axes,
   params,
   having_clauses,
   data_view_options
@@ -357,7 +357,7 @@ function create_player_team_stats_query({
   const effective_years = expand_years_for_offset_range({
     years: get_effective_years({ params, data_view_options }),
     params,
-    splits
+    row_axes
   })
   if (effective_years.length) {
     player_team_stats_query.whereIn('nfl_games.year', effective_years)
@@ -371,7 +371,7 @@ function create_player_team_stats_query({
     rate_columns,
     emit_numerator_denominator: is_year_offset_range(params)
   })
-  add_splits({ query: player_team_stats_query, with_table_name, splits })
+  add_row_axes({ query: player_team_stats_query, with_table_name, row_axes })
   add_having_clauses({ query: player_team_stats_query, having_clauses })
 
   return player_team_stats_query
@@ -420,13 +420,13 @@ function add_select_columns({
   }
 }
 
-function add_splits({ query, with_table_name, splits }) {
-  if (splits.includes('year')) {
+function add_row_axes({ query, with_table_name, row_axes }) {
+  if (row_axes.includes('year')) {
     query.select(`${with_table_name}.year`)
     query.groupBy(`${with_table_name}.year`)
   }
 
-  if (splits.includes('week')) {
+  if (row_axes.includes('week')) {
     query.select(`${with_table_name}.week`)
     query.groupBy(`${with_table_name}.week`)
   }

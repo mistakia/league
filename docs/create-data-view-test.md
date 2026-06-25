@@ -41,11 +41,11 @@ Test files are JSON in `test/data-view-queries/` with the following structure:
     "prefix_columns": ["player_name"],
     "where": [{"column_id": "...", "operator": "...", "value": "..."}],
     "sort": [{"column_id": "...", "desc": true}],
-    "splits": ["year", "week"],
+    "row_axes": ["year", "week"],
     "limit": 10
   },
   "expected_query": "...",
-  "tags": ["player", "splits", "parameters"],
+  "tags": ["player", "row_axes", "parameters"],
   "timeout_ms": 35000
 }
 ```
@@ -90,7 +90,7 @@ Edit the JSON file to:
 
 ## Common Tags
 
-`player`, `team`, `splits`, `year`, `week`, `plays`, `seasonlogs`, `parameters`, `filters`, `sorting`, `cte`, `joins`, `rate_type`, `basic`
+`player`, `team`, `row_axes`, `year`, `week`, `plays`, `seasonlogs`, `parameters`, `filters`, `sorting`, `cte`, `joins`, `rate_type`, `basic`
 
 ## Running All Tests
 

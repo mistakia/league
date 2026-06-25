@@ -21,7 +21,7 @@ This document provides comprehensive documentation for every function in the dat
 
 **Note**: This section documents the new centralized reference system that replaces the deprecated `year_split_join_clause` and `week_split_join_clause` parameters. All functions now use `data_view_options` with centralized references for consistent year/week joins and player ID references.
 
-#### `determine_from_table({ sort, columns, prefix_columns, splits, data_views_column_definitions })`
+#### `determine_from_table({ sort, columns, prefix_columns, row_axes, data_views_column_definitions })`
 
 **Purpose**: Analyzes sort columns to identify the optimal starting table for query performance.
 
@@ -30,7 +30,7 @@ This document provides comprehensive documentation for every function in the dat
 - `sort` (Array): Sort configuration from user request
 - `columns` (Array): Column configurations
 - `prefix_columns` (Array): Prefix column configurations
-- `splits` (Array): Active split dimensions ['year', 'week']
+- `row_axes` (Array): Active split dimensions ['year', 'week']
 - `data_views_column_definitions` (Object): Column definition registry
 
 **Returns**:
@@ -46,7 +46,7 @@ This document provides comprehensive documentation for every function in the dat
 
 1. Examines first sort column for table information
 2. Prioritizes CTE tables (typically 1-5K records) over regular tables (20K+ records)
-3. Validates split compatibility with requested splits
+3. Validates split compatibility with requested row_axes
 
 **Example**:
 
@@ -56,7 +56,7 @@ determine_from_table({
   sort: [{ column_id: 'player_fantasy_points_from_plays', desc: true }],
   columns: [],
   prefix_columns: [],
-  splits: ['year'],
+  row_axes: ['year'],
   data_views_column_definitions
 })
 // Returns: {
@@ -77,13 +77,13 @@ Only whitelisted columns use the new from table optimization system. All other c
 
 ---
 
-#### `setup_default_from_table(splits)`
+#### `setup_default_from_table(row_axes)`
 
-**Purpose**: Sets up the default from table configuration based on splits when no sort-based optimization is available.
+**Purpose**: Sets up the default from table configuration based on row_axes when no sort-based optimization is available.
 
 **Parameters**:
 
-- `splits` (Array): Active split dimensions ['year', 'week']
+- `row_axes` (Array): Active split dimensions ['year', 'week']
 
 **Returns**:
 
@@ -97,15 +97,15 @@ Only whitelisted columns use the new from table optimization system. All other c
 **Logic**:
 
 ```javascript
-// Week splits require player_years_weeks CTE
-if (splits.includes('week')) {
+// Week row_axes require player_years_weeks CTE
+if (row_axes.includes('week')) {
   return { from_table_name: 'player_years_weeks', ... }
 }
-// Year splits require player_years CTE
-else if (splits.includes('year')) {
+// Year row_axes require player_years CTE
+else if (row_axes.includes('year')) {
   return { from_table_name: 'player_years', ... }
 }
-// No splits use base player table
+// No row_axes use base player table
 else {
   return { from_table_name: 'player', ... }
 }
@@ -113,16 +113,16 @@ else {
 
 ---
 
-#### `get_from_table_config({ sort, columns, prefix_columns, splits, data_views_column_definitions })`
+#### `get_from_table_config({ sort, columns, prefix_columns, row_axes, data_views_column_definitions })`
 
-**Purpose**: Determines the final from table to use for the query by combining sort-based optimization with split requirements.
+**Purpose**: Determines the final from table to use for the query by combining sort-based optimization with row_axes requirements.
 
 **Parameters**:
 
 - `sort` (Array): Sort configuration
 - `columns` (Array): Column configurations
 - `prefix_columns` (Array): Prefix column configurations
-- `splits` (Array): Active split dimensions
+- `row_axes` (Array): Active split dimensions
 - `data_views_column_definitions` (Object): Column definition registry
 
 **Returns**: Final from table configuration object
@@ -130,8 +130,8 @@ else {
 **Decision Logic**:
 
 1. Attempts sort-based from table optimization
-2. Uses sort-based table if no splits are configured OR if table supports required splits
-3. Falls back to default split-based table selection
+2. Uses sort-based table if no row_axes are configured OR if table supports required row_axes
+3. Falls back to default row_axes-based table selection
 
 ---
 
@@ -170,14 +170,14 @@ if (from_table_name !== 'player') {
 
 ---
 
-#### `setup_central_references({ data_view_options, splits })`
+#### `setup_central_references({ data_view_options, row_axes })`
 
 **Purpose**: Sets up centralized references for player PID, year, and week based on the from table configuration.
 
 **Parameters**:
 
 - `data_view_options` (Object): Query options including from_table_name
-- `splits` (Array): Active split dimensions
+- `row_axes` (Array): Active split dimensions
 
 **Returns**: Updated data_view_options with centralized references
 
@@ -221,7 +221,7 @@ NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)
 
 ---
 
-#### `get_table_name({ column_definition, column_params, splits })`
+#### `get_table_name({ column_definition, column_params, row_axes })`
 
 **Purpose**: Determines the appropriate table name for a column based on its definition and parameters.
 
@@ -229,7 +229,7 @@ NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)
 
 - `column_definition` (Object): Column configuration from definitions
 - `column_params` (Object): Column-specific parameters
-- `splits` (Array): Active split dimensions
+- `row_axes` (Array): Active split dimensions
 
 **Returns**: String - Table name (may be aliased or generated)
 
@@ -237,7 +237,7 @@ NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)
 
 ```javascript
 return column_definition.table_alias
-  ? column_definition.table_alias({ params: column_params, splits })
+  ? column_definition.table_alias({ params: column_params, row_axes })
   : column_definition.table_name
 ```
 
@@ -281,7 +281,7 @@ return null
 
 ---
 
-#### `get_select_string({ column_id, column_params, column_index, column_definition, table_name, rate_type_column_mapping, splits, is_main_select, data_view_options })`
+#### `get_select_string({ column_id, column_params, column_index, column_definition, table_name, rate_type_column_mapping, row_axes, is_main_select, data_view_options })`
 
 **Purpose**: Core function that generates SELECT expressions with support for complex aggregations and rate calculations.
 
@@ -296,7 +296,7 @@ return null
 - `column_definition` (Object): Column configuration from definitions
 - `table_name` (String): Target table name (may be aliased)
 - `rate_type_column_mapping` (Object): Maps column keys to rate type CTEs
-- `splits` (Array): Active split dimensions ['year', 'week']
+- `row_axes` (Array): Active split dimensions ['year', 'week']
 - `is_main_select` (Boolean): Whether for main query or CTE
 - `data_view_options` (Object): Query options with centralized references
   - `pid_reference` (String): Centralized player PID reference
@@ -342,7 +342,7 @@ return null
 
 ### WHERE String Generation (`where-string.mjs`)
 
-#### `get_where_string({ where_clause, column_definition, table_name, column_index, is_main_select, params, rate_type_column_mapping, splits, data_view_options })`
+#### `get_where_string({ where_clause, column_definition, table_name, column_index, is_main_select, params, rate_type_column_mapping, row_axes, data_view_options })`
 
 **Purpose**: Generates WHERE clause conditions with support for various operators and PostgreSQL array columns.
 
@@ -359,7 +359,7 @@ return null
 - `params` (Object): Additional parameters
   - `case_insensitive` (Boolean): For string comparisons
 - `rate_type_column_mapping` (Object): Rate type mappings
-- `splits` (Array): Active splits
+- `row_axes` (Array): Active splits
 - `data_view_options` (Object): Query options with centralized references
 
 **Supported Operators**:
@@ -482,13 +482,13 @@ if (!is_current_season) {
 
 ### Data View Hash (`get-data-view-hash.mjs`)
 
-#### `get_data_view_hash({ splits, where, columns, prefix_columns, sort, offset, limit })`
+#### `get_data_view_hash({ row_axes, where, columns, prefix_columns, sort, offset, limit })`
 
 **Purpose**: Creates deterministic hash for cache key generation.
 
 **Parameters**:
 
-- `splits` (Array): Split dimensions
+- `row_axes` (Array): Split dimensions
 - `where` (Array): Filter conditions
 - `columns` (Array): Selected columns
 - `prefix_columns` (Array): Additional columns
@@ -535,7 +535,7 @@ return `t${hash.toString('hex')}`
 - `table_name` (String): Table to join
 - `join_table_clause` (String): Custom join clause
 - `join_type` (String): 'LEFT' or 'INNER'
-- `splits` (Array): Active splits
+- `row_axes` (Array): Active splits
 - `params` (Object): Query parameters
   - `year` (Array): Years to filter
   - `week` (Array): Weeks to filter
@@ -667,7 +667,7 @@ WITH ${table_name} AS (
 - `having_clauses` (Array): Post-aggregation filters
 - `select_strings` (Array): Custom SELECT expressions
 - `pid_columns` (Array): Player ID columns to coalesce
-- `splits` (Array): Active splits
+- `row_axes` (Array): Active splits
 - `where_clauses` (Array): Pre-aggregation filters
 - `data_view_options` (Object): Query options with centralized references
   - `pid_reference` (String): Centralized player PID reference
@@ -678,7 +678,7 @@ WITH ${table_name} AS (
 
 - **Career Filtering**: Filters by career year/game ranges
 - **Multiple Player IDs**: Coalesces different player ID columns
-- **Split-Aware Grouping**: Adds appropriate GROUP BY for splits
+- **Split-Aware Grouping**: Adds appropriate GROUP BY for row_axes
 - **WHERE vs HAVING**: Supports both pre and post aggregation filtering
 
 **Error Handling**: Throws if `with_table_name` is missing.
@@ -730,7 +730,7 @@ const rate_type_handlers = {
 
 ---
 
-#### `add_rate_type_cte({ players_query, params, rate_type_table_name, splits, rate_type, team_unit, is_team })`
+#### `add_rate_type_cte({ players_query, params, rate_type_table_name, row_axes, rate_type, team_unit, is_team })`
 
 **Purpose**: Adds rate type CTE to query.
 
@@ -738,13 +738,13 @@ const rate_type_handlers = {
 
 - `players_query` (Knex.QueryBuilder): Query builder
 - `rate_type_table_name` (String): CTE name
-- `splits` (Array): Active splits
+- `row_axes` (Array): Active splits
 
 **Effect**: Modifies query by adding WITH clause
 
 ---
 
-#### `join_rate_type_cte({ players_query, params, rate_type_table_name, splits, rate_type, team_unit, is_team, data_view_options })`
+#### `join_rate_type_cte({ players_query, params, rate_type_table_name, row_axes, rate_type, team_unit, is_team, data_view_options })`
 
 **Purpose**: Joins rate type CTE to main query.
 
@@ -779,7 +779,7 @@ const rate_type_handlers = {
 
 ---
 
-#### `add_per_game_cte({ players_query, params, rate_type_table_name, splits })`
+#### `add_per_game_cte({ players_query, params, rate_type_table_name, row_axes })`
 
 **Purpose**: Creates CTE counting games for rate calculations.
 
@@ -820,7 +820,7 @@ WITH rate_type_per_team_game_off_2023_2024_2025_REG AS (
 
 ---
 
-#### `join_per_game_cte({ players_query, rate_type_table_name, splits, params, team_unit, is_team, data_view_options })`
+#### `join_per_game_cte({ players_query, rate_type_table_name, row_axes, params, team_unit, is_team, data_view_options })`
 
 **Purpose**: Joins game count CTE for rate calculations.
 
@@ -828,7 +828,7 @@ WITH rate_type_per_team_game_off_2023_2024_2025_REG AS (
 
 - `players_query` (Knex.QueryBuilder): Query builder instance
 - `rate_type_table_name` (String): CTE table name
-- `splits` (Array): Active split dimensions
+- `row_axes` (Array): Active split dimensions
 - `params` (Object): Query parameters including year_offset
 - `team_unit` (String): 'off' or 'def' for team rates
 - `is_team` (Boolean): Whether this is a team-level join
@@ -837,7 +837,7 @@ WITH rate_type_per_team_game_off_2023_2024_2025_REG AS (
 **Join Patterns**:
 
 ```javascript
-// Simple join (no splits)
+// Simple join (no row_axes)
 query.leftJoin(cte_name, `${cte_name}.pid`, data_view_options.pid_reference)
 
 // Split-aware join using centralized references
@@ -857,7 +857,7 @@ query.leftJoin(cte_name, function () {
 })
 
 // Week join using centralized reference
-if (splits.includes('week')) {
+if (row_axes.includes('week')) {
   this.andOn(`${cte_name}.week`, '=', data_view_options.week_reference)
 }
 ```

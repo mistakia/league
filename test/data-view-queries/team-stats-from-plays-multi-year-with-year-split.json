@@ -11,7 +11,7 @@
       }
     ],
     "prefix_columns": ["player_name"],
-    "splits": ["year"],
+    "row_axes": ["year"],
     "where": [
       {
         "column_id": "player_position",

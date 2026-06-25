@@ -21,7 +21,7 @@ const create_player_dfs_salaries_field = (props) => ({
     career_year,
     career_game
   },
-  splits: ['year', 'week'],
+  row_axes: ['year', 'week'],
   with_where: () => 'player_salaries.salary'
 })
 

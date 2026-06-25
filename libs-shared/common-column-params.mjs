@@ -206,7 +206,7 @@ export const year_offset = {
   min: -30,
   max: 30,
   show_key_in_short: true,
-  enable_on_splits: ['year']
+  enable_on_row_axes: ['year']
 }
 
 export const single_year_offset = {
@@ -217,7 +217,7 @@ export const single_year_offset = {
   default_value: 0,
   is_single: true,
   show_key_in_short: true,
-  enable_on_splits: ['year']
+  enable_on_row_axes: ['year']
 }
 
 export const single_position = {

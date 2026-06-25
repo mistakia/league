@@ -27,7 +27,7 @@ const expect = chai.expect
 // (query.toString()); population-level value checks run at live verification
 // against prod data (the bundled test DB seeds players only, no plays/games).
 
-const team_column = ({ period, year, team_attribution, splits = [] }) => {
+const team_column = ({ period, year, team_attribution, row_axes = [] }) => {
   const params = {
     year,
     output: { period, aggregation: 'rate', threshold: null }
@@ -39,11 +39,11 @@ const team_column = ({ period, year, team_attribution, splits = [] }) => {
   }
 }
 
-const view = (columns, { splits = [] } = {}) => ({
+const view = (columns, { row_axes = [] } = {}) => ({
   columns,
   sort: [],
   where: [],
-  splits
+  row_axes
 })
 
 describe('data-views team_attribution', () => {
@@ -111,7 +111,7 @@ describe('data-views team_attribution', () => {
     // Driven at the unit level: with no effective scope, requires_wrap falls
     // back to query_context.year_range for the distinct-year count.
     const multi_year_ctx = {
-      splits: [],
+      row_axes: [],
       nfl_week_ids: [],
       year_range: [2023, 2024, 2025]
     }

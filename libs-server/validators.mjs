@@ -217,7 +217,7 @@ const limit_schema = {
 }
 export const limit_validator = v.compile(limit_schema)
 
-const splits_schema = {
+const row_axes_schema = {
   type: 'array',
   items: {
     type: 'string'
@@ -241,7 +241,7 @@ const table_state_schema = {
   sort: sort_schema,
   columns: columns_schema,
   where: where_schema,
-  splits: splits_schema,
+  row_axes: row_axes_schema,
   row_grain: row_grain_schema
 }
 export const table_state_validator = v.compile(table_state_schema)

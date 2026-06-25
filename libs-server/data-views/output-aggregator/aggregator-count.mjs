@@ -81,7 +81,8 @@ export const join_cte = ({
   params = {},
   column_def = null
 }) => {
-  const { players_query, pid_reference, year_reference, splits } = query_context
+  const { players_query, pid_reference, year_reference, row_axes } =
+    query_context
   const is_team = identity_id.startsWith('team')
   const team_target = is_team
     ? resolve_team_join_target({
@@ -96,7 +97,7 @@ export const join_cte = ({
     } else {
       this.on(`${cte_name}.pid`, '=', pid_reference)
     }
-    if (splits.includes('year') && year_reference) {
+    if (row_axes.includes('year') && year_reference) {
       this.andOn(`${cte_name}.year`, '=', year_reference)
     }
   })

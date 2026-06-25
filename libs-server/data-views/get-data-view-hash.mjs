@@ -1,7 +1,7 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 
 export default function get_data_view_hash({
-  splits = [],
+  row_axes = [],
   where = [],
   columns = [],
   prefix_columns = [],
@@ -11,7 +11,7 @@ export default function get_data_view_hash({
 }) {
   return get_table_hash(
     JSON.stringify({
-      splits,
+      row_axes,
       where,
       columns,
       prefix_columns,

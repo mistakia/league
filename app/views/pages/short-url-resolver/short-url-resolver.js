@@ -71,7 +71,7 @@ export default function ShortUrlResolver({
               sort: parsed.sort,
               where: parsed.where,
               prefix_columns: parsed.prefix_columns,
-              splits: parsed.splits,
+              row_axes: parsed.row_axes,
               q: parsed.q,
               rank_aggregation: parsed.rank_aggregation,
               scatter_plot_options: parsed.scatter_plot_options,

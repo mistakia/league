@@ -21,9 +21,9 @@ import {
 
 const team_table_get_cache_info = create_immutable_cache_info()
 
-const get_player_bridge = ({ splits = [] } = {}) => {
-  if (splits.includes('week')) return PLAYER_YEARS_WEEKS_TEAMS_CTE
-  if (splits.includes('year')) return PLAYER_YEARS_TEAMS_CTE
+const get_player_bridge = ({ row_axes = [] } = {}) => {
+  if (row_axes.includes('week')) return PLAYER_YEARS_WEEKS_TEAMS_CTE
+  if (row_axes.includes('year')) return PLAYER_YEARS_TEAMS_CTE
   return PLAYER_TEAMS_CTE
 }
 
@@ -37,9 +37,9 @@ const ensure_team_values_cte = ({ query, query_context }) => {
   query_context.registered_ctes.add('team')
 }
 
-const ensure_player_bridge_cte = ({ query, query_context, splits }) => {
+const ensure_player_bridge_cte = ({ query, query_context, row_axes }) => {
   if (!query_context.registered_ctes) query_context.registered_ctes = new Set()
-  const bridge = get_player_bridge({ splits })
+  const bridge = get_player_bridge({ row_axes })
   if (query_context.registered_ctes.has(bridge)) return
   if (bridge === PLAYER_TEAMS_CTE) {
     query.with(bridge, db.raw(player_teams_cte_sql()))
@@ -79,8 +79,8 @@ const get_bridge_join_keys = ({ bridge, query_context }) => {
   return keys
 }
 
-const join_player_bridge = ({ query, query_context, splits, join_type }) => {
-  const bridge = get_player_bridge({ splits })
+const join_player_bridge = ({ query, query_context, row_axes, join_type }) => {
+  const bridge = get_player_bridge({ row_axes })
   const join_key_set = `joined_player_team_bridges`
   if (!query_context[join_key_set]) query_context[join_key_set] = new Set()
   if (query_context[join_key_set].has(bridge)) return
@@ -98,9 +98,9 @@ const make_column = ({ column_name }) => ({
   source: { grain: 'team' },
   get_cache_info: team_table_get_cache_info,
 
-  table_alias: ({ splits = [], query_context = null } = {}) => {
+  table_alias: ({ row_axes = [], query_context = null } = {}) => {
     if (is_player_row_grain(query_context)) {
-      return get_player_bridge({ splits })
+      return get_player_bridge({ row_axes })
     }
     return 'team'
   },
@@ -109,9 +109,9 @@ const make_column = ({ column_name }) => ({
   // - team_code -> the bridge CTE's `teams` array directly (already text[])
   // - others -> correlated array_agg over the team VALUES CTE for each
   //   team_code in the bridge's `teams` array.
-  main_select: ({ table_name, column_index, splits, query_context }) => {
+  main_select: ({ table_name, column_index, row_axes, query_context }) => {
     if (is_player_row_grain(query_context)) {
-      const bridge = get_player_bridge({ splits })
+      const bridge = get_player_bridge({ row_axes })
       if (column_name === 'team_code') {
         return [`${bridge}.teams as ${column_name}_${column_index}`]
       }
@@ -122,9 +122,9 @@ const make_column = ({ column_name }) => ({
     return [`${table_name}.${column_name} as ${column_name}_${column_index}`]
   },
 
-  main_group_by: ({ table_name, splits, query_context }) => {
+  main_group_by: ({ table_name, row_axes, query_context }) => {
     if (is_player_row_grain(query_context)) {
-      const bridge = get_player_bridge({ splits })
+      const bridge = get_player_bridge({ row_axes })
       return [`${bridge}.teams`]
     }
     return [`${table_name}.${column_name}`]
@@ -133,12 +133,12 @@ const make_column = ({ column_name }) => ({
   // Filters on team-identity columns under player row_grain treat the
   // value as the set of team-attribute values across the player's team
   // membership window. Mirrors player_nfl_teams array semantics.
-  is_where_column_array: ({ splits = [], query_context = null } = {}) =>
+  is_where_column_array: ({ row_axes = [], query_context = null } = {}) =>
     is_player_row_grain(query_context),
 
-  main_where: ({ table_name, splits, query_context }) => {
+  main_where: ({ table_name, row_axes, query_context }) => {
     if (is_player_row_grain(query_context)) {
-      const bridge = get_player_bridge({ splits })
+      const bridge = get_player_bridge({ row_axes })
       if (column_name === 'team_code') {
         return `${bridge}.teams`
       }
@@ -147,23 +147,23 @@ const make_column = ({ column_name }) => ({
     return `${table_name}.${column_name}`
   },
 
-  register_ctes: async ({ query, splits, data_view_options }) => {
+  register_ctes: async ({ query, row_axes, data_view_options }) => {
     const query_context = data_view_options?.query_context
     if (!is_player_row_grain(query_context)) return
-    ensure_player_bridge_cte({ query, query_context, splits })
+    ensure_player_bridge_cte({ query, query_context, row_axes })
     if (column_name !== 'team_code') {
       ensure_team_values_cte({ query, query_context })
     }
   },
 
-  join: async ({ query, splits, data_view_options, join_type }) => {
+  join: async ({ query, row_axes, data_view_options, join_type }) => {
     const query_context = data_view_options?.query_context
     if (!is_player_row_grain(query_context)) return
-    ensure_player_bridge_cte({ query, query_context, splits })
+    ensure_player_bridge_cte({ query, query_context, row_axes })
     if (column_name !== 'team_code') {
       ensure_team_values_cte({ query, query_context })
     }
-    join_player_bridge({ query, query_context, splits, join_type })
+    join_player_bridge({ query, query_context, row_axes, join_type })
   }
 })
 

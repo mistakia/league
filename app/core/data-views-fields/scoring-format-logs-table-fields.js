@@ -29,7 +29,7 @@ const from_scoring_format_seasonlogs = (field) => ({
     year_offset: single_year_offset,
     scoring_format_id: scoring_format_id_param
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 const from_scoring_format_careerlogs = (field) => ({

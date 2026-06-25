@@ -28,7 +28,7 @@ const create_game_field = (props) => ({
   column_params: {
     nfl_week_id
   },
-  splits: ['year', 'week']
+  row_axes: ['year', 'week']
 })
 
 export default {

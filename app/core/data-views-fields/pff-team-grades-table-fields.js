@@ -23,7 +23,7 @@ const pff_team_field = (props) => ({
     },
     matchup_opponent_type
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 export default {

@@ -27,7 +27,7 @@ export const identities = {
   player: {
     id: 'player',
     row_grain: 'player',
-    splits: [],
+    row_axes: [],
     key_columns: ['pid'],
     pid_column: 'player.pid',
     team_column: null,
@@ -39,7 +39,7 @@ export const identities = {
   player_year: {
     id: 'player_year',
     row_grain: 'player',
-    splits: ['year'],
+    row_axes: ['year'],
     key_columns: ['pid', 'year'],
     pid_column: 'player.pid',
     team_column: null,
@@ -63,7 +63,7 @@ export const identities = {
   player_year_week: {
     id: 'player_year_week',
     row_grain: 'player',
-    splits: ['year', 'week'],
+    row_axes: ['year', 'week'],
     key_columns: ['pid', 'year', 'week'],
     pid_column: 'player.pid',
     team_column: null,
@@ -95,7 +95,7 @@ export const identities = {
   team: {
     id: 'team',
     row_grain: 'team',
-    splits: [],
+    row_axes: [],
     key_columns: ['team_code'],
     pid_column: null,
     team_column: 'team.team_code',
@@ -110,7 +110,7 @@ export const identities = {
   team_year: {
     id: 'team_year',
     row_grain: 'team',
-    splits: ['year'],
+    row_axes: ['year'],
     key_columns: ['team_code', 'year'],
     pid_column: null,
     team_column: 'team_years.team_code',
@@ -132,7 +132,7 @@ export const identities = {
   team_year_week: {
     id: 'team_year_week',
     row_grain: 'team',
-    splits: ['year', 'week'],
+    row_axes: ['year', 'week'],
     key_columns: ['team_code', 'year', 'week'],
     pid_column: null,
     team_column: 'team_years_weeks.team_code',

@@ -10,16 +10,16 @@ const games_played_join = ({
   table_name,
   query,
   params,
-  splits
+  row_axes
 }) => {
   if (data_view_options.query_context?.applied_output_ctes?.has(table_name)) {
     return
   }
-  register_per_game_cte({ query, params, splits, data_view_options })
+  register_per_game_cte({ query, params, row_axes, data_view_options })
   join_per_game_cte({
     players_query: query,
     rate_type_table_name: table_name,
-    splits,
+    row_axes,
     params,
     data_view_options
   })

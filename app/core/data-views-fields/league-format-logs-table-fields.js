@@ -35,7 +35,7 @@ const from_league_format_seasonlogs = (field) => ({
     league_format_id: league_format_id_param,
     year_offset: single_year_offset
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 const from_league_format_careerlogs = (field) => ({

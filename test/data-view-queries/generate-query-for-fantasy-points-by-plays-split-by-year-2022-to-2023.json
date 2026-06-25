@@ -30,7 +30,7 @@
         "desc": true
       }
     ],
-    "splits": [
+    "row_axes": [
       "year"
     ]
   },

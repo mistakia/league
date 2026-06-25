@@ -148,7 +148,7 @@ const player_betting_market_with = ({
   with_table_name,
   having_clauses,
   where_clauses,
-  splits,
+  row_axes,
   select_strings = [],
   is_player_game_prop = false
 }) => {
@@ -310,7 +310,7 @@ const team_betting_market_with = ({
   select_strings = [],
   having_clauses,
   where_clauses,
-  splits
+  row_axes
 }) => {
   const {
     time_type,
@@ -392,7 +392,7 @@ const team_game_implied_team_total_with = ({
   with_table_name,
   having_clauses,
   where_clauses,
-  splits
+  row_axes
 }) => {
   const { time_type, source_id, year, week, seas_type } = get_default_params({
     params,

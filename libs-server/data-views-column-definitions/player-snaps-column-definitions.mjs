@@ -10,7 +10,7 @@ const apply_player_snaps_attach = ({
   query_context,
   params,
   table_alias,
-  splits
+  row_axes
 }) => {
   if (query_context.applied_output_ctes?.has(table_alias)) {
     return
@@ -22,7 +22,7 @@ const apply_player_snaps_attach = ({
     players_query,
     params,
     rate_type_table_name: table_alias,
-    splits,
+    row_axes,
     data_view_options,
     query_context
   })
@@ -30,7 +30,7 @@ const apply_player_snaps_attach = ({
   join_per_player_play_cte({
     players_query,
     rate_type_table_name: table_alias,
-    splits,
+    row_axes,
     params,
     data_view_options
   })

@@ -45,15 +45,15 @@ const keeptradecut_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  splits = [],
+  row_axes = [],
   params = {},
   data_view_options = {}
 }) => {
   // using an inner join for week splits because its much faster, not sure why
-  const join_func = get_join_func(splits.includes('week') ? 'INNER' : join_type)
+  const join_func = get_join_func(row_axes.includes('week') ? 'INNER' : join_type)
   const { year_offset_single } = get_default_params({ params })
 
-  if (splits.includes('year') && !data_view_options.opening_days_joined) {
+  if (row_axes.includes('year') && !data_view_options.opening_days_joined) {
     query.leftJoin(
       'opening_days',
       'opening_days.year',
@@ -63,10 +63,10 @@ const keeptradecut_join = ({
   }
 
   if (
-    splits.includes('week') &&
+    row_axes.includes('week') &&
     !data_view_options.nfl_year_week_timestamp_joined
   ) {
-    if (splits.includes('year')) {
+    if (row_axes.includes('year')) {
       query.leftJoin('nfl_year_week_timestamp', function () {
         this.on('nfl_year_week_timestamp.year', '=', 'player_years_weeks.year')
         this.on('nfl_year_week_timestamp.week', '=', 'player_years_weeks.week')
@@ -84,14 +84,14 @@ const keeptradecut_join = ({
     this.andOn(`${table_name}.qb`, '=', db.raw('?', [params.qb || 2]))
     this.andOn(`${table_name}.type`, '=', db.raw('?', [type]))
 
-    if (splits.includes('week')) {
+    if (row_axes.includes('week')) {
       // TODO handle year_offset_single and week_offset_single
       this.andOn(
         `${table_name}.d`,
         '=',
         'nfl_year_week_timestamp.week_timestamp'
       )
-    } else if (splits.includes('year')) {
+    } else if (row_axes.includes('year')) {
       this.andOn(
         `${table_name}.d`,
         '=',
@@ -188,10 +188,10 @@ const create_keeptradecut_definition = (type) => ({
   main_select_string_year_offset_range: keeptradecut_year_offset_range_select(
     keeptradecut_metric_types[type.toUpperCase()]
   ),
-  year_select: ({ splits, table_name, column_params = {} }) => {
+  year_select: ({ row_axes, table_name, column_params = {} }) => {
     const { year_offset_single } = get_default_params({ params: column_params })
 
-    if (splits.includes('week')) {
+    if (row_axes.includes('week')) {
       return `nfl_year_week_timestamp.year`
     }
     return year_offset_single

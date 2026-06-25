@@ -7,7 +7,7 @@ export const get_where_string = ({
   is_main_select = false,
   params = {},
   output_select_mapping = {},
-  splits,
+  row_axes,
   data_view_options = {}
 }) => {
   const use_select_as =
@@ -40,7 +40,7 @@ export const get_where_string = ({
         params,
         column_id: where_clause.column_id,
         column_index,
-        splits,
+        row_axes,
         data_view_options
       })
     : has_output
@@ -56,7 +56,7 @@ export const get_where_string = ({
     column_definition.is_where_column_array &&
     column_definition.is_where_column_array({
       params,
-      splits
+      row_axes
     })
 
   if (where_clause.operator === 'IS NULL') {

@@ -60,7 +60,7 @@ export const requires_wrap = ({ query_context, params, identity_id }) => {
   // the wrap's entire purpose. Skip it; the plain non-wrap join then correlates
   // on current_nfl_team via resolve_team_join_target.
   if (get_team_attribution(params) === 'current') return false
-  if (query_context.splits.includes('year')) return false
+  if (query_context.row_axes.includes('year')) return false
   const years = resolve_effective_years({ query_context, params })
   const distinct_years = new Set(years.map((y) => parseInt(y, 10)))
   if (distinct_years.size < 2) return false

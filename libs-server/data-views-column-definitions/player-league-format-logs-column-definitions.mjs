@@ -62,13 +62,13 @@ const league_format_player_seasonlogs_source = {
   ]
 }
 
-const league_format_seasonlogs_conditions = ({ params, splits = [] }) => {
+const league_format_seasonlogs_conditions = ({ params, row_axes = [] }) => {
   const conditions = [
     { column: 'league_format_id', value: get_league_format_id(params) }
   ]
 
   // Add year filter when no year splits are active
-  if (!splits.includes('year') && params.year) {
+  if (!row_axes.includes('year') && params.year) {
     const year = Array.isArray(params.year) ? params.year[0] : params.year
     if (year !== undefined && year !== null) {
       conditions.push({ column: 'year', value: year })

@@ -12,7 +12,7 @@
         }
       }
     ],
-    "splits": ["year", "week"],
+    "row_axes": ["year", "week"],
     "where": [
       {
         "column_id": "player_career_year",

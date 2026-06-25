@@ -71,7 +71,7 @@ export const add_per_team_play_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits,
+  row_axes,
   play_type = null,
   group_by = null,
   team_unit = 'off',
@@ -114,12 +114,12 @@ export const add_per_team_play_cte = ({
   }
 
   let year_grouped = false
-  for (const split of splits) {
-    if (split === 'year') {
+  for (const row_axis of row_axes) {
+    if (row_axis === 'year') {
       cte_query.select('nfl_plays.year')
       cte_query.groupBy('nfl_plays.year')
       year_grouped = true
-    } else if (split === 'week') {
+    } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
       cte_query.groupBy('nfl_plays.week')
     }
@@ -129,7 +129,7 @@ export const add_per_team_play_cte = ({
   // year-of-stat to that year's team and that year's team-pass-play total.
   // Without this the wrap collapses the per-year denominator to a single
   // total-across-years number and the historical-team-mode attribution is
-  // lost. Idempotent against the splits-year branch above.
+  // lost. Idempotent against the row_axes-year branch above.
   if (force_year_grain && !year_grouped) {
     cte_query.select('nfl_plays.year')
     cte_query.groupBy('nfl_plays.year')
@@ -155,7 +155,7 @@ export const join_per_team_play_cte = ({
   query_context,
   params,
   rate_type_table_name,
-  splits,
+  row_axes,
   team_unit = 'off',
   data_view_options = {}
 }) => {
@@ -200,7 +200,7 @@ export const join_per_team_play_cte = ({
     })
     this.on(`${rate_type_table_name}.${team_unit}`, team_join_target)
 
-    if (splits.includes('year')) {
+    if (row_axes.includes('year')) {
       const offset_range = resolve_year_offset_range(params)
       if (offset_range) {
         // Correlate the rate-type table year to the base-year anchor THROUGH
@@ -238,7 +238,7 @@ export const join_per_team_play_cte = ({
       }
     }
 
-    if (splits.includes('week')) {
+    if (row_axes.includes('week')) {
       this.on(
         `${rate_type_table_name}.week`,
         '=',
@@ -296,7 +296,7 @@ export const add_cte = ({
     players_query: query_context.players_query,
     params,
     rate_type_table_name: cte_name,
-    splits: query_context.splits,
+    row_axes: query_context.row_axes,
     play_type: dispatch_params.play_type ?? null,
     group_by: dispatch_params.group_by ?? null,
     team_unit: resolve_team_unit(column_def, dispatch_params),
@@ -343,7 +343,7 @@ export const join_cte = ({
     query_context,
     params: effective_params,
     rate_type_table_name: cte_name,
-    splits: query_context.splits,
+    row_axes: query_context.row_axes,
     team_unit: resolve_team_unit(column_def, dispatch_params),
     data_view_options: query_context.data_view_options
   })

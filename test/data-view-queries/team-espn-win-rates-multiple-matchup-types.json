@@ -33,7 +33,7 @@
         "operator": "IN"
       }
     ],
-    "splits": []
+    "row_axes": []
   },
   "tags": [
     "team",

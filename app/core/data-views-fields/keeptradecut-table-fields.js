@@ -12,7 +12,7 @@ const shared_properties = {
   column_groups: [COLUMN_GROUPS.KEEPTRADECUT],
   column_params: {
     date: {
-      disable_on_splits: true,
+      disable_on_row_axes: true,
       data_type: table_constants.TABLE_DATA_TYPES.DATE,
       default_label: 'Latest',
       datepicker_props: {
@@ -22,11 +22,11 @@ const shared_properties = {
     year: {
       ...single_year,
       default_value: current_season.year,
-      enable_on_splits: ['year']
+      enable_on_row_axes: ['year']
     },
     year_offset: single_year_offset
   },
-  splits: ['year']
+  row_axes: ['year']
 }
 
 export default {

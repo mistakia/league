@@ -31,7 +31,7 @@ The data view system supports complex queries with:
 - Column selections (main data and prefix columns)
 - Filtering conditions (where clauses)
 - Sorting specifications
-- Time-based splits (year/week groupings)
+- Time-based row axes (year/week groupings)
 - Rate type normalizations (per-game, per-play, etc.)
 - League/scoring format configurations
 
@@ -44,7 +44,7 @@ The data view system supports complex queries with:
    - Determine any prefix columns (player identification, team info)
    - Specify filtering criteria (position, year range, team, etc.)
    - Define sorting preferences
-   - Choose appropriate time splits if needed
+   - Choose appropriate time row axes if needed
 
 2. **Validate Column Definitions**
 
@@ -53,7 +53,7 @@ The data view system supports complex queries with:
    - **Check column existence**: Verify ALL column IDs exist in data-view-specs/index.json
    - **Parameter validation**: Check data-view-specs/parameters/schemas/ for valid parameters
    - **Rate type compatibility**: Confirm rate_type values exist in data-view-specs/parameters/values/rate-types.json
-   - **Split compatibility**: Verify columns support requested splits (year/week) per column family definitions
+   - **Split compatibility**: Verify columns support requested row_axes (year/week) per column family definitions
    - **Required parameters**: Ensure columns requiring scoring_format_hash, year, etc. have them specified
 
    **Common Column ID Patterns:**
@@ -68,7 +68,7 @@ The data view system supports complex queries with:
    - `prefix_columns`: Array of identifying column configurations
    - `where`: Array of filter conditions
    - `sort`: Array of sorting specifications
-   - `splits`: Array of time grouping dimensions
+   - `row_axes`: Array of time grouping dimensions
    - `view_name`: Descriptive name for the view
    - `view_description`: Detailed description of analysis purpose
 
@@ -139,7 +139,7 @@ The data view system supports complex queries with:
          "desc": true  // ALWAYS include desc: true/false
        }
      ],
-     "splits": ["year", "week"], // Enable time-series splits
+     "row_axes": ["year", "week"], // Enable time-series row axes
      "view_name": "Week 1 Rookie RB Rush Attempts 2019-2024",
      "view_description": "First career game rushing attempts for rookie RBs"
    }
@@ -148,7 +148,7 @@ The data view system supports complex queries with:
 7. **Generate URL Options**
 
    - URL encode the JSON parameters
-   - Construct: `https://xo.football/data-views?columns={encoded}&prefix_columns={encoded}&sort={encoded}&where={encoded}&splits={encoded}&view_name={encoded}&view_description={encoded}`
+   - Construct: `https://xo.football/data-views?columns={encoded}&prefix_columns={encoded}&sort={encoded}&where={encoded}&row_axes={encoded}&view_name={encoded}&view_description={encoded}`
    - POST the full URL to `/u`
    - Use returned hash: `https://xo.football/u/{hash}`
 

@@ -141,7 +141,7 @@
     },
     "incompatible_combination": {
       "error": "Parameter combination {params} not compatible",
-      "examples": ["rate_type per_game incompatible with week splits"]
+      "examples": ["rate_type per_game incompatible with week row axis"]
     },
     "performance_warning": {
       "warning": "Parameter combination {params} may impact performance",
@@ -160,10 +160,10 @@
       ]
     },
     "validate_rate_type_compatibility": {
-      "description": "Check rate type works with family and splits",
+      "description": "Check rate type works with family and row_axes",
       "checks": [
         "family supports rate types",
-        "rate type compatible with splits"
+        "rate type compatible with row_axes"
       ]
     },
     "validate_required_params": {

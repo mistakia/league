@@ -126,8 +126,8 @@ export default {
   },
   player_age: {
     // TODO career_year
-    table_alias: ({ splits }) => {
-      if (splits.includes('year')) {
+    table_alias: ({ row_axes }) => {
+      if (row_axes.includes('year')) {
         return 'year_splits_player_age'
       }
 
@@ -135,8 +135,8 @@ export default {
     },
     column_name: 'age',
     year_select: () => undefined,
-    join: ({ query, splits, join_type, data_view_options }) => {
-      if (!splits.includes('year')) {
+    join: ({ query, row_axes, join_type, data_view_options }) => {
+      if (!row_axes.includes('year')) {
         return
       }
 
@@ -151,8 +151,8 @@ export default {
       )
       data_view_options.opening_days_joined = true
     },
-    main_select: ({ column_index, splits }) => {
-      const base_year = splits.includes('year')
+    main_select: ({ column_index, row_axes }) => {
+      const base_year = row_axes.includes('year')
         ? 'opening_days.opening_day'
         : 'CURRENT_DATE'
       return [
@@ -161,12 +161,12 @@ export default {
         )
       ]
     },
-    main_group_by: ({ splits }) =>
-      splits.includes('year')
+    main_group_by: ({ row_axes }) =>
+      row_axes.includes('year')
         ? ['player.dob', 'opening_days.opening_day']
         : ['player.dob'],
-    main_where: ({ splits = [] } = {}) => {
-      const base_year = splits.includes('year')
+    main_where: ({ row_axes = [] } = {}) => {
+      const base_year = row_axes.includes('year')
         ? 'opening_days.opening_day'
         : 'CURRENT_DATE'
       return db.raw(

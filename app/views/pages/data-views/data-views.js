@@ -14,7 +14,7 @@ import {
   get_team_color,
   get_position_color
 } from '@libs-shared'
-import get_split_label_suffix from '@libs-shared/get-split-label-suffix.mjs'
+import get_row_axis_label_suffix from '@libs-shared/get-row-axis-label-suffix.mjs'
 import parse_table_state_from_url from '@core/data-views/parse-table-state-from-url.mjs'
 import { derive_auto_tags } from '@core/data-views/derive-auto-tags'
 import { nfl_team_abbreviations } from '@constants'
@@ -116,7 +116,7 @@ export default function DataViewsPage({
         prefix_columns,
         where,
         sort,
-        splits,
+        row_axes,
         row_grain,
         q,
         rank_aggregation,
@@ -143,7 +143,7 @@ export default function DataViewsPage({
           sort,
           where,
           prefix_columns,
-          splits,
+          row_axes,
           row_grain,
           q,
           rank_aggregation,
@@ -377,14 +377,14 @@ export default function DataViewsPage({
     [point_color_mode]
   )
 
-  const current_splits = useMemo(
-    () => filtered_table_state.splits || [],
-    [filtered_table_state.splits]
+  const current_row_axes = useMemo(
+    () => filtered_table_state.row_axes || [],
+    [filtered_table_state.row_axes]
   )
 
-  const get_split_label_suffix_cb = useCallback(
-    (row) => get_split_label_suffix(current_splits, row),
-    [current_splits]
+  const get_row_axis_label_suffix_cb = useCallback(
+    (row) => get_row_axis_label_suffix(current_row_axes, row),
+    [current_row_axes]
   )
 
   const fetch_more = useCallback(() => {
@@ -501,8 +501,10 @@ export default function DataViewsPage({
         get_scatter_point_color={
           point_color_mode ? get_scatter_point_color : null
         }
+        row_axes_label="Splits"
+        no_row_axes_available_label="No splits available for selected columns"
         get_scatter_point_label_suffix={
-          current_splits.length ? get_split_label_suffix_cb : null
+          current_row_axes.length ? get_row_axis_label_suffix_cb : null
         }
         is_scatter_plot_point_label_enabled={
           is_scatter_plot_point_label_enabled

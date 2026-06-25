@@ -127,7 +127,7 @@ export default function ({ week }) {
     ...(options.fixed && { fixed: options.fixed }),
     ...(options.reverse_percentiles && { reverse_percentiles: true }),
     size: 70,
-    splits:
+    row_axes:
       period === 'Season'
         ? ['year']
         : period === 'Week'

@@ -2583,12 +2583,12 @@ const options = {
               },
               description: 'Filter conditions for the data view'
             },
-            splits: {
+            row_axes: {
               type: 'array',
               items: {
                 type: 'string'
               },
-              description: 'Split configurations for data grouping',
+              description: 'Row axis configurations for data grouping',
               example: ['week', 'team']
             },
             prefix_columns: {
@@ -2754,12 +2754,12 @@ const options = {
               },
               description: 'Columns to prefix in the output'
             },
-            splits: {
+            row_axes: {
               type: 'array',
               items: {
                 type: 'string'
               },
-              description: 'Split configurations for data grouping'
+              description: 'Row axis configurations for data grouping'
             }
           },
           required: ['columns']

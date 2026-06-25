@@ -94,7 +94,7 @@
     "prefix_columns": [
       "player_name"
     ],
-    "splits": [
+    "row_axes": [
       "year"
     ]
   },

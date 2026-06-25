@@ -17,7 +17,7 @@ const expect = chai.expect
 // ONLY when a year split is active, matching the player per-game denominator and
 // build-period-cte's `include_year` invariant.
 
-const team_per_game_request = ({ year, splits = [] }) => ({
+const team_per_game_request = ({ year, row_axes = [] }) => ({
   columns: [
     {
       column_id: 'team_pass_attempts_from_plays',
@@ -29,7 +29,7 @@ const team_per_game_request = ({ year, splits = [] }) => ({
   ],
   sort: [],
   where: [],
-  splits
+  row_axes
 })
 
 describe('data-views team per-game denominator grain', () => {
@@ -50,7 +50,7 @@ describe('data-views team per-game denominator grain', () => {
 
   it('partitions the nfl_games denominator by (team, year) when a year split IS active', async () => {
     const { query } = await get_data_view_results_query(
-      team_per_game_request({ year: [2023, 2024, 2025], splits: ['year'] })
+      team_per_game_request({ year: [2023, 2024, 2025], row_axes: ['year'] })
     )
     const sql = query.toString()
 

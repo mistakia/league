@@ -12,7 +12,7 @@ export const add_defensive_play_by_play_with_statement = ({
   having_clauses = [],
   select_strings = [],
   pid_columns = [],
-  splits = [],
+  row_axes = [],
   data_view_options = {}
 }) => {
   if (!with_table_name) {
@@ -94,16 +94,16 @@ export const add_defensive_play_by_play_with_statement = ({
     with_query.select(db.raw(select_string))
   }
 
-  // Add splits
-  for (const split of splits) {
-    if (data_views_constants.split_params.includes(split)) {
-      const column_param_definition = nfl_plays_column_params[split]
+  // Add row_axes
+  for (const row_axis of row_axes) {
+    if (data_views_constants.row_axis_params.includes(row_axis)) {
+      const column_param_definition = nfl_plays_column_params[row_axis]
       const table_name =
         (column_param_definition && column_param_definition.table) ||
         'defensive_plays'
-      const split_statement = `${table_name}.${split}`
-      with_query.select(split_statement)
-      with_query.groupBy(split_statement)
+      const row_axis_statement = `${table_name}.${row_axis}`
+      with_query.select(row_axis_statement)
+      with_query.groupBy(row_axis_statement)
     }
   }
 

@@ -195,13 +195,13 @@ function derive_metric_domain(column_ids) {
 
 function derive_time_horizon(view) {
   const view_name = view.view_name || ''
-  const splits = (view.table_state && view.table_state.splits) || []
+  const row_axes = (view.table_state && view.table_state.row_axes) || []
 
   if (/matchup preview|week \d|this week/i.test(view_name)) {
     return 'current-week'
   }
 
-  if (/by week|weekly/i.test(view_name) && splits.length > 0) {
+  if (/by week|weekly/i.test(view_name) && row_axes.length > 0) {
     return 'season-to-date'
   }
 

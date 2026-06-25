@@ -8,7 +8,7 @@ import {
 // pid+year(+week) CTE off `nfl_plays`. Accepts an optional `extra_conditions`
 // callback for per-column predicates like `pid_column`. Pid equality is
 // always emitted; year/week predicates are emitted only when the bucket's
-// splits projected those columns onto the CTE. Year/week references prefer
+// row_axes projected those columns onto the CTE. Year/week references prefer
 // from-table-aware data_view_options so from-table-optimization scenarios
 // resolve against the FROM-table aliases instead of the unjoined player_years
 // identity CTE.
@@ -17,7 +17,7 @@ export const apply_plays_join = ({
   params,
   table_alias,
   join_type,
-  splits = [],
+  row_axes = [],
   extra_conditions
 }) => {
   const dv = query_context.data_view_options || {}
@@ -34,8 +34,8 @@ export const apply_plays_join = ({
     offset_range && (offset_range[0] !== 0 || offset_range[1] !== 0)
   )
   const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
-  const join_year = splits.includes('year')
-  const join_week = splits.includes('week')
+  const join_year = row_axes.includes('year')
+  const join_week = row_axes.includes('week')
 
   players_query[join_method](table_alias, function () {
     this.on(`${table_alias}.pid`, '=', pid_reference)

@@ -21,8 +21,8 @@ export const add_cte = ({ query_context }) => {
 }
 
 export const join_cte = ({ query_context }) => {
-  const { players_query, splits = [] } = query_context
-  const join_on_year = splits.includes('year')
+  const { players_query, row_axes = [] } = query_context
+  const join_on_year = row_axes.includes('year')
   players_query.innerJoin('player_years_weeks', function () {
     this.on('player_years_weeks.pid', 'player.pid')
     if (join_on_year) {

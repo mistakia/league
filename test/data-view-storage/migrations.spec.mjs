@@ -59,6 +59,26 @@ describe('data-view-storage migrations module', () => {
     expect(snapshot).to.equal(already_current)
   })
 
+  it('v2_to_v3 rewrites splits to row_axes and drops splits key', () => {
+    const v2_snapshot = {
+      version: 2,
+      timestamp: Date.now(),
+      change_type: 'user_edit',
+      table_state: {
+        columns: [],
+        prefix_columns: ['player_name'],
+        sort: [],
+        where: [],
+        splits: ['year']
+      }
+    }
+    const { snapshot, migrated } = run_migrations(v2_snapshot)
+    expect(migrated).to.be.true
+    expect(snapshot.version).to.equal(STORAGE_SCHEMA_VERSION)
+    expect(snapshot.table_state.row_axes).to.deep.equal(['year'])
+    expect(snapshot.table_state).to.not.have.property('splits')
+  })
+
   it('Object.freeze-d input does not throw and is not mutated', () => {
     const input = Object.freeze(legacy_snapshot())
     expect(() => run_migrations(input)).to.not.throw()

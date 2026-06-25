@@ -12,7 +12,7 @@ const create_practice_field = (props) => ({
   column_params: {
     single_nfl_week_id
   },
-  splits: ['year', 'week']
+  row_axes: ['year', 'week']
 })
 
 export default {

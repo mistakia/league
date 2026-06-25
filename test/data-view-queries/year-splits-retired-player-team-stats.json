@@ -19,7 +19,7 @@
         "value": "TOMX-BRAD-2000-1977-08-03"
       }
     ],
-    "splits": ["year"],
+    "row_axes": ["year"],
     "sort": [
       {
         "column_id": "team_pass_yards_from_plays",

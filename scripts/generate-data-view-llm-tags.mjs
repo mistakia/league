@@ -35,7 +35,7 @@
 // Description: {view_description}
 // Top columns (by frequency): {column_ids}
 // Where filters: {where_filters}
-// Splits: {splits}
+// Row axes: {row_axes}
 // User tags (anchors — mirror these if applicable): {user_tags}
 //
 // Return only a JSON array of 1-4 kebab-case descriptor tags.
@@ -112,8 +112,8 @@ const build_user_message = ({
     return `${w.column_id}=${vals}`
   })
 
-  // Extract splits
-  const splits = table_state?.splits || []
+  // Extract row_axes
+  const row_axes = table_state?.row_axes || []
 
   const user_tag_names = user_tags.map((t) => t.tag_name).join(', ') || 'none'
 
@@ -123,7 +123,7 @@ Name: ${view_name}
 Description: ${view_description || 'none'}
 Top columns (by frequency): ${top_columns.length ? top_columns.join(', ') : 'none'}
 Where filters: ${where_parts.length ? where_parts.join('; ') : 'none'}
-Splits: ${splits.length ? splits.join(', ') : 'none'}
+Row axes: ${row_axes.length ? row_axes.join(', ') : 'none'}
 User tags (anchors — mirror these if applicable): ${user_tag_names}
 
 Return only a JSON array of 1-4 kebab-case descriptor tags.`

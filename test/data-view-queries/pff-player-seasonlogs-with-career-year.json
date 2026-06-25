@@ -25,7 +25,7 @@
       }
     ],
     "prefix_columns": ["player_name", "player_position"],
-    "splits": []
+    "row_axes": []
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", \"t3ccee899b242f76b0cc3232311933895\".\"receiving\" AS \"pff_receiving_0\", \"t3ccee899b242f76b0cc3232311933895\".\"offense\" AS \"pff_offense_0\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"pff_player_seasonlogs\" as \"t3ccee899b242f76b0cc3232311933895\" on \"t3ccee899b242f76b0cc3232311933895\".\"pid\" = \"player\".\"pid\" and \"t3ccee899b242f76b0cc3232311933895\".\"year\" = 2023 inner join \"player_seasonlogs\" as \"t3ccee899b242f76b0cc3232311933895_career_year\" on \"t3ccee899b242f76b0cc3232311933895_career_year\".\"pid\" = \"t3ccee899b242f76b0cc3232311933895\".\"pid\" and \"t3ccee899b242f76b0cc3232311933895_career_year\".\"year\" = \"t3ccee899b242f76b0cc3232311933895\".\"year\" and \"t3ccee899b242f76b0cc3232311933895_career_year\".\"seas_type\" = 'REG' where \"t3ccee899b242f76b0cc3232311933895_career_year\".\"career_year\" between 1 and 3 group by player.fname, player.lname, \"player\".\"pos\", \"t3ccee899b242f76b0cc3232311933895\".\"receiving\", \"t3ccee899b242f76b0cc3232311933895\".\"offense\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "pff", "parameters", "career_year", "filters"],

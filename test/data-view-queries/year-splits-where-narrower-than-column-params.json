@@ -2,7 +2,7 @@
   "name": "year splits with WHERE narrower than column year params",
   "description": "Regression test: when splits:['year'] is active and a WHERE clause targets a single year on a column whose params request a wider year range, the display join must bind to player_years.year (not to the WHERE's single year). Previously the WHERE's narrower year params leaked into group_column_params, collapsing the join to the single year and causing duplicate rows per player across split years.",
   "request": {
-    "splits": ["year"],
+    "row_axes": ["year"],
     "prefix_columns": ["player_name", "player_position"],
     "columns": [
       {

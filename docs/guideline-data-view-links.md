@@ -43,7 +43,7 @@ All data view links MUST include these core parameters:
 
 - `where`: Filter conditions to limit results
 - `sort`: Sorting specifications for result ordering
-- `splits`: Time-based groupings (year, week)
+- `row_axes`: Time-based groupings (year, week)
 - `view_id`: UUID for saved views
 - `view_search_column_id`: Default search column
 
@@ -62,7 +62,7 @@ Main columns MUST be relevant to the analysis purpose and include required param
 ### Key Requirements
 
 - Use single year arrays for optimal performance: `{"year": [2024]}`
-- Rate types must be compatible with splits (avoid per_game with week splits)
+- Rate types must be compatible with row_axes (avoid per_game with week row axis)
 - Fantasy points columns require scoring_format_hash parameter
 - Use common formats: half_ppr, ppr, standard
 

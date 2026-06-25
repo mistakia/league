@@ -6,7 +6,7 @@
 import { migrate_table_state } from './../data-views-nfl-week-migration.mjs'
 import { migrate_table_state as migrate_saved_view_table_state } from './../data-views-saved-view-migration.mjs'
 
-export const STORAGE_SCHEMA_VERSION = 2
+export const STORAGE_SCHEMA_VERSION = 3
 
 const is_dev =
   typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production'
@@ -33,9 +33,16 @@ const v1_to_v2 = (snapshot) => {
   return { ...snapshot, table_state: next_table_state, version: 2 }
 }
 
+const v2_to_v3 = (snapshot) => {
+  const { splits, ...rest_table_state } = snapshot.table_state
+  const next_table_state = { ...rest_table_state, row_axes: splits }
+  return { ...snapshot, table_state: next_table_state, version: 3 }
+}
+
 export const migrations = [
   { from: 0, to: 1, migrate: v0_to_v1 },
-  { from: 1, to: 2, migrate: v1_to_v2 }
+  { from: 1, to: 2, migrate: v1_to_v2 },
+  { from: 2, to: 3, migrate: v2_to_v3 }
 ]
 
 export const run_migrations = (snapshot) => {

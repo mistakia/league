@@ -16,7 +16,7 @@
         }
       }
     ],
-    "splits": [
+    "row_axes": [
       "year"
     ],
     "sort": [

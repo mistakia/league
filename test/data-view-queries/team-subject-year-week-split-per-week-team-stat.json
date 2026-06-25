@@ -5,7 +5,7 @@
     "row_grain": [
       "team"
     ],
-    "splits": [
+    "row_axes": [
       "year",
       "week"
     ],

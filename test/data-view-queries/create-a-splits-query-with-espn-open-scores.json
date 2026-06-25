@@ -2,7 +2,7 @@
   "name": "should create a splits query with espn open scores",
   "description": "Test case for should create a splits query with espn open scores",
   "request": {
-    "splits": ["year"],
+    "row_axes": ["year"],
     "prefix_columns": ["player_name"],
     "columns": [
       {

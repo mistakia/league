@@ -13,7 +13,7 @@
       }
     ],
     "prefix_columns": ["player_name", "player_position"],
-    "splits": ["year", "week"],
+    "row_axes": ["year", "week"],
     "sort": [
       {
         "column_id": "player_keeptradecut_value",

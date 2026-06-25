@@ -8,7 +8,7 @@ import {
 export const register_per_game_cte = ({
   query,
   params,
-  splits,
+  row_axes,
   data_view_options
 }) => {
   const table_name = get_per_game_cte_table_name({ params })
@@ -23,7 +23,7 @@ export const register_per_game_cte = ({
     players_query: query,
     params,
     rate_type_table_name: table_name,
-    splits,
+    row_axes,
     query_context
   })
   query_context.registered_per_game_ctes.add(table_name)

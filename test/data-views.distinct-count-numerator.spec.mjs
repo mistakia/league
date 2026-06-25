@@ -18,7 +18,7 @@ const build = (measures) =>
     apply_filters: null,
     measures,
     period: 'game',
-    query_context: { splits: [] },
+    query_context: { row_axes: [] },
     identity_id: 'player_year',
     params: {}
   }).toString()
@@ -71,7 +71,7 @@ describe('data-views distinct-count numerator', () => {
       pid_columns: ['bc_pid'],
       apply_filters: null,
       period: 'game',
-      query_context: { splits: [] },
+      query_context: { row_axes: [] },
       identity_id: 'player_year',
       params: {},
       aggregate: 'count_distinct'

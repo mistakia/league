@@ -29,7 +29,7 @@ const generate_table_alias = ({ params = {} } = {}) => {
 // Two shapes: player-identity (force_player_active=true) joins the
 // *_player_team_stats CTE by pid; team-identity joins the *_team_stats CTE
 // by team. Year and week predicates are emitted only when the bucket's
-// splits projected those columns onto the CTE. References are sourced
+// row_axes projected those columns onto the CTE. References are sourced
 // from data_view_options when available (FROM-table-aware) and fall back
 // to the identity-derived query_context defaults; player_year_teams_cte_name
 // lives only on query_context (set by the identity bridge).
@@ -38,7 +38,7 @@ const apply_team_stats_join = ({
   params,
   table_alias,
   join_type,
-  splits = [],
+  row_axes = [],
   force_player_active
 }) => {
   const dv = query_context.data_view_options
@@ -54,8 +54,8 @@ const apply_team_stats_join = ({
     : '_team_stats'
   const target = `${table_alias}${suffix}`
   const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
-  const join_year = splits.includes('year')
-  const join_week = splits.includes('week')
+  const join_year = row_axes.includes('year')
+  const join_week = row_axes.includes('week')
 
   // Wrap-mode `_team_stats` is keyed by pid (see
   // add-team-stats-play-by-play-with-statement.mjs), not by nfl_team. Join
@@ -276,19 +276,19 @@ const team_stat_from_plays = ({
         : `${args.table_name}_team_stats`
     },
     // grain set to the base identity (no implicit year/week extension): the
-    // attach reads splits to decide whether to emit year/week predicates.
+    // attach reads row_axes to decide whether to emit year/week predicates.
     // Using 'team_year' / 'player_year' would require the team-to-team-year
     // bridge which mandates a non-empty year_range -- not provided for
-    // no-splits team-subject fixtures.
+    // no-row-axes team-subject fixtures.
     //
-    // supports_splits is declared explicitly because the `with` builder
+    // supports_row_axes is declared explicitly because the `with` builder
     // (add_team_stats_play_by_play_with_statement) DOES project year/week
-    // onto the CTE when those splits are active; without this override,
-    // group_tables_by_supported_splits would intersect the request splits
+    // onto the CTE when those row_axes are active; without this override,
+    // group_tables_by_supported_row_axes would intersect the request row_axes
     // against grain's [] and drop year/week before forwarding to with_func.
     source: {
       grain: force_player_active ? 'player' : 'team',
-      supports_splits: ['year', 'week'],
+      supports_row_axes: ['year', 'week'],
       attach: (attach_args) =>
         apply_team_stats_join({ ...attach_args, force_player_active })
     },

@@ -190,11 +190,11 @@ ${normalized_results.map((row) => `<tr>${fields.map((h) => `<td>${escape_html(ro
  *           items:
  *             $ref: '#/components/schemas/WhereClause'
  *           description: 'Filter conditions for the data view'
- *         splits:
+ *         row_axes:
  *           type: array
  *           items:
  *             type: string
- *           description: 'Split configurations for data grouping'
+ *           description: 'Row axis configurations for data grouping'
  *           example: ['week', 'team']
  *         prefix_columns:
  *           type: array
@@ -320,11 +320,11 @@ ${normalized_results.map((row) => `<tr>${fields.map((h) => `<td>${escape_html(ro
  *           items:
  *             type: string
  *           description: 'Columns to prefix in the output'
- *         splits:
+ *         row_axes:
  *           type: array
  *           items:
  *             type: string
- *           description: 'Split configurations for data grouping'
+ *           description: 'Row axis configurations for data grouping'
  *       required:
  *         - columns
  *
@@ -911,7 +911,7 @@ router.delete('/:view_id', async (req, res) => {
  *                   { column_id: 'player_name', desc: false }
  *                 ]
  *                 offset: 0
- *                 splits: ['team']
+ *                 row_axes: ['team']
  *                 prefix_columns: ['player_']
  *     responses:
  *       '200':
@@ -945,7 +945,7 @@ router.delete('/:view_id', async (req, res) => {
 router.post('/search/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const { where, columns, sort, offset, prefix_columns, splits } = req.body
+    const { where, columns, sort, offset, prefix_columns, row_axes } = req.body
 
     const cache_key = `/data-views/${get_data_view_hash({
       where,
@@ -953,7 +953,7 @@ router.post('/search/?', async (req, res) => {
       sort,
       offset,
       prefix_columns,
-      splits
+      row_axes
     })}`
     const cached_result = await redis_cache.get(cache_key)
 
@@ -968,7 +968,7 @@ router.post('/search/?', async (req, res) => {
         sort,
         offset,
         prefix_columns,
-        splits
+        row_axes
       })
 
     if (data_view_results && data_view_results.length) {
@@ -1233,7 +1233,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       sort: table_state.sort,
       offset: table_state.offset,
       prefix_columns: table_state.prefix_columns,
-      splits: table_state.splits
+      row_axes: table_state.row_axes
     })}`
 
     let data_view_results
@@ -1255,7 +1255,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         sort: table_state.sort,
         offset: table_state.offset,
         prefix_columns: table_state.prefix_columns,
-        splits: table_state.splits,
+        row_axes: table_state.row_axes,
         limit
       })
       data_view_results = result.data_view_results

@@ -67,7 +67,7 @@ const get_select_string = ({
   column_definition,
   table_name,
   output_select_mapping = {},
-  splits,
+  row_axes,
   is_main_select = false,
   data_view_options = {},
   query_context = null
@@ -94,7 +94,7 @@ const get_select_string = ({
           table_name,
           params: column_params,
           column_index,
-          splits
+          row_axes
         })
       : !is_main_select && column_definition.table_name
         ? column_definition.table_name
@@ -114,7 +114,7 @@ const get_select_string = ({
         table_name,
         params: column_params,
         column_index,
-        splits,
+        row_axes,
         data_view_options,
         query_context
       }),
@@ -124,7 +124,7 @@ const get_select_string = ({
               table_name,
               params: column_params,
               column_index,
-              splits,
+              row_axes,
               data_view_options,
               query_context
             })
@@ -258,7 +258,7 @@ const get_select_string = ({
 
   // TODO unused currently
   // if (is_main_select && column_definition.main_group_by) {
-  //   group_by.push(...column_definition.main_group_by({ table_name, params: column_params, column_index, rate_type_table_name, splits }))
+  //   group_by.push(...column_definition.main_group_by({ table_name, params: column_params, column_index, rate_type_table_name, row_axes }))
   // }
 
   const select_alias = is_main_select

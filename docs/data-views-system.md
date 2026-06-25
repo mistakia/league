@@ -93,8 +93,8 @@ Each stage makes key decisions that affect query performance:
 
 **Historical-Team Joins for `per_team_play` Denominators**: `rate-type-per-team-play.mjs` attributes the team-aggregated denominator (`per_team_pass_play`, `per_team_rush_play`, etc.) to the player's team-of-record per (pid, year) via the `player_year_teams` bridge CTE (materialized by the `player_year` -> `team_year` entry in `identity-bridge-registry.mjs`). Three branches share that bridge:
 
-1. **Single-year snapshot join** (single `params.year`, or splits include `year` resolving to one year, no `year_offset` range): `join_per_team_play_cte` joins the denominator on `player_year_teams.team` with `andOn(rate_type_table_name.year = <specific_year>)`. The bridge's own `join_cte` pins `player_year_teams` to `max(year_range)`, which for the single-year case is that year. Denominator CTE is grouped by `off` only.
-2. **Year-split per-(pid, year) row grain** (`splits.includes('year')`): the denominator CTE adds `nfl_plays.year` to its select and group-by so each (off, year) cell is addressable; the join binds `rate_type_table_name.year = data_view_options.year_reference`. Attribution is structural to the row grain — no wrap needed because each output row already carries its own year.
+1. **Single-year snapshot join** (single `params.year`, or row_axes include `year` resolving to one year, no `year_offset` range): `join_per_team_play_cte` joins the denominator on `player_year_teams.team` with `andOn(rate_type_table_name.year = <specific_year>)`. The bridge's own `join_cte` pins `player_year_teams` to `max(year_range)`, which for the single-year case is that year. Denominator CTE is grouped by `off` only.
+2. **Year-split per-(pid, year) row grain** (`row_axes.includes('year')`): the denominator CTE adds `nfl_plays.year` to its select and group-by so each (off, year) cell is addressable; the join binds `rate_type_table_name.year = data_view_options.year_reference`. Attribution is structural to the row grain — no wrap needed because each output row already carries its own year.
 3. **Multi-year-no-split wrap CTE** (`requires_wrap` in `per-team-play-wrap.mjs`: player subject, 2+ distinct effective years, no `year` split, no `matchup_opponent_type`): `add_per_team_play_cte` is invoked with `force_year_grain=true` so the denominator is grouped by `(off, year)`. `join_cte` then registers a per-column wrap CTE (`flush_per_team_play_wraps` materializes it after `flush_measure_batches`) that recomputes the numerator at (pid, year) grain inline, INNER JOINs `player_year_teams` on (pid, year) and the denominator on (team, year), then groups back to pid. The outer query LEFT JOINs the wrap on pid and divides `MAX(numerator_sum) / NULLIF(MAX(denominator_sum), 0)`. Without the wrap, a player who changed teams (Davante Adams: LV/2023 -> NYJ/2024 -> LA/2025) would have his multi-year stats divided by a single `max(year_range)` team's count; players with no row for `max(year_range)` would return NULL even when they accumulated stats in prior years.
 
 **Team `per_game` denominator grain**: `rate-type-per-game.mjs`'s `add_team_per_game_cte` counts games per team from `nfl_games` (home/away `UNION ALL` → `COUNT(*)`) and partitions by `year` **only when a year split is active**, matching `build-period-cte`'s `include_year` invariant (and the player per-game denominator). Unsplit, this is one row per team (full-window game count, ~team-invariant: 51 over 2023-2025 REG); under a year split it is one row per `(team, year)` for a year-correlated 1:1 join. Grouping by year unconditionally fans the denominator into `(team, year)` while the numerator stays a full multi-year total, so the outer `MAX()` collapses to a single season's game count and inflates every team per-game rate by ~N (years in window) — the 2026-06-20 grain bug (commit cbcfb8c4). Residual: the `per_game` team path still joins its numerator via `player_year_teams` (2025 team) but its denominator on `player.current_nfl_team`; post-fix the denominator is team-invariant so the only effect is that an offseason team-changer's displayed team volume reflects their 2025 team, not their new team (unlike `per_team_play`, which routes both through `identity_bridge_registry`).
@@ -112,7 +112,7 @@ Each stage makes key decisions that affect query performance:
   column_name: 'rec_yds',                 // Database column name
 
   // Query generation functions (performance-critical)
-  main_select: ({ column_index, params, table_name, rate_type_column_mapping, splits, data_view_options }) => [
+  main_select: ({ column_index, params, table_name, rate_type_column_mapping, row_axes, data_view_options }) => [
     {
       sql: `SUM(${table_name}.rec_yds) as receiving_yards_${column_index}`,
       bindings: []
@@ -129,13 +129,13 @@ Each stage makes key decisions that affect query performance:
   ],
 
   // Performance optimization functions
-  table_alias: ({ params, splits }) => {
+  table_alias: ({ params, row_axes }) => {
     // Use year-specific partitioned tables when possible
     if (params.year?.length === 1) return `player_gamelogs_${params.year[0]}`
     return 'player_gamelogs'
   },
 
-  join: async ({ query, table_name, params, join_type, splits, data_view_options }) => {
+  join: async ({ query, table_name, params, join_type, row_axes, data_view_options }) => {
     // Custom JOIN logic with performance considerations
     query.leftJoin(table_name, `${table_name}.pid`, data_view_options.pid_reference)
   },
@@ -152,7 +152,7 @@ Each stage makes key decisions that affect query performance:
   }),
 
   // Metadata for optimization
-  supported_splits: ['year', 'week'],
+  supported_row_axes: ['year', 'week'],
   supported_rate_types: ['per_game', 'per_team_play'],
   use_having: false,            // Use HAVING instead of WHERE for aggregates
 }
@@ -209,7 +209,7 @@ POST /data-views/search
   prefix_columns: Array<ColumnConfig>,    // Additional columns (e.g., player info)
   where: Array<WhereClause>,              // Filter conditions
   sort: Array<SortClause>,                // Sorting configuration
-  splits: Array<SplitType>,               // Time grouping ('year', 'week')
+  row_axes: Array<SplitType>,              // Time grouping ('year', 'week')
   offset: Number,                         // Pagination offset
   limit: Number                           // Result limit (max 500)
 }
@@ -361,7 +361,7 @@ const from_table_config = get_from_table_config({
   sort,
   columns,
   prefix_columns,
-  splits,
+  row_axes,
   data_views_column_definitions
 })
 
@@ -376,8 +376,8 @@ if (from_table_config.from_table_name) {
   }
 }
 
-// Determines split strategy based on request
-if (splits.includes('week') || splits.includes('year')) {
+// Determines row_axes strategy based on request
+if (row_axes.includes('week') || row_axes.includes('year')) {
   const year_range = get_year_range([...prefix_columns, ...columns], where)
   // Creates base_years CTE for cross-join optimization
 }
@@ -414,7 +414,7 @@ async add_clauses_for_table({
   where_clauses = [],      // Filter conditions for this table
   table_name,              // Target table name or alias
   group_column_params = {},// Shared parameters for optimization
-  splits = [],             // Active split dimensions
+  row_axes = [],           // Active split dimensions
   rate_type_column_mapping,// Column to rate type table mapping
   data_view_options,       // Query-level optimization flags with centralized references
   data_view_metadata       // Cache metadata tracking
@@ -441,7 +441,7 @@ if (table_name !== data_view_options.from_table_name) {
       table_name,
       params: group_column_params,
       join_type: where_clauses.length ? 'INNER' : 'LEFT',
-      splits,
+      row_axes,
       data_view_options // Contains centralized references
     })
   }
@@ -488,18 +488,18 @@ if (table_name !== data_view_options.from_table_name) {
     group_column_params: { year: [2024] },
     where_clauses: [...],
     select_columns: [...],
-    supported_splits: ['week']
+    supported_row_axes: ['week']
   },
   'player_gamelogs': {                // General table
     group_column_params: { year: [2023, 2022] },
     where_clauses: [...],
     select_columns: [...],
-    supported_splits: ['year', 'week']
+    supported_row_axes: ['year', 'week']
   }
 }
 ```
 
-#### `group_tables_by_supported_splits()` - Split Compatibility
+#### `group_tables_by_supported_row_axes()` - Split Compatibility
 
 **Optimization Logic**: Further groups tables by split support to ensure optimal processing order and prevent incompatible operations.
 
@@ -544,7 +544,7 @@ player_years AS (
 **Query Structure Modification**:
 
 ```javascript
-// Base query (no splits)
+// Base query (no row_axes)
 players_query.from('player')
 
 // Year split optimization
@@ -583,7 +583,7 @@ The centralized reference system replaces individual `year_split_join_clause` an
 
 ```javascript
 // setup_central_references() sets up references based on from table
-const setup_central_references = ({ data_view_options, splits }) => {
+const setup_central_references = ({ data_view_options, row_axes }) => {
   const { from_table_name } = data_view_options
 
   // Setup player PID reference
@@ -605,7 +605,7 @@ players_query.leftJoin(rate_type_table_name, function () {
   this.on(`${rate_type_table_name}.pid`, data_view_options.pid_reference)
 
   // Year joins with offset calculations
-  if (splits.includes('year')) {
+  if (row_axes.includes('year')) {
     this.on(
       db.raw(
         `${rate_type_table_name}.year = ${data_view_options.year_reference} + ?`,
@@ -615,7 +615,7 @@ players_query.leftJoin(rate_type_table_name, function () {
   }
 
   // Week joins
-  if (splits.includes('week')) {
+  if (row_axes.includes('week')) {
     this.andOn(
       `${rate_type_table_name}.week`,
       '=',
@@ -637,7 +637,7 @@ players_query.leftJoin(rate_type_table_name, function () {
 **Performance-Driven Sorting**:
 
 ```javascript
-const sorted_grouped_by_splits = Object.entries(grouped_by_splits).sort(
+const sorted_grouped_by_row_axes = Object.entries(grouped_by_row_axes).sort(
   ([key_a], [key_b]) => {
     const has_year_a = key_a.includes('year')
     const has_year_b = key_b.includes('year')
@@ -706,7 +706,7 @@ export const add_per_game_cte = ({
   players_query,
   params,
   rate_type_table_name,
-  splits
+  row_axes
 }) => {
   const cte_query = db('player_gamelogs')
     .select([
@@ -734,10 +734,10 @@ export const add_per_game_cte = ({
 export const join_per_game_cte = ({
   players_query,
   rate_type_table_name,
-  splits,
+  row_axes,
   data_view_options
 }) => {
-  if (splits.includes('year')) {
+  if (row_axes.includes('year')) {
     // Split-aware join for time-series analysis
     players_query.leftJoin(rate_type_table_name, function () {
       this.on(`${rate_type_table_name}.pid`, data_view_options.pid_reference)
@@ -795,7 +795,7 @@ for (const [rate_type_table_name, config] of Object.entries(
     players_query,
     params: config.params,
     rate_type_table_name,
-    splits,
+    row_axes,
     rate_type: config.rate_type,
     team_unit: config.team_unit,
     is_team: config.is_team
@@ -805,7 +805,7 @@ for (const [rate_type_table_name, config] of Object.entries(
     players_query,
     params: config.params,
     rate_type_table_name,
-    splits,
+    row_axes,
     rate_type: config.rate_type,
     team_unit: config.team_unit,
     is_team: config.is_team,
@@ -876,7 +876,7 @@ main_select_string_year_offset_range: ({
 
 ```javascript
 // Column definition optimization
-table_alias: ({ params, splits }) => {
+table_alias: ({ params, row_axes }) => {
   // Use partitioned tables for single-year queries (major performance gain)
   if (params.year && Array.isArray(params.year) && params.year.length === 1) {
     return `player_gamelogs_${params.year[0]}`
@@ -902,7 +902,7 @@ await join_func({
   table_name,
   params: group_column_params,
   join_type: where_clauses.length ? 'INNER' : 'LEFT', // Key optimization
-  splits,
+  row_axes,
   data_view_options // Contains centralized year_reference, week_reference, pid_reference
 })
 ```
@@ -934,7 +934,7 @@ join_rate_type_cte({
   players_query,
   params: config.params,
   rate_type_table_name,
-  splits,
+  row_axes,
   rate_type: config.rate_type,
   team_unit: config.team_unit,
   is_team: config.is_team,
@@ -954,7 +954,7 @@ join_rate_type_cte({
 
 **Solution**: A shared `player_year_teams` CTE (`pid → year → primary_team`) sourced from `player_gamelogs` joined to `nfl_games` where `seas_type = 'REG'`. Primary team per `(pid, year)` is selected by `(array_agg(tm ORDER BY game_count DESC, tm ASC))[1]` — most regular-season games, alphabetical tie-break.
 
-**Registration**: the CTE and its outer-query LEFT JOIN are encapsulated in the `player_year` -> `team_year` identity bridge (`libs-server/data-views/identity-bridges/player-year-to-team-year.mjs`). Consumers invoke it via `apply_bridge({ query_context, from: 'player_year', to: 'team_year', params, source })` (`libs-server/data-views/identity-bridge-registry.mjs`). `apply_bridge` is idempotent — `query_context.applied_bridges` keys on `"<from>-><to>|<mode>"`, so the second call from a different consumer no-ops. The retired `historical-team-mode.mjs` module previously gated bridge attachment on `has_year_filter(params) || splits.length > 0`; that predicate was retired in `f13f8300` once the bridge became always-on for the contexts that invoke it (the consumer decides whether to invoke based on its own predicate — e.g., `rate-type-per-team-play.mjs` invokes when the subject identity is `player` and there is no `matchup_opponent_type`). Source-attach rules in `libs-server/data-views/source-attach/` invoke the bridge automatically when a `team_year`-shaped source attaches to a `player`-shaped cell.
+**Registration**: the CTE and its outer-query LEFT JOIN are encapsulated in the `player_year` -> `team_year` identity bridge (`libs-server/data-views/identity-bridges/player-year-to-team-year.mjs`). Consumers invoke it via `apply_bridge({ query_context, from: 'player_year', to: 'team_year', params, source })` (`libs-server/data-views/identity-bridge-registry.mjs`). `apply_bridge` is idempotent — `query_context.applied_bridges` keys on `"<from>-><to>|<mode>"`, so the second call from a different consumer no-ops. The retired `historical-team-mode.mjs` module previously gated bridge attachment on `has_year_filter(params) || row_axes.length > 0`; that predicate was retired in `f13f8300` once the bridge became always-on for the contexts that invoke it (the consumer decides whether to invoke based on its own predicate — e.g., `rate-type-per-team-play.mjs` invokes when the subject identity is `player` and there is no `matchup_opponent_type`). Source-attach rules in `libs-server/data-views/source-attach/` invoke the bridge automatically when a `team_year`-shaped source attaches to a `player`-shaped cell.
 
 **Year resolution** (`resolve_year_range` in `player-year-to-team-year.mjs`): the year range used to materialize the CTE and to pin the join's `year =` clause follows a 4-step fallback so the bridge is robust in offseason / source-attach contexts where `query_context.year_range` is empty:
 
@@ -1010,21 +1010,21 @@ if (join_func) {
 
 ### New Functions in Centralized Reference System
 
-#### `setup_central_references({ data_view_options, splits })`
+#### `setup_central_references({ data_view_options, row_axes })`
 
 **Purpose**: Sets up centralized references for year, week, and player PID based on the from table.
 
 **Parameters**:
 
 - `data_view_options` (Object): Query optimization state object containing from table information
-- `splits` (Array): Active split dimensions ['year', 'week']
+- `row_axes` (Array): Active split dimensions ['year', 'week']
 
 **Returns**: Updated `data_view_options` object with centralized references
 
 **Implementation**:
 
 ```javascript
-const setup_central_references = ({ data_view_options, splits }) => {
+const setup_central_references = ({ data_view_options, row_axes }) => {
   const { from_table_name } = data_view_options
 
   // Setup player PID reference
@@ -1038,7 +1038,7 @@ const setup_central_references = ({ data_view_options, splits }) => {
 }
 ```
 
-#### `get_from_table_config({ sort, columns, prefix_columns, splits, data_views_column_definitions })`
+#### `get_from_table_config({ sort, columns, prefix_columns, row_axes, data_views_column_definitions })`
 
 **Purpose**: Determines the optimal from table configuration with whitelist-based rollout.
 
@@ -1047,7 +1047,7 @@ const setup_central_references = ({ data_view_options, splits }) => {
 - `sort` (Array): Sort configuration from user request
 - `columns` (Array): Column configurations
 - `prefix_columns` (Array): Prefix column configurations
-- `splits` (Array): Active split dimensions
+- `row_axes` (Array): Active split dimensions
 - `data_views_column_definitions` (Object): Column definition registry
 
 **Returns**: From table configuration object with `from_table_name`, `from_table_type`, and `column_id`
@@ -1143,7 +1143,7 @@ This mapping and its `get_rate_type_sql` emitter were the pre-output-aggregator 
 
 ```javascript
 const validator_result = validators.table_state_validator({
-  splits,
+  row_axes,
   where,
   columns,
   prefix_columns,
@@ -1267,7 +1267,7 @@ await add_clauses_for_table({
 })
 
 // New system - centralized references
-setup_central_references({ data_view_options, splits })
+setup_central_references({ data_view_options, row_axes })
 // Sets: data_view_options.year_reference, week_reference, pid_reference
 
 await add_clauses_for_table({
@@ -1287,7 +1287,7 @@ await add_clauses_for_table({
 
 **Implementation Details**:
 
-- `setup_central_references()` determines optimal references based on from table and splits
+- `setup_central_references()` determines optimal references based on from table and row_axes
 - All join functions now use `data_view_options.year_reference` and `data_view_options.week_reference`
 - Rate type CTEs automatically use centralized references for consistent joins
 - Player PID reference adapts to from table optimization (`player.pid` vs `from_table.pid`)
@@ -1298,12 +1298,12 @@ await add_clauses_for_table({
 **Strategy**: Start queries from the most selective table rather than always using `player` table, with gradual rollout using whitelist.
 
 ```javascript
-// Determine optimal starting table from sort column and splits
+// Determine optimal starting table from sort column and row_axes
 const from_table_config = get_from_table_config({
   sort,
   columns,
   prefix_columns,
-  splits,
+  row_axes,
   data_views_column_definitions
 })
 
@@ -1320,7 +1320,7 @@ if (
 }
 
 // Fall back to default from table setup for non-whitelisted columns
-return setup_default_from_table(splits)
+return setup_default_from_table(row_axes)
 ```
 
 **Impact Achieved**:
@@ -1482,7 +1482,7 @@ class QueryCompiler {
     return {
       tableUsage: this.analyzeTableUsage(request),
       rateTypePatterns: this.analyzeRateTypes(request),
-      splitRequirements: this.analyzeSplits(request),
+      rowAxesRequirements: this.analyzeRowAxes(request),
       cacheOptimizations: this.analyzeCaching(request)
     }
   }

@@ -3,7 +3,7 @@
   "skip_query_match": true,
   "description": "Test case for should create a rushing yards split by week",
   "request": {
-    "splits": ["year", "week"],
+    "row_axes": ["year", "week"],
     "prefix_columns": ["player_name"],
     "columns": [
       {

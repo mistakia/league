@@ -14,7 +14,7 @@
         "column_id": "player_nfl_teams"
       }
     ],
-    "splits": ["year"],
+    "row_axes": ["year"],
     "where": [
       {
         "column_id": "player_nfl_teams",

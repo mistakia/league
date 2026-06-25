@@ -63,7 +63,7 @@ const create_player_season_rankings_field = (props) => ({
     ranking_source_id,
     ranking_type
   },
-  splits: ['year']
+  row_axes: ['year']
 })
 
 export default {

@@ -11,7 +11,7 @@
         }
       }
     ],
-    "splits": ["year"],
+    "row_axes": ["year"],
     "sort": [
       {
         "column_id": "player_targets_from_plays",

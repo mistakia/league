@@ -41,9 +41,9 @@ describe('data-views column-definition coverage', () => {
 
   // Every *_from_plays column scans nfl_plays, which carries a week dimension,
   // and its with/aggregator builder projects year AND week onto the stat CTE.
-  // Such a column MUST declare source.supports_splits covering ['year','week'].
-  // Without it, group_tables_by_supported_splits intersects the requested
-  // splits against the grain identity's narrower splits (player_year ->
+  // Such a column MUST declare source.supports_row_axes covering ['year','week'].
+  // Without it, group_tables_by_supported_row_axes intersects the requested
+  // row_axes against the grain identity's narrower row_axes (player_year ->
   // ['year'], team -> []), silently drops week, and the per-week rows collapse
   // to the season total repeated at every week. This is the class of bug that
   // commit 343f4cd3 fixed for the *-stats-from-plays columns but missed for
@@ -57,20 +57,20 @@ describe('data-views column-definition coverage', () => {
     )) {
       if (!def || typeof def !== 'object') continue
       if (!column_id.endsWith('_from_plays')) continue
-      const supports_splits = def.source?.supports_splits
+      const supports_row_axes = def.source?.supports_row_axes
       const declares_week =
-        Array.isArray(supports_splits) &&
-        supports_splits.includes('year') &&
-        supports_splits.includes('week')
+        Array.isArray(supports_row_axes) &&
+        supports_row_axes.includes('year') &&
+        supports_row_axes.includes('week')
       if (!declares_week) {
         offenders.push(
-          `${column_id} (source.supports_splits=${JSON.stringify(supports_splits)})`
+          `${column_id} (source.supports_row_axes=${JSON.stringify(supports_row_axes)})`
         )
       }
     }
     expect(
       offenders,
-      `from-plays columns missing source.supports_splits ['year','week']: ${offenders.join(', ')}`
+      `from-plays columns missing source.supports_row_axes ['year','week']: ${offenders.join(', ')}`
     ).to.have.length(0)
   })
 

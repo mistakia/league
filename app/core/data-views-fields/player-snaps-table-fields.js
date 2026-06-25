@@ -15,6 +15,6 @@ export default {
       rate_type: rate_type_column_param.offensive_rate_type_param,
       ...nfl_plays_column_params
     },
-    splits: ['year', 'week']
+    row_axes: ['year', 'week']
   }
 }

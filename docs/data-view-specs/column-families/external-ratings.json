@@ -36,7 +36,7 @@
       "description": "KeepTradeCut dynasty value score",
       "parameters": ["year", "year_offset"],
       "supported_rate_types": [],
-      "supported_splits": ["year"],
+      "supported_row_axes": ["year"],
       "data_type": "number"
     },
 
@@ -44,7 +44,7 @@
       "description": "Overall rank among all players in KeepTradeCut",
       "parameters": ["year", "year_offset"],
       "supported_rate_types": [],
-      "supported_splits": ["year"],
+      "supported_row_axes": ["year"],
       "data_type": "number"
     },
 
@@ -52,7 +52,7 @@
       "description": "Position rank in KeepTradeCut",
       "parameters": ["year", "year_offset"],
       "supported_rate_types": [],
-      "supported_splits": ["year"],
+      "supported_row_axes": ["year"],
       "data_type": "number"
     },
 
@@ -60,7 +60,7 @@
       "description": "PFF overall grade for the season",
       "parameters": ["year", "week", "seas_type"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -68,7 +68,7 @@
       "description": "PFF offensive grade",
       "parameters": ["year", "week", "seas_type"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -76,7 +76,7 @@
       "description": "PFF defensive grade",
       "parameters": ["year", "week", "seas_type"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -84,7 +84,7 @@
       "description": "PFF passing grade for quarterbacks",
       "parameters": ["year", "week", "seas_type"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -92,7 +92,7 @@
       "description": "PFF receiving grade",
       "parameters": ["year", "week", "seas_type"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -100,7 +100,7 @@
       "description": "ESPN receiver open score measuring separation ability",
       "parameters": ["year", "week"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -108,7 +108,7 @@
       "description": "ESPN catch score measuring catching ability",
       "parameters": ["year", "week"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -116,7 +116,7 @@
       "description": "ESPN overall performance score",
       "parameters": ["year", "week"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -124,7 +124,7 @@
       "description": "ESPN yards after catch score",
       "parameters": ["year", "week"],
       "supported_rate_types": [],
-      "supported_splits": ["year", "week"],
+      "supported_row_axes": ["year", "week"],
       "data_type": "number"
     },
 
@@ -132,7 +132,7 @@
       "description": "Pro Football Reference single season approximate value",
       "parameters": ["year"],
       "supported_rate_types": [],
-      "supported_splits": ["year"],
+      "supported_row_axes": ["year"],
       "data_type": "number"
     },
 
@@ -140,7 +140,7 @@
       "description": "Career approximate value (weighted) from Pro Football Reference",
       "parameters": ["year"],
       "supported_rate_types": [],
-      "supported_splits": [],
+      "supported_row_axes": [],
       "data_type": "number"
     }
   },

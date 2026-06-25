@@ -23,12 +23,12 @@ export const parse_url_to_table_state = (full_url) => {
     prefix_columns: [],
     where: [],
     sort: [],
-    splits: [],
+    row_axes: [],
     offset: 0,
     limit: 500
   }
 
-  const json_params = ['columns', 'prefix_columns', 'where', 'sort', 'splits', 'row_grain']
+  const json_params = ['columns', 'prefix_columns', 'where', 'sort', 'row_axes', 'row_grain']
   for (const param of json_params) {
     if (params.has(param)) {
       try {

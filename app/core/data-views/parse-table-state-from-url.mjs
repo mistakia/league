@@ -14,7 +14,7 @@ export default function parse_table_state_from_url(search_params) {
     prefix_columns: migrate_entries_array(table_state.prefix_columns),
     where: migrate_entries_array(table_state.where),
     sort: migrate_sort_array(table_state.sort),
-    splits: table_state.splits,
+    row_axes: table_state.row_axes,
     row_grain:
       Array.isArray(table_state.row_grain) && table_state.row_grain.length
         ? table_state.row_grain

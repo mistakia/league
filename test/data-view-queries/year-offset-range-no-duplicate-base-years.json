@@ -25,7 +25,7 @@
         "desc": true
       }
     ],
-    "splits": ["year"],
+    "row_axes": ["year"],
     "where": [
       {
         "column_id": "player_position",
