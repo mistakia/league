@@ -1,4 +1,4 @@
-/* global describe it before */
+/* global describe it before after */
 
 import * as chai from 'chai'
 import fs from 'fs/promises'
@@ -106,6 +106,14 @@ describe('LIBS-SERVER find_or_create_adp_format', function () {
   // (it lands there only via the gated export:schema from prod), so load it
   // here when the table is absent. Guarded so the test still works after the
   // export step lands adp_format in db/schema.postgres.sql.
+  //
+  // These tests commit adp_format rows to the shared test DB (find_or_create is
+  // not transactional). Capture the rows present before the suite runs so the
+  // after hook can drop only what this suite minted -- otherwise the leaked
+  // (PPR, 1QB, REDRAFT, ALL, MANAGED) row collides on adp_format_axis_unique with
+  // the data-view result-equivalence fixture's same-axis seed later in the run.
+  let preexisting_adp_format_ids = []
+
   before(async function () {
     // The adp_format unique index uses NULLS NOT DISTINCT (PG 15+). Prod is
     // 16.14; a pre-15 local DB cannot parse the DDL, and a COALESCE-shimmed
@@ -119,10 +127,24 @@ describe('LIBS-SERVER find_or_create_adp_format', function () {
     const has_table = await db.schema.hasTable('adp_format')
     if (!has_table) {
       const ddl = await fs.readFile(
-        path.resolve(__dirname, '../db/adhoc/2026-06-10-adp-format-dimension.sql'),
+        path.resolve(
+          __dirname,
+          '../db/adhoc/2026-06-10-adp-format-dimension.sql'
+        ),
         'utf8'
       )
       await db.raw(ddl)
+    }
+
+    const existing = await db('adp_format').select('id')
+    preexisting_adp_format_ids = existing.map((row) => row.id)
+  })
+
+  after(async function () {
+    // Drop only the adp_format rows this suite committed, leaving the shared DB
+    // as we found it for subsequent test files.
+    if (await db.schema.hasTable('adp_format')) {
+      await db('adp_format').whereNotIn('id', preexisting_adp_format_ids).del()
     }
   })
 
