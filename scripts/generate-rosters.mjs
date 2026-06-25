@@ -44,10 +44,19 @@ const run = async () => {
       week: previousWeek
     })
 
+    // Only source rosters that actually hold players can produce writes in the
+    // new slice. An empty source roster (a shell with no rosters_players, e.g. a
+    // prior final-week roster that was never populated) legitimately contributes
+    // nothing, so it must not count toward the shortfall expectation.
+    let source_teams_with_players = 0
+
     for (const roster of rosters) {
       // get current roster players
       const { tid, lid, uid } = roster
       const roster_player_rows = await db('rosters_players').where({ rid: uid })
+      if (roster_player_rows.length) {
+        source_teams_with_players += 1
+      }
       const current_pids = roster_player_rows.map((p) => p.pid)
 
       // get roster id
@@ -128,10 +137,10 @@ const run = async () => {
       }
     }
 
-    // Post-write oracle: every team that had a source roster should appear in
-    // rosters_players for the new (lid, year, week) slice. A shortfall means
-    // some teams silently received no roster entries.
-    const source_team_count = rosters.length
+    // Post-write oracle: every source team that HAD roster players should appear
+    // in rosters_players for the new (lid, year, week) slice. A shortfall means
+    // some populated source roster silently produced no entries in the new slice.
+    const source_team_count = source_teams_with_players
     if (source_team_count > 0) {
       const written_row = await db('rosters_players')
         .where({
