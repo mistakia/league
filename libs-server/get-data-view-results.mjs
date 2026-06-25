@@ -44,26 +44,26 @@ import {
 import { resolve as resolve_bridge } from '#libs-server/data-views/identity-bridge-registry.mjs'
 import { attach_source } from '#libs-server/data-views/source-attach/dispatcher.mjs'
 
-// Splits inherently supported by the column's row shape. `source.grain` is
-// the row-shape identity declared by the column-def; the identity's splits
+// Row axes inherently supported by the column's row shape. `source.grain` is
+// the row-shape identity declared by the column-def; the identity's row_axes
 // list determines whether the column can anchor a year/week split query as
 // the sort-based FROM table. Base identities (`player`, `team`) declare zero
-// splits, so they only anchor no-split queries.
+// row_axes, so they only anchor no-split queries.
 //
-// `source.supports_splits` is an explicit override for cases where the
+// `source.supports_row_axes` is an explicit override for cases where the
 // grain is deliberately narrow (e.g. team-stats-from-plays uses grain='team_year'
-// to avoid the team-to-team-year bridge for no-splits team-subject fixtures)
-// but the column's `with` builder projects wider splits onto the CTE. Without
-// the override, group_tables_by_supported_splits intersects the request
-// splits with the grain's splits and silently drops anything wider -- the
-// `with` builder then never sees the dropped split and the CTE collapses
+// to avoid the team-to-team-year bridge for no-row_axes team-subject fixtures)
+// but the column's `with` builder projects wider row_axes onto the CTE. Without
+// the override, group_tables_by_supported_row_axes intersects the request
+// row_axes with the grain's row_axes and silently drops anything wider -- the
+// `with` builder then never sees the dropped row axis and the CTE collapses
 // to a season/career total at every per-week row.
-const derive_supported_splits_from_source = (column_definition) => {
-  const override = column_definition.source?.supports_splits
+const derive_supported_row_axes_from_source = (column_definition) => {
+  const override = column_definition.source?.supports_row_axes
   if (Array.isArray(override)) return override
   const grain = column_definition.source?.grain
   if (!grain) return []
-  return get_identity(grain).splits
+  return get_identity(grain).row_axes
 }
 
 const is_team_column_definition = (column_definition) =>
@@ -585,12 +585,12 @@ const find_sort_column = ({ column_id, column_index = 0, columns }) => {
 }
 
 /**
- * Determines the optimal from table based on sort configuration and splits
+ * Determines the optimal from table based on sort configuration and row_axes
  * @param {Object} params - Parameters object
  * @param {Array} params.sort - Sort configuration from user request
  * @param {Array} params.columns - Column configurations
  * @param {Array} params.prefix_columns - Prefix column configurations
- * @param {Array} params.splits - Active split dimensions ['year', 'week']
+ * @param {Array} params.row_axes - Active row axes ['year', 'week']
  * @param {Object} params.data_views_column_definitions - Column definition registry
  * @returns {Object} From table information
  */
@@ -598,7 +598,7 @@ const determine_from_table = ({
   sort = [],
   columns,
   prefix_columns,
-  splits,
+  row_axes,
   data_views_column_definitions
 }) => {
   // If no sort columns, use default behavior
@@ -658,7 +658,7 @@ const determine_from_table = ({
     const table_name = get_table_name({
       column_definition,
       column_params,
-      splits
+      row_axes
     })
     return {
       from_table_name: table_name,
@@ -672,7 +672,7 @@ const determine_from_table = ({
   const table_name = get_table_name({
     column_definition,
     column_params,
-    splits
+    row_axes
   })
   return {
     from_table_name: table_name,
@@ -708,7 +708,7 @@ const can_use_as_from_table = (column_definition, column_id) => {
  * @param {Array} params.sort - Sort configuration
  * @param {Array} params.columns - Column configurations
  * @param {Array} params.prefix_columns - Prefix column configurations
- * @param {Array} params.splits - Active split dimensions
+ * @param {Array} params.row_axes - Active row axes
  * @param {Object} params.data_views_column_definitions - Column definition registry
  * @returns {Object} Final from table configuration
  */
@@ -716,7 +716,7 @@ const get_from_table_config = ({
   sort,
   columns,
   prefix_columns,
-  splits,
+  row_axes,
   row_grain = ['player'],
   data_views_column_definitions
 }) => {
@@ -725,7 +725,7 @@ const get_from_table_config = ({
     sort,
     columns,
     prefix_columns,
-    splits,
+    row_axes,
     data_views_column_definitions
   })
 
@@ -759,19 +759,19 @@ const get_from_table_config = ({
         grain && get_identity(grain).row_grain === row_grain_id
 
       if (identity_compatible) {
-        // Use sort-based from table if available and no splits are configured
-        // or if it supports all required splits
-        if (splits.length === 0) {
+        // Use sort-based from table if available and no row_axes are configured
+        // or if it supports all required row_axes
+        if (row_axes.length === 0) {
           return sort_based_from_table
         }
 
-        const grain_splits =
-          derive_supported_splits_from_source(column_definition)
-        const supports_all_splits = splits.every((split) =>
-          grain_splits.includes(split)
+        const grain_row_axes =
+          derive_supported_row_axes_from_source(column_definition)
+        const supports_all_row_axes = row_axes.every((row_axis) =>
+          grain_row_axes.includes(row_axis)
         )
 
-        if (supports_all_splits) {
+        if (supports_all_row_axes) {
           return sort_based_from_table
         }
       }
@@ -779,12 +779,12 @@ const get_from_table_config = ({
   }
 
   // Fall back to the row_grain's canonical FROM table -- the identity's
-  // canonical from_source.table for the active row_grain + splits.
+  // canonical from_source.table for the active row_grain + row_axes.
   if (row_grain_id === 'team') {
-    if (splits.includes('week')) {
+    if (row_axes.includes('week')) {
       return { from_table_name: 'team_years_weeks', from_table_type: 'table' }
     }
-    if (splits.includes('year')) {
+    if (row_axes.includes('year')) {
       return { from_table_name: 'team_years', from_table_type: 'table' }
     }
     return { from_table_name: 'team', from_table_type: 'table' }
@@ -801,14 +801,14 @@ const get_from_table_config = ({
  * @param {Object} params.players_query - The Knex query builder instance
  * @param {Object} params.from_table_config - From table configuration
  * @param {Object} params.data_views_column_definitions - Column definition registry
- * @param {Array} params.splits - Active split dimensions
+ * @param {Array} params.row_axes - Active row axes
  * @returns {void}
  */
 const setup_from_table_and_player_joins = ({
   players_query,
   from_table_config,
   data_views_column_definitions,
-  splits = [],
+  row_axes = [],
   query_context
 }) => {
   const { from_table_name, from_table_type, column_id, column_params } =
@@ -819,7 +819,7 @@ const setup_from_table_and_player_joins = ({
   const row_grain_id = query_context.row_grain_id
 
   // Team-identity FROM-source dispatch: register the team identity's CTEs
-  // (team VALUES, team_years, team_years_weeks per active splits), FROM the
+  // (team VALUES, team_years, team_years_weeks per active row_axes), FROM the
   // identity's canonical table, SELECT team_code instead of pid, skip the
   // player inner join. When FROM is a bridge CTE (team_years /
   // team_years_weeks) inner-join the base `team` CTE so team-table column
@@ -877,7 +877,7 @@ const setup_from_table_and_player_joins = ({
   if (column_definition && column_definition.get_table_conditions) {
     const conditions = column_definition.get_table_conditions({
       params: column_params || {},
-      splits
+      row_axes
     })
     for (const condition of conditions) {
       // Validate column name to prevent SQL injection
@@ -898,7 +898,7 @@ const setup_from_table_and_player_joins = ({
     if (!query_context.joined_split_bridges)
       query_context.joined_split_bridges = new Set()
     if (
-      splits.includes('year') &&
+      row_axes.includes('year') &&
       !query_context.joined_split_bridges.has('player->player_year')
     ) {
       const player_year_bridge = resolve_bridge('player', 'player_year')
@@ -906,7 +906,7 @@ const setup_from_table_and_player_joins = ({
       query_context.joined_split_bridges.add('player->player_year')
     }
     if (
-      splits.includes('week') &&
+      row_axes.includes('week') &&
       !query_context.joined_split_bridges.has('player_year->player_year_week')
     ) {
       const player_year_week_bridge = resolve_bridge(
@@ -926,13 +926,13 @@ const setup_from_table_and_player_joins = ({
 const get_table_name = ({
   column_definition,
   column_params,
-  splits,
+  row_axes,
   data_view_options = null
 }) => {
   if (column_definition.table_alias) {
     return column_definition.table_alias({
       params: column_params,
-      splits,
+      row_axes,
       data_view_options,
       query_context: data_view_options?.query_context || null
     })
@@ -987,7 +987,7 @@ const add_clauses_for_table = async ({
   where_clauses = [],
   table_name,
   group_column_params = {},
-  splits = [],
+  row_axes = [],
   output_select_mapping = {},
   data_view_options,
   data_view_metadata
@@ -999,7 +999,7 @@ const add_clauses_for_table = async ({
 
   const make_source_join_func =
     (column_definition, column_id) =>
-    ({ query, params, join_type, splits: arg_splits }) =>
+    ({ query, params, join_type, row_axes: arg_row_axes }) =>
       attach_source({
         players_query: query,
         query_context: data_view_options.query_context,
@@ -1007,7 +1007,7 @@ const add_clauses_for_table = async ({
         params,
         table_alias: table_name,
         join_type,
-        splits: arg_splits ?? splits
+        row_axes: arg_row_axes ?? row_axes
       })
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
@@ -1055,7 +1055,7 @@ const add_clauses_for_table = async ({
       await column_definition.register_ctes({
         query: players_query,
         params: column_params,
-        splits,
+        row_axes,
         data_view_options
       })
     }
@@ -1066,7 +1066,7 @@ const add_clauses_for_table = async ({
       column_definition,
       table_name,
       output_select_mapping,
-      splits,
+      row_axes,
       data_view_options,
       query_context: data_view_options.query_context
     })
@@ -1101,7 +1101,7 @@ const add_clauses_for_table = async ({
         column_index,
         column_definition,
         table_name,
-        splits,
+        row_axes,
         data_view_options,
         query_context: data_view_options.query_context
       })
@@ -1128,7 +1128,7 @@ const add_clauses_for_table = async ({
       await column_definition.register_ctes({
         query: players_query,
         params: where_clause.params,
-        splits,
+        row_axes,
         data_view_options
       })
     }
@@ -1166,7 +1166,7 @@ const add_clauses_for_table = async ({
         table_name,
         column_index: 0,
         params: where_clause.params,
-        splits,
+        row_axes,
         data_view_options
       })
 
@@ -1180,7 +1180,7 @@ const add_clauses_for_table = async ({
           column_index: 0,
           column_definition,
           table_name,
-          splits,
+          row_axes,
           data_view_options,
           query_context: data_view_options.query_context
         })
@@ -1206,7 +1206,7 @@ const add_clauses_for_table = async ({
       column_index: 0,
       params: where_clause.params,
       output_select_mapping,
-      splits,
+      row_axes,
       data_view_options
     })
 
@@ -1267,7 +1267,7 @@ const add_clauses_for_table = async ({
       having_clauses: with_having_clause_strings,
       where_clauses: with_where_clause_strings,
       select_strings: with_select_strings,
-      splits,
+      row_axes,
       pid_columns,
       select_column_names,
       rate_columns,
@@ -1357,7 +1357,7 @@ const add_clauses_for_table = async ({
         table_name,
         params: group_column_params,
         join_type: where_clauses.length ? 'INNER' : 'LEFT',
-        splits,
+        row_axes,
         data_view_options
       })
     } else if (
@@ -1400,7 +1400,7 @@ const get_grouped_clauses_by_table = ({
   where: where_clauses,
   table_columns,
   data_views_column_definitions,
-  splits,
+  row_axes,
   data_view_options = null
 }) => {
   const grouped_clauses_by_table = {}
@@ -1416,7 +1416,7 @@ const get_grouped_clauses_by_table = ({
     const table_name = get_table_name({
       column_definition,
       column_params,
-      splits,
+      row_axes,
       data_view_options
     })
 
@@ -1449,7 +1449,7 @@ const get_grouped_clauses_by_table = ({
     const table_name = get_table_name({
       column_definition,
       column_params,
-      splits,
+      row_axes,
       data_view_options
     })
 
@@ -1479,32 +1479,32 @@ const get_grouped_clauses_by_table = ({
   return grouped_clauses_by_table
 }
 
-const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
-  const grouped_by_splits = {}
+const group_tables_by_supported_row_axes = (grouped_clauses_by_table, row_axes) => {
+  const grouped_by_row_axes = {}
 
   for (const [table_name, table_info] of Object.entries(
     grouped_clauses_by_table
   )) {
-    const supported_splits = derive_supported_splits_from_source(
+    const supported_row_axes = derive_supported_row_axes_from_source(
       table_info.column_definition
     )
-    const supported_splits_key = supported_splits
-      .filter((split) => splits.includes(split))
+    const supported_row_axes_key = supported_row_axes
+      .filter((row_axis) => row_axes.includes(row_axis))
       .sort()
       .join('_')
 
-    if (!grouped_by_splits[supported_splits_key]) {
-      grouped_by_splits[supported_splits_key] = {}
+    if (!grouped_by_row_axes[supported_row_axes_key]) {
+      grouped_by_row_axes[supported_row_axes_key] = {}
     }
 
-    grouped_by_splits[supported_splits_key][table_name] = table_info
+    grouped_by_row_axes[supported_row_axes_key][table_name] = table_info
   }
 
-  return grouped_by_splits
+  return grouped_by_row_axes
 }
 
 export const get_data_view_results_query = async ({
-  splits = [],
+  row_axes = [],
   where = [],
   columns = [],
   prefix_columns = [],
@@ -1514,7 +1514,7 @@ export const get_data_view_results_query = async ({
   row_grain = ['player']
 } = {}) => {
   const validator_result = validators.table_state_validator({
-    splits,
+    row_axes,
     where,
     columns,
     prefix_columns,
@@ -1576,16 +1576,16 @@ export const get_data_view_results_query = async ({
   prefix_columns = prefix_columns.map(process_item_params)
   sort = sort.map(process_item_params)
 
-  columns = normalize_columns({ columns, splits })
-  prefix_columns = normalize_columns({ columns: prefix_columns, splits })
-  where = normalize_columns({ columns: where, splits })
+  columns = normalize_columns({ columns, row_axes })
+  prefix_columns = normalize_columns({ columns: prefix_columns, row_axes })
+  where = normalize_columns({ columns: where, row_axes })
 
   // Determine primary table first to optimize query structure
   const from_table_config = get_from_table_config({
     sort,
     columns,
     prefix_columns,
-    splits,
+    row_axes,
     row_grain,
     data_views_column_definitions
   })
@@ -1621,7 +1621,7 @@ export const get_data_view_results_query = async ({
 
   const query_context = build_query_context({
     row_grain,
-    splits,
+    row_axes,
     year_range: [],
     nfl_week_ids,
     params: {},
@@ -1731,7 +1731,7 @@ export const get_data_view_results_query = async ({
     }
   }
 
-  if (splits.includes('week') || splits.includes('year')) {
+  if (row_axes.includes('week') || row_axes.includes('year')) {
     const year_range = get_year_range([...prefix_columns, ...columns], where)
     data_view_options.year_range = year_range
     query_context.year_range = year_range
@@ -1741,7 +1741,7 @@ export const get_data_view_results_query = async ({
       team_year_bridge.add_cte({ query_context })
       query_context.applied_bridges.add('team->team_year')
 
-      if (splits.includes('week')) {
+      if (row_axes.includes('week')) {
         const team_year_week_bridge = resolve_bridge(
           'team_year',
           'team_year_week'
@@ -1775,7 +1775,7 @@ export const get_data_view_results_query = async ({
       player_year_bridge.add_cte({ query_context })
       query_context.applied_bridges.add('player->player_year')
 
-      if (splits.includes('week')) {
+      if (row_axes.includes('week')) {
         const player_year_week_bridge = resolve_bridge(
           'player_year',
           'player_year_week'
@@ -1791,7 +1791,7 @@ export const get_data_view_results_query = async ({
     players_query,
     from_table_config,
     data_views_column_definitions,
-    splits,
+    row_axes,
     query_context
   })
 
@@ -1817,7 +1817,7 @@ export const get_data_view_results_query = async ({
 
   // sanitize parameters
 
-  // if splits week is enabled — delete all per_game rate_type column params.
+  // if week row axis is enabled — delete all per_game rate_type column params.
   // At week granularity a player has exactly one game per (year, week), so the
   // per-game denominator is always 1 and the division is a no-op: stripping
   // rate_type lets the column emit the plain weekly value instead of building a
@@ -1826,7 +1826,7 @@ export const get_data_view_results_query = async ({
   // are absent, not zero-game rows). Only per_game is affected; other rate
   // types (per_team_play, per_player_*) have non-unit week-level divisors and
   // still route through the aggregator division path under a week split.
-  if (splits.includes('week')) {
+  if (row_axes.includes('week')) {
     columns = columns.map((column) => {
       if (
         typeof column === 'object' &&
@@ -1934,17 +1934,17 @@ export const get_data_view_results_query = async ({
     where,
     table_columns,
     data_views_column_definitions,
-    splits,
+    row_axes,
     data_view_options
   })
 
-  const grouped_by_splits = group_tables_by_supported_splits(
+  const grouped_by_row_axes = group_tables_by_supported_row_axes(
     grouped_clauses_by_table,
-    splits
+    row_axes
   )
 
   // place year split tables last
-  const sorted_grouped_by_splits = Object.entries(grouped_by_splits)
+  const sorted_grouped_by_row_axes = Object.entries(grouped_by_row_axes)
     .sort(([key_a], [key_b]) => {
       const has_year_a = key_a.includes('year')
       const has_year_b = key_b.includes('year')
@@ -1957,10 +1957,10 @@ export const get_data_view_results_query = async ({
       return acc
     }, {})
 
-  for (const [supported_splits_key, tables] of Object.entries(
-    sorted_grouped_by_splits
+  for (const [supported_row_axes_key, tables] of Object.entries(
+    sorted_grouped_by_row_axes
   )) {
-    const available_splits = supported_splits_key.split('_').filter(Boolean)
+    const available_row_axes = supported_row_axes_key.split('_').filter(Boolean)
 
     // TODO setup a more robust sorting system
     // place year_splits_player_age table last to give other tables a chance to setup the opening_days join
@@ -1984,13 +1984,13 @@ export const get_data_view_results_query = async ({
         where_clauses,
         table_name,
         group_column_params,
-        splits: available_splits,
+        row_axes: available_row_axes,
         output_select_mapping,
         data_view_options,
         data_view_metadata
       })
 
-      if (available_splits.includes('year')) {
+      if (available_row_axes.includes('year')) {
         if (
           select_columns.length &&
           !is_year_offset_range(group_column_params)
@@ -2000,7 +2000,7 @@ export const get_data_view_results_query = async ({
           if (column_definition && column_definition.year_select) {
             const year_select_clause = column_definition.year_select({
               table_name,
-              splits,
+              row_axes,
               column_params: group_column_params
             })
             if (year_select_clause) {
@@ -2015,13 +2015,13 @@ export const get_data_view_results_query = async ({
   }
 
   // Add a select and group by for each split using centralized references
-  for (const split of splits) {
-    if (split === 'year') {
+  for (const row_axis of row_axes) {
+    if (row_axis === 'year') {
       players_query.select(data_view_options.year_reference)
       players_query.groupBy(data_view_options.year_reference)
     }
 
-    if (split === 'week') {
+    if (row_axis === 'week') {
       players_query.select(data_view_options.week_reference)
       players_query.groupBy(data_view_options.week_reference)
     }
@@ -2071,7 +2071,7 @@ export const get_data_view_results_query = async ({
     const table_name = get_table_name({
       column_definition,
       column_params,
-      splits,
+      row_axes,
       data_view_options
     })
 
@@ -2185,7 +2185,7 @@ export const get_data_view_results_query = async ({
 }
 
 export default async function ({
-  splits = [],
+  row_axes = [],
   where = [],
   columns = [],
   prefix_columns = [],
@@ -2197,7 +2197,7 @@ export default async function ({
   row_grain = ['player']
 } = {}) {
   const { query, data_view_metadata } = await get_data_view_results_query({
-    splits,
+    row_axes,
     where,
     columns,
     prefix_columns,
