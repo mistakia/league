@@ -25,23 +25,6 @@ import {
 } from '@core/api'
 import { api, api_request } from '@core/api/service'
 import { send } from '@core/ws'
-
-// nfl_plays_column_params is 51 KiB of static metadata used only inside the
-// collect_object_preset_params helper below. Defer it to its own chunk so it
-// doesn't ride in the main bundle for users who never hit the data-views
-// param-option-counts path.
-let _nfl_plays_column_params_cache = null
-function* load_nfl_plays_column_params() {
-  if (_nfl_plays_column_params_cache) return _nfl_plays_column_params_cache
-  const mod = yield call(
-    () =>
-      import(
-        /* webpackChunkName: "nfl-plays-column-params" */ '#libs-shared/nfl-plays-column-params.mjs'
-      )
-  )
-  _nfl_plays_column_params_cache = mod.default
-  return _nfl_plays_column_params_cache
-}
 import {
   get_app,
   get_selected_data_view,
@@ -66,6 +49,23 @@ import {
 } from '#libs-shared/data-view-storage/storage.mjs'
 import { is_valid_table_state } from '#libs-shared/data-view-storage/validate.mjs'
 import deep_equal from '@core/utils/deep_equal'
+
+// nfl_plays_column_params is 51 KiB of static metadata used only inside the
+// collect_object_preset_params helper below. Defer it to its own chunk so it
+// doesn't ride in the main bundle for users who never hit the data-views
+// param-option-counts path.
+let _nfl_plays_column_params_cache = null
+function* load_nfl_plays_column_params() {
+  if (_nfl_plays_column_params_cache) return _nfl_plays_column_params_cache
+  const mod = yield call(
+    () =>
+      import(
+        /* webpackChunkName: "nfl-plays-column-params" */ '#libs-shared/nfl-plays-column-params.mjs'
+      )
+  )
+  _nfl_plays_column_params_cache = mod.default
+  return _nfl_plays_column_params_cache
+}
 
 const DEFAULT_VIEW_IDS = new Set(Object.keys(default_data_views))
 

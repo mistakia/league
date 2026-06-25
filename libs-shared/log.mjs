@@ -12,11 +12,11 @@ const TITLE_MAX_LENGTH = 200
 // microtask chain open and prevents PM2 from restarting the worker.
 const TRANSPORT_TIMEOUT_MS = 5000
 
-const TIMESTAMP_PATTERN = /\d{4}-\d{2}-\d{2}T[\d:.Z+\-]+/g
+const TIMESTAMP_PATTERN = /\d{4}-\d{2}-\d{2}T[\d:.Z+-]+/g
 const UUID_PATTERN =
   /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi
 const HEX_PATTERN = /\b[a-f0-9]{16,}\b/gi
-const PATH_PATTERN = /\/[A-Za-z0-9_./\-]+/g
+const PATH_PATTERN = /\/[A-Za-z0-9_./-]+/g
 const NUMERIC_PATTERN = /\b\d+\b/g
 
 export const normalize_fingerprint_input = (text) =>

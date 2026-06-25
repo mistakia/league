@@ -36,7 +36,6 @@ import {
   is_main,
   report_job,
   fetch_with_retry,
-  batch_insert,
   throw_if_shortfall,
   readCSV
 } from '#libs-server'
@@ -46,8 +45,6 @@ const log = debug('import-nfl-gamebook-starters')
 debug.enable('import-nfl-gamebook-starters')
 
 const stream_pipeline = promisify(pipeline)
-const BATCH_SIZE = 500
-const STARTERS_PER_GAME = 44
 const RESOLUTION_FLOOR_PER_GAME = 0.95
 
 // Same alias map as scripts/import-nflverse-weekly-rosters.mjs -- pre-normalise
