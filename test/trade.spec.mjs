@@ -157,8 +157,14 @@ describe('API /trades', function () {
     it('trade preserves extension counts', async () => {
       await draft(knex)
 
-      // Get players from both teams
-      const proposingTeamPlayerRows = await knex('rosters_players')
+      // Pick one player of the SAME position from each team so the 1-for-1
+      // BENCH swap is position-neutral. The draft fixture fills rosters with
+      // random positions; trading mismatched positions can exceed the
+      // receiving team's active position limit, so has_bench_space_for_position
+      // rejects the proposal with a 400 -- a nondeterministic flake. A
+      // same-position swap removes and re-adds the same position, so it always
+      // passes roster-slot validation.
+      const proposing_pool = await knex('rosters_players')
         .where({
           lid: 1,
           tid: 1,
@@ -166,9 +172,8 @@ describe('API /trades', function () {
           week: current_season.week
         })
         .whereNot('pos', 'K')
-        .limit(1)
 
-      const acceptingTeamPlayerRows = await knex('rosters_players')
+      const accepting_pool = await knex('rosters_players')
         .where({
           lid: 1,
           tid: 2,
@@ -176,10 +181,17 @@ describe('API /trades', function () {
           week: current_season.week
         })
         .whereNot('pos', 'K')
-        .limit(1)
 
-      const proposingTeamPlayers = [proposingTeamPlayerRows[0].pid]
-      const acceptingTeamPlayers = [acceptingTeamPlayerRows[0].pid]
+      const accepting_positions = new Set(accepting_pool.map((p) => p.pos))
+      const proposing_row = proposing_pool.find((p) =>
+        accepting_positions.has(p.pos)
+      )
+      const accepting_row = accepting_pool.find(
+        (p) => p.pos === proposing_row.pos
+      )
+
+      const proposingTeamPlayers = [proposing_row.pid]
+      const acceptingTeamPlayers = [accepting_row.pid]
 
       // Set extension counts for both players
       await knex('rosters_players')
