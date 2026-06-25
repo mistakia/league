@@ -466,7 +466,6 @@ const run = async ({ dry_run = false } = {}) => {
           db.raw('?', [current_season.year])
         )
       })
-      .join('leagues', 'leagues.uid', '=', 'rfab.lid')
       .where('rfab.year', current_season.year)
       .whereNull('rfab.processed')
       .whereNull('rfab.cancelled')
@@ -477,7 +476,7 @@ const run = async ({ dry_run = false } = {}) => {
       .where(function () {
         // bid meets the time-since-announcement requirement
         this.whereRaw(
-          '? - rfab.announced >= (24 - COALESCE(leagues.restricted_free_agency_announcement_hour, ?) + COALESCE(leagues.restricted_free_agency_processing_hour, ?)) * 3600',
+          '? - rfab.announced >= (24 - COALESCE(seasons.restricted_free_agency_announcement_hour, ?) + COALESCE(seasons.restricted_free_agency_processing_hour, ?)) * 3600',
           [
             timestamp,
             league_default_rfa_announcement_hour,
