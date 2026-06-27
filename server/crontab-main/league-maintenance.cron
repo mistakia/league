@@ -37,8 +37,9 @@
 ## Announce free agency period start (check every 30 minutes in August and September)
 */30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-free-agency-period-start.mjs >> /var/log/league/announce-free-agency-period-start.log 2>&1
 
-## Process extensions at ext_date (check every 5 minutes in May; self-gating fires once per league per ext_date via league_notifications marker)
-*/5 * * 5 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-extensions.mjs >> /var/log/league/process-extensions.log 2>&1
+## Process extensions at ext_date (check every 5 minutes May-Aug; self-gating fires once per league per ext_date via league_notifications marker).
+## Month range MUST cover the extension deadline AND its 14-day auto-process retry tail (AUTO_PROCESS_WINDOW_DAYS in process-extensions.mjs). Widen if a schedule shift pushes ext_date outside May-Aug — a single-month pin (was `5`) silently skipped the 2026 Jul-6 deadline.
+*/5 * * 5-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-extensions.mjs >> /var/log/league/process-extensions.log 2>&1
 
 # League Each Season Week
 
