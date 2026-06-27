@@ -16,6 +16,54 @@ import PropTypes from 'prop-types'
 
 const KEEPALIVE_STACK_LIMIT = 16000
 
+// CSS/JS chunk-load failures are a stale-client condition, not a server bug.
+// After a deploy ships new contenthashed chunk filenames, clients still running
+// the previous index.html request the now-deleted old hashes and throw a
+// ChunkLoadError. This is expected post-deploy churn — e.g. the 2026-06-26
+// 12:24-12:29 burst across CSS chunks 6900 (vendor-react-table) and 5295 after
+// a react-table bump rehashed those chunks — and should NOT surface as
+// log_error signals. Instead we recover the stale client with a single forced
+// reload (which pulls the fresh index.html and the current chunk hashes); only
+// if the error RECURS within a short window after that reload — a genuinely
+// broken deploy whose chunks are missing for everyone — do we report it.
+const CHUNK_RELOAD_KEY = 'xo_chunk_reload_at'
+const CHUNK_RELOAD_WINDOW_MS = 60 * 1000
+
+const is_chunk_load_error = (err) => {
+  if (!err) return false
+  if (err.name === 'ChunkLoadError') return true
+  const message = err.message || ''
+  return /Loading (?:CSS )?chunk\s+\S+\s+failed/i.test(message)
+}
+
+// Returns true if the caller should SKIP reporting (a recovery reload was
+// triggered); false if the error recurred post-reload and should be reported as
+// a genuine break. Never throws — sessionStorage/reload access is guarded.
+const recover_from_chunk_error = () => {
+  let last = 0
+  try {
+    last = Number(window.sessionStorage.getItem(CHUNK_RELOAD_KEY)) || 0
+  } catch (_e) {
+    // sessionStorage unavailable (privacy mode) — proceed without a guard.
+  }
+  const now = Date.now()
+  if (now - last < CHUNK_RELOAD_WINDOW_MS) {
+    // Already reloaded recently and the chunk still fails — genuine break.
+    return false
+  }
+  try {
+    window.sessionStorage.setItem(CHUNK_RELOAD_KEY, String(now))
+  } catch (_e) {
+    // ignore — proceed to reload regardless
+  }
+  try {
+    window.location.reload()
+  } catch (_e) {
+    // ignore — if reload is unavailable, fall through; nothing else to do
+  }
+  return true
+}
+
 const truncate_stack = (stack) => {
   if (typeof stack !== 'string') return stack
   if (stack.length <= KEEPALIVE_STACK_LIMIT) return stack
@@ -35,6 +83,9 @@ let current_user = null
 
 const post_to_league_api = (err, metadata) => {
   try {
+    // Suppress expected post-deploy chunk-load churn (see is_chunk_load_error):
+    // recover the stale client with a reload instead of emitting a signal.
+    if (is_chunk_load_error(err) && recover_from_chunk_error()) return
     const enriched =
       current_user && typeof current_user === 'object'
         ? { ...(metadata || {}), user: current_user }
