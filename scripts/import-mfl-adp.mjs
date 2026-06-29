@@ -33,7 +33,12 @@ const fetch_mfl_data = async (url) => {
   })
 
   const data = await response.json()
-  return data.adp.player
+  // MFL returns no `player` key for an empty result set (e.g. IS_PPR=0 standard
+  // before any standard mocks exist), and a bare object (not an array) when a
+  // single player is returned. Normalize both so callers always get an array.
+  const players = data?.adp?.player
+  if (!players) return []
+  return Array.isArray(players) ? players : [players]
 }
 
 const import_mfl_adp = async ({
