@@ -190,15 +190,28 @@ const create_player_adp_field = (field, select_as, range_offset_aggregate) => ({
   get_cache_info
 })
 
+// Source coverage of the dispersion columns (verified via dry runs 2026-06-29).
+// The live sources (Sleeper, Underdog) carry only a single ADP value, so these
+// are NULL for them and populated only by the secondary sources:
+//   min_pick / max_pick      -> MFL, CBS
+//   sample_size              -> MFL
+//   percent_drafted          -> ESPN, Yahoo, MFL, CBS
+//   std_dev                  -> no importer populates it (column removed
+//                               2026-06-29; re-add only if a source provides it)
+// The secondary sources were dormant (last run 2024-09-02) at audit time; these
+// columns fill in as those pipelines are re-enabled.
 export default {
   player_adp: create_player_adp_field('adp', 'adp', 'AVG'),
-  // min_pick / max_pick are populated ONLY by the MFL and CBS importers, both of
-  // which are currently dormant (last run 2024-09-02). They are NULL for every
-  // live source (Sleeper, Underdog), whose feeds carry a single ADP with no
-  // per-source draft-pick dispersion. Retained because the data is real where it
-  // exists; revisit if MFL/CBS are retired or the live sources start providing
-  // pick ranges. The std_dev / sample_size / percent_drafted columns were
-  // removed (2026-06-29) because no importer has ever populated them.
   player_adp_min: create_player_adp_field('min_pick', 'adp_min', 'MIN'),
-  player_adp_max: create_player_adp_field('max_pick', 'adp_max', 'MAX')
+  player_adp_max: create_player_adp_field('max_pick', 'adp_max', 'MAX'),
+  player_adp_sample_size: create_player_adp_field(
+    'sample_size',
+    'adp_sample_size',
+    'SUM'
+  ),
+  player_percent_drafted: create_player_adp_field(
+    'percent_drafted',
+    'percent_drafted',
+    'AVG'
+  )
 }
