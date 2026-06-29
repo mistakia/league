@@ -33,8 +33,11 @@ const parse_yahoo_data = (players) => {
     team: player.player.editorial_team_abbr,
     pos: player.player.eligible_positions[0].position,
     adp: Number(player.player.draft_analysis.average_pick) || null,
+    // Yahoo reports percent_drafted as a 0-1 fraction; normalize to the 0-100
+    // percent scale the other sources (ESPN/CBS/MFL) write, so the
+    // player_percent_drafted data-view column is consistent across sources.
     percent_drafted:
-      Number(player.player.draft_analysis.percent_drafted) || null,
+      Number(player.player.draft_analysis.percent_drafted) * 100 || null,
     aav: Number(player.player.draft_analysis.average_cost) || null,
     projected_av: Number(player.player.projected_auction_value) || null
   }))

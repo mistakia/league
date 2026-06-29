@@ -42,7 +42,13 @@ const import_mfl_adp = async ({
 } = {}) => {
   const adp_types = [
     {
-      url: `https://api.myfantasyleague.com/${year}/export?TYPE=adp&PERIOD=RECENT&FCOUNT=12&IS_PPR=-1&IS_KEEPER=N&IS_MOCK=0&CUTOFF=10&DETAILS=&JSON=1`,
+      // IS_PPR=0 selects true standard (non-PPR) leagues. The prior IS_PPR=-1
+      // meant "any scoring" and returned PPR-identical data, so STANDARD_REDRAFT
+      // was a mislabeled duplicate of the PPR_REDRAFT pull below (verified
+      // 2026-06-29: IS_PPR=-1 == IS_PPR=1 byte-for-byte). IS_PPR=0 may return no
+      // rows when MFL has no standard mocks yet -- correct-but-empty beats
+      // populated-but-mislabeled.
+      url: `https://api.myfantasyleague.com/${year}/export?TYPE=adp&PERIOD=RECENT&FCOUNT=12&IS_PPR=0&IS_KEEPER=N&IS_MOCK=0&CUTOFF=10&DETAILS=&JSON=1`,
       ranking_type: 'STANDARD_REDRAFT'
     },
     {
