@@ -82,8 +82,13 @@ const SLEEPER_ADP_TYPES = [
 ]
 
 const create_adp_entries = ({ player_row, adp, format_id_by_type }) => {
-  return SLEEPER_ADP_TYPES.filter(({ adp_key }) => adp[adp_key] != null) // Only include if ADP value exists
-    .map(({ type, adp_key }) => ({
+  // Only include real ADP values. Sleeper reports adp=999 for every undrafted
+  // player; storing it bloated player_adp_index/_history with ~97% sentinel rows
+  // (history grew to 14M rows, 90% of them 999) and polluted data views. Drop
+  // the sentinel here so absence == undrafted. No legitimate ADP nears 999.
+  return SLEEPER_ADP_TYPES.filter(
+    ({ adp_key }) => adp[adp_key] != null && adp[adp_key] < 999
+  ).map(({ type, adp_key }) => ({
       pid: player_row.pid,
       pos: player_row.pos,
       year: current_season.year,

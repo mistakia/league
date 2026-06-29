@@ -78,6 +78,10 @@ export default {
     player_value_path: 'adp',
     reverse_percentiles: true
   }),
+  // Min Pick / Max Pick are populated only by the dormant MFL/CBS importers
+  // (last run 2024-09-02); they are empty for the live sources (Sleeper,
+  // Underdog). The ADP StdDev / Sample Size / % Drafted columns were removed
+  // 2026-06-29 because no importer has ever populated their backing columns.
   player_adp_min: create_player_adp_field({
     column_title: 'Minimum Draft Position',
     header_label: 'Min Pick',
@@ -89,21 +93,5 @@ export default {
     header_label: 'Max Pick',
     player_value_path: 'adp_max',
     reverse_percentiles: true
-  }),
-  player_adp_stddev: create_player_adp_field({
-    column_title: 'ADP Standard Deviation',
-    header_label: 'ADP StdDev',
-    player_value_path: 'adp_stddev'
-  }),
-  player_adp_sample_size: create_player_adp_field({
-    column_title: 'ADP Sample Size',
-    header_label: 'Sample Size',
-    player_value_path: 'adp_sample_size'
-  }),
-  player_percent_drafted: create_player_adp_field({
-    column_title: 'Percent Drafted',
-    header_label: '% Drafted',
-    player_value_path: 'percent_drafted',
-    data_type: table_constants.TABLE_DATA_TYPES.PERCENT
   })
 }

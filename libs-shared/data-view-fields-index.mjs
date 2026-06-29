@@ -539,11 +539,11 @@ export default {
 
   // Player Rankings/ADP Fields
   player_adp: 'Average Draft Position (ADP)',
+  // min/max are populated only by the dormant MFL/CBS importers; null for live
+  // sources. std_dev/sample_size/percent_drafted removed 2026-06-29 (never
+  // populated by any importer).
   player_adp_min: 'Minimum Draft Position',
   player_adp_max: 'Maximum Draft Position',
-  player_adp_stddev: 'ADP Standard Deviation',
-  player_adp_sample_size: 'ADP Sample Size',
-  player_percent_drafted: 'Percent Drafted',
   player_average_ranking: 'Average Ranking / Draft Position (ADP)',
   player_overall_ranking: 'Overall Ranking',
   player_position_ranking: 'Position Ranking',
