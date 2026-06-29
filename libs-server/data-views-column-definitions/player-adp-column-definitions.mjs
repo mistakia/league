@@ -116,6 +116,15 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
     .whereIn('adp_format.duration', duration)
     .whereIn('adp_format.draft_pool', draft_pool)
     .whereIn('adp_format.contest_style', contest_style)
+    // Drop the undrafted sentinel: Sleeper's feed reports adp=999 for every
+    // player off the board, and the importer stores it verbatim (~97% of
+    // Sleeper rows). 999 is not a draft position -- surfacing it pollutes
+    // ascending sorts and the AVG range-offset aggregate, and leaks thousands
+    // of noise rows into every Sleeper-sourced view. No legitimate ADP from
+    // any source approaches 999 (observed max ~240), so this is a universal
+    // guard. Excluding the row makes player_adp resolve to NULL (LEFT join
+    // absence) for undrafted players, the correct "no meaningful ADP" value.
+    .where('player_adp_index.adp', '<', 999)
 
   query.with(cte_name, cte_query)
   query_context.registered_adp_ctes.add(cte_name)
