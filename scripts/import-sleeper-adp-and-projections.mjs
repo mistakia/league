@@ -89,18 +89,18 @@ const create_adp_entries = ({ player_row, adp, format_id_by_type }) => {
   return SLEEPER_ADP_TYPES.filter(
     ({ adp_key }) => adp[adp_key] != null && adp[adp_key] < 999
   ).map(({ type, adp_key }) => ({
-      pid: player_row.pid,
-      pos: player_row.pos,
-      year: current_season.year,
-      adp: adp[adp_key],
-      min_pick: null,
-      max_pick: null,
-      std_dev: null,
-      sample_size: null,
-      percent_drafted: null,
-      source_id: 'SLEEPER',
-      adp_format_id: format_id_by_type[type]
-    }))
+    pid: player_row.pid,
+    pos: player_row.pos,
+    year: current_season.year,
+    adp: adp[adp_key],
+    min_pick: null,
+    max_pick: null,
+    std_dev: null,
+    sample_size: null,
+    percent_drafted: null,
+    source_id: 'SLEEPER',
+    adp_format_id: format_id_by_type[type]
+  }))
 }
 
 const process_matched_player = ({
