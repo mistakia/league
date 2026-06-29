@@ -2,21 +2,13 @@
   "name": "emit_year_match case 6: multi-year year_default with range year_offset offset-expands the adp CTE",
   "description": "player_adp with year=[2022,2023] + year_offset=[1,2] offset-expands the adp_format CTE year filter and the join correlation to the cross-product target set IN(2023,2024,2025), and reduces the range window with the column-declared AVG aggregate (ADP is a mean, not additive). Regression guard for the year_offset-drop bug in the CTE-attach source bridge.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_adp",
         "params": {
-          "year": [
-            2022,
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2022, 2023],
+          "year_offset": [1, 2]
         }
       }
     ],
@@ -24,23 +16,15 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "QB"
-        ]
+        "value": ["QB"]
       },
       {
         "column_id": "player_adp",
         "operator": ">=",
         "value": 10,
         "params": {
-          "year": [
-            2022,
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2022, 2023],
+          "year_offset": [1, 2]
         }
       }
     ]
