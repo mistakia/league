@@ -29,6 +29,18 @@ JOB_PROJECT=league
 # DEFERRED: Underdog best-ball ADP runs from the storage server (residential IP + CloakBrowser), not the league VPS. See task follow-up.
 # 0 12 * 6-9 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-underdog-bestball-adp.mjs >> /var/log/league/import-underdog-bestball-adp.log 2>&1
 
+## import secondary ADP sources -- daily in the draft-season window (Jun-Aug),
+## staggered in the early-morning block. Re-enabled 2026-06-29 after dry-run
+## validation; ESPN is intentionally confined to this preseason window because
+## its percent_drafted is derived from preseason percentOwned, which only tracks
+## draftedness before in-season waiver churn.
+0 6 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-espn-adp.mjs >> /var/log/league/import-espn-adp.log 2>&1
+15 6 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-yahoo-adp.mjs >> /var/log/league/import-yahoo-adp.log 2>&1
+30 6 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-mfl-adp.mjs >> /var/log/league/import-mfl-adp.log 2>&1
+45 6 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-cbs-adp.mjs >> /var/log/league/import-cbs-adp.log 2>&1
+0 7 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-adp.mjs >> /var/log/league/import-nfl-adp.log 2>&1
+15 7 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-rts-adp.mjs >> /var/log/league/import-rts-adp.log 2>&1
+
 ## process projections & calculate projected points added, market salary
 30 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-projections.mjs >> /var/log/league/process-projections.log 2>&1
 
