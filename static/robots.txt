@@ -1,0 +1,17 @@
+# xo.football
+#
+# Public content — data views, play logs, league stats/standings, and docs — is
+# crawlable. Functional and error-generating routes carry no SEO value and only
+# produce client-side render noise when crawled, so they are disallowed.
+#
+# /api/ is intentionally left crawlable so a crawler's renderer can fetch the
+# data that populates public pages. Unactionable client errors from crawlers are
+# already dropped server-side at /api/errors, so robots.txt is for SEO, not noise
+# suppression.
+
+User-agent: *
+Allow: /
+Disallow: /error-test
+Disallow: /login
+Disallow: /settings
+Disallow: /u/

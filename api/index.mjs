@@ -39,6 +39,20 @@ const favicon_middleware = (req, res, next) => {
   res.end(favicon_buffer)
 }
 
+// Serve robots.txt at the root from static/. The SPA catch-all below would
+// otherwise return index.html for /robots.txt, which crawlers reject.
+const robots_path = path.join(__dirname, '../', 'static', 'robots.txt')
+const robots_buffer = fs.readFileSync(robots_path)
+const robots_max_age_seconds = 86400
+const robots_middleware = (req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next()
+  if (req.url !== '/robots.txt') return next()
+  res.set('Cache-Control', `public, max-age=${robots_max_age_seconds}`)
+  res.set('Content-Type', 'text/plain; charset=utf-8')
+  res.set('Content-Length', robots_buffer.length)
+  res.end(robots_buffer)
+}
+
 const api = express()
 
 api.locals.db = db
@@ -57,6 +71,7 @@ api.use(
 api.use(express.json({ limit: '150mb' }))
 
 api.use(favicon_middleware)
+api.use(robots_middleware)
 api.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', req.headers.origin || config.url)
   res.set('Access-Control-Allow-Credentials', 'true')
