@@ -140,12 +140,25 @@ observations:
     invoking it (even as `yarn prettier --check <file>`) silently reformatted 88 files. For
     verification use `npx prettier --check <file>` directly, or scope explicitly. Hardening (add a
     check-only script / narrow the write glob) is unwired — candidate sibling task.
+  - >-
+    [bug] 2026-06-30 Data-view share links (/u/<hash>) white-screened with a
+    Cannot-read-properties-of-undefined-reading-forEach crash at players/reducer.js:591 whenever the
+    view had been fetched over HTTP POST /data-views/search: that route cached the raw rows array
+    under the same /data-views/<hash> redis key the websocket socket and export route populate with
+    a {data_view_results, data_view_metadata} object, so on a socket cache hit
+    cached_value.data_view_results was undefined and DATA_VIEW_RESULT shipped result:undefined to
+    the unguarded reducer.
+  - >-
+    [fix] 2026-06-30 Commit 332bced0 unifies /data-views/search cache to the canonical object shape,
+    makes the data_view socket tolerate legacy array entries and never emit result:undefined, and
+    guards players/reducer.js with (payload.result || []).forEach; push/deploy pending behind the
+    red-main CI gate (dispatched session fix-league-ci-red).
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-20T15:43:41.654Z'
+updated_at: '2026-06-30T23:53:03.066Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
