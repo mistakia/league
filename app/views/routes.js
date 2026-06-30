@@ -1,3 +1,4 @@
+/* global IS_DEV */
 import React, { lazy } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { connect } from 'react-redux'
@@ -62,7 +63,7 @@ const Routes = ({ app }) => {
       <Route path='/data-views/:view_id' element={<DataViewsPage />} />
       <Route path='/plays' element={<PlaysPage />} />
       <Route path='/plays/:view_id' element={<PlaysPage />} />
-      <Route path='/error-test' element={<ErrorTest />} />
+      {IS_DEV && <Route path='/error-test' element={<ErrorTest />} />}
       <Route path='/leagues/:lid'>
         <Route path='/leagues/:lid/players' element={<PlayersPage />} />
         <Route
