@@ -1,8 +1,19 @@
-/* global describe it */
+/* global describe it beforeEach afterEach */
+import crypto from 'crypto'
+import { mkdtempSync, writeFileSync, rmSync } from 'fs'
+import { join } from 'path'
+import { tmpdir } from 'os'
+
+import express from 'express'
 import * as chai from 'chai'
+import chai_http, { request as chai_request } from 'chai-http'
 
-import { is_non_actionable_client_error } from '#api/routes/errors.mjs'
+import config from '#config'
+import errors_router, {
+  is_non_actionable_client_error
+} from '#api/routes/errors.mjs'
 
+chai.use(chai_http)
 const expect = chai.expect
 
 const GOOGLEBOT_UA =
@@ -69,5 +80,117 @@ describe('api/errors - is_non_actionable_client_error', function () {
         user_agent: REAL_USER_UA
       })
     ).to.equal(false)
+  })
+})
+
+// Route-level coverage of POST /api/errors: drives the handler with chai-http
+// and captures the downstream signal emit by stubbing globalThis.fetch (the
+// transport create_logger uses). Mirrors the machine-key setup in
+// test/libs-shared.log.spec.mjs so the emit guards in log.mjs pass.
+describe('api/errors - POST route emission', function () {
+  this.timeout(30 * 1000)
+
+  let app
+  let calls
+  let key_dir
+  let original_signals_api_url
+  let original_machine_slug
+  let original_key_file
+  let original_fetch
+
+  beforeEach(() => {
+    original_signals_api_url = config.signals_api_url
+    original_machine_slug = process.env.BASE_MACHINE_SLUG
+    original_key_file = process.env.BASE_INSTANCE_KEY_FILE
+    original_fetch = globalThis.fetch
+    config.signals_api_url = 'http://localhost:9999'
+
+    key_dir = mkdtempSync(join(tmpdir(), 'errors-spec-'))
+    const key_path = join(key_dir, 'instance-private.key')
+    const { privateKey } = crypto.generateKeyPairSync('ed25519')
+    writeFileSync(
+      key_path,
+      privateKey.export({ format: 'pem', type: 'pkcs8' }),
+      { mode: 0o600 }
+    )
+    process.env.BASE_MACHINE_SLUG = 'unit-test-slug'
+    process.env.BASE_INSTANCE_KEY_FILE = key_path
+
+    calls = []
+    globalThis.fetch = async (url, init = {}) => {
+      calls.push({ url, body: init.body ? JSON.parse(init.body) : null })
+      return { ok: true, status: 200, json: async () => ({}) }
+    }
+
+    app = express()
+    app.use(express.json())
+    app.locals.logger = () => {}
+    app.use('/api/errors', errors_router)
+  })
+
+  afterEach(() => {
+    config.signals_api_url = original_signals_api_url
+    if (original_machine_slug === undefined) {
+      delete process.env.BASE_MACHINE_SLUG
+    } else {
+      process.env.BASE_MACHINE_SLUG = original_machine_slug
+    }
+    if (original_key_file === undefined) {
+      delete process.env.BASE_INSTANCE_KEY_FILE
+    } else {
+      process.env.BASE_INSTANCE_KEY_FILE = original_key_file
+    }
+    globalThis.fetch = original_fetch
+    rmSync(key_dir, { recursive: true, force: true })
+  })
+
+  // The route fires the emit fetch in a microtask and responds without
+  // awaiting it; give that microtask a tick to run before asserting.
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 10))
+
+  it('carries request_url and a dedup_key into the emitted signal for a real-user error', async () => {
+    const request_url = 'https://xo.football/api/leagues/2/seasons/2024'
+    const res = await chai_request
+      .execute(app)
+      .post('/api/errors')
+      .set('User-Agent', REAL_USER_UA)
+      .send({
+        leagueId: 2,
+        error: {
+          name: 'TypeError',
+          message: "Cannot read properties of undefined (reading 'map')",
+          request_url
+        }
+      })
+    expect(res.status).to.equal(200)
+    await flush()
+
+    expect(calls).to.have.lengthOf(1)
+    expect(calls[0].url).to.equal('http://localhost:9999/api/signals')
+    const body = calls[0].body
+    expect(body.kind).to.equal('log_error')
+    expect(body.source).to.equal('league-client')
+    expect(body.payload.context.request_url).to.equal(request_url)
+    expect(body.dedup_key).to.equal(
+      `log_error:league-client:${body.payload.error_fingerprint}`
+    )
+  })
+
+  it('does not emit a signal for a crawler report (gate suppresses before emit)', async () => {
+    const res = await chai_request
+      .execute(app)
+      .post('/api/errors')
+      .set('User-Agent', GOOGLEBOT_UA)
+      .send({
+        error: {
+          name: 'TypeError',
+          message: 'Failed to fetch',
+          request_url: 'https://xo.football/api/leagues/2/seasons/2024'
+        }
+      })
+    expect(res.status).to.equal(200)
+    await flush()
+
+    expect(calls).to.have.lengthOf(0)
   })
 })
