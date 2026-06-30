@@ -1004,7 +1004,13 @@ router.post('/search/?', async (req, res) => {
     const cached_result = await redis_cache.get(cache_key)
 
     if (cached_result) {
-      return res.send(cached_result)
+      // The cache holds the canonical { data_view_results, data_view_metadata }
+      // shape shared with the websocket socket and export route. Tolerate a
+      // legacy bare-array entry written by older builds of this route.
+      const cached_rows = Array.isArray(cached_result)
+        ? cached_result
+        : cached_result.data_view_results
+      return res.send(cached_rows)
     }
 
     const { data_view_results, data_view_metadata } =
@@ -1019,9 +1025,15 @@ router.post('/search/?', async (req, res) => {
 
     if (data_view_results && data_view_results.length) {
       const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
+      // Cache the canonical { data_view_results, data_view_metadata } shape so
+      // the websocket socket and export route (which read cache_value.data_view_results
+      // under this same key) never see a bare array and emit result: undefined.
       await redis_cache.set(
         cache_key,
-        data_view_results,
+        {
+          data_view_results,
+          data_view_metadata
+        },
         Math.round(cache_ttl / 1000) // redis EX is seconds; cache_ttl is ms
       )
       if (data_view_metadata.cache_expire_at) {

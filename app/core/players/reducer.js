@@ -588,7 +588,9 @@ export function players_reducer(state = initialState, { payload, type }) {
 
     case data_view_request_actions.DATA_VIEW_RESULT:
       return state.withMutations((players) => {
-        payload.result.forEach((row) => {
+        // payload.result can be absent on a malformed/empty result message; the
+        // sibling data-view-request reducer already tolerates this via List(payload.result).
+        ;(payload.result || []).forEach((row) => {
           const formatted_player_data = {
             pid: row.pid,
             fname: row.fname,

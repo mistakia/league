@@ -19,12 +19,19 @@ class DataViewQueue {
     const cached_value = await redis_cache.get(cache_key)
 
     if (cached_value && !ignore_cache) {
+      // The cache value is the canonical { data_view_results, data_view_metadata }
+      // object. Tolerate a legacy bare-array entry (older /data-views/search builds
+      // cached the raw rows array under this same key) so a shape mismatch can never
+      // surface to the client as result: undefined and crash the data-view render.
+      const normalized = Array.isArray(cached_value)
+        ? { data_view_results: cached_value, data_view_metadata: {} }
+        : cached_value
       log('Cache hit', { request_id })
       this.send_cached_result({
         ws,
         request_id,
-        result: cached_value.data_view_results,
-        metadata: cached_value.data_view_metadata,
+        result: normalized.data_view_results,
+        metadata: normalized.data_view_metadata,
         append_results: params.append_results
       })
     } else {
@@ -179,7 +186,7 @@ class DataViewQueue {
         type: 'DATA_VIEW_RESULT',
         payload: {
           request_id,
-          result: data_view_results,
+          result: data_view_results || [],
           metadata: data_view_metadata,
           append_results: params.append_results
         }
