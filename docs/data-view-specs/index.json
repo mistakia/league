@@ -29,7 +29,7 @@
       "description": "Fantasy projections for week/season/rest-of-season timeframes",
       "table_name": "scoring_format_player_projection_points",
       "cache_strategy": "dynamic_by_season",
-      "requires_parameters": ["scoring_format_hash"]
+      "requires_parameters": ["scoring_format_id"]
     },
     "player_stats_from_plays": {
       "file": "./column-families/player-stats-from-plays.json",
@@ -43,7 +43,7 @@
       "description": "Fantasy points calculated from plays with scoring format customization",
       "table_name": "nfl_plays",
       "cache_strategy": "dynamic_by_season",
-      "requires_parameters": ["scoring_format_hash"],
+      "requires_parameters": ["scoring_format_id"],
       "supports": ["rate_types", "year_splits", "week_splits"]
     },
     "team_stats_from_plays": {

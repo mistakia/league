@@ -67,26 +67,28 @@ const get_scoring_format = async (scoring_format_id) => {
   }
 
   // Handle array format (take first element)
-  const hash = Array.isArray(scoring_format_id)
+  const format_id = Array.isArray(scoring_format_id)
     ? scoring_format_id[0]
     : scoring_format_id
 
-  if (!hash) {
+  if (!format_id) {
     return null
   }
 
-  const format = await db('league_scoring_formats').where('id', hash).first()
+  const format = await db('league_scoring_formats')
+    .where('id', format_id)
+    .first()
 
   if (!format) {
     // In test environment, fallback to default scoring instead of throwing error
     if (process.env.NODE_ENV === 'test') {
       console.warn(
-        `Scoring format not found for hash: ${hash}. Falling back to default scoring.`
+        `Scoring format not found for id: ${format_id}. Falling back to default scoring.`
       )
       return null
     }
     throw new Error(
-      `Scoring format not found for hash: ${hash}. Please ensure the scoring format exists in the database.`
+      `Scoring format not found for id: ${format_id}. Please ensure the scoring format exists in the database.`
     )
   }
 
@@ -565,7 +567,7 @@ const should_use_main_where = ({ params }) => {
 // inside the role_union inner sub, which the build_period_cte role_union
 // path does not yet support. All three production scoring_format_ides
 // in baseline.json have uniform `rec` values, so this is parity-safe.
-// SFB format `ed9c2daa...` would diverge -- track as a follow-up.
+// SFB formats (sfb15_sleeper/sfb15_mfl) would diverge -- track as a follow-up.
 const fp_role_attributions = async ({ params }) => {
   const scoring_format = await get_scoring_format(params.scoring_format_id)
   const rushing_inner = await generate_rushing_scoring_inner(scoring_format)

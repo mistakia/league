@@ -6,12 +6,12 @@
   "version": "1.0.0",
 
   "parameter_dependencies": {
-    "scoring_format_hash": {
+    "scoring_format_id": {
       "description": "Required for fantasy point calculations",
       "required_by_families": ["player_projections", "player_fantasy_points"],
       "validation": "Must be valid scoring format identifier or named format"
     },
-    "league_format_hash": {
+    "league_format_id": {
       "description": "Required for league-specific calculations",
       "required_by_families": ["player_projections", "league_specific"],
       "validation": "Must be valid league format identifier"
@@ -133,7 +133,7 @@
   "common_validation_errors": {
     "missing_required_params": {
       "error": "Parameter {param} is required for family {family}",
-      "examples": ["scoring_format_hash required for player_fantasy_points"]
+      "examples": ["scoring_format_id required for player_fantasy_points"]
     },
     "invalid_enum_value": {
       "error": "Value {value} not valid for parameter {param}",
