@@ -25,6 +25,7 @@
 // precise-bye-detection-inactive-traded-players.
 
 import db from '#db'
+import { PARTICIPATION_STATUS } from '#libs-shared/data-views/participation-cell.mjs'
 import {
   player_participation_weeks_cte_sql,
   player_years_teams_cte_sql,
@@ -123,7 +124,7 @@ export const participation_status_select = ({
   week_reference
 }) =>
   `CASE
-     WHEN ${PLAYER_PARTICIPATION_WEEKS_CTE}.active THEN 'active'
+     WHEN ${PLAYER_PARTICIPATION_WEEKS_CTE}.active THEN '${PARTICIPATION_STATUS.ACTIVE}'
      WHEN ${PLAYER_PARTICIPATION_WEEKS_CTE}.pid IS NULL
           AND ${PLAYER_YEARS_TEAMS_CTE}.teams IS NOT NULL
           AND NOT EXISTS (
@@ -132,6 +133,6 @@ export const participation_status_select = ({
               AND ${TEAM_WEEKS_PLAYED_CTE}.week = ${week_reference}
               AND ${TEAM_WEEKS_PLAYED_CTE}.team = ANY(${PLAYER_YEARS_TEAMS_CTE}.teams)
           )
-       THEN 'bye'
+       THEN '${PARTICIPATION_STATUS.BYE}'
      ELSE NULL
    END`

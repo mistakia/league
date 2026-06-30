@@ -4,6 +4,7 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
 import generate_view_id from 'react-table/src/utils/generate-view-id.js'
+import * as table_constants from 'react-table/src/constants.mjs'
 
 import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
@@ -15,6 +16,7 @@ import {
   get_position_color
 } from '@libs-shared'
 import get_row_axis_label_suffix from '@libs-shared/get-row-axis-label-suffix.mjs'
+import { render_participation_null } from '@libs-shared/data-views/participation-cell.mjs'
 import parse_table_state_from_url from '@core/data-views/parse-table-state-from-url.mjs'
 import { derive_auto_tags } from '@core/data-views/derive-auto-tags'
 import { nfl_team_abbreviations } from '@constants'
@@ -286,7 +288,12 @@ export default function DataViewsPage({
       )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [current_row_grain, selected_data_view, data_views_fields, data_view_changed]
+    [
+      current_row_grain,
+      selected_data_view,
+      data_views_fields,
+      data_view_changed
+    ]
   )
 
   const on_select_view = (args) => {
@@ -382,6 +389,44 @@ export default function DataViewsPage({
     [filtered_table_state.row_axes]
   )
 
+  // At week grain the server injects a hidden `participation_status` per row.
+  // Attach the participation-aware null render + export hooks to numeric columns
+  // so an otherwise-null cell renders 0 (active-but-zero) / BYE / blank distinctly.
+  // Gated on week grain: off-week-grain the signal is absent and columns are
+  // passed through unchanged, so non-week views keep their current behavior.
+  const all_columns = useMemo(() => {
+    if (!current_row_axes.includes('week')) return data_views_fields
+
+    const augmented = {}
+    for (const [key, column] of Object.entries(data_views_fields)) {
+      if (column.data_type !== table_constants.TABLE_DATA_TYPES.NUMBER) {
+        augmented[key] = column
+        continue
+      }
+
+      augmented[key] = {
+        ...column,
+        // table-cell passes the TanStack row -> read row.original
+        render_null: ({ row }) =>
+          render_participation_null({
+            participation_status: row?.original?.participation_status
+          }),
+        // table-menu export passes the raw data row -> read row directly;
+        // real values (including 0) pass through, only nulls get the marker.
+        export_value: ({ row, column_index }) => {
+          const value =
+            row[`${column.accessorKey}_${column_index}`] ??
+            row[column.accessorKey]
+          if (value != null) return value
+          return render_participation_null({
+            participation_status: row.participation_status
+          })
+        }
+      }
+    }
+    return augmented
+  }, [data_views_fields, current_row_axes])
+
   const get_row_axis_label_suffix_cb = useCallback(
     (row) => get_row_axis_label_suffix(current_row_axes, row),
     [current_row_axes]
@@ -472,7 +517,7 @@ export default function DataViewsPage({
         table_state={filtered_table_state}
         saved_table_state={filtered_saved_table_state}
         on_revert_view={revert_data_view}
-        all_columns={data_views_fields}
+        all_columns={all_columns}
         selected_view={selected_data_view}
         select_view={on_select_view}
         fetch_more={fetch_more}
@@ -501,8 +546,8 @@ export default function DataViewsPage({
         get_scatter_point_color={
           point_color_mode ? get_scatter_point_color : null
         }
-        row_axes_label="Splits"
-        no_row_axes_available_label="No splits available for selected columns"
+        row_axes_label='Splits'
+        no_row_axes_available_label='No splits available for selected columns'
         get_scatter_point_label_suffix={
           current_row_axes.length ? get_row_axis_label_suffix_cb : null
         }

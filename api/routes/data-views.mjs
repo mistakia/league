@@ -15,12 +15,58 @@ import get_param_option_counts, {
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import { nfl_plays_column_params } from '#libs-shared'
 import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
+import { render_participation_null } from '#libs-shared/data-views/participation-cell.mjs'
 import load_view_organization from '#libs-server/view-organization/load-view-organization.mjs'
 import add_user_tag from '#libs-server/view-organization/add-user-tag.mjs'
 import remove_user_tag from '#libs-server/view-organization/remove-user-tag.mjs'
 import toggle_favorite from '#libs-server/view-organization/toggle-favorite.mjs'
 
 const router = express.Router()
+
+const PARTICIPATION_STATUS_KEY = 'participation_status'
+
+// Apply the hidden week-grain participation signal to an export, then drop it.
+// For week-grain views the query injects one `participation_status` per row; a
+// null numeric stat cell should export as 0 (active-but-zero) / BYE / blank
+// rather than an ambiguous blank. The server has no column data_type, so
+// numeric-ness is inferred from the data: a field is numeric if any row holds a
+// number in it (identity/text fields hold strings and are left untouched). The
+// reserved participation_status column is always stripped from the output.
+// Non-week-grain results carry no participation_status, so this is a no-op
+// beyond being absent (nothing to strip, nothing to substitute).
+function apply_participation_to_export(data_view_results) {
+  if (!data_view_results || !data_view_results.length) return data_view_results
+
+  const has_participation = data_view_results.some(
+    (row) => row[PARTICIPATION_STATUS_KEY] != null
+  )
+
+  // Infer which fields are numeric (carry at least one number, never a
+  // non-empty non-number). Only these get the participation marker for nulls.
+  const numeric_fields = new Set()
+  const disqualified_fields = new Set()
+  for (const row of data_view_results) {
+    for (const [field, value] of Object.entries(row)) {
+      if (field === PARTICIPATION_STATUS_KEY) continue
+      if (typeof value === 'number') numeric_fields.add(field)
+      else if (value != null && value !== '') disqualified_fields.add(field)
+    }
+  }
+  for (const field of disqualified_fields) numeric_fields.delete(field)
+
+  return data_view_results.map((row) => {
+    const participation_status = row[PARTICIPATION_STATUS_KEY]
+    const next = {}
+    for (const [field, value] of Object.entries(row)) {
+      if (field === PARTICIPATION_STATUS_KEY) continue
+      next[field] =
+        has_participation && value == null && numeric_fields.has(field)
+          ? render_participation_null({ participation_status })
+          : value
+    }
+    return next
+  })
+}
 
 // Normalize data to ensure all rows have all columns
 function normalize_data_view_results(data_view_results) {
@@ -1289,6 +1335,11 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       .replace(/:/g, '-')
       .replace(/\..+/, '')
     const file_name = `${view.view_name}-${timestamp}`
+
+    // Resolve the hidden week-grain participation signal into the exported cells
+    // (0 / BYE / blank) and strip the reserved participation_status column before
+    // any format is produced (csv/md/html via normalize, json from the raw rows).
+    data_view_results = apply_participation_to_export(data_view_results)
 
     // Normalize data once for all export formats
     const { fields, normalized_results } =

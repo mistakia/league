@@ -573,6 +573,24 @@ WITH player_years_weeks AS (
 - INNER JOIN on timestamp table leverages indexes
 - Eliminates redundant player-week combinations
 
+#### Participation Signal (inactive vs zero vs bye)
+
+At week grain the row universe (`player_years_weeks`) emits a row for every REG week, including weeks a player did not play. Stat CTEs are `LEFT JOIN`ed with no outer `COALESCE`, so a no-contribution week yields `NULL` — indistinguishable from an inactive/DNP/bye week. To disambiguate, the query builder auto-injects one hidden value per `(pid, year, week)` row under the literal alias `participation_status`:
+
+- `active` — a `player_gamelogs` row exists with `active = true`. A null/zero numeric stat means the player **played but recorded zero** → renders **`0`**.
+- `bye` — no gamelog row **and** none of the player's season teams played that week → renders **`BYE`**.
+- `NULL` — everything else (inactive, DNP, IR, not-rostered) → renders **blank**.
+
+Mechanics and constraints:
+
+- **Auto-injection gate** (`get_data_view_results_query`): player (non-team) row grain + `row_axes` includes `week` + REG-only scope + non-empty year range. No user column, and `participation_status` is **not** in `table_state.columns`, so the `table_state` hash (cache key) is unchanged — old cached rows simply lack the field and render as before.
+- **Source CTEs** (`participation-status-cte.mjs`, composing `player-team-bridge-cte.mjs` + `rate-type-per-game.mjs`): `player_participation_weeks` (the gamelog⋈games join with the `active` filter relaxed, `bool_or(active)`), `team_weeks_played` (DISTINCT team-weeks, shared with the per-game denominator union), and `player_years_teams`.
+- **Row grain stays 1:1**: the bye check is a correlated `NOT EXISTS` against `team_weeks_played`, **not** a top-level `LEFT JOIN` — a mid-season-traded player's `teams[]` can match multiple team-weeks in one week, and a join would fan the output row and corrupt stat aggregates.
+- **Year reference** is derived from the joined week-source CTE (`player_years_weeks.year`), not the identity's `player_years.year` (a lower-grain CTE not joined at week grain).
+- **Stat values are never rewritten** — only display changes. Sorting, aggregation, and stored semantics are unaffected. The pure null→marker decision and the `active`/`bye` string constants are single-sourced in `libs-shared/data-views/participation-cell.mjs` (`render_participation_null`), imported by the client render hook, the client export hook, and the server export route; the server CASE imports the same constants so emitted value and decoded marker cannot drift.
+- **Rendering**: `mistakia/react-table`'s `table-cell` gained a `render_null` hook (per-column, else `meta.render_null`) plus a null guard on the percentile color. Numeric data-view columns set `render_null`/`export_value` (gated on week grain in `data-views.js`); the export route (`api/routes/data-views.mjs`) substitutes the marker for null numeric cells and strips the reserved `participation_status` column.
+- **Limitation (v1)**: a player dressed-inactive for an entire season has no `player_years_teams` row, so his bye weeks render blank rather than `BYE`; trade-boundary precision is likewise conservative. Precise resolution is deferred to the bye-precision follow-up.
+
 ### Centralized Reference System
 
 **Core Architecture**:
