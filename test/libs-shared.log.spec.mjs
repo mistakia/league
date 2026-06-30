@@ -150,6 +150,11 @@ describe('libs-shared/log', function () {
       expect(call.body.payload.error_fingerprint).to.be.a('string')
       expect(call.body.payload.context.request_id).to.equal('r1')
       expect(call.body.title).to.match(/^Error: something blew up/)
+      // dedup_key collapses recurrences of the same (service, fingerprint);
+      // must match the canonical log_error template in emit-signal.mjs.
+      expect(call.body.dedup_key).to.equal(
+        `log_error:unit-test:${call.body.payload.error_fingerprint}`
+      )
     })
 
     it('.error accepts severity override and an Error instance', async () => {

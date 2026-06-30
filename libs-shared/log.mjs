@@ -180,6 +180,13 @@ export const create_logger = (namespace, { service } = {}) => {
         error_fingerprint: fingerprint,
         context: merged_context
       },
+      // Collapse recurrences of the same (service, fingerprint) into one open
+      // signal instead of opening a fresh row per occurrence. The POST ingest
+      // route stores dedup_key as-given and does NOT synthesize one, so direct
+      // HTTP emitters must supply it. Must stay byte-identical to the canonical
+      // `log_error` arm in extension/signals/lib/emit-signal.mjs (default_dedup_key):
+      //   `log_error:<service>:<error_fingerprint>`
+      dedup_key: `log_error:${resolved_service}:${fingerprint}`,
       forensic_link
     }
 
