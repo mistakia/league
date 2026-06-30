@@ -27,6 +27,41 @@ const HIGH_SEVERITY_ERROR_CLASSES = new Set([
   'EvalError'
 ])
 
+// Known crawler / automated-agent user-agents. Search engines render the SPA and
+// scrapers replay the bundle, generating client errors that are never a real
+// user-facing regression.
+const CRAWLER_UA_RE =
+  /bot\b|crawl|spider|slurp|googlebot|bingbot|bingpreview|duckduckbot|yandex|baiduspider|facebookexternalhit|mediapartners|ahrefs|semrush|petalbot|gptbot|headlesschrome|phantomjs/i
+
+// Decide whether a client error report is worth emitting as a `log_error`
+// signal. Client telemetry is dominated by non-actionable noise — crawlers
+// executing the SPA, scrapers loading the bundle from a raw-IP mirror host, and
+// environmental stale-client / network conditions that point at no server bug.
+// Emitting one signal per report buries the rare genuine client regression, so
+// gate emission at this single choke point. Suppressed reports are still written
+// to the local request log for forensics; only the signal is skipped.
+//
+// Suppressed:
+//   - known crawler/bot user-agents
+//   - reports with no error message (empty/malformed POSTs, often endpoint scanners)
+//   - ChunkLoadError: a stale-client/post-deploy condition already recovered
+//     client-side (app/core/bugsnag.js); crawlers and pre-fix bundles can't run
+//     that recovery, so they still POST here
+//   - 'Failed to fetch': a client-side network/abort condition (adblock, navigate
+//     away, crawler abandons the request) with no actionable server signal — real
+//     API outages are caught by server-side run monitoring
+export const is_non_actionable_client_error = ({
+  error_class,
+  message,
+  user_agent
+} = {}) => {
+  if (user_agent && CRAWLER_UA_RE.test(user_agent)) return true
+  if (!message) return true
+  if (error_class === 'ChunkLoadError') return true
+  if (/failed to fetch/i.test(message)) return true
+  return false
+}
+
 const route_logger = create_logger('api:errors', { service: 'league-client' })
 
 /**
@@ -230,6 +265,20 @@ router.post('/?', async (req, res) => {
     logger({ leagueId, teamId, userId, error, ip, userAgent: user_agent })
 
     const error_class = error?.name || 'Error'
+
+    // Drop crawler / environmental / empty-message noise before it becomes a
+    // signal. The report is already in the local request log above.
+    if (
+      is_non_actionable_client_error({
+        error_class,
+        message: error?.message,
+        user_agent
+      })
+    ) {
+      res.send({ success: true })
+      return
+    }
+
     const severity = HIGH_SEVERITY_ERROR_CLASSES.has(error_class)
       ? 'high'
       : 'medium'
