@@ -171,6 +171,58 @@ const add_player_per_game_cte = ({
   players_query.withMaterialized(rate_type_table_name, cte_query)
 }
 
+export const TEAM_WEEKS_PLAYED_CTE = 'team_weeks_played'
+
+// Shared (home/away) UNION ALL over nfl_games. Both the per-game denominator
+// (COUNT(*) per (team, year[, week]) in add_team_per_game_cte) and the
+// participation bye-detection signal (DISTINCT team-weeks played, below)
+// consume this single union so there is exactly one nfl_games h/v union
+// definition in the codebase (review C2). The per-game path passes the view's
+// active row_axes; the participation path forces (year, week) so the team-week
+// set is always keyed at week grain regardless of the view's splits.
+export const build_team_sides_union = ({
+  row_axes = [],
+  query_context,
+  params = {}
+}) => {
+  const make_side = (team_col) => {
+    const sub = db('nfl_games').select(`${team_col} as team`)
+    if (row_axes.includes('year')) sub.select('year')
+    if (row_axes.includes('week')) sub.select('week')
+    apply_scope_to_query({
+      query: sub,
+      table_name: 'nfl_games',
+      query_context,
+      column_params: params
+    })
+    return sub
+  }
+
+  return make_side('h').unionAll(make_side('v'), true)
+}
+
+// DISTINCT (team, year, week) set of the REG weeks each team played within the
+// view scope. The participation signal uses this to classify a no-gamelog week
+// as 'bye' (none of the player's teams played that week) rather than another
+// absence. Idempotent via query_context.registered_ctes.
+export const register_team_weeks_played_cte = ({
+  players_query,
+  query_context
+}) => {
+  if (!query_context.registered_ctes) query_context.registered_ctes = new Set()
+  if (query_context.registered_ctes.has(TEAM_WEEKS_PLAYED_CTE)) return
+  const union = build_team_sides_union({
+    row_axes: ['year', 'week'],
+    query_context,
+    params: {}
+  })
+  players_query.with(
+    TEAM_WEEKS_PLAYED_CTE,
+    db.select('team', 'year', 'week').distinct().from(union.as('g'))
+  )
+  query_context.registered_ctes.add(TEAM_WEEKS_PLAYED_CTE)
+}
+
 const add_team_per_game_cte = ({
   players_query,
   params,
@@ -204,25 +256,10 @@ const add_team_per_game_cte = ({
     group_cols.push('week')
   }
 
-  const make_side = (team_col) => {
-    const sub = db('nfl_games').select(`${team_col} as team`)
-    if (row_axes.includes('year')) sub.select('year')
-    if (row_axes.includes('week')) sub.select('week')
-    apply_scope_to_query({
-      query: sub,
-      table_name: 'nfl_games',
-      query_context,
-      column_params: params
-    })
-    return sub
-  }
-
-  const home_side = make_side('h')
-  const away_side = make_side('v')
   const cte_query = db
     .select(...select_cols)
     .count('* as rate_type_total_count')
-    .from(home_side.unionAll(away_side, true).as('g'))
+    .from(build_team_sides_union({ row_axes, query_context, params }).as('g'))
     .groupBy(...group_cols)
 
   // MATERIALIZED required: predicates are pushed at construction time; planner

@@ -26,6 +26,12 @@ import {
 } from '#libs-server/data-views/where-string.mjs'
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 import { build_query_context } from '#libs-server/data-views/query-context.mjs'
+import {
+  register_participation_status_ctes,
+  join_participation_status_ctes,
+  participation_status_select,
+  participation_year_reference
+} from '#libs-server/data-views/participation-status-cte.mjs'
 import resolve_view_scope from '#libs-server/data-views/resolve-view-scope.mjs'
 import {
   is_year_offset_range,
@@ -1479,7 +1485,10 @@ const get_grouped_clauses_by_table = ({
   return grouped_clauses_by_table
 }
 
-const group_tables_by_supported_row_axes = (grouped_clauses_by_table, row_axes) => {
+const group_tables_by_supported_row_axes = (
+  grouped_clauses_by_table,
+  row_axes
+) => {
   const grouped_by_row_axes = {}
 
   for (const [table_name, table_info] of Object.entries(
@@ -2024,6 +2033,58 @@ export const get_data_view_results_query = async ({
     if (row_axis === 'week') {
       players_query.select(data_view_options.week_reference)
       players_query.groupBy(data_view_options.week_reference)
+    }
+  }
+
+  // Auto-inject the hidden participation_status signal at player week grain so
+  // the renderer can distinguish active-but-zero (renders 0) from on-bye
+  // (renders BYE) from did-not-play (renders blank) for otherwise-NULL numeric
+  // stat cells. One hidden value per (pid, year, week) under the literal alias
+  // `participation_status`; no user column, no table_state change (so the cache
+  // key is unaffected). REG-scoped only -- the participation CTEs are REG-only,
+  // and out-of-scope (e.g. POST) views safely emit no signal. The numeric-column
+  // gate lives client-side (where column data_type is known); the server has no
+  // column type information, and an unused hidden column is harmless.
+  if (query_context.row_grain_id !== 'team' && row_axes.includes('week')) {
+    const { seas_types } = decompose_nfl_weeks({
+      nfl_weeks: query_context.nfl_week_ids
+    })
+    const is_reg_scope =
+      seas_types.length > 0 &&
+      seas_types.every((seas_type) => seas_type === 'REG')
+
+    if (is_reg_scope && data_view_options.year_range.length) {
+      const { pid_reference, week_reference } = data_view_options
+      // year_reference comes from the week source (in scope), not the identity's
+      // player_years.year (a lower-grain CTE not joined here).
+      const year_reference = participation_year_reference({ week_reference })
+
+      register_participation_status_ctes({
+        players_query,
+        query_context,
+        year_range: data_view_options.year_range
+      })
+      join_participation_status_ctes({
+        players_query,
+        query_context,
+        pid_reference,
+        year_reference,
+        week_reference
+      })
+
+      // The literal alias (not the `_<idx>` suffix machinery) keeps
+      // row.original.participation_status stable for the client renderer. The
+      // CASE references LEFT-joined CTE columns, so Postgres requires it be
+      // repeated verbatim in GROUP BY rather than referenced by alias.
+      const participation_case = participation_status_select({
+        pid_reference,
+        year_reference,
+        week_reference
+      })
+      players_query.select(
+        db.raw(`${participation_case} AS participation_status`)
+      )
+      players_query.groupByRaw(participation_case)
     }
   }
 
