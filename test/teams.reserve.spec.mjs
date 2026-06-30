@@ -9,6 +9,7 @@ import league from '#db/fixtures/league.mjs'
 import {
   current_season,
   roster_slot_types,
+  active_roster_slots,
   transaction_types,
   player_nfl_status,
   player_nfl_injury_status
@@ -414,7 +415,8 @@ describe('API /teams - reserve', function () {
           week: current_season.week,
           year: current_season.year
         })
-        .whereNot('slot', roster_slot_types.RESERVE_SHORT_TERM)
+        .whereIn('slot', active_roster_slots)
+        .orderBy('pid')
         .limit(1)
 
       const pid = players[0].pid
