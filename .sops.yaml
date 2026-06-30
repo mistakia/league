@@ -1,0 +1,22 @@
+# sops/age recipient policy for league config secrets.
+#
+# config/config-production.json holds the production secrets (Postgres password,
+# JWT secret, league API auth token, Resend API key, job-tracker API key),
+# encrypted to the league domain's recipient set — every host that loads
+# config/index.mjs under NODE_ENV=production and therefore decrypts the file:
+# the league main host (.45, PM2 server + scheduled scripts), league-worker-1
+# (.107, odds/plays import workers), and base-storage (.22, the Underdog
+# best-ball ADP import cron, which reaches league prod PG over league-tunnel).
+# Each host's private identity lives only on that host at
+# ~/.config/sops/age/keys.txt; this file records only PUBLIC recipients
+# (safe to commit). Re-encrypt after editing: `sops config/config-production.json`.
+# Add a host = add its recipient here + `sops updatekeys config/config-production.json`.
+#
+# Only the production config is sops/age-migrated. config-development.json and
+# config-test.json stay on the legacy symmetric @tsmx/secure-config scheme
+# (dereferenced via CONFIG_ENCRYPTION_KEY_FILE) because their consumers — local
+# dev and CI — are NOT league age recipients; config-test.json is decrypted with
+# the committed in-repo test fixture key. Both are intentionally unmatched here.
+creation_rules:
+  - path_regex: config/config-production\.json$
+    age: age1ajtjq48cp44328um33x0hgwm4f8s9wcs5kaa092mdruncc875seqcspgwt,age1y2v9qgpd7sxctst6mly7ztqnv3wrgrqw9wx7dsrldvxk8eer2u7s4zae7m,age1gmhatmnl7f28yz4nhz6y527uxzrelg39s05ex2tvyfsumr45tvss40nm4a

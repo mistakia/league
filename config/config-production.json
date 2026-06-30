@@ -1,50 +1,52 @@
 {
-  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
-  "ssl": true,
-  "key": "/root/league/key.pem",
-  "cert": "/root/league/cert.pem",
-  "port": 443,
-  "url": "https://xo.football",
-  "nominationTimer": 45000,
-  "bidTimer": 14000,
+  "user_agent": "ENC[AES256_GCM,data:pkZc4NHhb4sEoSieRVCxKplyWf6T/gR1irg/YZQ9tbPdl473AR9+eYxXsoALF+b4vJPl3w1ilj7tMsUc9/f6Btab9Ok0sgAS4fLaCzg3K0LRC6Rwm9WhlqN66gayT670Rt8W+Pd9vKtNRthozBGCcR9hQ32BtLc3,iv:BDgxc5nlFXo2XmU+3YgMUgPJoOsz/jhkTc8/iEkIn6o=,tag:VJNKpUZ5Gvh8jU/uHZ19FQ==,type:str]",
+  "ssl": "ENC[AES256_GCM,data:w2X4JA==,iv:hktx7mOWSrboHs+uBUjL6aT9S53g9v62OeW4rUciWTs=,tag:1gqBJ0xAjw3f6osrrAx0Hw==,type:bool]",
+  "key": "ENC[AES256_GCM,data:K3nu+Hr0sltQs17CFu1KLb2UHzI=,iv:7EgYqIPIKqyKtcpDejQHVEUl78BPmeefz8Ep918Nzk4=,tag:Zg9e6e+O73GJ21kHlDB0cw==,type:str]",
+  "cert": "ENC[AES256_GCM,data:/O5cbDDBZz3OKqnKMZo1SkcaHxBW,iv:WEmMdESy8QVgs0RKEi3cgO342CDcFH2CJLz2ltZos7o=,tag:NTE0sOy6iJdnQBSAK7iRmA==,type:str]",
+  "port": "ENC[AES256_GCM,data:opFW,iv:/tbd9qOHmtRynE1haTiBMEtZsWYyRxhcDJ3w09Fbbi8=,tag:3pKntPiF3hs5MPwGh906UA==,type:float]",
+  "url": "ENC[AES256_GCM,data:jnqsIwElneIXHNIoZXDziM4FgQ==,iv:JChKGcY5wDTqSfEGsK3pn8jlzp3oO57fZ2mq74yJjiI=,tag:IEcgCeeAvYQSkdESiAsj8Q==,type:str]",
+  "nominationTimer": "ENC[AES256_GCM,data:6swUixc=,iv:fWXBfL5FaUYDwvYy/yYXrDGdP32jhsiVjZNKk9CSnO4=,tag:vJLiumiYpsS90QG95co/5g==,type:float]",
+  "bidTimer": "ENC[AES256_GCM,data:mbGDl4w=,iv:9/KdaL8AAd/MrgY8YlsVWsOPYS+4kEHXul7c8AuICdc=,tag:qf0UCi6udxgi3kzCLyJGgQ==,type:float]",
   "email": {
-    "resend_api_key": "ENCRYPTED|13bbb25f7f20616ead0a7bb62db7930d|d574f6370b0f59097000dea1dc67bfa799f0e0fb1437b366cc92ac5e289f934591e2b1841f68e653e715fb5d1edc0d3f",
-    "from": "noreply@xo.football"
+    "resend_api_key": "ENC[AES256_GCM,data:mrY2wj6uKPGq82mAS7QJ444VGtx73ina813HGzjvz1CFRHSj,iv:hvqgugW2G4MiUYyxjZGCk2FPYV+vpu/Ut3P8tSmdNKA=,tag:ipar2eKCv43sBSmj1datKg==,type:str]",
+    "from": "ENC[AES256_GCM,data:jT/4HxnF9MeQVaZ8HcmSdUgl8A==,iv:+7V8jk+QTIn4DmaqhQK/R8pJXIli9Y0cTZV089sMeMc=,tag:vNd9B+Ro/7k7sNbU6m6V3w==,type:str]"
   },
-  "league_api_auth_token": "ENCRYPTED|8266a739037e72fff10c427e0cfcfae5|5e40700c0dc7e630dbc211e38f97c8c2566a25493f3519bb0032ac9076b4f256948dbfdb29d888b4052b94b658eba08744823f5734aac4ff35cdfefade6c98eab4560b4ed0e9d3eea2f92ece899e0de04fb9a73c08f47cac9734fac92d5c823348b45388c092c4357d682d43a8e95e71cc2bf1c4f8dedbee0958e48b69d8e2c7",
+  "league_api_auth_token": "ENC[AES256_GCM,data:1XfmiwntkyZu1JaaYbfri28HVrYCLz/Gql8oUGd1G0su7D7qomfzmo2fVbJLarHtidjU4rvJMNK+mXVzzEN3vtt267DBIa/0PE7h38TE7E2o78msuyQWemvhiRm3h4+DBYrMPn0SThct38N3LRLnu7VCOmaQ56Sm,iv:qTdeRxDCH3OP1hMC+RwzSJ/bwoIwwnu7aoScDgZww30=,tag:5jG/IiKT9UpLDPgHZvgujQ==,type:str]",
   "jwt": {
-    "secret": "ENCRYPTED|ed2a3311603c57292e306419bfe616f7|ee2dc5729340077ee994d8dd030e2b1d8793818edc0310061bd0f142df094824",
-    "algorithms": ["HS256"],
-    "credentialsRequired": false
+    "secret": "ENC[AES256_GCM,data:0I/Cl80qSQA0RyMUAOQl6stO,iv:3/YL2HoFc7mtMBPVM15clfYMnX+E4PPKOfglylEYVZY=,tag:dbFStsAbh3GI/DUXX+dYFg==,type:str]",
+    "algorithms": [
+      "ENC[AES256_GCM,data:ehjPraw=,iv:gBzxikarALfz2/mtGdE77XQ2vlqb0tKZpt9IsOjwSiY=,tag:pNm1Sj3hSHVxVDCbvM+fHA==,type:str]"
+    ],
+    "credentialsRequired": "ENC[AES256_GCM,data:+4AEP08=,iv:yZmk/vF6do27x6UIJ0R13OX45T8GPkb0LxZZpPFB9u0=,tag:utr2wOUZY3rdPOwqZzuM0w==,type:bool]"
   },
   "postgres": {
-    "client": "postgres",
+    "client": "ENC[AES256_GCM,data:1ISw4Zaofa8=,iv:tsaD11PgjdcUammgHqCorT0dfwPMnN/Nqrsu3YdnQrs=,tag:d967E9SHKgxO6cXPDFuhQQ==,type:str]",
     "connection": {
-      "host": "38.242.199.45",
-      "user": "league_user",
-      "password": "ENCRYPTED|09e7ce2470732a397531984903482de4|344c240c21b2355585ffbce2a5ae2f704d813822b6d9955de2e653d8a06a76e0",
-      "database": "league_production",
-      "decimalNumbers": true,
-      "port": "5432"
+      "host": "ENC[AES256_GCM,data:0xzfnSYRh0R8qdiR3g==,iv:afEQEMBWqVNqf+jvFG2dsUDq1+rTIeIOZM45bprz4NQ=,tag:7w+gstGGX0LSD6lKtofPZw==,type:str]",
+      "user": "ENC[AES256_GCM,data:sGs5bd2RIcqlSss=,iv:U55ijgbyb6wqAu7EigeMcpMBHsUryKs5TCzV1hLGWl4=,tag:Jk8Vn64kgu7wE5H31R8WAQ==,type:str]",
+      "password": "ENC[AES256_GCM,data:3Z9zk9r0SlVAfJHsHOwJww==,iv:gqmnzA0tRS7tM9XLHEAVarf/jqEMOlGOBIJw/XbnVBI=,tag:QxuxXwkb4kOlcrMzQbMXZQ==,type:str]",
+      "database": "ENC[AES256_GCM,data:FBZzQ6tYI/owqmZuQLsdaZ8=,iv:Dse5BE2N9Sth3+uKjTREmOfqTBifCjC0dZVwZ0AhXgE=,tag:ojHnFboVT5dD/qPH5t0lTA==,type:str]",
+      "decimalNumbers": "ENC[AES256_GCM,data:v6YZNA==,iv:e0SSQCqLPeozBTbFMAW9eMO4YeNg1M0xw2GTpKlcuxs=,tag:jHwaVpIbZrxT8SRVNk/aRQ==,type:bool]",
+      "port": "ENC[AES256_GCM,data:T4+j3A==,iv:U/kw2A+rFYnJllPn0svJe6MBMd+k3gHEopN3ipKhuTo=,tag:7LnaGLxbjKOEM1P4eZhyUQ==,type:str]"
     },
     "pool": {
-      "min": 2,
-      "max": 20,
-      "acquireTimeoutMillis": 30000,
-      "createTimeoutMillis": 30000,
-      "idleTimeoutMillis": 30000,
-      "reapIntervalMillis": 1000
+      "min": "ENC[AES256_GCM,data:hQ==,iv:iKZu5ezVwhnu09LkniSEzv1aIFrnWFhrhghRqNXHEEw=,tag:iRdBJJ6ApalCViM9TKCqxA==,type:float]",
+      "max": "ENC[AES256_GCM,data:QXY=,iv:llP4S4lukNp31FJa+bXLMiPRd9EK+8u8Lsp1GHIV6q4=,tag:uf6GoofjJFsg4XWMlyVnfg==,type:float]",
+      "acquireTimeoutMillis": "ENC[AES256_GCM,data:CLsqfWc=,iv:H0UpqiP3kEFKlXpY7mgc1Z63gmjUAdavuAR77ADZuG0=,tag:Z3dx2GCXgf/6N3uiMk0+hQ==,type:float]",
+      "createTimeoutMillis": "ENC[AES256_GCM,data:A4jOlbk=,iv:Dez+0ioBSvr/vWeeET1hEbWkGHcYP0rerRVpIM+7lSY=,tag:4cAwJYh8+L1lyilq/TGQ8A==,type:float]",
+      "idleTimeoutMillis": "ENC[AES256_GCM,data:nnr3scs=,iv:H3wJUvR0H913iuCVVouVejf4aK2rEZxS3posr7kp7nY=,tag:1v8ORvjqXkQaywwpwqpMBw==,type:float]",
+      "reapIntervalMillis": "ENC[AES256_GCM,data:wNT9bQ==,iv:bv2wqEVt1VyE0bqgUqyS05s2t/bZUYttJg4XsPCtit0=,tag:ytKHa1Y0cdI/NvRNCdWtCA==,type:float]"
     }
   },
   "filter_prop_pairings_options": {
     "market_odds_max_threshold": null,
-    "historical_rate_min_threshold": 0.7,
-    "opponent_allowed_rate_min_threshold": 0,
-    "joint_historical_rate_min_threshold": 0,
-    "prop_hits_min_threshold": 0,
-    "pairing_size_max_threshold": 3,
+    "historical_rate_min_threshold": "ENC[AES256_GCM,data:6isa,iv:qQbnPSxFsJq36HBF9dpjSFejO4epiRzPld3IPtMpzqk=,tag:jHgQMF5Qekx3xTH3CVGf3g==,type:float]",
+    "opponent_allowed_rate_min_threshold": "ENC[AES256_GCM,data:yA==,iv:T9pqEodYvksZLqQYMCY8CHM0dcSz8WqCcXLs4YeW90A=,tag:dyvLpvJ7vYGYhnD+QB+Ztg==,type:float]",
+    "joint_historical_rate_min_threshold": "ENC[AES256_GCM,data:Zg==,iv:vlWba0LykdVYRVfBPXg+ACwyXs9ozmT7jDHUf+B3taA=,tag:8Q3+RyOtGB9a/XeTXj3gtQ==,type:float]",
+    "prop_hits_min_threshold": "ENC[AES256_GCM,data:7A==,iv:2z2I/3V3CF5/tSlA/wSzvy4VT+/aOYyJrTlYaIWxhlw=,tag:GU/fJ09XaLxSDc0Rx0ghxA==,type:float]",
+    "pairing_size_max_threshold": "ENC[AES256_GCM,data:rQ==,iv:kt9ddZFSFlMWvVoVVMuLNrBblBIhJq/OTMCRj6jqP1c=,tag:2svbbB8ALK7EpPxU4PfD8w==,type:float]",
     "highest_payout_min_threshold": null,
-    "lowest_payout_min_threshold": 200,
+    "lowest_payout_min_threshold": "ENC[AES256_GCM,data:tpQk,iv:b1MhX99qIOPctyhcIfcR7854C5jpBzhNQo1i9LW5m7c=,tag:nex/QW8rl4mEUYMA+DNkjA==,type:float]",
     "risk_total_max_threshold": null,
     "edge_min_threshold": null,
     "total_games_min_threshold": null,
@@ -54,12 +56,12 @@
     "exclude_props": [],
     "include_props": [],
     "exclude_nfl_team": [],
-    "opponent_allowed_py_min": -20,
-    "opponent_allowed_ry_min": -10,
-    "opponent_allowed_recy_min": -15,
+    "opponent_allowed_py_min": "ENC[AES256_GCM,data:XKEK,iv:PjupktvHZXxkNfzna8s6w5te2cZhxWjVBgzGYkerVKs=,tag:1fLlic+l6taOwacocPqJHw==,type:float]",
+    "opponent_allowed_ry_min": "ENC[AES256_GCM,data:sjIG,iv:GbvZFq6+KaWtO8CR6aPAe6tztU8m5/zUUyMnFT9RFF0=,tag:7KOe8g+Uvecvi66G8BwxrQ==,type:float]",
+    "opponent_allowed_recy_min": "ENC[AES256_GCM,data:0amQ,iv:EDos5FS+Xhdk3DuPqV9HRR40viD2XurlQ7eZ/0evoms=,tag:24E11A7d3MTSWcvJymlCjw==,type:float]",
     "opponent_allowed_pc_min": null,
     "opponent_allowed_tdp_min": null,
-    "opponent_allowed_rec_min": -1,
+    "opponent_allowed_rec_min": "ENC[AES256_GCM,data:fj8=,iv:Oh/IwQvtSfhqeYqIyykpqDX40gqakdL8U0g/M50Jwds=,tag:FPl0vO71XglWpv0bEOPXJw==,type:float]",
     "opponent_allowed_ints_min": null,
     "opponent_allowed_ra_min": null,
     "opponent_allowed_tdrec_min": null,
@@ -67,10 +69,30 @@
     "opponent_allowed_pa_min": null
   },
   "job_tracker": {
-    "api_url": "https://base.tint.space",
-    "api_key": "ENCRYPTED|f74f1f4858d9cecfd84f211ecfb094ea|93cb356fc580a8287a12a293cc6bb103db3a7184b4df30a55382ae7e22754a958f3fde55b0eba17180453a45f6c7197c1d41b55fb418ebc69c46c212d561039dab3e73c68fd47eb381a8a69033e1cd3c"
+    "api_url": "ENC[AES256_GCM,data:TveaBmmfXQ22ZDkIrwjNIV1Yf7eYjw4=,iv:+R3glC3qZum9TrDKCwprdxIHpn0lahE+YXA6ZL8wX7c=,tag:oAMtL3QACAOJ3DPu4cXj5g==,type:str]",
+    "api_key": "ENC[AES256_GCM,data:+7ANoIdax0fnfHiZ38Q5TUKuZFZI76+Xq5Ci/li/WMvHqEH4sRlQdYtgb+TEZVwEBoe9TPrxicnd8VJsvfDs/Q==,iv:4RSgKgnOuM2Itg7nulAw6M41tEzC0LlIdDBVXJ7llI0=,tag:n3HpyAU10/JGgcPd9rK1qQ==,type:str]"
   },
-  "signals_api_url": "https://base.tint.space",
+  "signals_api_url": "ENC[AES256_GCM,data:alWQQ7AcRD3kdzZKHMPbFVLQJEr0ATk=,iv:YgVcc0L9TBysfLJXbaFVsvhS6+1bwcnDp/cQUiiGoUE=,tag:y6MJetUSc7zkIgit4lB88A==,type:str]",
   "signals_secret": "",
-  "sourcemap_dir": "/root/league/sourcemaps"
+  "sourcemap_dir": "ENC[AES256_GCM,data:OALbSuLsRpWN6NUroHvZc9r6wkq7WQI=,iv:UuC8E0/LkEDiymMZU5kCV3iS7mJtby8HSwi5TJ0xLbQ=,tag:u16NEL3JTbm7OaIkogGrNQ==,type:str]",
+  "sops": {
+    "age": [
+      {
+        "enc": "-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB3V0gvZFNUcVNhRTF2OXo1\ncmhBTHV1NzdFM0lRaWVrY1ZjejkzQVpVTWlRCnBqejkvN3h4Wm1JOFBHbkFWaVY2\nYlJjdW5wTFJ5dXdyU1g4dWZnVFdVd3cKLS0tIEYySi9qV3lXQ1ZrY2xadTNKNmY3\nVjdNTVRuQ2VlMzJhLy8reUZGMzRDNHMKp7kgs6WahbC/Tme5FJGDv6G1kSA/x3i5\nD+V3WsEOEeuMAbXQYpRv063F+eS/KQyMY6gPkKbDA3i7uGDMpvi80Q==\n-----END AGE ENCRYPTED FILE-----\n",
+        "recipient": "age1ajtjq48cp44328um33x0hgwm4f8s9wcs5kaa092mdruncc875seqcspgwt"
+      },
+      {
+        "enc": "-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0QVJCd05YSXVLWjV5MTFk\nV0VUME1IZFBoSS9udGJ1cjFzKzd2UmRmR1hjCkVpZjNUVlEydy9LMkNLVVM5WkJa\nTC9aNHZFUXczMjhhLy9rd0VTVEF5Y2sKLS0tIFFXb2ZqZ3FZd3RpR255dkJlSzd5\nS2dacGJsMitjWTJyNzNpdzV6NzdwSEUK9/PbT5A6Tgrk0WywdEAztw3go/t06jtJ\nU2cZIDRGNs6VAMUIg88o2V9BWkeYNt+RYoSMOJgXZ819yhGalyYFEQ==\n-----END AGE ENCRYPTED FILE-----\n",
+        "recipient": "age1y2v9qgpd7sxctst6mly7ztqnv3wrgrqw9wx7dsrldvxk8eer2u7s4zae7m"
+      },
+      {
+        "enc": "-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2Q3VHUnhKMW9yOHF2M3V6\nTVUyQnVMeC9yQS8zQW1IUVJaNVNZeHJYdVFVClVpOHkwZTdnM3FDSnhDZ2dSSEx6\nZzJnMnBhK1pGSi9leU1RMTRSOFByUFkKLS0tIGlnbEQ5REl1UDVmM2oyT0MzUDVh\nRFhFZHBNNEFPZUMySHRucHA2Y2dTU3cKLiFEJ40G8HByGRlNNgyaS3XYz69sq/6Z\nA9YSuiWjWyQj7PN0H0gHKihzq64MJL0tRDI+6014ADTAyq4fBzqo0g==\n-----END AGE ENCRYPTED FILE-----\n",
+        "recipient": "age1gmhatmnl7f28yz4nhz6y527uxzrelg39s05ex2tvyfsumr45tvss40nm4a"
+      }
+    ],
+    "lastmodified": "2026-06-30T02:28:01Z",
+    "mac": "ENC[AES256_GCM,data:dk7ElZWhdvUEHkTId41l6a7Kc3z00/jXvUF7OZo8IZDSIQIn3d5qvw/pu13EBlmf7v9BQDwMlZn4UGDu1Z9ZL6YpJOvK0FYfXH9Xfv0mA8j0tvusZd2euuQNGUXiVCdt2V5fLkxfoBjezMJtCxGK27AMFzCVnbC8Ej6/Lvh58Vk=,iv:kSGEdtegOmiNSMHZaRD2VjKa+NGjDLB/B1JO7cFR9os=,tag:siArmuoAq/Loq3Xb+T43Aw==,type:str]",
+    "unencrypted_suffix": "_unencrypted",
+    "version": "3.13.1"
+  }
 }
