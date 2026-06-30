@@ -5,8 +5,13 @@
 # encrypted to the league domain's recipient set — every host that loads
 # config/index.mjs under NODE_ENV=production and therefore decrypts the file:
 # the league main host (.45, PM2 server + scheduled scripts), league-worker-1
-# (.107, odds/plays import workers), and base-storage (.22, the Underdog
-# best-ball ADP import cron, which reaches league prod PG over league-tunnel).
+# (.107, odds/plays import workers), base-storage (.22, the Underdog best-ball
+# ADP import cron), and macbook2025 (10.27.0.161, the league import + check
+# scheduled-commands — caesars-odds, pff/pfr imports, cross-source checks —
+# which reach league prod PG over league-tunnel). All four reach league prod PG
+# over league-tunnel. (macbook2025 was omitted from the 2026-06-29 cutover and
+# added 2026-06-30 after its NODE_ENV=production league crons began failing
+# load_sops_json with "no key has to be successful".)
 # Each host's private identity lives only on that host at
 # ~/.config/sops/age/keys.txt; this file records only PUBLIC recipients
 # (safe to commit). Re-encrypt after editing: `sops config/config-production.json`.
@@ -19,4 +24,4 @@
 # the committed in-repo test fixture key. Both are intentionally unmatched here.
 creation_rules:
   - path_regex: config/config-production\.json$
-    age: age1ajtjq48cp44328um33x0hgwm4f8s9wcs5kaa092mdruncc875seqcspgwt,age1y2v9qgpd7sxctst6mly7ztqnv3wrgrqw9wx7dsrldvxk8eer2u7s4zae7m,age1gmhatmnl7f28yz4nhz6y527uxzrelg39s05ex2tvyfsumr45tvss40nm4a
+    age: age1ajtjq48cp44328um33x0hgwm4f8s9wcs5kaa092mdruncc875seqcspgwt,age1y2v9qgpd7sxctst6mly7ztqnv3wrgrqw9wx7dsrldvxk8eer2u7s4zae7m,age1gmhatmnl7f28yz4nhz6y527uxzrelg39s05ex2tvyfsumr45tvss40nm4a,age1nvpxn4r70h90wvgh6vgr3r0hwej33p6qjtdkgthanlvtle8hpdssqdm4j0
