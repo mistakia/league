@@ -128,6 +128,12 @@ const route_logger = create_logger('api:errors', { service: 'league-client' })
  *                     type: integer
  *                     description: Column number where error occurred (optional)
  *                     example: 12
+ *                   request_url:
+ *                     type: string
+ *                     description: >-
+ *                       Target URL of a failed fetch (optional). Attached client-side for
+ *                       network-layer errors so they can be triaged to a specific endpoint.
+ *                     example: "https://xo.football/api/leagues/2/seasons/2024"
  *                 required:
  *                   - message
  *                 example:
@@ -300,6 +306,10 @@ router.post('/?', async (req, res) => {
         filename: error?.filename || null,
         lineno: error?.lineno ?? null,
         colno: error?.colno ?? null,
+        // Target URL of a failed fetch (api/service.js -> bugsnag.js). Lets a
+        // genuine real-user 'Failed to fetch' be triaged to a specific endpoint
+        // instead of an opaque network error.
+        request_url: error?.request_url || null,
         // Client-supplied metadata (capture surface, component stack, request
         // options, field info, user) — previously only captured by Bugsnag.
         handler: metadata?.handler || null,

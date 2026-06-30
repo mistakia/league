@@ -458,13 +458,26 @@ export const api_request = (apiFunction, opts, token) => {
 }
 
 export const dispatch_fetch = async (options) => {
-  const response = await fetch(options.url, options)
+  let response
+  try {
+    response = await fetch(options.url, options)
+  } catch (network_error) {
+    // A network-layer failure (e.g. `TypeError: Failed to fetch` from an
+    // aborted/reset connection or a navigated-away client) carries no URL of
+    // its own. Attach the target so the client error report can be triaged to
+    // a specific endpoint rather than an opaque "Failed to fetch".
+    if (network_error && !network_error.request_url) {
+      network_error.request_url = options.url
+    }
+    throw network_error
+  }
   if (response.status >= 200 && response.status < 300) {
     return response.json()
   } else {
     const res = await response.json()
     const error = new Error(res.error || response.statusText)
     error.response = response
+    error.request_url = options.url
     throw error
   }
 }

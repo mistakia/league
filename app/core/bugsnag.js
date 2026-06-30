@@ -99,7 +99,10 @@ const post_to_league_api = (err, metadata) => {
         error: {
           message: err?.message || 'Unknown',
           stack: truncate_stack(err?.stack),
-          name: err?.name || 'Error'
+          name: err?.name || 'Error',
+          // Target URL of a failed fetch, attached in api/service.js so a
+          // network-layer error is triageable to a specific endpoint.
+          request_url: err?.request_url || null
         },
         metadata: enriched
       })
