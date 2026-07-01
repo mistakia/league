@@ -1020,6 +1020,14 @@ DROP TYPE IF EXISTS public.dfs_source_id;
 DROP TYPE IF EXISTS public.coverage_type;
 DROP TYPE IF EXISTS public.adp_source_id;
 DROP EXTENSION IF EXISTS pgcrypto;
+-- *not* dropping schema, since initdb creates it
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
+
 --
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
 --
@@ -55771,1183 +55779,1183 @@ ALTER TABLE ONLY public.seasons
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: -
 --
 
-GRANT USAGE ON SCHEMA public TO league_readonly;
+GRANT USAGE ON SCHEMA public TO league_reader;
 
 
 --
 -- Name: TABLE adp_format; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.adp_format TO league_readonly;
+GRANT SELECT ON TABLE public.adp_format TO league_reader;
 
 
 --
 -- Name: TABLE composite_market_value_blend_weights; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.composite_market_value_blend_weights TO league_readonly;
+GRANT SELECT ON TABLE public.composite_market_value_blend_weights TO league_reader;
 
 
 --
 -- Name: SEQUENCE composite_market_value_blend_weights_version_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.composite_market_value_blend_weights_version_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.composite_market_value_blend_weights_version_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE composite_market_value_calibration; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.composite_market_value_calibration TO league_readonly;
+GRANT SELECT ON TABLE public.composite_market_value_calibration TO league_reader;
 
 
 --
 -- Name: TABLE composite_market_value_daily; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.composite_market_value_daily TO league_readonly;
+GRANT SELECT ON TABLE public.composite_market_value_daily TO league_reader;
 
 
 --
 -- Name: SEQUENCE composite_market_value_daily_cmv_row_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.composite_market_value_daily_cmv_row_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.composite_market_value_daily_cmv_row_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE config; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.config TO league_readonly;
+GRANT SELECT ON TABLE public.config TO league_reader;
 
 
 --
 -- Name: TABLE dfs_contests; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.dfs_contests TO league_readonly;
+GRANT SELECT ON TABLE public.dfs_contests TO league_reader;
 
 
 --
 -- Name: TABLE draft; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.draft TO league_readonly;
+GRANT SELECT ON TABLE public.draft TO league_reader;
 
 
 --
 -- Name: SEQUENCE draft_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.draft_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.draft_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE draftkings_category_activity; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.draftkings_category_activity TO league_readonly;
+GRANT SELECT ON TABLE public.draftkings_category_activity TO league_reader;
 
 
 --
 -- Name: TABLE dvoa_team_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.dvoa_team_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.dvoa_team_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE dvoa_team_seasonlogs_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_history TO league_readonly;
+GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_history TO league_reader;
 
 
 --
 -- Name: TABLE dvoa_team_seasonlogs_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_index TO league_readonly;
+GRANT SELECT ON TABLE public.dvoa_team_seasonlogs_index TO league_reader;
 
 
 --
 -- Name: TABLE dvoa_team_unit_seasonlogs_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_history TO league_readonly;
+GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_history TO league_reader;
 
 
 --
 -- Name: TABLE dvoa_team_unit_seasonlogs_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_index TO league_readonly;
+GRANT SELECT ON TABLE public.dvoa_team_unit_seasonlogs_index TO league_reader;
 
 
 --
 -- Name: TABLE espn_player_win_rates_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.espn_player_win_rates_history TO league_readonly;
+GRANT SELECT ON TABLE public.espn_player_win_rates_history TO league_reader;
 
 
 --
 -- Name: TABLE espn_player_win_rates_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.espn_player_win_rates_index TO league_readonly;
+GRANT SELECT ON TABLE public.espn_player_win_rates_index TO league_reader;
 
 
 --
 -- Name: TABLE espn_receiving_metrics_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.espn_receiving_metrics_history TO league_readonly;
+GRANT SELECT ON TABLE public.espn_receiving_metrics_history TO league_reader;
 
 
 --
 -- Name: TABLE espn_team_win_rates_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.espn_team_win_rates_history TO league_readonly;
+GRANT SELECT ON TABLE public.espn_team_win_rates_history TO league_reader;
 
 
 --
 -- Name: TABLE espn_team_win_rates_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.espn_team_win_rates_index TO league_readonly;
+GRANT SELECT ON TABLE public.espn_team_win_rates_index TO league_reader;
 
 
 --
 -- Name: TABLE external_league_connections; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.external_league_connections TO league_readonly;
+GRANT SELECT ON TABLE public.external_league_connections TO league_reader;
 
 
 --
 -- Name: TABLE external_league_import_job_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.external_league_import_job_history TO league_readonly;
+GRANT SELECT ON TABLE public.external_league_import_job_history TO league_reader;
 
 
 --
 -- Name: TABLE external_league_import_jobs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.external_league_import_jobs TO league_readonly;
+GRANT SELECT ON TABLE public.external_league_import_jobs TO league_reader;
 
 
 --
 -- Name: TABLE footballoutsiders; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.footballoutsiders TO league_readonly;
+GRANT SELECT ON TABLE public.footballoutsiders TO league_reader;
 
 
 --
 -- Name: TABLE format_category_signal_mapping; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.format_category_signal_mapping TO league_readonly;
+GRANT SELECT ON TABLE public.format_category_signal_mapping TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2009; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2009 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2009 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2010; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2010 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2010 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2011; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2011 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2011 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2012; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2012 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2012 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2013; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2013 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2013 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2014; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2014 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2014 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2015; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2015 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2015 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2016; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2016 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2016 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2017; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2017 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2017 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2018; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2018 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2018 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2019; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2019 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2019 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2020; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2020 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2020 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2021; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2021 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2021 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2022; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2022 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2022 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2023; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2023 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2023 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2024; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2024 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2024 TO league_reader;
 
 
 --
 -- Name: TABLE historical_injury_index_2025; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_readonly;
+GRANT SELECT ON TABLE public.historical_injury_index_2025 TO league_reader;
 
 
 --
 -- Name: TABLE invite_codes; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.invite_codes TO league_readonly;
+GRANT SELECT ON TABLE public.invite_codes TO league_reader;
 
 
 --
 -- Name: TABLE jobs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.jobs TO league_readonly;
+GRANT SELECT ON TABLE public.jobs TO league_reader;
 
 
 --
 -- Name: SEQUENCE jobs_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.jobs_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.jobs_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE keeptradecut_liquidity; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.keeptradecut_liquidity TO league_readonly;
+GRANT SELECT ON TABLE public.keeptradecut_liquidity TO league_reader;
 
 
 --
 -- Name: TABLE keeptradecut_pick; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.keeptradecut_pick TO league_readonly;
+GRANT SELECT ON TABLE public.keeptradecut_pick TO league_reader;
 
 
 --
 -- Name: TABLE keeptradecut_rankings; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.keeptradecut_rankings TO league_readonly;
+GRANT SELECT ON TABLE public.keeptradecut_rankings TO league_reader;
 
 
 --
 -- Name: TABLE league_baselines; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_baselines TO league_readonly;
+GRANT SELECT ON TABLE public.league_baselines TO league_reader;
 
 
 --
 -- Name: TABLE league_cutlist; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_cutlist TO league_readonly;
+GRANT SELECT ON TABLE public.league_cutlist TO league_reader;
 
 
 --
 -- Name: TABLE league_divisions; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_divisions TO league_readonly;
+GRANT SELECT ON TABLE public.league_divisions TO league_reader;
 
 
 --
 -- Name: TABLE league_format_draft_pick_value; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_format_draft_pick_value TO league_readonly;
+GRANT SELECT ON TABLE public.league_format_draft_pick_value TO league_reader;
 
 
 --
 -- Name: TABLE league_format_player_careerlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_format_player_careerlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_format_player_careerlogs TO league_reader;
 
 
 --
 -- Name: TABLE league_format_player_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_format_player_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_format_player_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE league_format_player_projection_values; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_format_player_projection_values TO league_readonly;
+GRANT SELECT ON TABLE public.league_format_player_projection_values TO league_reader;
 
 
 --
 -- Name: TABLE league_format_player_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_format_player_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_format_player_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE league_formats; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_formats TO league_readonly;
+GRANT SELECT ON TABLE public.league_formats TO league_reader;
 
 
 --
 -- Name: TABLE league_migrations; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_migrations TO league_readonly;
+GRANT SELECT ON TABLE public.league_migrations TO league_reader;
 
 
 --
 -- Name: SEQUENCE league_migrations_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.league_migrations_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.league_migrations_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE league_migrations_lock; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_migrations_lock TO league_readonly;
+GRANT SELECT ON TABLE public.league_migrations_lock TO league_reader;
 
 
 --
 -- Name: SEQUENCE league_migrations_lock_index_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.league_migrations_lock_index_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.league_migrations_lock_index_seq TO league_reader;
 
 
 --
 -- Name: TABLE league_nfl_team_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_nfl_team_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_nfl_team_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE league_notifications; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_notifications TO league_readonly;
+GRANT SELECT ON TABLE public.league_notifications TO league_reader;
 
 
 --
 -- Name: SEQUENCE league_notifications_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.league_notifications_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.league_notifications_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE league_player_projection_values; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_player_projection_values TO league_readonly;
+GRANT SELECT ON TABLE public.league_player_projection_values TO league_reader;
 
 
 --
 -- Name: TABLE league_player_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_player_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_player_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE league_scoring_formats; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_scoring_formats TO league_readonly;
+GRANT SELECT ON TABLE public.league_scoring_formats TO league_reader;
 
 
 --
 -- Name: TABLE league_team_careerlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_careerlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_careerlogs TO league_reader;
 
 
 --
 -- Name: TABLE league_team_daily_values; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_daily_values TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_daily_values TO league_reader;
 
 
 --
 -- Name: TABLE league_team_forecast; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_forecast TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_forecast TO league_reader;
 
 
 --
 -- Name: TABLE league_team_lineup_contribution_weeks; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_lineup_contribution_weeks TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_lineup_contribution_weeks TO league_reader;
 
 
 --
 -- Name: TABLE league_team_lineup_contributions; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_lineup_contributions TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_lineup_contributions TO league_reader;
 
 
 --
 -- Name: TABLE league_team_lineup_starters; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_lineup_starters TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_lineup_starters TO league_reader;
 
 
 --
 -- Name: TABLE league_team_lineups; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_lineups TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_lineups TO league_reader;
 
 
 --
 -- Name: TABLE league_team_player_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_player_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_player_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE league_team_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_team_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_team_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE league_user_careerlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.league_user_careerlogs TO league_readonly;
+GRANT SELECT ON TABLE public.league_user_careerlogs TO league_reader;
 
 
 --
 -- Name: TABLE leagues; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.leagues TO league_readonly;
+GRANT SELECT ON TABLE public.leagues TO league_reader;
 
 
 --
 -- Name: SEQUENCE leagues_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.leagues_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.leagues_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE matchups; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.matchups TO league_readonly;
+GRANT SELECT ON TABLE public.matchups TO league_reader;
 
 
 --
 -- Name: SEQUENCE matchups_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.matchups_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.matchups_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE nfl_coaches; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_coaches TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_coaches TO league_reader;
 
 
 --
 -- Name: TABLE nfl_draft_rankings_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_draft_rankings_history TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_draft_rankings_history TO league_reader;
 
 
 --
 -- Name: TABLE nfl_draft_rankings_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_draft_rankings_index TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_draft_rankings_index TO league_reader;
 
 
 --
 -- Name: TABLE nfl_game_coaches; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_game_coaches TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_game_coaches TO league_reader;
 
 
 --
 -- Name: TABLE nfl_games; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_games TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_games TO league_reader;
 
 
 --
 -- Name: TABLE nfl_games_changelog; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_games_changelog TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_games_changelog TO league_reader;
 
 
 --
 -- Name: TABLE nfl_matchup_stats; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_matchup_stats TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_matchup_stats TO league_reader;
 
 
 --
 -- Name: TABLE nfl_play_stats; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_play_stats TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_play_stats TO league_reader;
 
 
 --
 -- Name: TABLE nfl_play_stats_current_week; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_play_stats_current_week TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_current_week; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_current_week TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_current_week TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_passer; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_passer TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_passer TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_player; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_player TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_player TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_receiver; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_receiver TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_receiver TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_rusher; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_rusher TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_rusher TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2000; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2000 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2000 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2001; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2001 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2001 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2002; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2002 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2002 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2003; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2003 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2003 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2004; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2004 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2004 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2005; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2005 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2005 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2006; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2006 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2006 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2007; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2007 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2007 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2008; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2008 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2008 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2009; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2009 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2009 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2010; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2010 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2010 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2011; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2011 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2011 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2012; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2012 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2012 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2013; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2013 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2013 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2014; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2014 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2014 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2015; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2015 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2015 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2016; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2016 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2016 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2017; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2017 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2017 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2018; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2018 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2018 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2019; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2019 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2019 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2020; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2020 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2020 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2021; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2021 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2021 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2022; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2022 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2022 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2023; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2023 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2023 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2024; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2024 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2024 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2025; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2025 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2025 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_plays_year_2026; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_plays_year_2026 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_plays_year_2026 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2000; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2000 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2000 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2001; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2001 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2001 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2002; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2002 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2002 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2003; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2003 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2003 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2004; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2004 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2004 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2005; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2005 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2005 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2006; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2006 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2006 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2007; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2007 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2007 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2008; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2008 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2008 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2009; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2009 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2009 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2010; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2010 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2010 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2011; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2011 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2011 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2012; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2012 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2012 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2013; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2013 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2013 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2014; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2014 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2014 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2015; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2015 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2015 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2016; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2016 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2016 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2017; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2017 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2017 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2018; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2018 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2018 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2019; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2019 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2019 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2020; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2020 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2020 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2021; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2021 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2021 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2022; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2022 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2022 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2023; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2023 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2023 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2024; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2024 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2024 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2025; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2025 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2025 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_2026; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_2026 TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_2026 TO league_reader;
 
 
 --
 -- Name: TABLE nfl_snaps_year_default; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_snaps_year_default TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_snaps_year_default TO league_reader;
 
 
 --
 -- Name: TABLE nfl_team_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_team_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_team_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE nfl_team_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_team_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_team_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE nfl_year_week_timestamp; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.nfl_year_week_timestamp TO league_readonly;
+GRANT SELECT ON TABLE public.nfl_year_week_timestamp TO league_reader;
 
 
 --
 -- Name: TABLE ngs_prospect_scores_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.ngs_prospect_scores_history TO league_readonly;
+GRANT SELECT ON TABLE public.ngs_prospect_scores_history TO league_reader;
 
 
 --
 -- Name: TABLE ngs_prospect_scores_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_readonly;
+GRANT SELECT ON TABLE public.ngs_prospect_scores_index TO league_reader;
 
 
 --
 -- Name: TABLE opening_days; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.opening_days TO league_readonly;
+GRANT SELECT ON TABLE public.opening_days TO league_reader;
 
 
 --
 -- Name: TABLE percentiles; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.percentiles TO league_readonly;
+GRANT SELECT ON TABLE public.percentiles TO league_reader;
 
 
 --
 -- Name: TABLE personnel_count_discrepancies; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.personnel_count_discrepancies TO league_readonly;
+GRANT SELECT ON TABLE public.personnel_count_discrepancies TO league_reader;
 
 
 --
 -- Name: TABLE pff_game_id_map; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.pff_game_id_map TO league_readonly;
+GRANT SELECT ON TABLE public.pff_game_id_map TO league_reader;
 
 
 --
 -- Name: TABLE pff_player_facet_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.pff_player_facet_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.pff_player_facet_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE pff_player_facet_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.pff_player_facet_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.pff_player_facet_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE pff_player_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.pff_player_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.pff_player_seasonlogs TO league_reader;
 
 
 --
 -- Name: SEQUENCE pff_player_seasonlogs_changelog_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.pff_player_seasonlogs_changelog_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.pff_player_seasonlogs_changelog_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE pff_player_seasonlogs_changelog; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.pff_player_seasonlogs_changelog TO league_readonly;
+GRANT SELECT ON TABLE public.pff_player_seasonlogs_changelog TO league_reader;
 
 
 --
@@ -56955,7 +56963,7 @@ GRANT SELECT ON TABLE public.pff_player_seasonlogs_changelog TO league_readonly;
 --
 
 GRANT ALL ON SEQUENCE public.pff_team_gamelogs_uid_seq TO postgres;
-GRANT SELECT ON SEQUENCE public.pff_team_gamelogs_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.pff_team_gamelogs_uid_seq TO league_reader;
 
 
 --
@@ -56963,7 +56971,7 @@ GRANT SELECT ON SEQUENCE public.pff_team_gamelogs_uid_seq TO league_readonly;
 --
 
 GRANT ALL ON TABLE public.pff_team_gamelogs TO postgres;
-GRANT SELECT ON TABLE public.pff_team_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.pff_team_gamelogs TO league_reader;
 
 
 --
@@ -56971,7 +56979,7 @@ GRANT SELECT ON TABLE public.pff_team_gamelogs TO league_readonly;
 --
 
 GRANT ALL ON SEQUENCE public.pff_team_seasonlogs_uid_seq TO postgres;
-GRANT SELECT ON SEQUENCE public.pff_team_seasonlogs_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.pff_team_seasonlogs_uid_seq TO league_reader;
 
 
 --
@@ -56979,1001 +56987,1001 @@ GRANT SELECT ON SEQUENCE public.pff_team_seasonlogs_uid_seq TO league_readonly;
 --
 
 GRANT ALL ON TABLE public.pff_team_seasonlogs TO postgres;
-GRANT SELECT ON TABLE public.pff_team_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.pff_team_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE pff_unresolved_players; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.pff_unresolved_players TO league_readonly;
+GRANT SELECT ON TABLE public.pff_unresolved_players TO league_reader;
 
 
 --
 -- Name: TABLE placed_wagers; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.placed_wagers TO league_readonly;
+GRANT SELECT ON TABLE public.placed_wagers TO league_reader;
 
 
 --
 -- Name: SEQUENCE placed_wagers_wager_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.placed_wagers_wager_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.placed_wagers_wager_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE play_changelog; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.play_changelog TO league_readonly;
+GRANT SELECT ON TABLE public.play_changelog TO league_reader;
 
 
 --
 -- Name: TABLE player; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player TO league_readonly;
+GRANT SELECT ON TABLE public.player TO league_reader;
 
 
 --
 -- Name: TABLE player_adp_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_adp_history TO league_readonly;
+GRANT SELECT ON TABLE public.player_adp_history TO league_reader;
 
 
 --
 -- Name: TABLE player_adp_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_adp_index TO league_readonly;
+GRANT SELECT ON TABLE public.player_adp_index TO league_reader;
 
 
 --
 -- Name: TABLE player_aliases; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_aliases TO league_readonly;
+GRANT SELECT ON TABLE public.player_aliases TO league_reader;
 
 
 --
 -- Name: TABLE player_archetypes; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_archetypes TO league_readonly;
+GRANT SELECT ON TABLE public.player_archetypes TO league_reader;
 
 
 --
 -- Name: TABLE player_changelog; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_changelog TO league_readonly;
+GRANT SELECT ON TABLE public.player_changelog TO league_reader;
 
 
 --
 -- Name: TABLE player_changelog_injury_status_snapshot_2026_05_23; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_changelog_injury_status_snapshot_2026_05_23 TO league_readonly;
+GRANT SELECT ON TABLE public.player_changelog_injury_status_snapshot_2026_05_23 TO league_reader;
 
 
 --
 -- Name: SEQUENCE player_changelog_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.player_changelog_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.player_changelog_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE player_college_careerlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_college_careerlogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_college_careerlogs TO league_reader;
 
 
 --
 -- Name: TABLE player_college_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_college_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_college_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE player_contracts; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_contracts TO league_readonly;
+GRANT SELECT ON TABLE public.player_contracts TO league_reader;
 
 
 --
 -- Name: TABLE player_defender_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE player_dfs_ownership; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_dfs_ownership TO league_readonly;
+GRANT SELECT ON TABLE public.player_dfs_ownership TO league_reader;
 
 
 --
 -- Name: TABLE player_game_outcome_correlations; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_readonly;
+GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_active_snapshot_2026_05_23; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_active_snapshot_2026_05_23 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_active_snapshot_2026_05_23 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_default; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_default TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_default TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2000; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2000 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2000 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2001; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2001 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2001 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2002; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2002 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2002 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2003; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2003 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2003 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2004; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2004 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2004 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2005; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2005 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2005 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2006; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2006 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2006 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2007; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2007 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2007 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2008; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2008 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2008 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2009; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2009 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2009 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2010; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2010 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2010 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2011; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2011 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2011 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2012; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2012 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2012 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2013; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2013 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2013 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2014; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2014 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2014 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2015; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2015 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2015 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2016; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2016 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2016 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2017; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2017 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2017 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2018; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2018 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2018 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2019; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2019 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2019 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2020; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2020 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2020 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2021; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2021 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2021 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2022; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2022 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2022 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2023; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2023 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2023 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2024; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2024 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2024 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2025; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2025 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2025 TO league_reader;
 
 
 --
 -- Name: TABLE player_gamelogs_year_2026; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_gamelogs_year_2026 TO league_readonly;
+GRANT SELECT ON TABLE public.player_gamelogs_year_2026 TO league_reader;
 
 
 --
 -- Name: TABLE player_pair_correlations; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_pair_correlations TO league_readonly;
+GRANT SELECT ON TABLE public.player_pair_correlations TO league_reader;
 
 
 --
 -- Name: TABLE player_passing_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_passing_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_passing_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE player_prospect_profile; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_prospect_profile TO league_readonly;
+GRANT SELECT ON TABLE public.player_prospect_profile TO league_reader;
 
 
 --
 -- Name: TABLE player_rankings_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_rankings_history TO league_readonly;
+GRANT SELECT ON TABLE public.player_rankings_history TO league_reader;
 
 
 --
 -- Name: TABLE player_rankings_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_rankings_index TO league_readonly;
+GRANT SELECT ON TABLE public.player_rankings_index TO league_reader;
 
 
 --
 -- Name: TABLE player_receiving_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_receiving_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_receiving_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE player_rushing_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_rushing_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_rushing_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE player_salaries; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_salaries TO league_readonly;
+GRANT SELECT ON TABLE public.player_salaries TO league_reader;
 
 
 --
 -- Name: TABLE player_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.player_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE player_team_extension_state; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_team_extension_state TO league_readonly;
+GRANT SELECT ON TABLE public.player_team_extension_state TO league_reader;
 
 
 --
 -- Name: TABLE player_variance; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.player_variance TO league_readonly;
+GRANT SELECT ON TABLE public.player_variance TO league_reader;
 
 
 --
 -- Name: TABLE players_status; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.players_status TO league_readonly;
+GRANT SELECT ON TABLE public.players_status TO league_reader;
 
 
 --
 -- Name: TABLE playoffs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.playoffs TO league_readonly;
+GRANT SELECT ON TABLE public.playoffs TO league_reader;
 
 
 --
 -- Name: TABLE poach_releases; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.poach_releases TO league_readonly;
+GRANT SELECT ON TABLE public.poach_releases TO league_reader;
 
 
 --
 -- Name: TABLE poaches; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.poaches TO league_readonly;
+GRANT SELECT ON TABLE public.poaches TO league_reader;
 
 
 --
 -- Name: SEQUENCE poaches_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.poaches_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.poaches_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE position_game_outcome_defaults; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.position_game_outcome_defaults TO league_readonly;
+GRANT SELECT ON TABLE public.position_game_outcome_defaults TO league_reader;
 
 
 --
 -- Name: TABLE practice; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.practice TO league_readonly;
+GRANT SELECT ON TABLE public.practice TO league_reader;
 
 
 --
 -- Name: TABLE projections; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections TO league_readonly;
+GRANT SELECT ON TABLE public.projections TO league_reader;
 
 
 --
 -- Name: TABLE projections_archive; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_archive TO league_readonly;
+GRANT SELECT ON TABLE public.projections_archive TO league_reader;
 
 
 --
 -- Name: TABLE projections_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_default; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_default TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_default TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_y2020; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_y2020 TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_y2020 TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_y2021; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_y2021 TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_y2021 TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_y2022; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_y2022 TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_y2022 TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_y2023; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_y2023 TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_y2023 TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_y2024; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_y2024 TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_y2024 TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_y2025; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_y2025 TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_y2025 TO league_reader;
 
 
 --
 -- Name: TABLE projections_index_y2026; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.projections_index_y2026 TO league_readonly;
+GRANT SELECT ON TABLE public.projections_index_y2026 TO league_reader;
 
 
 --
 -- Name: TABLE prop_market_selections_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.prop_market_selections_history TO league_readonly;
+GRANT SELECT ON TABLE public.prop_market_selections_history TO league_reader;
 
 
 --
 -- Name: TABLE prop_market_selections_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.prop_market_selections_index TO league_readonly;
+GRANT SELECT ON TABLE public.prop_market_selections_index TO league_reader;
 
 
 --
 -- Name: TABLE prop_markets_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.prop_markets_history TO league_readonly;
+GRANT SELECT ON TABLE public.prop_markets_history TO league_reader;
 
 
 --
 -- Name: TABLE prop_markets_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.prop_markets_index TO league_readonly;
+GRANT SELECT ON TABLE public.prop_markets_index TO league_reader;
 
 
 --
 -- Name: TABLE prop_pairing_props; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.prop_pairing_props TO league_readonly;
+GRANT SELECT ON TABLE public.prop_pairing_props TO league_reader;
 
 
 --
 -- Name: TABLE prop_pairings; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.prop_pairings TO league_readonly;
+GRANT SELECT ON TABLE public.prop_pairings TO league_reader;
 
 
 --
 -- Name: TABLE props; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.props TO league_readonly;
+GRANT SELECT ON TABLE public.props TO league_reader;
 
 
 --
 -- Name: TABLE props_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.props_index TO league_readonly;
+GRANT SELECT ON TABLE public.props_index TO league_reader;
 
 
 --
 -- Name: TABLE props_index_new; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.props_index_new TO league_readonly;
+GRANT SELECT ON TABLE public.props_index_new TO league_reader;
 
 
 --
 -- Name: SEQUENCE props_index_new_prop_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.props_index_new_prop_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.props_index_new_prop_id_seq TO league_reader;
 
 
 --
 -- Name: SEQUENCE props_index_prop_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.props_index_prop_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.props_index_prop_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE restricted_free_agency_bids; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.restricted_free_agency_bids TO league_readonly;
+GRANT SELECT ON TABLE public.restricted_free_agency_bids TO league_reader;
 
 
 --
 -- Name: SEQUENCE restricted_free_agency_bids_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.restricted_free_agency_bids_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.restricted_free_agency_bids_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE restricted_free_agency_releases; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_readonly;
+GRANT SELECT ON TABLE public.restricted_free_agency_releases TO league_reader;
 
 
 --
 -- Name: TABLE ros_projections; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.ros_projections TO league_readonly;
+GRANT SELECT ON TABLE public.ros_projections TO league_reader;
 
 
 --
 -- Name: TABLE roster_asset_holding; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.roster_asset_holding TO league_readonly;
+GRANT SELECT ON TABLE public.roster_asset_holding TO league_reader;
 
 
 --
 -- Name: SEQUENCE roster_asset_holding_holding_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.roster_asset_holding_holding_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.roster_asset_holding_holding_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE roster_asset_transformation; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.roster_asset_transformation TO league_readonly;
+GRANT SELECT ON TABLE public.roster_asset_transformation TO league_reader;
 
 
 --
 -- Name: SEQUENCE roster_asset_transformation_transformation_row_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.roster_asset_transformation_transformation_row_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.roster_asset_transformation_transformation_row_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE rosters; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.rosters TO league_readonly;
+GRANT SELECT ON TABLE public.rosters TO league_reader;
 
 
 --
 -- Name: TABLE rosters_players; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.rosters_players TO league_readonly;
+GRANT SELECT ON TABLE public.rosters_players TO league_reader;
 
 
 --
 -- Name: SEQUENCE rosters_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.rosters_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.rosters_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE schedule; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.schedule TO league_readonly;
+GRANT SELECT ON TABLE public.schedule TO league_reader;
 
 
 --
 -- Name: TABLE scoring_format_player_careerlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.scoring_format_player_careerlogs TO league_readonly;
+GRANT SELECT ON TABLE public.scoring_format_player_careerlogs TO league_reader;
 
 
 --
 -- Name: TABLE scoring_format_player_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.scoring_format_player_gamelogs TO league_readonly;
+GRANT SELECT ON TABLE public.scoring_format_player_gamelogs TO league_reader;
 
 
 --
 -- Name: TABLE scoring_format_player_projection_points; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.scoring_format_player_projection_points TO league_readonly;
+GRANT SELECT ON TABLE public.scoring_format_player_projection_points TO league_reader;
 
 
 --
 -- Name: TABLE scoring_format_player_seasonlogs; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_readonly;
+GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_reader;
 
 
 --
 -- Name: TABLE seasons; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.seasons TO league_readonly;
+GRANT SELECT ON TABLE public.seasons TO league_reader;
 
 
 --
 -- Name: TABLE selection_combination_definitions; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.selection_combination_definitions TO league_readonly;
+GRANT SELECT ON TABLE public.selection_combination_definitions TO league_reader;
 
 
 --
 -- Name: SEQUENCE selection_combination_definitions_combination_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.selection_combination_definitions_combination_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.selection_combination_definitions_combination_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE selection_combination_odds_history; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.selection_combination_odds_history TO league_readonly;
+GRANT SELECT ON TABLE public.selection_combination_odds_history TO league_reader;
 
 
 --
 -- Name: SEQUENCE selection_combination_odds_history_history_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.selection_combination_odds_history_history_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.selection_combination_odds_history_history_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE selection_combination_odds_index; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.selection_combination_odds_index TO league_readonly;
+GRANT SELECT ON TABLE public.selection_combination_odds_index TO league_reader;
 
 
 --
 -- Name: TABLE sources; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.sources TO league_readonly;
+GRANT SELECT ON TABLE public.sources TO league_reader;
 
 
 --
 -- Name: SEQUENCE sources_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.sources_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.sources_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE super_priority; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.super_priority TO league_readonly;
+GRANT SELECT ON TABLE public.super_priority TO league_reader;
 
 
 --
 -- Name: SEQUENCE super_priority_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.super_priority_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.super_priority_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE teams; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.teams TO league_readonly;
+GRANT SELECT ON TABLE public.teams TO league_reader;
 
 
 --
 -- Name: SEQUENCE teams_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.teams_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.teams_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE trade_releases; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.trade_releases TO league_readonly;
+GRANT SELECT ON TABLE public.trade_releases TO league_reader;
 
 
 --
 -- Name: TABLE trades; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.trades TO league_readonly;
+GRANT SELECT ON TABLE public.trades TO league_reader;
 
 
 --
 -- Name: TABLE trades_picks; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.trades_picks TO league_readonly;
+GRANT SELECT ON TABLE public.trades_picks TO league_reader;
 
 
 --
 -- Name: TABLE trades_players; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.trades_players TO league_readonly;
+GRANT SELECT ON TABLE public.trades_players TO league_reader;
 
 
 --
 -- Name: TABLE trades_slots; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.trades_slots TO league_readonly;
+GRANT SELECT ON TABLE public.trades_slots TO league_reader;
 
 
 --
 -- Name: TABLE trades_transactions; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.trades_transactions TO league_readonly;
+GRANT SELECT ON TABLE public.trades_transactions TO league_reader;
 
 
 --
 -- Name: SEQUENCE trades_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.trades_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.trades_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE transactions; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.transactions TO league_readonly;
+GRANT SELECT ON TABLE public.transactions TO league_reader;
 
 
 --
 -- Name: SEQUENCE transactions_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.transactions_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.transactions_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE urls; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.urls TO league_readonly;
+GRANT SELECT ON TABLE public.urls TO league_reader;
 
 
 --
 -- Name: TABLE user_data_view_favorites; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.user_data_view_favorites TO league_readonly;
+GRANT SELECT ON TABLE public.user_data_view_favorites TO league_reader;
 
 
 --
 -- Name: TABLE user_data_view_tags; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.user_data_view_tags TO league_readonly;
+GRANT SELECT ON TABLE public.user_data_view_tags TO league_reader;
 
 
 --
 -- Name: TABLE user_data_views; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.user_data_views TO league_readonly;
+GRANT SELECT ON TABLE public.user_data_views TO league_reader;
 
 
 --
 -- Name: TABLE user_plays_views; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.user_plays_views TO league_readonly;
+GRANT SELECT ON TABLE public.user_plays_views TO league_reader;
 
 
 --
 -- Name: TABLE users; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.users TO league_readonly;
+GRANT SELECT ON TABLE public.users TO league_reader;
 
 
 --
 -- Name: SEQUENCE users_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.users_id_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.users_id_seq TO league_reader;
 
 
 --
 -- Name: TABLE users_sources; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.users_sources TO league_readonly;
+GRANT SELECT ON TABLE public.users_sources TO league_reader;
 
 
 --
 -- Name: TABLE users_teams; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.users_teams TO league_readonly;
+GRANT SELECT ON TABLE public.users_teams TO league_reader;
 
 
 --
 -- Name: TABLE view_roster_asset_lineage_walk; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_readonly;
+GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_reader;
 
 
 --
 -- Name: TABLE waiver_releases; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.waiver_releases TO league_readonly;
+GRANT SELECT ON TABLE public.waiver_releases TO league_reader;
 
 
 --
 -- Name: TABLE waivers; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.waivers TO league_readonly;
+GRANT SELECT ON TABLE public.waivers TO league_reader;
 
 
 --
 -- Name: SEQUENCE waivers_uid_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.waivers_uid_seq TO league_readonly;
+GRANT SELECT ON SEQUENCE public.waivers_uid_seq TO league_reader;
 
 
 --
 -- Name: TABLE weekly_market_selections_analysis_cache; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.weekly_market_selections_analysis_cache TO league_readonly;
+GRANT SELECT ON TABLE public.weekly_market_selections_analysis_cache TO league_reader;
 
 
 --
 -- Name: TABLE worker_heartbeat; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.worker_heartbeat TO league_readonly;
+GRANT SELECT ON TABLE public.worker_heartbeat TO league_reader;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: -
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE league_user IN SCHEMA public GRANT SELECT ON SEQUENCES TO league_readonly;
+ALTER DEFAULT PRIVILEGES FOR ROLE league_writer IN SCHEMA public GRANT SELECT ON SEQUENCES TO league_reader;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: -
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE league_user IN SCHEMA public GRANT SELECT ON TABLES TO league_readonly;
+ALTER DEFAULT PRIVILEGES FOR ROLE league_writer IN SCHEMA public GRANT SELECT ON TABLES TO league_reader;
 
 
 --
