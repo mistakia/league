@@ -138,7 +138,7 @@ router.post('/?', async (req, res) => {
     if (CANONICALIZE_ERROR_CODES.has(error.message)) {
       return res.status(400).json({ error: error.message })
     }
-    logger.error(error)
+    logger(error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
 })
@@ -199,7 +199,7 @@ router.get('/:hash', async (req, res) => {
     }
     res.json({ url: row.url, url_hash: hash })
   } catch (error) {
-    logger.error(error)
+    logger(error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
 })

@@ -30,7 +30,7 @@ done
 
 dump_dir="/root/backups"
 db_name="league_production"
-db_user="league_user"
+db_user="league_writer"
 db_host="localhost"
 
 db_user_tables="
