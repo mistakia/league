@@ -19,7 +19,7 @@
     "client": "postgres",
     "connection": {
       "host": "localhost",
-      "user": "league_user",
+      "user": "league_writer",
       "password": "ENCRYPTED|<iv>|<encrypted-value>",
       "database": "league_production",
       "decimalNumbers": true,

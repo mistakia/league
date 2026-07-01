@@ -3,7 +3,7 @@
 # db/schema.postgres.sql uses NULLS NOT DISTINCT (Postgres 15+), so the test DB
 # must be >= 15. This service listens on host :5433 to avoid clashing with a
 # local default Postgres on :5432. The init script creates the roles the schema
-# GRANTs to (postgres/league_user/league_readonly), which the official image
+# GRANTs to (postgres/league_writer/league_reader), which the official image
 # does not provide.
 #
 # Usage:

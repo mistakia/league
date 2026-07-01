@@ -23,7 +23,7 @@ observations:
     in the year_offset+1 DraftKings PPG column (was blank); CeeDee Lamb populated too.
   - >-
     [testing] 2026-06-17 Local test suite needs Postgres >= 15 (schema uses NULLS NOT DISTINCT); the
-    official postgres image also lacks the postgres/league_user/league_readonly roles the schema
+    official postgres image also lacks the postgres/league_writer/league_reader roles the schema
     GRANTs to. Recipe documented in repo CLAUDE.md Testing section.
   - >-
     [bug] player_adp and its sibling columns (adp_min/max/stddev/sample_size/percent_drafted)

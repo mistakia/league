@@ -21,7 +21,7 @@
     "connection": {
       "host": "38.242.199.45",
       "port": 5432,
-      "user": "league_user",
+      "user": "league_writer",
       "password": "ENCRYPTED|09e7ce2470732a397531984903482de4|344c240c21b2355585ffbce2a5ae2f704d813822b6d9955de2e653d8a06a76e0",
       "database": "league_production"
     },
