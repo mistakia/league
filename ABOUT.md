@@ -153,12 +153,19 @@ observations:
     makes the data_view socket tolerate legacy array entries and never emit result:undefined, and
     guards players/reducer.js with (payload.result || []).forEach; push/deploy pending behind the
     red-main CI gate (dispatched session fix-league-ci-red).
+  - >-
+    [ci] 2026-06-30 RED master CI (run 28474828891 / 86dd00e7, yarn test exit 3) was a stale-fixture
+    regression, NOT a storage/LFS/Actions quota issue — all setup steps passed, only the test step
+    failed. The participation_status auto-injection (get-data-view-results.mjs:2048) rewrote SQL for
+    player-view week-split queries but fixture
+    team-stats-from-plays-multi-year-week-split-no-wrap.json was never regenerated. Fixed in
+    b4f238ac (fixture-only).
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-06-30T23:53:03.066Z'
+updated_at: '2026-07-01T00:01:30.905Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
