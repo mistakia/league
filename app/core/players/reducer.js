@@ -548,7 +548,10 @@ export function players_reducer(state = initialState, { payload, type }) {
 
     case player_actions.GET_PLAYER_PROJECTIONS_FULFILLED:
       return state.withMutations((state) => {
-        const projections = payload.data
+        // payload.data can be absent when the projections fetch resolves with a
+        // body lacking data; guard so .forEach below never throws (mirrors the
+        // 332bced0 `|| []` cache-shape guard on DATA_VIEW_RESULT).
+        const projections = payload.data || []
         state.setIn(
           ['items', payload.opts.pid, 'projections'],
           new List(projections)

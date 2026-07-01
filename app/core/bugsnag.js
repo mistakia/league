@@ -64,6 +64,18 @@ const recover_from_chunk_error = () => {
   return true
 }
 
+// Expected client-side 4xx responses — a stale/malformed saved data_view_id,
+// an expired token, a not-found resource — are application flow already
+// surfaced to the user via a notification, not server bugs, so they must NOT
+// emit a log_error signal. dispatch_fetch (api/service.js) attaches the failed
+// Response as err.response on the non-2xx branch, so the status is readable
+// here. 5xx, network, and uncaught JS errors carry no 4xx response and still
+// report.
+const is_expected_client_error = (err) => {
+  const status = err?.response?.status
+  return typeof status === 'number' && status >= 400 && status < 500
+}
+
 const truncate_stack = (stack) => {
   if (typeof stack !== 'string') return stack
   if (stack.length <= KEEPALIVE_STACK_LIMIT) return stack
@@ -86,6 +98,9 @@ const post_to_league_api = (err, metadata) => {
     // Suppress expected post-deploy chunk-load churn (see is_chunk_load_error):
     // recover the stale client with a reload instead of emitting a signal.
     if (is_chunk_load_error(err) && recover_from_chunk_error()) return
+    // Drop expected client 4xx (e.g. invalid/stale saved data_view_id) before
+    // it becomes log_error noise — the user already saw a notification.
+    if (is_expected_client_error(err)) return
     const enriched =
       current_user && typeof current_user === 'object'
         ? { ...(metadata || {}), user: current_user }
