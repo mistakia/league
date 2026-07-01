@@ -23,7 +23,7 @@
 		"client": "ENC[AES256_GCM,data:1ISw4Zaofa8=,iv:tsaD11PgjdcUammgHqCorT0dfwPMnN/Nqrsu3YdnQrs=,tag:d967E9SHKgxO6cXPDFuhQQ==,type:str]",
 		"connection": {
 			"host": "ENC[AES256_GCM,data:0xzfnSYRh0R8qdiR3g==,iv:afEQEMBWqVNqf+jvFG2dsUDq1+rTIeIOZM45bprz4NQ=,tag:7w+gstGGX0LSD6lKtofPZw==,type:str]",
-			"user": "ENC[AES256_GCM,data:sGs5bd2RIcqlSss=,iv:U55ijgbyb6wqAu7EigeMcpMBHsUryKs5TCzV1hLGWl4=,tag:Jk8Vn64kgu7wE5H31R8WAQ==,type:str]",
+			"user": "ENC[AES256_GCM,data:ld/Xj+6BMe7f9Vbt9w==,iv:3+3Npmv5741rzEShVTfuX8BgoKUZV+ughpGbYFcFSpQ=,tag:vCCiXb1EWsM9KZHKbN/2nw==,type:str]",
 			"password": "ENC[AES256_GCM,data:3Z9zk9r0SlVAfJHsHOwJww==,iv:gqmnzA0tRS7tM9XLHEAVarf/jqEMOlGOBIJw/XbnVBI=,tag:QxuxXwkb4kOlcrMzQbMXZQ==,type:str]",
 			"database": "ENC[AES256_GCM,data:FBZzQ6tYI/owqmZuQLsdaZ8=,iv:Dse5BE2N9Sth3+uKjTREmOfqTBifCjC0dZVwZ0AhXgE=,tag:ojHnFboVT5dD/qPH5t0lTA==,type:str]",
 			"decimalNumbers": "ENC[AES256_GCM,data:v6YZNA==,iv:e0SSQCqLPeozBTbFMAW9eMO4YeNg1M0xw2GTpKlcuxs=,tag:jHwaVpIbZrxT8SRVNk/aRQ==,type:bool]",
@@ -94,8 +94,8 @@
 				"recipient": "age1nvpxn4r70h90wvgh6vgr3r0hwej33p6qjtdkgthanlvtle8hpdssqdm4j0"
 			}
 		],
-		"lastmodified": "2026-06-30T02:28:01Z",
-		"mac": "ENC[AES256_GCM,data:dk7ElZWhdvUEHkTId41l6a7Kc3z00/jXvUF7OZo8IZDSIQIn3d5qvw/pu13EBlmf7v9BQDwMlZn4UGDu1Z9ZL6YpJOvK0FYfXH9Xfv0mA8j0tvusZd2euuQNGUXiVCdt2V5fLkxfoBjezMJtCxGK27AMFzCVnbC8Ej6/Lvh58Vk=,iv:kSGEdtegOmiNSMHZaRD2VjKa+NGjDLB/B1JO7cFR9os=,tag:siArmuoAq/Loq3Xb+T43Aw==,type:str]",
+		"lastmodified": "2026-07-01T04:00:42Z",
+		"mac": "ENC[AES256_GCM,data:Orms1ouHKRgyMZMq9jM8Vf2DcJn2/UK3K9mIZnzpaR6Y3FOTlWu03mo41t7RB10FqtBPG4ml24HDR1/cf+Gmnx5Mu7p7gTwLdVjRsS3/9ldS6x9QtufmMdZ+O+itz9RHAu/XIkh5i36UafoOITkOL43p9z5dKbPQz2x66Kq0gPs=,iv:uy5+DjXPlBcZvhhlrG+luUcNNinmvdppYdd6JPdJ0KE=,tag:qjTj6o36axfkfBamW85JTA==,type:str]",
 		"unencrypted_suffix": "_unencrypted",
 		"version": "3.13.1"
 	}
