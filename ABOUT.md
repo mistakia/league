@@ -160,12 +160,27 @@ observations:
     player-view week-split queries but fixture
     team-stats-from-plays-multi-year-week-split-no-wrap.json was never regenerated. Fixed in
     b4f238ac (fixture-only).
+  - >-
+    [finding] 2026-07-01 2026 rookies were 100% missing pff_id (all 323, 114 fantasy-relevant)
+    because the only setter import-pff-seasonlogs --update_pff_ids needs PFF seasonlog rows that do
+    not exist until the season starts, and dynastyprocess/nflverse crosswalks carry the 2026 class
+    with pff_id=NA.
+  - >-
+    [finding] 2026-07-01 Offseason pff_id source: PFF big board (final post-draft version,
+    premium-auth) resolves 89/114 rookies; union with consumer-api fantasy rankings (static api-key,
+    no session) + get_pff_projections hits 103/114, ids match our pff_id space. Impl dispatched
+    pff-rookie-id-import.
+  - >-
+    [bug] 2026-07-01 pff.mjs handle_login_if_needed uses stale pre-Clerk selectors so
+    get_pff_session_cookie silently harvests a token-less cookie (no c_groot/_merlin_key); PFF
+    importers then degrade to the 10-row preview with no auto-recovery once the session expires. Fix
+    dispatched pff-session-cookie-fix.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-01T00:01:30.905Z'
+updated_at: '2026-07-01T15:14:15.641Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
