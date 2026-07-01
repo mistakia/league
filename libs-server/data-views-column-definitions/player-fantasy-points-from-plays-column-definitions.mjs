@@ -9,6 +9,7 @@ import { apply_plays_join } from '#libs-server/data-views/source-attach/apply-pl
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
+import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 
 const FP_OUTPUT_PERIODS = [
   'game',
@@ -553,11 +554,11 @@ const generate_fumble_scoring_sql = async (scoring_format) =>
   `ROUND(SUM(${await generate_fumble_scoring_inner(scoring_format)}), 2)`
 
 const should_use_main_where = ({ params }) => {
-  return (
-    params.year_offset &&
-    Array.isArray(params.year_offset) &&
-    params.year_offset.length > 1
-  )
+  // Equal-endpoint offsets ([k,k]) are a single-year shift, not a range: the
+  // CTE stays collapsed and the source join correlates the single year, so the
+  // main SELECT reads the plain per-season value. Only a genuine multi-year
+  // range (is_year_offset_range) re-sums across CTE year rows here.
+  return is_year_offset_range(params)
 }
 
 // Build the role-union role_attributions for fantasy points. Each role

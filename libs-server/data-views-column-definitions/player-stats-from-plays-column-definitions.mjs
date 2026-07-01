@@ -9,6 +9,7 @@ import get_stats_column_param_key from '#libs-server/data-views/get-stats-column
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 import { derive_measure } from '#libs-server/data-views/measure-contract.mjs'
+import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 
 // Every key apply_play_by_play_column_params_to_query may read from the
 // column's params. Declared as consumes_params_extra so the output-aggregator
@@ -18,12 +19,11 @@ import { derive_measure } from '#libs-server/data-views/measure-contract.mjs'
 const play_by_play_filter_param_keys = Object.keys(nfl_plays_column_params)
 
 const should_use_main_where = ({ params, has_numerator_denominator }) => {
-  return (
-    params.year_offset &&
-    Array.isArray(params.year_offset) &&
-    params.year_offset.length > 1 &&
-    has_numerator_denominator
-  )
+  // Equal-endpoint offsets ([k,k]) are a single-year shift, NOT a range: the
+  // CTE stays collapsed and the source join correlates the single year. Only a
+  // genuine multi-year range (is_year_offset_range) reduces num/den in the
+  // main SELECT. See year-offset-range.mjs for the canonical predicate.
+  return is_year_offset_range(params) && has_numerator_denominator
 }
 
 const plays_source = {
@@ -166,12 +166,7 @@ const player_stat_from_plays = ({
       generate_table_alias({ type: 'play_by_play', params, pid_columns }),
     column_name: stat_name,
     with_select: ({ params = {} }) => {
-      if (
-        params.year_offset &&
-        Array.isArray(params.year_offset) &&
-        params.year_offset.length > 1 &&
-        has_numerator_denominator
-      ) {
+      if (is_year_offset_range(params) && has_numerator_denominator) {
         return [
           `${numerator_select} as ${stat_name}_numerator`,
           `${denominator_select} as ${stat_name}_denominator`
@@ -282,11 +277,7 @@ const create_team_share_stat = ({
       })
       .groupBy('pg.pid')
 
-    if (
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1
-    ) {
+    if (is_year_offset_range(params)) {
       if (has_numerator_denominator) {
         with_query.select(
           db.raw(`${numerator_select} as ${column_name}_numerator`)
@@ -379,23 +370,14 @@ const create_team_share_stat = ({
   is_percentage,
   main_select_string_year_offset_range,
   with_where: ({ params }) => {
-    if (
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator
-    ) {
+    if (is_year_offset_range(params) && has_numerator_denominator) {
       // No where clause in the WITH statement when using year_offset range with numerator/denominator
       return null
     }
     return with_select_string
   },
   main_where: ({ params, table_name, data_view_options }) => {
-    if (
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1
-    ) {
+    if (is_year_offset_range(params)) {
       if (has_numerator_denominator) {
         const num_sum = `SUM(${table_name}.${column_name}_numerator)`
         const den_sum = `SUM(${table_name}.${column_name}_denominator)`
