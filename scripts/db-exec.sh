@@ -18,6 +18,6 @@ echo "db:exec: copying $SQL_FILE -> league:$REMOTE_PATH"
 scp -q "$SQL_FILE" "league:$REMOTE_PATH"
 
 echo "db:exec: executing on league_production (single transaction, ON_ERROR_STOP=1)"
-ssh league "psql -U league_user -h localhost --dbname=league_production --single-transaction --set ON_ERROR_STOP=1 -f $REMOTE_PATH; rc=\$?; rm -f $REMOTE_PATH; exit \$rc"
+ssh league "psql -U league_writer -h localhost --dbname=league_production --single-transaction --set ON_ERROR_STOP=1 -f $REMOTE_PATH; rc=\$?; rm -f $REMOTE_PATH; exit \$rc"
 
 echo "db:exec: done"
