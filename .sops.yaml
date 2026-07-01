@@ -5,7 +5,7 @@
 # encrypted to the league domain's recipient set — every host that loads
 # config/index.mjs under NODE_ENV=production and therefore decrypts the file:
 # the league main host (.45, PM2 server + scheduled scripts), league-worker-1
-# (.107, odds/plays import workers), base-storage (.22, the Underdog best-ball
+# (.107, odds/plays import workers), base-storage (the Underdog best-ball
 # ADP import cron), and macbook2025 (10.27.0.161, the league import + check
 # scheduled-commands — caesars-odds, pff/pfr imports, cross-source checks —
 # which reach league prod PG over league-tunnel). All four reach league prod PG
