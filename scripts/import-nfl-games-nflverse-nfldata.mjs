@@ -21,7 +21,6 @@ import {
   find_player
 } from '#libs-server/player-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import populate_opening_days from './populate-opening-days.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -352,18 +351,6 @@ const main = async () => {
         ? `import-nfl-games-nflverse-nfldata shortfall: ${result.games_processed} games processed (floor=${NFLVERSE_GAMES_FLOOR_UNBOUNDED} for unbounded run)`
         : null
     )
-
-    // The opening_days materialized view derives from the schedule we just
-    // imported; refresh it here so opening-day-derived columns (KTC snapshot
-    // key, player_age) cover new seasons. Isolated try/catch: a stale view is
-    // a downstream degradation, not a reason to fail the games import.
-    try {
-      log('Refreshing opening_days materialized view...')
-      const opening_days_result = await populate_opening_days()
-      log('opening_days refresh result:', opening_days_result)
-    } catch (refresh_error) {
-      log('Warning: Failed to refresh opening_days:', refresh_error.message)
-    }
   } catch (err) {
     error = err
     console.log(

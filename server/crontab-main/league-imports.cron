@@ -120,6 +120,13 @@ JOB_PROJECT=league
 ## At 04:00 in January, February and every month from September through December.
 0 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nflverse-nfldata.mjs -d >> /var/log/league/league-import-nfl-games-nflverse-nfldata.log 2>&1
 
+## Refresh the opening_days materialized view daily at 05:00, year-round. Cheap
+## (min REG game date per year over ~13k nfl_games rows) and decoupled from any
+## single importer: nfl_games has many writers, so refresh on a timer rather than
+## a hook. Keeps opening-day-derived data-view columns (KTC snapshot key,
+## player_age) fresh in-season and off, closing the gap that stalled it at 2024.
+0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/populate-opening-days.mjs >> /var/log/league/league-populate-opening-days.log 2>&1
+
 ## Every Tuesday at 07:15 in January, February, and September through December.
 ## nflverse weekly_rosters releases land late Monday; this populates
 ## player_gamelogs.active=false for game-day inactives and reserve-list members.
