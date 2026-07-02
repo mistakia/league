@@ -65,8 +65,14 @@ const derive_coach_id = (full_name, dob) => {
   // Strip non-alpha (apostrophe, hyphen, etc.) before slicing so the LNAM/FNAM
   // segments satisfy the CHECK regex [A-Z]{1,4}. E.g. "O'Leary" -> "OLEA",
   // not "O'LE" (the latter would fail the constraint and abort the txn).
-  const lnam = last.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 4)
-  const fnam = first.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 4)
+  const lnam = last
+    .replace(/[^A-Za-z]/g, '')
+    .toUpperCase()
+    .slice(0, 4)
+  const fnam = first
+    .replace(/[^A-Za-z]/g, '')
+    .toUpperCase()
+    .slice(0, 4)
   if (!lnam || !fnam) return null
   const dob_text =
     typeof dob === 'string' ? dob : dob.toISOString().slice(0, 10)
@@ -162,7 +168,8 @@ const main = () => {
   if (begin_idx < 0 || end_idx < 0) {
     throw new Error(`fixture markers not found in ${ADHOC_PATH}`)
   }
-  const next = adhoc.slice(0, begin_idx) + block + adhoc.slice(end_idx + END_MARKER.length)
+  const next =
+    adhoc.slice(0, begin_idx) + block + adhoc.slice(end_idx + END_MARKER.length)
   fs.writeFileSync(adhoc_path, next, 'utf-8')
   console.log(
     `wrote ${rows.length} fixture rows into ${ADHOC_PATH} (sentinel-kept=${kept_sentinel} dropped-null-dob=${dropped_null_dob})`

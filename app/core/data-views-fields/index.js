@@ -105,7 +105,10 @@ export function PlayerTableFields({
     ...with_row_grains(player_seasonlogs_table_fields(), PLAYER_ROW_GRAINS),
 
     ...with_row_grains(projected_table_fields({ week }), PLAYER_ROW_GRAINS),
-    ...with_row_grains(player_table_fields({ is_logged_in }), PLAYER_ROW_GRAINS),
+    ...with_row_grains(
+      player_table_fields({ is_logged_in }),
+      PLAYER_ROW_GRAINS
+    ),
     ...with_row_grains(team_table_fields, TEAM_ROW_GRAINS),
 
     ...with_row_grains(scoring_format_logs_table_fields, PLAYER_ROW_GRAINS),
@@ -113,7 +116,10 @@ export function PlayerTableFields({
     ...with_row_grains(player_stats_from_plays_table_fields, PLAYER_ROW_GRAINS),
     ...with_row_grains(betting_market_table_fields, PLAYER_ROW_GRAINS),
     ...with_row_grains(espn_score_table_fields, PLAYER_ROW_GRAINS),
-    ...with_row_grains(fantasy_points_from_plays_table_fields, PLAYER_ROW_GRAINS),
+    ...with_row_grains(
+      fantasy_points_from_plays_table_fields,
+      PLAYER_ROW_GRAINS
+    ),
     ...with_row_grains(team_stats_from_plays_table_fields, TEAM_ROW_GRAINS),
     ...with_row_grains(keeptradecut_table_fields, PLAYER_ROW_GRAINS),
     ...with_row_grains(player_games_played_table_fields, PLAYER_ROW_GRAINS),

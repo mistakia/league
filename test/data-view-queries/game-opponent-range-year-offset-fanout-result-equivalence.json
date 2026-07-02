@@ -33,10 +33,7 @@
       { "game_opponent_0": "ZZB", "game_is_home_0": true },
       { "game_opponent_0": "ZZC", "game_is_home_0": true }
     ],
-    "compare_columns": [
-      "game_opponent_0",
-      "game_is_home_0"
-    ]
+    "compare_columns": ["game_opponent_0", "game_is_home_0"]
   },
   "tags": [
     "year_offset",

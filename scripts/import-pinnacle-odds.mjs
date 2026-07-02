@@ -654,7 +654,8 @@ const process_matchup_batches = async ({
     if (signal?.aborted || (deadline && Date.now() >= deadline)) {
       const processed = batch_index
       const skipped_batches = matchup_batches.length - processed
-      const skipped_matchups = pinnacle_matchups.length - processed * CONCURRENCY_LIMIT
+      const skipped_matchups =
+        pinnacle_matchups.length - processed * CONCURRENCY_LIMIT
       log(
         `Time budget exhausted after ${processed}/${matchup_batches.length} batches — ` +
           `skipping ${skipped_batches} remaining batches (~${skipped_matchups} matchups). ` +

@@ -40,7 +40,13 @@ export default function validate_row_grain_compatibility({
   const row_grain_id = row_grain[0]
   const errors = []
   prefix_columns.forEach((item, i) =>
-    check_item({ item, field: `prefix_columns[${i}]`, row_grain_id, defs, errors })
+    check_item({
+      item,
+      field: `prefix_columns[${i}]`,
+      row_grain_id,
+      defs,
+      errors
+    })
   )
   columns.forEach((item, i) =>
     check_item({ item, field: `columns[${i}]`, row_grain_id, defs, errors })

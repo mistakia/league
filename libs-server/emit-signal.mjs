@@ -11,7 +11,9 @@ const sign_machine_token = ({ slug, key_path }) => {
   const private_key = crypto.createPrivateKey(readFileSync(key_path, 'utf8'))
   const exp = Date.now() + TOKEN_TTL_MS
   const payload = `${slug}.${exp}`
-  const sig = crypto.sign(null, Buffer.from(payload), private_key).toString('base64url')
+  const sig = crypto
+    .sign(null, Buffer.from(payload), private_key)
+    .toString('base64url')
   return `${payload}.${sig}`
 }
 
@@ -42,11 +44,18 @@ const emit_signal = async ({
   try {
     token = sign_machine_token({ slug, key_path })
   } catch (err) {
-    log('machine token sign failed: %s; signal NOT emitted: %s', err.message, title)
+    log(
+      'machine token sign failed: %s; signal NOT emitted: %s',
+      err.message,
+      title
+    )
     return
   }
   if (!token) {
-    log('machine token unavailable (missing key file); signal NOT emitted: %s', title)
+    log(
+      'machine token unavailable (missing key file); signal NOT emitted: %s',
+      title
+    )
     return
   }
   try {

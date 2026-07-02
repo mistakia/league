@@ -36,7 +36,10 @@ describe('LIBS-SERVER player underdog_id', function () {
     const has_column = await db.schema.hasColumn('player', 'underdog_id')
     if (!has_column) {
       const ddl = await fs.readFile(
-        path.resolve(__dirname, '../db/adhoc/2026-06-10-player-underdog-id.sql'),
+        path.resolve(
+          __dirname,
+          '../db/adhoc/2026-06-10-player-underdog-id.sql'
+        ),
         'utf8'
       )
       await db.raw(ddl)

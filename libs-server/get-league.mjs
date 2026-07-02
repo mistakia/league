@@ -26,11 +26,7 @@ export default async function ({ lid, year = current_season.year } = {}) {
       this.on('leagues.uid', '=', 'seasons.lid')
       this.on(db.raw(`seasons.year = ${year} or seasons.year is null`))
     })
-    .leftJoin(
-      'league_formats',
-      'seasons.league_format_id',
-      'league_formats.id'
-    )
+    .leftJoin('league_formats', 'seasons.league_format_id', 'league_formats.id')
     .leftJoin(
       'league_scoring_formats',
       'seasons.scoring_format_id',

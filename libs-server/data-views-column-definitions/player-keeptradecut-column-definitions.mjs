@@ -50,7 +50,9 @@ const keeptradecut_join = ({
   data_view_options = {}
 }) => {
   // using an inner join for week splits because its much faster, not sure why
-  const join_func = get_join_func(row_axes.includes('week') ? 'INNER' : join_type)
+  const join_func = get_join_func(
+    row_axes.includes('week') ? 'INNER' : join_type
+  )
   const { year_offset_single } = get_default_params({ params })
 
   if (row_axes.includes('year') && !data_view_options.opening_days_joined) {

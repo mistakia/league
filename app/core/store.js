@@ -27,8 +27,7 @@ const enhancers = [applyMiddleware(...middlewares)]
 const dynamic_reducers = {}
 const injected_saga_keys = new Set()
 
-const build_reducer = () =>
-  rootReducer(routerReducer, dynamic_reducers)
+const build_reducer = () => rootReducer(routerReducer, dynamic_reducers)
 
 export const store = createStore(
   build_reducer(),

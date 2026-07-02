@@ -22,9 +22,7 @@ export const resolve_format_hash = async ({ hash, lid, format, year }) => {
   // Direct hash provided
   if (hash) {
     // Check if it's a league or scoring format
-    const league_format = await db('league_formats')
-      .where('id', hash)
-      .first()
+    const league_format = await db('league_formats').where('id', hash).first()
     if (league_format) {
       return { hash, name: `hash-${hash.slice(0, 8)}`, type: 'league' }
     }

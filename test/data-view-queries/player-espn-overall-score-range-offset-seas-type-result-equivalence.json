@@ -2,20 +2,13 @@
   "name": "player_espn_overall_score range year_offset averages REG only, excluding POST (executed-result parity)",
   "description": "Seed one player with 2024 REG (50), 2024 POST (99), and 2025 REG (70) espn_overall_score, then run player_espn_overall_score with year=[2023] + year_offset=[1,2]. The result must AVG the REG window only (60), excluding the POST row -- proving the extra_predicates gate fix reapplies the seas_type discriminator that the prior trust-branch silently dropped for this real-table-no-alias source. If seas_type were ignored, the POST 99 would pull the average to 73.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_espn_overall_score",
         "params": {
-          "year": [
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2023],
+          "year_offset": [1, 2]
         }
       }
     ],
@@ -23,9 +16,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "ZZ"
-        ]
+        "value": ["ZZ"]
       }
     ]
   },
@@ -38,14 +29,7 @@
       "INSERT INTO player_seasonlogs (pid, year, seas_type, pos, espn_overall_score) VALUES ('TEST-ESPN-2000-2000-01-01', 2025, 'REG', 'ZZ', 70)"
     ],
     "reference_sql": "SELECT AVG(espn_overall_score) AS espn_overall_score_0 FROM player_seasonlogs WHERE pid = 'TEST-ESPN-2000-2000-01-01' AND year IN (2024, 2025) AND seas_type = 'REG'",
-    "compare_columns": [
-      "espn_overall_score_0"
-    ]
+    "compare_columns": ["espn_overall_score_0"]
   },
-  "tags": [
-    "year_offset",
-    "espn",
-    "range",
-    "result-equivalence"
-  ]
+  "tags": ["year_offset", "espn", "range", "result-equivalence"]
 }

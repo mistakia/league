@@ -7,7 +7,11 @@ const Loading = ({ loading }) => {
   if (loading) {
     return (
       <div className='loading'>
-        <div className='loading__spinner' role='progressbar' aria-label='loading' />
+        <div
+          className='loading__spinner'
+          role='progressbar'
+          aria-label='loading'
+        />
       </div>
     )
   }

@@ -2,32 +2,20 @@
   "name": "player_season min/max ranking range year_offset take the window MIN/MAX (executed-result parity)",
   "description": "Seed one player with 2024 (min 5, max 20) and 2025 (min 2, max 30) rankings, then run player_season_min_ranking + player_season_max_ranking with year=[2023] + year_offset=[1,2]. min_rank must equal the window MIN (2) and max_rank the window MAX (30) -- proving ranks reduce with MIN/MAX, never SUM.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_season_min_ranking",
         "params": {
-          "year": [
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2023],
+          "year_offset": [1, 2]
         }
       },
       {
         "column_id": "player_season_max_ranking",
         "params": {
-          "year": [
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2023],
+          "year_offset": [1, 2]
         }
       }
     ],
@@ -35,9 +23,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "ZZ"
-        ]
+        "value": ["ZZ"]
       }
     ]
   },
@@ -54,15 +40,7 @@
         "max_rank_0": 30
       }
     ],
-    "compare_columns": [
-      "min_rank_0",
-      "max_rank_0"
-    ]
+    "compare_columns": ["min_rank_0", "max_rank_0"]
   },
-  "tags": [
-    "year_offset",
-    "rankings",
-    "range",
-    "result-equivalence"
-  ]
+  "tags": ["year_offset", "rankings", "range", "result-equivalence"]
 }

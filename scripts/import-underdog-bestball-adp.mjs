@@ -128,7 +128,9 @@ const import_underdog_bestball_adp = async ({
 
       let player_row
       try {
-        player_row = await find_player_row({ underdog_id: appearance.player_id })
+        player_row = await find_player_row({
+          underdog_id: appearance.player_id
+        })
         if (!player_row) {
           player_row = await find_player_row({
             name,
@@ -170,7 +172,9 @@ const import_underdog_bestball_adp = async ({
     }
 
     const with_adp = appearances.length - no_adp
-    const match_rate = with_adp ? ((matched / with_adp) * 100).toFixed(1) : '0.0'
+    const match_rate = with_adp
+      ? ((matched / with_adp) * 100).toFixed(1)
+      : '0.0'
     log(
       `slate "${title}": ${appearances.length} appearances, ${no_adp} without adp, matched ${matched}/${with_adp} (${match_rate}%), unmatched ${unmatched}`
     )

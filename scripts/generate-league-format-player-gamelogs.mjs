@@ -72,10 +72,7 @@ const generate_league_format_player_gamelogs = async ({
       .where('nfl_games.week', week)
       .where('nfl_games.year', year)
       .where('nfl_games.seas_type', 'REG')
-      .where(
-        'league_format_player_gamelogs.league_format_id',
-        league_format_id
-      )
+      .where('league_format_player_gamelogs.league_format_id', league_format_id)
       .whereNotIn('league_format_player_gamelogs.pid', pids)
       .del()
     log(

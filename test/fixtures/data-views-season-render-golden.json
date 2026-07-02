@@ -1,7 +1,5 @@
 {
-  "player_pass_yards_from_plays": [
-    "SUM(pass_yds) as pass_yds_from_plays"
-  ],
+  "player_pass_yards_from_plays": ["SUM(pass_yds) as pass_yds_from_plays"],
   "player_pass_attempts_from_plays": [
     "SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) as pass_atts_from_plays"
   ],
@@ -47,9 +45,7 @@
   "player_pass_depth_per_pass_attempt_from_plays": [
     "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as pass_depth_per_att_from_plays"
   ],
-  "player_pass_air_yards_from_plays": [
-    "SUM(dot) as pass_air_yds_from_plays"
-  ],
+  "player_pass_air_yards_from_plays": ["SUM(dot) as pass_air_yds_from_plays"],
   "player_completed_air_yards_per_completion_from_plays": [
     "CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as comp_air_yds_per_comp_from_plays"
   ],
@@ -77,9 +73,7 @@
   "player_pass_net_yards_per_attempt_from_plays": [
     "CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND((SUM(pass_yds) - SUM(CASE WHEN sk = true THEN yds_gained ELSE 0 END))::decimal / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as pass_net_yds_per_att_from_plays"
   ],
-  "player_rush_yards_from_plays": [
-    "SUM(rush_yds) as rush_yds_from_plays"
-  ],
+  "player_rush_yards_from_plays": ["SUM(rush_yds) as rush_yds_from_plays"],
   "player_rush_touchdowns_from_plays": [
     "SUM(CASE WHEN td = true THEN 1 ELSE 0 END) as rush_tds_from_plays"
   ],
@@ -138,9 +132,7 @@
   "player_successful_rush_percentage_from_plays": [
     "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as succ_rush_pct_from_plays"
   ],
-  "player_broken_tackles_from_plays": [
-    "SUM(mbt) as broken_tackles_from_plays"
-  ],
+  "player_broken_tackles_from_plays": ["SUM(mbt) as broken_tackles_from_plays"],
   "player_broken_tackles_per_rush_attempt_from_plays": [
     "CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(mbt)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as broken_tackles_per_rush_att_from_plays"
   ],
@@ -174,9 +166,7 @@
   "player_air_yards_per_target_from_plays": [
     "CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as air_yds_per_trg_from_plays"
   ],
-  "player_air_yards_from_plays": [
-    "SUM(dot) as air_yds_from_plays"
-  ],
+  "player_air_yards_from_plays": ["SUM(dot) as air_yds_from_plays"],
   "player_receiving_first_down_from_plays": [
     "SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) as recv_first_down_from_plays"
   ],
@@ -232,9 +222,7 @@
   "player_time_to_throw_from_plays": [
     "AVG(CASE WHEN time_to_throw IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw ELSE NULL END) as time_to_throw_from_plays"
   ],
-  "team_pass_yards_from_plays": [
-    "SUM(pass_yds) AS team_pass_yds_from_plays"
-  ],
+  "team_pass_yards_from_plays": ["SUM(pass_yds) AS team_pass_yds_from_plays"],
   "player_team_pass_yards_from_plays": [
     "SUM(pass_yds) AS team_pass_yds_from_plays"
   ],
@@ -280,9 +268,7 @@
   "player_team_yards_after_catch_from_plays": [
     "SUM(yards_after_catch) AS team_yards_after_catch_from_plays"
   ],
-  "team_rush_yards_from_plays": [
-    "SUM(rush_yds) AS team_rush_yds_from_plays"
-  ],
+  "team_rush_yards_from_plays": ["SUM(rush_yds) AS team_rush_yds_from_plays"],
   "player_team_rush_yards_from_plays": [
     "SUM(rush_yds) AS team_rush_yds_from_plays"
   ],
@@ -334,12 +320,8 @@
     "SUM(CASE WHEN pass_yds >= 20 OR rush_yds >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator",
     "COUNT(*) as team_explosive_play_rate_from_plays_denominator"
   ],
-  "team_play_count_from_plays": [
-    "SUM(1) AS team_play_count_from_plays"
-  ],
-  "player_team_play_count_from_plays": [
-    "SUM(1) AS team_play_count_from_plays"
-  ],
+  "team_play_count_from_plays": ["SUM(1) AS team_play_count_from_plays"],
+  "player_team_play_count_from_plays": ["SUM(1) AS team_play_count_from_plays"],
   "team_series_count_from_plays": [
     "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', series_seq)) AS team_series_count_from_plays"
   ],

@@ -194,13 +194,13 @@ Scripts for bulk importing player data:
 
 ## Audit and Gamelog Scripts
 
-| Script                                 | Purpose                                                    |
-| -------------------------------------- | ---------------------------------------------------------- |
-| `scripts/audit-player-gamelogs.mjs`       | Compare DB gamelogs against PFR; requires pfr_id on player |
-| `scripts/generate-player-gamelogs.mjs`    | Aggregate play stats into player gamelogs                  |
-| `scripts/update-player-gsispid.mjs`       | Backfill gsispid on player table from nfl_play_stats       |
-| `scripts/archive-nfl-gamebooks.mjs`       | Download NFL gamebook PDFs to `/root/cache/nfl/gamebook/`  |
-| `scripts/import-nfl-gamebook-starters.mjs`| Parse gamebooks; write `player_gamelogs.started`           |
+| Script                                     | Purpose                                                    |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `scripts/audit-player-gamelogs.mjs`        | Compare DB gamelogs against PFR; requires pfr_id on player |
+| `scripts/generate-player-gamelogs.mjs`     | Aggregate play stats into player gamelogs                  |
+| `scripts/update-player-gsispid.mjs`        | Backfill gsispid on player table from nfl_play_stats       |
+| `scripts/archive-nfl-gamebooks.mjs`        | Download NFL gamebook PDFs to `/root/cache/nfl/gamebook/`  |
+| `scripts/import-nfl-gamebook-starters.mjs` | Parse gamebooks; write `player_gamelogs.started`           |
 
 ### `player_gamelogs.started` provenance
 

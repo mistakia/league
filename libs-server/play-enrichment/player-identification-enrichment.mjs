@@ -55,7 +55,11 @@ export const enrich_player_identifications = (
   // guessing. This writes only the owned nfl_plays._gsis/_pid columns; it never
   // mutates the NFL-owned nfl_play_stats row. See
   // user:text/league/data-quality-and-validation.md.
-  const resolve_role_gsis_via_snap_roster = (stats_for_play, stat_ids, esbid) => {
+  const resolve_role_gsis_via_snap_roster = (
+    stats_for_play,
+    stat_ids,
+    esbid
+  ) => {
     if (!snap_roster_by_esbid) return null
     const roster = snap_roster_by_esbid.get(esbid)
     if (!roster) return null
@@ -182,7 +186,11 @@ export const enrich_player_identifications = (
     // (interception), 20 (sack, 2023+ feed omits 14/15/16), and 111/112 (air
     // yards complete/incomplete). Omitting 19 wiped the passer on every
     // interception; omitting 111/112 wiped air-yards-only pass rows.
-    { gsis: 'psr_gsis', pid: 'psr_pid', stat_ids: [14, 15, 16, 19, 20, 111, 112] },
+    {
+      gsis: 'psr_gsis',
+      pid: 'psr_pid',
+      stat_ids: [14, 15, 16, 19, 20, 111, 112]
+    },
     // trg_gsis is set by statIds 21/22 (reception/TD), 113 (yards after catch),
     // and 115 (target/intended receiver -- the ONLY target stat present on
     // incompletions). Omitting 113/115 collapsed targets-from-plays to

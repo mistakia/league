@@ -389,7 +389,10 @@ export async function fetch_with_retry({
       if (use_proxy) {
         // Get a working proxy from the specified pool (rotates on failure)
         await proxy_manager.initialize()
-        current_proxy = await proxy_manager.get_working_proxy(proxy_pool, signal)
+        current_proxy = await proxy_manager.get_working_proxy(
+          proxy_pool,
+          signal
+        )
 
         if (current_proxy) {
           retry_log(

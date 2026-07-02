@@ -292,7 +292,9 @@ describe('enrich_player_identifications single-player family ownership', functio
     // target, collapsing targets-from-plays to receptions. statId 115 must
     // attribute trg_pid.
     const play_row = { esbid, playId }
-    const stats = [play_stat({ esbid, playId, statId: 115, gsisId: 'GSIS_TRG' })]
+    const stats = [
+      play_stat({ esbid, playId, statId: 115, gsisId: 'GSIS_TRG' })
+    ]
     const cache = make_player_cache({ GSIS_TRG: 'PID_TRG' })
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
@@ -303,7 +305,9 @@ describe('enrich_player_identifications single-player family ownership', functio
 
   it('trg family: statId 113 (yards after catch) attributes trg_pid', () => {
     const play_row = { esbid, playId }
-    const stats = [play_stat({ esbid, playId, statId: 113, gsisId: 'GSIS_TRG' })]
+    const stats = [
+      play_stat({ esbid, playId, statId: 113, gsisId: 'GSIS_TRG' })
+    ]
     const cache = make_player_cache({ GSIS_TRG: 'PID_TRG' })
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
@@ -403,7 +407,12 @@ describe('enrich_player_identifications snap-roster fallback (source NULL gsisId
 
   // A role stat row the NFL feed emitted with playerName + clubCode but a NULL
   // gsisId (the Jennings failure mode).
-  const named_stat = ({ statId, playerName, clubCode = 'NE', gsisId = null }) => ({
+  const named_stat = ({
+    statId,
+    playerName,
+    clubCode = 'NE',
+    gsisId = null
+  }) => ({
     esbid,
     playId,
     statId,

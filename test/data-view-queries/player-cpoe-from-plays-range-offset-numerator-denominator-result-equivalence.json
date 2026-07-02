@@ -2,20 +2,13 @@
   "name": "player cpoe from plays range year_offset pools numerator/denominator over the window (executed-result parity)",
   "description": "Seed pass plays with cpoe across 2024 (2.0, 4.0) and 2025 (6.0), then run player_completion_percentage_over_expected_from_plays with year=[2023] + year_offset=[1,2]. CPOE is a per-dropback mean, so the range pools SUM(cpoe)/SUM(qualifying dropbacks) over the offset window = 12.0/3 = 4.0 -- NOT the 2024-only mean (6.0/2 = 3.0). Proves the numerator/denominator recombination spans both offset years rather than collapsing to one.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_completion_percentage_over_expected_from_plays",
         "params": {
-          "year": [
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2023],
+          "year_offset": [1, 2]
         }
       }
     ],
@@ -23,9 +16,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "ZZ"
-        ]
+        "value": ["ZZ"]
       }
     ]
   },
@@ -38,9 +29,7 @@
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, psr_pid, cpoe) VALUES (990002, 1, 2025, 1, 0, 'REG', 'PASS', 'TEST-CPOE-2000-2000-01-01', 6.0)"
     ],
     "reference_sql": "SELECT SUM(cpoe) / NULLIF(SUM(CASE WHEN cpoe IS NOT NULL THEN 1 ELSE 0 END), 0) AS pass_comp_pct_over_expected_from_plays_0 FROM nfl_plays WHERE psr_pid = 'TEST-CPOE-2000-2000-01-01' AND year IN (2024, 2025) AND seas_type = 'REG' AND play_type <> 'NOPL'",
-    "compare_columns": [
-      "pass_comp_pct_over_expected_from_plays_0"
-    ]
+    "compare_columns": ["pass_comp_pct_over_expected_from_plays_0"]
   },
   "tags": [
     "year_offset",

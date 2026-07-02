@@ -2,37 +2,24 @@
   "name": "team subject year split with multiple team stat columns",
   "description": "Team subject + year split + multiple team-stat columns",
   "request": {
-    "row_grain": [
-      "team"
-    ],
-    "row_axes": [
-      "year"
-    ],
+    "row_grain": ["team"],
+    "row_axes": ["year"],
     "columns": [
       {
         "column_id": "team_pass_yards_from_plays",
         "params": {
-          "year": [
-            2023,
-            2022
-          ]
+          "year": [2023, 2022]
         }
       },
       {
         "column_id": "team_rush_yards_from_plays",
         "params": {
-          "year": [
-            2023,
-            2022
-          ]
+          "year": [2023, 2022]
         }
       }
     ]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023]) as year), \"team\" as (SELECT team_code, team_name, team_conference, team_division FROM (VALUES ('ARI','Arizona Cardinals','NFC','NFC West'),('ATL','Atlanta Falcons','NFC','NFC South'),('BAL','Baltimore Ravens','AFC','AFC North'),('BUF','Buffalo Bills','AFC','AFC East'),('CAR','Carolina Panthers','NFC','NFC South'),('CHI','Chicago Bears','NFC','NFC North'),('CIN','Cincinnati Bengals','AFC','AFC North'),('CLE','Cleveland Browns','AFC','AFC North'),('DAL','Dallas Cowboys','NFC','NFC East'),('DEN','Denver Broncos','AFC','AFC West'),('DET','Detroit Lions','NFC','NFC North'),('GB','Green Bay Packers','NFC','NFC North'),('HOU','Houston Texans','AFC','AFC South'),('IND','Indianapolis Colts','AFC','AFC South'),('JAX','Jacksonville Jaguars','AFC','AFC South'),('KC','Kansas City Chiefs','AFC','AFC West'),('LA','Los Angeles Rams','NFC','NFC West'),('LAC','Los Angeles Chargers','AFC','AFC West'),('LV','Las Vegas Raiders','AFC','AFC West'),('MIA','Miami Dolphins','AFC','AFC East'),('MIN','Minnesota Vikings','NFC','NFC North'),('NE','New England Patriots','AFC','AFC East'),('NO','New Orleans Saints','NFC','NFC South'),('NYG','New York Giants','NFC','NFC East'),('NYJ','New York Jets','AFC','AFC East'),('PHI','Philadelphia Eagles','NFC','NFC East'),('PIT','Pittsburgh Steelers','AFC','AFC North'),('SEA','Seattle Seahawks','NFC','NFC West'),('SF','San Francisco 49ers','NFC','NFC West'),('TB','Tampa Bay Buccaneers','NFC','NFC South'),('TEN','Tennessee Titans','AFC','AFC South'),('WAS','Washington Commanders','NFC','NFC East')) AS t(team_code, team_name, team_conference, team_division)), \"team_years\" as (SELECT team.team_code, base_years.year FROM team CROSS JOIN base_years), \"t5a2b2569de6127331d06ab399f9f3dd7\" as materialized (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays, SUM(rush_yds) AS team_rush_yds_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2022, 2023) group by \"nfl_plays\".\"off\", \"nfl_plays\".\"year\"), \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" as materialized (select \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", sum(t5a2b2569de6127331d06ab399f9f3dd7.team_pass_yds_from_plays) as team_pass_yds_from_plays, sum(t5a2b2569de6127331d06ab399f9f3dd7.team_rush_yds_from_plays) as team_rush_yds_from_plays, \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\" from \"t5a2b2569de6127331d06ab399f9f3dd7\" group by \"t5a2b2569de6127331d06ab399f9f3dd7\".\"nfl_team\", \"t5a2b2569de6127331d06ab399f9f3dd7\".\"year\") select \"team_years\".\"team_code\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\" AS \"team_pass_yds_from_plays_0\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_rush_yds_from_plays\" AS \"team_rush_yds_from_plays_0\", \"team_years\".\"year\" from \"team_years\" inner join \"team\" on \"team\".\"team_code\" = \"team_years\".\"team_code\" left join \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\" on \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"nfl_team\" = \"team_years\".\"team_code\" and t5a2b2569de6127331d06ab399f9f3dd7_team_stats.year = team_years.year group by \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_pass_yds_from_plays\", \"t5a2b2569de6127331d06ab399f9f3dd7_team_stats\".\"team_rush_yds_from_plays\", \"team_years\".\"year\", \"team_years\".\"team_code\" order by \"team_years\".\"team_code\" asc limit 500",
-  "tags": [
-    "team-subject",
-    "identity"
-  ],
+  "tags": ["team-subject", "identity"],
   "timeout_ms": 40000
 }

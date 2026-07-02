@@ -103,9 +103,7 @@ const csv_row_to_player_data = (r) => ({
   height: r.height ? Number(r.height) : null,
   weight: r.weight ? Number(r.weight) : null,
   col: r.college || null,
-  current_nfl_team: r.team
-    ? NFLVERSE_TEAM_ALIASES[r.team] || r.team
-    : null,
+  current_nfl_team: r.team ? NFLVERSE_TEAM_ALIASES[r.team] || r.team : null,
   gsisid: r.gsis_id,
   esbid: r.esb_id || null,
   gsis_it_id: r.gsis_it_id || null,

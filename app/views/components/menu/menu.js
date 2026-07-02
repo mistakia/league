@@ -32,7 +32,8 @@ Icon.propTypes = {
 const ICON_MENU = 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z'
 const ICON_INFO =
   'M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'
-const ICON_NAV_BEFORE = 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z'
+const ICON_NAV_BEFORE =
+  'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z'
 const ICON_NAV_NEXT = 'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z'
 
 export default function AppMenu({
@@ -69,7 +70,8 @@ export default function AppMenu({
   if (isMobile) drawer_classes.push('menu__drawer--temporary')
   else drawer_classes.push('menu__drawer--persistent')
   if (menu_open) drawer_classes.push('menu__drawer--open')
-  if (isMobile) drawer_classes.push(isMobile ? 'menu__drawer--right' : 'menu__drawer--left')
+  if (isMobile)
+    drawer_classes.push(isMobile ? 'menu__drawer--right' : 'menu__drawer--left')
 
   return (
     <>

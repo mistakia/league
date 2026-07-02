@@ -75,9 +75,17 @@ const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
   if (week !== undefined) query.where({ week })
 
   const games = await query
-  log(`${year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games with shieldid`)
+  log(
+    `${year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games with shieldid`
+  )
 
-  const counts = { found: games.length, cached: 0, downloaded: 0, not_found: 0, errored: 0 }
+  const counts = {
+    found: games.length,
+    cached: 0,
+    downloaded: 0,
+    not_found: 0,
+    errored: 0
+  }
   const dest_dir = path.join(os.homedir(), 'cache/nfl/gamebook')
   if (!dry_run) fs.mkdirSync(dest_dir, { recursive: true })
 
@@ -97,7 +105,9 @@ const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
       const result = await fetch_pdf({ url: GAMEBOOK_URL(game.shieldid) })
       if (result.status === 404) {
         counts.not_found += 1
-        log(`404 ${game.esbid} (${game.seas_type} W${game.week}) shieldid=${game.shieldid}`)
+        log(
+          `404 ${game.esbid} (${game.seas_type} W${game.week}) shieldid=${game.shieldid}`
+        )
         continue
       }
       const tmp = `${dest}.tmp`
@@ -132,7 +142,13 @@ const archive_nfl_gamebooks = async ({
     years.push(year || current_season.year)
   }
 
-  const totals = { found: 0, cached: 0, downloaded: 0, not_found: 0, errored: 0 }
+  const totals = {
+    found: 0,
+    cached: 0,
+    downloaded: 0,
+    not_found: 0,
+    errored: 0
+  }
   for (const y of years) {
     const c = await archive_year({ year: y, week, ignore_cache, dry_run })
     for (const k of Object.keys(totals)) totals[k] += c[k]
@@ -140,7 +156,8 @@ const archive_nfl_gamebooks = async ({
 
   log(`totals across ${years.length} year(s): ${JSON.stringify(totals)}`)
 
-  const processed = totals.cached + totals.downloaded + totals.not_found + totals.errored
+  const processed =
+    totals.cached + totals.downloaded + totals.not_found + totals.errored
   const shortfall =
     totals.found > 0 && processed !== totals.found
       ? `archive-nfl-gamebooks: processed ${processed}/${totals.found} games`

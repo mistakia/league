@@ -39,6 +39,7 @@ export const with_row_grains_by_prefix = (fields_obj) => {
 }
 
 export const derive_column_row_grains = (def) => {
-  if (Array.isArray(def?.row_grains) && def.row_grains.length) return def.row_grains
+  if (Array.isArray(def?.row_grains) && def.row_grains.length)
+    return def.row_grains
   return []
 }

@@ -25,9 +25,7 @@ export const check_format_exists = async ({ format_id, format_type }) => {
         .first()
       return !!result
     } else if (format_type === 'league') {
-      const result = await db('league_formats')
-        .where('id', format_id)
-        .first()
+      const result = await db('league_formats').where('id', format_id).first()
       return !!result
     }
     return false

@@ -8,9 +8,9 @@ const { expect } = chai
 
 describe('get_row_axis_label_suffix', () => {
   it('week split active, row has both year and week — returns suffix', () => {
-    expect(get_row_axis_label_suffix(['week'], { year: 2022, week: 5 })).to.equal(
-      ' (2022 W5)'
-    )
+    expect(
+      get_row_axis_label_suffix(['week'], { year: 2022, week: 5 })
+    ).to.equal(' (2022 W5)')
   })
 
   it('week split active, row missing week — returns empty string', () => {
@@ -22,7 +22,9 @@ describe('get_row_axis_label_suffix', () => {
   })
 
   it('year split active, row has year — returns suffix', () => {
-    expect(get_row_axis_label_suffix(['year'], { year: 2022 })).to.equal(' (2022)')
+    expect(get_row_axis_label_suffix(['year'], { year: 2022 })).to.equal(
+      ' (2022)'
+    )
   })
 
   it('year split active, row missing year — returns empty string', () => {

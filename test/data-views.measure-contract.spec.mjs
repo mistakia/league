@@ -104,7 +104,10 @@ describe('data-views measure-contract', () => {
         measure: { kind: 'additive', expr: 'rush_yds' },
         supported_rate_types: TEAM_RATE_TYPES
       })
-      expect(result.supports_output.aggregations).to.deep.equal(['rate', 'count'])
+      expect(result.supports_output.aggregations).to.deep.equal([
+        'rate',
+        'count'
+      ])
       expect(result.supports_output.periods.slice(0, 2)).to.deep.equal([
         'game',
         'season'

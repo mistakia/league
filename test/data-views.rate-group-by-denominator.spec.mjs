@@ -23,7 +23,10 @@ const team_rate_request = ({ period }) => ({
   columns: [
     {
       column_id: 'team_pass_attempts_from_plays',
-      params: { year: [2023], output: { period, aggregation: 'rate', threshold: null } }
+      params: {
+        year: [2023],
+        output: { period, aggregation: 'rate', threshold: null }
+      }
     }
   ],
   row_grain: ['team']

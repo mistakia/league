@@ -26,7 +26,10 @@ describe('data-views subject compatibility', () => {
         row_grain: ['team'],
         prefix_columns: ['player_name'],
         columns: [
-          { column_id: 'team_pass_attempts_from_plays', params: { year: [2023] } }
+          {
+            column_id: 'team_pass_attempts_from_plays',
+            params: { year: [2023] }
+          }
         ]
       },
       'player_name'
@@ -38,7 +41,10 @@ describe('data-views subject compatibility', () => {
       {
         row_grain: ['team'],
         columns: [
-          { column_id: 'team_pass_attempts_from_plays', params: { year: [2023] } }
+          {
+            column_id: 'team_pass_attempts_from_plays',
+            params: { year: [2023] }
+          }
         ],
         where: [
           {
@@ -58,7 +64,10 @@ describe('data-views subject compatibility', () => {
         row_grain: ['team'],
         columns: [
           { column_id: 'player_name' },
-          { column_id: 'team_pass_attempts_from_plays', params: { year: [2023] } }
+          {
+            column_id: 'team_pass_attempts_from_plays',
+            params: { year: [2023] }
+          }
         ]
       },
       'player_name'

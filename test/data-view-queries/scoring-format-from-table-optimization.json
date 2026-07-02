@@ -2,9 +2,7 @@
   "name": "should use scoring_format_player_seasonlogs as FROM table when sorting by fantasy points from seasonlogs",
   "description": "Tests from-table optimization for scoring format columns - query should start from scoring_format_player_seasonlogs table with scoring_format_id in WHERE clause",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_fantasy_points_from_seasonlogs",
@@ -21,10 +19,7 @@
     ]
   },
   "expected_query": "select \"tee00e671538393408c797cda707dfd30\".\"pid\", player.fname, player.lname, \"tee00e671538393408c797cda707dfd30\".\"points\" AS \"points_from_seasonlogs_0\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"tee00e671538393408c797cda707dfd30\" inner join \"player\" on \"player\".\"pid\" = \"tee00e671538393408c797cda707dfd30\".\"pid\" where \"tee00e671538393408c797cda707dfd30\".\"scoring_format_id\" = 'draftkings' and \"tee00e671538393408c797cda707dfd30\".\"year\" = 2022 group by player.fname, player.lname, \"tee00e671538393408c797cda707dfd30\".\"points\", \"tee00e671538393408c797cda707dfd30\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"tee00e671538393408c797cda707dfd30\".\"pid\" asc limit 500",
-  "tags": [
-    "from-table-optimization",
-    "scoring-format"
-  ],
+  "tags": ["from-table-optimization", "scoring-format"],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "one_week",

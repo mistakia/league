@@ -59,7 +59,13 @@ export const LEGACY_ADP_TYPES = Object.freeze([
 // Helper to spell out a full axis tuple with the legacy-default nulls.
 // Legacy `adp_type` rows carry no concrete scoring_format link and no team
 // count, so scoring_format_id and num_teams are null for every decoded row.
-const tuple = ({ scoring_class, num_qb, duration, draft_pool, contest_style }) =>
+const tuple = ({
+  scoring_class,
+  num_qb,
+  duration,
+  draft_pool,
+  contest_style
+}) =>
   Object.freeze({
     scoring_class,
     scoring_format_id: null,

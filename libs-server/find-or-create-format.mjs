@@ -96,7 +96,11 @@ export const find_or_create_league_format = async (knex = db, config) => {
     throw new Error('scoring_format_id is required')
   }
   const pricing_model = config.pricing_model || 'auction'
-  const insert_columns = [...LEAGUE_COLUMNS, 'scoring_format_id', 'pricing_model']
+  const insert_columns = [
+    ...LEAGUE_COLUMNS,
+    'scoring_format_id',
+    'pricing_model'
+  ]
   const conflict_columns = insert_columns
   const values = [
     ...LEAGUE_COLUMNS.map((col) =>

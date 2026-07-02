@@ -14,10 +14,7 @@ debug.enable('calculate-player-variance')
 /**
  * Calculate variance statistics for each player from historical gamelogs.
  */
-const calculate_player_variance = async ({
-  year,
-  scoring_format_id
-} = {}) => {
+const calculate_player_variance = async ({ year, scoring_format_id } = {}) => {
   if (!year) {
     throw new Error('year is required')
   }

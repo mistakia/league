@@ -172,8 +172,14 @@ const derive_coach_id = (full_name, dob) => {
   // Strip non-alpha (apostrophe, hyphen, etc.) before slicing so the LNAM/FNAM
   // segments satisfy the CHECK regex [A-Z]{1,4}. E.g. "O'Leary" -> "OLEA",
   // not "O'LE" (the latter would fail the constraint and abort the txn).
-  const lnam = last.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 4)
-  const fnam = first.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 4)
+  const lnam = last
+    .replace(/[^A-Za-z]/g, '')
+    .toUpperCase()
+    .slice(0, 4)
+  const fnam = first
+    .replace(/[^A-Za-z]/g, '')
+    .toUpperCase()
+    .slice(0, 4)
   if (!lnam || !fnam) return null
   // Accept either an ISO 'YYYY-MM-DD' string or a Date.
   const dob_text =

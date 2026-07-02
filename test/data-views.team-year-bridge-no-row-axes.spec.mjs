@@ -38,7 +38,9 @@ describe('data-views team->team_year bridge with no row-axis', () => {
     const sql = query.toString()
 
     // base_years is anchored on the column's own year (the params.year fallback)
-    expect(sql).to.match(/base_years" as \(SELECT unnest\(ARRAY\[2024\]\) as year/)
+    expect(sql).to.match(
+      /base_years" as \(SELECT unnest\(ARRAY\[2024\]\) as year/
+    )
     // team_years spine is team x base_years, joined back to the team identity
     expect(sql).to.include(
       'team_years" as (SELECT team.team_code, base_years.year FROM team CROSS JOIN base_years'
@@ -50,6 +52,8 @@ describe('data-views team->team_year bridge with no row-axis', () => {
       team_year_no_axes_request([2022])
     )
     const sql = query.toString()
-    expect(sql).to.match(/base_years" as \(SELECT unnest\(ARRAY\[2022\]\) as year/)
+    expect(sql).to.match(
+      /base_years" as \(SELECT unnest\(ARRAY\[2022\]\) as year/
+    )
   })
 })

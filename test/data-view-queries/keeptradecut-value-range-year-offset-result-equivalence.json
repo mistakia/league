@@ -31,14 +31,7 @@
       "INSERT INTO keeptradecut_rankings (pid, qb, type, d, v) SELECT 'TEST-KTC-2000-2000-01-01', 2, 1, EXTRACT(EPOCH FROM date_trunc('day', opening_day))::integer, 9999 FROM opening_days WHERE year = 2023"
     ],
     "reference_sql": "SELECT AVG(v) AS player_keeptradecut_value_0 FROM keeptradecut_rankings WHERE pid = 'TEST-KTC-2000-2000-01-01' AND qb = 2 AND type = 1 AND v < 9000",
-    "compare_columns": [
-      "player_keeptradecut_value_0"
-    ]
+    "compare_columns": ["player_keeptradecut_value_0"]
   },
-  "tags": [
-    "year_offset",
-    "keeptradecut",
-    "range",
-    "result-equivalence"
-  ]
+  "tags": ["year_offset", "keeptradecut", "range", "result-equivalence"]
 }

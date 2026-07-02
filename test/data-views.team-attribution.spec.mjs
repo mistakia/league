@@ -63,7 +63,11 @@ describe('data-views team_attribution', () => {
     it('per_game current: both halves project onto current_nfl_team', async () => {
       const { query } = await get_data_view_results_query(
         view([
-          team_column({ period: 'game', year: [2024], team_attribution: 'current' })
+          team_column({
+            period: 'game',
+            year: [2024],
+            team_attribution: 'current'
+          })
         ])
       )
       const sql = query.toString()
@@ -142,7 +146,11 @@ describe('data-views team_attribution', () => {
       const { query } = await get_data_view_results_query(
         view([
           team_column({ period: 'game', year: [2024] }),
-          team_column({ period: 'game', year: [2024], team_attribution: 'current' })
+          team_column({
+            period: 'game',
+            year: [2024],
+            team_attribution: 'current'
+          })
         ])
       )
       const sql = query.toString()
@@ -203,7 +211,10 @@ describe('data-views team_attribution', () => {
       },
       {
         label: 'team subject',
-        active_ctx: { row_grain_id: 'team', team_reference: 'nfl_team_subject' },
+        active_ctx: {
+          row_grain_id: 'team',
+          team_reference: 'nfl_team_subject'
+        },
         passive_ctx: { team_reference: 'nfl_team_subject' },
         params: {},
         expected: 'nfl_team_subject'
@@ -322,7 +333,9 @@ describe('data-views team_attribution', () => {
 
     it('historical (explicit) resolves the same team expression as the default', async () => {
       const { query } = await get_data_view_results_query(
-        view([counting_column({ year: [2024], team_attribution: 'historical' })])
+        view([
+          counting_column({ year: [2024], team_attribution: 'historical' })
+        ])
       )
       const sql = query.toString()
       expect(sql).to.match(/"nfl_team" = "player_year_teams"\."team"/)

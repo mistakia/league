@@ -58,7 +58,9 @@ export const get_per_team_play_cte_table_name = ({
   // team_attribution must therefore NOT share this CTE. Suffix is empty for the
   // 'historical' default so existing CTE names stay byte-identical.
   const team_attribution_suffix =
-    get_team_attribution(params) === 'current' ? '_team_attribution_current' : ''
+    get_team_attribution(params) === 'current'
+      ? '_team_attribution_current'
+      : ''
 
   const play_level_params_suffix = get_play_level_params_hash_suffix({ params })
 

@@ -57,13 +57,14 @@ export class ConfigSync {
         })
       }
 
-      const { scoring_params, league_params } = this.league_mapper.map_league_config({
-        platform: sync_context.platform,
-        league_config: external_league,
-        scoring_config: external_scoring,
-        roster_config:
-          external_league.roster_settings || external_league.settings
-      })
+      const { scoring_params, league_params } =
+        this.league_mapper.map_league_config({
+          platform: sync_context.platform,
+          league_config: external_league,
+          scoring_config: external_scoring,
+          roster_config:
+            external_league.roster_settings || external_league.settings
+        })
 
       const scoring_format_id = await find_or_create_scoring_format(
         db,

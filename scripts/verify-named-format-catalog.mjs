@@ -55,7 +55,9 @@ const verify_scoring = async () => {
   for (const [id, source_keys] of groups.entries()) {
     const row = await db('league_scoring_formats').where({ id }).first()
     if (!row) {
-      errors.push(`Missing DB row for scoring id '${id}' (source keys: ${source_keys.join(', ')})`)
+      errors.push(
+        `Missing DB row for scoring id '${id}' (source keys: ${source_keys.join(', ')})`
+      )
       continue
     }
     for (const source_key of source_keys) {
@@ -86,7 +88,9 @@ const verify_league = async () => {
   for (const [id, source_keys] of groups.entries()) {
     const row = await db('league_formats').where({ id }).first()
     if (!row) {
-      errors.push(`Missing DB row for league id '${id}' (source keys: ${source_keys.join(', ')})`)
+      errors.push(
+        `Missing DB row for league id '${id}' (source keys: ${source_keys.join(', ')})`
+      )
       continue
     }
     for (const source_key of source_keys) {
@@ -118,10 +122,7 @@ const verify_league = async () => {
 }
 
 const main = async () => {
-  const errors = [
-    ...(await verify_scoring()),
-    ...(await verify_league())
-  ]
+  const errors = [...(await verify_scoring()), ...(await verify_league())]
 
   if (errors.length) {
     console.error(`verify-named-format-catalog: ${errors.length} error(s)`)

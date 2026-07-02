@@ -67,6 +67,8 @@ describe('Data View CTE dedupe', () => {
     const { query } = await get_data_view_results_query(request)
     const sql = query.toString()
 
-    expect(count_occurrences(sql, '"player_year_teams" as materialized')).to.equal(1)
+    expect(
+      count_occurrences(sql, '"player_year_teams" as materialized')
+    ).to.equal(1)
   })
 })

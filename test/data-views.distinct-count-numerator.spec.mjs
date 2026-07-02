@@ -25,7 +25,9 @@ const build = (measures) =>
 
 describe('data-views distinct-count numerator', () => {
   it('emits SUM(expr) for an additive measure (unchanged default)', () => {
-    const sql = build([{ alias: 'm_sum', measure_expr: 'rush_yds', aggregate: 'sum' }])
+    const sql = build([
+      { alias: 'm_sum', measure_expr: 'rush_yds', aggregate: 'sum' }
+    ])
     expect(sql).to.match(/SUM\(rush_yds\) AS m_sum/)
     expect(sql).to.not.match(/COUNT\(DISTINCT/)
   })
@@ -84,7 +86,12 @@ describe('data-views distinct-count numerator', () => {
   it('compute_measure_alias distinguishes sum from count_distinct of the same expr', () => {
     const measure_expr = () => "CONCAT(esbid, '_', series_seq)"
     const sum_alias = compute_measure_alias({
-      column_def: { column_id: 'c', measure_source: 'plays', measure_expr, aggregate: 'sum' },
+      column_def: {
+        column_id: 'c',
+        measure_source: 'plays',
+        measure_expr,
+        aggregate: 'sum'
+      },
       params: {},
       identity_id: 'player_year'
     })

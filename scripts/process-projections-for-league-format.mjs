@@ -93,9 +93,7 @@ const process_league_format_year = async ({
         week,
         pts_added,
         market_salary:
-          pricing_model === 'auction'
-            ? player_row.market_salary[week]
-            : null
+          pricing_model === 'auction' ? player_row.market_salary[week] : null
       }
 
       value_inserts.push(params)

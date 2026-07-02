@@ -6,208 +6,235 @@
 export const named_scoring_formats = {
   draftkings: {
     id: 'draftkings',
-    label: "DraftKings DFS",
-    description: "DraftKings DFS scoring with full PPR, 4-point passing TDs, and milestone bonuses - bonus/kicker/defense support needed"
+    label: 'DraftKings DFS',
+    description:
+      'DraftKings DFS scoring with full PPR, 4-point passing TDs, and milestone bonuses - bonus/kicker/defense support needed'
   },
   fanduel: {
     id: 'fanduel',
-    label: "FanDuel DFS",
-    description: "FanDuel DFS scoring with half PPR, 4-point passing TDs, and yardage bonuses - bonus/kicker/defense support needed"
+    label: 'FanDuel DFS',
+    description:
+      'FanDuel DFS scoring with half PPR, 4-point passing TDs, and yardage bonuses - bonus/kicker/defense support needed'
   },
   genesis: {
     id: 'genesis',
-    label: "Genesis League",
-    description: "Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers"
+    label: 'Genesis League',
+    description:
+      'Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers'
   },
   half_ppr: {
     id: 'half_ppr',
-    label: "Half PPR",
-    description: "Half point per reception scoring with 4-point passing touchdowns"
+    label: 'Half PPR',
+    description:
+      'Half point per reception scoring with 4-point passing touchdowns'
   },
   half_ppr_lower_turnover: {
     id: 'half_ppr_lower_turnover',
-    label: "Half PPR (Lower Turnover)",
-    description: "Half PPR with lower turnover penalties: -1 INT, -1 fumble lost"
+    label: 'Half PPR (Lower Turnover)',
+    description:
+      'Half PPR with lower turnover penalties: -1 INT, -1 fumble lost'
   },
   ppr: {
     id: 'ppr',
-    label: "PPR (Full)",
-    description: "Full point per reception scoring with 4-point passing touchdowns"
+    label: 'PPR (Full)',
+    description:
+      'Full point per reception scoring with 4-point passing touchdowns'
   },
   ppr_lower_turnover: {
     id: 'draftkings',
-    label: "PPR (Lower Turnover)",
-    description: "Full PPR with lower turnover penalties: -1 INT, -1 fumble lost"
+    label: 'PPR (Lower Turnover)',
+    description:
+      'Full PPR with lower turnover penalties: -1 INT, -1 fumble lost'
   },
   sfb15_mfl: {
     id: 'sfb15_mfl',
-    label: "Scott Fish Bowl 15 (MFL)",
-    description: "Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties"
+    label: 'Scott Fish Bowl 15 (MFL)',
+    description:
+      'Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties'
   },
   sfb15_sleeper: {
     id: 'sfb15_sleeper',
-    label: "Scott Fish Bowl 15 (Sleeper)",
-    description: "Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties"
+    label: 'Scott Fish Bowl 15 (Sleeper)',
+    description:
+      'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
   },
   standard: {
     id: 'standard',
-    label: "Standard (No PPR)",
-    description: "Standard scoring with no PPR and 4-point passing touchdowns"
+    label: 'Standard (No PPR)',
+    description: 'Standard scoring with no PPR and 4-point passing touchdowns'
   }
 }
 
 export const named_league_formats = {
   draftkings_classic: {
     id: 'draftkings_classic',
-    label: "DraftKings Classic DFS",
-    description: "DraftKings classic DFS lineup - 1QB/2RB/3WR/1TE/1FLEX/1DST with $50k salary cap",
+    label: 'DraftKings Classic DFS',
+    description:
+      'DraftKings classic DFS lineup - 1QB/2RB/3WR/1TE/1FLEX/1DST with $50k salary cap',
     scoring_format: 'draftkings',
     pricing_model: 'dfs_fixed'
   },
   genesis_10_team: {
     id: 'genesis_10_team',
-    label: "Genesis League 10 Team",
-    description: "Genesis League 10-team superflex format with no kicker - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'Genesis League 10 Team',
+    description:
+      'Genesis League 10-team superflex format with no kicker - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'genesis',
     pricing_model: 'auction'
   },
   half_ppr_10_team: {
     id: 'half_ppr_10_team',
-    label: "Half PPR 10 Team",
-    description: "10-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'Half PPR 10 Team',
+    description: '10-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'half_ppr',
     pricing_model: 'auction'
   },
   half_ppr_10_team_superflex: {
     id: 'half_ppr_10_team_superflex',
-    label: "Half PPR 10 Team Superflex",
-    description: "10-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'Half PPR 10 Team Superflex',
+    description:
+      '10-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'half_ppr',
     pricing_model: 'auction'
   },
   half_ppr_12_team: {
     id: 'half_ppr_12_team',
-    label: "Half PPR 12 Team",
-    description: "12-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'Half PPR 12 Team',
+    description: '12-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'half_ppr',
     pricing_model: 'auction'
   },
   half_ppr_12_team_superflex: {
     id: 'half_ppr_12_team_superflex',
-    label: "Half PPR 12 Team Superflex",
-    description: "12-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'Half PPR 12 Team Superflex',
+    description:
+      '12-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'half_ppr',
     pricing_model: 'auction'
   },
   half_ppr_lower_turnover_10_team: {
     id: 'half_ppr_lower_turnover_10_team',
-    label: "Half PPR Lower Turnover 10 Team",
-    description: "10-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'Half PPR Lower Turnover 10 Team',
+    description:
+      '10-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'half_ppr_lower_turnover',
     pricing_model: 'auction'
   },
   half_ppr_lower_turnover_10_team_superflex: {
     id: 'half_ppr_lower_turnover_10_team_superflex',
-    label: "Half PPR Lower Turnover 10 Team Superflex",
-    description: "10-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'Half PPR Lower Turnover 10 Team Superflex',
+    description:
+      '10-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'half_ppr_lower_turnover',
     pricing_model: 'auction'
   },
   half_ppr_lower_turnover_12_team: {
     id: 'half_ppr_lower_turnover_12_team',
-    label: "Half PPR Lower Turnover 12 Team",
-    description: "12-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'Half PPR Lower Turnover 12 Team',
+    description:
+      '12-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'half_ppr_lower_turnover',
     pricing_model: 'auction'
   },
   half_ppr_lower_turnover_12_team_superflex: {
     id: 'half_ppr_lower_turnover_12_team_superflex',
-    label: "Half PPR Lower Turnover 12 Team Superflex",
-    description: "12-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'Half PPR Lower Turnover 12 Team Superflex',
+    description:
+      '12-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'half_ppr_lower_turnover',
     pricing_model: 'auction'
   },
   ppr_10_team: {
     id: 'ppr_10_team',
-    label: "PPR 10 Team",
-    description: "10-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'PPR 10 Team',
+    description: '10-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'ppr',
     pricing_model: 'auction'
   },
   ppr_10_team_superflex: {
     id: 'ppr_10_team_superflex',
-    label: "PPR 10 Team Superflex",
-    description: "10-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'PPR 10 Team Superflex',
+    description:
+      '10-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'ppr',
     pricing_model: 'auction'
   },
   ppr_12_team: {
     id: 'ppr_12_team',
-    label: "PPR 12 Team",
-    description: "12-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'PPR 12 Team',
+    description: '12-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'ppr',
     pricing_model: 'auction'
   },
   ppr_12_team_superflex: {
     id: 'ppr_12_team_superflex',
-    label: "PPR 12 Team Superflex",
-    description: "12-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'PPR 12 Team Superflex',
+    description:
+      '12-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'ppr',
     pricing_model: 'auction'
   },
   ppr_lower_turnover_10_team: {
     id: 'ppr_lower_turnover_10_team',
-    label: "PPR Lower Turnover 10 Team",
-    description: "10-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'PPR Lower Turnover 10 Team',
+    description:
+      '10-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'draftkings',
     pricing_model: 'auction'
   },
   ppr_lower_turnover_10_team_superflex: {
     id: 'ppr_lower_turnover_10_team_superflex',
-    label: "PPR Lower Turnover 10 Team Superflex",
-    description: "10-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'PPR Lower Turnover 10 Team Superflex',
+    description:
+      '10-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'draftkings',
     pricing_model: 'auction'
   },
   ppr_lower_turnover_12_team: {
     id: 'ppr_lower_turnover_12_team',
-    label: "PPR Lower Turnover 12 Team",
-    description: "12-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'PPR Lower Turnover 12 Team',
+    description:
+      '12-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'draftkings',
     pricing_model: 'auction'
   },
   ppr_lower_turnover_12_team_superflex: {
     id: 'ppr_lower_turnover_12_team_superflex',
-    label: "PPR Lower Turnover 12 Team Superflex",
-    description: "12-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX",
+    label: 'PPR Lower Turnover 12 Team Superflex',
+    description:
+      '12-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX',
     scoring_format: 'draftkings',
     pricing_model: 'auction'
   },
   sfb15_mfl: {
     id: 'sfb15_mfl',
-    label: "Scott Fish Bowl 15 (MFL)",
-    description: "Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions",
+    label: 'Scott Fish Bowl 15 (MFL)',
+    description:
+      'Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions',
     scoring_format: 'sfb15_mfl',
     pricing_model: 'auction'
   },
   sfb15_sleeper: {
     id: 'sfb15_sleeper',
-    label: "Scott Fish Bowl 15 (Sleeper)",
-    description: "Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions",
+    label: 'Scott Fish Bowl 15 (Sleeper)',
+    description:
+      'Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions',
     scoring_format: 'sfb15_sleeper',
     pricing_model: 'auction'
   },
   standard_10_team: {
     id: 'standard_10_team',
-    label: "Standard 10 Team (No PPR)",
-    description: "10-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'Standard 10 Team (No PPR)',
+    description:
+      '10-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'standard',
     pricing_model: 'auction'
   },
   standard_12_team: {
     id: 'standard_12_team',
-    label: "Standard 12 Team (No PPR)",
-    description: "12-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX",
+    label: 'Standard 12 Team (No PPR)',
+    description:
+      '12-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX',
     scoring_format: 'standard',
     pricing_model: 'auction'
   }

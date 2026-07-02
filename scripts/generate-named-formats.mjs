@@ -22,7 +22,9 @@ const stable_stringify = (value) => {
   const keys = Object.keys(value).sort()
   return (
     '{' +
-    keys.map((k) => JSON.stringify(k) + ':' + stable_stringify(value[k])).join(',') +
+    keys
+      .map((k) => JSON.stringify(k) + ':' + stable_stringify(value[k]))
+      .join(',') +
     '}'
   )
 }
@@ -82,19 +84,26 @@ const process_scoring_formats = () => {
   return { processed, errors, canonical_by_source }
 }
 
-const process_league_formats = (scoring_canonical_by_source, scoring_processed) => {
+const process_league_formats = (
+  scoring_canonical_by_source,
+  scoring_processed
+) => {
   const errors = []
-  const canonical_by_source = build_canonical_id_map(league_formats, (entry) => {
-    if (!entry.config) return null
-    const scoring_id =
-      entry.scoring_format && scoring_canonical_by_source[entry.scoring_format]
-    if (!scoring_id) return null
-    return {
-      config: entry.config,
-      scoring_format_id: scoring_id,
-      pricing_model: entry.pricing_model || 'auction'
+  const canonical_by_source = build_canonical_id_map(
+    league_formats,
+    (entry) => {
+      if (!entry.config) return null
+      const scoring_id =
+        entry.scoring_format &&
+        scoring_canonical_by_source[entry.scoring_format]
+      if (!scoring_id) return null
+      return {
+        config: entry.config,
+        scoring_format_id: scoring_id,
+        pricing_model: entry.pricing_model || 'auction'
+      }
     }
-  })
+  )
   const processed = {}
 
   for (const [name, format] of Object.entries(league_formats)) {
@@ -142,7 +151,9 @@ const process_league_formats = (scoring_canonical_by_source, scoring_processed) 
 }
 
 const emit_catalog_object = (entries, indent, extra_fields) => {
-  const sorted = Object.entries(entries).sort((a, b) => a[0].localeCompare(b[0]))
+  const sorted = Object.entries(entries).sort((a, b) =>
+    a[0].localeCompare(b[0])
+  )
   let out = ''
   for (const [name, entry] of sorted) {
     out += `${indent}${name}: {\n`
@@ -173,7 +184,10 @@ export const named_scoring_formats = {
 
 export const named_league_formats = {
 `
-  content += emit_catalog_object(league, '  ', ['scoring_format', 'pricing_model'])
+  content += emit_catalog_object(league, '  ', [
+    'scoring_format',
+    'pricing_model'
+  ])
   content += `}\n`
   return content
 }
@@ -187,7 +201,10 @@ const group_by_id = (entries) => {
   return groups
 }
 
-const generate_markdown_documentation = (scoring_processed, league_processed) => {
+const generate_markdown_documentation = (
+  scoring_processed,
+  league_processed
+) => {
   const timestamp = new Date().toISOString()
   let content = `# Named Scoring and League Formats
 
@@ -290,7 +307,8 @@ const main = async () => {
     canonical_by_source: scoring_canonical
   } = process_scoring_formats()
   all_errors.push(...scoring_errors)
-  const scoring_unique_ids = new Set(Object.values(scoring).map((e) => e.id)).size
+  const scoring_unique_ids = new Set(Object.values(scoring).map((e) => e.id))
+    .size
   console.log(
     `- Processed ${Object.keys(scoring).length} scoring source keys -> ${scoring_unique_ids} unique IDs`
   )

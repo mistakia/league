@@ -19,8 +19,8 @@ const Confirmation = lazy(() => import('@components/confirmation'))
 const Notification = lazy(() => import('@components/notification'))
 const SelectedPlayer = lazy(() => import('@components/selected-player'))
 const AuctionControls = lazy(() => import('@components/auction-controls'))
-const AuctionCommissionerControls = lazy(() =>
-  import('@components/auction-commissioner-controls')
+const AuctionCommissionerControls = lazy(
+  () => import('@components/auction-commissioner-controls')
 )
 
 hotkeys('control+command+w', () => {

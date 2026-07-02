@@ -20,13 +20,8 @@
       {
         "column_id": "player_fantasy_points_from_plays",
         "params": {
-          "career_year": [
-            1,
-            3
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "career_year": [1, 3],
+          "rate_type": ["per_game"]
         }
       }
     ],
@@ -56,9 +51,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "WR"
-        ]
+        "value": ["WR"]
       },
       {
         "column_id": "player_height",
@@ -67,20 +60,10 @@
         "operator": "<="
       }
     ],
-    "prefix_columns": [
-      "player_name",
-      "player_league_roster_status"
-    ],
+    "prefix_columns": ["player_name", "player_league_roster_status"],
     "row_axes": []
   },
   "expected_query": "with \"td086ed8a05adf6693c9d5d363c4306a7\" as materialized (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" left join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"player_gamelogs\".\"pid\" and \"player_seasonlogs\".\"year\" = \"nfl_games\".\"year\" and \"player_seasonlogs\".\"seas_type\" = \"nfl_games\".\"seas_type\" where \"player_gamelogs\".\"active\" = true and \"player_seasonlogs\".\"career_year\" between 1 and 3 group by \"player_gamelogs\".\"pid\"), \"rate_aggregate_d20643482d50\" as materialized (select \"role_union\".\"pid\" as \"pid\", SUM(role_union.pts) AS measure_total from (select nfl_plays.bc_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6 AS pts from \"nfl_plays\" where nfl_plays.bc_pid IS NOT NULL and \"nfl_plays\".\"play_type\" not in ('NOPL') union all select nfl_plays.psr_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1 AS pts from \"nfl_plays\" where nfl_plays.psr_pid IS NOT NULL and \"nfl_plays\".\"play_type\" not in ('NOPL') union all select nfl_plays.trg_pid AS pid, \"nfl_plays\".\"esbid\", COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1 AS pts from \"nfl_plays\" where nfl_plays.trg_pid IS NOT NULL and \"nfl_plays\".\"play_type\" not in ('NOPL') union all select nfl_plays.player_fuml_pid AS pid, \"nfl_plays\".\"esbid\", -1 AS pts from \"nfl_plays\" where nfl_plays.player_fuml_pid IS NOT NULL and \"nfl_plays\".\"play_type\" not in ('NOPL')) as \"role_union\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"role_union\".\"esbid\" inner join \"player_seasonlogs\" on \"player_seasonlogs\".\"pid\" = \"role_union\".\"pid\" and \"player_seasonlogs\".\"year\" = \"nfl_games\".\"year\" and \"player_seasonlogs\".\"seas_type\" = \"nfl_games\".\"seas_type\" where \"player_seasonlogs\".\"career_year\" between 1 and 3 group by \"role_union\".\"pid\" having SUM(role_union.pts) > 0) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"nfl_draft_year\" AS \"nfl_draft_year_0\", \"player\".\"dpos\" AS \"dpos_0\", \"player\".\"ngs_draft_grade\" AS \"ngs_draft_grade_0\", \"player\".\"ngs_production_score\" AS \"ngs_production_score_0\", \"player\".\"ngs_athleticism_score\" AS \"ngs_athleticism_score_0\", \"player\".\"ngs_size_score\" AS \"ngs_size_score_0\", \"player\".\"height\" AS \"height_0\", CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_3\" AS \"top_3_from_careerlogs_0\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_12\" AS \"top_12_from_careerlogs_0\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_24\" AS \"top_24_from_careerlogs_0\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_3\" AS \"top_3_from_careerlogs_1\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_12\" AS \"top_12_from_careerlogs_1\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_24\" AS \"top_24_from_careerlogs_1\", CAST(MAX(rate_aggregate_d20643482d50.measure_total) AS DECIMAL) / NULLIF(CAST(MAX(td086ed8a05adf6693c9d5d363c4306a7.rate_type_total_count) AS DECIMAL), 0) AS fantasy_points_from_plays_0, \"player\".\"pos\" from \"player\" left join \"td086ed8a05adf6693c9d5d363c4306a7\" on \"td086ed8a05adf6693c9d5d363c4306a7\".\"pid\" = \"player\".\"pid\" left join \"rate_aggregate_d20643482d50\" on \"rate_aggregate_d20643482d50\".\"pid\" = \"player\".\"pid\" left join \"rosters_players\" on \"rosters_players\".\"pid\" = \"player\".\"pid\" and \"rosters_players\".\"year\" = 2026 and \"rosters_players\".\"week\" = 0 and \"rosters_players\".\"lid\" = 1 left join \"scoring_format_player_careerlogs\" as \"tc7d9f44547f502d36c6b00d12e8c055d\" on \"tc7d9f44547f502d36c6b00d12e8c055d\".\"pid\" = \"player\".\"pid\" and \"tc7d9f44547f502d36c6b00d12e8c055d\".\"scoring_format_id\" = 'draftkings' where player.nfl_draft_year >= '2015' AND player.pos IN ('WR') AND player.height <= '71' group by player.fname, player.lname, \"player\".\"nfl_draft_year\", \"player\".\"dpos\", \"player\".\"ngs_draft_grade\", \"player\".\"ngs_production_score\", \"player\".\"ngs_athleticism_score\", \"player\".\"ngs_size_score\", \"player\".\"height\", rosters_players.slot, rosters_players.tid, rosters_players.tag, \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_3\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_12\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_24\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_3\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_12\", \"tc7d9f44547f502d36c6b00d12e8c055d\".\"top_24\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 17 DESC NULLS LAST, 16 DESC NULLS LAST, 15 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
-  "tags": [
-    "games",
-    "filters",
-    "parameters",
-    "sorting",
-    "rate_type",
-    "cte"
-  ],
+  "tags": ["games", "filters", "parameters", "sorting", "rate_type", "cte"],
   "timeout_ms": 40000
 }

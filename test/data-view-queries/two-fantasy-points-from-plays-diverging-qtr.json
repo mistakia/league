@@ -17,32 +17,18 @@
       {
         "column_id": "player_fantasy_points_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "scoring_format_id": [
-            "draftkings"
-          ],
-          "qtr": [
-            4
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "year": [2024],
+          "scoring_format_id": ["draftkings"],
+          "qtr": [4],
+          "rate_type": ["per_game"]
         }
       },
       {
         "column_id": "player_fantasy_points_from_plays",
         "params": {
-          "year": [
-            2024
-          ],
-          "scoring_format_id": [
-            "draftkings"
-          ],
-          "rate_type": [
-            "per_game"
-          ]
+          "year": [2024],
+          "scoring_format_id": ["draftkings"],
+          "rate_type": ["per_game"]
         }
       }
     ],
@@ -50,9 +36,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB"
-        ]
+        "value": ["RB"]
       }
     ],
     "sort": [

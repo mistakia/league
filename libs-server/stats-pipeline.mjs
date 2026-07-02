@@ -132,9 +132,7 @@ export const process_all_league_format_gamelogs = async ({ week }) => {
   const { league_formats } = await get_format_hashes()
 
   for (const [league_format_id, { lid }] of league_formats) {
-    log(
-      `Processing league format gamelogs: ${league_format_id} (lid: ${lid})`
-    )
+    log(`Processing league format gamelogs: ${league_format_id} (lid: ${lid})`)
     await generate_league_format_player_gamelogs({
       week,
       lid,

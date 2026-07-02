@@ -36,10 +36,7 @@
       "INSERT INTO pff_team_seasonlogs (nfl_team, year, grades_offense, wins) VALUES ('ZZZ', 2025, 80.00, 12)"
     ],
     "reference_sql": "SELECT AVG(grades_offense) AS pff_team_grades_offense_0, SUM(wins) AS pff_team_wins_0 FROM pff_team_seasonlogs WHERE nfl_team = 'ZZZ' AND year IN (2024, 2025)",
-    "compare_columns": [
-      "pff_team_grades_offense_0",
-      "pff_team_wins_0"
-    ]
+    "compare_columns": ["pff_team_grades_offense_0", "pff_team_wins_0"]
   },
   "tags": [
     "year_offset",

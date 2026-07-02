@@ -2,20 +2,13 @@
   "name": "team_unit_dvoa range year_offset averages the dynamic column (executed-result parity)",
   "description": "Seed one player on team ZZZ with distinct 2024 (0.10) and 2025 (0.30) OFFENSE total_dvoa, then run team_unit_dvoa with year=[2023] + year_offset=[1,2]. The bespoke main_select_string_year_offset_range override must resolve the dynamic column (total_dvoa) and AVG it across the offset-expanded window (0.20), scoped to the team_unit discriminator -- the range path that previously emitted a dropped JOIN alias and invalid SQL.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "team_unit_dvoa",
         "params": {
-          "year": [
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ],
+          "year": [2023],
+          "year_offset": [1, 2],
           "dvoa_type": "total_dvoa"
         }
       }
@@ -24,9 +17,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "ZZ"
-        ]
+        "value": ["ZZ"]
       }
     ]
   },
@@ -38,14 +29,7 @@
       "INSERT INTO dvoa_team_unit_seasonlogs_index (year, week, nfl_team, team_unit, timestamp, total_dvoa) VALUES (2025, 0, 'ZZZ', 'OFFENSE', 0, 0.30)"
     ],
     "reference_sql": "SELECT AVG(total_dvoa) AS team_unit_dvoa_0 FROM dvoa_team_unit_seasonlogs_index WHERE nfl_team = 'ZZZ' AND year IN (2024, 2025) AND team_unit = 'OFFENSE'",
-    "compare_columns": [
-      "team_unit_dvoa_0"
-    ]
+    "compare_columns": ["team_unit_dvoa_0"]
   },
-  "tags": [
-    "year_offset",
-    "dvoa",
-    "range",
-    "result-equivalence"
-  ]
+  "tags": ["year_offset", "dvoa", "range", "result-equivalence"]
 }

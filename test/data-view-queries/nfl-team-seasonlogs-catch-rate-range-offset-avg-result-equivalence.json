@@ -2,20 +2,13 @@
   "name": "nfl_team_seasonlogs_catch_rate range year_offset averages the window (executed-result parity)",
   "description": "Seed one player on team ZZZ with distinct 2024 (0.60) and 2025 (0.80) catch_rate, then run nfl_team_seasonlogs_catch_rate with year=[2023] + year_offset=[1,2]. The executed value must equal the AVG over the offset-expanded window (0.70), not the SUM (1.40) -- proving the rate reduces with AVG and, critically, that the team correlation uses the real `tm` column (the generic path previously emitted a non-existent `nfl_team` column that errored at execution but passed the SQL-snapshot).",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "nfl_team_seasonlogs_catch_rate",
         "params": {
-          "year": [
-            2023
-          ],
-          "year_offset": [
-            1,
-            2
-          ]
+          "year": [2023],
+          "year_offset": [1, 2]
         }
       }
     ],
@@ -23,9 +16,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "ZZ"
-        ]
+        "value": ["ZZ"]
       }
     ]
   },
@@ -37,14 +28,7 @@
       "INSERT INTO nfl_team_seasonlogs (tm, stat_key, year, catch_rate) VALUES ('ZZZ', 'QB_TOTAL', 2025, 0.80)"
     ],
     "reference_sql": "SELECT AVG(catch_rate) AS nfl_team_seasonlogs_catch_rate_0 FROM nfl_team_seasonlogs WHERE tm = 'ZZZ' AND stat_key = 'QB_TOTAL' AND year IN (2024, 2025)",
-    "compare_columns": [
-      "nfl_team_seasonlogs_catch_rate_0"
-    ]
+    "compare_columns": ["nfl_team_seasonlogs_catch_rate_0"]
   },
-  "tags": [
-    "year_offset",
-    "nfl_team_seasonlogs",
-    "range",
-    "result-equivalence"
-  ]
+  "tags": ["year_offset", "nfl_team_seasonlogs", "range", "result-equivalence"]
 }

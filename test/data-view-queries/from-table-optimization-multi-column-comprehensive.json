@@ -2,9 +2,7 @@
   "name": "should use from-table optimization with 7 columns from multiple sources",
   "description": "Tests from-table optimization with scoring format seasonlogs as FROM table, joining league format seasonlogs, weighted opportunity CTE, and player seasonlogs. Verifies scoring_format_id and year conditions appear in WHERE clause.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_fantasy_points_from_seasonlogs",
@@ -43,11 +41,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "RB",
-          "WR",
-          "TE"
-        ]
+        "value": ["RB", "WR", "TE"]
       }
     ],
     "sort": [

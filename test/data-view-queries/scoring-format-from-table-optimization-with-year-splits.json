@@ -2,23 +2,16 @@
   "name": "should use scoring_format_player_seasonlogs as FROM table when sorting by fantasy points from seasonlogs with year splits",
   "description": "Tests from-table optimization for scoring format columns with year splits - query should start from scoring_format_player_seasonlogs table with scoring_format_id in WHERE clause",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_fantasy_points_from_seasonlogs",
         "params": {
-          "year": [
-            2022,
-            2023
-          ]
+          "year": [2022, 2023]
         }
       }
     ],
-    "row_axes": [
-      "year"
-    ],
+    "row_axes": ["year"],
     "sort": [
       {
         "column_id": "player_fantasy_points_from_seasonlogs",
@@ -27,11 +20,7 @@
     ]
   },
   "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"pid\", player.fname, player.lname, \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"points\" AS \"points_from_seasonlogs_0\", \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"year\", \"player\".\"pos\" from \"scoring_format_player_seasonlogs\" as \"tf0d891b1f69e0b8ee39a5cf4baa48016\" inner join \"player\" on \"player\".\"pid\" = \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"pid\" where \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"scoring_format_id\" = 'draftkings' group by player.fname, player.lname, \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"points\", \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"year\", \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"tf0d891b1f69e0b8ee39a5cf4baa48016\".\"pid\" asc limit 500",
-  "tags": [
-    "from-table-optimization",
-    "scoring-format",
-    "splits"
-  ],
+  "tags": ["from-table-optimization", "scoring-format", "splits"],
   "timeout_ms": 40000,
   "expected_metadata": {
     "cache_ttl": "one_week",

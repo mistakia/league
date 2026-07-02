@@ -272,8 +272,16 @@ const parse_gamebook_lineups = async ({ pdf_path }) => {
   }
 
   return {
-    left: { abbr: left_team.abbr, offense: quadrants[0], defense: quadrants[1] },
-    right: { abbr: right_team.abbr, offense: quadrants[2], defense: quadrants[3] }
+    left: {
+      abbr: left_team.abbr,
+      offense: quadrants[0],
+      defense: quadrants[1]
+    },
+    right: {
+      abbr: right_team.abbr,
+      offense: quadrants[2],
+      defense: quadrants[3]
+    }
   }
 }
 
@@ -288,7 +296,14 @@ const last_name_of = (name) => {
 // 17-game era: REG 1-17, WC 18, DIV 19, CON 20, SB 21
 // 18-week era: REG 1-18, WC 19, DIV 20, CON 21, SB 22
 // Our DB uses (seas_type, week) where POST week resets to 1/2/3/4.
-const GAME_TYPE_TO_SEAS_TYPE = { REG: 'REG', WC: 'POST', DIV: 'POST', CON: 'POST', CONF: 'POST', SB: 'POST' }
+const GAME_TYPE_TO_SEAS_TYPE = {
+  REG: 'REG',
+  WC: 'POST',
+  DIV: 'POST',
+  CON: 'POST',
+  CONF: 'POST',
+  SB: 'POST'
+}
 const POST_GAME_TYPE_WEEK = { WC: 1, DIV: 2, CON: 3, CONF: 3, SB: 4 }
 
 const build_jersey_to_pid_index = async ({ year, force_download }) => {
@@ -336,9 +351,7 @@ const build_jersey_to_pid_index = async ({ year, force_download }) => {
     const seas_type = GAME_TYPE_TO_SEAS_TYPE[r.game_type]
     if (!seas_type) continue
     const week =
-      seas_type === 'POST'
-        ? POST_GAME_TYPE_WEEK[r.game_type]
-        : Number(r.week)
+      seas_type === 'POST' ? POST_GAME_TYPE_WEEK[r.game_type] : Number(r.week)
 
     const key_prefix = `${team}-${seas_type}-${week}`
     if (r.jersey_number) {
@@ -490,7 +503,13 @@ const process_game = async ({ game, index, dry_run }) => {
   }
 }
 
-const import_for_year = async ({ year, week, seas_type, force_download, dry_run }) => {
+const import_for_year = async ({
+  year,
+  week,
+  seas_type,
+  force_download,
+  dry_run
+}) => {
   const query = db('nfl_games')
     .select('esbid', 'year', 'week', 'h', 'v', 'seas_type', 'shieldid')
     .where({ year })

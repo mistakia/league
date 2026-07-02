@@ -66,7 +66,11 @@ export const derive_periods_from_rate_types = (rate_types) =>
 // artifacts. `supported_rate_types` is supplied by the calling factory (the
 // two factories advertise different default rate-type sets) and echoed back so
 // the factory can spread the whole return uniformly onto the column-def.
-export const derive_measure = ({ stat_name, measure, supported_rate_types }) => {
+export const derive_measure = ({
+  stat_name,
+  measure,
+  supported_rate_types
+}) => {
   assert_measure_rate_capability({ stat_name, measure })
 
   const { kind, expr } = measure

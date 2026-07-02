@@ -2,27 +2,19 @@
   "name": "player_season_projected_pass_yds honors the sourceid param (executed-result parity)",
   "description": "Seed one player with distinct AVERAGE (111.1) and ESPN (222.2) 2024 season passing-yards projections in projections_index, then request the column twice in one view: once with no sourceid (defaults to AVERAGE) and once with sourceid=3 (ESPN). The two output columns must return 111.1 and 222.2 respectively, proving (a) the param selects the source and (b) sourceid is part of the table alias so the two same-id columns do not collapse into a single shared join.",
   "request": {
-    "prefix_columns": [
-      "player_name"
-    ],
+    "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_season_projected_pass_yds",
         "params": {
-          "year": [
-            2024
-          ]
+          "year": [2024]
         }
       },
       {
         "column_id": "player_season_projected_pass_yds",
         "params": {
-          "year": [
-            2024
-          ],
-          "sourceid": [
-            3
-          ]
+          "year": [2024],
+          "sourceid": [3]
         }
       }
     ],
@@ -30,9 +22,7 @@
       {
         "column_id": "player_position",
         "operator": "IN",
-        "value": [
-          "ZZ"
-        ]
+        "value": ["ZZ"]
       }
     ]
   },
@@ -54,9 +44,5 @@
       "season_projected_pass_yds_1"
     ]
   },
-  "tags": [
-    "player_projected",
-    "sourceid",
-    "result-equivalence"
-  ]
+  "tags": ["player_projected", "sourceid", "result-equivalence"]
 }

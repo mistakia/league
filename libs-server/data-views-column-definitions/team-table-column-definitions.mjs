@@ -46,13 +46,17 @@ const ensure_player_bridge_cte = ({ query, query_context, row_axes }) => {
   } else if (bridge === PLAYER_YEARS_TEAMS_CTE) {
     query.with(
       bridge,
-      db.raw(player_years_teams_cte_sql({ year_range: query_context.year_range }))
+      db.raw(
+        player_years_teams_cte_sql({ year_range: query_context.year_range })
+      )
     )
   } else {
     query.with(
       bridge,
       db.raw(
-        player_years_weeks_teams_cte_sql({ year_range: query_context.year_range })
+        player_years_weeks_teams_cte_sql({
+          year_range: query_context.year_range
+        })
       )
     )
   }
