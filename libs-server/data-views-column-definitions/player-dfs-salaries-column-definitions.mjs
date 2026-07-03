@@ -61,7 +61,8 @@ const player_dfs_salaries_source = {
       career_game,
       platform_source_id
     } = get_params({ params })
-    const { db, players_query, pid_reference, week_reference } = query_context
+    const { db, players_query, pid_reference, year_reference, week_reference } =
+      query_context
     const cte_name = table_alias
 
     const week_split = Boolean(week_reference)
@@ -69,12 +70,24 @@ const player_dfs_salaries_source = {
       ? resolve_nfl_week_ids({ params })
       : single_nfl_week
 
-    const cte_query = db('player_salaries')
+    // player_salaries carries no slate-type discriminator: a book (source_id)
+    // that lists a player in more than one same-week slate (observed FanDuel:
+    // 'NFL Main' plus 'NFL Single Game') stores one row per slate at different
+    // prices, keyed by source_contest_id. Left unfiltered, the leftJoin fans a
+    // player's (pid, week) cell into duplicate rows. Select the canonical
+    // (main-slate) price by keeping, per (pid, year, week), the row whose slate
+    // covers the most distinct games in the requested window -- the main slate
+    // spans the full slate of games while a single-game slate covers exactly
+    // one. Ties break deterministically on source_contest_id.
+    const base_query = db('player_salaries')
       .select(
         'player_salaries.pid',
         'player_salaries.salary',
         'nfl_games.year',
-        'nfl_games.week'
+        'nfl_games.week',
+        'player_salaries.source_id',
+        'player_salaries.source_contest_id',
+        'player_salaries.esbid'
       )
       .join('nfl_games', function () {
         this.on('player_salaries.esbid', '=', 'nfl_games.esbid')
@@ -83,30 +96,63 @@ const player_dfs_salaries_source = {
       .whereIn('nfl_games.nfl_week_id', nfl_week)
 
     if (career_year.length) {
-      cte_query.join('player_seasonlogs', function () {
+      base_query.join('player_seasonlogs', function () {
         this.on('player_salaries.pid', '=', 'player_seasonlogs.pid')
           .andOn('nfl_games.year', '=', 'player_seasonlogs.year')
           .andOn('nfl_games.seas_type', '=', 'player_seasonlogs.seas_type')
       })
-      cte_query.whereBetween('player_seasonlogs.career_year', [
+      base_query.whereBetween('player_seasonlogs.career_year', [
         Math.min(career_year[0], career_year[1]),
         Math.max(career_year[0], career_year[1])
       ])
     }
 
     if (career_game.length) {
-      cte_query.join('player_gamelogs', function () {
+      base_query.join('player_gamelogs', function () {
         this.on('player_salaries.pid', '=', 'player_gamelogs.pid').andOn(
           'nfl_games.esbid',
           '=',
           'player_gamelogs.esbid'
         )
       })
-      cte_query.whereBetween('player_gamelogs.career_game', [
+      base_query.whereBetween('player_gamelogs.career_game', [
         Math.min(career_game[0], career_game[1]),
         Math.max(career_game[0], career_game[1])
       ])
     }
+
+    // slate_size = distinct games each (source_id, contest) covers in the
+    // requested window. Computed as a plain grouped aggregate (Postgres forbids
+    // DISTINCT inside a window aggregate), joined back to rank each row's slate.
+    const slate_sizes = db('dfs_base')
+      .select('source_id', 'source_contest_id')
+      .countDistinct('esbid as slate_size')
+      .groupBy('source_id', 'source_contest_id')
+
+    const cte_query = db
+      .with('dfs_base', base_query)
+      .with('dfs_slate_sizes', slate_sizes)
+      .distinctOn('dfs_base.pid', 'dfs_base.year', 'dfs_base.week')
+      .select(
+        'dfs_base.pid',
+        'dfs_base.salary',
+        'dfs_base.year',
+        'dfs_base.week'
+      )
+      .from('dfs_base')
+      .join('dfs_slate_sizes', function () {
+        this.on('dfs_base.source_id', 'dfs_slate_sizes.source_id').andOn(
+          'dfs_base.source_contest_id',
+          'dfs_slate_sizes.source_contest_id'
+        )
+      })
+      .orderBy([
+        { column: 'dfs_base.pid' },
+        { column: 'dfs_base.year' },
+        { column: 'dfs_base.week' },
+        { column: 'dfs_slate_sizes.slate_size', order: 'desc' },
+        { column: 'dfs_base.source_contest_id' }
+      ])
 
     players_query.with(cte_name, cte_query)
     const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
@@ -115,18 +161,11 @@ const player_dfs_salaries_source = {
       if (week_split) {
         // Correlate on year too: without it a same-week salary from another
         // year would match a different year's cell (year_range spans multiple
-        // years when the view sets no year filter). year_reference is the
-        // identity's canonical player_years.year, but a week-only outer query
-        // joins only the week relation (player_years_weeks) -- player_years is
-        // defined as a CTE but never joined, so player_years.year is
-        // unreachable here. Correlate against the week relation's own year
-        // column, which is present in the FROM and equal by construction
-        // (player_years_weeks INNER JOINs nfl_year_week_timestamp on year).
-        const week_rel = week_reference.slice(
-          0,
-          week_reference.lastIndexOf('.')
-        )
-        this.andOn(db.raw(`${cte_name}.year = ${week_rel}.year`))
+        // years when the view sets no year filter). year_reference resolves to
+        // player_years_weeks.year (the week relation's own, always-joined year
+        // column) for player_year_week cells, so it is reachable in both
+        // year+week and week-only splits.
+        this.andOn(db.raw(`${cte_name}.year = ${year_reference}`))
         this.andOn(db.raw(`${cte_name}.week = ${week_reference}`))
       }
     })

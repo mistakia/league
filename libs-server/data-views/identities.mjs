@@ -67,11 +67,16 @@ export const identities = {
     key_columns: ['pid', 'year', 'week'],
     pid_column: 'player.pid',
     team_column: null,
-    // year sourced from player_years (lower-grain CTE); player_years_weeks
-    // INNER JOINs nfl_year_week_timestamp on year, so its year is equivalent.
-    // Convention pins the reference to player_years for joinability with
-    // year-only consumers and fixture stability.
-    year_column: 'player_years.year',
+    // year sourced from player_years_weeks (the week relation), not the
+    // lower-grain player_years CTE: player_years_weeks is always joined into
+    // the outer FROM whenever the week bridge attaches (both year+week and
+    // week-only splits), whereas player_years is joined only when the year
+    // axis is present -- so a week-only split (row_axes: ['week']) leaves
+    // player_years defined-but-unjoined and any source correlated on
+    // player_years.year fails 42P01. player_years_weeks INNER JOINs
+    // nfl_year_week_timestamp on year, so its year is equal by construction.
+    // Mirrors the team analogue (team_year_week -> team_years_weeks.year).
+    year_column: 'player_years_weeks.year',
     week_column: 'player_years_weeks.week',
     from_source: ({ year_range, position_filter_sql = null }) => {
       const where = position_filter_sql ? ` WHERE ${position_filter_sql}` : ''
