@@ -1,7 +1,7 @@
 # sops/age recipient policy for league config secrets.
 #
 # config/config-production.json holds the production secrets (Postgres password,
-# JWT secret, league API auth token, Resend API key, job-tracker API key),
+# JWT secret, league API auth token, Resend API key),
 # encrypted to the league domain's recipient set — every host that loads
 # config/index.mjs under NODE_ENV=production and therefore decrypts the file:
 # the league main host (.45, PM2 server + scheduled scripts), league-worker-1
