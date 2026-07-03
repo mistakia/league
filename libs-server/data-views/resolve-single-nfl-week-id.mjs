@@ -53,6 +53,26 @@ export function resolve_single_nfl_week_id_if_explicit({ params = {} } = {}) {
   return resolve_single_nfl_week_id({ params })
 }
 
+// Resolves the FULL list of concrete nfl_week_id values the params request,
+// preserving order and resolving any dynamic entries. Used by week-split
+// (player_year_week) callers that fan a per-week fact across every requested
+// week rather than collapsing to a single scalar. Falls back to the scalar
+// resolver's precedence (year/week construction, current week) when no explicit
+// week list is present so a week-split column with no week param still yields
+// one concrete week.
+export function resolve_nfl_week_ids({ params = {} } = {}) {
+  const raw =
+    params.single_nfl_week_id != null
+      ? params.single_nfl_week_id
+      : params.nfl_week_id
+  const list = Array.isArray(raw) ? raw : raw == null ? [] : [raw]
+  const resolved = list.map(resolve_dynamic_single_nfl_week).filter(Boolean)
+  if (resolved.length) return resolved
+
+  const single = resolve_single_nfl_week_id({ params })
+  return single ? [single] : []
+}
+
 export default function resolve_single_nfl_week_id({ params = {} } = {}) {
   const single_value = first_scalar(params.single_nfl_week_id)
   if (single_value) return single_value

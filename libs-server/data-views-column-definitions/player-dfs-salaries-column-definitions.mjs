@@ -1,6 +1,8 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import resolve_single_nfl_week_id from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import resolve_single_nfl_week_id, {
+  resolve_nfl_week_ids
+} from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
 
 const get_params = ({ params = {} }) => {
   const nfl_week_id = resolve_single_nfl_week_id({ params })
@@ -40,15 +42,32 @@ const generate_table_alias = ({ params = {} } = {}) => {
 }
 
 const player_dfs_salaries_source = {
-  // Grain 'player': the CTE collapses each player to a single salary row
-  // via the nfl_week_id filter, so pid-only equality is the correct join
-  // predicate regardless of the cell's split shape.
+  // Grain 'player': the salary fact lives in player_salaries keyed by esbid, so
+  // the CTE derives year/week by joining nfl_games and the attach owns its join.
+  //
+  // Split-aware behavior (mirrors apply_projected_join in the projections
+  // column, the canonical per-week-fact-in-a-week-split pattern):
+  //   - Week-split cell (week_reference present): the CTE spans ALL requested
+  //     weeks and the join correlates on year AND week so each week row shows
+  //     that week's salary. Collapsing to a single week + pid-only join here
+  //     broadcast one week's salary across every week row.
+  //   - Season / non-week cell (no week_reference): collapse to a single week
+  //     and join pid-only, unchanged.
   grain: 'player',
   attach: ({ query_context, params, table_alias, join_type }) => {
-    const { nfl_week, career_year, career_game, platform_source_id } =
-      get_params({ params })
-    const { db, players_query, pid_reference } = query_context
+    const {
+      nfl_week: single_nfl_week,
+      career_year,
+      career_game,
+      platform_source_id
+    } = get_params({ params })
+    const { db, players_query, pid_reference, week_reference } = query_context
     const cte_name = table_alias
+
+    const week_split = Boolean(week_reference)
+    const nfl_week = week_split
+      ? resolve_nfl_week_ids({ params })
+      : single_nfl_week
 
     const cte_query = db('player_salaries')
       .select(
@@ -93,6 +112,23 @@ const player_dfs_salaries_source = {
     const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
     players_query[join_method](cte_name, function () {
       this.on(`${cte_name}.pid`, '=', pid_reference)
+      if (week_split) {
+        // Correlate on year too: without it a same-week salary from another
+        // year would match a different year's cell (year_range spans multiple
+        // years when the view sets no year filter). year_reference is the
+        // identity's canonical player_years.year, but a week-only outer query
+        // joins only the week relation (player_years_weeks) -- player_years is
+        // defined as a CTE but never joined, so player_years.year is
+        // unreachable here. Correlate against the week relation's own year
+        // column, which is present in the FROM and equal by construction
+        // (player_years_weeks INNER JOINs nfl_year_week_timestamp on year).
+        const week_rel = week_reference.slice(
+          0,
+          week_reference.lastIndexOf('.')
+        )
+        this.andOn(db.raw(`${cte_name}.year = ${week_rel}.year`))
+        this.andOn(db.raw(`${cte_name}.week = ${week_reference}`))
+      }
     })
   }
 }
