@@ -29,6 +29,19 @@ const build_job_type_to_id = () => {
 
 const job_type_to_id = build_job_type_to_id()
 
+// A resolvable pipeline_failure is emitted below via `base run report` only when
+// the job maps to a runs-primitive source (job_id) AND the base API URL is
+// configured; that signal auto-resolves on the next successful run. The
+// emit-only log_error twin from report_error carries no dedup-to-resolution and
+// never auto-clears, so emitting it alongside a resolvable twin leaves a
+// permanently-open signal after a self-healing transient (e.g. the single-proxy
+// pinnacle degradation) recovers and the pipeline_failure twin auto-resolves.
+// Emit the log_error twin only when no resolvable failure will carry the
+// outcome — i.e. an unmapped job_type or an unconfigured API URL, where the
+// log_error is the sole escalation channel.
+export const should_emit_log_error = ({ job_success, job_id, api_url }) =>
+  !job_success && !(job_id && api_url)
+
 export default async function report_job({
   job_type,
   job_success = true,
@@ -53,17 +66,14 @@ export default async function report_job({
     timestamp: job_report_timestamp
   })
 
-  if (!job_success) {
+  const job_id = job_type_to_id[job_type]
+  const api_url = process.env.BASE_API_URL
+
+  if (should_emit_log_error({ job_success, job_id, api_url })) {
     await report_error({ job_type, message: job_reason })
   }
 
-  const job_id = job_type_to_id[job_type]
-  if (!job_id) {
-    return
-  }
-
-  const api_url = process.env.BASE_API_URL
-  if (!api_url) {
+  if (!job_id || !api_url) {
     return
   }
 
