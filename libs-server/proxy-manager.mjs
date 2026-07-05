@@ -112,8 +112,20 @@ class ProxyPool {
       log(
         `[${this.name}] All proxies failed. Waiting ${delay}ms before retry #${this.retry_count}`
       )
-      await sleep(delay, signal)
-      this.reset_failed_proxies()
+      // Reset in a finally so an aborted backoff still clears the failed flags.
+      // The single-proxy pinnacle pool trips all_proxies_failed() on any one
+      // transient, and its backoff (pinned at MAX_BACKOFF_MS) always exceeds the
+      // caller's 2-min matchups budget, so this sleep is aborted every run. Before
+      // the finally, reset_failed_proxies() never ran and the lone proxy stayed
+      // failed for the module-singleton worker's lifetime, wedging every 4-hourly
+      // run until a manual restart. Resetting on abort makes the pool usable again
+      // on the next process call; reset_retry_count() on a later success unwinds
+      // the retry_count climb.
+      try {
+        await sleep(delay, signal)
+      } finally {
+        this.reset_failed_proxies()
+      }
     }
 
     // Round-robin selection: try each proxy in order, skipping failed ones
@@ -484,5 +496,5 @@ export async function fetch_with_retry({
   throw last_error
 }
 
-export { proxy_manager, fetch_with_proxy }
+export { proxy_manager, fetch_with_proxy, ProxyPool }
 export default fetch_with_proxy
