@@ -111,7 +111,18 @@ api.use('/api/*', (req, res, next) => {
 })
 
 api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
-  if (err.code === 'invalid_token' || err.code === 'credentials_required') {
+  // All express-jwt header rejections are benign client/scanner noise: the
+  // request proceeds unauthenticated and hits the `!req.auth` 401 guard below,
+  // so swallow them instead of passing to the log_error-emitting error
+  // middleware. credentials_bad_scheme/credentials_bad_format are the "Format is
+  // Authorization: Bearer [token]" rejections scanners trigger (signal #116769);
+  // mirrors the URIError scanner-noise skip in error-handler.mjs.
+  if (
+    err.code === 'invalid_token' ||
+    err.code === 'credentials_required' ||
+    err.code === 'credentials_bad_scheme' ||
+    err.code === 'credentials_bad_format'
+  ) {
     return next()
   }
   return next(err)
