@@ -2,3 +2,4 @@ dist
 .yarn
 data
 tmp
+config/external-league-credentials-key.sops.json

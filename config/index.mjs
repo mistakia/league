@@ -24,7 +24,11 @@ const resolve_age_key_file = () =>
   process.env.SOPS_AGE_KEY_FILE ||
   join(os.homedir(), '.config', 'sops', 'age', 'keys.txt')
 
-const load_sops_json = (file_path) => {
+// Exported so the external-league credential resolver
+// (libs-server/external-fantasy-leagues/utils/credential-encryption.mjs) reuses
+// this single fail-closed sops shell-out to read its dedicated {league}-only
+// column-key sops file, rather than spawning a second `sops` implementation.
+export const load_sops_json = (file_path) => {
   const result = spawnSync(
     'sops',
     ['--decrypt', '--input-type', 'json', '--output-type', 'json', file_path],

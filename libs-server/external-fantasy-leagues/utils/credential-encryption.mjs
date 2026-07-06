@@ -1,5 +1,9 @@
 import crypto from 'crypto'
 import debug from 'debug'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+import { load_sops_json } from '#config'
 
 const log = debug('external:credential-encryption')
 
@@ -10,78 +14,89 @@ const log = debug('external:credential-encryption')
  * - Uses AES-256-GCM (authenticated encryption)
  * - Random IV per encryption (stored with ciphertext)
  * - Auth tag ensures integrity
- * - Key derived from environment variable
- *
- * Environment variable required:
- * - EXTERNAL_LEAGUE_ENCRYPTION_KEY: 32-byte hex string (64 hex chars) or base64
+ * - Key is a dedicated 32-byte column key delivered via sops/age to {league}
+ *   only, resolved lazily at the decrypt site (never from process env)
  */
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 16 // 128 bits for GCM
 const AUTH_TAG_LENGTH = 16 // 128 bits
 
+// Dedicated 32-byte AES-256-GCM column key for
+// external_league_connections.credentials_encrypted (users' third-party
+// fantasy-platform logins). Delivered via sops/age to {league} ONLY -- the sole
+// host that runs the external-league encrypt/decrypt site (main API process on
+// .45). league-worker-1 / base-storage / macbook2025 hold league CONFIG secrets
+// but must NOT decrypt user credentials (least-privilege). The key is resolved
+// LAZILY inside get_encryption_key() on first use and memoized -- NEVER at
+// module scope: this module is pulled transitively by the API route graph that
+// non-recipient hosts import (the test suite loads the route/queue; #config is
+// pulled on other hosts), so a {league}-only decrypt at module scope would throw
+// at import on every non-recipient. Mirrors finance's
+// require_account_connections_key (api/routes/connections.mjs).
+const KEY_FILE = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+  'config',
+  'external-league-credentials-key.sops.json'
+)
+
+let cached_key_hex = null
+
 /**
- * Get encryption key from environment
+ * Resolve the dedicated column key from the {league}-only sops file.
+ * Lazy, first-call-memoized, fail-closed. There is NO environment/process.env
+ * discriminator -- production and every real caller resolve unconditionally from
+ * sops; test keys arrive only via the explicit key_hex parameter on
+ * encrypt/decrypt, a channel structurally absent on production call sites.
  * @returns {Buffer} 32-byte encryption key
- * @throws {Error} If key is missing or invalid
+ * @throws {Error} If the sops decrypt fails or the key is missing/malformed
  */
 function get_encryption_key() {
-  const key_env = process.env.EXTERNAL_LEAGUE_ENCRYPTION_KEY
-
-  if (!key_env) {
-    // In development/test, use a deterministic key derived from a fallback
-    // This allows the system to work without explicit configuration
-    // but should NEVER be used in production
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'test'
-    ) {
-      log(
-        'WARNING: Using development fallback key - set EXTERNAL_LEAGUE_ENCRYPTION_KEY for production'
-      )
-      return crypto.scryptSync('development-fallback-key', 'salt', 32)
-    }
-    throw new Error(
-      'EXTERNAL_LEAGUE_ENCRYPTION_KEY environment variable is required. ' +
-        'Set a 32-byte key as hex (64 chars) or base64 (44 chars) string.'
-    )
-  }
-
-  // Support hex-encoded keys (64 chars = 32 bytes)
-  if (/^[0-9a-fA-F]{64}$/.test(key_env)) {
-    return Buffer.from(key_env, 'hex')
-  }
-
-  // Support base64-encoded keys (44 chars = 32 bytes when decoded)
-  if (/^[A-Za-z0-9+/]+=*$/.test(key_env) && key_env.length >= 43) {
-    try {
-      const key = Buffer.from(key_env, 'base64')
-      if (key.length === 32) {
-        return key
-      }
+  if (!cached_key_hex) {
+    const loaded = load_sops_json(KEY_FILE)
+    const key_hex = loaded?.external_league_credentials_key
+    if (!key_hex || !/^[0-9a-fA-F]{64}$/.test(key_hex)) {
       throw new Error(
-        `Base64 key decodes to ${key.length} bytes, expected 32 bytes`
-      )
-    } catch (error) {
-      throw new Error(
-        `Invalid base64 key format: ${error.message}. Expected 44-character base64 string.`
+        'external_league_credentials_key missing or not 64-hex in ' +
+          'config/external-league-credentials-key.sops.json'
       )
     }
+    // Memoize the resolved VALUE only -- never a throw, so a transient sops
+    // failure inside the long-lived API process is retried on the next call
+    // rather than permanently poisoning the encrypt/decrypt sites.
+    cached_key_hex = key_hex
   }
+  return Buffer.from(cached_key_hex, 'hex')
+}
 
-  // If raw string, derive key using scrypt (less secure, but allows passphrase-style keys)
-  log(
-    'Deriving encryption key from raw string using scrypt. Consider using hex or base64 format for better security.'
-  )
-  return crypto.scryptSync(key_env, 'external-league-credentials', 32)
+/**
+ * Resolve the 32-byte key Buffer. An explicit key_hex (unit tests + the one-shot
+ * rekey script) takes precedence; production call sites pass nothing and resolve
+ * from the {league}-only sops file.
+ * @param {string} [key_hex] - optional 64-hex key override (dependency-injection seam)
+ * @returns {Buffer} 32-byte encryption key
+ */
+function resolve_key(key_hex) {
+  if (key_hex) {
+    if (!/^[0-9a-fA-F]{64}$/.test(key_hex)) {
+      throw new Error('key_hex must be 64 hex characters (32 bytes)')
+    }
+    return Buffer.from(key_hex, 'hex')
+  }
+  return get_encryption_key()
 }
 
 /**
  * Encrypt credentials object
  * @param {Object} credentials - Plain credentials object
+ * @param {Object} [options]
+ * @param {string} [options.key_hex] - optional 64-hex key override (tests / rekey)
  * @returns {string} Encrypted credentials (base64-encoded: iv + authTag + ciphertext)
  */
-export function encrypt_credentials(credentials) {
+export function encrypt_credentials(credentials, { key_hex } = {}) {
   if (!credentials || typeof credentials !== 'object') {
     return null
   }
@@ -92,7 +107,7 @@ export function encrypt_credentials(credentials) {
   }
 
   try {
-    const key = get_encryption_key()
+    const key = resolve_key(key_hex)
     const iv = crypto.randomBytes(IV_LENGTH)
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
 
@@ -117,10 +132,12 @@ export function encrypt_credentials(credentials) {
 /**
  * Decrypt credentials string
  * @param {string} encrypted_string - Base64-encoded encrypted credentials or legacy JSON
+ * @param {Object} [options]
+ * @param {string} [options.key_hex] - optional 64-hex key override (tests / rekey)
  * @returns {Object} Decrypted credentials object (empty object if input is null/empty)
  * @throws {Error} If decryption fails or encrypted data is malformed
  */
-export function decrypt_credentials(encrypted_string) {
+export function decrypt_credentials(encrypted_string, { key_hex } = {}) {
   if (!encrypted_string) {
     return {}
   }
@@ -137,7 +154,7 @@ export function decrypt_credentials(encrypted_string) {
   }
 
   try {
-    const key = get_encryption_key()
+    const key = resolve_key(key_hex)
     const combined = Buffer.from(encrypted_string, 'base64')
 
     // Validate minimum length (IV + AuthTag = 32 bytes minimum)
@@ -166,7 +183,7 @@ export function decrypt_credentials(encrypted_string) {
     log('Decryption failed:', error.message)
     throw new Error(
       `Failed to decrypt credentials: ${error.message}. ` +
-        'Ensure EXTERNAL_LEAGUE_ENCRYPTION_KEY matches the key used for encryption.'
+        'Ensure the external-league credentials key matches the key used for encryption.'
     )
   }
 }
@@ -197,9 +214,11 @@ export function is_encrypted(credentials_string) {
 /**
  * Migrate legacy credentials to encrypted format
  * @param {string} credentials_string - Potentially unencrypted credentials
+ * @param {Object} [options]
+ * @param {string} [options.key_hex] - optional 64-hex key override (tests / rekey)
  * @returns {string|null} Encrypted credentials string or null if empty
  */
-export function migrate_credentials(credentials_string) {
+export function migrate_credentials(credentials_string, { key_hex } = {}) {
   if (!credentials_string) {
     return null
   }
@@ -212,7 +231,7 @@ export function migrate_credentials(credentials_string) {
   // Parse legacy JSON and re-encrypt
   try {
     const credentials = JSON.parse(credentials_string)
-    return encrypt_credentials(credentials)
+    return encrypt_credentials(credentials, { key_hex })
   } catch (error) {
     log('Failed to migrate credentials:', error.message)
     return null

@@ -22,6 +22,15 @@
 # (dereferenced via CONFIG_ENCRYPTION_KEY_FILE) because their consumers — local
 # dev and CI — are NOT league age recipients; config-test.json is decrypted with
 # the committed in-repo test fixture key. Both are intentionally unmatched here.
+# external-league-credentials-key.sops.json holds the dedicated 32-byte
+# AES-256-GCM column key for external_league_connections.credentials_encrypted
+# (users' third-party fantasy-platform logins). Compartmentalized to {league}
+# ONLY — the sole host running the external-league encrypt/decrypt site (main API
+# process on .45). league-worker-1, base-storage, and macbook2025 hold league
+# CONFIG secrets but must NOT decrypt user credentials (least-privilege), so they
+# are deliberately absent here. Rule listed FIRST (first-specific-match wins).
 creation_rules:
+  - path_regex: (^|/)external-league-credentials-key\.sops\.json$
+    age: age1ajtjq48cp44328um33x0hgwm4f8s9wcs5kaa092mdruncc875seqcspgwt
   - path_regex: config/config-production\.json$
     age: age1ajtjq48cp44328um33x0hgwm4f8s9wcs5kaa092mdruncc875seqcspgwt,age1y2v9qgpd7sxctst6mly7ztqnv3wrgrqw9wx7dsrldvxk8eer2u7s4zae7m,age1gmhatmnl7f28yz4nhz6y527uxzrelg39s05ex2tvyfsumr45tvss40nm4a,age1nvpxn4r70h90wvgh6vgr3r0hwej33p6qjtdkgthanlvtle8hpdssqdm4j0
