@@ -967,7 +967,13 @@ export default class Auction {
 
   _setup_message_handlers(ws, user_id) {
     ws.on('message', (msg) => {
-      const message = JSON.parse(msg)
+      let message
+      try {
+        message = JSON.parse(msg)
+      } catch (error) {
+        this.logger('Failed to parse message', error.toString())
+        return
+      }
 
       switch (message.type) {
         case 'AUCTION_PAUSE':

@@ -220,7 +220,13 @@ export default function handle_data_view_socket(wss) {
     log('New WebSocket connection', { client_id: ws.client_id, user_id })
 
     ws.on('message', async (msg) => {
-      const message = JSON.parse(msg)
+      let message
+      try {
+        message = JSON.parse(msg)
+      } catch (error) {
+        log('Failed to parse message', { error: error.toString() })
+        return
+      }
 
       if (message.type === 'DATA_VIEW_REQUEST') {
         const { request_id, params, ignore_cache } = message.payload

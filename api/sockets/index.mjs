@@ -7,7 +7,9 @@ import handle_external_league_import_socket, {
   MESSAGE_TYPES
 } from './external-league-import.mjs'
 import { generate_client_id } from './utils.mjs'
+import debug from 'debug'
 
+const log = debug('socket-index')
 const auctions = new Map()
 
 export default function (wss) {
@@ -27,7 +29,13 @@ export default function (wss) {
     }
 
     ws.on('message', async (msg) => {
-      const message = JSON.parse(msg)
+      let message
+      try {
+        message = JSON.parse(msg)
+      } catch (error) {
+        log('Failed to parse message', { error: error.toString() })
+        return
+      }
 
       if (message.type === 'SCOREBOARD_REGISTER') {
         const { updated } = message.payload
