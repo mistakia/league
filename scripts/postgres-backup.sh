@@ -238,4 +238,11 @@ fi
 # Checkpoint files (checkpoint-*.tar.gz) are overwritten in place on each run, so
 # only the latest checkpoint per type is retained automatically. Storage server
 # pulls files from this directory via rsync and manages long-term retention.
-find "$dump_dir" -maxdepth 1 -type f -name "[0-9]*.tar.gz" -mtime +7 -delete
+#
+# Best-effort, and deliberately NOT allowed to gate the job's exit code: when a
+# sibling backup instance runs its identical sweep concurrently, one process can
+# unlink a file between this find's enumeration and its own -delete, so find
+# exits non-zero on a benign "No such file or directory". The backup outcome is
+# already established by the oracle above (dump + tar + mtime), so a retention
+# race must not flip a healthy backup into a reported failure under `set -e`.
+find "$dump_dir" -maxdepth 1 -type f -name "[0-9]*.tar.gz" -mtime +7 -delete || true
