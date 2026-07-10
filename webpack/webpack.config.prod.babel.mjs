@@ -1,4 +1,5 @@
 import path, { dirname } from 'path'
+import { execSync } from 'child_process'
 import webpack from 'webpack'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
@@ -15,6 +16,47 @@ import baseConfig from './webpack.config.base.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const VERSION = '0.0.1'
+
+// Git SHA this bundle was built from. Emitted into dist/build-manifest.json (a
+// separate file, NOT injected into the JS via DefinePlugin — embedding it would
+// change every content hash on every commit and defeat reproducible builds).
+// The config-drift monitor reads the deployed manifest to detect a client that
+// was never rebuilt for the latest frontend commits.
+const BUILD_SHA = (() => {
+  try {
+    return execSync('git rev-parse HEAD', {
+      cwd: path.join(__dirname, '..')
+    })
+      .toString()
+      .trim()
+  } catch {
+    return 'unknown'
+  }
+})()
+
+// Emit dist/build-manifest.json during compilation so it survives `output.clean`.
+const build_manifest_plugin = {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap('BuildManifestPlugin', (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'BuildManifestPlugin',
+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
+        },
+        () => {
+          const manifest = JSON.stringify({
+            sha: BUILD_SHA,
+            built_at: new Date().toISOString()
+          })
+          compilation.emitAsset(
+            'build-manifest.json',
+            new webpack.sources.RawSource(manifest)
+          )
+        }
+      )
+    })
+  }
+}
 
 export default merge(baseConfig, {
   devtool: 'source-map',
@@ -88,6 +130,8 @@ export default merge(baseConfig, {
       IS_DEV: false,
       APP_VERSION: JSON.stringify(VERSION)
     }),
+
+    build_manifest_plugin,
 
     new HtmlWebpackPlugin({
       template: 'app/index.html',
