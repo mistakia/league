@@ -1,7 +1,16 @@
+// Single-tree deploy: the PM2 app runs from /root/league — the same clone the
+// crontab scripts use. `script`/`cwd` are absolute so `pm2 start` registers the
+// correct path regardless of the invoking shell's working directory; a relative
+// `script` here is what let a `pm2 start` from the wrong cwd silently re-root the
+// app at a stale tree and serve a months-old bundle (see
+// user:text/league/league-server.md § Deployment Topology). Deploy with
+// `yarn deploy` (git pull + yarn install + pm2 reload) — no pm2-deploy layer.
 module.exports = {
   apps: [
     {
-      script: 'server.mjs',
+      name: 'server',
+      script: '/root/league/server.mjs',
+      cwd: '/root/league',
       autorestart: true,
       min_uptime: '60s',
       max_restarts: 10,
@@ -14,32 +23,5 @@ module.exports = {
       max_memory_restart: '3G',
       node_args: '--max-old-space-size=3072'
     }
-  ],
-
-  deploy: {
-    production: {
-      user: 'root',
-      host: '38.242.199.45',
-      ref: 'origin/master',
-      repo: 'git@github.com:mistakia/league.git',
-      path: '/root/league',
-      ssh_options: 'ForwardAgent=yes',
-      // The `data` submodule must NEVER be loaded on the production server.
-      // It is dev-only (large git-lfs reference dataset; git-lfs is not installed
-      // on prod). If it ever gets accidentally initialized, the deinit step
-      // below removes it so subsequent `git pull` operations do not fail
-      // trying to fetch its refs.
-      'pre-deploy':
-        'git submodule deinit -f data 2>/dev/null || true; git pull',
-      'pre-deploy-local': '',
-      'post-deploy': [
-        'source /root/.bash_profile',
-        'export PATH=/root/.nvm/versions/node/current/bin:/usr/local/bin:$PATH',
-        'git submodule update --init private',
-        'yarn install',
-        'pm2 reload server.pm2.config.js --env production'
-      ].join(' && '),
-      'pre-setup': ''
-    }
-  }
+  ]
 }

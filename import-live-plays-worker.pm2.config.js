@@ -2,7 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'import-live-plays-worker',
-      script: 'jobs/import-live-plays-worker.mjs',
+      script: '/root/league/jobs/import-live-plays-worker.mjs',
+      cwd: '/root/league',
       autorestart: true,
       min_uptime: '60s',
       max_restarts: 10,

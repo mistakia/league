@@ -2,7 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'import-live-odds-worker',
-      script: 'jobs/import-live-odds-worker.mjs',
+      script: '/root/league/jobs/import-live-odds-worker.mjs',
+      cwd: '/root/league',
       autorestart: true,
       min_uptime: '60s',
       max_restarts: 10,
