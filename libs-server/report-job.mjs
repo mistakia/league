@@ -8,6 +8,86 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const exec_file = promisify(execFile)
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// A long import (~18 min) can outlive the pooled connection reserved for its
+// terminal audit write: the server closes it on idle timeout, or a transient
+// network blip half-opens the socket. The subsequent `db('jobs').insert` then
+// fails during connection acquisition — a KnexTimeoutError carrying
+// `sql: undefined, bindings: undefined`, not a query error — or with a
+// pg-level connection-reset code. This predicate classifies exactly that
+// transient connection class so the retry below never masks a genuine query
+// failure (constraint violation, bad column, etc.). See
+// user:task/league/harden-report-job-terminal-jobs-insert.md (signal 120514).
+const CONNECTION_ERROR_CODES = new Set([
+  'ECONNRESET',
+  'EPIPE',
+  'ETIMEDOUT',
+  'ENOTFOUND',
+  'ECONNREFUSED',
+  '08000', // connection_exception
+  '08001', // sqlclient_unable_to_establish_sqlconnection
+  '08003', // connection_does_not_exist
+  '08004', // sqlserver_rejected_establishment_of_sqlconnection
+  '08006', // connection_failure
+  '08007', // transaction_resolution_unknown
+  '57P01', // admin_shutdown
+  '57P02', // crash_shutdown
+  '57P03' // cannot_connect_now
+])
+
+const CONNECTION_ERROR_PATTERNS = [
+  'connection terminated',
+  'connection ended',
+  'connection closed',
+  'connection is not open',
+  'server closed the connection',
+  'timeout acquiring a connection',
+  'read econnreset',
+  'socket hang up'
+]
+
+export const is_connection_error = (err) => {
+  if (!err) return false
+  // KnexTimeoutError: pool could not hand out a live connection in time.
+  if (err.name === 'KnexTimeoutError') return true
+  if (err.code && CONNECTION_ERROR_CODES.has(err.code)) return true
+  const message = String(err.message || '').toLowerCase()
+  return CONNECTION_ERROR_PATTERNS.some((pattern) => message.includes(pattern))
+}
+
+const CONNECTION_RETRY_ATTEMPTS = 3
+const CONNECTION_RETRY_DELAY_MS = 1000
+
+// Run a DB operation, retrying only on connection-class errors. Each retry
+// re-issues the query, so knex re-acquires from the pool — tarn discards the
+// connection that just errored, so the retry lands on a fresh one. Non-connection
+// errors throw immediately (no masking); the bound caps a genuine outage.
+export const with_connection_retry = async (
+  operation,
+  {
+    attempts = CONNECTION_RETRY_ATTEMPTS,
+    delay_ms = CONNECTION_RETRY_DELAY_MS
+  } = {}
+) => {
+  let last_error
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return await operation()
+    } catch (err) {
+      last_error = err
+      if (!is_connection_error(err) || attempt === attempts) {
+        throw err
+      }
+      console.error(
+        `report_job: connection-class error on attempt ${attempt}/${attempts}, retrying in ${delay_ms}ms: ${err.message}`
+      )
+      await sleep(delay_ms)
+    }
+  }
+  throw last_error
+}
+
 // Resolve base by absolute path, not bare `base` on PATH: the pm2 worker process
 // env does not include ~/.base/bin, so a bare `base` spawn ENOENTs and every run
 // report is silently lost. Mirrors report-run-outcome.mjs and the base
@@ -59,12 +139,25 @@ export default async function report_job({
 
   const job_report_timestamp = Math.round(Date.now() / 1000)
 
-  await db('jobs').insert({
-    type: job_type,
-    succ: job_success,
-    reason: job_reason,
-    timestamp: job_report_timestamp
-  })
+  // The jobs-table row is local audit bookkeeping. Retry it through a fresh
+  // pooled connection on a transient blip, but if it still fails, DO NOT throw:
+  // the import's real outcome (already decided above) must reach the runs
+  // primitive below regardless. A single stale-pool blip on this write must not
+  // fail an otherwise-successful ~18-min import and page a pipeline_failure.
+  try {
+    await with_connection_retry(() =>
+      db('jobs').insert({
+        type: job_type,
+        succ: job_success,
+        reason: job_reason,
+        timestamp: job_report_timestamp
+      })
+    )
+  } catch (err) {
+    console.error(
+      `report_job: jobs-table audit insert failed after retries; the import outcome is still reported to the runs primitive below: ${err.message}`
+    )
+  }
 
   const job_id = job_type_to_id[job_type]
   const api_url = process.env.BASE_API_URL
