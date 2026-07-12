@@ -42,8 +42,6 @@ const CONNECTION_ERROR_PATTERNS = [
   'connection closed',
   'connection is not open',
   'server closed the connection',
-  'timeout acquiring a connection',
-  'read econnreset',
   'socket hang up'
 ]
 
