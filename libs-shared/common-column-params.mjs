@@ -80,6 +80,60 @@ const format_week_value = ({ value, def }) => {
   return parts.join(', ')
 }
 
+// year_offset is a relative-year window: N is added to the row's year, and the
+// range is a SUM over [row_year + lo, row_year + hi]. Render clear relative-year
+// language instead of the raw `lo+` numeric span. The `variant` forwarded by the
+// react-table engine selects a terse chip label (short) or a descriptive phrase
+// (long); closed multi-year spans fall back to a compact signed-offset span so
+// the short chip stays under ~10 characters.
+const year_offset_word = (n) => {
+  if (n === 0) return 'cur'
+  if (n === -1) return 'prior'
+  if (n === 1) return 'next'
+  if (n < 0) return `${-n}y prior`
+  return `${n}y fwd`
+}
+
+const year_offset_phrase = (n) => {
+  if (n === 0) return 'current year'
+  if (n === -1) return 'prior year'
+  if (n === 1) return 'next year'
+  if (n < 0) return `${-n} yrs prior`
+  return `${n} yrs later`
+}
+
+const signed_offset = (n) => (n > 0 ? `+${n}` : `${n}`)
+
+const format_year_offset_value = ({ value, def, variant }) => {
+  const { min, max } = def || {}
+  const is_long = variant === 'long'
+  const scalar = (n) => (is_long ? year_offset_phrase(n) : year_offset_word(n))
+
+  if (!Array.isArray(value)) return scalar(Number(value))
+  if (value.length < 2) return scalar(Number(value[0]))
+
+  const lo = Math.min(Number(value[0]), Number(value[1]))
+  const hi = Math.max(Number(value[0]), Number(value[1]))
+  const at_min = typeof min === 'number' && lo <= min
+  const at_max = typeof max === 'number' && hi >= max
+
+  if (at_min && at_max) return is_long ? 'all years' : 'all'
+  if (lo === hi) return scalar(lo)
+  if (at_max) {
+    return is_long
+      ? `${year_offset_phrase(lo)} onward`
+      : `${year_offset_word(lo)}+`
+  }
+  if (at_min) {
+    return is_long
+      ? `through ${year_offset_phrase(hi)}`
+      : `≤${year_offset_word(hi)}`
+  }
+  return is_long
+    ? `${year_offset_phrase(lo)} to ${year_offset_phrase(hi)}`
+    : `${signed_offset(lo)}..${signed_offset(hi)}y`
+}
+
 export const career_year = {
   data_type: table_constants.TABLE_DATA_TYPES.RANGE,
   label: 'Career Year',
@@ -205,7 +259,7 @@ export const year_offset = {
   label: 'Year + N',
   min: -30,
   max: 30,
-  show_key_in_short: true,
+  format_value: format_year_offset_value,
   enable_on_row_axes: ['year']
 }
 
@@ -216,7 +270,7 @@ export const single_year_offset = {
   max: 30,
   default_value: 0,
   is_single: true,
-  show_key_in_short: true,
+  format_value: format_year_offset_value,
   enable_on_row_axes: ['year']
 }
 
