@@ -6,12 +6,12 @@
   "nominationTimer": 45000,
   "bidTimer": 14000,
   "email": {
-    "resend_api_key": "ENCRYPTED|<iv>|<encrypted-value>",
+    "resend_api_key": "<value>",
     "from": "noreply@example.com"
   },
-  "league_api_auth_token": "ENCRYPTED|<iv>|<encrypted-value>",
+  "league_api_auth_token": "<value>",
   "jwt": {
-    "secret": "ENCRYPTED|<iv>|<encrypted-value>",
+    "secret": "<value>",
     "algorithms": ["HS256"],
     "credentialsRequired": false
   },
@@ -20,7 +20,7 @@
     "connection": {
       "host": "localhost",
       "user": "league_writer",
-      "password": "ENCRYPTED|<iv>|<encrypted-value>",
+      "password": "<value>",
       "database": "league_production",
       "decimalNumbers": true,
       "port": "5432"
@@ -39,5 +39,5 @@
     "historical_rate_min_threshold": 0.7
   },
   "signals_api_url": "https://base.example.com",
-  "signals_secret": "ENCRYPTED|<iv>|<encrypted-value>"
+  "signals_secret": "<value>"
 }
