@@ -12,7 +12,7 @@
   "league_api_auth_token": "",
   "discord_sysadmin_alerts_channel_webhook_url": "",
   "jwt": {
-    "secret": "ENCRYPTED|ed2a3311603c57292e306419bfe616f7|ee2dc5729340077ee994d8dd030e2b1d8793818edc0310061bd0f142df094824",
+    "secret": "",
     "algorithms": ["HS256"],
     "credentialsRequired": false
   },
@@ -22,7 +22,7 @@
       "host": "38.242.199.45",
       "port": 5432,
       "user": "league_writer",
-      "password": "ENCRYPTED|09e7ce2470732a397531984903482de4|344c240c21b2355585ffbce2a5ae2f704d813822b6d9955de2e653d8a06a76e0",
+      "password": "",
       "database": "league_production"
     },
     "pool": {

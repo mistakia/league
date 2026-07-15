@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs'
-import secure_config from '@tsmx/secure-config'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import os from 'os'
@@ -53,35 +52,26 @@ export const load_sops_json = (file_path) => {
   return JSON.parse(result.stdout)
 }
 
-// Legacy @tsmx/secure-config path, retained for the development and test
-// environments only. Those run on hosts that are NOT league age recipients
-// (local dev / CI), so they keep decrypting config-<NODE_ENV>.json with the
-// symmetric key. CONFIG_ENCRYPTION_KEY_FILE is required and dereferenced into
-// process.env.CONFIG_ENCRYPTION_KEY (a process-internal carrier @tsmx reads);
-// any inherited inline CONFIG_ENCRYPTION_KEY is overwritten and never trusted.
-// config-test.json is decrypted with the committed in-repo test fixture key.
-const load_secure_config = () => {
-  if (!process.env.CONFIG_ENCRYPTION_KEY_FILE) {
-    throw new Error('CONFIG_ENCRYPTION_KEY_FILE must be set')
-  }
-  try {
-    process.env.CONFIG_ENCRYPTION_KEY = readFileSync(
-      process.env.CONFIG_ENCRYPTION_KEY_FILE,
+// Dev and test read their config file plaintext off disk. This replaces the
+// retired @tsmx/secure-config symmetric-key scheme (2026-07-15 Phase D): those
+// hosts were never league age recipients, so there is no encryption tier below
+// production worth maintaining a second decrypt path for. config-test.json
+// holds only non-sensitive local-fixture values; config-development.json
+// leaves any real dev credential blank for the developer to fill in locally
+// (never committed).
+const load_plaintext_config = () =>
+  JSON.parse(
+    readFileSync(
+      join(config_dir, `config-${process.env.NODE_ENV}.json`),
       'utf8'
-    ).trim()
-  } catch (err) {
-    throw new Error(
-      `CONFIG_ENCRYPTION_KEY_FILE unreadable: ${process.env.CONFIG_ENCRYPTION_KEY_FILE}: ${err.code || err.message}`
     )
-  }
-  return secure_config({ directory: config_dir })
-}
+  )
 
-// Production is the only environment migrated to sops/age; dev and test stay on
-// the legacy symmetric scheme (their consumers are not age recipients).
+// Production is the only environment on the sops/age scheme; dev and test
+// stay plaintext.
 const config =
   process.env.NODE_ENV === 'production'
     ? load_sops_json(join(config_dir, 'config-production.json'))
-    : load_secure_config()
+    : load_plaintext_config()
 
 export default config

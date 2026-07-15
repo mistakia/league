@@ -59,27 +59,19 @@ The orchestrator shells out to:
 …all of which can also be run standalone if you only need part of the
 workflow.
 
-## Credentials and secure-config
+## Credentials
 
 Sleeper's public API needs no credentials. ESPN private leagues require a
-`SWID` cookie and `espn_s2` token; these and any future platform credentials
-are loaded by the collectors via `#config` (`@tsmx/secure-config`) at
-runtime.
+`SWID` cookie and an `espn_s2` token. Pass them to
+`collect-espn-fixtures.mjs` via `--espn-s2 <value> --swid <value>`, or set
+them under the `espn.credentials` key of the platform config file
+(`libs-server/external-fantasy-leagues/external-platforms.json`) — see that
+collector's `--help` for the full lookup order. Never commit real cookie
+values; supply them locally per run.
 
-To add or rotate a credential:
-
-1. Edit `config/config-development.json` (or the appropriate environment
-   config) and place an `ENCRYPTED|<iv>|<encrypted-value>` token under the
-   relevant platform key. See `config/config.sample.json` for the schema.
-2. Use `secure-config`'s encryption helper (the master key lives outside the
-   repo — see the project's existing credential-management runbook) to
-   produce the encrypted value.
-3. Run the collector for that platform; it will pull credentials through
-   `#config` and authenticate before fetching.
-
-If a collector fails with an authentication error after a rotation, the
-encryption key or the encrypted token is wrong — fix that before re-running
-the orchestrator, do not commit unencrypted credentials.
+If a collector fails with an authentication error, the cookie values are
+stale or wrong — re-extract them from the browser and retry before re-running
+the orchestrator.
 
 ## Anonymization
 

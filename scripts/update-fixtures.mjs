@@ -6,7 +6,8 @@
  *
  * Wraps the existing per-platform collectors (scripts/collect-{sleeper,espn}-fixtures.mjs)
  * and the expected-output generator (scripts/generate-expected-outputs.mjs). Credentials
- * for platforms that need them are read from secure-config via #config.
+ * for platforms that need them are passed as CLI args to the collectors (see
+ * docs/fixture-maintenance.md).
  *
  * Usage:
  *   node scripts/update-fixtures.mjs                      # all platforms + regenerate
@@ -118,8 +119,8 @@ Options:
   --season-year <year>     Forwarded to ESPN collector
   --help                   Show this help
 
-Credentials for ESPN (and any future platforms requiring auth) are loaded by
-each collector via secure-config. See docs/fixture-maintenance.md.
+Credentials for ESPN (and any future platforms requiring auth) are passed as
+CLI args to each collector. See docs/fixture-maintenance.md.
 `)
 }
 

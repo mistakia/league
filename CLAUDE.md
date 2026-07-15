@@ -185,7 +185,7 @@ To run mocha directly against the :5433 container (e.g. a custom reporter or `--
 
 ```
 LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=5433 TZ=America/New_York NODE_ENV=test TEST=all \
-  node_modules/.bin/mocha --exit --require test/setup-encryption-key.mjs --require test/global.mjs --reporter min test/<file>.spec.mjs
+  node_modules/.bin/mocha --exit --require test/global.mjs --reporter min test/<file>.spec.mjs
 ```
 
 ### League Context
