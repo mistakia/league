@@ -1,6 +1,12 @@
-import React, { useRef, useEffect, useMemo } from 'react'
+import React, {
+  useRef,
+  useEffect,
+  useMemo,
+  useState,
+  useLayoutEffect
+} from 'react'
+import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
-import Popper from '@mui/material/Popper'
 import { ClickAwayListener } from '@mui/base/ClickAwayListener'
 
 import { nfl_week_identifier } from '@libs-shared'
@@ -30,6 +36,12 @@ export default function NflWeekSelectorYearPopper({
 }) {
   const drag_ref = useRef(null)
   const last_week_ref = useRef({})
+  const container_ref = useRef(null)
+  const [position, set_position] = useState(() => {
+    if (!anchor_el) return { top: 0, left: 0 }
+    const rect = anchor_el.getBoundingClientRect()
+    return { top: rect.bottom, left: rect.left }
+  })
 
   useEffect(() => {
     const on_document_mouse_up = () => {
@@ -38,6 +50,42 @@ export default function NflWeekSelectorYearPopper({
     document.addEventListener('mouseup', on_document_mouse_up)
     return () => document.removeEventListener('mouseup', on_document_mouse_up)
   }, [])
+
+  // Position the weeks popover once, when it opens, and on viewport scroll /
+  // resize. Deliberately NOT recomputed on selection changes: the anchor caret
+  // does not move while the popover is open, so re-running positioning on every
+  // re-render buys nothing and is exactly what produced the MUI Popper
+  // interim-frame flicker during drag-select.
+  useLayoutEffect(() => {
+    if (!anchor_el) return undefined
+    const reposition = () => {
+      const rect = anchor_el.getBoundingClientRect()
+      const el = container_ref.current
+      const width = el ? el.offsetWidth : 0
+      const height = el ? el.offsetHeight : 0
+      const pad = 8
+      let left = rect.left
+      let top = rect.bottom
+      if (width && left + width > window.innerWidth - pad) {
+        left = Math.max(pad, window.innerWidth - width - pad)
+      }
+      if (height && top + height > window.innerHeight - pad) {
+        const above = rect.top - height
+        top =
+          above >= pad
+            ? above
+            : Math.max(pad, window.innerHeight - height - pad)
+      }
+      set_position({ top, left })
+    }
+    reposition()
+    window.addEventListener('resize', reposition)
+    window.addEventListener('scroll', reposition, true)
+    return () => {
+      window.removeEventListener('resize', reposition)
+      window.removeEventListener('scroll', reposition, true)
+    }
+  }, [anchor_el])
 
   const statics_set = useMemo(
     () =>
@@ -136,13 +184,12 @@ export default function NflWeekSelectorYearPopper({
     handle_change(next)
   }
 
-  return (
-    <ClickAwayListener onClickAway={on_close}>
-      <Popper
-        open
-        anchorEl={anchor_el}
-        placement='bottom-start'
+  return createPortal(
+    <ClickAwayListener onClickAway={on_close} mouseEvent='onMouseDown'>
+      <div
+        ref={container_ref}
         className='table-popper nfl-week-selector-year-popper'
+        style={{ position: 'fixed', top: position.top, left: position.left }}
       >
         <div
           className='nfl-week-selector-year-popper-body'
@@ -202,8 +249,9 @@ export default function NflWeekSelectorYearPopper({
             )
           })}
         </div>
-      </Popper>
-    </ClickAwayListener>
+      </div>
+    </ClickAwayListener>,
+    document.body
   )
 }
 

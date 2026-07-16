@@ -3,7 +3,6 @@
 // undo / redo actions is the textbook reducer case.
 import React, { useState, useReducer, useMemo, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import Tooltip from '@mui/material/Tooltip'
 
 import FilterBase from 'react-table/src/filter-base'
 import { format_column_params } from 'react-table/src/utils/format-column-params.js'
@@ -232,11 +231,9 @@ export default function ColumnParamNflWeekSelector({
   )
 
   return (
-    <Tooltip title={selected_label}>
-      <span className='nfl-week-selector-chip'>
-        <FilterBase {...{ label, selected_label, body, trigger_close }} />
-      </span>
-    </Tooltip>
+    <span className='nfl-week-selector-chip'>
+      <FilterBase {...{ label, selected_label, body, trigger_close }} />
+    </span>
   )
 }
 
