@@ -25,8 +25,10 @@ const NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK = 'draft_pick_on_clock'
 // marker either way. event_timestamp is derived deterministically from
 // draft_start and pick number so each slot has a unique, idempotent key
 // within (lid, year, notification_type).
+// 12-hour pick cadence (43200s) per the commissioner's 2026 draft-window
+// election (governance-reference.md); halved from the prior 24-hour clock.
 const get_pick_event_timestamp = ({ draft_start, pick_number }) =>
-  draft_start + (pick_number - 1) * 86400
+  draft_start + (pick_number - 1) * 43200
 
 const run = async () => {
   // get lists of leagues after draft start date
