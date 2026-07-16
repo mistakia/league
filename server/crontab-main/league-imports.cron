@@ -1,7 +1,13 @@
 JOB_PROJECT=league
 
 ## draft notifications
-1 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/notifications-draft.mjs >> /var/log/league/notifications-draft.log 2>&1
+## Polls the on-clock frontier every 10 minutes so a pick is announced within
+## ~10 min of the previous pick being made. Cadence MUST stay well below the
+## shortest draft_pick_clock_hours window (currently 12h) to be on time; the
+## once-only guarantee comes from the notification marker, not the schedule.
+## The script self-gates cheaply (no active draft -> two quick queries), so it
+## is left unscoped by month to avoid a date-shift silently skipping the draft.
+*/10 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/notifications-draft.mjs >> /var/log/league/notifications-draft.log 2>&1
 
 
 # PROJECTIONS

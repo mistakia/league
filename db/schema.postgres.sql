@@ -25773,7 +25773,8 @@ CREATE TABLE public.seasons (
     free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
     season_finalized_at bigint,
     scoring_format_id text NOT NULL,
-    league_format_id text NOT NULL
+    league_format_id text NOT NULL,
+    draft_pick_clock_hours smallint DEFAULT 24 NOT NULL
 );
 
 

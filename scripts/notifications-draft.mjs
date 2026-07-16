@@ -18,21 +18,15 @@ debug.enable('notifications-draft')
 
 const NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK = 'draft_pick_on_clock'
 
-// The actual sendNotifications call is currently disabled (see TODO below).
-// The record_league_notification_sent marker is the canonical "this pick was
-// detected and announced" signal — when the notification implementation is
-// restored it goes inside the same gate, and the oracle below validates the
-// marker either way. event_timestamp is derived deterministically from
-// draft_start and pick number so each slot has a unique, idempotent key
-// within (lid, year, notification_type).
-// 12-hour pick cadence (43200s) per the commissioner's 2026 draft-window
-// election (governance-reference.md); halved from the prior 24-hour clock.
-const get_pick_event_timestamp = ({ draft_start, pick_number }) =>
-  draft_start + (pick_number - 1) * 43200
+// Fallback only — the window length is data-driven from seasons.draft_pick_clock_hours.
+const DEFAULT_PICK_CLOCK_HOURS = 24
 
 const run = async () => {
-  // get lists of leagues after draft start date
   const now = dayjs().unix()
+
+  // Leagues whose draft has started (draft_start in the past). draft_start and
+  // the per-season pick clock (draft_pick_clock_hours) both live on the
+  // seasons row, so a single left join carries the configured window length.
   const league_seasons = await db('leagues')
     .leftJoin('seasons', function () {
       this.on('leagues.uid', '=', 'seasons.lid')
@@ -46,27 +40,48 @@ const run = async () => {
   const due_announcements = []
 
   for (const league_season of league_seasons) {
-    const { lid } = league_season
-    const league = await getLeague({ lid })
-    const draftStart = dayjs.unix(league_season.draft_start)
-    const difference = dayjs().diff(draftStart, 'days')
-    const pick_number = difference + 1
+    const { lid, draft_start } = league_season
+    const clock_hours =
+      league_season.draft_pick_clock_hours || DEFAULT_PICK_CLOCK_HOURS
+    const clock_seconds = clock_hours * 3600
 
-    const picks = await db('draft')
+    const league = await getLeague({ lid })
+
+    // The pick actually on the clock is the lowest-numbered unmade pick: the
+    // draft is sequential, so every earlier pick is already made. Deriving the
+    // pick from elapsed time instead mis-fires whenever the real pace differs
+    // from the clock (announces nothing in a fast draft, announces a future
+    // pick in a stalled one), so we track the frontier directly.
+    const frontier = await db('draft')
       .join('teams', 'draft.tid', 'teams.uid')
       .where('draft.year', current_season.year)
       .where('teams.year', current_season.year)
-      .where('draft.pick', pick_number)
       .where('draft.lid', league.uid)
       .whereNull('draft.pid')
+      .orderBy('draft.pick')
+      .select('draft.pick', 'draft.tid', 'teams.name', 'teams.abbrv')
+      .first()
 
-    if (!picks.length) continue
+    if (!frontier) continue // draft complete for this league
 
-    const pick = picks[0]
-    const event_timestamp = get_pick_event_timestamp({
-      draft_start: league_season.draft_start,
-      pick_number
-    })
+    // The window opens the instant the previous pick is made (draft_start for
+    // pick 1), per Article XI Section 8. That timestamp is the true on-clock
+    // time and doubles as the stable, unique idempotency key for this pick.
+    let on_clock_at = draft_start
+    if (frontier.pick > 1) {
+      const previous = await db('draft')
+        .where({
+          lid: league.uid,
+          year: current_season.year,
+          pick: frontier.pick - 1
+        })
+        .first()
+      on_clock_at = previous?.selection_timestamp || draft_start
+    }
+
+    if (on_clock_at > now) continue // window has not opened yet
+
+    const event_timestamp = on_clock_at
 
     const already_sent = await has_league_notification_been_sent({
       lid,
@@ -76,20 +91,22 @@ const run = async () => {
     })
     if (already_sent) {
       log(
-        `league ${lid}: on-clock notification already recorded for pick #${pick.pick}; skipping`
+        `league ${lid}: on-clock notification already recorded for pick #${frontier.pick}; skipping`
       )
       continue
     }
 
-    const message = `${pick.name} (${pick.abbrv}) is now on the clock with the #${pick.pick} pick in the ${pick.year} draft.`
+    const deadline = on_clock_at + clock_seconds
+    const message = `${frontier.name} (${frontier.abbrv}) is now on the clock with the #${frontier.pick} pick in the ${current_season.year} draft. The ${clock_hours}-hour window closes ${dayjs.unix(deadline).format('ddd MMM D h:mm A')}.`
 
     log(message)
 
-    // TODO - outdated, needs updating
+    // TODO - notification send is disabled; restore it inside this gate so it
+    // shares the once-only marker below.
 
     /* await sendNotifications({
      *   league,
-     *   teamIds: [pick.tid],
+     *   teamIds: [frontier.tid],
      *   message
      * }) */
 
@@ -99,10 +116,16 @@ const run = async () => {
       notification_type: NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK,
       event_timestamp,
       message,
-      metadata: { pick_number: pick.pick, tid: pick.tid }
+      metadata: {
+        pick_number: frontier.pick,
+        tid: frontier.tid,
+        on_clock_at,
+        deadline,
+        clock_hours
+      }
     })
 
-    due_announcements.push({ lid, event_timestamp, pick_number: pick.pick })
+    due_announcements.push({ lid, event_timestamp, pick_number: frontier.pick })
   }
 
   if (!due_announcements.length) {
