@@ -18,8 +18,8 @@
 // Run attended, as trashman (whose Aqua session makes the window visible):
 //   node scripts/espn-signin.mjs
 // then bridge the profile to the sandbox daemon that libs-server/espn-auth.mjs
-// reads:
-//   ../../cli/browser/migrate-profile-to-daemon.sh espn
+// reads (from the league repo root — the script lives in user-base cli/):
+//   ../../../cli/browser/migrate-profile-to-daemon.sh espn
 //
 // The automated back half (fresh espn_s2/SWID extraction) is
 // libs-server/espn-auth.mjs. See user:text/base/cloakbrowser-callers.md
@@ -29,6 +29,7 @@ import os from 'os'
 import path from 'path'
 import readline from 'readline'
 import { spawnSync } from 'child_process'
+import { fileURLToPath } from 'url'
 
 import {
   launch_persistent_context,
@@ -160,8 +161,18 @@ const main = async () => {
   )
   console.error('consumer (libs-server/espn-auth.mjs) can read the session:')
   console.error('')
+  // Derive the bridge script's absolute path from this file's location
+  // (invariant to the invoking cwd): scripts/ -> league -> active ->
+  // repository -> user-base, then cli/browser/.
+  const user_base_root = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    '..',
+    '..',
+    '..'
+  )
   console.error(
-    `  ${path.join(process.cwd(), '..', '..', 'cli', 'browser', 'migrate-profile-to-daemon.sh')} ${args.profile}`
+    `  ${path.join(user_base_root, 'cli', 'browser', 'migrate-profile-to-daemon.sh')} ${args.profile}`
   )
   console.error('')
 }
