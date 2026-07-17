@@ -23,7 +23,7 @@
 //
 // The automated back half (fresh espn_s2/SWID extraction) is
 // libs-server/espn-auth.mjs. See user:text/base/cloakbrowser-callers.md
-// "operator re-auth lifecycle" and user:text/league/espn-auth-pipeline.md.
+// "operator re-auth lifecycle".
 
 import os from 'os'
 import path from 'path'
