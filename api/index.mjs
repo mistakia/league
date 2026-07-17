@@ -185,6 +185,9 @@ api.use(
     }
   }
 )
+// Markdown context documents served at human-path + `.md` (not under /api).
+// Mounted after the static handlers and before the SPA catch-all.
+api.use('/', routes.context_docs)
 api.use('/*', (req, res, next) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), (err) => {
     if (err) {

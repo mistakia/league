@@ -175,12 +175,19 @@ observations:
     get_pff_session_cookie silently harvests a token-less cookie (no c_groot/_merlin_key); PFF
     importers then degrade to the 10-row preview with no auto-recovery once the session expires. Fix
     dispatched pff-session-cookie-fix.
+  - >-
+    [architecture] League/team markdown context docs are served at human-path + .md (e.g.
+    /leagues/1.md, /leagues/1/teams/5.md, /leagues/1/rules.md, /leagues/1/schedule.md) via
+    api/routes/context-docs.mjs and libs-server/context-docs/; self-sufficiency (each doc complete
+    for its level) is a contract, cap is computed from a bid-populated per-team getRoster source,
+    and the full filterable transaction log lives behind the separate
+    add-transactions-markdown-output-format task.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-01T15:14:15.641Z'
+updated_at: '2026-07-17T20:40:00.424Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 

@@ -7,6 +7,7 @@ import PageLayout from '@layouts/page'
 import LeagueSelectTeam from '@components/league-select-team'
 import LeagueTeam from '@components/league-team'
 import LeagueTeamHistoricalRanks from '@components/league-team-historical-ranks'
+import CopyMarkdownButton from '@components/copy-markdown-button'
 
 import './team.styl'
 
@@ -66,7 +67,14 @@ export default function TeamPage({
     </div>
   )
 
-  return <PageLayout body={body} scroll />
+  const head = (
+    <CopyMarkdownButton
+      path={`/leagues/${lid}/teams/${tid}.md`}
+      title='Copy team as Markdown'
+    />
+  )
+
+  return <PageLayout body={body} head={head} scroll />
 }
 
 TeamPage.propTypes = {

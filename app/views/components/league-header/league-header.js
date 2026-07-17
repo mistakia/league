@@ -4,6 +4,7 @@ import Stack from '@mui/material/Stack'
 import Chip from '@mui/material/Chip'
 
 import LeagueTeamsValueOverTime from '@components/league-teams-value-over-time'
+import CopyMarkdownButton from '@components/copy-markdown-button'
 
 import './league-header.styl'
 
@@ -52,7 +53,15 @@ export default function LeagueHeader({ league, is_in_league }) {
   })
   return (
     <div className='league__header'>
-      <h1>{league.name}</h1>
+      <h1>
+        {league.name}
+        {Boolean(league.uid) && (
+          <CopyMarkdownButton
+            path={`/leagues/${league.uid}.md`}
+            title='Copy league as Markdown'
+          />
+        )}
+      </h1>
       {!is_in_league && (
         <Stack direction='row' spacing={1} className='league__chips'>
           {Boolean(league.num_teams) && (

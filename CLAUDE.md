@@ -113,14 +113,15 @@ Format identities (`league_scoring_formats.id`, `league_formats.id`) are opaque 
 
 ## Key Documentation
 
-| Document                                                                             | Description                                                  |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| [docs/player-management.md](docs/player-management.md)                               | Player lookup, creation, updates, and external ID management |
-| [docs/data-views-system.md](docs/data-views-system.md)                               | Dynamic table configuration and data view field definitions  |
-| [docs/api-documentation.md](docs/api-documentation.md)                               | API endpoints and authentication                             |
-| [docs/glossary.md](docs/glossary.md)                                                 | Fantasy football terminology and abbreviations               |
-| [docs/named-formats.md](docs/named-formats.md)                                       | League scoring format definitions                            |
-| [docs/fantasy-points-column-definition.md](docs/fantasy-points-column-definition.md) | Fantasy points calculation system                            |
+| Document                                                                             | Description                                                             |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| [docs/player-management.md](docs/player-management.md)                               | Player lookup, creation, updates, and external ID management            |
+| [docs/data-views-system.md](docs/data-views-system.md)                               | Dynamic table configuration and data view field definitions             |
+| [docs/api-documentation.md](docs/api-documentation.md)                               | API endpoints and authentication                                        |
+| [docs/glossary.md](docs/glossary.md)                                                 | Fantasy football terminology and abbreviations                          |
+| [docs/named-formats.md](docs/named-formats.md)                                       | League scoring format definitions                                       |
+| [docs/context-documents.md](docs/context-documents.md)                               | Server-generated markdown league/team context docs (human-path + `.md`) |
+| [docs/fantasy-points-column-definition.md](docs/fantasy-points-column-definition.md) | Fantasy points calculation system                                       |
 
 ## Key Development Patterns
 

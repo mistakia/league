@@ -21,6 +21,7 @@ import markets from './markets.mjs'
 import shorten_url from './shorten-url.mjs'
 import docs from './docs.mjs'
 import selection_combinations from './selection-combinations.mjs'
+import context_docs from './context-docs.mjs'
 
 export default {
   auth,
@@ -45,5 +46,6 @@ export default {
   markets,
   shorten_url,
   docs,
-  selection_combinations
+  selection_combinations,
+  context_docs
 }

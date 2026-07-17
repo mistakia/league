@@ -210,3 +210,11 @@ export const getPlayByPlayQuery = (db) =>
   db('nfl_plays_current_week')
     .select(fields)
     .join('nfl_games', 'nfl_plays_current_week.esbid', '=', 'nfl_games.esbid')
+
+export {
+  generate_league_context,
+  generate_league_rules,
+  generate_league_schedule,
+  generate_team_context,
+  ContextDocError
+} from './context-docs/index.mjs'
