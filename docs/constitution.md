@@ -450,13 +450,13 @@ xiv. 10-13 points allowed (2)
 
 ## Article IX
 
-> RESTRCIED FREE AGENCY AUCTION
+> RESTRICTED FREE AGENCY AUCTION
 
 1. Each team may nominate a maximum of two (2) players for the “fair-market” Restricted Free Agency Auction.
 
 2. Original team will submit a contract offer via a blind offer process (blind to all other league managers).
 
-3. Non-original teams will have the option to submit an offer for any of the designated players entered into this Restricted Free Agecy Auction.
+3. Non-original teams will have the option to submit an offer for any of the designated players entered into this Restricted Free Agency Auction.
 
 4. If no non-original teams offer a contract that exceeds the original team’s offer by greater than 20% or $2, whichever is greater, the player will be awarded to the original team. Otherwise, the player will be awarded to the highest bidder.
 
@@ -831,7 +831,6 @@ Interpretive Note: _While the Commissioner is the dispute resolution officer of 
 **Rescheduled.**
 
 1. If an NFL game is cancelled or suspended, stats from the rescheduled game will be used for scoring unless the result of that NFL game is not needed to determine the NFL playoff seed of both NFL teams.
-   Cancelled.
 
 **Cancelled**
 
