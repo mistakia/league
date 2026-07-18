@@ -1,0 +1,24 @@
+-- 2026-07-18: Drop the dead legacy table public.props_index_new.
+--
+-- props_index_new is a MySQL -> Postgres migration/rebuild artifact (numeric
+-- index names idx_24981_*, the "_new" suffix, raw sourceid integer / time_type
+-- smallint columns, and a typo column market_prop). It has 195,230 rows and was
+-- last written 2023-02-07; nothing has touched it since. It is superseded by the
+-- retained props_index table (proper market_source_id / time_type enums, week +
+-- year columns, correct market_prob) and by the current prop_market_selections_*
+-- pipeline.
+--
+-- No functional reader or writer exists in the codebase: the only references were
+-- the db_betting_tables subset list in scripts/postgres-backup.sh (removed
+-- separately) and this schema dump. The data holds nothing unique or
+-- irreplaceable -- props_index_new is a derived hit-rate rollup, and every player
+-- and the full 2020-2023 timespan it covers is present in the raw props table
+-- (4.1M rows, 2020-11-25..2023-11-09); all 680 pids that appear only in
+-- props_index_new (not in props_index) also exist in raw props, so the rollup is
+-- fully recomputable from source. A discrete pre-drop safeguard dump was taken:
+-- league:/root/backups/props_index_new-predrop-2026-07-18.dump (pg_dump -Fc).
+--
+-- The owned sequence props_index_new_prop_id_seq, its default, the primary key
+-- constraint, and both indexes drop with the table.
+
+DROP TABLE IF EXISTS public.props_index_new;

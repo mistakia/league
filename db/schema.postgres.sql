@@ -191,7 +191,6 @@ DROP INDEX IF EXISTS public.idx_ros_projections_pid;
 DROP INDEX IF EXISTS public.idx_rfa_bids_lid_year_active;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_releases_bid_id;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_lid;
-DROP INDEX IF EXISTS public.idx_props_index_new_hits_soft;
 DROP INDEX IF EXISTS public.idx_props_index_hits_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_week;
 DROP INDEX IF EXISTS public.idx_prop_pairings_total_games;
@@ -389,7 +388,6 @@ DROP INDEX IF EXISTS public.idx_25004_gid;
 DROP INDEX IF EXISTS public.idx_24999_player_team;
 DROP INDEX IF EXISTS public.idx_24999_pid;
 DROP INDEX IF EXISTS public.idx_24990_sourceid;
-DROP INDEX IF EXISTS public.idx_24981_prop;
 DROP INDEX IF EXISTS public.idx_24974_prop;
 DROP INDEX IF EXISTS public.idx_24970_prop;
 DROP INDEX IF EXISTS public.idx_24959_market;
@@ -582,7 +580,6 @@ ALTER TABLE IF EXISTS ONLY public.user_data_views DROP CONSTRAINT IF EXISTS "idx
 ALTER TABLE IF EXISTS ONLY public.restricted_free_agency_bids DROP CONSTRAINT IF EXISTS "idx_25108_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.sources DROP CONSTRAINT IF EXISTS "idx_25023_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.rosters DROP CONSTRAINT IF EXISTS "idx_24995_PRIMARY";
-ALTER TABLE IF EXISTS ONLY public.props_index_new DROP CONSTRAINT IF EXISTS "idx_24981_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.props_index DROP CONSTRAINT IF EXISTS "idx_24974_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.prop_pairings DROP CONSTRAINT IF EXISTS "idx_24967_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.poaches DROP CONSTRAINT IF EXISTS "idx_24917_PRIMARY";
@@ -645,7 +642,6 @@ ALTER TABLE IF EXISTS public.rosters ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.roster_asset_transformation ALTER COLUMN transformation_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.roster_asset_holding ALTER COLUMN holding_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS public.props_index_new ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.poaches ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.player_changelog ALTER COLUMN uid DROP DEFAULT;
@@ -712,8 +708,6 @@ DROP TABLE IF EXISTS public.restricted_free_agency_releases;
 DROP SEQUENCE IF EXISTS public.restricted_free_agency_bids_uid_seq;
 DROP TABLE IF EXISTS public.restricted_free_agency_bids;
 DROP SEQUENCE IF EXISTS public.props_index_prop_id_seq;
-DROP SEQUENCE IF EXISTS public.props_index_new_prop_id_seq;
-DROP TABLE IF EXISTS public.props_index_new;
 DROP TABLE IF EXISTS public.props_index;
 DROP TABLE IF EXISTS public.props;
 DROP TABLE IF EXISTS public.prop_pairings;
@@ -25197,67 +25191,6 @@ CREATE TABLE public.props_index (
 
 
 --
--- Name: props_index_new; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.props_index_new (
-    prop_id bigint NOT NULL,
-    pid character varying(25) NOT NULL,
-    prop_type character varying(50),
-    ln numeric(4,1),
-    o numeric(5,2),
-    u numeric(5,2),
-    o_am integer,
-    u_am integer,
-    sourceid integer NOT NULL,
-    "timestamp" integer NOT NULL,
-    time_type smallint NOT NULL,
-    name character varying(50),
-    team character varying(3),
-    opp character varying(3),
-    esbid bigint,
-    pos character varying(4),
-    hits_soft smallint,
-    hit_weeks_soft json,
-    hits_hard smallint,
-    hit_weeks_hard json,
-    hits_opp smallint,
-    opp_hit_weeks json,
-    hist_rate_soft numeric(5,4),
-    hist_rate_hard numeric(5,4),
-    opp_allow_rate numeric(5,4),
-    hist_edge_soft numeric(6,5),
-    hist_edge_hard numeric(6,5),
-    market_prop numeric(5,4),
-    is_pending smallint,
-    is_success smallint,
-    risk numeric(7,4),
-    payout numeric(7,4),
-    all_weeks json,
-    opp_weeks json
-);
-
-
---
--- Name: props_index_new_prop_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.props_index_new_prop_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: props_index_new_prop_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.props_index_new_prop_id_seq OWNED BY public.props_index_new.prop_id;
-
-
---
 -- Name: props_index_prop_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -27248,13 +27181,6 @@ ALTER TABLE ONLY public.props_index ALTER COLUMN prop_id SET DEFAULT nextval('pu
 
 
 --
--- Name: props_index_new prop_id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.props_index_new ALTER COLUMN prop_id SET DEFAULT nextval('public.props_index_new_prop_id_seq'::regclass);
-
-
---
 -- Name: restricted_free_agency_bids uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -27735,14 +27661,6 @@ ALTER TABLE ONLY public.prop_pairings
 
 ALTER TABLE ONLY public.props_index
     ADD CONSTRAINT "idx_24974_PRIMARY" PRIMARY KEY (prop_id);
-
-
---
--- Name: props_index_new idx_24981_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.props_index_new
-    ADD CONSTRAINT "idx_24981_PRIMARY" PRIMARY KEY (prop_id);
 
 
 --
@@ -29458,13 +29376,6 @@ CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id,
 
 
 --
--- Name: idx_24981_prop; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24981_prop ON public.props_index_new USING btree (sourceid, pid, esbid, prop_type, ln, time_type);
-
-
---
 -- Name: idx_24990_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30841,13 +30752,6 @@ CREATE INDEX idx_prop_pairings_week ON public.prop_pairings USING btree (week);
 --
 
 CREATE INDEX idx_props_index_hits_soft ON public.props_index USING btree (hits_soft);
-
-
---
--- Name: idx_props_index_new_hits_soft; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_props_index_new_hits_soft ON public.props_index_new USING btree (hits_soft);
 
 
 --
@@ -57584,20 +57488,6 @@ GRANT SELECT ON TABLE public.props TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.props_index TO league_reader;
-
-
---
--- Name: TABLE props_index_new; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.props_index_new TO league_reader;
-
-
---
--- Name: SEQUENCE props_index_new_prop_id_seq; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON SEQUENCE public.props_index_new_prop_id_seq TO league_reader;
 
 
 --
