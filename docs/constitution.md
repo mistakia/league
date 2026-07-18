@@ -1,53 +1,55 @@
-# THE TEFLON LEAGUE CONSTITUTION
+# Genesis League Constitution
 
-> Originally adopted 2020
+(Originally adopted 2020)
 
 ## Article I
 
-> FORMATION AND DURATION OF CONSTITUTION
+**FORMATION AND DURATION OF CONSTITUTION**
 
-This TEFLON (LEAGUE) Constitution constitutes an agreement among the LEAGUE Football Teams, as identified herein, each of which shall be entitled to the benefits of and shall be bound by all the terms and provisions hereof, and it shall remain in effect indefinitely, except that the provisions of Article III, Section 2 shall expire at such time as the current Commissioner ceases to hold office.
+This GENESIS LEAGUE (LEAGUE) Constitution constitutes an agreement among the LEAGUE Football Teams, as identified herein, each of which shall be entitled to the benefits of and shall be bound by all the terms and provisions hereof, and it shall remain in effect indefinitely, except that the provisions of Article III, Section 2 shall expire at such time as the current Commissioner ceases to hold office.
 
 ## Article II
 
-> DEFINITION OF TERMS
+**DEFINITION OF TERMS**
 
 ### Terms Defined.
 
-**“Boards”** shall mean the “League” Discord server.
+“Boards” shall mean the “League” Discord server
 
-**“Buy-In”** shall mean the sum of money submitted by a Team in order to be eligible to participate in the LEAGUE in a given year.
+“Buy-In” shall mean the sum of money submitted by a Team in order to be eligible to participate in the LEAGUE in a given year.
 
-**“Team”** shall mean a fantasy football team established pursuant to this Constitution.
+“Team” shall mean a fantasy football team established pursuant to this Constitution.
 
-**“Commissioner”** shall mean the incumbent of, and/or the Office of the Commissioner of the LEAGUE.
+“Commissioner” shall mean the incumbent of, and/or the Office of the Commissioner of the LEAGUE.
 
-**“Inactive”** shall mean the state of neglecting to do all of the following for a period of time: (a) Adding or dropping players; (b) rostering a full starting lineup; For further clarity, a Manager would not be “Inactive” on a given day if he failed to activate a wide receiver to replace a player on a bye week but did add an injured player to his bench.
+“Inactive” shall mean the state of neglecting to do all of the following for a period of time: (a) Adding or dropping players; (b) rostering a full starting lineup; For further clarity, a Manager would not be “Inactive” on a given day if he failed to activate a wide receiver to replace a player on a bye week but did add an injured player to his bench.
 
-**“Manager”** shall mean a participating player in the fantasy football game vested with authority to make binding decisions with respect to a Team.
+“Manager” shall mean a participating player in the fantasy football game vested with authority to make binding decisions with respect to a Team.
 
-**“Notice”** shall mean posting on the Boards. Only a post on the Boards shall serve as official and sufficient notice to the Commissioner of any action. While informal methods may be effective in advising the Commissioner of actions, no Team may review a decision of the Commissioner or bring a petition or complaint that was not announced on the Boards.
+“Notice” shall mean posting on the Boards. Only a post on the Boards shall serve as official and sufficient notice to the Commissioner of any action. While informal methods may be effective in advising the Commissioner of actions, no Team may review a decision of the Commissioner or bring a petition or complaint that was not announced on the Boards.
 
-**“Payout”** shall mean the sum of money due to a Team from the proceeds of the Buy-In at the conclusion of the LEAGUE CHAMPIONSHIP in respect to meeting certain victory conditions as dictated herein.
+“Payout” shall mean the sum of money due to a Team from the proceeds of the Buy-In at the conclusion of the LEAGUE CHAMPIONSHIP in respect to meeting certain victory conditions as dictated herein.
 
-**“TEFLON”** shall mean the fantasy football league to which this Constitution pertains.
+“GENESIS LEAGUE” shall mean the fantasy football league to which this Constitution pertains.
 
-**“LEAGUE”** shall mean the fantasy football league to which this Constitution pertains
+“LEAGUE” shall mean the fantasy football league to which this Constitution pertains
 
-**“LEAGUE CHAMPIONSHIP”** shall mean the championship round between the four finalists in the fantasy league.
+“LEAGUE CHAMPIONSHIP” shall mean the championship round between the four finalists in the fantasy league.
 
-**“Regular Season”** shall mean the period of time between 12:00 AM EST on the first Tuesday of Week 1 of the NFL Regular Season and the resolution of the LEAGUE CHAMPIONSHIP.
+“Regular Season” shall mean the period of time between 12:00 AM EST on the first Tuesday of Week 1 of the NFL Regular Season and the resolution of the LEAGUE CHAMPIONSHIP.
 
-**“Offseason”** shall mean the period of time between the resolution of the LEAGUE CHAMPIONSHIP and 12:00 AM EST on the first Tuesday of Week 1 of the NFL Regular Season.
+“Offseason” shall mean the period of time between the resolution of the LEAGUE CHAMPIONSHIP and 12:00 AM EST on the first Tuesday of Week 1 of the NFL Regular Season.
 
-**“Opening Day”** shall mean the first day upon which a regular season NFL football game is played within a given season.
+“Opening Day” shall mean the first day upon which a regular season NFL football game is played within a given season.
 
-**“NFL Rookie Draft”** shall mean the first day upon which the NFL Draft is held within a given season.
+> “NFL Rookie Draft” shall mean the first day upon which the NFL Draft is held within a given season.
 
-**Pronouns.**
-Where the male pronoun is used herein, it shall be taken to apply also to any persons as the situation may warrant.
+### Pronouns.
 
-**Computation of Time.**
+> Where the male pronoun is used herein, it shall be taken to apply also to any persons as the situation may warrant.
+
+### Computation of Time.
+
 Where this Constitution refers to a week, it shall have either the meaning ascribed to it in common usage (e.g., from 7 PM on a Tuesday to 7 PM the following Tuesday), or, in the context of head-to-head competition, a “week” shall refer to the period of time comprising the head-to-head contest between two opponents, regardless of the number of actual days within that time period.
 
 Where this Constitution refers to a period of time measured in days between two events, those days shall be counted by excluding the day on which the first event happens and including the day on which the second event happens, even if the words “at least” are used. Unless stated otherwise, “days” in every case _includes_ all weekends and holidays.
@@ -56,195 +58,172 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 
 ## Article III
 
-> THE COMMISSIONER
+**THE COMMISSIONER**
 
-**Establishment of Office.**
+### Establishment of Office.
 
-1. The Office of the Commissioner of the LEAGUE is hereby established.
+1.  The Office of the Commissioner of the LEAGUE is hereby established.
 
-**Powers and Duties.**
+### Powers and Duties.
 
-2. The functions of the Commissioner shall include:
+2.  The functions of the Commissioner shall include:
 
-(a) To serve as the Chief Administrative, Dispute Resolution and Financial officer of the LEAGUE.
+    1.  To serve as the Chief Administrative, Dispute Resolution and Financial officer of the LEAGUE.
 
-(b) To investigate, either upon complaint or upon the Commissioner’s own initiative, any act, transaction or practice charged, alleged or suspected not to be in the best interests of the game of fantasy football, with authority to compel the Teams and Managers therein to respond to such requests as may be necessary to resolve the same, and upon consideration or upon a refusal or failure to comply with such requests, to impose such penalties as are hereinafter provided.
+    2.  To investigate, either upon complaint or upon the Commissioner’s own initiative, any act, transaction or practice charged, alleged or suspected not to be in the best interests of the game of fantasy football, with authority to compel the Teams and Managers therein to respond to such requests as may be necessary to resolve the same, and upon consideration or upon a refusal or failure to comply with such requests, to impose such penalties as are hereinafter provided.
 
-(c\) To determine, after investigation, what preventative, remedial or punitive action is appropriate in the circumstances of the same act, transaction or practice, and to take such action against Teams, Managers or other individuals, as the case may be.
+    3.  To determine, after investigation, what preventative, remedial or punitive action is appropriate in the circumstances of the same act, transaction or practice, and to take such action against Teams, Managers or other individuals, as the case may be.
 
-(d) To appoint such persons to assist in the execution of the duties of the Commissioner as may be necessary in the Commissioner’s exclusive discretion.
+    4.  To appoint such persons to assist in the execution of the duties of the Commissioner as may be necessary in the Commissioner’s exclusive discretion.
 
-(e) To review and approve player extensions & designations and transactions between Teams in respect of competitive balance, freedom from collusion or other restricted practices, and for the best interests of fantasy football.
+    5.  To review and approve player extensions & designations and transactions between Teams in respect of competitive balance, freedom from collusion or other restricted practices, and for the best interests of fantasy football.
 
-(f) To make decisions, or to appoint persons to make decisions, in respect of rule interpretations, administrative functions, financial transactions or disciplinary action, as may be necessary.
+    6.  To make decisions, or to appoint persons to make decisions, in respect of rule interpretations, administrative functions, financial transactions or disciplinary action, as may be necessary.
 
-(g) To record all amendments to this Constitution in Appendix B “Amendment History”.
+    7.  To record all amendments to this Constitution in Appendix B “Amendment History”.
 
-**Prescribed Penalties.**
+### Prescribed Penalties.
 
-3. In the case of conduct deemed by the Commissioner not to be in the best interests of the LEAGUE or fantasy football, punitive or disciplinary actions against Teams or Managers may include any one or more of the following:
+3.  In the case of conduct deemed by the Commissioner not to be in the best interests of the LEAGUE or fantasy football, punitive or disciplinary actions against Teams or Managers may include any one or more of the following:
 
-(a) A formal warning;
+    1.  A formal warning;
 
-(b) A reprimand;
+    2.  A reprimand;
 
-(c\) A reversal, amendment to, or denial of a challenged transaction;
+    3.  A reversal, amendment to, or denial of a challenged transaction;
 
-(d) A forfeit of a specified draft pick;
+    4.  A forfeit of a specified draft pick;
 
-(e) A reduction in waiver claim priority;
+    5.  A reduction in waiver claim priority;
 
-(f) A reduction in FAAB;
+    6.  A reduction in FAAB;
 
-(g) Suspension or removal of a Team or a Manager from the LEAGUE;
+    7.  Suspension or removal of a Team or a Manager from the LEAGUE;
 
-(h) Forfeit of annual dues; or
+    8.  Forfeit of annual dues; or
 
-(i) Such other actions as the Commissioner may deem appropriate.
+    9.  Such other actions as the Commissioner may deem appropriate.
 
-4. Decisions of the Commissioner that include penalties to Teams must be posted formally on the Boards.
+4.  Decisions of the Commissioner that include penalties to Teams must be posted formally on the Boards.
 
-**Commissioner not to Supersede Authority of Teams.**
+### Commissioner not to Supersede Authority of Teams.
 
-5. Notwithstanding the provisions of Section 2, above, the Commissioner shall take no action in the best interests of fantasy football, and shall make no amendment to this Constitution or adjustment to the _status quo_ in respect of any matter that requires the Teams to take a vote, as set forth in Article IV, Section 2.
+5.  Notwithstanding the provisions of Section 2, above, the Commissioner shall take no action in the best interests of fantasy football, and shall make no amendment to this Constitution or adjustment to the _status quo_ in respect of any matter that requires the Teams to take a vote, as set forth in Article IV, Section 2.
 
-**Procedure to Review and/or Vacate Commissioner’s Decision.**
+### Procedure to Review and/or Vacate Commissioner’s Decision.
 
-6. Any action of the Commissioner taken pursuant to this Article, regardless of whether or not it is specifically designated as “reviewable”, may be overturned under the following process:
+6.  Any action of the Commissioner taken pursuant to this Article, regardless of whether or not it is specifically designated as “reviewable”, may be overturned under the following process:
 
-(a) Teams interested in the outcome of the Commissioner’s decision (i.e., the Team that would receive the direct benefit of an overturned vote and any other Team(s) directly involved in the challenged transaction and/or act) are deemed Interested Parties and are not eligible to participate in a vote to overturn that decision.
+    1.  Teams interested in the outcome of the Commissioner’s decision (i.e., the Team that would receive the direct benefit of an overturned vote and any other Team(s) directly involved in the challenged transaction and/or act) are deemed Interested Parties and are not eligible to participate in a vote to overturn that decision.
 
-_i. For further clarity, each Team’s interest in the general competitiveness of each other Team shall not constitute an “interest” in the outcome of a decision for the purposes of subsection (a)._
+        1.  For further clarity, each Team’s interest in the general competitiveness of each other Team shall not constitute an “interest” in the outcome of a decision for the purposes of subsection (a).
 
-(b) One-third of Teams eligible to cast a vote to overturn must agree to a petition for reconsideration or a vote upon the challenged decision. That petition must be made within one week of the formal posting of the challenged decision on the Boards.
+    2.  One-third of Teams eligible to cast a vote to overturn must agree to a petition for reconsideration or a vote upon the challenged decision. That petition must be made within one week of the formal posting of the challenged decision on the Boards.
 
-_i. For further clarity, without such a petition being made, there shall be no review of a Commissioner’s decision._
+        1.  For further clarity, without such a petition being made, there shall be no review of a Commissioner’s decision.
 
-(c\) If the Commissioner does not reconsider the decision, a vote shall be held.
+    3.  If the Commissioner does not reconsider the decision, a vote shall be held.
 
-(d) The Commissioner and all Interested Parties may make such representations to the Teams as they may wish in support of their preferred outcome.
+    4.  The Commissioner and all Interested Parties may make such representations to the Teams as they may wish in support of their preferred outcome.
 
-(e) The decision of the Commissioner may be overturned only upon a two-thirds majority vote of eligible Teams.
+    5.  The decision of the Commissioner may be overturned only upon a two-thirds majority vote of eligible Teams.
 
-(f) If such a majority is not achieved, the decision of the Commissioner stands.
+    6.  If such a majority is not achieved, the decision of the Commissioner stands.
 
-(g) If such a majority is achieved, the decision of the Commissioner is vacated.
+    7.  If such a majority is achieved, the decision of the Commissioner is vacated.
+        1.  For further clarity, this shall not preclude further action by the Commissioner upon the same challenged act.
 
-_i. For further clarity, this shall not preclude further action by the Commissioner upon the same challenged act._
-
-**Interpretive note:** _For example, the Commissioner may decide pursuant to Article III, Section (3), Subsection (g) that Team X is suspended permanently from the LEAGUE due to abusive behaviour against the best interests of fantasy football. That decision is posted on the Boards at 5:35 PM EST on a Tuesday. One-third of Teams (which do not include the abusive Team, because it is an Interested Party) petition the Commissioner for reconsideration or a re-vote, pursuant to Article III, Section 6, Subsection (b), and do so before the deadline at 5:35 PM EST the following Tuesday._
+Interpretive note: _For example, the Commissioner may decide pursuant to Article III, Section (3), Subsection (g) that Team X is suspended permanently from the LEAGUE due to abusive behaviour against the best interests of fantasy football. That decision is posted on the Boards at 5:35 PM EST on a Tuesday. One-third of Teams (which do not include the abusive Team, because it is an Interested Party) petition the Commissioner for reconsideration or a re-vote, pursuant to Article III, Section 6, Subsection (b), and do so before the deadline at 5:35 PM EST the following Tuesday._
 
 _The Commissioner refuses to reconsider, and a vote is therefore held. More than two-thirds of Teams vote that the decision should be vacated. There is therefore, at this point, no longer any decision of the Commissioner in respect of the challenged abusive acts. The Commissioner then decides pursuant to Article III, Section (3), Subsection (e) that the abusive Team shall forfeit a rookie draft pick instead. Only two Teams petition for a reconsideration of that decision. Because that is an insufficient number to form a petition, that decision stands and the abusive Team forfeits a rookie draft pick in the following Offseason._
 
-**Term Limits and Elections.**
+### Term Limits and Elections.
 
-7. The Commissioner shall hold office for a minimum term of two (2) years or for such longer term as shall be voted by the Teams in a given offseason.
+7.  The Commissioner shall hold office for a minimum term of two (2) years or for such longer term as shall be voted by the Teams in a given offseason.
 
-8. The Commissioner shall not be subject to a term limit and may succeed himself indefinitely.
+8.  The Commissioner shall not be subject to a term limit and may succeed himself indefinitely.
 
-9. With the exception of an election pursuant to Section 11, no election of a Commissioner shall take place less than sixty (60) days prior to the LEAGUE draft.
+9.  With the exception of an election pursuant to Section 11, no election of a Commissioner shall take place less than sixty (60) days prior to the LEAGUE draft.
 
 10. The election of a Commissioner shall be by simple majority, and each Team shall have one (1) vote. In the event of a tie, another election shall take place at least once per week until a Commissioner is elected.
 
-**Incapacity.**
+### Incapacity.
 
 11. In the event that the Commissioner is unable or unwilling to continue in his role, a vote shall be held immediately to replace him from among the ranks of the Team managers following the above process. In the event that the Commissioner disagrees that he is unable to continue, that decision shall be reviewable pursuant to Section 6.
 
-**Impartiality.**
+### Impartiality.
 
 12. The Commissioner vows to remain impartial and unbiased when making decisions involving the League and its Players.
 
-**Impeachment.**
+### Impeachment.
 
 13. A two-thirds majority vote of Teams is needed to Impeach the Commissioner.
 
 14. The Commissioner shall be removed from Office on Impeachment for Bribery, Maladministration or other High Crimes and Misdemeanors.
 
-(a) improperly exceeding or abusing the powers of the office;
+    1.  improperly exceeding or abusing the powers of the office;
 
-(b) behavior incompatible with the function and purpose of the office; and
+    2.  behavior incompatible with the function and purpose of the office; and
 
-(c) misusing the office for an improper purpose or for personal gain.
+    3.  misusing the office for an improper purpose or for personal gain.
 
 ## Article IV
 
-> TEAMS AND MANAGERS
+**TEAMS AND MANAGERS**
 
-**Establishment of Teams and Managers.**
+### Establishment of Teams and Managers.
 
-1. The Managers of each Team are established as follows:
+1.  The LEAGUE consists of ten (10) Teams, each managed by one or more Managers as recorded by the Commissioner.
 
-(a) Team 1
+### Voting in the Offseason.
 
-(b) Team 2
+2.  Each Offseason, Teams may be required to cast votes in respect of such matters as would include, but not be limited to:
 
-(c\) Team 3
+    1.  The election of a Commissioner;
 
-(d) Team 4
+    2.  The amount of a Team’s annual Buy-In;
 
-(e) Team 5
+    3.  The schedule of Payout conditions;
 
-(f) Team 6
+    4.  The amendment of this Constitution in respect of matters that shall include, but not be limited to:
 
-(g) Team 7
+        1.  The creation of expansion Teams;
 
-(h) Team 8
+        2.  Revisions to the League Settings, as defined in [Article V](#article-v); and
 
-(i) Team 9
+        3.  Revisions to the regulations pertaining to a draft;
 
-(j) Team 10
+> All of which shall require a simple majority vote by means of a poll on the Boards or in person so long as all Teams are represented; with the exception of subsection (d), which shall require a two-thirds majority vote. All votes will remain open for 3 days after the creation of the poll. Upon expiration of the voting window all votes will be counted and a ruling will be made by the Commissioner pursuant to the authority granted him in [Article III, Section 2, Subsection f](#article-iii).
 
-(k) Team 11
+### Voting in the Regular Season.
 
-(l) Team 12
+3.  During the Regular Season, Teams may be required to cast votes in respect of such matters as would include, but not be limited to:
 
-**Voting in the Offseason.**
+<!-- -->
 
-2. Each Offseason, Teams may be required to cast votes in respect of such matters as would include, but not be limited to:
+1.  Referenda or opinion polls as required by the Commissioner for his or her own guidance; and
 
-(a) The election of a Commissioner;
+2.  Reviews of the Commissioner’s decisions within the Regular Season, as set out in [Article III, Section 6](#article-iii).
 
-(b) The amount of a Team’s annual Buy-In;
+### No Contentious Constitutional Amendments During the Regular Season.
 
-(c\) The schedule of Payout conditions;
+4.  This Constitution may not be amended during the Regular Season except by unanimous vote of the Teams by means of a poll on the Boards. All votes will remain open for 3 days after the creation of the poll. Upon expiration of the voting window all votes will be counted and a ruling will be made by the Commissioner pursuant to the authority granted him in [Article III, Section 2, Subsection f](#article-iii).
 
-(d) The amendment of this Constitution in respect of matters that shall include, but not be limited to:
+### Minimum Voting Requirements.
 
-i. The creation of expansion Teams;
+5.  There is no minimum quorum or representation requirement for a Regular Season, Offseason or Constitutional Amendment vote.
 
-ii. Revisions to the League Settings, as defined in Article V; and
+### Withdrawal of Managers / Teams.
 
-iii. Revisions to the regulations pertaining to a draft;
+6.  Managers may withdraw from the LEAGUE at any time between the commencement of the Offseason and the NFL Rookie Draft within that offseason without penalty. They shall report their decision to the Commissioner, in writing, who will in-turn alert the other members of the League and begin to contact individuals on the League’s Waiting List in search of a replacement. Their Teams will persist and a replacement Manager(s) may be appointed from the Waiting List.
 
-All of which shall require a simple majority vote by means of a poll on the Boards or in person so long as all Teams are represented; with the exception of subsection (d), which shall require a two-thirds majority vote. All votes will remain open for 3 days after the creation of the poll. Upon expiration of the voting window all votes will be counted and a ruling will be made by the Commissioner pursuant to the authority granted him in Article III, Section 2, Subsection f.
+7.  Any Manager withdrawing between the NFL Rookie Draft and the commencement of the following Offseason in a given year shall forfeit his Buy-In funds.
 
-**Voting in the Regular Season.**
+8.  New Managers will have the opportunity to rename a Team from which all Managers have withdrawn.
 
-3. During the Regular Season, Teams may be required to cast votes in respect of such matters as would include, but not be limited to:
+### Waiting List & Addition to the League.
 
-(a) Referenda or opinion polls as required by the Commissioner for his or her own guidance; and
-
-(b) Reviews of the Commissioner’s decisions within the Regular Season, as set out in Article III, Section 6.
-
-**No Contentious Constitutional Amendments During the Regular Season.**
-
-4. This Constitution may not be amended during the Regular Season except by unanimous vote of the Teams by means of a poll on the Boards. All votes will remain open for 3 days after the creation of the poll. Upon expiration of the voting window all votes will be counted and a ruling will be made by the Commissioner pursuant to the authority granted him in Article III, Section 2, Subsection f.
-
-**Minimum Voting Requirements.**
-
-5. There is no minimum quorum or representation requirement for a Regular Season, Offseason or Constitutional Amendment vote.
-
-**Withdrawal of Managers / Teams.**
-
-6. Managers may withdraw from the LEAGUE at any time between the commencement of the Offseason and the NFL Rookie Draft within that offseason without penalty. They shall report their decision to the Commissioner, in writing, who will in-turn alert the other members of the League and begin to contact individuals on the League’s Waiting List in search of a replacement. Their Teams will persist and a replacement Manager(s) may be appointed from the Waiting List.
-
-7. Any Manager withdrawing between the NFL Rookie Draft and the commencement of the following Offseason in a given year shall forfeit his Buy-In funds.
-
-8. New Managers will have the opportunity to rename a Team from which all Managers have withdrawn.
-
-**Waiting List & Addition to the League.**
-
-9. The Waiting List shall be composed of those individuals that wish to gain entry to the League. The members of the list shall be voted on by the current members of the League to determine the ranking order of the list (when a spot or potential spot opens).
+9.  The Waiting List shall be composed of those individuals that wish to gain entry to the League. The members of the list shall be voted on by the current members of the League to determine the ranking order of the list (when a spot or potential spot opens).
 
 10. When a vacancy in the League develops a final vote on the League Waiting List order will be administered. The highest ranked individual will be offered admission into the League.
 
@@ -252,343 +231,343 @@ All of which shall require a simple majority vote by means of a poll on the Boar
 
 ## Article V
 
-> LEAGUE SETTINGS
+**LEAGUE SETTINGS**
 
-**Game Service and Format.**
+### Game Service and Format.
 
-1. The LEAGUE shall be a weekly head-to-head league.
+1.  The LEAGUE shall be a weekly head-to-head league.
 
-2. The scoring categories and associated points for the LEAGUE shall be as follows:
+2.  The scoring categories and associated points for the LEAGUE shall be as follows:
 
-(a) Passing categories:
+    1.  Passing categories:
 
-i. Passing Yards (0.05)
+        1.  Passing Yards (0.05)
 
-ii. TD Pass (4)
+        2.  TD Pass (4)
 
-iii. Interceptions Thrown (-1)
+        3.  Interceptions Thrown (-1)
 
-iv. 2pt Passing Conversions (2)
+        4.  2pt Passing Conversions (2)
 
-(b) Rushing categories:
+    2.  Rushing categories:
 
-i. Rushing Yards excluding Quarterback Kneels (0.1)
+        1.  Rushing Yards excluding Quarterback Kneels (0.1)
 
-ii. TD Rush (6)
+        2.  TD Rush (6)
 
-iii. 2pt Rushing Conversion (2)
+        3.  2pt Rushing Conversion (2)
 
-(c\) Receiving Categories:
+    3.  Receiving Categories:
 
-i. Receiving Yards (0.1)
+        1.  Receiving Yards (0.1)
 
-ii. Reception (0.5)
+        2.  Reception (0.5)
 
-iii. TD Reception (6)
+        3.  TD Reception (6)
 
-iv. 2pt Receiving Conversion (2)
+        4.  2pt Receiving Conversion (2)
 
-(d) Miscellaneous:
+    4.  Miscellaneous:
 
-i. Kickoff Return TD (6)
+        1.  Kickoff Return TD (6)
 
-ii. Punt Return TD (6)
+        2.  Punt Return TD (6)
 
-iii. Fumble Recovered for TD (6)
+        3.  Fumble Recovered for TD (6)
 
-iv. Fumbles Lost (-1)
+        4.  Fumble Lost (-1)
 
-v. Fumble Return TD (6)
+        5.  Fumble Return TD (6)
 
-vi. 2 Point Return TD (2)
+        6.  2 Point Return TD (2)
 
-(e) Kicking categories:
+    5.  Kicking categories:
 
-i. Each PAT Made (1)
+        1.  Each PAT Made (1)
 
-ii. FG Made (3 + 0.1 per yard over 30)
+        2.  FG Made (3 + 0.1 per yard over 30)
 
-(f) Defense and Special Teams categories:
+    6.  Defense and Special Teams categories:
 
-i. Sack (1)
+        1.  Sack (1)
 
-ii. INT Return TD (6)
+        2.  INT Return TD (6)
 
-iii. Fumble Return TD (6)
+        3.  Fumble Return TD (6)
 
-iv. Blocked Punt or FG return for TD (6)
+        4.  Blocked Punt or FG return for TD (6)
 
-v. Blocked Punt, PAT or FG (2)
+        5.  Blocked Punt, PAT or FG (2)
 
-vi. Interception (2)
+        6.  Interception (2)
 
-vii. 4th Down Stop (1)
+        7.  4th Down Stop (1)
 
-viii. 2-PT Conversion Returns (2)
+        8.  2-PT Conversion Returns (2)
 
-ix. Fumble Recovered (2)
+        9.  Fumble Recovered (2)
 
-x. Safety (2)
+        10. Safety (2)
 
-xi. 0 points allowed (12)
+        11. 0 points allowed (12)
 
-xii. 1-6 points allowed (8)
+        12. 1-6 points allowed (8)
 
-xiii. 7-9 points allowed (5)
+        13. 7-9 points allowed (5)
 
-xiv. 10-13 points allowed (2)
+        14. 10-13 points allowed (2)
 
-3. The positional composition of the LEAGUE roster shall be as follows:
+3.  The positional composition of the LEAGUE roster shall be as follows:
 
-(a) 1 starting Quarterback (QB); No maximum
+    1.  1 starting Quarterback (QB); No maximum
 
-(b) 2 starting Running Backs (RB); No maximum
+    2.  2 starting Running Backs (RB); No maximum
 
-(c\) 2 starting Wide Receivers (WR); No maximum
+    3.  2 starting Wide Receivers (WR); No maximum
 
-(d) 1 starting TE; No maximum
+    4.  1 starting TE; No maximum
 
-(e) 1 starting Superflex (QB/RB/WR/TE);
+    5.  1 starting Superflex (QB/RB/WR/TE);
 
-(f) 1 starting Flex (RB/WR/TE);
+    6.  1 starting Flex (RB/WR/TE);
 
-(g) 1 starting Team Defence/Special Teams (D/ST); 3 maximum
+    7.  1 starting Team Defence/Special Teams (D/ST); 3 maximum
 
-(h) 7 Bench (BE);
+    8.  7 Bench (BE);
 
-4. During the Regular Season, this roster shall consist at all times of 16 players unless a roster spot is emptied due to a penalty described in Article XIII, Section 13.
+4.  During the Regular Season, this roster shall consist at all times of 16 players unless a roster spot is emptied due to a penalty described in [Article XIII, Section 13](#article-xiii).
 
-**Player Position Determination**
+### Player Position Determination.
 
-5. A player's position shall be determined based on the NFL team reported depth chart position listing. The NFL provides depth charts on their publicly accessible domain nfl.com.
+5.  A player's position shall be determined based on the NFL team reported depth chart position listing. The NFL provides depth charts on their publicly accessible domain nfl.com.
 
-**Wins and Tiebreakers.**
+### Wins and Tiebreakers.
 
-5. Weekly Head-to-Head matchups are won by the team with the higher point total for that given week
+6.  Weekly Head-to-Head matchups are won by the team with the higher point total for that given week
 
-6. Matchups that end in a tie are recorded as a tie with the exception of WILDCARD Round and CHAMPIONSHIP Round as described herein.
+7.  Matchups that end in a tie are recorded as a tie with the exception of WILDCARD Round and CHAMPIONSHIP Round as described herein.
 
-**Transactional Restrictions.**
+### Transactional Restrictions.
 
-7. Each Team is entitled to make an unlimited number of trades and/or add/drops each season.
+8.  Each Team is entitled to make an unlimited number of trades and/or add/drops each season.
 
-8. Each trade, once submitted, shall be approved by the Commissioner within 24 hours and can be appealed following the process described in Article III section 6.
+9.  Each trade, once submitted, shall be approved by the Commissioner within 24 hours and can be appealed following the process described in [Article III section 6](#article-iii).
 
-**Financial Matters.**
+### Financial Matters.
 
-9. The Buy-In for participation in the LEAGUE shall be set annually each Offseason by vote pursuant to Article IV, Section 2 and shall be appended hereto as Schedule “A”, along with agreed-to details in respect of Buy-In, Payout and financial transaction information.
+10. The Buy-In for participation in the LEAGUE shall be set annually each Offseason by vote pursuant to Article IV, Section 2 and shall be appended hereto as Schedule “A”, along with agreed-to details in respect of Buy-In, Payout and financial transaction information.
 
-10. Failure to submit Buy-In funds by the Buy-In date shall result in a Team being locked out of its Team Management Controls, any drafting privileges and all players benched. This forced period of inactivity shall count towards Inactivity under the meaning of this Constitution, including the Offences section in Article XIX and its applicable penalties.
+11. Failure to submit Buy-In funds by the Buy-In date shall result in a Team being locked out of its Team Management Controls, any drafting privileges and all players benched. This forced period of inactivity shall count towards Inactivity under the meaning of this Constitution, including the Offences section in Article XIX and its applicable penalties.
 
-**Awards.**
+### Awards.
 
-11. Payouts shall be made as follows:
+12. Payouts shall be made as follows:
+    1.  Highest regular season weekly score: 2% of total yearly buy-in.
 
-(a) Highest regular season weekly score: 2% of total yearly buy-in.
+### Divisions.
 
-**Divisions.**
+13. Divisions shall be redrawn yearly. The draw process is as follows:
 
-12. Divisions shall be redrawn yearly. The draw process is as follows:
+    1.  The teams shall be divided into five (5) pots based on a team’s power index (PI), which is calculated by combining the team’s normalized win percentage and points for (PF) per game from, at most, the previous two (2) years.
 
-(a) The teams shall be divided into five (5) pots based on a team’s power index (PI), which is calculated by combining the team’s normalized win percentage and points for (PF) per game from, at most, the previous two (2) years.
+    2.  At random, one team will be selected from each pot to form a division.
 
-(b) At random, one team will be selected from each pot to form a division.
+### Lineups.
 
-**Interpretive Note:** _Note that a two-week period of Inactivity, under the Offences section, is grounds for permanent suspension._
+14. Only active players in the starting lineup will become locked when their team’s scheduled game begins.
 
-**Lineups**
-
-13. Only active players in the starting lineup will become locked when their team’s scheduled game begins.
+Interpretive Note: _Note that a two-week period of Inactivity, under the Offences section, is grounds for permanent suspension._
 
 ## Article VI
 
-> INAUGURAL ROOKIE DRAFT
+**INAUGURAL ROOKIE DRAFT**
 
-**Draft Order.**
+### Draft Order.
 
-1. The inaugural draft order will be decided by a FFPC style competition taking place during the 2019 NFL Playoffs.
+1.  The inaugural draft order will be decided by a FFPC style competition taking place during the 2019 NFL Playoffs.
 
 ## Article VII
 
-> INAUGURAL NON-ROOKIE AUCTION
+**INAUGURAL NON-ROOKIE AUCTION**
 
-**Budget.**
+### Budget.
 
-1. Each Team's budget will be determined by subtracting the sum of the contract values of their rookie players on the Team’s active roster from $200.
+1.  Each Team's budget will be determined by subtracting the sum of the contract values of their rookie players on the Team’s active roster from $200.
 
 ## Article VIII
 
-> PLAYER RETENTION
+**PLAYER RETENTION**
 
-**Extensions.**
+### Extensions.
 
-1. At the beginning of each year, Team’s can keep any combination of players whose combined values are under $200. Player values increase on each extension by +$5 per consumed extension step, applied as `new_value = current_value + (extensions + 1) * $5`:
+1.  At the beginning of each year, Team’s can keep any combination of players whose combined values are under $200. Player values increase on each extension by +$5 per consumed extension step, applied as `new_value = current_value + (extensions + 1) * $5`:
 
-(a) 1st extension: +$5
+    1.  1st extension: +$5
 
-(b) 2nd extension: +$10
+    2.  2nd extension: +$10
 
-(c\) 3rd extension: +$15
+    3.  3rd extension: +$15
 
-(d) 4th extension: +$20
+    4.  4th extension: +$20
 
-(e) 5th+ extension: +$5 additional per subsequent extension
+    5.  5th+ extension: +$5 additional per subsequent extension
 
-2. Extension counts are reset when a player changes Teams through Free Agency or on a successful Restricted Free Agency acquisition.
+2.  Extension counts are reset when a player changes Teams through Free Agency or on a successful Restricted Free Agency acquisition.
 
-**Rookie Tag.**
+### Rookie Tag.
 
-3. Each year one (1) rookie can be extended for $0. This will not count toward a players extension count.
+3.  Each year one (1) rookie can be extended for $0. This will not count toward a player's extension count.
 
-**Salary Cap Enforcement.**
+### Salary Cap Enforcement.
 
-4. The $200 Salary Cap will be enforced on all bids during the Offseason and on Opening Day. Teams above the Salary Cap on Opening Day will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
+4.  The $200 Salary Cap will be enforced on all bids during the Offseason and on Opening Day. Teams above the Salary Cap on Opening Day will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
 
-**Extension Deadline**
+### Extension Deadline.
 
-5. Extensions will be applied to all active roster players at the extension deadline, the first deadline in the OFFSEASON.
+5.  Extensions will be applied to all active roster players at the extension deadline, the first deadline in the OFFSEASON.
 
 ## Article IX
 
-> RESTRICTED FREE AGENCY AUCTION
+**RESTRICTED FREE AGENCY AUCTION**
 
-1. Each team may nominate a maximum of two (2) players for the “fair-market” Restricted Free Agency Auction.
+1.  Each team may nominate a maximum of two (2) players for the “fair-market” Restricted Free Agency Auction.
 
-2. Original team will submit a contract offer via a blind offer process (blind to all other league managers).
+2.  Original team will submit a contract offer via a blind offer process (blind to all other league managers).
 
-3. Non-original teams will have the option to submit an offer for any of the designated players entered into this Restricted Free Agency Auction.
+3.  Non-original teams will have the option to submit an offer for any of the designated players entered into this Restricted Free Agency Auction.
 
-4. If no non-original teams offer a contract that exceeds the original team’s offer by greater than 20% or $2, whichever is greater, the player will be awarded to the original team. Otherwise, the player will be awarded to the highest bidder.
+4.  If no non-original teams offer a contract that exceeds the original team’s offer by greater than 20% or $2, whichever is greater, the player will be awarded to the original team. Otherwise, the player will be awarded to the highest bidder.
 
-(a) In the event that two (2) or more non-original teams offer equal winning contracts, those teams will submit an additional blind contract offer.
+    1.  In the event that two (2) or more non-original teams offer equal winning contracts, those teams will submit an additional blind contract offer.
+        1.  This process would be repeated until one (1) team offers a contract with a higher value.
 
-i. This process would be repeated until one (1) team offers a contract with a higher value.
+5.  A Compensatory draft pick will be awarded to those teams that lose players in the Blind FA process.
 
-5. A Compensatory draft pick will be awarded to those teams that lose players in the Blind FA process.
-
-6. The $200 retention budget is enforced throughout the process.
+6.  The $200 retention budget is enforced throughout the process.
 
 ## Article X
 
-> FRANCHISE TAGS
+**FRANCHISE TAGS**
 
-1. Each team will be allowed the use of one (1) Franchise Tag each season to extend a player.
+1.  Each team will be allowed the use of one (1) Franchise Tag each season to extend a player.
 
-2. The contract value of the Franchise Tag will be the average of the top contracts at the player’s position (rounded up to the nearest whole number) based on the previous season values and points.
+2.  The contract value of the Franchise Tag will be the average of the top contracts at the player’s position (rounded up to the nearest whole number) based on the previous season values and points.
 
-(a) QB, WR & RB: top ten (10) player contract values
+    1.  QB, WR & RB: top ten (10) player contract values
 
-(b) TE: top five (5) player contract values
+    2.  TE: top five (5) player contract values
 
-3. A player can not be franchise tagged three (3) consecutive years.
+3.  A player can not be franchise tagged three (3) consecutive years.
 
 ## Article XI
 
-> ROOKIE DRAFT
+**ROOKIE DRAFT**
 
-**Format.**
+### Format.
 
-1. Three (3) round straight draft.
+1.  Three (3) round straight draft.
 
-**Draft Order.**
+### Draft Order.
 
-2. Non-playoff team draft order will be determined by a Draft Order Index (DOI). The DOI will be calculated by normalizing and combining a team’s Potential Points (PP) and All-Play Losses (APL). A team’s Potential Points are how many points it would have scored had it submitted its best possible lineup using the players available on the team’s active roster for each week of the Regular Season. A team’s All-Play Losses are how many losses it would have if it were to play every team each week of the Regular Season. Draft picks will be awarded in ascending order of a team’s Draft Order Index, with the 1st pick being awarded to the team with the lowest Draft Order Index.
+2.  Non-playoff team draft order will be determined by a Draft Order Index (DOI). The DOI will be calculated by normalizing and combining a team’s Potential Points (PP) and All-Play Losses (APL). A team’s Potential Points are how many points it would have scored had it submitted its best possible lineup using the players available on the team’s active roster for each week of the Regular Season. A team’s All-Play Losses are how many losses it would have if it were to play every team each week of the Regular Season. Draft picks will be awarded in ascending order of a team’s Draft Order Index, with the 1st pick being awarded to the team with the lowest Draft Order Index.
 
-**Interpretive Note:** _A team’s Potential Points and All-Play Losses make up 90% and 10% of their DOI, respectively. A lower value yields a higher draft pick._
+Interpretive Note: _A team’s Potential Points and All-Play Losses make up 90% and 10% of their DOI, respectively. A lower value yields a higher draft pick._
 
-3. In the event a team’s optimal lineup does not meet the requirements of a complete set of starters who were active, if they are in possession of their own first round pick for the following year, they will receive a Potential Points Penalty (PPP) so that their Potential Points for that week is equal to that of the team with the highest Potential Points for that week.
+The Potential Points and All-Play Losses are each min-max normalized across all non-playoff teams for the Regular Season, then combined as 90% Potential Points and 10% All-Play Losses to yield the Draft Order Index.
 
-4. Playoff team draft order will be based on the following results:
+3.  In the event a team’s optimal lineup does not meet the requirements of a complete set of starters who were active, if they are in possession of their own first round pick for the following year, they will receive a Potential Points Penalty (PPP) so that their Potential Points for that week is equal to that of the team with the highest Potential Points for that week.
 
-(a) The losers of the Week 15 Wildcard round will receive the 7th and 8th pick, with the lowest scoring team receiving the 7th pick
+4.  Playoff team draft order will be based on the following results:
 
-(b) The winner of the LEAGUE CHAMPIONSHIP will receive the 12th pick, while the 2nd, 3rd and 4th place Teams will receive the 11th, 10th, and 9th picks respectively.
+    1.  The losers of the Week 15 Wildcard round will receive the 7th and 8th pick, with the lowest scoring team receiving the 7th pick.
 
-**Contracts.**
+    2.  The winner of the LEAGUE CHAMPIONSHIP will receive the 12th pick, while the 2nd, 3rd and 4th place Teams will receive the 11th, 10th, and 9th picks respectively.
 
-5. Rookie contracts are based on when they are picked, starting at $12 for the first pick and decreasing $1 for each subsequent pick with the minimum contract being $1.
+### Contracts.
 
-**Compensatory Picks.**
+5.  Rookie contracts are based on when they are picked, starting at $12 for the first pick and decreasing $1 for each subsequent pick with the minimum contract being $1.
 
-6. Compensatory picks will follow the draft order and take place at the conclusion of the three (3) round draft.
+### Compensatory Picks.
 
-7. Teams who have more than one (1) compensatory pick will make their second selection after all the Teams with a compensatory pick have made their first selection.
+6.  Compensatory picks will follow the draft order and take place at the conclusion of the three (3) round draft.
 
-**Rookie Clock.**
+7.  Teams who have more than one (1) compensatory pick will make their second selection after all the Teams with a compensatory pick have made their first selection.
 
-8. When utilizing 24-hour draft windows, the draft window will commence immediately following the previous pick. The window will extend until the next midnight Eastern Standard Time that occurs at least 24 hours after the start of the draft window.
+### Draft Clock.
+
+8.  When utilizing 24-hour draft windows, the draft window will commence immediately following the previous pick. The window will extend until the next midnight Eastern Standard Time that occurs at least 24 hours after the start of the draft window.
 
 ## Article XII
 
-> FREE AGENCY AUCTION
+**FREE AGENCY AUCTION**
 
-**Announcement.**
+### Announcement.
 
-1. The date and time will be posted on the LEAGUE home page and will also be communicated to each Manager via email.
+1.  The date and time will be posted on the LEAGUE home page and will also be communicated to each Manager via email.
 
-2. The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no earlier than ten (10) days and no later than two (2) days prior to the start of the Regular Season, and with no less than seven (7) days’ notice to the Teams.
+2.  The commencement date of each subsequent LEAGUE Auction shall be set by the Commissioner no earlier than ten (10) days and no later than two (2) days prior to the start of the Regular Season, and with no less than seven (7) days’ notice to the Teams.
 
-**Budget.**
+### Budget.
 
-3. Each Team's budget will be determined by subtracting the sum of the contract values for all players on the Team’s active roster from $200.
+3.  Each Team's budget will be determined by subtracting the sum of the contract values for all players on the Team’s active roster from $200.
 
-4. Following the rookie draft order, Teams will nominate players for bidding and set a bid themselves (minimum $0). Teams who have a full active roster will be skipped.
+4.  Following the rookie draft order, Teams will nominate players for bidding and set a bid themselves (minimum $0). Teams who have a full active roster will be skipped.
 
-**Free Agency Period.**
+### Free Agency Period.
 
-5. Teams must be at or below the Salary Cap at the start of the Free Agency Period. Teams above the Salary Cap will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
+5.  Teams must be at or below the Salary Cap at the start of the Free Agency Period. Teams above the Salary Cap will have their players automatically released, in ascending market salary savings, until they are at or below the Salary Cap.
 
-6. The Free Agency Period will begin no later than forty-eight (48) hours prior to the scheduled Free Agency Auction and last until the start of the Regular Season.
+6.  The Free Agency Period will begin no later than forty-eight (48) hours prior to the scheduled Free Agency Auction and last until the start of the Regular Season.
 
-7. The following day after the Free Agency Auction, Active Roster, Practice Squad and Poaching waivers will be processed daily at 3 pm EST during the Free Agency Period.
+7.  The following day after the Free Agency Auction, Active Roster, Practice Squad and Poaching waivers will be processed daily at 3 pm EST during the Free Agency Period.
 
 ## Article XIII
 
-> FREE AGENCY AND ROSTER MANAGEMENT
+**FREE AGENCY AND ROSTER MANAGEMENT**
 
-**Free Agent Acquisition.**
+### Free Agent Acquisition.
 
-1. Any players not on an Active Roster or Practice Squad are considered Free Agents (FA). Free Agents are awarded each week based on a blind bid waiver request system and then on a first-come first-served basis.
+1.  Any players not on an Active Roster or Practice Squad are considered Free Agents (FA). Free Agents are awarded each week based on a blind bid waiver request system and then on a first-come first-served basis.
 
-**Waivers.**
+### Waivers.
 
-2. All FA will be placed on waivers immediately after the free agency auction, each week of play or if dropped from a Team's Active Roster, Practice Squad or IR.
+2.  All FA will be placed on waivers immediately after the free agency auction, each week of play or if dropped from a Team's Active Roster, Practice Squad or IR.
 
-3. During a player’s waiver period, any Team may put in a blind bid for that player. The Team with the highest bid wins the player and the amount of the successful bid is deducted from the winning Team’s budget. In the event of a tie, the Team with the higher waiver order will be awarded the player.
+3.  During a player’s waiver period, any Team may put in a blind bid for that player. The Team with the highest bid wins the player and the amount of the successful bid is deducted from the winning Team’s budget. In the event of a tie, the Team with the higher waiver order will be awarded the player.
 
-4. Players who are not claimed during their waiver period become free agents available on a first come, first serve basis.
+4.  Players who are not claimed during their waiver period become free agents available on a first come, first serve basis.
 
-**Free Agent Auction Bidding Budget.**
+### Free Agent Auction Bidding Budget.
 
-5. Each Team begins the Regular Season with a Free Agent Auction Bidding (FAAB) budget of $200.
+5.  Each Team begins the Regular Season with a Free Agent Auction Bidding (FAAB) budget of $200.
 
-**Waiver Period.**
+### Waiver Period.
 
-6. During the Regular Season, weekly waivers will be processed on Wednesday after games.
+6.  During the Regular Season, weekly waivers will be processed on Wednesday after games.
 
-7. The waiver period for dropped players will be one (1) day. This means the waiver will process at the next waiver processing that is at least a full 24 hours (1 day) later. So, if you drop a player at 8 p.m. ET on Thursday, your waiver will run on or about 4 a.m. ET Saturday - the next scheduled running of waivers that is at least 24 hours past the time the player was dropped.
+7.  The waiver period for dropped players will be one (1) day. This means the waiver will process at the next waiver processing that is at least a full 24 hours (1 day) later. So, if you drop a player at 8 p.m. ET on Thursday, your waiver will run on or about 4 a.m. ET Saturday - the next scheduled running of waivers that is at least 24 hours past the time the player was dropped.
 
-8. To prevent cycling, players need to be on the active roster for at least 24 hours to go on waivers.
+8.  To prevent cycling, players need to be on the active roster for at least 24 hours to go on waivers.
 
-**Waiver Order.**
+### Waiver Order.
 
-9. The waiver order will follow the draft order at the start of each year.
+9.  The waiver order will follow the draft order at the start of each year.
 
 10. Teams will be moved to the bottom of the waiver order after each successful waiver claim.
 
 11. The waiver order will rollover each week.
 
-**Manager Responsibilities and Roster Management.**
+### Manager Responsibilities and Roster Management.
 
 12. Managers must field a complete team at all times.
 
 13. Managers may not permit players on Injured Reserve to be in their active lineup for more than one (1) week from the time of his designation to the Injured Reserve.
 
-14. Failure to abide by the responsibilities will subject the Team to penalties at the Commissioner’s discretion pursuant to Article III, Section 3 and will be reviewable pursuant to Article III, Section 6.
+14. Failure to abide by the responsibilities will subject the Team to penalties at the Commissioner’s discretion pursuant to [Article III, Section 3](#article-iii) and will be reviewable pursuant to [Article III, Section 6](#article-iii).
 
 15. In addition to the foregoing, if a Manager is Inactive for a period of more than two weeks, that neglect will constitute an Offence under Article XIX.
 
-**Injured Reserve (IR).**
+### Injured Reserve (IR).
 
 16. Each team will have three (3) IR slots.
 
@@ -598,35 +577,35 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 19. Players placed on INJURED RESERVE between the start of the Free Agency Auction and the Regular Season can not be placed in the starting lineup during the first six (6) weeks of the Regular Season.
 
-**Long Term Injured Reserve (LT-IR).**
+### Long Term Injured Reserve (LT-IR).
 
 20. Each team will have an unlimited number of Long Term IR slots. Players placed on LT-IR after the start of the Free Agency Auction and during the Regular Season cannot be placed in the starting lineup for the remainder of the season.
 
-**Reserve Eligibility.**
+### Reserve Eligibility.
 
 21. Only active roster players are eligible for reserve slots (regular and long-term).
 
 ## Article XIV
 
-> PRACTICE SQUAD
+**PRACTICE SQUAD**
 
-1. The practice squad (PS) will consist of a maximum of four (4) players that were signed as Free Agents and no limit to the number of players acquired through the Rookie Draft.
+1.  The practice squad (PS) will consist of a maximum of four (4) players that were signed as Free Agents and no limit to the number of players acquired through the Rookie Draft.
 
-2. During the Regular Season, all Free Agents (FA) who have cleared waivers are eligible. During the Offseason, rookies who have cleared waivers, unsigned NFL players, and practice squad NFL players are eligible.
+2.  During the Regular Season, all Free Agents (FA) who have cleared waivers are eligible. During the Offseason, rookies who have cleared waivers, unsigned NFL players, and practice squad NFL players are eligible.
 
-3. PS players will not count towards the active roster limit or toward the player retention salary cap.
+3.  PS players will not count towards the active roster limit or toward the player retention salary cap.
 
-4. During the Regular Season, once you move a player from the PS to the active roster you may not move him back to the PS.
+4.  During the Regular Season, once you move a player from the PS to the active roster you may not move him back to the PS.
 
-5. Poached PS players will be placed directly into the active roster and will lose PS eligibility until they are released and clear waivers. (Article XIV subsection 2).
+5.  Poached PS players will be placed directly into the active roster and will lose PS eligibility until they are released and clear waivers (Article XIV subsection 2).
 
-6. When an offer is made to poach a player, the PS player may not be released or traded from the team unless brought up to the activated roster first.
+6.  When an offer is made to poach a player, the PS player may not be released or traded from the team unless brought up to the activated roster first.
 
-7. PS players may be traded and can be placed on the receiving team’s practice squad (PS) or their active roster. Players placed on the active roster must be deactivated within 48 hours of the trade being completed or remain on the active roster permanently.
+7.  PS players may be traded and can be placed on the receiving team’s practice squad (PS) or their active roster. Players placed on the active roster must be deactivated within 48 hours of the trade being completed or remain on the active roster permanently.
 
-8. Any PS-eligible player that is acquired by waivers or free agency during the Regular Season must be placed onto the PS within 48 hours of the acquisition or remain on the active roster.
+8.  Any PS-eligible player that is acquired by waivers or free agency during the Regular Season must be placed onto the PS within 48 hours of the acquisition or remain on the active roster.
 
-9. The Manager of poached PS player will be awarded a Compensatory draft pick
+9.  The Manager of poached PS player will be awarded a Compensatory draft pick
 
 10. Releasing a player that was poached during the same Offseason will result in a Salary Cap penalty equal to the salary of the released poached player. Similarly, releasing a poached player during the same Regular Season will result in a Free Agent Auction Budget penalty equal to the salary of the released player or five dollars ($5), whichever is greater. The Commissioner may, in his discretion, levy any penalties available under Article III Subsection (3) if it is deemed the poach and subsequent release was done frivolously.
 
@@ -636,187 +615,187 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 13. Players acquired through free agency waivers that had one or more competing bids are ineligible for the practice squad.
 
-**Poaching.**
+### Poaching.
 
 14. Another team may poach players on a PS for an extra $2 on their current contract. The Manager of the PS player has the ability to promote the player to the active roster or lose that player. Poaching claims will be processed 48 hours after submission except for those submitted after 6 pm EST on Thursday and before 3 pm EST on Sunday during the Regular Season, which will be processed the following Tuesday at 3 pm EST.
 
-**Sanctuary Periods.**
+### Sanctuary Periods.
 
 15. Poaching claims can not be submitted during the following Sanctuary Periods:
 
-(a) First twenty-four (24) hours of the Regular Season;
+    1.  First twenty-four (24) hours of the Regular Season;
 
-(b) First twenty-four (24) hours a practice squad player is signed;
+    2.  First twenty-four (24) hours a practice squad player is signed;
 
-(c) From the start of the Free Agency Period through the conclusion of the Free Agency Auction;
+    3.  From the start of the Free Agency Period through the conclusion of the Free Agency Auction
 
-**Super Priority For Poached Players.**
+### Super Priority For Poached Players.
 
 16. When a poached player is first released, the original team will have Super-Priority to claim them when they are on waivers. This Super-Priority applies only to Practice Squad claims and does not reset the team’s waiver order. Super-Priority does not precede active roster claims. If the Super-Priority claim is successful, the player will be placed back on the Practice Squad (drafted or signed) at their original Practice Squad Salary. The Super-Priority remains in effect until one of the following occurs:
 
-(a) The player is rostered for at least four (4) weeks or started in at least one (1) week by the poaching team;
+    1.  The player is rostered for at least four (4) weeks or started in at least one (1) week by the poaching team;
 
-(b) The player is traded to another team;
+    2.  The player is traded to another team;
 
-(c) The player is signed as a Restricted Free Agent;
+    3.  The player is signed as a Restricted Free Agent;
 
-(d) The player is extended and remains on the Active roster at the start of the Regular Season.
+    4.  The player is extended and remains on the Active roster at the start of the Regular Season.
 
-**Practice Squad Reserve Eligibility.**
+### Practice Squad Reserve Eligibility.
 
 17. A practice squad player with a poaching claim can be activated directly to reserve if they meet all reserve eligibility requirements.
 
 ## Article XV
 
-> TRANSACTIONS
+**TRANSACTIONS**
 
-**Authorization to Trade.**
+### Authorization to Trade.
 
-11. The Commissioner is authorized to evaluate all transactions, as authorized by Article III, Section 2(e), upon the following terms:
+1.  The Commissioner is authorized to evaluate all transactions, as authorized by Article III, Section 2(e), upon the following terms:
 
-(a) The Commissioner may veto or nullify any such transactions that contravene this Constitution or that, in his discretion, would be contrary to the best interests of fantasy football;
+    1.  The Commissioner may veto or nullify any such transactions that contravene this Constitution or that, in his discretion, would be contrary to the best interests of fantasy football;
 
-(b) All such vetoes must be announced within twenty-four (24) hours of the announced transaction;
+    2.  All such vetoes must be announced within twenty-four (24) hours of the announced transaction;
 
-(c\) All such vetoes are reviewable decisions, pursuant to Article III, Section 6; and
+    3.  All such vetoes are reviewable decisions, pursuant to [Article III, Section 6](#article-iii); and
 
-(d) The Commissioner must confirm the transaction with all parties;
+    4.  The Commissioner must confirm the transaction with all parties;
 
-(e) If a trade has been offered or accepted in error, the manager making the error must notify the Commissioner and the other team immediately (i.e. within 10 minutes of the trade acceptance) to request that the trade be voided. Trades may only be voided due to legitimate error that is reported in a timely manner - trades may not be voided due to buyers remorse, sellers remorse, or failure to perform due diligence. The Commissioner reserves the right to allow a trade to stand if the error is not deemed credible;
+    5.  If a trade has been offered or accepted in error, the manager making the error must notify the Commissioner and the other team immediately (i.e. within 10 minutes of the trade acceptance) to request that the trade be voided. Trades may only be voided due to legitimate error that is reported in a timely manner - trades may not be voided due to buyers remorse, sellers remorse, or failure to perform due diligence. The Commissioner reserves the right to allow a trade to stand if the error is not deemed credible;
 
-12. Players and two-year-advance rookie picks are available for trade.
+2.  Players and two-year-advance rookie picks are available for trade.
 
-**Trade Deadline.**
+### Trade Deadline.
 
-13. The deadline for making trades is set to Saturday, at 12am, during the 12th week of the LEAGUE season.
+3.  The deadline for making trades is set to Saturday, at 12am, during the 12th week of the LEAGUE season.
 
-14. Trading can resume at the start of the Offseason.
+4.  Trading can resume at the start of the Offseason.
 
 ## Article XVI
 
-> WILDCARD ROUND
+**WILDCARD ROUND**
 
-**Format.**
+### Format.
 
-1. The WILDCARD is a one (1) week competition wherein four (4) Teams compete and the two (2) highest scoring teams advance to the CHAMPIONSHIP.
+1.  The WILDCARD is a one (1) week competition wherein four (4) Teams compete and the two (2) highest scoring teams advance to the CHAMPIONSHIP.
 
-**Timing.**
+### Timing.
 
-2. The wildcard round shall begin on Week 15 of the NFL regular season.
+2.  The wildcard round shall begin on Week 15 of the NFL regular season.
 
-**Participation.**
+### Participation.
 
-3. The team with the lowest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with two (2) at large teams with the highest Total Points For (PF) among teams who are not 1st or 2nd in their division.
+3.  The team with the lowest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with two (2) at large teams with the highest Total Points For (PF) among teams who are not 1st or 2nd in their division.
 
-4. In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
+4.  In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
 
-**Tiebreakers.**
+### Tiebreakers.
 
-5. In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
+5.  In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
 
 ## Article XVII
 
-> CHAMPIONSHIP
+**CHAMPIONSHIP**
 
-**Format.**
+### Format.
 
-1. The CHAMPIONSHIP is a two (2) week competition wherein four (4) Teams compete and the top-scoring Team becomes the CHAMPION.
+1.  The CHAMPIONSHIP is a two (2) week competition wherein four (4) Teams compete and the top-scoring Team becomes the CHAMPION.
 
-**Timing.**
+### Timing.
 
-2. The championship shall begin on Week 16 of the NFL regular season.
+2.  The championship shall begin on Week 16 of the NFL regular season.
 
-**Participation.**
+### Participation.
 
-3. The team with the highest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with the two (2) WILDCARD ROUND winners.
+3.  The team with the highest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with the two (2) WILDCARD ROUND winners.
 
-4. In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
+4.  In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
 
-**Tiebreakers.**
+### Tiebreakers.
 
-5. In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
+5.  In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
 
-**Awards.**
+### Awards.
 
-6. Payouts are to be made by the Commissioner no more than one week after the conclusion of the LEAGUE Championship.
+6.  Payouts are to be made by the Commissioner no more than one week after the conclusion of the LEAGUE Championship.
 
-7. Payouts shall be made as follows:
+7.  Payouts shall be made as follows:
 
-(a) LEAGUE Championship Champion: 62% of total yearly buy-in
+    1.  LEAGUE Championship Champion: 62% of total yearly buy-in
 
-(b) LEAGUE Championship Runner-Up: 10% of total yearly buy-in
+    2.  LEAGUE Championship Runner-Up: 10% of total yearly buy-in
 
 ## Article XVIII
 
-> ORPHANS
+**ORPHANS**
 
-**Retirement.**
+### Retirement.
 
-1. A Manager may retire from the league in good standing. Retirement must be announced before the conclusion of the Regular Season to retire in good standing.
+1.  A Manager may retire from the league in good standing. Retirement must be announced before the conclusion of the Regular Season to retire in good standing.
 
-2. Once a Manager announces their retirement, they may not make any trades for the remainder of the season. A retirement announcement is irrevocable, but a manager who retires in good standing may be considered for reinstatement to the league after an absence of at least one full season.
+2.  Once a Manager announces their retirement, they may not make any trades for the remainder of the season. A retirement announcement is irrevocable, but a manager who retires in good standing may be considered for reinstatement to the league after an absence of at least one full season.
 
-**Orphaned Teams.**
+### Orphaned Teams.
 
-3. A team shall be considered Orphaned, upon the following terms:
+3.  A team shall be considered Orphaned, upon the following terms:
 
-(a) Quitting Team: If a Manager publicly declares they are quitting the league, the team is immediately classified as an orphan team and the Commissioner will assume control of the team until a replacement manager is found. Public, written declarations are permanent and irrevocable; quitting managers are permanently barred from seeking reinstatement to the league;
+    1.  Quitting Team: If a Manager publicly declares they are quitting the league, the team is immediately classified as an orphan team and the Commissioner will assume control of the team until a replacement manager is found. Public, written declarations are permanent and irrevocable; quitting managers are permanently barred from seeking reinstatement to the league;
 
-(b) Abandoning Team: A team is considered abandoned during the season if a Manager fails to set a lineup for two consecutive games;
+    2.  Abandoning Team: A team is considered abandoned during the season if a Manager fails to set a lineup for two consecutive games;
 
-(c\) Removal of a Manager;
+    3.  Removal of a Manager;
 
-**Lineup Management.**
+### Lineup Management.
 
-4. If a team is orphaned during the Regular Season, the Commissioner will set that team’s roster for the remainder of that season.
+4.  If a team is orphaned during the Regular Season, the Commissioner will set that team’s roster for the remainder of that season.
 
-5. In the event the Commissioner’s team plays the orphan team during the Regular Season, another league member appointed by the Commissioner shall set the orphan team’s lineup for that game.
+5.  In the event the Commissioner’s team plays the orphan team during the Regular Season, another league member appointed by the Commissioner shall set the orphan team’s lineup for that game.
 
 ## Article XIX
 
-> OFFENCES
+**OFFENCES**
 
-**Nature of Offences.**
+### Nature of Offences.
 
-1. This Article deals with activities that are deemed to go beyond the scope of irregularities or minor contraventions of the Constitution and constitute wrongful conduct worthy of more severe sanctions.
+1.  This Article deals with activities that are deemed to go beyond the scope of irregularities or minor contraventions of the Constitution and constitute wrongful conduct worthy of more severe sanctions.
 
-**Commencement of Offence Proceedings.**
+### Commencement of Offence Proceedings.
 
-2. The Commissioner, on his own initiative or following the receipt of a complaint, whether anonymous or public, may, after satisfying himself that the complaint has merit, announce that a Team or its Manager has committed an offence, and the penalty for that offence.
+2.  The Commissioner, on his own initiative or following the receipt of a complaint, whether anonymous or public, may, after satisfying himself that the complaint has merit, announce that a Team or its Manager has committed an offence, and the penalty for that offence.
 
-3. The Commissioner is authorized to investigate alleged offences if he deems it necessary to do so, and Managers are required to assist in such investigations by providing truthful statements to the Commissioner if requested to do so.
+3.  The Commissioner is authorized to investigate alleged offences if he deems it necessary to do so, and Managers are required to assist in such investigations by providing truthful statements to the Commissioner if requested to do so.
 
-**Offences.**
+### Offences.
 
-4. Everyone commits an offence who:
+4.  Everyone commits an offence who:
 
-(a) Bribery: Provides another party with value other than in-game value in exchange for in-game value.
+    1.  Bribery: Provides another party with value other than in-game value in exchange for in-game value.
 
-(b) Collusion: Agrees with another party to limit open competition in the game by deceiving, misleading or defrauding others in order for a party, who may or may not be a party to the collusion, to obtain an unfair market advantage.
+    2.  Collusion: Agrees with another party to limit open competition in the game by deceiving, misleading or defrauding others in order for a party, who may or may not be a party to the collusion, to obtain an unfair market advantage.
 
-i. Collusion shall be assumed in any case where one Manager acts for more than one Team at the same time.
+        1.  Collusion shall be assumed in any case where one Manager acts for more than one Team at the same time.
 
-ii. Sharing of limited resources, including but not limited to active roster space, salary space, or players.
+        2.  Sharing of limited resources, including but not limited to active roster space, salary space, or players.
 
-(c\) Non-Competitive Behaviour: Demonstrates an intention not to compete that goes beyond mere negligence.
+    3.  Non-Competitive Behaviour: Demonstrates an intention not to compete that goes beyond mere negligence.
 
-i. Under extreme circumstances, a recurring refusal to engage in reasonable transactions may be considered non-competitive behaviour.
+        1.  Under extreme circumstances, a recurring refusal to engage in reasonable transactions may be considered non-competitive behaviour.
 
-(d) General Anti-Avoidance Provision (GAAP): Engages in conduct not otherwise prohibited by this Constitution but is generally acknowledged to be shitty.
+    4.  General Anti-Avoidance Provision (GAAP): Engages in conduct not otherwise prohibited by this Constitution but is generally acknowledged to be shitty.
 
-**Penalties.**
+### Penalties.
 
-5. Any Manager found guilty of an offence is susceptible to the most extreme penalties provided for in Article III, Section 3, including permanent suspension without refund.
+5.  Any Manager found guilty of an offence is susceptible to the most extreme penalties provided for in Article III, Section 3, including permanent suspension without refund.
 
-6. The Commissioner may, in his discretion, punish a Team for the actions of a Manager.
+6.  The Commissioner may, in his discretion, punish a Team for the actions of a Manager.
 
-7. Decisions concerning an offence and its penalty are reviewable pursuant to Article III Section 6.
+7.  Decisions concerning an offence and its penalty are reviewable pursuant to [Article III Section 6](#article-iii).
 
-**Arbitrators and Juries.**
+### Arbitrators and Juries.
 
-8. The Commissioner is specifically empowered under Article III, Section 2(d) to appoint a neutral arbitrator or a jury if he, in his exclusive discretion, deems it necessary; and must do so if he is an Interested Party in an alleged offence. Despite Article III, Section 6, the decision to appoint an arbitrator or jury is not reviewable.
+8.  The Commissioner is specifically empowered under [Article III, Section 2(d)](#article-iii) to appoint a neutral arbitrator or a jury if he, in his exclusive discretion, deems it necessary; and must do so if he is an Interested Party in an alleged offence. Despite [Article III, Section 6](#article-iii), the decision to appoint an arbitrator or jury is not reviewable.
 
-9. A jury vote is not binding but is advisory only.
+9.  A jury vote is not binding but is advisory only.
 
 10. Jury votes may not be secret.
 
@@ -826,50 +805,105 @@ Interpretive Note: _While the Commissioner is the dispute resolution officer of 
 
 ## Article XX
 
-> CANCELLED OR RESCHEDULED NFL GAMES
+CANCELLED OR RESCHEDULED NFL GAMES
 
-**Rescheduled.**
+### Rescheduled.
 
-1. If an NFL game is cancelled or suspended, stats from the rescheduled game will be used for scoring unless the result of that NFL game is not needed to determine the NFL playoff seed of both NFL teams.
+1.  If an NFL game is cancelled or suspended, stats from the rescheduled game will be used for scoring unless the result of that NFL game is not needed to determine the NFL playoff seed of both NFL teams.
 
-**Cancelled**
+### Cancelled.
 
-2. If a rescheduled game can not be used, the first game outside of the REGULAR SEASON will be used where the player is active and is an NFL post-season game or NFL regular-season game within the same year and where at the start of the game the result of that game is needed to determine the playoff seed of both NFL teams.
+2.  If a rescheduled game can not be used, the first game outside of the REGULAR SEASON will be used where the player is active and is an NFL post-season game or NFL regular-season game within the same year and where at the start of the game the result of that game is needed to determine the playoff seed of both NFL teams.
 
-3. If a player has no such games available then stats can be used from an NFL regular-season game where at the start of the game the result of that game is needed to determine the playoff seed of the NFL opponent of that player’s NFL team.
+3.  If a player has no such games available then stats can be used from an NFL regular-season game where at the start of the game the result of that game is needed to determine the playoff seed of the NFL opponent of that player’s NFL team.
 
-4. If a substitute and rescheduled game is not available, the REGULAR SEASON ALL-PLAY record will be used to determine the results among teams whose results are impacted by a cancelled or suspended NFL game. REGULAR SEASON POINTS FOR would serve as a tiebreaker.
+4.  If a substitute and rescheduled game is not available, the REGULAR SEASON ALL-PLAY record will be used to determine the results among teams whose results are impacted by a cancelled or suspended NFL game. REGULAR SEASON POINTS FOR would serve as a tiebreaker.
 
 ## Article XXI
 
-> DECOMMISSIONED TEAMS
+**DECOMMISSIONED TEAMS**
 
-**Decommissioned**
+### Decommissioned
 
-1. An Orphaned Team can be decommissioned through unanimous consent.
+1.  An Orphaned Team can be decommissioned through unanimous consent.
 
-2. Players rostered on a decommissioned team shall be released.
+2.  Players rostered on a decommissioned team shall be released.
 
-3. Draft picks in possession of the decommissioned team shall be nullified.
+3.  Draft picks in possession of the decommissioned team shall be nullified.
 
-4. Draft picks for future seasons originally belonging to the decommissioned team and in possession of another team will be given a mid round position.
+4.  Draft picks for future seasons originally belonging to the decommissioned team and in possession of another team will be given a mid round position.
 
 ## Article XXII
 
-> TEAM VALUE
+**TEAM VALUE**
 
-**Team Value.**
+### Team Value.
 
-1. Team Value will be determined using the Team Value Formula that assigns an integer value to all team players and draft picks. The value is based on the implied trade value of the player or pick based on recent trades made in other leagues of similar size, starting slots, and scoring.
+1.  Team Value will be determined using the Team Value Formula that assigns an integer value to all team players and draft picks. The value is based on the implied trade value of the player or pick based on recent trades made in other leagues of similar size, starting slots, and scoring.
 
-**Deposit Pool.**
+### Deposit Pool.
 
-2. The Team Deposit Value is calculated daily as follows:
+2.  The Team Deposit Value is calculated daily as follows:
 
-```
-(Team Value / Total League Team Value) * Deposit Pool Total
-```
+> (Team Value / Total League Team Value) \* Deposit Pool Total
+>
+> This determines each team's share of the Deposit Pool Total based on their relative value compared to the league as a whole.
 
-This determines each team's share of the Deposit Pool Total based on their relative value compared to the league as a whole.
+3.  Managers joining the league must deposit the Team Deposit Value for their team upon entry. Managers leaving the league will withdraw the Team Deposit Value for their team from the Deposit Pool upon exit. These transactions should occur on the same day to ensure that the Deposit Pool Total remains constant.
 
-3. Managers joining the league must deposit the Team Deposit Value for their team upon entry. Managers leaving the league will withdraw the Team Deposit Value for their team from the Deposit Pool upon exit. These transactions should occur on the same day to ensure that the Deposit Pool Total remains constant.
+_Originally agreed and ratified by the Teams on 2 February 2020._
+
+## FINANCIAL MATTERS
+
+**APPENDIX “A”**
+
+The LEAGUE charges an annual Buy-In, set by vote pursuant to Article IV, Section 2 and Article V, Section 10. The Commissioner collects Buy-In funds and disburses Payouts. Buy-Ins are to be made via Venmo, CashApp, or check to the Commissioner; Payouts shall be made from the Commissioner. All funds are in U.S. Dollars.
+
+The current Buy-In rate, Buy-In due date, and Commissioner contact information are set each Offseason and communicated to Managers by the Commissioner.
+
+## AMENDMENTS
+
+**APPENDIX "B"**
+
+| Amendment | Description                                               | Introduced | Adopted    |
+| --------- | --------------------------------------------------------- | ---------- | ---------- |
+| I         | COVID-19                                                  | 2020       | 2020       |
+| II        | Impeachment                                               | 2020       | 2020       |
+| III       | Practice Squad and Poaching                               | 2020       | 2020       |
+| IV        | Draft Order Potential Points Penalty                      | 2020       | 2020       |
+| V         | Collusion                                                 | 2020       | 2021-08-10 |
+| VI        | Reserve Eligibility                                       | 2020       | 2020       |
+| VII       | Championship Round Expansion                              | 2021       |            |
+| VIII      | Limit Offseason Injured Reserve Use During Regular Season | 2021-09-01 | 2021-09-07 |
+| IX        | Practice Squad Eligibility Expansion                      | 2021-09-01 | 2021-09-07 |
+| X         | Free Agency Auction Minimum Bid                           | 2021-08-29 | 2021-09-07 |
+| XI        | Poaching Claim Sanctuary Periods                          | 2021-09-05 | 2021-09-07 |
+| XII       | Locking of Active Starters                                | 2021-10-05 | 2021-10-05 |
+| XIII      | Practice Squad Eligibility Restrictions                   | 2021-11-13 | 2021-11-13 |
+| XIV       | Restricted Free Agency Extension Reset                    | 2022-07-10 | 2022-07-10 |
+| XV        | Practice Squad Expansion Through Draft Selection          | 2022-07-24 | 2022-07-24 |
+| XVI       | Practice Squad Expansion Through Draft (Unlimited)        | 2022-08-03 | 2022-08-03 |
+| XVII      | Salary Cap Enforcement                                    | 2022-08-09 | 2022-08-09 |
+| XVIII     | Free Agency Period Scheduling and Waivers                 | 2022-08-22 | 2022-08-23 |
+| XIX       | Regular Season Poaching Claim Processing                  | 2022-10-08 | 2022-10-08 |
+| XX        | Cancelled or Rescheduled NFL Games                        | 2023-01-07 | 2023-01-07 |
+| XXI       | Quarterback Kneel Scoring                                 | 2023-04-02 | 2023-04-03 |
+| XXII      | Decommissioned Teams                                      | 2023-06-01 |            |
+| XXIII     | Amended Team Management                                   | 2023-06-01 | 2023-06-02 |
+| XXIV      | Two Divisions                                             | 2023-06-03 | 2023-06-04 |
+| XXV       | Corrected Payouts                                         | 2023-09-04 | 2023-09-04 |
+| XXVI      | Potential Points Correction                               | 2023-09-04 | 2023-09-04 |
+| XXVII     | Removal of Kickers                                        | 2023-09-04 | 2023-09-04 |
+| XXVIII    | Player Position Determination                             | 2023-09-04 | 2023-09-04 |
+| XXIX      | Active Roster Player Extensions                           | 2023-09-04 | 2023-09-04 |
+| XXX       | Cleanup Draft Order Tournament Text                       | 2023-09-04 | 2023-09-04 |
+| XXXI      | Rookie Draft Clock                                        | 2024-08-12 | 2024-08-12 |
+| XXXII     | Long Term Injured Reserve                                 | 2024-08-17 | 2024-08-18 |
+| XXXIII    | Team Value and Deposit Pool                               | 2024-08-17 | 2024-08-18 |
+| XXXIV     | Super Priority for Poached Players                        | 2024-08-19 | 2024       |
+| XXXV      | Post-Free-Agency Auction Poaching                         | 2025-07-25 | 2025       |
+| XXXVI     | Poaching Compensatory Pick                                |            |            |
+| XXXVII    | Practice Squad Reserve Eligibility                        | 2025-07-25 | 2025       |
+| XXXVIII   | Offseason Injured Reserve Clarification                   | 2025-07-25 | 2025       |
+
+Amendments are folded into the articles above as they are ratified; this appendix records the amendment history. Amendments VII and XXXVI were drafted but never ratified.
