@@ -7,6 +7,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Paper from '@mui/material/Paper'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import TeamImage from '@components/team-image'
+import CopyMarkdownButton from '@components/copy-markdown-button'
 
 import './league-select-team.styl'
 
@@ -74,6 +75,9 @@ export default function LeagueSelectTeam({
                 {historical_rank.last_season_year}
               </div>
               {Boolean(division_name) && <div>{division_name} Division</div>}
+              <CopyMarkdownButton
+                path={`/leagues/${lid}/teams/${selected_tid}.md`}
+              />
             </div>
           </div>
         </div>

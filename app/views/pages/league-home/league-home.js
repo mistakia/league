@@ -16,6 +16,7 @@ import LeagueRecentTransactions from '@components/league-recent-transactions'
 import PoachNotice from '@components/poach-notice'
 import PageLayout from '@layouts/page'
 import Notices from '@components/notices'
+import CopyMarkdownButton from '@components/copy-markdown-button'
 import { current_season, fantasy_positions, league_defaults } from '@constants'
 import {
   isReserveEligible,
@@ -225,6 +226,11 @@ export default function LeagueHomePage({
 
   const body = (
     <div className='league-container league__home'>
+      {league.uid && (
+        <div className='copy-markdown-button-row'>
+          <CopyMarkdownButton path={`/leagues/${league.uid}.md`} />
+        </div>
+      )}
       <Grid container spacing={2} alignItems='flex-start'>
         {notice_items.length ? (
           <Grid item xs={12}>

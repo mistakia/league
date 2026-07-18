@@ -1,2 +1,27 @@
+// Right-aligned row for pages that surface the link on its own (league home).
+.copy-markdown-button-row
+  display flex
+  justify-content flex-end
+  padding 12px 16px
+
+// Subtle inline link — muted, borderless, matches the 12px Inter meta text it
+// sits alongside so it reads as a secondary action, not a prominent button.
 .copy-markdown-button
-  color inherit
+  display inline-flex
+  align-items center
+  gap 4px
+  padding 0
+  border 0
+  background none
+  cursor pointer
+  color rgba(0, 0, 0, 0.6)
+  font-family 'Inter', sans-serif
+  font-size 12px
+  font-weight 400
+  line-height 1
+
+  svg
+    font-size 14px
+
+  &:hover
+    color rgba(0, 0, 0, 0.87)
