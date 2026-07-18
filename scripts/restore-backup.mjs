@@ -83,7 +83,7 @@ const initialize_cli = () => {
     })
     .option('full', {
       describe:
-        'Restore a whole-DB custom-format (-Fc) .dump via pg_restore -j (the full-dump backbone path)',
+        'Restore a whole-DB directory-format (-Fd) full via pg_restore -j (the full-dump backbone path)',
       type: 'boolean',
       default: false
     })
