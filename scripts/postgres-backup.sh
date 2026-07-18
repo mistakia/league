@@ -33,6 +33,32 @@ db_name="league_production"
 db_user="league_writer"
 db_host="localhost"
 
+# Tables whose DATA is excluded from the full dump (their schema/DDL is still
+# dumped, so a full restore recreates them empty). These are large (~16 GB),
+# derived, no-FK, no-consumer tables regenerated on demand by
+# generate-prop-pairings.mjs; carrying their data into every full would bloat
+# the dump, the B2 copy, and the replica snapshots for no recovery value.
+# Mirrors the legacy mysql-backup.sh --ignore-table treatment.
+full_exclude_data_tables="
+prop_pairings
+prop_pairing_props
+"
+
+# Parallel worker count for the full (-Fd) dump. Directory format lets pg_dump
+# dump tables concurrently, using multiple CPUs. Default to (CPUs - 2) to leave
+# headroom for the live API / DB backend on this shared host; override with the
+# FULL_JOBS env var.
+if [ -n "$FULL_JOBS" ]; then
+    full_jobs="$FULL_JOBS"
+else
+    ncpu=$(nproc 2>/dev/null || echo 4)
+    if [ "$ncpu" -gt 2 ]; then
+        full_jobs=$((ncpu - 2))
+    else
+        full_jobs=1
+    fi
+fi
+
 db_user_tables="
 config
 draft
@@ -171,8 +197,6 @@ elif $projections; then
 else
     backup_type="user"
 fi
-sql_file="$file_name-$backup_type.sql"
-gz_file="$file_name-$backup_type.tar.gz"
 
 # make sure that the folder exists
 mkdir -p $dump_dir
@@ -193,42 +217,69 @@ dump_tables() {
 }
 
 if $full; then
-    echo "Performing full backup"
-    pg_dump -h $db_host -U $db_user -d $db_name > $sql_file
-elif $logs; then
-    dump_tables "$db_logs_tables"
-elif $stats; then
-    dump_tables "$db_stats_tables"
-elif $betting; then
-    dump_tables "$db_betting_tables"
-elif $cache; then
-    dump_tables "$db_cache_tables"
-elif $projections; then
-    dump_tables "$db_projections_tables"
+    # Full whole-DB dump in DIRECTORY format (-Fd) with parallel workers (-j):
+    # uses multiple CPUs to dump, is compressed, and is pg_restore -j
+    # parallel-restorable. The artifact is a directory (toc.dat + per-table
+    # *.dat.gz), not a single file -- no plain-SQL intermediate, no tar.
+    output_file="$file_name-full"
+    echo "Performing full backup (directory format, -j $full_jobs)"
+    exclude_args=""
+    for table in $full_exclude_data_tables; do
+        exclude_args="$exclude_args --exclude-table-data=public.$table"
+    done
+    pg_dump -h $db_host -U $db_user -d $db_name -Fd -j "$full_jobs" $exclude_args -f "$output_file"
+    if [ $? -ne 0 ]; then
+        echo "Error: pg_dump -Fd failed for full backup" >&2
+        exit 1
+    fi
 else
-    dump_tables "$db_user_tables"
+    sql_file="$file_name-$backup_type.sql"
+    output_file="$file_name-$backup_type.tar.gz"
+    if $logs; then
+        dump_tables "$db_logs_tables"
+    elif $stats; then
+        dump_tables "$db_stats_tables"
+    elif $betting; then
+        dump_tables "$db_betting_tables"
+    elif $cache; then
+        dump_tables "$db_cache_tables"
+    elif $projections; then
+        dump_tables "$db_projections_tables"
+    else
+        dump_tables "$db_user_tables"
+    fi
+    tar -vcf "$output_file" "$sql_file"
+    rm "$sql_file"
 fi
 
-tar -vcf $gz_file $sql_file
-rm $sql_file
-
-# Output-file oracle: confirm the tar landed a non-empty file whose mtime is
-# from this run. set -e + the explicit pg_dump check earlier already cover
-# the throwing paths, but a silently-truncated tar (e.g. ENOSPC mid-write
-# that doesn't propagate) would leave an empty or stale .tar.gz behind. Exit
-# 2 so the job-wrapper reports the run failed and the file is preserved as
-# forensic state for the cleanup pass (the >7d find runs afterward).
-if [ ! -f "$gz_file" ]; then
-    echo "Error: backup output $gz_file missing after tar" >&2
+# Output oracle: confirm the run produced a non-empty artifact whose mtime is
+# from this run. set -e + the explicit pg_dump checks earlier already cover the
+# throwing paths, but a silently-truncated write (e.g. ENOSPC mid-write that
+# doesn't propagate) would leave an empty or stale artifact behind. Exit 2 so
+# the job-wrapper reports the run failed and the artifact is preserved as
+# forensic state for the cleanup pass (the >7d find runs afterward). The full
+# (-Fd) artifact is a directory whose table-of-contents (toc.dat) is the freshness
+# witness; the user artifact is a single .tar.gz file.
+if $full; then
+    if [ ! -d "$output_file" ]; then
+        echo "Error: backup output dir $output_file missing after run" >&2
+        exit 2
+    fi
+    oracle_target="$output_file/toc.dat"
+else
+    if [ ! -f "$output_file" ]; then
+        echo "Error: backup output $output_file missing after run" >&2
+        exit 2
+    fi
+    oracle_target="$output_file"
+fi
+if [ ! -s "$oracle_target" ]; then
+    echo "Error: backup output $oracle_target is empty" >&2
     exit 2
 fi
-if [ ! -s "$gz_file" ]; then
-    echo "Error: backup output $gz_file is empty" >&2
-    exit 2
-fi
-file_mtime=$(stat -c %Y "$gz_file")
+file_mtime=$(stat -c %Y "$oracle_target")
 if [ "$file_mtime" -lt "$run_start_ts" ]; then
-    echo "Error: backup output $gz_file mtime ($file_mtime) predates run start ($run_start_ts) -- tar did not refresh the file" >&2
+    echo "Error: backup output $oracle_target mtime ($file_mtime) predates run start ($run_start_ts) -- the dump did not refresh the artifact" >&2
     exit 2
 fi
 

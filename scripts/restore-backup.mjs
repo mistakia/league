@@ -80,6 +80,17 @@ const initialize_cli = () => {
         'Update config table with values from backup (instead of replacing)',
       type: 'boolean',
       default: false
+    })
+    .option('full', {
+      describe:
+        'Restore a whole-DB custom-format (-Fc) .dump via pg_restore -j (the full-dump backbone path)',
+      type: 'boolean',
+      default: false
+    })
+    .option('jobs', {
+      describe: 'Parallel worker count for pg_restore -j (full restore only)',
+      type: 'number',
+      default: 4
     }).argv
 }
 
@@ -214,6 +225,11 @@ DO UPDATE SET value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}'
 
 const STORAGE_BACKUP_PATH = '/storage/backups/servers/league-production/backups'
 const LOCAL_BACKUP_PATH = '/root/backups'
+// Whole-DB directory-format (-Fd) full dumps land under the database-dumps tree
+// on storage (not the backups/servers/ tree that holds the plain-SQL user
+// tarballs), and directly in /root/backups on the league server itself. Each
+// full is a DIRECTORY named `<timestamp>-full` (toc.dat + per-table *.dat.gz).
+const STORAGE_FULL_DUMP_PATH = '/storage/database-dumps/league-production'
 
 /**
  * Find the latest backup file matching the query.
@@ -262,7 +278,8 @@ const download_file = async ({ file }) => {
   }
   const local_dest = `./${file.name}`
   log('Downloading %s from storage via scp', file.name)
-  await exec(`scp base-storage:${file.remote_path} ${local_dest}`)
+  // -r so directory-format full dumps copy recursively (harmless for files).
+  await exec(`scp -r base-storage:${file.remote_path} ${local_dest}`)
   log('Download complete: %s', file.name)
   return local_dest
 }
@@ -595,6 +612,93 @@ const download_backup_from_drive = async (
   }
 }
 
+/**
+ * Find the latest whole-DB full dump directory (`*-full`) matching the query.
+ * Mirrors find_backup_file but targets the -Fd directory-format artifacts
+ * (`ls -dt` lists the directories themselves, newest first): local /root/backups
+ * first, then the database-dumps tree on storage.
+ */
+const find_full_dump_file = async ({ query }) => {
+  if (existsSync(LOCAL_BACKUP_PATH)) {
+    log('Searching local full dumps at %s', LOCAL_BACKUP_PATH)
+    const { stdout } = await exec(
+      `ls -dt "${LOCAL_BACKUP_PATH}"/*-full 2>/dev/null || true`
+    )
+    const files = stdout.trim().split('\n').filter(Boolean)
+    const match = files.find((f) => path.basename(f).includes(query))
+    if (match) {
+      return { name: path.basename(match), local_path: match }
+    }
+    log('No local full dump matched %s, falling back to storage', query)
+  }
+
+  log('Searching storage server full dumps via SSH')
+  const { stdout } = await exec(
+    `ssh base-storage 'ls -dt ${STORAGE_FULL_DUMP_PATH}/*-full 2>/dev/null || true'`
+  )
+  const files = stdout.trim().split('\n').filter(Boolean)
+  const match = files.find((f) => path.basename(f).includes(query))
+  if (!match) {
+    throw new Error(
+      `No full dump directories found matching "${query}" in ${LOCAL_BACKUP_PATH} or base-storage:${STORAGE_FULL_DUMP_PATH}`
+    )
+  }
+  return { name: path.basename(match), remote_path: match }
+}
+
+/**
+ * Restore a whole-DB directory-format (-Fd) dump into the target database via
+ * pg_restore -j. This is the migration's validated restore path: restore the
+ * latest full into a throwaway DB, then assert table + per-table row-count
+ * parity against production (the parity assertion runs outside this script).
+ *
+ * --no-owner / --no-privileges keep the restore self-contained on a host that
+ * may lack the production roles (league_writer/league_reader); pg_restore does
+ * not stop on the first error by default, so warnings about absent roles or
+ * extensions are non-fatal and the object-count parity check is the real oracle.
+ */
+const restore_full_dump = async ({
+  query,
+  db_name,
+  db_user,
+  db_password,
+  options
+}) => {
+  const file = await find_full_dump_file({ query })
+  log(`Found full dump: ${file.name}`)
+  const dump_path = await download_file({ file })
+  log(`Using dump at ${dump_path}`)
+
+  if (options.drop) {
+    await drop_and_recreate_database({ db_name, db_user, db_password })
+  }
+
+  const jobs = options.jobs || 4
+  log(`Restoring ${file.name} into ${db_name} via pg_restore -j ${jobs}`)
+  let restore_cmd = `pg_restore -U ${db_user} -d ${db_name} -j ${jobs} --no-owner --no-privileges "${dump_path}"`
+  if (db_password) {
+    restore_cmd = `PGPASSWORD=${db_password} ${restore_cmd}`
+  }
+  const { stderr } = await exec(restore_cmd)
+  if (stderr) {
+    log('pg_restore messages (non-fatal warnings expected):', stderr)
+  }
+  log('Successfully restored full dump into PostgreSQL')
+
+  // Only remove the dump if it was downloaded from storage into cwd.
+  if (!file.local_path) {
+    await exec(`rm "${dump_path}"`)
+    log('Cleaned up downloaded dump')
+  }
+
+  return {
+    success: true,
+    file_name: file.name,
+    db_name,
+    table: 'all tables (full pg_restore -j)'
+  }
+}
+
 const main = async () => {
   let error
   try {
@@ -617,16 +721,26 @@ const main = async () => {
       config_only: argv.config_only,
       ignore_duplicates: argv.ignore_duplicates,
       chunk_size: argv.chunk_size,
-      update_config: argv.update_config
+      update_config: argv.update_config,
+      full: argv.full,
+      jobs: argv.jobs
     }
 
-    const result = await download_backup_from_drive(
-      query,
-      db_name,
-      db_user,
-      db_password,
-      options
-    )
+    const result = options.full
+      ? await restore_full_dump({
+          query,
+          db_name,
+          db_user,
+          db_password,
+          options
+        })
+      : await download_backup_from_drive(
+          query,
+          db_name,
+          db_user,
+          db_password,
+          options
+        )
     console.log(
       `Successfully imported ${result.file_name} into database ${result.db_name} (${result.table})`
     )
