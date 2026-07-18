@@ -8,12 +8,14 @@
 #           (latest overwritten in place) for ≤15-min on-prem RPO.
 #
 # No season gate, no table-subset jobs — every table has a ≤3-4-day whole-DB copy
-# year-round. base crontab build injects JOB_SCHEDULE="<cron-expr>" per line, so
-# the runs-staleness oracle knows each job's real cadence (the full's 3/4-day
-# Tue+Fri gap is expected, not the 3-day default).
+# year-round. The full's Tue+Fri schedule has a 4-day Fri→Tue gap; the runs-staleness
+# oracle ignores JOB_SCHEDULE for cron:* sources and applies a flat 3-day default, so
+# the full's line reports under a scheduled-command carrier entity via
+# JOB_SCHEDULE_ENTITY_URI, whose staleness_window_seconds (5 days) tolerates the gap.
+# The user dumps stay cron:* sources (daily / 15-min cadence < the 3-day default).
 
 # Full whole-DB dump (directory format, parallel) — Tuesday + Friday 08:00 UTC (off-peak)
-0 8 * * 2,5 job-wrapper.sh league-backup-full /bin/bash /root/league/scripts/postgres-backup.sh -f >> /var/log/league/league-postgres-backup.log 2>&1
+0 8 * * 2,5 JOB_SCHEDULE_ENTITY_URI=user:scheduled-command/league/league-backup-full.md job-wrapper.sh league-backup-full /bin/bash /root/league/scripts/postgres-backup.sh -f >> /var/log/league/league-postgres-backup.log 2>&1
 
 # User dump — daily time-series (dated, 7-day window) at 00:00 UTC
 0 0 * * * job-wrapper.sh league-backup-user-timeseries /bin/bash /root/league/scripts/postgres-backup.sh >> /var/log/league/league-postgres-backup.log 2>&1
