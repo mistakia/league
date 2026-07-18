@@ -268,6 +268,9 @@ describe('context documents', function () {
       doc.should.include(doc_url(base_url, { lid: 1, view: 'rules' }))
       doc.should.include(doc_url(base_url, { lid: 1, view: 'schedule' }))
       doc.should.include(doc_url(base_url, { lid: 1, tid: 1 }))
+
+      // the Genesis league (lid 1) cross-links the authored constitution
+      doc.should.include(`${base_url}/constitution.md`)
     })
 
     it('rules: labeled scoring/roster (no raw keys), cap, franchise amounts', async function () {
@@ -289,6 +292,10 @@ describe('context documents', function () {
       doc.should.include('Free agency budget (FAAB)')
       doc.should.include('Salary attribution rule')
       doc.should.include('$15') // fqb
+
+      // Genesis league (lid 1) points to the authored constitution for governance
+      doc.should.include('League Constitution')
+      doc.should.include(`${base_url}/constitution.md`)
     })
 
     it('schedule: calendar rows for each populated event, matchups with names', async function () {
@@ -460,6 +467,13 @@ describe('context documents', function () {
         res.text.should.match(/^---\n/)
       })
     }
+
+    it('GET /constitution.md → 200 text/markdown (authored doc, no frontmatter)', async function () {
+      const res = await chai_request.execute(server).get('/constitution.md')
+      res.should.have.status(200)
+      res.should.have.header('content-type', /text\/markdown/)
+      res.text.should.include('# Genesis League Constitution')
+    })
 
     it('GET a missing league → 404', async function () {
       const res = await chai_request.execute(server).get('/leagues/999999.md')

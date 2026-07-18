@@ -13,7 +13,9 @@ import {
   markdown_table,
   cross_link_footer,
   format_date_et,
-  doc_url
+  doc_url,
+  constitution_url,
+  CONSTITUTION_LEAGUE_ID
 } from './markdown.mjs'
 
 const DEFAULT_BASE_URL = 'https://xo.football'
@@ -71,7 +73,15 @@ export default async function generate_league_rules({
     }
   })
 
-  const identity = heading(1, `${league.name} — Rules (${year})`)
+  const identity = [
+    heading(1, `${league.name} — Rules (${year})`),
+    lid === CONSTITUTION_LEAGUE_ID &&
+      `These are the league's configured format settings. The full governance rules, definitions, and amendment history are in the [League Constitution](${constitution_url(
+        base_url
+      )}).`
+  ]
+    .filter(Boolean)
+    .join('\n\n')
 
   // Roster construction: starting slots + bench/PS/IR, then position limits.
   const starting_rows = Object.entries(starting_lineup_labels)
@@ -132,6 +142,10 @@ export default async function generate_league_rules({
     {
       label: 'League schedule',
       url: doc_url(base_url, { lid, view: 'schedule' })
+    },
+    lid === CONSTITUTION_LEAGUE_ID && {
+      label: 'League constitution',
+      url: constitution_url(base_url)
     }
   ])
 

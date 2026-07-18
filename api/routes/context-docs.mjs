@@ -1,4 +1,6 @@
 import express from 'express'
+import fs from 'fs/promises'
+import { fileURLToPath } from 'url'
 
 import {
   generate_league_context,
@@ -58,5 +60,23 @@ router.get('/leagues/:lid(\\d+)/teams/:tid(\\d+).md', (req, res) =>
     tid: Number(req.params.tid)
   })
 )
+
+// The constitution is an authored (not generated) markdown doc. It is served
+// raw at /constitution.md so agents can WebFetch it as text/markdown alongside
+// the generated context docs; the SPA renders the same file at /constitution.
+const constitution_path = fileURLToPath(
+  new URL('../../docs/constitution.md', import.meta.url)
+)
+
+router.get('/constitution.md', async (req, res) => {
+  try {
+    const markdown = await fs.readFile(constitution_path, 'utf-8')
+    res.set('Content-Type', 'text/markdown; charset=utf-8')
+    res.send(markdown)
+  } catch (error) {
+    req.app.locals.logger(error)
+    res.status(404).send('Not found')
+  }
+})
 
 export default router

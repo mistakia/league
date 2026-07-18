@@ -74,6 +74,18 @@ export function doc_url(base_url, { lid, tid, view } = {}) {
   return `${base_url}/leagues/${lid}.md`
 }
 
+/**
+ * The public constitution (`/constitution.md`) is the Genesis League's authored
+ * governance document, not a generated per-league doc. Only its league gets a
+ * constitution cross-link; other leagues on the platform have no published
+ * constitution.
+ */
+export const CONSTITUTION_LEAGUE_ID = 1
+
+export function constitution_url(base_url) {
+  return `${base_url}/constitution.md`
+}
+
 export function heading(level, text) {
   return `${'#'.repeat(level)} ${text}`
 }

@@ -5,7 +5,6 @@ import { marked } from 'marked'
 
 import { DOCS_URL, README_URL } from '@core/constants'
 import PageLayout from '@layouts/page'
-import { get_string_from_object } from '@libs-shared'
 
 import './markdown.styl'
 
@@ -35,7 +34,11 @@ export default class MarkdownPage extends React.Component {
       })
       .then((res) => res.json())
       .then((json) => {
-        const content = window.atob(json.content)
+        // GitHub returns base64; atob yields a Latin-1 binary string, so decode
+        // the bytes as UTF-8 to preserve em dashes and smart quotes.
+        const binary = window.atob(json.content)
+        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+        const content = new TextDecoder('utf-8').decode(bytes)
         const renderer = new marked.Renderer()
         const linkRenderer = renderer.link
 
@@ -47,13 +50,9 @@ export default class MarkdownPage extends React.Component {
           return html
         }
         const markdown = marked(content, { renderer })
-        const className = get_string_from_object({
-          markdown: true,
-          'max-width-1150': this.props.path === '/resources'
-        })
         const html = (
           <div
-            className={className}
+            className='markdown'
             dangerouslySetInnerHTML={{ __html: markdown }}
           />
         )

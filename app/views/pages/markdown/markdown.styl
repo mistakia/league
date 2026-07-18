@@ -5,9 +5,10 @@
   margin 0 auto
   max-width 1300px
 
-  &.max-width-1150
-    margin 0 auto
-    max-width 1150px
+  // Plain docs (constitution, rules) have no authored two-column layout; keep
+  // them in a single readable column rather than the full 1300px.
+  &:not(:has(.table-of-contents))
+    max-width 900px
 
   p
     padding-bottom 16px
@@ -93,7 +94,7 @@
     white-space nowrap
 
 @media (min-width: 960px)
-  .markdown
+  .markdown:has(.table-of-contents)
     align-items flex-start
     flex-direction row-reverse
     display flex

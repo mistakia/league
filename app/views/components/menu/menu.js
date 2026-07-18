@@ -221,7 +221,7 @@ export default function AppMenu({
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}
               >
-                <NavLink to='/rules'>Rules</NavLink>
+                <NavLink to='/constitution'>Rules</NavLink>
                 <NavLink to='/about'>About</NavLink>
                 <a
                   href='https://github.com/mistakia/league'

@@ -107,7 +107,6 @@ const Routes = ({ app }) => {
         element={<MarkdownPage path='/resources.md' />}
       />
       <Route path='/glossary' element={<MarkdownPage path='/glossary.md' />} />
-      <Route path='/rules' element={<MarkdownPage path='/rules.md' />} />
       <Route
         path='/constitution'
         element={<MarkdownPage path='/constitution.md' />}

@@ -11,7 +11,9 @@ import {
   markdown_table,
   cross_link_footer,
   format_date_et,
-  doc_url
+  doc_url,
+  constitution_url,
+  CONSTITUTION_LEAGUE_ID
 } from './markdown.mjs'
 import {
   build_league_calendar,
@@ -170,6 +172,10 @@ export default async function generate_league_context({
     {
       label: 'League schedule',
       url: doc_url(base_url, { lid, view: 'schedule' })
+    },
+    lid === CONSTITUTION_LEAGUE_ID && {
+      label: 'League constitution',
+      url: constitution_url(base_url)
     },
     ...teams.map((team) => ({
       label: `Team: ${team.name}`,
