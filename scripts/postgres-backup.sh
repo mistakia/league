@@ -8,21 +8,11 @@ set -x
 run_start_ts=$(date +%s)
 
 full=false
-logs=false
-stats=false
-cache=false
-projections=false
-betting=false
 filename=""
 
-while getopts 'fclspbn:' opt; do
+while getopts 'fn:' opt; do
     case $opt in
         f) full=true ;;
-        c) cache=true ;;
-        l) logs=true ;;
-        s) stats=true ;;
-        p) projections=true ;;
-        b) betting=true ;;
         n) filename="$OPTARG" ;;
         *) echo 'Error in command line parsing' >&2
     esac
@@ -96,84 +86,6 @@ league_team_careerlogs
 invite_codes
 "
 
-db_cache_tables="
-league_baselines
-league_formats
-league_scoring_formats
-league_format_player_careerlogs
-scoring_format_player_careerlogs
-league_format_player_gamelogs
-scoring_format_player_gamelogs
-league_format_player_seasonlogs
-scoring_format_player_seasonlogs
-league_player_seasonlogs
-scoring_format_player_projection_points
-league_format_player_projection_values
-league_format_draft_pick_value
-league_player_projection_values
-league_team_forecast
-league_team_lineup_contribution_weeks
-league_team_lineup_contributions
-league_team_lineup_starters
-league_team_lineups
-ros_projections
-league_nfl_team_seasonlogs
-league_team_daily_values
-nfl_team_seasonlogs
-percentiles"
-
-db_logs_tables="
-jobs
-player_changelog
-nfl_games_changelog
-play_changelog
-"
-
-db_stats_tables="
-footballoutsiders
-player_gamelogs
-keeptradecut_rankings
-nfl_games
-nfl_play_stats
-nfl_plays
-nfl_snaps
-player
-player_aliases
-players_status
-practice
-player_rankings_history
-player_rankings_index
-player_adp_index
-player_adp_history
-player_seasonlogs
-pff_player_seasonlogs
-pff_player_seasonlogs_changelog
-espn_player_win_rates_history
-espn_player_win_rates_index
-espn_team_win_rates_history
-espn_team_win_rates_index
-nfl_plays_passer
-nfl_plays_player
-nfl_plays_receiver
-nfl_plays_rusher
-player_salaries
-"
-
-db_betting_tables="
-props
-props_index
-props_index_new
-prop_markets_history
-prop_markets_index
-prop_market_selections_history
-prop_market_selections_index
-"
-
-db_projections_tables="
-projections
-projections_index
-"
-
 date_format="%Y-%m-%d_%H-%M"
 
 if [ -z "$filename" ]; then  # Check if filename is provided
@@ -184,16 +96,6 @@ fi
 
 if $full; then
     backup_type="full"
-elif $logs; then
-    backup_type="logs"
-elif $stats; then
-    backup_type="stats"
-elif $betting; then
-    backup_type="betting"
-elif $cache; then
-    backup_type="cache"
-elif $projections; then
-    backup_type="projections"
 else
     backup_type="user"
 fi
@@ -233,22 +135,16 @@ if $full; then
         exit 1
     fi
 else
+    # User dump: the small, irreplaceable, fast-changing slice. Stays plain-SQL
+    # inside a .tar.gz so the two dev consumers (restore-backup.mjs,
+    # import-database-backup.mjs) keep working unchanged.
     sql_file="$file_name-$backup_type.sql"
     output_file="$file_name-$backup_type.tar.gz"
-    if $logs; then
-        dump_tables "$db_logs_tables"
-    elif $stats; then
-        dump_tables "$db_stats_tables"
-    elif $betting; then
-        dump_tables "$db_betting_tables"
-    elif $cache; then
-        dump_tables "$db_cache_tables"
-    elif $projections; then
-        dump_tables "$db_projections_tables"
-    else
-        dump_tables "$db_user_tables"
-    fi
-    tar -vcf "$output_file" "$sql_file"
+    dump_tables "$db_user_tables"
+    # Real gzip (-z), not a misnamed uncompressed tar: the .tar.gz name is now
+    # honest, and both consumers extract with `tar -xzf` (explicit -z), which
+    # only works against a genuinely gzipped archive on GNU tar.
+    tar -vczf "$output_file" "$sql_file"
     rm "$sql_file"
 fi
 
@@ -283,12 +179,10 @@ if [ "$file_mtime" -lt "$run_start_ts" ]; then
     exit 2
 fi
 
-# Local retention: delete ALL time-series backups older than 7 days (any type).
-# Cleaning all types prevents stale files from other backup categories (which may
-# run on different schedules) from persisting and being re-copied by rsync.
-# Checkpoint files (checkpoint-*.tar.gz) are overwritten in place on each run, so
-# only the latest checkpoint per type is retained automatically. Storage server
-# pulls files from this directory via rsync and manages long-term retention.
+# Local retention, user dumps: delete dated time-series user backups older than
+# 7 days. Checkpoint files (checkpoint-*.tar.gz) are overwritten in place on each
+# run, so only the latest checkpoint is retained automatically. base-storage pulls
+# from this directory via rsync and owns long-term retention.
 #
 # Best-effort, and deliberately NOT allowed to gate the job's exit code: when a
 # sibling backup instance runs its identical sweep concurrently, one process can
@@ -297,3 +191,16 @@ fi
 # already established by the oracle above (dump + tar + mtime), so a retention
 # race must not flip a healthy backup into a reported failure under `set -e`.
 find "$dump_dir" -maxdepth 1 -type f -name "[0-9]*.tar.gz" -mtime +7 -delete || true
+
+# Local retention, full dumps: keep the latest 2 *-full directories, delete older.
+# The -Fd full is a DIRECTORY, so the -type f find above never touches it; this is
+# its dedicated prune. Two fulls (one Tue, one Fri) is a rolling week of on-VPS
+# whole-DB restorability; base-storage holds the 30-day window. Same best-effort
+# discipline (|| true, race-tolerant) as the user sweep — the oracle already
+# established this run's outcome, so a prune race must not fail the job.
+full_dirs=$(ls -1dt "$dump_dir"/*-full 2>/dev/null || true)
+if [ -n "$full_dirs" ]; then
+    echo "$full_dirs" | tail -n +3 | while IFS= read -r stale_full; do
+        [ -n "$stale_full" ] && rm -rf "$stale_full"
+    done || true
+fi
