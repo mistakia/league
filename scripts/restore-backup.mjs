@@ -225,11 +225,13 @@ DO UPDATE SET value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}'
 
 const STORAGE_BACKUP_PATH = '/storage/backups/servers/league-production/backups'
 const LOCAL_BACKUP_PATH = '/root/backups'
-// Whole-DB directory-format (-Fd) full dumps land under the database-dumps tree
-// on storage (not the backups/servers/ tree that holds the plain-SQL user
-// tarballs), and directly in /root/backups on the league server itself. Each
-// full is a DIRECTORY named `<timestamp>-full` (toc.dat + per-table *.dat.gz).
-const STORAGE_FULL_DUMP_PATH = '/storage/database-dumps/league-production'
+// Whole-DB directory-format (-Fd) full dumps land under the canonical DB-dump tree
+// on storage (/storage/backups/database-dumps/, NOT the backups/servers/ tree that
+// holds the plain-SQL user tarballs), and directly in /root/backups on the league
+// server itself. Each full is a DIRECTORY named `<timestamp>-full` (toc.dat +
+// per-table *.dat.gz). This path matches league-backup-pull's FULL_DIR.
+const STORAGE_FULL_DUMP_PATH =
+  '/storage/backups/database-dumps/league-production'
 
 /**
  * Find the latest backup file matching the query.
