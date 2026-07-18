@@ -687,9 +687,11 @@ const restore_full_dump = async ({
   }
   log('Successfully restored full dump into PostgreSQL')
 
-  // Only remove the dump if it was downloaded from storage into cwd.
+  // Only remove the dump if it was downloaded from storage into cwd. A full is a
+  // directory-format (-Fd) dump, i.e. a DIRECTORY, so remove it recursively (the
+  // download uses `scp -r` for the same reason).
   if (!file.local_path) {
-    await exec(`rm "${dump_path}"`)
+    await exec(`rm -rf "${dump_path}"`)
     log('Cleaned up downloaded dump')
   }
 
