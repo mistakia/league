@@ -7,77 +7,81 @@ debug.enable('generate-player-id')
 
 // Player ID (pid) format:
 //
-//   FFFF-LLLL-YYYY-YYYY-MM-DD
+//   FNAM-LNAM-<serial>
 //
 // Where:
-//   FFFF = First four letters of first name (A-Z, uppercase, padded with X if <4)
-//   LLLL = First four letters of last name (A-Z, uppercase, padded with X if <4)
-//   YYYY = NFL draft year (4 digits, zero-padded if missing)
-//   YYYY-MM-DD = Date of birth (zero-padded, may be 0000-00-00 if unknown)
+//   FNAM     = First four letters of first name (A-Z, uppercase, X-padded if <4)
+//   LNAM     = First four letters of last name (A-Z, uppercase, X-padded if <4)
+//   <serial> = an opaque, immutable, collision-free ordinal, zero-padded to six digits
+//              and allowed to grow past six as the sequence advances
 //
-// Examples from production data:
-//   AARI-PENT-2017-1994-09-03
-//   AARO-ADAM-2013-1989-05-16
-//   AARO-ADEO-2019-1993-08-26
-//   AARO-BAIL-2017-0000-00-00
-//   AARO-BANK-2021-0000-00-00
-//   AARO-BANK-2021-1997-09-03
-//   AARO-BARR-1991-1969-08-14
-//   AARO-BEAS-1996-1973-07-07
-//   AARO-BERR-2010-1988-06-25
-//   AARO-BRAN-2007-1984-09-16
+// Examples:
+//   PATR-MAHO-000123
+//   AARO-RODG-004567
 //
-// If the player is a DST (defense/special teams), the pid is the team abbreviation (e.g., "NE", "DAL").
+// The FNAM-LNAM prefix is a frozen, human-readable courtesy snapshot taken once at mint.
+// It carries NO referential meaning: it is never recomputed, is allowed to go stale if the
+// person's name is later corrected, and must not be parsed for identity. The <serial> is
+// the actual identity -- immutable, assigned exactly once, never regenerated. The pid does
+// not depend on dob or nfl_draft_year, so a person can be minted at recruit/college stage
+// before either field exists.
 //
-// This format is used as the canonical player identifier throughout the system.
-const required_fields = ['fname', 'lname', 'dob']
+// The serial is allocated by the caller (create-player.mjs draws nextval from the dedicated
+// player_pid_serial_seq sequence) and passed in, keeping this a pure, synchronous, DB-free
+// function that is trivially unit-testable with a fixed serial.
+//
+// If the player is a DST (defense/special teams), the pid is the team abbreviation (e.g.
+// "NE", "DAL") -- a stable non-person pseudo-identifier carrying no serial.
+//
+// This format is the canonical player identifier throughout the system.
 
-const generate_player_id = (player_data) => {
-  // check if all required fields are present
-  for (const field of required_fields) {
-    if (!player_data[field]) {
-      throw new Error(`Missing field ${field}`)
+const SERIAL_MIN_DIGITS = 6
+
+const four_letter_prefix = (name) =>
+  name
+    .match(/[a-zA-Z]/g)
+    .slice(0, 4)
+    .map((letter) => letter.toUpperCase())
+    .join('')
+    .padEnd(4, 'X')
+
+const generate_player_id = ({
+  fname,
+  lname,
+  pos,
+  current_nfl_team,
+  serial
+} = {}) => {
+  // DST pseudo-rows are not persons: the pid is the team abbreviation, no serial.
+  if (pos === 'DST') {
+    if (!current_nfl_team) {
+      throw new Error('Missing field current_nfl_team')
     }
+    return current_nfl_team
   }
 
-  if (!player_data.nfl_draft_year) {
-    throw new Error('Missing field nfl_draft_year')
+  if (!fname) {
+    throw new Error('Missing field fname')
   }
 
-  // if DST, get pid from team abbreviation
-  if (player_data.pos === 'DST') {
-    return player_data.current_nfl_team
+  if (!lname) {
+    throw new Error('Missing field lname')
   }
 
-  // get first initial, uppercase, pad if needed
-  const first_name_first_four = player_data.fname
-    .match(/[a-zA-Z]/g)
-    .slice(0, 4)
-    .map((initial) => initial.toUpperCase())
-    .join('')
-    .padEnd(4, 'X')
+  if (serial === undefined || serial === null || serial === '') {
+    throw new Error('Missing field serial')
+  }
 
-  // get last three initials, uppercase and pad if needed
-  const last_name_first_four = player_data.lname
-    .match(/[a-zA-Z]/g)
-    .slice(0, 4)
-    .map((initial) => initial.toUpperCase())
-    .join('')
-    .padEnd(4, 'X')
+  const serial_number = Number(serial)
+  if (!Number.isInteger(serial_number) || serial_number < 0) {
+    throw new Error(`Invalid serial ${serial}`)
+  }
 
-  // format nfl draft year, a number, to ensure it is in format YYYY, fill in any missing digits
-  const start = player_data.nfl_draft_year
+  const formatted_serial = serial_number
     .toString()
-    .slice(0, 4)
-    .padStart(4, '0')
+    .padStart(SERIAL_MIN_DIGITS, '0')
 
-  // format date of birth to ensure it is in format YYYY-MM-DD, fill in any missing digits
-  const dob = player_data.dob
-    .split('-')
-    .map((part) => part.padStart(2, '0')) // pad each part
-    .join('-')
-
-  const pid = `${first_name_first_four}-${last_name_first_four}-${start}-${dob}`
+  const pid = `${four_letter_prefix(fname)}-${four_letter_prefix(lname)}-${formatted_serial}`
   log(`Generated pid ${pid}`)
   return pid
 }
@@ -88,7 +92,8 @@ if (is_main(import.meta.url)) {
   const main = () => {
     const pid = generate_player_id({
       fname: 'Francis',
-      lname: 'Scott'
+      lname: 'Scott',
+      serial: 123
     })
 
     console.log(pid)

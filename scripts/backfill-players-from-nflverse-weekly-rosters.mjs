@@ -33,9 +33,9 @@ import {
   fetch_with_retry,
   createPlayer,
   updatePlayer,
+  find_player_row,
   readCSV
 } from '#libs-server'
-import generate_player_id from '#libs-server/generate-player-id.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('backfill-players-from-nflverse-weekly-rosters')
@@ -81,6 +81,34 @@ const REQUIRED_FOR_SCORE = [
   'weight'
 ]
 const score_row = (r) => REQUIRED_FOR_SCORE.filter((f) => r[f]).length
+
+// createPlayer's actual required set (mapped to player_data keys). Used only for
+// accurate "why did the mint reject this row" diagnostics -- dob/nfl_draft_year are no
+// longer required by createPlayer, so REQUIRED_FOR_SCORE would mis-report them.
+const CREATE_PLAYER_REQUIRED = [
+  'fname',
+  'lname',
+  'pos',
+  'pos1',
+  'posd',
+  'height',
+  'weight'
+]
+
+// External-id fields find_player_row understands, used to resolve a candidate to
+// an existing player before minting. gsisid is excluded on purpose: the candidate
+// set is precisely the gsis_ids missing from the player table, so gsisid never
+// resolves here -- the point is to catch the same person under a different id.
+const FIND_ROW_ID_KEYS = [
+  'pfr_id',
+  'esbid',
+  'gsis_it_id',
+  'sportradar_id',
+  'pff_id',
+  'espn_id',
+  'yahoo_id',
+  'sleeper_id'
+]
 
 // Pre-normalize historical nflverse team codes that fixTeam doesn't know.
 const NFLVERSE_TEAM_ALIASES = {
@@ -163,74 +191,128 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
       created += 1
       continue
     }
-    // generate_player_id collides with existing (name, draft_year, dob) tuples;
-    // when so, the right action is to set gsisid + other null IDs on the
-    // existing row rather than insert a duplicate. Only fall through to
-    // createPlayer when no existing record matches.
-    let candidate_pid
+    // The opaque serial removes the old content-derived-pid dedup oracle (regenerate a
+    // deterministic name+draft+dob pid and look it up). Resolve a possible existing
+    // player instead, then enrich it rather than inserting a duplicate. Resolution is
+    // deliberately conservative because a wrong match WRITES this CSV row's external ids
+    // onto an unrelated player -- a corruption the old mint-only script could not cause:
+    //   1. By each external id the CSV carries, ONE AT A TIME. find_player_row ANDs a
+    //      bundled multi-id query (and always ANDs sleeper_id), so passing several ids at
+    //      once can zero out a real single-id match; every other call site passes one id
+    //      key. First id hit wins.
+    //   2. Else by name + pos + dob + draft year, but ONLY when a real discriminator
+    //      (a non-stub dob or a draft year) is present, and the returned candidate is
+    //      accepted for enrichment ONLY if its non-stub dob or its draft year actually
+    //      agrees -- name + the broad expanded position group alone is too loose to
+    //      authorize an id write, and would enrich a same-surname different person.
+    // Ambiguous (MatchedMultiplePlayers) or any thrown error is a hard skip, never a
+    // mint. A genuine no-match mints (a possible duplicate is later mergeable; wrongly
+    // enriching a real player is not). The whole body is guarded so one bad record --
+    // e.g. a placeholder name that makes createPlayer throw -- skips, not aborts the run.
     try {
-      candidate_pid = generate_player_id(player_data)
+      let existing
+      let matched_by_id = false
+      for (const k of FIND_ROW_ID_KEYS) {
+        if (!player_data[k]) continue
+        existing = await find_player_row({ [k]: player_data[k] })
+        if (existing) {
+          matched_by_id = true
+          break
+        }
+      }
+
+      const has_discriminator =
+        (player_data.dob && player_data.dob !== '0000-00-00') ||
+        Boolean(player_data.nfl_draft_year)
+      if (!existing && has_discriminator) {
+        const candidate = await find_player_row({
+          name: `${player_data.fname} ${player_data.lname}`,
+          pos: player_data.pos,
+          dob: player_data.dob,
+          nfl_draft_year: player_data.nfl_draft_year
+        })
+        const dob_agrees =
+          candidate &&
+          candidate.dob &&
+          candidate.dob !== '0000-00-00' &&
+          candidate.dob === player_data.dob
+        const draft_agrees =
+          candidate &&
+          candidate.nfl_draft_year &&
+          Number(candidate.nfl_draft_year) ===
+            Number(player_data.nfl_draft_year)
+        if (candidate && (dob_agrees || draft_agrees)) existing = candidate
+      }
+
+      if (existing) {
+        const update = {}
+        for (const k of [
+          'gsisid',
+          'esbid',
+          'gsis_it_id',
+          'espn_id',
+          'sportradar_id',
+          'yahoo_id',
+          'rotowire_id',
+          'pff_id',
+          'pfr_id',
+          'fantasy_data_id',
+          'sleeper_id'
+        ]) {
+          if (player_data[k] && !existing[k]) update[k] = player_data[k]
+        }
+        if (!Object.keys(update).length) {
+          failed += 1
+          if (failure_samples.length < 5) {
+            failure_samples.push({
+              gsis_id,
+              name: r.full_name,
+              reason: `matched existing player (${matched_by_id ? 'by id' : 'by name'}); no new ids to add`
+            })
+          }
+          continue
+        }
+        const changes = await updatePlayer({
+          player_row: existing,
+          update,
+          allow_protected_props: false
+        })
+        if (changes) updated += 1
+        else failed += 1
+        continue
+      }
+
+      const result = await createPlayer(player_data)
+      if (result) {
+        created += 1
+      } else {
+        failed += 1
+        if (failure_samples.length < 5) {
+          // createPlayer swallows its own insert errors and returns null. Report the
+          // missing required field(s) when that is the cause; otherwise say so honestly
+          // rather than emit a misleading empty list (the insert failed for another
+          // reason -- e.g. a NOT NULL column still un-relaxed pre-prep-01 -- see the
+          // create-player debug log).
+          const missing = CREATE_PLAYER_REQUIRED.filter((f) => !player_data[f])
+          failure_samples.push({
+            gsis_id,
+            name: r.full_name,
+            reason: missing.length
+              ? `createPlayer rejected: missing ${missing.join(', ')}`
+              : 'createPlayer returned null with no required field missing (see create-player log)'
+          })
+        }
+      }
     } catch (err) {
       failed += 1
       if (failure_samples.length < 5) {
         failure_samples.push({
           gsis_id,
           name: r.full_name,
-          reason: `generate_player_id failed: ${err.message}`
+          reason: `resolution/mint failed: ${err.message}`
         })
       }
       continue
-    }
-    const existing = await db('player').where({ pid: candidate_pid }).first()
-    if (existing) {
-      const update = {}
-      for (const k of [
-        'gsisid',
-        'esbid',
-        'gsis_it_id',
-        'espn_id',
-        'sportradar_id',
-        'yahoo_id',
-        'rotowire_id',
-        'pff_id',
-        'pfr_id',
-        'fantasy_data_id',
-        'sleeper_id'
-      ]) {
-        if (player_data[k] && !existing[k]) update[k] = player_data[k]
-      }
-      if (!Object.keys(update).length) {
-        failed += 1
-        if (failure_samples.length < 5) {
-          failure_samples.push({
-            gsis_id,
-            name: r.full_name,
-            reason: 'existing pid has all IDs populated already'
-          })
-        }
-        continue
-      }
-      const changes = await updatePlayer({
-        player_row: existing,
-        update,
-        allow_protected_props: false
-      })
-      if (changes) updated += 1
-      else failed += 1
-      continue
-    }
-    const result = await createPlayer(player_data)
-    if (result) {
-      created += 1
-    } else {
-      failed += 1
-      if (failure_samples.length < 5) {
-        failure_samples.push({
-          gsis_id,
-          name: r.full_name,
-          missing_fields: REQUIRED_FOR_SCORE.filter((f) => !r[f])
-        })
-      }
     }
   }
 

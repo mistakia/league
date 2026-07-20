@@ -9,10 +9,7 @@ import {
 } from '#libs-shared'
 import db from '#db'
 import generate_player_id from './generate-player-id.mjs'
-import * as espn from './espn.mjs'
-import * as sportradar from './sportradar/index.mjs'
 
-const IS_PROD = process.env.NODE_ENV === 'production'
 const log = debug('create-player')
 debug.enable('create-player')
 
@@ -38,47 +35,9 @@ debug.enable('create-player')
    jnum 0
  */
 
-const required = [
-  'fname',
-  'lname',
-  'dob',
-  'nfl_draft_year',
-  'pos',
-  'pos1',
-  'height',
-  'weight',
-  'posd'
-]
+const required = ['fname', 'lname', 'pos', 'pos1', 'height', 'weight', 'posd']
 
 const createPlayer = async (playerData) => {
-  if (!playerData.nfl_draft_year) {
-    const { espn_id, sportradar_id } = playerData
-    if (espn_id) {
-      const espnPlayer = await espn.getPlayer({ espn_id })
-      playerData.nfl_draft_year = espnPlayer.athlete.debutYear
-    }
-
-    if (IS_PROD && !playerData.nfl_draft_year && sportradar_id) {
-      try {
-        const sportradarPlayer = await sportradar.getPlayer({ sportradar_id })
-        playerData.nfl_draft_year = sportradarPlayer.rookie_year
-
-        if (!playerData.nfl_draft_year) {
-          if (sportradarPlayer.draft) {
-            playerData.nfl_draft_year = sportradarPlayer.draft.year
-          } else if (sportradarPlayer.seasons.length) {
-            const seasons = sportradarPlayer.seasons.map((s) => s.year)
-            playerData.nfl_draft_year = Math.min(...seasons)
-          }
-        }
-      } catch (e) {
-        log(e)
-      }
-    }
-  }
-
-  const playerId = generate_player_id(playerData)
-
   for (const field of required) {
     if (!playerData[field]) {
       log(`Unable to create player, missing ${field} field`)
@@ -86,6 +45,18 @@ const createPlayer = async (playerData) => {
       return null
     }
   }
+
+  // Draw the immutable opaque serial from the dedicated sequence and compose the pid.
+  // DST pseudo-rows take the team abbreviation and consume no serial.
+  let serial
+  if (playerData.pos !== 'DST') {
+    const result = await db.raw(
+      "SELECT nextval('player_pid_serial_seq') AS serial"
+    )
+    serial = result.rows[0].serial
+  }
+
+  const playerId = generate_player_id({ ...playerData, serial })
 
   playerData.pname = `${playerData.fname
     .match(/[a-zA-Z]/)

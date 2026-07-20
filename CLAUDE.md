@@ -297,4 +297,4 @@ NODE_ENV=production node scripts/resolve-player-match.mjs create --fname "First"
 
 ### Player ID Format
 
-Player IDs are generated as: `FNAM-LNAM-YEAR-DOB` (e.g., `PATR-MAHO-2017-1995-09-17`)
+Player IDs are `FNAM-LNAM-<serial>` (e.g., `PATR-MAHO-000123`): a frozen 4+4-letter name prefix (a courtesy snapshot, never recomputed, carries no identity) plus an opaque immutable zero-padded serial from a dedicated sequence that IS the identity. The pid does not depend on `dob`/`nfl_draft_year` and is never regenerated. DST pids are the bare team abbreviation (`NE`). See [docs/player-management.md](docs/player-management.md).

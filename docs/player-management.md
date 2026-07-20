@@ -15,14 +15,17 @@ This document provides a comprehensive guide for managing player data in the xo.
 
 ## Player ID Format
 
-Player IDs follow the format: `FNAM-LNAM-YEAR-DOB`
+Player IDs follow the format: `FNAM-LNAM-<serial>`
 
-- **FNAM**: First 4 characters of first name (uppercase)
-- **LNAM**: First 4 characters of last name (uppercase)
-- **YEAR**: NFL draft/rookie year
-- **DOB**: Date of birth (YYYY-MM-DD)
+- **FNAM**: First 4 letters of first name (uppercase, `X`-padded if shorter)
+- **LNAM**: First 4 letters of last name (uppercase, `X`-padded if shorter)
+- **&lt;serial&gt;**: An opaque, immutable, collision-free ordinal, zero-padded to six digits and allowed to grow (drawn from a dedicated Postgres sequence)
 
-Example: `PATR-MAHO-2017-1995-09-17` (Patrick Mahomes)
+Example: `PATR-MAHO-000123` (Patrick Mahomes)
+
+The `FNAM-LNAM` prefix is a frozen, human-readable courtesy snapshot taken once at mint. It carries **no** referential meaning: it is never recomputed, is allowed to go stale if the person's name is later corrected, and must not be parsed for identity. The `<serial>` is the actual identity — assigned exactly once and never regenerated. A pid does **not** depend on `dob` or `nfl_draft_year`, so a person can be minted at recruit/college stage before either field exists.
+
+A DST (defense/special teams) pid is the team abbreviation (e.g. `NE`, `DAL`) — a stable non-person pseudo-identifier with no serial.
 
 ## Lookup Command
 

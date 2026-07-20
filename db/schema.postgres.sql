@@ -72,6 +72,7 @@ DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.player_underdog_id_unique;
 DROP INDEX IF EXISTS public.player_name_search_idx;
+DROP INDEX IF EXISTS public.player_legacy_pid_key;
 DROP INDEX IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx;
 DROP INDEX IF EXISTS public.pff_unresolved_players_year_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_year_facet_idx;
@@ -743,6 +744,7 @@ DROP TABLE IF EXISTS public.player_receiving_gamelogs;
 DROP TABLE IF EXISTS public.player_rankings_index;
 DROP TABLE IF EXISTS public.player_rankings_history;
 DROP TABLE IF EXISTS public.player_prospect_profile;
+DROP SEQUENCE IF EXISTS public.player_pid_serial_seq;
 DROP TABLE IF EXISTS public.player_passing_gamelogs;
 DROP TABLE IF EXISTS public.player_pair_correlations;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2026;
@@ -19027,7 +19029,7 @@ CREATE TABLE public.play_changelog (
 --
 
 CREATE TABLE public.player (
-    pid character varying(25) NOT NULL,
+    legacy_pid character varying(25) NOT NULL,
     fname character varying(20) NOT NULL,
     lname character varying(40) NOT NULL,
     pname character varying(25) NOT NULL,
@@ -19037,7 +19039,7 @@ CREATE TABLE public.player (
     pos2 character varying(4),
     height smallint,
     weight smallint,
-    dob character varying(10) NOT NULL,
+    dob character varying(10),
     forty numeric(3,2),
     bench smallint,
     vertical numeric(3,1),
@@ -19050,7 +19052,7 @@ CREATE TABLE public.player (
     round smallint,
     col character varying(255),
     dv character varying(35),
-    nfl_draft_year integer NOT NULL,
+    nfl_draft_year integer,
     current_nfl_team character varying(3) DEFAULT 'INA'::character varying NOT NULL,
     posd character varying(8),
     jnum smallint,
@@ -19123,15 +19125,17 @@ CREATE TABLE public.player (
     hometown character varying(100),
     sumer_id character varying(36),
     fantasylabs_id integer,
-    underdog_id character varying(36)
+    underdog_id character varying(36),
+    pid character varying(25) NOT NULL,
+    CONSTRAINT player_pid_format CHECK ((((pid)::text ~ '^[A-Z]{1,4}-[A-Z]{1,4}-[0-9]{6,}$'::text) OR ((pid)::text ~ '^[A-Z]{2,3}(-(OFF|DEF|DST))?$'::text)))
 );
 
 
 --
--- Name: COLUMN player.pid; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player.legacy_pid; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.pid IS 'player id';
+COMMENT ON COLUMN public.player.legacy_pid IS 'player id';
 
 
 --
@@ -23728,6 +23732,18 @@ CREATE TABLE public.player_passing_gamelogs (
     tight_window_pct numeric(5,4),
     play_action_pct numeric(5,4)
 );
+
+
+--
+-- Name: player_pid_serial_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.player_pid_serial_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
 --
@@ -29232,7 +29248,7 @@ CREATE UNIQUE INDEX idx_24798_pfr_id ON public.player USING btree (pfr_id);
 -- Name: idx_24798_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_pid ON public.player USING btree (pid);
+CREATE UNIQUE INDEX idx_24798_pid ON public.player USING btree (legacy_pid);
 
 
 --
@@ -30485,14 +30501,14 @@ CREATE INDEX idx_player_pff_id ON public.player USING btree (pff_id);
 -- Name: idx_player_pid_incl_pos_fname_lname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pid_incl_pos_fname_lname ON public.player USING btree (pid) INCLUDE (pos, fname, lname);
+CREATE INDEX idx_player_pid_incl_pos_fname_lname ON public.player USING btree (legacy_pid) INCLUDE (pos, fname, lname);
 
 
 --
 -- Name: idx_player_pid_pos; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
+CREATE INDEX idx_player_pid_pos ON public.player USING btree (legacy_pid, pos);
 
 
 --
@@ -42981,6 +42997,13 @@ CREATE INDEX player_gamelogs_year_2026_tm_esbid_pid_idx ON public.player_gamelog
 --
 
 CREATE UNIQUE INDEX player_gamelogs_year_2026_year_esbid_pid_idx ON public.player_gamelogs_year_2026 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_legacy_pid_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_legacy_pid_key ON public.player USING btree (legacy_pid);
 
 
 --
@@ -57243,6 +57266,13 @@ GRANT SELECT ON TABLE public.player_pair_correlations TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.player_passing_gamelogs TO league_reader;
+
+
+--
+-- Name: SEQUENCE player_pid_serial_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.player_pid_serial_seq TO league_reader;
 
 
 --
