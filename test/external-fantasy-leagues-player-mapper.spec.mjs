@@ -138,7 +138,7 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
         test_data.test_scenarios.direct_id_mapping.sleeper
       const result = await mapper.map_to_internal({
         platform: 'espn',
-        external_player_id: 2330 // This is the espn_id for TEST-SLEEPER-1
+        external_player_id: 2330 // This is the espn_id for TEST-SLEP-000001
       })
 
       result.should.equal(sleeper_scenario.expected_pid)
@@ -153,7 +153,7 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
             test_data.test_scenarios.direct_id_mapping.sleeper.external_id,
           fallback_data: {}
         },
-        { external_id: '67890', fallback_data: {} }, // TEST-SLEEPER-2
+        { external_id: '67890', fallback_data: {} }, // TEST-SLEP-000002
         {
           external_id: test_data.test_scenarios.not_found.external_id,
           fallback_data: {}
@@ -171,7 +171,7 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
         .should.equal(
           test_data.test_scenarios.direct_id_mapping.sleeper.expected_pid
         )
-      results.get('67890').should.equal('TEST-SLEEPER-2')
+      results.get('67890').should.equal('TEST-SLEP-000002')
       chai.expect(results.get(test_data.test_scenarios.not_found.external_id))
         .to.be.null
     })
@@ -232,7 +232,7 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
 
       const espn_result = await mapper.map_to_internal({
         platform: 'espn',
-        external_player_id: 2330 // This is the espn_id for TEST-SLEEPER-1
+        external_player_id: 2330 // This is the espn_id for TEST-SLEP-000001
       })
 
       sleeper_result.should.equal(sleeper_scenario.expected_pid)

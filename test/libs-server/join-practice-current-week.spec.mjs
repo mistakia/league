@@ -10,7 +10,7 @@ import { run_under_season_type } from '../fixtures/postseason.mjs'
 
 const expect = chai.expect
 
-const TEST_PID = 'TEST-PRAC-2024-1990-01-01'
+const TEST_PID = 'TEST-PRAC-000914'
 
 const seed_player = async () => {
   await knex('player')

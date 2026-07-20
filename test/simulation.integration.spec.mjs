@@ -21,7 +21,7 @@ describe('LIBS-SERVER simulation integration', function () {
   })
 
   describe('load_market_projections', function () {
-    const test_player_id = 'TEST-PLAYER-001'
+    const test_player_id = 'TEST-PLYR-000001'
     const test_week = 1
     const test_year = current_season.year
     const test_esbid = 123456789

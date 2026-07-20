@@ -21,7 +21,7 @@ export async function seed(knex, Promise) {
   for (let i = 0; i < 200; i++) {
     const pos = fantasy_positions[i % fantasy_positions.length]
     rookies.push({
-      pid: `XR-${i * 5}`,
+      pid: `XR-ROOK-${String(i * 5).padStart(6, '0')}`,
       pname: `TestRookie${i}`,
       fname: `TestRookie${i}`,
       lname: `TestRookie${i}`,
@@ -41,7 +41,7 @@ export async function seed(knex, Promise) {
   for (let i = 0; i < 50; i++) {
     const pos = fantasy_positions[i % fantasy_positions.length]
     sophmores.push({
-      pid: `XS-${i * 5}`,
+      pid: `XS-SOPH-${String(i * 5).padStart(6, '0')}`,
       pname: `TestSophmore${i}`,
       fname: `TestSophmore${i}`,
       lname: `TestSophmore${i}`,

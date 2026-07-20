@@ -30,7 +30,7 @@
   "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(pff_team_seasonlogs.grades_offense) FROM pff_team_seasonlogs WHERE pff_team_seasonlogs.nfl_team = player.current_nfl_team AND pff_team_seasonlogs.year IN (2024,2025)) AS \"pff_team_grades_offense_0\", (SELECT SUM(pff_team_seasonlogs.wins) FROM pff_team_seasonlogs WHERE pff_team_seasonlogs.nfl_team = player.current_nfl_team AND pff_team_seasonlogs.year IN (2024,2025)) AS \"pff_team_wins_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
-      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-PFF-2000-2000-01-01', 'Test', 'Pff', 'T.Pff', 'Test Pff', 'ZZ', 'ZZ', '2000-01-01', 2020, 'ZZZ')",
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-PFF-000911', 'Test', 'Pff', 'T.Pff', 'Test Pff', 'ZZ', 'ZZ', '2000-01-01', 2020, 'ZZZ')",
       "INSERT INTO pff_team_seasonlogs (nfl_team, year, grades_offense, wins) VALUES ('ZZZ', 2023, 10.00, 1)",
       "INSERT INTO pff_team_seasonlogs (nfl_team, year, grades_offense, wins) VALUES ('ZZZ', 2024, 60.00, 4)",
       "INSERT INTO pff_team_seasonlogs (nfl_team, year, grades_offense, wins) VALUES ('ZZZ', 2025, 80.00, 12)"

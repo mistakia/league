@@ -30,13 +30,13 @@
   "skip_query_match": true,
   "result_equivalence": {
     "seed": [
-      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-FPWK-2000-2000-01-01','Test','Fpwk','T.Fpwk','Test Fpwk','ZZ','ZZ','2000-01-01',2020,'ZZ')",
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-FPWK-000903','Test','Fpwk','T.Fpwk','Test Fpwk','ZZ','ZZ','2000-01-01',2020,'ZZ')",
       "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (992001, 2023, 1, 'REG', 'ZZ', 'OP')",
       "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (992002, 2023, 2, 'REG', 'ZZ', 'OP')",
-      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, bc_pid, rush_yds) VALUES (992001, 1, 2023, 1, 0, 'REG', 'RUSH', 'ZZ', 'TEST-FPWK-2000-2000-01-01', 50)",
-      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, bc_pid, rush_yds) VALUES (992002, 1, 2023, 2, 0, 'REG', 'RUSH', 'ZZ', 'TEST-FPWK-2000-2000-01-01', 80)"
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, bc_pid, rush_yds) VALUES (992001, 1, 2023, 1, 0, 'REG', 'RUSH', 'ZZ', 'TEST-FPWK-000903', 50)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, bc_pid, rush_yds) VALUES (992002, 1, 2023, 2, 0, 'REG', 'RUSH', 'ZZ', 'TEST-FPWK-000903', 80)"
     ],
-    "reference_sql": "SELECT ROUND(SUM(COALESCE(rush_yds,0) * 0.1 + COALESCE(rush_td::int,0) * 6), 2) AS fantasy_points_from_plays_0 FROM nfl_plays WHERE bc_pid='TEST-FPWK-2000-2000-01-01' AND year IN (2023) AND seas_type='REG' AND play_type <> 'NOPL' GROUP BY week",
+    "reference_sql": "SELECT ROUND(SUM(COALESCE(rush_yds,0) * 0.1 + COALESCE(rush_td::int,0) * 6), 2) AS fantasy_points_from_plays_0 FROM nfl_plays WHERE bc_pid='TEST-FPWK-000903' AND year IN (2023) AND seas_type='REG' AND play_type <> 'NOPL' GROUP BY week",
     "compare_columns": ["fantasy_points_from_plays_0"]
   },
   "tags": [

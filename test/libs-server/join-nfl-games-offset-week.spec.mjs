@@ -12,7 +12,7 @@ import { run_under_season_type } from '../fixtures/postseason.mjs'
 
 const expect = chai.expect
 
-const TEST_PID = 'TEST-OFF-2024-1990-01-01'
+const TEST_PID = 'TEST-OFF-000910'
 
 describe('LIBS-SERVER apply_nfl_games_offset_week_join', function () {
   before(async function () {

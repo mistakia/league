@@ -2,7 +2,7 @@
   "description": "Test data for PlayerIdMapper tests",
   "test_players": [
     {
-      "pid": "TEST-SLEEPER-1",
+      "pid": "TEST-SLEP-000001",
       "fname": "Josh",
       "lname": "Allen",
       "pname": "J.Allen",
@@ -16,7 +16,7 @@
       "espn_id": 2330
     },
     {
-      "pid": "TEST-SLEEPER-2",
+      "pid": "TEST-SLEP-000002",
       "fname": "Christian",
       "lname": "McCaffrey",
       "pname": "C.McCaffrey",
@@ -30,7 +30,7 @@
       "espn_id": 2977186
     },
     {
-      "pid": "TEST-ESPN-1",
+      "pid": "TEST-ESPN-000001",
       "fname": "Travis",
       "lname": "Kelce",
       "pname": "T.Kelce",
@@ -43,7 +43,7 @@
       "espn_id": 14183
     },
     {
-      "pid": "TEST-ESPN-2",
+      "pid": "TEST-ESPN-000002",
       "fname": "Tyreek",
       "lname": "Hill",
       "pname": "T.Hill",
@@ -56,7 +56,7 @@
       "espn_id": 2977187
     },
     {
-      "pid": "TEST-FALLBACK-1",
+      "pid": "TEST-FALL-000001",
       "fname": "Patrick",
       "lname": "Mahomes",
       "pname": "P.Mahomes",
@@ -72,11 +72,11 @@
     "direct_id_mapping": {
       "sleeper": {
         "external_id": "12345",
-        "expected_pid": "TEST-SLEEPER-1"
+        "expected_pid": "TEST-SLEP-000001"
       },
       "espn": {
         "external_id": 14183,
-        "expected_pid": "TEST-ESPN-1"
+        "expected_pid": "TEST-ESPN-000001"
       }
     },
     "fallback_matching": {
@@ -86,7 +86,7 @@
         "position": "QB",
         "team": "KC"
       },
-      "expected_pid": "TEST-FALLBACK-1"
+      "expected_pid": "TEST-FALL-000001"
     },
     "not_found": {
       "external_id": "99999",

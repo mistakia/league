@@ -13,14 +13,14 @@ describe('LIBS-SHARED format_standard_selection_id with safe option', function (
       const result = format_standard_selection_id({
         esbid: '2024111011',
         market_type: 'GAME_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14',
+        pid: 'JARE-GOFF-000460',
         selection_type: 'OVER',
         line: 249.5,
         safe: true,
         source_id: 'FANDUEL'
       })
       expect(result).to.equal(
-        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:OVER|LINE:249.5'
+        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-000460|SEL:OVER|LINE:249.5'
       )
     })
 
@@ -29,14 +29,14 @@ describe('LIBS-SHARED format_standard_selection_id with safe option', function (
         year: 2024,
         seas_type: 'REG',
         market_type: 'SEASON_PASSING_YARDS',
-        pid: 'PATR-MAHO-2017-1995-09-17',
+        pid: 'PATR-MAHO-000756',
         selection_type: 'OVER',
         line: 4500.5,
         safe: true,
         source_id: 'DRAFTKINGS'
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_PASSING_YARDS|PID:PATR-MAHO-2017-1995-09-17|SEL:OVER|LINE:4500.5'
+        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_PASSING_YARDS|PID:PATR-MAHO-000756|SEL:OVER|LINE:4500.5'
       )
     })
 
@@ -57,7 +57,7 @@ describe('LIBS-SHARED format_standard_selection_id with safe option', function (
       const result = format_standard_selection_id({
         esbid: '2024111011',
         market_type: 'INVALID_MARKET_TYPE',
-        pid: 'JARE-GOFF-2016-1994-10-14',
+        pid: 'JARE-GOFF-000460',
         selection_type: 'OVER',
         line: 249.5,
         safe: true,
@@ -66,7 +66,7 @@ describe('LIBS-SHARED format_standard_selection_id with safe option', function (
       expect(result).to.match(/^UNKNOWN\|SOURCE:FANDUEL\|RAW:/)
       expect(result).to.include('esbid=2024111011')
       expect(result).to.include('market_type=INVALID_MARKET_TYPE')
-      expect(result).to.include('pid=JARE-GOFF-2016-1994-10-14')
+      expect(result).to.include('pid=JARE-GOFF-000460')
       expect(result).to.include('sel=OVER')
       expect(result).to.include('line=249.5')
     })
@@ -89,7 +89,7 @@ describe('LIBS-SHARED format_standard_selection_id with safe option', function (
       const result = format_standard_selection_id({
         esbid: '2024111011',
         market_type: 'GAME_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14',
+        pid: 'JARE-GOFF-000460',
         selection_type: 'INVALID_TYPE',
         line: 249.5,
         safe: true,
@@ -102,7 +102,7 @@ describe('LIBS-SHARED format_standard_selection_id with safe option', function (
     it('returns UNKNOWN for missing event identifier', () => {
       const result = format_standard_selection_id({
         market_type: 'GAME_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14',
+        pid: 'JARE-GOFF-000460',
         selection_type: 'OVER',
         line: 249.5,
         safe: true,

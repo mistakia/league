@@ -24,8 +24,8 @@ const make_player = (pid, underdog_id) => ({
   underdog_id
 })
 
-const PID_A = 'TEST-UDOG-A'
-const PID_B = 'TEST-UDOG-B'
+const PID_A = 'TEST-UDOG-000001'
+const PID_B = 'TEST-UDOG-000002'
 
 describe('LIBS-SERVER player underdog_id', function () {
   before(async () => {

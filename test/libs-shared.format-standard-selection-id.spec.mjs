@@ -16,12 +16,12 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
       const result = format_standard_selection_id({
         esbid: '2024111011',
         market_type: 'GAME_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14',
+        pid: 'JARE-GOFF-000460',
         selection_type: 'OVER',
         line: 249.5
       })
       expect(result).to.equal(
-        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:OVER|LINE:249.5'
+        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-000460|SEL:OVER|LINE:249.5'
       )
     })
 
@@ -29,12 +29,12 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
       const result = format_standard_selection_id({
         esbid: '2024111011',
         market_type: 'GAME_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14',
+        pid: 'JARE-GOFF-000460',
         selection_type: 'UNDER',
         line: 249.5
       })
       expect(result).to.equal(
-        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:UNDER|LINE:249.5'
+        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-000460|SEL:UNDER|LINE:249.5'
       )
     })
 
@@ -84,11 +84,11 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
       const result = format_standard_selection_id({
         esbid: '2024111011',
         market_type: 'ANYTIME_TOUCHDOWN',
-        pid: 'TYRE-HILL-2016-1994-03-01',
+        pid: 'TYRE-HILL-000996',
         selection_type: 'YES'
       })
       expect(result).to.equal(
-        'ESBID:2024111011|MARKET:ANYTIME_TOUCHDOWN|PID:TYRE-HILL-2016-1994-03-01|SEL:YES'
+        'ESBID:2024111011|MARKET:ANYTIME_TOUCHDOWN|PID:TYRE-HILL-000996|SEL:YES'
       )
     })
   })
@@ -99,12 +99,12 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         year: 2024,
         seas_type: 'REG',
         market_type: 'SEASON_PASSING_YARDS',
-        pid: 'PATR-MAHO-2017-1995-09-17',
+        pid: 'PATR-MAHO-000756',
         selection_type: 'OVER',
         line: 4500.5
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_PASSING_YARDS|PID:PATR-MAHO-2017-1995-09-17|SEL:OVER|LINE:4500.5'
+        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_PASSING_YARDS|PID:PATR-MAHO-000756|SEL:OVER|LINE:4500.5'
       )
     })
 
@@ -139,10 +139,10 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         year: 2024,
         seas_type: 'REG',
         market_type: 'SEASON_MVP',
-        pid: 'LAMA-JACK-2018-1997-01-07'
+        pid: 'LAMA-JACK-000619'
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_MVP|PID:LAMA-JACK-2018-1997-01-07'
+        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_MVP|PID:LAMA-JACK-000619'
       )
     })
 
@@ -151,10 +151,10 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         year: 2024,
         seas_type: 'REG',
         market_type: 'SEASON_LEADER_PASSING_YARDS',
-        pid: 'PATR-MAHO-2017-1995-09-17'
+        pid: 'PATR-MAHO-000756'
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_LEADER_PASSING_YARDS|PID:PATR-MAHO-2017-1995-09-17'
+        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_LEADER_PASSING_YARDS|PID:PATR-MAHO-000756'
       )
     })
   })
@@ -165,12 +165,12 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         year: 2024,
         seas_type: 'POST',
         market_type: 'PLAYOFF_PASSING_YARDS',
-        pid: 'PATR-MAHO-2017-1995-09-17',
+        pid: 'PATR-MAHO-000756',
         selection_type: 'OVER',
         line: 800.5
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:POST|MARKET:PLAYOFF_PASSING_YARDS|PID:PATR-MAHO-2017-1995-09-17|SEL:OVER|LINE:800.5'
+        'SEAS:2024|SEAS_TYPE:POST|MARKET:PLAYOFF_PASSING_YARDS|PID:PATR-MAHO-000756|SEL:OVER|LINE:800.5'
       )
     })
 
@@ -179,12 +179,12 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         year: 2024,
         seas_type: 'POST',
         market_type: 'PLAYOFF_RUSHING_YARDS',
-        pid: 'DERI-HENR-2016-1994-01-04',
+        pid: 'DERI-HENR-000284',
         selection_type: 'UNDER',
         line: 400.5
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:POST|MARKET:PLAYOFF_RUSHING_YARDS|PID:DERI-HENR-2016-1994-01-04|SEL:UNDER|LINE:400.5'
+        'SEAS:2024|SEAS_TYPE:POST|MARKET:PLAYOFF_RUSHING_YARDS|PID:DERI-HENR-000284|SEL:UNDER|LINE:400.5'
       )
     })
   })
@@ -196,10 +196,10 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         seas_type: 'REG',
         week: 12,
         market_type: 'GAME_LEADER_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14'
+        pid: 'JARE-GOFF-000460'
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|MARKET:GAME_LEADER_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14'
+        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|MARKET:GAME_LEADER_PASSING_YARDS|PID:JARE-GOFF-000460'
       )
     })
   })
@@ -212,10 +212,10 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         week: 12,
         day: 'SUN',
         market_type: 'SUNDAY_LEADER_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14'
+        pid: 'JARE-GOFF-000460'
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|DAY:SUN|MARKET:SUNDAY_LEADER_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14'
+        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|DAY:SUN|MARKET:SUNDAY_LEADER_PASSING_YARDS|PID:JARE-GOFF-000460'
       )
     })
 
@@ -226,10 +226,10 @@ describe('LIBS-SHARED format_standard_selection_id', function () {
         week: 12,
         day: 'SUN',
         market_type: 'SUNDAY_LEADER_RUSHING_YARDS',
-        pid: 'DERI-HENR-2016-1994-01-04'
+        pid: 'DERI-HENR-000284'
       })
       expect(result).to.equal(
-        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|DAY:SUN|MARKET:SUNDAY_LEADER_RUSHING_YARDS|PID:DERI-HENR-2016-1994-01-04'
+        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|DAY:SUN|MARKET:SUNDAY_LEADER_RUSHING_YARDS|PID:DERI-HENR-000284'
       )
     })
   })
@@ -402,11 +402,11 @@ describe('LIBS-SHARED parse_standard_selection_id', function () {
   describe('game events', function () {
     it('parses player game prop', () => {
       const result = parse_standard_selection_id(
-        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:OVER|LINE:249.5'
+        'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-000460|SEL:OVER|LINE:249.5'
       )
       expect(result.esbid).to.equal('2024111011')
       expect(result.market_type).to.equal('GAME_PASSING_YARDS')
-      expect(result.pid).to.equal('JARE-GOFF-2016-1994-10-14')
+      expect(result.pid).to.equal('JARE-GOFF-000460')
       expect(result.selection_type).to.equal('OVER')
       expect(result.line).to.equal(249.5)
       expect(result.event_type).to.equal('game')
@@ -437,12 +437,12 @@ describe('LIBS-SHARED parse_standard_selection_id', function () {
   describe('season events', function () {
     it('parses regular season player prop', () => {
       const result = parse_standard_selection_id(
-        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_PASSING_YARDS|PID:PATR-MAHO-2017-1995-09-17|SEL:OVER|LINE:4500.5'
+        'SEAS:2024|SEAS_TYPE:REG|MARKET:SEASON_PASSING_YARDS|PID:PATR-MAHO-000756|SEL:OVER|LINE:4500.5'
       )
       expect(result.year).to.equal(2024)
       expect(result.seas_type).to.equal('REG')
       expect(result.market_type).to.equal('SEASON_PASSING_YARDS')
-      expect(result.pid).to.equal('PATR-MAHO-2017-1995-09-17')
+      expect(result.pid).to.equal('PATR-MAHO-000756')
       expect(result.selection_type).to.equal('OVER')
       expect(result.line).to.equal(4500.5)
       expect(result.event_type).to.equal('season')
@@ -450,7 +450,7 @@ describe('LIBS-SHARED parse_standard_selection_id', function () {
 
     it('parses playoff event', () => {
       const result = parse_standard_selection_id(
-        'SEAS:2024|SEAS_TYPE:POST|MARKET:PLAYOFF_PASSING_YARDS|PID:PATR-MAHO-2017-1995-09-17|SEL:OVER|LINE:800.5'
+        'SEAS:2024|SEAS_TYPE:POST|MARKET:PLAYOFF_PASSING_YARDS|PID:PATR-MAHO-000756|SEL:OVER|LINE:800.5'
       )
       expect(result.year).to.equal(2024)
       expect(result.seas_type).to.equal('POST')
@@ -462,13 +462,13 @@ describe('LIBS-SHARED parse_standard_selection_id', function () {
   describe('week events', function () {
     it('parses week leader market', () => {
       const result = parse_standard_selection_id(
-        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|MARKET:GAME_LEADER_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14'
+        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|MARKET:GAME_LEADER_PASSING_YARDS|PID:JARE-GOFF-000460'
       )
       expect(result.year).to.equal(2024)
       expect(result.seas_type).to.equal('REG')
       expect(result.week).to.equal(12)
       expect(result.market_type).to.equal('GAME_LEADER_PASSING_YARDS')
-      expect(result.pid).to.equal('JARE-GOFF-2016-1994-10-14')
+      expect(result.pid).to.equal('JARE-GOFF-000460')
       expect(result.event_type).to.equal('week')
     })
   })
@@ -476,14 +476,14 @@ describe('LIBS-SHARED parse_standard_selection_id', function () {
   describe('day events', function () {
     it('parses sunday leader market', () => {
       const result = parse_standard_selection_id(
-        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|DAY:SUN|MARKET:SUNDAY_LEADER_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14'
+        'SEAS:2024|SEAS_TYPE:REG|WEEK:12|DAY:SUN|MARKET:SUNDAY_LEADER_PASSING_YARDS|PID:JARE-GOFF-000460'
       )
       expect(result.year).to.equal(2024)
       expect(result.seas_type).to.equal('REG')
       expect(result.week).to.equal(12)
       expect(result.day).to.equal('SUN')
       expect(result.market_type).to.equal('SUNDAY_LEADER_PASSING_YARDS')
-      expect(result.pid).to.equal('JARE-GOFF-2016-1994-10-14')
+      expect(result.pid).to.equal('JARE-GOFF-000460')
       expect(result.event_type).to.equal('day')
     })
   })
@@ -493,7 +493,7 @@ describe('LIBS-SHARED parse_standard_selection_id', function () {
       const original = {
         esbid: '2024111011',
         market_type: 'GAME_PASSING_YARDS',
-        pid: 'JARE-GOFF-2016-1994-10-14',
+        pid: 'JARE-GOFF-000460',
         selection_type: 'OVER',
         line: 249.5
       }
@@ -512,7 +512,7 @@ describe('LIBS-SHARED parse_standard_selection_id', function () {
         year: 2024,
         seas_type: 'REG',
         market_type: 'SEASON_PASSING_YARDS',
-        pid: 'PATR-MAHO-2017-1995-09-17',
+        pid: 'PATR-MAHO-000756',
         selection_type: 'OVER',
         line: 4500.5
       }

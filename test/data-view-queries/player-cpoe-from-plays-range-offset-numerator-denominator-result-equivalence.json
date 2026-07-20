@@ -23,12 +23,12 @@
   "expected_query": "with \"t4d043ca740216658fcf7143d5502657f\" as materialized (select COALESCE(psr_pid) as pid, SUM(cpoe) as pass_comp_pct_over_expected_from_plays_numerator, SUM(CASE WHEN cpoe IS NOT NULL THEN 1 ELSE 0 END) as pass_comp_pct_over_expected_from_plays_denominator from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"year\" in (2024, 2025) group by COALESCE(psr_pid)) select \"player\".\"pid\", player.fname, player.lname, (SELECT SUM(t4d043ca740216658fcf7143d5502657f.pass_comp_pct_over_expected_from_plays_numerator) / NULLIF(SUM(t4d043ca740216658fcf7143d5502657f.pass_comp_pct_over_expected_from_plays_denominator), 0) FROM t4d043ca740216658fcf7143d5502657f WHERE t4d043ca740216658fcf7143d5502657f.pid = player.pid) AS \"pass_comp_pct_over_expected_from_plays_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
-      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-CPOE-2000-2000-01-01', 'Test', 'Cpoe', 'T.Cpoe', 'Test Cpoe', 'ZZ', 'ZZ', '2000-01-01', 2020)",
-      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, psr_pid, cpoe) VALUES (990001, 1, 2024, 1, 0, 'REG', 'PASS', 'TEST-CPOE-2000-2000-01-01', 2.0)",
-      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, psr_pid, cpoe) VALUES (990001, 2, 2024, 1, 0, 'REG', 'PASS', 'TEST-CPOE-2000-2000-01-01', 4.0)",
-      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, psr_pid, cpoe) VALUES (990002, 1, 2025, 1, 0, 'REG', 'PASS', 'TEST-CPOE-2000-2000-01-01', 6.0)"
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-CPOE-000899', 'Test', 'Cpoe', 'T.Cpoe', 'Test Cpoe', 'ZZ', 'ZZ', '2000-01-01', 2020)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, psr_pid, cpoe) VALUES (990001, 1, 2024, 1, 0, 'REG', 'PASS', 'TEST-CPOE-000899', 2.0)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, psr_pid, cpoe) VALUES (990001, 2, 2024, 1, 0, 'REG', 'PASS', 'TEST-CPOE-000899', 4.0)",
+      "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, psr_pid, cpoe) VALUES (990002, 1, 2025, 1, 0, 'REG', 'PASS', 'TEST-CPOE-000899', 6.0)"
     ],
-    "reference_sql": "SELECT SUM(cpoe) / NULLIF(SUM(CASE WHEN cpoe IS NOT NULL THEN 1 ELSE 0 END), 0) AS pass_comp_pct_over_expected_from_plays_0 FROM nfl_plays WHERE psr_pid = 'TEST-CPOE-2000-2000-01-01' AND year IN (2024, 2025) AND seas_type = 'REG' AND play_type <> 'NOPL'",
+    "reference_sql": "SELECT SUM(cpoe) / NULLIF(SUM(CASE WHEN cpoe IS NOT NULL THEN 1 ELSE 0 END), 0) AS pass_comp_pct_over_expected_from_plays_0 FROM nfl_plays WHERE psr_pid = 'TEST-CPOE-000899' AND year IN (2024, 2025) AND seas_type = 'REG' AND play_type <> 'NOPL'",
     "compare_columns": ["pass_comp_pct_over_expected_from_plays_0"]
   },
   "tags": [

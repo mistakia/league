@@ -24,11 +24,11 @@
   "result_equivalence": {
     "seed": [
       "INSERT INTO league_formats (num_teams, sqb, srb, swr, ste, srbwr, srbwrte, sqbrbwrte, swrte, sdst, sk, bench, ps, reserve_short_term_limit, cap, id, scoring_format_id) VALUES (10, 1, 2, 2, 1, 1, 1, 0, 0, 1, 1, 6, 4, 3, 200, 'genesis_10_team', 'draftkings') ON CONFLICT (id) DO NOTHING",
-      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-LGF-2000-2000-01-01', 'Test', 'Lgfmt', 'T.Lgfmt', 'Test Lgfmt', 'ZZ', 'ZZ', '2000-01-01', 2020)",
-      "INSERT INTO league_format_player_seasonlogs (pid, year, startable_games, points_added_earned, points_added_earned_per_game, points_added_earned_rank, points_added_earned_position_rank, earned_salary, points_added_earned_per_game_rank, points_added_earned_per_game_position_rank, points_added_net, points_added_net_per_game, league_format_id) VALUES ('TEST-LGF-2000-2000-01-01', 2024, 10, 80, 5.0, 40, 8, 12.5, 40, 8, 70, 4.0, 'genesis_10_team')",
-      "INSERT INTO league_format_player_seasonlogs (pid, year, startable_games, points_added_earned, points_added_earned_per_game, points_added_earned_rank, points_added_earned_position_rank, earned_salary, points_added_earned_per_game_rank, points_added_earned_per_game_position_rank, points_added_net, points_added_net_per_game, league_format_id) VALUES ('TEST-LGF-2000-2000-01-01', 2025, 12, 240, 15.0, 10, 2, 30.0, 10, 2, 220, 14.0, 'genesis_10_team')"
+      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-LGF-000908', 'Test', 'Lgfmt', 'T.Lgfmt', 'Test Lgfmt', 'ZZ', 'ZZ', '2000-01-01', 2020)",
+      "INSERT INTO league_format_player_seasonlogs (pid, year, startable_games, points_added_earned, points_added_earned_per_game, points_added_earned_rank, points_added_earned_position_rank, earned_salary, points_added_earned_per_game_rank, points_added_earned_per_game_position_rank, points_added_net, points_added_net_per_game, league_format_id) VALUES ('TEST-LGF-000908', 2024, 10, 80, 5.0, 40, 8, 12.5, 40, 8, 70, 4.0, 'genesis_10_team')",
+      "INSERT INTO league_format_player_seasonlogs (pid, year, startable_games, points_added_earned, points_added_earned_per_game, points_added_earned_rank, points_added_earned_position_rank, earned_salary, points_added_earned_per_game_rank, points_added_earned_per_game_position_rank, points_added_net, points_added_net_per_game, league_format_id) VALUES ('TEST-LGF-000908', 2025, 12, 240, 15.0, 10, 2, 30.0, 10, 2, 220, 14.0, 'genesis_10_team')"
     ],
-    "reference_sql": "SELECT AVG(points_added_earned_per_game) AS points_added_earned_per_game_from_seasonlogs_0 FROM league_format_player_seasonlogs WHERE pid = 'TEST-LGF-2000-2000-01-01' AND year IN (2024,2025) AND league_format_id = 'genesis_10_team'",
+    "reference_sql": "SELECT AVG(points_added_earned_per_game) AS points_added_earned_per_game_from_seasonlogs_0 FROM league_format_player_seasonlogs WHERE pid = 'TEST-LGF-000908' AND year IN (2024,2025) AND league_format_id = 'genesis_10_team'",
     "compare_columns": ["points_added_earned_per_game_from_seasonlogs_0"]
   },
   "tags": [

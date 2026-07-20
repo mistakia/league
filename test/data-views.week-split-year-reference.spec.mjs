@@ -25,8 +25,8 @@ const expect = chai.expect
 const YEAR = 2025
 const WEEK = 1
 const NFL_WEEK_ID = `${YEAR}_REG_WEEK_${WEEK}`
-const MAIN_PID = 'XR-0'
-const OTHER_PID = 'XR-5'
+const MAIN_PID = 'XR-ROOK-000000'
+const OTHER_PID = 'XR-ROOK-000005'
 const ESBID_A = 990001
 const ESBID_B = 990002
 

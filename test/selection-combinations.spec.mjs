@@ -27,7 +27,7 @@ describe('API /selection-combinations', function () {
   }
 
   const test_player_1 = {
-    pid: 'TEST-PLAY-2024-1990-01-01',
+    pid: 'TEST-PLAY-000913',
     fname: 'Test',
     lname: 'Quarterback',
     pname: 'T.Quarterback',
@@ -43,7 +43,7 @@ describe('API /selection-combinations', function () {
   }
 
   const test_player_2 = {
-    pid: 'TEST-RECV-2024-1992-02-02',
+    pid: 'TEST-RECV-000919',
     fname: 'Test',
     lname: 'Receiver',
     pname: 'T.Receiver',
@@ -62,8 +62,8 @@ describe('API /selection-combinations', function () {
     combination_id: 9999,
     source_id: 'FANDUEL',
     selection_ids: [
-      'ESBID:2025120799|MARKET:GAME_ALT_PASSING_YARDS|PID:TEST-PLAY-2024-1990-01-01|SEL:OVER|LINE:299.5',
-      'ESBID:2025120799|MARKET:GAME_ALT_RECEIVING_YARDS|PID:TEST-RECV-2024-1992-02-02|SEL:OVER|LINE:99.5'
+      'ESBID:2025120799|MARKET:GAME_ALT_PASSING_YARDS|PID:TEST-PLAY-000913|SEL:OVER|LINE:299.5',
+      'ESBID:2025120799|MARKET:GAME_ALT_RECEIVING_YARDS|PID:TEST-RECV-000919|SEL:OVER|LINE:99.5'
     ],
     esbid: 2025120799,
     year: 2025,
