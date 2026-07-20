@@ -65,7 +65,7 @@ const options = {
         PlayerId: {
           type: 'string',
           description: 'Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD',
-          example: 'PATR-MAHO-2017-1995-09-17',
+          example: 'PATR-MAHO-005785',
           pattern: '^[A-Z]{4}-[A-Z]{4}-\\d{4}-\\d{4}-\\d{2}-\\d{2}$'
         },
         // Common property schemas
@@ -495,7 +495,7 @@ const options = {
             pid: {
               type: 'string',
               description: 'Player ID',
-              example: 'JALE-HURT-2020-1998-08-07'
+              example: 'JALE-HURT-003085'
             },
             sourceid: {
               type: 'integer',
@@ -774,7 +774,7 @@ const options = {
               maxLength: 25,
               description:
                 'Player ID of the baseline player for this position/week',
-              example: 'JACO-MYER-2020-1996-09-10'
+              example: 'JAKO-MEYE-017624'
             },
             type: {
               type: 'string',
@@ -819,7 +819,7 @@ const options = {
             player_id: {
               type: 'string',
               description: 'Player ID',
-              example: 'ALVI-KAME-2022-1999-02-05'
+              example: 'ALVI-KAMA-015215'
             }
           },
           required: ['eligible', 'original_tid', 'player_id']
@@ -845,7 +845,7 @@ const options = {
                   pid: {
                     type: 'string',
                     description: 'Player ID of released player',
-                    example: 'JORD-LOVE-2020-1998-11-02'
+                    example: 'JORD-LOVE-001990'
                   },
                   waiverid: {
                     type: 'integer',
@@ -866,7 +866,7 @@ const options = {
             pid: {
               type: 'string',
               description: 'Player ID to claim',
-              example: 'ALVI-KAME-2022-1999-02-05'
+              example: 'ALVI-KAMA-015215'
             },
             teamId: {
               type: 'integer',
@@ -893,7 +893,7 @@ const options = {
                 type: 'string'
               },
               description: 'Array of player IDs to release',
-              example: ['JORD-LOVE-2020-1998-11-02']
+              example: ['JORD-LOVE-001990']
             },
             super_priority: {
               type: 'boolean',
@@ -930,7 +930,7 @@ const options = {
             pid: {
               type: 'string',
               description: 'Player ID',
-              example: 'ALVI-KAME-2022-1999-02-05'
+              example: 'ALVI-KAMA-015215'
             },
             po: {
               type: 'integer',
@@ -963,7 +963,7 @@ const options = {
                 type: 'string'
               },
               description: 'Array of player IDs to release',
-              example: ['JORD-LOVE-2020-1998-11-02']
+              example: ['JORD-LOVE-001990']
             }
           },
           required: [
@@ -1030,7 +1030,7 @@ const options = {
                 type: 'string'
               },
               description: 'Updated array of player IDs to release',
-              example: ['JORD-LOVE-2020-1998-11-02']
+              example: ['JORD-LOVE-001990']
             }
           },
           required: ['teamId', 'leagueId']
@@ -1055,7 +1055,7 @@ const options = {
                 type: 'string'
               },
               description: 'Updated array of player IDs to release',
-              example: ['JORD-LOVE-2020-1998-11-02']
+              example: ['JORD-LOVE-001990']
             }
           },
           required: ['uid', 'bid', 'release']
@@ -1201,7 +1201,7 @@ const options = {
                     description:
                       'Standard selection ID in format: ESBID:{esbid}|MARKET:{type}|PID:{pid}|SEL:{type}|LINE:{line}',
                     example:
-                      'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:OVER|LINE:249.5'
+                      'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-002009|SEL:OVER|LINE:249.5'
                   },
                   odds: {
                     type: 'integer',
@@ -1220,12 +1220,12 @@ const options = {
               },
               example: [
                 {
-                  id: 'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:OVER|LINE:249.5',
+                  id: 'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-002009|SEL:OVER|LINE:249.5',
                   odds: -110,
                   status: 'WON'
                 },
                 {
-                  id: 'ESBID:2024111011|MARKET:GAME_RUSHING_YARDS|PID:DAVI-MONT-2021-1999-01-25|SEL:OVER|LINE:75.5',
+                  id: 'ESBID:2024111011|MARKET:GAME_RUSHING_YARDS|PID:DAVI-MONT-005910|SEL:OVER|LINE:75.5',
                   odds: -115,
                   status: 'WON'
                 }
@@ -1410,7 +1410,7 @@ const options = {
                   type: 'string',
                   nullable: true,
                   description: 'Player ID who fumbled',
-                  example: 'PATR-MAHO-2017-1995-09-17'
+                  example: 'PATR-MAHO-005785'
                 },
                 fuml: {
                   type: 'boolean',
@@ -1422,7 +1422,7 @@ const options = {
                   type: 'string',
                   nullable: true,
                   description: 'Ball carrier player ID',
-                  example: 'PATR-MAHO-2017-1995-09-17'
+                  example: 'PATR-MAHO-005785'
                 },
                 pass_yds: {
                   type: 'integer',
@@ -1458,19 +1458,19 @@ const options = {
                   type: 'string',
                   nullable: true,
                   description: 'Passer player ID',
-                  example: 'PATR-MAHO-2017-1995-09-17'
+                  example: 'PATR-MAHO-005785'
                 },
                 trg_pid: {
                   type: 'string',
                   nullable: true,
                   description: 'Target player ID',
-                  example: 'TRAV-KELC-2013-1989-10-05'
+                  example: 'TRAV-KELC-002004'
                 },
                 intp_pid: {
                   type: 'string',
                   nullable: true,
                   description: 'Intercepted by player ID',
-                  example: 'MARC-PETE-2017-1995-07-26'
+                  example: 'MARC-PETE-002708'
                 },
                 comp: {
                   type: 'boolean',
@@ -1600,7 +1600,7 @@ const options = {
             pid: {
               type: 'string',
               description: 'Player ID',
-              example: 'PATR-MAHO-2017-1995-09-17'
+              example: 'PATR-MAHO-005785'
             },
             stat_type: {
               type: 'string',
@@ -2159,7 +2159,7 @@ const options = {
                 $ref: '#/components/schemas/PlayerId'
               },
               description: 'Player IDs traded by proposing team',
-              example: ['JALE-HURT-2020-1998-08-07']
+              example: ['JALE-HURT-003085']
             },
             acceptingTeamPlayers: {
               type: 'array',
@@ -2167,7 +2167,7 @@ const options = {
                 $ref: '#/components/schemas/PlayerId'
               },
               description: 'Player IDs traded by accepting team',
-              example: ['PATR-MAHO-2017-1995-09-17']
+              example: ['PATR-MAHO-005785']
             },
             proposingTeamPicks: {
               type: 'array',

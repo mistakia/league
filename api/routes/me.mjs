@@ -132,7 +132,7 @@ const router = express.Router()
  *                     username: 'fantasy_manager'
  *                     email: 'user@example.com'
  *                     lastvisit: '2024-01-15T10:30:00Z'
- *                     watchlist: ['JALE-HURT-2020-1998-08-07', 'PATR-MAHO-2017-1995-09-17']
+ *                     watchlist: ['JALE-HURT-003085', 'PATR-MAHO-005785']
  *                   teams:
  *                     - uid: 13
  *                       name: 'Dynasty Warriors'
@@ -344,7 +344,7 @@ router.get('/?', async (req, res) => {
  *               summary: Update player watchlist
  *               value:
  *                 type: 'watchlist'
- *                 value: ['JALE-HURT-2020-1998-08-07', 'PATR-MAHO-2017-1995-09-17', 'JOSH-ALLE-2018-1996-05-21']
+ *                 value: ['JALE-HURT-003085', 'PATR-MAHO-005785', 'JOSH-ALLE-000098']
  *     responses:
  *       200:
  *         description: User profile updated successfully
@@ -374,7 +374,7 @@ router.get('/?', async (req, res) => {
  *               watchlist_updated:
  *                 summary: Watchlist successfully updated
  *                 value:
- *                   value: ['JALE-HURT-2020-1998-08-07', 'PATR-MAHO-2017-1995-09-17']
+ *                   value: ['JALE-HURT-003085', 'PATR-MAHO-005785']
  *       400:
  *         description: Bad request - validation error or missing parameters
  *         content:

@@ -56,7 +56,7 @@ const router = express.Router({ mergeParams: true })
  *                   pid:
  *                     type: string
  *                     description: Player ID
- *                     example: "JALE-HURT-2020-1998-08-07"
+ *                     example: "JALE-HURT-003085"
  *                   submitted:
  *                     type: integer
  *                     description: Submission timestamp
@@ -133,7 +133,7 @@ router.get('/?', async (req, res) => {
  *               pid:
  *                 type: string
  *                 description: Player ID
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -151,11 +151,11 @@ router.get('/?', async (req, res) => {
  *                 items:
  *                   type: string
  *                 description: Players to release if bid succeeds
- *                 example: ["JORD-LOVE-2020-1998-11-02"]
+ *                 example: ["JORD-LOVE-001990"]
  *               remove:
  *                 type: string
  *                 description: Player to remove tag from (original team only)
- *                 example: "JACO-BURR-2020-1996-12-10"
+ *                 example: "JOEX-BURR-000131"
  *             required:
  *               - pid
  *               - leagueId
@@ -165,18 +165,18 @@ router.get('/?', async (req, res) => {
  *             originalTeamBid:
  *               summary: Original team sets RFA bid
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 bid: 25
  *                 playerTid: 5
  *             competingBid:
  *               summary: Competing team makes offer
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 bid: 30
  *                 playerTid: 5
- *                 release: ["JORD-LOVE-2020-1998-11-02"]
+ *                 release: ["JORD-LOVE-001990"]
  *     responses:
  *       200:
  *         description: Bid created successfully
@@ -204,7 +204,7 @@ router.get('/?', async (req, res) => {
  *                 pid:
  *                   type: string
  *                   description: Player ID
- *                   example: "JALE-HURT-2020-1998-08-07"
+ *                   example: "JALE-HURT-003085"
  *                 submitted:
  *                   type: integer
  *                   description: Submission timestamp
@@ -226,11 +226,11 @@ router.get('/?', async (req, res) => {
  *                   items:
  *                     type: string
  *                   description: Players to release
- *                   example: ["JORD-LOVE-2020-1998-11-02"]
+ *                   example: ["JORD-LOVE-001990"]
  *                 remove:
  *                   type: string
  *                   description: Player tag removed
- *                   example: "JACO-BURR-2020-1996-12-10"
+ *                   example: "JOEX-BURR-000131"
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:
@@ -533,7 +533,7 @@ router.post('/?', async (req, res) => {
  *               pid:
  *                 type: string
  *                 description: Player ID
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -545,7 +545,7 @@ router.post('/?', async (req, res) => {
  *             cancelBid:
  *               summary: Cancel RFA bid
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *     responses:
  *       200:
@@ -700,7 +700,7 @@ router.delete('/?', async (req, res) => {
  *               pid:
  *                 type: string
  *                 description: Player ID
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -714,7 +714,7 @@ router.delete('/?', async (req, res) => {
  *                 items:
  *                   type: string
  *                 description: Updated players to release
- *                 example: ["JORD-LOVE-2020-1998-11-02"]
+ *                 example: ["JORD-LOVE-001990"]
  *             required:
  *               - pid
  *               - leagueId
@@ -723,10 +723,10 @@ router.delete('/?', async (req, res) => {
  *             updateBid:
  *               summary: Update bid amount
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 bid: 30
- *                 release: ["JORD-LOVE-2020-1998-11-02"]
+ *                 release: ["JORD-LOVE-001990"]
  *     responses:
  *       200:
  *         description: Bid updated successfully
@@ -752,7 +752,7 @@ router.delete('/?', async (req, res) => {
  *                   items:
  *                     type: string
  *                   description: Updated release players
- *                   example: ["JORD-LOVE-2020-1998-11-02"]
+ *                   example: ["JORD-LOVE-001990"]
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:
@@ -984,7 +984,7 @@ router.put('/?', async (req, res) => {
  *               pid:
  *                 type: string
  *                 description: Player ID to nominate
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -996,7 +996,7 @@ router.put('/?', async (req, res) => {
  *             nominatePlayer:
  *               summary: Nominate RFA player
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *     responses:
  *       200:
@@ -1121,7 +1121,7 @@ router.post('/nominate/?', async (req, res) => {
  *               pid:
  *                 type: string
  *                 description: Player ID
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -1133,7 +1133,7 @@ router.post('/nominate/?', async (req, res) => {
  *             cancelNomination:
  *               summary: Cancel RFA nomination
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *     responses:
  *       200:

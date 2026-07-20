@@ -72,12 +72,12 @@ if (process.env.NODE_ENV !== 'test') {
  *                 oneOf:
  *                   - type: string
  *                     description: Single player ID
- *                     example: "PATR-MAHO-2017-1995-09-17"
+ *                     example: "PATR-MAHO-005785"
  *                   - type: array
  *                     items:
  *                       type: string
  *                     description: Array of player IDs
- *                     example: ["PATR-MAHO-2017-1995-09-17", "JOSH-ALLE-2018-1996-05-21"]
+ *                     example: ["PATR-MAHO-005785", "JOSH-ALLE-000098"]
  *                     maxItems: 100
  *                 description: Player ID(s) to retrieve specific players
  *     responses:
@@ -103,12 +103,12 @@ if (process.env.NODE_ENV !== 'test') {
  *                           type: string
  *                         nullable: true
  *                         description: List of player IDs that would be released if this bid is successful (only present when authenticated)
- *                         example: ["JORD-LOVE-2020-1998-11-02"]
+ *                         example: ["JORD-LOVE-001990"]
  *             examples:
  *               search_results:
  *                 summary: Search results for "Mahomes"
  *                 value:
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     fname: "Patrick"
  *                     lname: "Mahomes"
  *                     pname: "P.Mahomes"
@@ -128,7 +128,7 @@ if (process.env.NODE_ENV !== 'test') {
  *               specific_player:
  *                 summary: Specific player by ID
  *                 value:
- *                   - pid: "JOSH-ALLE-2018-1996-05-21"
+ *                   - pid: "JOSH-ALLE-000098"
  *                     fname: "Josh"
  *                     lname: "Allen"
  *                     pname: "J.Allen"
@@ -246,7 +246,7 @@ router.post('/?', async (req, res) => {
  *         schema:
  *           type: string
  *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
- *           example: "PATR-MAHO-2017-1995-09-17"
+ *           example: "PATR-MAHO-005785"
  *         description: |
  *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
  *           - FFFF: First 4 characters of first name
@@ -264,7 +264,7 @@ router.post('/?', async (req, res) => {
  *               quarterback:
  *                 summary: NFL Quarterback example
  *                 value:
- *                   pid: "PATR-MAHO-2017-1995-09-17"
+ *                   pid: "PATR-MAHO-005785"
  *                   fname: "Patrick"
  *                   lname: "Mahomes"
  *                   pname: "P.Mahomes"
@@ -285,7 +285,7 @@ router.post('/?', async (req, res) => {
  *               running_back:
  *                 summary: NFL Running Back example
  *                 value:
- *                   pid: "CHRI-MCCA-2017-1996-06-07"
+ *                   pid: "CHRI-MCCA-005372"
  *                   fname: "Christian"
  *                   lname: "McCaffrey"
  *                   pname: "C.McCaffrey"
@@ -387,7 +387,7 @@ router.get('/:pid', async (req, res) => {
  *         schema:
  *           type: string
  *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
- *           example: "PATR-MAHO-2017-1995-09-17"
+ *           example: "PATR-MAHO-005785"
  *         description: |
  *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
  *           - FFFF: First 4 characters of first name
@@ -407,7 +407,7 @@ router.get('/:pid', async (req, res) => {
  *                   pid:
  *                     type: string
  *                     description: Player ID
- *                     example: "PATR-MAHO-2017-1995-09-17"
+ *                     example: "PATR-MAHO-005785"
  *                   date:
  *                     type: string
  *                     format: date
@@ -460,7 +460,7 @@ router.get('/:pid', async (req, res) => {
  *               full_participation:
  *                 summary: Player with full practice participation
  *                 value:
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     date: "2024-01-15"
  *                     status: "FULL"
  *                     week: 18
@@ -469,7 +469,7 @@ router.get('/:pid', async (req, res) => {
  *                     injury: null
  *                     source: "NFL Injury Report"
  *                     timestamp: "2024-01-15T15:30:00Z"
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     date: "2024-01-16"
  *                     status: "FULL"
  *                     week: 18
@@ -481,7 +481,7 @@ router.get('/:pid', async (req, res) => {
  *               limited_participation:
  *                 summary: Player with limited practice participation due to injury
  *                 value:
- *                   - pid: "CHRI-MCCA-2017-1996-06-07"
+ *                   - pid: "CHRI-MCCA-005372"
  *                     date: "2024-01-15"
  *                     status: "LP"
  *                     week: 18
@@ -490,7 +490,7 @@ router.get('/:pid', async (req, res) => {
  *                     injury: "Ankle"
  *                     source: "NFL Injury Report"
  *                     timestamp: "2024-01-15T15:30:00Z"
- *                   - pid: "CHRI-MCCA-2017-1996-06-07"
+ *                   - pid: "CHRI-MCCA-005372"
  *                     date: "2024-01-16"
  *                     status: "DNP"
  *                     week: 18
@@ -570,7 +570,7 @@ router.get('/:pid/practices/?', async (req, res) => {
  *         schema:
  *           type: string
  *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
- *           example: "PATR-MAHO-2017-1995-09-17"
+ *           example: "PATR-MAHO-005785"
  *         description: |
  *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
  *           - FFFF: First 4 characters of first name
@@ -621,7 +621,7 @@ router.get('/:pid/practices/?', async (req, res) => {
  *               quarterback_basic:
  *                 summary: QB game log without position-specific stats
  *                 value:
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     esbid: "2024011401"
  *                     points: 24.5
  *                     pos_rnk: 3
@@ -637,7 +637,7 @@ router.get('/:pid/practices/?', async (req, res) => {
  *               quarterback_detailed:
  *                 summary: QB game log with passing and rushing stats
  *                 value:
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     esbid: "2024011401"
  *                     points: 24.5
  *                     pos_rnk: 3
@@ -662,7 +662,7 @@ router.get('/:pid/practices/?', async (req, res) => {
  *               running_back:
  *                 summary: RB game log with rushing and receiving stats
  *                 value:
- *                   - pid: "CHRI-MCCA-2017-1996-06-07"
+ *                   - pid: "CHRI-MCCA-005372"
  *                     esbid: "2024011401"
  *                     points: 18.7
  *                     pos_rnk: 5
@@ -867,7 +867,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *         schema:
  *           type: string
  *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
- *           example: "PATR-MAHO-2017-1995-09-17"
+ *           example: "PATR-MAHO-005785"
  *         description: |
  *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
  *           - FFFF: First 4 characters of first name

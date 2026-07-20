@@ -48,7 +48,7 @@ const router = express.Router({ mergeParams: true })
  *                         items:
  *                           type: string
  *                         description: Players to release if RFA bid succeeds
- *                         example: ["JORD-LOVE-2020-1998-11-02"]
+ *                         example: ["JORD-LOVE-001990"]
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */

@@ -67,12 +67,12 @@ if (process.env.NODE_ENV !== 'test') {
  *                         items:
  *                           type: string
  *                         description: "List of player IDs that would be released if this bid is successful (only present if authenticated and releases exist)"
- *                         example: ['JACO-MYER-2020-1996-09-10', 'DANT-JONE-2019-1994-12-29']
+ *                         example: ['JAKO-MEYE-017624', 'DANT-JONE-018140']
  *             examples:
  *               unauthenticated_response:
  *                 summary: Response for unauthenticated user
  *                 value:
- *                   - pid: 'PATR-MAHO-2017-1995-09-17'
+ *                   - pid: 'PATR-MAHO-005785'
  *                     fname: 'Patrick'
  *                     lname: 'Mahomes'
  *                     pname: 'P.Mahomes'
@@ -93,7 +93,7 @@ if (process.env.NODE_ENV !== 'test') {
  *               authenticated_with_bids:
  *                 summary: Response for authenticated user with restricted free agency bids
  *                 value:
- *                   - pid: 'PATR-MAHO-2017-1995-09-17'
+ *                   - pid: 'PATR-MAHO-005785'
  *                     fname: 'Patrick'
  *                     lname: 'Mahomes'
  *                     pname: 'P.Mahomes'
@@ -113,8 +113,8 @@ if (process.env.NODE_ENV !== 'test') {
  *                     dob: '1995-09-17'
  *                     bid: 45
  *                     restricted_free_agency_conditional_releases:
- *                       - 'JACO-MYER-2020-1996-09-10'
- *                       - 'DANT-JONE-2019-1994-12-29'
+ *                       - 'JAKO-MEYE-017624'
+ *                       - 'DANT-JONE-018140'
  *       '400':
  *         $ref: '#/components/responses/BadRequestError'
  *       '401':

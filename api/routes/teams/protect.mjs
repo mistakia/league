@@ -41,7 +41,7 @@ const router = express.Router({ mergeParams: true })
  *               pid:
  *                 type: string
  *                 description: Player ID to protect
- *                 example: "ALVI-KAME-2022-1999-02-05"
+ *                 example: "ALVI-KAMA-015215"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -53,7 +53,7 @@ const router = express.Router({ mergeParams: true })
  *             protectPlayer:
  *               summary: Protect practice squad player
  *               value:
- *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 pid: "ALVI-KAMA-015215"
  *                 leagueId: 2
  *     responses:
  *       200:
@@ -66,7 +66,7 @@ const router = express.Router({ mergeParams: true })
  *                 pid:
  *                   type: string
  *                   description: Player ID
- *                   example: "ALVI-KAME-2022-1999-02-05"
+ *                   example: "ALVI-KAMA-015215"
  *                 tid:
  *                   type: integer
  *                   description: Team ID

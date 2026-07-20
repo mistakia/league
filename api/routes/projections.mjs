@@ -47,7 +47,7 @@ const router = express.Router()
  *               quarterback_projection:
  *                 summary: Quarterback season projection
  *                 value:
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     sourceid: 18
  *                     week: 0
  *                     year: 2024
@@ -65,7 +65,7 @@ const router = express.Router()
  *               running_back_projection:
  *                 summary: Running back season projection
  *                 value:
- *                   - pid: "CHRI-MCCA-2017-1996-06-07"
+ *                   - pid: "CHRI-MCCA-005372"
  *                     sourceid: 18
  *                     week: 0
  *                     year: 2024
@@ -155,7 +155,7 @@ router.get('/?', async (req, res) => {
  *         schema:
  *           type: string
  *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
- *         example: "PATR-MAHO-2017-1995-09-17"
+ *         example: "PATR-MAHO-005785"
  *     responses:
  *       200:
  *         description: All projections for the specified player
@@ -166,7 +166,7 @@ router.get('/?', async (req, res) => {
  *               items:
  *                 $ref: '#/components/schemas/Projection'
  *             example:
- *               - pid: "PATR-MAHO-2017-1995-09-17"
+ *               - pid: "PATR-MAHO-005785"
  *                 sourceid: 18
  *                 week: 0
  *                 year: 2024
@@ -181,7 +181,7 @@ router.get('/?', async (req, res) => {
  *                 ry: 180
  *                 tdr: 4
  *                 pts: 285.6
- *               - pid: "PATR-MAHO-2017-1995-09-17"
+ *               - pid: "PATR-MAHO-005785"
  *                 sourceid: 16
  *                 week: 1
  *                 year: 2024
@@ -253,7 +253,7 @@ router.get('/:pid/?', async (req, res) => {
  *         schema:
  *           type: string
  *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
- *         example: "PATR-MAHO-2017-1995-09-17"
+ *         example: "PATR-MAHO-005785"
  *     requestBody:
  *       required: true
  *       content:
@@ -474,7 +474,7 @@ router.put(
  *         schema:
  *           type: string
  *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
- *         example: "PATR-MAHO-2017-1995-09-17"
+ *         example: "PATR-MAHO-005785"
  *     requestBody:
  *       required: true
  *       content:
@@ -526,7 +526,7 @@ router.put(
  *                 pid:
  *                   type: string
  *                   description: Player ID that was deleted
- *                   example: "PATR-MAHO-2017-1995-09-17"
+ *                   example: "PATR-MAHO-005785"
  *               required:
  *                 - success
  *                 - week

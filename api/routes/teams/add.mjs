@@ -34,7 +34,7 @@ const router = express.Router({ mergeParams: true })
  *               pid:
  *                 type: string
  *                 description: Player ID to add
- *                 example: "ALVI-KAME-2022-1999-02-05"
+ *                 example: "ALVI-KAMA-015215"
  *               teamId:
  *                 type: integer
  *                 description: Team ID
@@ -53,7 +53,7 @@ const router = express.Router({ mergeParams: true })
  *                 items:
  *                   type: string
  *                 description: Player IDs to release (optional)
- *                 example: ["JORD-LOVE-2020-1998-11-02"]
+ *                 example: ["JORD-LOVE-001990"]
  *             required:
  *               - pid
  *               - teamId
@@ -63,25 +63,25 @@ const router = express.Router({ mergeParams: true })
  *             addToBench:
  *               summary: Add player to bench
  *               value:
- *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 pid: "ALVI-KAMA-015215"
  *                 teamId: 5
  *                 leagueId: 2
  *                 slot: 4
  *             addToPracticeSquad:
  *               summary: Add player to practice squad
  *               value:
- *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 pid: "ALVI-KAMA-015215"
  *                 teamId: 5
  *                 leagueId: 2
  *                 slot: 5
  *             addWithRelease:
  *               summary: Add player and release another
  *               value:
- *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 pid: "ALVI-KAMA-015215"
  *                 teamId: 5
  *                 leagueId: 2
  *                 slot: 4
- *                 release: ["JORD-LOVE-2020-1998-11-02"]
+ *                 release: ["JORD-LOVE-001990"]
  *     responses:
  *       200:
  *         description: Player added successfully
@@ -95,7 +95,7 @@ const router = express.Router({ mergeParams: true })
  *                   pid:
  *                     type: string
  *                     description: Player ID
- *                     example: "ALVI-KAME-2022-1999-02-05"
+ *                     example: "ALVI-KAMA-015215"
  *                   tid:
  *                     type: integer
  *                     description: Team ID
@@ -130,7 +130,7 @@ const router = express.Router({ mergeParams: true })
  *                       pid:
  *                         type: string
  *                         description: Player ID
- *                         example: "ALVI-KAME-2022-1999-02-05"
+ *                         example: "ALVI-KAMA-015215"
  *                       type:
  *                         type: integer
  *                         description: Transaction type

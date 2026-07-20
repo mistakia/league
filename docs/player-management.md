@@ -121,13 +121,13 @@ Update existing player fields including external IDs:
 ```bash
 # Update team and position
 NODE_ENV=production node scripts/resolve-player-match.mjs update \
-  --pid "PATR-MAHO-2017-1995-09-17" \
+  --pid "PATR-MAHO-005785" \
   --team KC \
   --pos QB
 
 # Add missing external IDs
 NODE_ENV=production node scripts/resolve-player-match.mjs update \
-  --pid "PATR-MAHO-2017-1995-09-17" \
+  --pid "PATR-MAHO-005785" \
   --gsisid "00-0033873" \
   --gsis-it-id "46046" \
   --pfr-id "MahoPa00"
@@ -247,7 +247,7 @@ The PFR audit (`audit-player-gamelogs.mjs`) matches gamelogs by `pfr_id`, `week`
 
    ```bash
    NODE_ENV=production node scripts/resolve-player-match.mjs add-alias \
-     --pid "PATR-MAHO-2017-1995-09-17" \
+     --pid "PATR-MAHO-005785" \
      --alias "Patrick Mahomes II"
    ```
 

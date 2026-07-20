@@ -39,7 +39,7 @@ const router = express.Router({ mergeParams: true })
  *               pid:
  *                 type: string
  *                 description: Player ID to tag
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -51,7 +51,7 @@ const router = express.Router({ mergeParams: true })
  *               remove:
  *                 type: string
  *                 description: Player ID to remove existing tag from (optional)
- *                 example: "JORD-LOVE-2020-1998-11-02"
+ *                 example: "JORD-LOVE-001990"
  *             required:
  *               - pid
  *               - leagueId
@@ -60,22 +60,22 @@ const router = express.Router({ mergeParams: true })
  *             franchiseTag:
  *               summary: Apply franchise tag
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 tag: 3
  *             transitionTag:
  *               summary: Apply transition tag
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 tag: 4
  *             tagWithRemove:
  *               summary: Tag player and remove existing tag
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 tag: 3
- *                 remove: "JORD-LOVE-2020-1998-11-02"
+ *                 remove: "JORD-LOVE-001990"
  *     responses:
  *       200:
  *         description: Player tagged successfully
@@ -249,7 +249,7 @@ router.post('/?', async (req, res) => {
  *               pid:
  *                 type: string
  *                 description: Player ID to remove tag from
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -261,7 +261,7 @@ router.post('/?', async (req, res) => {
  *             removeTag:
  *               summary: Remove player tag
  *               value:
- *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *     responses:
  *       200:
@@ -277,7 +277,7 @@ router.post('/?', async (req, res) => {
  *                 pid:
  *                   type: string
  *                   description: Player ID
- *                   example: "JALE-HURT-2020-1998-08-07"
+ *                   example: "JALE-HURT-003085"
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:

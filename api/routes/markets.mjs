@@ -541,7 +541,7 @@ router.get('/:source_market_id/history', async (req, res) => {
  *           type: string
  *           pattern: '^[a-zA-Z0-9-]+$'
  *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
- *         example: "PATR-MAHO-2017-1995-09-17"
+ *         example: "PATR-MAHO-005785"
  *       - $ref: '#/components/parameters/week'
  *       - $ref: '#/components/parameters/year'
  *       - name: seas_type
@@ -586,7 +586,7 @@ router.get('/:source_market_id/history', async (req, res) => {
  *                       selection_pid:
  *                         type: string
  *                         description: Player ID this market is for
- *                         example: "PATR-MAHO-2017-1995-09-17"
+ *                         example: "PATR-MAHO-005785"
  *                       source_market_id:
  *                         type: string
  *                         description: Unique market identifier from sportsbook
@@ -604,7 +604,7 @@ router.get('/:source_market_id/history', async (req, res) => {
  *                     open: true
  *                     live: false
  *                     settled: false
- *                     selection_pid: "PATR-MAHO-2017-1995-09-17"
+ *                     selection_pid: "PATR-MAHO-005785"
  *                     selections:
  *                       - selection_name: "Over"
  *                         selection_type: "OVER"
@@ -626,7 +626,7 @@ router.get('/:source_market_id/history', async (req, res) => {
  *                     open: true
  *                     live: false
  *                     settled: false
- *                     selection_pid: "CHRI-MCCA-2017-1996-06-07"
+ *                     selection_pid: "CHRI-MCCA-005372"
  *                     selections:
  *                       - selection_name: "Over"
  *                         selection_type: "OVER"
@@ -817,7 +817,7 @@ router.get('/players/:pid', async (req, res) => {
  *                         type: string
  *                         nullable: true
  *                         description: Player ID if this is a player prop market
- *                         example: "PATR-MAHO-2017-1995-09-17"
+ *                         example: "PATR-MAHO-005785"
  *             examples:
  *               game_markets_mix:
  *                 summary: Mixed game and player markets
@@ -829,7 +829,7 @@ router.get('/players/:pid', async (req, res) => {
  *                     open: true
  *                     live: false
  *                     settled: false
- *                     selection_pid: "PATR-MAHO-2017-1995-09-17"
+ *                     selection_pid: "PATR-MAHO-005785"
  *                     selections:
  *                       - selection_name: "Over"
  *                         selection_type: "OVER"
@@ -975,7 +975,7 @@ router.get('/games/:esbid', async (req, res) => {
  *                       type: string
  *                       nullable: true
  *                       description: Player ID if this is a player prop market
- *                       example: "PATR-MAHO-2017-1995-09-17"
+ *                       example: "PATR-MAHO-005785"
  *                     selections:
  *                       type: array
  *                       items:
@@ -1005,7 +1005,7 @@ router.get('/games/:esbid', async (req, res) => {
  *                   open: true
  *                   live: false
  *                   settled: false
- *                   selection_pid: "PATR-MAHO-2017-1995-09-17"
+ *                   selection_pid: "PATR-MAHO-005785"
  *                   selections:
  *                     - selection_name: "Over"
  *                       selection_type: "OVER"

@@ -37,7 +37,7 @@ const router = express.Router({ mergeParams: true })
  *               reserve_pid:
  *                 type: string
  *                 description: Player ID to move to reserve
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -50,7 +50,7 @@ const router = express.Router({ mergeParams: true })
  *               activate_pid:
  *                 type: string
  *                 description: Player ID to activate from reserve (optional)
- *                 example: "JACO-BURR-2020-1996-12-10"
+ *                 example: "JOEX-BURR-000131"
  *             required:
  *               - reserve_pid
  *               - leagueId
@@ -59,16 +59,16 @@ const router = express.Router({ mergeParams: true })
  *             moveToShortTermReserve:
  *               summary: Move player to Short Term Reserve
  *               value:
- *                 reserve_pid: "JALE-HURT-2020-1998-08-07"
+ *                 reserve_pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 slot: 7
  *             moveToShortTermReserveAndActivate:
  *               summary: Move to Short Term Reserve and activate another
  *               value:
- *                 reserve_pid: "JALE-HURT-2020-1998-08-07"
+ *                 reserve_pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 slot: 7
- *                 activate_pid: "JACO-BURR-2020-1996-12-10"
+ *                 activate_pid: "JOEX-BURR-000131"
  *     responses:
  *       200:
  *         description: Player moved to reserve successfully
@@ -80,7 +80,7 @@ const router = express.Router({ mergeParams: true })
  *                 pid:
  *                   type: string
  *                   description: Player ID
- *                   example: "JALE-HURT-2020-1998-08-07"
+ *                   example: "JALE-HURT-003085"
  *                 tid:
  *                   type: integer
  *                   description: Team ID

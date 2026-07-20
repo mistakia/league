@@ -70,7 +70,7 @@ const get_selection_id_from_source = async ({
 
   // Determine if this is a team-based market
   // For team markets, selection_pid contains a team abbreviation (e.g., 'ATL', 'KC')
-  // For player markets, selection_pid contains a player ID (e.g., 'PATR-MAHO-2017-1995-09-17')
+  // For player markets, selection_pid contains a player ID (e.g., 'PATR-MAHO-005785')
   const is_team_market = team_market_types.has(market_type)
 
   // Use format_standard_selection_id with safe=true for consistent error handling

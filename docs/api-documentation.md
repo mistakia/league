@@ -105,7 +105,7 @@ Common query parameters:
 
 ## Data Types
 
-- **Player ID (pid)** - String format like "AARI-PENT-2017-1994-09-03" (see: FFFF-LLLL-YYYY-YYYY-MM-DD, where FFFF = first four letters of first name, LLLL = first four of last name, YYYY = draft year, YYYY-MM-DD = date of birth; DSTs use team abbreviation)
+- **Player ID (pid)** - String format like "AARI-PENT-008269" (see: FFFF-LLLL-YYYY-YYYY-MM-DD, where FFFF = first four letters of first name, LLLL = first four of last name, YYYY = draft year, YYYY-MM-DD = date of birth; DSTs use team abbreviation)
 - **League ID (lid or league_id)** - Integer (xo.football internal ID)
 - **Team ID (tid)** - Integer (xo.football internal ID)
 - **Week** - Integer (0-18)

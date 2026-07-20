@@ -36,7 +36,7 @@ const router = express.Router({ mergeParams: true })
  *               activate_pid:
  *                 type: string
  *                 description: Player ID to activate
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -44,11 +44,11 @@ const router = express.Router({ mergeParams: true })
  *               release_pid:
  *                 type: string
  *                 description: Player ID to release (optional)
- *                 example: "JORD-LOVE-2020-1998-11-02"
+ *                 example: "JORD-LOVE-001990"
  *               reserve_pid:
  *                 type: string
  *                 description: Player ID to move to reserve (optional)
- *                 example: "JACO-BURR-2020-1996-12-10"
+ *                 example: "JOEX-BURR-000131"
  *               deactivate_pid:
  *                 type: string
  *                 description: Player ID to deactivate to practice squad (optional, use when activating from practice squad)
@@ -65,25 +65,25 @@ const router = express.Router({ mergeParams: true })
  *             simpleActivation:
  *               summary: Simple activation from practice squad
  *               value:
- *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 activate_pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *             activateWithRelease:
  *               summary: Activate player and release another
  *               value:
- *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 activate_pid: "JALE-HURT-003085"
  *                 leagueId: 2
- *                 release_pid: "JORD-LOVE-2020-1998-11-02"
+ *                 release_pid: "JORD-LOVE-001990"
  *             activateWithReserve:
  *               summary: Activate player and move another to Short Term Reserve
  *               value:
- *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 activate_pid: "JALE-HURT-003085"
  *                 leagueId: 2
- *                 reserve_pid: "JACO-BURR-2020-1996-12-10"
+ *                 reserve_pid: "JOEX-BURR-000131"
  *                 slot: 7
  *             activateWithDeactivate:
  *               summary: Activate player from practice squad and deactivate another signed practice squad player
  *               value:
- *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 activate_pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *                 deactivate_pid: "AMON-ST-B-2023-2001-04-24"
  *     responses:
@@ -97,7 +97,7 @@ const router = express.Router({ mergeParams: true })
  *                 pid:
  *                   type: string
  *                   description: Player ID
- *                   example: "JALE-HURT-2020-1998-08-07"
+ *                   example: "JALE-HURT-003085"
  *                 tid:
  *                   type: integer
  *                   description: Team ID

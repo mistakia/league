@@ -49,7 +49,7 @@ const router = express.Router({ mergeParams: true })
  *         schema:
  *           type: string
  *         description: Player ID
- *         example: 'ALVI-KAME-2022-1999-02-05'
+ *         example: 'ALVI-KAMA-015215'
  *     responses:
  *       200:
  *         description: Super priority status retrieved successfully
@@ -62,12 +62,12 @@ const router = express.Router({ mergeParams: true })
  *                 value:
  *                   eligible: true
  *                   original_tid: 5
- *                   player_id: 'ALVI-KAME-2022-1999-02-05'
+ *                   player_id: 'ALVI-KAMA-015215'
  *               not_eligible:
  *                 value:
  *                   eligible: false
  *                   original_tid: null
- *                   player_id: 'ALVI-KAME-2022-1999-02-05'
+ *                   player_id: 'ALVI-KAMA-015215'
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
@@ -133,7 +133,7 @@ router.get('/super-priority/:pid', async (req, res) => {
  *                   - uid: 12345
  *                     processed: 1640995200
  *                     release:
- *                       - pid: 'JORD-LOVE-2020-1998-11-02'
+ *                       - pid: 'JORD-LOVE-001990'
  *                   - uid: 12346
  *                     processed: 1640908800
  *                     release: []
@@ -205,16 +205,16 @@ router.get('/?', async (req, res) => {
  *             free_agency_claim:
  *               summary: Free agency waiver claim with bid and release
  *               value:
- *                 pid: 'ALVI-KAME-2022-1999-02-05'
+ *                 pid: 'ALVI-KAMA-015215'
  *                 teamId: 5
  *                 leagueId: 2
  *                 type: 1
  *                 bid: 50
- *                 release: ['JORD-LOVE-2020-1998-11-02']
+ *                 release: ['JORD-LOVE-001990']
  *             practice_squad_claim:
  *               summary: Practice squad waiver claim
  *               value:
- *                 pid: 'DAMI-HARR-2019-1997-01-09'
+ *                 pid: 'DAMI-HARR-015645'
  *                 teamId: 5
  *                 leagueId: 2
  *                 type: 3
@@ -223,7 +223,7 @@ router.get('/?', async (req, res) => {
  *             poach_claim:
  *               summary: Practice squad poaching claim
  *               value:
- *                 pid: 'ISAI-PACH-2022-1999-07-22'
+ *                 pid: 'ISIA-PACH-015734'
  *                 teamId: 5
  *                 leagueId: 2
  *                 type: 2
@@ -232,7 +232,7 @@ router.get('/?', async (req, res) => {
  *             super_priority_claim:
  *               summary: Super priority practice squad claim
  *               value:
- *                 pid: 'ALVI-KAME-2022-1999-02-05'
+ *                 pid: 'ALVI-KAMA-015215'
  *                 teamId: 5
  *                 leagueId: 2
  *                 type: 3
@@ -253,13 +253,13 @@ router.get('/?', async (req, res) => {
  *                   tid: 5
  *                   userid: 1
  *                   lid: 2
- *                   pid: 'ALVI-KAME-2022-1999-02-05'
+ *                   pid: 'ALVI-KAMA-015215'
  *                   po: 9999
  *                   submitted: 1640995200
  *                   bid: 50
  *                   type: 1
  *                   super_priority: 0
- *                   release: ['JORD-LOVE-2020-1998-11-02']
+ *                   release: ['JORD-LOVE-001990']
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:
@@ -780,7 +780,7 @@ router.put('/order', async (req, res) => {
  *                 teamId: 5
  *                 leagueId: 2
  *                 bid: 75
- *                 release: ['JORD-LOVE-2020-1998-11-02', 'DAMI-HARR-2019-1997-01-09']
+ *                 release: ['JORD-LOVE-001990', 'DAMI-HARR-015645']
  *             update_bid_only:
  *               summary: Update bid amount only
  *               value:
@@ -800,7 +800,7 @@ router.put('/order', async (req, res) => {
  *                 value:
  *                   uid: 12345
  *                   bid: 75
- *                   release: ['JORD-LOVE-2020-1998-11-02', 'DAMI-HARR-2019-1997-01-09']
+ *                   release: ['JORD-LOVE-001990', 'DAMI-HARR-015645']
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:

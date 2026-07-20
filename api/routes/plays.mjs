@@ -381,7 +381,7 @@ router.get('/all', async (req, res) => {
  *                   - esbid: "2024120801"
  *                     playId: 1
  *                     week: 13
- *                     pid: "PATR-MAHO-2017-1995-09-17"
+ *                     pid: "PATR-MAHO-005785"
  *                     stat_type: "PASSING"
  *                     yards: 15
  *                     touchdown: false
@@ -475,7 +475,7 @@ router.get('/stats', async (req, res) => {
  *         schema:
  *           type: string
  *         description: Filter by player ID (shows plays for their team)
- *         example: "PATR-MAHO-2017-1995-09-17"
+ *         example: "PATR-MAHO-005785"
  *     responses:
  *       200:
  *         description: Historical NFL plays matching filters
@@ -503,7 +503,7 @@ router.get('/stats', async (req, res) => {
  *                     qtr: 1
  *                     play_type: "RUSH"
  *                     yards_gained: 7
- *                     bc_pid: "PATR-MAHO-2017-1995-09-17"
+ *                     bc_pid: "PATR-MAHO-005785"
  *                     rush_yds: 7
  *                     first_down: false
  *                     successful_play: true

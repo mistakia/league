@@ -56,7 +56,7 @@ const cache_path = path.join(os.homedir(), './cache')
  *                   example: {
  *                     "players": [
  *                       {
- *                         "pid": "PATR-MAHO-2017-1995-09-17",
+ *                         "pid": "PATR-MAHO-005785",
  *                         "name": "Patrick Mahomes",
  *                         "passing_yards": 285
  *                       }
@@ -72,7 +72,7 @@ const cache_path = path.join(os.homedir(), './cache')
  *                   key: "player_stats/2024/week_4"
  *                   value:
  *                     players:
- *                       - pid: "PATR-MAHO-2017-1995-09-17"
+ *                       - pid: "PATR-MAHO-005785"
  *                         name: "Patrick Mahomes"
  *                         passing_yards: 285
  *               cache_miss:
@@ -172,7 +172,7 @@ router.get('/:cache_key(*)', async (req, res) => {
  *               summary: Player statistics data
  *               value:
  *                 players:
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     name: "Patrick Mahomes"
  *                     passing_yards: 285
  *                     touchdowns: 3
@@ -212,7 +212,7 @@ router.get('/:cache_key(*)', async (req, res) => {
  *                   example: {
  *                     "players": [
  *                       {
- *                         "pid": "PATR-MAHO-2017-1995-09-17",
+ *                         "pid": "PATR-MAHO-005785",
  *                         "name": "Patrick Mahomes",
  *                         "passing_yards": 285
  *                       }
@@ -225,7 +225,7 @@ router.get('/:cache_key(*)', async (req, res) => {
  *               key: "player_stats/2024/week_4"
  *               value:
  *                 players:
- *                   - pid: "PATR-MAHO-2017-1995-09-17"
+ *                   - pid: "PATR-MAHO-005785"
  *                     name: "Patrick Mahomes"
  *                     passing_yards: 285
  *       400:

@@ -27,13 +27,13 @@ const router = express.Router({ mergeParams: true })
  *               - lid: 2
  *                 week: "1"
  *                 year: 2024
- *                 pid: "JACO-MYER-2020-1996-09-10"
+ *                 pid: "JAKO-MEYE-017624"
  *                 type: "starter"
  *                 pos: "WR"
  *               - lid: 2
  *                 week: "1"
  *                 year: 2024
- *                 pid: "DEON-JACK-2021-1997-12-13"
+ *                 pid: "DEON-JACK-006958"
  *                 type: "starter"
  *                 pos: "RB"
  *       400:

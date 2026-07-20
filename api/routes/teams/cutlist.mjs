@@ -31,8 +31,8 @@ const router = express.Router({ mergeParams: true })
  *               items:
  *                 type: string
  *                 description: Player ID
- *                 example: "JORD-LOVE-2020-1998-11-02"
- *               example: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *                 example: "JORD-LOVE-001990"
+ *               example: ["JORD-LOVE-001990", "ALVI-KAMA-015215"]
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:
@@ -98,7 +98,7 @@ router.get('/?', async (req, res) => {
  *                 items:
  *                   type: string
  *                 description: Ordered list of player IDs (first to be cut first)
- *                 example: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *                 example: ["JORD-LOVE-001990", "ALVI-KAMA-015215"]
  *             required:
  *               - leagueId
  *               - pids
@@ -107,7 +107,7 @@ router.get('/?', async (req, res) => {
  *               summary: Set cutlist order
  *               value:
  *                 leagueId: 2
- *                 pids: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *                 pids: ["JORD-LOVE-001990", "ALVI-KAMA-015215"]
  *     responses:
  *       200:
  *         description: Cutlist updated successfully
@@ -118,8 +118,8 @@ router.get('/?', async (req, res) => {
  *               items:
  *                 type: string
  *                 description: Player ID
- *                 example: "JORD-LOVE-2020-1998-11-02"
- *               example: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *                 example: "JORD-LOVE-001990"
+ *               example: ["JORD-LOVE-001990", "ALVI-KAMA-015215"]
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:

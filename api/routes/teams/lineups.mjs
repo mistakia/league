@@ -116,7 +116,7 @@ router.get('/?', async (req, res) => {
  *                     pid:
  *                       type: string
  *                       description: Player ID
- *                       example: "JALE-HURT-2020-1998-08-07"
+ *                       example: "JALE-HURT-003085"
  *                     slot:
  *                       type: integer
  *                       description: Target slot
@@ -134,9 +134,9 @@ router.get('/?', async (req, res) => {
  *               value:
  *                 leagueId: 2
  *                 players:
- *                   - pid: "JALE-HURT-2020-1998-08-07"
+ *                   - pid: "JALE-HURT-003085"
  *                     slot: 0
- *                   - pid: "JORD-LOVE-2020-1998-11-02"
+ *                   - pid: "JORD-LOVE-001990"
  *                     slot: 4
  *     responses:
  *       200:
@@ -155,7 +155,7 @@ router.get('/?', async (req, res) => {
  *                   pid:
  *                     type: string
  *                     description: Player ID
- *                     example: "JALE-HURT-2020-1998-08-07"
+ *                     example: "JALE-HURT-003085"
  *                   week:
  *                     type: integer
  *                     description: Week number

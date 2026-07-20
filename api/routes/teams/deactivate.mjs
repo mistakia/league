@@ -37,7 +37,7 @@ const router = express.Router({ mergeParams: true })
  *               deactivate_pid:
  *                 type: string
  *                 description: Player ID to deactivate
- *                 example: "JALE-HURT-2020-1998-08-07"
+ *                 example: "JALE-HURT-003085"
  *               leagueId:
  *                 type: integer
  *                 description: League ID
@@ -45,7 +45,7 @@ const router = express.Router({ mergeParams: true })
  *               release_pid:
  *                 type: string
  *                 description: Player ID to release from practice squad (optional)
- *                 example: "JORD-LOVE-2020-1998-11-02"
+ *                 example: "JORD-LOVE-001990"
  *             required:
  *               - deactivate_pid
  *               - leagueId
@@ -53,14 +53,14 @@ const router = express.Router({ mergeParams: true })
  *             deactivatePlayer:
  *               summary: Simple deactivation
  *               value:
- *                 deactivate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 deactivate_pid: "JALE-HURT-003085"
  *                 leagueId: 2
  *             deactivateWithRelease:
  *               summary: Deactivate and release practice squad player
  *               value:
- *                 deactivate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 deactivate_pid: "JALE-HURT-003085"
  *                 leagueId: 2
- *                 release_pid: "JORD-LOVE-2020-1998-11-02"
+ *                 release_pid: "JORD-LOVE-001990"
  *     responses:
  *       200:
  *         description: Player deactivated successfully
@@ -72,7 +72,7 @@ const router = express.Router({ mergeParams: true })
  *                 pid:
  *                   type: string
  *                   description: Player ID
- *                   example: "JALE-HURT-2020-1998-08-07"
+ *                   example: "JALE-HURT-003085"
  *                 tid:
  *                   type: integer
  *                   description: Team ID

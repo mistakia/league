@@ -37,7 +37,7 @@ const router = express.Router({ mergeParams: true })
  *               pid:
  *                 type: string
  *                 description: Player ID to release
- *                 example: "JORD-LOVE-2020-1998-11-02"
+ *                 example: "JORD-LOVE-001990"
  *               teamId:
  *                 type: integer
  *                 description: Team ID
@@ -54,7 +54,7 @@ const router = express.Router({ mergeParams: true })
  *             releasePlayer:
  *               summary: Release player from roster
  *               value:
- *                 pid: "JORD-LOVE-2020-1998-11-02"
+ *                 pid: "JORD-LOVE-001990"
  *                 teamId: 5
  *                 leagueId: 2
  *     responses:
@@ -68,7 +68,7 @@ const router = express.Router({ mergeParams: true })
  *                 pid:
  *                   type: string
  *                   description: Player ID
- *                   example: "JORD-LOVE-2020-1998-11-02"
+ *                   example: "JORD-LOVE-001990"
  *                 tid:
  *                   type: integer
  *                   description: Team ID

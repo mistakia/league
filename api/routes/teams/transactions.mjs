@@ -52,7 +52,7 @@ const router = express.Router({ mergeParams: true })
  *                   pid:
  *                     type: string
  *                     description: Player ID
- *                     example: "JALE-HURT-2020-1998-08-07"
+ *                     example: "JALE-HURT-003085"
  *                   type:
  *                     type: integer
  *                     description: Transaction type

@@ -50,12 +50,12 @@ const router = express.Router()
  *                     play_type: "PASS"
  *                     yards_gained: 15
  *                     playStats:
- *                       - pid: "PATR-MAHO-2017-1995-09-17"
+ *                       - pid: "PATR-MAHO-005785"
  *                         stat_type: "PASSING"
  *                         yards: 15
  *                         touchdown: false
  *                         interception: false
- *                       - pid: "TRAV-KELC-2013-1989-10-05"
+ *                       - pid: "TRAV-KELC-002004"
  *                         stat_type: "RECEIVING"
  *                         yards: 15
  *                         touchdown: false
