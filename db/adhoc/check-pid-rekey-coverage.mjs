@@ -54,10 +54,18 @@ const TEAM_UNIT = '^[A-Z]{2,3}(-(OFF|DEF|DST))?$'
 // columns (via `pid_%`). Including pid_a/pid_b closes the oracle blind spot -- they
 // match neither `pid` nor `%_pid`, so a stale value there would otherwise go unseen.
 const enumerate_pid_columns = async ({ include_player = false } = {}) => {
+  // Skip partition PARENTS (relkind 'p'): a parent scan reads every child, so
+  // enumerating both parent and children double-scans the whole partition set (the
+  // nfl_plays parent alone = ~25 pid columns x ~80M rows). The leaf children ('r')
+  // cover exactly the same rows, so relying on them is complete and far cheaper.
   const { rows } = await db.raw(
     `SELECT table_name, column_name FROM information_schema.columns
        WHERE table_schema = current_schema()
          AND (column_name LIKE '%\\_pid' OR column_name = 'pid' OR column_name LIKE 'pid\\_%')
+         AND table_name NOT IN (
+           SELECT c.relname FROM pg_class c
+             JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = current_schema() AND c.relkind = 'p')
          ${include_player ? '' : "AND table_name <> 'player'"}
        ORDER BY table_name, column_name`
   )
@@ -106,35 +114,42 @@ const run_checks = async ({ errors, warnings }) => {
   // was deleted by a historical merge before this migration; no map entry exists), so
   // it is reported as a warning, not a failure.
   for (const { table_name, column_name } of columns) {
-    const stale = await scalar(
-      `SELECT count(*)::int AS n FROM ?? t
-         WHERE t.?? ~ ?
-           AND EXISTS (SELECT 1 FROM player p WHERE p.legacy_pid = t.??)`,
-      [table_name, column_name, OLD_PERSON, column_name]
+    // One single-pass scan per column computes all three counts via two hash
+    // anti-joins against player (legacy_pid and pid are both unique, so no row
+    // fan-out), replacing three separate correlated-subquery scans of the same
+    // (often multi-million-row) table.
+    const { rows: agg } = await db.raw(
+      `SELECT
+         count(*) FILTER (WHERE t.?? ~ ? AND lg.legacy_pid IS NOT NULL)::int AS stale,
+         count(*) FILTER (WHERE t.?? ~ ? AND lg.legacy_pid IS NULL)::int AS orphan_stale,
+         count(*) FILTER (WHERE t.?? IS NOT NULL AND t.?? !~ ? AND pk.pid IS NULL)::int AS dangling
+       FROM ?? t
+       LEFT JOIN player lg ON lg.legacy_pid = t.??
+       LEFT JOIN player pk ON pk.pid = t.??`,
+      [
+        column_name,
+        OLD_PERSON,
+        column_name,
+        OLD_PERSON,
+        column_name,
+        column_name,
+        TEAM_UNIT,
+        table_name,
+        column_name,
+        column_name
+      ]
     )
+    const { stale, orphan_stale, dangling } = agg[0]
     if (stale > 0) {
       errors.push(
         `${table_name}.${column_name}: ${stale} row(s) on an old-shape pid that maps to a live player (should have been remapped)`
       )
     }
-    const orphan_stale = await scalar(
-      `SELECT count(*)::int AS n FROM ?? t
-         WHERE t.?? ~ ?
-           AND NOT EXISTS (SELECT 1 FROM player p WHERE p.legacy_pid = t.??)`,
-      [table_name, column_name, OLD_PERSON, column_name]
-    )
     if (orphan_stale > 0) {
       warnings.push(
         `${table_name}.${column_name}: ${orphan_stale} pre-existing orphaned old pid(s) (no live player; not remappable)`
       )
     }
-    const dangling = await scalar(
-      `SELECT count(*)::int AS n FROM ?? t
-         WHERE t.?? IS NOT NULL
-           AND t.?? !~ ?
-           AND NOT EXISTS (SELECT 1 FROM player p WHERE p.pid = t.??)`,
-      [table_name, column_name, column_name, TEAM_UNIT, column_name]
-    )
     if (dangling > 0) {
       warnings.push(
         `${table_name}.${column_name}: ${dangling} value(s) absent from player.pid (pre-existing orphans?)`
@@ -209,7 +224,7 @@ const run_checks = async ({ errors, warnings }) => {
     JOIN pg_type t ON t.oid = a.atttypid
     JOIN pg_type e ON e.oid = t.typelem
     WHERE n.nspname = current_schema()
-      AND c.relkind IN ('r', 'p')
+      AND c.relkind = 'r'
       AND a.attnum > 0 AND NOT a.attisdropped
       AND t.typcategory = 'A'
       AND e.typcategory = 'S'
