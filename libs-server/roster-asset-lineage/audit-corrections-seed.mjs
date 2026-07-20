@@ -9,7 +9,7 @@ const audit_corrections = [
   {
     lid: 1,
     tid: 11,
-    player_id: 'AJXX-BROW-2019-1997-06-30',
+    player_id: 'AJXX-BROW-007507',
     period_start_ts: 1749074407,
     correction_note:
       '2025-06-03 RFA conditional-release bug: original processing dropped Max Levy (WLB) winning bid due to missing conditional-release records; player was awarded to Daniel Cohen (TTPD) at a lower price. Commissioner rolled back and reprocessed bids; WLB was awarded the player at the correct price.'
