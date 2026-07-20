@@ -19029,7 +19029,7 @@ CREATE TABLE public.play_changelog (
 --
 
 CREATE TABLE public.player (
-    legacy_pid character varying(25) NOT NULL,
+    legacy_pid character varying(25),
     fname character varying(20) NOT NULL,
     lname character varying(40) NOT NULL,
     pname character varying(25) NOT NULL,
@@ -19135,7 +19135,7 @@ CREATE TABLE public.player (
 -- Name: COLUMN player.legacy_pid; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.legacy_pid IS 'player id';
+COMMENT ON COLUMN public.player.legacy_pid IS 'pre-rekey player id, demoted alternate key (nullable; NULL for players minted after the re-key)';
 
 
 --
