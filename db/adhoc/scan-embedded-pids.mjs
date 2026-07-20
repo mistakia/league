@@ -102,9 +102,12 @@ const resolve_inventory_path = () => {
 // here independently would violate the pid_a < pid_b CHECK.
 const enumerate_candidate_columns = async ({ skip_large = false } = {}) => {
   // Join pg_class for reltuples so --skip-large can drop giant tables (whose col::text
-  // scan would be an untenable in-window sequential scan). relkind is not filtered: a
-  // partition parent's reltuples is the family aggregate, so a large partitioned family is
-  // skipped at the parent AND its individual children are judged on their own estimate.
+  // scan would be an untenable sequential scan). Exclude partition PARENTS (relkind 'p'):
+  // a parent scan/UPDATE reads/routes every child, so enumerating both parent and children
+  // double-scans the whole partition family (nfl_plays alone = ~80M rows x dozens of text
+  // columns -- the dominant cost of the verify pass). The leaf children ('r') cover exactly
+  // the same rows, and --skip-large still drops the giants because each child's own
+  // reltuples estimate exceeds the threshold.
   const { rows } = await db.raw(
     `
     SELECT c.table_name, c.column_name, c.data_type
@@ -112,6 +115,7 @@ const enumerate_candidate_columns = async ({ skip_large = false } = {}) => {
     JOIN pg_namespace ns ON ns.nspname = c.table_schema
     JOIN pg_class pc ON pc.relname = c.table_name AND pc.relnamespace = ns.oid
     WHERE c.table_schema = current_schema()
+      AND pc.relkind <> 'p'
       AND c.data_type IN ('text', 'character varying', 'character', 'json', 'jsonb')
       AND c.column_name <> 'pid'
       AND c.column_name NOT LIKE '%\\_pid'
