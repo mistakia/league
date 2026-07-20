@@ -409,7 +409,6 @@ DROP INDEX IF EXISTS public.idx_24798_sportradar_id;
 DROP INDEX IF EXISTS public.idx_24798_sleeper_id;
 DROP INDEX IF EXISTS public.idx_24798_rotoworld_id;
 DROP INDEX IF EXISTS public.idx_24798_rotowire_id;
-DROP INDEX IF EXISTS public.idx_24798_pid;
 DROP INDEX IF EXISTS public.idx_24798_pfr_id;
 DROP INDEX IF EXISTS public.idx_24798_keeptradecut_id;
 DROP INDEX IF EXISTS public.idx_24798_gsispid;
@@ -29245,13 +29244,6 @@ CREATE UNIQUE INDEX idx_24798_pfr_id ON public.player USING btree (pfr_id);
 
 
 --
--- Name: idx_24798_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24798_pid ON public.player USING btree (legacy_pid);
-
-
---
 -- Name: idx_24798_rotowire_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30501,14 +30493,14 @@ CREATE INDEX idx_player_pff_id ON public.player USING btree (pff_id);
 -- Name: idx_player_pid_incl_pos_fname_lname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pid_incl_pos_fname_lname ON public.player USING btree (legacy_pid) INCLUDE (pos, fname, lname);
+CREATE INDEX idx_player_pid_incl_pos_fname_lname ON public.player USING btree (pid) INCLUDE (pos, fname, lname);
 
 
 --
 -- Name: idx_player_pid_pos; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pid_pos ON public.player USING btree (legacy_pid, pos);
+CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
 
 
 --
