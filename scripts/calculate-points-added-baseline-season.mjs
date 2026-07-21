@@ -48,7 +48,7 @@ const calculate_points_added_baseline_season = async ({ league }) => {
   for (; year < current_season.year; year++) {
     const { players } = await calculate_points_added({ year, league })
     const values = Object.values(players)
-    const byPosition = groupBy(values, 'pos')
+    const byPosition = groupBy(values, 'primary_position')
     for (const pos in byPosition) {
       if (data[pos]) {
         data[pos][year] = byPosition[pos]
@@ -76,7 +76,7 @@ const calculate_points_added_baseline_season = async ({ league }) => {
           sums[index].points += player.points
         } else {
           sums[index] = {
-            pos,
+            primary_position: pos,
             rank: index + 1,
             pts_added: player.pts_added_earned,
             value: player.value,
@@ -151,12 +151,12 @@ if (is_main(import.meta.url)) {
 
     for (const player of result) {
       if (player.pts_added > 0) {
-        baselines[player.pos] = player
+        baselines[player.primary_position] = player
       }
 
       p.addRow(
         {
-          position: `${player.pos}${player.rank}`,
+          position: `${player.primary_position}${player.rank}`,
           value: player.pts_added.toFixed(1),
           reg_value: player.regV,
           reg_points: player.regP,
@@ -164,7 +164,7 @@ if (is_main(import.meta.url)) {
           points: player.points.toFixed(1)
         },
         {
-          color: getColor(player.pos)
+          color: getColor(player.primary_position)
         }
       )
     }
@@ -182,7 +182,10 @@ if (is_main(import.meta.url)) {
       }
 
       for (const player of result) {
-        const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
+        const eligibleSlots = get_eligible_slots({
+          pos: player.primary_position,
+          league
+        })
         for (const slot of eligibleSlots) {
           if (starters_pool[slot].length < playerCountBySlot[slot]) {
             starters_pool[slot].push(player)
@@ -196,10 +199,10 @@ if (is_main(import.meta.url)) {
       for (const slot in starters_pool) {
         const players = starters_pool[slot]
         for (const player of players) {
-          if (!starters_pool_by_pos[player.pos]) {
-            starters_pool_by_pos[player.pos] = []
+          if (!starters_pool_by_pos[player.primary_position]) {
+            starters_pool_by_pos[player.primary_position] = []
           }
-          starters_pool_by_pos[player.pos].push(player)
+          starters_pool_by_pos[player.primary_position].push(player)
         }
       }
 

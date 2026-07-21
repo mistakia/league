@@ -103,9 +103,9 @@ const load_team_names = async ({ team_ids }) => {
 const get_player_name = async ({ pid }) => {
   const player = await db('player')
     .where('pid', pid)
-    .first('fname', 'lname', 'pos')
+    .first('first_name', 'last_name', 'primary_position')
   if (player) {
-    return `${player.fname} ${player.lname} (${player.pos})`
+    return `${player.first_name} ${player.last_name} (${player.primary_position})`
   }
   return pid
 }

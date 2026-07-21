@@ -43,8 +43,16 @@ const calculate_points_added = async ({
     .select(
       'scoring_format_player_gamelogs.pid',
       'scoring_format_player_gamelogs.points',
-      'player.pname',
-      'player.pos',
+      'player.short_name',
+      // Aliased (not renamed) to `pos`: this row shape flows unmodified into
+      // libs-shared/calculate-baselines.mjs + calculate-values.mjs, which are
+      // out of scope here and still read `.pos`/`{ pos } = player` as a plain
+      // JS property (not a DB read, so the compat view can't shield them).
+      // Renaming this key would silently zero out every pts_added calculation.
+      // A `primary_position` duplicate is added at push-time below for this
+      // file's own (non-libs-shared) reads; drop the `pos` alias + duplicate
+      // once calculate-baselines.mjs/calculate-values.mjs are repointed.
+      'player.primary_position as pos',
       'player.nfl_draft_year',
       'nfl_games.week',
       'nfl_games.year',
@@ -58,7 +66,7 @@ const calculate_points_added = async ({
     .join('player', 'scoring_format_player_gamelogs.pid', 'player.pid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
-    .whereIn('player.pos', fantasy_positions) // TODO - filter using player_gamelogs.pos
+    .whereIn('player.primary_position', fantasy_positions) // TODO - filter using player_gamelogs.pos
     .where(
       'scoring_format_player_gamelogs.scoring_format_id',
       league.scoring_format_id
@@ -109,9 +117,17 @@ const calculate_points_added = async ({
       item.points[game.week] = { total: game.points }
     }
 
-    const { pname, pos, nfl_draft_year } = games[0]
+    const { short_name, pos, nfl_draft_year } = games[0]
     const pos_rnk = pos_rnk_map[pid] || null
-    players.push({ pid, pname, pos, nfl_draft_year, pos_rnk, ...item })
+    players.push({
+      pid,
+      short_name,
+      pos, // kept for libs-shared/calculate-baselines.mjs + calculate-values.mjs
+      primary_position: pos, // this file's own reads use this key
+      nfl_draft_year,
+      pos_rnk,
+      ...item
+    })
   }
 
   log(`calculating Points Added for ${rows.length} players`)
@@ -127,7 +143,7 @@ const calculate_points_added = async ({
       const p = baseline[position].starter
       baselineTotals[position] += p.points[week].total
       log(
-        `Baseline ${position} of week ${week} is ${p.pname} (${p.pos}) with ${p.points[week].total}pts`
+        `Baseline ${position} of week ${week} is ${p.short_name} (${p.primary_position}) with ${p.points[week].total}pts`
       )
     }
 
@@ -170,7 +186,7 @@ const calculate_points_added = async ({
     player.pts_added.earned_net = earned_net
     player.pts_added_raw_by_week = raw_by_week
 
-    points_by_position[player.pos].push(player.points)
+    points_by_position[player.primary_position].push(player.points)
   }
 
   calculatePrices({
@@ -183,9 +199,9 @@ const calculate_points_added = async ({
   const output = {}
   for (const player of players) {
     output[player.pid] = {
-      player: player.pname,
+      player: player.short_name,
       rookie: player.nfl_draft_year === year,
-      pos: player.pos,
+      primary_position: player.primary_position,
       pos_rnk: player.pos_rnk,
       pts_added_earned: player.pts_added.earned,
       pts_added_net: player.pts_added.earned_net,
@@ -250,13 +266,13 @@ const main = async () => {
           name: player.player,
           pts_added: player.pts_added_earned.toFixed(2),
           points: player.points.toFixed(2),
-          rank: `${player.pos}${player.pos_rnk}`,
+          rank: `${player.primary_position}${player.pos_rnk}`,
           value: `$${player.value}`,
           rookie: player.rookie ? 'rookie' : '',
           startable: player.starts
         },
         {
-          color: getColor(player.pos)
+          color: getColor(player.primary_position)
         }
       )
     }

@@ -38,7 +38,7 @@ const process_nfl_plays_player = async () => {
     .whereNotExists(function () {
       this.select('*')
         .from('player')
-        .whereRaw('player.gsis_it_id = nfl_plays_player.gsis_it_id')
+        .whereRaw('player.gsis_it_player_id = nfl_plays_player.gsis_it_id')
     })
     .where({ year: current_season.year })
     .select('gsis_it_id')
@@ -117,9 +117,9 @@ const process_nfl_plays_player = async () => {
       continue
     }
 
-    if (player_row.gsis_it_id) {
+    if (player_row.gsis_it_player_id) {
       log(player_row)
-      log('Player already has existing gsis_it_id field')
+      log('Player already has existing gsis_it_player_id field')
       continue
     }
 
@@ -127,7 +127,7 @@ const process_nfl_plays_player = async () => {
       await updatePlayer({
         player_row,
         update: {
-          gsis_it_id,
+          gsis_it_player_id: gsis_it_id,
           allow_protected_props: true,
           ignore_retired: true
         }

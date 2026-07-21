@@ -46,8 +46,8 @@ const calculate_points = async ({
   const query = db('player_gamelogs')
     .select(
       'player_gamelogs.*',
-      'player.pname',
-      'player.pos',
+      'player.short_name',
+      'player.primary_position',
       'player.nfl_draft_year',
       'player_gamelogs.pid',
       'nfl_games.week'
@@ -55,7 +55,7 @@ const calculate_points = async ({
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
-    .whereIn('player.pos', fantasy_positions)
+    .whereIn('player.primary_position', fantasy_positions)
     .join('player', 'player_gamelogs.pid', 'player.pid')
 
   if (week !== 'ALL') {
@@ -83,14 +83,14 @@ const calculate_points = async ({
     for (const game of games) {
       const points = calculatePoints({
         stats: game,
-        position: game.pos,
+        position: game.primary_position,
         league
       })
       item.points[game.week] = points
     }
 
-    const { pname, pos, nfl_draft_year } = games[0]
-    players.push({ pid, pname, pos, nfl_draft_year, ...item })
+    const { short_name, primary_position, nfl_draft_year } = games[0]
+    players.push({ pid, short_name, primary_position, nfl_draft_year, ...item })
   }
 
   const points_by_position = {}
@@ -103,7 +103,7 @@ const calculate_points = async ({
       (sum, p) => sum + p.total,
       0
     )
-    points_by_position[player.pos].push(player.total_points)
+    points_by_position[player.primary_position].push(player.total_points)
   }
 
   for (const pos of fantasy_positions) {
@@ -115,10 +115,13 @@ const calculate_points = async ({
   const output = {}
   for (const player of players) {
     output[player.pid] = {
-      player: player.pname,
+      player: player.short_name,
       rookie: player.nfl_draft_year === year,
-      pos_rnk: points_by_position[player.pos].indexOf(player.total_points) + 1,
-      pos: player.pos,
+      pos_rnk:
+        points_by_position[player.primary_position].indexOf(
+          player.total_points
+        ) + 1,
+      primary_position: player.primary_position,
       points: player.total_points,
       games: player.games
     }
@@ -162,12 +165,12 @@ const main = async () => {
           index: index + 1,
           name: player.player,
           points: player.points.toFixed(2),
-          pos: player.pos,
+          pos: player.primary_position,
           rookie: player.rookie ? 'rookie' : '',
           games: player.games.length
         },
         {
-          color: get_color(player.pos)
+          color: get_color(player.primary_position)
         }
       )
     }

@@ -30,25 +30,25 @@ export async function load_position_ranks({ player_ids, year, week }) {
 
   // Load player info (position, current team)
   const players = await db('player')
-    .select('pid', 'pos', 'current_nfl_team')
+    .select('pid', 'primary_position', 'current_nfl_team')
     .whereIn('pid', player_ids)
 
   const player_teams = new Map()
   const player_positions = new Map()
   players.forEach((p) => {
     player_teams.set(p.pid, p.current_nfl_team)
-    player_positions.set(p.pid, p.pos)
+    player_positions.set(p.pid, p.primary_position)
   })
 
   const position_ranks = new Map()
 
   // QB doesn't need positional ranking - only one starter per team
   for (const p of players) {
-    if (p.pos === 'QB') {
+    if (p.primary_position === 'QB') {
       position_ranks.set(p.pid, 'QB')
-    } else if (p.pos === 'K') {
+    } else if (p.primary_position === 'K') {
       position_ranks.set(p.pid, 'K')
-    } else if (p.pos === 'DST') {
+    } else if (p.primary_position === 'DST') {
       position_ranks.set(p.pid, 'DST')
     }
   }
@@ -93,20 +93,24 @@ async function calculate_target_share_ranks({ player_ids, year, week }) {
     .whereIn('player_gamelogs.pid', player_ids)
     .where('nfl_games.year', year)
     .where('nfl_games.week', '<=', week)
-    .whereIn('player.pos', ['WR', 'TE'])
+    .whereIn('player.primary_position', ['WR', 'TE'])
     .select(
       'player_gamelogs.pid',
-      'player.pos',
+      'player.primary_position',
       'player.current_nfl_team',
       db.raw('SUM(player_gamelogs.trg) as total_targets')
     )
-    .groupBy('player_gamelogs.pid', 'player.pos', 'player.current_nfl_team')
+    .groupBy(
+      'player_gamelogs.pid',
+      'player.primary_position',
+      'player.current_nfl_team'
+    )
 
   // Group by team and position, then rank
   const team_position_players = new Map()
 
   for (const row of gamelogs) {
-    const key = `${row.current_nfl_team}:${row.pos}`
+    const key = `${row.current_nfl_team}:${row.primary_position}`
     if (!team_position_players.has(key)) {
       team_position_players.set(key, [])
     }
@@ -141,13 +145,13 @@ async function calculate_target_share_ranks({ player_ids, year, week }) {
   const missing_pids = player_ids.filter((pid) => !position_ranks.has(pid))
   if (missing_pids.length > 0) {
     const missing_players = await db('player')
-      .select('pid', 'pos')
+      .select('pid', 'primary_position')
       .whereIn('pid', missing_pids)
 
     for (const p of missing_players) {
-      if (p.pos === 'WR') {
+      if (p.primary_position === 'WR') {
         position_ranks.set(p.pid, 'WR3')
-      } else if (p.pos === 'TE') {
+      } else if (p.primary_position === 'TE') {
         position_ranks.set(p.pid, 'TE1')
       }
     }
@@ -171,7 +175,7 @@ async function calculate_opportunity_share_ranks({ player_ids, year, week }) {
     .whereIn('player_gamelogs.pid', player_ids)
     .where('nfl_games.year', year)
     .where('nfl_games.week', '<=', week)
-    .where('player.pos', 'RB')
+    .where('player.primary_position', 'RB')
     .select(
       'player_gamelogs.pid',
       'player.current_nfl_team',

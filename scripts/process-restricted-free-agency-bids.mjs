@@ -267,7 +267,7 @@ const run = async ({ dry_run = false } = {}) => {
           .first()
         if (player) {
           log(
-            `DRY RUN: Bid for ${player.fname} ${player.lname} (${player.pos}) is not eligible yet`
+            `DRY RUN: Bid for ${player.first_name} ${player.last_name} (${player.primary_position}) is not eligible yet`
           )
         } else {
           log(
@@ -302,7 +302,7 @@ const run = async ({ dry_run = false } = {}) => {
         .first()
       if (player) {
         log(
-          `DRY RUN: Would process restricted free agency bid for ${player.fname} ${player.lname} (${player.pos}) in league ${lid}`
+          `DRY RUN: Would process restricted free agency bid for ${player.first_name} ${player.last_name} (${player.primary_position}) in league ${lid}`
         )
       } else {
         log(
@@ -347,7 +347,7 @@ const run = async ({ dry_run = false } = {}) => {
           const time_remaining = min_seconds_required - time_since_announcement
           const player = await db('player').where('pid', bid.pid).first()
           const player_name = player
-            ? `${player.fname} ${player.lname} (${player.pos})`
+            ? `${player.first_name} ${player.last_name} (${player.primary_position})`
             : `Player ${bid.pid}`
           log(
             `DRY RUN: Bid for ${player_name} would be eligible in ${Math.ceil(time_remaining / 3600)} hours`

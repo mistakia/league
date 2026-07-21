@@ -44,7 +44,9 @@ async function analyze_player({ pid, lid }) {
   // Get player details
   const player = await db('player').where({ pid }).first()
 
-  log(`Player: ${player?.fname} ${player?.lname} (${player?.pos})`)
+  log(
+    `Player: ${player?.first_name} ${player?.last_name} (${player?.primary_position})`
+  )
 
   log('\n--- Calculated Status (from source tables) ---')
   if (calculated_status.eligible) {
@@ -98,9 +100,9 @@ async function analyze_all_players({ year, lid, validate }) {
     .where('poaching.year', year)
     .select(
       'super_priority.*',
-      'player.fname',
-      'player.lname',
-      'player.pos',
+      'player.first_name',
+      'player.last_name',
+      'player.primary_position',
       'original.name as original_team_name',
       'original.abbrv as original_team_abbrv',
       'poaching.name as poaching_team_name',
@@ -136,7 +138,7 @@ async function analyze_all_players({ year, lid, validate }) {
         (Date.now() / 1000 - record.poach_timestamp) / (24 * 60 * 60)
       )
       log(
-        `${record.fname} ${record.lname} (${record.pos}) - ${record.poaching_team_abbrv} → ${record.original_team_abbrv} | Poached: ${poach_date} (${days_since} days ago)`
+        `${record.first_name} ${record.last_name} (${record.primary_position}) - ${record.poaching_team_abbrv} → ${record.original_team_abbrv} | Poached: ${poach_date} (${days_since} days ago)`
       )
     }
   }
@@ -151,7 +153,7 @@ async function analyze_all_players({ year, lid, validate }) {
         ? new Date(record.claimed_at * 1000).toLocaleDateString()
         : 'Unknown'
       log(
-        `${record.fname} ${record.lname} (${record.pos}) - Claimed: ${claimed_date} | Originally poached: ${poach_date}`
+        `${record.first_name} ${record.last_name} (${record.primary_position}) - Claimed: ${claimed_date} | Originally poached: ${poach_date}`
       )
     }
   }
@@ -175,7 +177,7 @@ async function analyze_all_players({ year, lid, validate }) {
         if (!is_consistent) {
           inconsistencies++
           log(
-            `⚠️  ${record.fname} ${record.lname}: Calculated=${calculated.eligible ? 'eligible' : 'ineligible'}, Cached=${cached_eligible ? 'eligible' : 'ineligible'}`
+            `⚠️  ${record.first_name} ${record.last_name}: Calculated=${calculated.eligible ? 'eligible' : 'ineligible'}, Cached=${cached_eligible ? 'eligible' : 'ineligible'}`
           )
           if (!calculated.eligible) {
             log(`   Reason: ${calculated.reason}`)
@@ -183,7 +185,7 @@ async function analyze_all_players({ year, lid, validate }) {
         }
       } catch (error) {
         log(
-          `❌ Error validating ${record.fname} ${record.lname}: ${error.message}`
+          `❌ Error validating ${record.first_name} ${record.last_name}: ${error.message}`
         )
       }
     }

@@ -9,7 +9,14 @@ import { getTeam } from '#libs-server'
 const get_player_info = async (pid) => {
   try {
     const players = await db('player')
-      .select('pid', 'fname', 'lname', 'formatted', 'pos', 'pos1')
+      .select(
+        'pid',
+        'first_name',
+        'last_name',
+        'formatted_name',
+        'primary_position',
+        'secondary_position'
+      )
       .where({ pid })
       .limit(1)
 
@@ -70,8 +77,9 @@ const format_player_display = (player) => {
     return 'Unknown Player'
   }
 
-  const name = `${player.fname} ${player.lname}` || player.formatted
-  const position = player.pos || player.pos1 || ''
+  const name =
+    `${player.first_name} ${player.last_name}` || player.formatted_name
+  const position = player.primary_position || player.secondary_position || ''
 
   return position ? `${name} (${position})` : name
 }
@@ -134,7 +142,7 @@ export const format_nomination_complete_message = async ({
   const team_name = winning_team.name
   const team_abbrv = winning_team.abbrv || ''
 
-  return `${team_name}${team_abbrv ? ` (${team_abbrv})` : ''} has signed free agent ${player.fname} ${player.lname} (${player.pos}) for $${winning_bid_amount}.`
+  return `${team_name}${team_abbrv ? ` (${team_abbrv})` : ''} has signed free agent ${player.first_name} ${player.last_name} (${player.primary_position}) for $${winning_bid_amount}.`
 }
 
 export default {

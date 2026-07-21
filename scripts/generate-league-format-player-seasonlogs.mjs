@@ -36,7 +36,7 @@ const generate_league_format_player_seasonlogs = async ({
 
   // get league player gamelogs for season
   const gamelogs = await db('league_format_player_gamelogs')
-    .select('league_format_player_gamelogs.*', 'player.pos')
+    .select('league_format_player_gamelogs.*', 'player.primary_position')
     .join('player', 'player.pid', 'league_format_player_gamelogs.pid')
     .join('nfl_games', 'league_format_player_gamelogs.esbid', 'nfl_games.esbid')
     .where({ year, seas_type: 'REG', league_format_id })
@@ -49,7 +49,7 @@ const generate_league_format_player_seasonlogs = async ({
   for (const pid of pids) {
     // get gamelogs for pid
     const player_gamelogs = gamelogs.filter((g) => g.pid === pid)
-    const pos = player_gamelogs[0].pos
+    const pos = player_gamelogs[0].primary_position
 
     const games = player_gamelogs.length
     const points_added_earned = sum(

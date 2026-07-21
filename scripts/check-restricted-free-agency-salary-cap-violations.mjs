@@ -70,7 +70,12 @@ const get_team_display_name = async ({ tid }) => {
 const get_restricted_free_agency_transactions = async ({ tid, lid }) => {
   return await db('transactions')
     .leftJoin('player', 'transactions.pid', 'player.pid')
-    .select('transactions.*', 'player.fname', 'player.lname', 'player.pos')
+    .select(
+      'transactions.*',
+      'player.first_name',
+      'player.last_name',
+      'player.primary_position'
+    )
     .where('transactions.tid', tid)
     .where('transactions.lid', lid)
     .where('transactions.year', CURRENT_YEAR)
@@ -81,8 +86,15 @@ const get_restricted_free_agency_transactions = async ({ tid, lid }) => {
 /**
  * Format player name for display
  */
-const format_player_name = ({ fname, lname, pos, pid }) => {
-  return fname && lname ? `${fname} ${lname} (${pos})` : `Player ${pid}`
+const format_player_name = ({
+  first_name,
+  last_name,
+  primary_position,
+  pid
+}) => {
+  return first_name && last_name
+    ? `${first_name} ${last_name} (${primary_position})`
+    : `Player ${pid}`
 }
 
 /**

@@ -21,7 +21,7 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   for (; year < current_season.year; year++) {
     const { players } = await calculate_points_added({ year, league })
     const values = Object.values(players)
-    const byPosition = groupBy(values, 'pos')
+    const byPosition = groupBy(values, 'primary_position')
     for (const pos in byPosition) {
       if (data[pos]) {
         data[pos][year] = byPosition[pos]
@@ -46,7 +46,7 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
           sums[player.pos_rnk].points += player.points
         } else {
           sums[player.pos_rnk] = {
-            pos,
+            primary_position: pos,
             rank: player.pos_rnk,
             pts_added: player.pts_added_earned,
             value: player.value,
@@ -110,13 +110,13 @@ if (is_main(import.meta.url)) {
     for (const player of result) {
       p.addRow(
         {
-          position: `${player.pos}${player.rank}`,
+          position: `${player.primary_position}${player.rank}`,
           pts_added: player.pts_added_earned.toFixed(1),
           regression: player.reg,
           actual: player.value.toFixed(2)
         },
         {
-          color: getColor(player.pos)
+          color: getColor(player.primary_position)
         }
       )
     }

@@ -59,21 +59,21 @@ function render_roster_groups(roster, players) {
   return slot_groups
     .map((group) => {
       const rows = all
-        .filter((player) => group.slots.includes(player.slot))
-        .map((player) => {
-          const info = players[player.pid] || {}
+        .filter((roster_entry) => group.slots.includes(roster_entry.slot))
+        .map((roster_entry) => {
+          const info = players[roster_entry.pid] || {}
           const tag =
-            player.tag && player.tag !== player_tag_types.REGULAR
-              ? player_tag_display_names[player.tag]
-              : player.extensions
-                ? `Ext x${player.extensions}`
+            roster_entry.tag && roster_entry.tag !== player_tag_types.REGULAR
+              ? player_tag_display_names[roster_entry.tag]
+              : roster_entry.extensions
+                ? `Ext x${roster_entry.extensions}`
                 : ''
           return [
-            roster_slot_display_names[player.slot] || player.slot,
-            info.name || player.pid,
-            info.pos || player.pos,
+            roster_slot_display_names[roster_entry.slot] || roster_entry.slot,
+            info.name || roster_entry.pid,
+            info.primary_position || roster_entry.pos,
             info.nfl_team || '—',
-            `$${player.value}`,
+            `$${roster_entry.value}`,
             tag
           ]
         })

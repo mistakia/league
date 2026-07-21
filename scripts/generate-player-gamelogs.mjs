@@ -105,7 +105,7 @@ const patch_play_stats_from_role_pid = async (playStats) => {
   if (!pids_set.size) return
 
   const players = await db('player')
-    .select('pid', 'gsisid', 'gsispid')
+    .select('pid', 'gsis_player_id', 'smart_player_id')
     .whereIn('pid', [...pids_set])
   const player_by_pid = new Map(players.map((p) => [p.pid, p]))
 
@@ -115,8 +115,8 @@ const patch_play_stats_from_role_pid = async (playStats) => {
     if (!pid) continue
     const player = player_by_pid.get(pid)
     if (!player) continue
-    if (player.gsisid) ps.gsisId = player.gsisid
-    if (player.gsispid) ps.gsispid = player.gsispid
+    if (player.gsis_player_id) ps.gsisId = player.gsis_player_id
+    if (player.smart_player_id) ps.gsispid = player.smart_player_id
     if (ps.gsisId || ps.gsispid) patched++
   }
   log(
@@ -446,19 +446,19 @@ const generate_snap_based_gamelogs = async ({
   const players_with_snaps = await db('nfl_snaps')
     .select(
       'player.pid',
-      'player.pos',
+      'player.primary_position',
       'player.current_nfl_team',
-      'player.gsispid',
+      'player.smart_player_id',
       'nfl_snaps.esbid'
     )
-    .join('player', 'player.gsis_it_id', 'nfl_snaps.gsis_it_id')
+    .join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_id')
     .whereIn('nfl_snaps.esbid', unique_esbids)
     .where('nfl_snaps.year', year)
     .groupBy(
       'player.pid',
-      'player.pos',
+      'player.primary_position',
       'player.current_nfl_team',
-      'player.gsispid',
+      'player.smart_player_id',
       'nfl_snaps.esbid'
     )
     .havingRaw('COUNT(*) > 0')
@@ -524,7 +524,7 @@ const generate_snap_based_gamelogs = async ({
 
       // Priority: 1) existing gamelog tm, 2) play_stats clubCode, 3) current_nfl_team (fallback)
       const gamelog_lookup_key = `${snap_player.pid}_${snap_player.esbid}`
-      const play_stats_lookup_key = `${snap_player.gsispid}_${snap_player.esbid}`
+      const play_stats_lookup_key = `${snap_player.smart_player_id}_${snap_player.esbid}`
       const existing_team = existing_gamelog_team_map[gamelog_lookup_key]
       const play_stats_team = play_stats_team_map[play_stats_lookup_key]
 
@@ -540,7 +540,7 @@ const generate_snap_based_gamelogs = async ({
       player_gamelog_inserts.push({
         esbid: snap_player.esbid,
         pid: snap_player.pid,
-        pos: snap_player.pos,
+        pos: snap_player.primary_position,
         tm: team,
         opp: opponent,
         year,
@@ -627,11 +627,11 @@ const process_player_gamelogs = ({
       continue
     }
 
-    // Skip if already processed via gsispid
+    // Skip if already processed via smart_player_id
     if (
-      player_identifier_field === 'gsisid' &&
-      player_row.gsispid &&
-      processed_player_ids.includes(player_row.gsispid)
+      player_identifier_field === 'gsis_player_id' &&
+      player_row.smart_player_id &&
+      processed_player_ids.includes(player_row.smart_player_id)
     ) {
       continue
     }
@@ -647,13 +647,13 @@ const process_player_gamelogs = ({
 
     const stats = calculateStatsFromPlayStats(play_stats_by_player[player_id])
 
-    if (player_identifier_field === 'gsispid') {
+    if (player_identifier_field === 'smart_player_id') {
       processed_player_ids.push(player_id)
     }
 
     const player_gamelog = format_player_gamelog({
       pid: player_row.pid,
-      pos: player_row.pos,
+      pos: player_row.primary_position,
       tm: fixTeam(play_stat.clubCode),
       opp,
       esbid: play_stat.esbid,
@@ -905,14 +905,20 @@ const generate_player_gamelogs = async ({
   // Load player data
   const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
   const gsispids = Object.keys(play_stats_by_gsispid)
-  const player_gsispid_rows = await db('player').whereIn('gsispid', gsispids)
+  const player_gsispid_rows = await db('player').whereIn(
+    'smart_player_id',
+    gsispids
+  )
   log(
     `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} gsispid players`
   )
 
   const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
   const gsisids = Object.keys(play_stats_by_gsisid)
-  const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
+  const player_gsisid_rows = await db('player').whereIn(
+    'gsis_player_id',
+    gsisids
+  )
   log(
     `loaded play stats for ${Object.keys(play_stats_by_gsisid).length} gsisid players`
   )
@@ -922,7 +928,7 @@ const generate_player_gamelogs = async ({
   process_player_gamelogs({
     play_stats_by_player: play_stats_by_gsispid,
     player_rows: player_gsispid_rows,
-    player_identifier_field: 'gsispid',
+    player_identifier_field: 'smart_player_id',
     team_gamelog_inserts,
     player_gamelog_inserts,
     player_receiving_gamelog_inserts,
@@ -936,7 +942,7 @@ const generate_player_gamelogs = async ({
   process_player_gamelogs({
     play_stats_by_player: play_stats_by_gsisid,
     player_rows: player_gsisid_rows,
-    player_identifier_field: 'gsisid',
+    player_identifier_field: 'gsis_player_id',
     team_gamelog_inserts,
     player_gamelog_inserts,
     player_receiving_gamelog_inserts,

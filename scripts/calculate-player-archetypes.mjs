@@ -122,12 +122,12 @@ const calculate_player_archetypes = async ({ year } = {}) => {
     .where('nfl_games.seas_type', 'REG')
     .select(
       'player_gamelogs.pid',
-      'player.pos',
+      'player.primary_position',
       db.raw('SUM(player_gamelogs.ra) as total_rush_att'),
       db.raw('SUM(player_gamelogs.trg) as total_targets'),
       db.raw('COUNT(DISTINCT player_gamelogs.esbid) as games_played')
     )
-    .groupBy('player_gamelogs.pid', 'player.pos')
+    .groupBy('player_gamelogs.pid', 'player.primary_position')
 
   log(`Found ${player_stats.length} players with gamelogs`)
 
@@ -191,19 +191,19 @@ const calculate_player_archetypes = async ({ year } = {}) => {
     let opportunity_share = null
 
     // QB archetype: based on rushing rate (rush attempts per game)
-    if (player.pos === 'QB') {
+    if (player.primary_position === 'QB') {
       rushing_rate = rush_att / games
       archetype = get_qb_archetype(rushing_rate)
     }
 
     // WR archetype: based on target share
-    if (player.pos === 'WR') {
+    if (player.primary_position === 'WR') {
       target_share = targets / team_targets
       archetype = get_wr_archetype(target_share)
     }
 
     // RB archetype: based on target ratio (targets / opportunities)
-    if (player.pos === 'RB') {
+    if (player.primary_position === 'RB') {
       const opportunities = rush_att + targets
       if (opportunities > 0) {
         opportunity_share = targets / opportunities
@@ -216,7 +216,10 @@ const calculate_player_archetypes = async ({ year } = {}) => {
       archetype_records.push({
         pid: player.pid,
         year,
-        pos: player.pos,
+        // `pos` here is the player_archetypes table's own column (unrelated
+        // to the player-dimension rename); the value read is DB-derived off
+        // the joined `player` row, which does need to follow the rename.
+        pos: player.primary_position,
         archetype,
         rushing_rate: rushing_rate !== null ? rushing_rate.toFixed(2) : null,
         target_share: target_share !== null ? target_share.toFixed(3) : null,

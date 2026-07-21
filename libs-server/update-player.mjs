@@ -10,37 +10,37 @@ import db from '#db'
 const log = debug('update-player')
 debug.enable('update-player')
 
-const excluded_props = ['pid', 'formatted', 'pos']
+const excluded_props = ['pid', 'formatted_name', 'primary_position']
 
 const protected_props = [
-  'nfl_id',
-  'esbid',
-  'gsisid',
-  'gsispid',
-  'gsis_it_id',
-  'sleeper_id',
-  'rotoworld_id',
-  'rotowire_id',
-  'sportradar_id',
-  'espn_id',
-  'fantasy_data_id',
-  'yahoo_id',
-  'keeptradecut_id',
-  'mfl_id',
-  'cbs_id',
-  'swish_id',
-  'rts_id',
-  'pff_id',
-  'otc_id',
-  'fleaflicker_id',
-  'fanduel_id',
-  'draftkings_id',
-  'fantasylabs_id',
-  'cfbref_id',
-  'underdog_id'
+  'nfl_player_id',
+  'esb_player_id',
+  'gsis_player_id',
+  'smart_player_id',
+  'gsis_it_player_id',
+  'sleeper_player_id',
+  'rotoworld_player_id',
+  'rotowire_player_id',
+  'sportradar_player_id',
+  'espn_player_id',
+  'fantasy_data_player_id',
+  'yahoo_player_id',
+  'keeptradecut_player_id',
+  'mfl_player_id',
+  'cbs_player_id',
+  'swish_player_id',
+  'rts_player_id',
+  'pff_player_id',
+  'otc_player_id',
+  'fleaflicker_player_id',
+  'fanduel_player_id',
+  'draftkings_player_id',
+  'fantasylabs_player_id',
+  'cfbref_player_id',
+  'underdog_player_id'
 ]
 
-const combine_protected_props = ['height', 'weight']
+const combine_protected_props = ['height_inches', 'weight_pounds']
 
 const nullable_props = ['game_designation']
 
@@ -187,7 +187,7 @@ const initialize_cli = () => {
 
 /**
  * Example CLI usage:
- * node update-player.mjs --pid 1234 --fname "John" --lname "Doe" --pos "QB"
+ * node update-player.mjs --pid 1234 --first_name "John" --last_name "Doe" --primary_position "QB"
  *
  * This command will update the player with ID 1234, setting their first name to "John",
  * last name to "Doe", and position to "QB".

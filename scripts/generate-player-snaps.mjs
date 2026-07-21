@@ -45,7 +45,7 @@ const generate_player_snaps_for_week = async ({
 
   const gamelogs = await db('player_gamelogs')
     .select(
-      'player.gsis_it_id',
+      'player.gsis_it_player_id',
       'player_gamelogs.tm',
       'player_gamelogs.opp',
       'player_gamelogs.pos'
@@ -92,8 +92,8 @@ const generate_player_snaps_for_week = async ({
   const gsis_it_ids = Object.keys(nfl_snap_rows_by_gsis_it_id)
 
   const player_rows = await db('player')
-    .select('pid', 'gsis_it_id')
-    .whereIn('gsis_it_id', gsis_it_ids)
+    .select('pid', 'gsis_it_player_id')
+    .whereIn('gsis_it_player_id', gsis_it_ids)
 
   const team_totals = {}
 
@@ -212,13 +212,17 @@ const generate_player_snaps_for_week = async ({
 
   for (const gsis_it_id_key in nfl_snap_rows_by_gsis_it_id) {
     const gsis_it_id = Number(gsis_it_id_key)
-    const player_row = player_rows.find((p) => p.gsis_it_id === gsis_it_id)
+    const player_row = player_rows.find(
+      (p) => p.gsis_it_player_id === gsis_it_id
+    )
     if (!player_row) {
       log(`player not found for gsis_it_id: ${gsis_it_id}`)
       continue
     }
 
-    const player_gamelog = gamelogs.find((p) => p.gsis_it_id === gsis_it_id)
+    const player_gamelog = gamelogs.find(
+      (p) => p.gsis_it_player_id === gsis_it_id
+    )
     if (!player_gamelog) {
       log(`player_gamelog not found for pid: ${player_row.pid}`)
       continue

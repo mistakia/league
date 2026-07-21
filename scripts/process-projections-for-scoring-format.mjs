@@ -72,7 +72,7 @@ export const process_scoring_format_year = async ({
         week,
         ...calculatePoints({
           stats,
-          position: player.pos,
+          position: player.primary_position,
           league: league_scoring_format,
           use_projected_stats: true
         })
@@ -88,7 +88,7 @@ export const process_scoring_format_year = async ({
         week: 'ros',
         ...calculatePoints({
           stats: ros_row,
-          position: player.pos,
+          position: player.primary_position,
           league: league_scoring_format,
           use_projected_stats: true
         })

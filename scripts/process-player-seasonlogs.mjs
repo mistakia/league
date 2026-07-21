@@ -24,7 +24,7 @@ const processPlayerSeasonlogs = async ({
 
   // get league player gamelogs for season
   const gamelogs = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'player.pos')
+    .select('player_gamelogs.*', 'player.primary_position')
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .where('nfl_games.year', year)
@@ -36,7 +36,7 @@ const processPlayerSeasonlogs = async ({
   for (const pid of pids) {
     // get gamelogs for pid
     const player_gamelogs = gamelogs.filter((g) => g.pid === pid)
-    const pos = player_gamelogs[0].pos
+    const pos = player_gamelogs[0].primary_position
 
     const season_stats = create_empty_fantasy_stats()
     for (const gamelog of player_gamelogs) {

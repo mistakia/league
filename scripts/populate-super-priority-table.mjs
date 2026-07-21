@@ -72,9 +72,9 @@ const run = async ({
 
         if (player_details && original_team && poaching_team) {
           eligible_players_processed.push({
-            fname: player_details.fname,
-            lname: player_details.lname,
-            pos: player_details.pos,
+            fname: player_details.first_name,
+            lname: player_details.last_name,
+            pos: player_details.primary_position,
             original_team_name: original_team.name,
             original_team_abbrv: original_team.abbrv,
             poaching_team_name: poaching_team.name,
@@ -149,12 +149,12 @@ const run = async ({
 
   if (eligible_players_processed.length > 0) {
     log('\n=== ELIGIBLE PLAYERS ===')
-    for (const player of eligible_players_processed) {
+    for (const eligible_player of eligible_players_processed) {
       const poach_date = new Date(
-        player.poach_timestamp * 1000
+        eligible_player.poach_timestamp * 1000
       ).toLocaleDateString()
       log(
-        `${player.fname} ${player.lname} (${player.pos}) - Poached by ${player.poaching_team_abbrv} from ${player.original_team_abbrv} on ${poach_date}`
+        `${eligible_player.fname} ${eligible_player.lname} (${eligible_player.pos}) - Poached by ${eligible_player.poaching_team_abbrv} from ${eligible_player.original_team_abbrv} on ${poach_date}`
       )
     }
   }

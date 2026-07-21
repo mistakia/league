@@ -40,7 +40,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
       'player_game_outcome_correlations.pid',
       'player_game_outcome_correlations.correlation',
       'player_game_outcome_correlations.confidence',
-      'player.pos',
+      'player.primary_position',
       'player_archetypes.archetype'
     )
 
@@ -51,7 +51,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
   const archetype_groups = new Map()
 
   for (const pc of player_correlations) {
-    const pos = pc.pos
+    const pos = pc.primary_position
     const archetype = pc.archetype
     const correlation = parseFloat(pc.correlation)
     const confidence = parseFloat(pc.confidence)

@@ -88,11 +88,11 @@ const initialize_cli = () => {
 
 /**
  * Format player information for display
- * @param {Object} player - Player object with fname, lname, pos, and optional pid
+ * @param {Object} player - Player object with first_name, last_name, primary_position, and optional pid
  * @returns {string} Formatted player display string
  */
 const format_player_display = (player) =>
-  `${player.fname} ${player.lname} (${player.pos}${player.pid ? `, ID: ${player.pid}` : ''})`
+  `${player.first_name} ${player.last_name} (${player.primary_position}${player.pid ? `, ID: ${player.pid}` : ''})`
 
 /**
  * Search for players by name with exact match priority
@@ -108,7 +108,9 @@ const search_players_by_name = (search_term, players) => {
   const fuzzy_matches = new Set() // Use Set to avoid duplicates
 
   for (const player of players) {
-    const formatted_full = format_player_name(`${player.fname} ${player.lname}`)
+    const formatted_full = format_player_name(
+      `${player.first_name} ${player.last_name}`
+    )
     if (!formatted_full) continue
 
     // Exact full name match - highest priority
@@ -145,7 +147,12 @@ const search_players_by_name = (search_term, players) => {
 const get_roster_players = async ({ lid, tid }) => {
   return db('rosters_players')
     .join('player', 'rosters_players.pid', 'player.pid')
-    .select('player.pid', 'player.fname', 'player.lname', 'player.pos')
+    .select(
+      'player.pid',
+      'player.first_name',
+      'player.last_name',
+      'player.primary_position'
+    )
     .where({
       'rosters_players.tid': tid,
       'rosters_players.lid': lid,

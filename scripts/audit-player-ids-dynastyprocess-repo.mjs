@@ -59,42 +59,55 @@ const audit_player_ids_dynastyprocess_repo = async ({
 
   for (const player_data of csv_data) {
     try {
+      // Normalize the DynastyProcess feed to OUR canonical column names (keys)
+      // so it compares key-for-key against the player-table row below. The
+      // values are the DP CSV's own raw field names, unchanged.
       dynastyprocess_data.push({
-        mfl_id: Number(player_data.mfl_id) || null,
-        sportradar_id: player_data.sportradar_id,
-        gsisid: player_data.gsis_id,
-        pff_id: Number(player_data.pff_id) || null,
-        sleeper_id: player_data.sleeper_id,
-        nfl_id: player_data.nfl_id,
-        espn_id: player_data.espn_id ? Number(player_data.espn_id) : null,
-        yahoo_id: player_data.yahoo_id ? Number(player_data.yahoo_id) : null,
-        fleaflicker_id: Number(player_data.fleaflicker_id) || null,
-        cbs_id: Number(player_data.cbs_id) || null,
-        rotowire_id: player_data.rotowire_id
+        mfl_player_id: Number(player_data.mfl_id) || null,
+        sportradar_player_id: player_data.sportradar_id,
+        gsis_player_id: player_data.gsis_id,
+        pff_player_id: Number(player_data.pff_id) || null,
+        sleeper_player_id: player_data.sleeper_id,
+        nfl_player_id: player_data.nfl_id,
+        espn_player_id: player_data.espn_id
+          ? Number(player_data.espn_id)
+          : null,
+        yahoo_player_id: player_data.yahoo_id
+          ? Number(player_data.yahoo_id)
+          : null,
+        fleaflicker_player_id: Number(player_data.fleaflicker_id) || null,
+        cbs_player_id: Number(player_data.cbs_id) || null,
+        rotowire_player_id: player_data.rotowire_id
           ? Number(player_data.rotowire_id)
           : null,
-        rotoworld_id: player_data.rotoworld_id
+        rotoworld_player_id: player_data.rotoworld_id
           ? Number(player_data.rotoworld_id)
           : null,
-        keeptradecut_id: player_data.ktc_id ? Number(player_data.ktc_id) : null,
-        pfr_id: player_data.pfr_id,
-        cfbref_id: player_data.cfbref_id,
+        keeptradecut_player_id: player_data.ktc_id
+          ? Number(player_data.ktc_id)
+          : null,
+        pfr_player_id: player_data.pfr_id,
+        cfbref_player_id: player_data.cfbref_id,
         // stats_id: player_data.stats_id,
         // stats_global_id: player_data.stats_global_id,
-        fantasy_data_id: player_data.fantasy_data_id
+        fantasy_data_player_id: player_data.fantasy_data_id
           ? Number(player_data.fantasy_data_id)
           : null,
-        formatted: format_player_name(player_data.name),
-        pos: player_data.position,
+        formatted_name: format_player_name(player_data.name),
+        primary_position: player_data.position,
         current_nfl_team: fixTeam(player_data.team),
-        dob: player_data.birthdate,
-        round: player_data.draft_round ? Number(player_data.draft_round) : null,
-        dpos: player_data.draft_ovr ? Number(player_data.draft_ovr) : null,
+        date_of_birth: player_data.birthdate,
+        draft_round: player_data.draft_round
+          ? Number(player_data.draft_round)
+          : null,
+        draft_overall_pick: player_data.draft_ovr
+          ? Number(player_data.draft_ovr)
+          : null,
         twitter_username: player_data.twitter_username,
-        height: player_data.height ? Number(player_data.height) : null,
-        weight: player_data.weight ? Number(player_data.weight) : null,
-        // col: player_data.college // TODO format/standardize college name
-        swish_id: Number(player_data.swish_id) || null
+        height_inches: player_data.height ? Number(player_data.height) : null,
+        weight_pounds: player_data.weight ? Number(player_data.weight) : null,
+        // college: player_data.college // TODO format/standardize college name
+        swish_player_id: Number(player_data.swish_id) || null
       })
     } catch (err) {
       log(`error parsing row: ${player_data}`)
@@ -104,34 +117,34 @@ const audit_player_ids_dynastyprocess_repo = async ({
 
   const player_data = await db('player').select([
     'pid',
-    'sportradar_id',
-    'fantasy_data_id',
-    'gsisid',
-    'sleeper_id',
-    'nfl_id',
-    'espn_id',
-    'yahoo_id',
-    'rotowire_id',
-    'rotoworld_id',
-    'keeptradecut_id',
-    'pfr_id',
-    'formatted',
-    'pos',
+    'sportradar_player_id',
+    'fantasy_data_player_id',
+    'gsis_player_id',
+    'sleeper_player_id',
+    'nfl_player_id',
+    'espn_player_id',
+    'yahoo_player_id',
+    'rotowire_player_id',
+    'rotoworld_player_id',
+    'keeptradecut_player_id',
+    'pfr_player_id',
+    'formatted_name',
+    'primary_position',
     'current_nfl_team',
-    'dob',
-    'round',
-    'dpos',
-    'height',
-    'weight',
+    'date_of_birth',
+    'draft_round',
+    'draft_overall_pick',
+    'height_inches',
+    'weight_pounds',
     'nfl_draft_year',
-    'pff_id',
-    'mfl_id',
-    'fleaflicker_id',
-    'cbs_id',
-    'cfbref_id',
+    'pff_player_id',
+    'mfl_player_id',
+    'fleaflicker_player_id',
+    'cbs_player_id',
+    'cfbref_player_id',
     'twitter_username',
-    'swish_id'
-    // 'col' TODO
+    'swish_player_id'
+    // 'college' TODO
   ])
 
   let total_differences = 0
@@ -140,33 +153,40 @@ const audit_player_ids_dynastyprocess_repo = async ({
   const field_difference_count = {}
 
   for (const dp_player of dynastyprocess_data) {
-    if (fantasy_data_id_blacklist.includes(dp_player.fantasy_data_id)) {
+    if (fantasy_data_id_blacklist.includes(dp_player.fantasy_data_player_id)) {
       continue
     }
 
     const matching_player = player_data.find(
       (player) =>
-        // (player.sportradar_id &&
-        //   player.sportradar_id === dp_player.sportradar_id) ||
-        (player.fantasy_data_id &&
-          player.fantasy_data_id === dp_player.fantasy_data_id) ||
-        (player.gsisid && player.gsisid === dp_player.gsisid) ||
-        (player.sleeper_id && player.sleeper_id === dp_player.sleeper_id) ||
-        (player.nfl_id && player.nfl_id === dp_player.nfl_id) ||
-        (player.espn_id && player.espn_id === dp_player.espn_id) ||
-        (player.yahoo_id && player.yahoo_id === dp_player.yahoo_id) ||
-        (player.rotowire_id && player.rotowire_id === dp_player.rotowire_id) ||
-        (player.rotoworld_id &&
-          player.rotoworld_id === dp_player.rotoworld_id) ||
-        (player.keeptradecut_id &&
-          player.keeptradecut_id === dp_player.keeptradecut_id) ||
-        (player.pfr_id && player.pfr_id === dp_player.pfr_id)
+        // (player.sportradar_player_id &&
+        //   player.sportradar_player_id === dp_player.sportradar_player_id) ||
+        (player.fantasy_data_player_id &&
+          player.fantasy_data_player_id === dp_player.fantasy_data_player_id) ||
+        (player.gsis_player_id &&
+          player.gsis_player_id === dp_player.gsis_player_id) ||
+        (player.sleeper_player_id &&
+          player.sleeper_player_id === dp_player.sleeper_player_id) ||
+        (player.nfl_player_id &&
+          player.nfl_player_id === dp_player.nfl_player_id) ||
+        (player.espn_player_id &&
+          player.espn_player_id === dp_player.espn_player_id) ||
+        (player.yahoo_player_id &&
+          player.yahoo_player_id === dp_player.yahoo_player_id) ||
+        (player.rotowire_player_id &&
+          player.rotowire_player_id === dp_player.rotowire_player_id) ||
+        (player.rotoworld_player_id &&
+          player.rotoworld_player_id === dp_player.rotoworld_player_id) ||
+        (player.keeptradecut_player_id &&
+          player.keeptradecut_player_id === dp_player.keeptradecut_player_id) ||
+        (player.pfr_player_id &&
+          player.pfr_player_id === dp_player.pfr_player_id)
     )
 
     if (!matching_player) {
       // TODO create new player
       log(
-        `no matching player for ${dp_player.formatted}, ${dp_player.pos}, ${dp_player.current_nfl_team}`
+        `no matching player for ${dp_player.formatted_name}, ${dp_player.primary_position}, ${dp_player.current_nfl_team}`
       )
       total_players_not_matched++
       continue
@@ -181,11 +201,11 @@ const audit_player_ids_dynastyprocess_repo = async ({
       dp_player,
       (path, key) =>
         key === 'pid' ||
-        key === 'formatted' ||
-        key === 'height' ||
-        key === 'weight' ||
-        key === 'pos' || // TODO
-        key === 'nfl_id' ||
+        key === 'formatted_name' ||
+        key === 'height_inches' ||
+        key === 'weight_pounds' ||
+        key === 'primary_position' || // TODO
+        key === 'nfl_player_id' ||
         key === 'current_nfl_team'
     )
 
@@ -206,20 +226,20 @@ const audit_player_ids_dynastyprocess_repo = async ({
           (key) =>
             dp_player[key] &&
             key.endsWith('id') &&
-            key !== 'sportradar_id' &&
+            key !== 'sportradar_player_id' &&
             matching_player[key] === dp_player[key]
         )
         log(
-          `Differences for ${dp_player.formatted} (matched by ${matched_id}: ${dp_player[matched_id]}):`
+          `Differences for ${dp_player.formatted_name} (matched by ${matched_id}: ${dp_player[matched_id]}):`
         )
         log({
-          db_player: `${matching_player.formatted} (${matching_player.pos}, ${matching_player.current_nfl_team})`,
-          dp_player: `${dp_player.formatted} (${dp_player.pos}, ${dp_player.current_nfl_team})`
+          db_player: `${matching_player.formatted_name} (${matching_player.primary_position}, ${matching_player.current_nfl_team})`,
+          dp_player: `${dp_player.formatted_name} (${dp_player.primary_position}, ${dp_player.current_nfl_team})`
         })
         log(filtered_diff_result)
 
         const truthy_differences = filtered_diff_result.filter((change) => {
-          if (change.path[0] === 'dob') {
+          if (change.path[0] === 'date_of_birth') {
             return (
               change.lhs !== '0000-00-00' &&
               change.rhs !== '0000-00-00' &&
@@ -240,7 +260,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
             player_row: matching_player,
             update: updates
           })
-          log(`Updated player ${dp_player.formatted} with all differences`)
+          log(`Updated player ${dp_player.formatted_name} with all differences`)
         } else if (update_player_conflicts) {
           for (const change of filtered_diff_result) {
             const field = change.path[0]
@@ -257,10 +277,12 @@ const audit_player_ids_dynastyprocess_repo = async ({
                 player_row: matching_player,
                 update: { [field]: new_value }
               })
-              log(`Updated field ${field} for player ${dp_player.formatted}`)
+              log(
+                `Updated field ${field} for player ${dp_player.formatted_name}`
+              )
             } else {
               log(
-                `Skipped updating field ${field} for player ${dp_player.formatted}`
+                `Skipped updating field ${field} for player ${dp_player.formatted_name}`
               )
             }
           }

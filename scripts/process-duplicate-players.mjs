@@ -27,27 +27,33 @@ const is_nicknames = (name1, name2) => {
 }
 
 const accept_diff_props = [
-  'formatted',
-  'pname',
+  'formatted_name',
+  'short_name',
 
   'pid',
   'current_nfl_team',
-  'weight',
-  'height',
-  'jnum',
+  'weight_pounds',
+  'height_inches',
+  'jersey_number',
 
   'roster_status',
   'game_designation',
 
-  'pos',
-  'pos1',
-  'pos2',
-  'posd',
+  'primary_position',
+  'secondary_position',
+  'tertiary_position',
+  'position_depth',
 
-  'dcp'
+  'draft_capital_points'
 ]
 
-const compare_diff_props = ['fname', 'lname', 'col', 'dv', 'high_school']
+const compare_diff_props = [
+  'first_name',
+  'last_name',
+  'college',
+  'college_division',
+  'high_school'
+]
 
 const unresolvable_differences = (a, b) => {
   const differences = diff(a, b)
@@ -100,7 +106,7 @@ const unresolvable_differences = (a, b) => {
       }
 
       // for first name check if they could be nicknames
-      if (difference.path[0] === 'fname') {
+      if (difference.path[0] === 'first_name') {
         if (is_nicknames(lhs, rhs)) {
           return false
         }
@@ -128,20 +134,24 @@ const unresolvable_differences = (a, b) => {
 const processDuplicatePlayers = async ({ formatted = null } = {}) => {
   const query = db('player')
     .select(
-      'player.dob',
+      'player.date_of_birth',
       'player.nfl_draft_year',
-      'player.formatted',
-      db.raw("CONCAT(dob, '_', nfl_draft_year) as group_id")
+      'player.formatted_name',
+      db.raw("CONCAT(date_of_birth, '_', nfl_draft_year) as group_id")
     )
-    .whereNot('dob', '0000-00-00')
+    .whereNot('date_of_birth', '0000-00-00')
     .whereNot('nfl_draft_year', '0000')
-    .groupBy('player.dob', 'player.nfl_draft_year', 'player.formatted')
+    .groupBy(
+      'player.date_of_birth',
+      'player.nfl_draft_year',
+      'player.formatted_name'
+    )
     .having(db.raw('COUNT(*) > 1'))
     .orderBy(db.raw('COUNT(*)'), 'desc')
     .select(db.raw('COUNT(*) as count'))
 
   if (formatted) {
-    query.where('formatted', formatted)
+    query.where('formatted_name', formatted)
   }
 
   const duplicates = await query
@@ -152,8 +162,11 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
   let ignore_count = 0
 
   for (const duplicate_player_row of duplicates) {
-    const { dob, nfl_draft_year } = duplicate_player_row
-    const player_rows = await db('player').where({ dob, nfl_draft_year })
+    const { date_of_birth, nfl_draft_year } = duplicate_player_row
+    const player_rows = await db('player').where({
+      date_of_birth,
+      nfl_draft_year
+    })
 
     // iterate over player_rows finding any two rows that can be merged
     for (let i = 0; i < player_rows.length; i += 1) {
@@ -168,10 +181,10 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
         )
         if (differences.length) {
           log(
-            `unexpected differences between ${player_row.fname} ${
-              player_row.lname
-            } and ${other_player_row.fname} ${
-              other_player_row.lname
+            `unexpected differences between ${player_row.first_name} ${
+              player_row.last_name
+            } and ${other_player_row.first_name} ${
+              other_player_row.last_name
             }: ${differences.map((d) => d.path[0]).join(', ')}`
           )
           ignore_count += 1
@@ -203,7 +216,7 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
       .slice(0, 10)
       .map(
         (player_row) =>
-          `select * from player where formatted = '${player_row.formatted}' and dob = '${player_row.dob}' and nfl_draft_year = ${player_row.nfl_draft_year};`
+          `select * from player where formatted_name = '${player_row.formatted_name}' and date_of_birth = '${player_row.date_of_birth}' and nfl_draft_year = ${player_row.nfl_draft_year};`
       )
   )
 }

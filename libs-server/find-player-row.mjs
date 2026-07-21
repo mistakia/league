@@ -148,46 +148,50 @@ const find_player_row = async ({
 
   const query = db('player').select('player.*')
 
+  // NOTE: the destructured parameters keep their external-system short names
+  // (sleeper_id, espn_id, ...) as this resolver's stable lookup interface — the
+  // values callers pass come from external feeds. Only the DB column keys on the
+  // right of each `.where` conform to the new {system}_player_id column names.
   if (sleeper_id) {
-    query.where({ sleeper_id })
+    query.where({ sleeper_player_id: sleeper_id })
   }
 
   if (keeptradecut_id) {
-    query.where({ keeptradecut_id })
+    query.where({ keeptradecut_player_id: keeptradecut_id })
   } else if (pfr_id) {
-    query.where({ pfr_id })
+    query.where({ pfr_player_id: pfr_id })
   } else if (esbid) {
-    query.where({ esbid })
+    query.where({ esb_player_id: esbid })
   } else if (gsisid) {
-    query.where({ gsisid })
+    query.where({ gsis_player_id: gsisid })
   } else if (gsis_it_id) {
-    query.where({ gsis_it_id })
+    query.where({ gsis_it_player_id: gsis_it_id })
   } else if (sportradar_id) {
-    query.where({ sportradar_id })
+    query.where({ sportradar_player_id: sportradar_id })
   } else if (otc_id) {
-    query.where({ otc_id })
+    query.where({ otc_player_id: otc_id })
   } else if (pff_id) {
-    query.where({ pff_id })
+    query.where({ pff_player_id: pff_id })
   } else if (draftkings_id) {
-    query.where({ draftkings_id })
+    query.where({ draftkings_player_id: draftkings_id })
   } else if (fanduel_id) {
-    query.where({ fanduel_id })
+    query.where({ fanduel_player_id: fanduel_id })
   } else if (cbs_id) {
-    query.where({ cbs_id })
+    query.where({ cbs_player_id: cbs_id })
   } else if (yahoo_id) {
-    query.where({ yahoo_id })
+    query.where({ yahoo_player_id: yahoo_id })
   } else if (rts_id) {
-    query.where({ rts_id })
+    query.where({ rts_player_id: rts_id })
   } else if (espn_id) {
-    query.where({ espn_id })
+    query.where({ espn_player_id: espn_id })
   } else if (nfl_id) {
-    query.where({ nfl_id })
+    query.where({ nfl_player_id: nfl_id })
   } else if (mfl_id) {
-    query.where({ mfl_id })
+    query.where({ mfl_player_id: mfl_id })
   } else if (sis_id) {
-    query.where({ sis_id })
+    query.where({ sis_player_id: sis_id })
   } else if (underdog_id) {
-    query.where({ underdog_id })
+    query.where({ underdog_player_id: underdog_id })
   } else {
     if (name) {
       const formatted = format_player_name(name)
@@ -195,28 +199,30 @@ const find_player_row = async ({
       query.leftJoin('player_aliases', 'player.pid', 'player_aliases.pid')
 
       query.where(function () {
-        this.where({ formatted }).orWhere({ formatted_alias: formatted })
+        this.where({ formatted_name: formatted }).orWhere({
+          formatted_alias: formatted
+        })
       })
     }
 
     if (pname) {
-      query.where({ pname })
+      query.where({ short_name: pname })
     }
 
     if (pos) {
       if (typeof pos === 'string') {
         const expanded = expand_position(pos)
         query.where(function () {
-          this.whereIn('pos', expanded)
-            .orWhereIn('pos1', expanded)
-            .orWhereIn('pos2', expanded)
+          this.whereIn('primary_position', expanded)
+            .orWhereIn('secondary_position', expanded)
+            .orWhereIn('tertiary_position', expanded)
         })
       } else if (Array.isArray(pos)) {
         const expanded_positions = pos.flatMap(expand_position)
         query.where(function () {
-          this.whereIn('pos', expanded_positions)
-            .orWhereIn('pos1', expanded_positions)
-            .orWhereIn('pos2', expanded_positions)
+          this.whereIn('primary_position', expanded_positions)
+            .orWhereIn('secondary_position', expanded_positions)
+            .orWhereIn('tertiary_position', expanded_positions)
         })
       }
     }
@@ -228,7 +234,9 @@ const find_player_row = async ({
 
     if (dob) {
       query.where(function () {
-        this.where({ dob }).orWhere({ dob: '0000-00-00' })
+        this.where({ date_of_birth: dob }).orWhere({
+          date_of_birth: '0000-00-00'
+        })
       })
     }
 

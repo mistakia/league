@@ -264,7 +264,7 @@ class PlayerCache {
     // Clean formatted names to remove null bytes
     return players.map((player) => ({
       ...player,
-      formatted: clean_string(player.formatted)
+      formatted_name: clean_string(player.formatted_name)
     }))
   }
 
@@ -281,7 +281,7 @@ class PlayerCache {
     return all_players
       .map((player) => ({
         ...player,
-        formatted: clean_string(player.formatted)
+        formatted_name: clean_string(player.formatted_name)
       }))
       .filter((player) => this._is_active_player(player))
   }
@@ -372,8 +372,8 @@ class PlayerCache {
    */
   _build_gsisid_index(players) {
     for (const player of players) {
-      if (player.gsisid) {
-        this.players_by_gsisid.set(player.gsisid, player)
+      if (player.gsis_player_id) {
+        this.players_by_gsisid.set(player.gsis_player_id, player)
       }
     }
   }
@@ -385,8 +385,8 @@ class PlayerCache {
    */
   _build_sportradar_id_index(players) {
     for (const player of players) {
-      if (player.sportradar_id) {
-        this.players_by_sportradar_id.set(player.sportradar_id, player)
+      if (player.sportradar_player_id) {
+        this.players_by_sportradar_id.set(player.sportradar_player_id, player)
       }
     }
   }
@@ -398,8 +398,8 @@ class PlayerCache {
    */
   _build_espn_id_index(players) {
     for (const player of players) {
-      if (player.espn_id) {
-        this.players_by_espn_id.set(Number(player.espn_id), player)
+      if (player.espn_player_id) {
+        this.players_by_espn_id.set(Number(player.espn_player_id), player)
       }
     }
   }
@@ -411,17 +411,20 @@ class PlayerCache {
    */
   _build_draftkings_id_index(players) {
     for (const player of players) {
-      if (player.draftkings_id) {
-        this.players_by_draftkings_id.set(Number(player.draftkings_id), player)
+      if (player.draftkings_player_id) {
+        this.players_by_draftkings_id.set(
+          Number(player.draftkings_player_id),
+          player
+        )
       }
     }
   }
 
   _build_fantasylabs_id_index(players) {
     for (const player of players) {
-      if (player.fantasylabs_id) {
+      if (player.fantasylabs_player_id) {
         this.players_by_fantasylabs_id.set(
-          Number(player.fantasylabs_id),
+          Number(player.fantasylabs_player_id),
           player
         )
       }
@@ -435,8 +438,8 @@ class PlayerCache {
    */
   _build_otc_id_index(players) {
     for (const player of players) {
-      if (player.otc_id) {
-        this.players_by_otc_id.set(player.otc_id, player)
+      if (player.otc_player_id) {
+        this.players_by_otc_id.set(player.otc_player_id, player)
       }
     }
   }
@@ -448,8 +451,8 @@ class PlayerCache {
    */
   _build_name_draft_index(players) {
     for (const player of players) {
-      if (player.formatted && player.nfl_draft_year) {
-        const key = `${format_player_name(player.formatted)}_${player.nfl_draft_year}`
+      if (player.formatted_name && player.nfl_draft_year) {
+        const key = `${format_player_name(player.formatted_name)}_${player.nfl_draft_year}`
         this.players_by_name_draft_year.set(key, player)
       }
     }
@@ -458,10 +461,10 @@ class PlayerCache {
   /**
    * Adds a player to the formatted name index
    * @param {Object} player - Player object
-   * @param {string} formatted_name - Formatted name to index by (defaults to player.formatted)
+   * @param {string} formatted_name - Formatted name to index by (defaults to player.formatted_name)
    * @private
    */
-  _add_player_to_name_index(player, formatted_name = player.formatted) {
+  _add_player_to_name_index(player, formatted_name = player.formatted_name) {
     if (!formatted_name) return
 
     if (!this.players_by_formatted_name.has(formatted_name)) {

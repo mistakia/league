@@ -107,7 +107,7 @@ router.get('/?', async (req, res) => {
       user_projections = await db('projections_index')
         .select('projections.*')
         .join('player', 'projections.pid', 'player.pid')
-        .whereIn('player.pos', fantasy_positions)
+        .whereIn('player.primary_position', fantasy_positions)
         .whereNot('player.current_nfl_team', 'INA')
         .where({
           year: current_season.year,

@@ -92,10 +92,10 @@ if (is_main(import.meta.url)) {
             points: player.points.toFixed(2),
             position_rank: player.position_rank,
             value: player.value,
-            pos: player.pos
+            pos: player.primary_position
           },
           {
-            color: getColor(player.pos)
+            color: getColor(player.primary_position)
           }
         )
       }

@@ -125,7 +125,7 @@ const audit_player_gamelogs = async ({
   const player_gamelogs = await db('player_gamelogs')
     .select(
       'player_gamelogs.*',
-      'player.pfr_id',
+      'player.pfr_player_id',
       'nfl_games.seas_type',
       'nfl_games.week'
     )
@@ -142,7 +142,7 @@ const audit_player_gamelogs = async ({
 
     const player_gamelog = player_gamelogs.find(
       (p) =>
-        p.pfr_id === pfr_player_gamelog.pfr_id &&
+        p.pfr_player_id === pfr_player_gamelog.pfr_id &&
         p.week === pfr_player_gamelog.week &&
         p.seas_type === pfr_player_gamelog.seas_type
     )
