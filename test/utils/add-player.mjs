@@ -59,7 +59,7 @@ export default async function ({
     rid: rosterId,
     pid: player.pid,
     slot,
-    pos: player.pos1,
+    pos: player.secondary_position,
     tag,
     tid: teamId,
     lid: leagueId,

@@ -22,13 +22,13 @@ export async function seed(knex, Promise) {
     const pos = fantasy_positions[i % fantasy_positions.length]
     rookies.push({
       pid: `XR-ROOK-${String(i * 5).padStart(6, '0')}`,
-      pname: `TestRookie${i}`,
-      fname: `TestRookie${i}`,
-      lname: `TestRookie${i}`,
-      formatted: `testrookie${i}`,
-      dob: '0000-00-00',
-      pos,
-      pos1: pos,
+      short_name: `TestRookie${i}`,
+      first_name: `TestRookie${i}`,
+      last_name: `TestRookie${i}`,
+      formatted_name: `testrookie${i}`,
+      date_of_birth: '0000-00-00',
+      primary_position: pos,
+      secondary_position: pos,
       current_nfl_team:
         nfl_team_abbreviations[i % nfl_team_abbreviations.length],
       nfl_draft_year: current_season.year
@@ -42,13 +42,13 @@ export async function seed(knex, Promise) {
     const pos = fantasy_positions[i % fantasy_positions.length]
     sophmores.push({
       pid: `XS-SOPH-${String(i * 5).padStart(6, '0')}`,
-      pname: `TestSophmore${i}`,
-      fname: `TestSophmore${i}`,
-      lname: `TestSophmore${i}`,
-      formatted: `testsophmore${i}`,
-      dob: '0000-00-00',
-      pos,
-      pos1: pos,
+      short_name: `TestSophmore${i}`,
+      first_name: `TestSophmore${i}`,
+      last_name: `TestSophmore${i}`,
+      formatted_name: `testsophmore${i}`,
+      date_of_birth: '0000-00-00',
+      primary_position: pos,
+      secondary_position: pos,
       current_nfl_team:
         nfl_team_abbreviations[i % nfl_team_abbreviations.length],
       nfl_draft_year: current_season.year - 1

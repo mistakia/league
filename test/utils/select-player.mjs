@@ -14,7 +14,7 @@ export default async function ({
 } = {}) {
   const query = db('player')
     .whereNot('current_nfl_team', 'INA')
-    .where('pos1', pos)
+    .where('secondary_position', pos)
 
   // Use deterministic ordering for tests when random is false
   if (random) {
@@ -47,7 +47,7 @@ export default async function ({
   }
 
   if (excludePS) {
-    query.whereNot('posd', 'PS')
+    query.whereNot('position_depth', 'PS')
   }
 
   if (roster_status) {

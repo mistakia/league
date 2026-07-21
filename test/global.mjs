@@ -6,7 +6,9 @@ import scoring_formats_seed from '#db/fixtures/scoring-formats.mjs'
 import server from '#api'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const schema_file = path.resolve(__dirname, '../db/schema.postgres.sql')
+const schema_file = process.env.LEAGUE_SCHEMA_FILE
+  ? path.resolve(process.env.LEAGUE_SCHEMA_FILE)
+  : path.resolve(__dirname, '../db/schema.postgres.sql')
 
 let original_server_close
 
