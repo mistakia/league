@@ -65,7 +65,7 @@ const process_nfl_plays_player = async () => {
     if (nfl_plays_player_row.gsis_id) {
       try {
         player_row = await find_player_row({
-          gsisid: nfl_plays_player_row.gsis_id
+          gsis_player_id: nfl_plays_player_row.gsis_id
         })
       } catch (err) {
         log(`Error matching player using gsis_id: ${err.message}`)
@@ -76,7 +76,7 @@ const process_nfl_plays_player = async () => {
     if (!player_row && nfl_plays_player_row.player_esbid) {
       try {
         player_row = await find_player_row({
-          esbid: nfl_plays_player_row.player_esbid
+          esb_player_id: nfl_plays_player_row.player_esbid
         })
       } catch (err) {
         log(`Error matching player using player_esbid: ${err.message}`)

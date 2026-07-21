@@ -124,7 +124,9 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     } else {
       let player_row
       try {
-        player_row = await find_player_row({ keeptradecut_id: item.playerID })
+        player_row = await find_player_row({
+          keeptradecut_player_id: item.playerID
+        })
         if (!player_row) {
           player_row = await find_player_row({
             name: keeptradecut_player.playerName,
@@ -136,7 +138,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           if (player_row) {
             await updatePlayer({
               player_row,
-              update: { keeptradecut_id: item.playerID }
+              update: { keeptradecut_player_id: item.playerID }
             })
           } else {
             log(

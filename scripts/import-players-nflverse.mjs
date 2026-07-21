@@ -73,12 +73,12 @@ const find_player_from_nflverse_row = ({ row }) => {
   const opts = { ignore_free_agent: false, ignore_retired: false }
 
   if (row.otc_id) {
-    const player = find_player({ otc_id: row.otc_id, ...opts })
+    const player = find_player({ otc_player_id: row.otc_id, ...opts })
     if (player) return player
   }
 
   if (row.gsis_id) {
-    const player = find_player({ gsisid: row.gsis_id, ...opts })
+    const player = find_player({ gsis_player_id: row.gsis_id, ...opts })
     if (player) return player
   }
 

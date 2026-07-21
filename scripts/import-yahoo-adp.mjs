@@ -64,7 +64,9 @@ const import_yahoo_adp = async ({
   for (const source_player of players) {
     let player_row
     try {
-      player_row = await find_player_row({ yahoo_id: source_player.yahoo_id })
+      player_row = await find_player_row({
+        yahoo_player_id: source_player.yahoo_id
+      })
     } catch (err) {
       log(`Error getting player by yahoo_id: ${err}`)
       unmatched_players.push(source_player)

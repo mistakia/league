@@ -129,7 +129,7 @@ const import_underdog_bestball_adp = async ({
       let player_row
       try {
         player_row = await find_player_row({
-          underdog_id: appearance.player_id
+          underdog_player_id: appearance.player_id
         })
         if (!player_row) {
           player_row = await find_player_row({
@@ -139,10 +139,10 @@ const import_underdog_bestball_adp = async ({
           })
           // backfill underdog_id on a name match so the next run matches by id
           // (skip in dry run -- this writes to player)
-          if (!dry_run && player_row && !player_row.underdog_id) {
+          if (!dry_run && player_row && !player_row.underdog_player_id) {
             await updatePlayer({
               player_row,
-              update: { underdog_id: appearance.player_id }
+              update: { underdog_player_id: appearance.player_id }
             })
           }
         }

@@ -59,7 +59,9 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
     // try esbid
     if (ngs_player.esbId) {
       try {
-        player_row = await find_player_row({ esbid: ngs_player.esbId })
+        player_row = await find_player_row({
+          esb_player_id: ngs_player.esbId
+        })
       } catch (err) {
         log(err)
       }
@@ -68,7 +70,9 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
     // try gsisid
     if (!player_row && ngs_player.gsisId) {
       try {
-        player_row = await find_player_row({ gsisid: ngs_player.gsisId })
+        player_row = await find_player_row({
+          gsis_player_id: ngs_player.gsisId
+        })
       } catch (err) {
         log(err)
       }

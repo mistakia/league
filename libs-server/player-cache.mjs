@@ -17,12 +17,12 @@ class PlayerCache {
   constructor() {
     this.players_by_formatted_name = new Map()
     this.players_by_pid = new Map()
-    this.players_by_gsisid = new Map()
-    this.players_by_otc_id = new Map()
-    this.players_by_sportradar_id = new Map()
-    this.players_by_espn_id = new Map()
-    this.players_by_draftkings_id = new Map()
-    this.players_by_fantasylabs_id = new Map()
+    this.players_by_gsis_player_id = new Map()
+    this.players_by_otc_player_id = new Map()
+    this.players_by_sportradar_player_id = new Map()
+    this.players_by_espn_player_id = new Map()
+    this.players_by_draftkings_player_id = new Map()
+    this.players_by_fantasylabs_player_id = new Map()
     this.players_by_name_draft_year = new Map()
     this.is_initialized = false
   }
@@ -31,7 +31,7 @@ class PlayerCache {
    * Preloads players and their aliases into memory cache
    * @param {Object} options - Configuration options
    * @param {boolean} options.all_players - Load all players including retired/inactive (default: false)
-   * @param {boolean} options.include_otc_id_index - Build otc_id index (default: false)
+   * @param {boolean} options.include_otc_id_index - Build otc_player_id index (default: false)
    * @param {boolean} options.include_name_draft_index - Build name+draft year index (default: false)
    * @throws {Error} If database query fails
    */
@@ -57,14 +57,14 @@ class PlayerCache {
       this._clear_cache()
       this._build_player_indexes(players)
       this._build_alias_indexes(player_aliases)
-      this._build_gsisid_index(players)
-      this._build_sportradar_id_index(players)
-      this._build_espn_id_index(players)
-      this._build_draftkings_id_index(players)
-      this._build_fantasylabs_id_index(players)
+      this._build_gsis_player_id_index(players)
+      this._build_sportradar_player_id_index(players)
+      this._build_espn_player_id_index(players)
+      this._build_draftkings_player_id_index(players)
+      this._build_fantasylabs_player_id_index(players)
 
       if (include_otc_id_index) {
-        this._build_otc_id_index(players)
+        this._build_otc_player_id_index(players)
       }
 
       if (include_name_draft_index) {
@@ -84,12 +84,12 @@ class PlayerCache {
    * Finds a player by various identifiers
    * @param {Object} params - Search parameters
    * @param {string} params.name - Player name to search for
-   * @param {string} params.gsisid - GSIS ID to search for
-   * @param {string} params.sportradar_id - Sportradar ID to search for
-   * @param {number} params.espn_id - ESPN ID to search for
-   * @param {number} params.otc_id - Over The Cap ID to search for
-   * @param {number|string} params.draftkings_id - DraftKings ID to search for
-   * @param {number} params.fantasylabs_id - FantasyLabs ID to search for
+   * @param {string} params.gsis_player_id - GSIS ID to search for
+   * @param {string} params.sportradar_player_id - Sportradar ID to search for
+   * @param {number} params.espn_player_id - ESPN ID to search for
+   * @param {number} params.otc_player_id - Over The Cap ID to search for
+   * @param {number|string} params.draftkings_player_id - DraftKings ID to search for
+   * @param {number} params.fantasylabs_player_id - FantasyLabs ID to search for
    * @param {number} params.nfl_draft_year - NFL draft year (used with name for composite lookup)
    * @param {string[]} params.teams - Optional team abbreviations to filter by
    * @param {boolean} params.ignore_free_agent - Whether to exclude free agents (default: true)
@@ -99,12 +99,12 @@ class PlayerCache {
    */
   find_player({
     name,
-    gsisid,
-    sportradar_id,
-    espn_id,
-    otc_id,
-    draftkings_id,
-    fantasylabs_id,
+    gsis_player_id,
+    sportradar_player_id,
+    espn_player_id,
+    otc_player_id,
+    draftkings_player_id,
+    fantasylabs_player_id,
     nfl_draft_year,
     teams = [],
     ignore_free_agent = true,
@@ -113,8 +113,10 @@ class PlayerCache {
     this._ensure_initialized()
 
     // Fast lookup by DraftKings ID if provided
-    if (draftkings_id) {
-      const player = this.players_by_draftkings_id.get(Number(draftkings_id))
+    if (draftkings_player_id) {
+      const player = this.players_by_draftkings_player_id.get(
+        Number(draftkings_player_id)
+      )
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -127,8 +129,10 @@ class PlayerCache {
     }
 
     // Fast lookup by FantasyLabs ID if provided
-    if (fantasylabs_id) {
-      const player = this.players_by_fantasylabs_id.get(Number(fantasylabs_id))
+    if (fantasylabs_player_id) {
+      const player = this.players_by_fantasylabs_player_id.get(
+        Number(fantasylabs_player_id)
+      )
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -141,8 +145,9 @@ class PlayerCache {
     }
 
     // Fast lookup by Sportradar ID if provided
-    if (sportradar_id) {
-      const player = this.players_by_sportradar_id.get(sportradar_id)
+    if (sportradar_player_id) {
+      const player =
+        this.players_by_sportradar_player_id.get(sportradar_player_id)
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -155,8 +160,8 @@ class PlayerCache {
     }
 
     // Fast lookup by ESPN ID if provided
-    if (espn_id) {
-      const player = this.players_by_espn_id.get(Number(espn_id))
+    if (espn_player_id) {
+      const player = this.players_by_espn_player_id.get(Number(espn_player_id))
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -169,8 +174,8 @@ class PlayerCache {
     }
 
     // Fast lookup by OTC ID if provided
-    if (otc_id) {
-      const player = this.players_by_otc_id.get(otc_id)
+    if (otc_player_id) {
+      const player = this.players_by_otc_player_id.get(otc_player_id)
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -183,8 +188,8 @@ class PlayerCache {
     }
 
     // Fast lookup by GSISID if provided
-    if (gsisid) {
-      const player = this.players_by_gsisid.get(gsisid)
+    if (gsis_player_id) {
+      const player = this.players_by_gsis_player_id.get(gsis_player_id)
       if (player) {
         const filtered_players = this._apply_filters([player], {
           teams,
@@ -242,11 +247,11 @@ class PlayerCache {
       is_initialized: this.is_initialized,
       total_players: this.players_by_pid.size,
       formatted_name_entries: this.players_by_formatted_name.size,
-      gsisid_entries: this.players_by_gsisid.size,
-      sportradar_id_entries: this.players_by_sportradar_id.size,
-      espn_id_entries: this.players_by_espn_id.size,
-      draftkings_id_entries: this.players_by_draftkings_id.size,
-      otc_id_entries: this.players_by_otc_id.size,
+      gsis_player_id_entries: this.players_by_gsis_player_id.size,
+      sportradar_player_id_entries: this.players_by_sportradar_player_id.size,
+      espn_player_id_entries: this.players_by_espn_player_id.size,
+      draftkings_player_id_entries: this.players_by_draftkings_player_id.size,
+      otc_player_id_entries: this.players_by_otc_player_id.size,
       name_draft_year_entries: this.players_by_name_draft_year.size
     }
   }
@@ -329,12 +334,12 @@ class PlayerCache {
   _clear_cache() {
     this.players_by_formatted_name.clear()
     this.players_by_pid.clear()
-    this.players_by_gsisid.clear()
-    this.players_by_otc_id.clear()
-    this.players_by_sportradar_id.clear()
-    this.players_by_espn_id.clear()
-    this.players_by_draftkings_id.clear()
-    this.players_by_fantasylabs_id.clear()
+    this.players_by_gsis_player_id.clear()
+    this.players_by_otc_player_id.clear()
+    this.players_by_sportradar_player_id.clear()
+    this.players_by_espn_player_id.clear()
+    this.players_by_draftkings_player_id.clear()
+    this.players_by_fantasylabs_player_id.clear()
     this.players_by_name_draft_year.clear()
   }
 
@@ -370,10 +375,10 @@ class PlayerCache {
    * @param {Array} players - Array of player objects
    * @private
    */
-  _build_gsisid_index(players) {
+  _build_gsis_player_id_index(players) {
     for (const player of players) {
       if (player.gsis_player_id) {
-        this.players_by_gsisid.set(player.gsis_player_id, player)
+        this.players_by_gsis_player_id.set(player.gsis_player_id, player)
       }
     }
   }
@@ -383,10 +388,13 @@ class PlayerCache {
    * @param {Array} players - Array of player objects
    * @private
    */
-  _build_sportradar_id_index(players) {
+  _build_sportradar_player_id_index(players) {
     for (const player of players) {
       if (player.sportradar_player_id) {
-        this.players_by_sportradar_id.set(player.sportradar_player_id, player)
+        this.players_by_sportradar_player_id.set(
+          player.sportradar_player_id,
+          player
+        )
       }
     }
   }
@@ -396,10 +404,13 @@ class PlayerCache {
    * @param {Array} players - Array of player objects
    * @private
    */
-  _build_espn_id_index(players) {
+  _build_espn_player_id_index(players) {
     for (const player of players) {
       if (player.espn_player_id) {
-        this.players_by_espn_id.set(Number(player.espn_player_id), player)
+        this.players_by_espn_player_id.set(
+          Number(player.espn_player_id),
+          player
+        )
       }
     }
   }
@@ -409,10 +420,10 @@ class PlayerCache {
    * @param {Array} players - Array of player objects
    * @private
    */
-  _build_draftkings_id_index(players) {
+  _build_draftkings_player_id_index(players) {
     for (const player of players) {
       if (player.draftkings_player_id) {
-        this.players_by_draftkings_id.set(
+        this.players_by_draftkings_player_id.set(
           Number(player.draftkings_player_id),
           player
         )
@@ -420,10 +431,10 @@ class PlayerCache {
     }
   }
 
-  _build_fantasylabs_id_index(players) {
+  _build_fantasylabs_player_id_index(players) {
     for (const player of players) {
       if (player.fantasylabs_player_id) {
-        this.players_by_fantasylabs_id.set(
+        this.players_by_fantasylabs_player_id.set(
           Number(player.fantasylabs_player_id),
           player
         )
@@ -436,10 +447,10 @@ class PlayerCache {
    * @param {Array} players - Array of player objects
    * @private
    */
-  _build_otc_id_index(players) {
+  _build_otc_player_id_index(players) {
     for (const player of players) {
       if (player.otc_player_id) {
-        this.players_by_otc_id.set(player.otc_player_id, player)
+        this.players_by_otc_player_id.set(player.otc_player_id, player)
       }
     }
   }

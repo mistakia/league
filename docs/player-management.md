@@ -4,14 +4,14 @@ This document provides a comprehensive guide for managing player data in the xo.
 
 ## Quick Reference
 
-| Operation           | Command                                                                                |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| Search database     | `node scripts/resolve-player-match.mjs search --name "Name"`                           |
-| Multi-source lookup | `node scripts/resolve-player-match.mjs lookup --name "Name" --sources all`             |
-| Create player       | `node scripts/resolve-player-match.mjs create --fname "First" --lname "Last" --pos QB` |
-| Update player       | `node scripts/resolve-player-match.mjs update --pid "PID" --gsisid "00-0012345"`       |
-| Add alias           | `node scripts/resolve-player-match.mjs add-alias --pid "PID" --alias "Nickname"`       |
-| Merge duplicates    | `node scripts/resolve-player-match.mjs merge --keep-pid "KEEP" --remove-pid "REMOVE"`  |
+| Operation           | Command                                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Search database     | `node scripts/resolve-player-match.mjs search --name "Name"`                                                 |
+| Multi-source lookup | `node scripts/resolve-player-match.mjs lookup --name "Name" --sources all`                                   |
+| Create player       | `node scripts/resolve-player-match.mjs create --first-name "First" --last-name "Last" --primary-position QB` |
+| Update player       | `node scripts/resolve-player-match.mjs update --pid "PID" --gsis-player-id "00-0012345"`                     |
+| Add alias           | `node scripts/resolve-player-match.mjs add-alias --pid "PID" --alias "Nickname"`                             |
+| Merge duplicates    | `node scripts/resolve-player-match.mjs merge --keep-pid "KEEP" --remove-pid "REMOVE"`                        |
 
 ## Player ID Format
 
@@ -23,7 +23,7 @@ Player IDs follow the format: `FNAM-LNAM-<serial>`
 
 Example: `PATR-MAHO-000123` (Patrick Mahomes)
 
-The `FNAM-LNAM` prefix is a frozen, human-readable courtesy snapshot taken once at mint. It carries **no** referential meaning: it is never recomputed, is allowed to go stale if the person's name is later corrected, and must not be parsed for identity. The `<serial>` is the actual identity — assigned exactly once and never regenerated. A pid does **not** depend on `dob` or `nfl_draft_year`, so a person can be minted at recruit/college stage before either field exists.
+The `FNAM-LNAM` prefix is a frozen, human-readable courtesy snapshot taken once at mint. It carries **no** referential meaning: it is never recomputed, is allowed to go stale if the person's name is later corrected, and must not be parsed for identity. The `<serial>` is the actual identity — assigned exactly once and never regenerated. A pid does **not** depend on `date_of_birth` or `nfl_draft_year`, so a person can be minted at recruit/college stage before either field exists.
 
 A DST (defense/special teams) pid is the team abbreviation (e.g. `NE`, `DAL`) — a stable non-person pseudo-identifier with no serial.
 
@@ -41,19 +41,19 @@ NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Patrick
 NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Mahomes" --sources sleeper,espn
 
 # Filter by position and team
-NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Mahomes" --pos QB --team KC
+NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Mahomes" --primary-position QB --team KC
 ```
 
 ### Command Options
 
-| Option           | Alias | Description                              | Default |
-| ---------------- | ----- | ---------------------------------------- | ------- |
-| `--name`         |       | Player name to search (required)         |         |
-| `--team`         |       | NFL team abbreviation filter             |         |
-| `--pos`          |       | Position filter (QB, RB, WR, TE, K, DEF) |         |
-| `--draft-year`   |       | Draft year filter                        |         |
-| `--sources`      | `-s`  | Data sources to query                    | `all`   |
-| `--ignore-cache` |       | Bypass cached data                       | `false` |
+| Option               | Alias | Description                              | Default |
+| -------------------- | ----- | ---------------------------------------- | ------- |
+| `--name`             |       | Player name to search (required)         |         |
+| `--team`             |       | NFL team abbreviation filter             |         |
+| `--primary-position` |       | Position filter (QB, RB, WR, TE, K, DEF) |         |
+| `--draft-year`       |       | Draft year filter                        |         |
+| `--sources`          | `-s`  | Data sources to query                    | `all`   |
+| `--ignore-cache`     |       | Bypass cached data                       | `false` |
 
 ### Data Sources
 
@@ -78,22 +78,22 @@ The lookup command provides:
 
 ### Required Fields
 
-| Field            | Description       | Example                                    |
-| ---------------- | ----------------- | ------------------------------------------ |
-| `fname`          | First name        | `Patrick`                                  |
-| `lname`          | Last name         | `Mahomes`                                  |
-| `pos`            | Position          | `QB`                                       |
-| `dob`            | Date of birth     | `1995-09-17` (use `0000-00-00` if unknown) |
-| `nfl_draft_year` | Draft/rookie year | `2017`                                     |
-| `height`         | Height in inches  | `75`                                       |
-| `weight`         | Weight in pounds  | `225`                                      |
+| Field              | Description       | Example                                    |
+| ------------------ | ----------------- | ------------------------------------------ |
+| `first_name`       | First name        | `Patrick`                                  |
+| `last_name`        | Last name         | `Mahomes`                                  |
+| `primary_position` | Position          | `QB`                                       |
+| `date_of_birth`    | Date of birth     | `1995-09-17` (use `0000-00-00` if unknown) |
+| `nfl_draft_year`   | Draft/rookie year | `2017`                                     |
+| `height`           | Height in inches  | `75`                                       |
+| `weight`           | Weight in pounds  | `225`                                      |
 
 ### Workflow
 
 1. **Always lookup first** to check for duplicates:
 
    ```bash
-   NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Player Name" --pos QB
+   NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Player Name" --primary-position QB
    ```
 
 2. **Use the suggested command** from lookup output, which includes all discovered IDs
@@ -101,17 +101,17 @@ The lookup command provides:
 3. **If creating manually**, include as many external IDs as available:
    ```bash
    NODE_ENV=production node scripts/resolve-player-match.mjs create \
-     --fname "First" \
-     --lname "Last" \
-     --pos QB \
+     --first-name "First" \
+     --last-name "Last" \
+     --primary-position QB \
      --team KC \
-     --dob "1995-09-17" \
+     --date-of-birth "1995-09-17" \
      --draft-year 2017 \
      --height 75 \
      --weight 225 \
-     --sleeper-id "12345" \
-     --espn-id 3139477 \
-     --gsisid "00-0033873"
+     --sleeper-player-id "12345" \
+     --espn-player-id 3139477 \
+     --gsis-player-id "00-0033873"
    ```
 
 ## Updating Players
@@ -123,64 +123,64 @@ Update existing player fields including external IDs:
 NODE_ENV=production node scripts/resolve-player-match.mjs update \
   --pid "PATR-MAHO-005785" \
   --team KC \
-  --pos QB
+  --primary-position QB
 
 # Add missing external IDs
 NODE_ENV=production node scripts/resolve-player-match.mjs update \
   --pid "PATR-MAHO-005785" \
-  --gsisid "00-0033873" \
-  --gsis-it-id "46046" \
-  --pfr-id "MahoPa00"
+  --gsis-player-id "00-0033873" \
+  --gsis-it-player-id "46046" \
+  --pfr-player-id "MahoPa00"
 ```
 
 ## External ID Types
 
 ### Fantasy Platform IDs
 
-| ID Type           | Platform        | CLI Flag            |
-| ----------------- | --------------- | ------------------- |
-| `sleeper_id`      | Sleeper         | `--sleeper-id`      |
-| `yahoo_id`        | Yahoo Fantasy   | `--yahoo-id`        |
-| `mfl_id`          | MyFantasyLeague | `--mfl-id`          |
-| `cbs_id`          | CBS Sports      | `--cbs-id`          |
-| `keeptradecut_id` | KeepTradeCut    | `--keeptradecut-id` |
-| `fleaflicker_id`  | Fleaflicker     | `--fleaflicker-id`  |
-| `underdog_id`     | Underdog        | `--underdog-id`     |
+| ID Type                  | Platform        | CLI Flag                   |
+| ------------------------ | --------------- | -------------------------- |
+| `sleeper_player_id`      | Sleeper         | `--sleeper-player-id`      |
+| `yahoo_player_id`        | Yahoo Fantasy   | `--yahoo-player-id`        |
+| `mfl_player_id`          | MyFantasyLeague | `--mfl-player-id`          |
+| `cbs_player_id`          | CBS Sports      | `--cbs-player-id`          |
+| `keeptradecut_player_id` | KeepTradeCut    | `--keeptradecut-player-id` |
+| `fleaflicker_player_id`  | Fleaflicker     | `--fleaflicker-player-id`  |
+| `underdog_player_id`     | Underdog        | `--underdog-player-id`     |
 
 ### Analytics IDs
 
-| ID Type           | Platform           | CLI Flag            |
-| ----------------- | ------------------ | ------------------- |
-| `pff_id`          | Pro Football Focus | `--pff-id`          |
-| `fantasy_data_id` | FantasyData        | `--fantasy-data-id` |
+| ID Type                  | Platform           | CLI Flag                   |
+| ------------------------ | ------------------ | -------------------------- |
+| `pff_player_id`          | Pro Football Focus | `--pff-player-id`          |
+| `fantasy_data_player_id` | FantasyData        | `--fantasy-data-player-id` |
 
 ### Official NFL IDs
 
-| ID Type         | Description   | CLI Flag          |
-| --------------- | ------------- | ----------------- |
-| `gsisid`        | NFL GSIS ID   | `--gsisid`        |
-| `esbid`         | NFL ESB ID    | `--esbid`         |
-| `gsis_it_id`    | GSIS IT ID    | `--gsis-it-id`    |
-| `nfl_id`        | NFL.com ID    | `--nfl-id`        |
-| `espn_id`       | ESPN ID       | `--espn-id`       |
-| `sportradar_id` | Sportradar ID | `--sportradar-id` |
+| ID Type                | Description   | CLI Flag                 |
+| ---------------------- | ------------- | ------------------------ |
+| `gsis_player_id`       | NFL GSIS ID   | `--gsis-player-id`       |
+| `esb_player_id`        | NFL ESB ID    | `--esb-player-id`        |
+| `gsis_it_player_id`    | GSIS IT ID    | `--gsis-it-player-id`    |
+| `nfl_player_id`        | NFL.com ID    | `--nfl-player-id`        |
+| `espn_player_id`       | ESPN ID       | `--espn-player-id`       |
+| `sportradar_player_id` | Sportradar ID | `--sportradar-player-id` |
 
 ### Reference IDs
 
-| ID Type        | Platform               | CLI Flag         |
-| -------------- | ---------------------- | ---------------- |
-| `pfr_id`       | Pro-Football-Reference | `--pfr-id`       |
-| `rotowire_id`  | RotoWire               | `--rotowire-id`  |
-| `rotoworld_id` | RotoWorld              | `--rotoworld-id` |
-| `otc_id`       | Over The Cap           | `--otc-id`       |
+| ID Type               | Platform               | CLI Flag                |
+| --------------------- | ---------------------- | ----------------------- |
+| `pfr_player_id`       | Pro-Football-Reference | `--pfr-player-id`       |
+| `rotowire_player_id`  | RotoWire               | `--rotowire-player-id`  |
+| `rotoworld_player_id` | RotoWorld              | `--rotoworld-player-id` |
+| `otc_player_id`       | Over The Cap           | `--otc-player-id`       |
 
 ### DFS IDs
 
-| ID Type         | Platform   | CLI Flag          |
-| --------------- | ---------- | ----------------- |
-| `draftkings_id` | DraftKings | `--draftkings-id` |
-| `fanduel_id`    | FanDuel    | `--fanduel-id`    |
-| `rts_id`        | RTS        | `--rts-id`        |
+| ID Type                | Platform   | CLI Flag                 |
+| ---------------------- | ---------- | ------------------------ |
+| `draftkings_player_id` | DraftKings | `--draftkings-player-id` |
+| `fanduel_player_id`    | FanDuel    | `--fanduel-player-id`    |
+| `rts_player_id`        | RTS        | `--rts-player-id`        |
 
 ## Import Scripts
 
@@ -211,13 +211,13 @@ The `started` column is owned by `scripts/import-nfl-gamebook-starters.mjs`. Cov
 
 ### PFR Audit Workflow
 
-The PFR audit (`audit-player-gamelogs.mjs`) matches gamelogs by `pfr_id`, `week`, and `seas_type`. Players without `pfr_id` show as "missing gamelogs" even if their data exists.
+The PFR audit (`audit-player-gamelogs.mjs`) matches gamelogs by `pfr_player_id`, `week`, and `seas_type`. Players without `pfr_player_id` show as "missing gamelogs" even if their data exists.
 
 **PFR ID format**: First 4 letters of last name + first 2 of first name + numeric suffix (e.g., `MahoPa00`). Suffixes increment across all players sharing the prefix, not per position -- verify assignments by checking stat patterns (QB stats vs WR stats).
 
 **Common audit issues**:
 
-- Missing pfr_id: use `update --pid PID --pfr-id VALUE` to populate
+- Missing pfr_player_id: use `update --pid PID --pfr-player-id VALUE` to populate
 - Stale PFR cache: re-run with `--ignore_cache` to refresh
 - Gamelog zeros despite plays existing: check gsisid/gsispid linkage in `nfl_play_stats`
 

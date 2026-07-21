@@ -70,7 +70,7 @@ const importPlayersNFL = async ({
     let error
     if (gsisid) {
       try {
-        player_row = await find_player_row({ gsisid })
+        player_row = await find_player_row({ gsis_player_id: gsisid })
       } catch (err) {
         log(err)
       }
@@ -78,7 +78,7 @@ const importPlayersNFL = async ({
 
     if (!player_row && esbid) {
       try {
-        player_row = await find_player_row({ esbid })
+        player_row = await find_player_row({ esb_player_id: esbid })
       } catch (err) {
         log(err)
       }
@@ -86,7 +86,7 @@ const importPlayersNFL = async ({
 
     if (!player_row) {
       try {
-        player_row = await find_player_row({ name, dob })
+        player_row = await find_player_row({ name, date_of_birth: dob })
       } catch (err) {
         error = err
         log(err)

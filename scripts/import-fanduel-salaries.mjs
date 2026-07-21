@@ -88,7 +88,7 @@ const import_fanduel_salaries = async ({
 
       try {
         player_row = await find_player_row({
-          fanduel_id: fanduel_player.id
+          fanduel_player_id: fanduel_player.id
         })
       } catch (err) {
         log(err)
@@ -196,11 +196,11 @@ const process_matched_player = async ({
   teams_index,
   unmatched_games
 }) => {
-  if (!player_row.fanduel_id) {
+  if (!player_row.fanduel_player_id) {
     await updatePlayer({
       player_row,
       update: {
-        fanduel_id: fanduel_player.id
+        fanduel_player_id: fanduel_player.id
       }
     })
   }

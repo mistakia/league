@@ -76,7 +76,9 @@ const import_players_from_combine_profiles_for_year = async ({
   for (const profile of profiles_data.combineProfiles) {
     let player_row
     try {
-      player_row = await find_player_row({ esbid: profile.person.esbId })
+      player_row = await find_player_row({
+        esb_player_id: profile.person.esbId
+      })
     } catch (err) {
       log(err)
       continue

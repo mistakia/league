@@ -324,7 +324,7 @@ const import_ownership = async ({
         if (dk_id) {
           try {
             player_row = find_player({
-              draftkings_id: dk_id,
+              draftkings_player_id: dk_id,
               ignore_free_agent: false,
               ignore_retired: false
             })

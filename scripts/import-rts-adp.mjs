@@ -79,7 +79,9 @@ const import_rts_adp = async ({
     for (const player of players) {
       let player_row
       try {
-        player_row = await find_player_row({ rts_id: player.player_id })
+        player_row = await find_player_row({
+          rts_player_id: player.player_id
+        })
       } catch (err) {
         log(`Error getting player by rts_id: ${err}`)
         unmatched_players.push(player)
@@ -125,19 +127,19 @@ const import_rts_adp = async ({
 
       if (player_row) {
         if (
-          player_row.rts_id &&
-          matched_rts_ids.has(Number(player_row.rts_id))
+          player_row.rts_player_id &&
+          matched_rts_ids.has(Number(player_row.rts_player_id))
         ) {
-          log(`Player ${player_row.rts_id} already matched`)
+          log(`Player ${player_row.rts_player_id} already matched`)
           log(player)
           continue
         }
 
-        if (!player_row.rts_id) {
+        if (!player_row.rts_player_id) {
           await updatePlayer({
             player_row,
             update: {
-              rts_id: Number(player.player_id)
+              rts_player_id: Number(player.player_id)
             }
           })
         }

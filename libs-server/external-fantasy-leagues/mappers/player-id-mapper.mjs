@@ -23,17 +23,20 @@ const CACHE_TTL_MS = 30 * 60 * 1000 // 30 minutes TTL
 export default class PlayerIdMapper {
   constructor() {
     this.cache = new Map() // key -> { value, timestamp }
+    // platform -> canonical player DB column. The same column name is a
+    // find_player_row lookup parameter AND an update_player column, so it is
+    // used directly by both with no translation.
     this.platform_column_map = {
-      sleeper: 'sleeper_id',
-      espn: 'espn_id',
-      yahoo: 'yahoo_id',
-      mfl: 'mfl_id',
-      cbs: 'cbs_id',
-      ffpc: 'ffpc_id',
-      nffc: 'nffc_id',
-      fantrax: 'fantrax_id',
-      fleaflicker: 'fleaflicker_id',
-      nfl: 'nfl_id',
+      sleeper: 'sleeper_player_id',
+      espn: 'espn_player_id',
+      yahoo: 'yahoo_player_id',
+      mfl: 'mfl_player_id',
+      cbs: 'cbs_player_id',
+      ffpc: 'ffpc_player_id',
+      nffc: 'nffc_player_id',
+      fantrax: 'fantrax_player_id',
+      fleaflicker: 'fleaflicker_player_id',
+      nfl: 'nfl_player_id',
       rtsports: 'rts_player_id'
     }
   }

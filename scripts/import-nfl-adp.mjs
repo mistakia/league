@@ -130,7 +130,9 @@ const import_nfl_adp = async ({
 
     let player_row
     try {
-      player_row = await find_player_row({ nfl_id: source_player.nfl_id })
+      player_row = await find_player_row({
+        nfl_player_id: source_player.nfl_id
+      })
     } catch (err) {
       log(`Error getting player by nfl_id: ${err}`)
       unmatched_players.push(source_player)

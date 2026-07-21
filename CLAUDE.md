@@ -286,13 +286,13 @@ See [docs/player-management.md](docs/player-management.md) for comprehensive doc
 NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Player Name" --sources all
 
 # Lookup with filters
-NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Mahomes" --pos QB --team KC
+NODE_ENV=production node scripts/resolve-player-match.mjs lookup --name "Mahomes" --primary-position QB --team KC
 
 # Update player with external IDs
-NODE_ENV=production node scripts/resolve-player-match.mjs update --pid "PID" --gsisid "00-0012345"
+NODE_ENV=production node scripts/resolve-player-match.mjs update --pid "PID" --gsis-player-id "00-0012345"
 
 # Create player (use suggested command from lookup)
-NODE_ENV=production node scripts/resolve-player-match.mjs create --fname "First" --lname "Last" --pos QB
+NODE_ENV=production node scripts/resolve-player-match.mjs create --first-name "First" --last-name "Last" --primary-position QB
 ```
 
 ### Player ID Format

@@ -86,39 +86,42 @@ const fetch_sleeper_players = async ({ ignore_cache = false } = {}) => {
   return data
 }
 
-// Maps each stable CLI flag name (yargs option, e.g. --espn-id) to the
-// canonical player DB column it writes. The flag names are the tool's
-// stable human interface and must not change; only the column names (used
-// as object keys for createPlayer/updatePlayer) are canonical.
-const external_id_column_map = {
-  'pff-id': 'pff_player_id',
-  'draftkings-id': 'draftkings_player_id',
-  'fanduel-id': 'fanduel_player_id',
-  'espn-id': 'espn_player_id',
-  'sleeper-id': 'sleeper_player_id',
-  'yahoo-id': 'yahoo_player_id',
-  'sportradar-id': 'sportradar_player_id',
-  'nfl-id': 'nfl_player_id',
-  gsisid: 'gsis_player_id',
-  'gsis-it-id': 'gsis_it_player_id',
-  esbid: 'esb_player_id',
-  'rotowire-id': 'rotowire_player_id',
-  'rotoworld-id': 'rotoworld_player_id',
-  'cbs-id': 'cbs_player_id',
-  'mfl-id': 'mfl_player_id',
-  'pfr-id': 'pfr_player_id',
-  'otc-id': 'otc_player_id',
-  'keeptradecut-id': 'keeptradecut_player_id',
-  'fantasy-data-id': 'fantasy_data_player_id',
-  'rts-id': 'rts_player_id',
-  'fleaflicker-id': 'fleaflicker_player_id',
-  'underdog-id': 'underdog_player_id'
-}
+// Canonical player DB columns for external IDs. Each column's CLI flag is the
+// column name with underscores as dashes (e.g. espn_player_id -> --espn-player-id);
+// the column name is used directly as the createPlayer/updatePlayer object key
+// and as a find_player_row lookup parameter. One vocabulary end to end.
+const EXTERNAL_ID_COLUMNS = [
+  'pff_player_id',
+  'draftkings_player_id',
+  'fanduel_player_id',
+  'espn_player_id',
+  'sleeper_player_id',
+  'yahoo_player_id',
+  'sportradar_player_id',
+  'nfl_player_id',
+  'gsis_player_id',
+  'gsis_it_player_id',
+  'esb_player_id',
+  'rotowire_player_id',
+  'rotoworld_player_id',
+  'cbs_player_id',
+  'mfl_player_id',
+  'pfr_player_id',
+  'otc_player_id',
+  'keeptradecut_player_id',
+  'fantasy_data_player_id',
+  'rts_player_id',
+  'fleaflicker_player_id',
+  'underdog_player_id'
+]
+
+const column_to_flag = (column) => column.replace(/_/g, '-')
 
 const get_external_id_from_argv = (argv) => {
-  for (const [arg_name, column] of Object.entries(external_id_column_map)) {
-    if (argv[arg_name] !== undefined) {
-      return { column, value: argv[arg_name] }
+  for (const column of EXTERNAL_ID_COLUMNS) {
+    const flag = column_to_flag(column)
+    if (argv[flag] !== undefined) {
+      return { column, value: argv[flag] }
     }
   }
   return null
@@ -126,61 +129,51 @@ const get_external_id_from_argv = (argv) => {
 
 const get_all_external_ids_from_argv = (argv) => {
   const ids = {}
-  for (const [arg_name, column] of Object.entries(external_id_column_map)) {
-    if (argv[arg_name] !== undefined) {
-      ids[column] = argv[arg_name]
+  for (const column of EXTERNAL_ID_COLUMNS) {
+    const flag = column_to_flag(column)
+    if (argv[flag] !== undefined) {
+      ids[column] = argv[flag]
     }
   }
   return ids
 }
 
-// entry.external_ids (built in consolidate_results) uses old-style display
-// keys (sleeper_id, gsisid, esbid, ...) mirroring the external systems'
-// field names for human display -- these are not DB columns and are not
-// renamed. This map translates those display keys to the matching
-// canonical db_matches row column, so the "already set on this player row"
-// check in action_lookup's suggested-update-command path still works
-// against the renamed player table columns. Only covers keys actually
-// present in the db_matches select list.
-const EXTERNAL_ID_DISPLAY_TO_DB_COLUMN = {
-  sleeper_id: 'sleeper_player_id',
-  espn_id: 'espn_player_id',
-  sportradar_id: 'sportradar_player_id',
-  gsisid: 'gsis_player_id',
-  esbid: 'esb_player_id',
-  gsis_it_id: 'gsis_it_player_id',
-  pfr_id: 'pfr_player_id'
-}
-
 const action_create_player = async (argv) => {
-  const { fname, lname, pos, team, dob, draftYear } = argv
+  const {
+    firstName: first_name,
+    lastName: last_name,
+    primaryPosition: primary_position,
+    team,
+    dateOfBirth: date_of_birth,
+    draftYear
+  } = argv
 
-  if (!fname || !lname) {
-    throw new Error('--fname and --lname are required')
+  if (!first_name || !last_name) {
+    throw new Error('--first-name and --last-name are required')
   }
 
-  if (!pos) {
-    throw new Error('--pos is required')
+  if (!primary_position) {
+    throw new Error('--primary-position is required')
   }
 
   // Warn (don't block) when DOB missing: the resulting stub pid
   // (FFFF-LLLL-YEAR-0000-00-00) is the hijack vector that
   // import-pff-seasonlogs and similar fall-back importers latch onto. Pass
-  // --dob whenever possible.
-  if (!dob || dob === '0000-00-00') {
+  // --date-of-birth whenever possible.
+  if (!date_of_birth || date_of_birth === '0000-00-00') {
     log(
-      `WARNING: creating ${fname} ${lname} with no DOB. Stub pids are a known external-ID hijack risk -- pass --dob to mint a stable pid (see guideline/nfl/league/league-player-resolution.md).`
+      `WARNING: creating ${first_name} ${last_name} with no DOB. Stub pids are a known external-ID hijack risk -- pass --date-of-birth to mint a stable pid (see guideline/nfl/league/league-player-resolution.md).`
     )
   }
 
   const player_data = {
-    first_name: fname,
-    last_name: lname,
-    primary_position: pos,
-    secondary_position: pos,
-    position_depth: pos,
+    first_name,
+    last_name,
+    primary_position,
+    secondary_position: primary_position,
+    position_depth: primary_position,
     current_nfl_team: team || 'INA',
-    date_of_birth: dob || '0000-00-00',
+    date_of_birth: date_of_birth || '0000-00-00',
     nfl_draft_year: draftYear || new Date().getFullYear(),
     height_inches: argv.height || 72,
     weight_pounds: argv.weight || 200
@@ -190,7 +183,7 @@ const action_create_player = async (argv) => {
   const external_ids = get_all_external_ids_from_argv(argv)
   Object.assign(player_data, external_ids)
 
-  log(`Creating player: ${fname} ${lname}`)
+  log(`Creating player: ${first_name} ${last_name}`)
   log(player_data)
 
   const result = await createPlayer(player_data)
@@ -213,7 +206,7 @@ const action_update_external_id = async (argv) => {
   const external_id = get_external_id_from_argv(argv)
   if (!external_id) {
     throw new Error(
-      'At least one external ID argument is required (e.g., --pff-id, --draftkings-id)'
+      'At least one external ID argument is required (e.g., --pff-player-id, --draftkings-player-id)'
     )
   }
 
@@ -238,7 +231,7 @@ const action_update_external_id = async (argv) => {
 }
 
 const action_update_player = async (argv) => {
-  const { pid, team, pos } = argv
+  const { pid, team, primaryPosition: primary_position } = argv
 
   if (!pid) {
     throw new Error('--pid is required')
@@ -254,25 +247,26 @@ const action_update_player = async (argv) => {
   }
 
   // Handle position update
-  if (pos) {
-    const upper_pos = pos.toUpperCase()
+  if (primary_position) {
+    const upper_pos = primary_position.toUpperCase()
     update.primary_position = upper_pos
     update.secondary_position = upper_pos
     update.position_depth = upper_pos
-    log(`Setting pos = ${upper_pos}`)
+    log(`Setting primary_position = ${upper_pos}`)
   }
 
   // Handle external IDs
-  for (const [arg_name, column] of Object.entries(external_id_column_map)) {
-    if (argv[arg_name] !== undefined) {
-      update[column] = argv[arg_name]
-      log(`Setting ${column} = ${argv[arg_name]}`)
+  for (const column of EXTERNAL_ID_COLUMNS) {
+    const flag = column_to_flag(column)
+    if (argv[flag] !== undefined) {
+      update[column] = argv[flag]
+      log(`Setting ${column} = ${argv[flag]}`)
     }
   }
 
   if (Object.keys(update).length === 0) {
     throw new Error(
-      'At least one update field is required (e.g., --team, --pos, --gsis-it-id)'
+      'At least one update field is required (e.g., --team, --primary-position, --gsis-it-player-id)'
     )
   }
 
@@ -360,7 +354,7 @@ const action_merge_players = async (argv) => {
 }
 
 const action_search = async (argv) => {
-  const { name, team, pos } = argv
+  const { name, team, primaryPosition: pos } = argv
 
   const query = db('player')
     .select(
@@ -633,16 +627,17 @@ const consolidate_results = async ({ results, pos, team }) => {
     })
 
     entry.sources.push('sleeper')
-    entry.external_ids.sleeper_id = source_player.sleeper_id
+    entry.external_ids.sleeper_player_id = source_player.sleeper_id
     if (source_player.espn_id)
-      entry.external_ids.espn_id = source_player.espn_id
+      entry.external_ids.espn_player_id = source_player.espn_id
     if (source_player.sportradar_id)
-      entry.external_ids.sportradar_id = source_player.sportradar_id
-    if (source_player.gsis_id) entry.external_ids.gsisid = source_player.gsis_id
+      entry.external_ids.sportradar_player_id = source_player.sportradar_id
+    if (source_player.gsis_id)
+      entry.external_ids.gsis_player_id = source_player.gsis_id
     if (source_player.rotowire_id)
-      entry.external_ids.rotowire_id = source_player.rotowire_id
+      entry.external_ids.rotowire_player_id = source_player.rotowire_id
     if (source_player.yahoo_id)
-      entry.external_ids.yahoo_id = source_player.yahoo_id
+      entry.external_ids.yahoo_player_id = source_player.yahoo_id
 
     // Store additional sleeper data
     entry.sleeper_data = {
@@ -665,7 +660,7 @@ const consolidate_results = async ({ results, pos, team }) => {
     })
 
     if (!entry.sources.includes('espn')) entry.sources.push('espn')
-    entry.external_ids.espn_id = source_player.espn_id
+    entry.external_ids.espn_player_id = source_player.espn_id
   }
 
   // Process NFL Pro results (source_player: NFL Pro API record, not a DB row)
@@ -677,10 +672,12 @@ const consolidate_results = async ({ results, pos, team }) => {
     })
 
     if (!entry.sources.includes('nfl')) entry.sources.push('nfl')
-    if (source_player.gsisid) entry.external_ids.gsisid = source_player.gsisid
-    if (source_player.esbid) entry.external_ids.esbid = source_player.esbid
+    if (source_player.gsisid)
+      entry.external_ids.gsis_player_id = source_player.gsisid
+    if (source_player.esbid)
+      entry.external_ids.esb_player_id = source_player.esbid
     if (source_player.gsis_it_id)
-      entry.external_ids.gsis_it_id = source_player.gsis_it_id
+      entry.external_ids.gsis_it_player_id = source_player.gsis_it_id
 
     // Store NFL Pro data
     entry.nfl_data = {
@@ -705,7 +702,7 @@ const consolidate_results = async ({ results, pos, team }) => {
     })
 
     if (!entry.sources.includes('pfr')) entry.sources.push('pfr')
-    entry.external_ids.pfr_id = source_player.pfr_id
+    entry.external_ids.pfr_player_id = source_player.pfr_id
 
     // Store PFR data
     entry.pfr_data = {
@@ -727,7 +724,14 @@ const consolidate_results = async ({ results, pos, team }) => {
 }
 
 const action_lookup = async (argv) => {
-  const { name, team, pos, draftYear, ignoreCache, sources: sources_arg } = argv
+  const {
+    name,
+    team,
+    primaryPosition: pos,
+    draftYear,
+    ignoreCache,
+    sources: sources_arg
+  } = argv
 
   if (!name) {
     throw new Error('--name is required')
@@ -881,13 +885,13 @@ const action_lookup = async (argv) => {
   // Step 4: Check for duplicates in database
   log('\n=== Duplicate Check ===')
   for (const entry of consolidated) {
-    for (const [id_type, id_value] of Object.entries(entry.external_ids)) {
+    for (const [id_column, id_value] of Object.entries(entry.external_ids)) {
       if (!id_value) continue
       try {
-        const existing = await find_player_row({ [id_type]: id_value })
+        const existing = await find_player_row({ [id_column]: id_value })
         if (existing) {
           log(
-            `[WARNING] Player with ${id_type}=${id_value} already exists: ${existing.pid}`
+            `[WARNING] Player with ${id_column}=${id_value} already exists: ${existing.pid}`
           )
         }
       } catch (err) {
@@ -916,11 +920,9 @@ const action_lookup = async (argv) => {
         `--pid "${matching_db_player.pid}"`
       ]
 
-      for (const [id_type, id_value] of Object.entries(best.external_ids)) {
-        const db_column = EXTERNAL_ID_DISPLAY_TO_DB_COLUMN[id_type] || id_type
-        if (id_value && !matching_db_player[db_column]) {
-          const arg_name = id_type.replace(/_/g, '-')
-          cmd_parts.push(`--${arg_name} "${id_value}"`)
+      for (const [id_column, id_value] of Object.entries(best.external_ids)) {
+        if (id_value && !matching_db_player[id_column]) {
+          cmd_parts.push(`--${column_to_flag(id_column)} "${id_value}"`)
         }
       }
 
@@ -958,10 +960,9 @@ const action_lookup = async (argv) => {
       }
 
       // Add all external IDs
-      for (const [id_type, id_value] of Object.entries(best.external_ids)) {
+      for (const [id_column, id_value] of Object.entries(best.external_ids)) {
         if (id_value) {
-          const arg_name = id_type.replace(/_/g, '-')
-          cmd_parts.push(`--${arg_name} "${id_value}"`)
+          cmd_parts.push(`--${column_to_flag(id_column)} "${id_value}"`)
         }
       }
 
@@ -980,14 +981,17 @@ const main = async () => {
       .usage('Usage: $0 <action> [options]')
       .command('create', 'Create a new player', (yargs) => {
         return yargs
-          .option('fname', { type: 'string', description: 'First name' })
-          .option('lname', { type: 'string', description: 'Last name' })
-          .option('pos', { type: 'string', description: 'Position' })
+          .option('first-name', { type: 'string', description: 'First name' })
+          .option('last-name', { type: 'string', description: 'Last name' })
+          .option('primary-position', {
+            type: 'string',
+            description: 'Position'
+          })
           .option('team', {
             type: 'string',
             description: 'NFL team abbreviation'
           })
-          .option('dob', {
+          .option('date-of-birth', {
             type: 'string',
             description: 'Date of birth (YYYY-MM-DD)'
           })
@@ -1015,7 +1019,7 @@ const main = async () => {
               type: 'string',
               description: 'NFL team abbreviation'
             })
-            .option('pos', {
+            .option('primary-position', {
               type: 'string',
               description: 'Position'
             })
@@ -1047,7 +1051,10 @@ const main = async () => {
             type: 'string',
             description: 'NFL team abbreviation'
           })
-          .option('pos', { type: 'string', description: 'Position' })
+          .option('primary-position', {
+            type: 'string',
+            description: 'Position'
+          })
       })
       .command(
         'lookup',
@@ -1063,7 +1070,10 @@ const main = async () => {
               type: 'string',
               description: 'NFL team abbreviation'
             })
-            .option('pos', { type: 'string', description: 'Position' })
+            .option('primary-position', {
+              type: 'string',
+              description: 'Position'
+            })
             .option('draft-year', {
               type: 'number',
               description: 'Draft year to filter by'
@@ -1082,51 +1092,60 @@ const main = async () => {
             })
         }
       )
-      .option('pff-id', { type: 'number', description: 'PFF player ID' })
-      .option('draftkings-id', {
+      .option('pff-player-id', { type: 'number', description: 'PFF player ID' })
+      .option('draftkings-player-id', {
         type: 'number',
         description: 'DraftKings player ID'
       })
-      .option('fanduel-id', {
+      .option('fanduel-player-id', {
         type: 'string',
         description: 'FanDuel player ID'
       })
-      .option('espn-id', { type: 'number', description: 'ESPN player ID' })
-      .option('sleeper-id', {
+      .option('espn-player-id', {
+        type: 'number',
+        description: 'ESPN player ID'
+      })
+      .option('sleeper-player-id', {
         type: 'string',
         description: 'Sleeper player ID'
       })
-      .option('yahoo-id', { type: 'number', description: 'Yahoo player ID' })
-      .option('sportradar-id', {
+      .option('yahoo-player-id', {
+        type: 'number',
+        description: 'Yahoo player ID'
+      })
+      .option('sportradar-player-id', {
         type: 'string',
         description: 'Sportradar player ID'
       })
-      .option('nfl-id', { type: 'number', description: 'NFL player ID' })
-      .option('gsisid', { type: 'string', description: 'GSIS player ID' })
-      .option('gsis-it-id', {
+      .option('nfl-player-id', { type: 'number', description: 'NFL player ID' })
+      .option('gsis-player-id', {
+        type: 'string',
+        description: 'GSIS player ID'
+      })
+      .option('gsis-it-player-id', {
         type: 'string',
         description: 'GSIS IT player ID'
       })
-      .option('esbid', { type: 'string', description: 'ESB player ID' })
-      .option('rotowire-id', {
+      .option('esb-player-id', { type: 'string', description: 'ESB player ID' })
+      .option('rotowire-player-id', {
         type: 'number',
         description: 'Rotowire player ID'
       })
-      .option('rotoworld-id', {
+      .option('rotoworld-player-id', {
         type: 'number',
         description: 'Rotoworld player ID'
       })
-      .option('cbs-id', { type: 'number', description: 'CBS player ID' })
-      .option('mfl-id', { type: 'number', description: 'MFL player ID' })
-      .option('pfr-id', {
+      .option('cbs-player-id', { type: 'number', description: 'CBS player ID' })
+      .option('mfl-player-id', { type: 'number', description: 'MFL player ID' })
+      .option('pfr-player-id', {
         type: 'string',
         description: 'Pro Football Reference player ID'
       })
-      .option('otc-id', {
+      .option('otc-player-id', {
         type: 'number',
         description: 'Over The Cap player ID'
       })
-      .option('keeptradecut-id', {
+      .option('keeptradecut-player-id', {
         type: 'number',
         description: 'KeepTradeCut player ID'
       })

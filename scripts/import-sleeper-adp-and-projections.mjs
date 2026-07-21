@@ -175,7 +175,9 @@ const import_sleeper_adp_and_projections = async ({
 
     let player_row
     try {
-      player_row = await find_player_row({ sleeper_id: projection.player_id })
+      player_row = await find_player_row({
+        sleeper_player_id: projection.player_id
+      })
     } catch (err) {
       log(`Error getting player by sleeper_id: ${err}`)
       unmatched_projections.push(projection)
@@ -215,10 +217,10 @@ const import_sleeper_adp_and_projections = async ({
 
     if (player_row) {
       if (
-        player_row.sleeper_id &&
-        matched_sleeper_ids.has(Number(player_row.sleeper_id))
+        player_row.sleeper_player_id &&
+        matched_sleeper_ids.has(Number(player_row.sleeper_player_id))
       ) {
-        log(`Player ${player_row.sleeper_id} already matched`)
+        log(`Player ${player_row.sleeper_player_id} already matched`)
         continue
       }
 

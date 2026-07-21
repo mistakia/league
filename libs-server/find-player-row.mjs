@@ -115,28 +115,32 @@ const find_player_row = async ({
   pos,
   team,
   teams = [],
-  dob,
-  sleeper_id,
-  keeptradecut_id,
-  pfr_id,
-  otc_id,
-  pff_id,
-  esbid,
-  gsisid,
-  pname,
+  date_of_birth,
+  sleeper_player_id,
+  keeptradecut_player_id,
+  pfr_player_id,
+  otc_player_id,
+  pff_player_id,
+  esb_player_id,
+  gsis_player_id,
+  short_name,
   nfl_draft_year,
-  gsis_it_id,
-  draftkings_id,
-  fanduel_id,
-  cbs_id,
-  yahoo_id,
-  rts_id,
-  espn_id,
-  nfl_id,
-  mfl_id,
-  sis_id,
-  sportradar_id,
-  underdog_id,
+  gsis_it_player_id,
+  draftkings_player_id,
+  fanduel_player_id,
+  cbs_player_id,
+  yahoo_player_id,
+  rts_player_id,
+  espn_player_id,
+  nfl_player_id,
+  mfl_player_id,
+  sis_player_id,
+  sportradar_player_id,
+  underdog_player_id,
+  fleaflicker_player_id,
+  ffpc_player_id,
+  nffc_player_id,
+  fantrax_player_id,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -148,50 +152,57 @@ const find_player_row = async ({
 
   const query = db('player').select('player.*')
 
-  // NOTE: the destructured parameters keep their external-system short names
-  // (sleeper_id, espn_id, ...) as this resolver's stable lookup interface — the
-  // values callers pass come from external feeds. Only the DB column keys on the
-  // right of each `.where` conform to the new {system}_player_id column names.
-  if (sleeper_id) {
-    query.where({ sleeper_player_id: sleeper_id })
+  // Lookup parameters are the canonical player DB column names; the values
+  // callers pass come from external feeds. One vocabulary end to end — no
+  // param-to-column translation seam.
+  if (sleeper_player_id) {
+    query.where({ sleeper_player_id })
   }
 
-  if (keeptradecut_id) {
-    query.where({ keeptradecut_player_id: keeptradecut_id })
-  } else if (pfr_id) {
-    query.where({ pfr_player_id: pfr_id })
-  } else if (esbid) {
-    query.where({ esb_player_id: esbid })
-  } else if (gsisid) {
-    query.where({ gsis_player_id: gsisid })
-  } else if (gsis_it_id) {
-    query.where({ gsis_it_player_id: gsis_it_id })
-  } else if (sportradar_id) {
-    query.where({ sportradar_player_id: sportradar_id })
-  } else if (otc_id) {
-    query.where({ otc_player_id: otc_id })
-  } else if (pff_id) {
-    query.where({ pff_player_id: pff_id })
-  } else if (draftkings_id) {
-    query.where({ draftkings_player_id: draftkings_id })
-  } else if (fanduel_id) {
-    query.where({ fanduel_player_id: fanduel_id })
-  } else if (cbs_id) {
-    query.where({ cbs_player_id: cbs_id })
-  } else if (yahoo_id) {
-    query.where({ yahoo_player_id: yahoo_id })
-  } else if (rts_id) {
-    query.where({ rts_player_id: rts_id })
-  } else if (espn_id) {
-    query.where({ espn_player_id: espn_id })
-  } else if (nfl_id) {
-    query.where({ nfl_player_id: nfl_id })
-  } else if (mfl_id) {
-    query.where({ mfl_player_id: mfl_id })
-  } else if (sis_id) {
-    query.where({ sis_player_id: sis_id })
-  } else if (underdog_id) {
-    query.where({ underdog_player_id: underdog_id })
+  if (keeptradecut_player_id) {
+    query.where({ keeptradecut_player_id })
+  } else if (pfr_player_id) {
+    query.where({ pfr_player_id })
+  } else if (esb_player_id) {
+    query.where({ esb_player_id })
+  } else if (gsis_player_id) {
+    query.where({ gsis_player_id })
+  } else if (gsis_it_player_id) {
+    query.where({ gsis_it_player_id })
+  } else if (sportradar_player_id) {
+    query.where({ sportradar_player_id })
+  } else if (otc_player_id) {
+    query.where({ otc_player_id })
+  } else if (pff_player_id) {
+    query.where({ pff_player_id })
+  } else if (draftkings_player_id) {
+    query.where({ draftkings_player_id })
+  } else if (fanduel_player_id) {
+    query.where({ fanduel_player_id })
+  } else if (cbs_player_id) {
+    query.where({ cbs_player_id })
+  } else if (yahoo_player_id) {
+    query.where({ yahoo_player_id })
+  } else if (rts_player_id) {
+    query.where({ rts_player_id })
+  } else if (espn_player_id) {
+    query.where({ espn_player_id })
+  } else if (nfl_player_id) {
+    query.where({ nfl_player_id })
+  } else if (mfl_player_id) {
+    query.where({ mfl_player_id })
+  } else if (sis_player_id) {
+    query.where({ sis_player_id })
+  } else if (underdog_player_id) {
+    query.where({ underdog_player_id })
+  } else if (fleaflicker_player_id) {
+    query.where({ fleaflicker_player_id })
+  } else if (ffpc_player_id) {
+    query.where({ ffpc_player_id })
+  } else if (nffc_player_id) {
+    query.where({ nffc_player_id })
+  } else if (fantrax_player_id) {
+    query.where({ fantrax_player_id })
   } else {
     if (name) {
       const formatted = format_player_name(name)
@@ -205,8 +216,8 @@ const find_player_row = async ({
       })
     }
 
-    if (pname) {
-      query.where({ short_name: pname })
+    if (short_name) {
+      query.where({ short_name })
     }
 
     if (pos) {
@@ -232,9 +243,9 @@ const find_player_row = async ({
       query.where({ current_nfl_team: t })
     }
 
-    if (dob) {
+    if (date_of_birth) {
       query.where(function () {
-        this.where({ date_of_birth: dob }).orWhere({
+        this.where({ date_of_birth }).orWhere({
           date_of_birth: '0000-00-00'
         })
       })

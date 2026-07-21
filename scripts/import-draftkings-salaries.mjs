@@ -52,7 +52,7 @@ const import_draftkings_salaries = async ({ dry_run = false, year } = {}) => {
 
       try {
         player_row = find_player({
-          draftkings_id: draftable.playerDkId,
+          draftkings_player_id: draftable.playerDkId,
           ignore_free_agent: false,
           ignore_retired: false
         })
@@ -149,11 +149,11 @@ const process_matched_player = async ({
   salary_inserts,
   unmatched_games
 }) => {
-  if (!player_row.draftkings_id) {
+  if (!player_row.draftkings_player_id) {
     await updatePlayer({
       player_row,
       update: {
-        draftkings_id: draftable.playerDkId
+        draftkings_player_id: draftable.playerDkId
       }
     })
   }

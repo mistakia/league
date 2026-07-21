@@ -56,7 +56,7 @@ const run = async () => {
     let player_row
     let matched_by_sleeper_id = false
     try {
-      player_row = await find_player_row({ sleeper_id })
+      player_row = await find_player_row({ sleeper_player_id: sleeper_id })
       if (player_row) {
         matched_by_sleeper_id = true
       } else {

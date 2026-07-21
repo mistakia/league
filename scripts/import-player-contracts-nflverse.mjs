@@ -157,7 +157,7 @@ const find_player_from_contract_data = ({ row }) => {
   // Primary lookup: OTC ID (most accurate identifier)
   if (row.otc_id) {
     const player = find_player({
-      otc_id: row.otc_id,
+      otc_player_id: row.otc_id,
       ...player_lookup_options
     })
     if (player) return player

@@ -95,21 +95,21 @@ const CREATE_PLAYER_REQUIRED = [
   'weight_pounds'
 ]
 
-// External-id fields find_player_row understands, used to resolve a candidate to
+// External-id columns find_player_row understands, used to resolve a candidate to
 // an existing player before minting. gsis_player_id is excluded on purpose: the
 // candidate set is precisely the gsis_ids missing from the player table, so it
 // never resolves here -- the point is to catch the same person under a different id.
-// Each entry is [player_data column key, find_player_row parameter name]: the
-// resolver keeps its short external-id parameter names as a stable lookup interface.
-const FIND_ROW_ID_KEYS = [
-  ['pfr_player_id', 'pfr_id'],
-  ['esb_player_id', 'esbid'],
-  ['gsis_it_player_id', 'gsis_it_id'],
-  ['sportradar_player_id', 'sportradar_id'],
-  ['pff_player_id', 'pff_id'],
-  ['espn_player_id', 'espn_id'],
-  ['yahoo_player_id', 'yahoo_id'],
-  ['sleeper_player_id', 'sleeper_id']
+// Each entry is a canonical player DB column that is both the player_data key and
+// the find_player_row lookup parameter -- one vocabulary, no translation.
+const FIND_ROW_ID_COLUMNS = [
+  'pfr_player_id',
+  'esb_player_id',
+  'gsis_it_player_id',
+  'sportradar_player_id',
+  'pff_player_id',
+  'espn_player_id',
+  'yahoo_player_id',
+  'sleeper_player_id'
 ]
 
 // Pre-normalize historical nflverse team codes that fixTeam doesn't know.
@@ -214,9 +214,11 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
     try {
       let existing
       let matched_by_id = false
-      for (const [pd_key, param_key] of FIND_ROW_ID_KEYS) {
-        if (!player_data[pd_key]) continue
-        existing = await find_player_row({ [param_key]: player_data[pd_key] })
+      for (const id_column of FIND_ROW_ID_COLUMNS) {
+        if (!player_data[id_column]) continue
+        existing = await find_player_row({
+          [id_column]: player_data[id_column]
+        })
         if (existing) {
           matched_by_id = true
           break
@@ -231,7 +233,7 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
         const candidate = await find_player_row({
           name: `${player_data.first_name} ${player_data.last_name}`,
           pos: player_data.primary_position,
-          dob: player_data.date_of_birth,
+          date_of_birth: player_data.date_of_birth,
           nfl_draft_year: player_data.nfl_draft_year
         })
         const dob_agrees =

@@ -91,7 +91,7 @@ export const enrich_player_identifications = (
     if (enriched_play[pid_field]) return true
 
     const player = player_cache.find_player({
-      gsisid: gsis,
+      gsis_player_id: gsis,
       ignore_free_agent: false,
       ignore_retired: false
     })
@@ -118,7 +118,7 @@ export const enrich_player_identifications = (
     if (gsisid) {
       enriched_play[gsis_field] = gsisid
       const player = player_cache.find_player({
-        gsisid,
+        gsis_player_id: gsisid,
         ignore_free_agent: false,
         ignore_retired: false
       })
@@ -152,7 +152,7 @@ export const enrich_player_identifications = (
       if (gsisid) {
         enriched_play[gsis_field] = gsisid
         const player = player_cache.find_player({
-          gsisid,
+          gsis_player_id: gsisid,
           ignore_free_agent: false,
           ignore_retired: false
         })

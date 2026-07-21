@@ -8,12 +8,12 @@ import { enrich_player_identifications } from '#libs-server/play-enrichment/play
 chai.should()
 const expect = chai.expect
 
-// Minimal player_cache stub. Yields a pid for any gsisid present in pid_by_gsis,
-// otherwise null (mirroring find_player's not-found behavior).
+// Minimal player_cache stub. Yields a pid for any gsis_player_id present in
+// pid_by_gsis, otherwise null (mirroring find_player's not-found behavior).
 const make_player_cache = (pid_by_gsis = {}) => ({
-  find_player: ({ gsisid }) => {
-    if (pid_by_gsis[gsisid]) {
-      return { pid: pid_by_gsis[gsisid] }
+  find_player: ({ gsis_player_id }) => {
+    if (pid_by_gsis[gsis_player_id]) {
+      return { pid: pid_by_gsis[gsis_player_id] }
     }
     return null
   }

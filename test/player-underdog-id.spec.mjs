@@ -36,8 +36,8 @@ describe('LIBS-SERVER player underdog_id', function () {
     await db('player').whereIn('pid', [PID_A, PID_B]).del()
   })
 
-  it('find_player_row matches by underdog_id', async () => {
-    const row = await find_player_row({ underdog_id: 'UD-AAA' })
+  it('find_player_row matches by underdog_player_id', async () => {
+    const row = await find_player_row({ underdog_player_id: 'UD-AAA' })
     row.should.be.an('object')
     row.pid.should.equal(PID_A)
   })

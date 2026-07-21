@@ -76,7 +76,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
       let player_row = null
       if (player_data.espn_id) {
         player_row = find_player({
-          espn_id: player_data.espn_id
+          espn_player_id: player_data.espn_id
         })
       }
 

@@ -62,7 +62,9 @@ const import_espn_adp = async ({
   for (const source_player of players) {
     let player_row
     try {
-      player_row = await find_player_row({ espn_id: source_player.espn_id })
+      player_row = await find_player_row({
+        espn_player_id: source_player.espn_id
+      })
     } catch (err) {
       log(`Error getting player by espn_id: ${err}`)
       unmatched_players.push(source_player)

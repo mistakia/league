@@ -142,7 +142,7 @@ const resolve_player_id = async ({
   // First: try matching on sportradar_id alone (no team filter)
   // This ensures we match the unique identifier first, regardless of team
   const cached_player = find_player({
-    sportradar_id: sportradar_player_id,
+    sportradar_player_id,
     teams: [],
     ignore_free_agent: false,
     ignore_retired: false
