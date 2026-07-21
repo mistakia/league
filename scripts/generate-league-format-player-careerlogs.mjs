@@ -63,17 +63,17 @@ const generate_league_format_player_careerlogs = async ({
     return acc
   }, {})
   const draft_classes_query = await db('player')
-    .select('nfl_draft_year', 'pid', 'dpos')
-    .whereIn('pos', fantasy_positions)
+    .select('nfl_draft_year', 'pid', 'draft_overall_pick')
+    .whereIn('primary_position', fantasy_positions)
     .whereIn('pid', pids)
   const draft_classes = draft_classes_query.map((i) => i.nfl_draft_year)
   const sorted_pids_by_draft_classes = {}
   for (const draft_class of draft_classes) {
     const players = draft_classes_query.filter(
-      (i) => i.nfl_draft_year === draft_class && i.dpos
+      (i) => i.nfl_draft_year === draft_class && i.draft_overall_pick
     )
     sorted_pids_by_draft_classes[draft_class] = players
-      .sort((a, b) => a.dpos - b.dpos)
+      .sort((a, b) => a.draft_overall_pick - b.draft_overall_pick)
       .map((i) => i.pid)
 
     // TODO have a rank based on adp instead of draft position

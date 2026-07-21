@@ -161,9 +161,9 @@ const parse_csv = async (file_path) => {
 const build_player_index = async ({ gsis_ids }) => {
   if (!gsis_ids.size) return new Map()
   const rows = await db('player')
-    .select('pid', 'gsisid')
-    .whereIn('gsisid', Array.from(gsis_ids))
-  return new Map(rows.map((r) => [r.gsisid, r]))
+    .select('pid', 'gsis_player_id')
+    .whereIn('gsis_player_id', Array.from(gsis_ids))
+  return new Map(rows.map((r) => [r.gsis_player_id, r]))
 }
 
 const build_name_index = async () => {
@@ -172,12 +172,12 @@ const build_name_index = async () => {
   // most recent draft year by query order. Higher false-match risk than the
   // weekly_rosters fallback, hence the 70% resolution-rate floor.
   const rows = await db('player')
-    .select('pid', 'fname', 'lname')
+    .select('pid', 'first_name', 'last_name')
     .orderBy('nfl_draft_year')
   const idx = new Map()
   for (const r of rows) {
-    if (!r.fname || !r.lname) continue
-    const key = `${r.fname.toLowerCase()}|${r.lname.toLowerCase()}`
+    if (!r.first_name || !r.last_name) continue
+    const key = `${r.first_name.toLowerCase()}|${r.last_name.toLowerCase()}`
     idx.set(key, r)
   }
   return idx

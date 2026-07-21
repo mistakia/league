@@ -15,7 +15,7 @@ export default async function get_player_projections({
   if (!pids.length) {
     const players = await db('player')
       .select('pid')
-      .whereIn('pos', fantasy_positions)
+      .whereIn('primary_position', fantasy_positions)
       .whereNot({ current_nfl_team: 'INA' })
     players.forEach((p) => pids.push(p.pid))
   }

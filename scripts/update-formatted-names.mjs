@@ -15,9 +15,12 @@ const updateFormattedNames = async () => {
   for (const player_row of player_rows) {
     try {
       const formatted = format_player_name(
-        `${player_row.fname} ${player_row.lname}`
+        `${player_row.first_name} ${player_row.last_name}`
       )
-      const changes = await updatePlayer({ player_row, update: { formatted } })
+      const changes = await updatePlayer({
+        player_row,
+        update: { formatted_name: formatted }
+      })
       count += changes
     } catch (err) {
       log(err)

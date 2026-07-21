@@ -23,7 +23,9 @@ const importPlayersESPN = async () => {
         const {
           groups: { espn_id }
         } = re_result
-        const query_result = await db('player').where({ espn_id })
+        const query_result = await db('player').where({
+          espn_player_id: espn_id
+        })
 
         if (query_result.length) {
           log(`espn_id already exists: ${espn_id}`)
@@ -60,11 +62,11 @@ const importPlayersESPN = async () => {
         // name-matched pid -- this lookup goes name+pos+team only, so a
         // Jr/Sr name collision could otherwise hijack the wrong pid.
         if (
-          player_row.espn_id != null &&
-          String(player_row.espn_id) !== String(espn_id)
+          player_row.espn_player_id != null &&
+          String(player_row.espn_player_id) !== String(espn_id)
         ) {
           log(
-            `SKIP espn_id overwrite: matched_pid=${player_row.pid} already has espn_id=${player_row.espn_id}, ESPN reports ${espn_id} for "${name}". Reconcile manually.`
+            `SKIP espn_id overwrite: matched_pid=${player_row.pid} already has espn_id=${player_row.espn_player_id}, ESPN reports ${espn_id} for "${name}". Reconcile manually.`
           )
           continue
         }
@@ -72,7 +74,7 @@ const importPlayersESPN = async () => {
         const changes = await updatePlayer({
           player_row,
           update: {
-            espn_id
+            espn_player_id: espn_id
           }
         })
 

@@ -21,7 +21,7 @@ const apply_updates = async ({ rows_to_fix, dry_run }) => {
         clubCode: row.clubCode,
         statId: row.statId
       })
-      .update({ gsisId: row.gsisid })
+      .update({ gsisId: row.gsis_player_id })
     total_updated++
   }
 
@@ -33,7 +33,7 @@ const group_and_log = (rows, label) => {
   for (const row of rows) {
     const key = `${row.playerName} (${row.clubCode})`
     if (!by_player[key]) {
-      by_player[key] = { gsisid: row.gsisid, pid: row.pid, count: 0 }
+      by_player[key] = { gsisid: row.gsis_player_id, pid: row.pid, count: 0 }
     }
     by_player[key].count++
   }
@@ -61,7 +61,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
   const pass1_rows = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
     .join('player as p', function () {
-      this.on('ps.playerName', '=', 'p.pname').andOn(
+      this.on('ps.playerName', '=', 'p.short_name').andOn(
         'ps.clubCode',
         '=',
         'p.current_nfl_team'
@@ -71,7 +71,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
     .whereNull('ps.gsisId')
     .whereNotNull('ps.playerName')
     .where('ps.playerName', '!=', '')
-    .whereNotNull('p.gsisid')
+    .whereNotNull('p.gsis_player_id')
     .select(
       'ps.esbid',
       'ps.playId',
@@ -79,8 +79,8 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
       'ps.clubCode',
       'ps.statId',
       'p.pid',
-      'p.gsisid',
-      'p.pname'
+      'p.gsis_player_id',
+      'p.short_name'
     )
 
   // Filter out ambiguous matches (multiple players with same pname+team)
@@ -142,17 +142,17 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
 
     // Find players matching by pname with exactly one match
     const player_matches = await db('player')
-      .whereIn('pname', player_names)
-      .whereNotNull('gsisid')
-      .select('pname', 'pid', 'gsisid')
+      .whereIn('short_name', player_names)
+      .whereNotNull('gsis_player_id')
+      .select('short_name', 'pid', 'gsis_player_id')
 
-    // Group by pname to find unique matches
+    // Group by short_name to find unique matches
     const by_pname = {}
     for (const p of player_matches) {
-      if (!by_pname[p.pname]) {
-        by_pname[p.pname] = []
+      if (!by_pname[p.short_name]) {
+        by_pname[p.short_name] = []
       }
-      by_pname[p.pname].push(p)
+      by_pname[p.short_name].push(p)
     }
 
     // Only use unique matches (exactly one player with that pname)
@@ -172,8 +172,8 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
         pass2_rows.push({
           ...row,
           pid: match.pid,
-          gsisid: match.gsisid,
-          pname: match.pname
+          gsis_player_id: match.gsis_player_id,
+          short_name: match.short_name
         })
       } else if (by_pname[row.playerName]?.length > 1) {
         skipped_ambiguous.add(row.playerName)

@@ -110,9 +110,15 @@ const parse_csv = async (file_path) => {
 const build_player_index = async ({ gsis_ids }) => {
   if (!gsis_ids.size) return { by_gsis_id: new Map(), by_name_year: new Map() }
   const rows = await db('player')
-    .select('pid', 'gsisid', 'fname', 'lname', 'nfl_draft_year')
-    .whereIn('gsisid', Array.from(gsis_ids))
-  const by_gsis_id = new Map(rows.map((r) => [r.gsisid, r]))
+    .select(
+      'pid',
+      'gsis_player_id',
+      'first_name',
+      'last_name',
+      'nfl_draft_year'
+    )
+    .whereIn('gsis_player_id', Array.from(gsis_ids))
+  const by_gsis_id = new Map(rows.map((r) => [r.gsis_player_id, r]))
   // Name-fallback index is built lazily below from a wider query, only if needed.
   return { by_gsis_id, by_name_year: new Map() }
 }
@@ -120,14 +126,14 @@ const build_player_index = async ({ gsis_ids }) => {
 const build_name_year_index = async () => {
   const rows = await db('player').select(
     'pid',
-    'fname',
-    'lname',
+    'first_name',
+    'last_name',
     'nfl_draft_year'
   )
   const idx = new Map()
   for (const r of rows) {
-    if (!r.fname || !r.lname) continue
-    const key = `${r.fname.toLowerCase()}|${r.lname.toLowerCase()}|${r.nfl_draft_year || ''}`
+    if (!r.first_name || !r.last_name) continue
+    const key = `${r.first_name.toLowerCase()}|${r.last_name.toLowerCase()}|${r.nfl_draft_year || ''}`
     // Last write wins; collisions are rare (homonyms with same draft year).
     idx.set(key, r)
   }

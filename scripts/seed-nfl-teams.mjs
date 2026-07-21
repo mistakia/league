@@ -25,61 +25,61 @@ const seed_nfl_teams = async () => {
 
   for (const {
     pid,
-    fname,
-    lname,
-    pname,
-    formatted,
+    first_name,
+    last_name,
+    short_name,
+    formatted_name,
     current_nfl_team,
-    dob,
-    height,
-    weight,
+    date_of_birth,
+    height_inches,
+    weight_pounds,
     nfl_draft_year: start,
-    jnum
+    jersey_number
   } of player_rows_teams) {
     inserts.push({
       pid: `${pid}-DEF`,
-      fname,
-      lname: `${lname} Defense`,
-      formatted: `${formatted} defense`,
-      pname,
-      pos: 'DEF',
-      pos1: 'DEF',
+      first_name,
+      last_name: `${last_name} Defense`,
+      formatted_name: `${formatted_name} defense`,
+      short_name,
+      primary_position: 'DEF',
+      secondary_position: 'DEF',
       current_nfl_team,
-      dob,
-      height,
-      weight,
+      date_of_birth,
+      height_inches,
+      weight_pounds,
       nfl_draft_year: start,
-      jnum
+      jersey_number
     })
     inserts.push({
       pid: `${pid}-OFF`,
-      fname,
-      lname: `${lname} Offense`,
-      formatted: `${formatted} offense`,
-      pname,
-      pos: 'OFF',
-      pos1: 'OFF',
+      first_name,
+      last_name: `${last_name} Offense`,
+      formatted_name: `${formatted_name} offense`,
+      short_name,
+      primary_position: 'OFF',
+      secondary_position: 'OFF',
       current_nfl_team,
-      dob,
-      height,
-      weight,
+      date_of_birth,
+      height_inches,
+      weight_pounds,
       nfl_draft_year: start,
-      jnum
+      jersey_number
     })
     inserts.push({
       pid: `${pid}-DST`,
-      fname,
-      lname: `${lname} Defense and Special Teams`,
-      formatted: `${formatted} defense and special teams`,
-      pname,
-      pos: 'DST',
-      pos1: 'DST',
+      first_name,
+      last_name: `${last_name} Defense and Special Teams`,
+      formatted_name: `${formatted_name} defense and special teams`,
+      short_name,
+      primary_position: 'DST',
+      secondary_position: 'DST',
       current_nfl_team,
-      dob,
-      height,
-      weight,
+      date_of_birth,
+      height_inches,
+      weight_pounds,
       nfl_draft_year: start,
-      jnum
+      jersey_number
     })
   }
 
