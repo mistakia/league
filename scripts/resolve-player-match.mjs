@@ -933,14 +933,14 @@ const action_lookup = async (argv) => {
       const data = best.sleeper_data || best.nfl_data || {}
       const cmd_parts = [
         'NODE_ENV=production node scripts/resolve-player-match.mjs create',
-        `--fname "${data.first_name || best.name.split(' ')[0]}"`,
-        `--lname "${data.last_name || best.name.split(' ').slice(1).join(' ')}"`,
-        `--pos "${best.position || 'UNK'}"`,
+        `--first-name "${data.first_name || best.name.split(' ')[0]}"`,
+        `--last-name "${data.last_name || best.name.split(' ').slice(1).join(' ')}"`,
+        `--primary-position "${best.position || 'UNK'}"`,
         `--team "${best.team || 'INA'}"`
       ]
 
       if (data.birth_date) {
-        cmd_parts.push(`--dob "${data.birth_date}"`)
+        cmd_parts.push(`--date-of-birth "${data.birth_date}"`)
       }
 
       const draft_year =
