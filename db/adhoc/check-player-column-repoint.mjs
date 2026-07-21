@@ -234,4 +234,11 @@ function main() {
   }
 }
 
-main()
+// Lightweight is-main (avoids importing #libs-server, which pulls in config and
+// requires NODE_ENV) so the rename map above can be imported by transform tools.
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+) {
+  main()
+}
