@@ -93,22 +93,22 @@ const import_players_from_combine_profiles_for_year = async ({
 
     // Extract combine metrics
     const combine_data = {
-      height: profile.height ? Math.round(profile.height) : null,
-      weight: profile.weight || null,
-      forty: profile.fortyYardDash?.seconds || null,
-      forty_designation: profile.fortyYardDash?.designation ?? null,
-      bench: profile.benchPress?.repetitions || null,
-      vertical: profile.verticalJump?.inches || null,
-      broad: profile.broadJump?.inches || null,
-      shuttle: profile.twentyYardShuttle?.seconds || null,
-      cone: profile.threeConeDrill?.seconds || null,
-      arm: profile.armLength || null,
-      hand: profile.handSize || null,
-      ten_yard_split: profile.tenYardSplit?.seconds || null,
+      height_inches: profile.height ? Math.round(profile.height) : null,
+      weight_pounds: profile.weight || null,
+      forty_yard_dash_seconds: profile.fortyYardDash?.seconds || null,
+      forty_yard_dash_designation: profile.fortyYardDash?.designation ?? null,
+      bench_press_reps: profile.benchPress?.repetitions || null,
+      vertical_jump_inches: profile.verticalJump?.inches || null,
+      broad_jump_inches: profile.broadJump?.inches || null,
+      shuttle_run_seconds: profile.twentyYardShuttle?.seconds || null,
+      three_cone_drill_seconds: profile.threeConeDrill?.seconds || null,
+      arm_length_inches: profile.armLength || null,
+      hand_size_inches: profile.handSize || null,
+      ten_yard_split_seconds: profile.tenYardSplit?.seconds || null,
       ten_yard_split_designation: profile.tenYardSplit?.designation ?? null,
-      pro_forty: profile.proFortyYardDash?.seconds || null,
-      pro_forty_designation: profile.proFortyYardDash?.designation ?? null,
-      sixty_yard_shuttle: profile.sixtyYardShuttle?.seconds || null,
+      pro_day_forty_seconds: profile.proFortyYardDash?.seconds || null,
+      pro_day_forty_designation: profile.proFortyYardDash?.designation ?? null,
+      sixty_yard_shuttle_seconds: profile.sixtyYardShuttle?.seconds || null,
       sixty_yard_shuttle_designation:
         profile.sixtyYardShuttle?.designation ?? null,
       combine_attendance: profile.combineAttendance ?? null,
@@ -122,20 +122,20 @@ const import_players_from_combine_profiles_for_year = async ({
     if (!player_row) {
       try {
         player_row = await createPlayer({
-          fname: profile.person.firstName,
-          lname: profile.person.lastName,
-          pos: profile.position,
-          pos1: profile.position,
-          posd: 'INA',
-          height: Math.round(profile.height),
-          weight: profile.weight,
-          col: profile.person.collegeNames.length
+          first_name: profile.person.firstName,
+          last_name: profile.person.lastName,
+          primary_position: profile.position,
+          secondary_position: profile.position,
+          position_depth: 'INA',
+          height_inches: Math.round(profile.height),
+          weight_pounds: profile.weight,
+          college: profile.person.collegeNames.length
             ? profile.person.collegeNames[0]
             : null,
           nfl_draft_year: year,
-          esbid: profile.person.esbId,
-          jnum: 0,
-          dob: '0000-00-00', // TODO - ideally required
+          esb_player_id: profile.person.esbId,
+          jersey_number: 0,
+          date_of_birth: '0000-00-00', // TODO - ideally required
           ...combine_data,
           hometown
         })

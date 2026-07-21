@@ -151,7 +151,7 @@ const resolve_player_id = async ({
   if (cached_player) {
     return {
       pid: cached_player.pid,
-      gsisid: cached_player.gsisid,
+      gsisid: cached_player.gsis_player_id,
       sportradar_id: sportradar_player_id
     }
   }
@@ -171,13 +171,13 @@ const resolve_player_id = async ({
       if (!cached_player && sportradar_player_id) {
         // Clear duplicate sportradar_id before updating
         await db('player')
-          .update({ sportradar_id: null })
-          .where({ sportradar_id: sportradar_player_id })
+          .update({ sportradar_player_id: null })
+          .where({ sportradar_player_id })
 
         // Update the player with the sportradar_id
         await updatePlayer({
           player_row: name_cached_player,
-          update: { sportradar_id: sportradar_player_id },
+          update: { sportradar_player_id },
           allow_protected_props: true
         })
 
@@ -197,7 +197,7 @@ const resolve_player_id = async ({
 
       return {
         pid: name_cached_player.pid,
-        gsisid: name_cached_player.gsisid,
+        gsisid: name_cached_player.gsis_player_id,
         sportradar_id: sportradar_player_id
       }
     }
@@ -1071,11 +1071,13 @@ const print_sportradar_player_resolution_summary = ({
   if (sportradar_players_not_found.size > 0) {
     log(`\nPlayers Not Found (${sportradar_players_not_found.size}):`)
     console.table(
-      Array.from(sportradar_players_not_found.values()).map((player) => ({
-        Name: player.name || 'unknown',
-        Team: player.team || 'unknown',
-        'Sportradar ID': player.sportradar_id
-      }))
+      Array.from(sportradar_players_not_found.values()).map(
+        (unresolved_player) => ({
+          Name: unresolved_player.name || 'unknown',
+          Team: unresolved_player.team || 'unknown',
+          'Sportradar ID': unresolved_player.sportradar_id
+        })
+      )
     )
   }
 
@@ -1491,12 +1493,12 @@ const import_plays_sportradar = async ({
       })
     }
 
-    for (const player of sportradar_players_not_found.values()) {
+    for (const unresolved_player of sportradar_players_not_found.values()) {
       collector.add_player_issue({
         type: 'player_not_found',
-        player_name: player.name,
-        team: player.team,
-        identifier: player.sportradar_id,
+        player_name: unresolved_player.name,
+        team: unresolved_player.team,
+        identifier: unresolved_player.sportradar_id,
         source: 'sportradar'
       })
     }

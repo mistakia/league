@@ -59,42 +59,42 @@ const import_espn_adp = async ({
   const unmatched_players = []
 
   // First iteration: match by espn_id
-  for (const player of players) {
+  for (const source_player of players) {
     let player_row
     try {
-      player_row = await find_player_row({ espn_id: player.espn_id })
+      player_row = await find_player_row({ espn_id: source_player.espn_id })
     } catch (err) {
       log(`Error getting player by espn_id: ${err}`)
-      unmatched_players.push(player)
+      unmatched_players.push(source_player)
       continue
     }
 
     if (player_row) {
-      matched_espn_ids.add(Number(player.espn_id))
+      matched_espn_ids.add(Number(source_player.espn_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.pos,
+        pos: player_row.primary_position,
         year,
-        adp: player.average_draft_position,
+        adp: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
         std_dev: null,
         sample_size: null,
-        percent_drafted: player.percent_owned,
+        percent_drafted: source_player.percent_owned,
         source_id: 'ESPN',
         adp_format_id
       })
     } else {
-      unmatched_players.push(player)
+      unmatched_players.push(source_player)
     }
   }
 
   // Second iteration: match remaining players by name, team, pos
-  for (const player of unmatched_players) {
+  for (const source_player of unmatched_players) {
     const player_params = {
-      name: player.player_name,
-      pos: player.position,
-      team: player.team
+      name: source_player.player_name,
+      pos: source_player.position,
+      team: source_player.team
     }
 
     let player_row
@@ -108,34 +108,34 @@ const import_espn_adp = async ({
 
     if (player_row) {
       if (
-        player_row.espn_id &&
-        matched_espn_ids.has(Number(player_row.espn_id))
+        player_row.espn_player_id &&
+        matched_espn_ids.has(Number(player_row.espn_player_id))
       ) {
-        log(`Player ${player_row.espn_id} already matched`)
-        log(player)
+        log(`Player ${player_row.espn_player_id} already matched`)
+        log(source_player)
         continue
       }
 
-      if (!player_row.espn_id) {
+      if (!player_row.espn_player_id) {
         await updatePlayer({
           player_row,
           update: {
-            espn_id: player.espn_id
+            espn_player_id: source_player.espn_id
           }
         })
       }
 
-      matched_espn_ids.add(Number(player.espn_id))
+      matched_espn_ids.add(Number(source_player.espn_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.pos,
+        pos: player_row.primary_position,
         year,
-        adp: player.average_draft_position,
+        adp: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
         std_dev: null,
         sample_size: null,
-        percent_drafted: player.percent_owned,
+        percent_drafted: source_player.percent_owned,
         source_id: 'ESPN',
         adp_format_id
       })

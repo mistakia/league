@@ -168,31 +168,31 @@ const options = {
             pid: {
               $ref: '#/components/schemas/PlayerId'
             },
-            fname: {
+            first_name: {
               type: 'string',
               maxLength: 20,
               description: 'First name',
               example: 'Patrick'
             },
-            lname: {
+            last_name: {
               type: 'string',
               maxLength: 40,
               description: 'Last name',
               example: 'Mahomes'
             },
-            pname: {
+            short_name: {
               type: 'string',
               maxLength: 25,
               description: 'Preferred name',
               example: 'P.Mahomes'
             },
-            formatted: {
+            formatted_name: {
               type: 'string',
               maxLength: 50,
               description: 'Formatted name for display',
               example: 'patrick mahomes'
             },
-            pos: {
+            primary_position: {
               type: 'string',
               maxLength: 4,
               enum: [
@@ -213,25 +213,25 @@ const options = {
               description: 'Primary position',
               example: 'QB'
             },
-            pos1: {
+            secondary_position: {
               type: 'string',
               maxLength: 4,
               description: 'Primary position',
               example: 'QB'
             },
-            pos2: {
+            tertiary_position: {
               type: 'string',
               maxLength: 4,
               nullable: true,
               description: 'Secondary position',
               example: null
             },
-            height: {
+            height_inches: {
               type: 'integer',
               description: 'Height in inches',
               example: 75
             },
-            weight: {
+            weight_pounds: {
               type: 'integer',
               description: 'Weight in pounds',
               example: 230
@@ -239,7 +239,7 @@ const options = {
             current_nfl_team: {
               $ref: '#/components/schemas/NFLTeamAbbreviation'
             },
-            jnum: {
+            jersey_number: {
               type: 'integer',
               description: 'Jersey number',
               example: 15
@@ -249,12 +249,12 @@ const options = {
               description: 'NFL draft year',
               example: 2017
             },
-            round: {
+            draft_round: {
               type: 'integer',
               description: 'Draft round (0 = undrafted)',
               example: 1
             },
-            col: {
+            college: {
               type: 'string',
               description: 'College',
               example: 'Texas Tech'
@@ -278,7 +278,7 @@ const options = {
               description: 'Weekly game-week injury designation',
               example: null
             },
-            dob: {
+            date_of_birth: {
               type: 'string',
               format: 'date',
               description: 'Date of birth',

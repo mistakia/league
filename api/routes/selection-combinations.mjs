@@ -144,13 +144,13 @@ function transform_combination_odds_row({ row, player_lookup_map }) {
         result,
         selection_num,
         values: {
-          player_pff_id: player?.pff_id,
-          player_gsis_it_id: player?.gsis_it_id,
-          player_gsisid: player?.gsisid,
-          player_position: player?.pos,
+          player_pff_id: player?.pff_player_id,
+          player_gsis_it_id: player?.gsis_it_player_id,
+          player_gsisid: player?.gsis_player_id,
+          player_position: player?.primary_position,
           nfl_team: player?.current_nfl_team,
-          first_name: player?.fname,
-          last_name: player?.lname,
+          first_name: player?.first_name,
+          last_name: player?.last_name,
           market_type: parsed.market_type,
           line: parsed.line,
           selection_type: parsed.selection_type
@@ -254,13 +254,13 @@ router.get('/', async (req, res) => {
       const players = await db('player')
         .select(
           'pid',
-          'pff_id',
-          'gsis_it_id',
-          'gsisid',
-          'pos',
+          'pff_player_id',
+          'gsis_it_player_id',
+          'gsis_player_id',
+          'primary_position',
           'current_nfl_team',
-          'fname',
-          'lname'
+          'first_name',
+          'last_name'
         )
         .whereIn('pid', pids)
 

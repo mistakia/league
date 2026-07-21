@@ -81,7 +81,9 @@ export default async function process_super_priority({
     super_priority_record.requires_waiver &&
     target_slot === roster_slot_types.PS
   ) {
-    if (!roster.has_practice_squad_space_for_position(player_row.pos)) {
+    if (
+      !roster.has_practice_squad_space_for_position(player_row.primary_position)
+    ) {
       throw new Error(
         'No practice squad space available or position limit exceeded'
       )
@@ -115,7 +117,7 @@ export default async function process_super_priority({
     rid: current_week_roster.uid,
     slot: target_slot,
     pid,
-    pos: player_row.pos,
+    pos: player_row.primary_position,
     tag: player_tag_types.REGULAR,
     extensions: 0,
     tid: original_tid,
@@ -176,7 +178,7 @@ export default async function process_super_priority({
   if (team_rows.length) {
     const team = team_rows[0]
 
-    let message = `${player_row.fname} ${player_row.lname} (${player_row.pos}) has been claimed via Super Priority by ${team.name} (${team.abbrv}).`
+    let message = `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) has been claimed via Super Priority by ${team.name} (${team.abbrv}).`
 
     // Add release information if players were released
     if (releasePlayers.length) {
@@ -186,7 +188,7 @@ export default async function process_super_priority({
       )
 
       const released_names = released_player_rows
-        .map((p) => `${p.fname} ${p.lname} (${p.pos})`)
+        .map((p) => `${p.first_name} ${p.last_name} (${p.primary_position})`)
         .join(', ')
 
       const verb = releasePlayers.length === 1 ? 'has' : 'have'

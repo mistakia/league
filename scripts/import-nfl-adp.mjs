@@ -122,28 +122,28 @@ const import_nfl_adp = async ({
   const matched_nfl_ids = new Set()
 
   // First iteration: match by nfl_id
-  for (const player of players) {
-    if (!player.nfl_id) {
-      log(player)
+  for (const source_player of players) {
+    if (!source_player.nfl_id) {
+      log(source_player)
       continue
     }
 
     let player_row
     try {
-      player_row = await find_player_row({ nfl_id: player.nfl_id })
+      player_row = await find_player_row({ nfl_id: source_player.nfl_id })
     } catch (err) {
       log(`Error getting player by nfl_id: ${err}`)
-      unmatched_players.push(player)
+      unmatched_players.push(source_player)
       continue
     }
 
     if (player_row) {
-      matched_nfl_ids.add(Number(player.nfl_id))
+      matched_nfl_ids.add(Number(source_player.nfl_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.pos,
+        pos: player_row.primary_position,
         year,
-        adp: player.adp,
+        adp: source_player.adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,
@@ -153,16 +153,16 @@ const import_nfl_adp = async ({
         adp_format_id
       })
     } else {
-      unmatched_players.push(player)
+      unmatched_players.push(source_player)
     }
   }
 
   // Second iteration: match remaining players by name, team, pos
-  for (const player of unmatched_players) {
+  for (const source_player of unmatched_players) {
     const player_params = {
-      name: player.name,
-      pos: player.pos,
-      team: player.team
+      name: source_player.name,
+      pos: source_player.pos,
+      team: source_player.team
     }
 
     let player_row
@@ -175,27 +175,30 @@ const import_nfl_adp = async ({
     }
 
     if (player_row) {
-      if (player_row.nfl_id && matched_nfl_ids.has(Number(player_row.nfl_id))) {
-        log(`Player ${player_row.nfl_id} already matched`)
-        log(player)
+      if (
+        player_row.nfl_player_id &&
+        matched_nfl_ids.has(Number(player_row.nfl_player_id))
+      ) {
+        log(`Player ${player_row.nfl_player_id} already matched`)
+        log(source_player)
         continue
       }
 
-      if (!player_row.nfl_id) {
+      if (!player_row.nfl_player_id) {
         await updatePlayer({
           player_row,
           update: {
-            nfl_id: player.nfl_id
+            nfl_player_id: source_player.nfl_id
           }
         })
       }
 
-      matched_nfl_ids.add(Number(player.nfl_id))
+      matched_nfl_ids.add(Number(source_player.nfl_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.pos,
+        pos: player_row.primary_position,
         year,
-        adp: player.adp,
+        adp: source_player.adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,
@@ -205,7 +208,9 @@ const import_nfl_adp = async ({
         adp_format_id
       })
     } else {
-      log(`Unmatched player: ${player.name} (${player.pos}, ${player.team})`)
+      log(
+        `Unmatched player: ${source_player.name} (${source_player.pos}, ${source_player.team})`
+      )
     }
   }
 
@@ -237,7 +242,7 @@ const import_nfl_adp = async ({
   }
 
   log(`Unmatched players: ${unmatched_players.length}`)
-  unmatched_players.forEach((player) => log(player))
+  unmatched_players.forEach((source_player) => log(source_player))
 }
 
 const main = async () => {

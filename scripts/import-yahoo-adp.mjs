@@ -61,41 +61,41 @@ const import_yahoo_adp = async ({
   const unmatched_players = []
   const matched_yahoo_ids = new Set()
 
-  for (const player of players) {
+  for (const source_player of players) {
     let player_row
     try {
-      player_row = await find_player_row({ yahoo_id: player.yahoo_id })
+      player_row = await find_player_row({ yahoo_id: source_player.yahoo_id })
     } catch (err) {
       log(`Error getting player by yahoo_id: ${err}`)
-      unmatched_players.push(player)
+      unmatched_players.push(source_player)
       continue
     }
 
     if (player_row) {
-      matched_yahoo_ids.add(Number(player.yahoo_id))
+      matched_yahoo_ids.add(Number(source_player.yahoo_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.pos,
+        pos: player_row.primary_position,
         year,
-        adp: player.adp,
+        adp: source_player.adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,
         sample_size: null,
-        percent_drafted: player.percent_drafted,
+        percent_drafted: source_player.percent_drafted,
         source_id: 'YAHOO',
         adp_format_id
       })
     } else {
-      unmatched_players.push(player)
+      unmatched_players.push(source_player)
     }
   }
 
-  for (const player of unmatched_players) {
+  for (const source_player of unmatched_players) {
     const player_params = {
-      name: player.player_name,
-      pos: player.pos,
-      team: player.team
+      name: source_player.player_name,
+      pos: source_player.pos,
+      team: source_player.team
     }
 
     let player_row
@@ -109,40 +109,40 @@ const import_yahoo_adp = async ({
 
     if (player_row) {
       if (
-        player_row.yahoo_id &&
-        matched_yahoo_ids.has(Number(player_row.yahoo_id))
+        player_row.yahoo_player_id &&
+        matched_yahoo_ids.has(Number(player_row.yahoo_player_id))
       ) {
-        log(`Player ${player_row.yahoo_id} already matched`)
-        log(player)
+        log(`Player ${player_row.yahoo_player_id} already matched`)
+        log(source_player)
         continue
       }
 
-      if (!player_row.yahoo_id) {
+      if (!player_row.yahoo_player_id) {
         await updatePlayer({
           player_row,
           update: {
-            yahoo_id: player.yahoo_id
+            yahoo_player_id: source_player.yahoo_id
           }
         })
       }
 
-      matched_yahoo_ids.add(Number(player.yahoo_id))
+      matched_yahoo_ids.add(Number(source_player.yahoo_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.pos,
+        pos: player_row.primary_position,
         year,
-        adp: player.adp,
+        adp: source_player.adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,
         sample_size: null,
-        percent_drafted: player.percent_drafted,
+        percent_drafted: source_player.percent_drafted,
         source_id: 'YAHOO',
         adp_format_id
       })
     } else {
       log(
-        `Unmatched player: ${player.player_name} (${player.pos}, ${player.team})`
+        `Unmatched player: ${source_player.player_name} (${source_player.pos}, ${source_player.team})`
       )
     }
   }
@@ -175,7 +175,7 @@ const import_yahoo_adp = async ({
   }
 
   log(`Unmatched players: ${unmatched_players.length}`)
-  unmatched_players.forEach((player) => log(player))
+  unmatched_players.forEach((source_player) => log(source_player))
 }
 
 const main = async () => {

@@ -28,7 +28,7 @@ const import_pro_football_reference_player_ids = async ({
   for (const pfr_player of pfr_players) {
     let player
     try {
-      player = all_players.find((p) => p.pfr_id === pfr_player.pfr_id)
+      player = all_players.find((p) => p.pfr_player_id === pfr_player.pfr_id)
 
       if (player) {
         continue
@@ -53,10 +53,10 @@ const import_pro_football_reference_player_ids = async ({
       const formatted = format_player_name(pfr_player.name)
       const matched_players = all_players.filter(
         (p) =>
-          p.formatted === formatted &&
-          (pfr_player.positions.includes(p.pos) ||
-            pfr_player.positions.includes(p.pos1) ||
-            pfr_player.positions.includes(p.pos2)) &&
+          p.formatted_name === formatted &&
+          (pfr_player.positions.includes(p.primary_position) ||
+            pfr_player.positions.includes(p.secondary_position) ||
+            pfr_player.positions.includes(p.tertiary_position)) &&
           pfr_player.start === p.nfl_draft_year
       )
 
@@ -67,10 +67,10 @@ const import_pro_football_reference_player_ids = async ({
       if (!matched_players.length) {
         const matched_players = all_players.filter(
           (p) =>
-            p.formatted === formatted &&
-            (pfr_player.positions.includes(p.pos) ||
-              pfr_player.positions.includes(p.pos1) ||
-              pfr_player.positions.includes(p.pos2))
+            p.formatted_name === formatted &&
+            (pfr_player.positions.includes(p.primary_position) ||
+              pfr_player.positions.includes(p.secondary_position) ||
+              pfr_player.positions.includes(p.tertiary_position))
         )
 
         if (matched_players.length === 1) {
@@ -89,11 +89,11 @@ const import_pro_football_reference_player_ids = async ({
     }
 
     // update all_players array to reflect the new pfr_id
-    player.pfr_id = pfr_player.pfr_id
+    player.pfr_player_id = pfr_player.pfr_id
 
     await db('player')
       .where({ pid: player.pid })
-      .update({ pfr_id: pfr_player.pfr_id })
+      .update({ pfr_player_id: pfr_player.pfr_id })
     update_count += 1
   }
 

@@ -13,12 +13,14 @@ export default {
     table_name: 'nfl_plays',
     join: join_player_passer,
     main_select: () => [
-      db.raw("passer.fname || ' ' || passer.lname as play_passer"),
+      db.raw("passer.first_name || ' ' || passer.last_name as play_passer"),
       'nfl_plays.psr_pid'
     ],
-    main_where: () => "passer.fname || ' ' || passer.lname",
+    main_where: () => "passer.first_name || ' ' || passer.last_name",
     aggregate_select: ({ params } = {}) =>
-      db.raw("MAX(passer.fname || ' ' || passer.lname) as play_passer"),
+      db.raw(
+        "MAX(passer.first_name || ' ' || passer.last_name) as play_passer"
+      ),
     player_group_by: 'player_passer'
   },
   play_passer_pid: {

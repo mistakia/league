@@ -73,44 +73,44 @@ if (process.env.NODE_ENV !== 'test') {
  *                 summary: Response for unauthenticated user
  *                 value:
  *                   - pid: 'PATR-MAHO-005785'
- *                     fname: 'Patrick'
- *                     lname: 'Mahomes'
- *                     pname: 'P.Mahomes'
- *                     formatted: 'patrick mahomes'
- *                     pos: 'QB'
- *                     pos1: 'QB'
- *                     pos2: null
- *                     height: 75
- *                     weight: 230
+ *                     first_name: 'Patrick'
+ *                     last_name: 'Mahomes'
+ *                     short_name: 'P.Mahomes'
+ *                     formatted_name: 'patrick mahomes'
+ *                     primary_position: 'QB'
+ *                     secondary_position: 'QB'
+ *                     tertiary_position: null
+ *                     height_inches: 75
+ *                     weight_pounds: 230
  *                     current_nfl_team: 'KC'
- *                     jnum: 15
+ *                     jersey_number: 15
  *                     nfl_draft_year: 2017
- *                     round: 1
- *                     col: 'Texas Tech'
+ *                     draft_round: 1
+ *                     college: 'Texas Tech'
  *                     roster_status: 'ACTIVE'
  *                     game_designation: null
- *                     dob: '1995-09-17'
+ *                     date_of_birth: '1995-09-17'
  *               authenticated_with_bids:
  *                 summary: Response for authenticated user with restricted free agency bids
  *                 value:
  *                   - pid: 'PATR-MAHO-005785'
- *                     fname: 'Patrick'
- *                     lname: 'Mahomes'
- *                     pname: 'P.Mahomes'
- *                     formatted: 'patrick mahomes'
- *                     pos: 'QB'
- *                     pos1: 'QB'
- *                     pos2: null
- *                     height: 75
- *                     weight: 230
+ *                     first_name: 'Patrick'
+ *                     last_name: 'Mahomes'
+ *                     short_name: 'P.Mahomes'
+ *                     formatted_name: 'patrick mahomes'
+ *                     primary_position: 'QB'
+ *                     secondary_position: 'QB'
+ *                     tertiary_position: null
+ *                     height_inches: 75
+ *                     weight_pounds: 230
  *                     current_nfl_team: 'KC'
- *                     jnum: 15
+ *                     jersey_number: 15
  *                     nfl_draft_year: 2017
- *                     round: 1
- *                     col: 'Texas Tech'
+ *                     draft_round: 1
+ *                     college: 'Texas Tech'
  *                     roster_status: 'ACTIVE'
  *                     game_designation: null
- *                     dob: '1995-09-17'
+ *                     date_of_birth: '1995-09-17'
  *                     bid: 45
  *                     restricted_free_agency_conditional_releases:
  *                       - 'JAKO-MEYE-017624'

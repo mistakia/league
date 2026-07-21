@@ -186,16 +186,16 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   for (const [data_key, win_rate_type] of Object.entries(
     player_win_rate_types
   )) {
-    for (const player of extracted_data[data_key]) {
+    for (const win_rate_entry of extracted_data[data_key]) {
       const insert_data = {
-        pid: player.pid,
-        player_name: player.player_name,
-        espn_id: player.espn_id,
-        team: player.team,
-        wins: player.wins,
-        plays: player.plays,
-        win_rate: player[`${data_key}_win_rate`],
-        double_team_pct: player.double_team_pct,
+        pid: win_rate_entry.pid,
+        player_name: win_rate_entry.player_name,
+        espn_id: win_rate_entry.espn_id,
+        team: win_rate_entry.team,
+        wins: win_rate_entry.wins,
+        plays: win_rate_entry.plays,
+        win_rate: win_rate_entry[`${data_key}_win_rate`],
+        double_team_pct: win_rate_entry.double_team_pct,
         espn_win_rate_type: win_rate_type,
         timestamp,
         year: current_season.year

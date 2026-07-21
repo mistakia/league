@@ -97,13 +97,13 @@ const run = async () => {
       }
 
       const protected_collision = [
-        ['sleeper_id', sleeper_id, player_row.sleeper_id],
+        ['sleeper_player_id', sleeper_id, player_row.sleeper_player_id],
         [
-          'gsisid',
+          'gsis_player_id',
           item.gsis_id ? item.gsis_id.trim() : null,
-          player_row.gsisid
+          player_row.gsis_player_id
         ],
-        ['espn_id', item.espn_id, player_row.espn_id]
+        ['espn_player_id', item.espn_id, player_row.espn_player_id]
       ].find(
         ([, incoming, existing]) =>
           incoming != null &&
@@ -144,16 +144,16 @@ const run = async () => {
     } = item
 
     const data = {
-      rotoworld_id,
+      rotoworld_player_id: rotoworld_id,
       high_school,
-      rotowire_id,
-      gsisid: gsis_id ? gsis_id.trim() : null,
-      sportradar_id: sportradar_id || null,
-      espn_id,
-      fantasy_data_id,
-      yahoo_id,
+      rotowire_player_id: rotowire_id,
+      gsis_player_id: gsis_id ? gsis_id.trim() : null,
+      sportradar_player_id: sportradar_id || null,
+      espn_player_id: espn_id,
+      fantasy_data_player_id: fantasy_data_id,
+      yahoo_player_id: yahoo_id,
       // stats_global_id: stats_id,
-      sleeper_id,
+      sleeper_player_id: sleeper_id,
       current_nfl_team: team
     }
 
@@ -184,18 +184,18 @@ const run = async () => {
 
       try {
         player_row = await createPlayer({
-          fname: item.first_name,
-          lname: item.last_name,
-          pos: item.position,
-          pos1: item.position,
-          height: item.height,
-          weight: item.weight,
-          dob: item.birth_date,
-          col: item.college,
+          first_name: item.first_name,
+          last_name: item.last_name,
+          primary_position: item.position,
+          secondary_position: item.position,
+          height_inches: item.height,
+          weight_pounds: item.weight,
+          date_of_birth: item.birth_date,
+          college: item.college,
           current_nfl_team: item.team,
-          jnum: item.number,
+          jersey_number: item.number,
 
-          posd: item.position,
+          position_depth: item.position,
           start,
 
           ...data

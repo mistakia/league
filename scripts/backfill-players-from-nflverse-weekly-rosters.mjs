@@ -86,28 +86,30 @@ const score_row = (r) => REQUIRED_FOR_SCORE.filter((f) => r[f]).length
 // accurate "why did the mint reject this row" diagnostics -- dob/nfl_draft_year are no
 // longer required by createPlayer, so REQUIRED_FOR_SCORE would mis-report them.
 const CREATE_PLAYER_REQUIRED = [
-  'fname',
-  'lname',
-  'pos',
-  'pos1',
-  'posd',
-  'height',
-  'weight'
+  'first_name',
+  'last_name',
+  'primary_position',
+  'secondary_position',
+  'position_depth',
+  'height_inches',
+  'weight_pounds'
 ]
 
 // External-id fields find_player_row understands, used to resolve a candidate to
-// an existing player before minting. gsisid is excluded on purpose: the candidate
-// set is precisely the gsis_ids missing from the player table, so gsisid never
-// resolves here -- the point is to catch the same person under a different id.
+// an existing player before minting. gsis_player_id is excluded on purpose: the
+// candidate set is precisely the gsis_ids missing from the player table, so it
+// never resolves here -- the point is to catch the same person under a different id.
+// Each entry is [player_data column key, find_player_row parameter name]: the
+// resolver keeps its short external-id parameter names as a stable lookup interface.
 const FIND_ROW_ID_KEYS = [
-  'pfr_id',
-  'esbid',
-  'gsis_it_id',
-  'sportradar_id',
-  'pff_id',
-  'espn_id',
-  'yahoo_id',
-  'sleeper_id'
+  ['pfr_player_id', 'pfr_id'],
+  ['esb_player_id', 'esbid'],
+  ['gsis_it_player_id', 'gsis_it_id'],
+  ['sportradar_player_id', 'sportradar_id'],
+  ['pff_player_id', 'pff_id'],
+  ['espn_player_id', 'espn_id'],
+  ['yahoo_player_id', 'yahoo_id'],
+  ['sleeper_player_id', 'sleeper_id']
 ]
 
 // Pre-normalize historical nflverse team codes that fixTeam doesn't know.
@@ -121,28 +123,28 @@ const NFLVERSE_TEAM_ALIASES = {
 
 // Map a CSV row to the createPlayer playerData shape.
 const csv_row_to_player_data = (r) => ({
-  fname: r.first_name,
-  lname: r.last_name,
-  dob: r.birth_date,
+  first_name: r.first_name,
+  last_name: r.last_name,
+  date_of_birth: r.birth_date,
   nfl_draft_year: Number(r.entry_year) || Number(r.rookie_year) || null,
-  pos: r.position,
-  pos1: r.depth_chart_position || r.position,
-  posd: r.depth_chart_position || r.position,
-  height: r.height ? Number(r.height) : null,
-  weight: r.weight ? Number(r.weight) : null,
-  col: r.college || null,
+  primary_position: r.position,
+  secondary_position: r.depth_chart_position || r.position,
+  position_depth: r.depth_chart_position || r.position,
+  height_inches: r.height ? Number(r.height) : null,
+  weight_pounds: r.weight ? Number(r.weight) : null,
+  college: r.college || null,
   current_nfl_team: r.team ? NFLVERSE_TEAM_ALIASES[r.team] || r.team : null,
-  gsisid: r.gsis_id,
-  esbid: r.esb_id || null,
-  gsis_it_id: r.gsis_it_id || null,
-  espn_id: r.espn_id || null,
-  sportradar_id: r.sportradar_id || null,
-  yahoo_id: r.yahoo_id || null,
-  rotowire_id: r.rotowire_id || null,
-  pff_id: r.pff_id || null,
-  pfr_id: r.pfr_id || null,
-  fantasy_data_id: r.fantasy_data_id || null,
-  sleeper_id: r.sleeper_id || null,
+  gsis_player_id: r.gsis_id,
+  esb_player_id: r.esb_id || null,
+  gsis_it_player_id: r.gsis_it_id || null,
+  espn_player_id: r.espn_id || null,
+  sportradar_player_id: r.sportradar_id || null,
+  yahoo_player_id: r.yahoo_id || null,
+  rotowire_player_id: r.rotowire_id || null,
+  pff_player_id: r.pff_id || null,
+  pfr_player_id: r.pfr_id || null,
+  fantasy_data_player_id: r.fantasy_data_id || null,
+  sleeper_player_id: r.sleeper_id || null,
   draft_team: r.draft_club
     ? NFLVERSE_TEAM_ALIASES[r.draft_club] || r.draft_club
     : null,
@@ -161,9 +163,9 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
 
   const csv_gsis = new Set(candidates.map((r) => r.gsis_id))
   const have = await db('player')
-    .select('gsisid')
-    .whereIn('gsisid', Array.from(csv_gsis))
-  const have_set = new Set(have.map((r) => r.gsisid))
+    .select('gsis_player_id')
+    .whereIn('gsis_player_id', Array.from(csv_gsis))
+  const have_set = new Set(have.map((r) => r.gsis_player_id))
   const missing_gsis = Array.from(csv_gsis).filter((g) => !have_set.has(g))
 
   log(
@@ -212,9 +214,9 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
     try {
       let existing
       let matched_by_id = false
-      for (const k of FIND_ROW_ID_KEYS) {
-        if (!player_data[k]) continue
-        existing = await find_player_row({ [k]: player_data[k] })
+      for (const [pd_key, param_key] of FIND_ROW_ID_KEYS) {
+        if (!player_data[pd_key]) continue
+        existing = await find_player_row({ [param_key]: player_data[pd_key] })
         if (existing) {
           matched_by_id = true
           break
@@ -222,20 +224,21 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
       }
 
       const has_discriminator =
-        (player_data.dob && player_data.dob !== '0000-00-00') ||
+        (player_data.date_of_birth &&
+          player_data.date_of_birth !== '0000-00-00') ||
         Boolean(player_data.nfl_draft_year)
       if (!existing && has_discriminator) {
         const candidate = await find_player_row({
-          name: `${player_data.fname} ${player_data.lname}`,
-          pos: player_data.pos,
-          dob: player_data.dob,
+          name: `${player_data.first_name} ${player_data.last_name}`,
+          pos: player_data.primary_position,
+          dob: player_data.date_of_birth,
           nfl_draft_year: player_data.nfl_draft_year
         })
         const dob_agrees =
           candidate &&
-          candidate.dob &&
-          candidate.dob !== '0000-00-00' &&
-          candidate.dob === player_data.dob
+          candidate.date_of_birth &&
+          candidate.date_of_birth !== '0000-00-00' &&
+          candidate.date_of_birth === player_data.date_of_birth
         const draft_agrees =
           candidate &&
           candidate.nfl_draft_year &&
@@ -247,17 +250,17 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
       if (existing) {
         const update = {}
         for (const k of [
-          'gsisid',
-          'esbid',
-          'gsis_it_id',
-          'espn_id',
-          'sportradar_id',
-          'yahoo_id',
-          'rotowire_id',
-          'pff_id',
-          'pfr_id',
-          'fantasy_data_id',
-          'sleeper_id'
+          'gsis_player_id',
+          'esb_player_id',
+          'gsis_it_player_id',
+          'espn_player_id',
+          'sportradar_player_id',
+          'yahoo_player_id',
+          'rotowire_player_id',
+          'pff_player_id',
+          'pfr_player_id',
+          'fantasy_data_player_id',
+          'sleeper_player_id'
         ]) {
           if (player_data[k] && !existing[k]) update[k] = player_data[k]
         }

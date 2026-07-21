@@ -20,7 +20,7 @@ export default async function ({ update_player_row, remove_player_row }) {
     update_pid === update_player_row.pid ? remove_player_row : update_player_row
 
   log(
-    `merging ${keep_player_row.fname} ${keep_player_row.lname} ${keep_player_row.pid} and ${discard_player_row.fname} ${discard_player_row.lname} ${discard_player_row.pid}. Using pid ${update_pid}`
+    `merging ${keep_player_row.first_name} ${keep_player_row.last_name} ${keep_player_row.pid} and ${discard_player_row.first_name} ${discard_player_row.last_name} ${discard_player_row.pid}. Using pid ${update_pid}`
   )
 
   await update_player_id({
@@ -72,9 +72,9 @@ export default async function ({ update_player_row, remove_player_row }) {
 
 function determine_pid_to_use({ update_player, remove_player }) {
   const update_has_birthdate =
-    update_player.dob && update_player.dob !== '0000-00-00'
+    update_player.date_of_birth && update_player.date_of_birth !== '0000-00-00'
   const remove_has_birthdate =
-    remove_player.dob && remove_player.dob !== '0000-00-00'
+    remove_player.date_of_birth && remove_player.date_of_birth !== '0000-00-00'
 
   if (update_has_birthdate && !remove_has_birthdate) {
     // update_player has birthdate and remove_player does not

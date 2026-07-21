@@ -289,7 +289,9 @@ export default async function ({
     }
 
     roster.removePlayer(reserve_pid)
-    if (!roster.has_bench_space_for_position(activate_player_row.pos)) {
+    if (
+      !roster.has_bench_space_for_position(activate_player_row.primary_position)
+    ) {
       throw new Error('exceeds roster limits')
     }
 
@@ -325,7 +327,7 @@ export default async function ({
       tid,
       slot: roster_slot_types.BENCH,
       rid: roster.uid,
-      pos: activate_player_row.pos,
+      pos: activate_player_row.primary_position,
       transaction
     })
 
@@ -381,10 +383,10 @@ export default async function ({
     year: current_season.year
   })
   const team = teams[0]
-  let message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on ${transaction_type_display_names[type]}.`
+  let message = `${team.name} (${team.abbrv}) has placed ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) on ${transaction_type_display_names[type]}.`
 
   if (activate_player_row) {
-    message += ` ${activate_player_row.fname} ${activate_player_row.lname} (${activate_player_row.pos}) has been activated`
+    message += ` ${activate_player_row.first_name} ${activate_player_row.last_name} (${activate_player_row.primary_position}) has been activated`
   }
 
   await sendNotifications({
@@ -399,7 +401,7 @@ export default async function ({
     pid: reserve_pid,
     rid: roster.uid,
     tid,
-    pos: player_row.pos
+    pos: player_row.primary_position
   })
 
   return data

@@ -90,7 +90,9 @@ export default async function ({
       roster.removePlayer(release_pid)
     }
   }
-  const hasSlot = roster.has_bench_space_for_position(poachPlayer.pos)
+  const hasSlot = roster.has_bench_space_for_position(
+    poachPlayer.primary_position
+  )
   if (!hasSlot) {
     throw new Error('poaching claim unsuccessful, no available roster space')
   }
@@ -157,8 +159,8 @@ export default async function ({
     .first()
   const processing_time = getPoachProcessingTime(submitted)
   const message = `${team.name} has submitted a poaching claim for ${
-    poachPlayer.fname
-  } ${poachPlayer.lname} (${poachPlayer.pos}) on ${
+    poachPlayer.first_name
+  } ${poachPlayer.last_name} (${poachPlayer.primary_position}) on ${
     player_team.name
   }. This claim will be processed around ${processing_time.format(
     'dddd, MMMM Do h:mm a'

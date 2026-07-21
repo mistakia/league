@@ -50,7 +50,7 @@ describe('Plays View', () => {
         params: { year: [2023] }
       })
 
-      const expected_query = `select passer.fname || ' ' || passer.lname as play_passer, "nfl_plays"."psr_pid", "nfl_plays"."pass_yds" as "play_pass_yds", "nfl_plays"."air_yards" as "play_air_yards", "nfl_plays"."comp" as "play_comp" from "nfl_plays" left join "player" as "passer" on "nfl_plays"."psr_pid" = "passer"."pid" where "nfl_plays"."year" in (2023) and "nfl_plays"."seas_type" in ('REG') limit 500`
+      const expected_query = `select passer.first_name || ' ' || passer.last_name as play_passer, "nfl_plays"."psr_pid", "nfl_plays"."pass_yds" as "play_pass_yds", "nfl_plays"."air_yards" as "play_air_yards", "nfl_plays"."comp" as "play_comp" from "nfl_plays" left join "player" as "passer" on "nfl_plays"."psr_pid" = "passer"."pid" where "nfl_plays"."year" in (2023) and "nfl_plays"."seas_type" in ('REG') limit 500`
 
       compare_queries(query.toString(), expected_query)
     })
@@ -157,7 +157,7 @@ describe('Plays View', () => {
         params: { year: [2023] }
       })
 
-      const expected_query = `select MAX(passer.fname || ' ' || passer.lname) as play_passer, SUM(nfl_plays.pass_yds) as play_pass_yds, SUM(CASE WHEN nfl_plays.comp = true THEN 1 ELSE 0 END) as play_comp, COUNT(*) as play_count from "nfl_plays" left join "player" as "passer" on "nfl_plays"."psr_pid" = "passer"."pid" where "nfl_plays"."year" in (2023) and "nfl_plays"."seas_type" in ('REG') group by "nfl_plays"."psr_pid" limit 500`
+      const expected_query = `select MAX(passer.first_name || ' ' || passer.last_name) as play_passer, SUM(nfl_plays.pass_yds) as play_pass_yds, SUM(CASE WHEN nfl_plays.comp = true THEN 1 ELSE 0 END) as play_comp, COUNT(*) as play_count from "nfl_plays" left join "player" as "passer" on "nfl_plays"."psr_pid" = "passer"."pid" where "nfl_plays"."year" in (2023) and "nfl_plays"."seas_type" in ('REG') group by "nfl_plays"."psr_pid" limit 500`
 
       compare_queries(query.toString(), expected_query)
     })
@@ -200,7 +200,7 @@ describe('Plays View', () => {
         params: { year: [2023] }
       })
 
-      const expected_query = `select MAX(passer.fname || ' ' || passer.lname) as play_passer, SUM(nfl_plays.pass_yds) as play_pass_yds, COUNT(*) as play_count from "nfl_plays" left join "player" as "passer" on "nfl_plays"."psr_pid" = "passer"."pid" where "nfl_plays"."year" in (2023) and "nfl_plays"."seas_type" in ('REG') group by "nfl_plays"."psr_pid" having nfl_plays.pass_yds > 300 limit 500`
+      const expected_query = `select MAX(passer.first_name || ' ' || passer.last_name) as play_passer, SUM(nfl_plays.pass_yds) as play_pass_yds, COUNT(*) as play_count from "nfl_plays" left join "player" as "passer" on "nfl_plays"."psr_pid" = "passer"."pid" where "nfl_plays"."year" in (2023) and "nfl_plays"."seas_type" in ('REG') group by "nfl_plays"."psr_pid" having nfl_plays.pass_yds > 300 limit 500`
 
       compare_queries(query.toString(), expected_query)
     })

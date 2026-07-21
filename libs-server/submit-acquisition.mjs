@@ -179,7 +179,10 @@ export default async function ({
     }
   }
 
-  const hasSlot = roster.isEligibleForSlot({ slot, pos: player_row.pos })
+  const hasSlot = roster.isEligibleForSlot({
+    slot,
+    pos: player_row.primary_position
+  })
   if (!hasSlot) {
     throw new Error('exceeds roster limits')
   }
@@ -207,7 +210,7 @@ export default async function ({
   await db('rosters_players').insert({
     rid: roster.uid,
     pid,
-    pos: player_row.pos,
+    pos: player_row.primary_position,
     slot,
     extensions: 0,
     tid: teamId,
@@ -235,16 +238,16 @@ export default async function ({
     pid,
     slot,
     rid: roster.uid,
-    pos: player_row.pos,
+    pos: player_row.primary_position,
     transaction: addTransaction
   })
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed free agent ${player_row.fname} ${player_row.lname} (${player_row.pos}) for $${bid}.`
+  let message = `${team.name} (${team.abbrv}) has signed free agent ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) for $${bid}.`
   if (releasePlayers.length) {
     for (const release_pid of releasePlayers) {
       const release_player_row = player_rows.find((p) => p.pid === release_pid)
-      message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+      message += ` ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}) has been released.`
     }
   }
 

@@ -5,7 +5,7 @@
  * writes the 44 declared starters per game to player_gamelogs.started.
  *
  * Resolution path: PDF (team, jersey) -> nflverse weekly_rosters CSV
- * (team, week, jersey_number) -> gsis_id -> player.gsisid -> pid.
+ * (team, week, jersey_number) -> gsis_id -> player.gsis_player_id -> pid.
  *
  * After upserting the 44 started=true rows for an esbid, sweeps the rest of
  * the dressed roster to started=false (active IS TRUE OR active IS NULL --
@@ -328,9 +328,9 @@ const build_jersey_to_pid_index = async ({ year, force_download }) => {
   // gsis_id -> pid via single batched query
   const gsis_ids = Array.from(new Set(candidates.map((r) => r.gsis_id)))
   const player_rows = await db('player')
-    .select('pid', 'gsisid')
-    .whereIn('gsisid', gsis_ids)
-  const pid_by_gsis = new Map(player_rows.map((p) => [p.gsisid, p.pid]))
+    .select('pid', 'gsis_player_id')
+    .whereIn('gsis_player_id', gsis_ids)
+  const pid_by_gsis = new Map(player_rows.map((p) => [p.gsis_player_id, p.pid]))
 
   // Keys are `${team}-${seas_type}-${week}-${jnum}` (and lastname variant) so
   // REG W1 and POST W1 (Wild Card) don't collide.

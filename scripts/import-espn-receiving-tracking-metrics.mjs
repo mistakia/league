@@ -60,12 +60,16 @@ const import_espn_receiving_tracking_metrics = async ({
 
   log(`single_season_data length: ${single_season_data.length}`)
 
-  const players = await db('player').select('pid', 'gsisid', 'pos')
+  const players = await db('player').select(
+    'pid',
+    'gsis_player_id',
+    'primary_position'
+  )
   const player_seasonlogs_inserts = []
   const timestamp = Math.round(Date.now() / 1000)
 
   for (const item of single_season_data) {
-    const player = players.find((p) => p.gsisid === item.gsis_id)
+    const player = players.find((p) => p.gsis_player_id === item.gsis_id)
     if (!player) {
       result.players_not_matched++
       if (collector) {
@@ -83,7 +87,7 @@ const import_espn_receiving_tracking_metrics = async ({
     const player_seasonlogs_insert = {
       pid: player.pid,
       year: item.min_season,
-      pos: player.pos,
+      pos: player.primary_position,
       seas_type: 'REG',
       espn_rtm_routes: item.rtm_routes,
       espn_rtm_targets: item.rtm_targets,

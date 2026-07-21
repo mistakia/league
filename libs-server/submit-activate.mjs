@@ -93,7 +93,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     tid,
     slot: roster_slot_types.BENCH,
     rid: roster.uid,
-    pos: player_row.pos,
+    pos: player_row.primary_position,
     transaction
   }
 
@@ -103,7 +103,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   })
   const team = teams[0]
 
-  const message = `${team.name} (${team.abbrv}) has activated ${player_row.fname} ${player_row.lname} (${player_row.pos}).`
+  const message = `${team.name} (${team.abbrv}) has activated ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}).`
 
   await sendNotifications({
     league,

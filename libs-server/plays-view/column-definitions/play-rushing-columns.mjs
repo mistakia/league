@@ -13,12 +13,14 @@ export default {
     table_name: 'nfl_plays',
     join: join_player_rusher,
     main_select: () => [
-      db.raw("rusher.fname || ' ' || rusher.lname as play_rusher"),
+      db.raw("rusher.first_name || ' ' || rusher.last_name as play_rusher"),
       'nfl_plays.bc_pid'
     ],
-    main_where: () => "rusher.fname || ' ' || rusher.lname",
+    main_where: () => "rusher.first_name || ' ' || rusher.last_name",
     aggregate_select: ({ params } = {}) =>
-      db.raw("MAX(rusher.fname || ' ' || rusher.lname) as play_rusher"),
+      db.raw(
+        "MAX(rusher.first_name || ' ' || rusher.last_name) as play_rusher"
+      ),
     player_group_by: 'player_rusher'
   },
   play_rusher_pid: {

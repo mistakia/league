@@ -286,16 +286,16 @@ const importPlaysForWeek = async ({
   await preload_active_players()
 
   const players = await db('player')
-    .select('esbid', 'gsisid')
-    .whereNotNull('esbid')
-    .whereNotNull('gsisid')
+    .select('esb_player_id', 'gsis_player_id')
+    .whereNotNull('esb_player_id')
+    .whereNotNull('gsis_player_id')
 
   log(`loaded ${players.length} players`)
 
   const esbid_to_gsis_id_index = {}
   for (const player of players) {
-    if (player.esbid && player.gsisid) {
-      esbid_to_gsis_id_index[player.esbid] = player.gsisid
+    if (player.esb_player_id && player.gsis_player_id) {
+      esbid_to_gsis_id_index[player.esb_player_id] = player.gsis_player_id
     }
   }
 

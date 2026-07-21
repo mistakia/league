@@ -109,18 +109,18 @@ if (process.env.NODE_ENV !== 'test') {
  *                 summary: Search results for "Mahomes"
  *                 value:
  *                   - pid: "PATR-MAHO-005785"
- *                     fname: "Patrick"
- *                     lname: "Mahomes"
- *                     pname: "P.Mahomes"
- *                     formatted: "patrick mahomes"
- *                     pos: "QB"
+ *                     first_name: "Patrick"
+ *                     last_name: "Mahomes"
+ *                     short_name: "P.Mahomes"
+ *                     formatted_name: "patrick mahomes"
+ *                     primary_position: "QB"
  *                     current_nfl_team: "KC"
- *                     height: 75
- *                     weight: 230
- *                     jnum: 15
+ *                     height_inches: 75
+ *                     weight_pounds: 230
+ *                     jersey_number: 15
  *                     nfl_draft_year: 2017
- *                     round: 1
- *                     col: "Texas Tech"
+ *                     draft_round: 1
+ *                     college: "Texas Tech"
  *                     roster_status: "ACTIVE"
  *                     game_designation: null
  *                     bid: 200
@@ -129,18 +129,18 @@ if (process.env.NODE_ENV !== 'test') {
  *                 summary: Specific player by ID
  *                 value:
  *                   - pid: "JOSH-ALLE-000098"
- *                     fname: "Josh"
- *                     lname: "Allen"
- *                     pname: "J.Allen"
- *                     formatted: "josh allen"
- *                     pos: "QB"
+ *                     first_name: "Josh"
+ *                     last_name: "Allen"
+ *                     short_name: "J.Allen"
+ *                     formatted_name: "josh allen"
+ *                     primary_position: "QB"
  *                     current_nfl_team: "BUF"
- *                     height: 77
- *                     weight: 237
- *                     jnum: 17
+ *                     height_inches: 77
+ *                     weight_pounds: 237
+ *                     jersey_number: 17
  *                     nfl_draft_year: 2018
- *                     round: 1
- *                     col: "Wyoming"
+ *                     draft_round: 1
+ *                     college: "Wyoming"
  *                     roster_status: "ACTIVE"
  *                     game_designation: null
  *       400:
@@ -265,44 +265,44 @@ router.post('/?', async (req, res) => {
  *                 summary: NFL Quarterback example
  *                 value:
  *                   pid: "PATR-MAHO-005785"
- *                   fname: "Patrick"
- *                   lname: "Mahomes"
- *                   pname: "P.Mahomes"
- *                   formatted: "patrick mahomes"
- *                   pos: "QB"
- *                   pos1: "QB"
- *                   pos2: null
- *                   height: 75
- *                   weight: 230
+ *                   first_name: "Patrick"
+ *                   last_name: "Mahomes"
+ *                   short_name: "P.Mahomes"
+ *                   formatted_name: "patrick mahomes"
+ *                   primary_position: "QB"
+ *                   secondary_position: "QB"
+ *                   tertiary_position: null
+ *                   height_inches: 75
+ *                   weight_pounds: 230
  *                   current_nfl_team: "KC"
- *                   jnum: 15
+ *                   jersey_number: 15
  *                   nfl_draft_year: 2017
- *                   round: 1
- *                   col: "Texas Tech"
+ *                   draft_round: 1
+ *                   college: "Texas Tech"
  *                   roster_status: "ACTIVE"
  *                   game_designation: null
- *                   dob: "1995-09-17"
+ *                   date_of_birth: "1995-09-17"
  *               running_back:
  *                 summary: NFL Running Back example
  *                 value:
  *                   pid: "CHRI-MCCA-005372"
- *                   fname: "Christian"
- *                   lname: "McCaffrey"
- *                   pname: "C.McCaffrey"
- *                   formatted: "christian mccaffrey"
- *                   pos: "RB"
- *                   pos1: "RB"
- *                   pos2: null
- *                   height: 71
- *                   weight: 205
+ *                   first_name: "Christian"
+ *                   last_name: "McCaffrey"
+ *                   short_name: "C.McCaffrey"
+ *                   formatted_name: "christian mccaffrey"
+ *                   primary_position: "RB"
+ *                   secondary_position: "RB"
+ *                   tertiary_position: null
+ *                   height_inches: 71
+ *                   weight_pounds: 205
  *                   current_nfl_team: "SF"
- *                   jnum: 23
+ *                   jersey_number: 23
  *                   nfl_draft_year: 2017
- *                   round: 1
- *                   col: "Stanford"
+ *                   draft_round: 1
+ *                   college: "Stanford"
  *                   roster_status: "ACTIVE"
  *                   game_designation: null
- *                   dob: "1996-06-07"
+ *                   date_of_birth: "1996-06-07"
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       404:

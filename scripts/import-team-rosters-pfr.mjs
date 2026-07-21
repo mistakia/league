@@ -188,7 +188,9 @@ const save_rosters = async ({ rosters, year }) => {
   }
 
   // Get all pfr_ids from the rosters
-  const pfr_ids = rosters.map((player) => player.pfr_id).filter(Boolean)
+  const pfr_ids = rosters
+    .map((roster_player) => roster_player.pfr_id)
+    .filter(Boolean)
 
   if (!pfr_ids.length) {
     log('No valid PFR IDs found in roster data')
@@ -197,11 +199,11 @@ const save_rosters = async ({ rosters, year }) => {
 
   // Get existing players with these pfr_ids
   const existing_players = await db('player')
-    .whereIn('pfr_id', pfr_ids)
-    .select('pid', 'pfr_id')
+    .whereIn('pfr_player_id', pfr_ids)
+    .select('pid', 'pfr_player_id')
   const players_by_pfr_id = {}
   for (const player of existing_players) {
-    players_by_pfr_id[player.pfr_id] = player
+    players_by_pfr_id[player.pfr_player_id] = player
   }
 
   let update_count = 0
@@ -209,10 +211,10 @@ const save_rosters = async ({ rosters, year }) => {
 
   // Use a transaction for database operations
   await db.transaction(async (trx) => {
-    for (const player of rosters) {
+    for (const roster_player of rosters) {
       // If we found a matching player, update their season value in player_seasonlogs
-      const matching_player = players_by_pfr_id[player.pfr_id]
-      if (matching_player && player.av) {
+      const matching_player = players_by_pfr_id[roster_player.pfr_id]
+      if (matching_player && roster_player.av) {
         // Insert or update player_seasonlogs with the PFR season value
         await trx('player_seasonlogs')
           .where({
@@ -221,13 +223,13 @@ const save_rosters = async ({ rosters, year }) => {
             seas_type: 'REG'
           })
           .update({
-            pfr_season_value: player.av
+            pfr_season_value: roster_player.av
           })
 
         update_count++
-      } else if (player.pfr_id && !matching_player) {
+      } else if (roster_player.pfr_id && !matching_player) {
         log(
-          `No matching player found for PFR ID ${player.pfr_id} (${player.name})`
+          `No matching player found for PFR ID ${roster_player.pfr_id} (${roster_player.name})`
         )
         missing_count++
       }

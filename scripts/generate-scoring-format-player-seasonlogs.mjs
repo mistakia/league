@@ -29,7 +29,7 @@ const generate_scoring_format_player_seasonlogs = async ({
 
   // get scoring format player gamelogs for season
   const gamelogs = await db('scoring_format_player_gamelogs')
-    .select('scoring_format_player_gamelogs.*', 'player.pos')
+    .select('scoring_format_player_gamelogs.*', 'player.primary_position')
     .join('player', 'player.pid', 'scoring_format_player_gamelogs.pid')
     .join(
       'nfl_games',
@@ -46,7 +46,7 @@ const generate_scoring_format_player_seasonlogs = async ({
   for (const pid of pids) {
     // get gamelogs for pid
     const player_gamelogs = gamelogs.filter((g) => g.pid === pid)
-    const pos = player_gamelogs[0].pos
+    const pos = player_gamelogs[0].primary_position
 
     const games = player_gamelogs.length
     const points = sum(player_gamelogs.map((g) => g.points))

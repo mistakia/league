@@ -201,7 +201,7 @@ router.post('/?', async (req, res) => {
       tid,
       slot,
       rid: roster.uid,
-      pos: player_row.pos,
+      pos: player_row.primary_position,
       transaction
     }
     res.send(data)
@@ -216,7 +216,7 @@ router.post('/?', async (req, res) => {
     })
     const team = teams[0]
 
-    const message = `${team.name} (${team.abbrv}) has designated ${player_row.fname} ${player_row.lname} (${player_row.pos}) as a protected practice squad member.`
+    const message = `${team.name} (${team.abbrv}) has designated ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a protected practice squad member.`
 
     await sendNotifications({
       league,

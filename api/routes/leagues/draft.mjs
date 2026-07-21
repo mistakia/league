@@ -227,9 +227,9 @@ const router = express.Router({ mergeParams: true })
  *                         pick: 3
  *                         pid: "3456"
  *                         player:
- *                           fname: "John"
- *                           lname: "Doe"
- *                           pos: "RB"
+ *                           first_name: "John"
+ *                           last_name: "Doe"
+ *                           primary_position: "RB"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -739,7 +739,7 @@ router.post('/?', async (req, res) => {
     })
     const team = teams[0]
 
-    let message = `${team.name} has selected ${player_row.fname} ${player_row.lname} (${player_row.pos}) with `
+    let message = `${team.name} has selected ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) with `
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {

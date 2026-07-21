@@ -160,7 +160,7 @@ export default async function ({
     tid,
     slot,
     rid: roster.uid,
-    pos: player_row.pos,
+    pos: player_row.primary_position,
     transaction
   }
 
@@ -170,7 +170,7 @@ export default async function ({
   })
   const team = teams[0]
 
-  const message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on the practice squad.`
+  const message = `${team.name} (${team.abbrv}) has placed ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) on the practice squad.`
 
   await sendNotifications({
     league,

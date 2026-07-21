@@ -1031,13 +1031,13 @@ router.post(
       for (const pid of proposingTeamPlayers) {
         const player_row = player_rows.find((p) => p.pid === pid)
         proposingTeamItems.push(
-          `${player_row.fname} ${player_row.lname} (${player_row.pos})`
+          `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position})`
         )
       }
       for (const pid of acceptingTeamPlayers) {
         const player_row = player_rows.find((p) => p.pid === pid)
         acceptingTeamItems.push(
-          `${player_row.fname} ${player_row.lname} (${player_row.pos})`
+          `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position})`
         )
       }
 
@@ -1071,8 +1071,10 @@ router.post(
       if (releasePlayers.length) {
         const releaseItems = []
         for (const pid of releasePlayers) {
-          const { fname, lname, pos } = player_rows.find((p) => p.pid === pid)
-          releaseItems.push(`${fname} ${lname} (${pos})`)
+          const { first_name, last_name, primary_position } = player_rows.find(
+            (p) => p.pid === pid
+          )
+          releaseItems.push(`${first_name} ${last_name} (${primary_position})`)
         }
         const releaseItemsStr = toStringArray(releaseItems)
         message = `${message} ${releaseItemsStr} have been released.`
@@ -1081,10 +1083,10 @@ router.post(
       if (activePoaches.length) {
         const poachItems = []
         for (const poach of activePoaches) {
-          const { fname, lname, pos } = player_rows.find(
+          const { first_name, last_name, primary_position } = player_rows.find(
             (p) => p.pid === poach.pid
           )
-          poachItems.push(`${fname} ${lname} (${pos})`)
+          poachItems.push(`${first_name} ${last_name} (${primary_position})`)
         }
         const poachItemsStr = toStringArray(poachItems)
 

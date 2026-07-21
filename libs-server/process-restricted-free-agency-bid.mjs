@@ -139,13 +139,13 @@ export default async function ({
   const team = await getTeam(tid)
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed restricted free agent ${player_row.fname} ${player_row.lname} (${player_row.pos}) for $${bid}. `
+  let message = `${team.name} (${team.abbrv}) has signed restricted free agent ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) for $${bid}. `
   if (release_pids.length) {
     const releaseMessages = []
     for (const release_pid of release_pids) {
       const release_player_row = player_rows.find((p) => p.pid === release_pid)
       releaseMessages.push(
-        `${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos})`
+        `${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position})`
       )
     }
 

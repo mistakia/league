@@ -14,28 +14,36 @@ const log = debug('create-player')
 debug.enable('create-player')
 
 /*
-   fname
-   lname
-   dob
+   first_name
+   last_name
+   date_of_birth
    nfl_draft_year
 
-   pos
-   pos1
-   posd
+   primary_position
+   secondary_position
+   position_depth
 
    current_nfl_team
 
-   height
-   weight
+   height_inches
+   weight_pounds
 
-   col
+   college
 
-   dpos 0
-   dcp 0
-   jnum 0
+   draft_overall_pick 0
+   draft_capital_points 0
+   jersey_number 0
  */
 
-const required = ['fname', 'lname', 'pos', 'pos1', 'height', 'weight', 'posd']
+const required = [
+  'first_name',
+  'last_name',
+  'primary_position',
+  'secondary_position',
+  'height_inches',
+  'weight_pounds',
+  'position_depth'
+]
 
 const createPlayer = async (playerData) => {
   for (const field of required) {
@@ -49,7 +57,7 @@ const createPlayer = async (playerData) => {
   // Draw the immutable opaque serial from the dedicated sequence and compose the pid.
   // DST pseudo-rows take the team abbreviation and consume no serial.
   let serial
-  if (playerData.pos !== 'DST') {
+  if (playerData.primary_position !== 'DST') {
     const result = await db.raw(
       "SELECT nextval('player_pid_serial_seq') AS serial"
     )
@@ -58,18 +66,18 @@ const createPlayer = async (playerData) => {
 
   const playerId = generate_player_id({ ...playerData, serial })
 
-  playerData.pname = `${playerData.fname
+  playerData.short_name = `${playerData.first_name
     .match(/[a-zA-Z]/)
     .pop()
-    .toUpperCase()}.${playerData.lname}`
-  playerData.formatted = format_player_name(
-    `${playerData.fname} ${playerData.lname}`
+    .toUpperCase()}.${playerData.last_name}`
+  playerData.formatted_name = format_player_name(
+    `${playerData.first_name} ${playerData.last_name}`
   )
-  playerData.height = formatHeight(playerData.height)
+  playerData.height_inches = formatHeight(playerData.height_inches)
   playerData.current_nfl_team = fixTeam(playerData.current_nfl_team)
-  playerData.pos = formatPosition(playerData.pos)
-  playerData.pos1 = formatPosition(playerData.pos1)
-  playerData.posd = formatPosition(playerData.posd)
+  playerData.primary_position = formatPosition(playerData.primary_position)
+  playerData.secondary_position = formatPosition(playerData.secondary_position)
+  playerData.position_depth = formatPosition(playerData.position_depth)
   playerData.roster_status = format_nfl_status(playerData.roster_status)
 
   try {

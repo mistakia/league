@@ -23,8 +23,8 @@ debug.enable('generate-player-id')
 // It carries NO referential meaning: it is never recomputed, is allowed to go stale if the
 // person's name is later corrected, and must not be parsed for identity. The <serial> is
 // the actual identity -- immutable, assigned exactly once, never regenerated. The pid does
-// not depend on dob or nfl_draft_year, so a person can be minted at recruit/college stage
-// before either field exists.
+// not depend on date_of_birth or nfl_draft_year, so a person can be minted at recruit/college
+// stage before either field exists.
 //
 // The serial is allocated by the caller (create-player.mjs draws nextval from the dedicated
 // player_pid_serial_seq sequence) and passed in, keeping this a pure, synchronous, DB-free
@@ -46,26 +46,26 @@ const four_letter_prefix = (name) =>
     .padEnd(4, 'X')
 
 const generate_player_id = ({
-  fname,
-  lname,
-  pos,
+  first_name,
+  last_name,
+  primary_position,
   current_nfl_team,
   serial
 } = {}) => {
   // DST pseudo-rows are not persons: the pid is the team abbreviation, no serial.
-  if (pos === 'DST') {
+  if (primary_position === 'DST') {
     if (!current_nfl_team) {
       throw new Error('Missing field current_nfl_team')
     }
     return current_nfl_team
   }
 
-  if (!fname) {
-    throw new Error('Missing field fname')
+  if (!first_name) {
+    throw new Error('Missing field first_name')
   }
 
-  if (!lname) {
-    throw new Error('Missing field lname')
+  if (!last_name) {
+    throw new Error('Missing field last_name')
   }
 
   if (serial === undefined || serial === null || serial === '') {
@@ -81,7 +81,7 @@ const generate_player_id = ({
     .toString()
     .padStart(SERIAL_MIN_DIGITS, '0')
 
-  const pid = `${four_letter_prefix(fname)}-${four_letter_prefix(lname)}-${formatted_serial}`
+  const pid = `${four_letter_prefix(first_name)}-${four_letter_prefix(last_name)}-${formatted_serial}`
   log(`Generated pid ${pid}`)
   return pid
 }
@@ -91,8 +91,8 @@ export default generate_player_id
 if (is_main(import.meta.url)) {
   const main = () => {
     const pid = generate_player_id({
-      fname: 'Francis',
-      lname: 'Scott',
+      first_name: 'Francis',
+      last_name: 'Scott',
       serial: 123
     })
 

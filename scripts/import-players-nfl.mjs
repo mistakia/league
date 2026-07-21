@@ -115,16 +115,16 @@ const importPlayersNFL = async ({
       await updatePlayer({
         player_row,
         update: {
-          gsisid,
-          esbid,
-          dob,
+          gsis_player_id: gsisid,
+          esb_player_id: esbid,
+          date_of_birth: dob,
           high_school,
-          col,
-          dpos,
-          round,
+          college: col,
+          draft_overall_pick: dpos,
+          draft_round: round,
           start,
-          weight,
-          height,
+          weight_pounds: weight,
+          height_inches: height,
           roster_status
         },
         source: 'nfl'
@@ -136,28 +136,28 @@ const importPlayersNFL = async ({
       dob
     ) {
       const player_row = await createPlayer({
-        fname: node.person.firstName,
-        lname: node.person.suffix
+        first_name: node.person.firstName,
+        last_name: node.person.suffix
           ? `${node.person.lastName} ${node.person.suffix}`
           : node.person.lastName,
         start,
 
-        pos,
-        pos1: pos,
-        posd: pos,
+        primary_position: pos,
+        secondary_position: pos,
+        position_depth: pos,
 
         current_nfl_team,
-        jnum,
+        jersey_number: jnum,
 
-        weight,
-        height,
+        weight_pounds: weight,
+        height_inches: height,
 
-        dpos,
-        round,
+        draft_overall_pick: dpos,
+        draft_round: round,
 
-        col,
+        college: col,
         high_school,
-        dob,
+        date_of_birth: dob,
         roster_status
       })
       if (player_row) pids.push(player_row.pid)

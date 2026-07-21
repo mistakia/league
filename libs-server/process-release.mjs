@@ -284,7 +284,7 @@ export default async function ({
       tid,
       slot: roster_slot_types.BENCH,
       rid: roster.uid,
-      pos: activate_player_row.pos,
+      pos: activate_player_row.primary_position,
       transaction
     })
   }
@@ -328,7 +328,7 @@ export default async function ({
     slot: null,
     tid,
     rid: roster.uid,
-    pos: release_player_row.pos,
+    pos: release_player_row.primary_position,
     transaction
   })
 
@@ -350,9 +350,9 @@ export default async function ({
 
     let message
     if (activate_pid) {
-      message = `${team.name} (${team.abbrv}) has activated ${activate_player_row.fname} ${activate_player_row.lname} (${activate_player_row.pos}). ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+      message = `${team.name} (${team.abbrv}) has activated ${activate_player_row.first_name} ${activate_player_row.last_name} (${activate_player_row.primary_position}). ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}) has been released.`
     } else {
-      message = `${team.name} (${team.abbrv}) has released ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}).`
+      message = `${team.name} (${team.abbrv}) has released ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}).`
     }
 
     await sendNotifications({

@@ -60,7 +60,9 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
 
   // Check roster space availability, catch error if no space
   try {
-    const hasSlot = roster.has_bench_space_for_position(poach_player_row.pos)
+    const hasSlot = roster.has_bench_space_for_position(
+      poach_player_row.primary_position
+    )
     if (!hasSlot) {
       throw new Error('poaching claim unsuccessful, no available roster space')
     }
@@ -124,7 +126,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     rid: rosterRow.uid,
     slot: roster_slot_types.BENCH,
     pid,
-    pos: poach_player_row.pos,
+    pos: poach_player_row.primary_position,
     extensions: 0,
     tid,
     lid,
@@ -156,16 +158,16 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   // send notification
   let message
   if (should_immediate_release_poached_player) {
-    message = `${poach_player_row.fname} ${poach_player_row.lname} (${poach_player_row.pos}) was poached and released to waivers.`
+    message = `${poach_player_row.first_name} ${poach_player_row.last_name} (${poach_player_row.primary_position}) was poached and released to waivers.`
   } else {
-    message = `Poaching claim for ${poach_player_row.fname} ${poach_player_row.lname} (${poach_player_row.pos}) successfully processed.`
+    message = `Poaching claim for ${poach_player_row.first_name} ${poach_player_row.last_name} (${poach_player_row.primary_position}) successfully processed.`
     if (release.length) {
       for (const release_pid of release) {
         if (roster.has(release_pid)) {
           const release_player_row = player_rows.find(
             (p) => p.pid === release_pid
           )
-          message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+          message += ` ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}) has been released.`
         }
       }
     }

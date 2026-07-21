@@ -19,18 +19,18 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
       'player.pid',
       'nfl_play_stats.gsisId',
       'nfl_play_stats.gsispid',
-      'player.gsispid as player_gsispid',
-      'player.gsisid as player_gsisid'
+      'player.smart_player_id as player_gsispid',
+      'player.gsis_player_id as player_gsisid'
     )
-    .leftJoin('player', 'player.gsisid', 'nfl_play_stats.gsisId')
+    .leftJoin('player', 'player.gsis_player_id', 'nfl_play_stats.gsisId')
     .whereNotNull('nfl_play_stats.playerName')
     .whereNotNull('nfl_play_stats.gsisId')
     .groupBy(
       'nfl_play_stats.gsispid',
       'player.pid',
       'nfl_play_stats.gsisId',
-      'player.gsispid',
-      'player.gsisid'
+      'player.smart_player_id',
+      'player.gsis_player_id'
     )
 
   log(query.toString())
@@ -83,8 +83,10 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
       }
 
       // clear any duplicates
-      await db('player').update({ gsispid: null }).where({ gsispid: value })
-      await updatePlayer({ pid, update: { gsispid: value } })
+      await db('player')
+        .update({ smart_player_id: null })
+        .where({ smart_player_id: value })
+      await updatePlayer({ pid, update: { smart_player_id: value } })
     }
   }
 
@@ -104,8 +106,10 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
       }
 
       // clear any duplicates
-      await db('player').update({ gsispid: null }).where({ gsispid: value })
-      await updatePlayer({ pid, update: { gsispid: value } })
+      await db('player')
+        .update({ smart_player_id: null })
+        .where({ smart_player_id: value })
+      await updatePlayer({ pid, update: { smart_player_id: value } })
     }
   }
 
@@ -116,10 +120,10 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
         'player.pid',
         'nfl_play_stats.gsisId',
         'nfl_play_stats.gsispid',
-        'player.gsispid as player_gsispid',
-        'player.gsisid as player_gsisid'
+        'player.smart_player_id as player_gsispid',
+        'player.gsis_player_id as player_gsisid'
       )
-      .leftJoin('player', 'player.gsispid', 'nfl_play_stats.gsispid')
+      .leftJoin('player', 'player.smart_player_id', 'nfl_play_stats.gsispid')
       .whereNotNull('nfl_play_stats.playerName')
       .whereNotNull('nfl_play_stats.gsispid')
       .whereIn('nfl_play_stats.gsisId', gsisids)
@@ -127,8 +131,8 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
         'nfl_play_stats.gsisId',
         'player.pid',
         'nfl_play_stats.gsispid',
-        'player.gsispid',
-        'player.gsisid'
+        'player.smart_player_id',
+        'player.gsis_player_id'
       )
 
     for (const play_stat of missing_play_stats) {
@@ -167,8 +171,10 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
         }
 
         // clear any duplicates
-        await db('player').update({ gsisid: null }).where({ gsisid: value })
-        await updatePlayer({ pid, update: { gsisid: value } })
+        await db('player')
+          .update({ gsis_player_id: null })
+          .where({ gsis_player_id: value })
+        await updatePlayer({ pid, update: { gsis_player_id: value } })
       }
     }
   }

@@ -15,10 +15,10 @@ async function load_sumer_id_cache() {
 
   load_promise = (async () => {
     const rows = await db('player')
-      .select('pid', 'sumer_id')
-      .whereNotNull('sumer_id')
+      .select('pid', 'sumer_player_id')
+      .whereNotNull('sumer_player_id')
     for (const row of rows) {
-      sumer_id_cache.set(row.sumer_id, row.pid)
+      sumer_id_cache.set(row.sumer_player_id, row.pid)
     }
     log(`loaded ${sumer_id_cache.size} sumer_id mappings`)
   })()
@@ -34,34 +34,34 @@ async function _query_player_by_last_name_and_jersey({
 }) {
   // Exact last name match with team
   const base_query = () =>
-    db('player').select('pid').where('jnum', jersey_number)
+    db('player').select('pid').where('jersey_number', jersey_number)
 
-  // Try: exact lname + team
+  // Try: exact last_name + team
   if (normalized_team) {
     const rows = await base_query()
-      .whereRaw('LOWER(lname) = ?', [last_name.toLowerCase()])
+      .whereRaw('LOWER(last_name) = ?', [last_name.toLowerCase()])
       .where('current_nfl_team', normalized_team)
       .limit(2)
     if (rows.length === 1) return { pid: rows[0].pid }
   }
 
-  // Try: exact lname without team (offseason moves)
+  // Try: exact last_name without team (offseason moves)
   const rows_no_team = await base_query()
-    .whereRaw('LOWER(lname) = ?', [last_name.toLowerCase()])
+    .whereRaw('LOWER(last_name) = ?', [last_name.toLowerCase()])
     .limit(2)
   if (rows_no_team.length === 1) return { pid: rows_no_team[0].pid }
 
-  // Try: lname starts with (handles "Walker" matching "Walker III")
+  // Try: last_name starts with (handles "Walker" matching "Walker III")
   if (normalized_team) {
     const rows_prefix = await base_query()
-      .whereRaw('LOWER(lname) LIKE ?', [`${last_name.toLowerCase()} %`])
+      .whereRaw('LOWER(last_name) LIKE ?', [`${last_name.toLowerCase()} %`])
       .where('current_nfl_team', normalized_team)
       .limit(2)
     if (rows_prefix.length === 1) return { pid: rows_prefix[0].pid }
   }
 
   const rows_prefix_no_team = await base_query()
-    .whereRaw('LOWER(lname) LIKE ?', [`${last_name.toLowerCase()} %`])
+    .whereRaw('LOWER(last_name) LIKE ?', [`${last_name.toLowerCase()} %`])
     .limit(2)
   if (rows_prefix_no_team.length === 1)
     return { pid: rows_prefix_no_team[0].pid }
@@ -133,7 +133,7 @@ export async function match_charting_player({
     try {
       // Check if another player already has this sumer_id
       const existing = await db('player')
-        .where({ sumer_id: sumer_player_id })
+        .where({ sumer_player_id })
         .first('pid')
       if (existing && existing.pid !== matched_player.pid) {
         log(
@@ -142,7 +142,7 @@ export async function match_charting_player({
       } else if (!existing) {
         await db('player')
           .where({ pid: matched_player.pid })
-          .update({ sumer_id: sumer_player_id })
+          .update({ sumer_player_id })
         sumer_id_cache.set(sumer_player_id, matched_player.pid)
         log(
           `mapped sumer_id ${sumer_player_id} -> ${matched_player.pid} (${full_name})`

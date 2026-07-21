@@ -219,12 +219,12 @@ const import_player_draft_position_pfr = async ({
     }
   }
 
-  const pfr_ids = draft_players.map((player) => player.pfr_id)
-  const players = await db('player').whereIn('pfr_id', pfr_ids)
+  const pfr_ids = draft_players.map((draft_player) => draft_player.pfr_id)
+  const players = await db('player').whereIn('pfr_player_id', pfr_ids)
 
   const players_map = {}
   for (const player_row of players) {
-    players_map[player_row.pfr_id] = player_row
+    players_map[player_row.pfr_player_id] = player_row
   }
   const missing_players = []
 
@@ -253,9 +253,9 @@ const import_player_draft_position_pfr = async ({
     // Note: College team data is available from PFR but not included for now
     // TODO: Consider including college team data in a future update
     const update = {
-      round: draft_player.round,
-      dpos: draft_player.overall_pick,
-      pfr_id: draft_player.pfr_id,
+      draft_round: draft_player.round,
+      draft_overall_pick: draft_player.overall_pick,
+      pfr_player_id: draft_player.pfr_id,
       all_pro_first_team_selections: draft_player.all_pro_first_team_selections,
       pro_bowl_selections: draft_player.pro_bowl_selections,
       pfr_years_as_primary_starter: draft_player.years_as_primary_starter,

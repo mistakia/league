@@ -186,7 +186,7 @@ router.post('/?', async (req, res) => {
       await sendNotifications({
         league,
         notifyLeague: true,
-        message: `${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+        message: `${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}) has been released.`
       })
     }
   } catch (error) {
