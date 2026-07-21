@@ -85,27 +85,13 @@ const shorthand_columns = new Map([
 // Bare single-letter / ambiguous team-role spellings (checked as exact names).
 const ambiguous_team_columns = new Set(['v', 'h', 'team', 'club', 'clubcode'])
 
-// Source-revealing vendor terms (the obfuscation legend is private; this list
-// is only the publicly-obvious vendor tokens the audit flags in identifiers).
-// Kept deliberately in-code and non-secret: these are the names being retired.
-const vendor_tokens = [
-  'pff',
-  'dvoa',
-  'espn',
-  'ngs',
-  'keeptradecut',
-  'ktc',
-  'sleeper',
-  'sportradar',
-  'fantasypros',
-  'draftkings',
-  'fanduel',
-  'prizepicks',
-  'underdog',
-  'sis',
-  'cfbref',
-  'pfr'
-]
+// Source-revealing vendor terms the audit flags in identifiers. Per the operator
+// ruling (2026-07-20), obfuscation is scoped to the three premium charted/tracking
+// sources only — NGS, NFL Pro, PFF — NOT every integration we legitimately name
+// (ESPN, Sleeper, the sportsbooks, the projection providers). Kept in-code and
+// non-secret: these are the names being retired to obfuscated codes. The full
+// private term list lives in the scan legend (private/source-legend.json).
+const vendor_tokens = ['pff', 'ngs', 'nfl_pro', 'nflpro']
 
 // External-id columns that end in _id but do not follow {system}_{entitytype}_id.
 // Detected by pattern; this set is the known non-conforming roster for messaging.
