@@ -26,11 +26,7 @@ export default function ReserveLongTermConfirmation({
       <DialogTitle>Designate Reserve/IR (Long Term)</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`${player_map.get('fname')} ${player_map.get(
-            'lname'
-          )} (${player_map.get(
-            'pos'
-          )}) will be placed on Reserves/IR (Long Term). You will not be able to activate him until the offseason.`}
+          {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/IR (Long Term). You will not be able to activate him until the offseason.`}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

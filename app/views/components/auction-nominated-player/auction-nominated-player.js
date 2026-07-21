@@ -52,7 +52,7 @@ export default function AuctionNominatedPlayer({
         </div>
         <div className='selected__player-header-item'>
           <label>Age</label>
-          <PlayerAge date={player_map.get('dob')} />
+          <PlayerAge date={player_map.get('date_of_birth')} />
         </div>
       </div>
     </div>

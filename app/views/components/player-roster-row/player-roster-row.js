@@ -42,7 +42,7 @@ class PlayerRosterRow extends Player {
     const bid = player_map.get('bid')
     const salary = calculate_extension
       ? getExtensionAmount({
-          pos: player_map.get('pos'),
+          pos: player_map.get('primary_position'),
           tag: player_map.get('tag'),
           extensions,
           league,

@@ -38,7 +38,7 @@ export default class PlayerSlot extends React.Component {
         <Button
           disabled={isLocked}
           onClick={() =>
-            handleSelect({ slot, pid, pos: player_map.get('pos') })
+            handleSelect({ slot, pid, pos: player_map.get('primary_position') })
           }
           small
         >

@@ -67,7 +67,8 @@ export default class RookieConfirmation extends React.Component {
       const pid = taggedPlayerMap.get('pid')
       menuItems.push(
         <MenuItem key={pid} value={pid}>
-          {taggedPlayerMap.get('name')} ({taggedPlayerMap.get('pos')})
+          {taggedPlayerMap.get('name')} (
+          {taggedPlayerMap.get('primary_position')})
         </MenuItem>
       )
     }
@@ -77,9 +78,7 @@ export default class RookieConfirmation extends React.Component {
         <DialogTitle>Rookie Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Rookie Tag to ${player_map.get('name')} (${player_map.get(
-              'pos'
-            )})`}
+            {`Apply Rookie Tag to ${player_map.get('name')} (${player_map.get('primary_position')})`}
           </DialogContentText>
           <div className='confirmation__inputs'>
             {!this._isEligible && (

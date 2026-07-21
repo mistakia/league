@@ -57,7 +57,7 @@ export default function LeagueTeam({
   for (const position of fantasy_positions) {
     if (!groups[position]) groups[position] = []
     groups[position] = players.active
-      .filter((pMap) => pMap.get('pos') === position)
+      .filter((pMap) => pMap.get('primary_position') === position)
       .sort(
         (a, b) =>
           b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0)
@@ -107,8 +107,8 @@ export default function LeagueTeam({
     all_practice_squad_drafted_players.sort((a, b) => {
       const a_draft_year = a.get('nfl_draft_year') || 0
       const b_draft_year = b.get('nfl_draft_year') || 0
-      const a_draft_pos = a.get('dpos') || 9999
-      const b_draft_pos = b.get('dpos') || 9999
+      const a_draft_pos = a.get('draft_overall_pick') || 9999
+      const b_draft_pos = b.get('draft_overall_pick') || 9999
 
       if (a_draft_year !== b_draft_year) {
         return b_draft_year - a_draft_year

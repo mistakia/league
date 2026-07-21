@@ -37,7 +37,7 @@ const get_export_api_url = ({ view_id, export_format }) => {
 }
 
 const get_scatter_point_label = (row) => {
-  return `${row.fname} ${row.lname}`
+  return `${row.first_name} ${row.last_name}`
 }
 
 const get_scatter_point_image = ({ row, total_rows }) => {
@@ -377,7 +377,7 @@ export default function DataViewsPage({
         return get_team_color({ abbr: row.player_nfl_teams_0, key: 'primary' })
       }
       if (point_color_mode === 'position') {
-        return get_position_color(row.pos)
+        return get_position_color(row.primary_position)
       }
       return undefined
     },

@@ -134,7 +134,7 @@ const project_lineups = async (lid) => {
           const baseline = baselines.find(
             (b) =>
               b.week === week &&
-              b.pos === player_row.pos &&
+              b.pos === player_row.primary_position &&
               b.type === 'available'
           )
           const baseline_player = baseline_players.find(

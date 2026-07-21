@@ -56,7 +56,7 @@ export function calculatePlayerValues(payload) {
       if (projection) {
         const points = calculatePoints({
           stats: projection,
-          position: player.pos,
+          position: player.primary_position,
           league
         })
         player.points[week] = points
@@ -78,7 +78,7 @@ export function calculatePlayerValues(payload) {
     if (player.projection.ros) {
       player.points.ros = calculatePoints({
         stats: player.projection.ros,
-        position: player.pos,
+        position: player.primary_position,
         league
       })
     }
@@ -114,8 +114,14 @@ export function optimizeAuctionLineup({
   const variables = {}
   const ints = {}
 
+  // `players`/`active` here are synthetic optimize candidates
+  // { pid, pos, points, market_salary } built by format_auction_player;
+  // `pos` is a generic position code, not the player-dimension
+  // primary_position column.
   const pool = players.concat(active)
-  const positions = pool.map((p) => p.pos).filter(Boolean)
+  const positions = pool
+    .map((optimize_player) => optimize_player.pos)
+    .filter(Boolean)
   const positionConstraints = getOptimizerPositionConstraints({
     positions,
     league
@@ -126,26 +132,28 @@ export function optimizeAuctionLineup({
     ...limits
   }
 
-  const addPlayer = ({ player, freeAgent }) => {
-    variables[player.pid] = {
-      points: Math.round(player.points || 0),
+  const addPlayer = ({ player: optimize_player, freeAgent }) => {
+    variables[optimize_player.pid] = {
+      points: Math.round(optimize_player.points || 0),
       starter: 1
     }
-    variables[player.pid][player.pid] = 1
-    // variables[player.pid][player.pos] = 1
-    if (constraints[player.pid]) {
-      constraints[player.pid].max = 1
+    variables[optimize_player.pid][optimize_player.pid] = 1
+    // variables[optimize_player.pid][optimize_player.pos] = 1
+    if (constraints[optimize_player.pid]) {
+      constraints[optimize_player.pid].max = 1
     } else {
-      constraints[player.pid] = { max: 1 }
+      constraints[optimize_player.pid] = { max: 1 }
     }
-    ints[player.pid] = 1
+    ints[optimize_player.pid] = 1
     for (const pos of fantasy_positions) {
-      variables[player.pid][pos] = player.pos === pos ? 1 : 0
+      variables[optimize_player.pid][pos] = optimize_player.pos === pos ? 1 : 0
     }
 
     if (freeAgent) {
-      variables[player.pid].fa = 1
-      variables[player.pid].value = Math.round(player.market_salary || 0)
+      variables[optimize_player.pid].fa = 1
+      variables[optimize_player.pid].value = Math.round(
+        optimize_player.market_salary || 0
+      )
     }
   }
 

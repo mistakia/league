@@ -30,7 +30,7 @@ export default class Lineup extends React.Component {
       const selectedSlot = this.state.selected_player_slot.slot
       const slot = r.isEligibleForSlot({
         slot: selectedSlot,
-        pos: player_map.get('pos')
+        pos: player_map.get('primary_position')
       })
         ? selectedSlot
         : roster_slot_types.BENCH

@@ -14,7 +14,9 @@ export default function optimizeLineup({
   use_baseline_when_missing
 }) {
   const results = {}
-  const player_positions = players.map((p) => p.pos).filter(Boolean)
+  const player_positions = players
+    .map((p) => p.primary_position)
+    .filter(Boolean)
   const positions = use_baseline_when_missing
     ? player_positions.concat(fantasy_positions)
     : player_positions
@@ -42,7 +44,11 @@ export default function optimizeLineup({
       const points = Math.round(
         (player.points && player.points[week] && player.points[week].total) || 0
       )
-      addPlayer({ pid: player.pid, player_pos: player.pos, points })
+      addPlayer({
+        pid: player.pid,
+        player_pos: player.primary_position,
+        points
+      })
     }
 
     if (use_baseline_when_missing) {

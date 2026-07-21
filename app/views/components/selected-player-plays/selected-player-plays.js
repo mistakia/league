@@ -65,7 +65,7 @@ export default function SelectedPlayerPlays({
   send_plays_request
 }) {
   const pid = player_map.get('pid')
-  const pos = player_map.get('pos')
+  const pos = player_map.get('primary_position')
 
   const columns = useMemo(() => get_default_columns_for_position(pos), [pos])
   const table_state = {

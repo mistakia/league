@@ -53,7 +53,7 @@ const get_quarter_snap_type = (pos) => {
 
 export default function SelectedPlayerGamelogs({ player_map, load, years }) {
   const pid = player_map.get('pid')
-  const position = player_map.get('pos')
+  const position = player_map.get('primary_position')
   const [show_quarter_snaps, set_show_quarter_snaps] = useState(false)
   const [show_quarter_pct, set_show_quarter_pct] = useState(false)
 

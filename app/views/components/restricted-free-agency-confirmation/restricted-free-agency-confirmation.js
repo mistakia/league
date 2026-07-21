@@ -187,7 +187,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       const pid = r_player_map.get('pid')
       menu_items.push(
         <MenuItem key={pid} value={pid}>
-          {r_player_map.get('name')} ({r_player_map.get('pos')})
+          {r_player_map.get('name')} ({r_player_map.get('primary_position')})
         </MenuItem>
       )
     }
@@ -204,13 +204,13 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
         return
       }
 
-      const pos = player_map.get('pos')
+      const pos = player_map.get('primary_position')
       options.push({
         id: pid_i,
         label: player_map.get('name'),
         pos,
         team: player_map.get('team'),
-        pname: player_map.get('pname'),
+        pname: player_map.get('short_name'),
         value: player_map.get('value')
       })
     })
@@ -253,9 +253,9 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       release_players.push({
         id: player_map.get('pid'),
         label: player_map.get('name'),
-        pos: player_map.get('pos'),
+        pos: player_map.get('primary_position'),
         team: player_map.get('team'),
-        pname: player_map.get('pname'),
+        pname: player_map.get('short_name'),
         value: player_map.get('value')
       })
     })
@@ -265,9 +265,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
         <DialogTitle>Restricted Free Agent Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Place Restricted Free Agent bid on ${player_map.get('name')} (${player_map.get(
-              'pos'
-            )})`}
+            {`Place Restricted Free Agent bid on ${player_map.get('name')} (${player_map.get('primary_position')})`}
           </DialogContentText>
           <div className='restricted-free-agency__bid-inputs'>
             <TextField

@@ -48,7 +48,11 @@ export default function WaiverConfirmation({
         continue
       r.removePlayer(releasePlayerMap.get('pid'))
       if (isActiveRoster) {
-        if (r.has_bench_space_for_position(releasePlayerMap.get('pos')))
+        if (
+          r.has_bench_space_for_position(
+            releasePlayerMap.get('primary_position')
+          )
+        )
           releases.push(releasePlayerMap)
       } else {
         if (r.hasOpenPracticeSquadSlot()) releases.push(releasePlayerMap)
@@ -61,8 +65,10 @@ export default function WaiverConfirmation({
   const ros = new Roster({ roster: roster.toJS(), league })
   const has_bench_space = (isActiveRoster) =>
     isActiveRoster
-      ? ros.has_bench_space_for_position(player_map.get('pos'))
-      : ros.has_practice_squad_space_for_position(player_map.get('pos'))
+      ? ros.has_bench_space_for_position(player_map.get('primary_position'))
+      : ros.has_practice_squad_space_for_position(
+          player_map.get('primary_position')
+        )
 
   const [waiver_max_bid, set_waiver_max_bid] = useState(
     current_season.isRegularSeason ? team.faab : ros.availableCap
@@ -163,9 +169,9 @@ export default function WaiverConfirmation({
     options.push({
       id: releasePlayerMap.get('pid'),
       label: releasePlayerMap.get('name'),
-      pos: releasePlayerMap.get('pos'),
+      pos: releasePlayerMap.get('primary_position'),
       team: releasePlayerMap.get('team'),
-      pname: releasePlayerMap.get('pname'),
+      pname: releasePlayerMap.get('short_name'),
       value: releasePlayerMap.get('value')
     })
   }
@@ -178,9 +184,9 @@ export default function WaiverConfirmation({
     releasePlayers.push({
       id: releasePlayerMap.get('pid'),
       label: releasePlayerMap.get('name'),
-      pos: releasePlayerMap.get('pos'),
+      pos: releasePlayerMap.get('primary_position'),
       team: releasePlayerMap.get('team'),
-      pname: releasePlayerMap.get('pname'),
+      pname: releasePlayerMap.get('short_name'),
       value: releasePlayerMap.get('value')
     })
   })
@@ -246,7 +252,7 @@ export default function WaiverConfirmation({
       <DialogTitle>Waiver Claim</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`Add ${player_map.get('name')} (${player_map.get('pos')})`}
+          {`Add ${player_map.get('name')} (${player_map.get('primary_position')})`}
         </DialogContentText>
         <div className='confirmation__inputs'>
           {waiver_type === waiver_types.FREE_AGENCY && (

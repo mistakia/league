@@ -34,13 +34,13 @@ export async function load_player_info({ player_ids }) {
   }
 
   const players = await db('player')
-    .select('pid', 'pos', 'current_nfl_team')
+    .select('pid', 'primary_position', 'current_nfl_team')
     .whereIn('pid', player_ids)
 
   const player_map = new Map()
   for (const p of players) {
     player_map.set(p.pid, {
-      position: p.pos,
+      position: p.primary_position,
       nfl_team: p.current_nfl_team
     })
   }

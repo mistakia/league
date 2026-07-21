@@ -58,7 +58,7 @@ function ensure_complete_slot_assignments({
     // Calculate default slot
     const player = {
       pid: player_map.get('pid'),
-      pos: player_map.get('pos'),
+      primary_position: player_map.get('primary_position'),
       roster_status: player_map.get('roster_status'),
       game_designation: player_map.get('game_designation'),
       practice: player_map.get('practice'),

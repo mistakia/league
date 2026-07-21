@@ -1,9 +1,9 @@
 import { List, Map } from 'immutable'
 
 export function createPlayer({
-  fname,
-  lname,
-  pname,
+  first_name,
+  last_name,
+  short_name,
   current_nfl_team,
 
   projection,
@@ -77,11 +77,11 @@ export function createPlayer({
     params.team = current_nfl_team
   }
 
-  if (fname && lname) {
-    params.fname = fname
-    params.lname = lname
-    params.name = `${fname} ${lname}`
-    params.pname = pname || `${fname[0]}. ${lname}`
+  if (first_name && last_name) {
+    params.first_name = first_name
+    params.last_name = last_name
+    params.name = `${first_name} ${last_name}`
+    params.short_name = short_name || `${first_name[0]}. ${last_name}`
   }
 
   // Add status fields to top-level player object for direct access

@@ -60,7 +60,7 @@ export default function ReserveConfirmation({
     const pid = aPlayerMap.get('pid')
     menuItems.push(
       <MenuItem key={pid} value={pid}>
-        {aPlayerMap.get('name')} ({aPlayerMap.get('pos')})
+        {aPlayerMap.get('name')} ({aPlayerMap.get('primary_position')})
       </MenuItem>
     )
   }
@@ -70,11 +70,7 @@ export default function ReserveConfirmation({
       <DialogTitle>Designate Reserve</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`${player_map.get('fname')} ${player_map.get(
-            'lname'
-          )} (${player_map.get(
-            'pos'
-          )}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
+          {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
         </DialogContentText>
         {!has_reserve_space && (
           <DialogContentText>

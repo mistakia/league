@@ -11,7 +11,7 @@ export default class PlayerNameText extends React.Component {
     return (
       <div className='player__name'>
         <div className='player__name-main'>
-          <span>{player_map.get('pname')}</span>
+          <span>{player_map.get('short_name')}</span>
           {current_season.year === player_map.get('nfl_draft_year') && (
             <PlayerLabel label='R' type='rookie' description='Rookie' />
           )}

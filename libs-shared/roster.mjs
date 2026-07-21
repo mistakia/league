@@ -409,7 +409,7 @@ export default class Roster {
 
   /**
    * Validate if a player can be assigned to a specific slot
-   * @param {Object} player - Player object with pos property
+   * @param {Object} player - Player object with primary_position property
    * @param {number} target_slot - Slot constant to validate
    * @returns {boolean} True if player can be assigned to the slot
    */
@@ -427,7 +427,7 @@ export default class Roster {
       target_slot === roster_slot_types.PS ||
       target_slot === roster_slot_types.PSP
     ) {
-      return this.has_practice_squad_space_for_position(player.pos)
+      return this.has_practice_squad_space_for_position(player.primary_position)
     }
 
     // Check reserve slots
@@ -444,7 +444,7 @@ export default class Roster {
 
     // Check bench slot
     if (target_slot === roster_slot_types.BENCH) {
-      return this.has_bench_space_for_position(player.pos)
+      return this.has_bench_space_for_position(player.primary_position)
     }
 
     // Check starter slots
@@ -453,7 +453,7 @@ export default class Roster {
         (key) => roster_slot_types[key] === target_slot
       )
       // Check position eligibility
-      if (!slot_name.includes(player.pos)) {
+      if (!slot_name.includes(player.primary_position)) {
         return false
       }
       return this.hasOpenSlot(target_slot)
@@ -464,19 +464,19 @@ export default class Roster {
 
   /**
    * Get all available slots for a player based on position and roster space
-   * @param {Object} player - Player object with pos property
+   * @param {Object} player - Player object with primary_position property
    * @returns {Array<number>} Array of valid slot constants
    */
   get_available_slots_for_player(player) {
     const available_slots = []
 
     // Always include bench if there's space
-    if (this.has_bench_space_for_position(player.pos)) {
+    if (this.has_bench_space_for_position(player.primary_position)) {
       available_slots.push(roster_slot_types.BENCH)
     }
 
     // Include signed practice squad if space available
-    if (this.has_practice_squad_space_for_position(player.pos)) {
+    if (this.has_practice_squad_space_for_position(player.primary_position)) {
       available_slots.push(roster_slot_types.PS)
     }
 
@@ -493,7 +493,10 @@ export default class Roster {
       const slot_name = Object.keys(roster_slot_types).find(
         (key) => roster_slot_types[key] === starter_slot
       )
-      if (slot_name.includes(player.pos) && this.hasOpenSlot(starter_slot)) {
+      if (
+        slot_name.includes(player.primary_position) &&
+        this.hasOpenSlot(starter_slot)
+      ) {
         available_slots.push(starter_slot)
       }
     }

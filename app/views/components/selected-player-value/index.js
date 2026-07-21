@@ -12,7 +12,7 @@ const map_state_to_props = createSelector(
   (player_map, baselines) => {
     const baData = []
     const wsData = []
-    const position = player_map.get('pos')
+    const position = player_map.get('primary_position')
     for (const week of fantasy_weeks) {
       if (week < current_season.week) continue
       baData.push(

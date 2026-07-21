@@ -22,10 +22,10 @@ function PlayerLarge({ player_map, handleClick, width, square = false }) {
         <PlayerHeadshot player_map={player_map} width={width} square={square} />
       </div>
       <div className='player__name-lead'>
-        <div className='player__name-first'>{player_map.get('fname')}</div>
-        <div className='player__name-last'>{player_map.get('lname')}</div>
+        <div className='player__name-first'>{player_map.get('first_name')}</div>
+        <div className='player__name-last'>{player_map.get('last_name')}</div>
         <div className='player__name-meta'>
-          <Position pos={player_map.get('pos')} />
+          <Position pos={player_map.get('primary_position')} />
           <NFLTeam team={player_map.get('team')} />
           {Boolean(player_number) && <span>#{player_number}</span>}
         </div>
@@ -91,7 +91,7 @@ export default function PlayerName({
       <div className='player__name cursor' onClick={handleClick}>
         {!hidePosition && (
           <div className='player__name-position'>
-            <Position pos={player_map.get('pos')} />
+            <Position pos={player_map.get('primary_position')} />
           </div>
         )}
         {Boolean(headshot_width) && (
@@ -101,14 +101,16 @@ export default function PlayerName({
               width={headshot_width}
               square={headshot_square}
               position={
-                show_position_bar && is_mobile ? player_map.get('pos') : null
+                show_position_bar && is_mobile
+                  ? player_map.get('primary_position')
+                  : null
               }
             />
           </div>
         )}
         <div className='player__name-main'>
           <div className='player__name-top'>
-            <span>{player_map.get('pname')}</span>
+            <span>{player_map.get('short_name')}</span>
             {current_season.year === player_map.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}

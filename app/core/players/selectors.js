@@ -71,14 +71,14 @@ export function getFilteredPlayers(state) {
   const positions = pState.get('positions')
   if (positions.size !== fantasy_positions.length) {
     filtered = filtered.filter((player_map) =>
-      positions.includes(player_map.get('pos'))
+      positions.includes(player_map.get('primary_position'))
     )
   }
 
   const nfl_draft_rounds_filter = pState.get('nfl_draft_rounds')
   if (nfl_draft_rounds_filter.size !== nfl_draft_rounds.length) {
     filtered = filtered.filter((player_map) =>
-      nfl_draft_rounds_filter.includes(player_map.get('round'))
+      nfl_draft_rounds_filter.includes(player_map.get('draft_round'))
     )
   }
 
@@ -111,14 +111,14 @@ export function getFilteredPlayers(state) {
   const colleges = pState.get('colleges')
   if (colleges.size !== ncaa_college_names.length) {
     filtered = filtered.filter((player_map) =>
-      colleges.includes(player_map.get('col'))
+      colleges.includes(player_map.get('college'))
     )
   }
 
   const collegeDivisions = pState.get('collegeDivisions')
   if (collegeDivisions.size !== ncaa_conference_names.length) {
     filtered = filtered.filter((player_map) =>
-      collegeDivisions.includes(player_map.get('dv'))
+      collegeDivisions.includes(player_map.get('college_division'))
     )
   }
 

@@ -117,7 +117,8 @@ export default class ActivateConfirmation extends React.Component {
       const pid = reservePlayerMap.get('pid')
       reserveItems.push(
         <MenuItem key={pid} value={pid}>
-          {reservePlayerMap.get('name')} ({reservePlayerMap.get('pos')})
+          {reservePlayerMap.get('name')} (
+          {reservePlayerMap.get('primary_position')})
         </MenuItem>
       )
     }
@@ -127,7 +128,8 @@ export default class ActivateConfirmation extends React.Component {
       const pid = activePlayerMap.get('pid')
       releaseItems.push(
         <MenuItem key={pid} value={pid}>
-          {activePlayerMap.get('name')} ({activePlayerMap.get('pos')})
+          {activePlayerMap.get('name')} (
+          {activePlayerMap.get('primary_position')})
         </MenuItem>
       )
     }
@@ -137,7 +139,8 @@ export default class ActivateConfirmation extends React.Component {
       const pid = activePlayerMap.get('pid')
       deactivateItems.push(
         <MenuItem key={pid} value={pid}>
-          {activePlayerMap.get('name')} ({activePlayerMap.get('pos')})
+          {activePlayerMap.get('name')} (
+          {activePlayerMap.get('primary_position')})
         </MenuItem>
       )
     }
@@ -155,11 +158,7 @@ export default class ActivateConfirmation extends React.Component {
         <DialogTitle>Activate Player</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`${player_map.get('fname')} ${player_map.get(
-              'lname'
-            )} (${player_map.get(
-              'pos'
-            )}) will be placed on the active roster. If the player was not previously activated, activating them will make them ineligible for the practice squad.`}
+            {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on the active roster. If the player was not previously activated, activating them will make them ineligible for the practice squad.`}
           </DialogContentText>
           {!this._hasBenchSpace && (
             <DialogContentText>{noBenchSpaceMessage}</DialogContentText>

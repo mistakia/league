@@ -22,7 +22,7 @@ export default class AddFreeAgentDialog extends React.Component {
     const releases = []
     const { league, player_map, practice } = props
     const r = new Roster({ roster: props.roster.toJS(), league })
-    const pos = player_map.get('pos')
+    const pos = player_map.get('primary_position')
 
     if (practice) {
       props.rosterPlayers.practice.forEach((practicePlayerMap) => {
@@ -82,15 +82,14 @@ export default class AddFreeAgentDialog extends React.Component {
         const pid = releasePlayerMap.get('pid')
         menuItems.push(
           <MenuItem key={pid} value={pid}>
-            {releasePlayerMap.get('name')} ({releasePlayerMap.get('pos')})
+            {releasePlayerMap.get('name')} (
+            {releasePlayerMap.get('primary_position')})
           </MenuItem>
         )
       }
     }
 
-    let text = `Sign ${player_map.get('name')} (${player_map.get(
-      'pos'
-    )}) to a salary of $0 and add them to the `
+    let text = `Sign ${player_map.get('name')} (${player_map.get('primary_position')}) to a salary of $0 and add them to the `
     if (practice) text += 'practice squad.'
     else text += 'active roster.'
 

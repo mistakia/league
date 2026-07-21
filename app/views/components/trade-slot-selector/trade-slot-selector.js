@@ -168,7 +168,7 @@ export default function TradeSlotSelector({
     (opt) => opt.value === current_slot
   )
 
-  const player_name = player_map?.get('pname') || 'Player'
+  const player_name = player_map?.get('short_name') || 'Player'
 
   if (!is_editable) {
     return (

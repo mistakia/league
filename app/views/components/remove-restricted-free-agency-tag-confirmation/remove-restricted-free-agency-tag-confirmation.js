@@ -27,7 +27,7 @@ export default class RemoveRestrictedFreeAgencyTagConfirmation extends React.Com
           <DialogContentText>
             {`Remove Restricted Free Agency Bid on ${player_map.get(
               'name'
-            )} (${player_map.get('pos')})`}
+            )} (${player_map.get('primary_position')})`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

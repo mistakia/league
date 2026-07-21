@@ -5,7 +5,7 @@ import isReserveEligible from './is-reserve-eligible.mjs'
  * Validate that a player can be assigned to a specific slot
  *
  * @param {Object} params - The parameters object
- * @param {Object} params.player - Player object with roster_status, game_designation, pos, etc.
+ * @param {Object} params.player - Player object with roster_status, game_designation, primary_position, etc.
  * @param {number} params.slot - Target slot constant
  * @param {Object} params.roster - Roster object for space validation
  * @param {number} params.week - Current week number
@@ -21,7 +21,9 @@ export default function validate_trade_slot_assignment({
 }) {
   // Validate BENCH (active roster) slot
   if (slot === roster_slot_types.BENCH) {
-    const has_space = roster.has_bench_space_for_position(player.pos)
+    const has_space = roster.has_bench_space_for_position(
+      player.primary_position
+    )
     return {
       valid: has_space,
       error: has_space
@@ -33,7 +35,9 @@ export default function validate_trade_slot_assignment({
 
   // Validate signed practice squad slots (PS, PSP converted to PS)
   if (slot === roster_slot_types.PS || slot === roster_slot_types.PSP) {
-    const has_space = roster.has_practice_squad_space_for_position(player.pos)
+    const has_space = roster.has_practice_squad_space_for_position(
+      player.primary_position
+    )
     return {
       valid: has_space,
       error: has_space

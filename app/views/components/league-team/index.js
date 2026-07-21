@@ -54,7 +54,7 @@ const map_state_to_props = createSelector(
         tag === player_tag_types.RESTRICTED_FREE_AGENCY
       const bid = p.get('bid', 0)
       const extensions = p.get('extensions', 0)
-      const pos = p.get('pos')
+      const pos = p.get('primary_position')
       const slot = p.get('slot')
       const market_salary = p.getIn(['market_salary', '0'], 0)
       const extendedSalary = getExtensionAmount({

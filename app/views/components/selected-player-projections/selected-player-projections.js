@@ -18,7 +18,7 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
     const { player_map } = this.props
 
     const pid = player_map.get('pid')
-    const pos = player_map.get('pos')
+    const pos = player_map.get('primary_position')
     const loading_projections = player_map.get('loading_projections')
     const tables = []
     const projections = player_map.get('projections', new List()).toJS()

@@ -14,7 +14,7 @@ function SelectedPlayerSeasonStats({
 }) {
   useEffect(() => {
     const pid = player_map.get('pid')
-    const position = player_map.get('pos')
+    const position = player_map.get('primary_position')
     load({ pid, position })
     load_seasonlogs({ pid })
   }, [player_map, load, load_seasonlogs])

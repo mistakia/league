@@ -20,11 +20,11 @@ function PlayerNameDisplay({ player_map }) {
   return (
     <div className='player__name'>
       <div className='player__name-position'>
-        <Position pos={player_map.get('pos')} />
+        <Position pos={player_map.get('primary_position')} />
       </div>
       <div className='player__name-main'>
         <div className='player__name-top'>
-          <span>{player_map.get('pname')}</span>
+          <span>{player_map.get('short_name')}</span>
         </div>
         <NFLTeam team={player_map.get('team')} />
       </div>

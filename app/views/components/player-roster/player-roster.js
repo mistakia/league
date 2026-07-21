@@ -51,7 +51,7 @@ class PlayerRoster extends Player {
         ? bid
         : value
     const extensions = player_map.get('extensions', 0)
-    const pos = player_map.get('pos', '')
+    const pos = player_map.get('primary_position', '')
     const slot = player_map.get('slot')
     const extendedSalary = isRestrictedFreeAgency
       ? bid

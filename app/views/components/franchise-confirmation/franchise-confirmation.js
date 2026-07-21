@@ -74,7 +74,7 @@ export default class FranchiseConfirmation extends React.Component {
       const pid = rPlayerMap.get('pid')
       menuItems.push(
         <MenuItem key={pid} value={pid}>
-          {rPlayerMap.get('name')} ({rPlayerMap.get('pos')})
+          {rPlayerMap.get('name')} ({rPlayerMap.get('primary_position')})
         </MenuItem>
       )
     }
@@ -84,9 +84,7 @@ export default class FranchiseConfirmation extends React.Component {
         <DialogTitle>Franchise Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Franchise Tag to ${player_map.get('name')} (${player_map.get(
-              'pos'
-            )})`}
+            {`Apply Franchise Tag to ${player_map.get('name')} (${player_map.get('primary_position')})`}
           </DialogContentText>
           <div className='confirmation__inputs'>
             {!this._isEligible && (

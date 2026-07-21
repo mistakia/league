@@ -25,7 +25,7 @@ export default function SelectedPlayerSchedule({
     load_nfl_team_seasonlogs()
   }, [load_nfl_team_seasonlogs])
 
-  const pos = player_map.get('pos')
+  const pos = player_map.get('primary_position')
   const team = player_map.get('team')
   const current_week = Math.max(current_season.week, 1)
   const [selected_week, set_selected_week] = useState(current_week)

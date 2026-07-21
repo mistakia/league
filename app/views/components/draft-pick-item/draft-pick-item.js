@@ -9,7 +9,7 @@ import PlayerHeadshot from '@components/player-headshot'
 import './draft-pick-item.styl'
 
 export default function DraftPickItem({ player, pick, year, showYear = true }) {
-  const pos = player?.get('pos')
+  const pos = player?.get('primary_position')
   const classNames = ['draft-pick-item']
   if (pos) classNames.push(pos)
 
@@ -23,10 +23,10 @@ export default function DraftPickItem({ player, pick, year, showYear = true }) {
             <PlayerHeadshot player_map={player} width={48} position={pos} />
             <Box className='draft-pick-item-player'>
               <div className='draft-pick-item-player-last'>
-                {player.get('lname')}
+                {player.get('last_name')}
               </div>
               <div className='draft-pick-item-player-first'>
-                {player.get('fname')}
+                {player.get('first_name')}
               </div>
             </Box>
           </>

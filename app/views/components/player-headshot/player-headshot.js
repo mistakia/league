@@ -16,7 +16,8 @@ export default function PlayerHeadshot({
 }) {
   const height = Math.round((width * 70) / 96)
   const src = get_player_image_url({ player_map, width, height })
-  const alt = player_map?.get('pname') || player_map?.get('formatted') || ''
+  const alt =
+    player_map?.get('short_name') || player_map?.get('formatted_name') || ''
 
   const classNames = ['player__headshot']
   const style = {

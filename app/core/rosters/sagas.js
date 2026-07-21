@@ -207,7 +207,7 @@ export function* calculatePlayerLineupContribution({ player_map }) {
     } else {
       const baselinePlayerId = baselines.getIn([
         week,
-        player_map.get('pos'),
+        player_map.get('primary_position'),
         'available'
       ])
       const baselinePlayer = playerItems.get(baselinePlayerId, new Map())
@@ -485,9 +485,9 @@ export function* export_rosters() {
         market_salary: (
           player_map.getIn(['market_salary', projectionType]) || 0
         ).toFixed(0),
-        player: player_map.get('pname'),
+        player: player_map.get('short_name'),
         playerid: player_map.get('pid'),
-        pos: player_map.get('pos'),
+        pos: player_map.get('primary_position'),
         last_transaction_timestamp: rosterPlayer.timestamp,
         last_transaction_type:
           transaction_type_display_names[rosterPlayer.type],

@@ -44,7 +44,7 @@ const get_filtered_gamelogs_for_schedule = createSelector(
     }
 
     const opponent = player_map.get('team') === game.h ? game.v : game.h
-    const position = player_map.get('pos')
+    const position = player_map.get('primary_position')
 
     return logs
       .filter((gamelog) => {
@@ -110,7 +110,7 @@ const map_state_to_props = createSelector(
       return {}
     }
     const opponent = player_map.get('team') === game.h ? game.v : game.h
-    const position = player_map.get('pos')
+    const position = player_map.get('primary_position')
 
     const nfl_team_against_seasonlogs = []
 

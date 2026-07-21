@@ -36,7 +36,7 @@ class PlayerRow extends Player {
     const tid = player_map.get('tid')
     const team = teams.get(tid, new Team())
     const nfl_team = player_map.get('team')
-    const pos = player_map.get('pos')
+    const pos = player_map.get('primary_position')
     const isRostered = Boolean(tid)
     const isSelected = selectedPlayer === pid || selected === pid
 
@@ -51,7 +51,7 @@ class PlayerRow extends Player {
 
     const name =
       window.innerWidth <= 600
-        ? player_map.get('pname')
+        ? player_map.get('short_name')
         : player_map.get('name')
 
     const field_items = []

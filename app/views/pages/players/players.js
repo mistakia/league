@@ -146,7 +146,7 @@ export default function PlayersPage({
       const item = {
         name: player_map.get('name'),
         team: player_map.get('team'),
-        pos: player_map.get('pos')
+        pos: player_map.get('primary_position')
       }
 
       for (const field_info of field_infos) {

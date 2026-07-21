@@ -596,12 +596,12 @@ export function players_reducer(state = initialState, { payload, type }) {
         ;(payload.result || []).forEach((row) => {
           const formatted_player_data = {
             pid: row.pid,
-            fname: row.fname,
-            lname: row.lname
+            first_name: row.first_name,
+            last_name: row.last_name
           }
 
-          if (row.pos) {
-            formatted_player_data.pos = row.pos
+          if (row.primary_position) {
+            formatted_player_data.primary_position = row.primary_position
           }
 
           if (players.hasIn(['items', row.pid])) {

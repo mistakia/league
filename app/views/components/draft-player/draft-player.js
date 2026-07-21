@@ -38,7 +38,7 @@ export default class DraftPlayer extends React.Component {
           </div>
           <div className='player-draft__item-index'>{index + 1}.</div>
           <div className='player-draft__item-name'>
-            <span>{player_map.get('pname')}</span>
+            <span>{player_map.get('short_name')}</span>
             <NFLTeam team={player_map.get('team')} />
           </div>
           <div className='player-draft__item-metric'>

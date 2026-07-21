@@ -12,14 +12,14 @@ const calculateValues = ({ players, baselines, week, league = {} }) => {
       player.pts_added = {}
     }
 
-    const { pos } = player
+    const { primary_position } = player
     player.pts_added[week] = default_points_added
 
-    if (pos === 'K') {
+    if (primary_position === 'K') {
       continue
     }
 
-    if (!fantasy_positions.includes(pos)) {
+    if (!fantasy_positions.includes(primary_position)) {
       continue
     }
 
@@ -27,18 +27,19 @@ const calculateValues = ({ players, baselines, week, league = {} }) => {
     if (player_week_points) {
       const isSeasonProjection = week === 0
       const historic_baseline_week =
-        league[`pts_base_week_${pos.toLowerCase()}`]
+        league[`pts_base_week_${primary_position.toLowerCase()}`]
       const historic_baseline_season =
-        league[`pts_base_season_${pos.toLowerCase()}`]
+        league[`pts_base_season_${primary_position.toLowerCase()}`]
       if (isSeasonProjection && historic_baseline_season) {
         const baseline =
           historic_baseline_season * (current_season.nflFinalWeek - 1)
         player.pts_added[week] = player_week_points - baseline
       } else if (historic_baseline_week) {
         player.pts_added[week] = player_week_points - historic_baseline_week
-      } else if (baselines[pos].starter) {
+      } else if (baselines[primary_position].starter) {
         player.pts_added[week] =
-          player_week_points - baselines[pos].starter.points[week].total
+          player_week_points -
+          baselines[primary_position].starter.points[week].total
       }
     }
 

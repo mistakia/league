@@ -62,7 +62,8 @@ export default function DeactivateConfirmation({
     )
     releaseItems.push(
       <MenuItem key={pid} value={pid}>
-        {release_player_map.get('name')} ({release_player_map.get('pos')})
+        {release_player_map.get('name')} (
+        {release_player_map.get('primary_position')})
       </MenuItem>
     )
   }
@@ -72,11 +73,7 @@ export default function DeactivateConfirmation({
       <DialogTitle>Deactivate Player</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`${player_map.get('fname')} ${player_map.get(
-            'lname'
-          )} (${player_map.get(
-            'pos'
-          )}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`}
+          {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`}
         </DialogContentText>
       </DialogContent>
       <DialogContent>

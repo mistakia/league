@@ -112,7 +112,7 @@ export default function LeagueHomePage({
   for (const position of fantasy_positions) {
     if (!groups[position]) groups[position] = []
     groups[position] = players.active
-      .filter((pMap) => pMap.get('pos') === position)
+      .filter((pMap) => pMap.get('primary_position') === position)
       .sort(
         (a, b) =>
           b.getIn(['lineups', 'starts'], 0) - a.getIn(['lineups', 'starts'], 0)

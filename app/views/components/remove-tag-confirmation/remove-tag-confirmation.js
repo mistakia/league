@@ -29,7 +29,7 @@ export default class RemoveTagConfirmation extends React.Component {
           <DialogContentText>
             {`Remove ${tagType} Tag from ${player_map.get(
               'name'
-            )} (${player_map.get('pos')})`}
+            )} (${player_map.get('primary_position')})`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

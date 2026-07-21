@@ -177,18 +177,18 @@ export default async function ({
     query.groupBy(db.raw(selects.join(',')))
   } else {
     const default_columns = [
-      'player.fname',
-      'player.lname',
-      'player.pname',
+      'player.first_name',
+      'player.last_name',
+      'player.short_name',
       'player.nfl_draft_year',
-      'player.col',
-      'player.dv',
-      'player.pos',
-      'player.round',
+      'player.college',
+      'player.college_division',
+      'player.primary_position',
+      'player.draft_round',
       'player.current_nfl_team',
-      'player.gsisid',
-      'player.gsispid',
-      'player.espn_id',
+      'player.gsis_player_id',
+      'player.smart_player_id',
+      'player.espn_player_id',
       'player.roster_status',
       'player.game_designation'
     ]
@@ -255,12 +255,12 @@ export default async function ({
         "name_search_vector @@ plainto_tsquery('english', ?)",
         textSearch
       )
-      .whereIn('player.pos', fantasy_positions)
+      .whereIn('player.primary_position', fantasy_positions)
   } else if (pids.length) {
     query.whereIn('player.pid', pids)
   } else if (include_all_active_players) {
     query.orWhere(function () {
-      this.whereIn('player.pos', fantasy_positions)
+      this.whereIn('player.primary_position', fantasy_positions)
         .whereNot('player.current_nfl_team', 'INA')
         .where(function () {
           this.whereNotIn('player.roster_status', [
@@ -273,7 +273,7 @@ export default async function ({
     if (current_season.week === 0) {
       query.orWhere(function () {
         this.where('player.nfl_draft_year', current_season.year).whereIn(
-          'player.pos',
+          'player.primary_position',
           fantasy_positions
         )
       })

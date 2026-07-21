@@ -61,11 +61,7 @@ export default function DraftPage({
   const handleDraft = () => {
     showConfirmation({
       title: 'Draft Selection',
-      description: `Select ${selectedPlayerMap.get(
-        'fname'
-      )} ${selectedPlayerMap.get('lname')} (${selectedPlayerMap.get(
-        'pos'
-      )}) with the #${nextPick.pick} pick in the ${current_season.year} draft.`,
+      description: `Select ${selectedPlayerMap.get('first_name')} ${selectedPlayerMap.get('last_name')} (${selectedPlayerMap.get('primary_position')}) with the #${nextPick.pick} pick in the ${current_season.year} draft.`,
       on_confirm_func: draft_player
     })
   }
@@ -151,7 +147,9 @@ export default function DraftPage({
   const groups = {}
   for (const position of positions) {
     if (!groups[position]) groups[position] = []
-    groups[position] = sorted.filter((pMap) => pMap.get('pos') === position)
+    groups[position] = sorted.filter(
+      (pMap) => pMap.get('primary_position') === position
+    )
   }
 
   const items = {}
@@ -209,7 +207,7 @@ export default function DraftPage({
   }
 
   const p = selectedPlayerMap
-  const playerHeight = p.get('height')
+  const playerHeight = p.get('height_inches')
   const formattedPlayerHeight = playerHeight
     ? `${Math.floor(playerHeight / 12)}-${playerHeight % 12}`
     : '-'
@@ -218,11 +216,11 @@ export default function DraftPage({
     <div className='draft__selected'>
       <div className='draft__selected-head'>
         <div className='draft__selected-title'>
-          {p.get('fname')} {p.get('lname')}
+          {p.get('first_name')} {p.get('last_name')}
         </div>
         <div className='draft__selected-alt'>
           <div>
-            <Position pos={p.get('pos')} />
+            <Position pos={p.get('primary_position')} />
           </div>
           <div>{p.get('team')}</div>
           {Boolean(p.get('jnum')) && <div>#{p.get('jnum')}</div>}
@@ -236,7 +234,9 @@ export default function DraftPage({
       <div className='draft__selected-body'>
         <div>
           <label>Drafted</label>
-          {p.get('dpos') ? `#${p.get('dpos')}` : '-'}
+          {p.get('draft_overall_pick')
+            ? `#${p.get('draft_overall_pick')}`
+            : '-'}
         </div>
         <div>
           <label>Proj.</label>
@@ -244,7 +244,11 @@ export default function DraftPage({
         </div>
         <div>
           <label>Age</label>
-          {p.get('dob') ? <PlayerAge date={p.get('dob')} /> : '-'}
+          {p.get('date_of_birth') ? (
+            <PlayerAge date={p.get('date_of_birth')} />
+          ) : (
+            '-'
+          )}
         </div>
         <div>
           <label>Height</label>
@@ -252,7 +256,7 @@ export default function DraftPage({
         </div>
         <div>
           <label>Weight</label>
-          {p.get('weight', '-')}
+          {p.get('weight_pounds', '-')}
         </div>
         <div>
           <label>Forty</label>
@@ -288,11 +292,11 @@ export default function DraftPage({
         </div>
         <div>
           <label>College</label>
-          {p.get('col', '-')}
+          {p.get('college', '-')}
         </div>
         <div>
           <label>Division</label>
-          {p.get('dv', '-')}
+          {p.get('college_division', '-')}
         </div>
       </div>
     </div>

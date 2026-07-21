@@ -41,7 +41,9 @@ export function* loadReserveTransactions() {
 
 export function* loadPlayers({ payload }) {
   const players = yield select(get_player_maps)
-  const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
+  const missing = payload.data.filter(
+    (p) => !players.getIn([p.pid, 'first_name'])
+  )
   if (missing.length) {
     const { leagueId } = yield select(get_app)
     yield call(api_get_players, { leagueId, pids: missing.map((p) => p.pid) })

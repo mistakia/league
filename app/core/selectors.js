@@ -275,7 +275,7 @@ export const get_active_roster_player_ids_for_current_league = createSelector(
 export const get_auction_info_for_position = createSelector(
   (state, { pos }) =>
     get_player_maps(state).filter((pMap) =>
-      pos ? pMap.get('pos') === pos : true
+      pos ? pMap.get('primary_position') === pos : true
     ),
   get_rostered_player_ids_for_current_league,
   get_active_roster_player_ids_for_current_league,
@@ -344,7 +344,7 @@ export const is_nominated_player_eligible = createSelector(
       return false
     }
 
-    const pos = player_map.get('pos')
+    const pos = player_map.get('primary_position')
     if (!pos) {
       return false
     }
@@ -1017,7 +1017,7 @@ export function get_cutlist_total_salary(state) {
     const bid = player_map.get('bid', 0)
     const salary = isBeforeExtension
       ? getExtensionAmount({
-          pos: player_map.get('pos'),
+          pos: player_map.get('primary_position'),
           tag: player_map.get('tag'),
           extensions,
           league,
@@ -1048,7 +1048,12 @@ export function getSelectedPlayerGames(state) {
 // used by editable baseline component
 export function getPlayersByPosition(state, { position }) {
   const playerMaps = get_player_maps(state)
-  const filtered = playerMaps.filter((p) => p.pos === position)
+  // FIXME pre-existing bug (unrelated to the player-column rename): `p` is an
+  // Immutable Map, so `p.primary_position` is a plain-property read that is
+  // always undefined — this filter matches nothing. Correct form is
+  // `p.get('primary_position')`. Left as-is to avoid a behavior change in the
+  // column-rename linchpin; flagged for follow-up.
+  const filtered = playerMaps.filter((p) => p.primary_position === position)
   const period = !current_season.week ? '0' : 'ros'
   return filtered
     .sort(
@@ -1104,7 +1109,7 @@ export function getGamesByYearForSelectedPlayer(state) {
     }, initialValue)
     const points = calculatePoints({
       stats: sum,
-      position: player_map.get('pos'),
+      position: player_map.get('primary_position'),
       league: league.toJS()
     })
     sum.total = points.total
@@ -1564,7 +1569,7 @@ export function get_plays_for_player(state, { player_map, week }) {
   const formatted = plays.valueSeq().toList()
 
   const playerTeam = player_map.get('team')
-  if (player_map.get('pos') === 'DST') {
+  if (player_map.get('primary_position') === 'DST') {
     return formatted.filter((p) => {
       if (fixTeam(p.h) !== playerTeam && fixTeam(p.v) !== playerTeam) {
         return false
@@ -1594,8 +1599,8 @@ export function get_plays_for_player(state, { player_map, week }) {
 
     const playStats = play.playStats.filter(
       (ps) =>
-        (ps.gsisId && ps.gsisId === player_map.get('gsisid')) ||
-        (ps.gsispid && ps.gsispid === player_map.get('gsispid'))
+        (ps.gsisId && ps.gsisId === player_map.get('gsis_player_id')) ||
+        (ps.gsispid && ps.gsispid === player_map.get('smart_player_id'))
     )
 
     if (!playStats.length) continue
@@ -2251,7 +2256,7 @@ export function getOptimalPointsByTeamId(state, { tid, week }) {
     const player_map = getPlayerById(state, { pid })
     if (!player_map || !player_map.get('pid')) continue
 
-    const pos = player_map.get('pos')
+    const pos = player_map.get('primary_position')
     if (!pos) continue
 
     const gamelog = get_gamelog_for_player(state, { player_map, week })
@@ -2486,11 +2491,17 @@ export function getPlaysByMatchupId(state, { mid }) {
     return arr.concat(starters)
   }, [])
 
-  const gsisids = playerMaps.map((pMap) => pMap.get('gsisid')).filter(Boolean)
-  const gsispids = playerMaps.map((pMap) => pMap.get('gsispid')).filter(Boolean)
+  const gsisids = playerMaps
+    .map((pMap) => pMap.get('gsis_player_id'))
+    .filter(Boolean)
+  const gsispids = playerMaps
+    .map((pMap) => pMap.get('smart_player_id'))
+    .filter(Boolean)
 
   // Identify DST starters and their teams
-  const dst_player_maps = playerMaps.filter((pMap) => pMap.get('pos') === 'DST')
+  const dst_player_maps = playerMaps.filter(
+    (pMap) => pMap.get('primary_position') === 'DST'
+  )
   const dst_teams = dst_player_maps.map((pMap) => fixTeam(pMap.get('team')))
 
   // Need either individual players or DST starters to proceed
@@ -2557,9 +2568,15 @@ export function getPlaysByMatchupId(state, { mid }) {
     const grouped_play_stats = {}
     for (const playStat of play_stats_with_ids) {
       const player_map = playerMaps.find((pMap) => {
-        if (playStat.gsispid && pMap.get('gsispid', false) === playStat.gsispid)
+        if (
+          playStat.gsispid &&
+          pMap.get('smart_player_id', false) === playStat.gsispid
+        )
           return true
-        if (playStat.gsisId && pMap.get('gsisid', false) === playStat.gsisId)
+        if (
+          playStat.gsisId &&
+          pMap.get('gsis_player_id', false) === playStat.gsisId
+        )
           return true
         return false
       })
@@ -2577,7 +2594,7 @@ export function getPlaysByMatchupId(state, { mid }) {
       stats[pid] = calculateStatsFromPlayStats(player_play_stats)
       points[pid] = calculatePoints({
         stats: stats[pid],
-        position: player_map.get('pos'),
+        position: player_map.get('primary_position'),
         league
       })
     }
@@ -2926,7 +2943,7 @@ export function get_gamelog_for_player(
   const plays = get_plays_for_player(state, { player_map, week }).toJS()
   if (!plays.length) return null
 
-  const pos = player_map.get('pos')
+  const pos = player_map.get('primary_position')
   const stats =
     pos === 'DST'
       ? calculateDstStatsFromPlays(plays, player_map.get('team'))
@@ -3099,7 +3116,7 @@ export function get_trade_is_valid(state) {
       // Convert Immutable player_map to plain object for get_default_trade_slot
       const player = {
         pid: player_map.get('pid'),
-        pos: player_map.get('pos'),
+        primary_position: player_map.get('primary_position'),
         roster_status: player_map.get('roster_status'),
         game_designation: player_map.get('game_designation'),
         practice: player_map.get('practice'),
@@ -3121,13 +3138,15 @@ export function get_trade_is_valid(state) {
     // Validate slot availability
     let has_space = true
     if (target_slot === roster_slot_types.BENCH) {
-      has_space = roster.has_bench_space_for_position(player_map.get('pos'))
+      has_space = roster.has_bench_space_for_position(
+        player_map.get('primary_position')
+      )
     } else if (
       target_slot === roster_slot_types.PS ||
       target_slot === roster_slot_types.PSP
     ) {
       has_space = roster.has_practice_squad_space_for_position(
-        player_map.get('pos')
+        player_map.get('primary_position')
       )
     } else if (
       target_slot === roster_slot_types.PSD ||
@@ -3148,7 +3167,7 @@ export function get_trade_is_valid(state) {
       roster.addPlayer({
         slot: target_slot,
         pid,
-        pos: player_map.get('pos'),
+        pos: player_map.get('primary_position'),
         value: player_map.get('value')
       })
     } catch (error) {
@@ -3212,7 +3231,7 @@ export function get_trade_validation_details(state) {
     if (!target_slot) {
       const player = {
         pid: player_map.get('pid'),
-        pos: player_map.get('pos'),
+        primary_position: player_map.get('primary_position'),
         roster_status: player_map.get('roster_status'),
         game_designation: player_map.get('game_designation'),
         practice: player_map.get('practice'),
@@ -3233,7 +3252,9 @@ export function get_trade_validation_details(state) {
 
     // Check if this slot needs releases
     if (target_slot === roster_slot_types.BENCH) {
-      if (!roster.has_bench_space_for_position(player_map.get('pos'))) {
+      if (
+        !roster.has_bench_space_for_position(player_map.get('primary_position'))
+      ) {
         needs_active_releases.push(pid)
         all_valid = false
         continue
@@ -3243,7 +3264,9 @@ export function get_trade_validation_details(state) {
       target_slot === roster_slot_types.PSP
     ) {
       if (
-        !roster.has_practice_squad_space_for_position(player_map.get('pos'))
+        !roster.has_practice_squad_space_for_position(
+          player_map.get('primary_position')
+        )
       ) {
         needs_ps_releases.push(pid)
         all_valid = false
@@ -3262,7 +3285,7 @@ export function get_trade_validation_details(state) {
       roster.addPlayer({
         slot: target_slot,
         pid,
-        pos: player_map.get('pos'),
+        pos: player_map.get('primary_position'),
         value: player_map.get('value')
       })
     } catch (error) {

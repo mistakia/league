@@ -24,7 +24,9 @@ export default function PlayerRowNameColumn({
 }) {
   const player_map = player_maps.get(row.original.pid, new Map())
   const name =
-    window.innerWidth < 600 ? player_map.get('pname') : player_map.get('name')
+    window.innerWidth < 600
+      ? player_map.get('short_name')
+      : player_map.get('name')
   const nfl_team = player_map.get('team')
   const pid = player_map.get('pid')
   const tag = player_map.get('tag')

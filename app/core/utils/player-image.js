@@ -1,5 +1,5 @@
 export const get_player_image_url = ({ player_map, width, height }) => {
-  const is_team = player_map.get('pos') === 'DST'
+  const is_team = player_map.get('primary_position') === 'DST'
 
   if (is_team) {
     const pid = player_map.get('pid')
@@ -8,7 +8,7 @@ export const get_player_image_url = ({ player_map, width, height }) => {
     }&w=${height * 2}`
   }
 
-  const espn_id = player_map.get('espn_id')
+  const espn_id = player_map.get('espn_player_id')
   return espn_id
     ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${espn_id}.png&w=${
         width * 2

@@ -36,7 +36,7 @@ export default function DraftPick({
     class_names.push('user')
   }
 
-  const pos = player_map.get('pos')
+  const pos = player_map.get('primary_position')
   if (pos) class_names.push(pos)
 
   return (
@@ -54,10 +54,10 @@ export default function DraftPick({
           {Boolean(player_map.get('pid')) && (
             <div className='draft__pick-player'>
               <div className='draft__pick-player-name last'>
-                {player_map.get('lname')}
+                {player_map.get('last_name')}
               </div>
               <div className='draft__pick-player-name first'>
-                {player_map.get('fname')}
+                {player_map.get('first_name')}
               </div>
             </div>
           )}

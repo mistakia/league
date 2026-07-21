@@ -44,15 +44,7 @@ const calculate_points_added = async ({
       'scoring_format_player_gamelogs.pid',
       'scoring_format_player_gamelogs.points',
       'player.short_name',
-      // Aliased (not renamed) to `pos`: this row shape flows unmodified into
-      // libs-shared/calculate-baselines.mjs + calculate-values.mjs, which are
-      // out of scope here and still read `.pos`/`{ pos } = player` as a plain
-      // JS property (not a DB read, so the compat view can't shield them).
-      // Renaming this key would silently zero out every pts_added calculation.
-      // A `primary_position` duplicate is added at push-time below for this
-      // file's own (non-libs-shared) reads; drop the `pos` alias + duplicate
-      // once calculate-baselines.mjs/calculate-values.mjs are repointed.
-      'player.primary_position as pos',
+      'player.primary_position',
       'player.nfl_draft_year',
       'nfl_games.week',
       'nfl_games.year',
@@ -117,13 +109,12 @@ const calculate_points_added = async ({
       item.points[game.week] = { total: game.points }
     }
 
-    const { short_name, pos, nfl_draft_year } = games[0]
+    const { short_name, primary_position, nfl_draft_year } = games[0]
     const pos_rnk = pos_rnk_map[pid] || null
     players.push({
       pid,
       short_name,
-      pos, // kept for libs-shared/calculate-baselines.mjs + calculate-values.mjs
-      primary_position: pos, // this file's own reads use this key
+      primary_position,
       nfl_draft_year,
       pos_rnk,
       ...item

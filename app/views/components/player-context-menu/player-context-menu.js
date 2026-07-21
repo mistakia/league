@@ -42,11 +42,7 @@ export default function PlayerContextMenu({
   const handleProtect = () => {
     showConfirmation({
       title: 'Designate Protected',
-      description: `${player_map.get('fname')} ${player_map.get(
-        'lname'
-      )} (${player_map.get(
-        'pos'
-      )}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
+      description: `${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
       on_confirm_func: () => protect(player_map.get('pid'))
     })
     hide()
@@ -75,9 +71,7 @@ export default function PlayerContextMenu({
   const handleCancelWaiver = () => {
     showConfirmation({
       title: 'Cancel claim',
-      description: `Your claim for ${player_map.get('fname')} ${player_map.get(
-        'lname'
-      )} (${player_map.get('pos')}) will no longer be processed.`,
+      description: `Your claim for ${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will no longer be processed.`,
       on_confirm_func: () => cancelClaim(waiverId)
     })
     hide()
@@ -139,11 +133,7 @@ export default function PlayerContextMenu({
   const handleReserveCOV = () => {
     showConfirmation({
       title: 'Roster Reserve',
-      description: `${player_map.get('fname')} ${player_map.get(
-        'lname'
-      )} (${player_map.get(
-        'pos'
-      )}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
+      description: `${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
       on_confirm_func: () =>
         reserve({
           reserve_pid: player_map.get('pid'),
@@ -156,11 +146,7 @@ export default function PlayerContextMenu({
   const handleRelease = () => {
     showConfirmation({
       title: 'Release Player',
-      description: `${player_map.get('fname')} ${player_map.get(
-        'lname'
-      )} (${player_map.get(
-        'pos'
-      )}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
+      description: `${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
       on_confirm_func: () => release(player_map.get('pid'))
     })
     hide()

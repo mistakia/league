@@ -16,7 +16,7 @@ const map_state_to_props = createSelector(
   getGamelogsForSelectedPlayer,
   get_current_league,
   (player_map, gamelogs, league) => {
-    const position = player_map.get('pos')
+    const position = player_map.get('primary_position')
     gamelogs = gamelogs.map((gamelog) => {
       let points
       if (!gamelog.points) {

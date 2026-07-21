@@ -74,7 +74,7 @@ export default class AddPlayerDialog extends React.Component {
     for (const [index, player_map] of sorted.entries()) {
       menuItems.push(
         <option key={index} value={player_map.get('pid')}>
-          {player_map.get('name')} ({player_map.get('pos')})
+          {player_map.get('name')} ({player_map.get('primary_position')})
         </option>
       )
     }

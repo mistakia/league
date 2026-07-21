@@ -38,7 +38,7 @@ export default class PlayerRosterTotal extends React.Component {
       const isRestrictedFreeAgent =
         tag === player_tag_types.RESTRICTED_FREE_AGENCY
       const extendedSalary = getExtensionAmount({
-        pos: player_map.get('pos'),
+        pos: player_map.get('primary_position'),
         tag: is_before_extension_deadline ? tag : player_tag_types.REGULAR,
         extensions,
         league,

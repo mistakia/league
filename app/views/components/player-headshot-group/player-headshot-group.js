@@ -18,8 +18,8 @@ export default class PlayerHeadshotGroup extends React.Component {
       items.push(
         <Tooltip key={index} title={player_map.get('name')}>
           <Avatar src={src} className='player__headshot'>
-            {player_map.get('fname', '').charAt(0)}
-            {player_map.get('lname', '').charAt(0)}
+            {player_map.get('first_name', '').charAt(0)}
+            {player_map.get('last_name', '').charAt(0)}
           </Avatar>
         </Tooltip>
       )

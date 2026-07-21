@@ -109,8 +109,8 @@ class PlayerNameExpanded extends Player {
 
     const playerName =
       window.innerWidth < 600
-        ? player_map.get('pname')
-        : `${player_map.get('fname', '')} ${player_map.get('lname', '')}`
+        ? player_map.get('short_name')
+        : `${player_map.get('first_name', '')} ${player_map.get('last_name', '')}`
 
     const player_roster_status = player_map.get('roster_status')
     const player_game_designation = player_map.get('game_designation')
@@ -163,7 +163,7 @@ class PlayerNameExpanded extends Player {
             <PlayerTag tag={player_map.get('tag')} />
           </div>
           <div className='player__name-expanded-row'>
-            <Position pos={player_map.get('pos')} />
+            <Position pos={player_map.get('primary_position')} />
             <NFLTeam team={player_map.get('team')} />
             {selected_year === current_season.year && (
               <GameStatus status={status} player_map={player_map} />

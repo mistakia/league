@@ -77,10 +77,10 @@ export default function TradeSelectPlayer({
   return (
     <div className={class_names.join(' ')}>
       <div className='player__name-position'>
-        <Position pos={player_map.get('pos')} />
+        <Position pos={player_map.get('primary_position')} />
       </div>
       <div className='player__name-main'>
-        <span>{player_map.get('pname')}</span>
+        <span>{player_map.get('short_name')}</span>
         {current_season.year === player_map.get('nfl_draft_year') && (
           <PlayerLabel label='R' type='rookie' description='Rookie' />
         )}

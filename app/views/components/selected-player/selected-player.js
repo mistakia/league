@@ -124,24 +124,24 @@ export default function SelectedPlayer({
     .toArray()
     .filter((week) => !blacklist.includes(week)).length
 
-  const pos = player_map.get('pos')
+  const pos = player_map.get('primary_position')
   const tid = player_map.get('tid', false)
   const player_roster_status = player_map.get('roster_status')
-  const draftNum = player_map.get('dpos')
+  const draftNum = player_map.get('draft_overall_pick')
   const draftYear = player_map.get('nfl_draft_year')
-  const draftRound = player_map.get('round')
+  const draftRound = player_map.get('draft_round')
   const playerValue = player_map.get('value')
   const rosPoints = player_map.getIn(['points', 'ros', 'total'], 0)
 
   const external_button_items = []
 
   const has_pfr_link = Boolean(
-    player_map.get('lname') && player_map.get('pfr_id')
+    player_map.get('last_name') && player_map.get('pfr_id')
   )
   if (has_pfr_link) {
     const open_pfr_link = () => {
       window.open(
-        `https://www.pro-football-reference.com/players/${player_map.get('lname')[0].toUpperCase()}/${player_map.get('pfr_id')}.htm`,
+        `https://www.pro-football-reference.com/players/${player_map.get('last_name')[0].toUpperCase()}/${player_map.get('pfr_id')}.htm`,
         '_blank'
       )
     }
@@ -182,11 +182,11 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_espn_link = Boolean(player_map.get('espn_id'))
+  const has_espn_link = Boolean(player_map.get('espn_player_id'))
   if (has_espn_link) {
     const open_espn_link = () => {
       window.open(
-        `https://www.espn.com/nfl/player/_/id/${player_map.get('espn_id')}`,
+        `https://www.espn.com/nfl/player/_/id/${player_map.get('espn_player_id')}`,
         '_blank'
       )
     }
@@ -310,7 +310,7 @@ export default function SelectedPlayer({
             {/* Always visible: Age */}
             <div className='selected__player-header-item'>
               <label>Age</label>
-              <PlayerAge date={player_map.get('dob')} />
+              <PlayerAge date={player_map.get('date_of_birth')} />
             </div>
 
             {/* Collapsible section */}

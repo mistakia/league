@@ -29,7 +29,7 @@ const map_state_to_props = createSelector(
     for (const position of fantasy_positions) {
       if (!playersByPosition[position]) playersByPosition[position] = new List()
       playersByPosition[position] = players
-        .filter((pMap) => pMap.get('pos') === position)
+        .filter((pMap) => pMap.get('primary_position') === position)
         .toList()
     }
 

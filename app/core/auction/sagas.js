@@ -48,7 +48,7 @@ export function* optimize() {
 
   const format_auction_player = (player_map) => ({
     pid: player_map.get('pid'),
-    pos: player_map.get('pos'),
+    pos: player_map.get('primary_position'),
     market_salary: player_map.getIn(['market_salary', '0'], 0),
     points: player_map.getIn(['points', '0', 'total'], 0)
   })

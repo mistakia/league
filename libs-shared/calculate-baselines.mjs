@@ -45,7 +45,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   // group by position
   const grouped = {}
   for (const position of fantasy_positions) {
-    grouped[position] = data.filter((p) => p.pos === position)
+    grouped[position] = data.filter((p) => p.primary_position === position)
   }
 
   const rows = []
@@ -78,20 +78,23 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
         roster.addPlayer({
           slot: roster_slot_types.BENCH,
           pid: p.pid,
-          pos: player.pos
+          pos: player.primary_position
         })
       }
 
       // set starting lineup with best players on roster
       for (const player of players) {
-        const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
+        const eligibleSlots = get_eligible_slots({
+          pos: player.primary_position,
+          league
+        })
         for (const slot of eligibleSlots) {
           if (roster.hasOpenSlot(roster_slot_types[slot])) {
             roster.removePlayer(player.pid)
             roster.addPlayer({
               slot: roster_slot_types[slot],
               pid: player.pid,
-              pos: player.pos
+              pos: player.primary_position
             })
             starters.push({ slot: roster_slot_types[slot], ...player })
             continue
@@ -103,7 +106,9 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
   // fill remaining roster slots with best available players
   const availablePlayerPool = data.filter(
-    (p) => !rostered_pids.includes(p.pid) || !fantasy_positions.includes(p.pos)
+    (p) =>
+      !rostered_pids.includes(p.pid) ||
+      !fantasy_positions.includes(p.primary_position)
   )
 
   const playerCountBySlot = getPlayerCountBySlot({ league })
@@ -116,7 +121,10 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
     let added = false
     for (const roster of rosters) {
-      const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
+      const eligibleSlots = get_eligible_slots({
+        pos: player.primary_position,
+        league
+      })
       for (const slot of eligibleSlots) {
         if (roster.hasOpenSlot(roster_slot_types[slot])) {
           if (!roster.availableSpace) {
@@ -126,7 +134,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
           roster.addPlayer({
             slot: roster_slot_types[slot],
             pid: player.pid,
-            pos: player.pos
+            pos: player.primary_position
           })
           starters.push({ slot: roster_slot_types[slot], ...player })
           added = true
@@ -156,7 +164,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   const groupedRemainingPlayers = {}
   for (const position of fantasy_positions) {
     groupedRemainingPlayers[position] = remainingPlayers.filter(
-      (s) => s.pos === position
+      (s) => s.primary_position === position
     )
   }
 

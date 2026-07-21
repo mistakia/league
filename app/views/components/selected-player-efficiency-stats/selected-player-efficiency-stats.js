@@ -95,7 +95,7 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
       player_map.get('stats', new Map()) ||
       new Map(create_empty_extended_stats())
     ).toJS()
-    const pos = player_map.get('pos')
+    const pos = player_map.get('primary_position')
 
     return (
       <div>

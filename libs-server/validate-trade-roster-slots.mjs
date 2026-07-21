@@ -67,7 +67,7 @@ export default function validate_trade_roster_slots({
       roster.addPlayer({
         slot: assigned_slot,
         pid,
-        pos: player_row.pos,
+        pos: player_row.primary_position,
         value: player_row.value,
         extensions: player_extensions[pid] || 0
       })

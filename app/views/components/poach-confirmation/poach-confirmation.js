@@ -22,7 +22,7 @@ export default class PoachConfirmation extends React.Component {
 
     const releases = []
     const { league, player_map, poach } = props
-    const pos = player_map.get('pos')
+    const pos = player_map.get('primary_position')
     for (const activePlayerMap of props.team.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
       r.removePlayer(activePlayerMap.get('pid'))
@@ -50,7 +50,7 @@ export default class PoachConfirmation extends React.Component {
 
     // TODO - valid salary during offseason
 
-    return r.has_bench_space_for_position(player_map.get('pos'))
+    return r.has_bench_space_for_position(player_map.get('primary_position'))
   }
 
   handleRelease = (event, value) => {
@@ -86,7 +86,7 @@ export default class PoachConfirmation extends React.Component {
 
     const options = []
     team.active.forEach((activePlayerMap) => {
-      const pos = activePlayerMap.get('pos')
+      const pos = activePlayerMap.get('primary_position')
       const extensions = player_map.get('extensions', 0)
       const salary = getExtensionAmount({
         pos,
@@ -101,7 +101,7 @@ export default class PoachConfirmation extends React.Component {
         label: activePlayerMap.get('name'),
         pos,
         team: activePlayerMap.get('team'),
-        pname: activePlayerMap.get('pname'),
+        pname: activePlayerMap.get('short_name'),
         value: salary
       })
     })
@@ -148,9 +148,9 @@ export default class PoachConfirmation extends React.Component {
       releasePlayers.push({
         id: releasePlayerMap.get('pid'),
         label: releasePlayerMap.get('name'),
-        pos: releasePlayerMap.get('pos'),
+        pos: releasePlayerMap.get('primary_position'),
         team: releasePlayerMap.get('team'),
-        pname: releasePlayerMap.get('pname'),
+        pname: releasePlayerMap.get('short_name'),
         value: releasePlayerMap.get('value')
       })
     })
@@ -162,9 +162,7 @@ export default class PoachConfirmation extends React.Component {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Poach ${player_map.get('name')} (${player_map.get(
-              'pos'
-            )}). If your claim is successful, he will be added to your active roster with a salary of $${
+            {`Poach ${player_map.get('name')} (${player_map.get('primary_position')}). If your claim is successful, he will be added to your active roster with a salary of $${
               rosterInfo.value + 2
             } and will not be eligible for the practice squad. The player's current manager can choose to process the claim at any time.`}
           </DialogContentText>

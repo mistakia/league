@@ -42,7 +42,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
   const opponent_field = (stat_field) => {
     return {
       get_percentile_key: (player_map) => {
-        const pos = player_map.get('pos')
+        const pos = player_map.get('primary_position')
         return `${pos}_AGAINST_ADJ${time_period_suffix}`
       },
       fixed: 1,
@@ -57,7 +57,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
       },
       get_player_field_value: (player_map) => {
         const nfl_team = player_map.get('team')
-        const pos = player_map.get('pos')
+        const pos = player_map.get('primary_position')
         const game = get_game_by_team(state, { nfl_team, week })
         const seasonlogs = get_seasonlogs(state)
         if (!game) {
@@ -101,7 +101,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
       column_header: 'Strength',
       csv_header: 'Opponent Strength',
       get_percentile_key: (player_map) => {
-        const pos = player_map.get('pos')
+        const pos = player_map.get('primary_position')
         return `${pos}_AGAINST_ADJ${time_period_suffix}`
       },
       percentile_field: 'pts',
@@ -117,7 +117,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
       },
       get_player_field_value: (player_map) => {
         const nfl_team = player_map.get('team')
-        const pos = player_map.get('pos')
+        const pos = player_map.get('primary_position')
         const game = get_game_by_team(state, { nfl_team, week })
         const seasonlogs = get_seasonlogs(state)
         if (!game) {
@@ -137,7 +137,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
       column_header: 'Avg',
       csv_header: 'Opponent Average Fantasy Points',
       get_percentile_key: (player_map) => {
-        const pos = player_map.get('pos')
+        const pos = player_map.get('primary_position')
         return `${pos}_AGAINST_AVG${time_period_suffix}`
       },
       percentile_field: 'pts',
@@ -152,7 +152,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
       },
       get_player_field_value: (player_map) => {
         const nfl_team = player_map.get('team')
-        const pos = player_map.get('pos')
+        const pos = player_map.get('primary_position')
         const game = get_game_by_team(state, { nfl_team, week })
         const seasonlogs = get_seasonlogs(state)
         if (!game) {

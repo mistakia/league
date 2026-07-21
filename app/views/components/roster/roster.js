@@ -219,8 +219,8 @@ export default class Roster extends React.Component {
 
         const a_draft_year = a_player.get('nfl_draft_year') || 0
         const b_draft_year = b_player.get('nfl_draft_year') || 0
-        const a_draft_pos = a_player.get('dpos') || 9999
-        const b_draft_pos = b_player.get('dpos') || 9999
+        const a_draft_pos = a_player.get('draft_overall_pick') || 9999
+        const b_draft_pos = b_player.get('draft_overall_pick') || 9999
 
         if (a_draft_year !== b_draft_year) {
           return b_draft_year - a_draft_year
