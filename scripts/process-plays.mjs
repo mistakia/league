@@ -32,13 +32,13 @@ const build_snap_roster_by_esbid = async (esbids) => {
   if (!esbids || esbids.length === 0) return roster_by_esbid
 
   const rows = await db('nfl_snaps as s')
-    .join('player as p', 'p.gsis_it_id', 's.gsis_it_id')
+    .join('player as p', 'p.gsis_it_player_id', 's.gsis_it_id')
     .whereIn('s.esbid', esbids)
-    .whereNotNull('p.gsisid')
-    .distinct('s.esbid', 'p.pid', 'p.gsisid', 'p.pname')
+    .whereNotNull('p.gsis_player_id')
+    .distinct('s.esbid', 'p.pid', 'p.gsis_player_id', 'p.short_name')
 
   for (const row of rows) {
-    const name_key = (row.pname || '').toString().trim().toLowerCase()
+    const name_key = (row.short_name || '').toString().trim().toLowerCase()
     if (!name_key) continue
     let by_name = roster_by_esbid.get(row.esbid)
     if (!by_name) {
@@ -46,7 +46,7 @@ const build_snap_roster_by_esbid = async (esbids) => {
       roster_by_esbid.set(row.esbid, by_name)
     }
     const list = by_name.get(name_key) || []
-    list.push({ pid: row.pid, gsisid: row.gsisid })
+    list.push({ pid: row.pid, gsisid: row.gsis_player_id })
     by_name.set(name_key, list)
   }
 

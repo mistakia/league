@@ -68,11 +68,11 @@ const run = async () => {
         const update = {}
 
         if (item.gsisId) {
-          update.gsisid = item.gsisId
+          update.gsis_player_id = item.gsisId
         }
 
         if (item.esbId) {
-          update.esbid = item.esbId
+          update.esb_player_id = item.esbId
         }
 
         await updatePlayer({ player_row, update })

@@ -307,7 +307,7 @@ const announce_restricted_free_agent = async ({
     // Use the calculated correct timestamp for the announcement
     const announcement_timestamp = announcement_info.correct_timestamp
 
-    const message = `${nominating_team.name} (${nominating_team.abbrv}) has announced ${player_row.fname} ${player_row.lname} (${player_row.pos}) as a restricted free agent`
+    const message = `${nominating_team.name} (${nominating_team.abbrv}) has announced ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a restricted free agent`
 
     if (dry_run) {
       const announcement_time = dayjs

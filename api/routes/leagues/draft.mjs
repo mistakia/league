@@ -655,7 +655,7 @@ router.post('/?', async (req, res) => {
     await db('rosters_players').insert({
       rid: roster.uid,
       pid,
-      pos: player_row.pos,
+      pos: player_row.primary_position,
       slot: roster_slot_types.PSD,
       extensions: 0,
       tid: teamId,

@@ -232,11 +232,11 @@ const fantasy_points_from_plays_with = async ({
   // Conditionally add position joins and select appropriate columns
   if (requires_position_data) {
     filtered_plays_cte
-      .select([...select_columns, 'p_trg.pos as trg_pos'])
+      .select([...select_columns, 'p_trg.primary_position as trg_pos'])
       .leftJoin('player as p_trg', function () {
         this.on('nfl_plays.trg_pid', 'p_trg.pid')
         // Only join for positions that can have different scoring
-        this.andOnIn('p_trg.pos', ['RB', 'WR', 'TE', 'FB'])
+        this.andOnIn('p_trg.primary_position', ['RB', 'WR', 'TE', 'FB'])
       })
   } else {
     filtered_plays_cte.select(select_columns)

@@ -94,7 +94,7 @@ const format_prop_row = ({
             year: play.year,
             week: play.week,
             seas_type: play.seas_type,
-            pos: player_row.pos,
+            pos: player_row.primary_position,
             first_quarter_stats: {
               passing_yards: 0,
               rushing_yards: 0,
@@ -136,7 +136,7 @@ const format_prop_row = ({
   const current_season_opponent_player_gamelogs = all_player_gamelogs.filter(
     (p) => {
       if (p.opp !== opponent) return false
-      if (p.pos !== player_row.pos) return false
+      if (p.pos !== player_row.primary_position) return false
       if (p.year !== year) return false
       if (seas_type === 'REG' && p.seas_type === 'POST') return false
       if (seas_type === p.seas_type && p.week >= week) return false
@@ -256,12 +256,12 @@ const format_prop_row = ({
     esbid: prop_row.esbid,
     selection_pid: prop_row.selection_pid,
 
-    name: `${player_row.fname} ${player_row.lname} ${prop_row.selection_metric_line} ${
+    name: `${player_row.first_name} ${player_row.last_name} ${prop_row.selection_metric_line} ${
       prop_desc[prop_row.market_type]
     } ${prop_row.selection_type || 'OVER'}`,
     team: player_row.current_nfl_team,
     opp: opponent,
-    pos: player_row.pos,
+    pos: player_row.primary_position,
 
     current_season_hits_soft: current_season_data.hits_soft,
     current_season_hit_weeks_soft: current_season_data.hit_weeks_soft,
@@ -349,7 +349,13 @@ const calculate_weekly_market_selections_analysis = async ({
 
   const player_pids = prop_rows.map((p) => p.selection_pid).filter(Boolean)
   const player_rows = await db('player')
-    .select('pid', 'fname', 'lname', 'current_nfl_team', 'pos')
+    .select(
+      'pid',
+      'first_name',
+      'last_name',
+      'current_nfl_team',
+      'primary_position'
+    )
     .whereIn('pid', player_pids)
 
   log(`loaded ${player_rows.length} players`)

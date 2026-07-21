@@ -125,9 +125,9 @@ const query_player_occurring_selections = async ({ year }) => {
     WITH occurring_selections AS (
       SELECT
         pmsi.selection_pid as player_id,
-        p.pname as player_name,
-        p.formatted as player_full_name,
-        p.pos as position,
+        p.short_name as player_name,
+        p.formatted_name as player_full_name,
+        p.primary_position as position,
         p.current_nfl_team as team,
         ng.week,
         pmi.market_type,
@@ -207,9 +207,9 @@ const query_team_occurring_selections = async ({ year }) => {
         pgl.tm as team,
         ng.week,
         pmsi.selection_pid as player_id,
-        p.pname as player_name,
-        p.formatted as player_full_name,
-        p.pos as position,
+        p.short_name as player_name,
+        p.formatted_name as player_full_name,
+        p.primary_position as position,
         pmi.market_type,
         pmi.source_market_name,
         pmsi.selection_name,
@@ -306,9 +306,9 @@ const query_opponent_occurring_selections = async ({ year }) => {
         pgl.opp as opponent,
         ng.week,
         pmsi.selection_pid as player_id,
-        p.pname as player_name,
-        p.formatted as player_full_name,
-        p.pos as position,
+        p.short_name as player_name,
+        p.formatted_name as player_full_name,
+        p.primary_position as position,
         pmi.market_type,
         pmi.source_market_name,
         pmsi.selection_name,
@@ -403,9 +403,9 @@ const query_all_longshots_latest_week = async ({ year, week }) => {
     WITH occurring_selections AS (
       SELECT
         pmsi.selection_pid as player_id,
-        COALESCE(p.pname, 'Unknown Player') as player_name,
-        COALESCE(p.formatted, p.pname, 'Unknown Player') as player_full_name,
-        COALESCE(p.pos, 'UNK') as position,
+        COALESCE(p.short_name, 'Unknown Player') as player_name,
+        COALESCE(p.formatted_name, p.short_name, 'Unknown Player') as player_full_name,
+        COALESCE(p.primary_position, 'UNK') as position,
         COALESCE(p.current_nfl_team, 'UNK') as team,
         ng.week,
         pmi.market_type,
@@ -464,9 +464,9 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
     WITH occurring_selections AS (
       SELECT
         pmsi.selection_pid as player_id,
-        COALESCE(p.pname, 'Unknown Player') as player_name,
-        COALESCE(p.formatted, p.pname, 'Unknown Player') as player_full_name,
-        COALESCE(p.pos, 'UNK') as position,
+        COALESCE(p.short_name, 'Unknown Player') as player_name,
+        COALESCE(p.formatted_name, p.short_name, 'Unknown Player') as player_full_name,
+        COALESCE(p.primary_position, 'UNK') as position,
         COALESCE(p.current_nfl_team, 'UNK') as team,
         ng.week,
         pmi.market_type,
@@ -529,9 +529,9 @@ const query_market_type_occurring_selections = async ({ year, week }) => {
             pmi.market_type,
             ng.week,
             pmsi.selection_pid as player_id,
-            p.pname as player_name,
-            p.formatted as player_full_name,
-            p.pos as position,
+            p.short_name as player_name,
+            p.formatted_name as player_full_name,
+            p.primary_position as position,
             p.current_nfl_team as team,
             pgl.opp as opponent,
             pmi.source_market_name,
@@ -727,13 +727,13 @@ const query_player_context = async ({ year, player_ids }) => {
   const sql = `
     SELECT
       p.pid,
-      p.pname,
-      p.formatted as player_full_name,
-      p.pos,
+      p.short_name,
+      p.formatted_name as player_full_name,
+      p.primary_position,
       p.nfl_draft_year,
-      p.height,
-      p.weight,
-      p.col as college,
+      p.height_inches,
+      p.weight_pounds,
+      p.college as college,
       p.current_nfl_team,
       CASE
         WHEN p.nfl_draft_year = ? THEN 'Rookie'
@@ -744,7 +744,7 @@ const query_player_context = async ({ year, player_ids }) => {
       (? - p.nfl_draft_year + 1) as nfl_seasons
     FROM player p
     WHERE p.pid = ANY(?)
-    ORDER BY p.nfl_draft_year DESC, p.pname ASC
+    ORDER BY p.nfl_draft_year DESC, p.short_name ASC
   `
 
   const results = await db.raw(sql, [

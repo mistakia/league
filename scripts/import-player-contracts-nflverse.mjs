@@ -61,20 +61,20 @@ const PLAYER_CACHE_OPTIONS = {
 
 // Player table fields that must be included in INSERT operations (NOT NULL constraints)
 const REQUIRED_PLAYER_FIELDS = [
-  'fname',
-  'lname',
-  'pname',
-  'formatted',
-  'pos',
-  'pos1',
-  'dob',
+  'first_name',
+  'last_name',
+  'short_name',
+  'formatted_name',
+  'primary_position',
+  'secondary_position',
+  'date_of_birth',
   'nfl_draft_year',
   'current_nfl_team'
 ]
 
 // Contract fields to update in the player table
 const CONTRACT_SUMMARY_FIELDS = [
-  'otc_id',
+  'otc_player_id',
   'contract_year_signed',
   'contract_years',
   'contract_value',
@@ -112,7 +112,7 @@ const deduplicate_by_key = (items, get_key) => {
  * Contains high-level contract information (year signed, total value, etc.)
  */
 const format_contract_summary = (row) => ({
-  otc_id: row.otc_id,
+  otc_player_id: row.otc_id,
   contract_year_signed: Number(row.year_signed) || null,
   contract_years: Number(row.years) || null,
   contract_value: format_number(row.value, 2),
