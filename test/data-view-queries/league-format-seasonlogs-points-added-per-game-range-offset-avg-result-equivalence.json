@@ -20,7 +20,7 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(league_format_player_seasonlogs.points_added_earned_per_game) FROM league_format_player_seasonlogs WHERE league_format_player_seasonlogs.pid = player.pid AND league_format_player_seasonlogs.year IN (2024,2025) AND league_format_player_seasonlogs.league_format_id = 'genesis_10_team') AS \"points_added_earned_per_game_from_seasonlogs_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(league_format_player_seasonlogs.points_added_earned_per_game) FROM league_format_player_seasonlogs WHERE league_format_player_seasonlogs.pid = player.pid AND league_format_player_seasonlogs.year IN (2024,2025) AND league_format_player_seasonlogs.league_format_id = 'genesis_10_team') AS \"points_added_earned_per_game_from_seasonlogs_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO league_formats (num_teams, sqb, srb, swr, ste, srbwr, srbwrte, sqbrbwrte, swrte, sdst, sk, bench, ps, reserve_short_term_limit, cap, id, scoring_format_id) VALUES (10, 1, 2, 2, 1, 1, 1, 0, 0, 1, 1, 6, 4, 3, 200, 'genesis_10_team', 'draftkings') ON CONFLICT (id) DO NOTHING",

@@ -14,6 +14,6 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(dvoa_team_unit_seasonlogs_index.total_dvoa) FROM dvoa_team_unit_seasonlogs_index WHERE dvoa_team_unit_seasonlogs_index.nfl_team = player.current_nfl_team AND dvoa_team_unit_seasonlogs_index.year IN (2024,2025) AND dvoa_team_unit_seasonlogs_index.team_unit = 'OFFENSE') AS \"team_unit_dvoa_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(dvoa_team_unit_seasonlogs_index.total_dvoa) FROM dvoa_team_unit_seasonlogs_index WHERE dvoa_team_unit_seasonlogs_index.nfl_team = player.current_nfl_team AND dvoa_team_unit_seasonlogs_index.year IN (2024,2025) AND dvoa_team_unit_seasonlogs_index.team_unit = 'OFFENSE') AS \"team_unit_dvoa_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "tags": ["year_offset", "dvoa", "range", "range_offset_aggregate"]
 }

@@ -2225,12 +2225,12 @@ export const get_data_view_results_query = async ({
     players_query.groupBy(data_view_options.team_reference)
   } else {
     players_query.orderBy(data_view_options.pid_reference, 'asc')
-    players_query.select('player.pos')
+    players_query.select('player.primary_position')
     players_query.groupBy(
       data_view_options.pid_reference,
-      'player.lname',
-      'player.fname',
-      'player.pos'
+      'player.last_name',
+      'player.first_name',
+      'player.primary_position'
     )
   }
 

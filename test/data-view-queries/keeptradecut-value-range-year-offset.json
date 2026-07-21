@@ -13,6 +13,6 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(ktc_o.v) FROM keeptradecut_rankings ktc_o JOIN opening_days od_o ON od_o.year = 2023 WHERE ktc_o.pid = player.pid AND ktc_o.qb = 2 AND ktc_o.type = 1 AND ktc_o.d IN (EXTRACT(EPOCH FROM (date_trunc('day', od_o.opening_day) + interval '1 year'))::integer, EXTRACT(EPOCH FROM (date_trunc('day', od_o.opening_day) + interval '2 year'))::integer)) AS \"player_keeptradecut_value_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(ktc_o.v) FROM keeptradecut_rankings ktc_o JOIN opening_days od_o ON od_o.year = 2023 WHERE ktc_o.pid = player.pid AND ktc_o.qb = 2 AND ktc_o.type = 1 AND ktc_o.d IN (EXTRACT(EPOCH FROM (date_trunc('day', od_o.opening_day) + interval '1 year'))::integer, EXTRACT(EPOCH FROM (date_trunc('day', od_o.opening_day) + interval '2 year'))::integer)) AS \"player_keeptradecut_value_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "tags": ["year_offset", "keeptradecut", "range", "regression"]
 }

@@ -13,6 +13,6 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT pff_player_seasonlogs.unit FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025) ORDER BY pff_player_seasonlogs.year DESC LIMIT 1) AS \"pff_unit_0\", \"player\".\"pos\" from \"player\" group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT pff_player_seasonlogs.unit FROM pff_player_seasonlogs WHERE pff_player_seasonlogs.pid = player.pid AND pff_player_seasonlogs.year IN (2024,2025) ORDER BY pff_player_seasonlogs.year DESC LIMIT 1) AS \"pff_unit_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "tags": ["year_offset", "pff", "range", "text-metadata", "latest-season"]
 }

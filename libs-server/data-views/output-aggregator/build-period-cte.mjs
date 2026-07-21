@@ -36,7 +36,7 @@ const period_key_expr = (period) => {
 // - `table`: the leaf table the measure rows live in.
 // - `team_col`: the column holding `team_code`; null disables team variant.
 // - `pid_via`: how to emit `pid`. 'native' = source has `pid`. 'gsis_bridge'
-//   = INNER JOIN player ON player.gsis_it_id = source.gsis_it_id; emits
+//   = INNER JOIN player ON player.gsis_it_player_id = source.gsis_it_id; emits
 //   player.pid.
 // - `extra_join`: optional join applied before the (year, period_key)
 //   grouping. Used by `plays_receiver` to bring in `nfl_plays` for the
@@ -335,7 +335,11 @@ export const build_batched_period_cte = ({
   }
 
   if (extra_player_join) {
-    sub.innerJoin('player', 'player.gsis_it_id', `${source_table}.gsis_it_id`)
+    sub.innerJoin(
+      'player',
+      'player.gsis_it_player_id',
+      `${source_table}.gsis_it_id`
+    )
   }
 
   if (is_team) {

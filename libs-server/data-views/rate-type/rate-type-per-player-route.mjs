@@ -129,7 +129,7 @@ export const join_per_player_route_cte = ({
   data_view_options = {}
 }) => {
   players_query.leftJoin(rate_type_table_name, function () {
-    this.on(`${rate_type_table_name}.gsis_id`, 'player.gsisid')
+    this.on(`${rate_type_table_name}.gsis_id`, 'player.gsis_player_id')
 
     if (row_axes.includes('year')) {
       const offset_range = resolve_year_offset_range(params)

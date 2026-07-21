@@ -20,7 +20,7 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, (SELECT AVG(scoring_format_player_seasonlogs.points_per_game) FROM scoring_format_player_seasonlogs WHERE scoring_format_player_seasonlogs.pid = player.pid AND scoring_format_player_seasonlogs.year IN (2024,2025) AND scoring_format_player_seasonlogs.scoring_format_id = 'draftkings') AS \"points_per_game_from_seasonlogs_0\", \"player\".\"pos\" from \"player\" where player.pos IN ('ZZ') group by player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(scoring_format_player_seasonlogs.points_per_game) FROM scoring_format_player_seasonlogs WHERE scoring_format_player_seasonlogs.pid = player.pid AND scoring_format_player_seasonlogs.year IN (2024,2025) AND scoring_format_player_seasonlogs.scoring_format_id = 'draftkings') AS \"points_per_game_from_seasonlogs_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year) VALUES ('TEST-SCOR-000920', 'Test', 'Scor', 'T.Scor', 'Test Scor', 'ZZ', 'ZZ', '2000-01-01', 2020)",

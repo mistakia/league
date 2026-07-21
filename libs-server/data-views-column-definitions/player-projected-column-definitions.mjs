@@ -369,9 +369,10 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
 //
 // Single consumer, so the scorer is inlined here rather than extracted.
 
-// player.pos is a correlatable outer column under the canonical `FROM player`
-// query; the receiving-position CASE and the year_offset subquery both read it.
-const PROJECTION_POSITION_REFERENCE = 'player.pos'
+// player.primary_position is a correlatable outer column under the canonical
+// `FROM player` query; the receiving-position CASE and the year_offset subquery
+// both read it.
+const PROJECTION_POSITION_REFERENCE = 'player.primary_position'
 
 const resolve_scoring_format_id = ({ params = {} }) => {
   const raw = Array.isArray(params.scoring_format_id)
