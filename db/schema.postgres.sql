@@ -57,7 +57,7 @@ DROP TRIGGER IF EXISTS trigger_update_selection_combination_definitions_updated_
 DROP TRIGGER IF EXISTS trigger_external_league_import_jobs_updated_at ON public.external_league_import_jobs;
 DROP TRIGGER IF EXISTS trigger_external_league_connections_updated_at ON public.external_league_connections;
 DROP TRIGGER IF EXISTS trg_cmv_classify_league_format ON public.league_formats;
-DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
+DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player_dimension;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
 DROP INDEX IF EXISTS public.user_data_view_favorites_user_id_idx;
@@ -72,7 +72,6 @@ DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.player_underdog_id_unique;
 DROP INDEX IF EXISTS public.player_name_search_idx;
-DROP INDEX IF EXISTS public.player_legacy_pid_key;
 DROP INDEX IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx;
 DROP INDEX IF EXISTS public.pff_unresolved_players_year_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_year_facet_idx;
@@ -227,7 +226,6 @@ DROP INDEX IF EXISTS public.idx_player_variance_pid;
 DROP INDEX IF EXISTS public.idx_player_sis_id;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
-DROP INDEX IF EXISTS public.idx_player_rtsports_id;
 DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pid_incl_pos_fname_lname;
@@ -476,21 +474,20 @@ ALTER TABLE IF EXISTS ONLY public.position_game_outcome_defaults DROP CONSTRAINT
 ALTER TABLE IF EXISTS ONLY public.playoffs DROP CONSTRAINT IF EXISTS playoffs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS player_variance_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_team_extension_state DROP CONSTRAINT IF EXISTS player_team_extension_state_pkey;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
 ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_year_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rtsports_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rts_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_rts_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_receiving_gamelogs DROP CONSTRAINT IF EXISTS player_receiving_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
 ALTER TABLE IF EXISTS ONLY public.player_prospect_profile DROP CONSTRAINT IF EXISTS player_prospect_profile_pkey;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_pff_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_passing_gamelogs DROP CONSTRAINT IF EXISTS player_passing_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_pair_correlations DROP CONSTRAINT IF EXISTS player_pair_correlations_pkey;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_otc_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_nffc_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_mfl_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_otc_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_nffc_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_mfl_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2026 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2026_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2025 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2025_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2024 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2024_pkey;
@@ -521,19 +518,19 @@ ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2000 DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_default DROP CONSTRAINT IF EXISTS player_gamelogs_default_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs DROP CONSTRAINT IF EXISTS player_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_game_outcome_correlations DROP CONSTRAINT IF EXISTS player_game_outcome_correlations_pkey;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_ffpc_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fantrax_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_ffpc_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_fantrax_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_dfs_ownership DROP CONSTRAINT IF EXISTS player_dfs_ownership_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_college_seasonlogs DROP CONSTRAINT IF EXISTS player_college_seasonlogs_pid_season_unique;
 ALTER TABLE IF EXISTS ONLY public.player_college_careerlogs DROP CONSTRAINT IF EXISTS player_college_careerlogs_pkey;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_dimension DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_archetypes DROP CONSTRAINT IF EXISTS player_archetypes_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_adp_index DROP CONSTRAINT IF EXISTS player_adp_index_unique;
@@ -789,7 +786,8 @@ DROP TABLE IF EXISTS public.player_archetypes;
 DROP TABLE IF EXISTS public.player_aliases;
 DROP TABLE IF EXISTS public.player_adp_index;
 DROP TABLE IF EXISTS public.player_adp_history;
-DROP TABLE IF EXISTS public.player;
+DROP VIEW IF EXISTS public.player;
+DROP TABLE IF EXISTS public.player_dimension;
 DROP TABLE IF EXISTS public.play_changelog;
 DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
 DROP TABLE IF EXISTS public.placed_wagers;
@@ -1754,8 +1752,8 @@ CREATE FUNCTION public.player_name_search_vector_update() RETURNS trigger
     AS $$
 BEGIN
   NEW.name_search_vector :=
-    setweight(to_tsvector('english', coalesce(NEW.fname,'')), 'A') ||
-    setweight(to_tsvector('english', coalesce(NEW.lname,'')), 'A');
+    setweight(to_tsvector('english', coalesce(NEW.first_name,'')), 'A') ||
+    setweight(to_tsvector('english', coalesce(NEW.last_name,'')), 'A');
   RETURN NEW;
 END
 $$;
@@ -19024,60 +19022,59 @@ CREATE TABLE public.play_changelog (
 
 
 --
--- Name: player; Type: TABLE; Schema: public; Owner: -
+-- Name: player_dimension; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.player (
-    legacy_pid character varying(25),
-    fname character varying(20) NOT NULL,
-    lname character varying(40) NOT NULL,
-    pname character varying(25) NOT NULL,
-    formatted character varying(50) NOT NULL,
-    pos character varying(4) NOT NULL,
-    pos1 character varying(4) NOT NULL,
-    pos2 character varying(4),
-    height smallint,
-    weight smallint,
-    dob character varying(10),
-    forty numeric(3,2),
-    bench smallint,
-    vertical numeric(3,1),
-    broad integer,
-    shuttle numeric(3,2),
-    cone numeric(3,2),
-    arm numeric(5,3),
-    hand numeric(5,3),
-    dpos integer,
-    round smallint,
-    col character varying(255),
-    dv character varying(35),
+CREATE TABLE public.player_dimension (
+    first_name character varying(20) NOT NULL,
+    last_name character varying(40) NOT NULL,
+    short_name character varying(25) NOT NULL,
+    formatted_name character varying(50) NOT NULL,
+    primary_position character varying(4) NOT NULL,
+    secondary_position character varying(4) NOT NULL,
+    tertiary_position character varying(4),
+    height_inches smallint,
+    weight_pounds smallint,
+    date_of_birth character varying(10),
+    forty_yard_dash_seconds numeric(3,2),
+    bench_press_reps smallint,
+    vertical_jump_inches numeric(3,1),
+    broad_jump_inches integer,
+    shuttle_run_seconds numeric(3,2),
+    three_cone_drill_seconds numeric(3,2),
+    arm_length_inches numeric(5,3),
+    hand_size_inches numeric(5,3),
+    draft_overall_pick integer,
+    draft_round smallint,
+    college character varying(255),
+    college_division character varying(35),
     nfl_draft_year integer,
     current_nfl_team character varying(3) DEFAULT 'INA'::character varying NOT NULL,
-    posd character varying(8),
-    jnum smallint,
-    dcp smallint,
-    nfl_id integer,
-    esbid character varying(10),
-    gsisid character varying(15),
-    gsispid character varying(47),
-    gsis_it_id integer,
+    position_depth character varying(8),
+    jersey_number smallint,
+    draft_capital_points smallint,
+    nfl_player_id integer,
+    esb_player_id character varying(10),
+    gsis_player_id character varying(15),
+    smart_player_id character varying(36),
+    gsis_it_player_id integer,
     high_school character varying(255),
-    sleeper_id character varying(11),
-    rotoworld_id integer,
-    rotowire_id integer,
-    sportradar_id character varying(36),
-    espn_id integer,
-    fantasy_data_id integer,
-    yahoo_id integer,
-    keeptradecut_id integer,
-    pfr_id character varying(10),
+    sleeper_player_id character varying(11),
+    rotoworld_player_id integer,
+    rotowire_player_id integer,
+    sportradar_player_id character varying(36),
+    espn_player_id integer,
+    fantasy_data_player_id integer,
+    yahoo_player_id integer,
+    keeptradecut_player_id integer,
+    pfr_player_id character varying(10),
     name_search_vector tsvector,
     ngs_athleticism_score numeric(5,2),
     ngs_draft_grade numeric(5,2),
     nfl_grade numeric(4,2),
     ngs_production_score numeric(5,2),
     ngs_size_score numeric(5,2),
-    otc_id integer,
+    otc_player_id integer,
     contract_year_signed smallint,
     contract_years smallint,
     contract_value numeric(10,2),
@@ -19087,334 +19084,492 @@ CREATE TABLE public.player (
     contract_inflated_value numeric(12,6),
     contract_inflated_apy numeric(10,6),
     contract_inflated_guaranteed numeric(12,6),
-    pff_id integer,
-    mfl_id integer,
-    fleaflicker_id integer,
-    cbs_id integer,
-    cfbref_id character varying,
+    pff_player_id integer,
+    mfl_player_id integer,
+    fleaflicker_player_id integer,
+    cbs_player_id integer,
+    cfbref_player_id character varying,
     twitter_username character varying,
-    swish_id integer,
-    draftkings_id integer,
-    fanduel_id character varying(20),
-    rts_id integer,
+    swish_player_id integer,
+    draftkings_player_id integer,
+    fanduel_player_id character varying(20),
+    rts_player_id integer,
     draft_team character varying(3) DEFAULT NULL::character varying,
-    sis_id integer,
+    sis_player_id integer,
     sis_prospect_grade numeric(10,3),
-    sis_prospect_pos_rank integer,
+    sis_prospect_position_rank integer,
     sis_prospect_overall_rank integer,
     all_pro_first_team_selections smallint DEFAULT 0,
     pro_bowls_selections smallint DEFAULT 0,
     pfr_years_as_primary_starter smallint DEFAULT 0,
     pfr_weighted_career_approximate_value smallint DEFAULT 0,
     pfr_weighted_career_approximate_value_drafted_team smallint DEFAULT 0,
-    ffpc_id integer,
-    nffc_id integer,
-    fantrax_id character varying(50),
-    rtsports_id integer,
+    ffpc_player_id integer,
+    nffc_player_id integer,
+    fantrax_player_id character varying(50),
     roster_status character varying(100),
     game_designation character varying(100),
-    forty_designation character varying(12),
-    ten_yard_split numeric(3,2),
+    forty_yard_dash_designation character varying(12),
+    ten_yard_split_seconds numeric(3,2),
     ten_yard_split_designation character varying(12),
-    pro_forty numeric(3,2),
-    pro_forty_designation character varying(12),
-    sixty_yard_shuttle numeric(4,2),
+    pro_day_forty_seconds numeric(3,2),
+    pro_day_forty_designation character varying(12),
+    sixty_yard_shuttle_seconds numeric(4,2),
     sixty_yard_shuttle_designation character varying(12),
     combine_attendance boolean,
     hometown character varying(100),
-    sumer_id character varying(36),
-    fantasylabs_id integer,
-    underdog_id character varying(36),
+    sumer_player_id character varying(36),
+    fantasylabs_player_id integer,
+    underdog_player_id character varying(36),
     pid character varying(25) NOT NULL,
     CONSTRAINT player_pid_format CHECK ((((pid)::text ~ '^[A-Z]{1,4}-[A-Z]{1,4}-[0-9]{6,}$'::text) OR ((pid)::text ~ '^[A-Z]{2,3}(-(OFF|DEF|DST))?$'::text)))
 );
 
 
 --
--- Name: COLUMN player.legacy_pid; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.first_name; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.legacy_pid IS 'pre-rekey player id, demoted alternate key (nullable; NULL for players minted after the re-key)';
+COMMENT ON COLUMN public.player_dimension.first_name IS 'first name';
 
 
 --
--- Name: COLUMN player.fname; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.last_name; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.fname IS 'first name';
+COMMENT ON COLUMN public.player_dimension.last_name IS 'last name';
 
 
 --
--- Name: COLUMN player.lname; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.short_name; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.lname IS 'last name';
+COMMENT ON COLUMN public.player_dimension.short_name IS 'f.last name';
 
 
 --
--- Name: COLUMN player.pname; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.formatted_name; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.pname IS 'f.last name';
+COMMENT ON COLUMN public.player_dimension.formatted_name IS 'formatted name';
 
 
 --
--- Name: COLUMN player.formatted; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.primary_position; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.formatted IS 'formatted name';
+COMMENT ON COLUMN public.player_dimension.primary_position IS 'primary position';
 
 
 --
--- Name: COLUMN player.pos; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.secondary_position; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.pos IS 'primary position';
+COMMENT ON COLUMN public.player_dimension.secondary_position IS 'secondary position';
 
 
 --
--- Name: COLUMN player.pos1; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.tertiary_position; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.pos1 IS 'secondary position';
+COMMENT ON COLUMN public.player_dimension.tertiary_position IS 'tertiary position';
 
 
 --
--- Name: COLUMN player.pos2; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.height_inches; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.pos2 IS 'tertiary position';
+COMMENT ON COLUMN public.player_dimension.height_inches IS 'height in inches';
 
 
 --
--- Name: COLUMN player.height; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.weight_pounds; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.height IS 'height in inches';
+COMMENT ON COLUMN public.player_dimension.weight_pounds IS 'weight in pounds';
 
 
 --
--- Name: COLUMN player.weight; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.date_of_birth; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.weight IS 'weight in pounds';
+COMMENT ON COLUMN public.player_dimension.date_of_birth IS 'date of birth';
 
 
 --
--- Name: COLUMN player.dob; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.forty_yard_dash_seconds; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.dob IS 'date of birth';
+COMMENT ON COLUMN public.player_dimension.forty_yard_dash_seconds IS '40-yard dash time';
 
 
 --
--- Name: COLUMN player.forty; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.bench_press_reps; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.forty IS '40-yard dash time';
+COMMENT ON COLUMN public.player_dimension.bench_press_reps IS 'bench press reps';
 
 
 --
--- Name: COLUMN player.bench; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.vertical_jump_inches; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.bench IS 'bench press reps';
+COMMENT ON COLUMN public.player_dimension.vertical_jump_inches IS 'vertical jump height';
 
 
 --
--- Name: COLUMN player.vertical; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.broad_jump_inches; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.vertical IS 'vertical jump height';
+COMMENT ON COLUMN public.player_dimension.broad_jump_inches IS 'broad jump distance';
 
 
 --
--- Name: COLUMN player.broad; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.shuttle_run_seconds; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.broad IS 'broad jump distance';
+COMMENT ON COLUMN public.player_dimension.shuttle_run_seconds IS 'shuttle run time';
 
 
 --
--- Name: COLUMN player.shuttle; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.three_cone_drill_seconds; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.shuttle IS 'shuttle run time';
+COMMENT ON COLUMN public.player_dimension.three_cone_drill_seconds IS '3-cone drill time';
 
 
 --
--- Name: COLUMN player.cone; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.arm_length_inches; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.cone IS '3-cone drill time';
+COMMENT ON COLUMN public.player_dimension.arm_length_inches IS 'arm length';
 
 
 --
--- Name: COLUMN player.arm; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.hand_size_inches; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.arm IS 'arm length';
+COMMENT ON COLUMN public.player_dimension.hand_size_inches IS 'hand size';
 
 
 --
--- Name: COLUMN player.hand; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.draft_overall_pick; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.hand IS 'hand size';
+COMMENT ON COLUMN public.player_dimension.draft_overall_pick IS 'draft position';
 
 
 --
--- Name: COLUMN player.dpos; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.draft_round; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.dpos IS 'draft position';
+COMMENT ON COLUMN public.player_dimension.draft_round IS 'draft round';
 
 
 --
--- Name: COLUMN player.round; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.college; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.round IS 'draft round';
+COMMENT ON COLUMN public.player_dimension.college IS 'college';
 
 
 --
--- Name: COLUMN player.col; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.college_division; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.col IS 'college';
+COMMENT ON COLUMN public.player_dimension.college_division IS 'college division';
 
 
 --
--- Name: COLUMN player.dv; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.nfl_draft_year; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.dv IS 'college division';
+COMMENT ON COLUMN public.player_dimension.nfl_draft_year IS 'starting nfl year';
 
 
 --
--- Name: COLUMN player.nfl_draft_year; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.current_nfl_team; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.nfl_draft_year IS 'starting nfl year';
+COMMENT ON COLUMN public.player_dimension.current_nfl_team IS 'current nfl team';
 
 
 --
--- Name: COLUMN player.current_nfl_team; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.position_depth; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.current_nfl_team IS 'current nfl team';
+COMMENT ON COLUMN public.player_dimension.position_depth IS 'position depth';
 
 
 --
--- Name: COLUMN player.posd; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.jersey_number; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.posd IS 'position depth';
+COMMENT ON COLUMN public.player_dimension.jersey_number IS 'jersey number';
 
 
 --
--- Name: COLUMN player.jnum; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.ngs_athleticism_score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.jnum IS 'jersey number';
+COMMENT ON COLUMN public.player_dimension.ngs_athleticism_score IS 'NGS Prospect athleticism score';
 
 
 --
--- Name: COLUMN player.ngs_athleticism_score; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.ngs_draft_grade; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.ngs_athleticism_score IS 'NGS Prospect athleticism score';
+COMMENT ON COLUMN public.player_dimension.ngs_draft_grade IS 'NGS Prospect draft grade';
 
 
 --
--- Name: COLUMN player.ngs_draft_grade; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.nfl_grade; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.ngs_draft_grade IS 'NGS Prospect draft grade';
+COMMENT ON COLUMN public.player_dimension.nfl_grade IS 'NFL Prospect grade';
 
 
 --
--- Name: COLUMN player.nfl_grade; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.ngs_production_score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.nfl_grade IS 'NFL Prospect grade';
+COMMENT ON COLUMN public.player_dimension.ngs_production_score IS 'NGS Prospect production score';
 
 
 --
--- Name: COLUMN player.ngs_production_score; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.ngs_size_score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.ngs_production_score IS 'NGS Prospect production score';
+COMMENT ON COLUMN public.player_dimension.ngs_size_score IS 'NGS Prospect size score';
 
 
 --
--- Name: COLUMN player.ngs_size_score; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_year_signed; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.ngs_size_score IS 'NGS Prospect size score';
+COMMENT ON COLUMN public.player_dimension.contract_year_signed IS 'Year the contract was signed';
 
 
 --
--- Name: COLUMN player.contract_year_signed; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_years; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_year_signed IS 'Year the contract was signed';
+COMMENT ON COLUMN public.player_dimension.contract_years IS 'Duration of the contract in years';
 
 
 --
--- Name: COLUMN player.contract_years; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_value; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_years IS 'Duration of the contract in years';
+COMMENT ON COLUMN public.player_dimension.contract_value IS 'Total value of the contract in millions';
 
 
 --
--- Name: COLUMN player.contract_value; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_apy; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_value IS 'Total value of the contract in millions';
+COMMENT ON COLUMN public.player_dimension.contract_apy IS 'Average per year value of the contract in millions';
 
 
 --
--- Name: COLUMN player.contract_apy; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_guaranteed; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_apy IS 'Average per year value of the contract in millions';
+COMMENT ON COLUMN public.player_dimension.contract_guaranteed IS 'Guaranteed amount of the contract in millions';
 
 
 --
--- Name: COLUMN player.contract_guaranteed; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_apy_cap_pct; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_guaranteed IS 'Guaranteed amount of the contract in millions';
+COMMENT ON COLUMN public.player_dimension.contract_apy_cap_pct IS 'Average per year value as a percentage of the salary cap';
 
 
 --
--- Name: COLUMN player.contract_apy_cap_pct; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_inflated_value; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_apy_cap_pct IS 'Average per year value as a percentage of the salary cap';
+COMMENT ON COLUMN public.player_dimension.contract_inflated_value IS 'Inflated total value of the contract in millions';
 
 
 --
--- Name: COLUMN player.contract_inflated_value; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_inflated_apy; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_inflated_value IS 'Inflated total value of the contract in millions';
+COMMENT ON COLUMN public.player_dimension.contract_inflated_apy IS 'Inflated average per year value of the contract in millions';
 
 
 --
--- Name: COLUMN player.contract_inflated_apy; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_dimension.contract_inflated_guaranteed; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_inflated_apy IS 'Inflated average per year value of the contract in millions';
+COMMENT ON COLUMN public.player_dimension.contract_inflated_guaranteed IS 'Inflated guaranteed amount of the contract in millions';
 
 
 --
--- Name: COLUMN player.contract_inflated_guaranteed; Type: COMMENT; Schema: public; Owner: -
+-- Name: player; Type: VIEW; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.contract_inflated_guaranteed IS 'Inflated guaranteed amount of the contract in millions';
+CREATE VIEW public.player AS
+ SELECT pid,
+    first_name,
+    first_name AS fname,
+    last_name,
+    last_name AS lname,
+    short_name,
+    short_name AS pname,
+    formatted_name,
+    formatted_name AS formatted,
+    primary_position,
+    primary_position AS pos,
+    secondary_position,
+    secondary_position AS pos1,
+    tertiary_position,
+    tertiary_position AS pos2,
+    position_depth,
+    position_depth AS posd,
+    height_inches,
+    height_inches AS height,
+    weight_pounds,
+    weight_pounds AS weight,
+    forty_yard_dash_seconds,
+    forty_yard_dash_seconds AS forty,
+    bench_press_reps,
+    bench_press_reps AS bench,
+    vertical_jump_inches,
+    vertical_jump_inches AS vertical,
+    broad_jump_inches,
+    broad_jump_inches AS broad,
+    shuttle_run_seconds,
+    shuttle_run_seconds AS shuttle,
+    three_cone_drill_seconds,
+    three_cone_drill_seconds AS cone,
+    arm_length_inches,
+    arm_length_inches AS arm,
+    hand_size_inches,
+    hand_size_inches AS hand,
+    forty_yard_dash_designation,
+    forty_yard_dash_designation AS forty_designation,
+    ten_yard_split_seconds,
+    ten_yard_split_seconds AS ten_yard_split,
+    ten_yard_split_designation,
+    pro_day_forty_seconds,
+    pro_day_forty_seconds AS pro_forty,
+    pro_day_forty_designation,
+    pro_day_forty_designation AS pro_forty_designation,
+    sixty_yard_shuttle_seconds,
+    sixty_yard_shuttle_seconds AS sixty_yard_shuttle,
+    sixty_yard_shuttle_designation,
+    combine_attendance,
+    draft_overall_pick,
+    draft_overall_pick AS dpos,
+    draft_round,
+    draft_round AS round,
+    draft_capital_points,
+    draft_capital_points AS dcp,
+    draft_team,
+    nfl_draft_year,
+    college,
+    college AS col,
+    college_division,
+    college_division AS dv,
+    high_school,
+    hometown,
+    date_of_birth,
+    date_of_birth AS dob,
+    current_nfl_team,
+    jersey_number,
+    jersey_number AS jnum,
+    roster_status,
+    game_designation,
+    nfl_player_id,
+    nfl_player_id AS nfl_id,
+    esb_player_id,
+    esb_player_id AS esbid,
+    gsis_player_id,
+    gsis_player_id AS gsisid,
+    smart_player_id,
+    smart_player_id AS gsispid,
+    gsis_it_player_id,
+    gsis_it_player_id AS gsis_it_id,
+    sleeper_player_id,
+    sleeper_player_id AS sleeper_id,
+    rotoworld_player_id,
+    rotoworld_player_id AS rotoworld_id,
+    rotowire_player_id,
+    rotowire_player_id AS rotowire_id,
+    sportradar_player_id,
+    sportradar_player_id AS sportradar_id,
+    espn_player_id,
+    espn_player_id AS espn_id,
+    fantasy_data_player_id,
+    fantasy_data_player_id AS fantasy_data_id,
+    yahoo_player_id,
+    yahoo_player_id AS yahoo_id,
+    keeptradecut_player_id,
+    keeptradecut_player_id AS keeptradecut_id,
+    pfr_player_id,
+    pfr_player_id AS pfr_id,
+    otc_player_id,
+    otc_player_id AS otc_id,
+    pff_player_id,
+    pff_player_id AS pff_id,
+    mfl_player_id,
+    mfl_player_id AS mfl_id,
+    fleaflicker_player_id,
+    fleaflicker_player_id AS fleaflicker_id,
+    cbs_player_id,
+    cbs_player_id AS cbs_id,
+    cfbref_player_id,
+    cfbref_player_id AS cfbref_id,
+    swish_player_id,
+    swish_player_id AS swish_id,
+    draftkings_player_id,
+    draftkings_player_id AS draftkings_id,
+    fanduel_player_id,
+    fanduel_player_id AS fanduel_id,
+    rts_player_id,
+    rts_player_id AS rts_id,
+    sis_player_id,
+    sis_player_id AS sis_id,
+    ffpc_player_id,
+    ffpc_player_id AS ffpc_id,
+    nffc_player_id,
+    nffc_player_id AS nffc_id,
+    fantrax_player_id,
+    fantrax_player_id AS fantrax_id,
+    sumer_player_id,
+    sumer_player_id AS sumer_id,
+    fantasylabs_player_id,
+    fantasylabs_player_id AS fantasylabs_id,
+    underdog_player_id,
+    underdog_player_id AS underdog_id,
+    twitter_username,
+    ngs_athleticism_score,
+    ngs_draft_grade,
+    ngs_production_score,
+    ngs_size_score,
+    nfl_grade,
+    sis_prospect_grade,
+    sis_prospect_position_rank,
+    sis_prospect_position_rank AS sis_prospect_pos_rank,
+    sis_prospect_overall_rank,
+    contract_year_signed,
+    contract_years,
+    contract_value,
+    contract_apy,
+    contract_guaranteed,
+    contract_apy_cap_pct,
+    contract_inflated_value,
+    contract_inflated_apy,
+    contract_inflated_guaranteed,
+    all_pro_first_team_selections,
+    pro_bowls_selections,
+    pfr_years_as_primary_starter,
+    pfr_weighted_career_approximate_value,
+    pfr_weighted_career_approximate_value_drafted_team,
+    name_search_vector
+   FROM public.player_dimension;
 
 
 --
@@ -28047,19 +28202,19 @@ ALTER TABLE ONLY public.player_archetypes
 
 
 --
--- Name: player player_cbs_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_cbs_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_cbs_id_unique UNIQUE (cbs_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_cbs_id_unique UNIQUE (cbs_player_id);
 
 
 --
--- Name: player player_cfbref_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_cfbref_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_cfbref_id_unique UNIQUE (cfbref_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_cfbref_id_unique UNIQUE (cfbref_player_id);
 
 
 --
@@ -28111,43 +28266,43 @@ ALTER TABLE ONLY public.player_dfs_ownership
 
 
 --
--- Name: player player_draftkings_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_draftkings_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_draftkings_id_unique UNIQUE (draftkings_id);
-
-
---
--- Name: player player_fanduel_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_fanduel_id_unique UNIQUE (fanduel_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_draftkings_id_unique UNIQUE (draftkings_player_id);
 
 
 --
--- Name: player player_fantrax_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_fanduel_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_fantrax_id_unique UNIQUE (fantrax_id);
-
-
---
--- Name: player player_ffpc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_ffpc_id_unique UNIQUE (ffpc_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_fanduel_id_unique UNIQUE (fanduel_player_id);
 
 
 --
--- Name: player player_fleaflicker_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_fantrax_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_fleaflicker_id_unique UNIQUE (fleaflicker_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_fantrax_id_unique UNIQUE (fantrax_player_id);
+
+
+--
+-- Name: player_dimension player_ffpc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_ffpc_id_unique UNIQUE (ffpc_player_id);
+
+
+--
+-- Name: player_dimension player_fleaflicker_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_fleaflicker_id_unique UNIQUE (fleaflicker_player_id);
 
 
 --
@@ -28391,27 +28546,27 @@ ALTER TABLE ONLY public.player_gamelogs_year_2026
 
 
 --
--- Name: player player_mfl_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_mfl_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_mfl_id_unique UNIQUE (mfl_id);
-
-
---
--- Name: player player_nffc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_nffc_id_unique UNIQUE (nffc_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_mfl_id_unique UNIQUE (mfl_player_id);
 
 
 --
--- Name: player player_otc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_nffc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_otc_id_unique UNIQUE (otc_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_nffc_id_unique UNIQUE (nffc_player_id);
+
+
+--
+-- Name: player_dimension player_otc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_otc_id_unique UNIQUE (otc_player_id);
 
 
 --
@@ -28431,18 +28586,18 @@ ALTER TABLE ONLY public.player_passing_gamelogs
 
 
 --
--- Name: player player_pff_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_pff_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_pff_id_unique UNIQUE (pff_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_pff_id_unique UNIQUE (pff_player_id);
 
 
 --
--- Name: player player_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
+ALTER TABLE ONLY public.player_dimension
     ADD CONSTRAINT player_pkey PRIMARY KEY (pid);
 
 
@@ -28471,19 +28626,11 @@ ALTER TABLE ONLY public.player_receiving_gamelogs
 
 
 --
--- Name: player player_rts_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_rts_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_rts_id_unique UNIQUE (rts_id);
-
-
---
--- Name: player player_rtsports_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_rtsports_id_unique UNIQUE (rtsports_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_rts_id_unique UNIQUE (rts_player_id);
 
 
 --
@@ -28503,11 +28650,11 @@ ALTER TABLE ONLY public.player_salaries
 
 
 --
--- Name: player player_swish_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_dimension player_swish_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.player
-    ADD CONSTRAINT player_swish_id_unique UNIQUE (swish_id);
+ALTER TABLE ONLY public.player_dimension
+    ADD CONSTRAINT player_swish_id_unique UNIQUE (swish_player_id);
 
 
 --
@@ -29191,98 +29338,98 @@ CREATE UNIQUE INDEX idx_24793_play ON public.play_changelog USING btree (esbid, 
 -- Name: idx_24798_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_esbid ON public.player USING btree (esbid);
+CREATE UNIQUE INDEX idx_24798_esbid ON public.player_dimension USING btree (esb_player_id);
 
 
 --
 -- Name: idx_24798_espn_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_espn_id ON public.player USING btree (espn_id);
+CREATE UNIQUE INDEX idx_24798_espn_id ON public.player_dimension USING btree (espn_player_id);
 
 
 --
 -- Name: idx_24798_fantasy_data_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_fantasy_data_id ON public.player USING btree (fantasy_data_id);
+CREATE UNIQUE INDEX idx_24798_fantasy_data_id ON public.player_dimension USING btree (fantasy_data_player_id);
 
 
 --
 -- Name: idx_24798_gsisItId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "idx_24798_gsisItId" ON public.player USING btree (gsis_it_id);
+CREATE UNIQUE INDEX "idx_24798_gsisItId" ON public.player_dimension USING btree (gsis_it_player_id);
 
 
 --
 -- Name: idx_24798_gsisid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_gsisid ON public.player USING btree (gsisid);
+CREATE UNIQUE INDEX idx_24798_gsisid ON public.player_dimension USING btree (gsis_player_id);
 
 
 --
 -- Name: idx_24798_gsispid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_gsispid ON public.player USING btree (gsispid);
+CREATE UNIQUE INDEX idx_24798_gsispid ON public.player_dimension USING btree (smart_player_id);
 
 
 --
 -- Name: idx_24798_keeptradecut_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_keeptradecut_id ON public.player USING btree (keeptradecut_id);
+CREATE UNIQUE INDEX idx_24798_keeptradecut_id ON public.player_dimension USING btree (keeptradecut_player_id);
 
 
 --
 -- Name: idx_24798_pfr_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_pfr_id ON public.player USING btree (pfr_id);
+CREATE UNIQUE INDEX idx_24798_pfr_id ON public.player_dimension USING btree (pfr_player_id);
 
 
 --
 -- Name: idx_24798_rotowire_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_rotowire_id ON public.player USING btree (rotowire_id);
+CREATE UNIQUE INDEX idx_24798_rotowire_id ON public.player_dimension USING btree (rotowire_player_id);
 
 
 --
 -- Name: idx_24798_rotoworld_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_rotoworld_id ON public.player USING btree (rotoworld_id);
+CREATE UNIQUE INDEX idx_24798_rotoworld_id ON public.player_dimension USING btree (rotoworld_player_id);
 
 
 --
 -- Name: idx_24798_sleeper_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_sleeper_id ON public.player USING btree (sleeper_id);
+CREATE UNIQUE INDEX idx_24798_sleeper_id ON public.player_dimension USING btree (sleeper_player_id);
 
 
 --
 -- Name: idx_24798_sportradar_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_sportradar_id ON public.player USING btree (sportradar_id);
+CREATE UNIQUE INDEX idx_24798_sportradar_id ON public.player_dimension USING btree (sportradar_player_id);
 
 
 --
 -- Name: idx_24798_sumer_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_sumer_id ON public.player USING btree (sumer_id);
+CREATE UNIQUE INDEX idx_24798_sumer_id ON public.player_dimension USING btree (sumer_player_id);
 
 
 --
 -- Name: idx_24798_yahoo_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24798_yahoo_id ON public.player USING btree (yahoo_id);
+CREATE UNIQUE INDEX idx_24798_yahoo_id ON public.player_dimension USING btree (yahoo_player_id);
 
 
 --
@@ -30367,35 +30514,35 @@ CREATE INDEX idx_player_dfs_ownership_year_week ON public.player_dfs_ownership U
 -- Name: idx_player_fantasylabs_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_fantasylabs_id ON public.player USING btree (fantasylabs_id) WHERE (fantasylabs_id IS NOT NULL);
+CREATE INDEX idx_player_fantasylabs_id ON public.player_dimension USING btree (fantasylabs_player_id) WHERE (fantasylabs_player_id IS NOT NULL);
 
 
 --
 -- Name: idx_player_fantrax_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_fantrax_id ON public.player USING btree (fantrax_id);
+CREATE INDEX idx_player_fantrax_id ON public.player_dimension USING btree (fantrax_player_id);
 
 
 --
 -- Name: idx_player_ffpc_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_ffpc_id ON public.player USING btree (ffpc_id);
+CREATE INDEX idx_player_ffpc_id ON public.player_dimension USING btree (ffpc_player_id);
 
 
 --
 -- Name: idx_player_fname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_fname ON public.player USING btree (fname);
+CREATE INDEX idx_player_fname ON public.player_dimension USING btree (first_name);
 
 
 --
 -- Name: idx_player_fname_lname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_fname_lname ON public.player USING btree (fname, lname);
+CREATE INDEX idx_player_fname_lname ON public.player_dimension USING btree (first_name, last_name);
 
 
 --
@@ -30458,14 +30605,14 @@ CREATE UNIQUE INDEX idx_player_gamelogs_year_esbid_pid ON ONLY public.player_gam
 -- Name: idx_player_lname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_lname ON public.player USING btree (lname);
+CREATE INDEX idx_player_lname ON public.player_dimension USING btree (last_name);
 
 
 --
 -- Name: idx_player_nffc_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_nffc_id ON public.player USING btree (nffc_id);
+CREATE INDEX idx_player_nffc_id ON public.player_dimension USING btree (nffc_player_id);
 
 
 --
@@ -30486,21 +30633,21 @@ CREATE INDEX idx_player_pair_correlations_year_pid_b ON public.player_pair_corre
 -- Name: idx_player_pff_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pff_id ON public.player USING btree (pff_id);
+CREATE INDEX idx_player_pff_id ON public.player_dimension USING btree (pff_player_id);
 
 
 --
 -- Name: idx_player_pid_incl_pos_fname_lname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pid_incl_pos_fname_lname ON public.player USING btree (pid) INCLUDE (pos, fname, lname);
+CREATE INDEX idx_player_pid_incl_pos_fname_lname ON public.player_dimension USING btree (pid) INCLUDE (primary_position, first_name, last_name);
 
 
 --
 -- Name: idx_player_pid_pos; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
+CREATE INDEX idx_player_pid_pos ON public.player_dimension USING btree (pid, primary_position);
 
 
 --
@@ -30508,13 +30655,6 @@ CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
 --
 
 CREATE INDEX idx_player_prospect_profile_sis_id ON public.player_prospect_profile USING btree (sis_id);
-
-
---
--- Name: idx_player_rtsports_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_player_rtsports_id ON public.player USING btree (rtsports_id);
 
 
 --
@@ -30535,7 +30675,7 @@ CREATE INDEX idx_player_seasonlogs_year_seas_type_career_year_pid ON public.play
 -- Name: idx_player_sis_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_sis_id ON public.player USING btree (sis_id);
+CREATE INDEX idx_player_sis_id ON public.player_dimension USING btree (sis_player_id);
 
 
 --
@@ -42992,24 +43132,17 @@ CREATE UNIQUE INDEX player_gamelogs_year_2026_year_esbid_pid_idx ON public.playe
 
 
 --
--- Name: player_legacy_pid_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX player_legacy_pid_key ON public.player USING btree (legacy_pid);
-
-
---
 -- Name: player_name_search_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vector);
+CREATE INDEX player_name_search_idx ON public.player_dimension USING gin (name_search_vector);
 
 
 --
 -- Name: player_underdog_id_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_underdog_id_unique ON public.player USING btree (underdog_id);
+CREATE UNIQUE INDEX player_underdog_id_unique ON public.player_dimension USING btree (underdog_player_id);
 
 
 --
@@ -55382,10 +55515,10 @@ ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type
 
 
 --
--- Name: player player_name_search_vector_update; Type: TRIGGER; Schema: public; Owner: -
+-- Name: player_dimension player_name_search_vector_update; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON public.player FOR EACH ROW EXECUTE FUNCTION public.player_name_search_vector_update();
+CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON public.player_dimension FOR EACH ROW EXECUTE FUNCTION public.player_name_search_vector_update();
 
 
 --
@@ -55588,7 +55721,7 @@ ALTER TABLE ONLY public.nfl_game_coaches
 --
 
 ALTER TABLE ONLY public.ngs_prospect_scores_history
-    ADD CONSTRAINT ngs_prospect_scores_history_pid_fkey FOREIGN KEY (pid) REFERENCES public.player(pid);
+    ADD CONSTRAINT ngs_prospect_scores_history_pid_fkey FOREIGN KEY (pid) REFERENCES public.player_dimension(pid);
 
 
 --
@@ -55596,7 +55729,7 @@ ALTER TABLE ONLY public.ngs_prospect_scores_history
 --
 
 ALTER TABLE ONLY public.ngs_prospect_scores_index
-    ADD CONSTRAINT ngs_prospect_scores_index_pid_fkey FOREIGN KEY (pid) REFERENCES public.player(pid);
+    ADD CONSTRAINT ngs_prospect_scores_index_pid_fkey FOREIGN KEY (pid) REFERENCES public.player_dimension(pid);
 
 
 --
@@ -56936,6 +57069,13 @@ GRANT SELECT ON SEQUENCE public.placed_wagers_wager_id_seq TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.play_changelog TO league_reader;
+
+
+--
+-- Name: TABLE player_dimension; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.player_dimension TO league_reader;
 
 
 --
