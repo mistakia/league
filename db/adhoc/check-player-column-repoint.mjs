@@ -110,6 +110,22 @@ export const PLAYER_COLUMN_RENAMES = {
 // form is a dangling player-column reference.
 const DUAL_MEANING_GAME_KEYS = new Set(['esbid'])
 
+// Verified non-dangling sites: a `player.<oldcol>` match that is NOT a player
+// dimension column read here, so it stays and must not gate the CONTRACT.
+// `player.esbid` in the simulation path is the GAME key carried on an in-memory
+// player-projection object (`game_environment` is `Map<esbid, {...}>`, looked up
+// via `game_environment.get(player.esbid)`), not the player.esbid Elias id column
+// that renamed to esb_player_id. Verified 2026-07-21 (JSDoc + game_environment
+// usage in all four files).
+const ACCEPTED_NON_DANGLING = {
+  esbid: [
+    'libs-server/simulation/simulate-nfl-game.mjs',
+    'libs-shared/simulation/build-extended-correlation-matrix.mjs',
+    'libs-shared/simulation/run-simulation.mjs',
+    'libs-shared/simulation/apply-game-environment-adjustments.mjs'
+  ]
+}
+
 const SCAN_DIRS = [
   'libs-server',
   'libs-shared',
@@ -169,7 +185,11 @@ function scan_column(old_col) {
     ? []
     : parse_hits(rg(['--vimgrep', '-e', `\\bp\\.${old_col}\\b`, ...dirs]))
 
-  return { gate: [...qualified, ...defs], warn: aliased }
+  // Drop verified non-dangling sites (e.g. simulation player.esbid = game key).
+  const accepted = new Set(ACCEPTED_NON_DANGLING[old_col] || [])
+  const gate = [...qualified, ...defs].filter((h) => !accepted.has(h.file))
+
+  return { gate, warn: aliased }
 }
 
 function main() {
