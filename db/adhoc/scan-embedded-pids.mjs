@@ -14,9 +14,11 @@
  * Audit-history carve-out: player_changelog and play_changelog hold pid strings in
  * their prev/new columns AS change history (player_changelog = player-attribute
  * changes; play_changelog = per-play pid-field changes, prop e.g. tackle_assist_1_pid).
- * Rewriting their old pids would falsify that history, so they are scanned/reported but
- * NEVER rewritten, and excluded from the stale oracle. Any surviving old pid there still
- * resolves through player.legacy_pid, mirroring the player_changelog treatment.
+ * Rewriting their old pids would falsify that history, so they WERE scanned/reported but
+ * never rewritten, and excluded from the stale oracle.
+ * RETIRED 2026-07-21: the carve-out is now empty (see AUDIT_CARVE_OUT). The legacy_pid
+ * retirement drops player.legacy_pid, so nothing resolves old pids anymore; these
+ * audit-history columns are rewritten to the post-rekey serial like everything else.
  *
  * WINDOW COST (size-aware, mirrors prep-02): a `col::text ~ pattern` filter is a full
  * sequential scan of the column, so scanning every text/varchar/json column of every giant
@@ -69,13 +71,13 @@ const OLD_PID_POSIX =
 const OLD_PID_TOKEN =
   /[A-Z]{1,4}-[A-Z]{1,4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}/g
 
-// Columns that hold pids as immutable audit history -- never rewritten.
-const AUDIT_CARVE_OUT = new Set([
-  'player_changelog.prev',
-  'player_changelog.new',
-  'play_changelog.prev',
-  'play_changelog.new'
-])
+// Audit-history pid columns. Formerly carved out (never rewritten) so their old
+// pids stayed resolvable through player.legacy_pid. Emptied 2026-07-21 for the
+// legacy_pid retirement (schema-redesign identity-crosswalk cluster): with no
+// legacy_pid to resolve through, these old pids are rewritten to the post-rekey
+// serial by --apply, and --verify then confirms zero old-format pids DB-wide,
+// clearing the way to DROP COLUMN player.legacy_pid.
+const AUDIT_CARVE_OUT = new Set([])
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

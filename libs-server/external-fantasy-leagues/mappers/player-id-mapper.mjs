@@ -34,7 +34,7 @@ export default class PlayerIdMapper {
       fantrax: 'fantrax_id',
       fleaflicker: 'fleaflicker_id',
       nfl: 'nfl_id',
-      rtsports: 'rtsports_id'
+      rtsports: 'rts_player_id'
     }
   }
 

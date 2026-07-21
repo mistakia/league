@@ -1,0 +1,23 @@
+-- player.legacy_pid retirement: DROP COLUMN (identity-crosswalk cluster)
+--
+-- Redesign task: user:task/league/redesign-league-database-schema.md
+-- Operator ruling 2026-07-20: fully retire legacy_pid. Verified no functional
+-- trade-off -- zero live legacy_pid readers, no player hard-delete path -- so the
+-- only residuals are old-format pids in four audit-history columns
+-- (player_changelog.prev/new, play_changelog.prev/new).
+--
+-- RUNBOOK ORDER (this file is the LAST step; the first three are prerequisites):
+--   1. (code) empty AUDIT_CARVE_OUT in db/adhoc/scan-embedded-pids.mjs (done in
+--      this commit) so the audit-history columns become rewrite targets.
+--   2. (LIVE, Phase A, ahead of the window; rewrites player_changelog 67.6M +
+--      play_changelog): NODE_ENV=production node db/adhoc/scan-embedded-pids.mjs --apply
+--   3. (WINDOW) NODE_ENV=production node db/adhoc/scan-embedded-pids.mjs --verify
+--      -- MUST exit 0 (zero old-format pids DB-wide). The map it verifies against
+--      is built from player.legacy_pid, so --verify MUST run BEFORE this DROP.
+--   4. (WINDOW) this file.
+--
+-- Runs BEFORE the conform-expand (while the base table is still named `player`).
+-- DROP COLUMN auto-removes the player_legacy_pid_key unique index and the column
+-- COMMENT; no FK references legacy_pid, so the drop is clean.
+
+ALTER TABLE public.player DROP COLUMN legacy_pid;

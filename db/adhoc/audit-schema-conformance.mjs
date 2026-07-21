@@ -93,6 +93,26 @@ const ambiguous_team_columns = new Set(['v', 'h', 'team', 'club', 'clubcode'])
 // private term list lives in the scan legend (private/source-legend.json).
 const vendor_tokens = ['pff', 'ngs', 'nfl_pro', 'nflpro']
 
+// Operator-ratified kept identifiers (2026-07-20): columns that legitimately
+// retain a vendor token because the operator chose to keep them un-obfuscated.
+// Keyed by table.column so the exemption is narrow -- the same token in ANY other
+// table still flags. `player_dimension` covers the compat-view window (the base
+// table is renamed player -> player_dimension until the CONTRACT phase); `player`
+// covers the final state. See the identity-crosswalk cluster of
+// user:task/league/redesign-league-database-schema.md.
+const accepted_kept_identifiers = new Set([
+  'player.pff_player_id',
+  'player.ngs_athleticism_score',
+  'player.ngs_draft_grade',
+  'player.ngs_production_score',
+  'player.ngs_size_score',
+  'player_dimension.pff_player_id',
+  'player_dimension.ngs_athleticism_score',
+  'player_dimension.ngs_draft_grade',
+  'player_dimension.ngs_production_score',
+  'player_dimension.ngs_size_score'
+])
+
 // External-id columns that end in _id but do not follow {system}_{entitytype}_id.
 // Detected by pattern; this set is the known non-conforming roster for messaging.
 const known_bad_external_ids = new Set([
@@ -229,8 +249,13 @@ function check_column(table, col) {
   // External id naming: ends in _id (or is a known id) but is not {a}_{b}_id.
   const is_id_column =
     /_?id$/.test(lower) && !allowlisted_identifiers.has(lower)
+  // {system}_{entitytype}_id, where {system} may be multi-token (gsis_it,
+  // fantasy_data) so gsis_it_player_id / fantasy_data_player_id conform; plus the
+  // two-token form and the {role}_pid form.
   const conforms_external =
-    /^[a-z0-9]+_[a-z0-9]+_id$/.test(lower) || /_pid$/.test(lower)
+    /^[a-z0-9]+(_[a-z0-9]+)*_(player|team|game)_id$/.test(lower) ||
+    /^[a-z0-9]+_[a-z0-9]+_id$/.test(lower) ||
+    /_pid$/.test(lower)
   if (
     (known_bad_external_ids.has(lower) ||
       (is_id_column && !conforms_external && looks_like_external(lower))) &&
@@ -258,9 +283,10 @@ function check_column(table, col) {
     }
   }
 
-  // Vendor leak in a column name.
+  // Vendor leak in a column name -- unless the operator ratified keeping this
+  // specific table.column un-obfuscated.
   const vendor = vendor_tokens.find((t) => name_has_token(lower, t))
-  if (vendor) {
+  if (vendor && !accepted_kept_identifiers.has(`${table}.${lower}`)) {
     findings.push({
       rule: 'vendor_leak',
       table,

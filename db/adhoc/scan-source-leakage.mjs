@@ -95,6 +95,30 @@ function build_matchers(legend) {
   return matchers
 }
 
+// Operator-ratified identifiers kept un-obfuscated (legend.accepted_kept_identifiers,
+// e.g. the player table's retained pff/ngs columns). A vendor-term hit that falls
+// INSIDE one of these exact identifiers is not a leak. The identifiers live in the
+// private legend, not here, because they embed the very tokens this public file
+// must never name. The same token anywhere else still flags.
+function build_accepted(legend) {
+  const ids = Array.isArray(legend.accepted_kept_identifiers)
+    ? legend.accepted_kept_identifiers
+    : []
+  return ids.map((id) => new RegExp(`(?<![a-z0-9_])${id}(?![a-z0-9_])`, 'gi'))
+}
+
+// True if the hit at char index `idx` on `line` is inside an accepted identifier.
+function covered_by_accepted(line, idx, accepted) {
+  for (const re of accepted) {
+    re.lastIndex = 0
+    let m
+    while ((m = re.exec(line)) !== null) {
+      if (idx >= m.index && idx < m.index + m[0].length) return true
+    }
+  }
+  return false
+}
+
 // --- scan surface ------------------------------------------------------------
 
 // The default public surface: the artifacts that form the published schema and
@@ -180,7 +204,7 @@ function collect_files(targets) {
 
 // --- scanning ----------------------------------------------------------------
 
-function scan_file(abs, matchers) {
+function scan_file(abs, matchers, accepted = []) {
   const findings = []
   let text
   try {
@@ -195,6 +219,7 @@ function scan_file(abs, matchers) {
     for (const m of matchers) {
       const hit = line.match(m.regex)
       if (hit) {
+        if (covered_by_accepted(line, hit.index, accepted)) continue
         findings.push({
           file: rel,
           line: i + 1,
@@ -321,6 +346,7 @@ function main() {
     argv.legend || process.env.LEAGUE_SOURCE_LEGEND || default_legend_path
   )
   const matchers = build_matchers(legend)
+  const accepted = build_accepted(legend)
 
   if (argv.selftest) {
     run_selftest(matchers)
@@ -333,7 +359,7 @@ function main() {
   const files = collect_files(targets)
   const findings = []
   for (const abs of files) {
-    findings.push(...scan_file(abs, matchers))
+    findings.push(...scan_file(abs, matchers, accepted))
   }
 
   report(findings, targets, argv)
