@@ -14,6 +14,13 @@
 -- with the honest sentinel 'historical_backfill' — per-row provenance cannot
 -- be reconstructed retroactively. Go-forward writes carry the real source.
 
+-- Prod carries a 40s default statement_timeout (DB/global level); the table
+-- rewrites (ALTER COLUMN TYPE, the multi-million-row source backfill UPDATE,
+-- and the natural-key index rebuild) each run far longer. db:exec wraps this
+-- file in a single transaction, so lift the timeout transaction-locally for
+-- the whole migration; it reverts at COMMIT.
+SET LOCAL statement_timeout = '60min';
+
 -- ============================================================================
 -- play_changelog: esbid, "playId" -> play_id; prop -> column_name;
 -- prev/new -> previous_value/new_value; "timestamp"(int) -> changed_at(tstz)

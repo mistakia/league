@@ -73,6 +73,7 @@ DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.player_underdog_id_unique;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx;
+DROP INDEX IF EXISTS public.play_changelog_natural_key;
 DROP INDEX IF EXISTS public.pff_unresolved_players_year_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_year_facet_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_pid_year_idx;
@@ -415,7 +416,6 @@ DROP INDEX IF EXISTS public."idx_24798_gsisItId";
 DROP INDEX IF EXISTS public.idx_24798_fantasy_data_id;
 DROP INDEX IF EXISTS public.idx_24798_espn_id;
 DROP INDEX IF EXISTS public.idx_24798_esbid;
-DROP INDEX IF EXISTS public.idx_24793_play;
 DROP INDEX IF EXISTS public.idx_24785_wager;
 DROP INDEX IF EXISTS public.idx_24781_percentile_key;
 DROP INDEX IF EXISTS public.idx_24741_stat;
@@ -529,11 +529,13 @@ ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS pla
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_college_seasonlogs DROP CONSTRAINT IF EXISTS player_college_seasonlogs_pid_season_unique;
 ALTER TABLE IF EXISTS ONLY public.player_college_careerlogs DROP CONSTRAINT IF EXISTS player_college_careerlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_changelog DROP CONSTRAINT IF EXISTS player_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_archetypes DROP CONSTRAINT IF EXISTS player_archetypes_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_adp_index DROP CONSTRAINT IF EXISTS player_adp_index_unique;
+ALTER TABLE IF EXISTS ONLY public.play_changelog DROP CONSTRAINT IF EXISTS play_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_unresolved_players DROP CONSTRAINT IF EXISTS pff_unresolved_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_team_seasonlogs DROP CONSTRAINT IF EXISTS pff_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_team_seasonlogs DROP CONSTRAINT IF EXISTS pff_team_seasonlogs_nfl_team_year_key;
@@ -553,6 +555,7 @@ ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS n
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl_plays_player_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_passer DROP CONSTRAINT IF EXISTS nfl_plays_passer_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_matchup_stats DROP CONSTRAINT IF EXISTS nfl_matchup_stats_pkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_games_changelog DROP CONSTRAINT IF EXISTS nfl_games_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pfr_coach_id_unique;
@@ -580,7 +583,6 @@ ALTER TABLE IF EXISTS ONLY public.rosters DROP CONSTRAINT IF EXISTS "idx_24995_P
 ALTER TABLE IF EXISTS ONLY public.props_index DROP CONSTRAINT IF EXISTS "idx_24974_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.prop_pairings DROP CONSTRAINT IF EXISTS "idx_24967_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.poaches DROP CONSTRAINT IF EXISTS "idx_24917_PRIMARY";
-ALTER TABLE IF EXISTS ONLY public.player_changelog DROP CONSTRAINT IF EXISTS "idx_24808_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.placed_wagers DROP CONSTRAINT IF EXISTS "idx_24785_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.matchups DROP CONSTRAINT IF EXISTS "idx_24699_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_24658_PRIMARY";
@@ -641,7 +643,6 @@ ALTER TABLE IF EXISTS public.roster_asset_holding ALTER COLUMN holding_id DROP D
 ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.poaches ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS public.player_changelog ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.placed_wagers ALTER COLUMN wager_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.matchups ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.leagues ALTER COLUMN uid DROP DEFAULT;
@@ -779,7 +780,6 @@ DROP TABLE IF EXISTS public.player_defender_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
 DROP TABLE IF EXISTS public.player_college_seasonlogs;
 DROP TABLE IF EXISTS public.player_college_careerlogs;
-DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
 DROP TABLE IF EXISTS public.player_changelog;
 DROP TABLE IF EXISTS public.player_archetypes;
 DROP TABLE IF EXISTS public.player_aliases;
@@ -795,7 +795,6 @@ DROP SEQUENCE IF EXISTS public.pff_team_seasonlogs_uid_seq;
 DROP TABLE IF EXISTS public.pff_team_gamelogs;
 DROP SEQUENCE IF EXISTS public.pff_team_gamelogs_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs_changelog;
-DROP SEQUENCE IF EXISTS public.pff_player_seasonlogs_changelog_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs;
 DROP TABLE IF EXISTS public.pff_player_facet_seasonlogs;
 DROP TABLE IF EXISTS public.pff_player_facet_gamelogs;
@@ -4691,10 +4690,27 @@ CREATE TABLE public.nfl_games (
 
 CREATE TABLE public.nfl_games_changelog (
     esbid character varying(36) NOT NULL,
-    column_name character varying(36) NOT NULL,
-    prev character varying(400),
-    new character varying(400),
-    "timestamp" integer NOT NULL
+    column_name text NOT NULL,
+    previous_value text,
+    new_value text,
+    changed_at timestamp with time zone NOT NULL,
+    source text NOT NULL,
+    reason text,
+    id bigint NOT NULL
+);
+
+
+--
+-- Name: nfl_games_changelog_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.nfl_games_changelog ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.nfl_games_changelog_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
@@ -18828,30 +18844,33 @@ CREATE TABLE public.pff_player_seasonlogs (
 
 
 --
--- Name: pff_player_seasonlogs_changelog_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.pff_player_seasonlogs_changelog_uid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
 -- Name: pff_player_seasonlogs_changelog; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.pff_player_seasonlogs_changelog (
-    uid integer DEFAULT nextval('public.pff_player_seasonlogs_changelog_uid_seq'::regclass) NOT NULL,
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
-    prop character varying(100) NOT NULL,
-    prev character varying(400) NOT NULL,
-    new character varying(400),
-    "timestamp" integer NOT NULL
+    season_year smallint NOT NULL,
+    column_name text NOT NULL,
+    previous_value text,
+    new_value text,
+    changed_at timestamp with time zone NOT NULL,
+    source text NOT NULL,
+    reason text,
+    id bigint NOT NULL
+);
+
+
+--
+-- Name: pff_player_seasonlogs_changelog_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.pff_player_seasonlogs_changelog ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.pff_player_seasonlogs_changelog_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
@@ -19011,11 +19030,28 @@ ALTER SEQUENCE public.placed_wagers_wager_id_seq OWNED BY public.placed_wagers.w
 
 CREATE TABLE public.play_changelog (
     esbid bigint NOT NULL,
-    "playId" bigint NOT NULL,
-    prop character varying(100) NOT NULL,
-    prev character varying(400) NOT NULL,
-    new character varying(400),
-    "timestamp" integer NOT NULL
+    play_id bigint NOT NULL,
+    column_name text NOT NULL,
+    previous_value text,
+    new_value text,
+    changed_at timestamp with time zone NOT NULL,
+    source text NOT NULL,
+    reason text,
+    id bigint NOT NULL
+);
+
+
+--
+-- Name: play_changelog_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.play_changelog ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.play_changelog_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
@@ -19574,34 +19610,29 @@ COMMENT ON COLUMN public.player_archetypes.confidence IS 'Confidence score (0.0-
 --
 
 CREATE TABLE public.player_changelog (
-    uid integer NOT NULL,
+    id bigint NOT NULL,
     pid character varying(25),
-    prop character varying(100) NOT NULL,
-    prev character varying(400) NOT NULL,
-    new character varying(400),
-    "timestamp" integer NOT NULL,
-    source character varying(32) DEFAULT 'sleeper'::character varying
+    column_name text NOT NULL,
+    previous_value text,
+    new_value text,
+    source text NOT NULL,
+    reason text,
+    changed_at timestamp with time zone NOT NULL
 );
 
 
 --
--- Name: player_changelog_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: player_changelog_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.player_changelog_uid_seq
-    AS integer
+ALTER TABLE public.player_changelog ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.player_changelog_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: player_changelog_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.player_changelog_uid_seq OWNED BY public.player_changelog.uid;
+    CACHE 1
+);
 
 
 --
@@ -27148,13 +27179,6 @@ ALTER TABLE ONLY public.placed_wagers ALTER COLUMN wager_id SET DEFAULT nextval(
 
 
 --
--- Name: player_changelog uid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.player_changelog ALTER COLUMN uid SET DEFAULT nextval('public.player_changelog_uid_seq'::regclass);
-
-
---
 -- Name: poaches uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -27620,14 +27644,6 @@ ALTER TABLE ONLY public.placed_wagers
 
 
 --
--- Name: player_changelog idx_24808_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.player_changelog
-    ADD CONSTRAINT "idx_24808_PRIMARY" PRIMARY KEY (uid);
-
-
---
 -- Name: poaches idx_24917_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -27844,6 +27860,14 @@ ALTER TABLE ONLY public.nfl_game_coaches
 
 
 --
+-- Name: nfl_games_changelog nfl_games_changelog_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_games_changelog
+    ADD CONSTRAINT nfl_games_changelog_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: nfl_matchup_stats nfl_matchup_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -27944,7 +27968,7 @@ ALTER TABLE ONLY public.pff_player_facet_seasonlogs
 --
 
 ALTER TABLE ONLY public.pff_player_seasonlogs_changelog
-    ADD CONSTRAINT pff_player_seasonlogs_changelog_pkey PRIMARY KEY (uid);
+    ADD CONSTRAINT pff_player_seasonlogs_changelog_pkey PRIMARY KEY (id);
 
 
 --
@@ -27996,6 +28020,14 @@ ALTER TABLE ONLY public.pff_unresolved_players
 
 
 --
+-- Name: play_changelog play_changelog_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.play_changelog
+    ADD CONSTRAINT play_changelog_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: player_adp_index player_adp_index_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -28033,6 +28065,14 @@ ALTER TABLE ONLY public.player
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_cfbref_id_unique UNIQUE (cfbref_player_id);
+
+
+--
+-- Name: player_changelog player_changelog_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_changelog
+    ADD CONSTRAINT player_changelog_pkey PRIMARY KEY (id);
 
 
 --
@@ -29143,13 +29183,6 @@ CREATE UNIQUE INDEX idx_24781_percentile_key ON public.percentiles USING btree (
 --
 
 CREATE UNIQUE INDEX idx_24785_wager ON public.placed_wagers USING btree (book_wager_id);
-
-
---
--- Name: idx_24793_play; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24793_play ON public.play_changelog USING btree (esbid, "playId", prop, "timestamp");
 
 
 --
@@ -41568,6 +41601,13 @@ CREATE INDEX pff_player_facet_seasonlogs_year_facet_idx ON public.pff_player_fac
 --
 
 CREATE INDEX pff_unresolved_players_year_idx ON public.pff_unresolved_players USING btree (year);
+
+
+--
+-- Name: play_changelog_natural_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX play_changelog_natural_key ON public.play_changelog USING btree (esbid, play_id, column_name, changed_at);
 
 
 --
@@ -56277,6 +56317,13 @@ GRANT SELECT ON TABLE public.nfl_games_changelog TO league_reader;
 
 
 --
+-- Name: SEQUENCE nfl_games_changelog_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.nfl_games_changelog_id_seq TO league_reader;
+
+
+--
 -- Name: TABLE nfl_matchup_stats; Type: ACL; Schema: public; Owner: -
 --
 
@@ -56816,17 +56863,17 @@ GRANT SELECT ON TABLE public.pff_player_seasonlogs TO league_reader;
 
 
 --
--- Name: SEQUENCE pff_player_seasonlogs_changelog_uid_seq; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON SEQUENCE public.pff_player_seasonlogs_changelog_uid_seq TO league_reader;
-
-
---
 -- Name: TABLE pff_player_seasonlogs_changelog; Type: ACL; Schema: public; Owner: -
 --
 
 GRANT SELECT ON TABLE public.pff_player_seasonlogs_changelog TO league_reader;
+
+
+--
+-- Name: SEQUENCE pff_player_seasonlogs_changelog_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.pff_player_seasonlogs_changelog_id_seq TO league_reader;
 
 
 --
@@ -56890,6 +56937,13 @@ GRANT SELECT ON TABLE public.play_changelog TO league_reader;
 
 
 --
+-- Name: SEQUENCE play_changelog_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.play_changelog_id_seq TO league_reader;
+
+
+--
 -- Name: TABLE player; Type: ACL; Schema: public; Owner: -
 --
 
@@ -56932,10 +56986,10 @@ GRANT SELECT ON TABLE public.player_changelog TO league_reader;
 
 
 --
--- Name: SEQUENCE player_changelog_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE player_changelog_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.player_changelog_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.player_changelog_id_seq TO league_reader;
 
 
 --

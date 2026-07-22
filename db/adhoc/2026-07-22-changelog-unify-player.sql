@@ -17,6 +17,12 @@
 -- yarn db:exec wraps this in a single transaction: readers see the old table
 -- until commit, and the row-count parity guard aborts the whole swap on any
 -- mismatch before the old table is dropped.
+--
+-- Prod carries a 40s default statement_timeout (DB/global level); the 67.8M-row
+-- INSERT SELECT rewrite runs minutes. Lift it transaction-locally for the whole
+-- swap (reverts at COMMIT). Bounded at 60min so a pathological hang can't hold
+-- the ACCESS EXCLUSIVE lock indefinitely.
+SET LOCAL statement_timeout = '60min';
 
 CREATE TABLE public.player_changelog_new (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
