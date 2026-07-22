@@ -47,7 +47,7 @@ export default function ({ is_logged_in }) {
         { value: 'K', label: 'K', group: 'Special Teams' },
         { value: 'DST', label: 'DST', group: 'Defense' }
       ],
-      player_value_path: 'pos',
+      player_value_path: 'primary_position',
       component: React.memo(PlayerRowPositionColumn),
       operators: [
         table_constants.TABLE_OPERATORS.IN,
@@ -77,7 +77,7 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'height'
+      player_value_path: 'height_inches'
     },
     player_weight: {
       column_title: 'Weight',
@@ -85,7 +85,7 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'weight'
+      player_value_path: 'weight_pounds'
     },
     player_body_mass_index: {
       column_title: 'Body Mass Index',
@@ -132,7 +132,7 @@ export default function ({ is_logged_in }) {
       header_label: 'DOB',
       size: 110,
       data_type: table_constants.TABLE_DATA_TYPES.DATE,
-      player_value_path: 'dob'
+      player_value_path: 'date_of_birth'
     },
     player_age: {
       column_title: 'Age',
@@ -148,7 +148,7 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'forty',
+      player_value_path: 'forty_yard_dash_seconds',
       reverse_percentiles: true
     },
     player_bench_press: {
@@ -157,7 +157,7 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'bench'
+      player_value_path: 'bench_press_reps'
     },
     player_vertical_jump: {
       column_title: 'Vertical Jump',
@@ -165,7 +165,7 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'vertical'
+      player_value_path: 'vertical_jump_inches'
     },
     player_broad_jump: {
       column_title: 'Broad Jump',
@@ -173,7 +173,7 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'broad'
+      player_value_path: 'broad_jump_inches'
     },
     player_shuttle_run: {
       column_title: 'Shuttle Run',
@@ -181,7 +181,7 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'shuttle',
+      player_value_path: 'shuttle_run_seconds',
       reverse_percentiles: true
     },
     player_three_cone_drill: {
@@ -190,7 +190,7 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'cone',
+      player_value_path: 'three_cone_drill_seconds',
       reverse_percentiles: true
     },
     player_arm_length: {
@@ -199,7 +199,7 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'arm'
+      player_value_path: 'arm_length_inches'
     },
     player_hand_size: {
       column_title: 'Hand Size',
@@ -207,7 +207,7 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'hand'
+      player_value_path: 'hand_size_inches'
     },
     player_draft_position: {
       column_title: 'Draft Position',
@@ -215,7 +215,7 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.DRAFT],
-      player_value_path: 'dpos',
+      player_value_path: 'draft_overall_pick',
       reverse_percentiles: true
     },
     player_draft_round: {
@@ -224,7 +224,7 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.DRAFT],
-      player_value_path: 'round',
+      player_value_path: 'draft_round',
       reverse_percentiles: true
     },
     player_college: {
@@ -233,7 +233,7 @@ export default function ({ is_logged_in }) {
       size: 150,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       column_groups: [COLUMN_GROUPS.COLLEGE],
-      player_value_path: 'col'
+      player_value_path: 'college'
     },
     player_college_division: {
       column_title: 'College Division',
@@ -241,7 +241,7 @@ export default function ({ is_logged_in }) {
       size: 140,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       column_groups: [COLUMN_GROUPS.COLLEGE],
-      player_value_path: 'dv'
+      player_value_path: 'college_division'
     },
     player_starting_nfl_year: {
       column_title: 'Starting NFL Year',
@@ -273,7 +273,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Pos Depth',
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'posd',
+      player_value_path: 'position_depth',
       column_groups: [COLUMN_GROUPS.NFL_TEAM]
     },
     player_jersey_number: {
@@ -281,7 +281,7 @@ export default function ({ is_logged_in }) {
       header_label: 'No.',
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-      player_value_path: 'jnum',
+      player_value_path: 'jersey_number',
       column_groups: [COLUMN_GROUPS.NFL_TEAM]
     },
     player_ngs_athleticism_score: {
@@ -330,7 +330,7 @@ export default function ({ is_logged_in }) {
       header_label: 'NFL ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'nfl_id',
+      player_value_path: 'nfl_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_esbid: {
@@ -338,7 +338,7 @@ export default function ({ is_logged_in }) {
       header_label: 'ESB ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'esbid',
+      player_value_path: 'esb_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_gsisid: {
@@ -346,7 +346,7 @@ export default function ({ is_logged_in }) {
       header_label: 'GSIS ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'gsisid',
+      player_value_path: 'gsis_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_gsispid: {
@@ -354,7 +354,7 @@ export default function ({ is_logged_in }) {
       header_label: 'GSIS PID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'gsispid',
+      player_value_path: 'smart_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_gsis_it_id: {
@@ -362,7 +362,7 @@ export default function ({ is_logged_in }) {
       header_label: 'GSIS IT ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'gsis_it_id',
+      player_value_path: 'gsis_it_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_sleeper_id: {
@@ -370,7 +370,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Sleeper ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'sleeper_id',
+      player_value_path: 'sleeper_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_rotoworld_id: {
@@ -378,7 +378,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Rotoworld ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'rotoworld_id',
+      player_value_path: 'rotoworld_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_rotowire_id: {
@@ -386,7 +386,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Rotowire ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'rotowire_id',
+      player_value_path: 'rotowire_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_sportradar_id: {
@@ -394,7 +394,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Sportradar ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'sportradar_id',
+      player_value_path: 'sportradar_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_espn_id: {
@@ -402,7 +402,7 @@ export default function ({ is_logged_in }) {
       header_label: 'ESPN ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'espn_id',
+      player_value_path: 'espn_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS, COLUMN_GROUPS.ESPN]
     },
     player_fantasy_data_id: {
@@ -410,7 +410,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Fantasy Data ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'fantasy_data_id',
+      player_value_path: 'fantasy_data_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_yahoo_id: {
@@ -418,7 +418,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Yahoo ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'yahoo_id',
+      player_value_path: 'yahoo_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_keeptradecut_id: {
@@ -426,7 +426,7 @@ export default function ({ is_logged_in }) {
       header_label: 'KTC ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'keeptradecut_id',
+      player_value_path: 'keeptradecut_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_pfr_id: {
@@ -442,7 +442,7 @@ export default function ({ is_logged_in }) {
       header_label: 'OTC ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'otc_id',
+      player_value_path: 'otc_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_draftkings_id: {
@@ -458,7 +458,7 @@ export default function ({ is_logged_in }) {
       header_label: 'PFF ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'pff_id',
+      player_value_path: 'pff_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS, COLUMN_GROUPS.PFF]
     },
     player_mfl_id: {
@@ -466,7 +466,7 @@ export default function ({ is_logged_in }) {
       header_label: 'MFL ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'mfl_id',
+      player_value_path: 'mfl_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_fleaflicker_id: {
@@ -474,7 +474,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Fleaflicker ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'fleaflicker_id',
+      player_value_path: 'fleaflicker_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_cbs_id: {
@@ -482,7 +482,7 @@ export default function ({ is_logged_in }) {
       header_label: 'CBS ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'cbs_id',
+      player_value_path: 'cbs_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_cfbref_id: {
