@@ -72,7 +72,7 @@ const year_default = (params) => {
 const nfl_team_source = {
   table: 'nfl_team_seasonlogs',
   grain: 'team_year',
-  key_columns: { team: 'tm', year: 'year' },
+  key_columns: { team: 'nfl_team', year: 'season_year' },
   year_default,
   extra_predicates: (params) => {
     const { stat_key } = get_default_params({ params })
@@ -83,7 +83,7 @@ const nfl_team_source = {
 const league_nfl_team_source = {
   table: 'league_nfl_team_seasonlogs',
   grain: 'team_year',
-  key_columns: { team: 'tm', year: 'year' },
+  key_columns: { team: 'nfl_team', year: 'season_year' },
   year_default,
   extra_predicates: (params) => {
     const { stat_key, league_id } = get_default_params({ params })
@@ -187,17 +187,17 @@ const create_field_from_league_nfl_team_seasonlogs = (column_name) => ({
   table_name: 'league_nfl_team_seasonlogs',
   table_alias: league_nfl_team_seasonlogs_table_alias,
   source: league_nfl_team_source,
-  // rnk is a league rank (AVG across the window); pts is additive fantasy
+  // rank is a league rank (AVG across the window); points is additive fantasy
   // points (SUM default).
-  range_offset_aggregate: column_name === 'rnk' ? 'AVG' : undefined,
+  range_offset_aggregate: column_name === 'rank' ? 'AVG' : undefined,
   get_cache_info
 })
 
 export default {
   league_nfl_team_seasonlogs_points:
-    create_field_from_league_nfl_team_seasonlogs('pts'),
+    create_field_from_league_nfl_team_seasonlogs('points'),
   league_nfl_team_seasonlogs_rank:
-    create_field_from_league_nfl_team_seasonlogs('rnk'),
+    create_field_from_league_nfl_team_seasonlogs('rank'),
   nfl_team_seasonlogs_passing_attempts:
     create_field_from_nfl_team_seasonlogs('passing_attempts'),
   nfl_team_seasonlogs_passing_completions:

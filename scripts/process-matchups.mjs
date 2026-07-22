@@ -124,7 +124,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
   const adjusted_pp_per_team = Object.values(result).map(
     (t) => t.stats.potential_points + t.stats.potential_points_penalty
   )
-  const apl_per_team = Object.values(result).map((t) => t.stats.apLosses)
+  const apl_per_team = Object.values(result).map((t) => t.stats.all_play_losses)
   const min_pp = Math.min(...adjusted_pp_per_team)
   const max_pp = Math.max(...adjusted_pp_per_team)
   const min_apl = Math.min(...apl_per_team)
@@ -133,7 +133,8 @@ const run = async ({ lid = 1, year = current_season.year }) => {
     const adjusted_pp =
       team.stats.potential_points + team.stats.potential_points_penalty
     const norm_pp = (adjusted_pp - min_pp) / (max_pp - min_pp)
-    const norm_apl = (team.stats.apLosses - min_apl) / (max_apl - min_apl)
+    const norm_apl =
+      (team.stats.all_play_losses - min_apl) / (max_apl - min_apl)
     team.stats.draft_order_index = 9 * norm_pp + norm_apl || 0
   }
 
@@ -146,7 +147,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
       tid,
       lid,
       year,
-      div: tm.div,
+      division: tm.div,
       ...remainingStats
     })
   }

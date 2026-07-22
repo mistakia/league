@@ -511,23 +511,23 @@ export const fantasy_team_stats = [
   'losses',
   'ties',
 
-  'apWins',
-  'apLosses',
-  'apTies',
+  'all_play_wins',
+  'all_play_losses',
+  'all_play_ties',
 
-  'pf',
-  'pa',
-  'pdiff',
+  'points_for',
+  'points_against',
+  'point_differential',
 
   'potential_points',
   'potential_points_penalty',
-  'pw',
-  'pl',
+  'potential_wins',
+  'potential_losses',
   'potential_points_pct',
 
-  'pmax',
-  'pmin',
-  'pdev',
+  'highest_weekly_score',
+  'lowest_weekly_score',
+  'weekly_score_deviation',
 
   'division_finish',
   'regular_season_finish',
@@ -538,8 +538,8 @@ export const fantasy_team_stats = [
 
   'draft_order_index',
 
-  ...Object.values(roster_slot_types).map((s) => `pSlot${s}`),
-  ...fantasy_positions.map((p) => `pPos${p}`)
+  ...Object.values(roster_slot_types).map((s) => `starter_slot_${s}_points`),
+  ...fantasy_positions.map((p) => `starter_points_${p.toLowerCase()}`)
 ]
 
 export const create_empty_fantasy_team_stats = () =>

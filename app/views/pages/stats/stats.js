@@ -32,24 +32,24 @@ const careerlog_group_fields = {
     ties: { label: 'Ties' }
   },
   'All Play': {
-    apWins: { label: 'Wins' },
-    apLosses: { label: 'Losses' },
-    apTies: { label: 'Ties' },
+    all_play_wins: { label: 'Wins' },
+    all_play_losses: { label: 'Losses' },
+    all_play_ties: { label: 'Ties' },
     best_season_all_play_pct: { label: 'Best %', fixed: 1 }
   },
   Points: {
-    pf: { label: 'Total' },
-    pa: { label: 'Against' },
-    pdiff: { label: 'Diff' },
-    pmax: { label: 'Max' },
-    pmin: { label: 'Min' },
+    points_for: { label: 'Total' },
+    points_against: { label: 'Against' },
+    point_differential: { label: 'Diff' },
+    highest_weekly_score: { label: 'Max' },
+    lowest_weekly_score: { label: 'Min' },
     weekly_high_scores: { label: 'Week Leader' }
   },
   Potential: {
     potential_points: { label: 'Points' },
     potential_points_pct: { label: '%', fixed: 1 },
-    pw: { label: 'Wins' },
-    pl: { label: 'Losses' }
+    potential_wins: { label: 'Wins' },
+    potential_losses: { label: 'Losses' }
   },
   'Overall Finish': {
     best_overall_finish: { label: 'Best' },
@@ -132,27 +132,27 @@ CareerLogRow.propTypes = {
 
 const season_fields = {
   Points: {
-    pf: {
+    points_for: {
       label: 'Total',
       tooltip: 'Points scored'
     },
-    pa: {
+    points_against: {
       label: 'Against',
       tooltip: 'Points against'
     },
-    pdiff: {
+    point_differential: {
       label: 'Diff',
       tooltip: 'Point differential'
     },
-    pmax: {
+    highest_weekly_score: {
       label: 'Max',
       tooltip: 'Maximum points for'
     },
-    pmin: {
+    lowest_weekly_score: {
       label: 'Min',
       tooltip: 'Minimum points for'
     },
-    pdev: {
+    weekly_score_deviation: {
       label: 'Stdev',
       tooltip: 'Points scored standard deviation'
     }
@@ -166,25 +166,25 @@ const season_fields = {
       label: '%',
       tooltip: 'Potential points percentage. Points scored with optimal lineup.'
     },
-    pw: {
+    potential_wins: {
       label: 'Wins',
       tooltip: 'Potential wins. Wins with optimal lineup.'
     },
-    pl: {
+    potential_losses: {
       label: 'Losses',
       tooltip: 'Potential losses. Losses with optimal lineup.'
     }
   },
   'All Play': {
-    apWins: {
+    all_play_wins: {
       label: 'Wins',
       tooltip: 'Wins verse all teams each week'
     },
-    apLosses: {
+    all_play_losses: {
       label: 'Losses',
       tooltip: 'Losses verse all teams each week'
     },
-    apTies: {
+    all_play_ties: {
       label: 'Ties',
       tooltip: 'Ties verse all teams each week'
     },
@@ -236,7 +236,7 @@ SummaryRow.propTypes = {
 
 function PositionRow({ team, percentiles, year, key }) {
   const position_cells = fantasy_positions.map((position) => {
-    const key = `pPos${position}`
+    const key = `starter_points_${position.toLowerCase()}`
     const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
     return [
@@ -247,7 +247,7 @@ function PositionRow({ team, percentiles, year, key }) {
         percentile={percentile}
       />,
       <div key={`percent_${position}`} className='table__cell metric'>
-        {toPercent(value / team.getIn(['stats', 'pf'], 0))}
+        {toPercent(value / team.getIn(['stats', 'points_for'], 0))}
       </div>
     ]
   })
@@ -270,10 +270,10 @@ PositionRow.propTypes = {
 function SlotRow({ team, slots, percentiles, key }) {
   const slot_cells = slots.map((s) => {
     const slot = roster_slot_types[s]
-    const key = `pSlot${slot}`
+    const key = `starter_slot_${slot}_points`
     const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
-    const total_points = team.getIn(['stats', 'pf'], 0)
+    const total_points = team.getIn(['stats', 'points_for'], 0)
 
     return [
       <PercentileMetric
@@ -361,8 +361,9 @@ export default function StatsPage({
 
   const sorted = teams.sort(
     (a, b) =>
-      b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) ||
-      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+      b.getIn(['stats', 'all_play_wins'], 0) -
+        a.getIn(['stats', 'all_play_wins'], 0) ||
+      b.getIn(['stats', 'points_for'], 0) - a.getIn(['stats', 'points_for'], 0)
   )
 
   const summary_rows = []

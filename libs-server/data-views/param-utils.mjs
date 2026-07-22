@@ -208,6 +208,7 @@ export const team_year_offset_range_select = ({
   const offset_range = resolve_year_offset_range(params)
   const [min_off, max_off] = offset_range
   const team_column = source?.key_columns?.team || 'nfl_team'
+  const year_column = source?.key_columns?.year || 'year'
   const team_ref = resolve_team_join_target({
     query_context: query_context || { data_view_options },
     params
@@ -216,7 +217,7 @@ export const team_year_offset_range_select = ({
   const year_clause = data_view_options.year_reference
   let year_predicate
   if (year_clause) {
-    year_predicate = ` AND ${table}.year BETWEEN ${year_clause} + ${min_off} AND ${year_clause} + ${max_off}`
+    year_predicate = ` AND ${table}.${year_column} BETWEEN ${year_clause} + ${min_off} AND ${year_clause} + ${max_off}`
   } else {
     const years = offset_expanded_years(
       typeof source?.year_default === 'function'
@@ -225,7 +226,7 @@ export const team_year_offset_range_select = ({
       offset_range
     )
     year_predicate = years.length
-      ? ` AND ${table}.year IN (${years.join(',')})`
+      ? ` AND ${table}.${year_column} IN (${years.join(',')})`
       : ''
   }
 
@@ -272,12 +273,13 @@ export const player_year_offset_range_select = ({
   const offset_range = resolve_year_offset_range(params)
   const [min_off, max_off] = offset_range
   const pid_column = source?.key_columns?.pid || 'pid'
+  const year_column = source?.key_columns?.year || 'year'
   const pid_ref = data_view_options.pid_reference
 
   const year_clause = data_view_options.year_reference
   let year_predicate
   if (year_clause) {
-    year_predicate = ` AND ${table}.year BETWEEN ${year_clause} + ${min_off} AND ${year_clause} + ${max_off}`
+    year_predicate = ` AND ${table}.${year_column} BETWEEN ${year_clause} + ${min_off} AND ${year_clause} + ${max_off}`
   } else {
     const years = offset_expanded_years(
       typeof source?.year_default === 'function'
@@ -286,7 +288,7 @@ export const player_year_offset_range_select = ({
       offset_range
     )
     year_predicate = years.length
-      ? ` AND ${table}.year IN (${years.join(',')})`
+      ? ` AND ${table}.${year_column} IN (${years.join(',')})`
       : ''
   }
 
@@ -295,7 +297,7 @@ export const player_year_offset_range_select = ({
     .join('')
 
   if (latest_by_year) {
-    return `(SELECT ${table}.${column} FROM ${table} WHERE ${table}.${pid_column} = ${pid_ref}${year_predicate}${extras} ORDER BY ${table}.year DESC LIMIT 1)`
+    return `(SELECT ${table}.${column} FROM ${table} WHERE ${table}.${pid_column} = ${pid_ref}${year_predicate}${extras} ORDER BY ${table}.${year_column} DESC LIMIT 1)`
   }
   return `(SELECT ${aggregate}(${table}.${column}) FROM ${table} WHERE ${table}.${pid_column} = ${pid_ref}${year_predicate}${extras})`
 }

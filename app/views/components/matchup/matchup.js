@@ -52,7 +52,7 @@ export default function Matchup({ matchup, teams, scoreboard }) {
         <div
           className='matchup__banner'
           style={{
-            backgroundColor: `#${away.pc}`
+            backgroundColor: `#${away.primary_color}`
           }}
         />
         <TeamImage tid={matchup.aid} year={matchup.year} />
@@ -75,7 +75,7 @@ export default function Matchup({ matchup, teams, scoreboard }) {
         <div
           className='matchup__banner'
           style={{
-            backgroundColor: `#${home.pc}`
+            backgroundColor: `#${home.primary_color}`
           }}
         />
         <TeamImage tid={matchup.hid} year={matchup.year} />

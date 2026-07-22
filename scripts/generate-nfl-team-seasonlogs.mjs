@@ -473,8 +473,8 @@ const generate_seasonlogs = async ({
       for (const { opp, tm, ...stats } of teams) {
         team_seasonlog_inserts.push({
           stat_key,
-          tm: opp,
-          year,
+          nfl_team: opp,
+          season_year: year,
           ...sanitize_passing_stats_for_position(stats, position)
         })
       }
@@ -505,8 +505,8 @@ const generate_seasonlogs = async ({
       for (const { opp, tm, ...stats } of teams) {
         team_seasonlog_inserts.push({
           stat_key,
-          tm,
-          year,
+          nfl_team: tm,
+          season_year: year,
           ...sanitize_passing_stats_for_position(stats, position)
         })
       }
@@ -529,7 +529,7 @@ const generate_seasonlogs = async ({
       save: async (batch) => {
         await db('nfl_team_seasonlogs')
           .insert(batch)
-          .onConflict(['stat_key', 'year', 'tm'])
+          .onConflict(['stat_key', 'season_year', 'nfl_team'])
           .merge()
       },
       batch_size: 500
@@ -567,27 +567,27 @@ const generate_seasonlogs = async ({
         })
 
         items.push({
-          tm: opp,
+          nfl_team: opp,
           stat_key,
-          pts: points.total
+          points: points.total
         })
       }
 
       // calculate rank
-      const sorted = items.sort((a, b) => a.pts - b.pts)
+      const sorted = items.sort((a, b) => a.points - b.points)
       sorted.forEach((item, index) => {
-        const rnk = index + 1
+        const rank = index + 1
         league_team_seasonlog_inserts.push({
           lid: leagueId,
-          year,
-          rnk,
+          season_year: year,
+          rank,
           ...item
         })
       })
 
       const percentiles = calculatePercentiles({
         items,
-        stats: ['pts']
+        stats: ['points']
       })
       percentile_inserts = percentile_inserts.concat(
         format_percentile_inserts(percentiles, stat_key)
@@ -601,7 +601,7 @@ const generate_seasonlogs = async ({
     )
     await db('league_nfl_team_seasonlogs')
       .insert(league_team_seasonlog_inserts)
-      .onConflict(['lid', 'stat_key', 'year', 'tm'])
+      .onConflict(['lid', 'stat_key', 'season_year', 'nfl_team'])
       .merge()
   }
 

@@ -10,8 +10,8 @@ export function seasonlogs_reducer(state = initialState, { payload, type }) {
   switch (type) {
     case seasonlogs_actions.GET_NFL_TEAM_SEASONLOGS_FULFILLED:
       return state.withMutations((state) => {
-        payload.data.forEach(({ tm, stat_key, ...seasonlog }) => {
-          state.setIn(['nfl_teams', tm, stat_key], seasonlog)
+        payload.data.forEach(({ nfl_team, stat_key, ...seasonlog }) => {
+          state.setIn(['nfl_teams', nfl_team, stat_key], seasonlog)
         })
       })
 

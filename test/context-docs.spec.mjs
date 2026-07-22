@@ -60,12 +60,12 @@ const seed_full_league = async () => {
       lid: 1,
       tid: i,
       year,
-      div: (i % 4) + 1,
+      division: (i % 4) + 1,
       wins: 12 - i,
       losses: i - 1,
       ties: 0,
-      pf: 1000 + i,
-      pa: 900 + i,
+      points_for: 1000 + i,
+      points_against: 900 + i,
       overall_finish: i
     })
   }

@@ -66,15 +66,15 @@ export default function SelectedPlayerSchedule({
   const labels = []
   games.forEach((game, index) => {
     const opp = team === game.h ? game.v : game.h
-    const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'pts'], '-')
-    const rnk = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'rnk'], '-')
+    const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'points'], '-')
+    const rnk = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'rank'], '-')
     const isHome = opp === game.v
     const label = (
       <PercentileMetric
         className='schedule__tab'
         value={pts}
         percentile_key={percentile_key}
-        field='pts'
+        field='points'
       >
         <small>{`W${game.week}`}</small>
         <div>{`${isHome ? '' : '@'}${opp}`}</div>

@@ -48,7 +48,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
     )
     team.wins = sum(team_seasonlogs.map((s) => s.wins))
     team.losses = sum(team_seasonlogs.map((s) => s.losses))
-    team.pf = sum(team_seasonlogs.map((s) => s.pf))
+    team.pf = sum(team_seasonlogs.map((s) => s.points_for))
 
     if (team.wins > maxWin) maxWin = team.wins
     if (team.wins < minWin) minWin = team.wins

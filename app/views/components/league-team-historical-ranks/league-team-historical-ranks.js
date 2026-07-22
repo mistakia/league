@@ -15,13 +15,13 @@ export default function LeagueTeamHistoricalRanks({ historical_ranks }) {
       />
       <MetricCard
         label='All Play Wins'
-        value={historical_ranks.apWins}
-        rank={historical_ranks.apWins_rank}
+        value={historical_ranks.all_play_wins}
+        rank={historical_ranks.all_play_wins_rank}
       />
       <MetricCard
         label='Total Points'
-        value={historical_ranks.pf}
-        rank={historical_ranks.pf_rank}
+        value={historical_ranks.points_for}
+        rank={historical_ranks.points_for_rank}
       />
       <MetricCard
         label='Post Seasons'

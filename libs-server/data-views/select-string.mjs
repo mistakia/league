@@ -183,6 +183,11 @@ const get_select_string = ({
     // throughout the WITH block.
     const source = column_definition.source
     const inner_table = source?.table || join_table_name
+    // The year column is source-specific the same way the team column is
+    // (nfl_team_seasonlogs uses `season_year`, the player seasonlogs use
+    // `year`) -- read it from source.key_columns.year rather than assuming
+    // `year`, which would emit a non-existent column for a season_year source.
+    const year_column = source?.key_columns?.year || 'year'
 
     // Anchored offset (year split): correlate to the year_reference through the
     // range. Otherwise emit the explicit `year IN (...)` list produced by
@@ -195,7 +200,7 @@ const get_select_string = ({
     // dropped the year filter for any CTE source that had NOT pre-filtered.
     let year_predicate
     if (year_clause) {
-      year_predicate = ` AND ${inner_table}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
+      year_predicate = ` AND ${inner_table}.${year_column} BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}`
     } else {
       const in_list = compute_year_in_list(
         source,
@@ -203,7 +208,9 @@ const get_select_string = ({
         min_year_offset,
         max_year_offset
       )
-      year_predicate = in_list ? ` AND ${inner_table}.year IN (${in_list})` : ''
+      year_predicate = in_list
+        ? ` AND ${inner_table}.${year_column} IN (${in_list})`
+        : ''
     }
 
     // Reapply source.extra_predicates whenever the subquery re-scans a real

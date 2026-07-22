@@ -72,10 +72,10 @@ export async function simulate_season_forecast({
         wins: 0,
         losses: 0,
         ties: 0,
-        pf: 0,
-        apWins: 0,
-        apLosses: 0,
-        apTies: 0
+        points_for: 0,
+        all_play_wins: 0,
+        all_play_losses: 0,
+        all_play_ties: 0
       }
     }
 
@@ -94,8 +94,8 @@ export async function simulate_season_forecast({
         team_stats_by_tid[m.aid].ties++
       }
 
-      team_stats_by_tid[m.hid].pf += hp
-      team_stats_by_tid[m.aid].pf += ap
+      team_stats_by_tid[m.hid].points_for += hp
+      team_stats_by_tid[m.aid].points_for += ap
     }
   } else {
     // Use end-of-season stats
@@ -202,10 +202,10 @@ export async function simulate_season_forecast({
         wins: 0,
         losses: 0,
         ties: 0,
-        pf: 0,
-        apWins: 0,
-        apLosses: 0,
-        apTies: 0
+        points_for: 0,
+        all_play_wins: 0,
+        all_play_losses: 0,
+        all_play_ties: 0
       }
       standings[team.uid] = {
         tid: team.uid,
@@ -213,10 +213,10 @@ export async function simulate_season_forecast({
         wins: stats.wins || 0,
         losses: stats.losses || 0,
         ties: stats.ties || 0,
-        pf: stats.pf || 0,
-        apWins: stats.apWins || 0,
-        apLosses: stats.apLosses || 0,
-        apTies: stats.apTies || 0
+        points_for: stats.points_for || 0,
+        all_play_wins: stats.all_play_wins || 0,
+        all_play_losses: stats.all_play_losses || 0,
+        all_play_ties: stats.all_play_ties || 0
       }
     }
 
@@ -310,11 +310,14 @@ function determine_playoffs({ standings, teams }) {
   for (const div_teams of Object.values(divisions)) {
     // Sort by wins, then ties, then points for
     const sorted = div_teams.sort(
-      (a, b) => b.wins - a.wins || b.ties - a.ties || b.pf - a.pf
+      (a, b) =>
+        b.wins - a.wins || b.ties - a.ties || b.points_for - a.points_for
     )
 
     // Top 2 are division leaders, sorted by all-play record
-    const leaders = sorted.slice(0, 2).sort((a, b) => b.apWins - a.apWins)
+    const leaders = sorted
+      .slice(0, 2)
+      .sort((a, b) => b.all_play_wins - a.all_play_wins)
     bye_tids.push(leaders[0].tid)
     division_wildcard_tids.push(leaders[1].tid)
   }
@@ -323,7 +326,7 @@ function determine_playoffs({ standings, teams }) {
   const division_winner_tids = [...bye_tids, ...division_wildcard_tids]
   const wildcard_candidates = Object.values(standings)
     .filter((t) => !division_winner_tids.includes(t.tid))
-    .sort((a, b) => b.pf - a.pf)
+    .sort((a, b) => b.points_for - a.points_for)
 
   const wildcard_tids = wildcard_candidates.slice(0, 2).map((t) => t.tid)
 

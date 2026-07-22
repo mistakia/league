@@ -33,18 +33,18 @@ const router = express.Router()
  *               team_season_logs:
  *                 summary: Sample team season logs
  *                 value:
- *                   - year: 2024
- *                     tm: "KC"
+ *                   - season_year: 2024
+ *                     nfl_team: "KC"
  *                     stat_key: "points_scored"
  *                     stat_value: 345
- *                     pts: 12.5
- *                     rnk: 3
- *                   - year: 2024
- *                     tm: "KC"
+ *                     points: 12.5
+ *                     rank: 3
+ *                   - season_year: 2024
+ *                     nfl_team: "KC"
  *                     stat_key: "points_allowed"
  *                     stat_value: 210
- *                     pts: 8.2
- *                     rnk: 7
+ *                     points: 8.2
+ *                     rank: 7
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -56,21 +56,27 @@ router.get('/teams', async (req, res) => {
 
     const query = db('nfl_team_seasonlogs')
       .select('nfl_team_seasonlogs.*')
-      .where('nfl_team_seasonlogs.year', year)
+      .where('nfl_team_seasonlogs.season_year', year)
 
     if (leagueId) {
       query
         .select(
-          'league_nfl_team_seasonlogs.pts',
-          'league_nfl_team_seasonlogs.rnk'
+          'league_nfl_team_seasonlogs.points',
+          'league_nfl_team_seasonlogs.rank'
         )
         .join('league_nfl_team_seasonlogs', function () {
-          this.on('nfl_team_seasonlogs.year', 'league_nfl_team_seasonlogs.year')
+          this.on(
+            'nfl_team_seasonlogs.season_year',
+            'league_nfl_team_seasonlogs.season_year'
+          )
           this.andOn(
             'nfl_team_seasonlogs.stat_key',
             'league_nfl_team_seasonlogs.stat_key'
           )
-          this.andOn('nfl_team_seasonlogs.tm', 'league_nfl_team_seasonlogs.tm')
+          this.andOn(
+            'nfl_team_seasonlogs.nfl_team',
+            'league_nfl_team_seasonlogs.nfl_team'
+          )
         })
         .where('league_nfl_team_seasonlogs.lid', leagueId)
     }

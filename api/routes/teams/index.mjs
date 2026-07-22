@@ -104,7 +104,7 @@ router.put('/:teamId', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const fields = ['name', 'image', 'abbrv', 'pc', 'ac']
+    const fields = ['name', 'image', 'abbrv', 'primary_color', 'accent_color']
 
     if (!field) {
       return res.status(400).send({ error: 'missing field' })
@@ -122,7 +122,7 @@ router.put('/:teamId', async (req, res) => {
       // TODO validate url
     }
 
-    if (['pc', 'ac'].includes(field)) {
+    if (['primary_color', 'accent_color'].includes(field)) {
       if (typeof value !== 'string' || value.length !== 6) {
         return res.status(400).send({ error: 'invalid value' })
       }

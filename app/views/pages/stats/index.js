@@ -23,9 +23,9 @@ const map_state_to_props = createSelector(
   (league, teams, app, league_user_historical_ranks) => {
     // calculate the all play win percentage
     teams = teams.map((team) => {
-      const wins = team.getIn(['stats', 'apWins'], 0)
-      const losses = team.getIn(['stats', 'apLosses'], 0)
-      const ties = team.getIn(['stats', 'apTies'], 0)
+      const wins = team.getIn(['stats', 'all_play_wins'], 0)
+      const losses = team.getIn(['stats', 'all_play_losses'], 0)
+      const ties = team.getIn(['stats', 'all_play_ties'], 0)
       const total = wins + losses + ties
       const all_play_win_pct = total > 0 ? (wins / total) * 100 : 0
       return team.setIn(['stats', 'all_play_win_pct'], all_play_win_pct)
@@ -49,18 +49,18 @@ const map_state_to_props = createSelector(
       'wins',
       'losses',
       'ties',
-      'apWins',
-      'apLosses',
-      'apTies',
-      'pf',
-      'pa',
-      'pdiff',
+      'all_play_wins',
+      'all_play_losses',
+      'all_play_ties',
+      'points_for',
+      'points_against',
+      'point_differential',
       'potential_points',
-      'pw',
-      'pl',
+      'potential_wins',
+      'potential_losses',
       'potential_points_pct',
-      'pmax',
-      'pmin',
+      'highest_weekly_score',
+      'lowest_weekly_score',
       'weekly_high_scores',
       'post_seasons',
       'championships',

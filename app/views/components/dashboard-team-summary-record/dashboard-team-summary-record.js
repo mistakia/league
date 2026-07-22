@@ -29,7 +29,7 @@ export default function DashboardTeamSummaryRecord({
           {t.getIn(['stats', 'ties'], 0)}
         </td>
         <td style={{ minWidth: '58px' }}>
-          {t.getIn(['stats', 'pf'], 0).toFixed(1)}
+          {t.getIn(['stats', 'points_for'], 0).toFixed(1)}
         </td>
       </tr>
     )

@@ -33,7 +33,9 @@ const ProbabilityLeverageChart = ({ teams }) => {
       low: team.get(`${current_data.data_key}_with_loss`),
       high: team.get(`${current_data.data_key}_with_win`),
       current: team.get(current_data.data_key),
-      color: team.get('pc') ? `#${team.get('pc').toString(16)}` : null
+      color: team.get('primary_color')
+        ? `#${team.get('primary_color').toString(16)}`
+        : null
     }))
     .toJS()
 

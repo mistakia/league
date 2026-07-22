@@ -12,8 +12,8 @@ export const Team = new Record({
   faab: null,
   waiver_order: null,
   draft_order: null,
-  pc: null,
-  ac: null,
+  primary_color: null,
+  accent_color: null,
   picks: new List(),
   stats: new Map(create_empty_fantasy_team_stats()),
 
@@ -41,8 +41,8 @@ export function createTeam({
   cap,
   faab,
   waiver_order,
-  pc,
-  ac,
+  primary_color,
+  accent_color,
 
   picks = [],
 
@@ -74,8 +74,8 @@ export function createTeam({
     faab,
     waiver_order,
     draft_order: params.draft_order,
-    pc,
-    ac,
+    primary_color,
+    accent_color,
     picks: new List(picks),
 
     stats: Map.isMap(stats) ? stats : stats ? new Map(stats) : undefined,

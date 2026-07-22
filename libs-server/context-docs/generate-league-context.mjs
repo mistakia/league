@@ -53,15 +53,15 @@ function build_standings({ teams, seasonlogs, managers, league }) {
       wins: log.wins || 0,
       losses: log.losses || 0,
       ties: log.ties || 0,
-      pf: Number(log.pf || 0),
-      pa: Number(log.pa || 0),
+      points_for: Number(log.points_for || 0),
+      points_against: Number(log.points_against || 0),
       division:
         league[`division_${team.div}_name`] ||
         (team.div ? `Division ${team.div}` : '—')
     }
   })
 
-  rows.sort((a, b) => b.wins - a.wins || b.pf - a.pf)
+  rows.sort((a, b) => b.wins - a.wins || b.points_for - a.points_for)
   return rows
 }
 
@@ -127,8 +127,8 @@ export default async function generate_league_context({
         `[${row.name}](${doc_url(base_url, { lid, tid: row.tid })})`,
         row.manager,
         `${row.wins}-${row.losses}-${row.ties}`,
-        row.pf.toFixed(2),
-        row.pa.toFixed(2),
+        row.points_for.toFixed(2),
+        row.points_against.toFixed(2),
         row.division
       ])
     )

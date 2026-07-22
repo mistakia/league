@@ -138,12 +138,12 @@ export default {
   league_nfl_team_seasonlogs_rank: create_league_seasonlog_field({
     column_title: 'Fantasy Points Rank Allowed By Position',
     header_label: 'Rank',
-    player_value_path: 'league_nfl_team_seasonlogs_rnk'
+    player_value_path: 'league_nfl_team_seasonlogs_rank'
   }),
   league_nfl_team_seasonlogs_points: create_league_seasonlog_field({
     column_title: 'Fantasy Points Allowed By Position',
     header_label: 'Pts',
-    player_value_path: 'league_nfl_team_seasonlogs_pts'
+    player_value_path: 'league_nfl_team_seasonlogs_points'
   }),
   // Passing Stats
   nfl_team_seasonlogs_passing_attempts: create_seasonlog_field({

@@ -49,7 +49,7 @@ export default async function ({
   )
   const cutlist_rows = await db('league_cutlist')
     .where('tid', tid)
-    .orderBy('order', 'asc')
+    .orderBy('sort_order', 'asc')
   const release_pids = []
 
   const isValid = () =>

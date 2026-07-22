@@ -87,13 +87,13 @@ export default function ScoreboardTeam({
         <div
           className='scoreboard__team-banner'
           style={{
-            backgroundColor: `#${team.pc || 'd0d0d0'}`
+            backgroundColor: `#${team.primary_color || 'd0d0d0'}`
           }}
         />
         <div
           className='scoreboard__team-line'
           style={{
-            backgroundColor: `#${team.ac || 'd0d0d0'}`
+            backgroundColor: `#${team.accent_color || 'd0d0d0'}`
           }}
         />
         <TeamImage tid={team.uid} year={matchup.year} />

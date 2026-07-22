@@ -475,16 +475,16 @@ const options = {
               description: 'Free Agent Acquisition Budget remaining',
               example: 150
             },
-            pc: {
+            primary_color: {
               type: 'string',
               nullable: true,
-              description: 'Primary contact/owner',
+              description: 'Primary team color (6-digit hex, no leading #)',
               example: null
             },
-            ac: {
+            accent_color: {
               type: 'string',
               nullable: true,
-              description: 'Assistant contact/co-owner',
+              description: 'Accent team color (6-digit hex, no leading #)',
               example: null
             }
           }
@@ -735,7 +735,7 @@ const options = {
         },
         TeamFieldEnum: {
           type: 'string',
-          enum: ['name', 'image', 'abbrv', 'pc', 'ac'],
+          enum: ['name', 'image', 'abbrv', 'primary_color', 'accent_color'],
           description: 'Fantasy team field that can be updated',
           example: 'name'
         },

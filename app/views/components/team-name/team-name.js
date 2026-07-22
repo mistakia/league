@@ -10,7 +10,7 @@ export default class TeamName extends React.Component {
   render = () => {
     const { team, abbrv, color, image, year } = this.props
 
-    const style = { color: `#${team.pc || '00000'}` }
+    const style = { color: `#${team.primary_color || '00000'}` }
     const name = (
       <div className='team__name' style={style}>
         {abbrv ? team.abbrv : team.name}
@@ -20,7 +20,7 @@ export default class TeamName extends React.Component {
     const colorEl = (
       <div
         className='team__color'
-        style={{ backgroundColor: `#${team.pc || '666666'}` }}
+        style={{ backgroundColor: `#${team.primary_color || '666666'}` }}
       />
     )
 

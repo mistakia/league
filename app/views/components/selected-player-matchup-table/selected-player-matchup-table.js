@@ -61,12 +61,12 @@ export default function SelectedPlayerMatchupTable({
         </div>
         <div className='table__cell metric' />
         <div className='table__cell metric'>
-          {(item.stats.pts || 0).toFixed(1)}
+          {(item.stats.points || 0).toFixed(1)}
         </div>
         <div className='table__cell metric'>
           {item.points_added_earned ? item.points_added_earned.toFixed(1) : '-'}
         </div>
-        <div className='table__cell metric'>{item.stats.rnk || '-'}</div>
+        <div className='table__cell metric'>{item.stats.rank || '-'}</div>
       </>
     )
     rows.push(

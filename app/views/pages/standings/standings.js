@@ -29,12 +29,12 @@ function StandingsTeam({ team, year, is_current_year, is_regular_season }) {
         {team.getIn(['stats', 'ties'], 0)}
       </div>
       <div className='table__cell metric wide_cell'>
-        {team.getIn(['stats', 'apWins'], 0)}-
-        {team.getIn(['stats', 'apLosses'], 0)}-
-        {team.getIn(['stats', 'apTies'], 0)}
+        {team.getIn(['stats', 'all_play_wins'], 0)}-
+        {team.getIn(['stats', 'all_play_losses'], 0)}-
+        {team.getIn(['stats', 'all_play_ties'], 0)}
       </div>
       <div className='table__cell metric wide_cell'>
-        {team.getIn(['stats', 'pf'], 0).toFixed(1)}
+        {team.getIn(['stats', 'points_for'], 0).toFixed(1)}
       </div>
       {is_current_year && is_regular_season && (
         <div className='table__cell metric'>{toPercent(team.playoff_odds)}</div>
@@ -65,7 +65,7 @@ function Standings({ teams, title, year, is_current_year, is_regular_season }) {
   const sorted = teams.sort(
     (a, b) =>
       b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
-      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+      b.getIn(['stats', 'points_for'], 0) - a.getIn(['stats', 'points_for'], 0)
   )
 
   const overallRows = []

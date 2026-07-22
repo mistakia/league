@@ -60,7 +60,7 @@ router.get('/?', async (req, res) => {
     const cutlist = await db('league_cutlist')
       .select('pid')
       .where('tid', teamId)
-      .orderBy('order', 'asc')
+      .orderBy('sort_order', 'asc')
 
     res.send(cutlist.map((p) => p.pid))
   } catch (error) {
@@ -187,7 +187,7 @@ router.post('/?', async (req, res) => {
       result.push({
         tid,
         pid,
-        order: index
+        sort_order: index
       })
     }
 

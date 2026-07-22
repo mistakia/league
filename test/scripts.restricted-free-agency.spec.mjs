@@ -223,7 +223,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       const cutlist = [player2, player3].map((p, idx) => ({
         pid: p.pid,
-        order: idx,
+        sort_order: idx,
         tid: team_id
       }))
       await knex('league_cutlist').insert(cutlist)

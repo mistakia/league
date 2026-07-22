@@ -3006,7 +3006,8 @@ export function get_overall_standings(state) {
       (a, b) =>
         b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
         b.getIn(['stats', 'ties'], 0) - a.getIn(['stats', 'ties'], 0) ||
-        b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+        b.getIn(['stats', 'points_for'], 0) -
+          a.getIn(['stats', 'points_for'], 0)
     )
 
     // top two teams
@@ -3016,9 +3017,11 @@ export function get_overall_standings(state) {
 
   let sortedDivisionLeaders = divisionLeaders.sort(
     (a, b) =>
-      b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) ||
-      b.getIn(['stats', 'apTies'], 0) - a.getIn(['stats', 'apTies'], 0) ||
-      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+      b.getIn(['stats', 'all_play_wins'], 0) -
+        a.getIn(['stats', 'all_play_wins'], 0) ||
+      b.getIn(['stats', 'all_play_ties'], 0) -
+        a.getIn(['stats', 'all_play_ties'], 0) ||
+      b.getIn(['stats', 'points_for'], 0) - a.getIn(['stats', 'points_for'], 0)
   )
 
   // TODO cleanup
@@ -3038,7 +3041,8 @@ export function get_overall_standings(state) {
     .filter((t) => !playoffTeamTids.includes(t.uid))
     .toList()
   const sortedWildcardTeams = wildcardTeams.sort(
-    (a, b) => b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
+    (a, b) =>
+      b.getIn(['stats', 'points_for'], 0) - a.getIn(['stats', 'points_for'], 0)
   )
 
   return {
@@ -3958,18 +3962,18 @@ export const get_league_user_historical_ranks = createSelector(
       'wins',
       'losses',
       'ties',
-      'apWins',
-      'apLosses',
-      'apTies',
-      'pf',
-      'pa',
-      'pdiff',
+      'all_play_wins',
+      'all_play_losses',
+      'all_play_ties',
+      'points_for',
+      'points_against',
+      'point_differential',
       'potential_points',
-      'pw',
-      'pl',
+      'potential_wins',
+      'potential_losses',
       'potential_points_pct',
-      'pmax',
-      'pmin',
+      'highest_weekly_score',
+      'lowest_weekly_score',
       'weekly_high_scores',
       'post_seasons',
       'championships',
@@ -4036,18 +4040,18 @@ export const get_league_team_historical_ranks = createSelector(
       'wins',
       'losses',
       'ties',
-      'apWins',
-      'apLosses',
-      'apTies',
-      'pf',
-      'pa',
-      'pdiff',
+      'all_play_wins',
+      'all_play_losses',
+      'all_play_ties',
+      'points_for',
+      'points_against',
+      'point_differential',
       'potential_points',
-      'pw',
-      'pl',
+      'potential_wins',
+      'potential_losses',
       'potential_points_pct',
-      'pmax',
-      'pmin',
+      'highest_weekly_score',
+      'lowest_weekly_score',
       'weekly_high_scores',
       'post_seasons',
       'championships',

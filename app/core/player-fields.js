@@ -104,7 +104,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
         const pos = player_map.get('primary_position')
         return `${pos}_AGAINST_ADJ${time_period_suffix}`
       },
-      percentile_field: 'pts',
+      percentile_field: 'points',
       fixed: 1,
       show_positivity: true,
       load: () => {
@@ -127,7 +127,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
         const isHome = game.h === nfl_team
         const opp = isHome ? game.v : game.h
         const stat_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
-        const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'pts'], 0)
+        const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'points'], 0)
 
         return pts
       }
@@ -140,7 +140,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
         const pos = player_map.get('primary_position')
         return `${pos}_AGAINST_AVG${time_period_suffix}`
       },
-      percentile_field: 'pts',
+      percentile_field: 'points',
       fixed: 1,
       load: () => {
         const positions = state.getIn(['players', 'positions'])
@@ -162,7 +162,7 @@ function PlayerFields({ week, opponent_time_period, state }) {
         const isHome = game.h === nfl_team
         const opp = isHome ? game.v : game.h
         const stat_key = `${pos}_AGAINST_AVG${time_period_suffix}`
-        const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'pts'], 0)
+        const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'points'], 0)
 
         return pts
       }

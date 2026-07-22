@@ -274,8 +274,8 @@ const router = express.Router({
  *                       draft_order: 3
  *                       cap: 200
  *                       faab: 150
- *                       pc: null
- *                       ac: null
+ *                       primary_color: null
+ *                       accent_color: null
  *                       playoff_odds: 0.85
  *                       division_odds: 0.45
  *                       bye_odds: 0.25

@@ -120,11 +120,11 @@ describe('API /teams - update', function () {
       expect(team.abbrv).to.equal(value)
     })
 
-    it('pc', async () => {
+    it('primary_color', async () => {
       // TODO
     })
 
-    it('ac', async () => {
+    it('accent_color', async () => {
       // TODO
     })
   })

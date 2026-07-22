@@ -91,7 +91,9 @@ export default function LeagueTeamsValueOverTime({
 
     series.push(item)
 
-    const team_color = team.pc ? `#${team.pc}` : next_color()
+    const team_color = team.primary_color
+      ? `#${team.primary_color}`
+      : next_color()
     colors.push(team_color)
   })
 

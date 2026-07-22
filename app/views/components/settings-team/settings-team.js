@@ -19,7 +19,10 @@ export default class SettingsTeam extends React.Component {
 
     const { team } = this.props
 
-    this.state = { pc: `#${team.pc}`, ac: `#${team.ac}` }
+    this.state = {
+      primary_color: `#${team.primary_color}`,
+      accent_color: `#${team.accent_color}`
+    }
   }
 
   handleSubmit = (type) => {
@@ -49,23 +52,23 @@ export default class SettingsTeam extends React.Component {
 
     this._pickrPrimary = new Pickr({
       el: this.primaryRef.current,
-      default: this.state.pc,
+      default: this.state.primary_color,
       theme: 'nano',
       closeOnScroll: true,
       ...options
     })
-      .on('change', (color) => this.setState({ pc: color.toHEXA() }))
-      .on('save', () => this.handleSubmit('pc'))
+      .on('change', (color) => this.setState({ primary_color: color.toHEXA() }))
+      .on('save', () => this.handleSubmit('primary_color'))
 
     this._pickrAlt = new Pickr({
       el: this.altRef.current,
-      default: this.state.ac,
+      default: this.state.accent_color,
       theme: 'nano',
       closeOnScroll: true,
       ...options
     })
-      .on('change', (color) => this.setState({ ac: color.toHEXA() }))
-      .on('save', () => this.handleSubmit('ac'))
+      .on('change', (color) => this.setState({ accent_color: color.toHEXA() }))
+      .on('save', () => this.handleSubmit('accent_color'))
   }
 
   componentWillUnmount = () => {
@@ -105,11 +108,11 @@ export default class SettingsTeam extends React.Component {
           <div className='settings__team-section team__brand'>
             <div
               className='team__brand-pc'
-              style={{ backgroundColor: this.state.pc }}
+              style={{ backgroundColor: this.state.primary_color }}
             />
             <div
               className='team__brand-ac'
-              style={{ backgroundColor: this.state.ac }}
+              style={{ backgroundColor: this.state.accent_color }}
             />
             <TeamImage tid={team.uid} />
             <div className='team__brand-colors'>

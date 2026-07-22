@@ -41,7 +41,7 @@ const calculateStandings = ({
       incomplete_optimal_lineup_weeks: new Set()
     }
 
-    teamStats[tid].stats.pmin = Infinity
+    teamStats[tid].stats.lowest_weekly_score = Infinity
   }
 
   const required_starter_count =
@@ -83,8 +83,10 @@ const calculateStandings = ({
         if (starter_pids.includes(pid)) {
           const starter = startingPlayers.find((p) => p.pid === pid)
           total = points.total + total
-          teamStats[tid].stats[`pPos${pos}`] += points.total
-          teamStats[tid].stats[`pSlot${starter.slot}`] += points.total
+          teamStats[tid].stats[`starter_points_${pos.toLowerCase()}`] +=
+            points.total
+          teamStats[tid].stats[`starter_slot_${starter.slot}_points`] +=
+            points.total
         }
         optimizePlayers.push({
           pid,
@@ -105,11 +107,13 @@ const calculateStandings = ({
         teamStats[tid].incomplete_optimal_lineup_weeks.add(week)
       }
 
-      if (teamStats[tid].stats.pmax < total) teamStats[tid].stats.pmax = total
-      if (teamStats[tid].stats.pmin > total) teamStats[tid].stats.pmin = total
+      if (teamStats[tid].stats.highest_weekly_score < total)
+        teamStats[tid].stats.highest_weekly_score = total
+      if (teamStats[tid].stats.lowest_weekly_score > total)
+        teamStats[tid].stats.lowest_weekly_score = total
 
       teamStats[tid].points.weeks[week] = total
-      teamStats[tid].stats.pf += total
+      teamStats[tid].stats.points_for += total
 
       // Update highest score tracking
       if (total > highest_score) {
@@ -135,24 +139,24 @@ const calculateStandings = ({
       const pHomeScore = teamStats[m.hid].potential_points_weekly[week]
       const pAwayScore = teamStats[m.aid].potential_points_weekly[week]
 
-      teamStats[m.hid].stats.pa += awayScore
-      teamStats[m.aid].stats.pa += homeScore
+      teamStats[m.hid].stats.points_against += awayScore
+      teamStats[m.aid].stats.points_against += homeScore
 
       if (homeScore > awayScore) {
         teamStats[m.hid].stats.wins += 1
         teamStats[m.aid].stats.losses += 1
 
         if (pAwayScore > homeScore) {
-          teamStats[m.aid].stats.pw += 1
-          teamStats[m.hid].stats.pl += 1
+          teamStats[m.aid].stats.potential_wins += 1
+          teamStats[m.hid].stats.potential_losses += 1
         }
       } else if (homeScore < awayScore) {
         teamStats[m.hid].stats.losses += 1
         teamStats[m.aid].stats.wins += 1
 
         if (pHomeScore > awayScore) {
-          teamStats[m.hid].stats.pw += 1
-          teamStats[m.aid].stats.pl += 1
+          teamStats[m.hid].stats.potential_wins += 1
+          teamStats[m.aid].stats.potential_losses += 1
         }
       } else {
         teamStats[m.hid].stats.ties += 1
@@ -167,9 +171,15 @@ const calculateStandings = ({
         .filter((p) => p.tid !== tid)
         .map((p) => p.points.weeks[week])
       const score = teamStats[tid].points.weeks[week]
-      teamStats[tid].stats.apWins += scores.filter((p) => p < score).length
-      teamStats[tid].stats.apLosses += scores.filter((p) => p > score).length
-      teamStats[tid].stats.apTies += scores.filter((p) => p === score).length
+      teamStats[tid].stats.all_play_wins += scores.filter(
+        (p) => p < score
+      ).length
+      teamStats[tid].stats.all_play_losses += scores.filter(
+        (p) => p > score
+      ).length
+      teamStats[tid].stats.all_play_ties += scores.filter(
+        (p) => p === score
+      ).length
     }
   }
 
@@ -180,7 +190,7 @@ const calculateStandings = ({
     (p) => p.stats.potential_points + p.stats.potential_points_penalty
   )
   const all_play_losses_per_team = Object.values(teamStats).map(
-    (p) => p.stats.apLosses
+    (p) => p.stats.all_play_losses
   )
   const min_potential_points = Math.min(...potential_points_per_team)
   const max_potential_points = Math.max(...potential_points_per_team)
@@ -190,7 +200,7 @@ const calculateStandings = ({
     const potential_points =
       teamStats[tid].stats.potential_points +
       teamStats[tid].stats.potential_points_penalty
-    const all_play_losses = teamStats[tid].stats.apLosses
+    const all_play_losses = teamStats[tid].stats.all_play_losses
     const normalized_potential_points =
       (potential_points - min_potential_points) /
       (max_potential_points - min_potential_points)
@@ -201,14 +211,18 @@ const calculateStandings = ({
       9 * normalized_potential_points + normalized_all_play_losses || 0
 
     const points = Object.values(teamStats[tid].points.weeks)
-    teamStats[tid].stats.pdev = points.length ? standardDeviation(points) : null
-    teamStats[tid].stats.pdiff =
-      teamStats[tid].stats.pf - teamStats[tid].stats.pa
+    teamStats[tid].stats.weekly_score_deviation = points.length
+      ? standardDeviation(points)
+      : null
+    teamStats[tid].stats.point_differential =
+      teamStats[tid].stats.points_for - teamStats[tid].stats.points_against
     teamStats[tid].stats.potential_points_pct =
-      (teamStats[tid].stats.pf / teamStats[tid].stats.potential_points) * 100 ||
-      null
+      (teamStats[tid].stats.points_for /
+        teamStats[tid].stats.potential_points) *
+        100 || null
 
-    if (teamStats[tid].stats.pmin === Infinity) teamStats[tid].stats.pmin = null
+    if (teamStats[tid].stats.lowest_weekly_score === Infinity)
+      teamStats[tid].stats.lowest_weekly_score = null
   }
 
   // calculate division finish
@@ -228,10 +242,10 @@ const calculateStandings = ({
       const b_losses = teamStats[team_b_tid].stats.losses
       const a_ties = teamStats[team_a_tid].stats.ties
       const b_ties = teamStats[team_b_tid].stats.ties
-      const a_points_for = teamStats[team_a_tid].stats.pf
-      const b_points_for = teamStats[team_b_tid].stats.pf
-      const a_all_play = teamStats[team_a_tid].stats.apWins
-      const b_all_play = teamStats[team_b_tid].stats.apWins
+      const a_points_for = teamStats[team_a_tid].stats.points_for
+      const b_points_for = teamStats[team_b_tid].stats.points_for
+      const a_all_play = teamStats[team_a_tid].stats.all_play_wins
+      const b_all_play = teamStats[team_b_tid].stats.all_play_wins
 
       if (a_wins > b_wins) return -1
       if (a_wins < b_wins) return 1
@@ -264,7 +278,7 @@ const calculateStandings = ({
   if (number_of_divisions === 4) {
     const all_division_winners = Object.values(teamStats)
       .filter((p) => p.stats.division_finish === 1)
-      .sort((a, b) => b.stats.apWins - a.stats.apWins)
+      .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
 
     bye_teams.push(all_division_winners[0], all_division_winners[1])
     division_wildcard_teams.push(
@@ -275,7 +289,7 @@ const calculateStandings = ({
     for (const div in divisions) {
       const sorted_division_leaders = Object.values(teamStats)
         .filter((p) => p.stats.division_finish < 3 && p.div === Number(div))
-        .sort((a, b) => b.stats.apWins - a.stats.apWins)
+        .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
 
       bye_teams.push(sorted_division_leaders[0])
       division_wildcard_teams.push(sorted_division_leaders[1])
@@ -285,7 +299,7 @@ const calculateStandings = ({
   }
 
   const sorted_bye_team_ids = bye_teams
-    .sort((a, b) => b.stats.apWins - a.stats.apWins)
+    .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
     .map((p) => p.tid)
 
   for (let i = 0; i < sorted_bye_team_ids.length; i++) {
@@ -294,7 +308,7 @@ const calculateStandings = ({
   }
 
   const sorted_division_wildcard_team_ids = division_wildcard_teams
-    .sort((a, b) => b.stats.apWins - a.stats.apWins)
+    .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
     .map((p) => p.tid)
 
   for (let i = 0; i < sorted_division_wildcard_team_ids.length; i++) {
@@ -306,7 +320,7 @@ const calculateStandings = ({
   const division_finish_threshold = number_of_divisions === 4 ? 1 : 2
   const remaining_teams = Object.values(teamStats)
     .filter((p) => p.stats.division_finish > division_finish_threshold)
-    .sort((a, b) => b.stats.pf - a.stats.pf)
+    .sort((a, b) => b.stats.points_for - a.stats.points_for)
     .map((p) => p.tid)
 
   for (let i = 0; i < remaining_teams.length; i++) {

@@ -53,18 +53,18 @@ const calculate_league_careerlogs = async ({ lid }) => {
       wins: 0,
       losses: 0,
       ties: 0,
-      apWins: 0,
-      apLosses: 0,
-      apTies: 0,
-      pf: 0,
-      pa: 0,
-      pdiff: 0,
+      all_play_wins: 0,
+      all_play_losses: 0,
+      all_play_ties: 0,
+      points_for: 0,
+      points_against: 0,
+      point_differential: 0,
       potential_points: 0,
-      pw: 0,
-      pl: 0,
+      potential_wins: 0,
+      potential_losses: 0,
       potential_points_pct: 0,
-      pmax: 0,
-      pmin: Number.MAX_VALUE,
+      highest_weekly_score: 0,
+      lowest_weekly_score: Number.MAX_VALUE,
       worst_regular_season_finish: 0,
       best_regular_season_finish: Number.MAX_VALUE,
       best_overall_finish: Number.MAX_VALUE,
@@ -95,17 +95,23 @@ const calculate_league_careerlogs = async ({ lid }) => {
       careerlog.wins += league_team_seasonlog.wins
       careerlog.losses += league_team_seasonlog.losses
       careerlog.ties += league_team_seasonlog.ties
-      careerlog.apWins += league_team_seasonlog.apWins
-      careerlog.apLosses += league_team_seasonlog.apLosses
-      careerlog.apTies += league_team_seasonlog.apTies
-      careerlog.pf += league_team_seasonlog.pf
-      careerlog.pa += league_team_seasonlog.pa
-      careerlog.pdiff += league_team_seasonlog.pdiff
+      careerlog.all_play_wins += league_team_seasonlog.all_play_wins
+      careerlog.all_play_losses += league_team_seasonlog.all_play_losses
+      careerlog.all_play_ties += league_team_seasonlog.all_play_ties
+      careerlog.points_for += league_team_seasonlog.points_for
+      careerlog.points_against += league_team_seasonlog.points_against
+      careerlog.point_differential += league_team_seasonlog.point_differential
       careerlog.potential_points += league_team_seasonlog.potential_points
-      careerlog.pw += league_team_seasonlog.pw
-      careerlog.pl += league_team_seasonlog.pl
-      careerlog.pmax = Math.max(careerlog.pmax, league_team_seasonlog.pmax)
-      careerlog.pmin = Math.min(careerlog.pmin, league_team_seasonlog.pmin)
+      careerlog.potential_wins += league_team_seasonlog.potential_wins
+      careerlog.potential_losses += league_team_seasonlog.potential_losses
+      careerlog.highest_weekly_score = Math.max(
+        careerlog.highest_weekly_score,
+        league_team_seasonlog.highest_weekly_score
+      )
+      careerlog.lowest_weekly_score = Math.min(
+        careerlog.lowest_weekly_score,
+        league_team_seasonlog.lowest_weekly_score
+      )
       careerlog.weekly_high_scores +=
         league_team_seasonlog.weekly_high_scores || 0
 
@@ -160,10 +166,10 @@ const calculate_league_careerlogs = async ({ lid }) => {
       )
       careerlog.best_season_all_play_pct = Math.max(
         careerlog.best_season_all_play_pct,
-        league_team_seasonlog.apWins /
-          (league_team_seasonlog.apWins +
-            league_team_seasonlog.apLosses +
-            league_team_seasonlog.apTies)
+        league_team_seasonlog.all_play_wins /
+          (league_team_seasonlog.all_play_wins +
+            league_team_seasonlog.all_play_losses +
+            league_team_seasonlog.all_play_ties)
       )
       careerlog.wildcards +=
         league_team_seasonlog.regular_season_finish >= 3 &&
@@ -231,7 +237,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
       careerlog.best_season_all_play_pct * 100
 
     careerlog.potential_points_pct =
-      (careerlog.pf / careerlog.potential_points) * 100
+      (careerlog.points_for / careerlog.potential_points) * 100
 
     return careerlog
   }
