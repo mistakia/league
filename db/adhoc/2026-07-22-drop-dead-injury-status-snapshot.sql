@@ -1,0 +1,24 @@
+-- 2026-07-22: Drop the dead table
+-- public.player_changelog_injury_status_snapshot_2026_05_23.
+--
+-- This is a one-time snapshot taken by db/adhoc/2026-05-23-normalize-injury-status-case.sql,
+-- which case-normalized injury-status values in player_changelog and captured the
+-- pre-normalization prev/new rows into this dated snapshot as a safety copy. That
+-- migration is long settled; the snapshot has served its purpose.
+--
+-- Dead: 10,888 rows, last written 2024-06-04, zero code readers. The only
+-- references in the repo are its creating adhoc (above) and the schema dump /
+-- league_reader grant. It is a copy of player_changelog rows (itself the audit
+-- changelog), so it holds nothing unique -- the normalized values live in
+-- player_changelog and the pre-normalization values are preserved in the safeguard
+-- dump below.
+--
+-- Pre-drop safeguard dump (pg_dump -Fc, table + data + ACL, restore-verified),
+-- held on the VPS and off-VPS on base-storage (md5 1a4d20569331010f6aecc73c9b1c2558):
+--   league:/root/backups/injury-status-snapshot-predrop-2026-07-22.dump
+--   base-storage:database-dumps/league-production/schema-redesign-safeguards/injury-status-snapshot-predrop-2026-07-22.dump
+--
+-- The table has no owned sequence, constraint, or index beyond the league_reader
+-- SELECT grant, which drops with it.
+
+DROP TABLE IF EXISTS public.player_changelog_injury_status_snapshot_2026_05_23;
