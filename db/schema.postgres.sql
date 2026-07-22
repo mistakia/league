@@ -360,9 +360,9 @@ DROP INDEX IF EXISTS public.idx_external_league_connections_platform;
 DROP INDEX IF EXISTS public.idx_external_league_connections_lid;
 DROP INDEX IF EXISTS public.idx_external_league_connections_last_sync;
 DROP INDEX IF EXISTS public.idx_external_league_connections_auto_sync;
-DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_year;
+DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_season_year;
 DROP INDEX IF EXISTS public.idx_espn_receiving_metrics_history;
-DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_year;
+DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_season_year;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_espn_win_rate_type;
 DROP INDEX IF EXISTS public.idx_draftkings_activity_last_seen;
 DROP INDEX IF EXISTS public.idx_draftkings_activity_checks;
@@ -615,10 +615,10 @@ ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_index DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_history DROP CONSTRAINT IF EXISTS espn_team_win_rates_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.espn_player_win_rates_index DROP CONSTRAINT IF EXISTS espn_player_win_rates_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.espn_player_win_rates_history DROP CONSTRAINT IF EXISTS espn_player_win_rates_history_pkey;
-ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_index DROP CONSTRAINT IF EXISTS dvoa_team_unit_seasonlogs_index_year_team_team_unit_key;
-ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_unit_seasonlogs_his_year_team_team_unit_week_key;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_index DROP CONSTRAINT IF EXISTS dvoa_team_unit_seasonlogs_index_season_year_team_team_unit_key;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_unit_seasonlogs_his_season_year_team_unit_week_key;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_index DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_index_pkey;
-ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_history_year_team_week_key;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_history_season_year_team_week_key;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS dvoa_team_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT IF EXISTS draftkings_category_activity_pkey;
 ALTER TABLE IF EXISTS ONLY public.dfs_contests DROP CONSTRAINT IF EXISTS dfs_contests_pkey;
@@ -2108,14 +2108,14 @@ CREATE TABLE public.draftkings_category_activity (
 --
 
 CREATE TABLE public.dvoa_team_gamelogs (
-    year integer NOT NULL,
+    season_year integer NOT NULL,
     week integer NOT NULL,
     nfl_team character varying(3) NOT NULL,
     total_dvoa numeric(5,1),
     offense_dvoa numeric(5,1),
     defense_dvoa numeric(5,1),
     special_teams_dvoa numeric(5,1),
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     pass_offense_dvoa numeric(5,1),
     pass_defense_dvoa numeric(5,1),
     rush_offense_dvoa numeric(5,1),
@@ -2128,7 +2128,7 @@ CREATE TABLE public.dvoa_team_gamelogs (
 --
 
 CREATE TABLE public.dvoa_team_seasonlogs_history (
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     nfl_team character varying(3) NOT NULL,
     total_dvoa_rank smallint,
@@ -2151,7 +2151,7 @@ CREATE TABLE public.dvoa_team_seasonlogs_history (
     future_schedule_rank smallint,
     total_variance numeric(5,1),
     total_variance_rank smallint,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     offense_weighted_dvoa numeric(5,1),
     offense_weighted_dvoa_rank smallint,
     pass_offense_dvoa numeric(5,1),
@@ -2206,7 +2206,7 @@ CREATE TABLE public.dvoa_team_seasonlogs_history (
 --
 
 CREATE TABLE public.dvoa_team_seasonlogs_index (
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     nfl_team character varying(3) NOT NULL,
     total_dvoa_rank smallint,
@@ -2269,7 +2269,7 @@ CREATE TABLE public.dvoa_team_seasonlogs_index (
     hidden_points_rank smallint,
     weather_points numeric(5,1),
     weather_points_rank smallint,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     last_week_offense_dvoa numeric,
     pass_defense_dvoa_rank smallint,
     rush_defense_dvoa_rank smallint,
@@ -2284,11 +2284,11 @@ CREATE TABLE public.dvoa_team_seasonlogs_index (
 --
 
 CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
-    year integer NOT NULL,
+    season_year integer NOT NULL,
     week smallint NOT NULL,
     nfl_team character varying(3) NOT NULL,
     team_unit public.team_unit NOT NULL,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     total_dvoa_rank integer,
     total_dvoa numeric,
     pass_dvoa_rank integer,
@@ -2471,11 +2471,11 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
 --
 
 CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
-    year integer NOT NULL,
+    season_year integer NOT NULL,
     week smallint NOT NULL,
     nfl_team character varying(3) NOT NULL,
     team_unit public.team_unit NOT NULL,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     total_dvoa_rank integer,
     total_dvoa numeric,
     pass_dvoa_rank integer,
@@ -2667,8 +2667,8 @@ CREATE TABLE public.espn_player_win_rates_history (
     win_rate numeric(5,4) NOT NULL,
     double_team_pct numeric(5,4) NOT NULL,
     espn_win_rate_type public.espn_win_rate_type NOT NULL,
-    "timestamp" bigint NOT NULL,
-    year integer NOT NULL
+    observed_at timestamp with time zone NOT NULL,
+    season_year integer NOT NULL
 );
 
 
@@ -2686,8 +2686,8 @@ CREATE TABLE public.espn_player_win_rates_index (
     win_rate numeric(5,4) NOT NULL,
     double_team_pct numeric(5,4) NOT NULL,
     espn_win_rate_type public.espn_win_rate_type NOT NULL,
-    "timestamp" bigint NOT NULL,
-    year integer NOT NULL
+    observed_at timestamp with time zone NOT NULL,
+    season_year integer NOT NULL
 );
 
 
@@ -2697,9 +2697,9 @@ CREATE TABLE public.espn_player_win_rates_index (
 
 CREATE TABLE public.espn_receiving_metrics_history (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     pos character varying(4) NOT NULL,
-    seas_type character varying(3) NOT NULL,
+    season_type character varying(3) NOT NULL,
     espn_rtm_routes integer,
     espn_rtm_targets integer,
     espn_rtm_recv_yds integer,
@@ -2707,7 +2707,7 @@ CREATE TABLE public.espn_receiving_metrics_history (
     espn_open_score integer,
     espn_catch_score integer,
     espn_yac_score integer,
-    "timestamp" bigint
+    observed_at timestamp with time zone
 );
 
 
@@ -2721,8 +2721,8 @@ CREATE TABLE public.espn_team_win_rates_history (
     run_stop_win_rate numeric(5,4),
     pass_block_win_rate numeric(5,4),
     run_block_win_rate numeric(5,4),
-    "timestamp" bigint NOT NULL,
-    year integer NOT NULL
+    observed_at timestamp with time zone NOT NULL,
+    season_year integer NOT NULL
 );
 
 
@@ -2736,8 +2736,8 @@ CREATE TABLE public.espn_team_win_rates_index (
     run_stop_win_rate numeric(5,4),
     pass_block_win_rate numeric(5,4),
     run_block_win_rate numeric(5,4),
-    "timestamp" bigint NOT NULL,
-    year integer NOT NULL
+    observed_at timestamp with time zone NOT NULL,
+    season_year integer NOT NULL
 );
 
 
@@ -27352,15 +27352,15 @@ ALTER TABLE ONLY public.draftkings_category_activity
 --
 
 ALTER TABLE ONLY public.dvoa_team_gamelogs
-    ADD CONSTRAINT dvoa_team_gamelogs_pkey PRIMARY KEY (year, week, nfl_team);
+    ADD CONSTRAINT dvoa_team_gamelogs_pkey PRIMARY KEY (season_year, week, nfl_team);
 
 
 --
--- Name: dvoa_team_seasonlogs_history dvoa_team_seasonlogs_history_year_team_week_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: dvoa_team_seasonlogs_history dvoa_team_seasonlogs_history_season_year_team_week_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dvoa_team_seasonlogs_history
-    ADD CONSTRAINT dvoa_team_seasonlogs_history_year_team_week_key UNIQUE (year, nfl_team, week);
+    ADD CONSTRAINT dvoa_team_seasonlogs_history_season_year_team_week_key UNIQUE (season_year, nfl_team, week);
 
 
 --
@@ -27368,23 +27368,23 @@ ALTER TABLE ONLY public.dvoa_team_seasonlogs_history
 --
 
 ALTER TABLE ONLY public.dvoa_team_seasonlogs_index
-    ADD CONSTRAINT dvoa_team_seasonlogs_index_pkey PRIMARY KEY (year, nfl_team);
+    ADD CONSTRAINT dvoa_team_seasonlogs_index_pkey PRIMARY KEY (season_year, nfl_team);
 
 
 --
--- Name: dvoa_team_unit_seasonlogs_history dvoa_team_unit_seasonlogs_his_year_team_team_unit_week_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: dvoa_team_unit_seasonlogs_history dvoa_team_unit_seasonlogs_his_season_year_team_unit_week_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dvoa_team_unit_seasonlogs_history
-    ADD CONSTRAINT dvoa_team_unit_seasonlogs_his_year_team_team_unit_week_key UNIQUE (year, nfl_team, team_unit, week);
+    ADD CONSTRAINT dvoa_team_unit_seasonlogs_his_season_year_team_unit_week_key UNIQUE (season_year, nfl_team, team_unit, week);
 
 
 --
--- Name: dvoa_team_unit_seasonlogs_index dvoa_team_unit_seasonlogs_index_year_team_team_unit_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: dvoa_team_unit_seasonlogs_index dvoa_team_unit_seasonlogs_index_season_year_team_team_unit_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dvoa_team_unit_seasonlogs_index
-    ADD CONSTRAINT dvoa_team_unit_seasonlogs_index_year_team_team_unit_key UNIQUE (year, nfl_team, team_unit);
+    ADD CONSTRAINT dvoa_team_unit_seasonlogs_index_season_year_team_team_unit_key UNIQUE (season_year, nfl_team, team_unit);
 
 
 --
@@ -27392,7 +27392,7 @@ ALTER TABLE ONLY public.dvoa_team_unit_seasonlogs_index
 --
 
 ALTER TABLE ONLY public.espn_player_win_rates_history
-    ADD CONSTRAINT espn_player_win_rates_history_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, "timestamp");
+    ADD CONSTRAINT espn_player_win_rates_history_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, observed_at);
 
 
 --
@@ -27400,7 +27400,7 @@ ALTER TABLE ONLY public.espn_player_win_rates_history
 --
 
 ALTER TABLE ONLY public.espn_player_win_rates_index
-    ADD CONSTRAINT espn_player_win_rates_index_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, year);
+    ADD CONSTRAINT espn_player_win_rates_index_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, season_year);
 
 
 --
@@ -27408,7 +27408,7 @@ ALTER TABLE ONLY public.espn_player_win_rates_index
 --
 
 ALTER TABLE ONLY public.espn_team_win_rates_history
-    ADD CONSTRAINT espn_team_win_rates_history_pkey PRIMARY KEY (team, "timestamp");
+    ADD CONSTRAINT espn_team_win_rates_history_pkey PRIMARY KEY (team, observed_at);
 
 
 --
@@ -27416,7 +27416,7 @@ ALTER TABLE ONLY public.espn_team_win_rates_history
 --
 
 ALTER TABLE ONLY public.espn_team_win_rates_index
-    ADD CONSTRAINT espn_team_win_rates_index_pkey PRIMARY KEY (team, year);
+    ADD CONSTRAINT espn_team_win_rates_index_pkey PRIMARY KEY (team, season_year);
 
 
 --
@@ -29557,24 +29557,24 @@ CREATE INDEX idx_espn_player_win_rates_history_espn_win_rate_type ON public.espn
 
 
 --
--- Name: idx_espn_player_win_rates_history_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_espn_player_win_rates_history_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_espn_player_win_rates_history_year ON public.espn_player_win_rates_history USING btree (year);
+CREATE INDEX idx_espn_player_win_rates_history_season_year ON public.espn_player_win_rates_history USING btree (season_year);
 
 
 --
 -- Name: idx_espn_receiving_metrics_history; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_espn_receiving_metrics_history ON public.espn_receiving_metrics_history USING btree (pid, year, seas_type, "timestamp");
+CREATE UNIQUE INDEX idx_espn_receiving_metrics_history ON public.espn_receiving_metrics_history USING btree (pid, season_year, season_type, observed_at);
 
 
 --
--- Name: idx_espn_team_win_rates_history_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_espn_team_win_rates_history_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_espn_team_win_rates_history_year ON public.espn_team_win_rates_history USING btree (year);
+CREATE INDEX idx_espn_team_win_rates_history_season_year ON public.espn_team_win_rates_history USING btree (season_year);
 
 
 --
