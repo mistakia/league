@@ -63,6 +63,11 @@ fs.writeFileSync(f, JSON.stringify(c, null, 2));
 '
 
 export NODE_ENV=development
+# Point the dev SPA at the loopback API rather than the machine's LAN IP: this
+# smoke is a single-machine, read-only affair, and the macOS Application
+# Firewall stealth-blocks incoming LAN-interface connections (loopback is
+# exempt), which would otherwise give the browser an "empty reply from server".
+export NC_DEV_API_HOST=127.0.0.1
 export LEAGUE_DB_HOST=127.0.0.1
 export LEAGUE_DB_PORT="$TUNNEL_PORT"
 export LEAGUE_DB_PASSWORD="$(NODE_ENV=production node -e 'import("#config").then(c=>process.stdout.write(String(c.default.postgres.connection.password)))')"

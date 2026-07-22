@@ -6,15 +6,22 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 
 import baseConfig from './webpack.config.base.mjs'
 
-let MACHINE_IP
-const ifaces = os.networkInterfaces()
-Object.keys(ifaces).forEach((ifname) => {
-  ifaces[ifname].forEach((iface) => {
-    if (iface.family === 'IPv4' && iface.internal === false) {
-      MACHINE_IP = iface.address
-    }
+// The dev API host the SPA calls. Defaults to the machine's LAN IP so the app
+// can be reached from other devices on the network (e.g. a phone). Override
+// with NC_DEV_API_HOST=127.0.0.1 for a single-machine session where the LAN
+// interface is unreachable (e.g. the macOS Application Firewall blocking
+// incoming connections) — dev:smoke does this, being a loopback-only smoke.
+let MACHINE_IP = process.env.NC_DEV_API_HOST
+if (!MACHINE_IP) {
+  const ifaces = os.networkInterfaces()
+  Object.keys(ifaces).forEach((ifname) => {
+    ifaces[ifname].forEach((iface) => {
+      if (iface.family === 'IPv4' && iface.internal === false) {
+        MACHINE_IP = iface.address
+      }
+    })
   })
-})
+}
 
 export default merge(baseConfig, {
   devtool: 'inline-source-map',
