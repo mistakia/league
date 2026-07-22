@@ -549,7 +549,7 @@ ALTER TABLE IF EXISTS ONLY public.pff_game_id_map DROP CONSTRAINT IF EXISTS pff_
 ALTER TABLE IF EXISTS ONLY public.personnel_count_discrepancies DROP CONSTRAINT IF EXISTS personnel_count_discrepancies_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_timestamp_key;
-ALTER TABLE IF EXISTS ONLY public.nfl_team_gamelogs DROP CONSTRAINT IF EXISTS nfl_team_gamelogs_esbid_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.nfl_team_gamelogs DROP CONSTRAINT IF EXISTS nfl_team_gamelogs_esbid_nfl_team_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_rusher DROP CONSTRAINT IF EXISTS nfl_plays_rusher_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS nfl_plays_receiver_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl_plays_player_pkey;
@@ -18386,25 +18386,25 @@ CREATE TABLE public.nfl_snaps_year_default (
 CREATE TABLE public.nfl_team_gamelogs (
     esbid integer NOT NULL,
     nfl_team character varying(3) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     off_pass_plays smallint,
-    off_pass_tds smallint,
-    off_pass_yds smallint,
-    off_pass_yds_per_play numeric(5,2),
+    off_pass_touchdowns smallint,
+    off_pass_yards smallint,
+    off_pass_yards_per_play numeric(5,2),
     off_pass_epa numeric(5,2),
     off_pass_epa_per_play numeric(5,2),
-    off_pass_atts smallint,
+    off_pass_attempts smallint,
     off_avg_time_to_throw numeric(5,2),
-    off_sack_yds smallint,
+    off_sack_yards smallint,
     off_sacks smallint,
     off_pressures smallint,
     off_avg_time_to_pressure numeric(5,2),
     off_yards_after_catch numeric(5,2),
-    off_yarsd_after_catch_over_expected numeric(5,2),
+    off_yards_after_catch_over_expected numeric(5,2),
     off_avg_target_separation numeric(5,2),
     off_run_plays smallint,
-    off_rush_tds smallint,
-    off_rush_yds smallint,
+    off_rush_touchdowns smallint,
+    off_rush_yards smallint,
     off_rush_yards_per_play numeric(5,2),
     off_rush_epa numeric(5,2),
     off_rush_epa_per_play numeric(5,2),
@@ -18414,13 +18414,13 @@ CREATE TABLE public.nfl_team_gamelogs (
     off_rush_yards_after_contact_per_attempt numeric(5,2),
     off_rush_yards_10_plus smallint,
     def_pass_plays smallint,
-    def_pass_yds smallint,
-    def_pass_yds_per_play numeric(5,2),
-    def_pass_tds smallint,
+    def_pass_yards smallint,
+    def_pass_yards_per_play numeric(5,2),
+    def_pass_touchdowns smallint,
     def_pass_epa numeric(5,2),
     def_pass_epa_per_play numeric(5,2),
     def_avg_time_to_throw numeric(5,2),
-    def_sack_yds smallint,
+    def_sack_yards smallint,
     def_sacks smallint,
     def_pressures smallint,
     def_avg_time_to_pressure numeric(5,2),
@@ -18429,10 +18429,10 @@ CREATE TABLE public.nfl_team_gamelogs (
     def_avg_target_separation numeric(5,2),
     def_tight_window_pct numeric(5,2),
     def_run_plays smallint,
-    def_rush_tds smallint,
-    def_rush_yds smallint,
-    def_rush_yds_per_play numeric(5,2),
-    def_rush_yds_10_plus smallint,
+    def_rush_touchdowns smallint,
+    def_rush_yards smallint,
+    def_rush_yards_per_play numeric(5,2),
+    def_rush_yards_10_plus smallint,
     def_rush_epa numeric(5,2),
     def_rush_epa_per_play numeric(5,2),
     def_rush_yards_over_expected numeric(5,2),
@@ -27908,11 +27908,11 @@ ALTER TABLE ONLY public.nfl_plays_rusher
 
 
 --
--- Name: nfl_team_gamelogs nfl_team_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: nfl_team_gamelogs nfl_team_gamelogs_esbid_nfl_team_season_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.nfl_team_gamelogs
-    ADD CONSTRAINT nfl_team_gamelogs_esbid_pid_year_unique UNIQUE (esbid, nfl_team, year);
+    ADD CONSTRAINT nfl_team_gamelogs_esbid_nfl_team_season_year_unique UNIQUE (esbid, nfl_team, season_year);
 
 
 --
