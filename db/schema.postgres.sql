@@ -3769,7 +3769,7 @@ CREATE TABLE public.league_baselines (
 CREATE TABLE public.league_cutlist (
     pid character varying(25),
     tid integer NOT NULL,
-    "order" smallint NOT NULL
+    sort_order smallint NOT NULL
 );
 
 
@@ -4074,12 +4074,12 @@ ALTER SEQUENCE public.league_migrations_lock_index_seq OWNED BY public.league_mi
 --
 
 CREATE TABLE public.league_nfl_team_seasonlogs (
-    tm character varying(7) NOT NULL,
+    nfl_team character varying(7) NOT NULL,
     stat_key character varying(100) NOT NULL,
-    year integer NOT NULL,
+    season_year integer NOT NULL,
     lid integer NOT NULL,
-    pts numeric(5,1),
-    rnk smallint
+    points numeric(5,1),
+    rank smallint
 );
 
 
@@ -4193,18 +4193,18 @@ CREATE TABLE public.league_team_careerlogs (
     wins smallint DEFAULT 0,
     losses smallint DEFAULT 0,
     ties smallint DEFAULT 0,
-    "apWins" smallint DEFAULT 0,
-    "apLosses" smallint DEFAULT 0,
-    "apTies" smallint DEFAULT 0,
-    pf numeric(8,2) DEFAULT 0.00,
-    pa numeric(8,2) DEFAULT 0.00,
-    pdiff numeric(8,2) DEFAULT 0.00,
+    all_play_wins smallint DEFAULT 0,
+    all_play_losses smallint DEFAULT 0,
+    all_play_ties smallint DEFAULT 0,
+    points_for numeric(8,2) DEFAULT 0.00,
+    points_against numeric(8,2) DEFAULT 0.00,
+    point_differential numeric(8,2) DEFAULT 0.00,
     potential_points numeric(8,2) DEFAULT 0.00,
-    pw smallint DEFAULT 0,
-    pl smallint DEFAULT 0,
+    potential_wins smallint DEFAULT 0,
+    potential_losses smallint DEFAULT 0,
     potential_points_pct numeric(5,2) DEFAULT 0.00,
-    pmax numeric(6,2) DEFAULT 0.00,
-    pmin numeric(6,2) DEFAULT 0.00,
+    highest_weekly_score numeric(6,2) DEFAULT 0.00,
+    lowest_weekly_score numeric(6,2) DEFAULT 0.00,
     worst_regular_season_finish smallint,
     best_regular_season_finish smallint,
     best_overall_finish smallint,
@@ -4369,55 +4369,55 @@ COMMENT ON TABLE public.league_team_player_seasonlogs IS 'Per-player surplus-val
 CREATE TABLE public.league_team_seasonlogs (
     lid integer NOT NULL,
     tid integer NOT NULL,
-    div smallint,
+    division smallint,
     year smallint NOT NULL,
     wins smallint DEFAULT '0'::smallint,
     losses smallint DEFAULT '0'::smallint,
     ties smallint DEFAULT '0'::smallint,
-    "apWins" smallint DEFAULT '0'::smallint,
-    "apLosses" smallint DEFAULT '0'::smallint,
-    "apTies" smallint DEFAULT '0'::smallint,
-    pf numeric(6,2) DEFAULT 0.00,
-    pa numeric(6,2) DEFAULT 0.00,
-    pdiff numeric(6,2) DEFAULT 0.00,
+    all_play_wins smallint DEFAULT '0'::smallint,
+    all_play_losses smallint DEFAULT '0'::smallint,
+    all_play_ties smallint DEFAULT '0'::smallint,
+    points_for numeric(6,2) DEFAULT 0.00,
+    points_against numeric(6,2) DEFAULT 0.00,
+    point_differential numeric(6,2) DEFAULT 0.00,
     potential_points numeric(6,2) DEFAULT 0.00,
     potential_points_penalty numeric(6,2) DEFAULT 0.00,
-    pw smallint DEFAULT '0'::smallint,
-    pl smallint DEFAULT '0'::smallint,
+    potential_wins smallint DEFAULT '0'::smallint,
+    potential_losses smallint DEFAULT '0'::smallint,
     potential_points_pct numeric(5,2) DEFAULT 0.00,
-    pmax numeric(5,2) DEFAULT 0.00,
-    pmin numeric(5,2) DEFAULT 0.00,
-    pdev numeric(5,2) DEFAULT 0.00,
+    highest_weekly_score numeric(5,2) DEFAULT 0.00,
+    lowest_weekly_score numeric(5,2) DEFAULT 0.00,
+    weekly_score_deviation numeric(5,2) DEFAULT 0.00,
     draft_order_index numeric(4,2) DEFAULT 0.00,
-    "pSlot1" numeric(6,2) DEFAULT 0.00,
-    "pSlot2" numeric(6,2) DEFAULT 0.00,
-    "pSlot3" numeric(6,2) DEFAULT 0.00,
-    "pSlot4" numeric(6,2) DEFAULT 0.00,
-    "pSlot5" numeric(6,2) DEFAULT 0.00,
-    "pSlot6" numeric(6,2) DEFAULT 0.00,
-    "pSlot7" numeric(6,2) DEFAULT 0.00,
-    "pSlot8" numeric(6,2) DEFAULT 0.00,
-    "pSlot9" numeric(6,2) DEFAULT 0.00,
-    "pSlot10" numeric(6,2) DEFAULT 0.00,
-    "pSlot11" numeric(6,2) DEFAULT 0.00,
-    "pSlot12" numeric(6,2) DEFAULT 0.00,
-    "pSlot13" numeric(6,2) DEFAULT 0.00,
-    "pSlot14" numeric(6,2) DEFAULT 0.00,
-    "pSlot15" numeric(6,2) DEFAULT 0.00,
-    "pSlot16" numeric(6,2),
-    "pSlot17" numeric(6,2),
-    "pPosQB" numeric(6,2) DEFAULT 0.00,
-    "pPosRB" numeric(6,2) DEFAULT 0.00,
-    "pPosWR" numeric(6,2) DEFAULT 0.00,
-    "pPosTE" numeric(6,2) DEFAULT 0.00,
-    "pPosK" numeric(6,2) DEFAULT 0.00,
-    "pPosDST" numeric(6,2) DEFAULT 0.00,
+    starter_slot_1_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_2_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_3_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_4_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_5_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_6_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_7_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_8_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_9_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_10_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_11_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_12_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_13_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_14_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_15_points numeric(6,2) DEFAULT 0.00,
+    starter_slot_16_points numeric(6,2),
+    starter_slot_17_points numeric(6,2),
+    starter_points_qb numeric(6,2) DEFAULT 0.00,
+    starter_points_rb numeric(6,2) DEFAULT 0.00,
+    starter_points_wr numeric(6,2) DEFAULT 0.00,
+    starter_points_te numeric(6,2) DEFAULT 0.00,
+    starter_points_k numeric(6,2) DEFAULT 0.00,
+    starter_points_dst numeric(6,2) DEFAULT 0.00,
     division_finish smallint,
     regular_season_finish smallint,
     post_season_finish smallint,
     overall_finish smallint,
     weekly_high_scores smallint DEFAULT 0,
-    "pSlot18" numeric(6,2)
+    starter_slot_18_points numeric(6,2)
 );
 
 
@@ -4431,18 +4431,18 @@ CREATE TABLE public.league_user_careerlogs (
     wins smallint DEFAULT 0,
     losses smallint DEFAULT 0,
     ties smallint DEFAULT 0,
-    "apWins" smallint DEFAULT 0,
-    "apLosses" smallint DEFAULT 0,
-    "apTies" smallint DEFAULT 0,
-    pf numeric(8,2) DEFAULT 0.00,
-    pa numeric(8,2) DEFAULT 0.00,
-    pdiff numeric(8,2) DEFAULT 0.00,
+    all_play_wins smallint DEFAULT 0,
+    all_play_losses smallint DEFAULT 0,
+    all_play_ties smallint DEFAULT 0,
+    points_for numeric(8,2) DEFAULT 0.00,
+    points_against numeric(8,2) DEFAULT 0.00,
+    point_differential numeric(8,2) DEFAULT 0.00,
     potential_points numeric(8,2) DEFAULT 0.00,
-    pw smallint DEFAULT 0,
-    pl smallint DEFAULT 0,
+    potential_wins smallint DEFAULT 0,
+    potential_losses smallint DEFAULT 0,
     potential_points_pct numeric(5,2) DEFAULT 0.00,
-    pmax numeric(6,2) DEFAULT 0.00,
-    pmin numeric(6,2) DEFAULT 0.00,
+    highest_weekly_score numeric(6,2) DEFAULT 0.00,
+    lowest_weekly_score numeric(6,2) DEFAULT 0.00,
     worst_regular_season_finish smallint,
     best_regular_season_finish smallint,
     best_overall_finish smallint,
@@ -18470,9 +18470,9 @@ CREATE TABLE public.nfl_team_gamelogs (
 --
 
 CREATE TABLE public.nfl_team_seasonlogs (
-    tm character varying(7) NOT NULL,
+    nfl_team character varying(7) NOT NULL,
     stat_key character varying(100) NOT NULL,
-    year integer NOT NULL,
+    season_year integer NOT NULL,
     passing_attempts numeric(5,2) DEFAULT 0.00,
     passing_completions numeric(5,2) DEFAULT 0.00,
     passing_yards numeric(6,2) DEFAULT 0.00,
@@ -25909,8 +25909,8 @@ CREATE TABLE public.teams (
     draft_order smallint,
     cap integer DEFAULT 0 NOT NULL,
     faab integer DEFAULT 0 NOT NULL,
-    pc character varying(6),
-    ac character varying(6)
+    primary_color character varying(6),
+    accent_color character varying(6)
 );
 
 
@@ -29063,7 +29063,7 @@ CREATE UNIQUE INDEX idx_24629_tid_pid ON public.league_cutlist USING btree (tid,
 -- Name: idx_24662_league_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24662_league_stat ON public.league_nfl_team_seasonlogs USING btree (lid, stat_key, year, tm);
+CREATE UNIQUE INDEX idx_24662_league_stat ON public.league_nfl_team_seasonlogs USING btree (lid, stat_key, season_year, nfl_team);
 
 
 --
@@ -29168,7 +29168,7 @@ CREATE UNIQUE INDEX idx_24722_play_stat ON public.nfl_play_stats_current_week US
 -- Name: idx_24741_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24741_stat ON public.nfl_team_seasonlogs USING btree (stat_key, year, tm);
+CREATE UNIQUE INDEX idx_24741_stat ON public.nfl_team_seasonlogs USING btree (stat_key, season_year, nfl_team);
 
 
 --
