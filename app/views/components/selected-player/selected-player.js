@@ -136,12 +136,12 @@ export default function SelectedPlayer({
   const external_button_items = []
 
   const has_pfr_link = Boolean(
-    player_map.get('last_name') && player_map.get('pfr_id')
+    player_map.get('last_name') && player_map.get('pfr_player_id')
   )
   if (has_pfr_link) {
     const open_pfr_link = () => {
       window.open(
-        `https://www.pro-football-reference.com/players/${player_map.get('last_name')[0].toUpperCase()}/${player_map.get('pfr_id')}.htm`,
+        `https://www.pro-football-reference.com/players/${player_map.get('last_name')[0].toUpperCase()}/${player_map.get('pfr_player_id')}.htm`,
         '_blank'
       )
     }
@@ -152,11 +152,11 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_rotowire_link = Boolean(player_map.get('rotowire_id'))
+  const has_rotowire_link = Boolean(player_map.get('rotowire_player_id'))
   if (has_rotowire_link) {
     const open_rotowire_link = () => {
       window.open(
-        `https://rotowire.com/football/player.php?id=${player_map.get('rotowire_id')}`,
+        `https://rotowire.com/football/player.php?id=${player_map.get('rotowire_player_id')}`,
         '_blank'
       )
     }
@@ -167,11 +167,13 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_fantasy_data_link = Boolean(player_map.get('fantasy_data_id'))
+  const has_fantasy_data_link = Boolean(
+    player_map.get('fantasy_data_player_id')
+  )
   if (has_fantasy_data_link) {
     const open_fantasy_data_link = () => {
       window.open(
-        `https://fantasydata.com/nfl/player-fantasy/${player_map.get('fantasy_data_id')}`,
+        `https://fantasydata.com/nfl/player-fantasy/${player_map.get('fantasy_data_player_id')}`,
         '_blank'
       )
     }
@@ -197,11 +199,11 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_yahoo_link = Boolean(player_map.get('yahoo_id'))
+  const has_yahoo_link = Boolean(player_map.get('yahoo_player_id'))
   if (has_yahoo_link) {
     const open_yahoo_link = () => {
       window.open(
-        `https://sports.yahoo.com/nfl/players/${player_map.get('yahoo_id')}`,
+        `https://sports.yahoo.com/nfl/players/${player_map.get('yahoo_player_id')}`,
         '_blank'
       )
     }

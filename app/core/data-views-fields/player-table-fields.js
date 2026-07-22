@@ -434,7 +434,7 @@ export default function ({ is_logged_in }) {
       header_label: 'PFR ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'pfr_id',
+      player_value_path: 'pfr_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_otc_id: {
@@ -450,7 +450,7 @@ export default function ({ is_logged_in }) {
       header_label: 'DraftKings ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'draftkings_id',
+      player_value_path: 'draftkings_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_pff_id: {
@@ -490,7 +490,7 @@ export default function ({ is_logged_in }) {
       header_label: 'CFBRef ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'cfbref_id',
+      player_value_path: 'cfbref_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_twitter_username: {
@@ -506,7 +506,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Swish ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'swish_id',
+      player_value_path: 'swish_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_rts_id: {
