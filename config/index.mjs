@@ -9,7 +9,7 @@ const config_dir = dirname(current_file_path)
 
 // sops/age decrypt path for the production config (2026-06-29 envelope-encryption
 // cutover). config/config-production.json is sops/age-encrypted at rest, its
-// values encrypted to the league domain's recipient set {league, league-worker-1,
+// values encrypted to the league domain's recipient set {league, digitalocean-0,
 // base-storage} (policy in .sops.yaml). Decryption shells out to the system
 // `sops` binary (on PATH on every recipient host via bootstrap
 // install-sops-age.sh / brew). Fail-closed by construction: a missing binary, a

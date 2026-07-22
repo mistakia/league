@@ -12,7 +12,7 @@ module.exports = {
       env_production: {
         NODE_ENV: 'production',
         DEBUG: 'import-live-odds-worker,draftkings,pinnacle,prizepicks',
-        BASE_MACHINE_SLUG: 'league-worker-1',
+        BASE_MACHINE_SLUG: 'digitalocean-0',
         BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key',
         USER_BASE_DIRECTORY:
           process.env.USER_BASE_DIRECTORY ||

@@ -4,7 +4,7 @@
 # JWT secret, league API auth token, Resend API key),
 # encrypted to the league domain's recipient set — every host that loads
 # config/index.mjs under NODE_ENV=production and therefore decrypts the file:
-# the league main host (.45, PM2 server + scheduled scripts), league-worker-1
+# the league main host (.45, PM2 server + scheduled scripts), digitalocean-0
 # (.107, odds/plays import workers), base-storage (the Underdog best-ball
 # ADP import cron), and macbook2025 (10.27.0.161, the league import + check
 # scheduled-commands — caesars-odds, pff/pfr imports, cross-source checks —
@@ -26,7 +26,7 @@
 # AES-256-GCM column key for external_league_connections.credentials_encrypted
 # (users' third-party fantasy-platform logins). Compartmentalized to {league}
 # ONLY — the sole host running the external-league encrypt/decrypt site (main API
-# process on .45). league-worker-1, base-storage, and macbook2025 hold league
+# process on .45). digitalocean-0, base-storage, and macbook2025 hold league
 # CONFIG secrets but must NOT decrypt user credentials (least-privilege), so they
 # are deliberately absent here. Rule listed FIRST (first-specific-match wins).
 creation_rules:

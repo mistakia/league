@@ -9,7 +9,7 @@ echo "Target Node version: v$NODE_VERSION"
 echo ""
 
 # Remote servers (Linux)
-for host in league league-worker-1; do
+for host in league digitalocean-0; do
   echo "Setting up $host..."
   ssh $host "source ~/.nvm/nvm.sh && nvm install $NODE_VERSION && npm install -g yarn pm2 && ln -sfn ~/.nvm/versions/node/v$NODE_VERSION ~/.nvm/versions/node/current && echo 'Done: current -> v$NODE_VERSION (with yarn, pm2)'"
   echo ""

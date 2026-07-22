@@ -26,7 +26,7 @@ const AUTH_TAG_LENGTH = 16 // 128 bits
 // external_league_connections.credentials_encrypted (users' third-party
 // fantasy-platform logins). Delivered via sops/age to {league} ONLY -- the sole
 // host that runs the external-league encrypt/decrypt site (main API process on
-// .45). league-worker-1 / base-storage / macbook2025 hold league CONFIG secrets
+// .45). digitalocean-0 / base-storage / macbook2025 hold league CONFIG secrets
 // but must NOT decrypt user credentials (least-privilege). The key is resolved
 // LAZILY inside get_encryption_key() on first use and memoized -- NEVER at
 // module scope: this module is pulled transitively by the API route graph that
