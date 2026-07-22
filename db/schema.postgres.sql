@@ -4689,14 +4689,14 @@ CREATE TABLE public.nfl_games (
 --
 
 CREATE TABLE public.nfl_games_changelog (
+    id bigint NOT NULL,
     esbid character varying(36) NOT NULL,
     column_name text NOT NULL,
     previous_value text,
     new_value text,
-    changed_at timestamp with time zone NOT NULL,
     source text NOT NULL,
     reason text,
-    id bigint NOT NULL
+    changed_at timestamp with time zone NOT NULL
 );
 
 
@@ -18848,15 +18848,15 @@ CREATE TABLE public.pff_player_seasonlogs (
 --
 
 CREATE TABLE public.pff_player_seasonlogs_changelog (
+    id bigint NOT NULL,
     pid character varying(25) NOT NULL,
     season_year smallint NOT NULL,
     column_name text NOT NULL,
     previous_value text,
     new_value text,
-    changed_at timestamp with time zone NOT NULL,
     source text NOT NULL,
     reason text,
-    id bigint NOT NULL
+    changed_at timestamp with time zone NOT NULL
 );
 
 
@@ -19029,15 +19029,15 @@ ALTER SEQUENCE public.placed_wagers_wager_id_seq OWNED BY public.placed_wagers.w
 --
 
 CREATE TABLE public.play_changelog (
+    id bigint NOT NULL,
     esbid bigint NOT NULL,
     play_id bigint NOT NULL,
     column_name text NOT NULL,
     previous_value text,
     new_value text,
-    changed_at timestamp with time zone NOT NULL,
     source text NOT NULL,
     reason text,
-    id bigint NOT NULL
+    changed_at timestamp with time zone NOT NULL
 );
 
 
