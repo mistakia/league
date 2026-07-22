@@ -82,6 +82,16 @@ const shorthand_columns = new Map([
   ['intp_pid', 'interceptor_pid']
 ])
 
+// Season-grain naming: the standard is `season_year` + `season_type`, so a bare
+// `year` column and the abbreviated `seas_type` both violate it. Exact-name
+// match so `season_year`/`draft_year`/`season_type` never flag. Value is the
+// intended full replacement (report only). These drive the coordinated
+// season_year sweep across the remaining time-series and league tables.
+const season_grain_columns = new Map([
+  ['year', 'season_year'],
+  ['seas_type', 'season_type']
+])
+
 // Bare single-letter / ambiguous team-role spellings (checked as exact names).
 const ambiguous_team_columns = new Set(['v', 'h', 'team', 'club', 'clubcode'])
 
@@ -212,6 +222,8 @@ const RULES = {
   quoted_camelcase: 'Quoted/camelCase identifier (snake_case required)',
   reserved_word: 'Reserved word used as identifier',
   shorthand: 'Domain shorthand (full words required)',
+  season_grain:
+    'Non-conforming season grain (season_year/season_type required)',
   ambiguous_team: 'Ambiguous team-role spelling (qualify explicitly)',
   external_id: 'External-id column not following {system}_{entitytype}_id',
   timestamp_type: 'Non-timestamptz timestamp representation',
@@ -252,6 +264,16 @@ function check_column(table, col) {
     })
   }
 
+  // Season grain (bare `year` / abbreviated `seas_type`).
+  if (season_grain_columns.has(lower)) {
+    findings.push({
+      rule: 'season_grain',
+      table,
+      column: col.name,
+      hint: season_grain_columns.get(lower)
+    })
+  }
+
   // Ambiguous team-role bare names.
   if (ambiguous_team_columns.has(lower)) {
     findings.push({ rule: 'ambiguous_team', table, column: col.name })
@@ -262,9 +284,11 @@ function check_column(table, col) {
     /_?id$/.test(lower) && !allowlisted_identifiers.has(lower)
   // {system}_{entitytype}_id, where {system} may be multi-token (gsis_it,
   // fantasy_data) so gsis_it_player_id / fantasy_data_player_id conform; plus the
-  // two-token form and the {role}_pid form.
+  // two-token form and the {role}_pid form. `league` is an entitytype so the
+  // external-league keys conform once renamed (leagues.espn_id -> espn_league_id,
+  // .sleeper_id -> sleeper_league_id).
   const conforms_external =
-    /^[a-z0-9]+(_[a-z0-9]+)*_(player|team|game)_id$/.test(lower) ||
+    /^[a-z0-9]+(_[a-z0-9]+)*_(player|team|game|league)_id$/.test(lower) ||
     /^[a-z0-9]+_[a-z0-9]+_id$/.test(lower) ||
     /_pid$/.test(lower)
   if (
