@@ -24,10 +24,10 @@
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-NTSL-000909', 'Test', 'Ntsl', 'T.Ntsl', 'Test Ntsl', 'ZZ', 'ZZ', '2000-01-01', 2020, 'ZZZ')",
-      "INSERT INTO nfl_team_seasonlogs (tm, stat_key, year, catch_rate) VALUES ('ZZZ', 'QB_TOTAL', 2024, 0.60)",
-      "INSERT INTO nfl_team_seasonlogs (tm, stat_key, year, catch_rate) VALUES ('ZZZ', 'QB_TOTAL', 2025, 0.80)"
+      "INSERT INTO nfl_team_seasonlogs (nfl_team, stat_key, season_year, catch_rate) VALUES ('ZZZ', 'QB_TOTAL', 2024, 0.60)",
+      "INSERT INTO nfl_team_seasonlogs (nfl_team, stat_key, season_year, catch_rate) VALUES ('ZZZ', 'QB_TOTAL', 2025, 0.80)"
     ],
-    "reference_sql": "SELECT AVG(catch_rate) AS nfl_team_seasonlogs_catch_rate_0 FROM nfl_team_seasonlogs WHERE tm = 'ZZZ' AND stat_key = 'QB_TOTAL' AND year IN (2024, 2025)",
+    "reference_sql": "SELECT AVG(catch_rate) AS nfl_team_seasonlogs_catch_rate_0 FROM nfl_team_seasonlogs WHERE nfl_team = 'ZZZ' AND stat_key = 'QB_TOTAL' AND season_year IN (2024, 2025)",
     "compare_columns": ["nfl_team_seasonlogs_catch_rate_0"]
   },
   "tags": ["year_offset", "nfl_team_seasonlogs", "range", "result-equivalence"]
