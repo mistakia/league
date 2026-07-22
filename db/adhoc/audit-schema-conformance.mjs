@@ -113,6 +113,17 @@ const accepted_kept_identifiers = new Set([
   'player_dimension.ngs_size_score'
 ])
 
+// Operator-ratified metric columns whose name legitimately ends in a word that
+// collides with the timestamp `_at` heuristic. These are SIS run-direction
+// metrics ("bounce/position percentage when run at [the gap]") -- numeric
+// percentages, not timestamps. Keyed table.column so the exemption is narrow.
+const accepted_non_timestamp_columns = new Set([
+  'player_college_careerlogs.bounce_pct_when_run_at',
+  'player_college_careerlogs.pos_pct_when_run_at',
+  'player_college_seasonlogs.bounce_pct_when_run_at',
+  'player_college_seasonlogs.pos_pct_when_run_at'
+])
+
 // External-id columns that end in _id but do not follow {system}_{entitytype}_id.
 // Detected by pattern; this set is the known non-conforming roster for messaging.
 const known_bad_external_ids = new Set([
@@ -273,7 +284,10 @@ function check_column(table, col) {
     const is_plain_timestamp =
       /timestamp without time zone/.test(type) ||
       (/^timestamp\b/.test(type) && !is_tztimestamp)
-    if (is_epoch_int || is_varchar || is_plain_timestamp) {
+    if (
+      (is_epoch_int || is_varchar || is_plain_timestamp) &&
+      !accepted_non_timestamp_columns.has(`${table}.${lower}`)
+    ) {
       findings.push({
         rule: 'timestamp_type',
         table,

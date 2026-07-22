@@ -250,7 +250,7 @@ DROP INDEX IF EXISTS public.idx_player_fantrax_id;
 DROP INDEX IF EXISTS public.idx_player_fantasylabs_id;
 DROP INDEX IF EXISTS public.idx_player_dfs_ownership_year_week;
 DROP INDEX IF EXISTS public.idx_player_dfs_ownership_draft_group;
-DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season;
+DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season_year;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_adp_index_year;
@@ -527,7 +527,7 @@ ALTER TABLE IF EXISTS ONLY public.player_dfs_ownership DROP CONSTRAINT IF EXISTS
 ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
-ALTER TABLE IF EXISTS ONLY public.player_college_seasonlogs DROP CONSTRAINT IF EXISTS player_college_seasonlogs_pid_season_unique;
+ALTER TABLE IF EXISTS ONLY public.player_college_seasonlogs DROP CONSTRAINT IF EXISTS player_college_seasonlogs_pid_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_college_careerlogs DROP CONSTRAINT IF EXISTS player_college_careerlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_changelog DROP CONSTRAINT IF EXISTS player_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
@@ -19670,7 +19670,7 @@ CREATE TABLE public.player_college_careerlogs (
     completions integer,
     comp_pct numeric,
     adot numeric,
-    "int" integer,
+    interceptions integer,
     receptions integer,
     targets integer,
     pass_block_points numeric,
@@ -19858,7 +19858,7 @@ CREATE TABLE public.player_college_careerlogs (
 
 CREATE TABLE public.player_college_seasonlogs (
     pid character varying(25) NOT NULL,
-    year integer NOT NULL,
+    season_year integer NOT NULL,
     team_name text,
     games integer,
     games_started integer,
@@ -19888,7 +19888,7 @@ CREATE TABLE public.player_college_seasonlogs (
     completions integer,
     comp_pct numeric,
     adot numeric,
-    "int" integer,
+    interceptions integer,
     receptions integer,
     targets integer,
     pass_block_points numeric,
@@ -28084,11 +28084,11 @@ ALTER TABLE ONLY public.player_college_careerlogs
 
 
 --
--- Name: player_college_seasonlogs player_college_seasonlogs_pid_season_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_college_seasonlogs player_college_seasonlogs_pid_season_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_college_seasonlogs
-    ADD CONSTRAINT player_college_seasonlogs_pid_season_unique UNIQUE (pid, year);
+    ADD CONSTRAINT player_college_seasonlogs_pid_season_year_unique UNIQUE (pid, season_year);
 
 
 --
@@ -30341,10 +30341,10 @@ CREATE INDEX idx_player_college_seasonlogs_pid ON public.player_college_seasonlo
 
 
 --
--- Name: idx_player_college_seasonlogs_season; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_college_seasonlogs_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_college_seasonlogs_season ON public.player_college_seasonlogs USING btree (year);
+CREATE INDEX idx_player_college_seasonlogs_season_year ON public.player_college_seasonlogs USING btree (season_year);
 
 
 --
