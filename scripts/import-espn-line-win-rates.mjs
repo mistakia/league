@@ -31,7 +31,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
     return { ...result, skipped: true }
   }
 
-  const timestamp = Math.floor(Date.now() / 1000)
+  const observed_at = new Date()
 
   // Preload player cache for fast lookups
   log('Preloading player cache...')
@@ -197,8 +197,8 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
         win_rate: win_rate_entry[`${data_key}_win_rate`],
         double_team_pct: win_rate_entry.double_team_pct,
         espn_win_rate_type: win_rate_type,
-        timestamp,
-        year: current_season.year
+        observed_at,
+        season_year: current_season.year
       }
 
       player_history_inserts.push(insert_data)
@@ -209,7 +209,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   await db('espn_player_win_rates_history').insert(player_history_inserts)
   await db('espn_player_win_rates_index')
     .insert(player_index_inserts)
-    .onConflict(['player_name', 'espn_id', 'espn_win_rate_type', 'year'])
+    .onConflict(['player_name', 'espn_id', 'espn_win_rate_type', 'season_year'])
     .merge()
 
   result.player_win_rates_inserted = player_history_inserts.length
@@ -221,8 +221,8 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   for (const team of extracted_data.team) {
     const insert_data = {
       ...team,
-      timestamp,
-      year: current_season.year
+      observed_at,
+      season_year: current_season.year
     }
 
     team_history_inserts.push(insert_data)
@@ -232,7 +232,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   await db('espn_team_win_rates_history').insert(team_history_inserts)
   await db('espn_team_win_rates_index')
     .insert(team_index_inserts)
-    .onConflict(['team', 'year'])
+    .onConflict(['team', 'season_year'])
     .merge()
 
   result.team_win_rates_inserted = team_history_inserts.length

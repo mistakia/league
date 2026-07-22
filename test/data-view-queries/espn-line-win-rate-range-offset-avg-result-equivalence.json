@@ -20,14 +20,14 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(espn_player_win_rates_index.win_rate) FROM espn_player_win_rates_index WHERE espn_player_win_rates_index.pid = player.pid AND espn_player_win_rates_index.year IN (2024,2025) AND espn_player_win_rates_index.espn_win_rate_type = 'PASS_RUSH') AS \"espn_line_win_rate_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(espn_player_win_rates_index.win_rate) FROM espn_player_win_rates_index WHERE espn_player_win_rates_index.pid = player.pid AND espn_player_win_rates_index.season_year IN (2024,2025) AND espn_player_win_rates_index.espn_win_rate_type = 'PASS_RUSH') AS \"espn_line_win_rate_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-ESPN-000902', 'Test', 'Espn', 'T.Espn', 'Test Espn', 'ZZ', 'ZZ', '2000-01-01', 2020)",
-      "INSERT INTO espn_player_win_rates_index (pid, player_name, espn_id, team, wins, plays, win_rate, double_team_pct, espn_win_rate_type, timestamp, year) VALUES ('TEST-ESPN-000902', 'Test Espn', 9990001, 'KC', 40, 100, 0.40, 0.10, 'PASS_RUSH', 1700000000, 2024)",
-      "INSERT INTO espn_player_win_rates_index (pid, player_name, espn_id, team, wins, plays, win_rate, double_team_pct, espn_win_rate_type, timestamp, year) VALUES ('TEST-ESPN-000902', 'Test Espn', 9990001, 'KC', 60, 100, 0.60, 0.10, 'PASS_RUSH', 1700000000, 2025)"
+      "INSERT INTO espn_player_win_rates_index (pid, player_name, espn_id, team, wins, plays, win_rate, double_team_pct, espn_win_rate_type, observed_at, season_year) VALUES ('TEST-ESPN-000902', 'Test Espn', 9990001, 'KC', 40, 100, 0.40, 0.10, 'PASS_RUSH', to_timestamp(1700000000), 2024)",
+      "INSERT INTO espn_player_win_rates_index (pid, player_name, espn_id, team, wins, plays, win_rate, double_team_pct, espn_win_rate_type, observed_at, season_year) VALUES ('TEST-ESPN-000902', 'Test Espn', 9990001, 'KC', 60, 100, 0.60, 0.10, 'PASS_RUSH', to_timestamp(1700000000), 2025)"
     ],
-    "reference_sql": "SELECT AVG(win_rate) AS espn_line_win_rate_0 FROM espn_player_win_rates_index WHERE pid = 'TEST-ESPN-000902' AND year IN (2024,2025) AND espn_win_rate_type = 'PASS_RUSH'",
+    "reference_sql": "SELECT AVG(win_rate) AS espn_line_win_rate_0 FROM espn_player_win_rates_index WHERE pid = 'TEST-ESPN-000902' AND season_year IN (2024,2025) AND espn_win_rate_type = 'PASS_RUSH'",
     "compare_columns": ["espn_line_win_rate_0"]
   },
   "tags": [

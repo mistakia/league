@@ -59,7 +59,7 @@ const dvoa_team_unit_seasonlogs_table_alias = ({ params = {} } = {}) => {
 const dvoa_team_source = {
   table: 'dvoa_team_unit_seasonlogs_index',
   grain: 'team_year',
-  key_columns: { team: 'nfl_team', year: 'year' },
+  key_columns: { team: 'nfl_team', year: 'season_year' },
   year_default: (params) => [get_default_params({ params }).year[0]],
   extra_predicates: (params) => {
     const { team_unit } = get_default_params({ params })

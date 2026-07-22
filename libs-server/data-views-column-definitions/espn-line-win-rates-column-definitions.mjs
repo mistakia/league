@@ -29,7 +29,7 @@ const espn_player_win_rates_table_alias = ({ params = {} } = {}) => {
 const espn_player_source = {
   table: 'espn_player_win_rates_index',
   grain: 'player_year',
-  key_columns: { pid: 'pid', year: 'year' },
+  key_columns: { pid: 'pid', year: 'season_year' },
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => [
     {
@@ -56,7 +56,7 @@ const espn_team_win_rates_table_alias = ({ params = {} } = {}) => {
 const espn_team_source = {
   table: 'espn_team_win_rates_index',
   grain: 'team_year',
-  key_columns: { team: 'team', year: 'year' },
+  key_columns: { team: 'team', year: 'season_year' },
   year_default: (params) => {
     const raw = params.year ?? current_season.stats_season_year
     const arr = Array.isArray(raw) ? raw : [raw]

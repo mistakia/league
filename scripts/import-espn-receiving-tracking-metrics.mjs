@@ -66,7 +66,7 @@ const import_espn_receiving_tracking_metrics = async ({
     'primary_position'
   )
   const player_seasonlogs_inserts = []
-  const timestamp = Math.round(Date.now() / 1000)
+  const observed_at = new Date()
 
   for (const item of single_season_data) {
     const player = players.find((p) => p.gsis_player_id === item.gsis_id)
@@ -116,9 +116,26 @@ const import_espn_receiving_tracking_metrics = async ({
       .onConflict(['pid', 'year', 'seas_type'])
       .merge()
 
+    const espn_receiving_metrics_inserts = player_seasonlogs_inserts.map(
+      (i) => ({
+        pid: i.pid,
+        season_year: i.year,
+        pos: i.pos,
+        season_type: i.seas_type,
+        espn_rtm_routes: i.espn_rtm_routes,
+        espn_rtm_targets: i.espn_rtm_targets,
+        espn_rtm_recv_yds: i.espn_rtm_recv_yds,
+        espn_overall_score: i.espn_overall_score,
+        espn_open_score: i.espn_open_score,
+        espn_catch_score: i.espn_catch_score,
+        espn_yac_score: i.espn_yac_score,
+        observed_at
+      })
+    )
+
     await db('espn_receiving_metrics_history')
-      .insert(player_seasonlogs_inserts.map((i) => ({ ...i, timestamp })))
-      .onConflict(['pid', 'year', 'seas_type', 'timestamp'])
+      .insert(espn_receiving_metrics_inserts)
+      .onConflict(['pid', 'season_year', 'season_type', 'observed_at'])
       .merge()
 
     result.players_updated = player_seasonlogs_inserts.length
