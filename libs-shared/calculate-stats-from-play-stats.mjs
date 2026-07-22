@@ -27,9 +27,9 @@ const calculateStatsFromPlayStats = (playStats) => {
   stats.rush_attempts_goaline = 0
 
   // New statistics for fantasy points support
-  stats.rush_first_down = 0
-  stats.rec_first_down = 0
-  stats.ry_excluding_kneels = 0
+  stats.rushing_first_downs = 0
+  stats.receiving_first_downs = 0
+  stats.rushing_yards_excluding_kneels = 0
 
   for (const playStat of playStats) {
     switch (playStat.statId) {
@@ -71,17 +71,17 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 10:
         // Rushing Yards - rushing yards with credit for rushing attempt
-        stats.ra += 1
-        stats.ry += playStat.yards
+        stats.rushing_attempts += 1
+        stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.qb_kneel) {
-          stats.ry_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
         // Track rushing first downs using play-level first_down flag
         if (playStat.first_down) {
-          stats.rush_first_down += 1
+          stats.rushing_first_downs += 1
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
@@ -95,17 +95,17 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 11:
         // Rushing Touchdown - rushing TD with yards and attempt credit
-        stats.ra += 1
-        stats.ry += playStat.yards
+        stats.rushing_attempts += 1
+        stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.qb_kneel) {
-          stats.ry_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
         // Track rushing first downs using play-level first_down flag
         if (playStat.first_down) {
-          stats.rush_first_down += 1
+          stats.rushing_first_downs += 1
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
@@ -115,16 +115,16 @@ const calculateStatsFromPlayStats = (playStats) => {
         if (playStat.ydl_100 <= 5) {
           stats.rush_attempts_goaline += 1
         }
-        stats.tdr += 1
+        stats.rushing_touchdowns += 1
         break
 
       case 12:
         // Lateral Rushing - yards after lateral (no attempt credit)
-        stats.ry += playStat.yards
+        stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.qb_kneel) {
-          stats.ry_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
@@ -132,41 +132,41 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 13:
         // Lateral Rushing Touchdown - rushing TD after lateral (no attempt credit)
-        stats.ry += playStat.yards
+        stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.qb_kneel) {
-          stats.ry_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
-        stats.tdr += 1
+        stats.rushing_touchdowns += 1
         break
 
       case 14:
         // Passing Incomplete - incomplete pass attempt
-        stats.pa += 1
+        stats.passing_attempts += 1
         break
 
       case 15:
         // Passing Yards - completed pass with yards
-        stats.pa += 1
-        stats.pc += 1
-        stats.py += playStat.yards
+        stats.passing_attempts += 1
+        stats.passing_completions += 1
+        stats.passing_yards += playStat.yards
         break
 
       case 16:
         // Passing Touchdown - passing TD with yards
-        stats.pa += 1
-        stats.pc += 1
-        stats.py += playStat.yards
-        stats.tdp += 1
+        stats.passing_attempts += 1
+        stats.passing_completions += 1
+        stats.passing_yards += playStat.yards
+        stats.passing_touchdowns += 1
         break
 
       case 19:
         // Interception - pass intercepted
-        stats.ints += 1
-        stats.pa += 1
+        stats.passing_interceptions += 1
+        stats.passing_attempts += 1
         break
 
       case 20:
@@ -175,8 +175,8 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 21:
         // Receiving Yards - reception with yards
-        stats.rec += 1
-        stats.recy += playStat.yards
+        stats.receptions += 1
+        stats.receiving_yards += playStat.yards
         stats.longest_reception = Math.max(
           stats.longest_reception,
           playStat.yards
@@ -186,15 +186,15 @@ const calculateStatsFromPlayStats = (playStats) => {
         }
         // Track receiving first downs using play-level first_down flag
         if (playStat.first_down) {
-          stats.rec_first_down += 1
+          stats.receiving_first_downs += 1
         }
         break
 
       case 22:
         // Receiving Touchdown - receiving TD with yards
-        stats.rec += 1
-        stats.tdrec += 1
-        stats.recy += playStat.yards
+        stats.receptions += 1
+        stats.receiving_touchdowns += 1
+        stats.receiving_yards += playStat.yards
         stats.longest_reception = Math.max(
           stats.longest_reception,
           playStat.yards
@@ -204,19 +204,19 @@ const calculateStatsFromPlayStats = (playStats) => {
         }
         // Track receiving first downs using play-level first_down flag
         if (playStat.first_down) {
-          stats.rec_first_down += 1
+          stats.receiving_first_downs += 1
         }
         break
 
       case 23:
         // Lateral Receiving - yards after lateral (no reception credit)
-        stats.recy += playStat.yards
+        stats.receiving_yards += playStat.yards
         break
 
       case 24:
         // Lateral Receiving Touchdown - receiving TD after lateral (no reception credit)
-        stats.recy += playStat.yards
-        stats.tdrec += 1
+        stats.receiving_yards += playStat.yards
+        stats.receiving_touchdowns += 1
         break
 
       case 25:
@@ -257,7 +257,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 34:
         // Punt Return Touchdown - punt returned for TD
-        stats.prtd += 1
+        stats.punt_return_touchdowns += 1
         break
 
       case 35:
@@ -266,7 +266,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 36:
         // Lateral Punt Return Touchdown - punt return TD after lateral
-        stats.prtd += 1
+        stats.punt_return_touchdowns += 1
         break
 
       case 37:
@@ -307,7 +307,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 46:
         // Kickoff Return Touchdown - kickoff returned for TD
-        stats.krtd += 1
+        stats.kickoff_return_touchdowns += 1
         break
 
       case 47:
@@ -316,7 +316,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 48:
         // Lateral Kickoff Return Touchdown - kickoff return TD after lateral
-        stats.krtd += 1
+        stats.kickoff_return_touchdowns += 1
         break
 
       case 49:
@@ -349,7 +349,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 56:
         // Fumble Recovery Touchdown (Own) - own fumble recovered for TD
-        stats.fum_ret_td += 1
+        stats.fumble_return_touchdowns += 1
         break
 
       case 57:
@@ -358,7 +358,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 58:
         // Lateral Fumble Recovery TD (Own) - own fumble recovery TD after lateral
-        stats.fum_ret_td += 1
+        stats.fumble_return_touchdowns += 1
         break
 
       case 59:
@@ -367,7 +367,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 60:
         // Fumble Recovery Touchdown (Opponent) - opponent fumble recovered for TD
-        stats.fum_ret_td += 1
+        stats.fumble_return_touchdowns += 1
         break
 
       case 61:
@@ -376,7 +376,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 62:
         // Lateral Fumble Recovery TD (Opponent) - opponent fumble recovery TD after lateral
-        stats.fum_ret_td += 1
+        stats.fumble_return_touchdowns += 1
         break
 
       case 63:
@@ -399,20 +399,20 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 70:
         // Field Goal Made - made field goal with distance
-        stats.fgm += 1
+        stats.field_goals_made += 1
         stats.fga += 1
-        stats.fgy += Math.max(playStat.yards, 30)
+        stats.field_goal_yards += Math.max(playStat.yards, 30)
         stats._fgm.push(playStat.yards)
         if (playStat.yards < 20) {
-          stats.fg19 += 1
+          stats.field_goals_made_0_19_yards += 1
         } else if (playStat.yards < 30) {
-          stats.fg29 += 1
+          stats.field_goals_made_20_29_yards += 1
         } else if (playStat.yards < 40) {
-          stats.fg39 += 1
+          stats.field_goals_made_30_39_yards += 1
         } else if (playStat.yards < 50) {
-          stats.fg49 += 1
+          stats.field_goals_made_40_49_yards += 1
         } else {
-          stats.fg50 += 1
+          stats.field_goals_made_50_plus_yards += 1
         }
         break
 
@@ -423,7 +423,7 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 72:
         // Extra Point Made - made extra point
         stats.xpa += 1
-        stats.xpm += 1
+        stats.extra_points_made += 1
         break
 
       case 73:
@@ -437,7 +437,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 75:
         // Two Point Rush Good - two point conversion rushing successful
-        stats.twoptc += 1
+        stats.two_point_conversions += 1
         break
 
       case 76:
@@ -446,7 +446,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 77:
         // Two Point Pass Good - two point conversion passing successful
-        stats.twoptc += 1
+        stats.two_point_conversions += 1
         break
 
       case 78:
@@ -527,7 +527,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 104:
         // Two Point Reception Good - two point conversion reception successful
-        stats.twoptc += 1
+        stats.two_point_conversions += 1
         break
 
       case 105:
@@ -536,7 +536,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 106:
         // Fumble Lost - fumble lost to opponent
-        stats.fuml += 1
+        stats.fumbles_lost += 1
         break
 
       case 107:
@@ -567,7 +567,7 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 115:
         // Target - pass target (intended receiver)
-        stats.trg += 1
+        stats.targets += 1
         stats.targeted_air_yards += playStat.dot
         if (playStat.ydl_100 <= 20) {
           stats.redzone_targets += 1

@@ -27,47 +27,47 @@ const log = debug('audit-player-gamelogs')
 debug.enable('audit-player-gamelogs,pro-football-reference')
 
 const format_gamelog = ({
-  pa = 0,
-  pc = 0,
-  py = 0,
-  ints = 0,
-  tdp = 0,
+  passing_attempts = 0,
+  passing_completions = 0,
+  passing_yards = 0,
+  passing_interceptions = 0,
+  passing_touchdowns = 0,
 
-  ra = 0,
-  ry = 0,
-  tdr = 0,
-  fuml = 0,
+  rushing_attempts = 0,
+  rushing_yards = 0,
+  rushing_touchdowns = 0,
+  fumbles_lost = 0,
 
-  trg = 0,
-  rec = 0,
-  recy = 0,
-  tdrec = 0,
+  targets = 0,
+  receptions = 0,
+  receiving_yards = 0,
+  receiving_touchdowns = 0,
 
-  // twoptc
+  // two_point_conversions
 
-  prtd = 0,
-  krtd = 0
+  punt_return_touchdowns = 0,
+  kickoff_return_touchdowns = 0
 }) => ({
-  pa,
-  pc,
-  py,
-  ints,
-  tdp,
+  passing_attempts,
+  passing_completions,
+  passing_yards,
+  passing_interceptions,
+  passing_touchdowns,
 
-  ra,
-  ry,
-  tdr,
-  fuml,
+  rushing_attempts,
+  rushing_yards,
+  rushing_touchdowns,
+  fumbles_lost,
 
-  trg,
-  rec,
-  recy,
-  tdrec,
+  targets,
+  receptions,
+  receiving_yards,
+  receiving_touchdowns,
 
-  // twoptc
+  // two_point_conversions
 
-  prtd,
-  krtd
+  punt_return_touchdowns,
+  kickoff_return_touchdowns
 })
 
 const parse_duration_to_ms = (duration) => {

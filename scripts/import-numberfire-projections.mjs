@@ -48,17 +48,17 @@ const run = async ({ dry = false } = {}) => {
 
   $('table.projection-table.no-fix tbody tr').each((i, el) => {
     const data = {}
-    data.py = $(el).find('td.pass_yd').text().trim()
-    data.tdp = $(el).find('td.pass_td').text().trim()
-    data.ints = $(el).find('td.pass_int').text().trim()
+    data.passing_yards = $(el).find('td.pass_yd').text().trim()
+    data.passing_touchdowns = $(el).find('td.pass_td').text().trim()
+    data.passing_interceptions = $(el).find('td.pass_int').text().trim()
 
-    data.ra = $(el).find('td.rush_att').text().trim()
-    data.ry = $(el).find('td.rush_yd').text().trim()
-    data.tdr = $(el).find('td.rush_td').text().trim()
+    data.rushing_attempts = $(el).find('td.rush_att').text().trim()
+    data.rushing_yards = $(el).find('td.rush_yd').text().trim()
+    data.rushing_touchdowns = $(el).find('td.rush_td').text().trim()
 
-    data.rec = $(el).find('td.rec').text().trim()
-    data.recy = $(el).find('td.rec_yd').text().trim()
-    data.tdrec = $(el).find('td.rec_td').text().trim()
+    data.receptions = $(el).find('td.rec').text().trim()
+    data.receiving_yards = $(el).find('td.rec_yd').text().trim()
+    data.receiving_touchdowns = $(el).find('td.rec_td').text().trim()
 
     items[i].data = data
   })

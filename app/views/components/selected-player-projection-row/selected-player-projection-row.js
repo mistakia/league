@@ -4,33 +4,46 @@ import PropTypes from 'prop-types'
 import PercentileMetric from '@components/percentile-metric'
 
 const defense_stats = [
-  'dpa',
-  'dya',
-  'dsk',
-  'dint',
-  'dff',
-  'drf',
-  'dtno',
-  'dfds',
-  'dblk',
-  'dsf',
-  'dtpr',
-  'dtd',
-  'prtd',
-  'krtd'
+  'defensive_points_against',
+  'defensive_yards_against',
+  'defensive_sacks',
+  'defensive_interceptions',
+  'defensive_forced_fumbles',
+  'defensive_recovered_fumbles',
+  'defensive_three_and_outs',
+  'defensive_fourth_down_stops',
+  'defensive_blocked_kicks',
+  'defensive_safeties',
+  'defensive_two_point_returns',
+  'defensive_touchdowns',
+  'punt_return_touchdowns',
+  'kickoff_return_touchdowns'
 ]
-const kicker_stats = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
+const kicker_stats = [
+  'extra_points_made',
+  'field_goals_made',
+  'field_goals_made_0_19_yards',
+  'field_goals_made_20_29_yards',
+  'field_goals_made_30_39_yards',
+  'field_goals_made_40_49_yards',
+  'field_goals_made_50_plus_yards'
+]
 const passing_rushing_stats = [
-  ['pa', 'py', 'tdp', 'ints'],
-  ['ra', 'ry', 'tdr', 'fuml']
+  [
+    'passing_attempts',
+    'passing_yards',
+    'passing_touchdowns',
+    'passing_interceptions'
+  ],
+  ['rushing_attempts', 'rushing_yards', 'rushing_touchdowns', 'fumbles_lost']
 ]
 const rushing_receiving_stats = [
-  ['ra', 'ry', 'tdr', 'fuml'],
-  ['trg', 'rec', 'recy', 'tdrec']
+  ['rushing_attempts', 'rushing_yards', 'rushing_touchdowns', 'fumbles_lost'],
+  ['targets', 'receptions', 'receiving_yards', 'receiving_touchdowns']
 ]
 const receiving_rushing_stats = [
-  ['trg', 'rec', 'recy', 'tdrec'],
-  ['ra', 'ry', 'tdr', 'fuml']
+  ['targets', 'receptions', 'receiving_yards', 'receiving_touchdowns'],
+  ['rushing_attempts', 'rushing_yards', 'rushing_touchdowns', 'fumbles_lost']
 ]
 
 const get_stat_fields = (pos) => {

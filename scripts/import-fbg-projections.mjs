@@ -22,21 +22,21 @@ debug.enable('import:projections,get-player,fetch')
 const week = Math.max(current_season.week, 1)
 
 const format_projection = (stats) => ({
-  py: stats.pyd,
-  pa: stats.att,
-  pc: stats.cmp,
-  tdp: stats.ptd,
-  ints: stats.icp,
+  passing_yards: stats.pyd,
+  passing_attempts: stats.att,
+  passing_completions: stats.cmp,
+  passing_touchdowns: stats.ptd,
+  passing_interceptions: stats.icp,
 
-  ra: stats.rsh,
-  ry: stats.rshyd,
-  tdr: stats.rshtd,
+  rushing_attempts: stats.rsh,
+  rushing_yards: stats.rshyd,
+  rushing_touchdowns: stats.rshtd,
 
-  fuml: stats.fum,
+  fumbles_lost: stats.fum,
 
-  rec: stats.rec,
-  recy: stats.recyd,
-  tdrec: stats.rectd
+  receptions: stats.rec,
+  receiving_yards: stats.recyd,
+  receiving_touchdowns: stats.rectd
 })
 
 const timestamp = Math.floor(Date.now() / 1000)

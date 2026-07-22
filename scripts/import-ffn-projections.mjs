@@ -20,36 +20,36 @@ const timestamp = new Date()
 const getURL = (position) =>
   `https://www.fantasyfootballnerd.com/service/weekly-projections/json/${config.ffn}/${position}/${week}`
 const getProjection = (stats) => ({
-  py: stats.passYds,
-  pa: stats.passAtt,
-  pc: stats.passCmp,
-  tdp: stats.passTD,
-  ints: stats.passInt,
+  passing_yards: stats.passYds,
+  passing_attempts: stats.passAtt,
+  passing_completions: stats.passCmp,
+  passing_touchdowns: stats.passTD,
+  passing_interceptions: stats.passInt,
 
-  ra: stats.rushAtt,
-  ry: stats.rushYds,
-  tdr: stats.rushTD,
+  rushing_attempts: stats.rushAtt,
+  rushing_yards: stats.rushYds,
+  rushing_touchdowns: stats.rushTD,
 
-  fuml: stats.fumblesLost,
+  fumbles_lost: stats.fumblesLost,
 
-  rec: stats.receptions,
-  recy: stats.recYds,
-  tdrec: stats.recTD,
+  receptions: stats.receptions,
+  receiving_yards: stats.recYds,
+  receiving_touchdowns: stats.recTD,
 
-  fg19: parseFloat(stats.fg) / 4,
-  fg29: parseFloat(stats.fg) / 4,
-  fg39: parseFloat(stats.fg) / 4,
-  fg49: parseFloat(stats.fg) / 4,
-  xpm: stats.xp,
+  field_goals_made_0_19_yards: parseFloat(stats.fg) / 4,
+  field_goals_made_20_29_yards: parseFloat(stats.fg) / 4,
+  field_goals_made_30_39_yards: parseFloat(stats.fg) / 4,
+  field_goals_made_40_49_yards: parseFloat(stats.fg) / 4,
+  extra_points_made: stats.xp,
 
-  dint: stats.defInt,
-  dff: stats.defFF,
-  drf: stats.defFR,
-  dsk: stats.defSack,
-  dtd: stats.defTD,
-  dsf: stats.defSafety,
-  dpa: stats.defPA,
-  dya: stats.defYdsAllowed
+  defensive_interceptions: stats.defInt,
+  defensive_forced_fumbles: stats.defFF,
+  defensive_recovered_fumbles: stats.defFR,
+  defensive_sacks: stats.defSack,
+  defensive_touchdowns: stats.defTD,
+  defensive_safeties: stats.defSafety,
+  defensive_points_against: stats.defPA,
+  defensive_yards_against: stats.defYdsAllowed
 })
 
 const run = async ({ dry = false } = {}) => {

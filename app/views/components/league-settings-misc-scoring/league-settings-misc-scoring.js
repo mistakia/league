@@ -16,7 +16,7 @@ export default function LeagueSettingsMiscScoring({
   const body = (
     <EditableLeagueField
       label='Two PT Conv.'
-      field='twoptc'
+      field='two_point_conversions'
       type='int'
       max={4}
       min={0}

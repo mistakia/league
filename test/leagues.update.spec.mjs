@@ -78,7 +78,7 @@ describe('API /leagues - update', function () {
         .put(`/api/leagues/${lid}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          field: 'rec',
+          field: 'receptions',
           value
         })
 
@@ -90,7 +90,7 @@ describe('API /leagues - update', function () {
       res.body.value.should.equal(value)
       const league = await getLeague({ lid })
 
-      expect(league.rec).to.equal(value)
+      expect(league.receptions).to.equal(value)
     })
   })
 

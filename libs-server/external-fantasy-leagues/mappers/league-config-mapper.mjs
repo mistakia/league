@@ -14,69 +14,69 @@ export default class LeagueConfigMapper {
     // Platform-specific scoring mappings
     this.scoring_mappings = {
       sleeper: {
-        pass_yd: 'py',
-        pass_td: 'tdp',
-        pass_int: 'ints',
-        pass_cmp: 'pc',
-        pass_att: 'pa',
-        rush_yd: 'ry',
-        rush_td: 'tdr',
-        rush_att: 'ra',
-        rush_fd: 'rush_first_down',
-        rec: 'rec',
-        rec_yd: 'recy',
-        rec_td: 'tdrec',
-        rec_fd: 'rec_first_down',
-        bonus_rec_rb: 'rbrec',
-        bonus_rec_wr: 'wrrec',
-        bonus_rec_te: 'terec',
-        pass_2pt: 'twoptc',
-        rush_2pt: 'twoptc',
-        rec_2pt: 'twoptc',
-        fum_lost: 'fuml',
-        def_pr_td: 'prtd',
-        def_kr_td: 'krtd',
-        rec_tgt: 'trg'
+        pass_yd: 'passing_yards',
+        pass_td: 'passing_touchdowns',
+        pass_int: 'passing_interceptions',
+        pass_cmp: 'passing_completions',
+        pass_att: 'passing_attempts',
+        rush_yd: 'rushing_yards',
+        rush_td: 'rushing_touchdowns',
+        rush_att: 'rushing_attempts',
+        rush_fd: 'rushing_first_downs',
+        rec: 'receptions',
+        rec_yd: 'receiving_yards',
+        rec_td: 'receiving_touchdowns',
+        rec_fd: 'receiving_first_downs',
+        bonus_rec_rb: 'running_back_reception',
+        bonus_rec_wr: 'wide_receiver_reception',
+        bonus_rec_te: 'tight_end_reception',
+        pass_2pt: 'two_point_conversions',
+        rush_2pt: 'two_point_conversions',
+        rec_2pt: 'two_point_conversions',
+        fum_lost: 'fumbles_lost',
+        def_pr_td: 'punt_return_touchdowns',
+        def_kr_td: 'kickoff_return_touchdowns',
+        rec_tgt: 'targets'
       },
       espn: {
-        passing_yards: 'py',
-        passing_touchdowns: 'tdp',
-        passing_interceptions: 'ints',
-        passing_completions: 'pc',
-        passing_attempts: 'pa',
-        rushing_yards: 'ry',
-        rushing_touchdowns: 'tdr',
-        rushing_attempts: 'ra',
-        rushing_first_downs: 'rush_first_down',
-        receiving_receptions: 'rec',
-        receiving_yards: 'recy',
-        receiving_touchdowns: 'tdrec',
-        receiving_first_downs: 'rec_first_down',
-        receiving_targets: 'trg',
-        '2_point_conversions': 'twoptc',
-        fumbles_lost: 'fuml',
-        punt_return_touchdowns: 'prtd',
-        kickoff_return_touchdowns: 'krtd'
+        passing_yards: 'passing_yards',
+        passing_touchdowns: 'passing_touchdowns',
+        passing_interceptions: 'passing_interceptions',
+        passing_completions: 'passing_completions',
+        passing_attempts: 'passing_attempts',
+        rushing_yards: 'rushing_yards',
+        rushing_touchdowns: 'rushing_touchdowns',
+        rushing_attempts: 'rushing_attempts',
+        rushing_first_downs: 'rushing_first_downs',
+        receiving_receptions: 'receptions',
+        receiving_yards: 'receiving_yards',
+        receiving_touchdowns: 'receiving_touchdowns',
+        receiving_first_downs: 'receiving_first_downs',
+        receiving_targets: 'targets',
+        '2_point_conversions': 'two_point_conversions',
+        fumbles_lost: 'fumbles_lost',
+        punt_return_touchdowns: 'punt_return_touchdowns',
+        kickoff_return_touchdowns: 'kickoff_return_touchdowns'
       },
       yahoo: {
-        PY: 'py',
-        PTD: 'tdp',
-        INT: 'ints',
-        PC: 'pc',
-        PA: 'pa',
-        RY: 'ry',
-        RTD: 'tdr',
-        RA: 'ra',
-        RFD: 'rush_first_down',
-        REC: 'rec',
-        REY: 'recy',
-        RETD: 'tdrec',
-        REFD: 'rec_first_down',
-        TAR: 'trg',
-        '2PC': 'twoptc',
-        FL: 'fuml',
-        PRTD: 'prtd',
-        KRTD: 'krtd'
+        PY: 'passing_yards',
+        PTD: 'passing_touchdowns',
+        INT: 'passing_interceptions',
+        PC: 'passing_completions',
+        PA: 'passing_attempts',
+        RY: 'rushing_yards',
+        RTD: 'rushing_touchdowns',
+        RA: 'rushing_attempts',
+        RFD: 'rushing_first_downs',
+        REC: 'receptions',
+        REY: 'receiving_yards',
+        RETD: 'receiving_touchdowns',
+        REFD: 'receiving_first_downs',
+        TAR: 'targets',
+        '2PC': 'two_point_conversions',
+        FL: 'fumbles_lost',
+        PRTD: 'punt_return_touchdowns',
+        KRTD: 'kickoff_return_touchdowns'
       }
     }
 
@@ -191,7 +191,12 @@ export default class LeagueConfigMapper {
         let value = scoring_config[external_key]
 
         // Convert points per yard values (usually decimal like 0.04 for 1 point per 25 yards)
-        if (['py', 'ry', 'recy'].includes(internal_key) && value < 1) {
+        if (
+          ['passing_yards', 'rushing_yards', 'receiving_yards'].includes(
+            internal_key
+          ) &&
+          value < 1
+        ) {
           value = Math.round(value * 100) // Convert 0.04 to 4 (1 point per 25 yards)
         }
 
@@ -283,23 +288,23 @@ export default class LeagueConfigMapper {
       case 'sleeper':
         // Sleeper might have QB kneel exclusion setting
         if (scoring_config.exclude_qb_kneels) {
-          scoring_params.exclude_qb_kneels = true
+          scoring_params.exclude_quarterback_kneels = true
         }
         break
 
       case 'espn':
         // ESPN might use different reception scoring by position
         if (scoring_config.receiving_receptions_rb !== undefined) {
-          scoring_params.rbrec =
-            scoring_config.receiving_receptions_rb - scoring_params.rec
+          scoring_params.running_back_reception =
+            scoring_config.receiving_receptions_rb - scoring_params.receptions
         }
         if (scoring_config.receiving_receptions_wr !== undefined) {
-          scoring_params.wrrec =
-            scoring_config.receiving_receptions_wr - scoring_params.rec
+          scoring_params.wide_receiver_reception =
+            scoring_config.receiving_receptions_wr - scoring_params.receptions
         }
         if (scoring_config.receiving_receptions_te !== undefined) {
-          scoring_params.terec =
-            scoring_config.receiving_receptions_te - scoring_params.rec
+          scoring_params.tight_end_reception =
+            scoring_config.receiving_receptions_te - scoring_params.receptions
         }
         break
 
@@ -319,29 +324,29 @@ export default class LeagueConfigMapper {
    */
   get_default_scoring_params() {
     return {
-      pa: 0,
-      pc: 0,
-      py: 0,
-      ints: 0,
-      tdp: 0,
-      ra: 0,
-      ry: 0,
-      tdr: 0,
-      rush_first_down: 0,
-      rec: 0,
-      rbrec: 0,
-      wrrec: 0,
-      terec: 0,
-      recy: 0,
-      rec_first_down: 0,
-      twoptc: 0,
-      tdrec: 0,
-      fuml: 0,
-      prtd: 0,
-      krtd: 0,
-      fum_ret_td: 6,
-      trg: 0,
-      exclude_qb_kneels: false
+      passing_attempts: 0,
+      passing_completions: 0,
+      passing_yards: 0,
+      passing_interceptions: 0,
+      passing_touchdowns: 0,
+      rushing_attempts: 0,
+      rushing_yards: 0,
+      rushing_touchdowns: 0,
+      rushing_first_downs: 0,
+      receptions: 0,
+      running_back_reception: 0,
+      wide_receiver_reception: 0,
+      tight_end_reception: 0,
+      receiving_yards: 0,
+      receiving_first_downs: 0,
+      two_point_conversions: 0,
+      receiving_touchdowns: 0,
+      fumbles_lost: 0,
+      punt_return_touchdowns: 0,
+      kickoff_return_touchdowns: 0,
+      fumble_return_touchdowns: 6,
+      targets: 0,
+      exclude_quarterback_kneels: false
     }
   }
 

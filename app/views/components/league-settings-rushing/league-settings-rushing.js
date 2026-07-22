@@ -17,7 +17,7 @@ export default function LeagueSettingsRushing({
     <>
       <EditableLeagueField
         label='Attempts'
-        field='ra'
+        field='rushing_attempts'
         type='float'
         max={1}
         min={0}
@@ -25,7 +25,7 @@ export default function LeagueSettingsRushing({
       />
       <EditableLeagueField
         label='Yards'
-        field='ry'
+        field='rushing_yards'
         type='float'
         max={2}
         min={0}
@@ -33,7 +33,7 @@ export default function LeagueSettingsRushing({
       />
       <EditableLeagueField
         label='Fumbles'
-        field='fuml'
+        field='fumbles_lost'
         type='int'
         max={0}
         min={-3}
@@ -41,7 +41,7 @@ export default function LeagueSettingsRushing({
       />
       <EditableLeagueField
         label='Tds'
-        field='tdr'
+        field='rushing_touchdowns'
         type='int'
         max={12}
         min={0}

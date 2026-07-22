@@ -23,7 +23,7 @@
  *           items:
  *             type: string
  *           description: Fantasy scoring system configuration fields
- *           example: ["pa", "pc", "py", "tdp", "ra", "ry", "tdr", "rec", "recy"]
+ *           example: ["passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "rushing_attempts", "rushing_yards", "rushing_touchdowns", "receptions", "receiving_yards"]
  *         season_fields:
  *           type: array
  *           items:
@@ -47,7 +47,7 @@
  *           items:
  *             type: string
  *           description: Fields that accept decimal/float values
- *           example: ["py", "ry", "rec", "recy", "pa", "pc"]
+ *           example: ["passing_yards", "rushing_yards", "receptions", "receiving_yards", "passing_attempts", "passing_completions"]
  *
  *     LeagueFieldMetadata:
  *       type: object
@@ -56,7 +56,7 @@
  *         field_name:
  *           type: string
  *           description: The setting field name
- *           example: "py"
+ *           example: "passing_yards"
  *         data_type:
  *           type: string
  *           enum: ["integer", "float", "string", "positive_integer"]
@@ -149,11 +149,11 @@
  *                 value:
  *                   league_fields: ["name", "espn_id", "sleeper_id", "mfl_id", "fleaflicker_id"]
  *                   league_format_fields: ["num_teams", "sqb", "srb", "swr", "ste", "bench", "ps", "reserve_short_term_limit", "cap", "min_bid"]
- *                   league_scoring_format_fields: ["pa", "pc", "py", "tdp", "ra", "ry", "tdr", "rec", "recy", "tdrec"]
+ *                   league_scoring_format_fields: ["passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "rushing_attempts", "rushing_yards", "rushing_touchdowns", "receptions", "receiving_yards", "receiving_touchdowns"]
  *                   season_fields: ["mqb", "mrb", "mwr", "mte", "mdst", "mk", "faab"]
- *                   integer_fields: ["num_teams", "sqb", "srb", "swr", "ste", "bench", "ps", "reserve_short_term_limit", "cap", "pa", "pc", "py", "tdp", "espn_id", "sleeper_id"]
+ *                   integer_fields: ["num_teams", "sqb", "srb", "swr", "ste", "bench", "ps", "reserve_short_term_limit", "cap", "passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "espn_id", "sleeper_id"]
  *                   positive_integer_fields: ["sqb", "srb", "swr", "ste", "bench", "ps", "reserve_short_term_limit", "cap", "min_bid", "espn_id", "sleeper_id", "mfl_id"]
- *                   float_fields: ["pa", "pc", "py", "ra", "ry", "rec", "recy"]
+ *                   float_fields: ["passing_attempts", "passing_completions", "passing_yards", "rushing_attempts", "rushing_yards", "receptions", "receiving_yards"]
  *       400:
  *         description: Invalid league ID
  *         content:
@@ -201,28 +201,28 @@ export const league_format_fields = [
 ]
 
 export const league_scoring_format_fields = [
-  'pa',
-  'pc',
-  'py',
-  'ints',
-  'tdp',
-  'ra',
-  'ry',
-  'tdr',
-  'rec',
-  'rbrec',
-  'wrrec',
-  'terec',
-  'recy',
-  'twoptc',
-  'tdrec',
-  'fuml',
-  'prtd',
-  'krtd',
-  'trg',
-  'rush_first_down',
-  'rec_first_down',
-  'exclude_qb_kneels'
+  'passing_attempts',
+  'passing_completions',
+  'passing_yards',
+  'passing_interceptions',
+  'passing_touchdowns',
+  'rushing_attempts',
+  'rushing_yards',
+  'rushing_touchdowns',
+  'receptions',
+  'running_back_reception',
+  'wide_receiver_reception',
+  'tight_end_reception',
+  'receiving_yards',
+  'two_point_conversions',
+  'receiving_touchdowns',
+  'fumbles_lost',
+  'punt_return_touchdowns',
+  'kickoff_return_touchdowns',
+  'targets',
+  'rushing_first_downs',
+  'receiving_first_downs',
+  'exclude_quarterback_kneels'
 ]
 
 export const season_fields = ['mqb', 'mrb', 'mwr', 'mte', 'mdst', 'mk', 'faab']
@@ -258,26 +258,26 @@ export const integer_fields = [
   'mk',
   'faab',
   'cap',
-  'pa',
-  'pc',
-  'py',
-  'ints',
-  'tdp',
-  'ra',
-  'ry',
-  'tdr',
-  'rbrec',
-  'wrrec',
-  'terec',
-  'rec',
-  'recy',
-  'twoptc',
-  'tdrec',
-  'fuml',
+  'passing_attempts',
+  'passing_completions',
+  'passing_yards',
+  'passing_interceptions',
+  'passing_touchdowns',
+  'rushing_attempts',
+  'rushing_yards',
+  'rushing_touchdowns',
+  'running_back_reception',
+  'wide_receiver_reception',
+  'tight_end_reception',
+  'receptions',
+  'receiving_yards',
+  'two_point_conversions',
+  'receiving_touchdowns',
+  'fumbles_lost',
   'num_teams',
   'min_bid',
-  'prtd',
-  'krtd',
+  'punt_return_touchdowns',
+  'kickoff_return_touchdowns',
   'espn_id',
   'sleeper_id',
   'mfl_id',
@@ -307,8 +307,8 @@ export const positive_integer_fields = [
   'faab',
   'cap',
   'min_bid',
-  'prtd',
-  'krtd',
+  'punt_return_touchdowns',
+  'kickoff_return_touchdowns',
   'espn_id',
   'sleeper_id',
   'mfl_id',
@@ -316,17 +316,17 @@ export const positive_integer_fields = [
 ]
 
 export const float_fields = [
-  'pa',
-  'pc',
-  'py',
-  'ra',
-  'ry',
-  'rbrec',
-  'wrrec',
-  'terec',
-  'rec',
-  'recy',
-  'trg',
-  'rush_first_down',
-  'rec_first_down'
+  'passing_attempts',
+  'passing_completions',
+  'passing_yards',
+  'rushing_attempts',
+  'rushing_yards',
+  'running_back_reception',
+  'wide_receiver_reception',
+  'tight_end_reception',
+  'receptions',
+  'receiving_yards',
+  'targets',
+  'rushing_first_downs',
+  'receiving_first_downs'
 ]

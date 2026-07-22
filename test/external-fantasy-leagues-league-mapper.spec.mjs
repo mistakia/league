@@ -28,7 +28,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
 
       result.should.have.property('scoring_params').that.is.an('object')
       result.should.have.property('league_params').that.is.an('object')
-      result.scoring_params.should.have.property('py')
+      result.scoring_params.should.have.property('passing_yards')
       result.league_params.should.have.property('num_teams')
     })
 
@@ -76,10 +76,10 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
         }
       })
 
-      result.should.have.property('py', 4)
-      result.should.have.property('ry', 10)
-      result.should.have.property('recy', 10)
-      result.should.have.property('tdp', 6)
+      result.should.have.property('passing_yards', 4)
+      result.should.have.property('rushing_yards', 10)
+      result.should.have.property('receiving_yards', 10)
+      result.should.have.property('passing_touchdowns', 6)
     })
 
     it('passes through Sleeper-specific exclude_qb_kneels rule', function () {
@@ -88,8 +88,8 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
         scoring_config: { exclude_qb_kneels: true, pass_yd: 0.04 }
       })
 
-      result.should.have.property('exclude_qb_kneels', true)
-      result.should.have.property('py', 4)
+      result.should.have.property('exclude_quarterback_kneels', true)
+      result.should.have.property('passing_yards', 4)
     })
 
     it('translates ESPN scoring keys into the canonical scoring_format', function () {
@@ -104,11 +104,11 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
         }
       })
 
-      result.should.have.property('py', 4)
-      result.should.have.property('tdp', 4)
-      result.should.have.property('ry', 10)
-      result.should.have.property('rec', 1)
-      result.should.have.property('recy', 10)
+      result.should.have.property('passing_yards', 4)
+      result.should.have.property('passing_touchdowns', 4)
+      result.should.have.property('rushing_yards', 10)
+      result.should.have.property('receptions', 1)
+      result.should.have.property('receiving_yards', 10)
     })
   })
 

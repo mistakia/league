@@ -235,249 +235,249 @@ function PlayerFields({ week, opponent_time_period, state }) {
       fixed: 1
     },
 
-    'projection.week.pa': {
+    'projection.week.passing_attempts': {
       category: 'passing',
       column_header: 'ATT',
       csv_header: 'Projected Passing Attempts (Week)',
-      player_value_path: `projection.${week}.pa`
+      player_value_path: `projection.${week}.passing_attempts`
     },
-    'projection.week.py': {
+    'projection.week.passing_yards': {
       category: 'passing',
       column_header: 'YDS',
       csv_header: 'Projected Passing Yards (Week)',
-      player_value_path: `projection.${week}.py`
+      player_value_path: `projection.${week}.passing_yards`
     },
-    'projection.week.tdp': {
+    'projection.week.passing_touchdowns': {
       category: 'passing',
       column_header: 'TD',
       csv_header: 'Projected Passing Touchdowns (Week)',
-      player_value_path: `projection.${week}.tdp`,
+      player_value_path: `projection.${week}.passing_touchdowns`,
       fixed: 1
     },
-    'projection.week.ints': {
+    'projection.week.passing_interceptions': {
       category: 'passing',
       column_header: 'INT',
       csv_header: 'Projected Interceptions (Week)',
-      player_value_path: `projection.${week}.ints`,
+      player_value_path: `projection.${week}.passing_interceptions`,
       fixed: 1
     },
 
-    'projection.0.pa': {
+    'projection.0.passing_attempts': {
       category: 'passing',
       column_header: 'ATT',
       csv_header: 'Projected Passing Attempts (Season)',
-      player_value_path: 'projection.0.pa'
+      player_value_path: 'projection.0.passing_attempts'
     },
-    'projection.0.py': {
+    'projection.0.passing_yards': {
       category: 'passing',
       column_header: 'YDS',
       csv_header: 'Projected Passing Yards (Season)',
-      player_value_path: 'projection.0.py'
+      player_value_path: 'projection.0.passing_yards'
     },
-    'projection.0.tdp': {
+    'projection.0.passing_touchdowns': {
       category: 'passing',
       column_header: 'TD',
       csv_header: 'Projected Passing Touchdowns (Season)',
-      player_value_path: 'projection.0.tdp',
+      player_value_path: 'projection.0.passing_touchdowns',
       fixed: 1
     },
-    'projection.0.ints': {
+    'projection.0.passing_interceptions': {
       category: 'passing',
       column_header: 'INT',
       csv_header: 'Projected Interceptions (Season)',
-      player_value_path: 'projection.0.ints',
+      player_value_path: 'projection.0.passing_interceptions',
       fixed: 1
     },
 
-    'projection.ros.pa': {
+    'projection.ros.passing_attempts': {
       category: 'passing',
       column_header: 'ATT',
       csv_header: 'Projected Passing Attempts (Rest-Of-Season)',
-      player_value_path: 'projection.ros.pa'
+      player_value_path: 'projection.ros.passing_attempts'
     },
-    'projection.ros.py': {
+    'projection.ros.passing_yards': {
       column_header: 'YDS',
       csv_header: 'Projected Passing Yards (Rest-Of-Season)',
-      player_value_path: 'projection.ros.py',
+      player_value_path: 'projection.ros.passing_yards',
       category: 'passing'
     },
-    'projection.ros.tdp': {
+    'projection.ros.passing_touchdowns': {
       category: 'passing',
       column_header: 'TD',
       csv_header: 'Projected Passing Touchdowns (Rest-Of-Season)',
-      player_value_path: 'projection.ros.tdp',
+      player_value_path: 'projection.ros.passing_touchdowns',
       fixed: 1
     },
-    'projection.ros.ints': {
+    'projection.ros.passing_interceptions': {
       category: 'passing',
       column_header: 'INT',
       csv_header: 'Projected Interceptions (Rest-Of-Season)',
-      player_value_path: 'projection.ros.ints',
+      player_value_path: 'projection.ros.passing_interceptions',
       fixed: 1
     },
 
-    'projection.week.ra': {
+    'projection.week.rushing_attempts': {
       category: 'rushing',
       column_header: 'ATT',
       csv_header: 'Projected Rushing Attempts (Week)',
-      player_value_path: `projection.${week}.ra`
+      player_value_path: `projection.${week}.rushing_attempts`
     },
-    'projection.week.ry': {
+    'projection.week.rushing_yards': {
       category: 'rushing',
       column_header: 'YDS',
       csv_header: 'Projected Rushing Yards (Week)',
-      player_value_path: `projection.${week}.ry`
+      player_value_path: `projection.${week}.rushing_yards`
     },
-    'projection.week.tdr': {
+    'projection.week.rushing_touchdowns': {
       category: 'rushing',
       column_header: 'TD',
       csv_header: 'Projected Rushing Touchdowns (Week)',
-      player_value_path: `projection.${week}.tdr`,
+      player_value_path: `projection.${week}.rushing_touchdowns`,
       fixed: 1
     },
-    'projection.week.fuml': {
+    'projection.week.fumbles_lost': {
       category: 'rushing',
       column_header: 'FUM',
       csv_header: 'Projected Fumbles (Week)',
-      player_value_path: `projection.${week}.fuml`,
+      player_value_path: `projection.${week}.fumbles_lost`,
       fixed: 1
     },
 
-    'projection.0.ra': {
+    'projection.0.rushing_attempts': {
       category: 'rushing',
       column_header: 'ATT',
       csv_header: 'Projected Rushing Attempts (Season)',
-      player_value_path: 'projection.0.ra'
+      player_value_path: 'projection.0.rushing_attempts'
     },
-    'projection.0.ry': {
+    'projection.0.rushing_yards': {
       category: 'rushing',
       column_header: 'YDS',
       csv_header: 'Projected Rushing Yards (Season)',
-      player_value_path: 'projection.0.ry'
+      player_value_path: 'projection.0.rushing_yards'
     },
-    'projection.0.tdr': {
+    'projection.0.rushing_touchdowns': {
       category: 'rushing',
       column_header: 'TD',
       csv_header: 'Projected Rushing Touchdowns (Season)',
-      player_value_path: 'projection.0.tdr',
+      player_value_path: 'projection.0.rushing_touchdowns',
       fixed: 1
     },
-    'projection.0.fuml': {
+    'projection.0.fumbles_lost': {
       category: 'rushing',
       column_header: 'FUM',
       csv_header: 'Projected Fumbles (Season)',
-      player_value_path: 'projection.0.fuml',
+      player_value_path: 'projection.0.fumbles_lost',
       fixed: 1
     },
 
-    'projection.ros.ra': {
+    'projection.ros.rushing_attempts': {
       category: 'rushing',
       column_header: 'ATT',
       csv_header: 'Projected Rushing Attempts (Rest-Of-Season)',
-      player_value_path: 'projection.ros.ra'
+      player_value_path: 'projection.ros.rushing_attempts'
     },
-    'projection.ros.ry': {
+    'projection.ros.rushing_yards': {
       category: 'rushing',
       column_header: 'YDS',
       csv_header: 'Projected Rushing Yards (Rest-Of-Season)',
-      player_value_path: 'projection.ros.ry'
+      player_value_path: 'projection.ros.rushing_yards'
     },
-    'projection.ros.tdr': {
+    'projection.ros.rushing_touchdowns': {
       category: 'rushing',
       column_header: 'TD',
       csv_header: 'Projected Rushing Touchdowns (Rest-Of-Season)',
-      player_value_path: 'projection.ros.tdr',
+      player_value_path: 'projection.ros.rushing_touchdowns',
       fixed: 1
     },
-    'projection.ros.fuml': {
+    'projection.ros.fumbles_lost': {
       category: 'rushing',
       column_header: 'FUM',
       csv_header: 'Projected Fumbles (Rest-Of-Season)',
-      player_value_path: 'projection.ros.fuml',
+      player_value_path: 'projection.ros.fumbles_lost',
       fixed: 1
     },
 
-    'projection.week.trg': {
+    'projection.week.targets': {
       category: 'receiving',
       column_header: 'TAR',
       csv_header: 'Projected Targets (Week)',
-      player_value_path: `projection.${week}.trg`,
+      player_value_path: `projection.${week}.targets`,
       fixed: 1
     },
-    'projection.week.rec': {
+    'projection.week.receptions': {
       category: 'receiving',
       column_header: 'REC',
       csv_header: 'Projected Receptions (Week)',
-      player_value_path: `projection.${week}.rec`,
+      player_value_path: `projection.${week}.receptions`,
       fixed: 1
     },
-    'projection.week.recy': {
+    'projection.week.receiving_yards': {
       category: 'receiving',
       column_header: 'YDS',
       csv_header: 'Projected Receiving Yards (Week)',
-      player_value_path: `projection.${week}.recy`
+      player_value_path: `projection.${week}.receiving_yards`
     },
-    'projection.week.tdrec': {
+    'projection.week.receiving_touchdowns': {
       category: 'receiving',
       column_header: 'TD',
       csv_header: 'Projected Receiving Touchdowns (Week)',
-      player_value_path: `projection.${week}.tdrec`,
+      player_value_path: `projection.${week}.receiving_touchdowns`,
       fixed: 1
     },
 
-    'projection.0.trg': {
+    'projection.0.targets': {
       category: 'receiving',
       column_header: 'TAR',
       csv_header: 'Projected Targets (Season)',
-      player_value_path: 'projection.0.trg',
+      player_value_path: 'projection.0.targets',
       fixed: 1
     },
-    'projection.0.rec': {
+    'projection.0.receptions': {
       category: 'receiving',
       column_header: 'REC',
       csv_header: 'Projected Receptions (Season)',
-      player_value_path: 'projection.0.rec',
+      player_value_path: 'projection.0.receptions',
       fixed: 1
     },
-    'projection.0.recy': {
+    'projection.0.receiving_yards': {
       category: 'receiving',
       column_header: 'YDS',
       csv_header: 'Projected Receiving Yards (Season)',
-      player_value_path: 'projection.0.recy'
+      player_value_path: 'projection.0.receiving_yards'
     },
-    'projection.0.tdrec': {
+    'projection.0.receiving_touchdowns': {
       category: 'receiving',
       column_header: 'TD',
       csv_header: 'Projected Receiving Touchdowns (Season)',
-      player_value_path: 'projection.0.tdrec',
+      player_value_path: 'projection.0.receiving_touchdowns',
       fixed: 1
     },
 
-    'projection.ros.trg': {
+    'projection.ros.targets': {
       category: 'receiving',
       column_header: 'TAR',
       csv_header: 'Projected Targets (Rest-Of-Season)',
-      player_value_path: 'projection.ros.trg',
+      player_value_path: 'projection.ros.targets',
       fixed: 1
     },
-    'projection.ros.rec': {
+    'projection.ros.receptions': {
       category: 'receiving',
       column_header: 'REC',
       csv_header: 'Projected Receptions (Rest-Of-Season)',
-      player_value_path: 'projection.ros.rec',
+      player_value_path: 'projection.ros.receptions',
       fixed: 1
     },
-    'projection.ros.recy': {
+    'projection.ros.receiving_yards': {
       category: 'receiving',
       column_header: 'YDS',
       csv_header: 'Projected Receiving Yards (Rest-Of-Season)',
-      player_value_path: 'projection.ros.recy'
+      player_value_path: 'projection.ros.receiving_yards'
     },
-    'projection.ros.tdrec': {
+    'projection.ros.receiving_touchdowns': {
       category: 'receiving',
       column_header: 'TD',
       csv_header: 'Projected Receiving Touchdowns (Rest-Of-Season)',
-      player_value_path: 'projection.ros.tdrec',
+      player_value_path: 'projection.ros.receiving_touchdowns',
       fixed: 1
     },
 
@@ -491,37 +491,37 @@ function PlayerFields({ week, opponent_time_period, state }) {
       percentile_field: 'pts'
     },
 
-    'stats.pa': {
+    'stats.passing_attempts': {
       category: 'passing',
       column_header: 'ATT',
       csv_header: 'Passing Attempts',
-      player_value_path: 'stats.pa',
+      player_value_path: 'stats.passing_attempts',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'pa'
+      percentile_field: 'passing_attempts'
     },
-    'stats.py': {
+    'stats.passing_yards': {
       category: 'passing',
       column_header: 'YDS',
       csv_header: 'Passing Yards',
-      player_value_path: 'stats.py',
+      player_value_path: 'stats.passing_yards',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'py'
+      percentile_field: 'passing_yards'
     },
-    'stats.tdp': {
+    'stats.passing_touchdowns': {
       category: 'passing',
       column_header: 'TD',
       csv_header: 'Passing Touchdowns',
-      player_value_path: 'stats.tdp',
+      player_value_path: 'stats.passing_touchdowns',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'tdp'
+      percentile_field: 'passing_touchdowns'
     },
-    'stats.ints': {
+    'stats.passing_interceptions': {
       category: 'passing',
       column_header: 'INT',
       csv_header: 'Interceptions',
-      player_value_path: 'stats.ints',
+      player_value_path: 'stats.passing_interceptions',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'ints'
+      percentile_field: 'passing_interceptions'
     },
     'stats.drppy': {
       category: 'passing',
@@ -685,21 +685,21 @@ function PlayerFields({ week, opponent_time_period, state }) {
       percentile_field: '_nygpa'
     },
 
-    'stats.ry': {
+    'stats.rushing_yards': {
       category: 'rushing',
       column_header: 'YDS',
       csv_header: 'Rushing Yards',
-      player_value_path: 'stats.ry',
+      player_value_path: 'stats.rushing_yards',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'ry'
+      percentile_field: 'rushing_yards'
     },
-    'stats.tdr': {
+    'stats.rushing_touchdowns': {
       category: 'rushing',
       column_header: 'TD',
       csv_header: 'Rushing Touchdowns',
-      player_value_path: 'stats.tdr',
+      player_value_path: 'stats.rushing_touchdowns',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'tdr'
+      percentile_field: 'rushing_touchdowns'
     },
     'stats.ry_pra': {
       category: 'efficiency',
@@ -709,13 +709,13 @@ function PlayerFields({ week, opponent_time_period, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'ry_pra'
     },
-    'stats.ra': {
+    'stats.rushing_attempts': {
       category: 'rushing',
       column_header: 'ATT',
       csv_header: 'Rushing Attempts',
-      player_value_path: 'stats.ra',
+      player_value_path: 'stats.rushing_attempts',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'ra'
+      percentile_field: 'rushing_attempts'
     },
     'stats.rfd': {
       category: 'rushing',
@@ -811,29 +811,29 @@ function PlayerFields({ week, opponent_time_period, state }) {
       percentile_field: 'mbt_pt'
     },
 
-    'stats.rec': {
+    'stats.receptions': {
       category: 'receiving',
       column_header: 'REC',
       csv_header: 'Receptions',
-      player_value_path: 'stats.rec',
+      player_value_path: 'stats.receptions',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'rec'
+      percentile_field: 'receptions'
     },
-    'stats.recy': {
+    'stats.receiving_yards': {
       category: 'receiving',
       column_header: 'YDS',
       csv_header: 'Receiving Yards',
-      player_value_path: 'stats.recy',
+      player_value_path: 'stats.receiving_yards',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'recy'
+      percentile_field: 'receiving_yards'
     },
-    'stats.tdrec': {
+    'stats.receiving_touchdowns': {
       category: 'receiving',
       column_header: 'TD',
       csv_header: 'Receiving Touchdowns',
-      player_value_path: 'stats.tdrec',
+      player_value_path: 'stats.receiving_touchdowns',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'tdrec'
+      percentile_field: 'receiving_touchdowns'
     },
     'stats.drops': {
       category: 'receiving',
@@ -851,13 +851,13 @@ function PlayerFields({ week, opponent_time_period, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'dryprecy'
     },
-    'stats.trg': {
+    'stats.targets': {
       category: 'opportunity',
       column_header: 'TAR',
       csv_header: 'Targets',
-      player_value_path: 'stats.trg',
+      player_value_path: 'stats.targets',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'trg'
+      percentile_field: 'targets'
     },
     'stats.dptrg_pct': {
       category: 'opportunity',
@@ -949,87 +949,87 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing matchup',
       column_header: 'ATT',
       csv_header: 'Opponent pass atts over average',
-      percentile_field: 'pa',
-      ...opponent_field('pa')
+      percentile_field: 'passing_attempts',
+      ...opponent_field('passing_attempts')
     },
     opponent_pass_pc: {
       category: 'passing matchup',
       column_header: 'COMP',
       csv_header: 'Opponent pass comps over average',
-      percentile_field: 'pc',
-      ...opponent_field('pc')
+      percentile_field: 'passing_completions',
+      ...opponent_field('passing_completions')
     },
     opponent_pass_py: {
       category: 'passing matchup',
       column_header: 'YDS',
       csv_header: 'Opponent pass yds over average',
-      percentile_field: 'py',
-      ...opponent_field('py')
+      percentile_field: 'passing_yards',
+      ...opponent_field('passing_yards')
     },
     opponent_pass_tdp: {
       category: 'passing matchup',
       column_header: 'TD',
       csv_header: 'Opponent pass tds over average',
-      percentile_field: 'tdp',
-      ...opponent_field('tdp')
+      percentile_field: 'passing_touchdowns',
+      ...opponent_field('passing_touchdowns')
     },
     opponent_pass_ints: {
       category: 'passing matchup',
       column_header: 'INTS',
       csv_header: 'Opponent pass ints over average',
-      percentile_field: 'ints',
-      ...opponent_field('ints')
+      percentile_field: 'passing_interceptions',
+      ...opponent_field('passing_interceptions')
     },
 
     opponent_rush_ra: {
       category: 'rushing matchup',
       column_header: 'ATT',
       csv_header: 'Opponent rush atts over average',
-      percentile_field: 'ra',
-      ...opponent_field('ra')
+      percentile_field: 'rushing_attempts',
+      ...opponent_field('rushing_attempts')
     },
     opponent_rush_ry: {
       category: 'rushing matchup',
       column_header: 'YDS',
       csv_header: 'Opponent rush yds over average',
-      percentile_field: 'ry',
-      ...opponent_field('ry')
+      percentile_field: 'rushing_yards',
+      ...opponent_field('rushing_yards')
     },
     opponent_rush_tdr: {
       category: 'rushing matchup',
       column_header: 'TD',
       csv_header: 'Opponent rush tds over average',
-      percentile_field: 'tdr',
-      ...opponent_field('tdr')
+      percentile_field: 'rushing_touchdowns',
+      ...opponent_field('rushing_touchdowns')
     },
 
     opponent_recv_trg: {
       category: 'receiving matchup',
       column_header: 'TRG',
       csv_header: 'Opponent targets over average',
-      percentile_field: 'trg',
-      ...opponent_field('trg')
+      percentile_field: 'targets',
+      ...opponent_field('targets')
     },
     opponent_recv_rec: {
       category: 'receiving matchup',
       column_header: 'REC',
       csv_header: 'Opponent recs over average',
-      percentile_field: 'rec',
-      ...opponent_field('rec')
+      percentile_field: 'receptions',
+      ...opponent_field('receptions')
     },
     opponent_recv_recy: {
       category: 'receiving matchup',
       column_header: 'YDS',
       csv_header: 'Opponent recv yds over average',
-      percentile_field: 'recy',
-      ...opponent_field('recy')
+      percentile_field: 'receiving_yards',
+      ...opponent_field('receiving_yards')
     },
     opponent_recv_tdrec: {
       category: 'receiving matchup',
       column_header: 'TD',
       csv_header: 'Opponent recv tds over average',
-      percentile_field: 'tdrec',
-      ...opponent_field('tdrec')
+      percentile_field: 'receiving_touchdowns',
+      ...opponent_field('receiving_touchdowns')
     },
 
     opponent_pass_rating: {

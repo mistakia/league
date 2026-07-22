@@ -98,7 +98,7 @@ async function calculate_target_share_ranks({ player_ids, year, week }) {
       'player_gamelogs.pid',
       'player.primary_position',
       'player.current_nfl_team',
-      db.raw('SUM(player_gamelogs.trg) as total_targets')
+      db.raw('SUM(player_gamelogs.targets) as total_targets')
     )
     .groupBy(
       'player_gamelogs.pid',
@@ -180,7 +180,7 @@ async function calculate_opportunity_share_ranks({ player_ids, year, week }) {
       'player_gamelogs.pid',
       'player.current_nfl_team',
       db.raw(
-        'SUM(player_gamelogs.ra + player_gamelogs.trg) as total_opportunities'
+        'SUM(player_gamelogs.rushing_attempts + player_gamelogs.targets) as total_opportunities'
       )
     )
     .groupBy('player_gamelogs.pid', 'player.current_nfl_team')

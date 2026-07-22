@@ -26,7 +26,7 @@ const fields_grouping = {
   ],
   'Stats By Play': {
     'Passing Stats By Play': {
-      Production: ['stats.py', 'stats.tdp'],
+      Production: ['stats.passing_yards', 'stats.passing_touchdowns'],
       Efficiency: ['stats.pc_pct']
     },
     'Rushing Stats By Play': [],

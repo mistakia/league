@@ -23,24 +23,26 @@ const initialize_cli = () => {
 }
 
 const get_projection = (stats) => ({
-  py: Number(stats['Pass Yds']) || null,
-  pa: Number(stats['Pass Att']) || null,
-  pc: stats.Comp ? Number(stats.Comp) : Number(stats['Pass Comp']) || null,
-  tdp: Number(stats['Pass TD']) || null,
-  ints: Number(stats.INT) || null,
+  passing_yards: Number(stats['Pass Yds']) || null,
+  passing_attempts: Number(stats['Pass Att']) || null,
+  passing_completions: stats.Comp
+    ? Number(stats.Comp)
+    : Number(stats['Pass Comp']) || null,
+  passing_touchdowns: Number(stats['Pass TD']) || null,
+  passing_interceptions: Number(stats.INT) || null,
 
-  ra: Number(stats['Rush Att']) || null,
-  ry: Number(stats['Rush Yds']) || null,
-  tdr: Number(stats['Rush TD']) || null,
+  rushing_attempts: Number(stats['Rush Att']) || null,
+  rushing_yards: Number(stats['Rush Yds']) || null,
+  rushing_touchdowns: Number(stats['Rush TD']) || null,
 
-  fuml: Number(stats.Fum) || null,
+  fumbles_lost: Number(stats.Fum) || null,
 
-  rec: Number(stats.Rec) || null,
-  recy: Number(stats['Rec Yds']) || null,
-  tdrec: Number(stats['Rec TD']) || null,
+  receptions: Number(stats.Rec) || null,
+  receiving_yards: Number(stats['Rec Yds']) || null,
+  receiving_touchdowns: Number(stats['Rec TD']) || null,
 
-  fgm: Number(stats.FG) || null,
-  xpm: Number(stats.XP) || null
+  field_goals_made: Number(stats.FG) || null,
+  extra_points_made: Number(stats.XP) || null
 })
 
 const run = async ({

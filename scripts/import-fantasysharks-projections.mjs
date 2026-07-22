@@ -38,21 +38,21 @@ const run = async ({ season = false, dry = false } = {}) => {
 
   const createEntry = (item) => ({
     // passing
-    ints: item.Int,
-    tdp: item.PassTD,
-    py: item.PassYards,
-    pc: item.Comp,
+    passing_interceptions: item.Int,
+    passing_touchdowns: item.PassTD,
+    passing_yards: item.PassYards,
+    passing_completions: item.Comp,
 
     // rushing
-    ra: item.Att,
-    ry: item.RushYards,
-    tdr: item.RushTD,
-    fuml: item.Fum,
+    rushing_attempts: item.Att,
+    rushing_yards: item.RushYards,
+    rushing_touchdowns: item.RushTD,
+    fumbles_lost: item.Fum,
 
     // receiving
-    rec: item.Rec,
-    recy: item.RecYards,
-    tdrec: item.RecTD
+    receptions: item.Rec,
+    receiving_yards: item.RecYards,
+    receiving_touchdowns: item.RecTD
   })
 
   const inserts = []

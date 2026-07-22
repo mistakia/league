@@ -17,7 +17,7 @@ const log = debug('simulation:load-projection-data')
  * Converts anytime_td to position-appropriate TD stat.
  *
  * @param {Object} params
- * @param {Object} params.traditional_stats - Traditional projection stats { py, ry, recy, rec, tdr, tdrec, ... }
+ * @param {Object} params.traditional_stats - Traditional projection stats { passing_yards, rushing_yards, receiving_yards, receptions, rushing_touchdowns, receiving_touchdowns, ... }
  * @param {Object} params.market_data - Market projection data { stats: { ... }, projection }
  * @param {string} params.position - Player position (QB, RB, WR, TE, K, DST)
  * @param {Object} params.league_settings - League scoring settings
@@ -53,17 +53,17 @@ export function merge_market_stats_with_traditional({
         // Convert to the appropriate TD stat based on position
         // This replaces the traditional TD projection with market expectation
         if (['WR', 'TE'].includes(position)) {
-          merged_stats.tdrec = value
+          merged_stats.receiving_touchdowns = value
         } else if (position === 'RB') {
-          merged_stats.tdr = value
+          merged_stats.rushing_touchdowns = value
         } else if (position === 'QB') {
           // For QBs, anytime_td represents rushing TDs (passing TDs are separate)
-          merged_stats.tdr = value
+          merged_stats.rushing_touchdowns = value
         }
         // Note: do NOT set anytime_td in merged_stats to avoid double-counting
         has_market_overrides = true
       } else {
-        // Direct stat override (recy, rec, py, ry, etc.)
+        // Direct stat override (receiving_yards, receptions, passing_yards, rushing_yards, etc.)
         merged_stats[stat] = value
         has_market_overrides = true
       }
@@ -145,7 +145,7 @@ export async function load_player_projections({
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @returns {Promise<Map>} Map of pid -> { py, ry, recy, rec, tdp, tdr, tdrec, ... }
+ * @returns {Promise<Map>} Map of pid -> { passing_yards, rushing_yards, receiving_yards, receptions, passing_touchdowns, rushing_touchdowns, receiving_touchdowns, ... }
  */
 export async function load_player_projection_stats({ player_ids, week, year }) {
   if (!player_ids.length) {
@@ -158,22 +158,22 @@ export async function load_player_projection_stats({ player_ids, week, year }) {
 
   // Define stat columns to load (matching projections_index columns)
   const stat_columns = [
-    'py',
-    'pc',
-    'pa',
-    'ints',
-    'tdp',
-    'ry',
-    'ra',
-    'tdr',
-    'recy',
-    'rec',
-    'trg',
-    'tdrec',
-    'fuml',
-    'twoptc',
-    'prtd',
-    'krtd'
+    'passing_yards',
+    'passing_completions',
+    'passing_attempts',
+    'passing_interceptions',
+    'passing_touchdowns',
+    'rushing_yards',
+    'rushing_attempts',
+    'rushing_touchdowns',
+    'receiving_yards',
+    'receptions',
+    'targets',
+    'receiving_touchdowns',
+    'fumbles_lost',
+    'two_point_conversions',
+    'punt_return_touchdowns',
+    'kickoff_return_touchdowns'
   ]
 
   // Load projections from all sources (excluding AVERAGE which is pre-calculated)

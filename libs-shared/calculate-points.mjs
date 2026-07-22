@@ -1,5 +1,15 @@
 import { base_fantasy_stats, projected_base_stats } from '#constants'
 
+// Position-specific reception scoring: a scoring format may award a different
+// per-reception value to running backs, wide receivers, and tight ends. The
+// league_scoring_formats config carries one column per position; positions
+// without an override (QB/K/DST) fall back to the base `receptions` value.
+const position_reception_columns = {
+  RB: 'running_back_reception',
+  WR: 'wide_receiver_reception',
+  TE: 'tight_end_reception'
+}
+
 const getScoring = ({ league, use_projected_stats = false }) => {
   const result = {}
   const stats_to_use = use_projected_stats
@@ -25,22 +35,27 @@ const calculatePoints = ({
     let statValue
 
     // Handle position-specific reception scoring
-    if (stat === 'rec') {
-      factor = league[`${position.toLowerCase()}rec`] || scoring[stat]
+    if (stat === 'receptions') {
+      const position_reception_column =
+        position_reception_columns[position.toUpperCase()]
+      factor =
+        (position_reception_column && league[position_reception_column]) ||
+        scoring[stat]
       statValue = stats[stat] || 0
     }
     // Handle QB kneel exclusion for rushing yards
-    // Only use ry_excluding_kneels if it has been explicitly calculated (not just initialized to 0)
-    // We check if it differs from ry OR if ry is also 0 (meaning no rushing yards at all)
+    // Only use rushing_yards_excluding_kneels if it has been explicitly
+    // calculated (not just initialized to 0). We check if it differs from
+    // rushing_yards OR if rushing_yards is also 0 (meaning no rushing yards at all)
     else if (
-      stat === 'ry' &&
-      league.exclude_qb_kneels &&
-      stats.ry_excluding_kneels !== undefined &&
-      stats.ry_excluding_kneels !== null &&
-      (stats.ry_excluding_kneels !== 0 || stats.ry === 0)
+      stat === 'rushing_yards' &&
+      league.exclude_quarterback_kneels &&
+      stats.rushing_yards_excluding_kneels !== undefined &&
+      stats.rushing_yards_excluding_kneels !== null &&
+      (stats.rushing_yards_excluding_kneels !== 0 || stats.rushing_yards === 0)
     ) {
       factor = scoring[stat]
-      statValue = stats.ry_excluding_kneels
+      statValue = stats.rushing_yards_excluding_kneels
     }
     // Handle all other stats normally
     else {
@@ -53,40 +68,47 @@ const calculatePoints = ({
     result.total = result.total + score
   }
 
-  result.xpm = (stats.xpm || 0) * 1
-  result.total = result.total + result.xpm
-  if (stats.fgy) {
-    result.fgm = stats.fgy / 10
-    result.total = result.total + result.fgm
+  result.extra_points_made = (stats.extra_points_made || 0) * 1
+  result.total = result.total + result.extra_points_made
+  if (stats.field_goal_yards) {
+    result.field_goals_made = stats.field_goal_yards / 10
+    result.total = result.total + result.field_goals_made
   } else {
-    result.fgm = (stats.fgm || 0) * 3
-    result.fg19 = (stats.fg19 || 0) * 3
-    result.fg29 = (stats.fg29 || 0) * 3
-    result.fg39 = (stats.fg39 || 0) * 3
-    result.fg49 = (stats.fg49 || 0) * 4
-    result.fg50 = (stats.fg50 || 0) * 5
+    result.field_goals_made = (stats.field_goals_made || 0) * 3
+    result.field_goals_made_0_19_yards =
+      (stats.field_goals_made_0_19_yards || 0) * 3
+    result.field_goals_made_20_29_yards =
+      (stats.field_goals_made_20_29_yards || 0) * 3
+    result.field_goals_made_30_39_yards =
+      (stats.field_goals_made_30_39_yards || 0) * 3
+    result.field_goals_made_40_49_yards =
+      (stats.field_goals_made_40_49_yards || 0) * 4
+    result.field_goals_made_50_plus_yards =
+      (stats.field_goals_made_50_plus_yards || 0) * 5
     result.total =
       result.total +
-      result.fg19 +
-      result.fg29 +
-      result.fg39 +
-      result.fg49 +
-      result.fg50
+      result.field_goals_made_0_19_yards +
+      result.field_goals_made_20_29_yards +
+      result.field_goals_made_30_39_yards +
+      result.field_goals_made_40_49_yards +
+      result.field_goals_made_50_plus_yards
   }
 
   const dst = {
-    dsk: (stats.dsk || 0) * 1,
-    dint: (stats.dint || 0) * 2,
-    dff: (stats.dff || 0) * 1, // forced fumble
-    drf: (stats.drf || 0) * 1, // recovered fumble
-    dtno: (stats.dtno || 0) * 1, // three and out
-    dfds: (stats.dfds || 0) * 1, // fourth down stop
-    dpa: Math.max(stats.dpa - 20 || 0, 0) * -0.4, // points against
-    dya: Math.max(stats.dya - 300 || 0, 0) * -0.02, // yards against
-    dblk: (stats.dblk || 0) * 3, // blocked kicks
-    dsf: (stats.dsf || 0) * 2, // safety
-    dtpr: (stats.dtpr || 0) * 2, // two point return
-    dtd: (stats.dtd || 0) * 6
+    defensive_sacks: (stats.defensive_sacks || 0) * 1,
+    defensive_interceptions: (stats.defensive_interceptions || 0) * 2,
+    defensive_forced_fumbles: (stats.defensive_forced_fumbles || 0) * 1,
+    defensive_recovered_fumbles: (stats.defensive_recovered_fumbles || 0) * 1,
+    defensive_three_and_outs: (stats.defensive_three_and_outs || 0) * 1,
+    defensive_fourth_down_stops: (stats.defensive_fourth_down_stops || 0) * 1,
+    defensive_points_against:
+      Math.max(stats.defensive_points_against - 20 || 0, 0) * -0.4,
+    defensive_yards_against:
+      Math.max(stats.defensive_yards_against - 300 || 0, 0) * -0.02,
+    defensive_blocked_kicks: (stats.defensive_blocked_kicks || 0) * 3,
+    defensive_safeties: (stats.defensive_safeties || 0) * 2,
+    defensive_two_point_returns: (stats.defensive_two_point_returns || 0) * 2,
+    defensive_touchdowns: (stats.defensive_touchdowns || 0) * 6
   }
 
   const dstTotal = Object.values(dst).reduce((sum, v) => sum + v, 0)
@@ -99,9 +121,9 @@ const calculatePoints = ({
 
   // Handle anytime_td (simulation-specific stat from ANYTIME_TOUCHDOWN market odds)
   // This is a combined rushing+receiving TD expectation, scored at TD value
-  // Only used when specific tdr/tdrec props are not available
+  // Only used when specific rushing_touchdowns/receiving_touchdowns props are not available
   if (stats.anytime_td !== undefined && stats.anytime_td !== null) {
-    const td_factor = league.tdr || 6 // Use rushing TD value, default 6 points
+    const td_factor = league.rushing_touchdowns || 6 // Use rushing TD value, default 6 points
     result.anytime_td = stats.anytime_td * td_factor
     result.total += result.anytime_td
   }

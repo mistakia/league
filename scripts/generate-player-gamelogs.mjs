@@ -253,7 +253,9 @@ const format_receiving_gamelog = ({
   team_dropbacks,
   validate = false
 }) => {
-  const team_target_share = team_stats.trg ? stats.trg / team_stats.trg : 0
+  const team_target_share = team_stats.targets
+    ? stats.targets / team_stats.targets
+    : 0
   const team_air_yard_share = team_stats.passing_air_yards
     ? stats.targeted_air_yards / team_stats.passing_air_yards
     : 0
@@ -305,7 +307,9 @@ const format_receiving_gamelog = ({
       log(
         `OVERFLOW: team_target_share = ${receiving_gamelog.team_target_share} (max ${DB_CONSTRAINTS.TEAM_TARGET_SHARE_MAX}) for pid=${pid}, esbid=${esbid}, year=${year}`
       )
-      log(`  stats.trg=${stats.trg}, team_stats.trg=${team_stats.trg}`)
+      log(
+        `  stats.targets=${stats.targets}, team_stats.targets=${team_stats.targets}`
+      )
     }
     if (
       receiving_gamelog.team_air_yard_share != null &&
@@ -346,13 +350,15 @@ const format_receiving_gamelog = ({
 }
 
 const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
-  const rush_share = team_stats.ra ? stats.ra / team_stats.ra : null
+  const rush_share = team_stats.rushing_attempts
+    ? stats.rushing_attempts / team_stats.rushing_attempts
+    : null
   const weighted_opportunity =
     1.3 * stats.rush_attempts_redzone +
     2.25 * stats.redzone_targets +
-    0.48 * (stats.ra - stats.rush_attempts_redzone) +
-    1.43 * (stats.trg - stats.redzone_targets)
-  const rush_yards_per_attempt = stats.ry / stats.ra
+    0.48 * (stats.rushing_attempts - stats.rush_attempts_redzone) +
+    1.43 * (stats.targets - stats.redzone_targets)
+  const rush_yards_per_attempt = stats.rushing_yards / stats.rushing_attempts
 
   return {
     esbid,
@@ -381,9 +387,9 @@ const generate_receiving_gamelog = ({
     null
 
   if (
-    player_gamelog.rec > 0 ||
-    player_gamelog.recy > 0 ||
-    player_gamelog.trg > 0 ||
+    player_gamelog.receptions > 0 ||
+    player_gamelog.receiving_yards > 0 ||
+    player_gamelog.targets > 0 ||
     player_routes > 0
   ) {
     const team_gamelog = find_team_gamelog({
@@ -415,7 +421,7 @@ const generate_rushing_gamelog = ({
   team_gamelog_inserts,
   player_rushing_gamelog_inserts
 }) => {
-  if (player_gamelog.ra > 0) {
+  if (player_gamelog.rushing_attempts > 0) {
     const team_gamelog = find_team_gamelog({
       team_gamelog_inserts,
       team: player_gamelog.tm,

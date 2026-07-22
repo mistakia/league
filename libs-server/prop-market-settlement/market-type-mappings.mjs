@@ -27,85 +27,85 @@ export const market_type_mappings = {
   // Player game performance markets - use player_gamelogs
   [player_game_prop_types.GAME_PASSING_YARDS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['py'],
+    metric_columns: ['passing_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_PASSING_COMPLETIONS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['pc'],
+    metric_columns: ['passing_completions'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_PASSING_ATTEMPTS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['pa'],
+    metric_columns: ['passing_attempts'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_PASSING_TOUCHDOWNS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['tdp'],
+    metric_columns: ['passing_touchdowns'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_PASSING_INTERCEPTIONS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['ints'],
+    metric_columns: ['passing_interceptions'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_RUSHING_YARDS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['ry'],
+    metric_columns: ['rushing_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_RUSHING_ATTEMPTS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['ra'],
+    metric_columns: ['rushing_attempts'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_RUSHING_TOUCHDOWNS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['tdr'],
+    metric_columns: ['rushing_touchdowns'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['recy'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_RECEPTIONS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['rec'],
+    metric_columns: ['receptions'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_RECEIVING_TOUCHDOWNS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['tdrec'],
+    metric_columns: ['receiving_touchdowns'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_RECEIVING_TARGETS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['trg'],
+    metric_columns: ['targets'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_DEFENSE_SACKS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['dsk'],
+    metric_columns: ['defensive_sacks'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_TACKLES_ASSISTS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['dtno'], // defensive tackles + assists
+    metric_columns: ['defensive_three_and_outs'], // defensive tackles + assists
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
@@ -119,7 +119,7 @@ export const market_type_mappings = {
   // },
   [player_game_prop_types.GAME_FIELD_GOALS_MADE]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['fgm'],
+    metric_columns: ['field_goals_made'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
@@ -135,13 +135,13 @@ export const market_type_mappings = {
   // Combined stat markets
   [player_game_prop_types.GAME_RUSHING_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['ry', 'recy'], // Multiple columns to sum
+    metric_columns: ['rushing_yards', 'receiving_yards'], // Multiple columns to sum
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
   [player_game_prop_types.GAME_PASSING_RUSHING_YARDS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['py', 'ry'],
+    metric_columns: ['passing_yards', 'rushing_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
   },
@@ -149,7 +149,7 @@ export const market_type_mappings = {
   // Anytime touchdown - special handling (based on reference script)
   [player_game_prop_types.ANYTIME_TOUCHDOWN]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['tdr', 'tdrec'], // Only rushing and receiving TDs like reference
+    metric_columns: ['rushing_touchdowns', 'receiving_touchdowns'], // Only rushing and receiving TDs like reference
     has_metric_value: true, // Store TD count for display in wager analysis
     selection_types: ['YES', 'NO'],
     special_logic: 'anytime_touchdown'
@@ -168,7 +168,7 @@ export const market_type_mappings = {
   // Two or more touchdowns - count total TDs from player gamelog
   [player_game_prop_types.GAME_TWO_PLUS_TOUCHDOWNS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
-    metric_columns: ['tdr', 'tdrec'], // rushing and receiving TDs
+    metric_columns: ['rushing_touchdowns', 'receiving_touchdowns'], // rushing and receiving TDs
     has_metric_value: true, // Store TD count for display in wager analysis
     selection_types: ['YES', 'NO'],
     special_logic: 'two_plus_touchdowns'

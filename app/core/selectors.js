@@ -1693,55 +1693,55 @@ export function getFilteredProps(state) {
     const proj = player_map.getIn(['projection', `${prop.week}`], {})
     switch (prop.prop_type) {
       case bookmaker_constants.player_prop_types.GAME_PASSING_YARDS:
-        prop.proj = proj.py
+        prop.proj = proj.passing_yards
         break
 
       case bookmaker_constants.player_prop_types.GAME_RECEIVING_YARDS:
-        prop.proj = proj.recy
+        prop.proj = proj.receiving_yards
         break
 
       case bookmaker_constants.player_prop_types.GAME_RUSHING_YARDS:
-        prop.proj = proj.ry
+        prop.proj = proj.rushing_yards
         break
 
       case bookmaker_constants.player_prop_types.GAME_PASSING_COMPLETIONS:
-        prop.proj = proj.pc
+        prop.proj = proj.passing_completions
         break
 
       case bookmaker_constants.player_prop_types.GAME_PASSING_TOUCHDOWNS:
-        prop.proj = proj.tdp
+        prop.proj = proj.passing_touchdowns
         break
 
       case bookmaker_constants.player_prop_types.GAME_RECEPTIONS:
-        prop.proj = proj.rec
+        prop.proj = proj.receptions
         break
 
       case bookmaker_constants.player_prop_types.GAME_PASSING_INTERCEPTIONS:
-        prop.proj = proj.ints
+        prop.proj = proj.passing_interceptions
         break
 
       case bookmaker_constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
-        prop.proj = proj.ra
+        prop.proj = proj.rushing_attempts
         break
 
       case bookmaker_constants.player_prop_types.ANYTIME_TOUCHDOWN:
-        prop.proj = proj.tdr + proj.tdrec
+        prop.proj = proj.rushing_touchdowns + proj.receiving_touchdowns
         break
 
       case bookmaker_constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
-        prop.proj = proj.ry + proj.recy
+        prop.proj = proj.rushing_yards + proj.receiving_yards
         break
 
       case bookmaker_constants.player_prop_types.GAME_PASSING_ATTEMPTS:
-        prop.proj = proj.pa
+        prop.proj = proj.passing_attempts
         break
 
       case bookmaker_constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS:
-        prop.proj = proj.tdr
+        prop.proj = proj.rushing_touchdowns
         break
 
       case bookmaker_constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
-        prop.proj = proj.tdrec
+        prop.proj = proj.receiving_touchdowns
         break
 
       default:
@@ -2546,7 +2546,10 @@ export function getPlaysByMatchupId(state, { mid }) {
   // Initialize DST running totals per team
   const dst_running_totals = {}
   for (const dst_team of dst_teams) {
-    dst_running_totals[dst_team] = { dya: 0, dpa: 0 }
+    dst_running_totals[dst_team] = {
+      defensive_yards_against: 0,
+      defensive_points_against: 0
+    }
   }
 
   let result = new List()

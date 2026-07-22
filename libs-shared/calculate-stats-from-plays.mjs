@@ -41,17 +41,17 @@ const calculateStatsFromPlays = (plays) => {
 
   plays.forEach((play) => {
     if (play.fuml) {
-      addStat(play.player_fuml_pid, 'fuml', 1)
+      addStat(play.player_fuml_pid, 'fumbles_lost', 1)
       playerToTeam[play.player_fuml_pid] = play.off
     }
 
     switch (play.play_type) {
       case 'RUSH': {
         playerToTeam[play.bc_pid] = play.off
-        addTeamStat(play.off, 'ra', 1)
-        addTeamStat(play.off, 'ry', play.yds_gained)
-        addStat(play.bc_pid, 'ra', 1)
-        addStat(play.bc_pid, 'ry', play.rush_yds)
+        addTeamStat(play.off, 'rushing_attempts', 1)
+        addTeamStat(play.off, 'rushing_yards', play.yds_gained)
+        addStat(play.bc_pid, 'rushing_attempts', 1)
+        addStat(play.bc_pid, 'rushing_yards', play.rush_yds)
         if (play.yards_after_any_contact)
           addStat(play.bc_pid, 'ryaco', play.yards_after_any_contact)
         if (play.first_down) {
@@ -65,7 +65,7 @@ const calculateStatsFromPlays = (plays) => {
         if (play.mbt) addStat(play.bc_pid, 'mbt', play.mbt)
         if (play.rush_yds > 0) addStat(play.bc_pid, 'posra', 1)
         if (play.first_down) addStat(play.bc_pid, 'rfd', 1)
-        if (play.td) addStat(play.bc_pid, 'tdr', 1)
+        if (play.td) addStat(play.bc_pid, 'rushing_touchdowns', 1)
         break
       }
 
@@ -93,8 +93,8 @@ const calculateStatsFromPlays = (plays) => {
         // receiver
         if (play.trg_pid) {
           playerToTeam[play.trg_pid] = play.off
-          addTeamStat(play.off, 'trg', 1)
-          addStat(play.trg_pid, 'trg', 1)
+          addTeamStat(play.off, 'targets', 1)
+          addStat(play.trg_pid, 'targets', 1)
           addStat(play.trg_pid, 'rdot', play.dot)
           if (play.dot >= 20) addStat(play.trg_pid, 'dptrg', 1)
           if (play.contested_ball) addStat(play.trg_pid, 'contested_ball', 1)
@@ -105,20 +105,20 @@ const calculateStatsFromPlays = (plays) => {
         }
 
         if (play.intp) {
-          addStat(play.psr_pid, 'ints', 1)
+          addStat(play.psr_pid, 'passing_interceptions', 1)
         } else if (play.comp && play.trg_pid) {
           // TODO deprecate - temp fix for missing trg
           // receiver
-          addStat(play.trg_pid, 'rec', 1)
-          addStat(play.trg_pid, 'recy', play.recv_yds)
+          addStat(play.trg_pid, 'receptions', 1)
+          addStat(play.trg_pid, 'receiving_yards', play.recv_yds)
           addStat(play.trg_pid, 'ryac', play.yards_after_catch)
           addStat(play.trg_pid, 'rcay', play.dot)
           if (play.mbt) addStat(play.trg_pid, 'mbt', play.mbt)
 
           // passer
-          addStat(play.psr_pid, 'pa', 1)
-          addStat(play.psr_pid, 'py', play.pass_yds)
-          addStat(play.psr_pid, 'pc', 1)
+          addStat(play.psr_pid, 'passing_attempts', 1)
+          addStat(play.psr_pid, 'passing_yards', play.pass_yds)
+          addStat(play.psr_pid, 'passing_completions', 1)
           addStat(play.psr_pid, 'pcay', play.dot)
           if (play.yards_after_catch)
             addStat(play.psr_pid, 'pyac', play.yards_after_catch)
@@ -130,14 +130,14 @@ const calculateStatsFromPlays = (plays) => {
           }
 
           if (play.td) {
-            addStat(play.psr_pid, 'tdp', 1)
-            addStat(play.trg_pid, 'tdrec', 1)
+            addStat(play.psr_pid, 'passing_touchdowns', 1)
+            addStat(play.trg_pid, 'receiving_touchdowns', 1)
           }
         } else if (play.sk) {
           addStat(play.psr_pid, 'sk', 1)
           addStat(play.psr_pid, 'sky', Math.abs(play.yds_gained))
         } else {
-          addStat(play.psr_pid, 'pa', 1)
+          addStat(play.psr_pid, 'passing_attempts', 1)
         }
       }
     }
@@ -148,47 +148,100 @@ const calculateStatsFromPlays = (plays) => {
     const team = playerToTeam[pid]
     const team_stats = teams[team]
 
-    const skpa = stats.sk + stats.pa
+    const skpa = stats.sk + stats.passing_attempts
 
-    stats._tch = stats.ra + stats.rec
+    stats._tch = stats.rushing_attempts + stats.receptions
 
     stats.pc_pct =
       round(
-        toPct(safe_div({ numerator: stats.pc, denominator: stats.pa })),
+        toPct(
+          safe_div({
+            numerator: stats.passing_completions,
+            denominator: stats.passing_attempts
+          })
+        ),
         1
       ) || 0
     // stats.py_pg
 
     stats.tdp_pct =
       round(
-        toPct(safe_div({ numerator: stats.tdp, denominator: stats.pa })),
+        toPct(
+          safe_div({
+            numerator: stats.passing_touchdowns,
+            denominator: stats.passing_attempts
+          })
+        ),
         1
       ) || 0
     stats.ints_pct =
       round(
-        toPct(safe_div({ numerator: stats.ints, denominator: stats.pa })),
+        toPct(
+          safe_div({
+            numerator: stats.passing_interceptions,
+            denominator: stats.passing_attempts
+          })
+        ),
         1
       ) || 0
 
     stats.int_worthy_pct =
       round(
-        toPct(safe_div({ numerator: stats.int_worthy, denominator: stats.pa })),
+        toPct(
+          safe_div({
+            numerator: stats.int_worthy,
+            denominator: stats.passing_attempts
+          })
+        ),
         1
       ) || 0
     stats.pcay_pc =
-      round(safe_div({ numerator: stats.pcay, denominator: stats.pc }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.pcay,
+          denominator: stats.passing_completions
+        }),
+        1
+      ) || 0
     stats._ypa =
-      round(safe_div({ numerator: stats.py, denominator: stats.pa }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.passing_yards,
+          denominator: stats.passing_attempts
+        }),
+        1
+      ) || 0
     stats.pyac_pc =
-      round(safe_div({ numerator: stats.pyac, denominator: stats.pc }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.pyac,
+          denominator: stats.passing_completions
+        }),
+        1
+      ) || 0
     // stats._adjypa
     stats._ypc =
-      round(safe_div({ numerator: stats.py, denominator: stats.pc }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.passing_yards,
+          denominator: stats.passing_completions
+        }),
+        1
+      ) || 0
     // stats._ypg
     stats._pacr =
-      round(safe_div({ numerator: stats.py, denominator: stats.pdot }), 2) || 0
+      round(
+        safe_div({ numerator: stats.passing_yards, denominator: stats.pdot }),
+        2
+      ) || 0
     stats.pdot_pa =
-      round(safe_div({ numerator: stats.pdot, denominator: stats.pa }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.pdot,
+          denominator: stats.passing_attempts
+        }),
+        1
+      ) || 0
     // stats._apacr
 
     stats.sk_pct =
@@ -210,72 +263,135 @@ const calculateStatsFromPlays = (plays) => {
       ) || 0
     stats._nygpa =
       round(
-        safe_div({ numerator: stats.py - stats.sky, denominator: skpa }),
+        safe_div({
+          numerator: stats.passing_yards - stats.sky,
+          denominator: skpa
+        }),
         1
       ) || 0
 
     stats.recy_prec =
-      round(safe_div({ numerator: stats.recy, denominator: stats.rec }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.receiving_yards,
+          denominator: stats.receptions
+        }),
+        1
+      ) || 0
     // stats.recy_pg
 
     const team_rdot = team_stats ? team_stats.rdot : 0
-    const team_trg = team_stats ? team_stats.trg : 0
+    const team_trg = team_stats ? team_stats.targets : 0
     const stray = team_rdot ? stats.rdot / team_rdot : 0 // share of teams air yards
-    const sttrg = team_trg ? stats.trg / team_trg : 0 // share of teams targets
+    const sttrg = team_trg ? stats.targets / team_trg : 0 // share of teams targets
     stats._stray = round(toPct(stray), 1) || 0
     stats._sttrg = round(toPct(sttrg), 1) || 0
 
     stats.dptrg_pct =
       round(
-        toPct(safe_div({ numerator: stats.dptrg, denominator: stats.trg })),
+        toPct(safe_div({ numerator: stats.dptrg, denominator: stats.targets })),
         1
       ) || 0
 
     // stats._ayps
     stats._ayprec =
-      round(safe_div({ numerator: stats.rdot, denominator: stats.rec }), 1) || 0
+      round(
+        safe_div({ numerator: stats.rdot, denominator: stats.receptions }),
+        1
+      ) || 0
     stats._ayptrg =
-      round(safe_div({ numerator: stats.rdot, denominator: stats.trg }), 1) || 0
+      round(
+        safe_div({ numerator: stats.rdot, denominator: stats.targets }),
+        1
+      ) || 0
     stats._recypay =
-      round(safe_div({ numerator: stats.recy, denominator: stats.rdot }), 1) ||
-      0
+      round(
+        safe_div({ numerator: stats.receiving_yards, denominator: stats.rdot }),
+        1
+      ) || 0
     // stats._recypsnp
     stats._recyprec =
-      round(safe_div({ numerator: stats.recy, denominator: stats.rec }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.receiving_yards,
+          denominator: stats.receptions
+        }),
+        1
+      ) || 0
     stats._recyptrg =
-      round(safe_div({ numerator: stats.recy, denominator: stats.trg }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.receiving_yards,
+          denominator: stats.targets
+        }),
+        1
+      ) || 0
     stats._wopr = round(1.5 * sttrg + 0.7 * stray, 1) || 0
     stats._ryacprec =
-      round(safe_div({ numerator: stats.ryac, denominator: stats.rec }), 1) || 0
+      round(
+        safe_div({ numerator: stats.ryac, denominator: stats.receptions }),
+        1
+      ) || 0
 
     // stats.ry_pg
     stats.ry_pra =
-      round(safe_div({ numerator: stats.ry, denominator: stats.ra }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.rushing_yards,
+          denominator: stats.rushing_attempts
+        }),
+        1
+      ) || 0
     stats.ryaco_pra =
-      round(safe_div({ numerator: stats.ryaco, denominator: stats.ra }), 1) || 0
+      round(
+        safe_div({
+          numerator: stats.ryaco,
+          denominator: stats.rushing_attempts
+        }),
+        1
+      ) || 0
 
     stats.mbt_pt =
       round(safe_div({ numerator: stats.mbt, denominator: stats._tch }), 1) || 0
     stats._fumlpra =
       round(
-        toPct(safe_div({ numerator: stats.fuml, denominator: stats.ra })),
+        toPct(
+          safe_div({
+            numerator: stats.fumbles_lost,
+            denominator: stats.rushing_attempts
+          })
+        ),
         1
       ) || 0
     stats.rasucc_pra =
       round(
-        toPct(safe_div({ numerator: stats.rasucc, denominator: stats.ra })),
+        toPct(
+          safe_div({
+            numerator: stats.rasucc,
+            denominator: stats.rushing_attempts
+          })
+        ),
         1
       ) || 0
     stats.posra_pra =
       round(
-        toPct(safe_div({ numerator: stats.posra, denominator: stats.ra })),
+        toPct(
+          safe_div({
+            numerator: stats.posra,
+            denominator: stats.rushing_attempts
+          })
+        ),
         1
       ) || 0
 
-    const team_ra = team_stats ? team_stats.ra : 0
-    const team_ry = team_stats ? team_stats.ry : 0
-    stats._stra = team_ra ? round(toPct(stats.ra / team_ra), 1) || 0 : 0
-    stats._stry = team_ry ? round(toPct(stats.ry / team_ry), 1) || 0 : 0
+    const team_ra = team_stats ? team_stats.rushing_attempts : 0
+    const team_ry = team_stats ? team_stats.rushing_yards : 0
+    stats._stra = team_ra
+      ? round(toPct(stats.rushing_attempts / team_ra), 1) || 0
+      : 0
+    stats._stry = team_ry
+      ? round(toPct(stats.rushing_yards / team_ry), 1) || 0
+      : 0
 
     // stats.fd_pct
     // stats.succ_psnp

@@ -26,8 +26,8 @@
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-TMSR-000922','Test','Tmsr','T.Tmsr','Test Tmsr','ZZ','ZZ','2000-01-01',2020,'ZZ')",
       "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (990301, 2024, 1, 'REG', 'ZZ', 'OP')",
       "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (990302, 2025, 1, 'REG', 'ZZ', 'OP')",
-      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rush_first_down, rec_first_down, ry_excluding_kneels) VALUES (990301, 'TEST-TMSR-000922', 'OP', 'ZZ', 'ZZ', 2024, 0, 0, 0)",
-      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rush_first_down, rec_first_down, ry_excluding_kneels) VALUES (990302, 'TEST-TMSR-000922', 'OP', 'ZZ', 'ZZ', 2025, 0, 0, 0)",
+      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES (990301, 'TEST-TMSR-000922', 'OP', 'ZZ', 'ZZ', 2024, 0, 0, 0)",
+      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES (990302, 'TEST-TMSR-000922', 'OP', 'ZZ', 'ZZ', 2025, 0, 0, 0)",
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, cpoe) VALUES (990301,1,2024,1,0,'REG','PASS','ZZ',2.0)",
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, cpoe) VALUES (990301,2,2024,1,0,'REG','PASS','ZZ',4.0)",
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, cpoe) VALUES (990302,1,2025,1,0,'REG','PASS','ZZ',6.0)"

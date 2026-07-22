@@ -75,35 +75,35 @@ const router = express.Router()
  *           maximum: 99
  *           description: Short term reserve roster slots limit (99 = unlimited)
  *           example: 3
- *         py:
+ *         passing_yards:
  *           type: number
  *           format: float
  *           description: Points per passing yard
  *           example: 0.04
- *         tdp:
+ *         passing_touchdowns:
  *           type: integer
  *           description: Points per passing touchdown
  *           example: 4
- *         ry:
+ *         rushing_yards:
  *           type: number
  *           format: float
  *           description: Points per rushing yard
  *           example: 0.1
- *         tdr:
+ *         rushing_touchdowns:
  *           type: integer
  *           description: Points per rushing touchdown
  *           example: 6
- *         rec:
+ *         receptions:
  *           type: number
  *           format: float
  *           description: Points per reception
  *           example: 0.5
- *         recy:
+ *         receiving_yards:
  *           type: number
  *           format: float
  *           description: Points per receiving yard
  *           example: 0.1
- *         tdrec:
+ *         receiving_touchdowns:
  *           type: integer
  *           description: Points per receiving touchdown
  *           example: 6
@@ -145,14 +145,14 @@ const router = express.Router()
  *           type: integer
  *           minimum: 0
  *           description: Free agent acquisition budget
- *         py:
+ *         passing_yards:
  *           type: number
  *           format: float
  *           description: Points per passing yard
- *         tdp:
+ *         passing_touchdowns:
  *           type: integer
  *           description: Points per passing touchdown
- *         rec:
+ *         receptions:
  *           type: number
  *           format: float
  *           description: Points per reception
@@ -219,13 +219,13 @@ const router = express.Router()
  *                   bench: 8
  *                   ps: 4
  *                   reserve_short_term_limit: 3
- *                   py: 0.04
- *                   tdp: 4
- *                   ry: 0.1
- *                   tdr: 6
- *                   rec: 0.5
- *                   recy: 0.1
- *                   tdrec: 6
+ *                   passing_yards: 0.04
+ *                   passing_touchdowns: 4
+ *                   rushing_yards: 0.1
+ *                   rushing_touchdowns: 6
+ *                   receptions: 0.5
+ *                   receiving_yards: 0.1
+ *                   receiving_touchdowns: 6
  *                   espn_id: null
  *                   sleeper_id: 67890
  *       400:
@@ -291,9 +291,9 @@ const router = express.Router()
  *             scoring_update:
  *               summary: Update scoring settings
  *               value:
- *                 py: 0.05
- *                 rec: 1.0
- *                 tdp: 6
+ *                 passing_yards: 0.05
+ *                 receptions: 1.0
+ *                 passing_touchdowns: 6
  *             roster_update:
  *               summary: Update roster requirements
  *               value:
@@ -321,13 +321,13 @@ const router = express.Router()
  *                   items:
  *                     type: string
  *                   description: List of updated setting fields
- *                   example: ["py", "rec", "tdp"]
+ *                   example: ["passing_yards", "receptions", "passing_touchdowns"]
  *             examples:
  *               settings_updated:
  *                 summary: Settings update confirmation
  *                 value:
  *                   success: true
- *                   updated: ["py", "rec", "tdp"]
+ *                   updated: ["passing_yards", "receptions", "passing_touchdowns"]
  *       400:
  *         description: Invalid request or league ID
  *         content:

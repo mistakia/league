@@ -15,18 +15,42 @@ const season_projections_view = {
     // TODO player market adjusted salary
     current_season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
     current_season.isOffseason ? 'points.0.total' : 'points.ros.total',
-    current_season.isOffseason ? 'projection.0.pa' : 'projection.ros.pa',
-    current_season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
-    current_season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
-    current_season.isOffseason ? 'projection.0.ints' : 'projection.ros.ints',
-    current_season.isOffseason ? 'projection.0.ra' : 'projection.ros.ra',
-    current_season.isOffseason ? 'projection.0.ry' : 'projection.ros.ry',
-    current_season.isOffseason ? 'projection.0.tdr' : 'projection.ros.tdr',
-    current_season.isOffseason ? 'projection.0.fuml' : 'projection.ros.fuml',
-    current_season.isOffseason ? 'projection.0.trg' : 'projection.ros.trg',
-    current_season.isOffseason ? 'projection.0.rec' : 'projection.ros.rec',
-    current_season.isOffseason ? 'projection.0.recy' : 'projection.ros.recy',
-    current_season.isOffseason ? 'projection.0.tdrec' : 'projection.ros.tdrec'
+    current_season.isOffseason
+      ? 'projection.0.passing_attempts'
+      : 'projection.ros.passing_attempts',
+    current_season.isOffseason
+      ? 'projection.0.passing_yards'
+      : 'projection.ros.passing_yards',
+    current_season.isOffseason
+      ? 'projection.0.passing_touchdowns'
+      : 'projection.ros.passing_touchdowns',
+    current_season.isOffseason
+      ? 'projection.0.passing_interceptions'
+      : 'projection.ros.passing_interceptions',
+    current_season.isOffseason
+      ? 'projection.0.rushing_attempts'
+      : 'projection.ros.rushing_attempts',
+    current_season.isOffseason
+      ? 'projection.0.rushing_yards'
+      : 'projection.ros.rushing_yards',
+    current_season.isOffseason
+      ? 'projection.0.rushing_touchdowns'
+      : 'projection.ros.rushing_touchdowns',
+    current_season.isOffseason
+      ? 'projection.0.fumbles_lost'
+      : 'projection.ros.fumbles_lost',
+    current_season.isOffseason
+      ? 'projection.0.targets'
+      : 'projection.ros.targets',
+    current_season.isOffseason
+      ? 'projection.0.receptions'
+      : 'projection.ros.receptions',
+    current_season.isOffseason
+      ? 'projection.0.receiving_yards'
+      : 'projection.ros.receiving_yards',
+    current_season.isOffseason
+      ? 'projection.0.receiving_touchdowns'
+      : 'projection.ros.receiving_touchdowns'
   ]
 }
 
@@ -39,10 +63,10 @@ const week_projections_view = {
     'opponent_strength_avg',
     'pts_added.week',
     'points.week.total',
-    'projection.week.pa',
-    'projection.week.py',
-    'projection.week.tdp',
-    'projection.week.ints',
+    'projection.week.passing_attempts',
+    'projection.week.passing_yards',
+    'projection.week.passing_touchdowns',
+    'projection.week.passing_interceptions',
     'opponent_pass_pa',
     'opponent_pass_pc',
     'opponent_pass_py',
@@ -63,10 +87,10 @@ const week_projections_view = {
     'opponent_deep_pass_att_pct',
     'opponent_tight_window_pct',
     'opponent_play_action_pct',
-    'projection.week.ra',
-    'projection.week.ry',
-    'projection.week.tdr',
-    'projection.week.fuml',
+    'projection.week.rushing_attempts',
+    'projection.week.rushing_yards',
+    'projection.week.rushing_touchdowns',
+    'projection.week.fumbles_lost',
     'opponent_rush_ra',
     'opponent_rush_ry',
     'opponent_rush_tdr',
@@ -75,10 +99,10 @@ const week_projections_view = {
     'opponent_rushing_yards_after_contact_per_attempt',
     'opponent_rushing_yards_over_expectation',
     'opponent_rushing_yards_over_expectation_per_attempt',
-    'projection.week.trg',
-    'projection.week.rec',
-    'projection.week.recy',
-    'projection.week.tdrec',
+    'projection.week.targets',
+    'projection.week.receptions',
+    'projection.week.receiving_yards',
+    'projection.week.receiving_touchdowns',
     'opponent_recv_trg',
     'opponent_recv_rec',
     'opponent_recv_recy',
@@ -96,14 +120,14 @@ const week_projections_view = {
 const views = {
   passing_stats_by_play: {
     name: 'Passing Stats by Play',
-    order_by: 'stats.py',
+    order_by: 'stats.passing_yards',
     fields: [
       'stats.pts',
-      'stats.pa',
-      'stats.py',
+      'stats.passing_attempts',
+      'stats.passing_yards',
       'stats.pyac',
-      'stats.tdp',
-      'stats.ints',
+      'stats.passing_touchdowns',
+      'stats.passing_interceptions',
       'stats.drppy',
       'stats.pc_pct',
       'stats.tdp_pct',
@@ -126,13 +150,13 @@ const views = {
   },
   rushing_stats_by_play: {
     name: 'Rushing Stats by Play',
-    order_by: 'stats.ry',
+    order_by: 'stats.rushing_yards',
     fields: [
       'stats.pts',
-      'stats.ry',
-      'stats.ra',
+      'stats.rushing_yards',
+      'stats.rushing_attempts',
       'stats.rfd',
-      'stats.tdr',
+      'stats.rushing_touchdowns',
       'stats.ry_pra',
       'stats.posra',
       'stats.ryaco',
@@ -148,15 +172,15 @@ const views = {
   },
   receiving_stats_by_play: {
     name: 'Receiving Stats by Play',
-    order_by: 'stats.recy',
+    order_by: 'stats.receiving_yards',
     fields: [
       'stats.pts',
-      'stats.rec',
-      'stats.recy',
-      'stats.tdrec',
+      'stats.receptions',
+      'stats.receiving_yards',
+      'stats.receiving_touchdowns',
       'stats.drops',
       'stats.dryprecy',
-      'stats.trg',
+      'stats.targets',
       'stats.dptrg_pct',
       'stats._ayptrg',
       'stats.rdot',

@@ -9,10 +9,13 @@ import './league-header.styl'
 
 export default function LeagueHeader({ league, is_in_league }) {
   const is_ppr_equal =
-    league.terec === league.rbrec && league.terec === league.wrrec
-  const isTEP = league.terec !== league.rbrec || league.terec !== league.wrrec
-  const isHalfPPR = is_ppr_equal && league.rec === 0.5
-  const isFullPPR = is_ppr_equal && league.rec === 1
+    league.tight_end_reception === league.running_back_reception &&
+    league.tight_end_reception === league.wide_receiver_reception
+  const isTEP =
+    league.tight_end_reception !== league.running_back_reception ||
+    league.tight_end_reception !== league.wide_receiver_reception
+  const isHalfPPR = is_ppr_equal && league.receptions === 0.5
+  const isFullPPR = is_ppr_equal && league.receptions === 1
 
   // TODO isSalaryCap
   // TODO is_hosted

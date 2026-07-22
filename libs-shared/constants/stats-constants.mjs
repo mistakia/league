@@ -3,56 +3,56 @@ import { roster_slot_types } from './roster-constants.mjs'
 export const fantasy_positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 
 export const base_fantasy_stats = [
-  'pa',
-  'pc',
-  'py',
-  'ints',
-  'tdp',
+  'passing_attempts',
+  'passing_completions',
+  'passing_yards',
+  'passing_interceptions',
+  'passing_touchdowns',
 
-  'ra',
-  'ry',
-  'ry_excluding_kneels', // rushing yards excluding kneel plays
-  'tdr',
-  'rush_first_down', // rushing first downs
-  'fuml',
+  'rushing_attempts',
+  'rushing_yards',
+  'rushing_yards_excluding_kneels', // rushing yards excluding kneel plays
+  'rushing_touchdowns',
+  'rushing_first_downs', // rushing first downs
+  'fumbles_lost',
 
-  'trg',
-  'rec',
-  'recy',
-  'rec_first_down', // receiving first downs
-  'tdrec',
+  'targets',
+  'receptions',
+  'receiving_yards',
+  'receiving_first_downs', // receiving first downs
+  'receiving_touchdowns',
 
-  'twoptc',
+  'two_point_conversions',
 
-  'prtd', // punt return touchdown
-  'krtd', // kickoff return touchdown
-  'fum_ret_td' // fumble return touchdown
+  'punt_return_touchdowns', // punt return touchdown
+  'kickoff_return_touchdowns', // kickoff return touchdown
+  'fumble_return_touchdowns' // fumble return touchdown
 ]
 
 export const kicker_fantasy_stats = [
-  'fgm', // field goal made
-  'fgy', // field goal yards (min of 30)
-  'fg19', // field goal <19
-  'fg29', // field goal 29
-  'fg39', // field goal 39
-  'fg49', // field goal 49
-  'fg50', // field goal 50
-  'xpm' // extra point made
+  'field_goals_made', // field goal made
+  'field_goal_yards', // field goal yards (min of 30)
+  'field_goals_made_0_19_yards', // field goal <19
+  'field_goals_made_20_29_yards', // field goal 29
+  'field_goals_made_30_39_yards', // field goal 39
+  'field_goals_made_40_49_yards', // field goal 49
+  'field_goals_made_50_plus_yards', // field goal 50
+  'extra_points_made' // extra point made
 ]
 
 export const defense_fantasy_stats = [
-  'dsk', // sack
-  'dint', // int
-  'dff', // forced fumble
-  'drf', // recovered fumble
-  'dtno', // three and out
-  'dfds', // fourth down stop
-  'dpa', // points against
-  'dya', // yards against
-  'dblk', // blocked kicks
-  'dsf', // safety
-  'dtpr', // two point return
-  'dtd' // touchdown
+  'defensive_sacks', // sack
+  'defensive_interceptions', // int
+  'defensive_forced_fumbles', // forced fumble
+  'defensive_recovered_fumbles', // recovered fumble
+  'defensive_three_and_outs', // three and out
+  'defensive_fourth_down_stops', // fourth down stop
+  'defensive_points_against', // points against
+  'defensive_yards_against', // yards against
+  'defensive_blocked_kicks', // blocked kicks
+  'defensive_safeties', // safety
+  'defensive_two_point_returns', // two point return
+  'defensive_touchdowns' // touchdown
 ]
 
 export const all_fantasy_stats = [
@@ -63,26 +63,26 @@ export const all_fantasy_stats = [
 
 // Stats supported for projections (excludes stats not yet in projection tables)
 export const projected_base_stats = [
-  'pa',
-  'pc',
-  'py',
-  'ints',
-  'tdp',
+  'passing_attempts',
+  'passing_completions',
+  'passing_yards',
+  'passing_interceptions',
+  'passing_touchdowns',
 
-  'ra',
-  'ry',
-  'tdr',
-  'fuml',
+  'rushing_attempts',
+  'rushing_yards',
+  'rushing_touchdowns',
+  'fumbles_lost',
 
-  'trg',
-  'rec',
-  'recy',
-  'tdrec',
+  'targets',
+  'receptions',
+  'receiving_yards',
+  'receiving_touchdowns',
 
-  'twoptc',
+  'two_point_conversions',
 
-  'prtd', // punt return touchdown
-  'krtd' // kickoff return touchdown
+  'punt_return_touchdowns', // punt return touchdown
+  'kickoff_return_touchdowns' // kickoff return touchdown
 ]
 
 export const all_projected_fantasy_stats = [
@@ -98,26 +98,26 @@ export const create_empty_projected_fantasy_stats = () =>
   all_projected_fantasy_stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
 export const fantasy_stat_display_names = {
-  pa: 'Passing Attempts',
-  pc: 'Passing Completions',
-  py: 'Passing Yards',
-  ints: 'Interceptions',
-  tdp: 'Passing TDs',
-  ra: 'Rushing Attempts',
-  ry: 'Rushing Yards',
-  ry_no_kneels: 'Rushing Yards (No Kneels)',
-  tdr: 'Rushing TDs',
-  rush_first_down: 'Rushing First Downs',
-  fuml: 'Fumbles',
-  trg: 'Targets',
-  rec: 'Receptions',
-  recy: 'Receiving Yards',
-  rec_first_down: 'Receiving First Downs',
-  tdrec: 'Receiving TDs',
-  twoptc: 'Two Point Conversions',
-  prtd: 'Punt Return Touchdowns',
-  krtd: 'Kickoff Return Touchdowns',
-  fum_ret_td: 'Fumble Return Touchdowns'
+  passing_attempts: 'Passing Attempts',
+  passing_completions: 'Passing Completions',
+  passing_yards: 'Passing Yards',
+  passing_interceptions: 'Interceptions',
+  passing_touchdowns: 'Passing TDs',
+  rushing_attempts: 'Rushing Attempts',
+  rushing_yards: 'Rushing Yards',
+  rushing_yards_excluding_kneels: 'Rushing Yards (No Kneels)',
+  rushing_touchdowns: 'Rushing TDs',
+  rushing_first_downs: 'Rushing First Downs',
+  fumbles_lost: 'Fumbles',
+  targets: 'Targets',
+  receptions: 'Receptions',
+  receiving_yards: 'Receiving Yards',
+  receiving_first_downs: 'Receiving First Downs',
+  receiving_touchdowns: 'Receiving TDs',
+  two_point_conversions: 'Two Point Conversions',
+  punt_return_touchdowns: 'Punt Return Touchdowns',
+  kickoff_return_touchdowns: 'Kickoff Return Touchdowns',
+  fumble_return_touchdowns: 'Fumble Return Touchdowns'
 }
 
 export const extended_player_stats = [
@@ -362,17 +362,17 @@ export const extended_player_stats = [
 ]
 
 const passing_qualifier = {
-  type: 'pa',
+  type: 'passing_attempts',
   value: 14
 }
 
 const rushing_qualifier = {
-  type: 'ra',
+  type: 'rushing_attempts',
   value: 8
 }
 
 const receiving_qualifier = {
-  type: 'trg',
+  type: 'targets',
   value: 8
 }
 

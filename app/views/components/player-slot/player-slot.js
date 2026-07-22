@@ -80,27 +80,33 @@ export default class PlayerSlot extends React.Component {
     const week = Math.max(current_season.week, 1)
 
     const statSuffix = {
-      pa: 'pass att',
-      pc: 'pass comp',
-      py: 'pass yds',
-      ints: 'ints',
-      tdp: 'pass TD',
+      passing_attempts: 'pass att',
+      passing_completions: 'pass comp',
+      passing_yards: 'pass yds',
+      passing_interceptions: 'ints',
+      passing_touchdowns: 'pass TD',
 
-      ra: 'rush att',
-      ry: 'rush yds',
-      tdr: 'rush TD',
-      fuml: 'fum lost',
+      rushing_attempts: 'rush att',
+      rushing_yards: 'rush yds',
+      rushing_touchdowns: 'rush TD',
+      fumbles_lost: 'fum lost',
 
-      trg: 'tar',
-      rec: 'rec',
-      recy: 'rec yds',
-      tdrec: 'rec TD',
+      targets: 'tar',
+      receptions: 'rec',
+      receiving_yards: 'rec yds',
+      receiving_touchdowns: 'rec TD',
 
-      twoptc: 'twoptc'
+      two_point_conversions: 'twoptc'
     }
 
     const passing = []
-    for (const stat of ['pa', 'pc', 'py', 'ints', 'tdp']) {
+    for (const stat of [
+      'passing_attempts',
+      'passing_completions',
+      'passing_yards',
+      'passing_interceptions',
+      'passing_touchdowns'
+    ]) {
       const value = player_map.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         passing.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
@@ -108,7 +114,12 @@ export default class PlayerSlot extends React.Component {
     }
 
     const rushing = []
-    for (const stat of ['ra', 'ry', 'tdr', 'fuml']) {
+    for (const stat of [
+      'rushing_attempts',
+      'rushing_yards',
+      'rushing_touchdowns',
+      'fumbles_lost'
+    ]) {
       const value = player_map.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         rushing.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
@@ -116,7 +127,12 @@ export default class PlayerSlot extends React.Component {
     }
 
     const receiving = []
-    for (const stat of ['trg', 'rec', 'recy', 'tdrec']) {
+    for (const stat of [
+      'targets',
+      'receptions',
+      'receiving_yards',
+      'receiving_touchdowns'
+    ]) {
       const value = player_map.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         receiving.push(`${value.toFixed(1)} ${statSuffix[stat]}`)

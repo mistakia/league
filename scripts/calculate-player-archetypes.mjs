@@ -123,8 +123,8 @@ const calculate_player_archetypes = async ({ year } = {}) => {
     .select(
       'player_gamelogs.pid',
       'player.primary_position',
-      db.raw('SUM(player_gamelogs.ra) as total_rush_att'),
-      db.raw('SUM(player_gamelogs.trg) as total_targets'),
+      db.raw('SUM(player_gamelogs.rushing_attempts) as total_rush_att'),
+      db.raw('SUM(player_gamelogs.targets) as total_targets'),
       db.raw('COUNT(DISTINCT player_gamelogs.esbid) as games_played')
     )
     .groupBy('player_gamelogs.pid', 'player.primary_position')
@@ -138,7 +138,7 @@ const calculate_player_archetypes = async ({ year } = {}) => {
     .where('nfl_games.seas_type', 'REG')
     .select(
       'player_gamelogs.tm',
-      db.raw('SUM(player_gamelogs.trg) as total_team_targets')
+      db.raw('SUM(player_gamelogs.targets) as total_team_targets')
     )
     .groupBy('player_gamelogs.tm')
 

@@ -11,18 +11,18 @@ const log = debug('simulation:load-market-projections')
 
 // Mapping from market types to stat column names
 const MARKET_TYPE_TO_STAT = {
-  [player_game_prop_types.GAME_PASSING_YARDS]: 'py',
-  [player_game_prop_types.GAME_PASSING_COMPLETIONS]: 'pc',
-  [player_game_prop_types.GAME_PASSING_TOUCHDOWNS]: 'tdp',
-  [player_game_prop_types.GAME_PASSING_INTERCEPTIONS]: 'ints',
-  [player_game_prop_types.GAME_PASSING_ATTEMPTS]: 'pa',
-  [player_game_prop_types.GAME_RUSHING_YARDS]: 'ry',
-  [player_game_prop_types.GAME_RUSHING_ATTEMPTS]: 'ra',
-  [player_game_prop_types.GAME_RUSHING_TOUCHDOWNS]: 'tdr',
-  [player_game_prop_types.GAME_RECEIVING_YARDS]: 'recy',
-  [player_game_prop_types.GAME_RECEPTIONS]: 'rec',
-  [player_game_prop_types.GAME_RECEIVING_TOUCHDOWNS]: 'tdrec',
-  [player_game_prop_types.GAME_RECEIVING_TARGETS]: 'trg'
+  [player_game_prop_types.GAME_PASSING_YARDS]: 'passing_yards',
+  [player_game_prop_types.GAME_PASSING_COMPLETIONS]: 'passing_completions',
+  [player_game_prop_types.GAME_PASSING_TOUCHDOWNS]: 'passing_touchdowns',
+  [player_game_prop_types.GAME_PASSING_INTERCEPTIONS]: 'passing_interceptions',
+  [player_game_prop_types.GAME_PASSING_ATTEMPTS]: 'passing_attempts',
+  [player_game_prop_types.GAME_RUSHING_YARDS]: 'rushing_yards',
+  [player_game_prop_types.GAME_RUSHING_ATTEMPTS]: 'rushing_attempts',
+  [player_game_prop_types.GAME_RUSHING_TOUCHDOWNS]: 'rushing_touchdowns',
+  [player_game_prop_types.GAME_RECEIVING_YARDS]: 'receiving_yards',
+  [player_game_prop_types.GAME_RECEPTIONS]: 'receptions',
+  [player_game_prop_types.GAME_RECEIVING_TOUCHDOWNS]: 'receiving_touchdowns',
+  [player_game_prop_types.GAME_RECEIVING_TARGETS]: 'targets'
 }
 
 // Market types we care about for fantasy projections
@@ -429,7 +429,10 @@ export async function load_market_projections({
     // - For RB/WR/TE: Represents combined rush/rec TDs
     // Only add if no specific TD props (tdr/tdrec) already exist
     if (data.anytime_td && is_anytime_td_eligible(position)) {
-      if (stats.tdr === undefined && stats.tdrec === undefined) {
+      if (
+        stats.rushing_touchdowns === undefined &&
+        stats.receiving_touchdowns === undefined
+      ) {
         const expected_td = calculate_expected_tds({
           one_plus: data.anytime_td.odds_decimal,
           two_plus: data.two_plus_td?.odds_decimal
@@ -459,11 +462,11 @@ export async function load_market_projections({
         three_plus: data.alt_passing_tds.three_plus,
         four_plus: data.alt_passing_tds.four_plus
       })
-      const prev_tdp = stats.tdp
-      stats.tdp = expected_tdp
+      const prev_tdp = stats.passing_touchdowns
+      stats.passing_touchdowns = expected_tdp
       market_types.push(player_game_prop_types.GAME_ALT_PASSING_TOUCHDOWNS)
       log(
-        `ALT_PASSING_TD: ${pid} 1+=${data.alt_passing_tds.one_plus?.toFixed(2)} 2+=${data.alt_passing_tds.two_plus?.toFixed(2)} 3+=${data.alt_passing_tds.three_plus?.toFixed(2)} 4+=${data.alt_passing_tds.four_plus?.toFixed(2)} -> tdp=${expected_tdp.toFixed(3)}${prev_tdp !== undefined ? ' (was line=' + prev_tdp.toFixed(1) + ')' : ''}`
+        `ALT_PASSING_TD: ${pid} 1+=${data.alt_passing_tds.one_plus?.toFixed(2)} 2+=${data.alt_passing_tds.two_plus?.toFixed(2)} 3+=${data.alt_passing_tds.three_plus?.toFixed(2)} 4+=${data.alt_passing_tds.four_plus?.toFixed(2)} -> passing_touchdowns=${expected_tdp.toFixed(3)}${prev_tdp !== undefined ? ' (was line=' + prev_tdp.toFixed(1) + ')' : ''}`
       )
     }
 

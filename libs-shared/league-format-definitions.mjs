@@ -9,29 +9,29 @@ export const scoring_formats = {
   standard: {
     label: 'Standard (No PPR)',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (points per yard)
-      ints: -2, // interceptions
-      tdp: 4, // passing touchdowns
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 0, // receptions (no PPR)
-      rbrec: 0, // RB receptions
-      wrrec: 0, // WR receptions
-      terec: 0, // TE receptions
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: -2, // fumbles lost
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 0, // targets (no points in standard)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (points per yard)
+      passing_interceptions: -2, // interceptions
+      passing_touchdowns: 4, // passing touchdowns
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 0, // receptions (no PPR)
+      running_back_reception: 0, // RB receptions
+      wide_receiver_reception: 0, // WR receptions
+      tight_end_reception: 0, // TE receptions
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: -2, // fumbles lost
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 0, // targets (no points in standard)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description: 'Standard scoring with no PPR and 4-point passing touchdowns'
   },
@@ -39,29 +39,29 @@ export const scoring_formats = {
   half_ppr: {
     label: 'Half PPR',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (points per yard)
-      ints: -2, // interceptions
-      tdp: 4, // passing touchdowns
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 0.5, // receptions (half PPR)
-      rbrec: 0.5, // RB receptions
-      wrrec: 0.5, // WR receptions
-      terec: 0.5, // TE receptions
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: -2, // fumbles lost
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 0, // targets (no points in standard)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (points per yard)
+      passing_interceptions: -2, // interceptions
+      passing_touchdowns: 4, // passing touchdowns
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 0.5, // receptions (half PPR)
+      running_back_reception: 0.5, // RB receptions
+      wide_receiver_reception: 0.5, // WR receptions
+      tight_end_reception: 0.5, // TE receptions
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: -2, // fumbles lost
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 0, // targets (no points in standard)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Half point per reception scoring with 4-point passing touchdowns'
@@ -70,29 +70,29 @@ export const scoring_formats = {
   ppr: {
     label: 'PPR (Full)',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (points per yard)
-      ints: -2, // interceptions
-      tdp: 4, // passing touchdowns
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 1, // receptions (full PPR)
-      rbrec: 1, // RB receptions
-      wrrec: 1, // WR receptions
-      terec: 1, // TE receptions
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: -2, // fumbles lost
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 0, // targets (no points in standard)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (points per yard)
+      passing_interceptions: -2, // interceptions
+      passing_touchdowns: 4, // passing touchdowns
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 1, // receptions (full PPR)
+      running_back_reception: 1, // RB receptions
+      wide_receiver_reception: 1, // WR receptions
+      tight_end_reception: 1, // TE receptions
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: -2, // fumbles lost
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 0, // targets (no points in standard)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Full point per reception scoring with 4-point passing touchdowns'
@@ -101,29 +101,29 @@ export const scoring_formats = {
   sfb15_mfl: {
     label: 'Scott Fish Bowl 15 (MFL)',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (points per yard)
-      ints: 0, // interceptions (0 points in SFB)
-      tdp: 6, // passing touchdowns
-      ra: 0.5, // rushing attempts (0.5 points per carry)
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 1, // receptions (full PPR)
-      rbrec: 1, // RB receptions
-      wrrec: 1, // WR receptions
-      terec: 2, // TE receptions (rec + 1 for SFB)
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: 0, // fumbles lost (0 points in SFB)
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 1, // targets (1 point per target in SFB)
-      rush_first_down: 1, // rushing first downs (1 point in SFB)
-      rec_first_down: 1, // receiving first downs (1 point in SFB)
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (points per yard)
+      passing_interceptions: 0, // interceptions (0 points in SFB)
+      passing_touchdowns: 6, // passing touchdowns
+      rushing_attempts: 0.5, // rushing attempts (0.5 points per carry)
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 1, // receptions (full PPR)
+      running_back_reception: 1, // RB receptions
+      wide_receiver_reception: 1, // WR receptions
+      tight_end_reception: 2, // TE receptions (rec + 1 for SFB)
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: 0, // fumbles lost (0 points in SFB)
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 1, // targets (1 point per target in SFB)
+      rushing_first_downs: 1, // rushing first downs (1 point in SFB)
+      receiving_first_downs: 1, // receiving first downs (1 point in SFB)
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties'
@@ -132,29 +132,29 @@ export const scoring_formats = {
   sfb15_sleeper: {
     label: 'Scott Fish Bowl 15 (Sleeper)',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (points per yard)
-      ints: 0, // interceptions (0 points in SFB)
-      tdp: 6, // passing touchdowns
-      ra: 0.5, // rushing attempts (0.5 points per carry)
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 2.5, // receptions (2.5 PPR)
-      rbrec: 2.5, // RB receptions
-      wrrec: 2.5, // WR receptions
-      terec: 3.5, // TE receptions (rec + 1 for SFB)
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: 0, // fumbles lost (0 points in SFB)
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 0, // targets (no points in SFB Sleeper)
-      rush_first_down: 1, // rushing first downs (1 point in SFB)
-      rec_first_down: 1, // receiving first downs (1 point in SFB)
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (points per yard)
+      passing_interceptions: 0, // interceptions (0 points in SFB)
+      passing_touchdowns: 6, // passing touchdowns
+      rushing_attempts: 0.5, // rushing attempts (0.5 points per carry)
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 2.5, // receptions (2.5 PPR)
+      running_back_reception: 2.5, // RB receptions
+      wide_receiver_reception: 2.5, // WR receptions
+      tight_end_reception: 3.5, // TE receptions (rec + 1 for SFB)
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: 0, // fumbles lost (0 points in SFB)
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 0, // targets (no points in SFB Sleeper)
+      rushing_first_downs: 1, // rushing first downs (1 point in SFB)
+      receiving_first_downs: 1, // receiving first downs (1 point in SFB)
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
@@ -163,29 +163,29 @@ export const scoring_formats = {
   fanduel: {
     label: 'FanDuel DFS',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (0.04 points per yard)
-      ints: -1, // interceptions (-1 points)
-      tdp: 4, // passing touchdowns (4 points)
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards (0.1 points per yard)
-      tdr: 6, // rushing touchdowns (6 points)
-      rec: 0.5, // receptions (0.5 PPR)
-      rbrec: 0.5, // RB receptions
-      wrrec: 0.5, // WR receptions
-      terec: 0.5, // TE receptions
-      recy: 0.1, // receiving yards (0.1 points per yard)
-      tdrec: 6, // receiving touchdowns (6 points)
-      twoptc: 2, // two-point conversions (2 points)
-      fuml: -2, // fumbles lost (-2 points)
-      prtd: 6, // punt return touchdowns (6 points)
-      krtd: 6, // kick return touchdowns (6 points)
-      fum_ret_td: 6, // fumble return touchdowns (6 points)
-      trg: 0, // targets (no points in FanDuel)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (0.04 points per yard)
+      passing_interceptions: -1, // interceptions (-1 points)
+      passing_touchdowns: 4, // passing touchdowns (4 points)
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards (0.1 points per yard)
+      rushing_touchdowns: 6, // rushing touchdowns (6 points)
+      receptions: 0.5, // receptions (0.5 PPR)
+      running_back_reception: 0.5, // RB receptions
+      wide_receiver_reception: 0.5, // WR receptions
+      tight_end_reception: 0.5, // TE receptions
+      receiving_yards: 0.1, // receiving yards (0.1 points per yard)
+      receiving_touchdowns: 6, // receiving touchdowns (6 points)
+      two_point_conversions: 2, // two-point conversions (2 points)
+      fumbles_lost: -2, // fumbles lost (-2 points)
+      punt_return_touchdowns: 6, // punt return touchdowns (6 points)
+      kickoff_return_touchdowns: 6, // kick return touchdowns (6 points)
+      fumble_return_touchdowns: 6, // fumble return touchdowns (6 points)
+      targets: 0, // targets (no points in FanDuel)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
       // TODO: Add support for unsupported FanDuel scoring:
       // - 100+ rushing yard bonus (3 points)
       // - 100+ receiving yard bonus (3 points)
@@ -203,29 +203,29 @@ export const scoring_formats = {
   draftkings: {
     label: 'DraftKings DFS',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (0.04 points per yard)
-      ints: -1, // interceptions (-1 points, less punitive than standard)
-      tdp: 4, // passing touchdowns (4 points)
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards (0.1 points per yard)
-      tdr: 6, // rushing touchdowns (6 points)
-      rec: 1, // receptions (1 PPR - full point per reception)
-      rbrec: 1, // RB receptions
-      wrrec: 1, // WR receptions
-      terec: 1, // TE receptions
-      recy: 0.1, // receiving yards (0.1 points per yard)
-      tdrec: 6, // receiving touchdowns (6 points)
-      twoptc: 2, // two-point conversions (2 points)
-      fuml: -1, // fumbles lost (-1 points, less punitive than standard)
-      prtd: 6, // punt return touchdowns (6 points)
-      krtd: 6, // kick return touchdowns (6 points)
-      fum_ret_td: 6, // fumble return touchdowns (6 points)
-      trg: 0, // targets (no points in DraftKings)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (0.04 points per yard)
+      passing_interceptions: -1, // interceptions (-1 points, less punitive than standard)
+      passing_touchdowns: 4, // passing touchdowns (4 points)
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards (0.1 points per yard)
+      rushing_touchdowns: 6, // rushing touchdowns (6 points)
+      receptions: 1, // receptions (1 PPR - full point per reception)
+      running_back_reception: 1, // RB receptions
+      wide_receiver_reception: 1, // WR receptions
+      tight_end_reception: 1, // TE receptions
+      receiving_yards: 0.1, // receiving yards (0.1 points per yard)
+      receiving_touchdowns: 6, // receiving touchdowns (6 points)
+      two_point_conversions: 2, // two-point conversions (2 points)
+      fumbles_lost: -1, // fumbles lost (-1 points, less punitive than standard)
+      punt_return_touchdowns: 6, // punt return touchdowns (6 points)
+      kickoff_return_touchdowns: 6, // kick return touchdowns (6 points)
+      fumble_return_touchdowns: 6, // fumble return touchdowns (6 points)
+      targets: 0, // targets (no points in DraftKings)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
       // TODO: Add support for unsupported DraftKings scoring:
       // - 300+ passing yard bonus (3 points)
       // - 100+ rushing yard bonus (3 points)
@@ -239,29 +239,29 @@ export const scoring_formats = {
   half_ppr_lower_turnover: {
     label: 'Half PPR (Lower Turnover)',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (points per yard)
-      ints: -1, // interceptions (-1 point, less punitive)
-      tdp: 4, // passing touchdowns
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 0.5, // receptions (half PPR)
-      rbrec: 0.5, // RB receptions
-      wrrec: 0.5, // WR receptions
-      terec: 0.5, // TE receptions
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: -1, // fumbles lost (-1 point, less punitive)
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 0, // targets (no points in standard)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (points per yard)
+      passing_interceptions: -1, // interceptions (-1 point, less punitive)
+      passing_touchdowns: 4, // passing touchdowns
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 0.5, // receptions (half PPR)
+      running_back_reception: 0.5, // RB receptions
+      wide_receiver_reception: 0.5, // WR receptions
+      tight_end_reception: 0.5, // TE receptions
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: -1, // fumbles lost (-1 point, less punitive)
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 0, // targets (no points in standard)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Half PPR with lower turnover penalties: -1 INT, -1 fumble lost'
@@ -270,29 +270,29 @@ export const scoring_formats = {
   ppr_lower_turnover: {
     label: 'PPR (Lower Turnover)',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.04, // passing yards (points per yard)
-      ints: -1, // interceptions (-1 point, less punitive)
-      tdp: 4, // passing touchdowns
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 1, // receptions (full PPR)
-      rbrec: 1, // RB receptions
-      wrrec: 1, // WR receptions
-      terec: 1, // TE receptions
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: -1, // fumbles lost (-1 point, less punitive)
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 0, // targets (no points in standard)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: false // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.04, // passing yards (points per yard)
+      passing_interceptions: -1, // interceptions (-1 point, less punitive)
+      passing_touchdowns: 4, // passing touchdowns
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 1, // receptions (full PPR)
+      running_back_reception: 1, // RB receptions
+      wide_receiver_reception: 1, // WR receptions
+      tight_end_reception: 1, // TE receptions
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: -1, // fumbles lost (-1 point, less punitive)
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 0, // targets (no points in standard)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Full PPR with lower turnover penalties: -1 INT, -1 fumble lost'
@@ -301,29 +301,29 @@ export const scoring_formats = {
   genesis: {
     label: 'Genesis League',
     config: {
-      pa: 0, // passing attempts
-      pc: 0, // passing completions
-      py: 0.05, // passing yards (0.05 points per yard)
-      ints: -1, // interceptions (-1 point)
-      tdp: 4, // passing touchdowns (4 points)
-      ra: 0, // rushing attempts
-      ry: 0.1, // rushing yards
-      tdr: 6, // rushing touchdowns
-      rec: 0.5, // receptions (half PPR)
-      rbrec: 0.5, // RB receptions
-      wrrec: 0.5, // WR receptions
-      terec: 0.5, // TE receptions
-      recy: 0.1, // receiving yards
-      tdrec: 6, // receiving touchdowns
-      twoptc: 2, // two-point conversions
-      fuml: -1, // fumbles lost (-1 point)
-      prtd: 6, // punt return touchdowns
-      krtd: 6, // kick return touchdowns
-      fum_ret_td: 6, // fumble return touchdowns
-      trg: 0, // targets (no points in Genesis)
-      rush_first_down: 0, // rushing first downs
-      rec_first_down: 0, // receiving first downs
-      exclude_qb_kneels: true // exclude QB kneels from rushing yards
+      passing_attempts: 0, // passing attempts
+      passing_completions: 0, // passing completions
+      passing_yards: 0.05, // passing yards (0.05 points per yard)
+      passing_interceptions: -1, // interceptions (-1 point)
+      passing_touchdowns: 4, // passing touchdowns (4 points)
+      rushing_attempts: 0, // rushing attempts
+      rushing_yards: 0.1, // rushing yards
+      rushing_touchdowns: 6, // rushing touchdowns
+      receptions: 0.5, // receptions (half PPR)
+      running_back_reception: 0.5, // RB receptions
+      wide_receiver_reception: 0.5, // WR receptions
+      tight_end_reception: 0.5, // TE receptions
+      receiving_yards: 0.1, // receiving yards
+      receiving_touchdowns: 6, // receiving touchdowns
+      two_point_conversions: 2, // two-point conversions
+      fumbles_lost: -1, // fumbles lost (-1 point)
+      punt_return_touchdowns: 6, // punt return touchdowns
+      kickoff_return_touchdowns: 6, // kick return touchdowns
+      fumble_return_touchdowns: 6, // fumble return touchdowns
+      targets: 0, // targets (no points in Genesis)
+      rushing_first_downs: 0, // rushing first downs
+      receiving_first_downs: 0, // receiving first downs
+      exclude_quarterback_kneels: true // exclude QB kneels from rushing yards
     },
     description:
       'Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers'

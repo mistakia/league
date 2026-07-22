@@ -58,26 +58,26 @@ const load_player_gamelogs = async (esbids) => {
       'player_gamelogs.opp',
       'player_gamelogs.active',
       // Passing stats
-      'player_gamelogs.pa',
-      'player_gamelogs.pc',
-      'player_gamelogs.py',
-      'player_gamelogs.ints',
-      'player_gamelogs.tdp',
+      'player_gamelogs.passing_attempts',
+      'player_gamelogs.passing_completions',
+      'player_gamelogs.passing_yards',
+      'player_gamelogs.passing_interceptions',
+      'player_gamelogs.passing_touchdowns',
       // Rushing stats
-      'player_gamelogs.ra',
-      'player_gamelogs.ry',
-      'player_gamelogs.tdr',
-      'player_gamelogs.fuml',
+      'player_gamelogs.rushing_attempts',
+      'player_gamelogs.rushing_yards',
+      'player_gamelogs.rushing_touchdowns',
+      'player_gamelogs.fumbles_lost',
       // Receiving stats
-      'player_gamelogs.trg',
-      'player_gamelogs.rec',
-      'player_gamelogs.recy',
-      'player_gamelogs.tdrec',
+      'player_gamelogs.targets',
+      'player_gamelogs.receptions',
+      'player_gamelogs.receiving_yards',
+      'player_gamelogs.receiving_touchdowns',
       // Defense stats
-      'player_gamelogs.dsk',
-      'player_gamelogs.dtno',
+      'player_gamelogs.defensive_sacks',
+      'player_gamelogs.defensive_three_and_outs',
       // Kicking stats
-      'player_gamelogs.fgm',
+      'player_gamelogs.field_goals_made',
       // Longest stats from specialized tables
       'player_receiving_gamelogs.longest_reception',
       'player_rushing_gamelogs.longest_rush'

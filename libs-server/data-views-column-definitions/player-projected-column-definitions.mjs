@@ -435,21 +435,22 @@ const projection_fantasy_points_sql = ({
   const weight = (key) => Number(scoring_format?.[key]) || 0
   const stat = (name) => `COALESCE(${column_ref(name)}, 0)`
 
-  const rec = weight('rec')
-  const rbrec = Number(scoring_format?.rbrec) || rec
-  const wrrec = Number(scoring_format?.wrrec) || rec
-  const terec = Number(scoring_format?.terec) || rec
+  const rec = weight('receptions')
+  const rbrec = Number(scoring_format?.running_back_reception) || rec
+  const wrrec = Number(scoring_format?.wide_receiver_reception) || rec
+  const terec = Number(scoring_format?.tight_end_reception) || rec
   const non_uniform_rec = rbrec !== rec || wrrec !== rec || terec !== rec
 
   const terms = []
   for (const projected_stat of projected_base_stats) {
-    if (projected_stat === 'rec') {
-      // calculatePoints: factor = league[`${pos}rec`] || league.rec. The CASE
-      // is only needed when a position weight differs from the base rec weight.
+    if (projected_stat === 'receptions') {
+      // calculatePoints: factor = league[`${pos}rec`] || league.receptions. The
+      // CASE is only needed when a position weight differs from the base
+      // receptions weight.
       terms.push(
         non_uniform_rec
-          ? `${stat('rec')} * (CASE ${position_reference} WHEN 'RB' THEN ${rbrec} WHEN 'WR' THEN ${wrrec} WHEN 'TE' THEN ${terec} ELSE ${rec} END)`
-          : `${stat('rec')} * ${rec}`
+          ? `${stat('receptions')} * (CASE ${position_reference} WHEN 'RB' THEN ${rbrec} WHEN 'WR' THEN ${wrrec} WHEN 'TE' THEN ${terec} ELSE ${rec} END)`
+          : `${stat('receptions')} * ${rec}`
       )
       continue
     }
@@ -457,30 +458,30 @@ const projection_fantasy_points_sql = ({
   }
 
   // Extra points, then field goals via the distance buckets. projections_index
-  // never populates fgy, so calculatePoints takes the bucket branch and fgm is
-  // excluded from the total.
-  terms.push(`${stat('xpm')} * 1`)
-  terms.push(`${stat('fg19')} * 3`)
-  terms.push(`${stat('fg29')} * 3`)
-  terms.push(`${stat('fg39')} * 3`)
-  terms.push(`${stat('fg49')} * 4`)
-  terms.push(`${stat('fg50')} * 5`)
+  // never populates field_goal_yards, so calculatePoints takes the bucket branch
+  // and field_goals_made is excluded from the total.
+  terms.push(`${stat('extra_points_made')} * 1`)
+  terms.push(`${stat('field_goals_made_0_19_yards')} * 3`)
+  terms.push(`${stat('field_goals_made_20_29_yards')} * 3`)
+  terms.push(`${stat('field_goals_made_30_39_yards')} * 3`)
+  terms.push(`${stat('field_goals_made_40_49_yards')} * 4`)
+  terms.push(`${stat('field_goals_made_50_plus_yards')} * 5`)
 
   // DST block (calculatePoints runs it unconditionally). Points/yards-against
   // are clipped with GREATEST. DST rows are absent from the projection tables,
   // so these terms evaluate to 0 for offense/kicker rows.
-  terms.push(`${stat('dsk')} * 1`)
-  terms.push(`${stat('dint')} * 2`)
-  terms.push(`${stat('dff')} * 1`)
-  terms.push(`${stat('drf')} * 1`)
-  terms.push(`${stat('dtno')} * 1`)
-  terms.push(`${stat('dfds')} * 1`)
-  terms.push(`GREATEST(${stat('dpa')} - 20, 0) * -0.4`)
-  terms.push(`GREATEST(${stat('dya')} - 300, 0) * -0.02`)
-  terms.push(`${stat('dblk')} * 3`)
-  terms.push(`${stat('dsf')} * 2`)
-  terms.push(`${stat('dtpr')} * 2`)
-  terms.push(`${stat('dtd')} * 6`)
+  terms.push(`${stat('defensive_sacks')} * 1`)
+  terms.push(`${stat('defensive_interceptions')} * 2`)
+  terms.push(`${stat('defensive_forced_fumbles')} * 1`)
+  terms.push(`${stat('defensive_recovered_fumbles')} * 1`)
+  terms.push(`${stat('defensive_three_and_outs')} * 1`)
+  terms.push(`${stat('defensive_fourth_down_stops')} * 1`)
+  terms.push(`GREATEST(${stat('defensive_points_against')} - 20, 0) * -0.4`)
+  terms.push(`GREATEST(${stat('defensive_yards_against')} - 300, 0) * -0.02`)
+  terms.push(`${stat('defensive_blocked_kicks')} * 3`)
+  terms.push(`${stat('defensive_safeties')} * 2`)
+  terms.push(`${stat('defensive_two_point_returns')} * 2`)
+  terms.push(`${stat('defensive_touchdowns')} * 6`)
 
   return `ROUND((${terms.join(' + ')}), 2)`
 }
@@ -664,19 +665,46 @@ const projected_stat_column_defintions = {
   ),
   ...create_projected_stat(player_projected_points_added, 'points_added'),
   ...create_projected_stat(player_projected_points, 'points'),
-  ...create_projected_stat(projections_index_base('pa'), 'pass_atts'),
-  ...create_projected_stat(projections_index_base('pc'), 'pass_comps'),
-  ...create_projected_stat(projections_index_base('py'), 'pass_yds'),
-  ...create_projected_stat(projections_index_base('tdp'), 'pass_tds'),
-  ...create_projected_stat(projections_index_base('ints'), 'pass_ints'),
-  ...create_projected_stat(projections_index_base('ra'), 'rush_atts'),
-  ...create_projected_stat(projections_index_base('ry'), 'rush_yds'),
-  ...create_projected_stat(projections_index_base('tdr'), 'rush_tds'),
-  ...create_projected_stat(projections_index_base('fuml'), 'fumbles_lost'),
-  ...create_projected_stat(projections_index_base('trg'), 'targets'),
-  ...create_projected_stat(projections_index_base('rec'), 'recs'),
-  ...create_projected_stat(projections_index_base('recy'), 'rec_yds'),
-  ...create_projected_stat(projections_index_base('tdrec'), 'rec_tds')
+  ...create_projected_stat(
+    projections_index_base('passing_attempts'),
+    'pass_atts'
+  ),
+  ...create_projected_stat(
+    projections_index_base('passing_completions'),
+    'pass_comps'
+  ),
+  ...create_projected_stat(projections_index_base('passing_yards'), 'pass_yds'),
+  ...create_projected_stat(
+    projections_index_base('passing_touchdowns'),
+    'pass_tds'
+  ),
+  ...create_projected_stat(
+    projections_index_base('passing_interceptions'),
+    'pass_ints'
+  ),
+  ...create_projected_stat(
+    projections_index_base('rushing_attempts'),
+    'rush_atts'
+  ),
+  ...create_projected_stat(projections_index_base('rushing_yards'), 'rush_yds'),
+  ...create_projected_stat(
+    projections_index_base('rushing_touchdowns'),
+    'rush_tds'
+  ),
+  ...create_projected_stat(
+    projections_index_base('fumbles_lost'),
+    'fumbles_lost'
+  ),
+  ...create_projected_stat(projections_index_base('targets'), 'targets'),
+  ...create_projected_stat(projections_index_base('receptions'), 'recs'),
+  ...create_projected_stat(
+    projections_index_base('receiving_yards'),
+    'rec_yds'
+  ),
+  ...create_projected_stat(
+    projections_index_base('receiving_touchdowns'),
+    'rec_tds'
+  )
 }
 
 export default {

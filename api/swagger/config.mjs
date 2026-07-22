@@ -528,62 +528,62 @@ const options = {
               description: 'Player position',
               example: 'QB'
             },
-            pa: {
+            passing_attempts: {
               type: 'number',
               description: 'Projected pass attempts',
               example: 29.3
             },
-            pc: {
+            passing_completions: {
               type: 'number',
               description: 'Projected completions',
               example: 20.1
             },
-            py: {
+            passing_yards: {
               type: 'number',
               description: 'Projected passing yards',
               example: 219.8
             },
-            ints: {
+            passing_interceptions: {
               type: 'number',
               description: 'Projected interceptions',
               example: 0.6
             },
-            tdp: {
+            passing_touchdowns: {
               type: 'number',
               description: 'Projected passing touchdowns',
               example: 0.8
             },
-            ra: {
+            rushing_attempts: {
               type: 'number',
               description: 'Projected rush attempts',
               example: 8.5
             },
-            ry: {
+            rushing_yards: {
               type: 'number',
               description: 'Projected rushing yards',
               example: 42.4
             },
-            tdr: {
+            rushing_touchdowns: {
               type: 'number',
               description: 'Projected rushing touchdowns',
               example: 0.8
             },
-            trg: {
+            targets: {
               type: 'number',
               description: 'Projected targets',
               example: 12.5
             },
-            rec: {
+            receptions: {
               type: 'number',
               description: 'Projected receptions',
               example: 8.2
             },
-            recy: {
+            receiving_yards: {
               type: 'number',
               description: 'Projected receiving yards',
               example: 95.3
             },
-            tdrec: {
+            receiving_touchdowns: {
               type: 'number',
               description: 'Projected receiving touchdowns',
               example: 0.7
@@ -1851,217 +1851,217 @@ const options = {
                 'Points added above baseline, cumulative including negative weeks (when leagueId provided)',
               example: 4.1
             },
-            pa: {
+            passing_attempts: {
               type: 'integer',
               nullable: true,
               description: 'Pass attempts (when passing=true)',
               example: 35
             },
-            pc: {
+            passing_completions: {
               type: 'integer',
               nullable: true,
               description: 'Pass completions (when passing=true)',
               example: 22
             },
-            py: {
+            passing_yards: {
               type: 'integer',
               nullable: true,
               description: 'Passing yards (when passing=true)',
               example: 287
             },
-            tdp: {
+            passing_touchdowns: {
               type: 'integer',
               nullable: true,
               description: 'Passing touchdowns (when passing=true)',
               example: 2
             },
-            ints: {
+            passing_interceptions: {
               type: 'integer',
               nullable: true,
               description: 'Interceptions thrown (when passing=true)',
               example: 0
             },
-            ra: {
+            rushing_attempts: {
               type: 'integer',
               nullable: true,
               description: 'Rush attempts (when rushing=true)',
               example: 8
             },
-            ry: {
+            rushing_yards: {
               type: 'integer',
               nullable: true,
               description: 'Rushing yards (when rushing=true)',
               example: 45
             },
-            tdr: {
+            rushing_touchdowns: {
               type: 'integer',
               nullable: true,
               description: 'Rushing touchdowns (when rushing=true)',
               example: 1
             },
-            rec: {
+            receptions: {
               type: 'integer',
               nullable: true,
               description: 'Receptions (when receiving=true)',
               example: 6
             },
-            recy: {
+            receiving_yards: {
               type: 'integer',
               nullable: true,
               description: 'Receiving yards (when receiving=true)',
               example: 78
             },
-            tdrec: {
+            receiving_touchdowns: {
               type: 'integer',
               nullable: true,
               description: 'Receiving touchdowns (when receiving=true)',
               example: 1
             },
-            trg: {
+            targets: {
               type: 'integer',
               nullable: true,
               description: 'Targets (when receiving=true)',
               example: 8
             },
-            fuml: {
+            fumbles_lost: {
               type: 'integer',
               nullable: true,
               description: 'Fumbles lost',
               example: 0
             },
-            twoptc: {
+            two_point_conversions: {
               type: 'integer',
               nullable: true,
               description: 'Two-point conversions',
               example: 0
             },
-            prtd: {
+            punt_return_touchdowns: {
               type: 'integer',
               nullable: true,
               description: 'Punt return touchdowns',
               example: 0
             },
-            krtd: {
+            kickoff_return_touchdowns: {
               type: 'integer',
               nullable: true,
               description: 'Kickoff return touchdowns',
               example: 0
             },
-            fgm: {
+            field_goals_made: {
               type: 'integer',
               nullable: true,
               description: 'Field goals made',
               example: 2
             },
-            fgy: {
+            field_goal_yards: {
               type: 'integer',
               nullable: true,
               description: 'Field goal yards',
               example: 95
             },
-            fg19: {
+            field_goals_made_0_19_yards: {
               type: 'integer',
               nullable: true,
               description: 'Field goals 1-19 yards',
               example: 0
             },
-            fg29: {
+            field_goals_made_20_29_yards: {
               type: 'integer',
               nullable: true,
               description: 'Field goals 20-29 yards',
               example: 1
             },
-            fg39: {
+            field_goals_made_30_39_yards: {
               type: 'integer',
               nullable: true,
               description: 'Field goals 30-39 yards',
               example: 1
             },
-            fg49: {
+            field_goals_made_40_49_yards: {
               type: 'integer',
               nullable: true,
               description: 'Field goals 40-49 yards',
               example: 0
             },
-            fg50: {
+            field_goals_made_50_plus_yards: {
               type: 'integer',
               nullable: true,
               description: 'Field goals 50+ yards',
               example: 0
             },
-            xpm: {
+            extra_points_made: {
               type: 'integer',
               nullable: true,
               description: 'Extra points made',
               example: 3
             },
-            dsk: {
+            defensive_sacks: {
               type: 'integer',
               nullable: true,
               description: 'Defensive sacks',
               example: 1
             },
-            dint: {
+            defensive_interceptions: {
               type: 'integer',
               nullable: true,
               description: 'Defensive interceptions',
               example: 0
             },
-            dff: {
+            defensive_forced_fumbles: {
               type: 'integer',
               nullable: true,
               description: 'Defensive forced fumbles',
               example: 0
             },
-            drf: {
+            defensive_recovered_fumbles: {
               type: 'integer',
               nullable: true,
               description: 'Defensive fumble recoveries',
               example: 0
             },
-            dtno: {
+            defensive_three_and_outs: {
               type: 'integer',
               nullable: true,
-              description: 'Defensive tackles (nose)',
+              description: 'Defensive three-and-outs',
               example: 8
             },
-            dfds: {
+            defensive_fourth_down_stops: {
               type: 'integer',
               nullable: true,
-              description: 'Defensive forced downs',
+              description: 'Defensive fourth down stops',
               example: 2
             },
-            dpa: {
+            defensive_points_against: {
               type: 'integer',
               nullable: true,
               description: 'Defensive points allowed',
               example: 14
             },
-            dya: {
+            defensive_yards_against: {
               type: 'integer',
               nullable: true,
               description: 'Defensive yards allowed',
               example: 350
             },
-            dblk: {
+            defensive_blocked_kicks: {
               type: 'integer',
               nullable: true,
               description: 'Defensive blocked kicks',
               example: 0
             },
-            dsf: {
+            defensive_safeties: {
               type: 'integer',
               nullable: true,
               description: 'Defensive safeties',
               example: 0
             },
-            dtpr: {
+            defensive_two_point_returns: {
               type: 'integer',
               nullable: true,
-              description: 'Defensive pass deflections',
+              description: 'Defensive two point returns',
               example: 1
             },
-            dtd: {
+            defensive_touchdowns: {
               type: 'integer',
               nullable: true,
               description: 'Defensive touchdowns',
@@ -2969,41 +2969,41 @@ const options = {
                 'Short term reserve roster slots limit (99 = unlimited)',
               example: 3
             },
-            py: {
+            passing_yards: {
               type: 'number',
               format: 'float',
               description: 'Points per passing yard',
               example: 0.04
             },
-            tdp: {
+            passing_touchdowns: {
               type: 'integer',
               description: 'Points per passing touchdown',
               example: 4
             },
-            ry: {
+            rushing_yards: {
               type: 'number',
               format: 'float',
               description: 'Points per rushing yard',
               example: 0.1
             },
-            tdr: {
+            rushing_touchdowns: {
               type: 'integer',
               description: 'Points per rushing touchdown',
               example: 6
             },
-            rec: {
+            receptions: {
               type: 'number',
               format: 'float',
               description: 'Points per reception',
               example: 0.5
             },
-            recy: {
+            receiving_yards: {
               type: 'number',
               format: 'float',
               description: 'Points per receiving yard',
               example: 0.1
             },
-            tdrec: {
+            receiving_touchdowns: {
               type: 'integer',
               description: 'Points per receiving touchdown',
               example: 6
@@ -3055,16 +3055,16 @@ const options = {
               minimum: 0,
               description: 'Free agent acquisition budget'
             },
-            py: {
+            passing_yards: {
               type: 'number',
               format: 'float',
               description: 'Points per passing yard'
             },
-            tdp: {
+            passing_touchdowns: {
               type: 'integer',
               description: 'Points per passing touchdown'
             },
-            rec: {
+            receptions: {
               type: 'number',
               format: 'float',
               description: 'Points per reception'

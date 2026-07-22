@@ -16,9 +16,9 @@ gl AS (
   SELECT pg.pid, pg.esbid, pg.year, pg.tm, pg.active,
          pg.snaps_off, pg.snaps_def, pg.snaps_st,
          pg.ruled_out_in_game,
-         (COALESCE(pg.pa,0)+COALESCE(pg.ra,0)+COALESCE(pg.trg,0)
-          +COALESCE(pg.rec,0)+COALESCE(pg.fgm,0)+COALESCE(pg.xpm,0)
-          +COALESCE(pg.dsk,0)+COALESCE(pg.dint,0)+COALESCE(pg.dtno,0)) AS any_stat_count
+         (COALESCE(pg.passing_attempts,0)+COALESCE(pg.rushing_attempts,0)+COALESCE(pg.targets,0)
+          +COALESCE(pg.receptions,0)+COALESCE(pg.field_goals_made,0)+COALESCE(pg.extra_points_made,0)
+          +COALESCE(pg.defensive_sacks,0)+COALESCE(pg.defensive_interceptions,0)+COALESCE(pg.defensive_three_and_outs,0)) AS any_stat_count
   FROM player_gamelogs pg
   WHERE pg.year BETWEEN :start_year AND :end_year
 ),

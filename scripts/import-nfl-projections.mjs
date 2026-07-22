@@ -56,41 +56,59 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
 
       if (week === 0) {
         // passing
-        data.py = parseFloat($(el).find('td').eq(3).text().trim()) || 0
-        data.tdp = parseFloat($(el).find('td').eq(4).text().trim()) || 0
-        data.ints = parseFloat($(el).find('td').eq(5).text().trim()) || 0
+        data.passing_yards =
+          parseFloat($(el).find('td').eq(3).text().trim()) || 0
+        data.passing_touchdowns =
+          parseFloat($(el).find('td').eq(4).text().trim()) || 0
+        data.passing_interceptions =
+          parseFloat($(el).find('td').eq(5).text().trim()) || 0
 
         // rushing
-        data.ry = parseFloat($(el).find('td').eq(6).text().trim()) || 0
-        data.tdr = parseFloat($(el).find('td').eq(7).text().trim()) || 0
-        data.fuml = parseFloat($(el).find('td').eq(14).text().trim()) || 0
+        data.rushing_yards =
+          parseFloat($(el).find('td').eq(6).text().trim()) || 0
+        data.rushing_touchdowns =
+          parseFloat($(el).find('td').eq(7).text().trim()) || 0
+        data.fumbles_lost =
+          parseFloat($(el).find('td').eq(14).text().trim()) || 0
 
         // receiving
-        data.rec = parseFloat($(el).find('td').eq(8).text().trim()) || 0
-        data.recy = parseFloat($(el).find('td').eq(9).text().trim()) || 0
-        data.tdrec = parseFloat($(el).find('td').eq(10).text().trim()) || 0
+        data.receptions = parseFloat($(el).find('td').eq(8).text().trim()) || 0
+        data.receiving_yards =
+          parseFloat($(el).find('td').eq(9).text().trim()) || 0
+        data.receiving_touchdowns =
+          parseFloat($(el).find('td').eq(10).text().trim()) || 0
 
-        data.twoptc = parseFloat($(el).find('td').eq(13).text().trim()) || 0
+        data.two_point_conversions =
+          parseFloat($(el).find('td').eq(13).text().trim()) || 0
 
         items.push({ params, data })
         lastProjection = parseFloat($(el).find('td').eq(15).text().trim())
       } else {
         // passing
-        data.py = parseFloat($(el).find('td').eq(2).text().trim()) || 0
-        data.tdp = parseFloat($(el).find('td').eq(3).text().trim()) || 0
-        data.ints = parseFloat($(el).find('td').eq(4).text().trim()) || 0
+        data.passing_yards =
+          parseFloat($(el).find('td').eq(2).text().trim()) || 0
+        data.passing_touchdowns =
+          parseFloat($(el).find('td').eq(3).text().trim()) || 0
+        data.passing_interceptions =
+          parseFloat($(el).find('td').eq(4).text().trim()) || 0
 
         // rushing
-        data.ry = parseFloat($(el).find('td').eq(5).text().trim()) || 0
-        data.tdr = parseFloat($(el).find('td').eq(6).text().trim()) || 0
-        data.fuml = parseFloat($(el).find('td').eq(13).text().trim()) || 0
+        data.rushing_yards =
+          parseFloat($(el).find('td').eq(5).text().trim()) || 0
+        data.rushing_touchdowns =
+          parseFloat($(el).find('td').eq(6).text().trim()) || 0
+        data.fumbles_lost =
+          parseFloat($(el).find('td').eq(13).text().trim()) || 0
 
         // receiving
-        data.rec = parseFloat($(el).find('td').eq(7).text().trim()) || 0
-        data.recy = parseFloat($(el).find('td').eq(8).text().trim()) || 0
-        data.tdrec = parseFloat($(el).find('td').eq(9).text().trim()) || 0
+        data.receptions = parseFloat($(el).find('td').eq(7).text().trim()) || 0
+        data.receiving_yards =
+          parseFloat($(el).find('td').eq(8).text().trim()) || 0
+        data.receiving_touchdowns =
+          parseFloat($(el).find('td').eq(9).text().trim()) || 0
 
-        data.twoptc = parseFloat($(el).find('td').eq(12).text().trim()) || 0
+        data.two_point_conversions =
+          parseFloat($(el).find('td').eq(12).text().trim()) || 0
 
         items.push({ params, data })
         lastProjection = parseFloat($(el).find('td').eq(14).text().trim())

@@ -53,14 +53,14 @@ const router = express.Router()
  *                     year: 2024
  *                     seas_type: "REG"
  *                     pos: "QB"
- *                     pa: 525
- *                     pc: 345
- *                     py: 4200
- *                     ints: 8
- *                     tdp: 32
- *                     ra: 45
- *                     ry: 180
- *                     tdr: 4
+ *                     passing_attempts: 525
+ *                     passing_completions: 345
+ *                     passing_yards: 4200
+ *                     passing_interceptions: 8
+ *                     passing_touchdowns: 32
+ *                     rushing_attempts: 45
+ *                     rushing_yards: 180
+ *                     rushing_touchdowns: 4
  *                     pts: 285.6
  *               running_back_projection:
  *                 summary: Running back season projection
@@ -71,13 +71,13 @@ const router = express.Router()
  *                     year: 2024
  *                     seas_type: "REG"
  *                     pos: "RB"
- *                     ra: 285
- *                     ry: 1350
- *                     tdr: 12
- *                     trg: 75
- *                     rec: 58
- *                     recy: 425
- *                     tdrec: 3
+ *                     rushing_attempts: 285
+ *                     rushing_yards: 1350
+ *                     rushing_touchdowns: 12
+ *                     targets: 75
+ *                     receptions: 58
+ *                     receiving_yards: 425
+ *                     receiving_touchdowns: 3
  *                     pts: 245.8
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
@@ -172,14 +172,14 @@ router.get('/?', async (req, res) => {
  *                 year: 2024
  *                 seas_type: "REG"
  *                 pos: "QB"
- *                 pa: 525
- *                 pc: 345
- *                 py: 4200
- *                 ints: 8
- *                 tdp: 32
- *                 ra: 45
- *                 ry: 180
- *                 tdr: 4
+ *                 passing_attempts: 525
+ *                 passing_completions: 345
+ *                 passing_yards: 4200
+ *                 passing_interceptions: 8
+ *                 passing_touchdowns: 32
+ *                 rushing_attempts: 45
+ *                 rushing_yards: 180
+ *                 rushing_touchdowns: 4
  *                 pts: 285.6
  *               - pid: "PATR-MAHO-005785"
  *                 sourceid: 16
@@ -187,14 +187,14 @@ router.get('/?', async (req, res) => {
  *                 year: 2024
  *                 seas_type: "REG"
  *                 pos: "QB"
- *                 pa: 35
- *                 pc: 23
- *                 py: 285
- *                 ints: 0
- *                 tdp: 2
- *                 ra: 3
- *                 ry: 15
- *                 tdr: 0
+ *                 passing_attempts: 35
+ *                 passing_completions: 23
+ *                 passing_yards: 285
+ *                 passing_interceptions: 0
+ *                 passing_touchdowns: 2
+ *                 rushing_attempts: 3
+ *                 rushing_yards: 15
+ *                 rushing_touchdowns: 0
  *                 pts: 20.5
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
@@ -232,12 +232,12 @@ router.get('/:pid/?', async (req, res) => {
  *       - Validates statistic type against supported fantasy stats
  *
  *       **Supported Statistics:**
- *       - Passing: pa, pc, py, ints, tdp
- *       - Rushing: ra, ry, tdr, fuml
- *       - Receiving: trg, rec, recy, tdrec
- *       - Special: twoptc, pts
- *       - Kicking: fga, fg, xpa, xpm
- *       - Defense: dint, dff, dtd, dsf, dblk, dya, dpa
+ *       - Passing: passing_attempts, passing_completions, passing_yards, passing_interceptions, passing_touchdowns
+ *       - Rushing: rushing_attempts, rushing_yards, rushing_touchdowns, fumbles_lost
+ *       - Receiving: targets, receptions, receiving_yards, receiving_touchdowns
+ *       - Special: two_point_conversions, pts
+ *       - Kicking: fga, fg, xpa, extra_points_made
+ *       - Defense: defensive_interceptions, defensive_forced_fumbles, defensive_touchdowns, defensive_safeties, defensive_blocked_kicks, defensive_yards_against, defensive_points_against
  *
  *       **Validation Rules:**
  *       - Value must be a positive integer
@@ -267,9 +267,9 @@ router.get('/:pid/?', async (req, res) => {
  *             properties:
  *               type:
  *                 type: string
- *                 enum: ['pa', 'pc', 'py', 'ints', 'tdp', 'ra', 'ry', 'tdr', 'fuml', 'trg', 'rec', 'recy', 'tdrec', 'twoptc', 'pts', 'fga', 'fg', 'xpa', 'xpm', 'dint', 'dff', 'dtd', 'dsf', 'dblk', 'dya', 'dpa']
+ *                 enum: ['passing_attempts', 'passing_completions', 'passing_yards', 'passing_interceptions', 'passing_touchdowns', 'rushing_attempts', 'rushing_yards', 'rushing_touchdowns', 'fumbles_lost', 'targets', 'receptions', 'receiving_yards', 'receiving_touchdowns', 'two_point_conversions', 'pts', 'fga', 'fg', 'xpa', 'extra_points_made', 'defensive_interceptions', 'defensive_forced_fumbles', 'defensive_touchdowns', 'defensive_safeties', 'defensive_blocked_kicks', 'defensive_yards_against', 'defensive_points_against']
  *                 description: Type of statistic to project
- *                 example: "py"
+ *                 example: "passing_yards"
  *               week:
  *                 type: integer
  *                 minimum: 0
@@ -291,14 +291,14 @@ router.get('/:pid/?', async (req, res) => {
  *             passing_yards_projection:
  *               summary: Weekly passing yards projection
  *               value:
- *                 type: "py"
+ *                 type: "passing_yards"
  *                 week: 4
  *                 value: 285
  *                 seas_type: "REG"
  *             season_touchdowns_projection:
  *               summary: Season touchdown projection
  *               value:
- *                 type: "tdp"
+ *                 type: "passing_touchdowns"
  *                 week: 0
  *                 value: 32
  *                 seas_type: "REG"

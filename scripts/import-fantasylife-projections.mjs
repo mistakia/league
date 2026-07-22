@@ -15,18 +15,18 @@ const log = debug('import-fantasylife-projections')
 debug.enable('import-fantasylife-projections,fantasylife,get-player')
 
 const format_projection = (item) => ({
-  pa: item.pass_att,
-  pc: item.pass_comp,
-  py: item.pass_yds,
-  ints: item.pass_ints,
-  tdp: item.pass_tds,
-  ra: item.rush_att,
-  ry: item.rush_yds,
-  tdr: item.rush_tds,
-  trg: item.targets,
-  rec: item.rec,
-  recy: item.rec_yds,
-  tdrec: item.rec_tds
+  passing_attempts: item.pass_att,
+  passing_completions: item.pass_comp,
+  passing_yards: item.pass_yds,
+  passing_interceptions: item.pass_ints,
+  passing_touchdowns: item.pass_tds,
+  rushing_attempts: item.rush_att,
+  rushing_yards: item.rush_yds,
+  rushing_touchdowns: item.rush_tds,
+  targets: item.targets,
+  receptions: item.rec,
+  receiving_yards: item.rec_yds,
+  receiving_touchdowns: item.rec_tds
 })
 
 const import_fantasylife_projections = async ({

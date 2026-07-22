@@ -40,19 +40,19 @@ const format_adp = (projection_item) => ({
 })
 
 const format_projection = (projection_item) => ({
-  pa: projection_item.stats.pass_att || 0,
-  pc: projection_item.stats.pass_cmp || 0,
-  py: projection_item.stats.pass_yd || 0,
-  ints: projection_item.stats.pass_int || 0,
-  tdp: projection_item.stats.pass_td || 0,
-  ra: projection_item.stats.rush_att || 0,
-  ry: projection_item.stats.rush_yd || 0,
-  tdr: projection_item.stats.rush_td || 0,
-  rec: projection_item.stats.rec || 0,
-  recy: projection_item.stats.rec_yd || 0,
-  tdrec: projection_item.stats.rec_td || 0,
-  fuml: projection_item.stats.fum_lost || 0,
-  twoptc:
+  passing_attempts: projection_item.stats.pass_att || 0,
+  passing_completions: projection_item.stats.pass_cmp || 0,
+  passing_yards: projection_item.stats.pass_yd || 0,
+  passing_interceptions: projection_item.stats.pass_int || 0,
+  passing_touchdowns: projection_item.stats.pass_td || 0,
+  rushing_attempts: projection_item.stats.rush_att || 0,
+  rushing_yards: projection_item.stats.rush_yd || 0,
+  rushing_touchdowns: projection_item.stats.rush_td || 0,
+  receptions: projection_item.stats.rec || 0,
+  receiving_yards: projection_item.stats.rec_yd || 0,
+  receiving_touchdowns: projection_item.stats.rec_td || 0,
+  fumbles_lost: projection_item.stats.fum_lost || 0,
+  two_point_conversions:
     (projection_item.stats.pass_2pt || 0) +
     (projection_item.stats.rush_2pt || 0)
 })

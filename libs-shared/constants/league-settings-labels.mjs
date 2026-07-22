@@ -10,41 +10,43 @@
  * `scoring_field_labels` is grouped by section (passing / rushing / receiving /
  * misc) to match both the settings UI sections and the rules-doc scoring table.
  * It additionally labels scoring fields that carry no UI control today
- * (`trg`, `rush_first_down`, `rec_first_down`, `prtd`, `krtd`, `fum_ret_td`,
- * `exclude_qb_kneels`) so no raw field key is ever surfaced.
+ * (`targets`, `rushing_first_downs`, `receiving_first_downs`,
+ * `punt_return_touchdowns`, `kickoff_return_touchdowns`,
+ * `fumble_return_touchdowns`, `exclude_quarterback_kneels`) so no raw field
+ * key is ever surfaced.
  */
 
 export const scoring_field_labels = {
   passing: {
-    pa: 'Attempts',
-    pc: 'Completions',
-    py: 'Yards',
-    ints: 'Ints',
-    tdp: 'Tds'
+    passing_attempts: 'Attempts',
+    passing_completions: 'Completions',
+    passing_yards: 'Yards',
+    passing_interceptions: 'Ints',
+    passing_touchdowns: 'Tds'
   },
   rushing: {
-    ra: 'Attempts',
-    ry: 'Yards',
-    fuml: 'Fumbles',
-    tdr: 'Tds',
-    rush_first_down: 'First Downs'
+    rushing_attempts: 'Attempts',
+    rushing_yards: 'Yards',
+    fumbles_lost: 'Fumbles',
+    rushing_touchdowns: 'Tds',
+    rushing_first_downs: 'First Downs'
   },
   receiving: {
-    rbrec: 'Rec. (RB)',
-    wrrec: 'Rec. (WR)',
-    terec: 'Rec. (TE)',
-    rec: 'Rec. (Other)',
-    recy: 'Yards',
-    tdrec: 'Tds',
-    trg: 'Targets',
-    rec_first_down: 'First Downs'
+    running_back_reception: 'Rec. (RB)',
+    wide_receiver_reception: 'Rec. (WR)',
+    tight_end_reception: 'Rec. (TE)',
+    receptions: 'Rec. (Other)',
+    receiving_yards: 'Yards',
+    receiving_touchdowns: 'Tds',
+    targets: 'Targets',
+    receiving_first_downs: 'First Downs'
   },
   misc: {
-    twoptc: 'Two PT Conv.',
-    prtd: 'Punt Return Tds',
-    krtd: 'Kick Return Tds',
-    fum_ret_td: 'Fumble Return Tds',
-    exclude_qb_kneels: 'Exclude QB Kneels'
+    two_point_conversions: 'Two PT Conv.',
+    punt_return_touchdowns: 'Punt Return Tds',
+    kickoff_return_touchdowns: 'Kick Return Tds',
+    fumble_return_touchdowns: 'Fumble Return Tds',
+    exclude_quarterback_kneels: 'Exclude QB Kneels'
   }
 }
 

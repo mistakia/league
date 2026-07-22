@@ -146,190 +146,190 @@ export default {
     player_value_path: 'league_nfl_team_seasonlogs_pts'
   }),
   // Passing Stats
-  nfl_team_seasonlogs_pa: create_seasonlog_field({
+  nfl_team_seasonlogs_passing_attempts: create_seasonlog_field({
     column_title: 'Pass Attempts Generated/Allowed By Position',
     header_label: 'PA',
-    player_value_path: 'nfl_team_seasonlogs_pa'
+    player_value_path: 'nfl_team_seasonlogs_passing_attempts'
   }),
-  nfl_team_seasonlogs_pc: create_seasonlog_field({
+  nfl_team_seasonlogs_passing_completions: create_seasonlog_field({
     column_title: 'Pass Completions Generated/Allowed By Position',
     header_label: 'PC',
-    player_value_path: 'nfl_team_seasonlogs_pc'
+    player_value_path: 'nfl_team_seasonlogs_passing_completions'
   }),
-  nfl_team_seasonlogs_py: create_seasonlog_field({
+  nfl_team_seasonlogs_passing_yards: create_seasonlog_field({
     column_title: 'Pass Yards Generated/Allowed By Position',
     header_label: 'PY',
-    player_value_path: 'nfl_team_seasonlogs_py'
+    player_value_path: 'nfl_team_seasonlogs_passing_yards'
   }),
-  nfl_team_seasonlogs_ints: create_seasonlog_field({
+  nfl_team_seasonlogs_passing_interceptions: create_seasonlog_field({
     column_title: 'Interceptions Generated/Allowed By Position',
     header_label: 'INT',
-    player_value_path: 'nfl_team_seasonlogs_ints'
+    player_value_path: 'nfl_team_seasonlogs_passing_interceptions'
   }),
-  nfl_team_seasonlogs_tdp: create_seasonlog_field({
+  nfl_team_seasonlogs_passing_touchdowns: create_seasonlog_field({
     column_title: 'Passing TDs Generated/Allowed By Position',
     header_label: 'TDP',
-    player_value_path: 'nfl_team_seasonlogs_tdp'
+    player_value_path: 'nfl_team_seasonlogs_passing_touchdowns'
   }),
-  nfl_team_seasonlogs_ra: create_seasonlog_field({
+  nfl_team_seasonlogs_rushing_attempts: create_seasonlog_field({
     column_title: 'Rush Attempts Generated/Allowed By Position',
     header_label: 'RA',
-    player_value_path: 'nfl_team_seasonlogs_ra'
+    player_value_path: 'nfl_team_seasonlogs_rushing_attempts'
   }),
-  nfl_team_seasonlogs_ry: create_seasonlog_field({
+  nfl_team_seasonlogs_rushing_yards: create_seasonlog_field({
     column_title: 'Rush Yards Generated/Allowed By Position',
     header_label: 'RY',
-    player_value_path: 'nfl_team_seasonlogs_ry'
+    player_value_path: 'nfl_team_seasonlogs_rushing_yards'
   }),
-  nfl_team_seasonlogs_tdr: create_seasonlog_field({
+  nfl_team_seasonlogs_rushing_touchdowns: create_seasonlog_field({
     column_title: 'Rushing TDs Generated/Allowed By Position',
     header_label: 'TDR',
-    player_value_path: 'nfl_team_seasonlogs_tdr'
+    player_value_path: 'nfl_team_seasonlogs_rushing_touchdowns'
   }),
-  nfl_team_seasonlogs_fuml: create_seasonlog_field({
+  nfl_team_seasonlogs_fumbles_lost: create_seasonlog_field({
     column_title: 'Fumbles Lost Generated/Allowed By Position',
     header_label: 'FUML',
-    player_value_path: 'nfl_team_seasonlogs_fuml'
+    player_value_path: 'nfl_team_seasonlogs_fumbles_lost'
   }),
-  nfl_team_seasonlogs_trg: create_seasonlog_field({
+  nfl_team_seasonlogs_targets: create_seasonlog_field({
     column_title: 'Targets Generated/Allowed By Position',
     header_label: 'TRG',
-    player_value_path: 'nfl_team_seasonlogs_trg'
+    player_value_path: 'nfl_team_seasonlogs_targets'
   }),
-  nfl_team_seasonlogs_rec: create_seasonlog_field({
+  nfl_team_seasonlogs_receptions: create_seasonlog_field({
     column_title: 'Receptions Generated/Allowed By Position',
     header_label: 'REC',
-    player_value_path: 'nfl_team_seasonlogs_rec'
+    player_value_path: 'nfl_team_seasonlogs_receptions'
   }),
-  nfl_team_seasonlogs_recy: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_yards: create_seasonlog_field({
     column_title: 'Receiving Yards Generated/Allowed By Position',
     header_label: 'RECY',
-    player_value_path: 'nfl_team_seasonlogs_recy'
+    player_value_path: 'nfl_team_seasonlogs_receiving_yards'
   }),
-  nfl_team_seasonlogs_tdrec: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_touchdowns: create_seasonlog_field({
     column_title: 'Receiving TDs Generated/Allowed By Position',
     header_label: 'TDREC',
-    player_value_path: 'nfl_team_seasonlogs_tdrec'
+    player_value_path: 'nfl_team_seasonlogs_receiving_touchdowns'
   }),
-  nfl_team_seasonlogs_twoptc: create_seasonlog_field({
+  nfl_team_seasonlogs_two_point_conversions: create_seasonlog_field({
     column_title: 'Two Point Conversions Generated/Allowed By Position',
     header_label: '2PC',
-    player_value_path: 'nfl_team_seasonlogs_twoptc'
+    player_value_path: 'nfl_team_seasonlogs_two_point_conversions'
   }),
-  nfl_team_seasonlogs_prtd: create_seasonlog_field({
+  nfl_team_seasonlogs_punt_return_touchdowns: create_seasonlog_field({
     column_title: 'Punt Return TDs Generated/Allowed By Position',
     header_label: 'PRTD',
-    player_value_path: 'nfl_team_seasonlogs_prtd'
+    player_value_path: 'nfl_team_seasonlogs_punt_return_touchdowns'
   }),
-  nfl_team_seasonlogs_krtd: create_seasonlog_field({
+  nfl_team_seasonlogs_kickoff_return_touchdowns: create_seasonlog_field({
     column_title: 'Kick Return TDs Generated/Allowed By Position',
     header_label: 'KRTD',
-    player_value_path: 'nfl_team_seasonlogs_krtd'
+    player_value_path: 'nfl_team_seasonlogs_kickoff_return_touchdowns'
   }),
   // nfl_team_seasonlogs_snp: create_seasonlog_field({
   //   column_title: 'Snaps Generated/Allowed By Position',
   //   header_label: 'SNP',
   //   player_value_path: 'nfl_team_seasonlogs_snp'
   // }),
-  nfl_team_seasonlogs_fgm: create_seasonlog_field({
+  nfl_team_seasonlogs_field_goals_made: create_seasonlog_field({
     column_title: 'Field Goals Made/Allowed By Position',
     header_label: 'FGM',
-    player_value_path: 'nfl_team_seasonlogs_fgm'
+    player_value_path: 'nfl_team_seasonlogs_field_goals_made'
   }),
-  nfl_team_seasonlogs_fgy: create_seasonlog_field({
+  nfl_team_seasonlogs_field_goal_yards: create_seasonlog_field({
     column_title: 'Field Goal Yards Generated/Allowed By Position',
     header_label: 'FGY',
-    player_value_path: 'nfl_team_seasonlogs_fgy'
+    player_value_path: 'nfl_team_seasonlogs_field_goal_yards'
   }),
-  nfl_team_seasonlogs_fg19: create_seasonlog_field({
+  nfl_team_seasonlogs_field_goals_made_0_19_yards: create_seasonlog_field({
     column_title: 'Field Goals Made 0-19 Yards Generated/Allowed By Position',
     header_label: 'FG19',
-    player_value_path: 'nfl_team_seasonlogs_fg19'
+    player_value_path: 'nfl_team_seasonlogs_field_goals_made_0_19_yards'
   }),
-  nfl_team_seasonlogs_fg29: create_seasonlog_field({
+  nfl_team_seasonlogs_field_goals_made_20_29_yards: create_seasonlog_field({
     column_title: 'Field Goals Made 20-29 Yards Generated/Allowed By Position',
     header_label: 'FG29',
-    player_value_path: 'nfl_team_seasonlogs_fg29'
+    player_value_path: 'nfl_team_seasonlogs_field_goals_made_20_29_yards'
   }),
-  nfl_team_seasonlogs_fg39: create_seasonlog_field({
+  nfl_team_seasonlogs_field_goals_made_30_39_yards: create_seasonlog_field({
     column_title: 'Field Goals Made 30-39 Yards Generated/Allowed By Position',
     header_label: 'FG39',
-    player_value_path: 'nfl_team_seasonlogs_fg39'
+    player_value_path: 'nfl_team_seasonlogs_field_goals_made_30_39_yards'
   }),
-  nfl_team_seasonlogs_fg49: create_seasonlog_field({
+  nfl_team_seasonlogs_field_goals_made_40_49_yards: create_seasonlog_field({
     column_title: 'Field Goals Made 40-49 Yards Generated/Allowed By Position',
     header_label: 'FG49',
-    player_value_path: 'nfl_team_seasonlogs_fg49'
+    player_value_path: 'nfl_team_seasonlogs_field_goals_made_40_49_yards'
   }),
-  nfl_team_seasonlogs_fg50: create_seasonlog_field({
+  nfl_team_seasonlogs_field_goals_made_50_plus_yards: create_seasonlog_field({
     column_title: 'Field Goals Made 50+ Yards Generated/Allowed By Position',
     header_label: 'FG50',
-    player_value_path: 'nfl_team_seasonlogs_fg50'
+    player_value_path: 'nfl_team_seasonlogs_field_goals_made_50_plus_yards'
   }),
-  nfl_team_seasonlogs_xpm: create_seasonlog_field({
+  nfl_team_seasonlogs_extra_points_made: create_seasonlog_field({
     column_title: 'Extra Points Made Generated/Allowed By Position',
     header_label: 'XPM',
-    player_value_path: 'nfl_team_seasonlogs_xpm'
+    player_value_path: 'nfl_team_seasonlogs_extra_points_made'
   }),
-  nfl_team_seasonlogs_dsk: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_sacks: create_seasonlog_field({
     column_title: 'Defensive Sacks Generated/Allowed By Position',
     header_label: 'DSK',
-    player_value_path: 'nfl_team_seasonlogs_dsk'
+    player_value_path: 'nfl_team_seasonlogs_defensive_sacks'
   }),
-  nfl_team_seasonlogs_dint: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_interceptions: create_seasonlog_field({
     column_title: 'Defensive Interceptions Generated/Allowed By Position',
     header_label: 'DINT',
-    player_value_path: 'nfl_team_seasonlogs_dint'
+    player_value_path: 'nfl_team_seasonlogs_defensive_interceptions'
   }),
-  nfl_team_seasonlogs_dff: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_forced_fumbles: create_seasonlog_field({
     column_title: 'Defensive Forced Fumbles Generated/Allowed By Position',
     header_label: 'DFF',
-    player_value_path: 'nfl_team_seasonlogs_dff'
+    player_value_path: 'nfl_team_seasonlogs_defensive_forced_fumbles'
   }),
-  nfl_team_seasonlogs_drf: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_recovered_fumbles: create_seasonlog_field({
     column_title: 'Defensive Recovered Fumbles Generated/Allowed By Position',
     header_label: 'DRF',
-    player_value_path: 'nfl_team_seasonlogs_drf'
+    player_value_path: 'nfl_team_seasonlogs_defensive_recovered_fumbles'
   }),
-  nfl_team_seasonlogs_dtno: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_three_and_outs: create_seasonlog_field({
     column_title: 'Defensive Three and Outs Generated/Allowed By Position',
     header_label: 'DTNO',
-    player_value_path: 'nfl_team_seasonlogs_dtno'
+    player_value_path: 'nfl_team_seasonlogs_defensive_three_and_outs'
   }),
-  nfl_team_seasonlogs_dfds: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_fourth_down_stops: create_seasonlog_field({
     column_title: 'Defensive Fourth Down Stops Generated/Allowed By Position',
     header_label: 'DFDS',
-    player_value_path: 'nfl_team_seasonlogs_dfds'
+    player_value_path: 'nfl_team_seasonlogs_defensive_fourth_down_stops'
   }),
-  nfl_team_seasonlogs_dpa: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_points_against: create_seasonlog_field({
     column_title: 'Defensive Points Against Generated/Allowed By Position',
     header_label: 'DPA',
-    player_value_path: 'nfl_team_seasonlogs_dpa'
+    player_value_path: 'nfl_team_seasonlogs_defensive_points_against'
   }),
-  nfl_team_seasonlogs_dya: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_yards_against: create_seasonlog_field({
     column_title: 'Defensive Yards Against Generated/Allowed By Position',
     header_label: 'DYA',
-    player_value_path: 'nfl_team_seasonlogs_dya'
+    player_value_path: 'nfl_team_seasonlogs_defensive_yards_against'
   }),
-  nfl_team_seasonlogs_dblk: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_blocked_kicks: create_seasonlog_field({
     column_title: 'Defensive Blocked Kicks Generated/Allowed By Position',
     header_label: 'DBLK',
-    player_value_path: 'nfl_team_seasonlogs_dblk'
+    player_value_path: 'nfl_team_seasonlogs_defensive_blocked_kicks'
   }),
-  nfl_team_seasonlogs_dsf: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_safeties: create_seasonlog_field({
     column_title: 'Defensive Safeties Generated/Allowed By Position',
     header_label: 'DSF',
-    player_value_path: 'nfl_team_seasonlogs_dsf'
+    player_value_path: 'nfl_team_seasonlogs_defensive_safeties'
   }),
-  nfl_team_seasonlogs_dtpr: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_two_point_returns: create_seasonlog_field({
     column_title: 'Defensive Two Point Returns Generated/Allowed By Position',
     header_label: 'DTPR',
-    player_value_path: 'nfl_team_seasonlogs_dtpr'
+    player_value_path: 'nfl_team_seasonlogs_defensive_two_point_returns'
   }),
-  nfl_team_seasonlogs_dtd: create_seasonlog_field({
+  nfl_team_seasonlogs_defensive_touchdowns: create_seasonlog_field({
     column_title: 'Defensive Touchdowns Generated/Allowed By Position',
     header_label: 'DTD',
-    player_value_path: 'nfl_team_seasonlogs_dtd'
+    player_value_path: 'nfl_team_seasonlogs_defensive_touchdowns'
   }),
   nfl_team_seasonlogs_pass_rating: create_seasonlog_field({
     column_title: 'Passer Rating Generated/Allowed By Position',

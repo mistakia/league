@@ -80,7 +80,7 @@ const router = express.Router()
  *                   New value for the field. Type depends on the field:
  *                   - String fields: name
  *                   - Integer fields: Most roster/scoring settings
- *                   - Float fields: Some scoring settings (pa, pc, py, ra, ry, rbrec, wrrec, terec, rec, recy)
+ *                   - Float fields: Some scoring settings (passing_attempts, passing_completions, passing_yards, rushing_attempts, rushing_yards, running_back_reception, wide_receiver_reception, tight_end_reception, receptions, receiving_yards)
  *                 example: "My Fantasy League"
  *             required:
  *               - field

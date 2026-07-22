@@ -198,42 +198,77 @@ export default {
     create_field_from_league_nfl_team_seasonlogs('pts'),
   league_nfl_team_seasonlogs_rank:
     create_field_from_league_nfl_team_seasonlogs('rnk'),
-  nfl_team_seasonlogs_pa: create_field_from_nfl_team_seasonlogs('pa'),
-  nfl_team_seasonlogs_pc: create_field_from_nfl_team_seasonlogs('pc'),
-  nfl_team_seasonlogs_py: create_field_from_nfl_team_seasonlogs('py'),
-  nfl_team_seasonlogs_ints: create_field_from_nfl_team_seasonlogs('ints'),
-  nfl_team_seasonlogs_tdp: create_field_from_nfl_team_seasonlogs('tdp'),
-  nfl_team_seasonlogs_ra: create_field_from_nfl_team_seasonlogs('ra'),
-  nfl_team_seasonlogs_ry: create_field_from_nfl_team_seasonlogs('ry'),
-  nfl_team_seasonlogs_tdr: create_field_from_nfl_team_seasonlogs('tdr'),
-  nfl_team_seasonlogs_fuml: create_field_from_nfl_team_seasonlogs('fuml'),
-  nfl_team_seasonlogs_trg: create_field_from_nfl_team_seasonlogs('trg'),
-  nfl_team_seasonlogs_rec: create_field_from_nfl_team_seasonlogs('rec'),
-  nfl_team_seasonlogs_recy: create_field_from_nfl_team_seasonlogs('recy'),
-  nfl_team_seasonlogs_tdrec: create_field_from_nfl_team_seasonlogs('tdrec'),
-  nfl_team_seasonlogs_twoptc: create_field_from_nfl_team_seasonlogs('twoptc'),
-  nfl_team_seasonlogs_prtd: create_field_from_nfl_team_seasonlogs('prtd'),
-  nfl_team_seasonlogs_krtd: create_field_from_nfl_team_seasonlogs('krtd'),
-  nfl_team_seasonlogs_fgm: create_field_from_nfl_team_seasonlogs('fgm'),
-  nfl_team_seasonlogs_fgy: create_field_from_nfl_team_seasonlogs('fgy'),
-  nfl_team_seasonlogs_fg19: create_field_from_nfl_team_seasonlogs('fg19'),
-  nfl_team_seasonlogs_fg29: create_field_from_nfl_team_seasonlogs('fg29'),
-  nfl_team_seasonlogs_fg39: create_field_from_nfl_team_seasonlogs('fg39'),
-  nfl_team_seasonlogs_fg49: create_field_from_nfl_team_seasonlogs('fg49'),
-  nfl_team_seasonlogs_fg50: create_field_from_nfl_team_seasonlogs('fg50'),
-  nfl_team_seasonlogs_xpm: create_field_from_nfl_team_seasonlogs('xpm'),
-  nfl_team_seasonlogs_dsk: create_field_from_nfl_team_seasonlogs('dsk'),
-  nfl_team_seasonlogs_dint: create_field_from_nfl_team_seasonlogs('dint'),
-  nfl_team_seasonlogs_dff: create_field_from_nfl_team_seasonlogs('dff'),
-  nfl_team_seasonlogs_drf: create_field_from_nfl_team_seasonlogs('drf'),
-  nfl_team_seasonlogs_dtno: create_field_from_nfl_team_seasonlogs('dtno'),
-  nfl_team_seasonlogs_dfds: create_field_from_nfl_team_seasonlogs('dfds'),
-  nfl_team_seasonlogs_dpa: create_field_from_nfl_team_seasonlogs('dpa'),
-  nfl_team_seasonlogs_dya: create_field_from_nfl_team_seasonlogs('dya'),
-  nfl_team_seasonlogs_dblk: create_field_from_nfl_team_seasonlogs('dblk'),
-  nfl_team_seasonlogs_dsf: create_field_from_nfl_team_seasonlogs('dsf'),
-  nfl_team_seasonlogs_dtpr: create_field_from_nfl_team_seasonlogs('dtpr'),
-  nfl_team_seasonlogs_dtd: create_field_from_nfl_team_seasonlogs('dtd'),
+  nfl_team_seasonlogs_passing_attempts:
+    create_field_from_nfl_team_seasonlogs('passing_attempts'),
+  nfl_team_seasonlogs_passing_completions:
+    create_field_from_nfl_team_seasonlogs('passing_completions'),
+  nfl_team_seasonlogs_passing_yards:
+    create_field_from_nfl_team_seasonlogs('passing_yards'),
+  nfl_team_seasonlogs_passing_interceptions:
+    create_field_from_nfl_team_seasonlogs('passing_interceptions'),
+  nfl_team_seasonlogs_passing_touchdowns:
+    create_field_from_nfl_team_seasonlogs('passing_touchdowns'),
+  nfl_team_seasonlogs_rushing_attempts:
+    create_field_from_nfl_team_seasonlogs('rushing_attempts'),
+  nfl_team_seasonlogs_rushing_yards:
+    create_field_from_nfl_team_seasonlogs('rushing_yards'),
+  nfl_team_seasonlogs_rushing_touchdowns:
+    create_field_from_nfl_team_seasonlogs('rushing_touchdowns'),
+  nfl_team_seasonlogs_fumbles_lost:
+    create_field_from_nfl_team_seasonlogs('fumbles_lost'),
+  nfl_team_seasonlogs_targets: create_field_from_nfl_team_seasonlogs('targets'),
+  nfl_team_seasonlogs_receptions:
+    create_field_from_nfl_team_seasonlogs('receptions'),
+  nfl_team_seasonlogs_receiving_yards:
+    create_field_from_nfl_team_seasonlogs('receiving_yards'),
+  nfl_team_seasonlogs_receiving_touchdowns:
+    create_field_from_nfl_team_seasonlogs('receiving_touchdowns'),
+  nfl_team_seasonlogs_two_point_conversions:
+    create_field_from_nfl_team_seasonlogs('two_point_conversions'),
+  nfl_team_seasonlogs_punt_return_touchdowns:
+    create_field_from_nfl_team_seasonlogs('punt_return_touchdowns'),
+  nfl_team_seasonlogs_kickoff_return_touchdowns:
+    create_field_from_nfl_team_seasonlogs('kickoff_return_touchdowns'),
+  nfl_team_seasonlogs_field_goals_made:
+    create_field_from_nfl_team_seasonlogs('field_goals_made'),
+  nfl_team_seasonlogs_field_goal_yards:
+    create_field_from_nfl_team_seasonlogs('field_goal_yards'),
+  nfl_team_seasonlogs_field_goals_made_0_19_yards:
+    create_field_from_nfl_team_seasonlogs('field_goals_made_0_19_yards'),
+  nfl_team_seasonlogs_field_goals_made_20_29_yards:
+    create_field_from_nfl_team_seasonlogs('field_goals_made_20_29_yards'),
+  nfl_team_seasonlogs_field_goals_made_30_39_yards:
+    create_field_from_nfl_team_seasonlogs('field_goals_made_30_39_yards'),
+  nfl_team_seasonlogs_field_goals_made_40_49_yards:
+    create_field_from_nfl_team_seasonlogs('field_goals_made_40_49_yards'),
+  nfl_team_seasonlogs_field_goals_made_50_plus_yards:
+    create_field_from_nfl_team_seasonlogs('field_goals_made_50_plus_yards'),
+  nfl_team_seasonlogs_extra_points_made:
+    create_field_from_nfl_team_seasonlogs('extra_points_made'),
+  nfl_team_seasonlogs_defensive_sacks:
+    create_field_from_nfl_team_seasonlogs('defensive_sacks'),
+  nfl_team_seasonlogs_defensive_interceptions:
+    create_field_from_nfl_team_seasonlogs('defensive_interceptions'),
+  nfl_team_seasonlogs_defensive_forced_fumbles:
+    create_field_from_nfl_team_seasonlogs('defensive_forced_fumbles'),
+  nfl_team_seasonlogs_defensive_recovered_fumbles:
+    create_field_from_nfl_team_seasonlogs('defensive_recovered_fumbles'),
+  nfl_team_seasonlogs_defensive_three_and_outs:
+    create_field_from_nfl_team_seasonlogs('defensive_three_and_outs'),
+  nfl_team_seasonlogs_defensive_fourth_down_stops:
+    create_field_from_nfl_team_seasonlogs('defensive_fourth_down_stops'),
+  nfl_team_seasonlogs_defensive_points_against:
+    create_field_from_nfl_team_seasonlogs('defensive_points_against'),
+  nfl_team_seasonlogs_defensive_yards_against:
+    create_field_from_nfl_team_seasonlogs('defensive_yards_against'),
+  nfl_team_seasonlogs_defensive_blocked_kicks:
+    create_field_from_nfl_team_seasonlogs('defensive_blocked_kicks'),
+  nfl_team_seasonlogs_defensive_safeties:
+    create_field_from_nfl_team_seasonlogs('defensive_safeties'),
+  nfl_team_seasonlogs_defensive_two_point_returns:
+    create_field_from_nfl_team_seasonlogs('defensive_two_point_returns'),
+  nfl_team_seasonlogs_defensive_touchdowns:
+    create_field_from_nfl_team_seasonlogs('defensive_touchdowns'),
   nfl_team_seasonlogs_pass_rating:
     create_field_from_nfl_team_seasonlogs('pass_rating'),
   nfl_team_seasonlogs_pass_yards_per_attempt:

@@ -13,41 +13,41 @@ const slot_nums = { QB: 0, RB: 2, WR: 4, TE: 6, K: 17, DST: 16 }
 
 export const stats = (d) => ({
   // passing
-  ints: d['20'],
-  tdp: d['4'],
-  py: d['3'],
-  pa: d['0'],
-  pc: d['1'],
+  passing_interceptions: d['20'],
+  passing_touchdowns: d['4'],
+  passing_yards: d['3'],
+  passing_attempts: d['0'],
+  passing_completions: d['1'],
 
   // rushing
-  ra: d['23'],
-  ry: d['24'],
-  tdr: d['25'],
-  fuml: d['72'],
+  rushing_attempts: d['23'],
+  rushing_yards: d['24'],
+  rushing_touchdowns: d['25'],
+  fumbles_lost: d['72'],
 
   // receiving
-  trg: d['58'],
-  rec: d['53'],
-  recy: d['42'],
-  tdrec: d['43'],
+  targets: d['58'],
+  receptions: d['53'],
+  receiving_yards: d['42'],
+  receiving_touchdowns: d['43'],
 
   // kicker
-  fg39: d['80'],
-  fg49: d['77'],
-  fg50: d['74'],
-  xpm: d['86'],
+  field_goals_made_30_39_yards: d['80'],
+  field_goals_made_40_49_yards: d['77'],
+  field_goals_made_50_plus_yards: d['74'],
+  extra_points_made: d['86'],
 
   // return
-  // prtd: d['102'],
-  // krtd: d['101'],
+  // punt_return_touchdowns: d['102'],
+  // kickoff_return_touchdowns: d['101'],
 
   // defense
-  dint: d['95'],
-  drf: d['96'],
-  dblk: d['97'],
-  dsf: d['98'],
-  dsk: d['99'],
-  dtd: (d['103'] || 0) + (d['104'] || 0) + (d['93'] || 0)
+  defensive_interceptions: d['95'],
+  defensive_recovered_fumbles: d['96'],
+  defensive_blocked_kicks: d['97'],
+  defensive_safeties: d['98'],
+  defensive_sacks: d['99'],
+  defensive_touchdowns: (d['103'] || 0) + (d['104'] || 0) + (d['93'] || 0)
 })
 
 export const positionId = {

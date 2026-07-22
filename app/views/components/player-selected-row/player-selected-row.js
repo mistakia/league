@@ -20,29 +20,37 @@ const FANTASY_STATS = [
 ]
 
 const DEFENSE_STATS = [
-  'dpa',
-  'dya',
-  'dsk',
-  'dint',
-  'dff',
-  'drf',
-  'dtno',
-  'dfds',
-  'dblk',
-  'dsf',
-  'dtpr',
-  'dtd',
-  'prtd',
-  'krtd'
+  'defensive_points_against',
+  'defensive_yards_against',
+  'defensive_sacks',
+  'defensive_interceptions',
+  'defensive_forced_fumbles',
+  'defensive_recovered_fumbles',
+  'defensive_three_and_outs',
+  'defensive_fourth_down_stops',
+  'defensive_blocked_kicks',
+  'defensive_safeties',
+  'defensive_two_point_returns',
+  'defensive_touchdowns',
+  'punt_return_touchdowns',
+  'kickoff_return_touchdowns'
 ]
 
-const KICKER_STATS = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
+const KICKER_STATS = [
+  'extra_points_made',
+  'field_goals_made',
+  'field_goals_made_0_19_yards',
+  'field_goals_made_20_29_yards',
+  'field_goals_made_30_39_yards',
+  'field_goals_made_40_49_yards',
+  'field_goals_made_50_plus_yards'
+]
 
 const PASSING_PRODUCTION = [
-  'pa',
-  'py',
-  'tdp',
-  'ints',
+  'passing_attempts',
+  'passing_yards',
+  'passing_touchdowns',
+  'passing_interceptions',
   'dropbacks',
   'pass_completed_air_yards',
   'pass_yards_after_catch'
@@ -73,7 +81,13 @@ const PASSING_USAGE = [
   'play_action_pct'
 ]
 
-const RUSHING_PRODUCTION = ['ra', 'ry', 'tdr', 'fuml', 'rush_epa']
+const RUSHING_PRODUCTION = [
+  'rushing_attempts',
+  'rushing_yards',
+  'rushing_touchdowns',
+  'fumbles_lost',
+  'rush_epa'
+]
 
 const RUSHING_OPPORTUNITIES = [
   'expected_rush_yards',
@@ -98,7 +112,13 @@ const RUSHING_EXPLOSIVENESS = [
 
 const RUSHING_REDZONE = ['rush_attempts_redzone', 'rush_attempts_goaline']
 
-const RECEIVING_PRODUCTION = ['trg', 'rec', 'recy', 'tdrec', 'recv_epa']
+const RECEIVING_PRODUCTION = [
+  'targets',
+  'receptions',
+  'receiving_yards',
+  'receiving_touchdowns',
+  'recv_epa'
+]
 
 const RECEIVING_EFFICIENCY = [
   'receiving_passer_rating',

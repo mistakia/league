@@ -99,7 +99,7 @@ describe('LIBS-SERVER simulation integration', function () {
       expect(result.has(test_player_id)).to.equal(true)
 
       const projection = result.get(test_player_id)
-      expect(projection.stats.py).to.equal(275.5)
+      expect(projection.stats.passing_yards).to.equal(275.5)
       expect(projection.source).to.include('FANDUEL')
       expect(projection.market_types).to.include(
         player_game_prop_types.GAME_PASSING_YARDS
@@ -165,7 +165,7 @@ describe('LIBS-SERVER simulation integration', function () {
       expect(result.size).to.equal(1)
       const projection = result.get(test_player_id)
       // Should use FanDuel line (280.0), not DraftKings (275.0)
-      expect(projection.stats.py).to.equal(280.0)
+      expect(projection.stats.passing_yards).to.equal(280.0)
     })
 
     it('should return empty map for players with no market data', async function () {
@@ -261,8 +261,8 @@ describe('LIBS-SERVER simulation integration', function () {
 
       expect(result.size).to.equal(1)
       const projection = result.get(test_player_id)
-      expect(projection.stats.py).to.equal(275.5)
-      expect(projection.stats.tdp).to.equal(2.5)
+      expect(projection.stats.passing_yards).to.equal(275.5)
+      expect(projection.stats.passing_touchdowns).to.equal(2.5)
       expect(projection.market_types).to.have.lengthOf(2)
       // Projection should include points from both stats
       expect(projection.projection).to.be.greaterThan(11) // More than just passing yards

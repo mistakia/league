@@ -17,7 +17,7 @@ export default function LeagueSettingsReceiving({
     <>
       <EditableLeagueField
         label='Rec. (RB)'
-        field='rbrec'
+        field='running_back_reception'
         type='float'
         max={2}
         min={0}
@@ -25,7 +25,7 @@ export default function LeagueSettingsReceiving({
       />
       <EditableLeagueField
         label='Rec. (WR)'
-        field='wrrec'
+        field='wide_receiver_reception'
         type='float'
         max={2}
         min={0}
@@ -33,7 +33,7 @@ export default function LeagueSettingsReceiving({
       />
       <EditableLeagueField
         label='Rec. (TE)'
-        field='terec'
+        field='tight_end_reception'
         type='float'
         max={2}
         min={0}
@@ -41,7 +41,7 @@ export default function LeagueSettingsReceiving({
       />
       <EditableLeagueField
         label='Rec. (Other)'
-        field='rec'
+        field='receptions'
         type='float'
         max={2}
         min={0}
@@ -49,7 +49,7 @@ export default function LeagueSettingsReceiving({
       />
       <EditableLeagueField
         label='Yards'
-        field='recy'
+        field='receiving_yards'
         type='float'
         max={2}
         min={0}
@@ -57,7 +57,7 @@ export default function LeagueSettingsReceiving({
       />
       <EditableLeagueField
         label='Tds'
-        field='tdrec'
+        field='receiving_touchdowns'
         type='int'
         max={12}
         min={0}

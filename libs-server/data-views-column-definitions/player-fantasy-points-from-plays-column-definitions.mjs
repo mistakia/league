@@ -103,11 +103,14 @@ const needs_position_data = (scoring_format) => {
   }
 
   // Check if any position-specific reception scoring differs from base reception scoring
-  const base_rec = scoring_format.rec || 0
+  const base_rec = scoring_format.receptions || 0
   return (
-    (scoring_format.rbrec && scoring_format.rbrec !== base_rec) ||
-    (scoring_format.wrrec && scoring_format.wrrec !== base_rec) ||
-    (scoring_format.terec && scoring_format.terec !== base_rec)
+    (scoring_format.running_back_reception &&
+      scoring_format.running_back_reception !== base_rec) ||
+    (scoring_format.wide_receiver_reception &&
+      scoring_format.wide_receiver_reception !== base_rec) ||
+    (scoring_format.tight_end_reception &&
+      scoring_format.tight_end_reception !== base_rec)
   )
 }
 
@@ -436,9 +439,9 @@ const generate_passing_scoring_inner = async (scoring_format) => {
     }
   }
 
-  const py = scoring_format.py || 0
-  const ptd = scoring_format.tdp || 0
-  const ints = scoring_format.ints || 0
+  const py = scoring_format.passing_yards || 0
+  const ptd = scoring_format.passing_touchdowns || 0
+  const ints = scoring_format.passing_interceptions || 0
 
   return `COALESCE(pass_yds, 0) * ${py} + COALESCE(pass_td::int, 0) * ${ptd} + COALESCE("int"::int, 0) * ${ints}`
 }
@@ -454,10 +457,10 @@ const generate_rushing_scoring_inner = async (scoring_format) => {
     }
   }
 
-  const ry = scoring_format.ry || 0
-  const rtd = scoring_format.tdr || 0
-  const rufd = scoring_format.rush_first_down || 0
-  const ra = scoring_format.ra || 0
+  const ry = scoring_format.rushing_yards || 0
+  const rtd = scoring_format.rushing_touchdowns || 0
+  const rufd = scoring_format.rushing_first_downs || 0
+  const ra = scoring_format.rushing_attempts || 0
 
   let sql = `COALESCE(rush_yds, 0) * ${ry} + COALESCE(rush_td::int, 0) * ${rtd}`
 
@@ -494,14 +497,14 @@ const generate_receiving_scoring_inner = async (
     }
   }
 
-  const recy = scoring_format.recy || 0
-  const rctd = scoring_format.tdrec || 0
-  const rec = scoring_format.rec || 0
-  const rbrec = scoring_format.rbrec || 0
-  const wrrec = scoring_format.wrrec || 0
-  const terec = scoring_format.terec || 0
-  const trg = scoring_format.trg || 0
-  const recfd = scoring_format.rec_first_down || 0
+  const recy = scoring_format.receiving_yards || 0
+  const rctd = scoring_format.receiving_touchdowns || 0
+  const rec = scoring_format.receptions || 0
+  const rbrec = scoring_format.running_back_reception || 0
+  const wrrec = scoring_format.wide_receiver_reception || 0
+  const terec = scoring_format.tight_end_reception || 0
+  const trg = scoring_format.targets || 0
+  const recfd = scoring_format.receiving_first_downs || 0
 
   let sql = `COALESCE(recv_yds, 0) * ${recy} + COALESCE(pass_td::int, 0) * ${rctd}`
 
@@ -546,7 +549,7 @@ const generate_fumble_scoring_inner = async (scoring_format) => {
     }
   }
 
-  const fuml = scoring_format.fuml || 0
+  const fuml = scoring_format.fumbles_lost || 0
   return String(fuml)
 }
 
@@ -563,11 +566,12 @@ const should_use_main_where = ({ params }) => {
 
 // Build the role-union role_attributions for fantasy points. Each role
 // emits the per-play scoring expression (no SUM/ROUND wrapper -- the
-// aggregator's SUM wraps it). Position-aware receiving (rbrec/wrrec/terec)
+// aggregator's SUM wraps it). Position-aware receiving
+// (running_back_reception/wide_receiver_reception/tight_end_reception)
 // is intentionally NOT enabled here: it requires a leftJoin on `player`
 // inside the role_union inner sub, which the build_period_cte role_union
 // path does not yet support. All three production scoring_format_ides
-// in baseline.json have uniform `rec` values, so this is parity-safe.
+// in baseline.json have uniform `receptions` values, so this is parity-safe.
 // SFB formats (sfb15_sleeper/sfb15_mfl) would diverge -- track as a follow-up.
 const fp_role_attributions = async ({ params }) => {
   const scoring_format = await get_scoring_format(params.scoring_format_id)

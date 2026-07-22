@@ -24,7 +24,7 @@
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-PTSR-000916','Test','Ptsr','T.Ptsr','Test Ptsr','ZZ','ZZ','2000-01-01',2020,'ZZ')",
       "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (991001, 2023, 1, 'REG', 'ZZ', 'OP')",
-      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rush_first_down, rec_first_down, ry_excluding_kneels) VALUES (991001, 'TEST-PTSR-000916', 'OP', 'ZZ', 'ZZ', 2023, 0, 0, 0)",
+      "INSERT INTO player_gamelogs (esbid, pid, opp, tm, pos, year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES (991001, 'TEST-PTSR-000916', 'OP', 'ZZ', 'ZZ', 2023, 0, 0, 0)",
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, successful_play) VALUES (991001,1,2023,1,0,'REG','PASS','ZZ',true)",
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, successful_play) VALUES (991001,2,2023,1,0,'REG','PASS','ZZ',true)",
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, successful_play) VALUES (991001,3,2023,1,0,'REG','RUSH','ZZ',false)"

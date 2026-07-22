@@ -17,26 +17,28 @@ debug.enable('generate-league-formats')
 const generate_scoring_format_title = (scoring_format) => {
   const parts = []
 
-  if (scoring_format.rec === 1) {
+  if (scoring_format.receptions === 1) {
     parts.push('PPR')
-  } else if (scoring_format.rec === 0.5) {
+  } else if (scoring_format.receptions === 0.5) {
     parts.push('0.5PPR')
-  } else if (scoring_format.rec === 0) {
+  } else if (scoring_format.receptions === 0) {
     parts.push('Standard')
   }
 
-  if (scoring_format.terec > scoring_format.rec) {
-    parts.push(`TE+${scoring_format.terec - scoring_format.rec}`)
+  if (scoring_format.tight_end_reception > scoring_format.receptions) {
+    parts.push(
+      `TE+${scoring_format.tight_end_reception - scoring_format.receptions}`
+    )
   }
 
-  parts.push(`${scoring_format.tdp}PTD`)
-  parts.push(`${scoring_format.ints}INT`)
+  parts.push(`${scoring_format.passing_touchdowns}PTD`)
+  parts.push(`${scoring_format.passing_interceptions}INT`)
 
-  if (scoring_format.py !== 0.04) {
-    parts.push(`${scoring_format.py}PY`)
+  if (scoring_format.passing_yards !== 0.04) {
+    parts.push(`${scoring_format.passing_yards}PY`)
   }
-  if (scoring_format.fuml !== -2) {
-    parts.push(`${scoring_format.fuml}FUM`)
+  if (scoring_format.fumbles_lost !== -2) {
+    parts.push(`${scoring_format.fumbles_lost}FUM`)
   }
 
   return parts.join(' / ')
@@ -58,25 +60,25 @@ const generate_league_formats = async () => {
     bench: [7],
     ps: [4],
     reserve_short_term_limit: [3],
-    pa: [0],
-    pc: [0],
-    py: [0.04, 0.05],
-    ints: [-1, -2],
-    tdp: [4, 6],
-    ra: [0],
-    ry: [0.1],
-    tdr: [6],
-    rec: [0, 0.5, 1],
-    recy: [0.1],
-    twoptc: [2],
-    tdrec: [6],
-    fuml: [-1, -2],
-    prtd: [6],
-    krtd: [6],
-    trg: [0],
-    rush_first_down: [0],
-    rec_first_down: [0],
-    exclude_qb_kneels: [false],
+    passing_attempts: [0],
+    passing_completions: [0],
+    passing_yards: [0.04, 0.05],
+    passing_interceptions: [-1, -2],
+    passing_touchdowns: [4, 6],
+    rushing_attempts: [0],
+    rushing_yards: [0.1],
+    rushing_touchdowns: [6],
+    receptions: [0, 0.5, 1],
+    receiving_yards: [0.1],
+    two_point_conversions: [2],
+    receiving_touchdowns: [6],
+    fumbles_lost: [-1, -2],
+    punt_return_touchdowns: [6],
+    kickoff_return_touchdowns: [6],
+    targets: [0],
+    rushing_first_downs: [0],
+    receiving_first_downs: [0],
+    exclude_quarterback_kneels: [false],
     cap: [200],
     min_bid: [0]
   }
@@ -109,28 +111,28 @@ const generate_league_formats = async () => {
   log(`Generated ${combinations.length} combinations`)
 
   const extract_scoring = (c) => ({
-    pa: c.pa,
-    pc: c.pc,
-    py: c.py,
-    ints: c.ints,
-    tdp: c.tdp,
-    ra: c.ra,
-    ry: c.ry,
-    tdr: c.tdr,
-    rec: c.rec,
-    rbrec: c.rec,
-    wrrec: c.rec,
-    terec: c.rec,
-    recy: c.recy,
-    twoptc: c.twoptc,
-    tdrec: c.tdrec,
-    fuml: c.fuml,
-    prtd: c.prtd,
-    krtd: c.krtd,
-    trg: c.trg,
-    rush_first_down: c.rush_first_down,
-    rec_first_down: c.rec_first_down,
-    exclude_qb_kneels: c.exclude_qb_kneels
+    passing_attempts: c.passing_attempts,
+    passing_completions: c.passing_completions,
+    passing_yards: c.passing_yards,
+    passing_interceptions: c.passing_interceptions,
+    passing_touchdowns: c.passing_touchdowns,
+    rushing_attempts: c.rushing_attempts,
+    rushing_yards: c.rushing_yards,
+    rushing_touchdowns: c.rushing_touchdowns,
+    receptions: c.receptions,
+    running_back_reception: c.receptions,
+    wide_receiver_reception: c.receptions,
+    tight_end_reception: c.receptions,
+    receiving_yards: c.receiving_yards,
+    two_point_conversions: c.two_point_conversions,
+    receiving_touchdowns: c.receiving_touchdowns,
+    fumbles_lost: c.fumbles_lost,
+    punt_return_touchdowns: c.punt_return_touchdowns,
+    kickoff_return_touchdowns: c.kickoff_return_touchdowns,
+    targets: c.targets,
+    rushing_first_downs: c.rushing_first_downs,
+    receiving_first_downs: c.receiving_first_downs,
+    exclude_quarterback_kneels: c.exclude_quarterback_kneels
   })
 
   const extract_league = (c) => ({

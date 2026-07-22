@@ -82,67 +82,67 @@ const default_options = {
  */
 const PROP_OPPONENT_ALLOWED_MAPPING = {
   [player_prop_types.GAME_PASSING_YARDS]: {
-    stat_key: 'py',
+    stat_key: 'passing_yards',
     threshold_key: 'opponent_allowed_py_min'
   },
   [player_prop_types.GAME_ALT_PASSING_YARDS]: {
-    stat_key: 'py',
+    stat_key: 'passing_yards',
     threshold_key: 'opponent_allowed_py_min'
   },
   [player_prop_types.GAME_RUSHING_YARDS]: {
-    stat_key: 'ry',
+    stat_key: 'rushing_yards',
     threshold_key: 'opponent_allowed_ry_min'
   },
   [player_prop_types.GAME_ALT_RUSHING_YARDS]: {
-    stat_key: 'ry',
+    stat_key: 'rushing_yards',
     threshold_key: 'opponent_allowed_ry_min'
   },
   [player_prop_types.GAME_RECEIVING_YARDS]: {
-    stat_key: 'recy',
+    stat_key: 'receiving_yards',
     threshold_key: 'opponent_allowed_recy_min'
   },
   [player_prop_types.GAME_ALT_RECEIVING_YARDS]: {
-    stat_key: 'recy',
+    stat_key: 'receiving_yards',
     threshold_key: 'opponent_allowed_recy_min'
   },
   [player_prop_types.GAME_ALT_PASSING_COMPLETIONS]: {
-    stat_key: 'pc',
+    stat_key: 'passing_completions',
     threshold_key: 'opponent_allowed_pc_min'
   },
   [player_prop_types.GAME_PASSING_COMPLETIONS]: {
-    stat_key: 'pc',
+    stat_key: 'passing_completions',
     threshold_key: 'opponent_allowed_pc_min'
   },
   [player_prop_types.GAME_PASSING_TOUCHDOWNS]: {
-    stat_key: 'tdp',
+    stat_key: 'passing_touchdowns',
     threshold_key: 'opponent_allowed_tdp_min'
   },
   [player_prop_types.GAME_RECEPTIONS]: {
-    stat_key: 'rec',
+    stat_key: 'receptions',
     threshold_key: 'opponent_allowed_rec_min'
   },
   [player_prop_types.GAME_PASSING_INTERCEPTIONS]: {
-    stat_key: 'ints',
+    stat_key: 'passing_interceptions',
     threshold_key: 'opponent_allowed_ints_min'
   },
   [player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: {
-    stat_key: 'ra',
+    stat_key: 'rushing_attempts',
     threshold_key: 'opponent_allowed_ra_min'
   },
   [player_prop_types.GAME_RUSHING_ATTEMPTS]: {
-    stat_key: 'ra',
+    stat_key: 'rushing_attempts',
     threshold_key: 'opponent_allowed_ra_min'
   },
   [player_prop_types.GAME_RECEIVING_TOUCHDOWNS]: {
-    stat_key: 'tdrec',
+    stat_key: 'receiving_touchdowns',
     threshold_key: 'opponent_allowed_tdrec_min'
   },
   [player_prop_types.GAME_RUSHING_TOUCHDOWNS]: {
-    stat_key: 'tdr',
+    stat_key: 'rushing_touchdowns',
     threshold_key: 'opponent_allowed_tdr_min'
   },
   [player_prop_types.GAME_PASSING_ATTEMPTS]: {
-    stat_key: 'pa',
+    stat_key: 'passing_attempts',
     threshold_key: 'opponent_allowed_pa_min'
   },
   [player_prop_types.ANYTIME_TOUCHDOWN]: {
@@ -172,12 +172,18 @@ const is_opponent_allowed_below_threshold = ({
 
   // Special case for anytime touchdown (combines rushing and receiving TDs)
   if (market_type === player_prop_types.ANYTIME_TOUCHDOWN) {
-    return opponent_seasonlog.tdr + opponent_seasonlog.tdrec < 1
+    return (
+      opponent_seasonlog.rushing_touchdowns +
+        opponent_seasonlog.receiving_touchdowns <
+      1
+    )
   }
 
   // Special case for rushing + receiving yards
   if (market_type === player_prop_types.GAME_RUSHING_RECEIVING_YARDS) {
-    return opponent_seasonlog.ry + opponent_seasonlog.recy < 0
+    return (
+      opponent_seasonlog.rushing_yards + opponent_seasonlog.receiving_yards < 0
+    )
   }
 
   const stat_value = opponent_seasonlog[mapping.stat_key]

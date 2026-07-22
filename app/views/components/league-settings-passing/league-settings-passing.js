@@ -17,7 +17,7 @@ export default function LeagueSettingsPassing({
     <>
       <EditableLeagueField
         label='Attempts'
-        field='pa'
+        field='passing_attempts'
         type='float'
         max={2}
         min={0}
@@ -25,7 +25,7 @@ export default function LeagueSettingsPassing({
       />
       <EditableLeagueField
         label='Completions'
-        field='pc'
+        field='passing_completions'
         type='float'
         max={2}
         min={0}
@@ -33,7 +33,7 @@ export default function LeagueSettingsPassing({
       />
       <EditableLeagueField
         label='Yards'
-        field='py'
+        field='passing_yards'
         type='float'
         max={1}
         min={0}
@@ -41,7 +41,7 @@ export default function LeagueSettingsPassing({
       />
       <EditableLeagueField
         label='Ints'
-        field='ints'
+        field='passing_interceptions'
         type='int'
         max={0}
         min={-3}
@@ -49,7 +49,7 @@ export default function LeagueSettingsPassing({
       />
       <EditableLeagueField
         label='Tds'
-        field='tdp'
+        field='passing_touchdowns'
         type='int'
         max={12}
         min={0}

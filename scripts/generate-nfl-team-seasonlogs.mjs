@@ -189,7 +189,7 @@ const sum = (items = [], keys = [], fixed_weight) => {
         } else if (receiving_stats.includes(key)) {
           weight = item.routes || 1
         } else if (rushing_stats.includes(key)) {
-          weight = item.ra || 1
+          weight = item.rushing_attempts || 1
         }
 
         if (item[key] !== null && item[key] !== undefined) {

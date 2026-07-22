@@ -28,19 +28,19 @@ const SEASON_MARKETS = [
 const scoring_multiplier = (market_type, scoring) => {
   switch (market_type) {
     case 'SEASON_PASSING_YARDS':
-      return Number(scoring.py) || 0
+      return Number(scoring.passing_yards) || 0
     case 'SEASON_PASSING_TOUCHDOWNS':
-      return Number(scoring.tdp) || 0
+      return Number(scoring.passing_touchdowns) || 0
     case 'SEASON_RUSHING_YARDS':
-      return Number(scoring.ry) || 0
+      return Number(scoring.rushing_yards) || 0
     case 'SEASON_RUSHING_TOUCHDOWNS':
-      return Number(scoring.tdr) || 0
+      return Number(scoring.rushing_touchdowns) || 0
     case 'SEASON_RECEIVING_YARDS':
-      return Number(scoring.recy) || 0
+      return Number(scoring.receiving_yards) || 0
     case 'SEASON_RECEIVING_TOUCHDOWNS':
-      return Number(scoring.tdrec) || 0
+      return Number(scoring.receiving_touchdowns) || 0
     case 'SEASON_RECEPTIONS':
-      return Number(scoring.rec) || 0
+      return Number(scoring.receptions) || 0
     default:
       return 0
   }

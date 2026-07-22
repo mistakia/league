@@ -62,23 +62,23 @@ const make_pid = (i) =>
 const make_gamelog = ({
   pid,
   week,
-  py = 0,
-  ptd = 0,
-  ry = 0,
-  rtd = 0,
-  recy = 0,
-  rectd = 0
+  passing_yards = 0,
+  passing_touchdowns = 0,
+  rushing_yards = 0,
+  rushing_touchdowns = 0,
+  receiving_yards = 0,
+  receiving_touchdowns = 0
 }) => ({
   pid,
   week,
-  py,
-  ptd,
-  ints: 0,
-  ry,
-  rtd,
-  rec: 0,
-  recy,
-  rectd,
+  passing_yards,
+  passing_touchdowns,
+  passing_interceptions: 0,
+  rushing_yards,
+  rushing_touchdowns,
+  receptions: 0,
+  receiving_yards,
+  receiving_touchdowns,
   // active flag is filtered by the script before passing in; the calc itself
   // does not consult it.
   active: true
@@ -106,9 +106,9 @@ const make_filler_gamelogs = (tid) =>
     make_gamelog({
       pid,
       week: 1,
-      py: pos === 'QB' ? 200 : 0,
-      ry: ['RB', 'WR'].includes(pos) ? 40 : 0,
-      recy: pos === 'TE' ? 30 : 0
+      passing_yards: pos === 'QB' ? 200 : 0,
+      rushing_yards: ['RB', 'WR'].includes(pos) ? 40 : 0,
+      receiving_yards: pos === 'TE' ? 30 : 0
     })
   )
 
@@ -151,9 +151,9 @@ describe('LIBS-SHARED calculate-standings -- incomplete optimal lineup detector'
         make_gamelog({
           pid,
           week: 1,
-          py: pos === 'QB' ? 250 : 0,
-          ry: ['RB', 'WR'].includes(pos) ? 50 : 0,
-          recy: pos === 'TE' ? 40 : 0
+          passing_yards: pos === 'QB' ? 250 : 0,
+          rushing_yards: ['RB', 'WR'].includes(pos) ? 50 : 0,
+          receiving_yards: pos === 'TE' ? 40 : 0
         })
       ),
       ...filler_gamelogs
@@ -193,7 +193,7 @@ describe('LIBS-SHARED calculate-standings -- incomplete optimal lineup detector'
     const active = { 1: { 1: roster, ...filler_active_by_tid } }
     const gamelogs = [
       ...roster.map(({ pid, pos }) =>
-        make_gamelog({ pid, week: 1, ry: 50, recy: 40 })
+        make_gamelog({ pid, week: 1, rushing_yards: 50, receiving_yards: 40 })
       ),
       ...filler_gamelogs
     ]
