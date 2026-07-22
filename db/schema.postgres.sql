@@ -230,8 +230,8 @@ DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pid_incl_pos_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
-DROP INDEX IF EXISTS public.idx_player_pair_correlations_year_pid_b;
-DROP INDEX IF EXISTS public.idx_player_pair_correlations_year_pid_a;
+DROP INDEX IF EXISTS public.idx_player_pair_correlations_season_year_pid_b;
+DROP INDEX IF EXISTS public.idx_player_pair_correlations_season_year_pid_a;
 DROP INDEX IF EXISTS public.idx_player_nffc_id;
 DROP INDEX IF EXISTS public.idx_player_lname;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_year_esbid_pid;
@@ -4570,7 +4570,7 @@ CREATE TABLE public.nfl_coaches (
     full_name character varying(80) NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     coach_id character varying(32) NOT NULL,
-    dob date,
+    date_of_birth date,
     CONSTRAINT nfl_coaches_coach_id_format CHECK (((coach_id)::text ~ '^[A-Z]{1,4}-[A-Z]{1,4}-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{2})?$'::text)),
     CONSTRAINT nfl_coaches_pfr_coach_id_basename CHECK (((pfr_coach_id IS NULL) OR ((pfr_coach_id)::text ~ '^[A-Za-z][A-Za-z0-9'']*[0-9]$'::text)))
 );
@@ -19516,8 +19516,8 @@ CREATE TABLE public.player_aliases (
 
 CREATE TABLE public.player_archetypes (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
-    pos character varying(3),
+    season_year smallint NOT NULL,
+    primary_position character varying(3),
     archetype character varying(20) NOT NULL,
     rushing_rate numeric(4,2),
     target_share numeric(4,3),
@@ -23615,9 +23615,9 @@ CREATE TABLE public.player_gamelogs_year_2026 (
 CREATE TABLE public.player_pair_correlations (
     pid_a character varying(25) NOT NULL,
     pid_b character varying(25) NOT NULL,
-    year smallint NOT NULL,
-    team_a character varying(3),
-    team_b character varying(3),
+    season_year smallint NOT NULL,
+    nfl_team_a character varying(3),
+    nfl_team_b character varying(3),
     games_together smallint NOT NULL,
     correlation numeric(5,4),
     relationship_type character varying(20) NOT NULL,
@@ -23649,17 +23649,17 @@ COMMENT ON COLUMN public.player_pair_correlations.pid_b IS 'Second player ID (al
 
 
 --
--- Name: COLUMN player_pair_correlations.team_a; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_pair_correlations.nfl_team_a; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_pair_correlations.team_a IS 'NFL team of pid_a when correlation was calculated (for team change detection)';
+COMMENT ON COLUMN public.player_pair_correlations.nfl_team_a IS 'NFL team of pid_a when correlation was calculated (for team change detection)';
 
 
 --
--- Name: COLUMN player_pair_correlations.team_b; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_pair_correlations.nfl_team_b; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_pair_correlations.team_b IS 'NFL team of pid_b when correlation was calculated (for team change detection)';
+COMMENT ON COLUMN public.player_pair_correlations.nfl_team_b IS 'NFL team of pid_b when correlation was calculated (for team change detection)';
 
 
 --
@@ -24222,9 +24222,9 @@ COMMENT ON COLUMN public.player_variance.coefficient_of_variation IS 'Coefficien
 
 CREATE TABLE public.players_status (
     pid character varying(25),
-    mfl_id character varying(11),
-    sleeper_id character varying(11),
-    active boolean,
+    mfl_player_id character varying(11),
+    sleeper_player_id character varying(11),
+    is_active boolean,
     depth_chart_order character varying(255),
     depth_chart_position character varying(255),
     details character varying(255),
@@ -28016,7 +28016,7 @@ ALTER TABLE ONLY public.player_aliases
 --
 
 ALTER TABLE ONLY public.player_archetypes
-    ADD CONSTRAINT player_archetypes_pkey PRIMARY KEY (pid, year);
+    ADD CONSTRAINT player_archetypes_pkey PRIMARY KEY (pid, season_year);
 
 
 --
@@ -28392,7 +28392,7 @@ ALTER TABLE ONLY public.player
 --
 
 ALTER TABLE ONLY public.player_pair_correlations
-    ADD CONSTRAINT player_pair_correlations_pkey PRIMARY KEY (pid_a, pid_b, year);
+    ADD CONSTRAINT player_pair_correlations_pkey PRIMARY KEY (pid_a, pid_b, season_year);
 
 
 --
@@ -30434,17 +30434,17 @@ CREATE INDEX idx_player_nffc_id ON public.player USING btree (nffc_player_id);
 
 
 --
--- Name: idx_player_pair_correlations_year_pid_a; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_pair_correlations_season_year_pid_a; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pair_correlations_year_pid_a ON public.player_pair_correlations USING btree (year, pid_a);
+CREATE INDEX idx_player_pair_correlations_season_year_pid_a ON public.player_pair_correlations USING btree (season_year, pid_a);
 
 
 --
--- Name: idx_player_pair_correlations_year_pid_b; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_pair_correlations_season_year_pid_b; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pair_correlations_year_pid_b ON public.player_pair_correlations USING btree (year, pid_b);
+CREATE INDEX idx_player_pair_correlations_season_year_pid_b ON public.player_pair_correlations USING btree (season_year, pid_b);
 
 
 --

@@ -30,7 +30,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
     .join('player', 'player_game_outcome_correlations.pid', 'player.pid')
     .leftJoin('player_archetypes', function () {
       this.on('player.pid', 'player_archetypes.pid').andOn(
-        db.raw('player_archetypes.year = ?', [year])
+        db.raw('player_archetypes.season_year = ?', [year])
       )
     })
     .where('player_game_outcome_correlations.year', year)

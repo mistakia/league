@@ -180,9 +180,9 @@ const calculate_player_correlations = async ({
       correlations_to_insert.push({
         pid_a: ordered_pid_a,
         pid_b: ordered_pid_b,
-        year,
-        team_a: ordered_team_a,
-        team_b: ordered_team_b,
+        season_year: year,
+        nfl_team_a: ordered_team_a,
+        nfl_team_b: ordered_team_b,
         games_together: common_games.length,
         correlation: corr_value.toFixed(4),
         relationship_type,
@@ -207,7 +207,7 @@ const calculate_player_correlations = async ({
       save: async (batch) => {
         await db('player_pair_correlations')
           .insert(batch)
-          .onConflict(['pid_a', 'pid_b', 'year'])
+          .onConflict(['pid_a', 'pid_b', 'season_year'])
           .merge()
       }
     })

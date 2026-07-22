@@ -73,8 +73,8 @@ export async function load_correlations({
 
   // Build query
   let query = db('player_pair_correlations')
-    .whereIn('year', years_to_query)
-    .orderBy('year', 'desc') // Prefer more recent year
+    .whereIn('season_year', years_to_query)
+    .orderBy('season_year', 'desc') // Prefer more recent season
 
   if (is_within_set) {
     // Both players must be in the set

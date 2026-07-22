@@ -128,7 +128,7 @@ export async function load_player_archetypes({ player_ids, year }) {
 
   const archetypes = await db('player_archetypes')
     .whereIn('pid', player_ids)
-    .where('year', year)
+    .where('season_year', year)
 
   const archetype_map = new Map()
   for (const row of archetypes) {

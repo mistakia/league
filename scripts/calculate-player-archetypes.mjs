@@ -215,11 +215,8 @@ const calculate_player_archetypes = async ({ year } = {}) => {
     if (archetype) {
       archetype_records.push({
         pid: player.pid,
-        year,
-        // `pos` here is the player_archetypes table's own column (unrelated
-        // to the player-dimension rename); the value read is DB-derived off
-        // the joined `player` row, which does need to follow the rename.
-        pos: player.primary_position,
+        season_year: year,
+        primary_position: player.primary_position,
         archetype,
         rushing_rate: rushing_rate !== null ? rushing_rate.toFixed(2) : null,
         target_share: target_share !== null ? target_share.toFixed(3) : null,
@@ -241,7 +238,7 @@ const calculate_player_archetypes = async ({ year } = {}) => {
       save: async (batch) => {
         await db('player_archetypes')
           .insert(batch)
-          .onConflict(['pid', 'year'])
+          .onConflict(['pid', 'season_year'])
           .merge()
       }
     })

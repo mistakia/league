@@ -459,7 +459,7 @@ const upsert_coaches_dim = async ({ dim_rows, dry_run }) => {
     // Sentinel '0000-00-00' is not a valid PostgreSQL date; store
     // 1900-01-01 for sentinel rows (the coach_id text carries the
     // '0000-00-00' marker for sentinel-aware consumers).
-    dob: r.dob === '0000-00-00' ? '1900-01-01' : r.dob,
+    date_of_birth: r.dob === '0000-00-00' ? '1900-01-01' : r.dob,
     updated_at: db.fn.now()
   }))
   for (const s of INTERIM_COORDINATOR_SEEDS) {
@@ -470,7 +470,7 @@ const upsert_coaches_dim = async ({ dim_rows, dry_run }) => {
       // Sentinel '0000-00-00' is not a valid PostgreSQL date; store
       // 1900-01-01 as the storage sentinel (the coach_id text carries
       // the '0000-00-00' marker for sentinel-aware consumers).
-      dob: s.dob === '0000-00-00' ? '1900-01-01' : s.dob,
+      date_of_birth: s.dob === '0000-00-00' ? '1900-01-01' : s.dob,
       updated_at: db.fn.now()
     })
   }
@@ -481,7 +481,7 @@ const upsert_coaches_dim = async ({ dim_rows, dry_run }) => {
   await db('nfl_coaches')
     .insert(rows)
     .onConflict('coach_id')
-    .merge(['pfr_coach_id', 'full_name', 'dob', 'updated_at'])
+    .merge(['pfr_coach_id', 'full_name', 'date_of_birth', 'updated_at'])
   return rows.length
 }
 

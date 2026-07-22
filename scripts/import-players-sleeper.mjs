@@ -217,9 +217,9 @@ const run = async () => {
 
     const status_insert = {
       pid: player_row.pid,
-      sleeper_id,
+      sleeper_player_id: sleeper_id,
 
-      active,
+      is_active: active,
       depth_chart_order,
       depth_chart_position,
       injury_body_part,
