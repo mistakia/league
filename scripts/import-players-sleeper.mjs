@@ -207,7 +207,8 @@ const run = async () => {
     } else {
       const changes = await updatePlayer({
         player_row,
-        update: data
+        update: data,
+        source: 'sleeper'
       })
       changeCount += changes
     }
@@ -295,10 +296,10 @@ const run = async () => {
     // either the API stripped content (caught above) or our writer is
     // broken upstream. The 2022 blackout ran 23 weeks undetected; this
     // catches a recurrence on day 3.
-    const cutoff = timestamp - 48 * 3600
+    const cutoff = new Date((timestamp - 48 * 3600) * 1000)
     const [{ c: recent_writes }] = await db('player_changelog')
-      .where({ source: 'sleeper', prop: 'injury_status' })
-      .andWhere('timestamp', '>=', cutoff)
+      .where({ source: 'sleeper', column_name: 'injury_status' })
+      .andWhere('changed_at', '>=', cutoff)
       .count({ c: '*' })
     if (Number(recent_writes) === 0) {
       return {

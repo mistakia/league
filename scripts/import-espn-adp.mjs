@@ -123,7 +123,8 @@ const import_espn_adp = async ({
           player_row,
           update: {
             espn_player_id: source_player.espn_id
-          }
+          },
+          source: 'espn'
         })
       }
 

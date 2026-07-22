@@ -66,7 +66,8 @@ export default async function ({ update_player_row, remove_player_row }) {
 
   await updatePlayer({
     pid: update_player_row.pid,
-    update: merged_player_row
+    update: merged_player_row,
+    source: 'merge'
   })
 }
 

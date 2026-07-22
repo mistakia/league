@@ -209,7 +209,8 @@ const run = async ({
       await update_play({
         play_row: db_play,
         update: play,
-        overwrite_existing
+        overwrite_existing,
+        source: 'nflfastr_ftn'
       })
     } else {
       play_not_matched.push(item)

@@ -201,7 +201,8 @@ const process_matched_player = async ({
       player_row,
       update: {
         fanduel_player_id: fanduel_player.id
-      }
+      },
+      source: 'fanduel'
     })
   }
 

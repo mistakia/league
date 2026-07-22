@@ -75,7 +75,8 @@ const importPlayersESPN = async () => {
           player_row,
           update: {
             espn_player_id: espn_id
-          }
+          },
+          source: 'espn'
         })
 
         changeCount += changes

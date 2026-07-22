@@ -32,21 +32,22 @@ practice_signal AS (
   GROUP BY pid, year, week
 ),
 changelog_signal AS (
-  -- Asymmetric per-game timestamp window: -7d back, +3h forward.
+  -- Asymmetric per-game window: -7d back, +3h forward. pc.changed_at is
+  -- timestamptz; gm.timestamp is epoch seconds, bridged via to_timestamp().
   SELECT gl_inner.pid, gl_inner.esbid,
-         BOOL_OR(pc.prop = 'injury_status'
-                 AND UPPER(pc.new) IN ('OUT','DOUBTFUL','IR','PUP','SUS','COV')) AS changelog_unavailable,
-         BOOL_OR(pc.prop = 'injury_status') AS changelog_injury_event,
-         BOOL_OR(pc.prop = 'nfl_status'
-                 AND pc.new IN ('INJURED_RESERVE','PHYSICALLY_UNABLE_TO_PERFORM',
+         BOOL_OR(pc.column_name = 'injury_status'
+                 AND UPPER(pc.new_value) IN ('OUT','DOUBTFUL','IR','PUP','SUS','COV')) AS changelog_unavailable,
+         BOOL_OR(pc.column_name = 'injury_status') AS changelog_injury_event,
+         BOOL_OR(pc.column_name = 'nfl_status'
+                 AND pc.new_value IN ('INJURED_RESERVE','PHYSICALLY_UNABLE_TO_PERFORM',
                                 'SUSPENDED','NON_FOOTBALL_RELATED_INJURED_RESERVE',
                                 'DID_NOT_REPORT')) AS changelog_nfl_reserve_event
   FROM player_gamelogs gl_inner
   JOIN nfl_games gm ON gm.esbid = gl_inner.esbid
   JOIN player_changelog pc
     ON pc.pid = gl_inner.pid
-   AND pc.prop IN ('injury_status','nfl_status','roster_status','status')
-   AND pc.timestamp BETWEEN gm.timestamp - 7*86400 AND gm.timestamp + 3*3600
+   AND pc.column_name IN ('injury_status','nfl_status','roster_status','status')
+   AND pc.changed_at BETWEEN to_timestamp(gm.timestamp - 7*86400) AND to_timestamp(gm.timestamp + 3*3600)
   WHERE gl_inner.year BETWEEN :start_year AND :end_year AND gm.seas_type = 'REG'
   GROUP BY gl_inner.pid, gl_inner.esbid
 ),

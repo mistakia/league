@@ -35,16 +35,18 @@ describe('compute_play_changes clearable_fields', function () {
       compute_play_changes({
         play_row: base_row,
         update: { solo_tackle_1_pid: null },
-        clearable_fields: new Set(['solo_tackle_1_pid'])
+        clearable_fields: new Set(['solo_tackle_1_pid']),
+        source: 'test'
       })
 
     expect(changes_count).to.equal(1)
     expect(field_updates).to.have.property('solo_tackle_1_pid', null)
     expect(changelog_entries).to.have.lengthOf(1)
     expect(changelog_entries[0]).to.include({
-      prop: 'solo_tackle_1_pid',
-      prev: 'PID_X',
-      new: null
+      column_name: 'solo_tackle_1_pid',
+      previous_value: 'PID_X',
+      new_value: null,
+      source: 'test'
     })
   })
 
@@ -79,12 +81,16 @@ describe('compute_play_changes clearable_fields', function () {
       compute_play_changes({
         play_row: base_row,
         update: { solo_tackle_1_pid: 'PID_Y' },
-        clearable_fields: new Set(['solo_tackle_1_pid'])
+        clearable_fields: new Set(['solo_tackle_1_pid']),
+        source: 'test'
       })
 
     expect(changes_count).to.equal(1)
     expect(field_updates).to.have.property('solo_tackle_1_pid', 'PID_Y')
-    expect(changelog_entries[0]).to.include({ prev: 'PID_X', new: 'PID_Y' })
+    expect(changelog_entries[0]).to.include({
+      previous_value: 'PID_X',
+      new_value: 'PID_Y'
+    })
   })
 
   it('non-clearable existing caller (no clearable_fields arg) behaves unchanged', () => {

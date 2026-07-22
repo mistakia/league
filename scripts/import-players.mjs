@@ -75,7 +75,7 @@ const run = async () => {
           update.esb_player_id = item.esbId
         }
 
-        await updatePlayer({ player_row, update })
+        await updatePlayer({ player_row, update, source: 'nfl' })
       }
     }
 

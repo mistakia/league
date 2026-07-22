@@ -124,7 +124,8 @@ const import_yahoo_adp = async ({
           player_row,
           update: {
             yahoo_player_id: source_player.yahoo_id
-          }
+          },
+          source: 'yahoo'
         })
       }
 

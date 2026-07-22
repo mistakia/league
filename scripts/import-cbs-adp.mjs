@@ -176,7 +176,8 @@ const import_cbs_adp = async ({
             player_row,
             update: {
               cbs_player_id: source_player.cbs_id
-            }
+            },
+            source: 'cbs'
           })
         }
 

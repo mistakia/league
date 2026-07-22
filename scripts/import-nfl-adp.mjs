@@ -191,7 +191,8 @@ const import_nfl_adp = async ({
           player_row,
           update: {
             nfl_player_id: source_player.nfl_id
-          }
+          },
+          source: 'nfl'
         })
       }
 

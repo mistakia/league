@@ -142,7 +142,8 @@ const import_underdog_bestball_adp = async ({
           if (!dry_run && player_row && !player_row.underdog_player_id) {
             await updatePlayer({
               player_row,
-              update: { underdog_player_id: appearance.player_id }
+              update: { underdog_player_id: appearance.player_id },
+              source: 'underdog'
             })
           }
         }

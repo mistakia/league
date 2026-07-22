@@ -107,7 +107,8 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
       player_changes = await updatePlayer({
         player_row,
         update: format_player(ngs_player),
-        allow_protected_props: true
+        allow_protected_props: true,
+        source: 'ngs'
       })
     } catch (err) {
       // TODO track which player and fields had errors updating

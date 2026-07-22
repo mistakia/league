@@ -154,7 +154,8 @@ const process_matched_player = async ({
       player_row,
       update: {
         draftkings_player_id: draftable.playerDkId
-      }
+      },
+      source: 'draftkings'
     })
   }
 

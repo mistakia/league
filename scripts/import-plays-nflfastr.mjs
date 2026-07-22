@@ -771,7 +771,8 @@ const process_play = async ({
         play_row: db_play,
         update: formatted_play,
         overwrite_existing,
-        overwrite_fields
+        overwrite_fields,
+        source: 'nflfastr'
       })
     }
 

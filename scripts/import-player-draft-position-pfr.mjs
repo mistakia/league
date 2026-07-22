@@ -268,7 +268,8 @@ const import_player_draft_position_pfr = async ({
     // No need to check for changes as that's handled by update-player.mjs
     await updatePlayer({
       player_row,
-      update
+      update,
+      source: 'pfr'
     })
   }
 

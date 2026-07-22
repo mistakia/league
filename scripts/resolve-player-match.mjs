@@ -218,7 +218,8 @@ const action_update_external_id = async (argv) => {
   const changes = await updatePlayer({
     pid,
     update,
-    allow_protected_props: true
+    allow_protected_props: true,
+    source: 'manual'
   })
 
   if (changes > 0) {
@@ -275,7 +276,8 @@ const action_update_player = async (argv) => {
   const changes = await updatePlayer({
     pid,
     update,
-    allow_protected_props: true
+    allow_protected_props: true,
+    source: 'manual'
   })
 
   if (changes > 0) {

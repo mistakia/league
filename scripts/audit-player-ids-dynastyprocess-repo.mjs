@@ -258,7 +258,8 @@ const audit_player_ids_dynastyprocess_repo = async ({
 
           await updatePlayer({
             player_row: matching_player,
-            update: updates
+            update: updates,
+            source: 'dynastyprocess'
           })
           log(`Updated player ${dp_player.formatted_name} with all differences`)
         } else if (update_player_conflicts) {
@@ -275,7 +276,8 @@ const audit_player_ids_dynastyprocess_repo = async ({
             if (answer.toLowerCase() === 'y') {
               await updatePlayer({
                 player_row: matching_player,
-                update: { [field]: new_value }
+                update: { [field]: new_value },
+                source: 'dynastyprocess'
               })
               log(
                 `Updated field ${field} for player ${dp_player.formatted_name}`

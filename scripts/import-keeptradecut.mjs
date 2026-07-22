@@ -138,7 +138,8 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           if (player_row) {
             await updatePlayer({
               player_row,
-              update: { keeptradecut_player_id: item.playerID }
+              update: { keeptradecut_player_id: item.playerID },
+              source: 'keeptradecut'
             })
           } else {
             log(

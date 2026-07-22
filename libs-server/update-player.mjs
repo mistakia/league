@@ -6,6 +6,7 @@ import { hideBin } from 'yargs/helpers'
 import { format_nfl_status, format_nfl_injury_status } from '#libs-shared'
 import is_main from './is-main.mjs'
 import db from '#db'
+import record_changelog from './record-changelog.mjs'
 
 const log = debug('update-player')
 debug.enable('update-player')
@@ -152,12 +153,20 @@ const updatePlayer = async ({
 
     const prev = edit.lhs
     if (prev) {
-      await db('player_changelog').insert({
-        pid: player_row.pid,
-        prop,
-        prev,
-        new: edit.rhs,
-        timestamp: Math.round(Date.now() / 1000)
+      if (!source) {
+        throw new Error(
+          `updatePlayer: source is required to record a player_changelog entry (pid ${player_row.pid}, field ${prop})`
+        )
+      }
+      await record_changelog({
+        table: 'player_changelog',
+        rows: {
+          pid: player_row.pid,
+          column_name: prop,
+          previous_value: prev,
+          new_value: edit.rhs,
+          source
+        }
       })
     }
 
@@ -209,7 +218,11 @@ const main = async () => {
       update[key] = argv[key]
     })
 
-    const changes = await updatePlayer({ pid: argv.pid, update })
+    const changes = await updatePlayer({
+      pid: argv.pid,
+      update,
+      source: 'manual'
+    })
     log(`player ${argv.pid} updated, changes: ${changes}`)
     process.exit()
   } catch (err) {

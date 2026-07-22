@@ -290,7 +290,8 @@ const import_nfl_games_nflverse_nfldata = async ({
       await update_nfl_game({
         game_row: db_game,
         update: game,
-        overwrite_existing
+        overwrite_existing,
+        source: 'nflverse'
       })
       result.games_updated++
     } else {

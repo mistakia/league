@@ -2,7 +2,12 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { is_main, report_job, compute_play_changes } from '#libs-server'
+import {
+  is_main,
+  report_job,
+  compute_play_changes,
+  record_changelog
+} from '#libs-server'
 import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
@@ -271,7 +276,8 @@ const process_plays = async ({
         play_row: current_play,
         update,
         overwrite_existing,
-        clearable_fields: role_clearable_fields
+        clearable_fields: role_clearable_fields,
+        source: 'play_enrichment'
       })
 
     if (changes_count > 0) {
@@ -321,10 +327,7 @@ const process_plays = async ({
         })
 
         for (const chunk of changelog_chunks) {
-          await trx('play_changelog')
-            .insert(chunk)
-            .onConflict(['esbid', 'playId', 'prop', 'timestamp'])
-            .ignore()
+          await record_changelog({ table: 'play_changelog', rows: chunk, trx })
         }
 
         log(`Inserted ${all_changelog_entries.length} changelog entries`)

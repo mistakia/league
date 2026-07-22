@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import is_main from './is-main.mjs'
 import db from '#db'
+import record_changelog from './record-changelog.mjs'
 
 const log = debug('update-nfl-game')
 debug.enable('update-nfl-game')
@@ -30,7 +31,8 @@ const update_nfl_game = async ({
   game_row,
   esbid,
   update,
-  overwrite_existing = false
+  overwrite_existing = false,
+  source = null
 }) => {
   if (!game_row && esbid) {
     game_row = await db('nfl_games').where({ esbid }).first()
@@ -73,12 +75,20 @@ const update_nfl_game = async ({
 
     const prev = edit.lhs
     if (prev) {
-      await db('nfl_games_changelog').insert({
-        esbid: game_row.esbid,
-        column_name,
-        prev,
-        new: edit.rhs,
-        timestamp: Math.round(Date.now() / 1000)
+      if (!source) {
+        throw new Error(
+          `update_nfl_game: source is required to record a nfl_games_changelog entry (esbid ${game_row.esbid}, field ${column_name})`
+        )
+      }
+      await record_changelog({
+        table: 'nfl_games_changelog',
+        rows: {
+          esbid: game_row.esbid,
+          column_name,
+          previous_value: prev,
+          new_value: edit.rhs,
+          source
+        }
       })
     }
 
@@ -125,7 +135,8 @@ const main = async () => {
 
     const changes = await update_nfl_game({
       esbid: argv.esbid,
-      update
+      update,
+      source: 'manual'
     })
     log(`game ${argv.esbid} updated, changes: ${changes}`)
     process.exit()

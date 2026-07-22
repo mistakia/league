@@ -86,7 +86,11 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
       await db('player')
         .update({ smart_player_id: null })
         .where({ smart_player_id: value })
-      await updatePlayer({ pid, update: { smart_player_id: value } })
+      await updatePlayer({
+        pid,
+        update: { smart_player_id: value },
+        source: 'nflverse'
+      })
     }
   }
 
@@ -109,7 +113,11 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
       await db('player')
         .update({ smart_player_id: null })
         .where({ smart_player_id: value })
-      await updatePlayer({ pid, update: { smart_player_id: value } })
+      await updatePlayer({
+        pid,
+        update: { smart_player_id: value },
+        source: 'nflverse'
+      })
     }
   }
 
@@ -174,7 +182,11 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
         await db('player')
           .update({ gsis_player_id: null })
           .where({ gsis_player_id: value })
-        await updatePlayer({ pid, update: { gsis_player_id: value } })
+        await updatePlayer({
+          pid,
+          update: { gsis_player_id: value },
+          source: 'nflverse'
+        })
       }
     }
   }

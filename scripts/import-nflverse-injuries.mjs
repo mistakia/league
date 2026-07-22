@@ -42,7 +42,8 @@ import {
   fetch_with_retry,
   batch_insert,
   throw_if_shortfall,
-  readCSV
+  readCSV,
+  record_changelog
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -313,13 +314,16 @@ const import_for_year = async ({
     }
 
     if (changelog_status) {
+      // Synthetic event time: kickoff-minus-day, so the row lands inside the
+      // historical-injury-index changelog window. game.timestamp is epoch
+      // seconds; changed_at is timestamptz.
       changelog_inserts.push({
         pid: pid_match.pid,
-        prop: 'injury_status',
-        prev: '',
-        new: changelog_status,
-        timestamp: game.timestamp - 86400,
-        source: source_sentinel
+        column_name: 'injury_status',
+        previous_value: '',
+        new_value: changelog_status,
+        source: source_sentinel,
+        changed_at: new Date((game.timestamp - 86400) * 1000)
       })
     }
 
@@ -344,17 +348,17 @@ const import_for_year = async ({
     }
   }
 
-  // Dedupe changelog inserts on (pid, timestamp).
+  // Dedupe changelog inserts on (pid, changed_at).
   const cl_dedup = new Map()
   for (const ins of changelog_inserts) {
-    cl_dedup.set(`${ins.pid}|${ins.timestamp}`, ins)
+    cl_dedup.set(`${ins.pid}|${ins.changed_at.getTime()}`, ins)
   }
   const before_cl_dedup = changelog_inserts.length
   changelog_inserts.length = 0
   changelog_inserts.push(...cl_dedup.values())
   if (before_cl_dedup !== changelog_inserts.length) {
     log(
-      `deduped ${before_cl_dedup - changelog_inserts.length} changelog (pid,timestamp) duplicates -> ${changelog_inserts.length} rows`
+      `deduped ${before_cl_dedup - changelog_inserts.length} changelog (pid,changed_at) duplicates -> ${changelog_inserts.length} rows`
     )
   }
 
@@ -419,19 +423,23 @@ const import_for_year = async ({
       inserts_written: 0
     }
   }
+  // bounds are epoch seconds (from nfl_games.timestamp); changed_at is tstz.
   const cl_deleted = await db('player_changelog')
     .where({ source: source_sentinel })
-    .whereBetween('timestamp', [bounds.start, bounds.end])
+    .whereBetween('changed_at', [
+      new Date(bounds.start * 1000),
+      new Date(bounds.end * 1000)
+    ])
     .del()
   log(
-    `deleted ${cl_deleted} prior changelog rows where source='${source_sentinel}' and timestamp in [${bounds.start}, ${bounds.end}]`
+    `deleted ${cl_deleted} prior changelog rows where source='${source_sentinel}' and changed_at in [${bounds.start}, ${bounds.end}]`
   )
 
   await batch_insert({
     items: changelog_inserts,
     batch_size: BATCH_SIZE,
     save: async (batch) => {
-      await db('player_changelog').insert(batch)
+      await record_changelog({ table: 'player_changelog', rows: batch })
     }
   })
   log(

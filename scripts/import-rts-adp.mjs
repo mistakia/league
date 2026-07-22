@@ -140,7 +140,8 @@ const import_rts_adp = async ({
             player_row,
             update: {
               rts_player_id: Number(player.player_id)
-            }
+            },
+            source: 'rts'
           })
         }
 

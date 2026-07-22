@@ -280,7 +280,8 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
         const changes = await updatePlayer({
           player_row: existing,
           update,
-          allow_protected_props: false
+          allow_protected_props: false,
+          source: 'nflverse'
         })
         if (changes) updated += 1
         else failed += 1

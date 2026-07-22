@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import is_main from './is-main.mjs'
 import db from '#db'
+import record_changelog from './record-changelog.mjs'
 import { normalize_game_clock } from './play-enum-utils.mjs'
 
 const log = debug('update-play')
@@ -124,7 +125,8 @@ export const compute_play_changes = ({
   overwrite_existing = false,
   overwrite_fields = [],
   clearable_fields = new Set(),
-  protected_fields = new Set()
+  protected_fields = new Set(),
+  source = null
 }) => {
   const changelog_entries = []
   const field_updates = {}
@@ -149,7 +151,7 @@ export const compute_play_changes = ({
     return { changelog_entries, field_updates, changes_count }
   }
 
-  const timestamp = Math.round(Date.now() / 1000)
+  const changed_at = new Date()
 
   for (const edit of edits) {
     const prop = edit.path[0]
@@ -214,11 +216,12 @@ export const compute_play_changes = ({
     if (edit.lhs) {
       changelog_entries.push({
         esbid: play_row.esbid,
-        playId: play_row.playId,
-        prop,
-        prev: edit.lhs,
-        new: edit.rhs,
-        timestamp
+        play_id: play_row.playId,
+        column_name: prop,
+        previous_value: edit.lhs,
+        new_value: edit.rhs,
+        source,
+        changed_at
       })
     }
   }
@@ -253,7 +256,8 @@ const update_play = async ({
   overwrite_existing = false,
   overwrite_fields = [],
   clearable_fields = new Set(),
-  protected_fields = new Set()
+  protected_fields = new Set(),
+  source = null
 }) => {
   if (!play_row && esbid && playId) {
     const play_rows = await db('nfl_plays').where({ esbid, playId })
@@ -271,7 +275,8 @@ const update_play = async ({
       overwrite_existing,
       overwrite_fields,
       clearable_fields,
-      protected_fields
+      protected_fields,
+      source
     })
 
   if (changes_count === 0) {
@@ -280,15 +285,17 @@ const update_play = async ({
 
   // Batch changelog inserts
   if (changelog_entries.length > 0) {
-    for (const entry of changelog_entries) {
-      log(
-        `Updating play: ${entry.esbid} - ${entry.playId}, Field: ${entry.prop}, Value: ${entry.new}`
+    if (!source) {
+      throw new Error(
+        `update_play: source is required to record play_changelog entries (esbid ${play_row.esbid})`
       )
     }
-    await db('play_changelog')
-      .insert(changelog_entries)
-      .onConflict(['esbid', 'playId', 'prop', 'timestamp'])
-      .ignore()
+    for (const entry of changelog_entries) {
+      log(
+        `Updating play: ${entry.esbid} - ${entry.play_id}, Field: ${entry.column_name}, Value: ${entry.new_value}`
+      )
+    }
+    await record_changelog({ table: 'play_changelog', rows: changelog_entries })
   }
 
   // Batch play update
@@ -338,7 +345,8 @@ const main = async () => {
     const changes = await update_play({
       esbid: argv.esbid,
       playId: argv.playId,
-      update
+      update,
+      source: 'manual'
     })
     log(`play ${argv.esbid} updated, changes: ${changes}`)
     process.exit()

@@ -93,6 +93,7 @@ export {
 } from './plays-view/get-plays-view-results.mjs'
 export { default as update_play, compute_play_changes } from './update-play.mjs'
 export { default as update_nfl_game } from './update-nfl-game.mjs'
+export { default as record_changelog } from './record-changelog.mjs'
 export * as betonline from './betonline.mjs'
 export { default as format_starting_hash } from './format-starting-hash.mjs'
 export { default as report_job } from './report-job.mjs'

@@ -130,7 +130,8 @@ const process_nfl_plays_player = async () => {
           gsis_it_player_id: gsis_it_id,
           allow_protected_props: true,
           ignore_retired: true
-        }
+        },
+        source: 'nfl'
       })
     } catch (err) {
       log(`Error updating player: ${err.message}`)

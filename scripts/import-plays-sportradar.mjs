@@ -178,7 +178,8 @@ const resolve_player_id = async ({
         await updatePlayer({
           player_row: name_cached_player,
           update: { sportradar_player_id },
-          allow_protected_props: true
+          allow_protected_props: true,
+          source: 'sportradar'
         })
 
         // Track the update (using pid as key to avoid duplicates)
@@ -1199,7 +1200,8 @@ const process_play = async ({
         // Authority blocklist: FTN/nflfastR-owned fields Sportradar may fill
         // when empty but must never overwrite, even under --overwrite_existing.
         // Structural backstop for the 2026-05-24 catchable_ball incident.
-        protected_fields: SPORTRADAR_PROTECTED_FIELDS
+        protected_fields: SPORTRADAR_PROTECTED_FIELDS,
+        source: 'sportradar'
       })
       const update_time = Date.now() - update_start_time
       if (update_time > PERFORMANCE_THRESHOLD_MS) {

@@ -111,7 +111,8 @@ export default class PlayerIdMapper {
           await this.update_player_external_id({
             pid: player_row.pid,
             column,
-            external_id: external_player_id
+            external_id: external_player_id,
+            source: platform
           })
         }
       }
@@ -169,15 +170,17 @@ export default class PlayerIdMapper {
    * @param {string} params.pid - Internal player ID
    * @param {string} params.column - Database column name for the external ID
    * @param {string|number} params.external_id - External platform player ID
+   * @param {string} params.source - Provenance for the changelog (the platform)
    * @private
    */
-  async update_player_external_id({ pid, column, external_id }) {
+  async update_player_external_id({ pid, column, external_id, source }) {
     try {
       const update_data = { [column]: external_id }
       const changes = await update_player({
         pid,
         update: update_data,
-        allow_protected_props: true
+        allow_protected_props: true,
+        source
       })
 
       if (changes > 0) {

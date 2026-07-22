@@ -19,7 +19,8 @@ const updateFormattedNames = async () => {
       )
       const changes = await updatePlayer({
         player_row,
-        update: { formatted_name: formatted }
+        update: { formatted_name: formatted },
+        source: 'name_normalization'
       })
       count += changes
     } catch (err) {

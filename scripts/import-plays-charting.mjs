@@ -141,7 +141,8 @@ async function process_game({ game, client, stats, dry = false }) {
     if (!dry) {
       const changes = await update_play({
         play_row: db_play,
-        update: mapped_fields
+        update: mapped_fields,
+        source: 'charting'
       })
       fields_updated += changes
     }
