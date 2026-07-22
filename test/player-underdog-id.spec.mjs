@@ -58,7 +58,8 @@ describe('LIBS-SERVER player underdog_id', function () {
     const changes = await updatePlayer({
       player_row,
       update: { underdog_player_id: 'UD-FORCED' },
-      allow_protected_props: true
+      allow_protected_props: true,
+      source: 'test'
     })
     changes.should.equal(1)
     const after_row = await db('player').where({ pid: PID_B }).first()
