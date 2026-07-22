@@ -223,7 +223,9 @@ export default function DraftPage({
             <Position pos={p.get('primary_position')} />
           </div>
           <div>{p.get('team')}</div>
-          {Boolean(p.get('jnum')) && <div>#{p.get('jnum')}</div>}
+          {Boolean(p.get('jersey_number')) && (
+            <div>#{p.get('jersey_number')}</div>
+          )}
         </div>
         {draftActive && onTheClock && !is_player_drafted && (
           <div className='draft__selected-action'>

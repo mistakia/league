@@ -15,7 +15,7 @@ import PlayerHeadshot from '@components/player-headshot'
 import './player-name.styl'
 
 function PlayerLarge({ player_map, handleClick, width, square = false }) {
-  const player_number = player_map.get('jnum')
+  const player_number = player_map.get('jersey_number')
   return (
     <div className='player__name large'>
       <div className='player__name-headshot'>
