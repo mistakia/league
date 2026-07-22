@@ -419,8 +419,8 @@ export async function load_market_projections({
     }
 
     // Get player position for scoring calculation
-    const player = await db('player').where({ pid }).first('pos')
-    const position = player?.pos || ''
+    const player = await db('player').where({ pid }).first('primary_position')
+    const position = player?.primary_position || ''
 
     // Add expected TDs from ANYTIME_TOUCHDOWN and GAME_TWO_PLUS_TOUCHDOWNS markets
     // Uses formula: E[TD] = P(1+) + P(2+) for more accurate expectation

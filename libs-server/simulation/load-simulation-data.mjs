@@ -209,10 +209,10 @@ export async function load_player_points_with_game_status({
   // Load player positions for TD stat mapping (as player_info format)
   const player_info = new Map()
   const position_rows = await db('player')
-    .select('pid', 'pos')
+    .select('pid', 'primary_position')
     .whereIn('pid', pending_players)
   for (const row of position_rows) {
-    player_info.set(row.pid, { position: row.pos })
+    player_info.set(row.pid, { position: row.primary_position })
   }
 
   // Load market projections for pending players

@@ -228,7 +228,9 @@ router.put('/:poachId', async (req, res) => {
         roster.removePlayer(releasePlayerId)
       }
     }
-    const hasSlot = roster.has_bench_space_for_position(poach_player_row.pos)
+    const hasSlot = roster.has_bench_space_for_position(
+      poach_player_row.primary_position
+    )
     if (!hasSlot) {
       return res
         .status(400)

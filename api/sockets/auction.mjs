@@ -390,7 +390,7 @@ export default class Auction {
       // Calculate eligible teams after bid placement
       const eligible_team_ids = await this._calculate_eligible_teams(
         value,
-        player_info.pos,
+        player_info.primary_position,
         tid
       )
 
@@ -440,7 +440,7 @@ export default class Auction {
       const player_info = players[0]
       const eligible_team_ids = await this._calculate_eligible_teams(
         value,
-        player_info.pos,
+        player_info.primary_position,
         nominating_team_id
       )
 
@@ -621,7 +621,9 @@ export default class Auction {
     const roster = await getRoster({ tid: nominating_team_id })
     const roster_obj = new Roster({ roster, league: this._league })
 
-    if (!roster_obj.has_bench_space_for_position(player_info.pos)) {
+    if (
+      !roster_obj.has_bench_space_for_position(player_info.primary_position)
+    ) {
       this.logger(
         `no open slots available for ${pid} on team_id ${nominating_team_id}`
       )
@@ -695,7 +697,9 @@ export default class Auction {
 
   _validate_team_can_acquire_player(roster_obj, player_info, value) {
     // Check roster space
-    if (!roster_obj.has_bench_space_for_position(player_info.pos)) {
+    if (
+      !roster_obj.has_bench_space_for_position(player_info.primary_position)
+    ) {
       this.logger(
         `no open slots available for ${player_info.pid} on team_id ${this._transactions[0].tid}`
       )
@@ -774,7 +778,7 @@ export default class Auction {
       await db('rosters_players').insert({
         rid: roster_obj.uid,
         slot: roster_slot_types.BENCH,
-        pos: player_info.pos,
+        pos: player_info.primary_position,
         pid: player_info.pid,
         extensions: 0,
         tid,

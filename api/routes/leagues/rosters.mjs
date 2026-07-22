@@ -466,7 +466,7 @@ router.post('/?', async (req, res) => {
     const rosterInsert = {
       rid: roster.uid,
       pid,
-      pos: player_row.pos,
+      pos: player_row.primary_position,
       slot: roster_slot_types.BENCH,
       extensions: 0,
       tid: teamId,

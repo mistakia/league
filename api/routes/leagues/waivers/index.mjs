@@ -608,8 +608,10 @@ router.post('/?', async (req, res) => {
     }
     const hasSlot =
       type === waiver_types.FREE_AGENCY_PRACTICE
-        ? roster.has_practice_squad_space_for_position(player_row.pos)
-        : roster.has_bench_space_for_position(player_row.pos)
+        ? roster.has_practice_squad_space_for_position(
+            player_row.primary_position
+          )
+        : roster.has_bench_space_for_position(player_row.primary_position)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
@@ -895,8 +897,10 @@ router.put('/:waiverId', async (req, res) => {
     }
     const hasSlot =
       waiver.type === waiver_types.FREE_AGENCY_PRACTICE
-        ? roster.has_practice_squad_space_for_position(player_row.pos)
-        : roster.has_bench_space_for_position(player_row.pos)
+        ? roster.has_practice_squad_space_for_position(
+            player_row.primary_position
+          )
+        : roster.has_bench_space_for_position(player_row.primary_position)
     if (!hasSlot) {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }

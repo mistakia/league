@@ -250,7 +250,7 @@ router.put('/?', async (req, res) => {
       if (item.slot !== roster_slot_types.BENCH) {
         const isEligible = roster.isEligibleForSlot({
           slot: item.slot,
-          pos: player_row.pos
+          pos: player_row.primary_position
         })
         if (!isEligible) {
           return res.status(400).send({ error: 'invalid slot' })
@@ -296,7 +296,7 @@ router.put('/?', async (req, res) => {
       roster.addPlayer({
         slot: item.slot,
         pid: item.pid,
-        pos: player_row.pos
+        pos: player_row.primary_position
       })
     }
 
