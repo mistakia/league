@@ -495,7 +495,7 @@ describe('API /teams - activate', function () {
         rid: rosterId,
         pid: deactivate_player.pid,
         slot: roster_slot_types.BENCH,
-        pos: deactivate_player.pos1,
+        pos: deactivate_player.secondary_position,
         tag: player_tag_types.REGULAR,
         tid: teamId,
         lid: leagueId,

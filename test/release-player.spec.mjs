@@ -219,7 +219,7 @@ describe('CLI release-player script', function () {
         slot: roster_slot_types.BENCH
       })
 
-      const full_name = `${player.fname} ${player.lname}`
+      const full_name = `${player.first_name} ${player.last_name}`
 
       const result = await run_script([
         '--league-id',
@@ -232,8 +232,8 @@ describe('CLI release-player script', function () {
       ])
 
       result.code.should.equal(0)
-      result.stdout.should.include(player.fname)
-      result.stdout.should.include(player.lname)
+      result.stdout.should.include(player.first_name)
+      result.stdout.should.include(player.last_name)
     })
 
     it('should handle fuzzy name matching', async () => {
@@ -253,13 +253,13 @@ describe('CLI release-player script', function () {
       // Find a player with a unique first name to avoid ambiguity
       let test_player = await knex('player')
         .whereNot('current_nfl_team', 'INA')
-        .where('pos1', 'WR')
+        .where('primary_position', 'WR')
         .whereNotIn('pid', Array.from(used_pids))
         .whereRaw(
-          `fname NOT IN (
-          SELECT fname FROM player 
-          WHERE pos1 = 'WR' AND current_nfl_team != 'INA'
-          GROUP BY fname 
+          `first_name NOT IN (
+          SELECT first_name FROM player
+          WHERE primary_position = 'WR' AND current_nfl_team != 'INA'
+          GROUP BY first_name
           HAVING COUNT(*) > 1
         )`
         )
@@ -270,7 +270,7 @@ describe('CLI release-player script', function () {
         // Fallback: use any WR player but ensure no duplicates with same first name
         test_player = await knex('player')
           .whereNot('current_nfl_team', 'INA')
-          .where('pos1', 'WR')
+          .where('primary_position', 'WR')
           .whereNotIn('pid', Array.from(used_pids))
           .orderBy('pid')
           .first()
@@ -290,7 +290,7 @@ describe('CLI release-player script', function () {
       })
 
       // Use just first name for matching
-      const partial_name = test_player.fname
+      const partial_name = test_player.first_name
 
       const result = await run_script([
         '--league-id',
@@ -303,7 +303,7 @@ describe('CLI release-player script', function () {
       ])
 
       result.code.should.equal(0)
-      result.stdout.should.include(test_player.fname)
+      result.stdout.should.include(test_player.first_name)
     })
 
     it('should fail with invalid player ID', async () => {

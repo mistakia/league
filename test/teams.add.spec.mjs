@@ -70,7 +70,7 @@ describe('API /teams - add', function () {
       res.body[0].slot.should.equal(roster_slot_types.BENCH)
 
       res.body[0].rid.should.exist
-      res.body[0].pos.should.equal(player.pos1)
+      res.body[0].pos.should.equal(player.secondary_position)
       res.body[0].transaction.userid.should.equal(userId)
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
@@ -89,7 +89,7 @@ describe('API /teams - add', function () {
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosters[0].pid).to.equal(player.pid)
-      expect(rosters[0].pos).to.equal(player.pos1)
+      expect(rosters[0].pos).to.equal(player.secondary_position)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
       expect(rosters[0].week).to.equal(current_season.week)
@@ -138,7 +138,7 @@ describe('API /teams - add', function () {
       res.body[0].slot.should.equal(roster_slot_types.PS)
 
       res.body[0].rid.should.exist
-      res.body[0].pos.should.equal(player.pos1)
+      res.body[0].pos.should.equal(player.secondary_position)
       res.body[0].transaction.userid.should.equal(userId)
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
@@ -157,7 +157,7 @@ describe('API /teams - add', function () {
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(roster_slot_types.PS)
       expect(rosters[0].pid).to.equal(player.pid)
-      expect(rosters[0].pos).to.equal(player.pos1)
+      expect(rosters[0].pos).to.equal(player.secondary_position)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
       expect(rosters[0].week).to.equal(current_season.week)

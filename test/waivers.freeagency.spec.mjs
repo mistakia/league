@@ -211,7 +211,7 @@ describe('API /waivers - free agency', function () {
     it('player is on a roster', async () => {
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
-        .where('pos1', 'RB')
+        .where('secondary_position', 'RB')
         .limit(1)
 
       await addPlayer({ leagueId: 1, player: players[0], teamId: 2, userId: 2 })
@@ -235,7 +235,7 @@ describe('API /waivers - free agency', function () {
     it('player is no longer on waivers - exceeded 24 hours', async () => {
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
-        .where('pos1', 'RB')
+        .where('secondary_position', 'RB')
         .orderByRaw('RANDOM()')
         .limit(1)
 

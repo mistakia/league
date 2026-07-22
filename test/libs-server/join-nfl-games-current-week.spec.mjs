@@ -16,13 +16,13 @@ const seed_player = async ({ team }) => {
   await knex('player')
     .insert({
       pid: TEST_PID,
-      fname: 'Test',
-      lname: 'Player',
-      pname: 'T.Player',
-      formatted: 'Test Player',
-      pos: 'QB',
-      pos1: 'QB',
-      dob: '1990-01-01',
+      first_name: 'Test',
+      last_name: 'Player',
+      short_name: 'T.Player',
+      formatted_name: 'Test Player',
+      primary_position: 'QB',
+      secondary_position: 'QB',
+      date_of_birth: '1990-01-01',
       nfl_draft_year: 2012,
       current_nfl_team: team
     })

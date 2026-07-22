@@ -30,7 +30,7 @@
   "skip_query_match": true,
   "result_equivalence": {
     "seed": [
-      "INSERT INTO player (pid, fname, lname, pname, formatted, pos, pos1, dob, nfl_draft_year, current_nfl_team) VALUES ('TEST-FPWK-000903','Test','Fpwk','T.Fpwk','Test Fpwk','ZZ','ZZ','2000-01-01',2020,'ZZ')",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-FPWK-000903','Test','Fpwk','T.Fpwk','Test Fpwk','ZZ','ZZ','2000-01-01',2020,'ZZ')",
       "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (992001, 2023, 1, 'REG', 'ZZ', 'OP')",
       "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h) VALUES (992002, 2023, 2, 'REG', 'ZZ', 'OP')",
       "INSERT INTO nfl_plays (esbid, \"playId\", year, week, updated, seas_type, play_type, off, bc_pid, rush_yds) VALUES (992001, 1, 2023, 1, 0, 'REG', 'RUSH', 'ZZ', 'TEST-FPWK-000903', 50)",

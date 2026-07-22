@@ -33,13 +33,13 @@ describe('LIBS-SERVER simulation integration', function () {
       // Create test player
       await knex('player').insert({
         pid: test_player_id,
-        pname: 'TestPlayer',
-        fname: 'Test',
-        lname: 'Player',
-        formatted: 'testplayer',
-        dob: '1995-01-01',
-        pos: 'QB',
-        pos1: 'QB',
+        short_name: 'TestPlayer',
+        first_name: 'Test',
+        last_name: 'Player',
+        formatted_name: 'testplayer',
+        date_of_birth: '1995-01-01',
+        primary_position: 'QB',
+        secondary_position: 'QB',
         current_nfl_team: 'KC',
         nfl_draft_year: 2018
       })

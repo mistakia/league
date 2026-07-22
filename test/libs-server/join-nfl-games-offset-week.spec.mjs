@@ -21,13 +21,13 @@ describe('LIBS-SERVER apply_nfl_games_offset_week_join', function () {
     await knex('player')
       .insert({
         pid: TEST_PID,
-        fname: 'Test',
-        lname: 'Offset',
-        pname: 'T.Offset',
-        formatted: 'Test Offset',
-        pos: 'QB',
-        pos1: 'QB',
-        dob: '1990-01-01',
+        first_name: 'Test',
+        last_name: 'Offset',
+        short_name: 'T.Offset',
+        formatted_name: 'Test Offset',
+        primary_position: 'QB',
+        secondary_position: 'QB',
+        date_of_birth: '1990-01-01',
         nfl_draft_year: 2012,
         current_nfl_team: 'KC'
       })

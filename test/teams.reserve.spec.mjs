@@ -637,7 +637,7 @@ describe('API /teams - reserve', function () {
         rid: prior_roster_uid,
         pid: player.pid,
         slot: roster_slot_types.BENCH,
-        pos: player.pos,
+        pos: player.primary_position,
         tid: teamId,
         lid: leagueId,
         week: prior_week,
@@ -676,7 +676,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         tm: player.current_nfl_team,
         opp: 'OPP',
-        pos: player.pos,
+        pos: player.primary_position,
         year: current_season.year,
         active: false
       })
@@ -771,7 +771,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         tm: player.current_nfl_team,
         opp: 'OPP',
-        pos: player.pos,
+        pos: player.primary_position,
         year: current_season.year,
         active: false
       })
@@ -862,7 +862,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         tm: player.current_nfl_team,
         opp: 'OPP',
-        pos: player.pos,
+        pos: player.primary_position,
         year: current_season.year,
         active: false
       })
@@ -951,7 +951,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         tm: player.current_nfl_team,
         opp: 'OPP',
-        pos: player.pos,
+        pos: player.primary_position,
         year: current_season.year,
         active: false
       })

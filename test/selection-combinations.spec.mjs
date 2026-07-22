@@ -28,34 +28,34 @@ describe('API /selection-combinations', function () {
 
   const test_player_1 = {
     pid: 'TEST-PLAY-000913',
-    fname: 'Test',
-    lname: 'Quarterback',
-    pname: 'T.Quarterback',
-    formatted: 'Test Quarterback',
-    pos: 'QB',
-    pos1: 'QB',
-    dob: '1990-01-01',
+    first_name: 'Test',
+    last_name: 'Quarterback',
+    short_name: 'T.Quarterback',
+    formatted_name: 'Test Quarterback',
+    primary_position: 'QB',
+    secondary_position: 'QB',
+    date_of_birth: '1990-01-01',
     nfl_draft_year: 2012,
     current_nfl_team: 'NYG',
-    pff_id: 99901,
-    gsis_it_id: 88801,
-    gsisid: '00-0099901'
+    pff_player_id: 99901,
+    gsis_it_player_id: 88801,
+    gsis_player_id: '00-0099901'
   }
 
   const test_player_2 = {
     pid: 'TEST-RECV-000919',
-    fname: 'Test',
-    lname: 'Receiver',
-    pname: 'T.Receiver',
-    formatted: 'Test Receiver',
-    pos: 'WR',
-    pos1: 'WR',
-    dob: '1992-02-02',
+    first_name: 'Test',
+    last_name: 'Receiver',
+    short_name: 'T.Receiver',
+    formatted_name: 'Test Receiver',
+    primary_position: 'WR',
+    secondary_position: 'WR',
+    date_of_birth: '1992-02-02',
     nfl_draft_year: 2014,
     current_nfl_team: 'DAL',
-    pff_id: 99902,
-    gsis_it_id: 88802,
-    gsisid: '00-0099902'
+    pff_player_id: 99902,
+    gsis_it_player_id: 88802,
+    gsis_player_id: '00-0099902'
   }
 
   const test_odds_record = {

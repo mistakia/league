@@ -94,10 +94,10 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
     it('should use fallback matching when direct ID lookup fails', async function () {
       const scenario = test_data.test_scenarios.fallback_matching
 
-      // First, add a sleeper_id to the fallback player to test the update functionality
+      // First, add a sleeper_player_id to the fallback player to test the update functionality
       await db('player')
         .where({ pid: scenario.expected_pid })
-        .update({ sleeper_id: scenario.external_id })
+        .update({ sleeper_player_id: scenario.external_id })
 
       const result = await mapper.map_to_internal({
         platform: 'sleeper',
@@ -138,7 +138,7 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
         test_data.test_scenarios.direct_id_mapping.sleeper
       const result = await mapper.map_to_internal({
         platform: 'espn',
-        external_player_id: 2330 // This is the espn_id for TEST-SLEP-000001
+        external_player_id: 2330 // This is the espn_player_id for TEST-SLEP-000001
       })
 
       result.should.equal(sleeper_scenario.expected_pid)
@@ -232,7 +232,7 @@ describe('External Fantasy Leagues - Player ID Mapper', function () {
 
       const espn_result = await mapper.map_to_internal({
         platform: 'espn',
-        external_player_id: 2330 // This is the espn_id for TEST-SLEP-000001
+        external_player_id: 2330 // This is the espn_player_id for TEST-SLEP-000001
       })
 
       sleeper_result.should.equal(sleeper_scenario.expected_pid)

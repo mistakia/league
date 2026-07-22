@@ -78,7 +78,7 @@ describe('API /leagues/rosters - update', function () {
       expect(rosterRow.players.length).to.equal(1)
       expect(rosterRow.players[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosterRow.players[0].pid).to.equal(player.pid)
-      expect(rosterRow.players[0].pos).to.equal(player.pos1)
+      expect(rosterRow.players[0].pos).to.equal(player.secondary_position)
       expect(rosterRow.players[0].userid).to.equal(1)
       expect(rosterRow.players[0].tid).to.equal(teamId)
       expect(rosterRow.players[0].lid).to.equal(leagueId)

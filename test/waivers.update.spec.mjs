@@ -267,7 +267,7 @@ describe('API /waivers - update', function () {
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
-        .where('pos1', 'WR')
+        .where('secondary_position', 'WR')
         .limit(2)
       const pid = players[0].pid
       const releasePlayer = players[1]
@@ -522,7 +522,7 @@ describe('API /waivers - update', function () {
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
-        .where('pos1', 'WR')
+        .where('secondary_position', 'WR')
         .limit(2)
       const pid = players[0].pid
       const releasePlayerId = players[1].pid

@@ -137,7 +137,7 @@ describe('LIB - get_super_priority_status', function () {
         tid: 1, // Original team
         lid: 1,
         slot: roster_slot_types.PSD, // PS drafted slot
-        pos: player.pos,
+        pos: player.primary_position,
         week: current_season.week - 2,
         year: current_season.year
       })
@@ -243,7 +243,7 @@ describe('LIB - get_super_priority_status', function () {
         tid: 2,
         lid: 1,
         slot: roster_slot_types.BENCH,
-        pos: player.pos,
+        pos: player.primary_position,
         week: 1,
         year: current_season.year
       })
@@ -345,7 +345,7 @@ describe('LIB - get_super_priority_status', function () {
           tid: 2, // Poaching team
           lid: 1,
           slot: roster_slot_types.PS,
-          pos: player.pos,
+          pos: player.primary_position,
           week: current_season.week - 4 + i,
           year: current_season.year
         })
@@ -380,7 +380,7 @@ describe('LIB - get_super_priority_status', function () {
         tid: 2, // Poaching team
         lid: 1,
         slot: roster_slot_types.QB, // Starting slot
-        pos: player.pos,
+        pos: player.primary_position,
         week: current_season.week - 1,
         year: current_season.year
       })

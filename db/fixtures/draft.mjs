@@ -12,7 +12,7 @@ export default async function (knex) {
   const league = await getLeague({ lid })
   const players = await knex('player')
     .orderByRaw('RANDOM()')
-    .whereIn('pos', fantasy_positions)
+    .whereIn('primary_position', fantasy_positions)
 
   await knex('rosters_players').del()
 
@@ -27,7 +27,9 @@ export default async function (knex) {
     let player
     for (let p = 0; p < players.length; p++) {
       player = players[p]
-      const hasOpenSlot = r.has_bench_space_for_position(player.pos1)
+      const hasOpenSlot = r.has_bench_space_for_position(
+        player.secondary_position
+      )
 
       if (hasOpenSlot) {
         players.splice(p, 1)
@@ -38,7 +40,7 @@ export default async function (knex) {
     await knex('rosters_players').insert({
       slot: roster_slot_types.BENCH,
       pid: player.pid,
-      pos: player.pos1,
+      pos: player.secondary_position,
       rid: roster.uid,
       tid: roster.tid,
       lid: league.uid,

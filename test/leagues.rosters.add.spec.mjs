@@ -60,7 +60,7 @@ describe('API /leagues/rosters - add', function () {
       res.should.be.json
 
       res.body.pid.should.equal(player.pid)
-      res.body.pos.should.equal(player.pos1)
+      res.body.pos.should.equal(player.secondary_position)
       res.body.slot.should.equal(roster_slot_types.BENCH)
       res.body.transaction.userid.should.equal(1)
       res.body.transaction.tid.should.equal(teamId)
@@ -74,7 +74,7 @@ describe('API /leagues/rosters - add', function () {
       expect(rosterRow.players.length).to.equal(1)
       expect(rosterRow.players[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosterRow.players[0].pid).to.equal(player.pid)
-      expect(rosterRow.players[0].pos).to.equal(player.pos1)
+      expect(rosterRow.players[0].pos).to.equal(player.secondary_position)
       expect(rosterRow.players[0].userid).to.equal(1)
       expect(rosterRow.players[0].tid).to.equal(teamId)
       expect(rosterRow.players[0].lid).to.equal(leagueId)

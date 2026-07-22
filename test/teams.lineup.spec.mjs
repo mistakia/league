@@ -83,7 +83,7 @@ describe('API /teams - lineups', function () {
 
       expect(rosterRows[0].slot).to.equal(roster_slot_types.RB)
       expect(rosterRows[0].pid).to.equal(player.pid)
-      expect(rosterRows[0].pos).to.equal(player.pos1)
+      expect(rosterRows[0].pos).to.equal(player.secondary_position)
       expect(rosterRows[0].tid).to.equal(teamId)
       expect(rosterRows[0].lid).to.equal(leagueId)
       expect(rosterRows[0].week).to.equal(current_season.week)

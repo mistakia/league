@@ -76,7 +76,9 @@ const seed_full_league = async () => {
   await knex('users').insert(users).onConflict('id').merge()
   await knex('league_team_seasonlogs').insert(seasonlogs)
 
-  const players = await knex('player').whereNot('pos', 'DST').limit(2)
+  const players = await knex('player')
+    .whereNot('primary_position', 'DST')
+    .limit(2)
   const rfa_player = players[0]
   const ps_player = players[1]
   const roster0 = await knex('rosters')
@@ -114,7 +116,7 @@ const seed_full_league = async () => {
       rid: roster0.uid,
       slot: roster_slot_types.QB,
       pid: rfa_player.pid,
-      pos: rfa_player.pos,
+      pos: rfa_player.primary_position,
       tag: player_tag_types.RESTRICTED_FREE_AGENCY,
       extensions: 0,
       tid: 1,
@@ -126,7 +128,7 @@ const seed_full_league = async () => {
       rid: roster0.uid,
       slot: roster_slot_types.PS,
       pid: ps_player.pid,
-      pos: ps_player.pos,
+      pos: ps_player.primary_position,
       tag: player_tag_types.REGULAR,
       extensions: 0,
       tid: 1,
