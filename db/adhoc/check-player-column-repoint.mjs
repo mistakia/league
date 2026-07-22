@@ -19,6 +19,22 @@
 // esbid gates only on the fully-qualified player/players form and is excluded
 // from the alias warning.
 //
+// BLIND SPOTS -- this gate is a FLOOR, not the contract gate. It only matches the
+// three textual patterns above, so it is structurally blind to consumers that read
+// a renamed player column WITHOUT a `player.`/`p.`/`column_name:` prefix:
+//   - Knex object-shorthand: db('player').where({ espn_id }) / .whereIn('pos', ...)
+//   - bare column-string arrays: .select(['pos','dob',...]), and the constant lists
+//     (protected_props, required, excluded_props) that drive update-player/create-player
+//   - bare row-variable reads: const { fname } = row / player_row.pos / info.pos
+//   - frontend reads the scan never covers: Immutable .get('pos')/getIn(['fname']),
+//     data-view accessorKey / player_value_path, and custom-cell row.original.<col>
+//   - the ENTIRE private/ submodule (SCAN_DIRS omits it)
+// This cycle, `--gate` reached 0 while row.original.pos (a custom data-view cell) and
+// five private createPlayer/updatePlayer write keys still carried old names -- both
+// would have broken production at CONTRACT. The REAL gate is the post-contract
+// full-suite dry-run (mocha against a schema with the view dropped + base renamed);
+// treat a clean `--gate` as necessary, never sufficient.
+//
 // Usage:
 //   node db/adhoc/check-player-column-repoint.mjs            # full report
 //   node db/adhoc/check-player-column-repoint.mjs --gate     # exit 1 if any GATE hit remains
