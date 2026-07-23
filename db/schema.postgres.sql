@@ -213,9 +213,9 @@ DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_projections_pid;
 DROP INDEX IF EXISTS public.idx_projections_nfl_week_id;
-DROP INDEX IF EXISTS public.idx_projections_index_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
+DROP INDEX IF EXISTS public.idx_projections_index_natural_key;
 DROP INDEX IF EXISTS public.idx_projections_archive_pid;
 DROP INDEX IF EXISTS public.idx_practice_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_position_game_outcome_defaults_year;
@@ -966,7 +966,7 @@ DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying);
 DROP FUNCTION IF EXISTS public.update_external_league_import_jobs_updated_at();
 DROP FUNCTION IF EXISTS public.update_external_league_connections_updated_at();
-DROP FUNCTION IF EXISTS public.seas_type_to_text(val public.seas_type);
+DROP FUNCTION IF EXISTS public.season_type_to_text(val public.season_type);
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP FUNCTION IF EXISTS public.needs_line_normalization(line numeric, name text);
 DROP FUNCTION IF EXISTS public.get_next_queued_job();
@@ -979,7 +979,7 @@ DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.team_unit;
 DROP TYPE IF EXISTS public.series_result;
 DROP TYPE IF EXISTS public.selection_type;
-DROP TYPE IF EXISTS public.seas_type;
+DROP TYPE IF EXISTS public.season_type;
 DROP TYPE IF EXISTS public.run_gap;
 DROP TYPE IF EXISTS public.receiver_separation;
 DROP TYPE IF EXISTS public.read_thrown_type;
@@ -1467,10 +1467,10 @@ CREATE TYPE public.run_gap AS ENUM (
 
 
 --
--- Name: seas_type; Type: TYPE; Schema: public; Owner: -
+-- Name: season_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE public.seas_type AS ENUM (
+CREATE TYPE public.season_type AS ENUM (
     'PRE',
     'REG',
     'POST'
@@ -1757,10 +1757,10 @@ $$;
 
 
 --
--- Name: seas_type_to_text(public.seas_type); Type: FUNCTION; Schema: public; Owner: -
+-- Name: season_type_to_text(public.season_type); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION public.seas_type_to_text(val public.seas_type) RETURNS text
+CREATE FUNCTION public.season_type_to_text(val public.season_type) RETURNS text
     LANGUAGE plpgsql IMMUTABLE STRICT
     AS $$
 BEGIN RETURN val::text; END;
@@ -24432,8 +24432,8 @@ CREATE TABLE public.projections (
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
     week smallint,
-    year smallint,
-    "timestamp" bigint NOT NULL,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
     field_goal_yards integer DEFAULT 0,
     field_goals_made_0_19_yards numeric(3,1),
@@ -24456,8 +24456,8 @@ CREATE TABLE public.projections (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24484,8 +24484,8 @@ CREATE TABLE public.projections_archive (
     fumbles_lost numeric(3,1),
     two_point_conversions numeric(3,1),
     week smallint,
-    year smallint,
-    "timestamp" timestamp with time zone NOT NULL,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
     field_goals_made numeric(4,1),
     field_goal_yards integer DEFAULT 0,
     field_goals_made_0_19_yards numeric(3,1),
@@ -24520,7 +24520,7 @@ CREATE TABLE public.projections_index (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24557,12 +24557,12 @@ CREATE TABLE public.projections_index (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 )
-PARTITION BY RANGE (year);
+PARTITION BY RANGE (season_year);
 
 
 --
@@ -24574,7 +24574,7 @@ CREATE TABLE public.projections_index_default (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24611,10 +24611,10 @@ CREATE TABLE public.projections_index_default (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24627,7 +24627,7 @@ CREATE TABLE public.projections_index_y2020 (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24664,10 +24664,10 @@ CREATE TABLE public.projections_index_y2020 (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24680,7 +24680,7 @@ CREATE TABLE public.projections_index_y2021 (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24717,10 +24717,10 @@ CREATE TABLE public.projections_index_y2021 (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24733,7 +24733,7 @@ CREATE TABLE public.projections_index_y2022 (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24770,10 +24770,10 @@ CREATE TABLE public.projections_index_y2022 (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24786,7 +24786,7 @@ CREATE TABLE public.projections_index_y2023 (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24823,10 +24823,10 @@ CREATE TABLE public.projections_index_y2023 (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24839,7 +24839,7 @@ CREATE TABLE public.projections_index_y2024 (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24876,10 +24876,10 @@ CREATE TABLE public.projections_index_y2024 (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24892,7 +24892,7 @@ CREATE TABLE public.projections_index_y2025 (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24929,10 +24929,10 @@ CREATE TABLE public.projections_index_y2025 (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -24945,7 +24945,7 @@ CREATE TABLE public.projections_index_y2026 (
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -24982,10 +24982,10 @@ CREATE TABLE public.projections_index_y2026 (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || public.seas_type_to_text(seas_type)) || '_WEEK_'::text) || (week)::text)) STORED
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -25324,8 +25324,8 @@ CREATE TABLE public.ros_projections (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    year smallint,
-    "timestamp" bigint NOT NULL
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL
 );
 
 
@@ -29329,14 +29329,14 @@ CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, yea
 -- Name: idx_24926_projection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24926_projection ON public.projections USING btree (sourceid, pid, userid, "timestamp", week, year, seas_type);
+CREATE UNIQUE INDEX idx_24926_projection ON public.projections USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
 
 
 --
 -- Name: idx_24932_projection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24932_projection ON public.projections_archive USING btree (sourceid, pid, userid, week, year, "timestamp");
+CREATE UNIQUE INDEX idx_24932_projection ON public.projections_archive USING btree (sourceid, pid, userid, week, season_year, generated_at);
 
 
 --
@@ -29385,7 +29385,7 @@ CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id,
 -- Name: idx_24990_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (sourceid, pid, year);
+CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (sourceid, pid, season_year);
 
 
 --
@@ -30586,6 +30586,13 @@ CREATE INDEX idx_projections_archive_pid ON public.projections_archive USING btr
 
 
 --
+-- Name: idx_projections_index_natural_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_projections_index_natural_key ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, season_year, season_type);
+
+
+--
 -- Name: idx_projections_index_nfl_week_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30597,13 +30604,6 @@ CREATE INDEX idx_projections_index_nfl_week_id ON ONLY public.projections_index 
 --
 
 CREATE INDEX idx_projections_index_pid ON ONLY public.projections_index USING btree (pid);
-
-
---
--- Name: idx_projections_index_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_projections_index_sourceid_pid_userid_week_year_seas_type ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -43004,6 +43004,13 @@ CREATE UNIQUE INDEX player_underdog_id_unique ON public.player USING btree (unde
 
 
 --
+-- Name: projections_index_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_default_natural_key_idx ON public.projections_index_default USING btree (sourceid, pid, userid, week, season_year, season_type);
+
+
+--
 -- Name: projections_index_default_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -43018,10 +43025,10 @@ CREATE INDEX projections_index_default_pid_idx ON public.projections_index_defau
 
 
 --
--- Name: projections_index_default_sourceid_pid_userid_week_year_seas_ty; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_default_sourceid_pid_userid_week_year_seas_ty ON public.projections_index_default USING btree (sourceid, pid, userid, week, year, seas_type);
+CREATE UNIQUE INDEX projections_index_y2020_natural_key_idx ON public.projections_index_y2020 USING btree (sourceid, pid, userid, week, season_year, season_type);
 
 
 --
@@ -43039,10 +43046,10 @@ CREATE INDEX projections_index_y2020_pid_idx ON public.projections_index_y2020 U
 
 
 --
--- Name: projections_index_y2020_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2021_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2020_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2020 USING btree (sourceid, pid, userid, week, year, seas_type);
+CREATE UNIQUE INDEX projections_index_y2021_natural_key_idx ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, season_year, season_type);
 
 
 --
@@ -43060,10 +43067,10 @@ CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 U
 
 
 --
--- Name: projections_index_y2021_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2021_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, year, seas_type);
+CREATE UNIQUE INDEX projections_index_y2022_natural_key_idx ON public.projections_index_y2022 USING btree (sourceid, pid, userid, week, season_year, season_type);
 
 
 --
@@ -43081,10 +43088,10 @@ CREATE INDEX projections_index_y2022_pid_idx ON public.projections_index_y2022 U
 
 
 --
--- Name: projections_index_y2022_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2023_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2022_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2022 USING btree (sourceid, pid, userid, week, year, seas_type);
+CREATE UNIQUE INDEX projections_index_y2023_natural_key_idx ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, season_year, season_type);
 
 
 --
@@ -43102,10 +43109,10 @@ CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 U
 
 
 --
--- Name: projections_index_y2023_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2023_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, year, seas_type);
+CREATE UNIQUE INDEX projections_index_y2024_natural_key_idx ON public.projections_index_y2024 USING btree (sourceid, pid, userid, week, season_year, season_type);
 
 
 --
@@ -43123,10 +43130,10 @@ CREATE INDEX projections_index_y2024_pid_idx ON public.projections_index_y2024 U
 
 
 --
--- Name: projections_index_y2024_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2025_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2024_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2024 USING btree (sourceid, pid, userid, week, year, seas_type);
+CREATE UNIQUE INDEX projections_index_y2025_natural_key_idx ON public.projections_index_y2025 USING btree (sourceid, pid, userid, week, season_year, season_type);
 
 
 --
@@ -43144,10 +43151,10 @@ CREATE INDEX projections_index_y2025_pid_idx ON public.projections_index_y2025 U
 
 
 --
--- Name: projections_index_y2025_sourceid_pid_userid_week_year_seas__idx; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2025_sourceid_pid_userid_week_year_seas__idx ON public.projections_index_y2025 USING btree (sourceid, pid, userid, week, year, seas_type);
+CREATE UNIQUE INDEX projections_index_y2026_natural_key_idx ON public.projections_index_y2026 USING btree (sourceid, pid, userid, week, season_year, season_type);
 
 
 --
@@ -43162,13 +43169,6 @@ CREATE INDEX projections_index_y2026_nfl_week_id_idx ON public.projections_index
 --
 
 CREATE INDEX projections_index_y2026_pid_idx ON public.projections_index_y2026 USING btree (pid);
-
-
---
--- Name: projections_index_y2026_sourceid_pid_userid_week_year_seas__idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projections_index_y2026_sourceid_pid_userid_week_year_seas__idx ON public.projections_index_y2026 USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -55205,6 +55205,13 @@ ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.pl
 
 
 --
+-- Name: projections_index_default_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_default_natural_key_idx;
+
+
+--
 -- Name: projections_index_default_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -55219,10 +55226,10 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
--- Name: projections_index_default_sourceid_pid_userid_week_year_seas_ty; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2020_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_default_sourceid_pid_userid_week_year_seas_ty;
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2020_natural_key_idx;
 
 
 --
@@ -55240,10 +55247,10 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
--- Name: projections_index_y2020_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2021_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2020_sourceid_pid_userid_week_year_seas_type;
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2021_natural_key_idx;
 
 
 --
@@ -55261,10 +55268,10 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
--- Name: projections_index_y2021_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2022_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2021_sourceid_pid_userid_week_year_seas_type;
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2022_natural_key_idx;
 
 
 --
@@ -55282,10 +55289,10 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
--- Name: projections_index_y2022_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2023_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2022_sourceid_pid_userid_week_year_seas_type;
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2023_natural_key_idx;
 
 
 --
@@ -55303,10 +55310,10 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
--- Name: projections_index_y2023_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2024_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2023_sourceid_pid_userid_week_year_seas_type;
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2024_natural_key_idx;
 
 
 --
@@ -55324,10 +55331,10 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
--- Name: projections_index_y2024_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2025_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2024_sourceid_pid_userid_week_year_seas_type;
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2025_natural_key_idx;
 
 
 --
@@ -55345,10 +55352,10 @@ ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections
 
 
 --
--- Name: projections_index_y2025_sourceid_pid_userid_week_year_seas__idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2026_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2025_sourceid_pid_userid_week_year_seas__idx;
+ALTER INDEX public.idx_projections_index_natural_key ATTACH PARTITION public.projections_index_y2026_natural_key_idx;
 
 
 --
@@ -55363,13 +55370,6 @@ ALTER INDEX public.idx_projections_index_nfl_week_id ATTACH PARTITION public.pro
 --
 
 ALTER INDEX public.idx_projections_index_pid ATTACH PARTITION public.projections_index_y2026_pid_idx;
-
-
---
--- Name: projections_index_y2026_sourceid_pid_userid_week_year_seas__idx; Type: INDEX ATTACH; Schema: public; Owner: -
---
-
-ALTER INDEX public.idx_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2026_sourceid_pid_userid_week_year_seas__idx;
 
 
 --
