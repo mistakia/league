@@ -468,7 +468,7 @@ const generate_player_snaps_for_week = async ({
       save: async (batch) => {
         await db('player_gamelogs')
           .insert(batch)
-          .onConflict(['esbid', 'pid', 'year'])
+          .onConflict(['esbid', 'pid', 'season_year'])
           .merge()
       },
       batch_size: 500
