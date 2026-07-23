@@ -807,7 +807,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       'nfl_games.day',
       'nfl_games.date',
       'nfl_games.week',
-      'nfl_games.seas_type',
+      'nfl_games.season_type as seas_type',
       'nfl_games.timestamp'
     )
 

@@ -271,9 +271,9 @@ const import_fanduel_wagers = async ({
 
   const nfl_games = await db('nfl_games')
     .where({
-      year: current_season.year
+      season_year: current_season.year
     })
-    .whereIn('seas_type', ['REG', 'POST'])
+    .whereIn('season_type', ['REG', 'POST'])
     .whereIn('week', weeks)
 
   for (const part of unique_parts) {

@@ -20,7 +20,7 @@ const populate_nfl_year_week_timestamp = async ({
 
   // Check if NFL games data exists for the year
   const games_count = await db('nfl_games')
-    .where({ year, seas_type: 'REG' })
+    .where({ season_year: year, season_type: 'REG' })
     .count('* as count')
     .first()
 

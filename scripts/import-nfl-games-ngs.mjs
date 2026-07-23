@@ -73,7 +73,7 @@ const format = (item) => {
     shieldid: item.smartId,
     ngsid: item.gameId,
 
-    year,
+    season_year: year,
     week,
     date,
     time_est,
@@ -83,7 +83,7 @@ const format = (item) => {
     v: fixTeam(item.visitorTeamAbbr),
     h: fixTeam(item.homeTeamAbbr),
 
-    seas_type,
+    season_type: seas_type,
     week_type,
     ot: (score.phase || '').includes('OVERTIME'),
 
@@ -132,7 +132,7 @@ const run = async ({ year = current_season.year, collector = null } = {}) => {
   if (inserts.length) {
     await db('nfl_games')
       .insert(inserts)
-      .onConflict(['v', 'h', 'week', 'year', 'seas_type'])
+      .onConflict(['v', 'h', 'week', 'season_year', 'season_type'])
       .merge()
     log(`saved data for ${inserts.length} games`)
     result.games_updated = inserts.length

@@ -512,11 +512,19 @@ const import_for_year = async ({
   dry_run
 }) => {
   const query = db('nfl_games')
-    .select('esbid', 'year', 'week', 'h', 'v', 'seas_type', 'shieldid')
-    .where({ year })
+    .select(
+      'esbid',
+      'season_year as year',
+      'week',
+      'h',
+      'v',
+      'season_type as seas_type',
+      'shieldid'
+    )
+    .where({ season_year: year })
     .whereNotNull('shieldid')
   if (week !== undefined) query.where({ week })
-  if (seas_type) query.where({ seas_type })
+  if (seas_type) query.where({ season_type: seas_type })
   const games = await query
   log(
     `${year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games to process`

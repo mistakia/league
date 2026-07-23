@@ -97,8 +97,8 @@ const detect_latest_week_with_longshots = async ({ year }) => {
     })
     .join('nfl_games as ng', 'pmi.esbid', 'ng.esbid')
     .where('pmsi.time_type', 'CLOSE')
-    .where('ng.year', year)
-    .where('ng.seas_type', 'REG')
+    .where('ng.season_year', year)
+    .where('ng.season_type', 'REG')
     .where('pmsi.odds_american', '>', 200)
     .where('pmsi.selection_result', 'WON')
     .select('ng.week')
@@ -149,10 +149,10 @@ const query_player_occurring_selections = async ({ year }) => {
       LEFT JOIN player p ON pmsi.selection_pid = p.pid
       WHERE
         pmsi.time_type = 'CLOSE'
-        AND ng.year = ?
+        AND ng.season_year = ?
         AND pmsi.odds_american > 200
         AND pmsi.selection_result = 'WON'
-        AND ng.seas_type = 'REG'
+        AND ng.season_type = 'REG'
         AND pmsi.selection_pid IS NOT NULL
         AND pmsi.selection_pid != ''
     ),
@@ -233,10 +233,10 @@ const query_team_occurring_selections = async ({ year }) => {
       LEFT JOIN player p ON pmsi.selection_pid = p.pid
       WHERE
         pmsi.time_type = 'CLOSE'
-        AND ng.year = ?
+        AND ng.season_year = ?
         AND pmsi.odds_american > 200
         AND pmsi.selection_result = 'WON'
-        AND ng.seas_type = 'REG'
+        AND ng.season_type = 'REG'
         AND pmsi.selection_pid IS NOT NULL
         AND pmsi.selection_pid != ''
     ),
@@ -332,10 +332,10 @@ const query_opponent_occurring_selections = async ({ year }) => {
       LEFT JOIN player p ON pmsi.selection_pid = p.pid
       WHERE
         pmsi.time_type = 'CLOSE'
-        AND ng.year = ?
+        AND ng.season_year = ?
         AND pmsi.odds_american > 200
         AND pmsi.selection_result = 'WON'
-        AND ng.seas_type = 'REG'
+        AND ng.season_type = 'REG'
         AND pmsi.selection_pid IS NOT NULL
         AND pmsi.selection_pid != ''
     ),
@@ -425,11 +425,11 @@ const query_all_longshots_latest_week = async ({ year, week }) => {
       LEFT JOIN player p ON pmsi.selection_pid = p.pid
       WHERE
         pmsi.time_type = 'CLOSE'
-        AND ng.year = ?
+        AND ng.season_year = ?
         AND ng.week = ?
         AND pmsi.odds_american > 200
         AND pmsi.selection_result = 'WON'
-        AND ng.seas_type = 'REG'
+        AND ng.season_type = 'REG'
         AND pmsi.selection_pid IS NOT NULL
         AND pmsi.selection_pid != ''
     )
@@ -486,11 +486,11 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
       LEFT JOIN player p ON pmsi.selection_pid = p.pid
       WHERE
         pmsi.time_type = 'CLOSE'
-        AND ng.year = ?
+        AND ng.season_year = ?
         AND ng.week = ?
         AND pmsi.odds_american >= 1000
         AND pmsi.selection_result = 'WON'
-        AND ng.seas_type = 'REG'
+        AND ng.season_type = 'REG'
         AND pmsi.selection_pid IS NOT NULL
         AND pmsi.selection_pid != ''
     )
@@ -556,10 +556,10 @@ const query_market_type_occurring_selections = async ({ year, week }) => {
         )
         WHERE
             pmsi.time_type = 'CLOSE'
-            AND ng.year = ?
+            AND ng.season_year = ?
             AND pmsi.odds_american > 200
             AND pmsi.selection_result = 'WON'
-            AND ng.seas_type = 'REG'
+            AND ng.season_type = 'REG'
             AND pmsi.selection_pid IS NOT NULL
             AND pmsi.selection_pid != ''
     ),

@@ -24,7 +24,7 @@
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTC-000907', 'Test', 'Ktc', 'T.Ktc', 'Test Ktc', 'ZZ', 'ZZ', '2000-01-01', 2020, 'ZZA')",
-      "INSERT INTO nfl_games (esbid, year, week, seas_type, v, h, date) VALUES (970301, 2023, 1, 'REG', 'ZZA', 'ZZX', '2023-09-07')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, v, h, date) VALUES (970301, 2023, 1, 'REG', 'ZZA', 'ZZX', '2023-09-07')",
       "REFRESH MATERIALIZED VIEW opening_days",
       "INSERT INTO keeptradecut_rankings (pid, qb, type, d, v) SELECT 'TEST-KTC-000907', 2, 1, EXTRACT(EPOCH FROM (date_trunc('day', opening_day) + interval '1 year'))::integer, 4000 FROM opening_days WHERE year = 2023",
       "INSERT INTO keeptradecut_rankings (pid, qb, type, d, v) SELECT 'TEST-KTC-000907', 2, 1, EXTRACT(EPOCH FROM (date_trunc('day', opening_day) + interval '2 year'))::integer, 4160 FROM opening_days WHERE year = 2023",

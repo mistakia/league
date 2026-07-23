@@ -157,7 +157,7 @@ const run = async ({
   // Pre-cache game ID mapping (nflverse_game_id -> esbid) for O(1) lookups
   log(`Loading game ID mapping for year ${year}...`)
   const games = await db('nfl_games')
-    .where({ year })
+    .where({ season_year: year })
     .whereNotNull('nflverse_game_id')
     .select('esbid', 'nflverse_game_id')
   const game_id_map = new Map()

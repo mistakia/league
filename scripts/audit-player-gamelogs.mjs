@@ -126,12 +126,12 @@ const audit_player_gamelogs = async ({
     .select(
       'player_gamelogs.*',
       'player.pfr_player_id',
-      'nfl_games.seas_type',
+      'nfl_games.season_type as seas_type',
       'nfl_games.week'
     )
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
 
   // compare pfr player gamelogs to our gamelogs
   for (const pfr_player_gamelog of pfr_player_gamelogs_for_season) {

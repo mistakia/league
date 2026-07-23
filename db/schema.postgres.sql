@@ -318,8 +318,8 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_current_week_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_matchup_stats_esbid;
-DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
-DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
+DROP INDEX IF EXISTS public.idx_nfl_games_season_year_season_type_week_esbid;
+DROP INDEX IF EXISTS public.idx_nfl_games_season_year_season_type_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_matchups_simulation_timestamp;
 DROP INDEX IF EXISTS public.idx_matchups_lid;
@@ -4627,7 +4627,7 @@ CREATE TABLE public.nfl_games (
     detailid_v3 character varying(36),
     detailid_v1 character varying(36),
     pfrid character varying(20),
-    year smallint,
+    season_year smallint,
     week smallint NOT NULL,
     day character varying(5),
     date character varying(10),
@@ -4638,7 +4638,7 @@ CREATE TABLE public.nfl_games (
     "timestamp" integer,
     v character varying(3) NOT NULL,
     h character varying(3) NOT NULL,
-    seas_type character varying(10) NOT NULL,
+    season_type character varying(10) NOT NULL,
     ot boolean,
     div boolean,
     home_team_id character varying(36),
@@ -4672,7 +4672,7 @@ CREATE TABLE public.nfl_games (
     home_play_caller character varying(36),
     sportradar_game_id character varying,
     sportradar_season_id character varying,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     pff_game_id bigint
 );
 
@@ -18591,11 +18591,11 @@ CREATE TABLE public.nfl_team_seasonlogs (
 
 CREATE MATERIALIZED VIEW public.nfl_year_week_timestamp AS
  WITH game_weeks AS (
-         SELECT DISTINCT nfl_games.year,
+         SELECT DISTINCT nfl_games.season_year AS year,
             nfl_games.week,
-            min((nfl_games.date)::text) OVER (PARTITION BY nfl_games.year, nfl_games.week) AS week_start_date
+            min((nfl_games.date)::text) OVER (PARTITION BY nfl_games.season_year, nfl_games.week) AS week_start_date
            FROM public.nfl_games
-          WHERE ((nfl_games.seas_type)::text = 'REG'::text)
+          WHERE ((nfl_games.season_type)::text = 'REG'::text)
         )
  SELECT year,
     week,
@@ -18640,11 +18640,11 @@ CREATE TABLE public.ngs_prospect_scores_index (
 --
 
 CREATE MATERIALIZED VIEW public.opening_days AS
- SELECT year,
+ SELECT season_year AS year,
     min((date)::date) AS opening_day
    FROM public.nfl_games
-  WHERE ((seas_type)::text = 'REG'::text)
-  GROUP BY year
+  WHERE ((season_type)::text = 'REG'::text)
+  GROUP BY season_year
   WITH NO DATA;
 
 
@@ -29066,7 +29066,7 @@ CREATE UNIQUE INDEX idx_24707_esbid ON public.nfl_games USING btree (esbid);
 -- Name: idx_24707_game; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24707_game ON public.nfl_games USING btree (v, h, week, year, seas_type);
+CREATE UNIQUE INDEX idx_24707_game ON public.nfl_games USING btree (v, h, week, season_year, season_type);
 
 
 --
@@ -29763,17 +29763,17 @@ CREATE INDEX idx_nfl_games_nfl_week_id ON public.nfl_games USING btree (nfl_week
 
 
 --
--- Name: idx_nfl_games_year_seas_type_esbid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_games_season_year_season_type_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_games_year_seas_type_esbid ON public.nfl_games USING btree (year, seas_type, esbid);
+CREATE INDEX idx_nfl_games_season_year_season_type_esbid ON public.nfl_games USING btree (season_year, season_type, esbid);
 
 
 --
--- Name: idx_nfl_games_year_seas_type_week_esbid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_games_season_year_season_type_week_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_games_year_seas_type_week_esbid ON public.nfl_games USING btree (year, seas_type, week, esbid);
+CREATE INDEX idx_nfl_games_season_year_season_type_week_esbid ON public.nfl_games USING btree (season_year, season_type, week, esbid);
 
 
 --

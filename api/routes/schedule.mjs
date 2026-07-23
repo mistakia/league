@@ -209,9 +209,17 @@ router.get('/?', async (req, res) => {
 
     const teams = {}
     const games = await db('nfl_games')
-      .select('year', 'week', 'date', 'time_est', 'v', 'h', 'status')
-      .where('year', current_season.year)
-      .where('seas_type', 'REG')
+      .select(
+        'season_year as year',
+        'week',
+        'date',
+        'time_est',
+        'v',
+        'h',
+        'status'
+      )
+      .where('season_year', current_season.year)
+      .where('season_type', 'REG')
       .orderBy('week', 'asc')
 
     for (const team of nfl_team_abbreviations) {

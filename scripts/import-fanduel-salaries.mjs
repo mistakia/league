@@ -51,7 +51,7 @@ const import_fanduel_salaries = async ({
   log(`Found ${filtered_fanduel_slates.length} fanduel slates of interest`)
 
   const nfl_games = await db('nfl_games').where({
-    year
+    season_year: year
   })
 
   await wait(10000)

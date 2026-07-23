@@ -119,7 +119,9 @@ const add_player_per_game_cte = ({
       query: cte_query,
       table_name: 'nfl_games',
       query_context,
-      column_params: params
+      column_params: params,
+      year_column: 'season_year',
+      seas_type_column: 'season_type'
     })
   }
 
@@ -130,8 +132,8 @@ const add_player_per_game_cte = ({
   if (career_year.length) {
     cte_query = cte_query.leftJoin('player_seasonlogs', function () {
       this.on('player_seasonlogs.pid', `${player_gamelogs_table}.pid`)
-      this.andOn('player_seasonlogs.year', 'nfl_games.year')
-      this.andOn('player_seasonlogs.seas_type', 'nfl_games.seas_type')
+      this.andOn('player_seasonlogs.year', 'nfl_games.season_year')
+      this.andOn('player_seasonlogs.seas_type', 'nfl_games.season_type')
     })
   }
 
@@ -155,8 +157,8 @@ const add_player_per_game_cte = ({
 
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      cte_query.select('nfl_games.year')
-      cte_query.groupBy('nfl_games.year')
+      cte_query.select('nfl_games.season_year as year')
+      cte_query.groupBy('nfl_games.season_year')
     }
 
     if (row_axis === 'week') {
@@ -189,13 +191,15 @@ export const build_team_sides_union = ({
 }) => {
   const make_side = (team_col) => {
     const sub = db('nfl_games').select(`${team_col} as team`)
-    if (row_axes.includes('year')) sub.select('year')
+    if (row_axes.includes('year')) sub.select('season_year as year')
     if (row_axes.includes('week')) sub.select('week')
     apply_scope_to_query({
       query: sub,
       table_name: 'nfl_games',
       query_context,
-      column_params: params
+      column_params: params,
+      year_column: 'season_year',
+      seas_type_column: 'season_type'
     })
     return sub
   }

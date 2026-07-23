@@ -9,17 +9,17 @@ export const add_week_opponent_cte_tables = ({
     qb.select('h as nfl_team', 'v as opponent')
       .from('public.nfl_games')
       .where({
-        year,
+        season_year: year,
         week,
-        seas_type
+        season_type: seas_type
       })
       .union((qb) => {
         qb.select('v as nfl_team', 'h as opponent')
           .from('public.nfl_games')
           .where({
-            year,
+            season_year: year,
             week,
-            seas_type
+            season_type: seas_type
           })
       })
   })

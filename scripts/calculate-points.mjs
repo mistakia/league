@@ -53,8 +53,8 @@ const calculate_points = async ({
       'nfl_games.week'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .whereIn('player.primary_position', fantasy_positions)
     .join('player', 'player_gamelogs.pid', 'player.pid')
 

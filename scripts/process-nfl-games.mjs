@@ -24,8 +24,8 @@ const processNflGames = async () => {
     v,
     h,
     week,
-    year,
-    seas_type,
+    season_year: year,
+    season_type: seas_type,
     week_type
   } of games) {
     if (date && time_est) {
@@ -39,8 +39,8 @@ const processNflGames = async () => {
         v,
         h,
         week,
-        year,
-        seas_type,
+        season_year: year,
+        season_type: seas_type,
         timestamp: datetime.unix()
       }
 

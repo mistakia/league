@@ -47,7 +47,7 @@ const format = (item) => {
     ...(shieldid && { shieldid }),
     ...(item.id && { detailid_v1: item.id }),
 
-    ...(year && { year }),
+    ...(year && { season_year: year }),
     ...(item.week && { week: item.week }),
     ...(date && { date }),
     ...(time_est && { time_est }),
@@ -61,7 +61,7 @@ const format = (item) => {
       h: fixTeam(item.homeTeam.abbreviation)
     }),
 
-    ...(seas_type && { seas_type }),
+    ...(seas_type && { season_type: seas_type }),
     ...(week_type && { week_type }),
     ...(score.detail && {
       ot: (score.detail.phase || '').includes('OVERTIME')
@@ -91,9 +91,9 @@ const run = async ({
   }
 
   const games = await db('nfl_games').where({
-    year,
+    season_year: year,
     week,
-    seas_type
+    season_type: seas_type
   })
 
   const game_missing_detailid_v1 = games.find((game) => !game.detailid_v1)
@@ -191,7 +191,7 @@ const main = async () => {
 
       const pre_weeks = await db('nfl_games')
         .select('week')
-        .where({ year, seas_type: 'PRE' })
+        .where({ season_year: year, season_type: 'PRE' })
         .groupBy('week')
       for (const { week } of pre_weeks) {
         await run({ year, week, seas_type: 'PRE', ignore_cache })
@@ -200,7 +200,7 @@ const main = async () => {
 
       const reg_weeks = await db('nfl_games')
         .select('week')
-        .where({ year, seas_type: 'REG' })
+        .where({ season_year: year, season_type: 'REG' })
         .groupBy('week')
       for (const { week } of reg_weeks) {
         await run({ year, week, seas_type: 'REG', ignore_cache })
@@ -209,7 +209,7 @@ const main = async () => {
 
       const post_weeks = await db('nfl_games')
         .select('week')
-        .where({ year, seas_type: 'POST' })
+        .where({ season_year: year, season_type: 'POST' })
         .groupBy('week')
       for (const { week } of post_weeks) {
         await run({ year, week, seas_type: 'POST', ignore_cache })

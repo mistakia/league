@@ -372,8 +372,8 @@ const execute_processing = async ({
 
     const query = db('nfl_games')
       .select('esbid')
-      .where('year', config.year)
-      .andWhere('seas_type', seas_type)
+      .where('season_year', config.year)
+      .andWhere('season_type', seas_type)
       .andWhere('week', week)
     log(`Query: ${query.toString()}`)
     const games = await query

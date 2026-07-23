@@ -264,11 +264,14 @@ router.get('/?', async (req, res) => {
         markets_query = markets_query.where('nfl_games.week', params.week)
       }
       if (params.year !== undefined) {
-        markets_query = markets_query.where('nfl_games.year', params.year)
+        markets_query = markets_query.where(
+          'nfl_games.season_year',
+          params.year
+        )
       }
       if (params.seas_type) {
         markets_query = markets_query.where(
-          'nfl_games.seas_type',
+          'nfl_games.season_type',
           params.seas_type
         )
       }
@@ -697,11 +700,14 @@ router.get('/players/:pid', async (req, res) => {
         markets_query = markets_query.where('nfl_games.week', params.week)
       }
       if (params.year !== undefined) {
-        markets_query = markets_query.where('nfl_games.year', params.year)
+        markets_query = markets_query.where(
+          'nfl_games.season_year',
+          params.year
+        )
       }
       if (params.seas_type) {
         markets_query = markets_query.where(
-          'nfl_games.seas_type',
+          'nfl_games.season_type',
           params.seas_type
         )
       }

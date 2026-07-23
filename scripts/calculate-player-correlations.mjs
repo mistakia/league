@@ -31,7 +31,7 @@ const calculate_player_correlations = async ({
 
   // Get all games for the year
   const games = await db('nfl_games')
-    .where({ year, seas_type: 'REG' })
+    .where({ season_year: year, season_type: 'REG' })
     .select('esbid', 'v', 'h')
 
   const game_map = new Map()
@@ -49,7 +49,7 @@ const calculate_player_correlations = async ({
       'nfl_games.esbid'
     )
     .join('player', 'scoring_format_player_gamelogs.pid', 'player.pid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .where(
       'scoring_format_player_gamelogs.scoring_format_id',
       scoring_format_id
@@ -78,7 +78,7 @@ const calculate_player_correlations = async ({
   // Get team for each player in each game from gamelogs
   const player_game_teams = await db('player_gamelogs')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .select(
       'player_gamelogs.pid',
       'player_gamelogs.esbid',

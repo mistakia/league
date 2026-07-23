@@ -37,7 +37,7 @@ export const player_years_teams_cte_sql = ({ year_range }) => {
       (year) => `SELECT pgl.pid, ${year}::int AS year, pgl.nfl_team AS team_code
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
-       WHERE pgl.active = TRUE AND g.seas_type = 'REG' AND g.year = ${year}`
+       WHERE pgl.active = TRUE AND g.season_type = 'REG' AND g.season_year = ${year}`
     )
     .join(' UNION ALL ')
   return `SELECT pid, year, array_agg(DISTINCT team_code) AS teams
@@ -76,7 +76,7 @@ export const player_participation_weeks_cte_sql = ({
       ) => `SELECT pgl.pid, ${year}::int AS year, g.week, pgl.active${inner_extra}
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
-       WHERE g.seas_type = 'REG' AND g.year = ${year}`
+       WHERE g.season_type = 'REG' AND g.season_year = ${year}`
     )
     .join(' UNION ALL ')
   return `SELECT pid, year, week, bool_or(active) AS active${outer_extra}
@@ -99,7 +99,7 @@ export const player_years_weeks_teams_cte_sql = ({ year_range }) => {
       ) => `SELECT pgl.pid, ${year}::int AS year, g.week, pgl.nfl_team AS team_code
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
-       WHERE pgl.active = TRUE AND g.seas_type = 'REG' AND g.year = ${year}`
+       WHERE pgl.active = TRUE AND g.season_type = 'REG' AND g.season_year = ${year}`
     )
     .join(' UNION ALL ')
   return `SELECT pid, year, week, ARRAY[team_code]::text[] AS teams

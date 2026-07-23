@@ -143,7 +143,7 @@ const build_name_year_index = async () => {
 const build_game_index = async ({ year }) => {
   const rows = await db('nfl_games')
     .select('esbid', 'week', 'h', 'v')
-    .where({ year, seas_type: 'REG' })
+    .where({ season_year: year, season_type: 'REG' })
   const idx = new Map()
   for (const g of rows) {
     const h = fixTeam(g.h)

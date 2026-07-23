@@ -586,7 +586,7 @@ describe('API /teams - reserve', function () {
       // Delete games with v='OPP' (test opponent) for current season year
       const test_game_esbids = await knex('nfl_games')
         .select('esbid')
-        .where('year', current_season.year)
+        .where('season_year', current_season.year)
         .where('v', 'OPP')
 
       if (test_game_esbids.length > 0) {
@@ -662,9 +662,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'SUN',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         timestamp: Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago from mocked date
@@ -690,9 +690,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'SUN',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
@@ -757,9 +757,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'SUN',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         timestamp: 1640000000 // Static timestamp for prior week game
@@ -783,9 +783,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'SUN',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
@@ -848,9 +848,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'SUN',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         timestamp: 1640000000 // Static timestamp for prior week game
@@ -874,9 +874,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'SUN',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
@@ -937,9 +937,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'SUN',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         timestamp: 1640000000 // Static timestamp for prior week game
@@ -963,9 +963,9 @@ describe('API /teams - reserve', function () {
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         day: 'THU',
-        seas_type: 'REG',
+        season_type: 'REG',
         h: player.current_nfl_team,
         v: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),

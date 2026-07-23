@@ -70,16 +70,16 @@ export const add_cte = ({ query_context, params = {}, source = null }) => {
 
   const inner_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
-    .select('nfl_games.year')
+    .select('nfl_games.season_year as year')
     .select('player_gamelogs.nfl_team')
     .count('* as game_count')
     .innerJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .whereIn('nfl_games.seas_type', resolve_seas_type(params))
-    .whereIn('nfl_games.year', year_range)
+    .whereIn('nfl_games.season_type', resolve_seas_type(params))
+    .whereIn('nfl_games.season_year', year_range)
     .whereIn('player_gamelogs.season_year', year_range)
     .groupBy(
       'player_gamelogs.pid',
-      'nfl_games.year',
+      'nfl_games.season_year',
       'player_gamelogs.nfl_team'
     )
 

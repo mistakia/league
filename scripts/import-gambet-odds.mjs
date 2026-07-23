@@ -128,9 +128,11 @@ const import_gambet_odds = async () => {
   const all_markets = []
   const timestamp = Math.round(Date.now() / 1000)
 
-  const nfl_games = await db('nfl_games').where({
-    year: current_season.year
-  })
+  const nfl_games = await db('nfl_games')
+    .select('*', 'season_year as year', 'season_type as seas_type')
+    .where({
+      season_year: current_season.year
+    })
 
   const events = await gambet.get_events()
 

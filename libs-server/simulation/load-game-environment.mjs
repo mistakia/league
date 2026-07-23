@@ -30,7 +30,7 @@ export async function load_game_environment({ esbids, week, year }) {
   // If week/year provided instead of esbids, get the games for that week
   if (!esbids && week && year) {
     const games = await db('nfl_games')
-      .where({ week, year, seas_type: 'REG' })
+      .where({ week, season_year: year, season_type: 'REG' })
       .select('esbid')
 
     game_filter_esbids = games.map((g) => g.esbid)

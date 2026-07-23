@@ -31,8 +31,8 @@ const calculate_player_variance = async ({ year, scoring_format_id } = {}) => {
       'scoring_format_player_gamelogs.esbid',
       'nfl_games.esbid'
     )
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .where(
       'scoring_format_player_gamelogs.scoring_format_id',
       scoring_format_id

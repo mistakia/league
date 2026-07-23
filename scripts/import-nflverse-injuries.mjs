@@ -187,7 +187,7 @@ const build_name_index = async () => {
 const build_game_index = async ({ year }) => {
   const rows = await db('nfl_games')
     .select('esbid', 'week', 'h', 'v', 'timestamp')
-    .where({ year, seas_type: 'REG' })
+    .where({ season_year: year, season_type: 'REG' })
   const idx = new Map()
   for (const g of rows) {
     const h = fixTeam(g.h)
@@ -215,7 +215,7 @@ const season_bounds = async ({ year }) => {
   const rows = await db('nfl_games')
     .min({ min_ts: 'timestamp' })
     .max({ max_ts: 'timestamp' })
-    .where({ year, seas_type: 'REG' })
+    .where({ season_year: year, season_type: 'REG' })
   const min_ts = rows[0]?.min_ts
   const max_ts = rows[0]?.max_ts
   if (!min_ts || !max_ts) return null

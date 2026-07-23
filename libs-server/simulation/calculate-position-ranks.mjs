@@ -91,7 +91,7 @@ async function calculate_target_share_ranks({ player_ids, year, week }) {
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .join('player', 'player_gamelogs.pid', 'player.pid')
     .whereIn('player_gamelogs.pid', player_ids)
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .where('nfl_games.week', '<=', week)
     .whereIn('player.primary_position', ['WR', 'TE'])
     .select(
@@ -173,7 +173,7 @@ async function calculate_opportunity_share_ranks({ player_ids, year, week }) {
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .join('player', 'player_gamelogs.pid', 'player.pid')
     .whereIn('player_gamelogs.pid', player_ids)
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .where('nfl_games.week', '<=', week)
     .where('player.primary_position', 'RB')
     .select(

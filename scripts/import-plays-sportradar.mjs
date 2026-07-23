@@ -1340,7 +1340,7 @@ const build_games_query = ({ game_id, year, week, all, seas_type }) => {
     .whereNotNull('sportradar_game_id')
     .select(
       'esbid',
-      'year',
+      'season_year as year',
       'week',
       'sportradar_game_id',
       'v',
@@ -1352,9 +1352,9 @@ const build_games_query = ({ game_id, year, week, all, seas_type }) => {
   if (game_id) {
     games_query = games_query.where({ esbid: game_id })
   } else if (!all) {
-    if (year) games_query = games_query.where({ year })
+    if (year) games_query = games_query.where({ season_year: year })
     if (week) games_query = games_query.where({ week })
-    if (seas_type) games_query = games_query.where({ seas_type })
+    if (seas_type) games_query = games_query.where({ season_type: seas_type })
   }
 
   return games_query

@@ -257,9 +257,9 @@ const generate_prop_pairings = async ({
     .select(
       'weekly_market_selections_analysis_cache.*',
       'prop_market_selections_index.*',
-      'nfl_games.year',
+      'nfl_games.season_year',
       'nfl_games.week',
-      'nfl_games.seas_type'
+      'nfl_games.season_type'
     )
     .join('prop_market_selections_index', function () {
       this.on(
@@ -321,8 +321,8 @@ const generate_prop_pairings = async ({
     .where('prop_market_selections_index.time_type', 'CLOSE')
     .where('prop_market_selections_index.source_id', source)
     .where('nfl_games.week', week)
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', seas_type)
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', seas_type)
 
   log(`loaded ${prop_rows.length} props`)
 

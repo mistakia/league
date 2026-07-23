@@ -341,7 +341,7 @@ const export_data_nfl_plays = async ({
   // Get esbids for the target year/seas_type first (small query)
   const games = await db('nfl_games')
     .select('esbid')
-    .where({ year, seas_type })
+    .where({ season_year: year, season_type: seas_type })
     .orderBy('esbid', 'asc')
   const esbids = games.map((g) => g.esbid)
   log(`found ${esbids.length} games for ${year} ${seas_type}`)

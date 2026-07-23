@@ -33,7 +33,7 @@ const import_draftkings_salaries = async ({ dry_run = false, year } = {}) => {
   log(`importing ${draft_groups.length} draft groups`)
 
   const nfl_games = await db('nfl_games').where({
-    year
+    season_year: year
   })
 
   const salary_inserts = []

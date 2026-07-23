@@ -36,18 +36,18 @@ describe('data-views week-split year_reference reachability', () => {
       .insert([
         {
           esbid: ESBID_A,
-          year: YEAR,
+          season_year: YEAR,
           week: WEEK,
-          seas_type: 'REG',
+          season_type: 'REG',
           date: '2025/09/07',
           v: 'KC',
           h: 'BAL'
         },
         {
           esbid: ESBID_B,
-          year: YEAR,
+          season_year: YEAR,
           week: WEEK,
-          seas_type: 'REG',
+          season_type: 'REG',
           date: '2025/09/07',
           v: 'NYG',
           h: 'DAL'

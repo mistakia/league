@@ -121,7 +121,7 @@ const game_source = {
 
     const cte_query = db('nfl_games')
       .select(
-        'year',
+        'season_year',
         'week',
         db.raw('v as nfl_team'),
         db.raw('h as game_opponent'),
@@ -130,7 +130,7 @@ const game_source = {
       .whereIn('nfl_week_id', nfl_week)
       .union(function () {
         this.select(
-          'year',
+          'season_year',
           'week',
           db.raw('h as nfl_team'),
           db.raw('v as game_opponent'),
@@ -155,12 +155,12 @@ const game_source = {
           db,
           year_reference: 'player_year_teams.year',
           source: { year_default: () => null },
-          key_columns: { year: 'year' },
+          key_columns: { year: 'season_year' },
           params,
           ref: cte_name
         })
       } else {
-        this.andOn(`${cte_name}.year`, '=', 'player_year_teams.year')
+        this.andOn(`${cte_name}.season_year`, '=', 'player_year_teams.year')
       }
     })
   }

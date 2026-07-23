@@ -554,7 +554,7 @@ router.get('/charted', async (req, res) => {
 
     // Build base query
     let query = getChartedPlayByPlayQuery(db).whereIn(
-      'nfl_games.seas_type',
+      'nfl_games.season_type',
       seas_types
     )
 
@@ -570,7 +570,7 @@ router.get('/charted', async (req, res) => {
 
     // Apply filters
     if (years.length) {
-      query = query.whereIn('nfl_games.year', years)
+      query = query.whereIn('nfl_games.season_year', years)
     }
     if (weeks.length) {
       query = query.whereIn('nfl_games.week', weeks)

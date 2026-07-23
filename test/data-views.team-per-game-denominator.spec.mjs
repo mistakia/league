@@ -55,7 +55,9 @@ describe('data-views team per-game denominator grain', () => {
     const sql = query.toString()
 
     // under a year split the union must carry year so the join correlates 1:1
-    expect(sql).to.match(/select "h" as "team", "year" from "nfl_games"/)
+    expect(sql).to.match(
+      /select "h" as "team", "season_year" as "year" from "nfl_games"/
+    )
     expect(sql).to.match(/group by "team", "year"/)
   })
 

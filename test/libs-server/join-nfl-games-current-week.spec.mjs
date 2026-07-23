@@ -54,7 +54,7 @@ describe('LIBS-SERVER apply_nfl_games_current_week_join', function () {
       it('joins the current REG-week row and excludes POST rows', async function () {
         const query = knex('player').select(
           'player.pid',
-          'nfl_games.seas_type',
+          'nfl_games.season_type as seas_type',
           'nfl_games.week'
         )
         apply_nfl_games_current_week_join({ db: knex, query })
@@ -82,7 +82,7 @@ describe('LIBS-SERVER apply_nfl_games_current_week_join', function () {
       it('joins the current POST-week row for the player team', async function () {
         const query = knex('player').select(
           'player.pid',
-          'nfl_games.seas_type',
+          'nfl_games.season_type as seas_type',
           'nfl_games.week'
         )
         apply_nfl_games_current_week_join({ db: knex, query })
@@ -96,7 +96,10 @@ describe('LIBS-SERVER apply_nfl_games_current_week_join', function () {
         await knex('player')
           .where({ pid: TEST_PID })
           .update({ current_nfl_team: 'NYG' })
-        const query = knex('player').select('player.pid', 'nfl_games.seas_type')
+        const query = knex('player').select(
+          'player.pid',
+          'nfl_games.season_type as seas_type'
+        )
         apply_nfl_games_current_week_join({ db: knex, query })
         const rows = await query.where('player.pid', TEST_PID)
         expect(rows).to.have.length(1)

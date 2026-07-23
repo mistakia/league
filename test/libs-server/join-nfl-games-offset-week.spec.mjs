@@ -50,7 +50,7 @@ describe('LIBS-SERVER apply_nfl_games_offset_week_join', function () {
     it('offset -1 from POST week 1 joins REG week 18 game', async function () {
       const query = knex('player').select(
         'player.pid',
-        'prior_game.seas_type',
+        'prior_game.season_type as seas_type',
         'prior_game.week'
       )
       apply_nfl_games_offset_week_join({
@@ -68,7 +68,7 @@ describe('LIBS-SERVER apply_nfl_games_offset_week_join', function () {
     it('offset -2 from POST week 1 joins REG week 17 game', async function () {
       const query = knex('player').select(
         'player.pid',
-        'ref_game.seas_type',
+        'ref_game.season_type as seas_type',
         'ref_game.week'
       )
       apply_nfl_games_offset_week_join({
@@ -117,7 +117,7 @@ describe('LIBS-SERVER apply_nfl_games_offset_week_join', function () {
     it('offset -1 from REG week 2 joins REG week 1 game', async function () {
       const query = knex('player').select(
         'player.pid',
-        'prior_game.seas_type',
+        'prior_game.season_type as seas_type',
         'prior_game.week'
       )
       apply_nfl_games_offset_week_join({

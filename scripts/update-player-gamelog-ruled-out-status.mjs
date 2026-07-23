@@ -115,7 +115,7 @@ const get_following_wednesday_timestamp = (game_timestamp) => {
 const load_games = async ({ year, week, seas_type }) => {
   const query = db('nfl_games')
     .select('esbid', 'timestamp', 'week', 'h', 'v')
-    .where({ year, seas_type })
+    .where({ season_year: year, season_type: seas_type })
     .whereNotNull('timestamp')
 
   if (week) {
@@ -430,14 +430,14 @@ const main = async () => {
       default_week: get_target_week(), // Default to target week
       year_query: ({ seas_type = 'REG' }) =>
         db('nfl_games')
-          .select('year')
-          .where({ seas_type })
-          .groupBy('year')
-          .orderBy('year', 'asc'),
+          .select('season_year as year')
+          .where({ season_type: seas_type })
+          .groupBy('season_year')
+          .orderBy('season_year', 'asc'),
       week_query: ({ year, seas_type = 'REG' }) =>
         db('nfl_games')
           .select('week')
-          .where({ year, seas_type })
+          .where({ season_year: year, season_type: seas_type })
           .groupBy('week')
           .orderBy('week', 'asc'),
       seas_type: argv.seas_type || 'REG'

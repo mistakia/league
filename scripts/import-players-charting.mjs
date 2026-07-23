@@ -18,22 +18,28 @@ const log = debug('import-players-charting')
 
 async function get_games_for_import({ year, week, esbid, seas_type }) {
   const query = db('nfl_games')
-    .select('esbid', 'shieldid', 'year', 'week', 'seas_type')
+    .select(
+      'esbid',
+      'shieldid',
+      'season_year as year',
+      'week',
+      'season_type as seas_type'
+    )
     .whereNotNull('shieldid')
 
   if (esbid) {
     query.where('esbid', esbid)
   } else {
-    query.where('year', year)
+    query.where('season_year', year)
     if (week) {
       query.where('week', week)
     }
     if (seas_type) {
-      query.where('seas_type', seas_type)
+      query.where('season_type', seas_type)
     }
   }
 
-  query.orderBy(['year', 'week', 'esbid'])
+  query.orderBy(['season_year', 'week', 'esbid'])
   return query
 }
 

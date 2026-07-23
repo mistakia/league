@@ -149,7 +149,7 @@ export async function load_player_points_with_game_status({
 
   // Load NFL schedule to check game status
   const games = await db('nfl_games')
-    .where({ year, week })
+    .where({ season_year: year, week })
     .select('h', 'v', 'esbid', 'status')
 
   const team_game_map = new Map()

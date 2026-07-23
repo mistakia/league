@@ -103,9 +103,9 @@ const calculate_historical_hit_rates = async ({
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.odds_american',
-      'nfl_games.seas_type',
+      'nfl_games.season_type as seas_type',
       'nfl_games.week',
-      'nfl_games.year'
+      'nfl_games.season_year as year'
     )
     .whereNotNull('prop_market_selections_index.selection_pid')
     .whereNotNull('prop_markets_index.esbid')
@@ -132,9 +132,9 @@ const calculate_historical_hit_rates = async ({
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.odds_american',
-      'nfl_games.seas_type',
+      'nfl_games.season_type',
       'nfl_games.week',
-      'nfl_games.year'
+      'nfl_games.season_year'
     )
 
   // Apply filters
@@ -149,7 +149,7 @@ const calculate_historical_hit_rates = async ({
   if (current_week_only) {
     prop_selections_query
       .where('nfl_games.week', current_season.nfl_seas_week)
-      .where('nfl_games.seas_type', current_season.nfl_seas_type)
+      .where('nfl_games.season_type', current_season.nfl_seas_type)
   }
 
   if (market_types && market_types.length > 0) {
@@ -182,15 +182,15 @@ const calculate_historical_hit_rates = async ({
     .select(
       'player_gamelogs.*',
       'nfl_games.week',
-      'nfl_games.year',
-      'nfl_games.seas_type',
+      'nfl_games.season_year as year',
+      'nfl_games.season_type as seas_type',
       'nfl_games.esbid'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .whereIn('nfl_games.seas_type', ['REG', 'POST'])
+    .whereIn('nfl_games.season_type', ['REG', 'POST'])
     .whereIn('player_gamelogs.pid', unique_pids).orderByRaw(`
-      nfl_games.year,
-      CASE WHEN nfl_games.seas_type = 'REG' THEN 0 ELSE 1 END,
+      nfl_games.season_year,
+      CASE WHEN nfl_games.season_type = 'REG' THEN 0 ELSE 1 END,
       nfl_games.week
     `)
 

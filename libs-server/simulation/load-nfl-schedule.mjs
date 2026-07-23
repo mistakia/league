@@ -82,9 +82,9 @@ export async function load_nfl_schedules_for_weeks({
   log(`Loading NFL schedules for year ${year}, weeks ${weeks.join(',')}`)
 
   const games = await db('nfl_games')
-    .where({ year })
+    .where({ season_year: year })
     .whereIn('week', weeks)
-    .whereIn('seas_type', seas_type === 'POST' ? ['POST'] : ['REG', 'POST'])
+    .whereIn('season_type', seas_type === 'POST' ? ['POST'] : ['REG', 'POST'])
     .select(
       'v',
       'h',

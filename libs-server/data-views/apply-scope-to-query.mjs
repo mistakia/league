@@ -99,7 +99,9 @@ export const apply_scope_to_query = ({
   query_context,
   column_params = null,
   has_seas_type = true,
-  has_nfl_week_id = true
+  has_nfl_week_id = true,
+  year_column = 'year',
+  seas_type_column = 'seas_type'
 }) => {
   const effective = compute_effective_scope({ query_context, column_params })
   if (!effective.length) return
@@ -120,10 +122,10 @@ export const apply_scope_to_query = ({
     query.whereIn(`${table_name}.nfl_week_id`, effective)
   }
   if (has_seas_type && sorted_seas_types.length) {
-    query.whereIn(`${table_name}.seas_type`, sorted_seas_types)
+    query.whereIn(`${table_name}.${seas_type_column}`, sorted_seas_types)
   }
   if (sorted_years.length) {
-    query.whereIn(`${table_name}.year`, sorted_years)
+    query.whereIn(`${table_name}.${year_column}`, sorted_years)
   }
 }
 

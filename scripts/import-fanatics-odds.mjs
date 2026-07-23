@@ -161,9 +161,11 @@ const run = async ({
   const timestamp = Math.round(Date.now() / 1000)
   const league_info = await fanatics.get_league_info({ ignore_cache })
 
-  const nfl_games = await db('nfl_games').where({
-    year: current_season.year
-  })
+  const nfl_games = await db('nfl_games')
+    .select('*', 'season_year as year', 'season_type as seas_type')
+    .where({
+      season_year: current_season.year
+    })
 
   const formatted_markets = []
   const raw_markets = []

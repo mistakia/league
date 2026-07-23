@@ -91,8 +91,8 @@ router.get('/gamelogs/players', async (req, res) => {
 
     const query = db('player_gamelogs')
       .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-      .where('nfl_games.year', year)
-      .where('nfl_games.seas_type', 'REG')
+      .where('nfl_games.season_year', year)
+      .where('nfl_games.season_type', 'REG')
       .whereIn('player_gamelogs.pos', position)
 
     if (week) {
@@ -203,7 +203,7 @@ router.get('/gamelogs/players', async (req, res) => {
       'nfl_games.week',
       'nfl_games.day',
       'nfl_games.date',
-      'nfl_games.seas_type',
+      'nfl_games.season_type as seas_type',
       'nfl_games.timestamp'
     )
 

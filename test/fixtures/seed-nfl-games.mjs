@@ -28,9 +28,9 @@ const build_rows_for_weeks = ({ year, seas_type, min_week, max_week }) => {
       const [v, h] = TEAMS[index - 1]
       rows.push({
         esbid: make_esbid({ year, seas_type, week, index }),
-        year,
+        season_year: year,
         week,
-        seas_type,
+        season_type: seas_type,
         v,
         h,
         // Plausible non-null date/time so downstream consumers that filter
@@ -65,5 +65,5 @@ export const seed_nfl_games = async ({ year = current_season.year } = {}) => {
 }
 
 export const clear_nfl_games = async ({ year = current_season.year } = {}) => {
-  await knex('nfl_games').where({ year }).del()
+  await knex('nfl_games').where({ season_year: year }).del()
 }

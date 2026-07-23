@@ -306,9 +306,9 @@ const importPlaysForWeek = async ({
   )
 
   const games = await db('nfl_games').where({
-    year,
+    season_year: year,
     week,
-    seas_type
+    season_type: seas_type
   })
 
   let skip_count = 0
@@ -624,7 +624,7 @@ const importPlaysForYear = async ({
 } = {}) => {
   const weeks = await db('nfl_games')
     .select('week')
-    .where({ year, seas_type })
+    .where({ season_year: year, season_type: seas_type })
     .groupBy('week')
     .orderBy('week', 'asc')
 
@@ -659,11 +659,11 @@ const importAllPlays = async ({
   dry_run = false
 } = {}) => {
   const nfl_games_result = await db('nfl_games')
-    .select('year')
-    .groupBy('year')
-    .orderBy('year', 'asc')
+    .select('season_year')
+    .groupBy('season_year')
+    .orderBy('season_year', 'asc')
 
-  let years = nfl_games_result.map((i) => i.year)
+  let years = nfl_games_result.map((i) => i.season_year)
   if (start) {
     years = years.filter((year) => year >= start)
   }

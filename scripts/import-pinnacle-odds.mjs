@@ -806,7 +806,9 @@ const import_pinnacle_odds = async ({
     }
 
     const timestamp = Math.round(Date.now() / 1000)
-    const nfl_games = await db('nfl_games').where({ year: current_season.year })
+    const nfl_games = await db('nfl_games')
+      .select('*', 'season_year as year', 'season_type as seas_type')
+      .where({ season_year: current_season.year })
 
     // The initial matchups fetch is the one network call NOT inside the batch
     // loop's per-matchup allSettled/try-catch, so its failures are the only ones

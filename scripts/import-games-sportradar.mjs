@@ -83,7 +83,7 @@ const preload_games = async ({ year, week = null }) => {
   const query = db('nfl_games')
     .select(
       'esbid',
-      'year',
+      'season_year as year',
       'week',
       'date',
       'h',
@@ -91,7 +91,7 @@ const preload_games = async ({ year, week = null }) => {
       'sportradar_game_id',
       'sportradar_season_id'
     )
-    .where({ year })
+    .where({ season_year: year })
 
   if (week) {
     query.where({ week })

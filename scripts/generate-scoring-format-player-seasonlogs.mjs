@@ -148,14 +148,14 @@ const main = async () => {
           'nfl_games.esbid',
           'scoring_format_player_gamelogs.esbid'
         )
-        .select('nfl_games.year')
-        .where('nfl_games.seas_type', 'REG')
+        .select('nfl_games.season_year as year')
+        .where('nfl_games.season_type', 'REG')
         .where(
           'scoring_format_player_gamelogs.scoring_format_id',
           scoring_format_id
         )
-        .groupBy('nfl_games.year')
-        .orderBy('nfl_games.year', 'asc')
+        .groupBy('nfl_games.season_year')
+        .orderBy('nfl_games.season_year', 'asc')
 
       let years = results.map((r) => r.year)
       if (argv.start) {

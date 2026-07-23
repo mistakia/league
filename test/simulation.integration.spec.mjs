@@ -48,8 +48,8 @@ describe('LIBS-SERVER simulation integration', function () {
       await knex('nfl_games').insert({
         esbid: test_esbid,
         week: test_week,
-        year: test_year,
-        seas_type: 'REG',
+        season_year: test_year,
+        season_type: 'REG',
         v: 'DEN',
         h: 'KC',
         time_est: '13:00:00'
@@ -279,8 +279,8 @@ describe('LIBS-SERVER simulation integration', function () {
       await knex('nfl_games').insert({
         esbid: test_esbid,
         week: test_week,
-        year: test_year,
-        seas_type: 'REG',
+        season_year: test_year,
+        season_type: 'REG',
         v: 'DEN',
         h: 'KC',
         time_est: '13:00:00'

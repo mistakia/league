@@ -85,9 +85,9 @@ const get_team_yardage_markets = async ({ year, current_week_only }) => {
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.odds_american',
-      'nfl_games.seas_type',
+      'nfl_games.season_type as seas_type',
       'nfl_games.week',
-      'nfl_games.year'
+      'nfl_games.season_year as year'
     )
     .whereNotNull('prop_markets_index.esbid')
     .whereNotNull('prop_market_selections_index.selection_pid')
@@ -115,15 +115,15 @@ const get_team_yardage_markets = async ({ year, current_week_only }) => {
       'prop_market_selections_index.source_market_id',
       'prop_market_selections_index.source_selection_id',
       'prop_market_selections_index.odds_american',
-      'nfl_games.seas_type',
+      'nfl_games.season_type',
       'nfl_games.week',
-      'nfl_games.year'
+      'nfl_games.season_year'
     )
 
   if (current_week_only) {
     query
       .where('nfl_games.week', current_season.nfl_seas_week)
-      .where('nfl_games.seas_type', current_season.nfl_seas_type)
+      .where('nfl_games.season_type', current_season.nfl_seas_type)
   }
 
   return query
@@ -174,7 +174,7 @@ const aggregate_team_game_yards = async ({ teams }) => {
 
 const get_game_info_for_esbids = async ({ esbids }) => {
   const games = await db('nfl_games')
-    .select('esbid', 'year', 'week', 'seas_type')
+    .select('esbid', 'season_year as year', 'week', 'season_type as seas_type')
     .whereIn('esbid', esbids)
 
   const game_info = {}

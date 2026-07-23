@@ -55,9 +55,9 @@ const run = async ({ lid = 1, year = current_season.year }) => {
   const gamelogs = await db('player_gamelogs')
     .select('player_gamelogs.*', 'nfl_games.week')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .where('player_gamelogs.active', true)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_type', 'REG')
     .whereIn('player_gamelogs.pid', Object.keys(player_pids))
 
   const result = calculateStandings({

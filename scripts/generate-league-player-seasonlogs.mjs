@@ -153,14 +153,14 @@ const main = async () => {
             'nfl_games.esbid',
             'league_format_player_gamelogs.esbid'
           )
-          .select('nfl_games.year')
-          .where('nfl_games.seas_type', seas_type)
+          .select('nfl_games.season_year as year')
+          .where('nfl_games.season_type', seas_type)
           .where(
             'league_format_player_gamelogs.league_format_id',
             league_format_id
           )
-          .groupBy('nfl_games.year')
-          .orderBy('nfl_games.year', 'asc'),
+          .groupBy('nfl_games.season_year')
+          .orderBy('nfl_games.season_year', 'asc'),
       script_args: { lid, league_format_id }
     })
   } catch (err) {

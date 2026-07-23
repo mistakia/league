@@ -12,9 +12,9 @@ debug.enable('generate-player-career-game-counts')
 
 const generate_player_career_game_counts = async () => {
   const years = await db('nfl_games')
-    .distinct('year')
-    .whereIn('seas_type', ['REG', 'POST'])
-    .orderBy('year', 'asc')
+    .distinct('season_year as year')
+    .whereIn('season_type', ['REG', 'POST'])
+    .orderBy('season_year', 'asc')
 
   const player_career_games = {}
   const player_career_years = {}
@@ -32,19 +32,19 @@ const generate_player_career_game_counts = async () => {
         'player_gamelogs.opponent_nfl_team',
         'player_gamelogs.nfl_team',
         'player_gamelogs.pos',
-        'nfl_games.year',
+        'nfl_games.season_year as year',
         'nfl_games.week',
-        'nfl_games.seas_type'
+        'nfl_games.season_type as seas_type'
       )
       .innerJoin('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'player_gamelogs.esbid').andOn(
-          'nfl_games.year',
+          'nfl_games.season_year',
           '=',
           'player_gamelogs.season_year'
         )
       })
-      .where({ 'nfl_games.year': year })
-      .whereIn('nfl_games.seas_type', ['REG', 'POST'])
+      .where({ 'nfl_games.season_year': year })
+      .whereIn('nfl_games.season_type', ['REG', 'POST'])
 
     log(
       `processing year ${year}: loaded ${rows.length} player games (excluding preseason)`

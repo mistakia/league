@@ -139,7 +139,7 @@ export default async function ({
           )
         )
         .andOn(
-          'reference_week_game.year',
+          'reference_week_game.season_year',
           '=',
           db.raw(
             `CASE WHEN prior_week_game.esbid IS NULL THEN ?::int ELSE ?::int END`,
@@ -147,7 +147,7 @@ export default async function ({
           )
         )
         .andOn(
-          'reference_week_game.seas_type',
+          'reference_week_game.season_type',
           '=',
           db.raw(
             `CASE WHEN prior_week_game.esbid IS NULL THEN ?::text ELSE ?::text END`,

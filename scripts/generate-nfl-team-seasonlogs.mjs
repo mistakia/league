@@ -296,10 +296,14 @@ const generate_seasonlogs = async ({
   // real team. Excluding it prevents a phantom 33rd team row in every position
   // rollup.
   const gamelogs_query = db('player_gamelogs')
-    .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
+    .select(
+      'player_gamelogs.*',
+      'nfl_games.week',
+      'nfl_games.season_year as year'
+    )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .whereNot('player_gamelogs.nfl_team', 'INA')
     .whereNot('player_gamelogs.opponent_nfl_team', 'INA')
 
@@ -635,10 +639,10 @@ const main = async () => {
       },
       year_query: () =>
         db('nfl_games')
-          .select('year')
-          .where({ seas_type: 'REG' })
-          .groupBy('year')
-          .orderBy('year', 'asc'),
+          .select('season_year as year')
+          .where({ season_type: 'REG' })
+          .groupBy('season_year')
+          .orderBy('season_year', 'asc'),
       season_only: true
     })
 

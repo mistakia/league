@@ -328,7 +328,7 @@ function create_player_team_stats_query({
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .join(`${with_table_name}`, function () {
       this.on('player_gamelogs.nfl_team', '=', `${with_table_name}.nfl_team`)
-      this.andOn('nfl_games.year', '=', `${with_table_name}.year`)
+      this.andOn('nfl_games.season_year', '=', `${with_table_name}.year`)
       this.andOn('nfl_games.week', '=', `${with_table_name}.week`)
     })
 
@@ -341,11 +341,11 @@ function create_player_team_stats_query({
       player_team_stats_query.whereIn('nfl_games.nfl_week_id', nfl_week)
     }
     if (seas_types.length) {
-      player_team_stats_query.whereIn('nfl_games.seas_type', seas_types)
+      player_team_stats_query.whereIn('nfl_games.season_type', seas_types)
     }
   } else {
     player_team_stats_query.whereIn(
-      'nfl_games.seas_type',
+      'nfl_games.season_type',
       default_params.seas_type
     )
   }
@@ -360,7 +360,7 @@ function create_player_team_stats_query({
     row_axes
   })
   if (effective_years.length) {
-    player_team_stats_query.whereIn('nfl_games.year', effective_years)
+    player_team_stats_query.whereIn('nfl_games.season_year', effective_years)
     player_team_stats_query.whereIn(
       'player_gamelogs.season_year',
       effective_years

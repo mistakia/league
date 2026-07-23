@@ -21,7 +21,7 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
       'nfl_games.h',
       'nfl_games.v',
       'nfl_games.esbid',
-      'nfl_games.year'
+      'nfl_games.season_year as year'
     )
     .join('nfl_games', 'nfl_play_stats.esbid', '=', 'nfl_games.esbid')
     .join('nfl_plays', function () {
@@ -107,7 +107,7 @@ export const get_play_type_nfl = (play_type_nfl) => {
 export const get_completed_games = async ({ year, week, seas_type }) => {
   const completed_games = await db('nfl_games')
     .select('esbid')
-    .where({ year, week, seas_type })
+    .where({ season_year: year, week, season_type: seas_type })
     .where(function () {
       // Method 1: Games with END_GAME play
       this.whereExists(function () {

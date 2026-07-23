@@ -317,9 +317,9 @@ const calculate_weekly_market_selections_analysis = async ({
   }
 
   const nfl_games = await db('nfl_games').where({
-    year,
+    season_year: year,
     week,
-    seas_type
+    season_type: seas_type
   })
   log(
     `loaded ${nfl_games.length} nfl games for week ${week} ${current_season.year}`
@@ -333,15 +333,15 @@ const calculate_weekly_market_selections_analysis = async ({
       'player_gamelogs.*',
       'nfl_games.esbid',
       'nfl_games.week',
-      'nfl_games.seas_type',
-      'nfl_games.year'
+      'nfl_games.season_type as seas_type',
+      'nfl_games.season_year as year'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .whereIn('nfl_games.year', [current_year, previous_year])
-    .whereNot('nfl_games.seas_type', 'PRE')
+    .whereIn('nfl_games.season_year', [current_year, previous_year])
+    .whereNot('nfl_games.season_type', 'PRE')
     .orderBy([
-      { column: 'nfl_games.year', order: 'asc' },
-      { column: 'nfl_games.seas_type', order: 'desc' },
+      { column: 'nfl_games.season_year', order: 'asc' },
+      { column: 'nfl_games.season_type', order: 'desc' },
       { column: 'nfl_games.week', order: 'asc' }
     ])
 
@@ -469,7 +469,7 @@ const main = async () => {
         'prop_markets_index.*',
         'prop_market_selections_index.*',
         'nfl_games.week',
-        'nfl_games.year'
+        'nfl_games.season_year as year'
       )
       .join('nfl_games', 'nfl_games.esbid', 'prop_markets_index.esbid')
       .join('prop_market_selections_index', function () {
@@ -522,8 +522,8 @@ const main = async () => {
       .where('prop_markets_index.time_type', 'CLOSE')
       .where('prop_markets_index.source_id', source)
       .where('nfl_games.week', week)
-      .where('nfl_games.seas_type', seas_type)
-      .where('nfl_games.year', year)
+      .where('nfl_games.season_type', seas_type)
+      .where('nfl_games.season_year', year)
 
     // log(prop_rows_query.toString())
 

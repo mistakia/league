@@ -83,7 +83,7 @@ const player_dfs_salaries_source = {
       .select(
         'player_salaries.pid',
         'player_salaries.salary',
-        'nfl_games.year',
+        'nfl_games.season_year as year',
         'nfl_games.week',
         'player_salaries.source_id',
         'player_salaries.source_contest_id',
@@ -98,8 +98,8 @@ const player_dfs_salaries_source = {
     if (career_year.length) {
       base_query.join('player_seasonlogs', function () {
         this.on('player_salaries.pid', '=', 'player_seasonlogs.pid')
-          .andOn('nfl_games.year', '=', 'player_seasonlogs.year')
-          .andOn('nfl_games.seas_type', '=', 'player_seasonlogs.seas_type')
+          .andOn('nfl_games.season_year', '=', 'player_seasonlogs.year')
+          .andOn('nfl_games.season_type', '=', 'player_seasonlogs.seas_type')
       })
       base_query.whereBetween('player_seasonlogs.career_year', [
         Math.min(career_year[0], career_year[1]),

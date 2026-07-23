@@ -184,7 +184,7 @@ const load_week_actual_scores = async ({
       .where({
         'scoring_format_player_gamelogs.scoring_format_id': scoring_format_id,
         'nfl_games.week': week,
-        'nfl_games.year': year
+        'nfl_games.season_year': year
       })
       .whereIn('scoring_format_player_gamelogs.pid', all_pids)
       .select(

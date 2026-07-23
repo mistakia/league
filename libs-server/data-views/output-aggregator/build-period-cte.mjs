@@ -12,8 +12,9 @@ import { normalize_career_year_range } from '../param-utils.mjs'
 import { apply_scope_to_query } from '../apply-scope-to-query.mjs'
 
 const game_period_key =
-  "CONCAT(nfl_games.year, '_', nfl_games.week, '_', nfl_games.esbid)"
-const season_period_key = "CONCAT(nfl_games.year, '_', nfl_games.seas_type)"
+  "CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid)"
+const season_period_key =
+  "CONCAT(nfl_games.season_year, '_', nfl_games.season_type)"
 
 // `period='aggregate'` is the numerator-CTE grain used when a legacy
 // denominator plugin owns the rate division. The CTE collapses to (pid|
@@ -196,7 +197,9 @@ const build_role_union_period_cte = ({
     .groupByRaw('"role_union"."pid"')
     .havingRaw('SUM(role_union.pts) > 0')
   if (include_year) {
-    outer.select('nfl_games.year').groupByRaw('"nfl_games"."year"')
+    outer
+      .select('nfl_games.season_year as year')
+      .groupByRaw('"nfl_games"."season_year"')
   }
   if (!is_aggregate) {
     outer.select(db.raw(`${period_key} AS period_key`)).groupByRaw(period_key)
@@ -205,7 +208,9 @@ const build_role_union_period_cte = ({
     query: outer,
     table_name: 'nfl_games',
     query_context,
-    column_params: params
+    column_params: params,
+    year_column: 'season_year',
+    seas_type_column: 'season_type'
   })
   // career_year / career_game: legacy with_func joined player_seasonlogs on
   // (pid, year, seas_type) and filtered between bounds. Mirror that here so
@@ -217,8 +222,8 @@ const build_role_union_period_cte = ({
   if (career_year || career_game) {
     outer.innerJoin('player_seasonlogs', function () {
       this.on('player_seasonlogs.pid', '=', 'role_union.pid')
-      this.andOn('player_seasonlogs.year', '=', 'nfl_games.year')
-      this.andOn('player_seasonlogs.seas_type', '=', 'nfl_games.seas_type')
+      this.andOn('player_seasonlogs.year', '=', 'nfl_games.season_year')
+      this.andOn('player_seasonlogs.seas_type', '=', 'nfl_games.season_type')
     })
     if (career_year) {
       const arr = Array.isArray(career_year)
@@ -329,7 +334,7 @@ export const build_batched_period_cte = ({
   const include_year =
     !is_aggregate || query_context.row_axes.includes('year') || force_year_grain
   sub.innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)
-  if (include_year) sub.select('nfl_games.year')
+  if (include_year) sub.select('nfl_games.season_year as year')
   if (!is_aggregate) {
     sub.select(db.raw(`${period_key} AS period_key`))
   }
@@ -365,7 +370,7 @@ export const build_batched_period_cte = ({
   }
   sub.groupByRaw(is_team ? `${source_table}.${source.team_col}` : pid_expr)
   if (!is_aggregate) sub.groupByRaw(period_key)
-  if (include_year) sub.groupByRaw('"nfl_games"."year"')
+  if (include_year) sub.groupByRaw('"nfl_games"."season_year"')
 
   if (measure_predicate) {
     sub.whereRaw(measure_predicate)
@@ -379,7 +384,9 @@ export const build_batched_period_cte = ({
     query: sub,
     table_name: 'nfl_games',
     query_context,
-    column_params: params
+    column_params: params,
+    year_column: 'season_year',
+    seas_type_column: 'season_type'
   })
 
   if (apply_filters) apply_filters({ query: sub })

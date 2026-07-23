@@ -19,8 +19,8 @@ const populate_opening_days = async () => {
   // Guard: a REFRESH against an empty nfl_games would leave the view empty and
   // silently blank every opening-day-derived column. Require schedule data.
   const reg_games = await db('nfl_games')
-    .where({ seas_type: 'REG' })
-    .max('year as max_year')
+    .where({ season_type: 'REG' })
+    .max('season_year as max_year')
     .first()
 
   if (!reg_games || reg_games.max_year == null) {

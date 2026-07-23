@@ -14,7 +14,7 @@ async function validate_play_match_rates({ year }) {
   const games = await db('nfl_games')
     .select('nfl_games.esbid', 'nfl_games.week', 'nfl_games.h', 'nfl_games.v')
     .whereNotNull('nfl_games.shieldid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
 
   const results = []
 
@@ -90,20 +90,20 @@ async function validate_player_match_rates({ year }) {
   // Check matchup stats player coverage
   const matchup_stats_count = await db('nfl_matchup_stats')
     .join('nfl_games', 'nfl_matchup_stats.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .count('* as count')
     .first()
 
   const null_offense = await db('nfl_matchup_stats')
     .join('nfl_games', 'nfl_matchup_stats.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .whereNull('nfl_matchup_stats.offense_player_id')
     .count('* as count')
     .first()
 
   const null_defense = await db('nfl_matchup_stats')
     .join('nfl_games', 'nfl_matchup_stats.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .whereNull('nfl_matchup_stats.defense_player_id')
     .count('* as count')
     .first()
@@ -132,7 +132,7 @@ async function validate_column_coverage({ year }) {
 
   const games_with_charting = await db('nfl_plays')
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .whereNotNull('nfl_plays.epa_charting')
     .count('* as count')
     .first()
@@ -148,7 +148,7 @@ async function validate_column_coverage({ year }) {
   for (const column of charting_columns) {
     const non_null = await db('nfl_plays')
       .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-      .where('nfl_games.year', year)
+      .where('nfl_games.season_year', year)
       .whereNotNull('nfl_plays.epa_charting')
       .whereNotNull(`nfl_plays.${column}`)
       .count('* as count')
@@ -168,7 +168,7 @@ async function validate_epa_correlation({ year }) {
 
   const plays_with_both = await db('nfl_plays')
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .whereNotNull('nfl_plays.epa')
     .whereNotNull('nfl_plays.epa_charting')
     .select('nfl_plays.epa', 'nfl_plays.epa_charting')

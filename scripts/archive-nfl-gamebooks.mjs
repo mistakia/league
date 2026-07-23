@@ -69,8 +69,8 @@ const fetch_pdf = async ({ url, max_retries = 3 }) => {
 
 const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
   const query = db('nfl_games')
-    .select('esbid', 'shieldid', 'seas_type', 'week')
-    .where({ year })
+    .select('esbid', 'shieldid', 'season_type as seas_type', 'week')
+    .where({ season_year: year })
     .whereNotNull('shieldid')
   if (week !== undefined) query.where({ week })
 

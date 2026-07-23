@@ -26,7 +26,7 @@ describe('data-views participation status', () => {
       expect(sql).to.not.match(/active\s*=\s*TRUE/i)
       // REG-scoped, per-year-partitioned source join (same shape as the bridge)
       expect(sql).to.match(/player_gamelogs_year_2025/)
-      expect(sql).to.match(/g\.seas_type\s*=\s*'REG'/)
+      expect(sql).to.match(/g\.season_type\s*=\s*'REG'/)
       expect(sql).to.match(/INNER JOIN nfl_games g ON g\.esbid = pgl\.esbid/)
       // active carried through as bool_or to defend against duplicate week rows
       expect(sql).to.match(/bool_or\(active\) AS active/)

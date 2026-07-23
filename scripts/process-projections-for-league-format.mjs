@@ -50,7 +50,7 @@ const process_league_format_year = async ({
   let week = 0
 
   const final_week_result = await db('nfl_games')
-    .where({ year, seas_type: 'REG' })
+    .where({ season_year: year, season_type: 'REG' })
     .max('week as final_week')
     .first()
 

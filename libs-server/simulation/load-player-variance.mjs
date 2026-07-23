@@ -61,7 +61,7 @@ export async function load_player_variance({
         'nfl_games.esbid'
       )
       .whereIn('scoring_format_player_gamelogs.pid', missing_pids)
-      .where('nfl_games.year', year)
+      .where('nfl_games.season_year', year)
       .where(
         'scoring_format_player_gamelogs.scoring_format_id',
         scoring_format_id

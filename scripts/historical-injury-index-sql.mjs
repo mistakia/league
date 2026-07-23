@@ -6,11 +6,11 @@
 
 export const rebuild_sql = `
 WITH reg_games AS (
-  SELECT esbid, year, week,
+  SELECT esbid, season_year AS year, week,
          h AS home_team, v AS away_team,
          home_qb_pid, away_qb_pid, timestamp AS game_timestamp
   FROM nfl_games
-  WHERE seas_type = 'REG' AND year BETWEEN :start_year AND :end_year
+  WHERE season_type = 'REG' AND season_year BETWEEN :start_year AND :end_year
 ),
 gl AS (
   SELECT pg.pid, pg.esbid, pg.season_year AS year, pg.nfl_team AS tm, pg.active,
@@ -48,7 +48,7 @@ changelog_signal AS (
     ON pc.pid = gl_inner.pid
    AND pc.column_name IN ('injury_status','nfl_status','roster_status','status')
    AND pc.changed_at BETWEEN to_timestamp(gm.timestamp - 7*86400) AND to_timestamp(gm.timestamp + 3*3600)
-  WHERE gl_inner.season_year BETWEEN :start_year AND :end_year AND gm.seas_type = 'REG'
+  WHERE gl_inner.season_year BETWEEN :start_year AND :end_year AND gm.season_type = 'REG'
   GROUP BY gl_inner.pid, gl_inner.esbid
 ),
 team_spans AS (

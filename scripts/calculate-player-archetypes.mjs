@@ -118,8 +118,8 @@ const calculate_player_archetypes = async ({ year } = {}) => {
   const player_stats = await db('player_gamelogs')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .join('player', 'player_gamelogs.pid', 'player.pid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .select(
       'player_gamelogs.pid',
       'player.primary_position',
@@ -134,8 +134,8 @@ const calculate_player_archetypes = async ({ year } = {}) => {
   // Get team totals for target share calculations
   const team_totals = await db('player_gamelogs')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .select(
       'player_gamelogs.nfl_team',
       db.raw('SUM(player_gamelogs.targets) as total_team_targets')
@@ -150,8 +150,8 @@ const calculate_player_archetypes = async ({ year } = {}) => {
   // Get player primary team (team with most games)
   const player_teams = await db('player_gamelogs')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .select(
       'player_gamelogs.pid',
       'player_gamelogs.nfl_team',

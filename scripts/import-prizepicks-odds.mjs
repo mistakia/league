@@ -142,8 +142,8 @@ const import_prizepicks_odds = async ({
 
   const nfl_games = await db('nfl_games').where({
     week: current_season.nfl_seas_week,
-    year: current_season.year,
-    seas_type: current_season.nfl_seas_type
+    season_year: current_season.year,
+    season_type: current_season.nfl_seas_type
   })
 
   let page = 1

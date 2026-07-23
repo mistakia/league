@@ -1018,14 +1018,14 @@ const main = async () => {
       script_function: generate_player_gamelogs,
       year_query: ({ seas_type = 'REG' }) =>
         db('nfl_games')
-          .select('year')
-          .where({ seas_type })
-          .groupBy('year')
-          .orderBy('year', 'asc'),
+          .select('season_year as year')
+          .where({ season_type: seas_type })
+          .groupBy('season_year')
+          .orderBy('season_year', 'asc'),
       week_query: ({ year, seas_type = 'REG' }) =>
         db('nfl_games')
           .select('week')
-          .where({ year, seas_type })
+          .where({ season_year: year, season_type: seas_type })
           .groupBy('week')
           .orderBy('week', 'asc'),
       script_args: {

@@ -69,8 +69,8 @@ const generate_scoring_format_player_gamelogs = async ({
         'nfl_games.esbid'
       )
       .where('nfl_games.week', week)
-      .where('nfl_games.year', year)
-      .where('nfl_games.seas_type', 'REG')
+      .where('nfl_games.season_year', year)
+      .where('nfl_games.season_type', 'REG')
       .where(
         'scoring_format_player_gamelogs.scoring_format_id',
         scoring_format_id
@@ -114,16 +114,16 @@ const main = async () => {
       year_query: ({ seas_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-          .select('nfl_games.year')
-          .where('nfl_games.seas_type', seas_type)
-          .groupBy('nfl_games.year')
-          .orderBy('nfl_games.year', 'asc'),
+          .select('nfl_games.season_year as year')
+          .where('nfl_games.season_type', seas_type)
+          .groupBy('nfl_games.season_year')
+          .orderBy('nfl_games.season_year', 'asc'),
       week_query: ({ year, seas_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
           .select('nfl_games.week')
-          .where('nfl_games.seas_type', seas_type)
-          .where('nfl_games.year', year)
+          .where('nfl_games.season_type', seas_type)
+          .where('nfl_games.season_year', year)
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc'),
       script_args: { scoring_format_id, dry: argv.dry },

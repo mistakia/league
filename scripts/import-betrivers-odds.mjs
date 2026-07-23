@@ -107,9 +107,11 @@ const import_betrivers_odds = async () => {
   const all_markets = []
   const timestamp = Math.round(Date.now() / 1000)
 
-  const nfl_games = await db('nfl_games').where({
-    year: current_season.year
-  })
+  const nfl_games = await db('nfl_games')
+    .select('*', 'season_year as year', 'season_type as seas_type')
+    .where({
+      season_year: current_season.year
+    })
 
   const market_groups = await betrivers.get_market_groups()
   for (const market_group of market_groups) {

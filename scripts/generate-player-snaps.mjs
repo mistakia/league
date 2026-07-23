@@ -40,7 +40,7 @@ const generate_player_snaps_for_week = async ({
 
   const nfl_game_rows = await db('nfl_games')
     .select('esbid')
-    .where({ week, year, seas_type })
+    .where({ week, season_year: year, season_type: seas_type })
   const esbids = nfl_game_rows.map((i) => i.esbid)
 
   const gamelogs = await db('player_gamelogs')
@@ -52,9 +52,9 @@ const generate_player_snaps_for_week = async ({
     )
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.year', year)
+    .where('nfl_games.season_year', year)
     .where('nfl_games.week', week)
-    .where('nfl_games.seas_type', seas_type)
+    .where('nfl_games.season_type', seas_type)
 
   await db.raw('SET statement_timeout = 0')
 
@@ -486,22 +486,22 @@ const main = async () => {
       script_function: generate_player_snaps_for_week,
       year_query: ({ seas_type = 'REG' }) => {
         const query = db('nfl_games')
-          .select('year')
-          .groupBy('year')
-          .orderBy('year', 'asc')
+          .select('season_year as year')
+          .groupBy('season_year')
+          .orderBy('season_year', 'asc')
         if (seas_type !== 'ALL') {
-          query.where({ seas_type })
+          query.where({ season_type: seas_type })
         }
         return query
       },
       week_query: ({ year, seas_type = 'REG' }) => {
         const query = db('nfl_games')
           .select('week')
-          .where({ year })
+          .where({ season_year: year })
           .groupBy('week')
           .orderBy('week', 'asc')
         if (seas_type !== 'ALL') {
-          query.where({ seas_type })
+          query.where({ season_type: seas_type })
         }
         return query
       },

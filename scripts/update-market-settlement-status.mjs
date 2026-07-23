@@ -112,7 +112,7 @@ export const update_market_settlement_status = async ({
   }
 
   if (seas_type) {
-    conditions.push('ng.seas_type = :seas_type')
+    conditions.push('ng.season_type = :seas_type')
     bindings.seas_type = seas_type
   }
 
@@ -143,7 +143,7 @@ export const update_market_settlement_status = async ({
         pmi.esbid,
         pmi.year,
         pmi.market_type,
-        ${needs_game_join ? 'ng.week, ng.seas_type,' : ''}
+        ${needs_game_join ? 'ng.week, ng.season_type as seas_type,' : ''}
         COUNT(DISTINCT pms.source_selection_id) as total_selections,
         COUNT(DISTINCT CASE
           WHEN pms.selection_result IS NOT NULL
@@ -165,7 +165,7 @@ export const update_market_settlement_status = async ({
         pmi.esbid,
         pmi.year,
         pmi.market_type
-        ${needs_game_join ? ', ng.week, ng.seas_type' : ''}
+        ${needs_game_join ? ', ng.week, ng.season_type' : ''}
     )
     SELECT
       source_id::text,

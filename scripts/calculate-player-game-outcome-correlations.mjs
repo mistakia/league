@@ -45,8 +45,8 @@ const calculate_player_game_outcome_correlations = async ({
         'scoring_format_player_gamelogs.pid'
       ).andOn('player_gamelogs.esbid', 'scoring_format_player_gamelogs.esbid')
     })
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .where(
       'scoring_format_player_gamelogs.scoring_format_id',
       scoring_format_id

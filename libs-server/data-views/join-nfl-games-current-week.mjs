@@ -19,8 +19,8 @@ export default function apply_nfl_games_current_week_join({
         team_column
       )
     })
-      .andOn(`${alias}.year`, '=', db.raw('?::int', [year]))
-      .andOn(`${alias}.seas_type`, '=', db.raw('?::text', [seas_type]))
+      .andOn(`${alias}.season_year`, '=', db.raw('?::int', [year]))
+      .andOn(`${alias}.season_type`, '=', db.raw('?::text', [seas_type]))
       .andOn(`${alias}.week`, '=', db.raw('?::int', [week]))
   })
 

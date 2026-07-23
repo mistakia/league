@@ -27,8 +27,8 @@ const processPlayerSeasonlogs = async ({
     .select('player_gamelogs.*', 'player.primary_position')
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', seas_type)
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', seas_type)
 
   const inserts = []
 
@@ -82,10 +82,10 @@ const main = async () => {
       year_query: ({ seas_type = 'REG' }) =>
         db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-          .select('nfl_games.year')
-          .where('nfl_games.seas_type', seas_type)
-          .groupBy('nfl_games.year')
-          .orderBy('nfl_games.year', 'asc'),
+          .select('nfl_games.season_year as year')
+          .where('nfl_games.season_type', seas_type)
+          .groupBy('nfl_games.season_year')
+          .orderBy('nfl_games.season_year', 'asc'),
       season_only: true,
       seas_type: argv.seas_type || 'REG'
     })

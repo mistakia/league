@@ -47,7 +47,7 @@ const calculate_points_added = async ({
       'player.primary_position',
       'player.nfl_draft_year',
       'nfl_games.week',
-      'nfl_games.year',
+      'nfl_games.season_year',
       'nfl_games.esbid'
     )
     .join(
@@ -56,8 +56,8 @@ const calculate_points_added = async ({
       'scoring_format_player_gamelogs.esbid'
     )
     .join('player', 'scoring_format_player_gamelogs.pid', 'player.pid')
-    .where('nfl_games.year', year)
-    .where('nfl_games.seas_type', 'REG')
+    .where('nfl_games.season_year', year)
+    .where('nfl_games.season_type', 'REG')
     .whereIn('player.primary_position', fantasy_positions) // TODO - filter using player_gamelogs.pos
     .where(
       'scoring_format_player_gamelogs.scoring_format_id',
