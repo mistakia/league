@@ -32,7 +32,7 @@ const pff_team_seasonlogs_table_alias = ({ params = {} } = {}) => {
 const pff_team_source = {
   table: 'pff_team_seasonlogs',
   grain: 'team_year',
-  key_columns: { team: 'nfl_team', year: 'year' },
+  key_columns: { team: 'nfl_team', year: 'season_year' },
   year_default: (params) => [get_default_params({ params }).year[0]]
 }
 

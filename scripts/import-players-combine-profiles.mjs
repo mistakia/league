@@ -43,9 +43,9 @@ const update_ngs_prospect_scores = async ({ pid, ngs_data, timestamp }) => {
       .insert({
         pid,
         ...ngs_data,
-        recorded_at: timestamp
+        observed_at: timestamp
       })
-      .onConflict(['pid', 'recorded_at'])
+      .onConflict(['pid', 'observed_at'])
       .ignore()
 
     log(`Updated NGS prospect scores for player ${pid}`)
@@ -58,7 +58,7 @@ const import_players_from_combine_profiles_for_year = async ({
   year = current_season.year,
   token,
   ignore_cache = false,
-  current_timestamp = Math.floor(Date.now() / 1000)
+  current_timestamp = new Date()
 } = {}) => {
   let change_count = 0
   let create_count = 0
@@ -184,7 +184,7 @@ const import_all_players_from_combine_profiles = async ({
   start,
   end,
   ignore_cache = false,
-  current_timestamp = Math.floor(Date.now() / 1000)
+  current_timestamp = new Date()
 }) => {
   const token = await nfl.get_session_token_v3()
   const min_year = 2006

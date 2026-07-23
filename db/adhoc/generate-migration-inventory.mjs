@@ -134,8 +134,8 @@ const CLUSTER_RULES = [
       t === 'pff_unresolved_players' ||
       t === 'nfl_coaches'
   ],
-  // NFL game dimension (catches pff_game_id_map before the pff-* rule).
-  ['nfl-games', (t) => /^nfl_game|game_id_map/.test(t)],
+  // NFL game dimension.
+  ['nfl-games', (t) => /^nfl_game/.test(t)],
   // PFF NFL aggregate/charting tables (pff_* remainder after identity/games).
   ['pff-charting-nfl', (t) => /^pff_/.test(t)],
   // NFL fact families.

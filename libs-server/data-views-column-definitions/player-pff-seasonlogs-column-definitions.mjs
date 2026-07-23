@@ -49,7 +49,7 @@ const pff_player_seasonlogs_table_alias = ({ params = {} }) => {
 const pff_player_source = {
   table: 'pff_player_seasonlogs',
   grain: 'player_year',
-  key_columns: { pid: 'pid', year: 'year' },
+  key_columns: { pid: 'pid', year: 'season_year' },
   year_default: (params) => get_pff_params({ params }).year.map(Number),
   attach: ({ query_context, params, table_alias }) => {
     const { career_year: career_year_param } = get_pff_params({ params })
@@ -62,7 +62,7 @@ const pff_player_source = {
     query_context.players_query
       .join(`player_seasonlogs as ${career_year_alias}`, function () {
         this.on(`${career_year_alias}.pid`, '=', `${table_alias}.pid`)
-          .andOn(`${career_year_alias}.year`, '=', `${table_alias}.year`)
+          .andOn(`${career_year_alias}.year`, '=', `${table_alias}.season_year`)
           .andOn(`${career_year_alias}.seas_type`, '=', db.raw('?', ['REG']))
       })
       .whereBetween(`${career_year_alias}.career_year`, [
