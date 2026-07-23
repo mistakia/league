@@ -41,7 +41,7 @@ const generate_season_table_alias = ({ params = {} } = {}) => {
 const player_season_rankings_source = {
   table: 'player_rankings_index',
   grain: 'player_year',
-  key_columns: { pid: 'pid', year: 'year' },
+  key_columns: { pid: 'pid', year: 'season_year' },
   year_default: (params) => get_season_default_params({ params }).year,
   extra_predicates: (params) => {
     const { ranking_source_id, ranking_type } = get_season_default_params({

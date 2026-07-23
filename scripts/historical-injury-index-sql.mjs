@@ -68,7 +68,7 @@ schedule_spine AS (
 )
 SELECT
   s.pid,
-  s.spine_year AS year,
+  s.spine_year AS season_year,
   s.week,
   s.esbid,
   s.tm,

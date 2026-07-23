@@ -36,14 +36,18 @@ export const load_pick_ktc_indexes = async ({ qb_axis }) => {
   }
   const pids_rows = await db('keeptradecut_pick').select(
     'pid',
-    'year',
+    'season_year',
     'round',
     'slot'
   )
   for (const r of pids_rows) {
-    const k = `${r.year}__${r.round}__${r.slot}`
+    const k = `${r.season_year}__${r.round}__${r.slot}`
     idx.pick_pid_by_yrs.set(k, r.pid)
-    idx.pick_pid_meta.set(r.pid, { year: r.year, round: r.round, slot: r.slot })
+    idx.pick_pid_meta.set(r.pid, {
+      year: r.season_year,
+      round: r.round,
+      slot: r.slot
+    })
   }
   if (!pids_rows.length) return idx
   const pids = pids_rows.map((r) => r.pid)

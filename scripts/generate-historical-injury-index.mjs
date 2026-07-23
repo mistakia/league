@@ -46,16 +46,16 @@ const initialize_cli = () =>
     .option('pid', { type: 'string' })
     .option('dry_run', { type: 'boolean', default: false }).argv
 
-const get_existing_row_count = async ({ year }) => {
+const get_existing_row_count = async ({ season_year }) => {
   const rows = await db('historical_injury_index')
-    .where({ year })
+    .where({ season_year })
     .count({ c: '*' })
   return Number(rows[0]?.c || 0)
 }
 
 const generate_for_year = async ({ year, pid, dry_run }) => {
   log(`processing year ${year}`)
-  const prior_count = await get_existing_row_count({ year })
+  const prior_count = await get_existing_row_count({ season_year: year })
   log(`prior row count for year ${year}: ${prior_count}`)
 
   const select_result = await db.raw(rebuild_sql, {
@@ -73,14 +73,14 @@ const generate_for_year = async ({ year, pid, dry_run }) => {
     }
   }
 
-  const now = Math.round(Date.now() / 1000)
+  const now = new Date()
   // Dedupe on the PK -- the spine can emit two rows for the same
   // (pid, year, week, esbid) when a player's two team_spans both contain
   // the game (e.g. traded mid-season to the week's opponent). PostgreSQL
   // refuses to UPSERT a batch that touches the same row twice.
   const dedup = new Map()
   for (const r of rows) {
-    dedup.set(`${r.pid}|${r.year}|${r.week}|${r.esbid}`, r)
+    dedup.set(`${r.pid}|${r.season_year}|${r.week}|${r.esbid}`, r)
   }
   const before_dedup = rows.length
   const deduped = Array.from(dedup.values())
@@ -106,7 +106,7 @@ const generate_for_year = async ({ year, pid, dry_run }) => {
     save: async (batch) => {
       await db('historical_injury_index')
         .insert(batch)
-        .onConflict(['pid', 'year', 'week', 'esbid'])
+        .onConflict(['pid', 'season_year', 'week', 'esbid'])
         .merge()
     }
   })
@@ -118,7 +118,7 @@ const generate_for_year = async ({ year, pid, dry_run }) => {
   // weeks where no prior baseline exists.
   let oracle_shortfall = null
   if (!pid) {
-    const post_count = await get_existing_row_count({ year })
+    const post_count = await get_existing_row_count({ season_year: year })
     if (prior_count === 0) {
       log(
         `oracle: year ${year} first run; baseline established at ${post_count}`

@@ -21,7 +21,7 @@ const initialize_cli = () => {
 const log = debug('import-fantasypros-draft-rankings')
 debug.enable('import-fantasypros-draft-rankings,get-player,fantasypros,fetch')
 
-const timestamp = Math.round(Date.now() / 1000)
+const observed_at = new Date()
 
 const getRanking = (item) => ({
   min: Number(item.rank_min),
@@ -110,7 +110,7 @@ const import_single_fantasypros_draft_rankings = async ({
     inserts.push({
       pid: player_row.pid,
       pos: params.pos,
-      year,
+      season_year: year,
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({
         fantasypros_scoring_type,
@@ -138,10 +138,10 @@ const import_single_fantasypros_draft_rankings = async ({
     log(`Inserting ${inserts.length} rankings into database`)
     await db('player_rankings_index')
       .insert(inserts)
-      .onConflict(['year', 'source_id', 'ranking_type', 'pid'])
+      .onConflict(['season_year', 'source_id', 'ranking_type', 'pid'])
       .merge()
     await db('player_rankings_history').insert(
-      inserts.map((i) => ({ ...i, timestamp }))
+      inserts.map((i) => ({ ...i, observed_at }))
     )
   }
 }
@@ -205,7 +205,7 @@ const import_fantasypros_draft_rankings_for_year = async ({
   // Oracle: every variant we attempted must have at least the floor number of
   // rows in `player_rankings_history` written at this run's timestamp.
   const variant_counts = await db('player_rankings_history')
-    .where({ year, source_id: 'FANTASYPROS', timestamp })
+    .where({ season_year: year, source_id: 'FANTASYPROS', observed_at })
     .whereIn('ranking_type', expected_variants)
     .groupBy('ranking_type')
     .select('ranking_type')
@@ -225,7 +225,7 @@ const import_fantasypros_draft_rankings_for_year = async ({
 
   if (shortfalls.length) {
     return {
-      shortfall: `player_rankings_history row-count shortfall at timestamp=${timestamp} year=${year} source=FANTASYPROS: ${shortfalls.join('; ')}`
+      shortfall: `player_rankings_history row-count shortfall at observed_at=${observed_at} season_year=${year} source=FANTASYPROS: ${shortfalls.join('; ')}`
     }
   }
   return { shortfall: null }

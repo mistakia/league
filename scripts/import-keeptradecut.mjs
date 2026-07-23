@@ -105,21 +105,27 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
         continue
       }
       pid = `KTCPICK-${item.playerID}`
-      const now = dayjs().unix()
+      const now = dayjs().toDate()
       if (!dry) {
         await db('keeptradecut_pick')
           .insert({
             pid,
             ktc_player_id: item.playerID,
             ktc_player_name: keeptradecut_player.playerName,
-            year: meta.year,
+            season_year: meta.year,
             round: meta.round,
             slot: meta.slot,
             created_at: now,
             updated_at: now
           })
           .onConflict('pid')
-          .merge(['ktc_player_name', 'year', 'round', 'slot', 'updated_at'])
+          .merge([
+            'ktc_player_name',
+            'season_year',
+            'round',
+            'slot',
+            'updated_at'
+          ])
       }
     } else {
       let player_row

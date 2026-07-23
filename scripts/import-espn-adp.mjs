@@ -23,7 +23,7 @@ const initialize_cli = () => {
 const log = debug('import-espn-adp')
 debug.enable('import-espn-adp,update-player,get-player,espn')
 
-const timestamp = Math.floor(Date.now() / 1000)
+const observed_at = new Date()
 const BATCH_SIZE = 500
 
 // TODO seperate ADP and draft rankings
@@ -76,7 +76,7 @@ const import_espn_adp = async ({
       adp_inserts.push({
         pid: player_row.pid,
         pos: player_row.primary_position,
-        year,
+        season_year: year,
         adp: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
@@ -132,7 +132,7 @@ const import_espn_adp = async ({
       adp_inserts.push({
         pid: player_row.pid,
         pos: player_row.primary_position,
-        year,
+        season_year: year,
         adp: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
@@ -159,12 +159,12 @@ const import_espn_adp = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
+          .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
           .merge()
       }
     })
     await batch_insert({
-      items: adp_inserts.map((i) => ({ ...i, timestamp })),
+      items: adp_inserts.map((i) => ({ ...i, observed_at })),
       batch_size: BATCH_SIZE,
       save: async (batch) => {
         await db('player_adp_history').insert(batch)

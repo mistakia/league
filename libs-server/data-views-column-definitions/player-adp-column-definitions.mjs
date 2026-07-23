@@ -101,7 +101,7 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
     .join('adp_format', 'player_adp_index.adp_format_id', 'adp_format.id')
     .select(
       'player_adp_index.pid',
-      'player_adp_index.year',
+      'player_adp_index.season_year',
       'player_adp_index.adp',
       'player_adp_index.min_pick',
       'player_adp_index.max_pick',
@@ -110,7 +110,7 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
       'player_adp_index.percent_drafted'
     )
     .whereIn('player_adp_index.source_id', adp_source_id)
-    .whereIn('player_adp_index.year', cte_years)
+    .whereIn('player_adp_index.season_year', cte_years)
     .whereIn('adp_format.scoring_class', scoring_class)
     .whereIn('adp_format.num_qb', num_qb)
     .whereIn('adp_format.duration', duration)
@@ -161,12 +161,12 @@ const player_adp_source = {
           db,
           year_reference,
           source: { year_default: () => year },
-          key_columns: { year: 'year' },
+          key_columns: { year: 'season_year' },
           params,
           ref: cte_name
         })
       } else if (year_reference) {
-        this.andOn(db.raw(`${cte_name}.year = ${year_reference}`))
+        this.andOn(db.raw(`${cte_name}.season_year = ${year_reference}`))
       }
     })
   }

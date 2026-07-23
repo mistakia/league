@@ -22,7 +22,7 @@ const initialize_cli = () => {
 const log = debug('import-mfl-adp')
 debug.enable('import-mfl-adp,update-player,get-player')
 
-const timestamp = Math.floor(Date.now() / 1000)
+const observed_at = new Date()
 const BATCH_SIZE = 500
 
 const fetch_mfl_data = async (url) => {
@@ -102,7 +102,7 @@ const import_mfl_adp = async ({
         adp_inserts.push({
           pid: player_row.pid,
           pos: player_row.pos,
-          year,
+          season_year: year,
           adp: player.average_pick,
           min_pick: player.min_pick,
           max_pick: player.max_pick,
@@ -185,12 +185,12 @@ const import_mfl_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
+            .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
             .merge()
         }
       })
       await batch_insert({
-        items: adp_inserts.map((i) => ({ ...i, timestamp })),
+        items: adp_inserts.map((i) => ({ ...i, observed_at })),
         batch_size: BATCH_SIZE,
         save: async (batch) => {
           await db('player_adp_history').insert(batch)

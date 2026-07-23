@@ -18,7 +18,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 const log = debug('import-underdog-bestball-adp')
 debug.enable('import-underdog-bestball-adp,underdog,underdog-session-manager')
 
-const timestamp = Math.floor(Date.now() / 1000)
+const observed_at = new Date()
 const BATCH_SIZE = 500
 
 // Best-ball slate titles that are payout variants, not roster-format variants.
@@ -160,7 +160,7 @@ const import_underdog_bestball_adp = async ({
       adp_inserts.push({
         pid: player_row.pid,
         pos: player_row.pos,
-        year,
+        season_year: year,
         adp,
         min_pick: null,
         max_pick: null,
@@ -201,12 +201,12 @@ const import_underdog_bestball_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
+            .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
             .merge()
         }
       })
       await batch_insert({
-        items: adp_inserts.map((i) => ({ ...i, timestamp })),
+        items: adp_inserts.map((i) => ({ ...i, observed_at })),
         batch_size: BATCH_SIZE,
         save: async (batch) => {
           await db('player_adp_history').insert(batch)

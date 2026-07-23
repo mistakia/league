@@ -91,7 +91,7 @@ const create_adp_entries = ({ player_row, adp, format_id_by_type }) => {
   ).map(({ type, adp_key }) => ({
     pid: player_row.pid,
     pos: player_row.pos,
-    year: current_season.year,
+    season_year: current_season.year,
     adp: adp[adp_key],
     min_pick: null,
     max_pick: null,
@@ -274,6 +274,7 @@ const import_sleeper_adp_and_projections = async ({
   }
 
   if (adp_inserts.length) {
+    const observed_at = new Date()
     log(`Inserting ${adp_inserts.length} ADP entries into database`)
     await batch_insert({
       items: adp_inserts,
@@ -281,12 +282,12 @@ const import_sleeper_adp_and_projections = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
+          .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
           .merge()
       }
     })
     await batch_insert({
-      items: adp_inserts.map((i) => ({ ...i, timestamp })),
+      items: adp_inserts.map((i) => ({ ...i, observed_at })),
       batch_size: BATCH_SIZE,
       save: async (batch) => {
         await db('player_adp_history').insert(batch)

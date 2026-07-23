@@ -23,7 +23,7 @@ const initialize_cli = () => {
 const log = debug('import-yahoo-adp')
 debug.enable('import-yahoo-adp,update-player,get-player')
 
-const timestamp = Math.floor(Date.now() / 1000)
+const observed_at = new Date()
 const batch_size = 500
 
 const parse_yahoo_data = (players) => {
@@ -78,7 +78,7 @@ const import_yahoo_adp = async ({
       adp_inserts.push({
         pid: player_row.pid,
         pos: player_row.primary_position,
-        year,
+        season_year: year,
         adp: source_player.adp,
         min_pick: null,
         max_pick: null,
@@ -133,7 +133,7 @@ const import_yahoo_adp = async ({
       adp_inserts.push({
         pid: player_row.pid,
         pos: player_row.primary_position,
-        year,
+        season_year: year,
         adp: source_player.adp,
         min_pick: null,
         max_pick: null,
@@ -164,12 +164,12 @@ const import_yahoo_adp = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
+          .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
           .merge()
       }
     })
     await batch_insert({
-      items: adp_inserts.map((i) => ({ ...i, timestamp })),
+      items: adp_inserts.map((i) => ({ ...i, observed_at })),
       batch_size,
       save: async (batch) => {
         await db('player_adp_history').insert(batch)

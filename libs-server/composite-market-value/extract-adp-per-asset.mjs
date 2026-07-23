@@ -25,16 +25,16 @@ export const extract_adp_per_asset = async ({
   const adp_rows = await db('player_adp_history')
     .select(
       db.raw(
-        "pid, TO_CHAR(TO_TIMESTAMP(timestamp), 'YYYY-MM-DD') AS date_iso, adp, source_id"
+        "pid, TO_CHAR(observed_at, 'YYYY-MM-DD') AS date_iso, adp, source_id"
       )
     )
     .whereIn('pid', player_ids)
     .where('adp_format_id', adp_format_id)
-    .where('timestamp', '>=', Math.floor(new Date(start_date).getTime() / 1000))
+    .where('observed_at', '>=', new Date(start_date))
     .where(
-      'timestamp',
+      'observed_at',
       '<=',
-      Math.floor(new Date(end_date).getTime() / 1000) + 86400
+      new Date(new Date(end_date).getTime() + 86400 * 1000)
     )
     .whereNotNull('adp')
 

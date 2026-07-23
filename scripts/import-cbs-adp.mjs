@@ -24,7 +24,7 @@ const initialize_cli = () => {
 const log = debug('import-cbs-adp')
 debug.enable('import-cbs-adp,update-player,get-player')
 
-const timestamp = Math.floor(Date.now() / 1000)
+const observed_at = new Date()
 const BATCH_SIZE = 500
 
 const fetch_cbs_data = async (url) => {
@@ -129,7 +129,7 @@ const import_cbs_adp = async ({
         adp_inserts.push({
           pid: player_row.pid,
           pos: player_row.primary_position,
-          year,
+          season_year: year,
           adp: source_player.adp,
           min_pick: source_player.low_adp,
           max_pick: source_player.high_adp,
@@ -185,7 +185,7 @@ const import_cbs_adp = async ({
         adp_inserts.push({
           pid: player_row.pid,
           pos: player_row.primary_position,
-          year,
+          season_year: year,
           adp: source_player.adp,
           min_pick: source_player.low_adp,
           max_pick: source_player.high_adp,
@@ -214,12 +214,12 @@ const import_cbs_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['year', 'source_id', 'adp_format_id', 'pid'])
+            .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
             .merge()
         }
       })
       await batch_insert({
-        items: adp_inserts.map((i) => ({ ...i, timestamp })),
+        items: adp_inserts.map((i) => ({ ...i, observed_at })),
         batch_size: BATCH_SIZE,
         save: async (batch) => {
           await db('player_adp_history').insert(batch)
