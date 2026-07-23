@@ -235,13 +235,13 @@ DROP INDEX IF EXISTS public.idx_player_pair_correlations_season_year_pid_b;
 DROP INDEX IF EXISTS public.idx_player_pair_correlations_season_year_pid_a;
 DROP INDEX IF EXISTS public.idx_player_nffc_id;
 DROP INDEX IF EXISTS public.idx_player_lname;
-DROP INDEX IF EXISTS public.idx_player_gamelogs_year_esbid_pid;
+DROP INDEX IF EXISTS public.idx_player_gamelogs_season_year_esbid_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_ruled_out;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_pid_week_teams;
-DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm_pid;
-DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
+DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_nfl_team_pid;
+DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_nfl_team;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
-DROP INDEX IF EXISTS public.idx_player_gamelogs_active_pid_year;
+DROP INDEX IF EXISTS public.idx_player_gamelogs_active_pid_season_year;
 DROP INDEX IF EXISTS public.idx_player_game_outcome_correlations_year;
 DROP INDEX IF EXISTS public.idx_player_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_fname;
@@ -20319,8 +20319,8 @@ COMMENT ON COLUMN public.player_game_outcome_correlations.confidence IS 'Confide
 CREATE TABLE public.player_gamelogs (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -20362,7 +20362,7 @@ CREATE TABLE public.player_gamelogs (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -20424,7 +20424,7 @@ CREATE TABLE public.player_gamelogs (
     q4_snaps_def_pct numeric(5,2),
     source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying
 )
-PARTITION BY RANGE (year);
+PARTITION BY RANGE (season_year);
 
 
 --
@@ -20454,8 +20454,8 @@ CREATE TABLE public.player_gamelogs_active_snapshot_2026_05_23 (
 CREATE TABLE public.player_gamelogs_default (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -20497,7 +20497,7 @@ CREATE TABLE public.player_gamelogs_default (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -20568,8 +20568,8 @@ CREATE TABLE public.player_gamelogs_default (
 CREATE TABLE public.player_gamelogs_year_2000 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -20611,7 +20611,7 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -20682,8 +20682,8 @@ CREATE TABLE public.player_gamelogs_year_2000 (
 CREATE TABLE public.player_gamelogs_year_2001 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -20725,7 +20725,7 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -20796,8 +20796,8 @@ CREATE TABLE public.player_gamelogs_year_2001 (
 CREATE TABLE public.player_gamelogs_year_2002 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -20839,7 +20839,7 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -20910,8 +20910,8 @@ CREATE TABLE public.player_gamelogs_year_2002 (
 CREATE TABLE public.player_gamelogs_year_2003 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -20953,7 +20953,7 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21024,8 +21024,8 @@ CREATE TABLE public.player_gamelogs_year_2003 (
 CREATE TABLE public.player_gamelogs_year_2004 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21067,7 +21067,7 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21138,8 +21138,8 @@ CREATE TABLE public.player_gamelogs_year_2004 (
 CREATE TABLE public.player_gamelogs_year_2005 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21181,7 +21181,7 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21252,8 +21252,8 @@ CREATE TABLE public.player_gamelogs_year_2005 (
 CREATE TABLE public.player_gamelogs_year_2006 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21295,7 +21295,7 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21366,8 +21366,8 @@ CREATE TABLE public.player_gamelogs_year_2006 (
 CREATE TABLE public.player_gamelogs_year_2007 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21409,7 +21409,7 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21480,8 +21480,8 @@ CREATE TABLE public.player_gamelogs_year_2007 (
 CREATE TABLE public.player_gamelogs_year_2008 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21523,7 +21523,7 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21594,8 +21594,8 @@ CREATE TABLE public.player_gamelogs_year_2008 (
 CREATE TABLE public.player_gamelogs_year_2009 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21637,7 +21637,7 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21708,8 +21708,8 @@ CREATE TABLE public.player_gamelogs_year_2009 (
 CREATE TABLE public.player_gamelogs_year_2010 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21751,7 +21751,7 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21822,8 +21822,8 @@ CREATE TABLE public.player_gamelogs_year_2010 (
 CREATE TABLE public.player_gamelogs_year_2011 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21865,7 +21865,7 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -21936,8 +21936,8 @@ CREATE TABLE public.player_gamelogs_year_2011 (
 CREATE TABLE public.player_gamelogs_year_2012 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -21979,7 +21979,7 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22050,8 +22050,8 @@ CREATE TABLE public.player_gamelogs_year_2012 (
 CREATE TABLE public.player_gamelogs_year_2013 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22093,7 +22093,7 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22164,8 +22164,8 @@ CREATE TABLE public.player_gamelogs_year_2013 (
 CREATE TABLE public.player_gamelogs_year_2014 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22207,7 +22207,7 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22278,8 +22278,8 @@ CREATE TABLE public.player_gamelogs_year_2014 (
 CREATE TABLE public.player_gamelogs_year_2015 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22321,7 +22321,7 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22392,8 +22392,8 @@ CREATE TABLE public.player_gamelogs_year_2015 (
 CREATE TABLE public.player_gamelogs_year_2016 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22435,7 +22435,7 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22506,8 +22506,8 @@ CREATE TABLE public.player_gamelogs_year_2016 (
 CREATE TABLE public.player_gamelogs_year_2017 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22549,7 +22549,7 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22620,8 +22620,8 @@ CREATE TABLE public.player_gamelogs_year_2017 (
 CREATE TABLE public.player_gamelogs_year_2018 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22663,7 +22663,7 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22734,8 +22734,8 @@ CREATE TABLE public.player_gamelogs_year_2018 (
 CREATE TABLE public.player_gamelogs_year_2019 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22777,7 +22777,7 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22848,8 +22848,8 @@ CREATE TABLE public.player_gamelogs_year_2019 (
 CREATE TABLE public.player_gamelogs_year_2020 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -22891,7 +22891,7 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -22962,8 +22962,8 @@ CREATE TABLE public.player_gamelogs_year_2020 (
 CREATE TABLE public.player_gamelogs_year_2021 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -23005,7 +23005,7 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -23076,8 +23076,8 @@ CREATE TABLE public.player_gamelogs_year_2021 (
 CREATE TABLE public.player_gamelogs_year_2022 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -23119,7 +23119,7 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -23190,8 +23190,8 @@ CREATE TABLE public.player_gamelogs_year_2022 (
 CREATE TABLE public.player_gamelogs_year_2023 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -23233,7 +23233,7 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -23304,8 +23304,8 @@ CREATE TABLE public.player_gamelogs_year_2023 (
 CREATE TABLE public.player_gamelogs_year_2024 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -23347,7 +23347,7 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -23418,8 +23418,8 @@ CREATE TABLE public.player_gamelogs_year_2024 (
 CREATE TABLE public.player_gamelogs_year_2025 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -23461,7 +23461,7 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -23532,8 +23532,8 @@ CREATE TABLE public.player_gamelogs_year_2025 (
 CREATE TABLE public.player_gamelogs_year_2026 (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    opp character varying(3) NOT NULL,
-    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    opponent_nfl_team character varying(3) NOT NULL,
+    nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
@@ -23575,7 +23575,7 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     defensive_two_point_returns smallint DEFAULT '0'::smallint,
     defensive_touchdowns smallint DEFAULT '0'::smallint,
     career_game smallint DEFAULT '0'::smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     snaps_off smallint,
     snaps_off_pct numeric(5,2) DEFAULT NULL::numeric,
     snaps_def smallint,
@@ -28176,7 +28176,7 @@ ALTER TABLE ONLY public.player_game_outcome_correlations
 --
 
 ALTER TABLE ONLY public.player_gamelogs
-    ADD CONSTRAINT player_gamelogs_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28184,7 +28184,7 @@ ALTER TABLE ONLY public.player_gamelogs
 --
 
 ALTER TABLE ONLY public.player_gamelogs_default
-    ADD CONSTRAINT player_gamelogs_default_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_default_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28192,7 +28192,7 @@ ALTER TABLE ONLY public.player_gamelogs_default
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2000
-    ADD CONSTRAINT player_gamelogs_year_2000_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2000_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28200,7 +28200,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2000
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2001
-    ADD CONSTRAINT player_gamelogs_year_2001_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2001_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28208,7 +28208,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2001
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2002
-    ADD CONSTRAINT player_gamelogs_year_2002_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2002_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28216,7 +28216,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2002
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2003
-    ADD CONSTRAINT player_gamelogs_year_2003_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2003_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28224,7 +28224,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2003
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2004
-    ADD CONSTRAINT player_gamelogs_year_2004_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2004_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28232,7 +28232,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2004
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2005
-    ADD CONSTRAINT player_gamelogs_year_2005_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2005_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28240,7 +28240,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2005
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2006
-    ADD CONSTRAINT player_gamelogs_year_2006_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2006_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28248,7 +28248,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2006
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2007
-    ADD CONSTRAINT player_gamelogs_year_2007_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2007_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28256,7 +28256,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2007
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2008
-    ADD CONSTRAINT player_gamelogs_year_2008_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2008_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28264,7 +28264,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2008
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2009
-    ADD CONSTRAINT player_gamelogs_year_2009_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2009_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28272,7 +28272,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2009
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2010
-    ADD CONSTRAINT player_gamelogs_year_2010_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2010_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28280,7 +28280,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2010
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2011
-    ADD CONSTRAINT player_gamelogs_year_2011_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2011_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28288,7 +28288,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2011
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2012
-    ADD CONSTRAINT player_gamelogs_year_2012_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2012_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28296,7 +28296,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2012
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2013
-    ADD CONSTRAINT player_gamelogs_year_2013_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2013_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28304,7 +28304,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2013
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2014
-    ADD CONSTRAINT player_gamelogs_year_2014_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2014_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28312,7 +28312,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2014
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2015
-    ADD CONSTRAINT player_gamelogs_year_2015_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2015_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28320,7 +28320,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2015
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2016
-    ADD CONSTRAINT player_gamelogs_year_2016_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2016_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28328,7 +28328,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2016
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2017
-    ADD CONSTRAINT player_gamelogs_year_2017_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2017_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28336,7 +28336,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2017
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2018
-    ADD CONSTRAINT player_gamelogs_year_2018_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2018_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28344,7 +28344,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2018
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2019
-    ADD CONSTRAINT player_gamelogs_year_2019_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2019_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28352,7 +28352,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2019
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2020
-    ADD CONSTRAINT player_gamelogs_year_2020_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2020_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28360,7 +28360,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2020
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2021
-    ADD CONSTRAINT player_gamelogs_year_2021_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2021_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28368,7 +28368,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2021
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2022
-    ADD CONSTRAINT player_gamelogs_year_2022_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2022_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28376,7 +28376,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2022
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2023
-    ADD CONSTRAINT player_gamelogs_year_2023_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2023_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28384,7 +28384,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2023
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2024
-    ADD CONSTRAINT player_gamelogs_year_2024_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2024_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28392,7 +28392,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2024
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2025
-    ADD CONSTRAINT player_gamelogs_year_2025_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2025_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -28400,7 +28400,7 @@ ALTER TABLE ONLY public.player_gamelogs_year_2025
 --
 
 ALTER TABLE ONLY public.player_gamelogs_year_2026
-    ADD CONSTRAINT player_gamelogs_year_2026_pkey PRIMARY KEY (esbid, pid, year);
+    ADD CONSTRAINT player_gamelogs_year_2026_pkey PRIMARY KEY (esbid, pid, season_year);
 
 
 --
@@ -30404,10 +30404,10 @@ CREATE INDEX idx_player_game_outcome_correlations_year ON public.player_game_out
 
 
 --
--- Name: idx_player_gamelogs_active_pid_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_gamelogs_active_pid_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_gamelogs_active_pid_year ON ONLY public.player_gamelogs USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX idx_player_gamelogs_active_pid_season_year ON ONLY public.player_gamelogs USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -30418,24 +30418,24 @@ CREATE INDEX idx_player_gamelogs_esbid_active_pid ON ONLY public.player_gamelogs
 
 
 --
--- Name: idx_player_gamelogs_esbid_tm; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_gamelogs_esbid_nfl_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_gamelogs_esbid_tm ON ONLY public.player_gamelogs USING btree (esbid, tm);
+CREATE INDEX idx_player_gamelogs_esbid_nfl_team ON ONLY public.player_gamelogs USING btree (esbid, nfl_team);
 
 
 --
--- Name: idx_player_gamelogs_esbid_tm_pid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_gamelogs_esbid_nfl_team_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_gamelogs_esbid_tm_pid ON ONLY public.player_gamelogs USING btree (tm, esbid, pid);
+CREATE INDEX idx_player_gamelogs_esbid_nfl_team_pid ON ONLY public.player_gamelogs USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: idx_player_gamelogs_pid_week_teams; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_gamelogs_pid_week_teams ON ONLY public.player_gamelogs USING btree (pid, tm);
+CREATE INDEX idx_player_gamelogs_pid_week_teams ON ONLY public.player_gamelogs USING btree (pid, nfl_team);
 
 
 --
@@ -30446,10 +30446,10 @@ CREATE INDEX idx_player_gamelogs_ruled_out ON ONLY public.player_gamelogs USING 
 
 
 --
--- Name: idx_player_gamelogs_year_esbid_pid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_gamelogs_season_year_esbid_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_player_gamelogs_year_esbid_pid ON ONLY public.player_gamelogs USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX idx_player_gamelogs_season_year_esbid_pid ON ONLY public.player_gamelogs USING btree (season_year, esbid, pid);
 
 
 --
@@ -41621,7 +41621,7 @@ CREATE INDEX player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx ON pu
 -- Name: player_gamelogs_default_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_default_active_pid_year_idx ON public.player_gamelogs_default USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_default_active_pid_year_idx ON public.player_gamelogs_default USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41635,14 +41635,14 @@ CREATE INDEX player_gamelogs_default_esbid_pid_active_idx ON public.player_gamel
 -- Name: player_gamelogs_default_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_default_esbid_tm_idx ON public.player_gamelogs_default USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_default_esbid_tm_idx ON public.player_gamelogs_default USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_default_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_default_pid_tm_idx ON public.player_gamelogs_default USING btree (pid, tm);
+CREATE INDEX player_gamelogs_default_pid_tm_idx ON public.player_gamelogs_default USING btree (pid, nfl_team);
 
 
 --
@@ -41656,21 +41656,21 @@ CREATE INDEX player_gamelogs_default_ruled_out_in_game_idx ON public.player_game
 -- Name: player_gamelogs_default_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_default_tm_esbid_pid_idx ON public.player_gamelogs_default USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_default_tm_esbid_pid_idx ON public.player_gamelogs_default USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_default_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_default_year_esbid_pid_idx ON public.player_gamelogs_default USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_default_year_esbid_pid_idx ON public.player_gamelogs_default USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2000_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2000_active_pid_year_idx ON public.player_gamelogs_year_2000 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2000_active_pid_year_idx ON public.player_gamelogs_year_2000 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41684,14 +41684,14 @@ CREATE INDEX player_gamelogs_year_2000_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2000_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2000_esbid_tm_idx ON public.player_gamelogs_year_2000 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2000_esbid_tm_idx ON public.player_gamelogs_year_2000 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2000_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2000_pid_tm_idx ON public.player_gamelogs_year_2000 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2000_pid_tm_idx ON public.player_gamelogs_year_2000 USING btree (pid, nfl_team);
 
 
 --
@@ -41705,21 +41705,21 @@ CREATE INDEX player_gamelogs_year_2000_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2000_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2000_tm_esbid_pid_idx ON public.player_gamelogs_year_2000 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2000_tm_esbid_pid_idx ON public.player_gamelogs_year_2000 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2000_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2000_year_esbid_pid_idx ON public.player_gamelogs_year_2000 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2000_year_esbid_pid_idx ON public.player_gamelogs_year_2000 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2001_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2001_active_pid_year_idx ON public.player_gamelogs_year_2001 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2001_active_pid_year_idx ON public.player_gamelogs_year_2001 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41733,14 +41733,14 @@ CREATE INDEX player_gamelogs_year_2001_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2001_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2001_esbid_tm_idx ON public.player_gamelogs_year_2001 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2001_esbid_tm_idx ON public.player_gamelogs_year_2001 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2001_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2001_pid_tm_idx ON public.player_gamelogs_year_2001 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2001_pid_tm_idx ON public.player_gamelogs_year_2001 USING btree (pid, nfl_team);
 
 
 --
@@ -41754,21 +41754,21 @@ CREATE INDEX player_gamelogs_year_2001_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2001_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2001_tm_esbid_pid_idx ON public.player_gamelogs_year_2001 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2001_tm_esbid_pid_idx ON public.player_gamelogs_year_2001 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2001_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2001_year_esbid_pid_idx ON public.player_gamelogs_year_2001 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2001_year_esbid_pid_idx ON public.player_gamelogs_year_2001 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2002_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2002_active_pid_year_idx ON public.player_gamelogs_year_2002 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2002_active_pid_year_idx ON public.player_gamelogs_year_2002 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41782,14 +41782,14 @@ CREATE INDEX player_gamelogs_year_2002_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2002_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2002_esbid_tm_idx ON public.player_gamelogs_year_2002 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2002_esbid_tm_idx ON public.player_gamelogs_year_2002 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2002_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2002_pid_tm_idx ON public.player_gamelogs_year_2002 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2002_pid_tm_idx ON public.player_gamelogs_year_2002 USING btree (pid, nfl_team);
 
 
 --
@@ -41803,21 +41803,21 @@ CREATE INDEX player_gamelogs_year_2002_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2002_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2002_tm_esbid_pid_idx ON public.player_gamelogs_year_2002 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2002_tm_esbid_pid_idx ON public.player_gamelogs_year_2002 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2002_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2002_year_esbid_pid_idx ON public.player_gamelogs_year_2002 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2002_year_esbid_pid_idx ON public.player_gamelogs_year_2002 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2003_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2003_active_pid_year_idx ON public.player_gamelogs_year_2003 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2003_active_pid_year_idx ON public.player_gamelogs_year_2003 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41831,14 +41831,14 @@ CREATE INDEX player_gamelogs_year_2003_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2003_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2003_esbid_tm_idx ON public.player_gamelogs_year_2003 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2003_esbid_tm_idx ON public.player_gamelogs_year_2003 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2003_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2003_pid_tm_idx ON public.player_gamelogs_year_2003 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2003_pid_tm_idx ON public.player_gamelogs_year_2003 USING btree (pid, nfl_team);
 
 
 --
@@ -41852,21 +41852,21 @@ CREATE INDEX player_gamelogs_year_2003_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2003_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2003_tm_esbid_pid_idx ON public.player_gamelogs_year_2003 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2003_tm_esbid_pid_idx ON public.player_gamelogs_year_2003 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2003_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2003_year_esbid_pid_idx ON public.player_gamelogs_year_2003 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2003_year_esbid_pid_idx ON public.player_gamelogs_year_2003 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2004_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2004_active_pid_year_idx ON public.player_gamelogs_year_2004 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2004_active_pid_year_idx ON public.player_gamelogs_year_2004 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41880,14 +41880,14 @@ CREATE INDEX player_gamelogs_year_2004_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2004_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2004_esbid_tm_idx ON public.player_gamelogs_year_2004 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2004_esbid_tm_idx ON public.player_gamelogs_year_2004 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2004_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2004_pid_tm_idx ON public.player_gamelogs_year_2004 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2004_pid_tm_idx ON public.player_gamelogs_year_2004 USING btree (pid, nfl_team);
 
 
 --
@@ -41901,21 +41901,21 @@ CREATE INDEX player_gamelogs_year_2004_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2004_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2004_tm_esbid_pid_idx ON public.player_gamelogs_year_2004 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2004_tm_esbid_pid_idx ON public.player_gamelogs_year_2004 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2004_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2004_year_esbid_pid_idx ON public.player_gamelogs_year_2004 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2004_year_esbid_pid_idx ON public.player_gamelogs_year_2004 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2005_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2005_active_pid_year_idx ON public.player_gamelogs_year_2005 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2005_active_pid_year_idx ON public.player_gamelogs_year_2005 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41929,14 +41929,14 @@ CREATE INDEX player_gamelogs_year_2005_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2005_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2005_esbid_tm_idx ON public.player_gamelogs_year_2005 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2005_esbid_tm_idx ON public.player_gamelogs_year_2005 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2005_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2005_pid_tm_idx ON public.player_gamelogs_year_2005 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2005_pid_tm_idx ON public.player_gamelogs_year_2005 USING btree (pid, nfl_team);
 
 
 --
@@ -41950,21 +41950,21 @@ CREATE INDEX player_gamelogs_year_2005_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2005_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2005_tm_esbid_pid_idx ON public.player_gamelogs_year_2005 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2005_tm_esbid_pid_idx ON public.player_gamelogs_year_2005 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2005_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2005_year_esbid_pid_idx ON public.player_gamelogs_year_2005 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2005_year_esbid_pid_idx ON public.player_gamelogs_year_2005 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2006_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2006_active_pid_year_idx ON public.player_gamelogs_year_2006 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2006_active_pid_year_idx ON public.player_gamelogs_year_2006 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -41978,14 +41978,14 @@ CREATE INDEX player_gamelogs_year_2006_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2006_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2006_esbid_tm_idx ON public.player_gamelogs_year_2006 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2006_esbid_tm_idx ON public.player_gamelogs_year_2006 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2006_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2006_pid_tm_idx ON public.player_gamelogs_year_2006 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2006_pid_tm_idx ON public.player_gamelogs_year_2006 USING btree (pid, nfl_team);
 
 
 --
@@ -41999,21 +41999,21 @@ CREATE INDEX player_gamelogs_year_2006_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2006_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2006_tm_esbid_pid_idx ON public.player_gamelogs_year_2006 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2006_tm_esbid_pid_idx ON public.player_gamelogs_year_2006 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2006_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2006_year_esbid_pid_idx ON public.player_gamelogs_year_2006 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2006_year_esbid_pid_idx ON public.player_gamelogs_year_2006 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2007_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2007_active_pid_year_idx ON public.player_gamelogs_year_2007 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2007_active_pid_year_idx ON public.player_gamelogs_year_2007 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42027,14 +42027,14 @@ CREATE INDEX player_gamelogs_year_2007_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2007_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2007_esbid_tm_idx ON public.player_gamelogs_year_2007 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2007_esbid_tm_idx ON public.player_gamelogs_year_2007 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2007_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2007_pid_tm_idx ON public.player_gamelogs_year_2007 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2007_pid_tm_idx ON public.player_gamelogs_year_2007 USING btree (pid, nfl_team);
 
 
 --
@@ -42048,21 +42048,21 @@ CREATE INDEX player_gamelogs_year_2007_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2007_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2007_tm_esbid_pid_idx ON public.player_gamelogs_year_2007 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2007_tm_esbid_pid_idx ON public.player_gamelogs_year_2007 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2007_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2007_year_esbid_pid_idx ON public.player_gamelogs_year_2007 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2007_year_esbid_pid_idx ON public.player_gamelogs_year_2007 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2008_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2008_active_pid_year_idx ON public.player_gamelogs_year_2008 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2008_active_pid_year_idx ON public.player_gamelogs_year_2008 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42076,14 +42076,14 @@ CREATE INDEX player_gamelogs_year_2008_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2008_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2008_esbid_tm_idx ON public.player_gamelogs_year_2008 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2008_esbid_tm_idx ON public.player_gamelogs_year_2008 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2008_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2008_pid_tm_idx ON public.player_gamelogs_year_2008 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2008_pid_tm_idx ON public.player_gamelogs_year_2008 USING btree (pid, nfl_team);
 
 
 --
@@ -42097,21 +42097,21 @@ CREATE INDEX player_gamelogs_year_2008_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2008_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2008_tm_esbid_pid_idx ON public.player_gamelogs_year_2008 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2008_tm_esbid_pid_idx ON public.player_gamelogs_year_2008 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2008_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2008_year_esbid_pid_idx ON public.player_gamelogs_year_2008 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2008_year_esbid_pid_idx ON public.player_gamelogs_year_2008 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2009_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2009_active_pid_year_idx ON public.player_gamelogs_year_2009 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2009_active_pid_year_idx ON public.player_gamelogs_year_2009 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42125,14 +42125,14 @@ CREATE INDEX player_gamelogs_year_2009_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2009_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2009_esbid_tm_idx ON public.player_gamelogs_year_2009 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2009_esbid_tm_idx ON public.player_gamelogs_year_2009 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2009_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2009_pid_tm_idx ON public.player_gamelogs_year_2009 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2009_pid_tm_idx ON public.player_gamelogs_year_2009 USING btree (pid, nfl_team);
 
 
 --
@@ -42146,21 +42146,21 @@ CREATE INDEX player_gamelogs_year_2009_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2009_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2009_tm_esbid_pid_idx ON public.player_gamelogs_year_2009 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2009_tm_esbid_pid_idx ON public.player_gamelogs_year_2009 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2009_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2009_year_esbid_pid_idx ON public.player_gamelogs_year_2009 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2009_year_esbid_pid_idx ON public.player_gamelogs_year_2009 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2010_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2010_active_pid_year_idx ON public.player_gamelogs_year_2010 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2010_active_pid_year_idx ON public.player_gamelogs_year_2010 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42174,14 +42174,14 @@ CREATE INDEX player_gamelogs_year_2010_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2010_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2010_esbid_tm_idx ON public.player_gamelogs_year_2010 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2010_esbid_tm_idx ON public.player_gamelogs_year_2010 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2010_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2010_pid_tm_idx ON public.player_gamelogs_year_2010 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2010_pid_tm_idx ON public.player_gamelogs_year_2010 USING btree (pid, nfl_team);
 
 
 --
@@ -42195,21 +42195,21 @@ CREATE INDEX player_gamelogs_year_2010_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2010_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2010_tm_esbid_pid_idx ON public.player_gamelogs_year_2010 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2010_tm_esbid_pid_idx ON public.player_gamelogs_year_2010 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2010_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2010_year_esbid_pid_idx ON public.player_gamelogs_year_2010 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2010_year_esbid_pid_idx ON public.player_gamelogs_year_2010 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2011_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2011_active_pid_year_idx ON public.player_gamelogs_year_2011 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2011_active_pid_year_idx ON public.player_gamelogs_year_2011 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42223,14 +42223,14 @@ CREATE INDEX player_gamelogs_year_2011_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2011_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2011_esbid_tm_idx ON public.player_gamelogs_year_2011 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2011_esbid_tm_idx ON public.player_gamelogs_year_2011 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2011_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2011_pid_tm_idx ON public.player_gamelogs_year_2011 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2011_pid_tm_idx ON public.player_gamelogs_year_2011 USING btree (pid, nfl_team);
 
 
 --
@@ -42244,21 +42244,21 @@ CREATE INDEX player_gamelogs_year_2011_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2011_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2011_tm_esbid_pid_idx ON public.player_gamelogs_year_2011 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2011_tm_esbid_pid_idx ON public.player_gamelogs_year_2011 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2011_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2011_year_esbid_pid_idx ON public.player_gamelogs_year_2011 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2011_year_esbid_pid_idx ON public.player_gamelogs_year_2011 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2012_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2012_active_pid_year_idx ON public.player_gamelogs_year_2012 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2012_active_pid_year_idx ON public.player_gamelogs_year_2012 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42272,14 +42272,14 @@ CREATE INDEX player_gamelogs_year_2012_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2012_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2012_esbid_tm_idx ON public.player_gamelogs_year_2012 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2012_esbid_tm_idx ON public.player_gamelogs_year_2012 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2012_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2012_pid_tm_idx ON public.player_gamelogs_year_2012 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2012_pid_tm_idx ON public.player_gamelogs_year_2012 USING btree (pid, nfl_team);
 
 
 --
@@ -42293,21 +42293,21 @@ CREATE INDEX player_gamelogs_year_2012_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2012_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2012_tm_esbid_pid_idx ON public.player_gamelogs_year_2012 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2012_tm_esbid_pid_idx ON public.player_gamelogs_year_2012 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2012_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2012_year_esbid_pid_idx ON public.player_gamelogs_year_2012 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2012_year_esbid_pid_idx ON public.player_gamelogs_year_2012 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2013_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2013_active_pid_year_idx ON public.player_gamelogs_year_2013 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2013_active_pid_year_idx ON public.player_gamelogs_year_2013 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42321,14 +42321,14 @@ CREATE INDEX player_gamelogs_year_2013_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2013_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2013_esbid_tm_idx ON public.player_gamelogs_year_2013 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2013_esbid_tm_idx ON public.player_gamelogs_year_2013 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2013_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2013_pid_tm_idx ON public.player_gamelogs_year_2013 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2013_pid_tm_idx ON public.player_gamelogs_year_2013 USING btree (pid, nfl_team);
 
 
 --
@@ -42342,21 +42342,21 @@ CREATE INDEX player_gamelogs_year_2013_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2013_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2013_tm_esbid_pid_idx ON public.player_gamelogs_year_2013 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2013_tm_esbid_pid_idx ON public.player_gamelogs_year_2013 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2013_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2013_year_esbid_pid_idx ON public.player_gamelogs_year_2013 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2013_year_esbid_pid_idx ON public.player_gamelogs_year_2013 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2014_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2014_active_pid_year_idx ON public.player_gamelogs_year_2014 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2014_active_pid_year_idx ON public.player_gamelogs_year_2014 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42370,14 +42370,14 @@ CREATE INDEX player_gamelogs_year_2014_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2014_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2014_esbid_tm_idx ON public.player_gamelogs_year_2014 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2014_esbid_tm_idx ON public.player_gamelogs_year_2014 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2014_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2014_pid_tm_idx ON public.player_gamelogs_year_2014 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2014_pid_tm_idx ON public.player_gamelogs_year_2014 USING btree (pid, nfl_team);
 
 
 --
@@ -42391,21 +42391,21 @@ CREATE INDEX player_gamelogs_year_2014_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2014_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2014_tm_esbid_pid_idx ON public.player_gamelogs_year_2014 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2014_tm_esbid_pid_idx ON public.player_gamelogs_year_2014 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2014_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2014_year_esbid_pid_idx ON public.player_gamelogs_year_2014 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2014_year_esbid_pid_idx ON public.player_gamelogs_year_2014 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2015_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2015_active_pid_year_idx ON public.player_gamelogs_year_2015 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2015_active_pid_year_idx ON public.player_gamelogs_year_2015 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42419,14 +42419,14 @@ CREATE INDEX player_gamelogs_year_2015_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2015_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2015_esbid_tm_idx ON public.player_gamelogs_year_2015 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2015_esbid_tm_idx ON public.player_gamelogs_year_2015 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2015_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2015_pid_tm_idx ON public.player_gamelogs_year_2015 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2015_pid_tm_idx ON public.player_gamelogs_year_2015 USING btree (pid, nfl_team);
 
 
 --
@@ -42440,21 +42440,21 @@ CREATE INDEX player_gamelogs_year_2015_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2015_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2015_tm_esbid_pid_idx ON public.player_gamelogs_year_2015 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2015_tm_esbid_pid_idx ON public.player_gamelogs_year_2015 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2015_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2015_year_esbid_pid_idx ON public.player_gamelogs_year_2015 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2015_year_esbid_pid_idx ON public.player_gamelogs_year_2015 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2016_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2016_active_pid_year_idx ON public.player_gamelogs_year_2016 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2016_active_pid_year_idx ON public.player_gamelogs_year_2016 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42468,14 +42468,14 @@ CREATE INDEX player_gamelogs_year_2016_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2016_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2016_esbid_tm_idx ON public.player_gamelogs_year_2016 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2016_esbid_tm_idx ON public.player_gamelogs_year_2016 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2016_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2016_pid_tm_idx ON public.player_gamelogs_year_2016 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2016_pid_tm_idx ON public.player_gamelogs_year_2016 USING btree (pid, nfl_team);
 
 
 --
@@ -42489,21 +42489,21 @@ CREATE INDEX player_gamelogs_year_2016_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2016_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2016_tm_esbid_pid_idx ON public.player_gamelogs_year_2016 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2016_tm_esbid_pid_idx ON public.player_gamelogs_year_2016 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2016_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2016_year_esbid_pid_idx ON public.player_gamelogs_year_2016 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2016_year_esbid_pid_idx ON public.player_gamelogs_year_2016 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2017_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2017_active_pid_year_idx ON public.player_gamelogs_year_2017 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2017_active_pid_year_idx ON public.player_gamelogs_year_2017 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42517,14 +42517,14 @@ CREATE INDEX player_gamelogs_year_2017_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2017_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2017_esbid_tm_idx ON public.player_gamelogs_year_2017 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2017_esbid_tm_idx ON public.player_gamelogs_year_2017 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2017_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2017_pid_tm_idx ON public.player_gamelogs_year_2017 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2017_pid_tm_idx ON public.player_gamelogs_year_2017 USING btree (pid, nfl_team);
 
 
 --
@@ -42538,21 +42538,21 @@ CREATE INDEX player_gamelogs_year_2017_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2017_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2017_tm_esbid_pid_idx ON public.player_gamelogs_year_2017 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2017_tm_esbid_pid_idx ON public.player_gamelogs_year_2017 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2017_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2017_year_esbid_pid_idx ON public.player_gamelogs_year_2017 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2017_year_esbid_pid_idx ON public.player_gamelogs_year_2017 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2018_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2018_active_pid_year_idx ON public.player_gamelogs_year_2018 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2018_active_pid_year_idx ON public.player_gamelogs_year_2018 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42566,14 +42566,14 @@ CREATE INDEX player_gamelogs_year_2018_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2018_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2018_esbid_tm_idx ON public.player_gamelogs_year_2018 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2018_esbid_tm_idx ON public.player_gamelogs_year_2018 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2018_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2018_pid_tm_idx ON public.player_gamelogs_year_2018 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2018_pid_tm_idx ON public.player_gamelogs_year_2018 USING btree (pid, nfl_team);
 
 
 --
@@ -42587,21 +42587,21 @@ CREATE INDEX player_gamelogs_year_2018_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2018_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2018_tm_esbid_pid_idx ON public.player_gamelogs_year_2018 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2018_tm_esbid_pid_idx ON public.player_gamelogs_year_2018 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2018_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2018_year_esbid_pid_idx ON public.player_gamelogs_year_2018 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2018_year_esbid_pid_idx ON public.player_gamelogs_year_2018 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2019_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2019_active_pid_year_idx ON public.player_gamelogs_year_2019 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2019_active_pid_year_idx ON public.player_gamelogs_year_2019 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42615,14 +42615,14 @@ CREATE INDEX player_gamelogs_year_2019_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2019_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2019_esbid_tm_idx ON public.player_gamelogs_year_2019 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2019_esbid_tm_idx ON public.player_gamelogs_year_2019 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2019_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2019_pid_tm_idx ON public.player_gamelogs_year_2019 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2019_pid_tm_idx ON public.player_gamelogs_year_2019 USING btree (pid, nfl_team);
 
 
 --
@@ -42636,21 +42636,21 @@ CREATE INDEX player_gamelogs_year_2019_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2019_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2019_tm_esbid_pid_idx ON public.player_gamelogs_year_2019 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2019_tm_esbid_pid_idx ON public.player_gamelogs_year_2019 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2019_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2019_year_esbid_pid_idx ON public.player_gamelogs_year_2019 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2019_year_esbid_pid_idx ON public.player_gamelogs_year_2019 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2020_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2020_active_pid_year_idx ON public.player_gamelogs_year_2020 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2020_active_pid_year_idx ON public.player_gamelogs_year_2020 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42664,14 +42664,14 @@ CREATE INDEX player_gamelogs_year_2020_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2020_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2020_esbid_tm_idx ON public.player_gamelogs_year_2020 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2020_esbid_tm_idx ON public.player_gamelogs_year_2020 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2020_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2020_pid_tm_idx ON public.player_gamelogs_year_2020 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2020_pid_tm_idx ON public.player_gamelogs_year_2020 USING btree (pid, nfl_team);
 
 
 --
@@ -42685,21 +42685,21 @@ CREATE INDEX player_gamelogs_year_2020_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2020_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2020_tm_esbid_pid_idx ON public.player_gamelogs_year_2020 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2020_tm_esbid_pid_idx ON public.player_gamelogs_year_2020 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2020_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2020_year_esbid_pid_idx ON public.player_gamelogs_year_2020 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2020_year_esbid_pid_idx ON public.player_gamelogs_year_2020 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2021_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2021_active_pid_year_idx ON public.player_gamelogs_year_2021 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2021_active_pid_year_idx ON public.player_gamelogs_year_2021 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42713,14 +42713,14 @@ CREATE INDEX player_gamelogs_year_2021_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2021_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2021_esbid_tm_idx ON public.player_gamelogs_year_2021 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2021_esbid_tm_idx ON public.player_gamelogs_year_2021 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2021_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2021_pid_tm_idx ON public.player_gamelogs_year_2021 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2021_pid_tm_idx ON public.player_gamelogs_year_2021 USING btree (pid, nfl_team);
 
 
 --
@@ -42734,21 +42734,21 @@ CREATE INDEX player_gamelogs_year_2021_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2021_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2021_tm_esbid_pid_idx ON public.player_gamelogs_year_2021 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2021_tm_esbid_pid_idx ON public.player_gamelogs_year_2021 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2021_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2021_year_esbid_pid_idx ON public.player_gamelogs_year_2021 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2021_year_esbid_pid_idx ON public.player_gamelogs_year_2021 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2022_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2022_active_pid_year_idx ON public.player_gamelogs_year_2022 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2022_active_pid_year_idx ON public.player_gamelogs_year_2022 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42762,14 +42762,14 @@ CREATE INDEX player_gamelogs_year_2022_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2022_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2022_esbid_tm_idx ON public.player_gamelogs_year_2022 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2022_esbid_tm_idx ON public.player_gamelogs_year_2022 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2022_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2022_pid_tm_idx ON public.player_gamelogs_year_2022 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2022_pid_tm_idx ON public.player_gamelogs_year_2022 USING btree (pid, nfl_team);
 
 
 --
@@ -42783,21 +42783,21 @@ CREATE INDEX player_gamelogs_year_2022_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2022_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2022_tm_esbid_pid_idx ON public.player_gamelogs_year_2022 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2022_tm_esbid_pid_idx ON public.player_gamelogs_year_2022 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2022_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2022_year_esbid_pid_idx ON public.player_gamelogs_year_2022 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2022_year_esbid_pid_idx ON public.player_gamelogs_year_2022 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2023_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2023_active_pid_year_idx ON public.player_gamelogs_year_2023 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2023_active_pid_year_idx ON public.player_gamelogs_year_2023 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42811,14 +42811,14 @@ CREATE INDEX player_gamelogs_year_2023_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2023_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2023_esbid_tm_idx ON public.player_gamelogs_year_2023 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2023_esbid_tm_idx ON public.player_gamelogs_year_2023 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2023_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2023_pid_tm_idx ON public.player_gamelogs_year_2023 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2023_pid_tm_idx ON public.player_gamelogs_year_2023 USING btree (pid, nfl_team);
 
 
 --
@@ -42832,21 +42832,21 @@ CREATE INDEX player_gamelogs_year_2023_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2023_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2023_tm_esbid_pid_idx ON public.player_gamelogs_year_2023 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2023_tm_esbid_pid_idx ON public.player_gamelogs_year_2023 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2023_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2023_year_esbid_pid_idx ON public.player_gamelogs_year_2023 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2023_year_esbid_pid_idx ON public.player_gamelogs_year_2023 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2024_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2024_active_pid_year_idx ON public.player_gamelogs_year_2024 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2024_active_pid_year_idx ON public.player_gamelogs_year_2024 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42860,14 +42860,14 @@ CREATE INDEX player_gamelogs_year_2024_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2024_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2024_esbid_tm_idx ON public.player_gamelogs_year_2024 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2024_esbid_tm_idx ON public.player_gamelogs_year_2024 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2024_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2024_pid_tm_idx ON public.player_gamelogs_year_2024 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2024_pid_tm_idx ON public.player_gamelogs_year_2024 USING btree (pid, nfl_team);
 
 
 --
@@ -42881,21 +42881,21 @@ CREATE INDEX player_gamelogs_year_2024_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2024_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2024_tm_esbid_pid_idx ON public.player_gamelogs_year_2024 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2024_tm_esbid_pid_idx ON public.player_gamelogs_year_2024 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2024_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2024_year_esbid_pid_idx ON public.player_gamelogs_year_2024 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2024_year_esbid_pid_idx ON public.player_gamelogs_year_2024 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2025_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2025_active_pid_year_idx ON public.player_gamelogs_year_2025 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2025_active_pid_year_idx ON public.player_gamelogs_year_2025 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42909,14 +42909,14 @@ CREATE INDEX player_gamelogs_year_2025_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2025_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2025_esbid_tm_idx ON public.player_gamelogs_year_2025 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2025_esbid_tm_idx ON public.player_gamelogs_year_2025 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2025_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2025_pid_tm_idx ON public.player_gamelogs_year_2025 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2025_pid_tm_idx ON public.player_gamelogs_year_2025 USING btree (pid, nfl_team);
 
 
 --
@@ -42930,21 +42930,21 @@ CREATE INDEX player_gamelogs_year_2025_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2025_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2025_tm_esbid_pid_idx ON public.player_gamelogs_year_2025 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2025_tm_esbid_pid_idx ON public.player_gamelogs_year_2025 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2025_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2025_year_esbid_pid_idx ON public.player_gamelogs_year_2025 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2025_year_esbid_pid_idx ON public.player_gamelogs_year_2025 USING btree (season_year, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2026_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2026_active_pid_year_idx ON public.player_gamelogs_year_2026 USING btree (active, pid, year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2026_active_pid_year_idx ON public.player_gamelogs_year_2026 USING btree (active, pid, season_year) WHERE (active = true);
 
 
 --
@@ -42958,14 +42958,14 @@ CREATE INDEX player_gamelogs_year_2026_esbid_pid_active_idx ON public.player_gam
 -- Name: player_gamelogs_year_2026_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2026_esbid_tm_idx ON public.player_gamelogs_year_2026 USING btree (esbid, tm);
+CREATE INDEX player_gamelogs_year_2026_esbid_tm_idx ON public.player_gamelogs_year_2026 USING btree (esbid, nfl_team);
 
 
 --
 -- Name: player_gamelogs_year_2026_pid_tm_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2026_pid_tm_idx ON public.player_gamelogs_year_2026 USING btree (pid, tm);
+CREATE INDEX player_gamelogs_year_2026_pid_tm_idx ON public.player_gamelogs_year_2026 USING btree (pid, nfl_team);
 
 
 --
@@ -42979,14 +42979,14 @@ CREATE INDEX player_gamelogs_year_2026_ruled_out_in_game_idx ON public.player_ga
 -- Name: player_gamelogs_year_2026_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2026_tm_esbid_pid_idx ON public.player_gamelogs_year_2026 USING btree (tm, esbid, pid);
+CREATE INDEX player_gamelogs_year_2026_tm_esbid_pid_idx ON public.player_gamelogs_year_2026 USING btree (nfl_team, esbid, pid);
 
 
 --
 -- Name: player_gamelogs_year_2026_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX player_gamelogs_year_2026_year_esbid_pid_idx ON public.player_gamelogs_year_2026 USING btree (year, esbid, pid);
+CREATE UNIQUE INDEX player_gamelogs_year_2026_year_esbid_pid_idx ON public.player_gamelogs_year_2026 USING btree (season_year, esbid, pid);
 
 
 --
@@ -53640,7 +53640,7 @@ ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_
 -- Name: player_gamelogs_default_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_default_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_default_active_pid_year_idx;
 
 
 --
@@ -53654,7 +53654,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_default_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_default_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_default_esbid_tm_idx;
 
 
 --
@@ -53682,21 +53682,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_default_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_default_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_default_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_default_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_default_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_default_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2000_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2000_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2000_active_pid_year_idx;
 
 
 --
@@ -53710,7 +53710,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2000_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2000_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2000_esbid_tm_idx;
 
 
 --
@@ -53738,21 +53738,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2000_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2000_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2000_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2000_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2000_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2000_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2001_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2001_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2001_active_pid_year_idx;
 
 
 --
@@ -53766,7 +53766,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2001_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2001_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2001_esbid_tm_idx;
 
 
 --
@@ -53794,21 +53794,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2001_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2001_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2001_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2001_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2001_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2001_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2002_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2002_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2002_active_pid_year_idx;
 
 
 --
@@ -53822,7 +53822,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2002_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2002_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2002_esbid_tm_idx;
 
 
 --
@@ -53850,21 +53850,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2002_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2002_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2002_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2002_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2002_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2002_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2003_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2003_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2003_active_pid_year_idx;
 
 
 --
@@ -53878,7 +53878,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2003_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2003_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2003_esbid_tm_idx;
 
 
 --
@@ -53906,21 +53906,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2003_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2003_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2003_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2003_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2003_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2003_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2004_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2004_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2004_active_pid_year_idx;
 
 
 --
@@ -53934,7 +53934,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2004_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2004_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2004_esbid_tm_idx;
 
 
 --
@@ -53962,21 +53962,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2004_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2004_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2004_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2004_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2004_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2004_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2005_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2005_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2005_active_pid_year_idx;
 
 
 --
@@ -53990,7 +53990,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2005_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2005_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2005_esbid_tm_idx;
 
 
 --
@@ -54018,21 +54018,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2005_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2005_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2005_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2005_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2005_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2005_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2006_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2006_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2006_active_pid_year_idx;
 
 
 --
@@ -54046,7 +54046,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2006_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2006_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2006_esbid_tm_idx;
 
 
 --
@@ -54074,21 +54074,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2006_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2006_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2006_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2006_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2006_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2006_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2007_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2007_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2007_active_pid_year_idx;
 
 
 --
@@ -54102,7 +54102,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2007_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2007_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2007_esbid_tm_idx;
 
 
 --
@@ -54130,21 +54130,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2007_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2007_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2007_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2007_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2007_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2007_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2008_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2008_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2008_active_pid_year_idx;
 
 
 --
@@ -54158,7 +54158,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2008_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2008_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2008_esbid_tm_idx;
 
 
 --
@@ -54186,21 +54186,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2008_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2008_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2008_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2008_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2008_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2008_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2009_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2009_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2009_active_pid_year_idx;
 
 
 --
@@ -54214,7 +54214,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2009_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2009_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2009_esbid_tm_idx;
 
 
 --
@@ -54242,21 +54242,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2009_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2009_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2009_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2009_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2009_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2009_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2010_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2010_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2010_active_pid_year_idx;
 
 
 --
@@ -54270,7 +54270,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2010_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2010_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2010_esbid_tm_idx;
 
 
 --
@@ -54298,21 +54298,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2010_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2010_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2010_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2010_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2010_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2010_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2011_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2011_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2011_active_pid_year_idx;
 
 
 --
@@ -54326,7 +54326,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2011_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2011_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2011_esbid_tm_idx;
 
 
 --
@@ -54354,21 +54354,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2011_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2011_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2011_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2011_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2011_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2011_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2012_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2012_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2012_active_pid_year_idx;
 
 
 --
@@ -54382,7 +54382,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2012_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2012_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2012_esbid_tm_idx;
 
 
 --
@@ -54410,21 +54410,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2012_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2012_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2012_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2012_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2012_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2012_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2013_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2013_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2013_active_pid_year_idx;
 
 
 --
@@ -54438,7 +54438,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2013_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2013_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2013_esbid_tm_idx;
 
 
 --
@@ -54466,21 +54466,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2013_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2013_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2013_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2013_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2013_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2013_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2014_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2014_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2014_active_pid_year_idx;
 
 
 --
@@ -54494,7 +54494,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2014_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2014_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2014_esbid_tm_idx;
 
 
 --
@@ -54522,21 +54522,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2014_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2014_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2014_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2014_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2014_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2014_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2015_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2015_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2015_active_pid_year_idx;
 
 
 --
@@ -54550,7 +54550,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2015_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2015_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2015_esbid_tm_idx;
 
 
 --
@@ -54578,21 +54578,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2015_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2015_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2015_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2015_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2015_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2015_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2016_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2016_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2016_active_pid_year_idx;
 
 
 --
@@ -54606,7 +54606,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2016_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2016_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2016_esbid_tm_idx;
 
 
 --
@@ -54634,21 +54634,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2016_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2016_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2016_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2016_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2016_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2016_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2017_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2017_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2017_active_pid_year_idx;
 
 
 --
@@ -54662,7 +54662,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2017_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2017_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2017_esbid_tm_idx;
 
 
 --
@@ -54690,21 +54690,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2017_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2017_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2017_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2017_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2017_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2017_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2018_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2018_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2018_active_pid_year_idx;
 
 
 --
@@ -54718,7 +54718,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2018_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2018_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2018_esbid_tm_idx;
 
 
 --
@@ -54746,21 +54746,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2018_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2018_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2018_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2018_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2018_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2018_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2019_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2019_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2019_active_pid_year_idx;
 
 
 --
@@ -54774,7 +54774,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2019_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2019_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2019_esbid_tm_idx;
 
 
 --
@@ -54802,21 +54802,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2019_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2019_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2019_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2019_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2019_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2019_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2020_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2020_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2020_active_pid_year_idx;
 
 
 --
@@ -54830,7 +54830,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2020_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2020_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2020_esbid_tm_idx;
 
 
 --
@@ -54858,21 +54858,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2020_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2020_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2020_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2020_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2020_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2020_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2021_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2021_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2021_active_pid_year_idx;
 
 
 --
@@ -54886,7 +54886,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2021_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2021_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2021_esbid_tm_idx;
 
 
 --
@@ -54914,21 +54914,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2021_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2021_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2021_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2021_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2021_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2021_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2022_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2022_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2022_active_pid_year_idx;
 
 
 --
@@ -54942,7 +54942,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2022_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2022_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2022_esbid_tm_idx;
 
 
 --
@@ -54970,21 +54970,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2022_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2022_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2022_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2022_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2022_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2022_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2023_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2023_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2023_active_pid_year_idx;
 
 
 --
@@ -54998,7 +54998,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2023_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2023_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2023_esbid_tm_idx;
 
 
 --
@@ -55026,21 +55026,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2023_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2023_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2023_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2023_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2023_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2023_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2024_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2024_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2024_active_pid_year_idx;
 
 
 --
@@ -55054,7 +55054,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2024_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2024_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2024_esbid_tm_idx;
 
 
 --
@@ -55082,21 +55082,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2024_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2024_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2024_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2024_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2024_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2024_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2025_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2025_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2025_active_pid_year_idx;
 
 
 --
@@ -55110,7 +55110,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2025_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2025_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2025_esbid_tm_idx;
 
 
 --
@@ -55138,21 +55138,21 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2025_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2025_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2025_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2025_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2025_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2025_year_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2026_active_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_active_pid_year ATTACH PARTITION public.player_gamelogs_year_2026_active_pid_year_idx;
+ALTER INDEX public.idx_player_gamelogs_active_pid_season_year ATTACH PARTITION public.player_gamelogs_year_2026_active_pid_year_idx;
 
 
 --
@@ -55166,7 +55166,7 @@ ALTER INDEX public.idx_player_gamelogs_esbid_active_pid ATTACH PARTITION public.
 -- Name: player_gamelogs_year_2026_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2026_esbid_tm_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team ATTACH PARTITION public.player_gamelogs_year_2026_esbid_tm_idx;
 
 
 --
@@ -55194,14 +55194,14 @@ ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_
 -- Name: player_gamelogs_year_2026_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2026_tm_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_esbid_nfl_team_pid ATTACH PARTITION public.player_gamelogs_year_2026_tm_esbid_pid_idx;
 
 
 --
 -- Name: player_gamelogs_year_2026_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2026_year_esbid_pid_idx;
+ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2026_year_esbid_pid_idx;
 
 
 --
