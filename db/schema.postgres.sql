@@ -446,7 +446,6 @@ DROP INDEX IF EXISTS public.cmv_pick_date_idx;
 DROP INDEX IF EXISTS public.cmv_date_category_type_idx;
 DROP INDEX IF EXISTS public.cmv_blend_weights_category_effective_idx;
 DROP INDEX IF EXISTS public.adp_format_axis_unique;
-ALTER TABLE IF EXISTS ONLY public.worker_heartbeat DROP CONSTRAINT IF EXISTS worker_heartbeat_pkey;
 ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
@@ -543,7 +542,6 @@ ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXIST
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_facet_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_facet_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_facet_gamelogs DROP CONSTRAINT IF EXISTS pff_player_facet_gamelogs_pkey;
-ALTER TABLE IF EXISTS ONLY public.personnel_count_discrepancies DROP CONSTRAINT IF EXISTS personnel_count_discrepancies_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_observed_at_key;
 ALTER TABLE IF EXISTS ONLY public.nfl_team_gamelogs DROP CONSTRAINT IF EXISTS nfl_team_gamelogs_esbid_nfl_team_season_year_unique;
@@ -650,7 +648,6 @@ ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN cmv_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
-DROP TABLE IF EXISTS public.worker_heartbeat;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
 DROP TABLE IF EXISTS public.waivers;
@@ -795,7 +792,6 @@ DROP TABLE IF EXISTS public.pff_player_seasonlogs_changelog;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs;
 DROP TABLE IF EXISTS public.pff_player_facet_seasonlogs;
 DROP TABLE IF EXISTS public.pff_player_facet_gamelogs;
-DROP TABLE IF EXISTS public.personnel_count_discrepancies;
 DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
 DROP TABLE IF EXISTS public.ngs_prospect_scores_index;
@@ -18672,22 +18668,6 @@ CREATE TABLE public.percentiles (
 
 
 --
--- Name: personnel_count_discrepancies; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.personnel_count_discrepancies (
-    esbid bigint NOT NULL,
-    playid integer NOT NULL,
-    side character(3) NOT NULL,
-    source_string character varying(100),
-    parse_status character varying(20) NOT NULL,
-    existing_counts jsonb,
-    parsed_counts jsonb,
-    recorded_at timestamp without time zone DEFAULT now()
-);
-
-
---
 -- Name: pff_player_facet_gamelogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -26316,20 +26296,6 @@ CREATE TABLE public.weekly_market_selections_analysis_cache (
 
 
 --
--- Name: worker_heartbeat; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.worker_heartbeat (
-    worker_name character varying(64) NOT NULL,
-    last_iteration_at bigint NOT NULL,
-    last_iteration_status character varying(16) NOT NULL,
-    last_iteration_detail text,
-    loop_count integer DEFAULT 0 NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-
---
 -- Name: historical_injury_index_2009; Type: TABLE ATTACH; Schema: public; Owner: -
 --
 
@@ -27909,14 +27875,6 @@ ALTER TABLE ONLY public.ngs_prospect_scores_index
 
 
 --
--- Name: personnel_count_discrepancies personnel_count_discrepancies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.personnel_count_discrepancies
-    ADD CONSTRAINT personnel_count_discrepancies_pkey PRIMARY KEY (esbid, playid, side);
-
-
---
 -- Name: pff_player_facet_gamelogs pff_player_facet_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -28682,14 +28640,6 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.weekly_market_selections_analysis_cache
     ADD CONSTRAINT weekly_market_selections_analysis_cache_pkey PRIMARY KEY (source_id, source_market_id, source_selection_id);
-
-
---
--- Name: worker_heartbeat worker_heartbeat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.worker_heartbeat
-    ADD CONSTRAINT worker_heartbeat_pkey PRIMARY KEY (worker_name);
 
 
 --
@@ -56783,13 +56733,6 @@ GRANT SELECT ON TABLE public.percentiles TO league_reader;
 
 
 --
--- Name: TABLE personnel_count_discrepancies; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.personnel_count_discrepancies TO league_reader;
-
-
---
 -- Name: TABLE pff_player_facet_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
@@ -57820,13 +57763,6 @@ GRANT SELECT ON SEQUENCE public.waivers_uid_seq TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.weekly_market_selections_analysis_cache TO league_reader;
-
-
---
--- Name: TABLE worker_heartbeat; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.worker_heartbeat TO league_reader;
 
 
 --
