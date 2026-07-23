@@ -49,14 +49,17 @@ const get_filtered_gamelogs_for_schedule = createSelector(
     return logs
       .filter((gamelog) => {
         // Filter by opponent and position
-        if (gamelog.opp !== opponent || gamelog.pos !== position) {
+        if (
+          gamelog.opponent_nfl_team !== opponent ||
+          gamelog.pos !== position
+        ) {
           return false
         }
 
         // Filter by selected years
         if (
           selected_years_for_filter.length > 0 &&
-          !selected_years_for_filter.includes(gamelog.year)
+          !selected_years_for_filter.includes(gamelog.season_year)
         ) {
           return false
         }
@@ -73,8 +76,8 @@ const get_filtered_gamelogs_for_schedule = createSelector(
       })
       .sort((a, b) => {
         // Sort by year first, then by week
-        if (a.year !== b.year) {
-          return b.year - a.year // Newest year first
+        if (a.season_year !== b.season_year) {
+          return b.season_year - a.season_year // Newest year first
         }
         return a.week - b.week // Earliest week first within year
       })

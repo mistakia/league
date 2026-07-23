@@ -50,7 +50,7 @@ const SOURCES = {
   },
   gamelogs: {
     table: 'player_gamelogs',
-    team_col: 'tm',
+    team_col: 'nfl_team',
     pid_via: 'native'
   },
   snaps: {

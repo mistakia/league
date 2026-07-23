@@ -29,7 +29,7 @@ const map_state_to_props = createSelector(
       }
     })
 
-    const years = groupBy(gamelogs, 'year')
+    const years = groupBy(gamelogs, 'season_year')
 
     return { player_map, years }
   }

@@ -80,7 +80,7 @@ const add_player_per_game_cte = ({
 
   // Effective view-level scope, narrowed by any per-column override.
   // years drives the single-year partition optimization and the
-  // player_gamelogs.year predicate; the full nfl_week_id set drives the
+  // player_gamelogs.season_year predicate; the full nfl_week_id set drives the
   // nfl_games seas_type / nfl_week_id predicates via apply_scope_to_query.
   const effective_scope = compute_effective_scope({
     query_context,
@@ -96,7 +96,9 @@ const add_player_per_game_cte = ({
   let cte_query = db(player_gamelogs_table)
     .select(`${player_gamelogs_table}.pid`)
     .count('* as rate_type_total_count')
-    .select(db.raw(`array_agg(distinct ${player_gamelogs_table}.tm) as teams`))
+    .select(
+      db.raw(`array_agg(distinct ${player_gamelogs_table}.nfl_team) as teams`)
+    )
     .where(`${player_gamelogs_table}.active`, true)
 
   // nfl_games join is required whenever the view has scoped weeks (the common
@@ -122,7 +124,7 @@ const add_player_per_game_cte = ({
   }
 
   if (sorted_years.length && !single_year) {
-    cte_query.whereIn(`${player_gamelogs_table}.year`, sorted_years)
+    cte_query.whereIn(`${player_gamelogs_table}.season_year`, sorted_years)
   }
 
   if (career_year.length) {

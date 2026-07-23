@@ -674,10 +674,10 @@ describe('API /teams - reserve', function () {
       await knex('player_gamelogs').insert({
         esbid: prior_week_esbid,
         pid: player.pid,
-        tm: player.current_nfl_team,
-        opp: 'OPP',
+        nfl_team: player.current_nfl_team,
+        opponent_nfl_team: 'OPP',
         pos: player.primary_position,
-        year: current_season.year,
+        season_year: current_season.year,
         active: false
       })
 
@@ -769,10 +769,10 @@ describe('API /teams - reserve', function () {
       await knex('player_gamelogs').insert({
         esbid: prior_week_esbid,
         pid: player.pid,
-        tm: player.current_nfl_team,
-        opp: 'OPP',
+        nfl_team: player.current_nfl_team,
+        opponent_nfl_team: 'OPP',
         pos: player.primary_position,
-        year: current_season.year,
+        season_year: current_season.year,
         active: false
       })
 
@@ -860,10 +860,10 @@ describe('API /teams - reserve', function () {
       await knex('player_gamelogs').insert({
         esbid: prior_week_esbid,
         pid: player.pid,
-        tm: player.current_nfl_team,
-        opp: 'OPP',
+        nfl_team: player.current_nfl_team,
+        opponent_nfl_team: 'OPP',
         pos: player.primary_position,
-        year: current_season.year,
+        season_year: current_season.year,
         active: false
       })
 
@@ -949,10 +949,10 @@ describe('API /teams - reserve', function () {
       await knex('player_gamelogs').insert({
         esbid: prior_week_esbid,
         pid: player.pid,
-        tm: player.current_nfl_team,
-        opp: 'OPP',
+        nfl_team: player.current_nfl_team,
+        opponent_nfl_team: 'OPP',
         pos: player.primary_position,
-        year: current_season.year,
+        season_year: current_season.year,
         active: false
       })
 

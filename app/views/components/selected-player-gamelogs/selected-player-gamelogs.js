@@ -94,7 +94,7 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           <div className='table__cell metric sticky__column sticky__two game__week'>
             {game.week}
           </div>
-          <div className='table__cell metric'>{game.opp}</div>
+          <div className='table__cell metric'>{game.opponent_nfl_team}</div>
           <div className='row__group'>
             <div className='row__group-body'>
               <div className='table__cell metric'>

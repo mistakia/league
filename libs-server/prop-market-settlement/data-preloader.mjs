@@ -52,10 +52,10 @@ const load_player_gamelogs = async (esbids) => {
     .select(
       'player_gamelogs.esbid',
       'player_gamelogs.pid',
-      'player_gamelogs.year',
+      'player_gamelogs.season_year',
       'player_gamelogs.pos',
-      'player_gamelogs.tm',
-      'player_gamelogs.opp',
+      'player_gamelogs.nfl_team',
+      'player_gamelogs.opponent_nfl_team',
       'player_gamelogs.active',
       // Passing stats
       'player_gamelogs.passing_attempts',

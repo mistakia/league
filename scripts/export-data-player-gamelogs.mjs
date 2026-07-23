@@ -62,8 +62,8 @@ const has_any_stat = (gamelog) =>
 const format_gamelog = (gamelog) => ({
   esbid: gamelog.esbid,
   pid: gamelog.pid,
-  opp: gamelog.opp,
-  tm: gamelog.tm,
+  opp: gamelog.opponent_nfl_team,
+  tm: gamelog.nfl_team,
   pos: gamelog.pos,
   jnum: gamelog.jnum,
   active: gamelog.active,
@@ -121,7 +121,7 @@ const export_data_player_gamelogs = async ({ collector = null } = {}) => {
 
   const gamelogs_by_year = {}
   for (const item of data) {
-    const { year, ...gamelog } = item
+    const { season_year: year, ...gamelog } = item
     if (!gamelogs_by_year[year]) {
       gamelogs_by_year[year] = []
     }

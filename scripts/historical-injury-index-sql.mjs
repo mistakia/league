@@ -13,14 +13,14 @@ WITH reg_games AS (
   WHERE seas_type = 'REG' AND year BETWEEN :start_year AND :end_year
 ),
 gl AS (
-  SELECT pg.pid, pg.esbid, pg.year, pg.tm, pg.active,
+  SELECT pg.pid, pg.esbid, pg.season_year AS year, pg.nfl_team AS tm, pg.active,
          pg.snaps_off, pg.snaps_def, pg.snaps_st,
          pg.ruled_out_in_game,
          (COALESCE(pg.passing_attempts,0)+COALESCE(pg.rushing_attempts,0)+COALESCE(pg.targets,0)
           +COALESCE(pg.receptions,0)+COALESCE(pg.field_goals_made,0)+COALESCE(pg.extra_points_made,0)
           +COALESCE(pg.defensive_sacks,0)+COALESCE(pg.defensive_interceptions,0)+COALESCE(pg.defensive_three_and_outs,0)) AS any_stat_count
   FROM player_gamelogs pg
-  WHERE pg.year BETWEEN :start_year AND :end_year
+  WHERE pg.season_year BETWEEN :start_year AND :end_year
 ),
 practice_signal AS (
   SELECT pid, year, week,
@@ -48,7 +48,7 @@ changelog_signal AS (
     ON pc.pid = gl_inner.pid
    AND pc.column_name IN ('injury_status','nfl_status','roster_status','status')
    AND pc.changed_at BETWEEN to_timestamp(gm.timestamp - 7*86400) AND to_timestamp(gm.timestamp + 3*3600)
-  WHERE gl_inner.year BETWEEN :start_year AND :end_year AND gm.seas_type = 'REG'
+  WHERE gl_inner.season_year BETWEEN :start_year AND :end_year AND gm.seas_type = 'REG'
   GROUP BY gl_inner.pid, gl_inner.esbid
 ),
 team_spans AS (

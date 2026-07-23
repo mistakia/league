@@ -82,13 +82,13 @@ const calculate_player_correlations = async ({
     .select(
       'player_gamelogs.pid',
       'player_gamelogs.esbid',
-      'player_gamelogs.tm'
+      'player_gamelogs.nfl_team'
     )
 
   const player_team_by_game = new Map()
   for (const pgt of player_game_teams) {
     const key = `${pgt.pid}:${pgt.esbid}`
-    player_team_by_game.set(key, pgt.tm)
+    player_team_by_game.set(key, pgt.nfl_team)
   }
 
   const player_ids = [...player_games.keys()]

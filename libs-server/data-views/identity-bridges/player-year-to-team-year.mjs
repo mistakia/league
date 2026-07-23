@@ -71,19 +71,25 @@ export const add_cte = ({ query_context, params = {}, source = null }) => {
   const inner_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
     .select('nfl_games.year')
-    .select('player_gamelogs.tm')
+    .select('player_gamelogs.nfl_team')
     .count('* as game_count')
     .innerJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .whereIn('nfl_games.seas_type', resolve_seas_type(params))
     .whereIn('nfl_games.year', year_range)
-    .whereIn('player_gamelogs.year', year_range)
-    .groupBy('player_gamelogs.pid', 'nfl_games.year', 'player_gamelogs.tm')
+    .whereIn('player_gamelogs.season_year', year_range)
+    .groupBy(
+      'player_gamelogs.pid',
+      'nfl_games.year',
+      'player_gamelogs.nfl_team'
+    )
 
   const cte_query = db
     .select('pid')
     .select('year')
     .select(
-      db.raw('(array_agg(tm ORDER BY game_count DESC, tm ASC))[1] as team')
+      db.raw(
+        '(array_agg(nfl_team ORDER BY game_count DESC, nfl_team ASC))[1] as team'
+      )
     )
     .from(inner_query.as('player_year_team_counts'))
     .groupBy('pid', 'year')

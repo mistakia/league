@@ -34,7 +34,7 @@ export const player_years_teams_cte_sql = ({ year_range }) => {
   }
   const unions = year_range
     .map(
-      (year) => `SELECT pgl.pid, ${year}::int AS year, pgl.tm AS team_code
+      (year) => `SELECT pgl.pid, ${year}::int AS year, pgl.nfl_team AS team_code
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
        WHERE pgl.active = TRUE AND g.seas_type = 'REG' AND g.year = ${year}`
@@ -96,7 +96,7 @@ export const player_years_weeks_teams_cte_sql = ({ year_range }) => {
     .map(
       (
         year
-      ) => `SELECT pgl.pid, ${year}::int AS year, g.week, pgl.tm AS team_code
+      ) => `SELECT pgl.pid, ${year}::int AS year, g.week, pgl.nfl_team AS team_code
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
        WHERE pgl.active = TRUE AND g.seas_type = 'REG' AND g.year = ${year}`

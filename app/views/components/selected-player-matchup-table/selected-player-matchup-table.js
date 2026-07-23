@@ -91,7 +91,7 @@ export default function SelectedPlayerMatchupTable({
         <div className='table__cell sticky__column sticky__two text'>
           <PlayerNameText pid={gamelog.pid} />
         </div>
-        <div className='table__cell metric'>{gamelog.tm}</div>
+        <div className='table__cell metric'>{gamelog.nfl_team}</div>
         <div className='table__cell metric'>
           {(gamelog.pts || 0).toFixed(1)}
         </div>

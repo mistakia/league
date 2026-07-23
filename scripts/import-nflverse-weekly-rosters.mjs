@@ -246,9 +246,9 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     inserts.push({
       pid: pid_match.pid,
       esbid: game.esbid,
-      year,
-      tm: game.tm,
-      opp: game.opp,
+      season_year: year,
+      nfl_team: game.tm,
+      opponent_nfl_team: game.opp,
       pos: row.position || 'UNK',
       active: STATUS_ACTIVE.has(row.status),
       source: SOURCE_SENTINEL
@@ -261,7 +261,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
   // player dressed that game).
   const dedup = new Map()
   for (const ins of inserts) {
-    const key = `${ins.esbid}|${ins.pid}|${ins.year}`
+    const key = `${ins.esbid}|${ins.pid}|${ins.season_year}`
     const existing = dedup.get(key)
     if (!existing || (ins.active && !existing.active)) {
       dedup.set(key, ins)
@@ -304,7 +304,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
   const existing_rows = inserts.length
     ? await db('player_gamelogs')
         .select('esbid', 'pid', 'active')
-        .where({ year })
+        .where({ season_year: year })
     : []
   const existing_by_key = new Map(
     existing_rows.map((r) => [`${r.esbid}|${r.pid}`, r])
@@ -361,7 +361,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
   // Delete-then-insert by (year, source) so reruns are idempotent and any
   // historical drift in resolution gets cleaned up.
   const deleted = await db('player_gamelogs')
-    .where({ year, source: SOURCE_SENTINEL })
+    .where({ season_year: year, source: SOURCE_SENTINEL })
     .del()
   log(`deleted ${deleted} prior ${SOURCE_SENTINEL} rows for ${year}`)
 
@@ -370,13 +370,14 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     batch_size: BATCH_SIZE,
     save: async (batch) => {
       // Narrow merge to `active` only. Existing rows from other importers
-      // (gameday-rosters, stat builders) keep their source/pos/tm/opp -- we
+      // (gameday-rosters, stat builders) keep their source/pos/nfl_team/
+      // opponent_nfl_team -- we
       // only assert authority over the boolean this importer exists to
       // populate. New INSERTs still tag source='nflverse-weekly-rosters'
       // for revert by sentinel.
       await db('player_gamelogs')
         .insert(batch)
-        .onConflict(['esbid', 'pid', 'year'])
+        .onConflict(['esbid', 'pid', 'season_year'])
         .merge(['active'])
     }
   })

@@ -46,8 +46,8 @@ const generate_player_snaps_for_week = async ({
   const gamelogs = await db('player_gamelogs')
     .select(
       'player.gsis_it_player_id',
-      'player_gamelogs.tm',
-      'player_gamelogs.opp',
+      'player_gamelogs.nfl_team',
+      'player_gamelogs.opponent_nfl_team',
       'player_gamelogs.pos'
     )
     .join('player', 'player.pid', 'player_gamelogs.pid')
@@ -266,7 +266,7 @@ const generate_player_snaps_for_week = async ({
       const play_key = `${play.esbid}_${play.playId}`
 
       if (play.play_type === 'PASS' || play.play_type === 'RUSH') {
-        if (play.off === player_gamelog.tm) {
+        if (play.off === player_gamelog.nfl_team) {
           player_snaps.off.add(play_key)
 
           if (play.play_type === 'PASS') player_snaps.pass.add(play_key)
@@ -299,7 +299,7 @@ const generate_player_snaps_for_week = async ({
           if (play.qtr >= 1 && play.qtr <= 4) {
             player_snaps[`q${play.qtr}_off`].add(play_key)
           }
-        } else if (play.def === player_gamelog.tm) {
+        } else if (play.def === player_gamelog.nfl_team) {
           player_snaps.def.add(play_key)
 
           // Track quarter-specific defensive snaps (exclude overtime)
@@ -317,7 +317,7 @@ const generate_player_snaps_for_week = async ({
     const snaps_def = player_snaps.def.size
     const snaps_st = player_snaps.st.size
 
-    const team = player_gamelog.tm
+    const team = player_gamelog.nfl_team
     const team_total = team_totals[team]
 
     if (!team_total) {

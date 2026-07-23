@@ -204,7 +204,7 @@ const query_team_occurring_selections = async ({ year }) => {
   const sql = `
     WITH occurring_selections AS (
       SELECT
-        pgl.tm as team,
+        pgl.nfl_team as team,
         ng.week,
         pmsi.selection_pid as player_id,
         p.short_name as player_name,
@@ -303,7 +303,7 @@ const query_opponent_occurring_selections = async ({ year }) => {
   const sql = `
     WITH occurring_selections AS (
       SELECT
-        pgl.opp as opponent,
+        pgl.opponent_nfl_team as opponent,
         ng.week,
         pmsi.selection_pid as player_id,
         p.short_name as player_name,
@@ -533,7 +533,7 @@ const query_market_type_occurring_selections = async ({ year, week }) => {
             p.formatted_name as player_full_name,
             p.primary_position as position,
             p.current_nfl_team as team,
-            pgl.opp as opponent,
+            pgl.opponent_nfl_team as opponent,
             pmi.source_market_name,
             pmsi.selection_name,
             pmsi.selection_metric_line,

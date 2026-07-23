@@ -138,7 +138,7 @@ const calculate_opponent = ({ team, home_team, away_team }) => {
  */
 const find_team_gamelog = ({ team_gamelog_inserts, team, esbid }) => {
   return team_gamelog_inserts.find(
-    (t) => t.tm === fixTeam(team) && t.esbid === esbid
+    (t) => t.nfl_team === fixTeam(team) && t.esbid === esbid
   )
 }
 
@@ -217,7 +217,13 @@ const clamp_receiving_gamelog_values = ({ item, dry_run }) => {
   return modified
 }
 
-const format_base_gamelog = ({ esbid, stats, opp, tm, year }) => {
+const format_base_gamelog = ({
+  esbid,
+  stats,
+  opponent_nfl_team,
+  nfl_team,
+  season_year
+}) => {
   const cleaned_stats = Object.keys(stats)
     .filter((key) => all_fantasy_stats.includes(key))
     .reduce((obj, key) => {
@@ -227,16 +233,30 @@ const format_base_gamelog = ({ esbid, stats, opp, tm, year }) => {
 
   return {
     esbid,
-    tm,
-    opp,
-    year,
+    nfl_team,
+    opponent_nfl_team,
+    season_year,
     ...cleaned_stats
   }
 }
 
-const format_player_gamelog = ({ esbid, pid, stats, opp, pos, tm, year }) => {
+const format_player_gamelog = ({
+  esbid,
+  pid,
+  stats,
+  opponent_nfl_team,
+  pos,
+  nfl_team,
+  season_year
+}) => {
   return {
-    ...format_base_gamelog({ esbid, stats, opp, tm, year }),
+    ...format_base_gamelog({
+      esbid,
+      stats,
+      opponent_nfl_team,
+      nfl_team,
+      season_year
+    }),
     pid,
     pos,
     active: true
@@ -394,17 +414,17 @@ const generate_receiving_gamelog = ({
   ) {
     const team_gamelog = find_team_gamelog({
       team_gamelog_inserts,
-      team: player_gamelog.tm,
+      team: player_gamelog.nfl_team,
       esbid: player_gamelog.esbid
     })
     const team_dropbacks =
       team_dropbacks_by_game[
-        `${fixTeam(player_gamelog.tm)}_${player_gamelog.esbid}`
+        `${fixTeam(player_gamelog.nfl_team)}_${player_gamelog.esbid}`
       ] || null
     const receiving_gamelog = format_receiving_gamelog({
       pid: player_gamelog.pid,
       esbid: player_gamelog.esbid,
-      year: player_gamelog.year,
+      year: player_gamelog.season_year,
       stats,
       team_stats: team_gamelog,
       player_routes,
@@ -424,13 +444,13 @@ const generate_rushing_gamelog = ({
   if (player_gamelog.rushing_attempts > 0) {
     const team_gamelog = find_team_gamelog({
       team_gamelog_inserts,
-      team: player_gamelog.tm,
+      team: player_gamelog.nfl_team,
       esbid: player_gamelog.esbid
     })
     const rushing_gamelog = format_rushing_gamelog({
       pid: player_gamelog.pid,
       esbid: player_gamelog.esbid,
-      year: player_gamelog.year,
+      year: player_gamelog.season_year,
       stats,
       team_stats: team_gamelog
     })
@@ -473,13 +493,13 @@ const generate_snap_based_gamelogs = async ({
 
   // Query existing gamelogs to get correct historical team data
   const existing_gamelogs = await db('player_gamelogs')
-    .select('pid', 'esbid', 'tm')
+    .select('pid', 'esbid', 'nfl_team')
     .whereIn('esbid', unique_esbids)
-    .whereNotNull('tm')
-    .whereNot('tm', '')
+    .whereNotNull('nfl_team')
+    .whereNot('nfl_team', '')
 
   const existing_gamelog_team_map = existing_gamelogs.reduce((acc, gl) => {
-    acc[`${gl.pid}_${gl.esbid}`] = gl.tm
+    acc[`${gl.pid}_${gl.esbid}`] = gl.nfl_team
     return acc
   }, {})
 
@@ -547,9 +567,9 @@ const generate_snap_based_gamelogs = async ({
         esbid: snap_player.esbid,
         pid: snap_player.pid,
         pos: snap_player.primary_position,
-        tm: team,
-        opp: opponent,
-        year,
+        nfl_team: team,
+        opponent_nfl_team: opponent,
+        season_year: year,
         active: true
         // All counting stats default to NULL/0
       })
@@ -660,10 +680,10 @@ const process_player_gamelogs = ({
     const player_gamelog = format_player_gamelog({
       pid: player_row.pid,
       pos: player_row.primary_position,
-      tm: fixTeam(play_stat.clubCode),
-      opp,
+      nfl_team: fixTeam(play_stat.clubCode),
+      opponent_nfl_team: opp,
       esbid: play_stat.esbid,
-      year: play_stat.year,
+      season_year: play_stat.year,
       stats
     })
     player_gamelog_inserts.push(player_gamelog)
@@ -707,9 +727,9 @@ const generate_team_gamelogs = ({ playStats, team_gamelog_inserts }) => {
     const team_gamelog = {
       ...team_stats,
       esbid: play_stat.esbid,
-      tm: fixTeam(team),
-      opp,
-      year: play_stat.year
+      nfl_team: fixTeam(team),
+      opponent_nfl_team: opp,
+      season_year: play_stat.year
     }
     team_gamelog_inserts.push(team_gamelog)
   }
@@ -752,10 +772,10 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
     const player_gamelog = format_player_gamelog({
       pid: team,
       pos: 'DST',
-      tm: team,
+      nfl_team: team,
       esbid: play.esbid,
-      year: play.year,
-      opp: fixTeam(opp),
+      season_year: play.year,
+      opponent_nfl_team: fixTeam(opp),
       stats
     })
     player_gamelog_inserts.push(player_gamelog)
@@ -777,7 +797,7 @@ const save_gamelogs = async ({
       save: async (batch) => {
         await db('player_gamelogs')
           .insert(batch)
-          .onConflict(['esbid', 'pid', 'year'])
+          .onConflict(['esbid', 'pid', 'season_year'])
           .merge()
       },
       batch_size: 500

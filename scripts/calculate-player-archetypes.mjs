@@ -137,14 +137,14 @@ const calculate_player_archetypes = async ({ year } = {}) => {
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
     .select(
-      'player_gamelogs.tm',
+      'player_gamelogs.nfl_team',
       db.raw('SUM(player_gamelogs.targets) as total_team_targets')
     )
-    .groupBy('player_gamelogs.tm')
+    .groupBy('player_gamelogs.nfl_team')
 
   const team_target_map = new Map()
   for (const t of team_totals) {
-    team_target_map.set(t.tm, parseInt(t.total_team_targets, 10) || 0)
+    team_target_map.set(t.nfl_team, parseInt(t.total_team_targets, 10) || 0)
   }
 
   // Get player primary team (team with most games)
@@ -154,10 +154,10 @@ const calculate_player_archetypes = async ({ year } = {}) => {
     .where('nfl_games.seas_type', 'REG')
     .select(
       'player_gamelogs.pid',
-      'player_gamelogs.tm',
+      'player_gamelogs.nfl_team',
       db.raw('COUNT(*) as games_on_team')
     )
-    .groupBy('player_gamelogs.pid', 'player_gamelogs.tm')
+    .groupBy('player_gamelogs.pid', 'player_gamelogs.nfl_team')
     .orderBy([
       { column: 'player_gamelogs.pid' },
       { column: 'games_on_team', order: 'desc' }
@@ -166,7 +166,7 @@ const calculate_player_archetypes = async ({ year } = {}) => {
   const player_primary_team = new Map()
   for (const pt of player_teams) {
     if (!player_primary_team.has(pt.pid)) {
-      player_primary_team.set(pt.pid, pt.tm)
+      player_primary_team.set(pt.pid, pt.nfl_team)
     }
   }
 

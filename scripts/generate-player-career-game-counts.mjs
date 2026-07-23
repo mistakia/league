@@ -29,8 +29,8 @@ const generate_player_career_game_counts = async () => {
       .select(
         'player_gamelogs.pid',
         'player_gamelogs.esbid',
-        'player_gamelogs.opp',
-        'player_gamelogs.tm',
+        'player_gamelogs.opponent_nfl_team',
+        'player_gamelogs.nfl_team',
         'player_gamelogs.pos',
         'nfl_games.year',
         'nfl_games.week',
@@ -40,7 +40,7 @@ const generate_player_career_game_counts = async () => {
         this.on('nfl_games.esbid', '=', 'player_gamelogs.esbid').andOn(
           'nfl_games.year',
           '=',
-          'player_gamelogs.year'
+          'player_gamelogs.season_year'
         )
       })
       .where({ 'nfl_games.year': year })
@@ -81,10 +81,10 @@ const generate_player_career_game_counts = async () => {
         game_updates.push({
           pid: game.pid,
           esbid: game.esbid,
-          opp: game.opp,
-          tm: game.tm,
+          opponent_nfl_team: game.opponent_nfl_team,
+          nfl_team: game.nfl_team,
           pos: game.pos,
-          year: game.year,
+          season_year: game.year,
           career_game: player_career_games[pid]
         })
 
@@ -109,7 +109,7 @@ const generate_player_career_game_counts = async () => {
         save: async (batch) => {
           await db('player_gamelogs')
             .insert(batch)
-            .onConflict(['year', 'esbid', 'pid'])
+            .onConflict(['season_year', 'esbid', 'pid'])
             .merge(['career_game'])
         },
         batch_size: 1000

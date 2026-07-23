@@ -13,7 +13,7 @@ export function gamelogs_reducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         payload.data.forEach((g) =>
           state.setIn(
-            ['players', `${g.year}/${g.seas_type}/${g.week}/${g.pid}`],
+            ['players', `${g.season_year}/${g.seas_type}/${g.week}/${g.pid}`],
             g
           )
         )
@@ -23,7 +23,7 @@ export function gamelogs_reducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         payload.data.forEach((g) =>
           state.setIn(
-            ['players', `${g.year}/${g.seas_type}/${g.week}/${g.pid}`],
+            ['players', `${g.season_year}/${g.seas_type}/${g.week}/${g.pid}`],
             g
           )
         )

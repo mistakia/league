@@ -59,7 +59,7 @@ const populate_qb_pid = async ({
         SELECT p2.pid
         FROM nfl_snaps ns
         JOIN player p2 ON p2.gsis_it_player_id = ns.gsis_it_id AND p2.primary_position = 'QB'
-        JOIN player_gamelogs pg ON pg.pid = p2.pid AND pg.esbid = np.esbid AND pg.tm = np.pos_team
+        JOIN player_gamelogs pg ON pg.pid = p2.pid AND pg.esbid = np.esbid AND pg.nfl_team = np.pos_team
         WHERE ns.esbid = np.esbid
           AND ns."playId" = np."playId"
           AND ns.year = :year

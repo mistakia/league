@@ -300,8 +300,8 @@ const generate_seasonlogs = async ({
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
-    .whereNot('player_gamelogs.tm', 'INA')
-    .whereNot('player_gamelogs.opp', 'INA')
+    .whereNot('player_gamelogs.nfl_team', 'INA')
+    .whereNot('player_gamelogs.opponent_nfl_team', 'INA')
 
   const query_weeks = []
 
@@ -385,10 +385,10 @@ const generate_seasonlogs = async ({
 
     individual[position] = {}
 
-    const gamelogs_by_opponent = groupBy(position_gamelogs, 'opp')
+    const gamelogs_by_opponent = groupBy(position_gamelogs, 'opponent_nfl_team')
     defense[position] = rollup(gamelogs_by_opponent)
 
-    const gamelogs_by_team = groupBy(position_gamelogs, 'tm')
+    const gamelogs_by_team = groupBy(position_gamelogs, 'nfl_team')
     offense[position] = rollup(gamelogs_by_team)
 
     const adjusted = []
@@ -407,10 +407,10 @@ const generate_seasonlogs = async ({
         const sum_gamelog_for_game = sum(game_gamelogs, all_stats)
 
         // get all team gamelogs except against this opponent
-        const opponent = game_gamelogs[0].tm
+        const opponent = game_gamelogs[0].nfl_team
         const team_gamelogs_except_opponent = (
           gamelogs_by_team[opponent] || []
-        ).filter((g) => g.opp !== nfl_team)
+        ).filter((g) => g.opponent_nfl_team !== nfl_team)
 
         if (!team_gamelogs_except_opponent.length) {
           continue

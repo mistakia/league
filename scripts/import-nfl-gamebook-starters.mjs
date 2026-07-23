@@ -471,18 +471,19 @@ const process_game = async ({ game, index, dry_run }) => {
 
   // UPDATE only -- never INSERT. The gamebook importer adds `started` to
   // player_gamelogs rows created by the rosters importers (which populate
-  // tm/opp/pos/active and satisfy player_gamelogs.opp NOT NULL). If no
-  // matching row exists for (esbid, pid, year), the starter is silently
-  // dropped -- count these to surface upstream rosters-importer gaps.
+  // nfl_team/opponent_nfl_team/pos/active and satisfy
+  // player_gamelogs.opponent_nfl_team NOT NULL). If no matching row exists
+  // for (esbid, pid, season_year), the starter is silently dropped -- count
+  // these to surface upstream rosters-importer gaps.
   let updated_count = 0
   for (const r of final_rows) {
-    // Skip rows mistakenly tagged tm='INA' by upstream rosters importers --
-    // 'INA' is a roster-status code (inactive), not a team. The (esbid, pid)
-    // resolves to a row whose `tm` is wrong; setting started=true there would
-    // produce nonsense team-level aggregates.
+    // Skip rows mistakenly tagged nfl_team='INA' by upstream rosters
+    // importers -- 'INA' is a roster-status code (inactive), not a team. The
+    // (esbid, pid) resolves to a row whose `nfl_team` is wrong; setting
+    // started=true there would produce nonsense team-level aggregates.
     const n = await db('player_gamelogs')
-      .where({ esbid: r.esbid, pid: r.pid, year: r.year })
-      .whereNot({ tm: 'INA' })
+      .where({ esbid: r.esbid, pid: r.pid, season_year: r.year })
+      .whereNot({ nfl_team: 'INA' })
       .update({ started: r.started })
     updated_count += n
   }
@@ -491,7 +492,7 @@ const process_game = async ({ game, index, dry_run }) => {
   await db('player_gamelogs')
     .where({ esbid: game.esbid })
     .whereNull('started')
-    .whereNot({ tm: 'INA' })
+    .whereNot({ nfl_team: 'INA' })
     .andWhere((q) => q.where('active', true).orWhereNull('active'))
     .update({ started: false })
 

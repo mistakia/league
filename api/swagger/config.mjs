@@ -1768,13 +1768,13 @@ const options = {
               description: 'Player position',
               example: 'QB'
             },
-            tm: {
+            nfl_team: {
               $ref: '#/components/schemas/NFLTeamAbbreviation'
             },
-            opp: {
+            opponent_nfl_team: {
               $ref: '#/components/schemas/NFLTeamAbbreviation'
             },
-            year: {
+            season_year: {
               type: 'integer',
               description: 'Season year',
               example: 2024

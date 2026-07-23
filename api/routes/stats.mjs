@@ -100,11 +100,11 @@ router.get('/gamelogs/players', async (req, res) => {
     }
 
     if (nfl_team) {
-      query.where('player_gamelogs.tm', nfl_team)
+      query.where('player_gamelogs.nfl_team', nfl_team)
     }
 
     if (opponent) {
-      query.where('player_gamelogs.opp', opponent)
+      query.where('player_gamelogs.opponent_nfl_team', opponent)
     }
 
     if (include_rushing) {
