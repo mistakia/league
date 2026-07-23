@@ -129,7 +129,7 @@ const format_contract_summary = (row) => ({
  * Contains year-by-year breakdown (salary, bonuses, cap hit, etc.)
  */
 const format_yearly_contract_detail = (row) => ({
-  year: row.year,
+  season_year: row.year,
   team: row.team === 'Total' ? null : fixTeam(row.team),
   base_salary: row.base_salary,
   prorated_bonus: row.prorated_bonus,
@@ -227,7 +227,7 @@ const save_contract_data = async ({ player_updates, contract_rows }) => {
       save: async (batch) => {
         await db('player_contracts')
           .insert(batch)
-          .onConflict(['year', 'pid'])
+          .onConflict(['season_year', 'pid'])
           .merge()
       }
     })
@@ -288,10 +288,10 @@ const process_contract_data = (parquet_file) =>
             `deduped to ${unique_player_updates.length} unique players (${player_updates.length - unique_player_updates.length} duplicates removed)`
           )
 
-          // Deduplicate by [year, pid] composite key (keep last occurrence)
+          // Deduplicate by [season_year, pid] composite key (keep last occurrence)
           const unique_contract_rows = deduplicate_by_key(
             contract_rows,
-            (row) => `${row.year}-${row.pid}`
+            (row) => `${row.season_year}-${row.pid}`
           )
 
           log(

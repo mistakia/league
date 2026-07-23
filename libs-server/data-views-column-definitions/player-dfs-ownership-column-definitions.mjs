@@ -49,7 +49,7 @@ const player_dfs_ownership_source = {
     // ownership despite being the largest by entries.
     const cte_query = db.raw(
       `
-      SELECT o.pid, o.ownership_pct, o.year, o.week
+      SELECT o.pid, o.ownership_pct, o.season_year, o.week
       FROM player_dfs_ownership o
       INNER JOIN (
         SELECT dc.source_contest_id, dc.source_id,
@@ -67,7 +67,7 @@ const player_dfs_ownership_source = {
                     AND own_stats.source_id = dc.source_id
         WHERE dc.ownership_imported = true
           AND dc.source_id IN (${platform_source_id.map(() => '?').join(',')})
-          AND (${year_week_pairs.map(() => '(dc.year = ? AND dc.week = ?)').join(' OR ')})
+          AND (${year_week_pairs.map(() => '(dc.season_year = ? AND dc.week = ?)').join(' OR ')})
       ) rc ON o.source_contest_id = rc.source_contest_id
           AND o.source_id = rc.source_id
           AND rc.rn = 1

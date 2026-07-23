@@ -20,15 +20,15 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(player_seasonlogs.espn_overall_score) FROM player_seasonlogs WHERE player_seasonlogs.pid = player.pid AND player_seasonlogs.year IN (2024,2025) AND player_seasonlogs.seas_type = 'REG') AS \"espn_overall_score_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(player_seasonlogs.espn_overall_score) FROM player_seasonlogs WHERE player_seasonlogs.pid = player.pid AND player_seasonlogs.season_year IN (2024,2025) AND player_seasonlogs.season_type = 'REG') AS \"espn_overall_score_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-ESPN-000902', 'Test', 'Espn', 'T.Espn', 'Test Espn', 'ZZ', 'ZZ', '2000-01-01', 2020)",
-      "INSERT INTO player_seasonlogs (pid, year, seas_type, pos, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'REG', 'ZZ', 50)",
-      "INSERT INTO player_seasonlogs (pid, year, seas_type, pos, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'POST', 'ZZ', 99)",
-      "INSERT INTO player_seasonlogs (pid, year, seas_type, pos, espn_overall_score) VALUES ('TEST-ESPN-000902', 2025, 'REG', 'ZZ', 70)"
+      "INSERT INTO player_seasonlogs (pid, season_year, season_type, pos, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'REG', 'ZZ', 50)",
+      "INSERT INTO player_seasonlogs (pid, season_year, season_type, pos, espn_overall_score) VALUES ('TEST-ESPN-000902', 2024, 'POST', 'ZZ', 99)",
+      "INSERT INTO player_seasonlogs (pid, season_year, season_type, pos, espn_overall_score) VALUES ('TEST-ESPN-000902', 2025, 'REG', 'ZZ', 70)"
     ],
-    "reference_sql": "SELECT AVG(espn_overall_score) AS espn_overall_score_0 FROM player_seasonlogs WHERE pid = 'TEST-ESPN-000902' AND year IN (2024, 2025) AND seas_type = 'REG'",
+    "reference_sql": "SELECT AVG(espn_overall_score) AS espn_overall_score_0 FROM player_seasonlogs WHERE pid = 'TEST-ESPN-000902' AND season_year IN (2024, 2025) AND season_type = 'REG'",
     "compare_columns": ["espn_overall_score_0"]
   },
   "tags": ["year_offset", "espn", "range", "result-equivalence"]

@@ -307,8 +307,8 @@ const create_team_share_stat = ({
     // Handle career_year
     if (params.career_year) {
       with_query.join('player_seasonlogs', function () {
-        this.on('nfl_plays.year', '=', 'player_seasonlogs.year')
-          .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.seas_type')
+        this.on('nfl_plays.year', '=', 'player_seasonlogs.season_year')
+          .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.season_type')
           .andOn('pg.pid', '=', 'player_seasonlogs.pid')
       })
       with_query.whereBetween('player_seasonlogs.career_year', [

@@ -20,13 +20,13 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"tc447a24b5421261899fec717107b6e9b\".\"base_salary\" AS \"base_salary_0\", \"player\".\"primary_position\" from \"player\" left join \"player_contracts\" as \"tc447a24b5421261899fec717107b6e9b\" on \"tc447a24b5421261899fec717107b6e9b\".\"pid\" = \"player\".\"pid\" and tc447a24b5421261899fec717107b6e9b.year = '2024' where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"tc447a24b5421261899fec717107b6e9b\".\"base_salary\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"tc447a24b5421261899fec717107b6e9b\".\"base_salary\" AS \"base_salary_0\", \"player\".\"primary_position\" from \"player\" left join \"player_contracts\" as \"tc447a24b5421261899fec717107b6e9b\" on \"tc447a24b5421261899fec717107b6e9b\".\"pid\" = \"player\".\"pid\" and tc447a24b5421261899fec717107b6e9b.season_year = '2024' where player.primary_position IN ('ZZ') group by player.first_name, player.last_name, \"tc447a24b5421261899fec717107b6e9b\".\"base_salary\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-CTRX-000900', 'Test', 'Ctrx', 'T.Ctrx', 'Test Ctrx', 'ZZ', 'ZZ', '2000-01-01', 2020)",
-      "INSERT INTO player_contracts (pid, year, team, base_salary) VALUES ('TEST-CTRX-000900', '2024', 'KC', 5000.000)"
+      "INSERT INTO player_contracts (pid, season_year, team, base_salary) VALUES ('TEST-CTRX-000900', '2024', 'KC', 5000.000)"
     ],
-    "reference_sql": "SELECT base_salary AS base_salary_0 FROM player_contracts WHERE pid = 'TEST-CTRX-000900' AND year = '2024'",
+    "reference_sql": "SELECT base_salary AS base_salary_0 FROM player_contracts WHERE pid = 'TEST-CTRX-000900' AND season_year = '2024'",
     "compare_columns": ["base_salary_0"]
   },
   "tags": [

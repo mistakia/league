@@ -83,7 +83,7 @@ const calculate_player_variance = async ({ year, scoring_format_id } = {}) => {
 
     variance_records.push({
       pid,
-      year,
+      season_year: year,
       scoring_format_id,
       games_played: n,
       mean_points: mean.toFixed(2),
@@ -105,7 +105,7 @@ const calculate_player_variance = async ({ year, scoring_format_id } = {}) => {
       save: async (batch) => {
         await db('player_variance')
           .insert(batch)
-          .onConflict(['pid', 'year', 'scoring_format_id'])
+          .onConflict(['pid', 'season_year', 'scoring_format_id'])
           .merge()
       }
     })

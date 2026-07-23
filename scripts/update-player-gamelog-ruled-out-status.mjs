@@ -166,12 +166,12 @@ const find_out_status_records = async ({
   const one_day_after_game = start_timestamp + 86400 // 24 hours in seconds
 
   const status_records = await db('players_status')
-    .select('pid', 'timestamp', 'game_designation', 'injury_body_part')
+    .select('pid', 'observed_at', 'game_designation', 'injury_body_part')
     .whereIn('pid', pids)
     .where('game_designation', 'OUT')
-    .where('timestamp', '>=', start_timestamp)
-    .where('timestamp', '<=', one_day_after_game) // Changed from end_timestamp
-    .orderBy('timestamp', 'asc')
+    .where('observed_at', '>=', new Date(start_timestamp * 1000))
+    .where('observed_at', '<=', new Date(one_day_after_game * 1000)) // Changed from end_timestamp
+    .orderBy('observed_at', 'asc')
 
   return status_records
 }
@@ -239,7 +239,7 @@ const process_game = async (game, gamelogs) => {
     const out_status = out_status_by_pid[gamelog.pid]
 
     if (out_status) {
-      const status_date = new Date(out_status.timestamp * 1000)
+      const status_date = new Date(out_status.observed_at)
         .toISOString()
         .split('T')[0]
 
@@ -249,7 +249,7 @@ const process_game = async (game, gamelogs) => {
           esbid: gamelog.esbid,
           pid: gamelog.pid,
           injury_body_part: out_status.injury_body_part,
-          status_timestamp: out_status.timestamp,
+          status_timestamp: out_status.observed_at,
           status_date,
           snaps_off: gamelog.snaps_off
         })
@@ -403,15 +403,14 @@ const run = async ({
 const PLAYERS_STATUS_STALE_THRESHOLD_SECONDS = 7 * 86400
 
 const check_players_status_freshness = async () => {
-  const row = await db('players_status').max('timestamp as max_ts').first()
-  const max_ts = row?.max_ts ? Number(row.max_ts) : null
+  const row = await db('players_status').max('observed_at as max_ts').first()
+  const max_ts = row?.max_ts ? new Date(row.max_ts) : null
   if (!max_ts) {
     return 'players_status table has no rows; cannot detect ruled-out players'
   }
-  const now = Math.round(Date.now() / 1000)
-  const age_seconds = now - max_ts
+  const age_seconds = Math.round((Date.now() - max_ts.getTime()) / 1000)
   if (age_seconds > PLAYERS_STATUS_STALE_THRESHOLD_SECONDS) {
-    return `players_status freshness stale: latest timestamp ${max_ts} is ${Math.round(age_seconds / 86400)} days old (threshold ${PLAYERS_STATUS_STALE_THRESHOLD_SECONDS / 86400} days)`
+    return `players_status freshness stale: latest observed_at ${max_ts.toISOString()} is ${Math.round(age_seconds / 86400)} days old (threshold ${PLAYERS_STATUS_STALE_THRESHOLD_SECONDS / 86400} days)`
   }
   return null
 }

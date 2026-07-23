@@ -33,7 +33,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
         db.raw('player_archetypes.season_year = ?', [year])
       )
     })
-    .where('player_game_outcome_correlations.year', year)
+    .where('player_game_outcome_correlations.season_year', year)
     .where('player_game_outcome_correlations.outcome_type', 'game_script')
     .where('player_game_outcome_correlations.confidence', '>=', 0.5) // Only use confident correlations
     .select(
@@ -104,7 +104,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
     defaults_to_insert.push({
       pos,
       archetype: null,
-      year,
+      season_year: year,
       outcome_type: 'game_script',
       default_correlation: default_correlation.toFixed(4),
       sample_size: data.correlations.length,
@@ -136,7 +136,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
     defaults_to_insert.push({
       pos: data.pos,
       archetype: data.archetype,
-      year,
+      season_year: year,
       outcome_type: 'game_script',
       default_correlation: default_correlation.toFixed(4),
       sample_size: data.correlations.length,
@@ -158,7 +158,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
       save: async (batch) => {
         // Delete existing records for this year first (simpler than complex upsert)
         await db('position_game_outcome_defaults')
-          .where({ year, outcome_type: 'game_script' })
+          .where({ season_year: year, outcome_type: 'game_script' })
           .delete()
 
         await db('position_game_outcome_defaults').insert(batch)

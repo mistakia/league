@@ -105,7 +105,7 @@ export default function SelectedPlayer({
   // Get the latest seasonlog (most recent year with data)
   const latest_seasonlog =
     player_seasonlogs.size > 0
-      ? player_seasonlogs.sortBy((s) => -s.year).first()
+      ? player_seasonlogs.sortBy((s) => -s.season_year).first()
       : null
 
   const handleChange = (event, value) => setValue(value)

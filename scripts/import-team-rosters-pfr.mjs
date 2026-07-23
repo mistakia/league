@@ -219,8 +219,8 @@ const save_rosters = async ({ rosters, year }) => {
         await trx('player_seasonlogs')
           .where({
             pid: matching_player.pid,
-            year,
-            seas_type: 'REG'
+            season_year: year,
+            season_type: 'REG'
           })
           .update({
             pfr_season_value: roster_player.av

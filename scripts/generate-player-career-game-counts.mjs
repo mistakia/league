@@ -92,10 +92,10 @@ const generate_player_career_game_counts = async () => {
         if (!season_updates[season_key]) {
           season_updates[season_key] = {
             pid: game.pid,
-            year: game.year,
+            season_year: game.year,
             pos: game.pos,
             career_year: player_career_years[pid].size,
-            seas_type: game.seas_type
+            season_type: game.seas_type
           }
         }
       }
@@ -127,7 +127,7 @@ const generate_player_career_game_counts = async () => {
         save: async (batch) => {
           await db('player_seasonlogs')
             .insert(batch)
-            .onConflict(['pid', 'year', 'seas_type'])
+            .onConflict(['pid', 'season_year', 'season_type'])
             .merge(['career_year'])
         },
         batch_size: 500

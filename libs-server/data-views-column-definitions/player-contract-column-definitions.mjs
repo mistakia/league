@@ -42,7 +42,7 @@ const player_contract_join = ({
 
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
-    this.andOn(db.raw(`${table_name}.year = '${year}'`))
+    this.andOn(db.raw(`${table_name}.season_year = '${year}'`))
   }
 
   query[join_func](`player_contracts as ${table_name}`, join_conditions)

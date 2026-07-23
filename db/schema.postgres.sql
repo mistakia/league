@@ -70,9 +70,9 @@ DROP INDEX IF EXISTS public.roster_asset_holding_team_period_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_player_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
+DROP INDEX IF EXISTS public.players_status_pid_observed_at_key;
 DROP INDEX IF EXISTS public.player_underdog_id_unique;
 DROP INDEX IF EXISTS public.player_name_search_idx;
-DROP INDEX IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx;
 DROP INDEX IF EXISTS public.play_changelog_natural_key;
 DROP INDEX IF EXISTS public.pff_unresolved_players_season_year_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_season_year_facet_idx;
@@ -216,14 +216,14 @@ DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_index_natural_key;
 DROP INDEX IF EXISTS public.idx_projections_archive_pid;
 DROP INDEX IF EXISTS public.idx_practice_nfl_week_id;
-DROP INDEX IF EXISTS public.idx_position_game_outcome_defaults_year;
+DROP INDEX IF EXISTS public.idx_position_game_outcome_defaults_season_year;
 DROP INDEX IF EXISTS public.idx_poaches_lid;
 DROP INDEX IF EXISTS public.idx_poach_releases_poachid;
 DROP INDEX IF EXISTS public.idx_playoffs_lid;
 DROP INDEX IF EXISTS public.idx_players_status_pid;
 DROP INDEX IF EXISTS public.idx_player_variance_pid;
 DROP INDEX IF EXISTS public.idx_player_sis_id;
-DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
+DROP INDEX IF EXISTS public.idx_player_seasonlogs_season_year_season_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
 DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
@@ -240,13 +240,13 @@ DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_nfl_team_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_nfl_team;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_active_pid_season_year;
-DROP INDEX IF EXISTS public.idx_player_game_outcome_correlations_year;
+DROP INDEX IF EXISTS public.idx_player_game_outcome_correlations_season_year;
 DROP INDEX IF EXISTS public.idx_player_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_fname;
 DROP INDEX IF EXISTS public.idx_player_ffpc_id;
 DROP INDEX IF EXISTS public.idx_player_fantrax_id;
 DROP INDEX IF EXISTS public.idx_player_fantasylabs_id;
-DROP INDEX IF EXISTS public.idx_player_dfs_ownership_year_week;
+DROP INDEX IF EXISTS public.idx_player_dfs_ownership_season_year_week;
 DROP INDEX IF EXISTS public.idx_player_dfs_ownership_draft_group;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season_year;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
@@ -366,7 +366,7 @@ DROP INDEX IF EXISTS public.idx_draftkings_activity_last_seen;
 DROP INDEX IF EXISTS public.idx_draftkings_activity_checks;
 DROP INDEX IF EXISTS public.idx_draft_tid;
 DROP INDEX IF EXISTS public.idx_draft_lid;
-DROP INDEX IF EXISTS public.idx_dfs_contests_year_week;
+DROP INDEX IF EXISTS public.idx_dfs_contests_season_year_week;
 DROP INDEX IF EXISTS public.idx_dfs_contests_draft_group;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25141_userid_tid_year;
@@ -397,7 +397,6 @@ DROP INDEX IF EXISTS public.idx_24926_projection;
 DROP INDEX IF EXISTS public.idx_24923_pid;
 DROP INDEX IF EXISTS public.idx_24913_pid;
 DROP INDEX IF EXISTS public.idx_24910_tid;
-DROP INDEX IF EXISTS public.idx_24905_status;
 DROP INDEX IF EXISTS public.idx_24855_pid;
 DROP INDEX IF EXISTS public.idx_24804_alias;
 DROP INDEX IF EXISTS public.idx_24798_yahoo_id;
@@ -473,14 +472,14 @@ ALTER TABLE IF EXISTS ONLY public.player_variance DROP CONSTRAINT IF EXISTS play
 ALTER TABLE IF EXISTS ONLY public.player_team_extension_state DROP CONSTRAINT IF EXISTS player_team_extension_state_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
-ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rts_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player_receiving_gamelogs DROP CONSTRAINT IF EXISTS player_receiving_gamelogs_esbid_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_receiving_gamelogs DROP CONSTRAINT IF EXISTS player_receiving_gamelogs_esbid_pid_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
 ALTER TABLE IF EXISTS ONLY public.player_prospect_profile DROP CONSTRAINT IF EXISTS player_prospect_profile_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
-ALTER TABLE IF EXISTS ONLY public.player_passing_gamelogs DROP CONSTRAINT IF EXISTS player_passing_gamelogs_esbid_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_passing_gamelogs DROP CONSTRAINT IF EXISTS player_passing_gamelogs_esbid_pid_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_pair_correlations DROP CONSTRAINT IF EXISTS player_pair_correlations_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_otc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_nffc_id_unique;
@@ -521,9 +520,9 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fantra
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_dfs_ownership DROP CONSTRAINT IF EXISTS player_dfs_ownership_pkey;
-ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
-ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_college_seasonlogs DROP CONSTRAINT IF EXISTS player_college_seasonlogs_pid_season_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_college_careerlogs DROP CONSTRAINT IF EXISTS player_college_careerlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_changelog DROP CONSTRAINT IF EXISTS player_changelog_pkey;
@@ -766,7 +765,6 @@ DROP TABLE IF EXISTS public.player_gamelogs_year_2002;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2001;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
 DROP TABLE IF EXISTS public.player_gamelogs_default;
-DROP TABLE IF EXISTS public.player_gamelogs_active_snapshot_2026_05_23;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_game_outcome_correlations;
 DROP TABLE IF EXISTS public.player_dfs_ownership;
@@ -2030,7 +2028,7 @@ CREATE TABLE public.dfs_contests (
     max_entries integer,
     game_type character varying(50),
     sport character varying(10) DEFAULT 'NFL'::character varying,
-    year smallint,
+    season_year smallint,
     week smallint,
     start_date timestamp with time zone,
     is_guaranteed boolean,
@@ -20033,7 +20031,7 @@ CREATE TABLE public.player_college_seasonlogs (
 
 CREATE TABLE public.player_contracts (
     pid character varying(25) NOT NULL,
-    year character varying(5) NOT NULL,
+    season_year character varying(5) NOT NULL,
     team character varying(3),
     base_salary numeric(10,3),
     prorated_bonus numeric(10,5),
@@ -20064,10 +20062,10 @@ COMMENT ON COLUMN public.player_contracts.pid IS 'Player ID';
 
 
 --
--- Name: COLUMN player_contracts.year; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_contracts.season_year; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_contracts.year IS 'Contract year or "Total"';
+COMMENT ON COLUMN public.player_contracts.season_year IS 'Contract year or "Total"';
 
 
 --
@@ -20161,7 +20159,7 @@ COMMENT ON COLUMN public.player_contracts.option_bonus IS 'Option bonus in milli
 CREATE TABLE public.player_defender_gamelogs (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     pass_rush_snaps smallint,
     pass_coverage_snaps smallint,
     tackles smallint,
@@ -20207,7 +20205,7 @@ CREATE TABLE public.player_dfs_ownership (
     roster_position character varying(10),
     fpts numeric(7,2),
     source_player_display_name character varying(100),
-    year smallint,
+    season_year smallint,
     week smallint,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
@@ -20219,7 +20217,7 @@ CREATE TABLE public.player_dfs_ownership (
 
 CREATE TABLE public.player_game_outcome_correlations (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     outcome_type character varying(20) NOT NULL,
     correlation numeric(5,4),
     games_sample smallint NOT NULL,
@@ -20389,19 +20387,6 @@ PARTITION BY RANGE (season_year);
 --
 
 COMMENT ON COLUMN public.player_gamelogs.ruled_out_in_game IS 'Indicates player was active (suited up) but left game early due to injury and was ruled OUT during/after the game. Used for reserve eligibility grace period.';
-
-
---
--- Name: player_gamelogs_active_snapshot_2026_05_23; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.player_gamelogs_active_snapshot_2026_05_23 (
-    esbid integer,
-    pid character varying(25),
-    year smallint,
-    active boolean,
-    source character varying(32)
-);
 
 
 --
@@ -23664,7 +23649,7 @@ COMMENT ON COLUMN public.player_pair_correlations.relationship_type IS 'same_tea
 CREATE TABLE public.player_passing_gamelogs (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     pass_rating numeric(5,1),
     pass_yards_per_attempt numeric(4,2),
     sacks smallint,
@@ -23985,7 +23970,7 @@ CREATE TABLE public.player_rankings_index (
 CREATE TABLE public.player_receiving_gamelogs (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     routes smallint,
     receiving_passer_rating numeric(5,2),
     catch_rate numeric(5,2),
@@ -24029,7 +24014,7 @@ CREATE TABLE public.player_receiving_gamelogs (
 CREATE TABLE public.player_rushing_gamelogs (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     rush_epa numeric(5,2),
     rush_epa_per_attempt numeric(5,2),
     expected_rush_yards numeric(5,2),
@@ -24080,8 +24065,8 @@ CREATE TABLE public.player_salaries (
 
 CREATE TABLE public.player_seasonlogs (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
-    seas_type character varying(10) NOT NULL,
+    season_year smallint NOT NULL,
+    season_type character varying(10) NOT NULL,
     pos character varying(4) NOT NULL,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
@@ -24147,7 +24132,7 @@ CREATE TABLE public.player_team_extension_state (
     franchise_tag_history_years smallint[],
     rookie_tag_used_year smallint,
     last_reset_event smallint,
-    last_refreshed_at timestamp without time zone NOT NULL
+    last_refreshed_at timestamp with time zone NOT NULL
 );
 
 
@@ -24164,7 +24149,7 @@ COMMENT ON TABLE public.player_team_extension_state IS 'Denormalized extension/t
 
 CREATE TABLE public.player_variance (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     games_played smallint NOT NULL,
     mean_points numeric(6,3),
     standard_deviation numeric(6,3),
@@ -24218,12 +24203,12 @@ CREATE TABLE public.players_status (
     details character varying(255),
     exp_return character varying(255),
     injury_body_part character varying(255),
-    injury_start_date character varying(255),
+    injury_start_date date,
     injury_notes character varying(255),
     practice_participation character varying(255),
     practice_description character varying(255),
     search_rank integer,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     roster_status character varying(100),
     game_designation character varying(100),
     source_status character varying(100),
@@ -24302,7 +24287,7 @@ CREATE TABLE public.position_game_outcome_defaults (
     pos character varying(4) NOT NULL,
     archetype character varying(30),
     archetype_key character varying(30) GENERATED ALWAYS AS (COALESCE(archetype, ''::character varying)) STORED NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     outcome_type character varying(20) NOT NULL,
     default_correlation numeric(5,4) NOT NULL,
     sample_size integer,
@@ -24346,7 +24331,7 @@ COMMENT ON COLUMN public.position_game_outcome_defaults.default_correlation IS '
 CREATE TABLE public.practice (
     pid character varying(25),
     week smallint NOT NULL,
-    year smallint,
+    season_year smallint,
     inj character varying(100),
     m character varying(20),
     tu character varying(20),
@@ -24358,11 +24343,11 @@ CREATE TABLE public.practice (
     roster_status character varying(100),
     game_designation character varying(100),
     source_status character varying(100),
-    seas_type character varying(10) NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    season_type character varying(10) NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     source character varying(32) DEFAULT 'rotowire'::character varying,
     practice_status character varying(20),
-    CONSTRAINT practice_reg_week_bound CHECK ((NOT (((seas_type)::text = 'REG'::text) AND (week > 18))))
+    CONSTRAINT practice_reg_week_bound CHECK ((NOT (((season_type)::text = 'REG'::text) AND (week > 18))))
 );
 
 
@@ -28019,11 +28004,11 @@ ALTER TABLE ONLY public.player_college_seasonlogs
 
 
 --
--- Name: player_contracts player_contracts_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_contracts player_contracts_pid_season_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_contracts
-    ADD CONSTRAINT player_contracts_pid_year_unique UNIQUE (pid, year);
+    ADD CONSTRAINT player_contracts_pid_season_year_unique UNIQUE (pid, season_year);
 
 
 --
@@ -28031,15 +28016,15 @@ ALTER TABLE ONLY public.player_contracts
 --
 
 ALTER TABLE ONLY public.player_contracts
-    ADD CONSTRAINT player_contracts_pkey PRIMARY KEY (pid, year);
+    ADD CONSTRAINT player_contracts_pkey PRIMARY KEY (pid, season_year);
 
 
 --
--- Name: player_defender_gamelogs player_defender_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_defender_gamelogs player_defender_gamelogs_esbid_pid_season_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_defender_gamelogs
-    ADD CONSTRAINT player_defender_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
+    ADD CONSTRAINT player_defender_gamelogs_esbid_pid_season_year_unique UNIQUE (esbid, pid, season_year);
 
 
 --
@@ -28095,7 +28080,7 @@ ALTER TABLE ONLY public.player
 --
 
 ALTER TABLE ONLY public.player_game_outcome_correlations
-    ADD CONSTRAINT player_game_outcome_correlations_pkey PRIMARY KEY (pid, year, outcome_type);
+    ADD CONSTRAINT player_game_outcome_correlations_pkey PRIMARY KEY (pid, season_year, outcome_type);
 
 
 --
@@ -28363,11 +28348,11 @@ ALTER TABLE ONLY public.player_pair_correlations
 
 
 --
--- Name: player_passing_gamelogs player_passing_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_passing_gamelogs player_passing_gamelogs_esbid_pid_season_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_passing_gamelogs
-    ADD CONSTRAINT player_passing_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
+    ADD CONSTRAINT player_passing_gamelogs_esbid_pid_season_year_unique UNIQUE (esbid, pid, season_year);
 
 
 --
@@ -28403,11 +28388,11 @@ ALTER TABLE ONLY public.player_rankings_index
 
 
 --
--- Name: player_receiving_gamelogs player_receiving_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_receiving_gamelogs player_receiving_gamelogs_esbid_pid_season_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_receiving_gamelogs
-    ADD CONSTRAINT player_receiving_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
+    ADD CONSTRAINT player_receiving_gamelogs_esbid_pid_season_year_unique UNIQUE (esbid, pid, season_year);
 
 
 --
@@ -28419,11 +28404,11 @@ ALTER TABLE ONLY public.player
 
 
 --
--- Name: player_rushing_gamelogs player_rushing_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: player_rushing_gamelogs player_rushing_gamelogs_esbid_pid_season_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_rushing_gamelogs
-    ADD CONSTRAINT player_rushing_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
+    ADD CONSTRAINT player_rushing_gamelogs_esbid_pid_season_year_unique UNIQUE (esbid, pid, season_year);
 
 
 --
@@ -28455,7 +28440,7 @@ ALTER TABLE ONLY public.player_team_extension_state
 --
 
 ALTER TABLE ONLY public.player_variance
-    ADD CONSTRAINT player_variance_pkey PRIMARY KEY (pid, year, scoring_format_id);
+    ADD CONSTRAINT player_variance_pkey PRIMARY KEY (pid, season_year, scoring_format_id);
 
 
 --
@@ -28471,7 +28456,7 @@ ALTER TABLE ONLY public.playoffs
 --
 
 ALTER TABLE ONLY public.position_game_outcome_defaults
-    ADD CONSTRAINT position_game_outcome_defaults_pkey PRIMARY KEY (pos, archetype_key, year, outcome_type);
+    ADD CONSTRAINT position_game_outcome_defaults_pkey PRIMARY KEY (pos, archetype_key, season_year, outcome_type);
 
 
 --
@@ -29213,14 +29198,7 @@ CREATE UNIQUE INDEX idx_24804_alias ON public.player_aliases USING btree (pid, f
 -- Name: idx_24855_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24855_pid ON public.player_seasonlogs USING btree (pid, year, seas_type);
-
-
---
--- Name: idx_24905_status; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24905_status ON public.players_status USING btree (pid, "timestamp");
+CREATE UNIQUE INDEX idx_24855_pid ON public.player_seasonlogs USING btree (pid, season_year, season_type);
 
 
 --
@@ -29241,7 +29219,7 @@ CREATE UNIQUE INDEX idx_24913_pid ON public.poach_releases USING btree (poachid,
 -- Name: idx_24923_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, year, seas_type);
+CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, season_year, season_type);
 
 
 --
@@ -29434,10 +29412,10 @@ CREATE INDEX idx_dfs_contests_draft_group ON public.dfs_contests USING btree (so
 
 
 --
--- Name: idx_dfs_contests_year_week; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_dfs_contests_season_year_week; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_dfs_contests_year_week ON public.dfs_contests USING btree (year, week, source_id);
+CREATE INDEX idx_dfs_contests_season_year_week ON public.dfs_contests USING btree (season_year, week, source_id);
 
 
 --
@@ -30274,10 +30252,10 @@ CREATE INDEX idx_player_dfs_ownership_draft_group ON public.player_dfs_ownership
 
 
 --
--- Name: idx_player_dfs_ownership_year_week; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_dfs_ownership_season_year_week; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_dfs_ownership_year_week ON public.player_dfs_ownership USING btree (year, week, source_id);
+CREATE INDEX idx_player_dfs_ownership_season_year_week ON public.player_dfs_ownership USING btree (season_year, week, source_id);
 
 
 --
@@ -30316,10 +30294,10 @@ CREATE INDEX idx_player_fname_lname ON public.player USING btree (first_name, la
 
 
 --
--- Name: idx_player_game_outcome_correlations_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_game_outcome_correlations_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_game_outcome_correlations_year ON public.player_game_outcome_correlations USING btree (year);
+CREATE INDEX idx_player_game_outcome_correlations_season_year ON public.player_game_outcome_correlations USING btree (season_year);
 
 
 --
@@ -30435,10 +30413,10 @@ CREATE INDEX idx_player_salaries_source_id_pid_salary_esbid ON public.player_sal
 
 
 --
--- Name: idx_player_seasonlogs_year_seas_type_career_year_pid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_player_seasonlogs_season_year_season_type_career_year_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_seasonlogs_year_seas_type_career_year_pid ON public.player_seasonlogs USING btree (year, seas_type, career_year, pid);
+CREATE INDEX idx_player_seasonlogs_season_year_season_type_career_year_pid ON public.player_seasonlogs USING btree (season_year, season_type, career_year, pid);
 
 
 --
@@ -30484,10 +30462,10 @@ CREATE INDEX idx_poaches_lid ON public.poaches USING btree (lid);
 
 
 --
--- Name: idx_position_game_outcome_defaults_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_position_game_outcome_defaults_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_position_game_outcome_defaults_year ON public.position_game_outcome_defaults USING btree (year);
+CREATE INDEX idx_position_game_outcome_defaults_season_year ON public.position_game_outcome_defaults USING btree (season_year);
 
 
 --
@@ -41516,13 +41494,6 @@ CREATE UNIQUE INDEX play_changelog_natural_key ON public.play_changelog USING bt
 
 
 --
--- Name: player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX player_gamelogs_active_snapshot_2026_05_23_esbid_pid_year_idx ON public.player_gamelogs_active_snapshot_2026_05_23 USING btree (esbid, pid, year);
-
-
---
 -- Name: player_gamelogs_default_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -42906,6 +42877,13 @@ CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vect
 --
 
 CREATE UNIQUE INDEX player_underdog_id_unique ON public.player USING btree (underdog_player_id);
+
+
+--
+-- Name: players_status_pid_observed_at_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX players_status_pid_observed_at_key ON public.players_status USING btree (pid, observed_at);
 
 
 --
@@ -56930,13 +56908,6 @@ GRANT SELECT ON TABLE public.player_game_outcome_correlations TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.player_gamelogs TO league_reader;
-
-
---
--- Name: TABLE player_gamelogs_active_snapshot_2026_05_23; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.player_gamelogs_active_snapshot_2026_05_23 TO league_reader;
 
 
 --

@@ -132,8 +132,8 @@ const add_player_per_game_cte = ({
   if (career_year.length) {
     cte_query = cte_query.leftJoin('player_seasonlogs', function () {
       this.on('player_seasonlogs.pid', `${player_gamelogs_table}.pid`)
-      this.andOn('player_seasonlogs.year', 'nfl_games.season_year')
-      this.andOn('player_seasonlogs.seas_type', 'nfl_games.season_type')
+      this.andOn('player_seasonlogs.season_year', 'nfl_games.season_year')
+      this.andOn('player_seasonlogs.season_type', 'nfl_games.season_type')
     })
   }
 

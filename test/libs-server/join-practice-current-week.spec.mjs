@@ -47,15 +47,15 @@ describe('LIBS-SERVER apply_practice_current_week_join', function () {
       await knex('practice').where({ pid: TEST_PID }).del()
       await knex('practice').insert({
         pid: TEST_PID,
-        year: current_season.stats_season_year,
-        seas_type: 'REG',
+        season_year: current_season.stats_season_year,
+        season_type: 'REG',
         week: Math.max(current_season.week, 1),
         game_designation: 'REG-MATCH'
       })
       await knex('practice').insert({
         pid: TEST_PID,
-        year: current_season.stats_season_year,
-        seas_type: 'POST',
+        season_year: current_season.stats_season_year,
+        season_type: 'POST',
         week: 1,
         game_designation: 'POST-UNUSED'
       })
@@ -67,13 +67,13 @@ describe('LIBS-SERVER apply_practice_current_week_join', function () {
     it('joins the current REG-week practice row', async function () {
       const query = knex('player').select(
         'player.pid',
-        'practice.seas_type',
+        'practice.season_type',
         'practice.game_designation'
       )
       apply_practice_current_week_join({ db: knex, query })
       const rows = await query.where('player.pid', TEST_PID)
       expect(rows).to.have.length(1)
-      expect(rows[0].seas_type).to.equal('REG')
+      expect(rows[0].season_type).to.equal('REG')
       expect(rows[0].game_designation).to.equal('REG-MATCH')
     })
   })
@@ -83,15 +83,15 @@ describe('LIBS-SERVER apply_practice_current_week_join', function () {
       await knex('practice').where({ pid: TEST_PID }).del()
       await knex('practice').insert({
         pid: TEST_PID,
-        year: current_season.stats_season_year,
-        seas_type: 'POST',
+        season_year: current_season.stats_season_year,
+        season_type: 'POST',
         week: 1,
         game_designation: 'POST-MATCH'
       })
       await knex('practice').insert({
         pid: TEST_PID,
-        year: current_season.stats_season_year,
-        seas_type: 'REG',
+        season_year: current_season.stats_season_year,
+        season_type: 'REG',
         week: 18,
         game_designation: 'REG-UNUSED'
       })
@@ -103,13 +103,13 @@ describe('LIBS-SERVER apply_practice_current_week_join', function () {
     it('joins the current POST-week practice row (not the REG week 18 row)', async function () {
       const query = knex('player').select(
         'player.pid',
-        'practice.seas_type',
+        'practice.season_type',
         'practice.game_designation'
       )
       apply_practice_current_week_join({ db: knex, query })
       const rows = await query.where('player.pid', TEST_PID)
       expect(rows).to.have.length(1)
-      expect(rows[0].seas_type).to.equal('POST')
+      expect(rows[0].season_type).to.equal('POST')
       expect(rows[0].game_designation).to.equal('POST-MATCH')
     })
   })

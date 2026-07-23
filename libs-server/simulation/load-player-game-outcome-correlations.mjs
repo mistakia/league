@@ -29,12 +29,12 @@ export async function load_player_game_outcome_correlations({
   // Query both current year and prior year, prefer current year
   const correlations = await db('player_game_outcome_correlations')
     .whereIn('pid', player_ids)
-    .whereIn('year', [year, year - 1])
+    .whereIn('season_year', [year, year - 1])
     .where('outcome_type', outcome_type)
-    .orderBy('year', 'desc')
+    .orderBy('season_year', 'desc')
     .select(
       'pid',
-      'year',
+      'season_year',
       'correlation',
       'confidence',
       'games_sample',
@@ -64,7 +64,7 @@ export async function load_player_game_outcome_correlations({
       leading_fpg: parseFloat(row.leading_fpg),
       trailing_fpg: parseFloat(row.trailing_fpg),
       overall_fpg: parseFloat(row.overall_fpg),
-      data_year: row.year
+      data_year: row.season_year
     })
   }
 

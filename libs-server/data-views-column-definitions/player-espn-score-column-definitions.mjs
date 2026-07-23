@@ -23,10 +23,10 @@ const get_cache_info_for_espn_score = create_exact_year_cache_info({
 const espn_score_source = {
   table: 'player_seasonlogs',
   grain: 'player_year',
-  key_columns: { pid: 'pid', year: 'year' },
+  key_columns: { pid: 'pid', year: 'season_year' },
   year_default: (params) => [get_valid_year(params.year)],
   extra_predicates: (params) => {
-    const extras = [{ column: 'seas_type', value: 'REG' }]
+    const extras = [{ column: 'season_type', value: 'REG' }]
     if (params.career_year) {
       extras.push({
         column: 'career_year',

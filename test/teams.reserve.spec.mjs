@@ -1145,8 +1145,8 @@ describe('API /teams - reserve', function () {
       await knex('practice').insert({
         pid: player.pid,
         week: current_season.week,
-        year: current_season.year,
-        seas_type: 'REG',
+        season_year: current_season.year,
+        season_type: 'REG',
         w: 'DNP'
       })
 
@@ -1198,8 +1198,8 @@ describe('API /teams - reserve', function () {
       await knex('practice').insert({
         pid: player.pid,
         week: current_season.week,
-        year: current_season.year,
-        seas_type: 'REG',
+        season_year: current_season.year,
+        season_type: 'REG',
         th: 'LP'
       })
 
@@ -1251,8 +1251,8 @@ describe('API /teams - reserve', function () {
       await knex('practice').insert({
         pid: player.pid,
         week: current_season.week,
-        year: current_season.year,
-        seas_type: 'REG',
+        season_year: current_season.year,
+        season_type: 'REG',
         w: 'FULL'
       })
 

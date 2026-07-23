@@ -60,8 +60,8 @@ export const add_player_stats_play_by_play_with_statement = ({
           this.orOn(`nfl_plays.${pid_column}`, '=', 'player_seasonlogs.pid')
         }
       })
-        .andOn('nfl_plays.year', '=', 'player_seasonlogs.year')
-        .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.seas_type')
+        .andOn('nfl_plays.year', '=', 'player_seasonlogs.season_year')
+        .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.season_type')
     })
     with_query.whereBetween(
       'player_seasonlogs.career_year',

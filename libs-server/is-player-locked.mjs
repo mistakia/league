@@ -35,9 +35,9 @@ export default async function (pid) {
       const players_status_rows = await db('players_status')
         .select('players_status.*')
         .where({ pid })
-        .whereBetween('timestamp', [
-          dayjs(gameStart).subtract(5, 'day').unix(),
-          dayjs(gameStart).unix()
+        .whereBetween('observed_at', [
+          dayjs(gameStart).subtract(5, 'day').toDate(),
+          dayjs(gameStart).toDate()
         ])
 
       // if the player was Inactive prior to the game, then they are not locked

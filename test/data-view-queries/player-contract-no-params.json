@@ -14,7 +14,7 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", \"te37cd3d7d7d8336a20d6e437e3276e05\".\"base_salary\" AS \"base_salary_0\", \"player\".\"primary_position\" from \"player\" left join \"player_contracts\" as \"te37cd3d7d7d8336a20d6e437e3276e05\" on \"te37cd3d7d7d8336a20d6e437e3276e05\".\"pid\" = \"player\".\"pid\" and te37cd3d7d7d8336a20d6e437e3276e05.year = '2026' group by \"te37cd3d7d7d8336a20d6e437e3276e05\".\"base_salary\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", \"te37cd3d7d7d8336a20d6e437e3276e05\".\"base_salary\" AS \"base_salary_0\", \"player\".\"primary_position\" from \"player\" left join \"player_contracts\" as \"te37cd3d7d7d8336a20d6e437e3276e05\" on \"te37cd3d7d7d8336a20d6e437e3276e05\".\"pid\" = \"player\".\"pid\" and te37cd3d7d7d8336a20d6e437e3276e05.season_year = '2026' group by \"te37cd3d7d7d8336a20d6e437e3276e05\".\"base_salary\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "contract", "basic"],
   "timeout_ms": 40000,
   "expected_metadata": {

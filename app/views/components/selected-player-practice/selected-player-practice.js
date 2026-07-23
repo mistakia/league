@@ -5,8 +5,8 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 const Row = ({ data }) => (
   <div className='player__selected-row'>
     <div className='row__group-body'>
-      <div className='refactor table__cell metric'>{data.year}</div>
-      <div className='table__cell metric'>{data.seas_type || '-'}</div>
+      <div className='refactor table__cell metric'>{data.season_year}</div>
+      <div className='table__cell metric'>{data.season_type || '-'}</div>
       <div className='table__cell metric'>{data.week}</div>
       <div className='table__cell text'>{data.status || '-'}</div>
       <div className='table__cell text'>{data.inj || '-'}</div>

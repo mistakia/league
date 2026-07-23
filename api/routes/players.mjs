@@ -431,12 +431,12 @@ router.get('/:pid', async (req, res) => {
  *                     example: 18
  *                     minimum: 1
  *                     maximum: 18
- *                   year:
+ *                   season_year:
  *                     type: integer
  *                     description: Season year
  *                     example: 2024
  *                     minimum: 2020
- *                   seas_type:
+ *                   season_type:
  *                     $ref: '#/components/schemas/SeasonTypeEnum'
  *                   injury:
  *                     type: string
@@ -464,8 +464,8 @@ router.get('/:pid', async (req, res) => {
  *                     date: "2024-01-15"
  *                     status: "FULL"
  *                     week: 18
- *                     year: 2024
- *                     seas_type: "REG"
+ *                     season_year: 2024
+ *                     season_type: "REG"
  *                     injury: null
  *                     source: "NFL Injury Report"
  *                     timestamp: "2024-01-15T15:30:00Z"
@@ -473,8 +473,8 @@ router.get('/:pid', async (req, res) => {
  *                     date: "2024-01-16"
  *                     status: "FULL"
  *                     week: 18
- *                     year: 2024
- *                     seas_type: "REG"
+ *                     season_year: 2024
+ *                     season_type: "REG"
  *                     injury: null
  *                     source: "NFL Injury Report"
  *                     timestamp: "2024-01-16T15:30:00Z"
@@ -485,8 +485,8 @@ router.get('/:pid', async (req, res) => {
  *                     date: "2024-01-15"
  *                     status: "LP"
  *                     week: 18
- *                     year: 2024
- *                     seas_type: "REG"
+ *                     season_year: 2024
+ *                     season_type: "REG"
  *                     injury: "Ankle"
  *                     source: "NFL Injury Report"
  *                     timestamp: "2024-01-15T15:30:00Z"
@@ -494,8 +494,8 @@ router.get('/:pid', async (req, res) => {
  *                     date: "2024-01-16"
  *                     status: "DNP"
  *                     week: 18
- *                     year: 2024
- *                     seas_type: "REG"
+ *                     season_year: 2024
+ *                     season_type: "REG"
  *                     injury: "Ankle"
  *                     source: "NFL Injury Report"
  *                     timestamp: "2024-01-16T15:30:00Z"
@@ -1135,7 +1135,7 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
 
     const query = db('player_seasonlogs')
       .where('player_seasonlogs.pid', pid)
-      .where('player_seasonlogs.seas_type', 'REG')
+      .where('player_seasonlogs.season_type', 'REG')
       .leftJoin('scoring_format_player_seasonlogs', function () {
         this.on(
           'scoring_format_player_seasonlogs.pid',
@@ -1145,7 +1145,7 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
           .andOn(
             'scoring_format_player_seasonlogs.year',
             '=',
-            'player_seasonlogs.year'
+            'player_seasonlogs.season_year'
           )
           .andOn(
             'scoring_format_player_seasonlogs.scoring_format_id',
@@ -1162,7 +1162,7 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
           .andOn(
             'league_format_player_seasonlogs.year',
             '=',
-            'player_seasonlogs.year'
+            'player_seasonlogs.season_year'
           )
           .andOn(
             'league_format_player_seasonlogs.league_format_id',
@@ -1190,7 +1190,7 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
         'league_format_player_seasonlogs.startable_games',
         'league_format_player_seasonlogs.earned_salary'
       )
-      .orderBy('player_seasonlogs.year', 'desc')
+      .orderBy('player_seasonlogs.season_year', 'desc')
 
     const data = await query
     res.send(data)

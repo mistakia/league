@@ -62,8 +62,12 @@ const pff_player_source = {
     query_context.players_query
       .join(`player_seasonlogs as ${career_year_alias}`, function () {
         this.on(`${career_year_alias}.pid`, '=', `${table_alias}.pid`)
-          .andOn(`${career_year_alias}.year`, '=', `${table_alias}.season_year`)
-          .andOn(`${career_year_alias}.seas_type`, '=', db.raw('?', ['REG']))
+          .andOn(
+            `${career_year_alias}.season_year`,
+            '=',
+            `${table_alias}.season_year`
+          )
+          .andOn(`${career_year_alias}.season_type`, '=', db.raw('?', ['REG']))
       })
       .whereBetween(`${career_year_alias}.career_year`, [
         Math.min(career_year_param[0], career_year_param[1]),

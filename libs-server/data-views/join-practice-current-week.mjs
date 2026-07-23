@@ -12,8 +12,8 @@ export default function apply_practice_current_week_join({
 
   query.leftJoin(table_expr, function () {
     this.on(`${alias}.pid`, '=', pid_column)
-      .andOn(`${alias}.year`, '=', db.raw('?::int', [year]))
-      .andOn(`${alias}.seas_type`, '=', db.raw('?::text', [seas_type]))
+      .andOn(`${alias}.season_year`, '=', db.raw('?::int', [year]))
+      .andOn(`${alias}.season_type`, '=', db.raw('?::text', [seas_type]))
       .andOn(`${alias}.week`, '=', db.raw('?::int', [week]))
   })
 

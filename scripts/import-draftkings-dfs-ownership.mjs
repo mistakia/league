@@ -158,7 +158,7 @@ const discover_contests = async ({ year, dry_run = false }) => {
       max_entries: contest.m,
       game_type: contest.gameType || 'Classic',
       sport: 'NFL',
-      year,
+      season_year: year,
       week: null, // will be filled from nfl_games if needed
       start_date,
       is_guaranteed
@@ -207,7 +207,7 @@ const import_ownership = async ({
     query = query.where('source_contest_id', String(contest_id))
   }
   if (year) {
-    query = query.where('year', year)
+    query = query.where('season_year', year)
   }
   if (week) {
     query = query.where('week', week)
@@ -362,7 +362,7 @@ const import_ownership = async ({
           roster_position: row.roster_position,
           fpts: row.fpts,
           source_player_display_name: row.player_name,
-          year: contest.year,
+          season_year: contest.season_year,
           week: contest.week
         })
       }

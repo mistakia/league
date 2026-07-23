@@ -86,9 +86,9 @@ const import_espn_receiving_tracking_metrics = async ({
 
     const player_seasonlogs_insert = {
       pid: player.pid,
-      year: item.min_season,
+      season_year: item.min_season,
       pos: player.primary_position,
-      seas_type: 'REG',
+      season_type: 'REG',
       espn_rtm_routes: item.rtm_routes,
       espn_rtm_targets: item.rtm_targets,
       espn_rtm_recv_yds: item.yds,
@@ -113,15 +113,15 @@ const import_espn_receiving_tracking_metrics = async ({
     )
     await db('player_seasonlogs')
       .insert(player_seasonlogs_inserts)
-      .onConflict(['pid', 'year', 'seas_type'])
+      .onConflict(['pid', 'season_year', 'season_type'])
       .merge()
 
     const espn_receiving_metrics_inserts = player_seasonlogs_inserts.map(
       (i) => ({
         pid: i.pid,
-        season_year: i.year,
+        season_year: i.season_year,
         pos: i.pos,
-        season_type: i.seas_type,
+        season_type: i.season_type,
         espn_rtm_routes: i.espn_rtm_routes,
         espn_rtm_targets: i.espn_rtm_targets,
         espn_rtm_recv_yds: i.espn_rtm_recv_yds,

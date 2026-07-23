@@ -164,7 +164,7 @@ const calculate_player_game_outcome_correlations = async ({
 
     correlations_to_insert.push({
       pid,
-      year,
+      season_year: year,
       outcome_type: 'game_script',
       correlation: correlation.toFixed(4),
       games_sample: games.length,
@@ -188,7 +188,7 @@ const calculate_player_game_outcome_correlations = async ({
       save: async (batch) => {
         await db('player_game_outcome_correlations')
           .insert(batch)
-          .onConflict(['pid', 'year', 'outcome_type'])
+          .onConflict(['pid', 'season_year', 'outcome_type'])
           .merge()
       }
     })

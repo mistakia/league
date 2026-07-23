@@ -111,8 +111,12 @@ export const add_defensive_play_by_play_with_statement = ({
   if (params.career_year) {
     with_query.join('player_seasonlogs', function () {
       this.on('defensive_plays.pid', '=', 'player_seasonlogs.pid')
-        .andOn('defensive_plays.year', '=', 'player_seasonlogs.year')
-        .andOn('defensive_plays.seas_type', '=', 'player_seasonlogs.seas_type')
+        .andOn('defensive_plays.year', '=', 'player_seasonlogs.season_year')
+        .andOn(
+          'defensive_plays.seas_type',
+          '=',
+          'player_seasonlogs.season_type'
+        )
     })
     with_query.whereBetween(
       'player_seasonlogs.career_year',

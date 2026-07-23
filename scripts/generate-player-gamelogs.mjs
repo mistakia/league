@@ -307,7 +307,7 @@ const format_receiving_gamelog = ({
   const receiving_gamelog = {
     esbid,
     pid,
-    year,
+    season_year: year,
     longest_reception: stats.longest_reception,
     recv_yards_15_plus_count: stats.recv_yards_15_plus_count,
     team_target_share,
@@ -383,7 +383,7 @@ const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
   return {
     esbid,
     pid,
-    year,
+    season_year: year,
     longest_rush: stats.longest_rush,
     rush_share,
     weighted_opportunity,
@@ -591,7 +591,7 @@ const load_player_routes = async ({ unique_esbids, year }) => {
   const player_routes_query = await db('player_receiving_gamelogs')
     .select('pid', 'esbid', 'routes')
     .whereIn('esbid', unique_esbids)
-    .where({ year })
+    .where({ season_year: year })
     .whereNotNull('routes')
 
   log(`loaded routes data for ${player_routes_query.length} players`)
@@ -825,7 +825,7 @@ const save_gamelogs = async ({
       save: async (batch) => {
         await db('player_receiving_gamelogs')
           .insert(batch)
-          .onConflict(['esbid', 'pid', 'year'])
+          .onConflict(['esbid', 'pid', 'season_year'])
           .merge()
       },
       batch_size: 500
@@ -839,7 +839,7 @@ const save_gamelogs = async ({
       save: async (batch) => {
         await db('player_rushing_gamelogs')
           .insert(batch)
-          .onConflict(['esbid', 'pid', 'year'])
+          .onConflict(['esbid', 'pid', 'season_year'])
           .merge()
       },
       batch_size: 500

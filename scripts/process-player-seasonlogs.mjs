@@ -47,8 +47,8 @@ const processPlayerSeasonlogs = async ({
 
     inserts.push({
       pid,
-      year,
-      seas_type,
+      season_year: year,
+      season_type: seas_type,
       pos,
       ...season_stats
     })
@@ -61,7 +61,7 @@ const processPlayerSeasonlogs = async ({
       save: async (batch) => {
         await db('player_seasonlogs')
           .insert(batch)
-          .onConflict(['pid', 'year', 'seas_type'])
+          .onConflict(['pid', 'season_year', 'season_type'])
           .merge()
       },
       batch_size: 500

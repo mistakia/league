@@ -222,8 +222,8 @@ const build_role_union_period_cte = ({
   if (career_year || career_game) {
     outer.innerJoin('player_seasonlogs', function () {
       this.on('player_seasonlogs.pid', '=', 'role_union.pid')
-      this.andOn('player_seasonlogs.year', '=', 'nfl_games.season_year')
-      this.andOn('player_seasonlogs.seas_type', '=', 'nfl_games.season_type')
+      this.andOn('player_seasonlogs.season_year', '=', 'nfl_games.season_year')
+      this.andOn('player_seasonlogs.season_type', '=', 'nfl_games.season_type')
     })
     if (career_year) {
       const arr = Array.isArray(career_year)

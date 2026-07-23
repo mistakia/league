@@ -388,11 +388,15 @@ const fantasy_points_from_plays_with = async ({
     if (params.career_year) {
       filtered_query = filtered_query.join('player_seasonlogs', function () {
         this.on('fantasy_points_plays.pid', '=', 'player_seasonlogs.pid')
-          .andOn('fantasy_points_plays.year', '=', 'player_seasonlogs.year')
+          .andOn(
+            'fantasy_points_plays.year',
+            '=',
+            'player_seasonlogs.season_year'
+          )
           .andOn(
             'fantasy_points_plays.seas_type',
             '=',
-            'player_seasonlogs.seas_type'
+            'player_seasonlogs.season_type'
           )
       })
       filtered_query = filtered_query.whereBetween(

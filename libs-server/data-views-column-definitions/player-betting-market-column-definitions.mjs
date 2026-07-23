@@ -220,8 +220,8 @@ const player_betting_market_with = ({
     if (career_year.length) {
       qb.join('player_seasonlogs', function () {
         this.on('pms.selection_pid', '=', 'player_seasonlogs.pid')
-          .andOn('m.year', '=', 'player_seasonlogs.year')
-          .andOn('m.seas_type', '=', 'player_seasonlogs.seas_type')
+          .andOn('m.year', '=', 'player_seasonlogs.season_year')
+          .andOn('m.seas_type', '=', 'player_seasonlogs.season_type')
       })
       qb.whereBetween('player_seasonlogs.career_year', [
         Math.min(career_year[0], career_year[1]),

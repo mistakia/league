@@ -24,7 +24,7 @@ function SelectedPlayerSeasonStats({
     <PlayerSelectedRow
       key={index}
       games={seasonlog.games}
-      title={seasonlog.year}
+      title={seasonlog.season_year}
       stats={seasonlog}
       pos={pos}
     />

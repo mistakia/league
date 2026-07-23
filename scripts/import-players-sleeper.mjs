@@ -224,7 +224,7 @@ const run = async () => {
       depth_chart_order,
       depth_chart_position,
       injury_body_part,
-      injury_start_date,
+      injury_start_date: injury_start_date || null,
       source_injury_status: injury_status,
       injury_notes,
       practice_participation,
@@ -232,7 +232,7 @@ const run = async () => {
       source_status: status,
       search_rank,
 
-      timestamp
+      observed_at: new Date(timestamp * 1000)
     }
 
     // Try to parse as game designation first (OUT, QUESTIONABLE, DOUBTFUL, PROBABLE)

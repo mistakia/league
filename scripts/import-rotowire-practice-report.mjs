@@ -93,7 +93,7 @@ const run = async () => {
     }
 
     const currentPRs = await db('practice')
-      .where({ pid: player_row.pid, week, year })
+      .where({ pid: player_row.pid, week, season_year: year })
       .limit(1)
     const currentPR = currentPRs[0]
 
@@ -106,14 +106,14 @@ const run = async () => {
         .where({
           pid: player_row.pid,
           week,
-          year
+          season_year: year
         })
     } else {
       await db('practice').insert({
         pid: player_row.pid,
         week,
-        year,
-        seas_type: current_season.nfl_seas_type,
+        season_year: year,
+        season_type: current_season.nfl_seas_type,
         ...practiceReport
       })
     }
@@ -140,8 +140,8 @@ const run = async () => {
   const window_weeks = week > 1 ? [week, week - 1] : [week]
   const [{ c: window_rows }] = await db('practice')
     .where({
-      year,
-      seas_type: current_season.nfl_seas_type,
+      season_year: year,
+      season_type: current_season.nfl_seas_type,
       source: 'rotowire'
     })
     .whereIn('week', window_weeks)

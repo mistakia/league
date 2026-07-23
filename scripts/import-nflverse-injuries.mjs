@@ -328,17 +328,17 @@ const import_for_year = async ({
     }
 
     if (write_practice) {
-      // practice unique key is (pid, week, year, seas_type) -- no game_designation
-      // or other column carries the row identity. Skip rows where every practice
-      // field would be null (no signal to record).
+      // practice unique key is (pid, week, season_year, season_type) -- no
+      // game_designation or other column carries the row identity. Skip rows
+      // where every practice field would be null (no signal to record).
       if (!practice_game_designation && !practice_status && !inj_text) {
         counts.practice_skipped_empty += 1
       } else {
         practice_inserts.push({
           pid: pid_match.pid,
           week: parseInt(row.week, 10),
-          year,
-          seas_type: 'REG',
+          season_year: year,
+          season_type: 'REG',
           inj: inj_text,
           game_designation: practice_game_designation,
           practice_status,
@@ -362,19 +362,22 @@ const import_for_year = async ({
     )
   }
 
-  // Dedupe practice inserts on (pid, week, year, seas_type) -- matches the
-  // table's unique constraint. Last write wins (covers mid-week team trade
-  // where a player appears under two team rows in the CSV).
+  // Dedupe practice inserts on (pid, week, season_year, season_type) --
+  // matches the table's unique constraint. Last write wins (covers mid-week
+  // team trade where a player appears under two team rows in the CSV).
   const pr_dedup = new Map()
   for (const ins of practice_inserts) {
-    pr_dedup.set(`${ins.pid}|${ins.week}|${ins.year}|${ins.seas_type}`, ins)
+    pr_dedup.set(
+      `${ins.pid}|${ins.week}|${ins.season_year}|${ins.season_type}`,
+      ins
+    )
   }
   const before_pr_dedup = practice_inserts.length
   practice_inserts.length = 0
   practice_inserts.push(...pr_dedup.values())
   if (before_pr_dedup !== practice_inserts.length) {
     log(
-      `deduped ${before_pr_dedup - practice_inserts.length} practice (pid,week,year,seas_type) duplicates -> ${practice_inserts.length} rows`
+      `deduped ${before_pr_dedup - practice_inserts.length} practice (pid,week,season_year,season_type) duplicates -> ${practice_inserts.length} rows`
     )
   }
 
@@ -449,7 +452,7 @@ const import_for_year = async ({
   let practice_written = 0
   if (write_practice) {
     const pr_deleted = await db('practice')
-      .where({ source: source_sentinel, year })
+      .where({ source: source_sentinel, season_year: year })
       .del()
     log(
       `deleted ${pr_deleted} prior practice rows where source='${source_sentinel}' and year=${year}`

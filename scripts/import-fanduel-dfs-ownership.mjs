@@ -87,7 +87,7 @@ const discover_contests = async ({ year, dry_run = false }) => {
       max_entries: largest.max_entries || largest.size,
       game_type: largest.game_type || 'GPP',
       sport: 'NFL',
-      year,
+      season_year: year,
       week: null,
       is_guaranteed: largest.is_guaranteed || false
     })
@@ -132,7 +132,7 @@ const import_ownership = async ({
     query = query.where('source_draft_group_id', String(fixture_list_id))
   }
   if (year) {
-    query = query.where('year', year)
+    query = query.where('season_year', year)
   }
   if (week) {
     query = query.where('week', week)
@@ -287,7 +287,7 @@ const import_ownership = async ({
         roster_position: fixture_player?.position || null,
         fpts: null,
         source_player_display_name: display_name,
-        year: contest.year,
+        season_year: contest.season_year,
         week: contest.week
       })
     }

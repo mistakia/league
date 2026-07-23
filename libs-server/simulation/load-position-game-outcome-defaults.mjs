@@ -20,10 +20,16 @@ export async function load_position_game_outcome_defaults({
 
   // Query both current year and prior year, prefer current year
   const defaults = await db('position_game_outcome_defaults')
-    .whereIn('year', [year, year - 1])
+    .whereIn('season_year', [year, year - 1])
     .where('outcome_type', outcome_type)
-    .orderBy('year', 'desc')
-    .select('pos', 'archetype', 'year', 'default_correlation', 'sample_size')
+    .orderBy('season_year', 'desc')
+    .select(
+      'pos',
+      'archetype',
+      'season_year',
+      'default_correlation',
+      'sample_size'
+    )
 
   // Build result map, deduplicate by key (prefer more recent year)
   const seen = new Set()
@@ -40,7 +46,7 @@ export async function load_position_game_outcome_defaults({
     result.set(key, {
       default_correlation: parseFloat(row.default_correlation),
       sample_size: row.sample_size,
-      data_year: row.year
+      data_year: row.season_year
     })
   }
 

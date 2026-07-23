@@ -32,7 +32,7 @@ export async function load_player_variance({
   // First try player_variance table
   const cached_variance = await db('player_variance')
     .whereIn('pid', player_ids)
-    .where({ year, scoring_format_id })
+    .where({ season_year: year, scoring_format_id })
 
   const variance_map = new Map()
   const found_pids = new Set()
