@@ -14,23 +14,30 @@ const initialize_cli = () => {
 const log = debug('create-season-partitions')
 debug.enable('create-season-partitions')
 
+// partition_column: the range-partition key column. projections_index has been
+// conformed to season_year; the other three keep plain `year` until the schema-wide
+// year-sweep renames them.
 const PARTITIONED_TABLES = [
   {
     parent_table: 'nfl_plays',
-    partition_prefix: 'nfl_plays_year_'
+    partition_prefix: 'nfl_plays_year_',
+    partition_column: 'year'
   },
   {
     parent_table: 'player_gamelogs',
-    partition_prefix: 'player_gamelogs_year_'
+    partition_prefix: 'player_gamelogs_year_',
+    partition_column: 'year'
   },
   {
     parent_table: 'projections_index',
     // TODO change name format from `y` to `year_`
-    partition_prefix: 'projections_index_y'
+    partition_prefix: 'projections_index_y',
+    partition_column: 'season_year'
   },
   {
     parent_table: 'nfl_snaps',
-    partition_prefix: 'nfl_snaps_year_'
+    partition_prefix: 'nfl_snaps_year_',
+    partition_column: 'year'
   }
 ]
 
@@ -50,7 +57,11 @@ const create_season_partitions = async ({
   const existing_tables = table_exists_results.rows.map((row) => row.table_name)
   const partition_creation_errors = []
 
-  for (const { parent_table, partition_prefix } of PARTITIONED_TABLES) {
+  for (const {
+    parent_table,
+    partition_prefix,
+    partition_column
+  } of PARTITIONED_TABLES) {
     const partition_table = `${partition_prefix}${year}`
 
     if (existing_tables.includes(partition_table)) {
@@ -112,7 +123,7 @@ const create_season_partitions = async ({
             `
             SELECT EXISTS(
               SELECT 1 FROM ONLY ${default_partition_name}
-              WHERE year = ?
+              WHERE ${partition_column} = ?
               LIMIT 1
             ) as has_conflict
           `,
@@ -130,7 +141,7 @@ const create_season_partitions = async ({
             await trx.raw(
               `
               CREATE TEMP TABLE ${temp_table_name} AS
-              SELECT * FROM ONLY ${default_partition_name} WHERE year = ?
+              SELECT * FROM ONLY ${default_partition_name} WHERE ${partition_column} = ?
             `,
               [year]
             )
@@ -144,7 +155,7 @@ const create_season_partitions = async ({
             // Delete from default partition
             await trx.raw(
               `
-              DELETE FROM ONLY ${default_partition_name} WHERE year = ?
+              DELETE FROM ONLY ${default_partition_name} WHERE ${partition_column} = ?
             `,
               [year]
             )

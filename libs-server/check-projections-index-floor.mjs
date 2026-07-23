@@ -25,7 +25,11 @@ export default async function check_projections_index_floor({
     return
   }
 
-  const query = db('projections_index').where({ year, week, seas_type })
+  const query = db('projections_index').where({
+    season_year: year,
+    week,
+    season_type: seas_type
+  })
   if (sourceids) query.whereIn('sourceid', sourceids)
   else query.where({ sourceid })
 
@@ -36,7 +40,7 @@ export default async function check_projections_index_floor({
 
   throw_if_shortfall(
     count < effective_floor
-      ? `projections_index row-count shortfall for sourceid=${source_label} (year=${year}, week=${week}, seas_type=${seas_type}): ${count} rows (floor=${effective_floor})`
+      ? `projections_index row-count shortfall for sourceid=${source_label} (season_year=${year}, week=${week}, season_type=${seas_type}): ${count} rows (floor=${effective_floor})`
       : null
   )
 }

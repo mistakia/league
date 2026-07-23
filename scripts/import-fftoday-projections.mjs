@@ -19,7 +19,7 @@ const initialize_cli = () => {
 
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
-const timestamp = Math.round(Date.now() / 1000)
+const generated_at = new Date()
 
 const getURL = ({
   position,
@@ -202,8 +202,8 @@ const run = async ({
     inserts.push({
       pid: player_row.pid,
       week,
-      year,
-      seas_type: 'REG',
+      season_year: year,
+      season_type: 'REG',
       sourceid: external_data_sources.FFTODAY,
       ...data
     })
@@ -231,10 +231,10 @@ const run = async ({
     // remove any existing projections in index not included in this set
     await db('projections_index')
       .where({
-        year,
+        season_year: year,
         week,
         sourceid: external_data_sources.FFTODAY,
-        seas_type: 'REG'
+        season_type: 'REG'
       })
       .whereNotIn(
         'pid',
@@ -245,9 +245,16 @@ const run = async ({
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index')
       .insert(inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
+      .onConflict([
+        'sourceid',
+        'pid',
+        'userid',
+        'week',
+        'season_year',
+        'season_type'
+      ])
       .merge()
-    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+    await db('projections').insert(inserts.map((i) => ({ ...i, generated_at })))
   }
 
   return {

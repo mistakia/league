@@ -50,8 +50,8 @@ const router = express.Router()
  *                   - pid: "PATR-MAHO-005785"
  *                     sourceid: 18
  *                     week: 0
- *                     year: 2024
- *                     seas_type: "REG"
+ *                     season_year: 2024
+ *                     season_type: "REG"
  *                     pos: "QB"
  *                     passing_attempts: 525
  *                     passing_completions: 345
@@ -68,8 +68,8 @@ const router = express.Router()
  *                   - pid: "CHRI-MCCA-005372"
  *                     sourceid: 18
  *                     week: 0
- *                     year: 2024
- *                     seas_type: "REG"
+ *                     season_year: 2024
+ *                     season_type: "REG"
  *                     pos: "RB"
  *                     rushing_attempts: 285
  *                     rushing_yards: 1350
@@ -92,13 +92,13 @@ router.get('/?', async (req, res) => {
      * res.set('Surrogate-Control', null)
      */
     let projections = cache.get('projections')
-    const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
+    const season_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
     if (!projections) {
       projections = await db('projections_index')
         .where('sourceid', external_data_sources.AVERAGE)
-        .where('year', current_season.year)
+        .where('season_year', current_season.year)
         .where('week', '>=', current_season.week)
-        .where('seas_type', seas_type)
+        .where('season_type', season_type)
       cache.set('projections', projections, 14400) // 4 hours
     }
 
@@ -110,8 +110,8 @@ router.get('/?', async (req, res) => {
         .whereIn('player.primary_position', fantasy_positions)
         .whereNot('player.current_nfl_team', 'INA')
         .where({
-          year: current_season.year,
-          seas_type,
+          season_year: current_season.year,
+          season_type: season_type,
           userid: req.auth.userId
         })
     }
@@ -169,8 +169,8 @@ router.get('/?', async (req, res) => {
  *               - pid: "PATR-MAHO-005785"
  *                 sourceid: 18
  *                 week: 0
- *                 year: 2024
- *                 seas_type: "REG"
+ *                 season_year: 2024
+ *                 season_type: "REG"
  *                 pos: "QB"
  *                 passing_attempts: 525
  *                 passing_completions: 345
@@ -184,8 +184,8 @@ router.get('/?', async (req, res) => {
  *               - pid: "PATR-MAHO-005785"
  *                 sourceid: 16
  *                 week: 1
- *                 year: 2024
- *                 seas_type: "REG"
+ *                 season_year: 2024
+ *                 season_type: "REG"
  *                 pos: "QB"
  *                 passing_attempts: 35
  *                 passing_completions: 23
@@ -281,7 +281,7 @@ router.get('/:pid/?', async (req, res) => {
  *                 minimum: 0
  *                 description: Projected value for the statistic
  *                 example: 285
- *               seas_type:
+ *               season_type:
  *                 type: string
  *                 enum: ['REG', 'POST', 'PRE']
  *                 default: 'REG'
@@ -294,14 +294,14 @@ router.get('/:pid/?', async (req, res) => {
  *                 type: "passing_yards"
  *                 week: 4
  *                 value: 285
- *                 seas_type: "REG"
+ *                 season_type: "REG"
  *             season_touchdowns_projection:
  *               summary: Season touchdown projection
  *               value:
  *                 type: "passing_touchdowns"
  *                 week: 0
  *                 value: 32
- *                 seas_type: "REG"
+ *                 season_type: "REG"
  *     responses:
  *       200:
  *         description: Projection successfully created or updated
@@ -357,7 +357,7 @@ router.put(
     try {
       let { value } = req.body
       const { pid } = req.params
-      const { type, week, seas_type = 'REG' } = req.body
+      const { type, week, season_type = 'REG' } = req.body
       const { userId } = req.auth
 
       // TODO validate pid
@@ -391,8 +391,8 @@ router.put(
           userid: userId,
           pid,
           week,
-          year: current_season.year,
-          seas_type
+          season_year: current_season.year,
+          season_type: season_type
         })
         .first()
 
@@ -405,14 +405,14 @@ router.put(
             userid: userId,
             pid,
             week,
-            year: current_season.year,
-            seas_type
+            season_year: current_season.year,
+            season_type: season_type
           })
 
         await db('projections').insert({
           ...existing_projection,
           [type]: value,
-          timestamp: new Date()
+          generated_at: new Date()
         })
       } else {
         const insert_data = {
@@ -420,14 +420,14 @@ router.put(
           userid: userId,
           pid,
           week,
-          year: current_season.year,
-          seas_type
+          season_year: current_season.year,
+          season_type: season_type
         }
         await db('projections_index').insert(insert_data)
 
         await db('projections').insert({
           ...insert_data,
-          timestamp: new Date()
+          generated_at: new Date()
         })
       }
 
@@ -463,7 +463,7 @@ router.put(
  *
  *       **Important Notes:**
  *       - Only deletes projections for the authenticated user
- *       - Week and seas_type must match exactly
+ *       - Week and season_type must match exactly
  *       - Historical audit trail is maintained
  *     security:
  *       - bearerAuth: []
@@ -490,7 +490,7 @@ router.put(
  *                 maximum: 18
  *                 description: Week number (0 for season total, 1-18 for weekly)
  *                 example: 4
- *               seas_type:
+ *               season_type:
  *                 type: string
  *                 enum: ['REG', 'POST', 'PRE']
  *                 default: 'REG'
@@ -501,12 +501,12 @@ router.put(
  *               summary: Delete weekly projection
  *               value:
  *                 week: 4
- *                 seas_type: "REG"
+ *                 season_type: "REG"
  *             delete_season_projection:
  *               summary: Delete season projection
  *               value:
  *                 week: 0
- *                 seas_type: "REG"
+ *                 season_type: "REG"
  *     responses:
  *       200:
  *         description: Projection successfully deleted
@@ -549,7 +549,7 @@ router.delete(
     try {
       const { userId } = req.auth
       const { pid } = req.params
-      const { week, seas_type = 'REG' } = req.body
+      const { week, season_type = 'REG' } = req.body
 
       // TODO validate pid
 
@@ -557,8 +557,8 @@ router.delete(
         userid: userId,
         pid,
         week,
-        year: current_season.year,
-        seas_type
+        season_year: current_season.year,
+        season_type: season_type
       })
 
       res.send({ success: true, week, pid })

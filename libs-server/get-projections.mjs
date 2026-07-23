@@ -24,9 +24,9 @@ export default async function get_player_projections({
     .from('projections_index')
     .whereIn('pid', pids)
     .where({
-      year,
+      season_year: year,
       userid: 0,
-      seas_type
+      season_type: seas_type
     })
     .where('week', '>=', week)
 

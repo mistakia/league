@@ -16,7 +16,7 @@ const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 const week = Math.max(current_season.week, 1)
 
-const timestamp = new Date()
+const generated_at = new Date()
 const getURL = (position) =>
   `https://www.fantasyfootballnerd.com/service/weekly-projections/json/${config.ffn}/${position}/${week}`
 const getProjection = (stats) => ({
@@ -89,9 +89,9 @@ const run = async ({ dry = false } = {}) => {
       const proj = getProjection(item)
       inserts.push({
         pid: player_row.pid,
-        year: current_season.year,
+        season_year: current_season.year,
         week,
-        seas_type: 'REG',
+        season_type: 'REG',
         sourceid: 12,
         ...proj
       })
@@ -112,9 +112,16 @@ const run = async ({ dry = false } = {}) => {
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections_index')
     .insert(inserts)
-    .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
+    .onConflict([
+      'sourceid',
+      'pid',
+      'userid',
+      'week',
+      'season_year',
+      'season_type'
+    ])
     .merge()
-  await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+  await db('projections').insert(inserts.map((i) => ({ ...i, generated_at })))
 }
 
 const main = async () => {

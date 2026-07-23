@@ -34,12 +34,12 @@ export const process_scoring_format_year = async ({
     .first()
 
   const projections = await db('projections_index').where({
-    year,
+    season_year: year,
     sourceid: external_data_sources.AVERAGE,
-    seas_type: 'REG'
+    season_type: 'REG'
   })
   const ros_projections = await db('ros_projections').where({
-    year,
+    season_year: year,
     sourceid: external_data_sources.AVERAGE
   })
 
@@ -129,10 +129,10 @@ const process_projections_for_scoring_format = async ({
     // concurrent del+reinsert race on the same (format, year) slice. Pass an
     // explicit --year to force a single year.
     const projection_years = await db('projections_index')
-      .distinct('year')
-      .orderBy('year', 'desc')
+      .distinct('season_year')
+      .orderBy('season_year', 'desc')
     years = projection_years
-      .map((row) => row.year)
+      .map((row) => row.season_year)
       .filter((y) => y !== current_season.year)
   }
 

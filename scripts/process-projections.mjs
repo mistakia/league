@@ -165,8 +165,8 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       projectionInserts.push({
         pid: player_row.pid,
         sourceid: external_data_sources.AVERAGE,
-        seas_type,
-        year: current_season.year,
+        season_type: seas_type,
+        season_year: current_season.year,
         week,
         ...projection
       })
@@ -188,8 +188,8 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       projectionInserts.push({
         pid: player_row.pid,
         sourceid: external_data_sources.AVERAGE,
-        seas_type,
-        year: current_season.year,
+        season_type: seas_type,
+        season_year: current_season.year,
         week,
         ...projection
       })
@@ -215,8 +215,8 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       rosProjectionInserts.push({
         pid: player_row.pid,
         sourceid: external_data_sources.AVERAGE,
-        year: current_season.year,
-        timestamp: 0, // must be set at zero for unique key
+        season_year: current_season.year,
+        generated_at: new Date(0), // epoch-0 sentinel marking the AVERAGE-source row
         ...ros
       })
     }
@@ -225,7 +225,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   if (projectionInserts.length) {
     log(`processing ${projectionInserts.length} projections`)
 
-    const timestamp = 0 // must be set at zero for unique key
+    const generated_at = new Date(0) // epoch-0 sentinel, part of the projections unique key
     await batch_insert({
       items: projectionInserts,
       save: (items) =>
@@ -236,14 +236,14 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
             'pid',
             'userid',
             'week',
-            'year',
-            'seas_type'
+            'season_year',
+            'season_type'
           ])
           .merge(),
       batch_size: 100
     })
     await batch_insert({
-      items: projectionInserts.map((i) => ({ ...i, timestamp })),
+      items: projectionInserts.map((i) => ({ ...i, generated_at })),
       save: (items) =>
         db('projections')
           .insert(items)
@@ -251,10 +251,10 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
             'sourceid',
             'pid',
             'userid',
-            'timestamp',
+            'generated_at',
             'week',
-            'year',
-            'seas_type'
+            'season_year',
+            'season_type'
           ])
           .merge(),
       batch_size: 100
@@ -270,7 +270,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       save: (items) =>
         db('ros_projections')
           .insert(items)
-          .onConflict(['sourceid', 'pid', 'year'])
+          .onConflict(['sourceid', 'pid', 'season_year'])
           .merge(),
       batch_size: 100
     })

@@ -179,7 +179,7 @@ export async function load_player_projection_stats({ player_ids, week, year }) {
   // Load projections from all sources (excluding AVERAGE which is pre-calculated)
   const projections = await db('projections_index')
     .whereIn('pid', player_ids)
-    .where({ year, week, userid: 0 })
+    .where({ season_year: year, week, userid: 0 })
     .whereNot('sourceid', external_data_sources.AVERAGE)
     .select('pid', 'sourceid', ...stat_columns)
 

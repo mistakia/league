@@ -142,9 +142,9 @@ const process_projections_for_league_format = async ({
 
   for (const process_year of years) {
     const projections = await db('projections_index').where({
-      year: process_year,
+      season_year: process_year,
       sourceid: external_data_sources.AVERAGE,
-      seas_type: 'REG'
+      season_type: 'REG'
     })
 
     const projections_by_pid = groupBy(projections, 'pid')
@@ -209,10 +209,10 @@ const main = async () => {
 
     if (all && !year) {
       const projection_years = await db('projections_index')
-        .distinct('year')
-        .orderBy('year', 'desc')
+        .distinct('season_year')
+        .orderBy('season_year', 'desc')
       const years = projection_years
-        .map((row) => row.year)
+        .map((row) => row.season_year)
         .filter((y) => y !== current_season.year)
       for (const process_year of years) {
         await process_projections_for_league_format({

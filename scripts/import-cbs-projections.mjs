@@ -21,7 +21,7 @@ const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
 const year = current_season.year
-const timestamp = Math.round(Date.now() / 1000)
+const generated_at = new Date()
 const getUrl = (pos, type) =>
   `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
 
@@ -133,8 +133,8 @@ const run = async ({ season = false, dry = false } = {}) => {
     inserts.push({
       pid: player_row.pid,
       week,
-      year,
-      seas_type: 'REG',
+      season_year: year,
+      season_type: 'REG',
       sourceid: external_data_sources.CBS,
       ...data
     })
@@ -155,10 +155,10 @@ const run = async ({ season = false, dry = false } = {}) => {
     // remove any existing projections in index not included in this set
     await db('projections_index')
       .where({
-        year,
+        season_year: year,
         week,
         sourceid: external_data_sources.CBS,
-        seas_type: 'REG'
+        season_type: 'REG'
       })
       .whereNotIn(
         'pid',
@@ -169,9 +169,16 @@ const run = async ({ season = false, dry = false } = {}) => {
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index')
       .insert(inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
+      .onConflict([
+        'sourceid',
+        'pid',
+        'userid',
+        'week',
+        'season_year',
+        'season_type'
+      ])
       .merge()
-    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+    await db('projections').insert(inserts.map((i) => ({ ...i, generated_at })))
   }
 
   return {

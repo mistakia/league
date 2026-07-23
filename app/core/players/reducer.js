@@ -568,9 +568,9 @@ export function players_reducer(state = initialState, { payload, type }) {
               sourceid,
               pid,
               userid,
-              year,
-              seas_type,
-              timestamp,
+              season_year,
+              season_type,
+              generated_at,
               ...stats
             } = projection
             average_projections[week] = stats

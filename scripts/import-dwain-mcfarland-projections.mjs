@@ -37,7 +37,7 @@ const import_dwain_mcfarland_projections = async ({
     throw new Error('table_id is required')
   }
 
-  const timestamp = new Date()
+  const generated_at = new Date()
   const inserts = []
   const missing = []
   const position_ids = [
@@ -80,10 +80,10 @@ const import_dwain_mcfarland_projections = async ({
       const data = format_projection(item)
       inserts.push({
         pid: player_row.pid,
-        year: current_season.year,
+        season_year: current_season.year,
         week: 0,
         sourceid: external_data_sources.FANTASYLIFE_DWAIN_MCFARLAND,
-        seas_type: 'REG',
+        season_type: 'REG',
         ...data
       })
     }
@@ -103,9 +103,16 @@ const import_dwain_mcfarland_projections = async ({
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index')
       .insert(inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
+      .onConflict([
+        'sourceid',
+        'pid',
+        'userid',
+        'week',
+        'season_year',
+        'season_type'
+      ])
       .merge()
-    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+    await db('projections').insert(inserts.map((i) => ({ ...i, generated_at })))
   }
 }
 

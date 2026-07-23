@@ -16,7 +16,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 const log = debug('import:projections')
 debug.enable('import:projections,get-player,4for4')
 
-const timestamp = Math.floor(Date.now() / 1000)
+const generated_at = new Date()
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -109,9 +109,9 @@ const run = async ({
     const proj = get_projection(item)
     inserts.push({
       pid: player_row.pid,
-      year,
+      season_year: year,
       week,
-      seas_type,
+      season_type: seas_type,
       sourceid: external_data_sources['4FOR4'],
       ...proj
     })
@@ -132,10 +132,10 @@ const run = async ({
     // remove any existing projections in index not included in this set
     await db('projections_index')
       .where({
-        year,
+        season_year: year,
         week,
         sourceid: external_data_sources['4FOR4'],
-        seas_type
+        season_type: seas_type
       })
       .whereNotIn(
         'pid',
@@ -148,9 +148,16 @@ const run = async ({
     )
     await db('projections_index')
       .insert(inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
+      .onConflict([
+        'sourceid',
+        'pid',
+        'userid',
+        'week',
+        'season_year',
+        'season_type'
+      ])
       .merge()
-    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+    await db('projections').insert(inserts.map((i) => ({ ...i, generated_at })))
   }
 
   return {

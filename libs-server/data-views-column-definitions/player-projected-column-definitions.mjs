@@ -135,6 +135,7 @@ const apply_projected_join = ({
   join_year = true,
   join_week = true,
   cast_join_week_to_string = false,
+  join_year_column = 'year',
   additional_conditions
 }) => {
   const { players_query, pid_reference, year_reference, week_reference } =
@@ -162,23 +163,27 @@ const apply_projected_join = ({
           source: {
             year_default: () => (Array.isArray(year) ? year[0] : year)
           },
-          key_columns: { year: 'year' },
+          key_columns: { year: join_year_column },
           params,
           ref: table_alias
         })
       } else if (year_reference) {
-        this.andOn(db.raw(`${table_alias}.year = ${year_reference}`))
+        this.andOn(
+          db.raw(`${table_alias}.${join_year_column} = ${year_reference}`)
+        )
         if (params.year) {
           const year_array = Array.isArray(year) ? year : [year]
           if (year_array.length) {
             this.andOn(
-              db.raw(`${table_alias}.year IN (${year_array.join(',')})`)
+              db.raw(
+                `${table_alias}.${join_year_column} IN (${year_array.join(',')})`
+              )
             )
           }
         }
       } else {
         this.andOn(
-          `${table_alias}.year`,
+          `${table_alias}.${join_year_column}`,
           '=',
           db.raw('?', [Array.isArray(year) ? year[0] : year])
         )
@@ -297,6 +302,10 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   grain: 'player',
   table: is_rest_of_season ? 'ros_projections' : 'projections_index',
   attach_owns_join: true,
+  // season_year, not year -- see select-string.mjs's source.key_columns.year
+  // read (generic year_offset_range correlated-subquery path re-scans
+  // source.table directly and needs the real column name).
+  key_columns: { year: 'season_year' },
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => {
     const { seas_type, week, sourceid } = get_default_params({ params })
@@ -311,7 +320,7 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
     return [
       { column: 'sourceid', value: sourceid },
       { column: 'week', value: week },
-      { column: 'seas_type', value: seas_type }
+      { column: 'season_type', value: seas_type }
     ]
   },
   attach: ({ query_context, params, table_alias, join_type }) => {
@@ -327,6 +336,7 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
       join_table_clause,
       join_year: true,
       join_week: !is_rest_of_season,
+      join_year_column: 'season_year',
       additional_conditions() {
         // sourceid discriminates the projection provider on both tables. ros
         // carries no week/seas_type/nfl_week_id columns, so it stops here.
@@ -340,7 +350,11 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
             )
           )
         } else {
-          this.andOn(`${table_alias}.seas_type`, '=', db.raw('?', [seas_type]))
+          this.andOn(
+            `${table_alias}.season_type`,
+            '=',
+            db.raw('?', [seas_type])
+          )
         }
       }
     })
@@ -518,13 +532,13 @@ const projection_points_year_offset_range_sql = ({
   const year_reference = data_view_options.year_reference
   let year_predicate
   if (year_reference) {
-    year_predicate = `${inner_table}.year BETWEEN ${year_reference} + ${min_offset} AND ${year_reference} + ${max_offset}`
+    year_predicate = `${inner_table}.season_year BETWEEN ${year_reference} + ${min_offset} AND ${year_reference} + ${max_offset}`
   } else {
     const years = []
     for (let offset = min_offset; offset <= max_offset; offset++) {
       years.push(Number(year) + offset)
     }
-    year_predicate = `${inner_table}.year IN (${years.join(',')})`
+    year_predicate = `${inner_table}.season_year IN (${years.join(',')})`
   }
 
   const predicates = [
@@ -535,7 +549,7 @@ const projection_points_year_offset_range_sql = ({
   // ros_projections carries no week / seas_type discriminator.
   if (!is_rest_of_season) {
     predicates.push(`${inner_table}.week = ${week}`)
-    predicates.push(`${inner_table}.seas_type = '${seas_type}'`)
+    predicates.push(`${inner_table}.season_type = '${seas_type}'`)
   }
 
   return `(SELECT SUM(${expression}) FROM ${inner_table} WHERE ${predicates.join(' AND ')})`

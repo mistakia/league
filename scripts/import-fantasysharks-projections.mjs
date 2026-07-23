@@ -26,7 +26,7 @@ const run = async ({ season = false, dry = false } = {}) => {
     : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
   const week = season ? 0 : Math.max(current_season.week, 1)
   const year = current_season.year
-  const timestamp = Math.round(Date.now() / 1000)
+  const generated_at = new Date()
   // do not pull in any projections after the season has ended
   if (current_season.week > current_season.nflFinalWeek) {
     return { skipped: true }
@@ -80,10 +80,10 @@ const run = async ({ season = false, dry = false } = {}) => {
     const entry = createEntry(item)
     inserts.push({
       pid: player_row.pid,
-      year,
+      season_year: year,
       week,
       sourceid: external_data_sources.FANTASY_SHARKS,
-      seas_type: 'REG',
+      season_type: 'REG',
       ...entry
     })
   }
@@ -102,10 +102,10 @@ const run = async ({ season = false, dry = false } = {}) => {
     // remove any existing projections in index not included in this set
     await db('projections_index')
       .where({
-        year,
+        season_year: year,
         week,
         sourceid: external_data_sources.FANTASY_SHARKS,
-        seas_type: 'REG'
+        season_type: 'REG'
       })
       .whereNotIn(
         'pid',
@@ -116,9 +116,16 @@ const run = async ({ season = false, dry = false } = {}) => {
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index')
       .insert(inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
+      .onConflict([
+        'sourceid',
+        'pid',
+        'userid',
+        'week',
+        'season_year',
+        'season_type'
+      ])
       .merge()
-    await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
+    await db('projections').insert(inserts.map((i) => ({ ...i, generated_at })))
   }
 
   return {

@@ -22,7 +22,7 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-sleeper-adp-and-projections')
-const timestamp = Math.floor(Date.now() / 1000)
+const generated_at = new Date()
 const BATCH_SIZE = 500
 debug.enable('import-sleeper-adp-and-projections,sleeper,get-player')
 
@@ -124,9 +124,9 @@ const process_matched_player = ({
   // Insert into projections_index and projections
   projection_inserts.push({
     pid: player_row.pid,
-    year: current_season.year,
+    season_year: current_season.year,
     week: 0,
-    seas_type: 'REG',
+    season_type: 'REG',
     sourceid: external_data_sources.SLEEPER,
     ...proj
   })
@@ -242,7 +242,7 @@ const import_sleeper_adp_and_projections = async ({
     // Check for duplicate projection_inserts
     const unique_keys = new Set()
     const duplicates = projection_inserts.filter((item) => {
-      const key = `${item.sourceid}-${item.pid}-${item.userid}-${item.week}-${item.year}`
+      const key = `${item.sourceid}-${item.pid}-${item.userid}-${item.week}-${item.season_year}`
       if (unique_keys.has(key)) {
         return true
       }
@@ -262,7 +262,7 @@ const import_sleeper_adp_and_projections = async ({
             item.pid === duplicates[0].pid &&
             item.userid === duplicates[0].userid &&
             item.week === duplicates[0].week &&
-            item.year === duplicates[0].year
+            item.season_year === duplicates[0].season_year
         )
       )
     } else {
@@ -308,14 +308,14 @@ const import_sleeper_adp_and_projections = async ({
             'pid',
             'userid',
             'week',
-            'year',
-            'seas_type'
+            'season_year',
+            'season_type'
           ])
           .merge()
       }
     })
     await batch_insert({
-      items: projection_inserts.map((i) => ({ ...i, timestamp })),
+      items: projection_inserts.map((i) => ({ ...i, generated_at })),
       batch_size: BATCH_SIZE,
       save: async (batch) => {
         await db('projections').insert(batch)
