@@ -253,12 +253,12 @@ DROP INDEX IF EXISTS public.idx_player_dfs_ownership_draft_group;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season_year;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
-DROP INDEX IF EXISTS public.idx_player_adp_index_year;
 DROP INDEX IF EXISTS public.idx_player_adp_index_source_format;
+DROP INDEX IF EXISTS public.idx_player_adp_index_season_year;
 DROP INDEX IF EXISTS public.idx_player_adp_index_pid;
-DROP INDEX IF EXISTS public.idx_player_adp_history_timestamp;
 DROP INDEX IF EXISTS public.idx_player_adp_history_source_format;
 DROP INDEX IF EXISTS public.idx_player_adp_history_pid;
+DROP INDEX IF EXISTS public.idx_player_adp_history_observed_at;
 DROP INDEX IF EXISTS public.idx_placed_wagers_userid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_selections;
 DROP INDEX IF EXISTS public.idx_placed_wagers_placed_at;
@@ -342,7 +342,7 @@ DROP INDEX IF EXISTS public.idx_league_cutlist_pid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_qb_type_d_pid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pid_qb_type_d;
-DROP INDEX IF EXISTS public.idx_keeptradecut_pick_yrs;
+DROP INDEX IF EXISTS public.idx_keeptradecut_pick_season_years;
 DROP INDEX IF EXISTS public.idx_keeptradecut_liquidity_d_superflex;
 DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
@@ -439,8 +439,8 @@ DROP INDEX IF EXISTS public.idx_24626_baseline;
 DROP INDEX IF EXISTS public.idx_24623_player_value;
 DROP INDEX IF EXISTS public.idx_24613_team;
 DROP INDEX IF EXISTS public.idx_24608_pick;
-DROP INDEX IF EXISTS public.idx_historical_injury_index_year_week;
-DROP INDEX IF EXISTS public.idx_historical_injury_index_pid_year;
+DROP INDEX IF EXISTS public.idx_historical_injury_index_season_year_week;
+DROP INDEX IF EXISTS public.idx_historical_injury_index_pid_season_year;
 DROP INDEX IF EXISTS public.cmv_player_unique_idx;
 DROP INDEX IF EXISTS public.cmv_player_date_idx;
 DROP INDEX IF EXISTS public.cmv_pick_unique_idx;
@@ -3100,7 +3100,7 @@ COMMENT ON TABLE public.format_category_signal_mapping IS 'Static 6-row mapping 
 
 CREATE TABLE public.historical_injury_index (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3120,10 +3120,10 @@ CREATE TABLE public.historical_injury_index (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 )
-PARTITION BY RANGE (year);
+PARTITION BY RANGE (season_year);
 
 
 --
@@ -3132,7 +3132,7 @@ PARTITION BY RANGE (year);
 
 CREATE TABLE public.historical_injury_index_2009 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3152,8 +3152,8 @@ CREATE TABLE public.historical_injury_index_2009 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3163,7 +3163,7 @@ CREATE TABLE public.historical_injury_index_2009 (
 
 CREATE TABLE public.historical_injury_index_2010 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3183,8 +3183,8 @@ CREATE TABLE public.historical_injury_index_2010 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3194,7 +3194,7 @@ CREATE TABLE public.historical_injury_index_2010 (
 
 CREATE TABLE public.historical_injury_index_2011 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3214,8 +3214,8 @@ CREATE TABLE public.historical_injury_index_2011 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3225,7 +3225,7 @@ CREATE TABLE public.historical_injury_index_2011 (
 
 CREATE TABLE public.historical_injury_index_2012 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3245,8 +3245,8 @@ CREATE TABLE public.historical_injury_index_2012 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3256,7 +3256,7 @@ CREATE TABLE public.historical_injury_index_2012 (
 
 CREATE TABLE public.historical_injury_index_2013 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3276,8 +3276,8 @@ CREATE TABLE public.historical_injury_index_2013 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3287,7 +3287,7 @@ CREATE TABLE public.historical_injury_index_2013 (
 
 CREATE TABLE public.historical_injury_index_2014 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3307,8 +3307,8 @@ CREATE TABLE public.historical_injury_index_2014 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3318,7 +3318,7 @@ CREATE TABLE public.historical_injury_index_2014 (
 
 CREATE TABLE public.historical_injury_index_2015 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3338,8 +3338,8 @@ CREATE TABLE public.historical_injury_index_2015 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3349,7 +3349,7 @@ CREATE TABLE public.historical_injury_index_2015 (
 
 CREATE TABLE public.historical_injury_index_2016 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3369,8 +3369,8 @@ CREATE TABLE public.historical_injury_index_2016 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3380,7 +3380,7 @@ CREATE TABLE public.historical_injury_index_2016 (
 
 CREATE TABLE public.historical_injury_index_2017 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3400,8 +3400,8 @@ CREATE TABLE public.historical_injury_index_2017 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3411,7 +3411,7 @@ CREATE TABLE public.historical_injury_index_2017 (
 
 CREATE TABLE public.historical_injury_index_2018 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3431,8 +3431,8 @@ CREATE TABLE public.historical_injury_index_2018 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3442,7 +3442,7 @@ CREATE TABLE public.historical_injury_index_2018 (
 
 CREATE TABLE public.historical_injury_index_2019 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3462,8 +3462,8 @@ CREATE TABLE public.historical_injury_index_2019 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3473,7 +3473,7 @@ CREATE TABLE public.historical_injury_index_2019 (
 
 CREATE TABLE public.historical_injury_index_2020 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3493,8 +3493,8 @@ CREATE TABLE public.historical_injury_index_2020 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3504,7 +3504,7 @@ CREATE TABLE public.historical_injury_index_2020 (
 
 CREATE TABLE public.historical_injury_index_2021 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3524,8 +3524,8 @@ CREATE TABLE public.historical_injury_index_2021 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3535,7 +3535,7 @@ CREATE TABLE public.historical_injury_index_2021 (
 
 CREATE TABLE public.historical_injury_index_2022 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3555,8 +3555,8 @@ CREATE TABLE public.historical_injury_index_2022 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3566,7 +3566,7 @@ CREATE TABLE public.historical_injury_index_2022 (
 
 CREATE TABLE public.historical_injury_index_2023 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3586,8 +3586,8 @@ CREATE TABLE public.historical_injury_index_2023 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3597,7 +3597,7 @@ CREATE TABLE public.historical_injury_index_2023 (
 
 CREATE TABLE public.historical_injury_index_2024 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3617,8 +3617,8 @@ CREATE TABLE public.historical_injury_index_2024 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3628,7 +3628,7 @@ CREATE TABLE public.historical_injury_index_2024 (
 
 CREATE TABLE public.historical_injury_index_2025 (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     esbid integer NOT NULL,
     tm character varying(3),
@@ -3648,8 +3648,8 @@ CREATE TABLE public.historical_injury_index_2025 (
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
-    inserted_at integer NOT NULL,
-    updated_at integer NOT NULL
+    inserted_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -3725,11 +3725,11 @@ CREATE TABLE public.keeptradecut_pick (
     pid character varying(25) NOT NULL,
     ktc_player_id integer NOT NULL,
     ktc_player_name text NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     round smallint NOT NULL,
     slot smallint NOT NULL,
-    created_at integer NOT NULL,
-    updated_at integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
     CONSTRAINT keeptradecut_pick_round_chk CHECK (((round >= 1) AND (round <= 4))),
     CONSTRAINT keeptradecut_pick_slot_chk CHECK (((slot >= 1) AND (slot <= 3)))
 );
@@ -4582,11 +4582,11 @@ CREATE TABLE public.nfl_coaches (
 CREATE TABLE public.nfl_draft_rankings_history (
     pid character varying(25) NOT NULL,
     source_id public.mock_draft_source_id NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     overall_rank integer,
     position_rank integer,
     "position" character varying(4),
-    "timestamp" bigint NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL
 );
 
@@ -4598,11 +4598,11 @@ CREATE TABLE public.nfl_draft_rankings_history (
 CREATE TABLE public.nfl_draft_rankings_index (
     pid character varying(25) NOT NULL,
     source_id public.mock_draft_source_id NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     overall_rank integer,
     position_rank integer,
     "position" character varying(4),
-    "timestamp" bigint NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL
 );
 
@@ -19447,14 +19447,14 @@ COMMENT ON COLUMN public.player.contract_inflated_guaranteed IS 'Inflated guaran
 CREATE TABLE public.player_adp_history (
     pid character varying(25),
     pos character varying(4) NOT NULL,
-    year smallint,
+    season_year smallint,
     adp numeric(5,2),
     min_pick integer,
     max_pick integer,
     std_dev numeric(5,2),
     sample_size integer,
     percent_drafted numeric(5,2),
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     source_id public.adp_source_id,
     adp_format_id text NOT NULL
 );
@@ -19474,7 +19474,7 @@ COMMENT ON TABLE public.player_adp_history IS 'Historical ADP data with timestam
 CREATE TABLE public.player_adp_index (
     pid character varying(25) NOT NULL,
     pos character varying(4) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     adp numeric(5,2),
     min_pick integer,
     max_pick integer,
@@ -23989,14 +23989,14 @@ CREATE TABLE public.player_prospect_profile (
 CREATE TABLE public.player_rankings_history (
     pid character varying(25),
     pos character varying(4) NOT NULL,
-    year smallint,
+    season_year smallint,
     min integer,
     max integer,
     avg numeric(5,2),
     std numeric(5,2),
     overall_rank integer,
     position_rank integer,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     source_id public.rankings_source_id,
     ranking_type public.ranking_type NOT NULL
 );
@@ -24009,7 +24009,7 @@ CREATE TABLE public.player_rankings_history (
 CREATE TABLE public.player_rankings_index (
     pid character varying(25) NOT NULL,
     pos character varying(4) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     min integer,
     max integer,
     avg numeric(5,2),
@@ -27464,7 +27464,7 @@ ALTER TABLE ONLY public.format_category_signal_mapping
 --
 
 ALTER TABLE ONLY public.historical_injury_index
-    ADD CONSTRAINT historical_injury_index_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27472,7 +27472,7 @@ ALTER TABLE ONLY public.historical_injury_index
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2009
-    ADD CONSTRAINT historical_injury_index_2009_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2009_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27480,7 +27480,7 @@ ALTER TABLE ONLY public.historical_injury_index_2009
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2010
-    ADD CONSTRAINT historical_injury_index_2010_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2010_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27488,7 +27488,7 @@ ALTER TABLE ONLY public.historical_injury_index_2010
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2011
-    ADD CONSTRAINT historical_injury_index_2011_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2011_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27496,7 +27496,7 @@ ALTER TABLE ONLY public.historical_injury_index_2011
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2012
-    ADD CONSTRAINT historical_injury_index_2012_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2012_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27504,7 +27504,7 @@ ALTER TABLE ONLY public.historical_injury_index_2012
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2013
-    ADD CONSTRAINT historical_injury_index_2013_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2013_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27512,7 +27512,7 @@ ALTER TABLE ONLY public.historical_injury_index_2013
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2014
-    ADD CONSTRAINT historical_injury_index_2014_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2014_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27520,7 +27520,7 @@ ALTER TABLE ONLY public.historical_injury_index_2014
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2015
-    ADD CONSTRAINT historical_injury_index_2015_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2015_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27528,7 +27528,7 @@ ALTER TABLE ONLY public.historical_injury_index_2015
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2016
-    ADD CONSTRAINT historical_injury_index_2016_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2016_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27536,7 +27536,7 @@ ALTER TABLE ONLY public.historical_injury_index_2016
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2017
-    ADD CONSTRAINT historical_injury_index_2017_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2017_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27544,7 +27544,7 @@ ALTER TABLE ONLY public.historical_injury_index_2017
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2018
-    ADD CONSTRAINT historical_injury_index_2018_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2018_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27552,7 +27552,7 @@ ALTER TABLE ONLY public.historical_injury_index_2018
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2019
-    ADD CONSTRAINT historical_injury_index_2019_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2019_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27560,7 +27560,7 @@ ALTER TABLE ONLY public.historical_injury_index_2019
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2020
-    ADD CONSTRAINT historical_injury_index_2020_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2020_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27568,7 +27568,7 @@ ALTER TABLE ONLY public.historical_injury_index_2020
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2021
-    ADD CONSTRAINT historical_injury_index_2021_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2021_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27576,7 +27576,7 @@ ALTER TABLE ONLY public.historical_injury_index_2021
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2022
-    ADD CONSTRAINT historical_injury_index_2022_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2022_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27584,7 +27584,7 @@ ALTER TABLE ONLY public.historical_injury_index_2022
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2023
-    ADD CONSTRAINT historical_injury_index_2023_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2023_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27592,7 +27592,7 @@ ALTER TABLE ONLY public.historical_injury_index_2023
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2024
-    ADD CONSTRAINT historical_injury_index_2024_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2024_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -27600,7 +27600,7 @@ ALTER TABLE ONLY public.historical_injury_index_2024
 --
 
 ALTER TABLE ONLY public.historical_injury_index_2025
-    ADD CONSTRAINT historical_injury_index_2025_pkey PRIMARY KEY (pid, year, week, esbid);
+    ADD CONSTRAINT historical_injury_index_2025_pkey PRIMARY KEY (pid, season_year, week, esbid);
 
 
 --
@@ -28032,7 +28032,7 @@ ALTER TABLE ONLY public.play_changelog
 --
 
 ALTER TABLE ONLY public.player_adp_index
-    ADD CONSTRAINT player_adp_index_unique UNIQUE (year, source_id, adp_format_id, pid);
+    ADD CONSTRAINT player_adp_index_unique UNIQUE (season_year, source_id, adp_format_id, pid);
 
 
 --
@@ -28472,7 +28472,7 @@ ALTER TABLE ONLY public.player_prospect_profile
 --
 
 ALTER TABLE ONLY public.player_rankings_index
-    ADD CONSTRAINT player_rankings_index_unique UNIQUE (year, source_id, ranking_type, pid);
+    ADD CONSTRAINT player_rankings_index_unique UNIQUE (season_year, source_id, ranking_type, pid);
 
 
 --
@@ -28773,255 +28773,255 @@ CREATE UNIQUE INDEX cmv_player_unique_idx ON public.composite_market_value_daily
 
 
 --
--- Name: idx_historical_injury_index_pid_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_historical_injury_index_pid_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_historical_injury_index_pid_year ON ONLY public.historical_injury_index USING btree (pid, year);
+CREATE INDEX idx_historical_injury_index_pid_season_year ON ONLY public.historical_injury_index USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2009_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2009_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2009_pid_year_idx ON public.historical_injury_index_2009 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2009_pid_season_year_idx ON public.historical_injury_index_2009 USING btree (pid, season_year);
 
 
 --
--- Name: idx_historical_injury_index_year_week; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_historical_injury_index_season_year_week; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_historical_injury_index_year_week ON ONLY public.historical_injury_index USING btree (year, week);
+CREATE INDEX idx_historical_injury_index_season_year_week ON ONLY public.historical_injury_index USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2009_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2009_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2009_year_week_idx ON public.historical_injury_index_2009 USING btree (year, week);
+CREATE INDEX historical_injury_index_2009_season_year_week_idx ON public.historical_injury_index_2009 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2010_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2010_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2010_pid_year_idx ON public.historical_injury_index_2010 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2010_pid_season_year_idx ON public.historical_injury_index_2010 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2010_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2010_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2010_year_week_idx ON public.historical_injury_index_2010 USING btree (year, week);
+CREATE INDEX historical_injury_index_2010_season_year_week_idx ON public.historical_injury_index_2010 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2011_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2011_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2011_pid_year_idx ON public.historical_injury_index_2011 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2011_pid_season_year_idx ON public.historical_injury_index_2011 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2011_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2011_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2011_year_week_idx ON public.historical_injury_index_2011 USING btree (year, week);
+CREATE INDEX historical_injury_index_2011_season_year_week_idx ON public.historical_injury_index_2011 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2012_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2012_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2012_pid_year_idx ON public.historical_injury_index_2012 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2012_pid_season_year_idx ON public.historical_injury_index_2012 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2012_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2012_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2012_year_week_idx ON public.historical_injury_index_2012 USING btree (year, week);
+CREATE INDEX historical_injury_index_2012_season_year_week_idx ON public.historical_injury_index_2012 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2013_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2013_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2013_pid_year_idx ON public.historical_injury_index_2013 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2013_pid_season_year_idx ON public.historical_injury_index_2013 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2013_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2013_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2013_year_week_idx ON public.historical_injury_index_2013 USING btree (year, week);
+CREATE INDEX historical_injury_index_2013_season_year_week_idx ON public.historical_injury_index_2013 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2014_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2014_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2014_pid_year_idx ON public.historical_injury_index_2014 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2014_pid_season_year_idx ON public.historical_injury_index_2014 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2014_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2014_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2014_year_week_idx ON public.historical_injury_index_2014 USING btree (year, week);
+CREATE INDEX historical_injury_index_2014_season_year_week_idx ON public.historical_injury_index_2014 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2015_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2015_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2015_pid_year_idx ON public.historical_injury_index_2015 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2015_pid_season_year_idx ON public.historical_injury_index_2015 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2015_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2015_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2015_year_week_idx ON public.historical_injury_index_2015 USING btree (year, week);
+CREATE INDEX historical_injury_index_2015_season_year_week_idx ON public.historical_injury_index_2015 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2016_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2016_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2016_pid_year_idx ON public.historical_injury_index_2016 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2016_pid_season_year_idx ON public.historical_injury_index_2016 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2016_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2016_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2016_year_week_idx ON public.historical_injury_index_2016 USING btree (year, week);
+CREATE INDEX historical_injury_index_2016_season_year_week_idx ON public.historical_injury_index_2016 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2017_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2017_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2017_pid_year_idx ON public.historical_injury_index_2017 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2017_pid_season_year_idx ON public.historical_injury_index_2017 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2017_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2017_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2017_year_week_idx ON public.historical_injury_index_2017 USING btree (year, week);
+CREATE INDEX historical_injury_index_2017_season_year_week_idx ON public.historical_injury_index_2017 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2018_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2018_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2018_pid_year_idx ON public.historical_injury_index_2018 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2018_pid_season_year_idx ON public.historical_injury_index_2018 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2018_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2018_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2018_year_week_idx ON public.historical_injury_index_2018 USING btree (year, week);
+CREATE INDEX historical_injury_index_2018_season_year_week_idx ON public.historical_injury_index_2018 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2019_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2019_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2019_pid_year_idx ON public.historical_injury_index_2019 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2019_pid_season_year_idx ON public.historical_injury_index_2019 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2019_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2019_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2019_year_week_idx ON public.historical_injury_index_2019 USING btree (year, week);
+CREATE INDEX historical_injury_index_2019_season_year_week_idx ON public.historical_injury_index_2019 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2020_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2020_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2020_pid_year_idx ON public.historical_injury_index_2020 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2020_pid_season_year_idx ON public.historical_injury_index_2020 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2020_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2020_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2020_year_week_idx ON public.historical_injury_index_2020 USING btree (year, week);
+CREATE INDEX historical_injury_index_2020_season_year_week_idx ON public.historical_injury_index_2020 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2021_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2021_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2021_pid_year_idx ON public.historical_injury_index_2021 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2021_pid_season_year_idx ON public.historical_injury_index_2021 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2021_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2021_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2021_year_week_idx ON public.historical_injury_index_2021 USING btree (year, week);
+CREATE INDEX historical_injury_index_2021_season_year_week_idx ON public.historical_injury_index_2021 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2022_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2022_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2022_pid_year_idx ON public.historical_injury_index_2022 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2022_pid_season_year_idx ON public.historical_injury_index_2022 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2022_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2022_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2022_year_week_idx ON public.historical_injury_index_2022 USING btree (year, week);
+CREATE INDEX historical_injury_index_2022_season_year_week_idx ON public.historical_injury_index_2022 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2023_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2023_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2023_pid_year_idx ON public.historical_injury_index_2023 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2023_pid_season_year_idx ON public.historical_injury_index_2023 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2023_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2023_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2023_year_week_idx ON public.historical_injury_index_2023 USING btree (year, week);
+CREATE INDEX historical_injury_index_2023_season_year_week_idx ON public.historical_injury_index_2023 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2024_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2024_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2024_pid_year_idx ON public.historical_injury_index_2024 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2024_pid_season_year_idx ON public.historical_injury_index_2024 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2024_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2024_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2024_year_week_idx ON public.historical_injury_index_2024 USING btree (year, week);
+CREATE INDEX historical_injury_index_2024_season_year_week_idx ON public.historical_injury_index_2024 USING btree (season_year, week);
 
 
 --
--- Name: historical_injury_index_2025_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2025_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2025_pid_year_idx ON public.historical_injury_index_2025 USING btree (pid, year);
+CREATE INDEX historical_injury_index_2025_pid_season_year_idx ON public.historical_injury_index_2025 USING btree (pid, season_year);
 
 
 --
--- Name: historical_injury_index_2025_year_week_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: historical_injury_index_2025_season_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX historical_injury_index_2025_year_week_idx ON public.historical_injury_index_2025 USING btree (year, week);
+CREATE INDEX historical_injury_index_2025_season_year_week_idx ON public.historical_injury_index_2025 USING btree (season_year, week);
 
 
 --
@@ -29697,10 +29697,10 @@ CREATE INDEX idx_keeptradecut_liquidity_d_superflex ON public.keeptradecut_liqui
 
 
 --
--- Name: idx_keeptradecut_pick_yrs; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_keeptradecut_pick_season_years; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_keeptradecut_pick_yrs ON public.keeptradecut_pick USING btree (year, round, slot);
+CREATE INDEX idx_keeptradecut_pick_season_years ON public.keeptradecut_pick USING btree (season_year, round, slot);
 
 
 --
@@ -30285,6 +30285,13 @@ CREATE INDEX idx_placed_wagers_userid ON public.placed_wagers USING btree (useri
 
 
 --
+-- Name: idx_player_adp_history_observed_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_history_observed_at ON public.player_adp_history USING btree (observed_at);
+
+
+--
 -- Name: idx_player_adp_history_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30299,13 +30306,6 @@ CREATE INDEX idx_player_adp_history_source_format ON public.player_adp_history U
 
 
 --
--- Name: idx_player_adp_history_timestamp; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_player_adp_history_timestamp ON public.player_adp_history USING btree ("timestamp");
-
-
---
 -- Name: idx_player_adp_index_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30313,17 +30313,17 @@ CREATE INDEX idx_player_adp_index_pid ON public.player_adp_index USING btree (pi
 
 
 --
+-- Name: idx_player_adp_index_season_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_index_season_year ON public.player_adp_index USING btree (season_year);
+
+
+--
 -- Name: idx_player_adp_index_source_format; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_player_adp_index_source_format ON public.player_adp_index USING btree (source_id, adp_format_id);
-
-
---
--- Name: idx_player_adp_index_year; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_player_adp_index_year ON public.player_adp_index USING btree (year);
 
 
 --
@@ -43256,10 +43256,10 @@ CREATE INDEX user_data_view_tags_user_source_idx ON public.user_data_view_tags U
 
 
 --
--- Name: historical_injury_index_2009_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2009_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2009_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2009_pid_season_year_idx;
 
 
 --
@@ -43270,17 +43270,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2009_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2009_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2009_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2009_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2010_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2010_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2010_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2010_pid_season_year_idx;
 
 
 --
@@ -43291,17 +43291,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2010_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2010_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2010_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2010_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2011_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2011_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2011_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2011_pid_season_year_idx;
 
 
 --
@@ -43312,17 +43312,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2011_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2011_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2011_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2011_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2012_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2012_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2012_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2012_pid_season_year_idx;
 
 
 --
@@ -43333,17 +43333,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2012_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2012_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2012_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2012_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2013_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2013_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2013_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2013_pid_season_year_idx;
 
 
 --
@@ -43354,17 +43354,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2013_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2013_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2013_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2013_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2014_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2014_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2014_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2014_pid_season_year_idx;
 
 
 --
@@ -43375,17 +43375,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2014_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2014_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2014_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2014_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2015_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2015_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2015_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2015_pid_season_year_idx;
 
 
 --
@@ -43396,17 +43396,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2015_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2015_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2015_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2015_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2016_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2016_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2016_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2016_pid_season_year_idx;
 
 
 --
@@ -43417,17 +43417,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2016_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2016_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2016_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2016_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2017_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2017_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2017_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2017_pid_season_year_idx;
 
 
 --
@@ -43438,17 +43438,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2017_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2017_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2017_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2017_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2018_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2018_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2018_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2018_pid_season_year_idx;
 
 
 --
@@ -43459,17 +43459,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2018_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2018_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2018_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2018_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2019_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2019_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2019_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2019_pid_season_year_idx;
 
 
 --
@@ -43480,17 +43480,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2019_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2019_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2019_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2019_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2020_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2020_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2020_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2020_pid_season_year_idx;
 
 
 --
@@ -43501,17 +43501,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2020_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2020_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2020_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2020_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2021_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2021_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2021_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2021_pid_season_year_idx;
 
 
 --
@@ -43522,17 +43522,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2021_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2021_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2021_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2021_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2022_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2022_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2022_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2022_pid_season_year_idx;
 
 
 --
@@ -43543,17 +43543,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2022_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2022_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2022_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2022_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2023_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2023_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2023_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2023_pid_season_year_idx;
 
 
 --
@@ -43564,17 +43564,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2023_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2023_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2023_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2023_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2024_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2024_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2024_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2024_pid_season_year_idx;
 
 
 --
@@ -43585,17 +43585,17 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2024_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2024_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2024_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2024_season_year_week_idx;
 
 
 --
--- Name: historical_injury_index_2025_pid_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2025_pid_season_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_pid_year ATTACH PARTITION public.historical_injury_index_2025_pid_year_idx;
+ALTER INDEX public.idx_historical_injury_index_pid_season_year ATTACH PARTITION public.historical_injury_index_2025_pid_season_year_idx;
 
 
 --
@@ -43606,10 +43606,10 @@ ALTER INDEX public.historical_injury_index_pkey ATTACH PARTITION public.historic
 
 
 --
--- Name: historical_injury_index_2025_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: historical_injury_index_2025_season_year_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_historical_injury_index_year_week ATTACH PARTITION public.historical_injury_index_2025_year_week_idx;
+ALTER INDEX public.idx_historical_injury_index_season_year_week ATTACH PARTITION public.historical_injury_index_2025_season_year_week_idx;
 
 
 --
