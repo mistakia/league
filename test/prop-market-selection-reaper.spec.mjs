@@ -27,11 +27,10 @@ const selection_row = ({
   source_market_id,
   source_selection_id,
   time_type,
-  // The committed schema declares this column as `timestamp integer NOT NULL`.
-  // The betting-props conform to `observed_at` is committed but its DDL is not
-  // applied, so the test schema is still pre-rename. The reaper reads neither
-  // column, so this fixture is unaffected by that rename either way.
-  timestamp: 1700000000
+  // The betting-props conform renamed this column to `observed_at` and retyped it
+  // from epoch-seconds integer to timestamptz. The reaper reads neither column, so
+  // this fixture only needs a well-typed value.
+  observed_at: new Date(1700000000 * 1000)
 })
 
 describe('libs-server prop market selection reaper', function () {
