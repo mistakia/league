@@ -2,6 +2,26 @@ import { uniqBy } from '#libs-shared'
 import { current_season, transaction_types, player_tag_types } from '#constants'
 import db from '#db'
 
+// A rostered player's salary is `transactions.value` -- `rosters_players` carries no
+// value column -- so the most recent transaction with this team is the only source of
+// the salary that `Roster` sums into `availableCap`. That makes this an INNER join by
+// design, not a degraded LEFT join: admitting a player with no team transaction would
+// hand `Roster` an undefined value and turn the cap arithmetic into NaN. The team id is
+// a join qualifier rather than a row filter, so it belongs in the ON clause.
+// The ordering feeds the `uniqBy` below, which keeps the newest row per player.
+export const build_roster_players_query = ({ db, rid, tid }) =>
+  db('rosters_players')
+    .join('transactions', function () {
+      this.on('rosters_players.pid', '=', 'transactions.pid').andOnVal(
+        'transactions.tid',
+        '=',
+        tid
+      )
+    })
+    .where('rid', rid)
+    .orderBy('transactions.timestamp', 'desc')
+    .orderBy('transactions.uid', 'desc')
+
 export default async function ({
   tid,
   week = current_season.fantasy_season_week,
@@ -14,12 +34,11 @@ export default async function ({
     throw new Error('No roster found')
   }
 
-  const players = await db('rosters_players')
-    .leftJoin('transactions', 'rosters_players.pid', 'transactions.pid')
-    .where('rid', roster_row.uid)
-    .where('transactions.tid', tid)
-    .orderBy('transactions.timestamp', 'desc')
-    .orderBy('transactions.uid', 'desc')
+  const players = await build_roster_players_query({
+    db,
+    rid: roster_row.uid,
+    tid
+  })
 
   roster_row.players = uniqBy(players, 'pid')
 
