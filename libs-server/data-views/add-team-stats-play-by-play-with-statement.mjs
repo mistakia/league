@@ -9,6 +9,7 @@ import {
   decompose_nfl_weeks,
   is_full_year_seas_type_coverage
 } from '#libs-shared/nfl-week-identifier.mjs'
+import { TEAM_UNIT_COLUMN } from '#libs-server/data-views/team-unit-column.mjs'
 
 // Cross the resolved year basis with a year_offset range to the explicit
 // year-set the range covers: (min(year)+min(offset)) .. (max(year)+max(offset)).
@@ -61,7 +62,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   const wrap_mode = wrap_decision.wrap_mode
 
   const with_query = db('nfl_plays')
-    .select(`nfl_plays.${team_unit} as nfl_team`)
+    .select(`nfl_plays.${TEAM_UNIT_COLUMN[team_unit]} as nfl_team`)
     .whereNot('play_type', 'NOPL')
 
   const unique_select_strings = new Set(select_strings)
@@ -82,7 +83,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   })
 
   // Add groupBy clause before having
-  with_query.groupBy(`nfl_plays.${team_unit}`)
+  with_query.groupBy(`nfl_plays.${TEAM_UNIT_COLUMN[team_unit]}`)
 
   // The player variant ALWAYS joins this base CTE to nfl_games on (year, week)
   // in create_player_team_stats_query, so year AND week must be projected onto
@@ -97,8 +98,12 @@ export const add_team_stats_play_by_play_with_statement = ({
   // In wrap mode, force year into the base CTE so each team-year is
   // addressable for the wrap-CTE join even when no `year` split is active.
   if (row_axes.includes('year') || wrap_mode || player_variant_projection) {
-    with_query.select('nfl_plays.year')
-    with_query.groupBy('nfl_plays.year')
+    // Grain axis stays 'year' in the row-axis vocabulary; alias the renamed
+    // physical column back so downstream consumers of this CTE's own output
+    // (create_player_team_stats_query, add_row_axes, etc.) keep reading
+    // '<with_table_name>.year'.
+    with_query.select('nfl_plays.season_year as year')
+    with_query.groupBy('nfl_plays.season_year')
   }
 
   if (row_axes.includes('week') || player_variant_projection) {
@@ -123,7 +128,7 @@ export const add_team_stats_play_by_play_with_statement = ({
       row_axes
     })
     if (effective_years.length) {
-      with_query.whereIn('nfl_plays.year', effective_years)
+      with_query.whereIn('nfl_plays.season_year', effective_years)
     }
   }
 

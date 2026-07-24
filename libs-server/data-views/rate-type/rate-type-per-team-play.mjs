@@ -20,6 +20,7 @@ import {
   register_wrap,
   get_wrap_cte_name
 } from './per-team-play-wrap.mjs'
+import { TEAM_UNIT_COLUMN } from '#libs-server/data-views/team-unit-column.mjs'
 
 // Cache-key contract: the returned name is a within-query dedup identifier
 // (see `applied_output_ctes` in add_cte below), NOT a cross-query result-cache
@@ -83,10 +84,14 @@ export const add_per_team_play_cte = ({
 }) => {
   team_unit = params.team_unit || team_unit
 
+  // team_unit ('off'/'def') stays stable as this CTE's own output column
+  // name (downstream joins correlate on it by that name); alias the renamed
+  // physical column back onto it.
+  const team_unit_column = TEAM_UNIT_COLUMN[team_unit]
   const cte_query = db('nfl_plays')
-    .select(`nfl_plays.${team_unit}`)
+    .select(`nfl_plays.${team_unit_column} as ${team_unit}`)
     .whereNot('play_type', 'NOPL')
-    .groupBy(`nfl_plays.${team_unit}`)
+    .groupBy(`nfl_plays.${team_unit_column}`)
 
   let count_expression = 'COUNT(*)'
   if (group_by) {
@@ -118,8 +123,10 @@ export const add_per_team_play_cte = ({
   let year_grouped = false
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      cte_query.select('nfl_plays.year')
-      cte_query.groupBy('nfl_plays.year')
+      // Grain axis stays 'year' in the row-axis vocabulary; alias the
+      // renamed physical column back so this CTE's own output is unchanged.
+      cte_query.select('nfl_plays.season_year as year')
+      cte_query.groupBy('nfl_plays.season_year')
       year_grouped = true
     } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
@@ -133,8 +140,8 @@ export const add_per_team_play_cte = ({
   // total-across-years number and the historical-team-mode attribution is
   // lost. Idempotent against the row_axes-year branch above.
   if (force_year_grain && !year_grouped) {
-    cte_query.select('nfl_plays.year')
-    cte_query.groupBy('nfl_plays.year')
+    cte_query.select('nfl_plays.season_year as year')
+    cte_query.groupBy('nfl_plays.season_year')
   }
 
   const denominator_params = get_rate_type_denominator_params({ params })

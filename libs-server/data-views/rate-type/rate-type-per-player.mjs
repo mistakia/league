@@ -48,29 +48,29 @@ export const add_per_player_cte = ({
   let count_expression = 'COUNT(*)'
   switch (stat_type) {
     case 'rush_attempt':
-      count_expression = `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`
-      cte_query.select('nfl_plays.bc_pid as pid')
-      cte_query.groupBy('nfl_plays.bc_pid')
+      count_expression = `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.ball_carrier_pid as pid')
+      cte_query.groupBy('nfl_plays.ball_carrier_pid')
       break
     case 'pass_attempt':
-      count_expression = `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`
-      cte_query.select('nfl_plays.psr_pid as pid')
-      cte_query.groupBy('nfl_plays.psr_pid')
+      count_expression = `SUM(CASE WHEN passer_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.passer_pid as pid')
+      cte_query.groupBy('nfl_plays.passer_pid')
       break
     case 'target':
-      count_expression = `SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END)`
-      cte_query.select('nfl_plays.trg_pid as pid')
-      cte_query.groupBy('nfl_plays.trg_pid')
+      count_expression = `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.target_pid as pid')
+      cte_query.groupBy('nfl_plays.target_pid')
       break
     case 'reception':
-      count_expression = `SUM(CASE WHEN trg_pid IS NOT NULL AND comp = true THEN 1 ELSE 0 END)`
-      cte_query.select('nfl_plays.trg_pid as pid')
-      cte_query.groupBy('nfl_plays.trg_pid')
+      count_expression = `SUM(CASE WHEN target_pid IS NOT NULL AND comp = true THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.target_pid as pid')
+      cte_query.groupBy('nfl_plays.target_pid')
       break
     case 'touch':
       cte_query.crossJoin(
         db.raw(
-          'LATERAL (VALUES (nfl_plays.bc_pid), (CASE WHEN nfl_plays.comp = true THEN nfl_plays.trg_pid END)) AS t(pid)'
+          'LATERAL (VALUES (nfl_plays.ball_carrier_pid), (CASE WHEN nfl_plays.comp = true THEN nfl_plays.target_pid END)) AS t(pid)'
         )
       )
       cte_query.whereRaw('t.pid IS NOT NULL')
@@ -80,7 +80,7 @@ export const add_per_player_cte = ({
     case 'opportunity':
       cte_query.crossJoin(
         db.raw(
-          'LATERAL (VALUES (CASE WHEN nfl_plays.sk IS NULL OR nfl_plays.sk = false THEN nfl_plays.psr_pid END), (nfl_plays.bc_pid), (nfl_plays.trg_pid)) AS t(pid)'
+          'LATERAL (VALUES (CASE WHEN nfl_plays.sk IS NULL OR nfl_plays.sk = false THEN nfl_plays.passer_pid END), (nfl_plays.ball_carrier_pid), (nfl_plays.target_pid)) AS t(pid)'
         )
       )
       cte_query.whereRaw('t.pid IS NOT NULL')
@@ -93,8 +93,11 @@ export const add_per_player_cte = ({
 
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      cte_query.select('nfl_plays.year')
-      cte_query.groupBy('nfl_plays.year')
+      // Grain axis stays 'year' in the row-axis vocabulary; alias the
+      // renamed physical column back so this CTE's own output ('year',
+      // referenced downstream as `${rate_type_table_name}.year`) is unchanged.
+      cte_query.select('nfl_plays.season_year as year')
+      cte_query.groupBy('nfl_plays.season_year')
     } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
       cte_query.groupBy('nfl_plays.week')

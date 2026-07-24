@@ -45,16 +45,16 @@ export const add_per_player_route_cte = ({
   query_context = null
 }) => {
   const cte_query = db('nfl_plays_receiver')
-    .select('nfl_plays_receiver.gsis_id')
+    .select('nfl_plays_receiver.gsis_player_id')
     .join('nfl_plays', function () {
       this.on('nfl_plays_receiver.esbid', '=', 'nfl_plays.esbid').andOn(
-        'nfl_plays_receiver.playId',
+        'nfl_plays_receiver.play_id',
         '=',
-        'nfl_plays.playId'
+        'nfl_plays.play_id'
       )
     })
     .where('play_type', 'PASS')
-    .groupBy('nfl_plays_receiver.gsis_id')
+    .groupBy('nfl_plays_receiver.gsis_player_id')
 
   let count_expression = 'COUNT(*)'
   if (group_by) {
@@ -79,8 +79,11 @@ export const add_per_player_route_cte = ({
 
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      cte_query.select('nfl_plays.year')
-      cte_query.groupBy('nfl_plays.year')
+      // Grain axis stays 'year' in the row-axis vocabulary; alias the
+      // renamed physical column back so this CTE's own output ('year',
+      // referenced downstream as `${rate_type_table_name}.year`) is unchanged.
+      cte_query.select('nfl_plays.season_year as year')
+      cte_query.groupBy('nfl_plays.season_year')
     } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
       cte_query.groupBy('nfl_plays.week')
@@ -111,7 +114,8 @@ export const add_per_player_route_cte = ({
       query_context,
       column_params: params,
       has_seas_type: false,
-      has_nfl_week_id: false
+      has_nfl_week_id: false,
+      year_column: 'season_year'
     })
   }
 
@@ -129,7 +133,7 @@ export const join_per_player_route_cte = ({
   data_view_options = {}
 }) => {
   players_query.leftJoin(rate_type_table_name, function () {
-    this.on(`${rate_type_table_name}.gsis_id`, 'player.gsis_player_id')
+    this.on(`${rate_type_table_name}.gsis_player_id`, 'player.gsis_player_id')
 
     if (row_axes.includes('year')) {
       const offset_range = resolve_year_offset_range(params)
@@ -180,7 +184,7 @@ export const join_per_player_route_cte = ({
     // No group_by correlation here by design: a group_by period
     // (half/quarter/drive/series) is encapsulated in the denominator's
     // COUNT(DISTINCT CONCAT(esbid, <dim>)) expression in add_per_player_route_cte,
-    // which keeps the CTE at gsis_id grain. There is no per-dimension column to
+    // which keeps the CTE at gsis_player_id grain. There is no per-dimension column to
     // join against, and correlating one would fan the denominator out.
   })
 }
@@ -224,7 +228,7 @@ export const add_cte = ({
 export const join_cte = ({ query_context, cte_name, params }) => {
   // dispatch_params (group_by) intentionally not threaded into the join:
   // group_by affects only the CTE body (the COUNT(DISTINCT) denominator), never
-  // the join correlation, which is gsis_id (+ year/week split). See
+  // the join correlation, which is gsis_player_id (+ year/week split). See
   // join_per_player_route_cte.
   join_per_player_route_cte({
     players_query: query_context.players_query,

@@ -47,6 +47,17 @@ export const add_defensive_play_by_play_with_statement = ({
 
   const select_columns = new Set([...stat_columns, ...base_columns])
 
+  // Grain axis stays 'year'/'seas_type' in the row-axis vocabulary; alias the
+  // renamed physical nfl_plays columns back so the derived 'defensive_plays'
+  // subquery's own output columns keep those names for every downstream
+  // consumer (row_axis interpolation, the career_year join, base_columns
+  // membership checks).
+  const to_inner_select_expr = (column) => {
+    if (column === 'year') return 'season_year as year'
+    if (column === 'seas_type') return 'season_type as seas_type'
+    return column
+  }
+
   // Inner UNION-ALL branches scan nfl_plays directly; apply_play_by_play is wired
   // to the outer defensive_plays subquery and cannot reach the branches, so this
   // push is the sole source of partition pruning for those scans.
@@ -56,7 +67,8 @@ export const add_defensive_play_by_play_with_statement = ({
     .queryBuilder()
     .select(db.raw('pid'))
     .from(function () {
-      const select_columns_array = Array.from(select_columns)
+      const select_columns_array =
+        Array.from(select_columns).map(to_inner_select_expr)
 
       this.from('nfl_plays')
       this.select(
@@ -66,7 +78,7 @@ export const add_defensive_play_by_play_with_statement = ({
       )
       this.whereNotNull(pid_columns[0])
       if (effective_years.length) {
-        this.whereIn('nfl_plays.year', effective_years)
+        this.whereIn('nfl_plays.season_year', effective_years)
       }
 
       for (const pid_column of pid_columns.slice(1)) {
@@ -79,7 +91,7 @@ export const add_defensive_play_by_play_with_statement = ({
             .from('nfl_plays')
             .whereNotNull(pid_column)
           if (effective_years.length) {
-            this.whereIn('nfl_plays.year', effective_years)
+            this.whereIn('nfl_plays.season_year', effective_years)
           }
         })
       }

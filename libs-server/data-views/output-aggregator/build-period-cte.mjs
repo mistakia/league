@@ -46,7 +46,7 @@ const period_key_expr = (period) => {
 const SOURCES = {
   plays: {
     table: 'nfl_plays',
-    team_col: 'pos_team',
+    team_col: 'possession_nfl_team',
     pid_via: 'native_or_role'
   },
   gamelogs: {
@@ -66,9 +66,9 @@ const SOURCES = {
     extra_join: (q) => {
       q.join('nfl_plays', function () {
         this.on('nfl_plays_receiver.esbid', '=', 'nfl_plays.esbid').andOn(
-          'nfl_plays_receiver.playId',
+          'nfl_plays_receiver.play_id',
           '=',
-          'nfl_plays.playId'
+          'nfl_plays.play_id'
         )
       })
     }
@@ -266,11 +266,12 @@ export const build_batched_period_cte = ({
   const base_source = resolve_source(measure_source)
   // For the `plays` source, params.team_unit selects which side of the play
   // the team grouping uses: 'def' groups by defender, otherwise offense
-  // (pos_team). Mirrors the legacy `add_team_stats_play_by_play_with_statement`
-  // semantics so team_unit='def' team-stat columns aggregate per defender.
+  // (possession_nfl_team). Mirrors the legacy
+  // `add_team_stats_play_by_play_with_statement` semantics so team_unit='def'
+  // team-stat columns aggregate per defender.
   const team_col_override =
     measure_source === 'plays' && params?.team_unit === 'def'
-      ? 'def'
+      ? 'defense_nfl_team'
       : base_source.team_col
   const source = { ...base_source, team_col: team_col_override }
   const source_table = source.table
@@ -305,8 +306,9 @@ export const build_batched_period_cte = ({
   // - 'native': source has a `pid` column.
   // - 'gsis_bridge': source carries gsis_it_id; INNER JOIN player to emit pid.
   // - 'native_or_role' (plays): `nfl_plays` has no pid; column-definition
-  //   declares which per-play role columns (`trg_pid`, `bc_pid`, `psr_pid`,
-  //   ...) participate via `pid_columns`. COALESCE them into a single key.
+  //   declares which per-play role columns (`target_pid`, `ball_carrier_pid`,
+  //   `passer_pid`, ...) participate via `pid_columns`. COALESCE them into a
+  //   single key.
   let pid_expr
   let extra_player_join = false
   if (source.pid_via === 'native') {

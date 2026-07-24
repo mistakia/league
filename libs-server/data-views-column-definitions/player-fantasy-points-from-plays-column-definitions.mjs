@@ -187,31 +187,34 @@ const fantasy_points_from_plays_with = async ({
     .whereNotIn('nfl_plays.play_type', ['NOPL'])
     // Only filter for plays that have at least one relevant player
     .where(function () {
-      this.whereNotNull('nfl_plays.bc_pid')
-        .orWhereNotNull('nfl_plays.psr_pid')
-        .orWhereNotNull('nfl_plays.trg_pid')
+      this.whereNotNull('nfl_plays.ball_carrier_pid')
+        .orWhereNotNull('nfl_plays.passer_pid')
+        .orWhereNotNull('nfl_plays.target_pid')
         .orWhereNotNull('nfl_plays.player_fuml_pid')
     })
 
   // Select only the columns we need to reduce data transfer
   const select_columns = [
-    'nfl_plays.bc_pid',
-    'nfl_plays.psr_pid',
-    'nfl_plays.trg_pid',
+    'nfl_plays.ball_carrier_pid',
+    'nfl_plays.passer_pid',
+    'nfl_plays.target_pid',
     'nfl_plays.player_fuml_pid',
     'nfl_plays.week',
-    'nfl_plays.seas_type',
-    'nfl_plays.year',
+    // Grain axis (year/seas_type) stays stable in the row-axis vocabulary;
+    // alias the renamed physical columns back so downstream code (group-by,
+    // output_columns, the career_year join) keeps reading 'year'/'seas_type'.
+    'nfl_plays.season_type as seas_type',
+    'nfl_plays.season_year as year',
     'nfl_plays.rush_yds',
     'nfl_plays.rush_td',
     'nfl_plays.pass_yds',
     'nfl_plays.pass_td',
     'nfl_plays.recv_yds',
     'nfl_plays.comp',
-    'nfl_plays.int',
+    'nfl_plays.interceptions',
     'nfl_plays.first_down',
     'nfl_plays.play_type',
-    'nfl_plays.fuml'
+    'nfl_plays.fumbles_lost'
   ]
 
   // Add additional columns needed for params (week and seas_type already included above)
@@ -237,7 +240,7 @@ const fantasy_points_from_plays_with = async ({
     filtered_plays_cte
       .select([...select_columns, 'p_trg.primary_position as trg_pos'])
       .leftJoin('player as p_trg', function () {
-        this.on('nfl_plays.trg_pid', 'p_trg.pid')
+        this.on('nfl_plays.target_pid', 'p_trg.pid')
         // Only join for positions that can have different scoring
         this.andOnIn('p_trg.primary_position', ['RB', 'WR', 'TE', 'FB'])
       })
@@ -254,7 +257,7 @@ const fantasy_points_from_plays_with = async ({
   })
 
   // Skip when scope has been emitted: apply_play_by_play_column_params_to_query
-  // (with query_context) already pushes nfl_plays.year via apply_scope_to_query.
+  // (with query_context) already pushes nfl_plays.season_year via apply_scope_to_query.
   const view_scope_emitted =
     data_view_options.query_context &&
     data_view_options.query_context.nfl_week_ids &&
@@ -262,7 +265,7 @@ const fantasy_points_from_plays_with = async ({
   if (!params.nfl_week_id && !view_scope_emitted) {
     const effective_years = get_effective_years({ params, data_view_options })
     if (effective_years.length) {
-      filtered_plays_cte.whereIn('nfl_plays.year', effective_years)
+      filtered_plays_cte.whereIn('nfl_plays.season_year', effective_years)
     }
   }
 
@@ -283,9 +286,9 @@ const fantasy_points_from_plays_with = async ({
   )
 
   // Build individual union subqueries with conditional position grouping
-  const bc_group_by = ['bc_pid', ...subquery_output_columns_list]
-  const psr_group_by = ['psr_pid', ...subquery_output_columns_list]
-  const trg_group_by = ['trg_pid', ...subquery_output_columns_list]
+  const bc_group_by = ['ball_carrier_pid', ...subquery_output_columns_list]
+  const psr_group_by = ['passer_pid', ...subquery_output_columns_list]
+  const trg_group_by = ['target_pid', ...subquery_output_columns_list]
   const fuml_group_by = ['player_fuml_pid', ...subquery_output_columns_list]
 
   // Only add position columns to GROUP BY if position data is available
@@ -295,32 +298,32 @@ const fantasy_points_from_plays_with = async ({
 
   const bc_subquery = db
     .select(
-      'bc_pid as pid',
+      'ball_carrier_pid as pid',
       db.raw(`${bc_scoring} as fantasy_points_from_plays`),
       ...subquery_output_columns_list
     )
     .from('filtered_plays')
-    .whereNotNull('bc_pid')
+    .whereNotNull('ball_carrier_pid')
     .groupBy(bc_group_by)
 
   const psr_subquery = db
     .select(
-      'psr_pid as pid',
+      'passer_pid as pid',
       db.raw(`${psr_scoring} as fantasy_points_from_plays`),
       ...subquery_output_columns_list
     )
     .from('filtered_plays')
-    .whereNotNull('psr_pid')
+    .whereNotNull('passer_pid')
     .groupBy(psr_group_by)
 
   const trg_subquery = db
     .select(
-      'trg_pid as pid',
+      'target_pid as pid',
       db.raw(`${trg_scoring} as fantasy_points_from_plays`),
       ...subquery_output_columns_list
     )
     .from('filtered_plays')
-    .whereNotNull('trg_pid')
+    .whereNotNull('target_pid')
     .groupBy(trg_group_by)
 
   const fuml_subquery = db
@@ -439,7 +442,7 @@ const generate_passing_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
-      return 'COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE("int"::int, 0) * -1'
+      return 'COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE("interceptions"::int, 0) * -1'
     }
   }
 
@@ -447,7 +450,7 @@ const generate_passing_scoring_inner = async (scoring_format) => {
   const ptd = scoring_format.passing_touchdowns || 0
   const ints = scoring_format.passing_interceptions || 0
 
-  return `COALESCE(pass_yds, 0) * ${py} + COALESCE(pass_td::int, 0) * ${ptd} + COALESCE("int"::int, 0) * ${ints}`
+  return `COALESCE(pass_yds, 0) * ${py} + COALESCE(pass_td::int, 0) * ${ptd} + COALESCE("interceptions"::int, 0) * ${ints}`
 }
 
 const generate_passing_scoring_sql = async (scoring_format) =>
@@ -587,9 +590,9 @@ const fp_role_attributions = async ({ params }) => {
   )
   const fumble_inner = await generate_fumble_scoring_inner(scoring_format)
   return [
-    { pid_column: 'bc_pid', measure_expr: rushing_inner },
-    { pid_column: 'psr_pid', measure_expr: passing_inner },
-    { pid_column: 'trg_pid', measure_expr: receiving_inner },
+    { pid_column: 'ball_carrier_pid', measure_expr: rushing_inner },
+    { pid_column: 'passer_pid', measure_expr: passing_inner },
+    { pid_column: 'target_pid', measure_expr: receiving_inner },
     { pid_column: 'player_fuml_pid', measure_expr: fumble_inner }
   ]
 }

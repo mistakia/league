@@ -369,7 +369,7 @@ const stat_specs = {
   team_pass_attempts_from_plays: {
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END`
+      expr: `CASE WHEN passer_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END`
     },
     stat_name: 'team_pass_att_from_plays'
   },
@@ -402,7 +402,7 @@ const stat_specs = {
   team_rush_attempts_from_plays: {
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END`
+      expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
     },
     stat_name: 'team_rush_att_from_plays'
   },

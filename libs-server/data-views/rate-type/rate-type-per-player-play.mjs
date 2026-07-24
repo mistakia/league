@@ -51,8 +51,8 @@ export const add_per_player_play_cte = ({
     .select('nfl_snaps.gsis_it_id')
     .join('nfl_snaps', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid')
-        .andOn('nfl_plays.playId', '=', 'nfl_snaps.playId')
-        .andOn('nfl_plays.year', '=', 'nfl_snaps.year')
+        .andOn('nfl_plays.play_id', '=', 'nfl_snaps.play_id')
+        .andOn('nfl_plays.season_year', '=', 'nfl_snaps.season_year')
     })
     .whereNot('play_type', 'NOPL')
     .groupBy('nfl_snaps.gsis_it_id')
@@ -86,8 +86,11 @@ export const add_per_player_play_cte = ({
 
   for (const row_axis of row_axes) {
     if (row_axis === 'year') {
-      cte_query.select('nfl_plays.year')
-      cte_query.groupBy('nfl_plays.year')
+      // Grain axis stays 'year' in the row-axis vocabulary; alias the
+      // renamed physical column back so this CTE's own output ('year',
+      // referenced downstream as `${rate_type_table_name}.year`) is unchanged.
+      cte_query.select('nfl_plays.season_year as year')
+      cte_query.groupBy('nfl_plays.season_year')
     } else if (row_axis === 'week') {
       cte_query.select('nfl_plays.week')
       cte_query.groupBy('nfl_plays.week')
@@ -118,7 +121,8 @@ export const add_per_player_play_cte = ({
       query_context,
       column_params: params,
       has_seas_type: false,
-      has_nfl_week_id: false
+      has_nfl_week_id: false,
+      year_column: 'season_year'
     })
   }
 

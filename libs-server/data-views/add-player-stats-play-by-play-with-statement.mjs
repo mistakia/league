@@ -40,9 +40,16 @@ export const add_player_stats_play_by_play_with_statement = ({
 
   for (const row_axis of row_axes) {
     if (data_views_constants.row_axis_params.includes(row_axis)) {
-      const row_axis_statement = `nfl_plays.${row_axis}`
+      // Grain axis stays 'year' in the row-axis vocabulary; alias the
+      // renamed physical column back so this CTE's own output keeps the
+      // 'year' name for downstream consumers.
+      const physical_row_axis = row_axis === 'year' ? 'season_year' : row_axis
+      const row_axis_statement =
+        row_axis === 'year'
+          ? `nfl_plays.${physical_row_axis} as year`
+          : `nfl_plays.${physical_row_axis}`
       with_query.select(row_axis_statement)
-      with_query.groupBy(row_axis_statement)
+      with_query.groupBy(`nfl_plays.${physical_row_axis}`)
     }
   }
 
@@ -60,8 +67,8 @@ export const add_player_stats_play_by_play_with_statement = ({
           this.orOn(`nfl_plays.${pid_column}`, '=', 'player_seasonlogs.pid')
         }
       })
-        .andOn('nfl_plays.year', '=', 'player_seasonlogs.season_year')
-        .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.season_type')
+        .andOn('nfl_plays.season_year', '=', 'player_seasonlogs.season_year')
+        .andOn('nfl_plays.season_type', '=', 'player_seasonlogs.season_type')
     })
     with_query.whereBetween(
       'player_seasonlogs.career_year',
@@ -103,7 +110,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   }
 
   // Skip when scope has been emitted: apply_play_by_play_column_params_to_query
-  // (with query_context) already pushes nfl_plays.year via apply_scope_to_query,
+  // (with query_context) already pushes nfl_plays.season_year via apply_scope_to_query,
   // and the legacy nfl_week_id branch pushes year on its own when nfl_week_id is
   // set. Only emit here for callers without view scope and without nfl_week_id.
   const view_scope_emitted =
@@ -113,7 +120,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   if (!params.nfl_week_id && !view_scope_emitted) {
     const effective_years = get_effective_years({ params, data_view_options })
     if (effective_years.length) {
-      with_query.whereIn('nfl_plays.year', effective_years)
+      with_query.whereIn('nfl_plays.season_year', effective_years)
     }
   }
 

@@ -4,8 +4,10 @@
 // years AND no `year` split is active AND the subject is `player`.
 //
 // Why this exists:
-// In the standard path, the denominator CTE is grouped by `nfl_plays.off`
-// alone and the numerator is grouped by `pid` alone (both collapse years).
+// In the standard path, the denominator CTE is grouped by the team_unit
+// column (`nfl_plays.offense_nfl_team`/`defense_nfl_team`, aliased back to
+// 'off'/'def') alone and the numerator is grouped by `pid` alone (both
+// collapse years).
 // The outer join binds them via the player's team for ONE year
 // (year_reference = max(year_range)). For a player who switched teams across
 // the selected years, that misattributes their multi-year receiving stats to

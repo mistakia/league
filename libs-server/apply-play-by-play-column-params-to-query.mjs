@@ -11,6 +11,22 @@ import { apply_scope_to_query } from '#libs-server/data-views/apply-scope-to-que
 
 const nfl_games_param_keys = Object.keys(nfl_games_params)
 
+// Grain axis stays 'year'/'seas_type' in the row-axis vocabulary. Every
+// caller's CTE alias (e.g. 'defensive_plays') already aliases its own
+// renamed physical column back to those names at the CTE boundary, so the
+// bare 'year'/'seas_type' interpolations below stay correct for CTE
+// table_names. Only genuinely physical plays-family tables -- queried here
+// directly, with no aliasing CTE in front of them -- need the renamed
+// physical column names substituted in.
+const PHYSICAL_YEAR_COLUMN = {
+  nfl_plays: 'season_year',
+  nfl_plays_current_week: 'season_year'
+}
+const PHYSICAL_SEAS_TYPE_COLUMN = {
+  nfl_plays: 'season_type',
+  nfl_plays_current_week: 'season_type'
+}
+
 export default function ({
   query,
   params,
@@ -39,7 +55,9 @@ export default function ({
       query,
       table_name,
       query_context,
-      column_params: params
+      column_params: params,
+      year_column: PHYSICAL_YEAR_COLUMN[table_name] || 'year',
+      seas_type_column: PHYSICAL_SEAS_TYPE_COLUMN[table_name] || 'seas_type'
     })
     params = { ...params }
     delete params.nfl_week_id
@@ -124,10 +142,16 @@ export default function ({
           // own -- the year column_param iteration emits it independently and
           // a duplicate predicate is cosmetic noise.
           if (years.length && params.year == null) {
-            query.whereIn(`${param_table}.year`, years)
+            query.whereIn(
+              `${param_table}.${PHYSICAL_YEAR_COLUMN[param_table] || 'year'}`,
+              years
+            )
           }
           if (seas_types.length) {
-            query.whereIn(`${param_table}.seas_type`, seas_types)
+            query.whereIn(
+              `${param_table}.${PHYSICAL_SEAS_TYPE_COLUMN[param_table] || 'seas_type'}`,
+              seas_types
+            )
           }
         } else {
           query.whereIn(`${param_table}.${column_name}`, column_values)
