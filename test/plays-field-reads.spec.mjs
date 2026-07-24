@@ -10,6 +10,7 @@ import * as chai from 'chai'
 
 import getPlayFromPlayStats from '#libs-shared/get-play-from-play-stats.mjs'
 import { enrich_fixed_drives } from '#libs-server/play-enrichment/fixed-drive-enrichment.mjs'
+import calculateStatsFromPlays from '#libs-shared/calculate-stats-from-plays.mjs'
 
 const expect = chai.expect
 
@@ -216,5 +217,43 @@ describe('fixed-drive-enrichment drive boundaries', function () {
     ]
 
     expect(drive_seqs(plays)).to.deep.equal([1, 2])
+  })
+})
+
+describe('calculate-stats-from-plays interception attribution', function () {
+  const pass_play = (rest) => ({
+    play_type: 'PASS',
+    offense_nfl_team: 'KC',
+    passer_pid: 'PASS-ER-000001',
+    ...rest
+  })
+
+  it('credits the passer an interception and an attempt on a picked pass', () => {
+    const players = calculateStatsFromPlays([
+      pass_play({ interceptor_pid: 'INTE-RCE-000002' })
+    ])
+
+    expect(players['PASS-ER-000001'].passing_interceptions).to.equal(1)
+    expect(players['PASS-ER-000001'].passing_attempts).to.equal(1)
+  })
+
+  it('ignores the pre-rename spelling intp', () => {
+    const players = calculateStatsFromPlays([pass_play({ intp: 'X' })])
+
+    expect(players['PASS-ER-000001'].passing_interceptions).to.equal(0)
+  })
+
+  it('does not count an interception on an ordinary completion', () => {
+    const players = calculateStatsFromPlays([
+      pass_play({
+        comp: true,
+        target_pid: 'TARG-ET-000003',
+        recv_yds: 12,
+        pass_yds: 12
+      })
+    ])
+
+    expect(players['PASS-ER-000001'].passing_interceptions).to.equal(0)
+    expect(players['PASS-ER-000001'].passing_attempts).to.equal(1)
   })
 })

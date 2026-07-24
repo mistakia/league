@@ -104,8 +104,9 @@ const calculateStatsFromPlays = (plays) => {
           }
         }
 
-        if (play.intp) {
+        if (play.interceptor_pid) {
           addStat(play.passer_pid, 'passing_interceptions', 1)
+          addStat(play.passer_pid, 'passing_attempts', 1)
         } else if (play.comp && play.target_pid) {
           // TODO deprecate - temp fix for missing trg
           // receiver
