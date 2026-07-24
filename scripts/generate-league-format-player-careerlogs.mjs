@@ -54,7 +54,7 @@ const generate_league_format_player_careerlogs = async ({
   const game_count_rows = await db('league_format_player_gamelogs as g')
     .join('nfl_games as ng', 'ng.esbid', 'g.esbid')
     .where('g.league_format_id', league_format_id)
-    .where('ng.seas_type', 'REG')
+    .where('ng.season_type', 'REG')
     .select('g.pid')
     .count('* as games')
     .groupBy('g.pid')

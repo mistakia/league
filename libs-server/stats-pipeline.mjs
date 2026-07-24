@@ -2,6 +2,10 @@ import debug from 'debug'
 
 import db from '#db'
 import { create_default_league } from '#libs-shared'
+import {
+  named_scoring_formats,
+  named_league_formats
+} from '#libs-shared/named-format-catalog.mjs'
 import { getLeague } from '#libs-server'
 
 import generate_scoring_format_player_gamelogs from '#scripts/generate-scoring-format-player-gamelogs.mjs'
@@ -32,31 +36,47 @@ export const get_hosted_league_ids = async () => {
 }
 
 /**
- * Get unique format hashes across all hosted leagues
- * @returns {Promise<Object>} Object containing sets of unique hashes and default league
+ * Get every format id that requires derived player data.
+ *
+ * This is the union of two sources, and it MUST stay a union:
+ *
+ * 1. The named format catalog. These ids are addressable by any request --
+ *    DEFAULT_SCORING_FORMAT_ID backs the synthetic lid=0 league that every
+ *    league-less API caller resolves to -- so their derived data must exist
+ *    whether or not a live league happens to use them.
+ * 2. The formats of live hosted leagues, which may be long-tail uuid ids that
+ *    are absent from the catalog.
+ *
+ * Deriving this set from live leagues alone is what silently blanked the 2025
+ * season for the whole named catalog: league 1 moved onto the `genesis` format
+ * for 2025, every other catalog format dropped out of the generated set, and
+ * the default-league `draftkings` fallback was left with no 2025 rows.
+ *
+ * @returns {Promise<Object>} Default league plus the scoring and league format id sets
  */
-export const get_format_hashes = async () => {
+export const get_format_ids = async () => {
   const default_league = create_default_league()
   const league_ids = await get_hosted_league_ids()
 
-  const scoring_format_ides = new Set([default_league.scoring_format_id])
-  // Map league_format_id -> lid (for gamelogs that need lid)
-  const league_formats = new Map([
-    [default_league.league_format_id, { lid: 0 }]
+  const scoring_format_ids = new Set([
+    ...Object.keys(named_scoring_formats),
+    default_league.scoring_format_id
+  ])
+  const league_format_ids = new Set([
+    ...Object.keys(named_league_formats),
+    default_league.league_format_id
   ])
 
   for (const lid of league_ids) {
     const league = await getLeague({ lid })
-    scoring_format_ides.add(league.scoring_format_id)
-    if (!league_formats.has(league.league_format_id)) {
-      league_formats.set(league.league_format_id, { lid })
-    }
+    scoring_format_ids.add(league.scoring_format_id)
+    league_format_ids.add(league.league_format_id)
   }
 
   return {
     default_league,
-    scoring_format_ides: Array.from(scoring_format_ides),
-    league_formats // Map of league_format_id -> { lid }
+    scoring_format_ids: Array.from(scoring_format_ids),
+    league_format_ids: Array.from(league_format_ids)
   }
 }
 
@@ -114,9 +134,9 @@ export const run_step = async ({
  * @returns {Promise<void>}
  */
 export const process_all_scoring_format_gamelogs = async ({ week }) => {
-  const { scoring_format_ides } = await get_format_hashes()
+  const { scoring_format_ids } = await get_format_ids()
 
-  for (const scoring_format_id of scoring_format_ides) {
+  for (const scoring_format_id of scoring_format_ids) {
     log(`Processing scoring format gamelogs: ${scoring_format_id}`)
     await generate_scoring_format_player_gamelogs({ week, scoring_format_id })
   }
@@ -129,15 +149,11 @@ export const process_all_scoring_format_gamelogs = async ({ week }) => {
  * @returns {Promise<void>}
  */
 export const process_all_league_format_gamelogs = async ({ week }) => {
-  const { league_formats } = await get_format_hashes()
+  const { league_format_ids } = await get_format_ids()
 
-  for (const [league_format_id, { lid }] of league_formats) {
-    log(`Processing league format gamelogs: ${league_format_id} (lid: ${lid})`)
-    await generate_league_format_player_gamelogs({
-      week,
-      lid,
-      league_format_id
-    })
+  for (const league_format_id of league_format_ids) {
+    log(`Processing league format gamelogs: ${league_format_id}`)
+    await generate_league_format_player_gamelogs({ week, league_format_id })
   }
 }
 
@@ -157,9 +173,9 @@ export const process_all_format_gamelogs = async ({ week }) => {
  * @returns {Promise<void>}
  */
 export const process_all_scoring_format_aggregates = async () => {
-  const { scoring_format_ides } = await get_format_hashes()
+  const { scoring_format_ids } = await get_format_ids()
 
-  for (const scoring_format_id of scoring_format_ides) {
+  for (const scoring_format_id of scoring_format_ids) {
     log(`Processing scoring format aggregates: ${scoring_format_id}`)
     await generate_scoring_format_player_seasonlogs({ scoring_format_id })
     await generate_scoring_format_player_careerlogs({ scoring_format_id })
@@ -171,9 +187,9 @@ export const process_all_scoring_format_aggregates = async () => {
  * @returns {Promise<void>}
  */
 export const process_all_league_format_aggregates = async () => {
-  const { league_formats } = await get_format_hashes()
+  const { league_format_ids } = await get_format_ids()
 
-  for (const [league_format_id] of league_formats) {
+  for (const league_format_id of league_format_ids) {
     log(`Processing league format aggregates: ${league_format_id}`)
     await generate_league_format_player_seasonlogs({ league_format_id })
     await generate_league_format_player_careerlogs({ league_format_id })

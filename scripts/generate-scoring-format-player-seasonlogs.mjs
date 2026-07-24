@@ -36,7 +36,11 @@ const generate_scoring_format_player_seasonlogs = async ({
       'scoring_format_player_gamelogs.esbid',
       'nfl_games.esbid'
     )
-    .where({ year, seas_type: 'REG', scoring_format_id })
+    .where({
+      'nfl_games.season_year': year,
+      'nfl_games.season_type': 'REG',
+      'scoring_format_player_gamelogs.scoring_format_id': scoring_format_id
+    })
 
   log(`loaded ${gamelogs.length} gamelogs`)
 

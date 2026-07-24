@@ -39,7 +39,11 @@ const generate_league_format_player_seasonlogs = async ({
     .select('league_format_player_gamelogs.*', 'player.primary_position')
     .join('player', 'player.pid', 'league_format_player_gamelogs.pid')
     .join('nfl_games', 'league_format_player_gamelogs.esbid', 'nfl_games.esbid')
-    .where({ year, seas_type: 'REG', league_format_id })
+    .where({
+      'nfl_games.season_year': year,
+      'nfl_games.season_type': 'REG',
+      'league_format_player_gamelogs.league_format_id': league_format_id
+    })
 
   log(`loaded ${gamelogs.length} gamelogs`)
 
