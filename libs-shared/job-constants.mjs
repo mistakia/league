@@ -151,7 +151,8 @@ export const job_types = {
   IMPORT_NFL_GAMEBOOK_STARTERS: 126,
 
   IMPORT_UNDERDOG_BESTBALL_ADP: 127,
-  VERIFY_FORMAT_DATA_COVERAGE: 128
+  VERIFY_FORMAT_DATA_COVERAGE: 128,
+  AUDIT_DRIVE_SEQ_COHERENCE: 129
 }
 
 export const job_title_by_id = {
@@ -282,5 +283,6 @@ export const job_title_by_id = {
   125: 'Archive NFL Gamebooks',
   126: 'Import NFL Gamebook Starters',
   127: 'Import Underdog Best Ball ADP',
-  128: 'Verify Format Data Coverage'
+  128: 'Verify Format Data Coverage',
+  129: 'Audit drive_seq Coherence'
 }

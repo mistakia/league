@@ -236,10 +236,48 @@ const is_timeout_or_warning = (play) => {
 }
 
 /**
- * Calculates drive_seq for all plays in a game using nflfastr's fixed_drive methodology
+ * The half a play belongs to for drive-boundary purposes.
  *
- * @param {Array} plays - Array of play objects for a single game, sorted by play_id
- * @returns {Array} Plays with drive_seq set (if not already present)
+ * Overtime (qtr >= 5) is deliberately folded into the second-half bucket rather
+ * than given its own. The bucket exists only to isolate lookback -- a drive
+ * cannot span halftime -- and the end of regulation is not a possession break
+ * the way halftime is. Splitting overtime out would force a spurious drive
+ * boundary at the start of OT; under a per-bucket counter it would also have
+ * reintroduced the numbering restart this module was fixed to remove.
+ */
+export const get_half = (play) => (play.qtr <= 2 ? 1 : 2)
+
+/**
+ * Calculates drive_seq for all plays using nflfastr's fixed_drive methodology.
+ *
+ * Numbering is game-continuous: the counter runs from 1 to N across the whole
+ * game and does NOT reset at halftime. This is the convention every other
+ * source in the system uses (nflfastR's fixed_drive, NFL's
+ * driveSequenceNumber, Sportradar), and it is what makes the `${esbid}_${drive_seq}`
+ * drive key in drive-play-count-enrichment.mjs -- and the equivalent
+ * COUNT(DISTINCT CONCAT(esbid, drive_seq)) denominators in the data-views rate
+ * types -- address a single drive rather than merging one drive per half.
+ *
+ * Halves are still grouped, but only for boundary detection and lookback
+ * isolation: the first play after halftime always starts a new drive, and the
+ * prev_play lookback must not reach back across the break.
+ *
+ * All-or-nothing per game: if any play in the incoming batch for a game already
+ * carries a drive_seq, the enrichment declines to write for that game entirely.
+ * A populated value came from a different numbering authority (NFL or
+ * Sportradar), which draws drive boundaries differently than nflfastR does.
+ * Filling only the gaps splices two methodologies into one sequence that is
+ * monotonic but meaningless -- worse than a visible gap, because it looks
+ * correct.
+ *
+ * The all-or-nothing check is scoped to the plays array passed in, NOT to
+ * database state, and that distinction is load-bearing. This module is pure and
+ * does no database access; a database-scoped check would see the partial state
+ * written by the first poll of a live game and decline forever after, freezing
+ * drive_seq at whatever that first partial write contained.
+ *
+ * @param {Array} plays - Array of play objects, one or more games
+ * @returns {Array} Plays with drive_seq set where the game had none
  */
 export const enrich_fixed_drives = (plays) => {
   log(`Starting fixed drive enrichment for ${plays.length} plays`)
@@ -248,56 +286,69 @@ export const enrich_fixed_drives = (plays) => {
     return plays
   }
 
-  // Group plays by game and half
+  // Group plays by game, retaining half membership within each game.
   const games_map = new Map()
 
   for (const play of plays) {
-    const game_half_key = `${play.esbid}_${play.qtr <= 2 ? 1 : 2}`
-
-    if (!games_map.has(game_half_key)) {
-      games_map.set(game_half_key, [])
+    if (!games_map.has(play.esbid)) {
+      games_map.set(play.esbid, [])
     }
-    games_map.get(game_half_key).push(play)
+    games_map.get(play.esbid).push(play)
   }
 
-  // Process each game-half
   const enriched_plays = []
-  let total_drives = 0
 
-  for (const [game_half_key, half_plays] of games_map.entries()) {
-    // Sort by play_id to ensure correct order
-    half_plays.sort((a, b) => a.play_id - b.play_id)
+  for (const [esbid, game_plays] of games_map.entries()) {
+    const has_existing_drive_seq = game_plays.some(
+      (play) => play.drive_seq !== null && play.drive_seq !== undefined
+    )
 
+    if (has_existing_drive_seq) {
+      log(`${esbid}: drive_seq already populated by another source, skipping`)
+      enriched_plays.push(...game_plays.map((play) => ({ ...play })))
+      continue
+    }
+
+    const halves = new Map()
+    for (const play of game_plays) {
+      const half = get_half(play)
+      if (!halves.has(half)) {
+        halves.set(half, [])
+      }
+      halves.get(half).push(play)
+    }
+
+    // The counter is declared outside the half loop -- this is the
+    // game-continuous numbering.
     let drive_number = 0
 
-    for (let i = 0; i < half_plays.length; i++) {
-      const play = half_plays[i]
-      const prev_play = i > 0 ? half_plays[i - 1] : null
-      const prev_play_2 = i > 1 ? half_plays[i - 2] : null
-      const prev_play_3 = i > 2 ? half_plays[i - 3] : null
+    for (const half of [...halves.keys()].sort((a, b) => a - b)) {
+      const half_plays = halves.get(half)
+      // Sort by play_id to ensure correct order
+      half_plays.sort((a, b) => a.play_id - b.play_id)
 
-      if (is_new_drive(play, prev_play, prev_play_2, prev_play_3)) {
-        drive_number++
+      for (let i = 0; i < half_plays.length; i++) {
+        const play = half_plays[i]
+        // Lookback is scoped to the half: the first play after halftime has no
+        // predecessor and therefore always opens a new drive.
+        const prev_play = i > 0 ? half_plays[i - 1] : null
+        const prev_play_2 = i > 1 ? half_plays[i - 2] : null
+        const prev_play_3 = i > 2 ? half_plays[i - 3] : null
+
+        if (is_new_drive(play, prev_play, prev_play_2, prev_play_3)) {
+          drive_number++
+        }
+
+        enriched_plays.push({
+          ...play,
+          drive_seq: drive_number
+        })
       }
-
-      // Set drive_seq using the calculated fixed_drive value if not already present
-      // nflfastr and other sources may have their own drive_seq values
-      // This is needed because enrich_drive_play_counts depends on drive_seq
-      const enriched_play = {
-        ...play
-      }
-
-      if (play.drive_seq === null || play.drive_seq === undefined) {
-        enriched_play.drive_seq = drive_number
-      }
-
-      enriched_plays.push(enriched_play)
     }
 
-    total_drives = Math.max(total_drives, drive_number)
-    log(`${game_half_key}: ${drive_number} drives`)
+    log(`${esbid}: ${drive_number} drives`)
   }
 
-  log(`Fixed drive enrichment complete. Total max drives: ${total_drives}`)
+  log('Fixed drive enrichment complete')
   return enriched_plays
 }

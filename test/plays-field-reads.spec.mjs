@@ -221,6 +221,340 @@ describe('fixed-drive-enrichment drive boundaries', function () {
   })
 })
 
+// A two-half game: KC and NE alternate possession in Q1, then again in Q3.
+// Under per-half numbering the second half restarts at 1 and every value
+// collides with a first-half drive; under game-continuous numbering the halves
+// share one 1..N sequence.
+const two_half_game = ({ esbid = 1, drive_seq_by_play_id = {} } = {}) =>
+  [
+    { play_id: 1, qtr: 1, offense_nfl_team: 'KC' },
+    { play_id: 2, qtr: 1, offense_nfl_team: 'KC' },
+    { play_id: 3, qtr: 2, offense_nfl_team: 'NE' },
+    { play_id: 4, qtr: 3, offense_nfl_team: 'KC' },
+    { play_id: 5, qtr: 3, offense_nfl_team: 'NE' },
+    { play_id: 6, qtr: 4, offense_nfl_team: 'KC' }
+  ].map((play) => ({
+    esbid,
+    play_type: 'RUSH',
+    drive_seq: Object.prototype.hasOwnProperty.call(
+      drive_seq_by_play_id,
+      play.play_id
+    )
+      ? drive_seq_by_play_id[play.play_id]
+      : null,
+    ...play
+  }))
+
+const half_of = (play) => (play.qtr <= 2 ? 1 : 2)
+
+describe('fixed-drive-enrichment game continuity', function () {
+  it('numbers drives continuously across halftime rather than restarting', () => {
+    // The defect: the counter reset to zero at halftime, so half 2's first
+    // drive was numbered 1 while half 1 had already used 1.
+    const enriched = enrich_fixed_drives(two_half_game())
+
+    expect(enriched.map((play) => play.drive_seq)).to.deep.equal([
+      1, 1, 2, 3, 4, 5
+    ])
+  })
+
+  it('forces a new drive at the start of the second half', () => {
+    // KC has the ball on the last play of half 1 and the first play of half 2.
+    // Possession did not change, but halftime is a drive boundary, so the
+    // lookback must not reach across it.
+    const plays = [
+      { play_id: 1, qtr: 2, offense_nfl_team: 'KC' },
+      { play_id: 2, qtr: 3, offense_nfl_team: 'KC' }
+    ].map((play) => ({ esbid: 1, play_type: 'RUSH', drive_seq: null, ...play }))
+
+    expect(
+      enrich_fixed_drives(plays).map((play) => play.drive_seq)
+    ).to.deep.equal([1, 2])
+  })
+
+  it('never emits a drive_seq value that appears in more than one half', () => {
+    // This is the invariant scripts/audit-drive-seq-coherence.mjs measures
+    // against production, asserted here at the writer.
+    const enriched = enrich_fixed_drives(two_half_game())
+
+    const pairs = new Set()
+    const triples = new Set()
+    for (const play of enriched) {
+      pairs.add(`${play.esbid}_${play.drive_seq}`)
+      triples.add(`${play.esbid}_${half_of(play)}_${play.drive_seq}`)
+    }
+
+    expect(triples.size).to.equal(pairs.size)
+  })
+
+  it('numbers each game independently when a batch carries several games', () => {
+    const enriched = enrich_fixed_drives([
+      ...two_half_game({ esbid: 1 }),
+      ...two_half_game({ esbid: 2 })
+    ])
+
+    for (const esbid of [1, 2]) {
+      const game_plays = enriched.filter((play) => play.esbid === esbid)
+      expect(game_plays.map((play) => play.drive_seq)).to.deep.equal([
+        1, 1, 2, 3, 4, 5
+      ])
+    }
+  })
+
+  it('leaves a partially populated game entirely untouched', () => {
+    // A populated drive_seq came from NFL or Sportradar, which draw drive
+    // boundaries differently. Filling only the gaps splices two numbering
+    // authorities into one sequence that is monotonic but meaningless -- the
+    // mechanism behind the second corruption class found in production. The
+    // nulls must stay null, including the administrative plays that encode
+    // "belongs to no drive" that way.
+    const plays = two_half_game({
+      drive_seq_by_play_id: { 1: 7, 2: 7, 4: 9 }
+    })
+
+    const enriched = enrich_fixed_drives(plays)
+
+    expect(enriched.map((play) => play.drive_seq)).to.deep.equal([
+      7,
+      7,
+      null,
+      9,
+      null,
+      null
+    ])
+  })
+
+  it('declines only for the game that is already populated', () => {
+    const enriched = enrich_fixed_drives([
+      ...two_half_game({ esbid: 1, drive_seq_by_play_id: { 1: 7 } }),
+      ...two_half_game({ esbid: 2 })
+    ])
+
+    const by_esbid = (esbid) =>
+      enriched
+        .filter((play) => play.esbid === esbid)
+        .map((play) => play.drive_seq)
+
+    expect(by_esbid(1)).to.deep.equal([7, null, null, null, null, null])
+    expect(by_esbid(2)).to.deep.equal([1, 1, 2, 3, 4, 5])
+  })
+
+  it('does not mutate the plays handed to it', () => {
+    const plays = two_half_game()
+
+    enrich_fixed_drives(plays)
+
+    expect(plays.map((play) => play.drive_seq)).to.deep.equal([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ])
+  })
+})
+
+describe('import-plays-nfl-v1 live upsert drive_seq protection', function () {
+  // The live worker re-polls the full playlist for an in-progress game every 60
+  // seconds and re-upserts every play, and getPlayData always sets the
+  // drive_seq key -- null for a play the NFL feed has not yet tagged. Under a
+  // blanket .merge() those nulls overwrite stored values, which turns the
+  // all-or-nothing enrichment rule into active data loss rather than a gap.
+
+  const load_build_plays_merge = async () => {
+    const module = await import('../scripts/import-plays-nfl-v1.mjs')
+    return module.build_plays_merge
+  }
+
+  const merge_sql = (merge, column) => merge[column].toString()
+
+  it('resolves drive_seq as a coalesce against the stored value', async () => {
+    const build_plays_merge = await load_build_plays_merge()
+    const merge = build_plays_merge('nfl_plays', [
+      { esbid: 1, play_id: 2, season_year: 2025, drive_seq: null }
+    ])
+
+    expect(merge_sql(merge, 'drive_seq')).to.equal(
+      'coalesce(EXCLUDED."drive_seq", "nfl_plays"."drive_seq")'
+    )
+  })
+
+  it('leaves every other column on blanket-merge semantics', async () => {
+    const build_plays_merge = await load_build_plays_merge()
+    const merge = build_plays_merge('nfl_plays', [
+      { esbid: 1, play_id: 2, drive_seq: null, drive_yds: 30, qtr: 1 }
+    ])
+
+    expect(merge_sql(merge, 'drive_yds')).to.equal('EXCLUDED."drive_yds"')
+    expect(merge_sql(merge, 'qtr')).to.equal('EXCLUDED."qtr"')
+  })
+
+  it('qualifies the coalesce with the table being written', async () => {
+    const build_plays_merge = await load_build_plays_merge()
+    const merge = build_plays_merge('nfl_plays_current_week', [
+      { esbid: 1, play_id: 2, drive_seq: null }
+    ])
+
+    expect(merge_sql(merge, 'drive_seq')).to.equal(
+      'coalesce(EXCLUDED."drive_seq", "nfl_plays_current_week"."drive_seq")'
+    )
+  })
+
+  it('covers every column present on any row of the batch', async () => {
+    const build_plays_merge = await load_build_plays_merge()
+    const merge = build_plays_merge('nfl_plays', [
+      { esbid: 1, play_id: 2, drive_seq: 4 },
+      { esbid: 1, play_id: 3, drive_seq: null, penalty: true }
+    ])
+
+    expect(Object.keys(merge).sort()).to.deep.equal([
+      'drive_seq',
+      'esbid',
+      'penalty',
+      'play_id'
+    ])
+  })
+
+  it('survives a second pass whose batch carries null for a stored value', async () => {
+    const build_plays_merge = await load_build_plays_merge()
+
+    // Pass 1: the whole game is untagged, so the enrichment computes drive_seq
+    // for every play and the upsert stores it.
+    const first_pass = enrich_fixed_drives(two_half_game())
+    const stored = new Map(
+      first_pass.map((play) => [play.play_id, play.drive_seq])
+    )
+    expect([...stored.values()]).to.deep.equal([1, 1, 2, 3, 4, 5])
+
+    // Pass 2, 60 seconds later: the feed has now tagged two plays, so the
+    // enrichment declines for the game and hands the upsert explicit nulls for
+    // the rest.
+    const second_pass = enrich_fixed_drives(
+      two_half_game({ drive_seq_by_play_id: { 1: 7, 2: 7 } })
+    )
+    expect(second_pass.map((play) => play.drive_seq)).to.deep.equal([
+      7,
+      7,
+      null,
+      null,
+      null,
+      null
+    ])
+
+    // Apply the upsert's own conflict rule rather than a restatement of it: a
+    // coalesce on drive_seq, plain replacement everywhere else.
+    const merge = build_plays_merge('nfl_plays', second_pass)
+    const coalesces_drive_seq = merge_sql(merge, 'drive_seq').startsWith(
+      'coalesce('
+    )
+
+    for (const play of second_pass) {
+      const previous = stored.get(play.play_id)
+      const written =
+        coalesces_drive_seq && play.drive_seq === null
+          ? previous
+          : play.drive_seq
+      stored.set(play.play_id, written)
+    }
+
+    // No previously-computed value became null. The feed's own values landed.
+    expect([...stored.values()]).to.deep.equal([7, 7, 2, 3, 4, 5])
+    expect([...stored.values()].some((value) => value === null)).to.equal(false)
+  })
+})
+
+describe('audit-drive-seq-coherence classification', function () {
+  // Real production rows -- the distinct (esbid, qtr, drive_seq) triples for
+  // three games, one of each class, read 2026-07-24. A synthetic fixture cannot
+  // distinguish correct game-continuous numbering from a per-half restart that
+  // happens to look right over a handful of plays, which is exactly the failure
+  // this auditor exists to catch.
+  //
+  //   2025080751 restart_at_1: half 1 reaches 16, half 2 restarts at 1
+  //   2001092311 other:        no restart, but 13 spans the halftime boundary
+  //   2025122900 coherent:     one unbroken 1..22 across both halves
+  const production_rows = [
+    [2001092311, 1, [1, 2, 3, 4, 5]],
+    [2001092311, 2, [5, 6, 7, 8, 9, 10, 11, 12, 13]],
+    [2001092311, 3, [13, 14, 15, 16]],
+    [2001092311, 4, [17, 18, 19, 20, 21, 22, 23, 24, 25]],
+    [2025080751, 1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
+    [2025080751, 2, [10, 11, 12, 13, 14, 15, 16]],
+    [2025080751, 3, [1, 2, 3, 4, 5, 6, 7]],
+    [2025080751, 4, [7, 8, 9, 10, 11, 12, 13]],
+    [2025122900, 1, [1, 2, 3, 4, 5]],
+    [2025122900, 2, [5, 6, 7, 8, 9, 10, 11]],
+    [2025122900, 3, [12, 13, 14, 15, 16]],
+    [2025122900, 4, [16, 17, 18, 19, 20, 21, 22]]
+  ].flatMap(([esbid, qtr, drive_seq_values]) =>
+    drive_seq_values.map((drive_seq) => ({ esbid, qtr, drive_seq }))
+  )
+
+  const classify = async (rows) => {
+    const { classify_drive_seq_coherence } = await import(
+      '../scripts/audit-drive-seq-coherence.mjs'
+    )
+    return classify_drive_seq_coherence(rows)
+  }
+
+  it('separates the two corruption classes and leaves coherent games alone', async () => {
+    const { games_checked, violations, violation_counts_by_class } =
+      await classify(production_rows)
+
+    expect(games_checked).to.equal(3)
+    expect(violation_counts_by_class).to.deep.equal({
+      restart_at_1: 1,
+      other: 1
+    })
+
+    const class_by_esbid = Object.fromEntries(
+      violations.map((violation) => [
+        violation.esbid,
+        violation.violation_class
+      ])
+    )
+    expect(class_by_esbid).to.deep.equal({
+      2025080751: 'restart_at_1',
+      2001092311: 'other'
+    })
+  })
+
+  it('does not flag a game merely for a non-contiguous sequence', async () => {
+    // Five production games have gaps in their drive_seq values because plays
+    // are missing from the feed, not because numbering broke. Asserting
+    // contiguity would leave those permanently red.
+    const rows = [
+      { esbid: 1, qtr: 1, drive_seq: 1 },
+      { esbid: 1, qtr: 2, drive_seq: 2 },
+      { esbid: 1, qtr: 3, drive_seq: 9 },
+      { esbid: 1, qtr: 4, drive_seq: 10 }
+    ]
+
+    const { violations } = await classify(rows)
+
+    expect(violations).to.deep.equal([])
+  })
+
+  it('flags what the enrichment used to emit and clears what it emits now', async () => {
+    // Drive the classifier with the writer's own output rather than a
+    // hand-built sequence, so the two cannot drift apart.
+    const enriched = enrich_fixed_drives(two_half_game())
+    const { violations } = await classify(enriched)
+
+    expect(violations).to.deep.equal([])
+
+    // The pre-fix per-half counter, reproduced: each half numbered from 1.
+    const per_half_numbered = two_half_game().map((play) => ({
+      ...play,
+      drive_seq: half_of(play) === 1 ? play.play_id : play.play_id - 3
+    }))
+    const { violation_counts_by_class } = await classify(per_half_numbered)
+
+    expect(violation_counts_by_class.restart_at_1).to.equal(1)
+  })
+})
+
 describe('calculate-stats-from-plays interception attribution', function () {
   const pass_play = (rest) => ({
     play_type: 'PASS',
