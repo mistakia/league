@@ -1149,6 +1149,8 @@ const process_cache_info = ({ cache_info, data_view_metadata }) => {
 }
 ```
 
+**Export endpoint cache**: `GET /api/data-views/export/:view_id/:export_format` caches `data_view_results` in Redis under a hash of `where`/`columns`/`sort`/`offset`/`prefix_columns`/`row_axes`, independent of the TTL logic above -- it defaults to 12 hours when a column's `cache_ttl` metadata is absent. A row that should now qualify (e.g. a player just backfilled with a new external id or value) can still be missing from an export for up to that long. Pass `?ignore_cache=true` to force a fresh query when verifying a just-shipped data fix.
+
 #### `rate_type_column_mapping` (removed)
 
 This mapping and its `get_rate_type_sql` emitter were the pre-output-aggregator rate-type dispatch. They became permanently dead once `normalize_output_param` began rewriting `params.rate_type` into `params.output` before any consumer ran (the mapping stayed `{}`, so every read yielded `undefined`). The declaration, its threading through `select-string.mjs` / `where-string.mjs` / the from-plays factories, and `get_rate_type_sql` were retired in the measure-first refactor. Rate output now flows exclusively through the output aggregator (`output-aggregator-registry.mjs` → the `rate-type/` plugins and `output-aggregator/`).
