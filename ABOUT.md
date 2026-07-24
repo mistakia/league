@@ -221,12 +221,27 @@ observations:
     documents it cannot gate found a sixth pre-existing instance (69e7567e): the charted-plays stats
     filter keyed on play.year/play.seas_type, which getChartedPlayByPlayQuery has never selected, so
     the week filter dropped every play and the view computed over an empty set.
+  - >-
+    [bug] api.nfl.com/v3/shield (NFL FDL v3) is decommissioned — deterministic Fastly 'unknown
+    domain' 500 on every request. It also stored a fused legal firstName (e.g. "De'Zhaun-Ryan")
+    distinct from the football name every feed and NFL's own displayName use ("De'Zhaun Stribling"),
+    which silently broke name-fallback matching and left affected players unlinked (no KTC/sleeper
+    ids, absent from data views).
+  - >-
+    [fix] 2026-07-24 scripts/import-players-nfl.mjs repointed from api.nfl.com/v3/shield to the
+    public NFL Pro per-team roster endpoint (pro.nfl.com/api/teams/roster, referer header only, no
+    session token), using footballName for clean first names. New
+    libs-server/ensure-player-alias.mjs seeds a football-name alias whenever a stored name diverges.
+    Commits: main 7ad47ca4, a8b2989b; private submodule 3860d11 (nfl-pro.mjs get_teams_roster).
+    Validated end-to-end against production (28,166 players, no status throws) plus KTC/Sleeper
+    re-imports; De'Zhaun Stribling (DEZH-STRI-000156) confirmed present in the DynastyIM WR data
+    view with keeptradecut_player_id 1976 and KTC value 2828.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-24T19:37:14.401Z'
+updated_at: '2026-07-24T19:51:30.050Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
