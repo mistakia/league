@@ -265,12 +265,34 @@ observations:
     [fix] Commits 455656c6 and bd2f038b declare the get-roster transactions join INNER and move both
     the team id and a (year, week) as-of bound into the ON clause; inner is correct because
     transactions.value is the only source of the salary Roster sums into availableCap.
+  - >-
+    [correction] 2026-07-24 The b15afa72 drive_seq defect framing is misdirecting: its 4,616 mixed
+    game-halves and 21,310 NULL plays reproduce exactly, but 98.3 percent of those plays are
+    administrative (NOPL 79.0 percent, NULL play_type 19.3 percent) and correctly stay NULL, so they
+    describe unfilled nulls rather than damage. The real damage is 48 games (2025: 32 PRE, 13 POST,
+    3 REG) where the per-half counter restarts numbering at 1 mid-game, collapsing 782 true PRE
+    drives into 443 distinct drive keys and 334 POST into 190.
+  - >-
+    [finding] 2026-07-24 A second, distinct drive_seq corruption class of 22 games (14 in 2025 REG,
+    1 in 2025 PRE, 7 scattered 2001-2023) carries a mixed-authority splice rather than a
+    half-restart: in 2026010401 quarter ranges overlap inside a single half (Q1 spans 1-6, Q2 spans
+    5-10), which no restart can produce. A DENSE_RANK renumber does not fix these; they need their
+    own characterization.
+  - >-
+    [trap] 2026-07-24 Two false leads when chasing drive_seq: a decreasing-drive_seq scan flags
+    1,271 halves, all caused by malformed rows carrying qtr=1 with a play_id inside a later quarter;
+    and 'deleted = false' silently drops the NULL-deleted rows, moving the violation counts from
+    70/48/22 to 64/39/25. Use 'deleted IS NOT TRUE', which is how the JS predicates read it.
+  - >-
+    [supersedes] 2026-07-24 The earlier [assessment] that enrich_fixed_drives 'only assigns
+    drive_seq where it is NULL' no longer holds: the module now declines for a whole game if any
+    play in the batch carries a value, so it never splices two numbering authorities.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-24T21:06:37.140Z'
+updated_at: '2026-07-24T23:45:46.855Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
