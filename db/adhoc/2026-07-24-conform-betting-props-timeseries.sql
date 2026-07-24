@@ -25,6 +25,36 @@
 -- transaction, so NO BEGIN/COMMIT here. Raise the 40s prod statement_timeout for the
 -- multi-million-row retypes (prop_market_selections_history 36.6M, prop_markets_history 12.7M,
 -- prop_market_selections_index 9.7M, props 4.14M, prop_markets_index 3.06M).
+--
+-- Lock discipline: every ACCESS EXCLUSIVE lock is taken UP FRONT under a short lock_timeout,
+-- before any row rewrite. Two reasons, both learned the hard way on large retypes:
+--   1. Fail fast. Acquiring locks lazily means a lock wait on the LAST table (props_index) can
+--      abort the transaction after 30+ minutes of completed rewrites, throwing all that work
+--      away. Up-front acquisition fails in seconds, having rewritten nothing.
+--   2. Do not queue behind a long query. A blocked ACCESS EXCLUSIVE request queues AHEAD of all
+--      subsequent readers, so an indefinite lock wait takes the table down before this script has
+--      done any work at all. lock_timeout bounds that to 5s and aborts cleanly.
+-- Once held, the locks persist to COMMIT, so the ALTERs below re-acquire them for free and the
+-- long rewrites can no longer be blocked mid-flight.
+SET LOCAL lock_timeout = '5s';
+LOCK TABLE
+  public.prop_markets_history,
+  public.prop_markets_index,
+  public.prop_market_selections_history,
+  public.prop_market_selections_index,
+  public.placed_wagers,
+  public.selection_combination_definitions,
+  public.selection_combination_odds_history,
+  public.selection_combination_odds_index,
+  public.prop_pairings,
+  public.weekly_market_selections_analysis_cache,
+  public.props,
+  public.props_index
+  IN ACCESS EXCLUSIVE MODE;
+
+-- Locks are held. Clear the lock guard (nothing below waits on a lock) and allow the rewrites the
+-- time they need.
+SET LOCAL lock_timeout = 0;
 SET LOCAL statement_timeout = '60min';
 
 -- ==== prop_markets_history (12.7M) ====
