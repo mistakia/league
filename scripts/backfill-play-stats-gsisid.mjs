@@ -16,12 +16,12 @@ const apply_updates = async ({ rows_to_fix, dry_run }) => {
     await db('nfl_play_stats')
       .where({
         esbid: row.esbid,
-        playId: row.playId,
-        playerName: row.playerName,
-        clubCode: row.clubCode,
-        statId: row.statId
+        play_id: row.play_id,
+        player_name: row.player_name,
+        nfl_team: row.nfl_team,
+        stat_id: row.stat_id
       })
-      .update({ gsisId: row.gsis_player_id })
+      .update({ gsis_player_id: row.gsis_player_id })
     total_updated++
   }
 
@@ -31,7 +31,7 @@ const apply_updates = async ({ rows_to_fix, dry_run }) => {
 const group_and_log = (rows, label) => {
   const by_player = {}
   for (const row of rows) {
-    const key = `${row.playerName} (${row.clubCode})`
+    const key = `${row.player_name} (${row.nfl_team})`
     if (!by_player[key]) {
       by_player[key] = { gsisid: row.gsis_player_id, pid: row.pid, count: 0 }
     }
@@ -44,7 +44,7 @@ const group_and_log = (rows, label) => {
       (a, b) => b[1].count - a[1].count
     )) {
       log(
-        `  ${name}: ${info.count} rows -> gsisId ${info.gsisid} (${info.pid})`
+        `  ${name}: ${info.count} rows -> gsis_player_id ${info.gsisid} (${info.pid})`
       )
     }
   }
@@ -53,7 +53,7 @@ const group_and_log = (rows, label) => {
 }
 
 const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
-  log(`Backfilling gsisId on nfl_play_stats for year ${year}`)
+  log(`Backfilling gsis_player_id on nfl_play_stats for year ${year}`)
 
   let total_updated = 0
 
@@ -61,23 +61,23 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
   const pass1_rows = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
     .join('player as p', function () {
-      this.on('ps.playerName', '=', 'p.short_name').andOn(
-        'ps.clubCode',
+      this.on('ps.player_name', '=', 'p.short_name').andOn(
+        'ps.nfl_team',
         '=',
         'p.current_nfl_team'
       )
     })
     .where('g.year', year)
-    .whereNull('ps.gsisId')
-    .whereNotNull('ps.playerName')
-    .where('ps.playerName', '!=', '')
+    .whereNull('ps.gsis_player_id')
+    .whereNotNull('ps.player_name')
+    .where('ps.player_name', '!=', '')
     .whereNotNull('p.gsis_player_id')
     .select(
       'ps.esbid',
-      'ps.playId',
-      'ps.playerName',
-      'ps.clubCode',
-      'ps.statId',
+      'ps.play_id',
+      'ps.player_name',
+      'ps.nfl_team',
+      'ps.stat_id',
       'p.pid',
       'p.gsis_player_id',
       'p.short_name'
@@ -86,7 +86,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
   // Filter out ambiguous matches (multiple players with same pname+team)
   const pass1_by_key = {}
   for (const row of pass1_rows) {
-    const key = `${row.esbid}:${row.playId}:${row.statId}`
+    const key = `${row.esbid}:${row.play_id}:${row.stat_id}`
     if (!pass1_by_key[key]) {
       pass1_by_key[key] = []
     }
@@ -116,20 +116,20 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
     log(`Pass 1: updated ${updated} rows`)
   }
 
-  // Pass 2: Match remaining null gsisId rows by pname only (for team-change cases)
+  // Pass 2: Match remaining null gsis_player_id rows by pname only (for team-change cases)
   // Only accept unique pname matches to avoid ambiguity
   const pass2_candidates = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
     .where('g.year', year)
-    .whereNull('ps.gsisId')
-    .whereNotNull('ps.playerName')
-    .where('ps.playerName', '!=', '')
+    .whereNull('ps.gsis_player_id')
+    .whereNotNull('ps.player_name')
+    .where('ps.player_name', '!=', '')
     .select(
       'ps.esbid',
-      'ps.playId',
-      'ps.playerName',
-      'ps.clubCode',
-      'ps.statId'
+      'ps.play_id',
+      'ps.player_name',
+      'ps.nfl_team',
+      'ps.stat_id'
     )
 
   if (pass2_candidates.length > 0) {
@@ -138,7 +138,9 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
     )
 
     // Get unique playerNames from candidates
-    const player_names = [...new Set(pass2_candidates.map((r) => r.playerName))]
+    const player_names = [
+      ...new Set(pass2_candidates.map((r) => r.player_name))
+    ]
 
     // Find players matching by pname with exactly one match
     const player_matches = await db('player')
@@ -167,7 +169,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
     const pass2_rows = []
     const skipped_ambiguous = new Set()
     for (const row of pass2_candidates) {
-      const match = unique_matches[row.playerName]
+      const match = unique_matches[row.player_name]
       if (match) {
         pass2_rows.push({
           ...row,
@@ -175,8 +177,8 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
           gsis_player_id: match.gsis_player_id,
           short_name: match.short_name
         })
-      } else if (by_pname[row.playerName]?.length > 1) {
-        skipped_ambiguous.add(row.playerName)
+      } else if (by_pname[row.player_name]?.length > 1) {
+        skipped_ambiguous.add(row.player_name)
       }
     }
 
@@ -203,9 +205,9 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
   const remaining = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
     .where('g.year', year)
-    .whereNull('ps.gsisId')
-    .whereNotNull('ps.playerName')
-    .where('ps.playerName', '!=', '')
+    .whereNull('ps.gsis_player_id')
+    .whereNotNull('ps.player_name')
+    .where('ps.player_name', '!=', '')
     .count('* as count')
     .first()
 

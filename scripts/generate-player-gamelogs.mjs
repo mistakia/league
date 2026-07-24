@@ -62,44 +62,47 @@ const DB_CONSTRAINTS = {
   WEIGHTED_OPPORTUNITY_RATING_MAX: 999.99 // numeric(5,2)
 }
 
-// Map of nfl_play_stats statId to the role _pid column on nfl_plays that
+// Map of nfl_play_stats stat_id to the role _pid column on nfl_plays that
 // identifies the player credited by that stat. Used to recover player identity
-// when the play_stat row itself carries empty gsisId / gsispid (e.g. when the
-// upstream feed never had a gsis ID for the player). statIds that do not
-// attribute a player (team-level rows, special-teams stats whose player
-// already lives in dedicated nfl_plays columns like kicker/punter/returner)
-// are intentionally omitted.
+// when the play_stat row itself carries empty gsis_player_id / smart_player_id
+// (e.g. when the upstream feed never had a gsis ID for the player). stat_ids
+// that do not attribute a player (team-level rows, special-teams stats whose
+// player already lives in dedicated nfl_plays columns like
+// kicker/punter/returner) are intentionally omitted.
 const STAT_ID_TO_ROLE_PID_COLUMN = {
-  10: 'bc_pid',
-  11: 'bc_pid',
-  14: 'psr_pid',
-  15: 'psr_pid',
-  16: 'psr_pid',
-  19: 'psr_pid',
-  20: 'psr_pid',
-  21: 'trg_pid',
-  22: 'trg_pid',
-  25: 'intp_pid',
-  26: 'intp_pid',
+  10: 'ball_carrier_pid',
+  11: 'ball_carrier_pid',
+  14: 'passer_pid',
+  15: 'passer_pid',
+  16: 'passer_pid',
+  19: 'passer_pid',
+  20: 'passer_pid',
+  21: 'target_pid',
+  22: 'target_pid',
+  25: 'interceptor_pid',
+  26: 'interceptor_pid',
   52: 'player_fuml_pid',
   53: 'player_fuml_pid',
   54: 'player_fuml_pid',
   106: 'player_fuml_pid',
-  111: 'psr_pid',
-  112: 'psr_pid',
-  113: 'trg_pid',
-  115: 'trg_pid'
+  111: 'passer_pid',
+  112: 'passer_pid',
+  113: 'target_pid',
+  115: 'target_pid'
 }
 
 const patch_play_stats_from_role_pid = async (playStats) => {
   const needs_fallback = playStats.filter(
-    (ps) => !ps.gsispid && !ps.gsisId && STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]
+    (ps) =>
+      !ps.smart_player_id &&
+      !ps.gsis_player_id &&
+      STAT_ID_TO_ROLE_PID_COLUMN[ps.stat_id]
   )
   if (!needs_fallback.length) return
 
   const pids_set = new Set()
   for (const ps of needs_fallback) {
-    const pid = ps[STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]]
+    const pid = ps[STAT_ID_TO_ROLE_PID_COLUMN[ps.stat_id]]
     if (pid) pids_set.add(pid)
   }
   if (!pids_set.size) return
@@ -111,13 +114,13 @@ const patch_play_stats_from_role_pid = async (playStats) => {
 
   let patched = 0
   for (const ps of needs_fallback) {
-    const pid = ps[STAT_ID_TO_ROLE_PID_COLUMN[ps.statId]]
+    const pid = ps[STAT_ID_TO_ROLE_PID_COLUMN[ps.stat_id]]
     if (!pid) continue
     const player = player_by_pid.get(pid)
     if (!player) continue
-    if (player.gsis_player_id) ps.gsisId = player.gsis_player_id
-    if (player.smart_player_id) ps.gsispid = player.smart_player_id
-    if (ps.gsisId || ps.gsispid) patched++
+    if (player.gsis_player_id) ps.gsis_player_id = player.gsis_player_id
+    if (player.smart_player_id) ps.smart_player_id = player.smart_player_id
+    if (ps.gsis_player_id || ps.smart_player_id) patched++
   }
   log(
     `id fallback from nfl_plays._pid: patched ${patched}/${needs_fallback.length} play_stats`
@@ -479,7 +482,7 @@ const generate_snap_based_gamelogs = async ({
     )
     .join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_id')
     .whereIn('nfl_snaps.esbid', unique_esbids)
-    .where('nfl_snaps.year', year)
+    .where('nfl_snaps.season_year', year)
     .groupBy(
       'player.pid',
       'player.primary_position',
@@ -509,15 +512,15 @@ const generate_snap_based_gamelogs = async ({
 
   // Query nfl_play_stats for historical team data as fallback
   const play_stats_teams = await db('nfl_play_stats')
-    .select('gsispid', 'esbid')
-    .max('clubCode as team')
+    .select('smart_player_id', 'esbid')
+    .max('nfl_team as team')
     .whereIn('esbid', unique_esbids)
-    .whereNotNull('clubCode')
-    .whereNot('clubCode', '')
-    .groupBy('gsispid', 'esbid')
+    .whereNotNull('nfl_team')
+    .whereNot('nfl_team', '')
+    .groupBy('smart_player_id', 'esbid')
 
   const play_stats_team_map = play_stats_teams.reduce((acc, ps) => {
-    acc[`${ps.gsispid}_${ps.esbid}`] = ps.team
+    acc[`${ps.smart_player_id}_${ps.esbid}`] = ps.team
     return acc
   }, {})
 
@@ -548,7 +551,7 @@ const generate_snap_based_gamelogs = async ({
         continue
       }
 
-      // Priority: 1) existing gamelog tm, 2) play_stats clubCode, 3) current_nfl_team (fallback)
+      // Priority: 1) existing gamelog tm, 2) play_stats nfl_team, 3) current_nfl_team (fallback)
       const gamelog_lookup_key = `${snap_player.pid}_${snap_player.esbid}`
       const play_stats_lookup_key = `${snap_player.smart_player_id}_${snap_player.esbid}`
       const existing_team = existing_gamelog_team_map[gamelog_lookup_key]
@@ -611,12 +614,12 @@ const load_player_routes = async ({ unique_esbids, year }) => {
  */
 const load_team_dropbacks = async ({ unique_esbids }) => {
   const team_dropbacks_query = await db('nfl_plays')
-    .select('pos_team as tm', 'esbid')
+    .select('possession_nfl_team as tm', 'esbid')
     .count('* as dropbacks')
     .whereIn('esbid', unique_esbids)
     .where({ qb_dropback: true })
     .whereNot({ play_type: 'NOPL' })
-    .groupBy('pos_team', 'esbid')
+    .groupBy('possession_nfl_team', 'esbid')
 
   log(`loaded dropback counts for ${team_dropbacks_query.length} team-games`)
 
@@ -662,11 +665,11 @@ const process_player_gamelogs = ({
       continue
     }
 
-    const play_stat = play_stats_by_player[player_id].find((p) => p.clubCode)
+    const play_stat = play_stats_by_player[player_id].find((p) => p.nfl_team)
     if (!play_stat) continue
 
     const opp = calculate_opponent({
-      team: play_stat.clubCode,
+      team: play_stat.nfl_team,
       home_team: play_stat.h,
       away_team: play_stat.v
     })
@@ -680,7 +683,7 @@ const process_player_gamelogs = ({
     const player_gamelog = format_player_gamelog({
       pid: player_row.pid,
       pos: player_row.primary_position,
-      nfl_team: fixTeam(play_stat.clubCode),
+      nfl_team: fixTeam(play_stat.nfl_team),
       opponent_nfl_team: opp,
       esbid: play_stat.esbid,
       season_year: play_stat.year,
@@ -711,7 +714,7 @@ const process_player_gamelogs = ({
  * Generate team gamelogs from play stats
  */
 const generate_team_gamelogs = ({ playStats, team_gamelog_inserts }) => {
-  const play_stats_by_team = groupBy(playStats, 'clubCode')
+  const play_stats_by_team = groupBy(playStats, 'nfl_team')
 
   for (const team of Object.keys(play_stats_by_team)) {
     const team_play_stats = play_stats_by_team[team]
@@ -746,7 +749,8 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
       }
 
       return (
-        (Boolean(p.pos_team) && fixTeam(p.pos_team) !== team) ||
+        (Boolean(p.possession_nfl_team) &&
+          fixTeam(p.possession_nfl_team) !== team) ||
         p.play_type_nfl === 'PUNT' ||
         p.play_type_nfl === 'KICK_OFF' ||
         p.play_type_nfl === 'XP_KICK'
@@ -756,13 +760,13 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
 
     const play = opponentPlays[0]
     const opp = fixTeam(play.h) === team ? play.v : play.h
-    const groupedPlays = groupBy(opponentPlays, 'playId')
+    const groupedPlays = groupBy(opponentPlays, 'play_id')
     const formattedPlays = []
     for (const playId in groupedPlays) {
       const playStats = groupedPlays[playId]
       const p = playStats[0]
       formattedPlays.push({
-        pos_team: p.pos_team,
+        possession_nfl_team: p.possession_nfl_team,
         drive_play_count: p.drive_play_count,
         play_type_nfl: p.play_type_nfl,
         playStats
@@ -903,8 +907,8 @@ const generate_player_gamelogs = async ({
   log(`loaded play stats for ${unique_esbids.length} games`)
   log(unique_esbids.join(', '))
 
-  // Patch play_stats rows whose upstream-feed identifiers (gsispid, gsisId) are
-  // empty but whose sibling nfl_plays row has the role _pid resolved (via the
+  // Patch play_stats rows whose upstream-feed identifiers (smart_player_id,
+  // gsis_player_id) are empty but whose sibling nfl_plays row has the role _pid resolved (via the
   // sportradar supplemental pass on sportradar_id, or any other enrichment
   // path). Without this, the per-player groupings below skip these rows and
   // counters (ra, py, recv_yds, etc.) under-report for affected players. See
@@ -929,7 +933,7 @@ const generate_player_gamelogs = async ({
   generate_team_gamelogs({ playStats, team_gamelog_inserts })
 
   // Load player data
-  const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
+  const play_stats_by_gsispid = groupBy(playStats, 'smart_player_id')
   const gsispids = Object.keys(play_stats_by_gsispid)
   const player_gsispid_rows = await db('player').whereIn(
     'smart_player_id',
@@ -939,7 +943,7 @@ const generate_player_gamelogs = async ({
     `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} gsispid players`
   )
 
-  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
+  const play_stats_by_gsisid = groupBy(playStats, 'gsis_player_id')
   const gsisids = Object.keys(play_stats_by_gsisid)
   const player_gsisid_rows = await db('player').whereIn(
     'gsis_player_id',

@@ -110,9 +110,9 @@ const run = async ({ dry = false, filepath } = {}) => {
       .format('mm:ss')
     const opts = {
       week: game.week,
-      year: game.year,
-      off: cPlay.off,
-      def: cPlay.def,
+      season_year: game.year,
+      offense_nfl_team: cPlay.off,
+      defense_nfl_team: cPlay.def,
       qtr: cPlay.qtr,
       game_clock_start,
       dwn: cPlay.dwn,
@@ -123,7 +123,7 @@ const run = async ({ dry = false, filepath } = {}) => {
     if (dbPlay && !dry) {
       await db('nfl_plays').update(formatPlay(cPlay)).where({
         esbid: dbPlay.esbid,
-        playId: dbPlay.playId
+        play_id: dbPlay.play_id
       })
     } else {
       log(`${cPlay.pid} - ${cPlay.detail}`)

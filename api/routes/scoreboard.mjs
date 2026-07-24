@@ -38,12 +38,12 @@ const router = express.Router()
  *                 summary: Sample scoreboard data
  *                 value:
  *                   - esbid: "2024120801"
- *                     playId: 1
+ *                     play_id: 1
  *                     week: 13
- *                     year: 2024
- *                     seas_type: "REG"
- *                     off: "KC"
- *                     def: "LV"
+ *                     season_year: 2024
+ *                     season_type: "REG"
+ *                     offense_nfl_team: "KC"
+ *                     defense_nfl_team: "LV"
  *                     down: 1
  *                     yards_to_go: 10
  *                     yfog: 25
@@ -94,7 +94,7 @@ router.get('/?', async (req, res) => {
     const query = getPlayByPlayQuery(db)
     const plays = await query
       .where('nfl_plays_current_week.week', week)
-      .where('nfl_plays_current_week.seas_type', seas_type)
+      .where('nfl_plays_current_week.season_type', seas_type)
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
     const playStats = await db('nfl_play_stats_current_week').whereIn(
       'esbid',
@@ -103,7 +103,7 @@ router.get('/?', async (req, res) => {
 
     for (const play of plays) {
       play.playStats = playStats.filter(
-        (p) => p.playId === play.playId && p.esbid === play.esbid
+        (p) => p.play_id === play.play_id && p.esbid === play.esbid
       )
     }
 

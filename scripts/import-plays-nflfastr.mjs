@@ -311,9 +311,9 @@ const format_play_context = (play) => {
     qtr: format_number(play.qtr),
     dwn,
     yards_to_go,
-    pos_team: off_team, // pos_team should match off (possession team)
-    off: off_team,
-    def: def_team,
+    possession_nfl_team: off_team, // possession_nfl_team should match offense_nfl_team
+    offense_nfl_team: off_team,
+    defense_nfl_team: def_team,
     play_type: format_play_type(
       play.play_type,
       format_boolean(play.special_teams_play),
@@ -582,8 +582,8 @@ const format_timeout_data = (play) => {
         ? play.posteam_timeouts_remaining
         : play.defteam_timeouts_remaining
     ),
-    to: format_boolean(play.timeout),
-    to_team: play.timeout_team ? fixTeam(play.timeout_team) : null
+    timeouts: format_boolean(play.timeout),
+    timeout_team: play.timeout_team ? fixTeam(play.timeout_team) : null
   }
 }
 
@@ -662,13 +662,13 @@ const format_play = (play) => ({
 
 /**
  * Build match criteria for finding plays in the database
- * Use stable playId equality now that nflfastR play_id matches DB "playId".
+ * Use stable play_id equality now that nflfastR play_id matches DB play_id.
  */
 const build_match_criteria = (esbid, formatted_play, item) => {
   const play_id_num = format_number(item.play_id)
   return {
     esbid,
-    playId: play_id_num
+    play_id: play_id_num
   }
 }
 
@@ -745,7 +745,7 @@ const process_play = async ({
       log(`Matched ${error.match_count} plays:`)
       error.matching_plays.forEach((play, index) => {
         log(
-          `  [${index + 1}] playId=${play.playId} desc="${play.desc?.substring(0, 60)}"`
+          `  [${index + 1}] play_id=${play.play_id} desc="${play.play_description?.substring(0, 60)}"`
         )
       })
       log('Match criteria:', match_criteria)
@@ -801,8 +801,8 @@ const log_match_criteria = (match_criteria) => {
   log(`    qtr: ${match_criteria.qtr}`)
   log(`    dwn: ${match_criteria.dwn}`)
   log(`    yards_to_go: ${match_criteria.yards_to_go}`)
-  log(`    off: ${match_criteria.off}`)
-  log(`    def: ${match_criteria.def}`)
+  log(`    offense_nfl_team: ${match_criteria.offense_nfl_team}`)
+  log(`    defense_nfl_team: ${match_criteria.defense_nfl_team}`)
   log(`    play_type: ${match_criteria.play_type}`)
   log(`    ydl_100: ${match_criteria.ydl_100}`)
   log(`    sec_rem_qtr: ${match_criteria.sec_rem_qtr}`)
@@ -893,7 +893,7 @@ const run = async ({
     if (play_result.matched) {
       plays_matched.push(play_result)
       // Evaluate field-level differences for summary stats
-      const excluded_fields = new Set(['esbid', 'playId', 'updated'])
+      const excluded_fields = new Set(['esbid', 'play_id', 'updated'])
       const db_play = play_result.db_play
       const formatted_play = play_result.formatted_play
 
@@ -958,7 +958,7 @@ const run = async ({
         log(
           `    Q${play.match_criteria.qtr} | ${play.match_criteria.dwn || 'N/A'} & ${play.match_criteria.yards_to_go || 'N/A'} | YDL: ${play.match_criteria.ydl_100 || 'N/A'} | Time: ${play.match_criteria.sec_rem_qtr}s`
         )
-        log(`    DB Play ID: ${play.db_play.playId}`)
+        log(`    DB Play ID: ${play.db_play.play_id}`)
       }
 
       if (type_plays.length > 3) {

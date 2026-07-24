@@ -8,9 +8,9 @@ import { getPlayByPlayQuery, wait } from '#libs-server'
 
 export const build_scoreboard_current_plays_query = ({ db: _db, updated }) =>
   getPlayByPlayQuery(_db)
-    .where('nfl_plays_current_week.year', current_season.year)
+    .where('nfl_plays_current_week.season_year', current_season.year)
     .where('nfl_plays_current_week.week', current_season.nfl_seas_week)
-    .where('nfl_plays_current_week.seas_type', current_season.nfl_seas_type)
+    .where('nfl_plays_current_week.season_type', current_season.nfl_seas_type)
     .where('updated', '>', updated)
 
 export default class Scoreboard {
@@ -54,7 +54,7 @@ export default class Scoreboard {
 
     for (const play of plays) {
       play.playStats = playStats.filter(
-        (p) => p.playId === play.playId && p.esbid === play.esbid
+        (p) => p.play_id === play.play_id && p.esbid === play.esbid
       )
     }
 

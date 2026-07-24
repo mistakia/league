@@ -140,7 +140,7 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
   }
 
   const data = {
-    desc: clean_string(play.playDescription),
+    play_description: clean_string(play.playDescription),
     // Normalize down to null for special teams plays (0 should be null)
     dwn: play.down === 0 ? null : play.down,
     // NOTE: drive_play_count is calculated by the play enrichment pipeline, not imported from NFL API
@@ -158,8 +158,8 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     ydl_start: clean_string(play.yardLine),
     first_down: play.firstDown,
     goal_to_go: play.goalToGo,
-    year,
-    seas_type,
+    season_year: year,
+    season_type: seas_type,
     week,
     next_play_type: clean_string(play.nextPlayType),
     sequence: play.orderSequence,
@@ -170,7 +170,9 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     score: play.scoringPlay,
     score_type: standardize_score_type(play.scoringPlayType),
     special_play_type: clean_string(play.stPlayType),
-    timestamp: play.timeOfDay ? dayjs(play.timeOfDay).format('HH:mm:ss') : null,
+    play_time_of_day: play.timeOfDay
+      ? dayjs(play.timeOfDay).format('HH:mm:ss')
+      : null,
     // Normalize yards_to_go to null for special teams plays (0 should be null)
     yards_to_go: play.yardsToGo === 0 ? null : play.yardsToGo,
     qtr: play.quarter,
@@ -187,7 +189,7 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
       pos_team = pos_team === game.h ? game.v : game.h
     }
 
-    data.pos_team = pos_team
+    data.possession_nfl_team = pos_team
   }
 
   if (play.scoringTeam) {
@@ -195,7 +197,7 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     data.score_team = fixTeam(abbr)
   }
 
-  if (play.yardLine && data.pos_team) {
+  if (play.yardLine && data.possession_nfl_team) {
     const cleaned_yard_line = clean_string(play.yardLine)
     if (cleaned_yard_line === '50') {
       data.ydl_num = 50
@@ -207,7 +209,9 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
       data.ydl_num = parseInt(ydl_parts[1], 10)
       data.ydl_side = fixTeam(clean_string(ydl_parts[0]))
       data.ydl_100 =
-        data.ydl_side === data.pos_team ? 100 - data.ydl_num : data.ydl_num
+        data.ydl_side === data.possession_nfl_team
+          ? 100 - data.ydl_num
+          : data.ydl_num
       // Normalize yardline format (handles team abbreviation normalization)
       data.ydl_start = normalize_yardline(`${data.ydl_side} ${data.ydl_num}`)
     }
@@ -246,9 +250,9 @@ const extract_elias = (smart_id) => {
 
 const getPlayStatData = (playStat) => ({
   yards: playStat.yards,
-  teamid: playStat.team.id,
-  playerName: clean_string(playStat.playerName), // Clean the player name here to remove null bytes
-  clubCode: playStat.team
+  nfl_team_id: playStat.team.id,
+  player_name: clean_string(playStat.playerName), // Clean the player name here to remove null bytes
+  nfl_team: playStat.team
     ? fixTeam(clean_string(playStat.team.abbreviation))
     : null,
   esbid: playStat.gsisPlayer ? extract_elias(playStat.gsisPlayer.id) : null
@@ -383,14 +387,14 @@ const importPlaysForWeek = async ({
       ) {
         const timeoutStat = play.playStats.find((stat) => stat.statId === 68)
         if (timeoutStat && timeoutStat.team) {
-          playData.to_team = fixTeam(
+          playData.timeout_team = fixTeam(
             clean_string(timeoutStat.team.abbreviation)
           )
         }
       }
 
       play_inserts.push({
-        playId,
+        play_id: playId,
         esbid: game.esbid,
         updated: timestamp,
         ...playData
@@ -398,22 +402,22 @@ const importPlaysForWeek = async ({
 
       // TODO re-enable and add `esbid` column to play_stats table
       for (const playStat of play.playStats) {
-        const { esbid, playerName, clubCode, teamid, yards } =
+        const { esbid, player_name, nfl_team, nfl_team_id, yards } =
           getPlayStatData(playStat)
-        const gsisId = esbid_to_gsis_id_index[esbid] || null
-        if (esbid && !gsisId) {
-          missing_esbids.add(JSON.stringify({ esbid, playerName, clubCode }))
+        const gsis_player_id = esbid_to_gsis_id_index[esbid] || null
+        if (esbid && !gsis_player_id) {
+          missing_esbids.add(JSON.stringify({ esbid, player_name, nfl_team }))
         }
 
         play_stat_inserts.push({
-          playId,
+          play_id: playId,
           esbid: game.esbid,
           valid: 1,
-          statId: playStat.statId,
-          gsisId,
-          playerName,
-          clubCode,
-          teamid,
+          stat_id: playStat.statId,
+          gsis_player_id,
+          player_name,
+          nfl_team,
+          nfl_team_id,
           yards
         })
       }
@@ -423,7 +427,7 @@ const importPlaysForWeek = async ({
     const play_stat_inserts_map = new Map()
 
     for (const play_stat of play_stat_inserts) {
-      const key = `${play_stat.esbid}-${play_stat.playId}-${play_stat.statId}-${play_stat.playerName}`
+      const key = `${play_stat.esbid}-${play_stat.play_id}-${play_stat.stat_id}-${play_stat.player_name}`
       play_stat_inserts_map.set(key, play_stat)
     }
     // Remove duplicates from play_stat_inserts
@@ -450,29 +454,31 @@ const importPlaysForWeek = async ({
     if (dry_run) {
       // Helper to format play sample data
       const format_play_sample = (play) => ({
-        playId: play.playId,
-        desc: play.desc ? play.desc.substring(0, 60) + '...' : null,
+        play_id: play.play_id,
+        play_description: play.play_description
+          ? play.play_description.substring(0, 60) + '...'
+          : null,
         dwn: play.dwn,
         ytg: play.yards_to_go,
-        pos_team: play.pos_team,
+        possession_nfl_team: play.possession_nfl_team,
         play_type_nfl: play.play_type_nfl,
-        off: play.off,
-        def: play.def,
+        offense_nfl_team: play.offense_nfl_team,
+        defense_nfl_team: play.defense_nfl_team,
         play_type: play.play_type,
         qb_kneel: play.qb_kneel,
         qb_spike: play.qb_spike,
-        bc_pid: play.bc_pid,
-        psr_pid: play.psr_pid,
-        trg_pid: play.trg_pid
+        ball_carrier_pid: play.ball_carrier_pid,
+        passer_pid: play.passer_pid,
+        target_pid: play.target_pid
       })
 
       // Helper to format play stat sample data
       const format_play_stat_sample = (stat) => ({
-        playId: stat.playId,
-        statId: stat.statId,
-        playerName: stat.playerName,
-        clubCode: stat.clubCode,
-        gsisId: stat.gsisId,
+        play_id: stat.play_id,
+        stat_id: stat.stat_id,
+        player_name: stat.player_name,
+        nfl_team: stat.nfl_team,
+        gsis_player_id: stat.gsis_player_id,
         yards: stat.yards
       })
 
@@ -518,14 +524,14 @@ const importPlaysForWeek = async ({
           // save in final tables
           await db('nfl_play_stats')
             .insert(play_stat_inserts)
-            .onConflict(['esbid', 'playId', 'statId', 'playerName'])
+            .onConflict(['esbid', 'play_id', 'stat_id', 'player_name'])
             .merge()
         }
 
         if (play_inserts.length) {
           await db('nfl_plays')
             .insert(play_inserts)
-            .onConflict(['esbid', 'playId', 'year'])
+            .onConflict(['esbid', 'play_id', 'season_year'])
             .merge()
           result.plays_updated += play_inserts.length
         }
@@ -562,14 +568,14 @@ const importPlaysForWeek = async ({
 
           await db('nfl_play_stats_current_week')
             .insert(play_stat_inserts)
-            .onConflict(['esbid', 'playId', 'statId', 'playerName'])
+            .onConflict(['esbid', 'play_id', 'stat_id', 'player_name'])
             .merge()
         }
 
         if (play_inserts.length) {
           await db('nfl_plays_current_week')
             .insert(play_inserts)
-            .onConflict(['esbid', 'playId'])
+            .onConflict(['esbid', 'play_id'])
             .merge()
         }
       } catch (err) {
@@ -581,15 +587,15 @@ const importPlaysForWeek = async ({
 
   // Log unique missing ESBIDs
   for (const missing_esbid of missing_esbids) {
-    const { esbid, playerName, clubCode } = JSON.parse(missing_esbid)
+    const { esbid, player_name, nfl_team } = JSON.parse(missing_esbid)
     log(
-      `missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`
+      `missing gsisId for esbid: ${esbid}, playerName: ${player_name}, clubCode: ${nfl_team}`
     )
     if (collector) {
       collector.add_player_issue({
         type: 'missing_gsisid',
-        player_name: playerName,
-        team: clubCode,
+        player_name,
+        team: nfl_team,
         identifier: esbid,
         source: 'nfl_v1'
       })

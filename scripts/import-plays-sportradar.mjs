@@ -296,19 +296,19 @@ const map_contextual_data = ({
       sportradar_alias: play.start_situation.possession.alias,
       team_mappings_cache
     })
-    mapped.pos_team = pos_team
-    mapped.off = pos_team
-    mapped.def =
+    mapped.possession_nfl_team = pos_team
+    mapped.offense_nfl_team = pos_team
+    mapped.defense_nfl_team =
       pos_team === game_context.home_team
         ? game_context.away_team
         : game_context.home_team
   }
 
   // Field position
-  if (play.start_situation?.location && mapped.pos_team) {
+  if (play.start_situation?.location && mapped.possession_nfl_team) {
     const start_ydl = parse_yardline(
       play.start_situation.location,
-      mapped.pos_team
+      mapped.possession_nfl_team
     )
     Object.assign(mapped, {
       ydl_side: start_ydl.ydl_side,
@@ -318,8 +318,11 @@ const map_contextual_data = ({
     })
   }
 
-  if (play.end_situation?.location && mapped.pos_team) {
-    const end_ydl = parse_yardline(play.end_situation.location, mapped.pos_team)
+  if (play.end_situation?.location && mapped.possession_nfl_team) {
+    const end_ydl = parse_yardline(
+      play.end_situation.location,
+      mapped.possession_nfl_team
+    )
     mapped.ydl_end = end_ydl.ydl_str
   }
 
@@ -414,38 +417,38 @@ const map_statistics = async ({
     map_passing_stats({
       pass_stats: get_stat('pass'),
       resolve_player,
-      pos_team: mapped_play.pos_team
+      pos_team: mapped_play.possession_nfl_team
     }),
     map_receiving_stats({
       receive_stats: get_stat('receive'),
       resolve_player,
-      pos_team: mapped_play.pos_team
+      pos_team: mapped_play.possession_nfl_team
     }),
     map_rushing_stats({
       rush_stats: get_stat('rush'),
       resolve_player,
-      pos_team: mapped_play.pos_team,
+      pos_team: mapped_play.possession_nfl_team,
       is_sack: mapped_play.sk
     }),
     map_field_goal_stats({
       field_goal_stats: get_stat('field_goal'),
       resolve_player,
-      pos_team: mapped_play.pos_team
+      pos_team: mapped_play.possession_nfl_team
     }),
     map_punt_stats({
       punt_stats: get_stat('punt'),
       resolve_player,
-      pos_team: mapped_play.pos_team
+      pos_team: mapped_play.possession_nfl_team
     }),
     map_kickoff_stats({
       kick_stats: get_stat('kick'),
       resolve_player,
-      pos_team: mapped_play.pos_team
+      pos_team: mapped_play.possession_nfl_team
     }),
     map_return_stats({
       return_stats: get_stat('return'),
       resolve_player,
-      def_team: mapped_play.def
+      def_team: mapped_play.defense_nfl_team
     }),
     map_penalty_stats({
       penalty_stats: get_stats('penalty'),
@@ -457,8 +460,8 @@ const map_statistics = async ({
       statistics: play.statistics || [],
       resolve_player,
       get_team_abbrev,
-      def_team: mapped_play.def,
-      off_team: mapped_play.off
+      def_team: mapped_play.defense_nfl_team,
+      off_team: mapped_play.offense_nfl_team
     })
   ]
 
@@ -515,7 +518,7 @@ const map_sportradar_play_to_nfl_play = async ({
   const fumble_stats =
     play.statistics?.filter((s) => s.stat_type === 'fumble') || []
   if (fumble_stats.length > 0) {
-    mapped.fuml = fumble_stats.some((f) => f.fumble === 1)
+    mapped.fumbles_lost = fumble_stats.some((f) => f.fumble === 1)
   }
 
   // Override play_type to NOPL for nullified plays
@@ -552,8 +555,8 @@ const build_match_criteria = (game_esbid, mapped_play) => {
       criteria.dwn = mapped_play.dwn
       criteria.yards_to_go = mapped_play.yards_to_go
     }
-    criteria.off = mapped_play.off
-    criteria.def = mapped_play.def
+    criteria.offense_nfl_team = mapped_play.offense_nfl_team
+    criteria.defense_nfl_team = mapped_play.defense_nfl_team
   }
 
   if (mapped_play.play_type !== 'KOFF' && mapped_play.play_type !== 'CONV') {
@@ -579,13 +582,13 @@ const build_match_criteria = (game_esbid, mapped_play) => {
         }
       } else {
         // PUNT needs team context
-        criteria.off = mapped_play.off
-        criteria.def = mapped_play.def
+        criteria.offense_nfl_team = mapped_play.offense_nfl_team
+        criteria.defense_nfl_team = mapped_play.defense_nfl_team
       }
     } else {
       // FGXP needs team context
-      criteria.off = mapped_play.off
-      criteria.def = mapped_play.def
+      criteria.offense_nfl_team = mapped_play.offense_nfl_team
+      criteria.defense_nfl_team = mapped_play.defense_nfl_team
       criteria.sec_rem_qtr_tolerance = FUZZY_TIME_TOLERANCE_FGXP
     }
   }
@@ -714,8 +717,8 @@ const log_unresolved_matches = ({
     dwn: mapped_play.dwn,
     yards_to_go: mapped_play.yards_to_go,
     ydl_100: mapped_play.ydl_100,
-    off: mapped_play.off,
-    def: mapped_play.def,
+    offense_nfl_team: mapped_play.offense_nfl_team,
+    defense_nfl_team: mapped_play.defense_nfl_team,
     description: sportradar_play.description
   })
   log('Possible matches:')
@@ -723,7 +726,7 @@ const log_unresolved_matches = ({
   plays_to_log.forEach((item, idx) => {
     const play = item.play || item
     const log_data = {
-      playId: play.playId,
+      play_id: play.play_id,
       play_type: play.play_type,
       qtr: play.qtr,
       game_clock_start: play.game_clock_start,
@@ -731,8 +734,8 @@ const log_unresolved_matches = ({
       dwn: play.dwn,
       yards_to_go: play.yards_to_go,
       ydl_100: play.ydl_100,
-      off: play.off,
-      def: play.def
+      offense_nfl_team: play.offense_nfl_team,
+      defense_nfl_team: play.defense_nfl_team
     }
     if (item.time_diff != null) {
       log_data.time_diff = item.time_diff
@@ -922,7 +925,7 @@ const match_play_to_db = ({
       multiple_match_error = true
     } else {
       log(
-        `Resolved ${matches.length} matches to single play: ${db_play.playId}`
+        `Resolved ${matches.length} matches to single play: ${db_play.play_id}`
       )
     }
   } else if (Array.isArray(matches) && matches.length === 1) {
@@ -999,7 +1002,7 @@ const track_collisions = ({
         new: edit.rhs,
         play_info: {
           esbid: game.esbid,
-          playId: db_play.playId,
+          play_id: db_play.play_id,
           qtr: db_play.qtr,
           game_clock: db_play.game_clock_start,
           play_type: mapped_play.play_type,
@@ -1038,7 +1041,7 @@ const format_unmatched_play_details = (unmatched_plays_details) => {
       log(
         `  Criteria: dwn=${detail.dwn} ytg=${detail.yards_to_go} ydl=${detail.ydl_100}`
       )
-      log(`  Teams: ${detail.off} vs ${detail.def}`)
+      log(`  Teams: ${detail.offense_nfl_team} vs ${detail.defense_nfl_team}`)
       log('')
     }
   }
@@ -1206,7 +1209,7 @@ const process_play = async ({
       const update_time = Date.now() - update_start_time
       if (update_time > PERFORMANCE_THRESHOLD_MS) {
         log(
-          `Slow update_play: ${update_time}ms for play ${game.esbid}-${db_play.playId} (${updates_made} updates)`
+          `Slow update_play: ${update_time}ms for play ${game.esbid}-${db_play.play_id} (${updates_made} updates)`
         )
       }
       if (updates_made > 0) stats.total_plays_updated++
@@ -1242,8 +1245,8 @@ const process_play = async ({
       dwn: mapped_play.dwn,
       yards_to_go: mapped_play.yards_to_go,
       ydl_100: mapped_play.ydl_100,
-      off: mapped_play.off,
-      def: mapped_play.def,
+      offense_nfl_team: mapped_play.offense_nfl_team,
+      defense_nfl_team: mapped_play.defense_nfl_team,
       match_criteria
     })
   }

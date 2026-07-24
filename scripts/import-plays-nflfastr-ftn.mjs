@@ -201,7 +201,7 @@ const run = async ({
 
     result.plays_processed++
     const playId = Number(item.nflverse_play_id)
-    const db_play = find_play({ esbid, playId })
+    const db_play = find_play({ esbid, play_id: playId })
 
     if (db_play) {
       result.plays_matched++

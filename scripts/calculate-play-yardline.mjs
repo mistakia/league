@@ -9,13 +9,27 @@ debug.enable('calculate-play-yardline')
 const calculate_play_yardline = async () => {
   const timestamp = Math.round(new Date() / 1000)
   const plays = await db('nfl_plays')
-    .select('playId', 'esbid', 'ydl_num', 'ydl_side', 'pos_team', 'year')
+    .select(
+      'play_id',
+      'esbid',
+      'ydl_num',
+      'ydl_side',
+      'possession_nfl_team',
+      'season_year'
+    )
     .whereNull('ydl_100')
     .whereNotNull('ydl_num')
   log(`loaded ${plays.length} with missing ydl_100`)
 
   const inserts = []
-  for (const { playId, esbid, ydl_num, ydl_side, pos_team, year } of plays) {
+  for (const {
+    play_id: playId,
+    esbid,
+    ydl_num,
+    ydl_side,
+    possession_nfl_team: pos_team,
+    season_year: year
+  } of plays) {
     let ydl_100
 
     if (ydl_num === 50) {
@@ -26,8 +40,8 @@ const calculate_play_yardline = async () => {
 
     if (ydl_100) {
       inserts.push({
-        year,
-        playId,
+        season_year: year,
+        play_id: playId,
         esbid,
         ydl_100,
         updated: timestamp
@@ -38,7 +52,7 @@ const calculate_play_yardline = async () => {
   if (inserts.length) {
     await db('nfl_plays')
       .insert(inserts)
-      .onConflict(['esbid', 'playId'])
+      .onConflict(['esbid', 'play_id'])
       .merge()
     log(`Updated ${inserts.length} play yardlines`)
   }

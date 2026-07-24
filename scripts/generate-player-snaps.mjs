@@ -61,10 +61,10 @@ const generate_player_snaps_for_week = async ({
   const nfl_snap_rows = await db('nfl_snaps')
     .select(
       'nfl_snaps.esbid',
-      'nfl_snaps.playId',
+      'nfl_snaps.play_id',
       'nfl_snaps.gsis_it_id',
-      'nfl_plays.off',
-      'nfl_plays.def',
+      'nfl_plays.offense_nfl_team',
+      'nfl_plays.defense_nfl_team',
       'nfl_plays.play_type',
       'nfl_plays.ydl_100',
       'nfl_plays.score_diff',
@@ -77,9 +77,9 @@ const generate_player_snaps_for_week = async ({
     )
     .leftJoin('nfl_plays', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid').andOn(
-        'nfl_plays.playId',
+        'nfl_plays.play_id',
         '=',
-        'nfl_snaps.playId'
+        'nfl_snaps.play_id'
       )
     })
     .whereIn('nfl_snaps.esbid', esbids)
@@ -101,9 +101,9 @@ const generate_player_snaps_for_week = async ({
   for (const snap of nfl_snap_rows) {
     const {
       esbid,
-      playId,
-      off,
-      def,
+      play_id: playId,
+      offense_nfl_team: off,
+      defense_nfl_team: def,
       play_type,
       ydl_100,
       score_diff,
@@ -263,10 +263,10 @@ const generate_player_snaps_for_week = async ({
     }
 
     for (const play of player_snap_rows) {
-      const play_key = `${play.esbid}_${play.playId}`
+      const play_key = `${play.esbid}_${play.play_id}`
 
       if (play.play_type === 'PASS' || play.play_type === 'RUSH') {
-        if (play.off === player_gamelog.nfl_team) {
+        if (play.offense_nfl_team === player_gamelog.nfl_team) {
           player_snaps.off.add(play_key)
 
           if (play.play_type === 'PASS') player_snaps.pass.add(play_key)
@@ -299,7 +299,7 @@ const generate_player_snaps_for_week = async ({
           if (play.qtr >= 1 && play.qtr <= 4) {
             player_snaps[`q${play.qtr}_off`].add(play_key)
           }
-        } else if (play.def === player_gamelog.nfl_team) {
+        } else if (play.defense_nfl_team === player_gamelog.nfl_team) {
           player_snaps.def.add(play_key)
 
           // Track quarter-specific defensive snaps (exclude overtime)

@@ -127,8 +127,8 @@ async function process_game({ game, client, stats, dry = false }) {
         try {
           db_play = find_play({
             ...match_criteria,
-            off: mapped_fields.off,
-            def: mapped_fields.def,
+            offense_nfl_team: mapped_fields.offense_nfl_team,
+            defense_nfl_team: mapped_fields.defense_nfl_team,
             return_all_matches: false
           })
         } catch (inner_error) {

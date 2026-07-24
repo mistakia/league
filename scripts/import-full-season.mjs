@@ -1205,9 +1205,9 @@ const import_full_season = async ({
       }
     }
 
-    // Backfill null gsisId on play_stats before aggregation
+    // Backfill null gsis_player_id on play_stats before aggregation
     if (run_processing) {
-      log('=== gsisId Backfill ===')
+      log('=== gsis_player_id Backfill ===')
       await backfill_play_stats_gsisid({ year, dry_run: dry })
       await wait(DELAYS.BETWEEN_STAGES)
     }

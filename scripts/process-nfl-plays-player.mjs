@@ -13,19 +13,19 @@ const process_nfl_plays_player = async () => {
   // load nfl_plays_player rows for current season
   const nfl_plays_player_rows = await db('nfl_plays_player')
     .join('nfl_plays', function () {
-      this.on('nfl_plays_player.playId', '=', 'nfl_plays.playId')
+      this.on('nfl_plays_player.play_id', '=', 'nfl_plays.play_id')
         .andOn('nfl_plays_player.esbid', '=', 'nfl_plays.esbid')
-        .andOn('nfl_plays_player.year', '=', 'nfl_plays.year')
+        .andOn('nfl_plays_player.season_year', '=', 'nfl_plays.season_year')
     })
-    .where({ 'nfl_plays_player.year': current_season.year })
+    .where({ 'nfl_plays_player.season_year': current_season.year })
     .select(
       'nfl_plays_player.gsis_it_id',
-      'nfl_plays_player.gsis_id',
+      'nfl_plays_player.gsis_player_id',
       'nfl_plays_player.player_esbid',
       'nfl_plays_player.first_name',
       'nfl_plays_player.last_name',
-      'nfl_plays.off',
-      'nfl_plays.def'
+      'nfl_plays.offense_nfl_team',
+      'nfl_plays.defense_nfl_team'
     )
     .distinct()
 
@@ -40,7 +40,7 @@ const process_nfl_plays_player = async () => {
         .from('player')
         .whereRaw('player.gsis_it_player_id = nfl_plays_player.gsis_it_id')
     })
-    .where({ year: current_season.year })
+    .where({ season_year: current_season.year })
     .select('gsis_it_id')
     .distinct()
 
@@ -62,10 +62,10 @@ const process_nfl_plays_player = async () => {
     let player_row
 
     // first try to match using gsis_id
-    if (nfl_plays_player_row.gsis_id) {
+    if (nfl_plays_player_row.gsis_player_id) {
       try {
         player_row = await find_player_row({
-          gsis_player_id: nfl_plays_player_row.gsis_id
+          gsis_player_id: nfl_plays_player_row.gsis_player_id
         })
       } catch (err) {
         log(`Error matching player using gsis_id: ${err.message}`)
@@ -93,8 +93,8 @@ const process_nfl_plays_player = async () => {
         player_row = await find_player_row({
           name: `${nfl_plays_player_row.first_name} ${nfl_plays_player_row.last_name}`,
           teams: [
-            nfl_plays_player_row.off,
-            nfl_plays_player_row.def,
+            nfl_plays_player_row.offense_nfl_team,
+            nfl_plays_player_row.defense_nfl_team,
             'INA'
           ].filter(Boolean)
         })
@@ -109,9 +109,10 @@ const process_nfl_plays_player = async () => {
         gsis_it_id,
         name: `${nfl_plays_player_row.first_name} ${nfl_plays_player_row.last_name}`,
         esbid: nfl_plays_player_row.player_esbid,
-        teams: [nfl_plays_player_row.off, nfl_plays_player_row.def].filter(
-          Boolean
-        )
+        teams: [
+          nfl_plays_player_row.offense_nfl_team,
+          nfl_plays_player_row.defense_nfl_team
+        ].filter(Boolean)
       }
       no_player_found.add(JSON.stringify(player_info))
       continue

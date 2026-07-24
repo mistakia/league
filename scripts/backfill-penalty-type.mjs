@@ -30,7 +30,14 @@ const backfill_penalty_type = async ({
   // Only process enforced penalties (pen_team IS NOT NULL)
   // Declined penalties have pen_team = NULL and don't need penalty_type
   let query = db(table_name)
-    .select('esbid', 'playId', 'desc', 'desc_nflfastr', 'pen_team', 'off')
+    .select(
+      'esbid',
+      'play_id',
+      'play_description',
+      'desc_nflfastr',
+      'pen_team',
+      'offense_nfl_team'
+    )
     .where('penalty', true)
     .whereNotNull('pen_team')
 
@@ -52,22 +59,22 @@ const backfill_penalty_type = async ({
   const updates = []
   for (const play of penalty_plays) {
     const penalty_type = get_canonical_penalty_type({
-      desc: play.desc,
+      desc: play.play_description,
       desc_nflfastr: play.desc_nflfastr,
       pen_team: play.pen_team,
-      off_team: play.off
+      off_team: play.offense_nfl_team
     })
 
     if (penalty_type) {
       updates.push({
         esbid: play.esbid,
-        playId: play.playId,
+        play_id: play.play_id,
         penalty_type
       })
     } else {
       result.plays_failed += 1
       log(
-        `Failed to extract penalty type for play ${play.esbid}:${play.playId}`
+        `Failed to extract penalty type for play ${play.esbid}:${play.play_id}`
       )
     }
   }
@@ -82,7 +89,7 @@ const backfill_penalty_type = async ({
     log(`Sample of ${sample_size} updates:`)
     for (let i = 0; i < sample_size; i++) {
       log(
-        `  ${updates[i].esbid}:${updates[i].playId} -> ${updates[i].penalty_type}`
+        `  ${updates[i].esbid}:${updates[i].play_id} -> ${updates[i].penalty_type}`
       )
     }
 
@@ -113,8 +120,8 @@ const backfill_penalty_type = async ({
 
     for (const chunk of update_chunks) {
       await Promise.all(
-        chunk.map(({ esbid, playId, penalty_type }) =>
-          trx(table_name).where({ esbid, playId }).update({ penalty_type })
+        chunk.map(({ esbid, play_id, penalty_type }) =>
+          trx(table_name).where({ esbid, play_id }).update({ penalty_type })
         )
       )
       log(`Updated ${chunk.length} plays`)

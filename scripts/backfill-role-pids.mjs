@@ -16,14 +16,14 @@ import {
 
 // Surgical backfill for the psr/trg family-gate regression (Phase B, commit
 // 01dece89). Re-runs ONLY player-identification enrichment and persists ONLY
-// the passer/target role columns, so it corrects the wiped trg_pid/psr_pid on
+// the passer/target role columns, so it corrects the wiped target_pid/passer_pid on
 // 2023+ reprocessed seasons WITHOUT the broad tackle/EPA churn a full
 // process-plays reprocess would introduce. See
 // libs-server/play-enrichment/player-identification-enrichment.mjs.
 const log = debug('backfill-role-pids')
 debug.enable('backfill-role-pids')
 
-const ROLE_COLS = ['psr_gsis', 'psr_pid', 'trg_gsis', 'trg_pid']
+const ROLE_COLS = ['psr_gsis', 'passer_pid', 'trg_gsis', 'target_pid']
 
 const norm = (v) => (v === undefined ? null : v)
 
@@ -36,24 +36,24 @@ const backfill_week = async ({ year, week, seas_type, dry_run }) => {
 
   const plays = await db('nfl_plays')
     .select('*')
-    .where({ year, week, seas_type })
+    .where({ season_year: year, week, season_type: seas_type })
     .whereIn('esbid', completed)
 
   const enriched = enrich_player_identifications(plays, filtered, player_cache)
 
   const by_key = new Map()
-  for (const p of plays) by_key.set(`${p.esbid}-${p.playId}`, p)
+  for (const p of plays) by_key.set(`${p.esbid}-${p.play_id}`, p)
 
   const updates = []
   for (const ep of enriched) {
-    const cur = by_key.get(`${ep.esbid}-${ep.playId}`)
+    const cur = by_key.get(`${ep.esbid}-${ep.play_id}`)
     if (!cur) continue
     const changed = {}
     for (const col of ROLE_COLS) {
       if (norm(ep[col]) !== norm(cur[col])) changed[col] = norm(ep[col])
     }
     if (Object.keys(changed).length) {
-      updates.push({ esbid: ep.esbid, playId: ep.playId, changed })
+      updates.push({ esbid: ep.esbid, play_id: ep.play_id, changed })
     }
   }
 
@@ -62,7 +62,7 @@ const backfill_week = async ({ year, week, seas_type, dry_run }) => {
       await db.transaction(async (trx) => {
         for (const u of part) {
           await trx('nfl_plays')
-            .where({ esbid: u.esbid, playId: u.playId })
+            .where({ esbid: u.esbid, play_id: u.play_id })
             .update(u.changed)
         }
       })
@@ -88,19 +88,19 @@ const main = async () => {
   await preload_active_players({ all_players: true })
 
   const rows = await db('nfl_plays')
-    .select('year', 'seas_type', 'week')
-    .where('year', '>=', argv.start)
-    .where('year', '<=', argv.end)
-    .groupBy('year', 'seas_type', 'week')
+    .select('season_year', 'season_type', 'week')
+    .where('season_year', '>=', argv.start)
+    .where('season_year', '<=', argv.end)
+    .groupBy('season_year', 'season_type', 'week')
     .orderBy([
-      { column: 'year', order: 'asc' },
-      { column: 'seas_type', order: 'asc' },
+      { column: 'season_year', order: 'asc' },
+      { column: 'season_type', order: 'asc' },
       { column: 'week', order: 'asc' }
     ])
 
   let total_plays = 0
   let total_updates = 0
-  for (const { year, seas_type, week } of rows) {
+  for (const { season_year: year, season_type: seas_type, week } of rows) {
     const { plays, updates } = await backfill_week({
       year,
       week,

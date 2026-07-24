@@ -14,19 +14,20 @@ const initialize_cli = () => {
 const log = debug('create-season-partitions')
 debug.enable('create-season-partitions')
 
-// partition_column: the range-partition key column. projections_index has been
-// conformed to season_year; the other three keep plain `year` until the schema-wide
-// year-sweep renames them.
+// partition_column: the range-partition key column. Every table here is now
+// partitioned by season_year -- verified against pg_get_partkeydef. player_gamelogs
+// was conformed by an earlier cluster but this list was not updated with it, so it
+// still named `year`; left uncorrected it would have failed the next season rollover.
 const PARTITIONED_TABLES = [
   {
     parent_table: 'nfl_plays',
     partition_prefix: 'nfl_plays_year_',
-    partition_column: 'year'
+    partition_column: 'season_year'
   },
   {
     parent_table: 'player_gamelogs',
     partition_prefix: 'player_gamelogs_year_',
-    partition_column: 'year'
+    partition_column: 'season_year'
   },
   {
     parent_table: 'projections_index',
@@ -37,7 +38,7 @@ const PARTITIONED_TABLES = [
   {
     parent_table: 'nfl_snaps',
     partition_prefix: 'nfl_snaps_year_',
-    partition_column: 'year'
+    partition_column: 'season_year'
   }
 ]
 

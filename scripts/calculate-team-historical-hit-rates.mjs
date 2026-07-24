@@ -91,7 +91,7 @@ const get_team_yardage_markets = async ({ year, current_week_only }) => {
     )
     .whereNotNull('prop_markets_index.esbid')
     .whereNotNull('prop_market_selections_index.selection_pid')
-    .where('prop_markets_index.year', year)
+    .where('prop_markets_index.season_year', year)
     .whereIn('prop_markets_index.market_type', TEAM_YARDAGE_MARKET_TYPES)
     .join('prop_markets_index', function () {
       this.on(
@@ -131,18 +131,18 @@ const get_team_yardage_markets = async ({ year, current_week_only }) => {
 
 const aggregate_team_game_yards = async ({ teams }) => {
   const plays = await db('nfl_plays')
-    .select('esbid', 'off', 'qtr', 'rush_yds', 'recv_yds')
-    .whereIn('off', teams)
+    .select('esbid', 'offense_nfl_team', 'qtr', 'rush_yds', 'recv_yds')
+    .whereIn('offense_nfl_team', teams)
     .whereNot('play_type', 'NOPL')
 
   const aggregated = {}
 
   for (const play of plays) {
-    const key = `${play.esbid}:${play.off}`
+    const key = `${play.esbid}:${play.offense_nfl_team}`
     if (!aggregated[key]) {
       aggregated[key] = {
         esbid: play.esbid,
-        team: play.off,
+        team: play.offense_nfl_team,
         full_game: { rushing: 0, receiving: 0, total: 0 },
         first_half: { rushing: 0, receiving: 0, total: 0 },
         first_quarter: { rushing: 0, receiving: 0, total: 0 }

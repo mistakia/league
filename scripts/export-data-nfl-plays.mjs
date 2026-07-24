@@ -19,14 +19,14 @@ const log = debug('export-data-nfl-plays')
 debug.enable('export-data-nfl-plays')
 const nfl_play_fields = [
   'esbid',
-  'playId',
+  'play_id',
   'sequence',
   'state',
 
   'dwn',
   'qtr',
 
-  'desc',
+  'play_description',
   'desc_nflfastr',
 
   'ydl_num',
@@ -89,11 +89,11 @@ const nfl_play_fields = [
   'sec_rem_half',
   'sec_rem_gm',
 
-  'pos_team',
-  'pos_team_id',
+  'possession_nfl_team',
+  'possession_nfl_team_id',
 
-  'off',
-  'def',
+  'offense_nfl_team',
+  'defense_nfl_team',
 
   'review',
 
@@ -105,20 +105,20 @@ const nfl_play_fields = [
 
   'player_fuml_pid',
   'player_fuml_gsis',
-  'bc_pid',
+  'ball_carrier_pid',
   'bc_gsis',
-  'psr_pid',
+  'passer_pid',
   'psr_gsis',
-  'trg_pid',
+  'target_pid',
   'trg_gsis',
-  'intp_pid',
+  'interceptor_pid',
   'intp_gsis',
 
   'yds_gained',
 
   'fum',
-  'fuml',
-  'int',
+  'fumbles_lost',
+  'interceptions',
   'sk',
   'successful_play',
   'comp',
@@ -301,8 +301,8 @@ const nfl_play_fields = [
   'away_to_rem',
   'pos_to_rem',
   'def_to_rem',
-  'to',
-  'to_team',
+  'timeouts',
+  'timeout_team',
 
   'home_score',
   'away_score',
@@ -352,7 +352,7 @@ const export_data_nfl_plays = async ({
     const plays = await db(plays_table)
       .select('*')
       .where({ esbid })
-      .orderBy('playId', 'asc')
+      .orderBy('play_id', 'asc')
     data.push(...plays)
   }
   log(`loaded ${data.length} plays`)
@@ -411,10 +411,10 @@ const main = async () => {
       years = [target_year]
     } else {
       const years_query_results = await db('nfl_plays')
-        .select('year')
-        .groupBy('year')
-        .orderBy('year', 'asc')
-      years = years_query_results.map((r) => r.year)
+        .select('season_year')
+        .groupBy('season_year')
+        .orderBy('season_year', 'asc')
+      years = years_query_results.map((r) => r.season_year)
     }
 
     const seas_types = ['PRE', 'REG', 'POST']

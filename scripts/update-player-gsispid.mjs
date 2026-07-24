@@ -17,18 +17,22 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
   const query = db('nfl_play_stats')
     .select(
       'player.pid',
-      'nfl_play_stats.gsisId',
-      'nfl_play_stats.gsispid',
+      'nfl_play_stats.gsis_player_id',
+      'nfl_play_stats.smart_player_id',
       'player.smart_player_id as player_gsispid',
       'player.gsis_player_id as player_gsisid'
     )
-    .leftJoin('player', 'player.gsis_player_id', 'nfl_play_stats.gsisId')
-    .whereNotNull('nfl_play_stats.playerName')
-    .whereNotNull('nfl_play_stats.gsisId')
+    .leftJoin(
+      'player',
+      'player.gsis_player_id',
+      'nfl_play_stats.gsis_player_id'
+    )
+    .whereNotNull('nfl_play_stats.player_name')
+    .whereNotNull('nfl_play_stats.gsis_player_id')
     .groupBy(
-      'nfl_play_stats.gsispid',
+      'nfl_play_stats.smart_player_id',
       'player.pid',
-      'nfl_play_stats.gsisId',
+      'nfl_play_stats.gsis_player_id',
       'player.smart_player_id',
       'player.gsis_player_id'
     )
@@ -54,7 +58,7 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
   for (const play_stat of play_stats) {
     if (play_stat.pid) {
       if (play_stat.player_gsispid) {
-        if (play_stat.player_gsispid !== play_stat.gsispid) {
+        if (play_stat.player_gsispid !== play_stat.smart_player_id) {
           result_join_gsisid.mismatch.push(play_stat)
         } else {
           result_join_gsisid.correct.push(play_stat)
@@ -68,14 +72,18 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
   }
 
   if (!dry && result_join_gsisid.mismatch.length) {
-    for (const { pid, gsisId, player_gsispid } of result_join_gsisid.mismatch) {
+    for (const {
+      pid,
+      gsis_player_id,
+      player_gsispid
+    } of result_join_gsisid.mismatch) {
       const results = await db('nfl_play_stats')
         .count('* as count')
-        .select('gsispId')
-        .where({ gsisid: gsisId })
-        .groupBy('gsispId')
+        .select('smart_player_id')
+        .where({ gsis_player_id })
+        .groupBy('smart_player_id')
         .orderBy('count', 'desc')
-      const value = results[0].gsispId
+      const value = results[0].smart_player_id
 
       if (value === player_gsispid) {
         // skip, player gsispid matches most common pairing with play_stats, mismatch likely amonst play_stats
@@ -95,14 +103,18 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
   }
 
   if (!dry && result_join_gsisid.update.length) {
-    for (const { pid, gsisId, player_gsispid } of result_join_gsisid.update) {
+    for (const {
+      pid,
+      gsis_player_id,
+      player_gsispid
+    } of result_join_gsisid.update) {
       const results = await db('nfl_play_stats')
         .count('* as count')
-        .select('gsispId')
-        .where({ gsisid: gsisId })
-        .groupBy('gsispId')
+        .select('smart_player_id')
+        .where({ gsis_player_id })
+        .groupBy('smart_player_id')
         .orderBy('count', 'desc')
-      const value = results[0].gsispId
+      const value = results[0].smart_player_id
 
       if (value === player_gsispid) {
         // skip, player gsispid matches most common pairing with play_stats, mismatch likely amonst play_stats
@@ -122,23 +134,29 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
   }
 
   if (result_join_gsisid.missing_player.length) {
-    const gsisids = result_join_gsisid.missing_player.map((r) => r.gsisId)
+    const gsisids = result_join_gsisid.missing_player.map(
+      (r) => r.gsis_player_id
+    )
     const missing_play_stats = await db('nfl_play_stats')
       .select(
         'player.pid',
-        'nfl_play_stats.gsisId',
-        'nfl_play_stats.gsispid',
+        'nfl_play_stats.gsis_player_id',
+        'nfl_play_stats.smart_player_id',
         'player.smart_player_id as player_gsispid',
         'player.gsis_player_id as player_gsisid'
       )
-      .leftJoin('player', 'player.smart_player_id', 'nfl_play_stats.gsispid')
-      .whereNotNull('nfl_play_stats.playerName')
-      .whereNotNull('nfl_play_stats.gsispid')
-      .whereIn('nfl_play_stats.gsisId', gsisids)
+      .leftJoin(
+        'player',
+        'player.smart_player_id',
+        'nfl_play_stats.smart_player_id'
+      )
+      .whereNotNull('nfl_play_stats.player_name')
+      .whereNotNull('nfl_play_stats.smart_player_id')
+      .whereIn('nfl_play_stats.gsis_player_id', gsisids)
       .groupBy(
-        'nfl_play_stats.gsisId',
+        'nfl_play_stats.gsis_player_id',
         'player.pid',
-        'nfl_play_stats.gsispid',
+        'nfl_play_stats.smart_player_id',
         'player.smart_player_id',
         'player.gsis_player_id'
       )
@@ -146,7 +164,7 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
     for (const play_stat of missing_play_stats) {
       if (play_stat.pid) {
         if (play_stat.player_gsisid) {
-          if (play_stat.player_gsisid !== play_stat.gsisId) {
+          if (play_stat.player_gsisid !== play_stat.gsis_player_id) {
             result_join_gsispid.mismatch.push(play_stat)
           } else {
             result_join_gsispid.correct.push(play_stat)
@@ -162,16 +180,16 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
     if (!dry && result_join_gsispid.update.length) {
       for (const {
         pid,
-        gsispid,
+        smart_player_id,
         player_gsisid
       } of result_join_gsispid.update) {
         const results = await db('nfl_play_stats')
           .count('* as count')
-          .select('gsisId')
-          .where({ gsispid })
-          .groupBy('gsisId')
+          .select('gsis_player_id')
+          .where({ smart_player_id })
+          .groupBy('gsis_player_id')
           .orderBy('count', 'desc')
-        const value = results[0].gsisId
+        const value = results[0].gsis_player_id
 
         if (value === player_gsisid) {
           // skip, player gsisid matches most common pairing with play_stats, mismatch likely amonst play_stats

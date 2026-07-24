@@ -31,14 +31,14 @@ const CACHE_TTL_ONE_WEEK = 7 * 24 * 60 * 60
 // but this is for the historical nfl_plays table (not nfl_plays_current_week)
 const HISTORICAL_PLAYS_FIELDS = [
   'nfl_plays.esbid',
-  'nfl_plays.playId',
+  'nfl_plays.play_id',
   'nfl_plays.sequence',
   'nfl_plays.dwn',
-  'nfl_plays.desc',
-  'nfl_plays.pos_team',
-  'nfl_plays.off',
-  'nfl_plays.def',
-  'nfl_plays.year',
+  'nfl_plays.play_description',
+  'nfl_plays.possession_nfl_team',
+  'nfl_plays.offense_nfl_team',
+  'nfl_plays.defense_nfl_team',
+  'nfl_plays.season_year',
   'nfl_plays.week',
   'nfl_plays.qtr',
   'nfl_plays.yards_to_go',
@@ -48,7 +48,7 @@ const HISTORICAL_PLAYS_FIELDS = [
   'nfl_plays.first_down',
   'nfl_plays.goal_to_go',
   'nfl_plays.drive_play_count',
-  'nfl_plays.timestamp',
+  'nfl_plays.play_time_of_day',
   'nfl_plays.play_type_nfl',
   'nfl_plays.updated',
   'nfl_plays.qb_kneel',
@@ -94,9 +94,9 @@ function build_historical_plays_query({ db, year, week, seas_type = 'REG' }) {
   return db('nfl_plays')
     .select(HISTORICAL_PLAYS_FIELDS)
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
-    .where('nfl_plays.year', year)
+    .where('nfl_plays.season_year', year)
     .where('nfl_plays.week', week)
-    .where('nfl_plays.seas_type', seas_type)
+    .where('nfl_plays.season_type', seas_type)
 }
 
 /**
@@ -116,13 +116,13 @@ function build_current_week_play_stats_query({ db }) {
         '=',
         'nfl_plays_current_week.esbid'
       ).andOn(
-        'nfl_play_stats_current_week.playId',
+        'nfl_play_stats_current_week.play_id',
         '=',
-        'nfl_plays_current_week.playId'
+        'nfl_plays_current_week.play_id'
       )
     })
-    .where('nfl_plays_current_week.year', current_season.year)
-    .where('nfl_plays_current_week.seas_type', current_season.nfl_seas_type)
+    .where('nfl_plays_current_week.season_year', current_season.year)
+    .where('nfl_plays_current_week.season_type', current_season.nfl_seas_type)
     .where('nfl_play_stats_current_week.valid', true)
 }
 
@@ -144,14 +144,14 @@ function build_historical_play_stats_query({
     )
     .leftJoin('nfl_plays', function () {
       this.on('nfl_play_stats.esbid', '=', 'nfl_plays.esbid').andOn(
-        'nfl_play_stats.playId',
+        'nfl_play_stats.play_id',
         '=',
-        'nfl_plays.playId'
+        'nfl_plays.play_id'
       )
     })
-    .where('nfl_plays.year', year)
+    .where('nfl_plays.season_year', year)
     .where('nfl_plays.week', week)
-    .where('nfl_plays.seas_type', seas_type)
+    .where('nfl_plays.season_type', seas_type)
     .where('nfl_play_stats.valid', true)
 }
 
@@ -241,12 +241,12 @@ function get_cache_ttl_for_season_type() {
  *                 summary: Sample current week plays
  *                 value:
  *                   - esbid: "2024120801"
- *                     playId: 1
- *                     year: 2024
+ *                     play_id: 1
+ *                     season_year: 2024
  *                     week: 13
- *                     seas_type: "REG"
- *                     off: "KC"
- *                     def: "LV"
+ *                     season_type: "REG"
+ *                     offense_nfl_team: "KC"
+ *                     defense_nfl_team: "LV"
  *                     down: 1
  *                     yards_to_go: 10
  *                     yfog: 25
@@ -264,9 +264,9 @@ router.get('/?', async (req, res) => {
 
     const query = is_current_week({ week, year, seas_type })
       ? getPlayByPlayQuery(db)
-          .where('nfl_plays_current_week.year', current_season.year)
+          .where('nfl_plays_current_week.season_year', current_season.year)
           .where(
-            'nfl_plays_current_week.seas_type',
+            'nfl_plays_current_week.season_type',
             current_season.nfl_seas_type
           )
       : build_historical_plays_query({ db, year, week, seas_type })
@@ -304,12 +304,12 @@ router.get('/?', async (req, res) => {
  *                 summary: Sample season plays
  *                 value:
  *                   - esbid: "2024120801"
- *                     playId: 1
- *                     year: 2024
+ *                     play_id: 1
+ *                     season_year: 2024
  *                     week: 13
- *                     seas_type: "REG"
- *                     off: "KC"
- *                     def: "LV"
+ *                     season_type: "REG"
+ *                     offense_nfl_team: "KC"
+ *                     defense_nfl_team: "LV"
  *                     down: 1
  *                     yards_to_go: 10
  *                     yfog: 25
@@ -331,8 +331,8 @@ router.get('/all', async (req, res) => {
 
     if (!data) {
       data = await db('nfl_plays')
-        .where('nfl_plays.year', year)
-        .where('nfl_plays.seas_type', seas_type)
+        .where('nfl_plays.season_year', year)
+        .where('nfl_plays.season_type', seas_type)
 
       await redis_cache.set(cache_key, data, CACHE_TTL_15_MINUTES)
     }
@@ -379,7 +379,7 @@ router.get('/all', async (req, res) => {
  *                 summary: Sample play statistics
  *                 value:
  *                   - esbid: "2024120801"
- *                     playId: 1
+ *                     play_id: 1
  *                     week: 13
  *                     pid: "PATR-MAHO-005785"
  *                     stat_type: "PASSING"
@@ -495,7 +495,7 @@ router.get('/stats', async (req, res) => {
  *                     week: 13
  *                     day: "Sunday"
  *                     seas_type: "REG"
- *                     off: "KC"
+ *                     offense_nfl_team: "KC"
  *                     def: "LV"
  *                     down: 1
  *                     yards_to_go: 10
@@ -503,7 +503,7 @@ router.get('/stats', async (req, res) => {
  *                     qtr: 1
  *                     play_type: "RUSH"
  *                     yards_gained: 7
- *                     bc_pid: "PATR-MAHO-005785"
+ *                     ball_carrier_pid: "PATR-MAHO-005785"
  *                     rush_yds: 7
  *                     first_down: false
  *                     successful_play: true
@@ -565,7 +565,10 @@ router.get('/charted', async (req, res) => {
         return res.status(404).send({ error: 'player not found' })
       }
       const player_row = player_rows[0]
-      query = query.where('nfl_plays.off', player_row.current_nfl_team)
+      query = query.where(
+        'nfl_plays.offense_nfl_team',
+        player_row.current_nfl_team
+      )
     }
 
     // Apply filters

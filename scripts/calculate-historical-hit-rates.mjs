@@ -109,7 +109,7 @@ const calculate_historical_hit_rates = async ({
     )
     .whereNotNull('prop_market_selections_index.selection_pid')
     .whereNotNull('prop_markets_index.esbid')
-    .where('prop_markets_index.year', year)
+    .where('prop_markets_index.season_year', year)
     .join('prop_markets_index', function () {
       this.on(
         'prop_markets_index.source_id',
@@ -203,9 +203,9 @@ const calculate_historical_hit_rates = async ({
       'pass_yds',
       'recv_yds',
       'rush_yds',
-      'psr_pid',
-      'trg_pid',
-      'bc_pid'
+      'passer_pid',
+      'target_pid',
+      'ball_carrier_pid'
     )
     .whereIn(
       'esbid',
@@ -221,25 +221,28 @@ const calculate_historical_hit_rates = async ({
         acc[play.esbid] = {}
       }
 
-      ;[play.psr_pid, play.bc_pid, play.trg_pid].forEach((pid) => {
-        if (!pid) return
-        if (!acc[play.esbid][pid]) {
-          acc[play.esbid][pid] = {
-            passing_yards: 0,
-            rushing_yards: 0,
-            receiving_yards: 0
+      ;[play.passer_pid, play.ball_carrier_pid, play.target_pid].forEach(
+        (pid) => {
+          if (!pid) return
+          if (!acc[play.esbid][pid]) {
+            acc[play.esbid][pid] = {
+              passing_yards: 0,
+              rushing_yards: 0,
+              receiving_yards: 0
+            }
           }
         }
-      })
+      )
 
-      if (play.psr_pid) {
-        acc[play.esbid][play.psr_pid].passing_yards += play.pass_yds || 0
+      if (play.passer_pid) {
+        acc[play.esbid][play.passer_pid].passing_yards += play.pass_yds || 0
       }
-      if (play.bc_pid) {
-        acc[play.esbid][play.bc_pid].rushing_yards += play.rush_yds || 0
+      if (play.ball_carrier_pid) {
+        acc[play.esbid][play.ball_carrier_pid].rushing_yards +=
+          play.rush_yds || 0
       }
-      if (play.trg_pid) {
-        acc[play.esbid][play.trg_pid].receiving_yards += play.recv_yds || 0
+      if (play.target_pid) {
+        acc[play.esbid][play.target_pid].receiving_yards += play.recv_yds || 0
       }
 
       return acc
@@ -254,9 +257,9 @@ const calculate_historical_hit_rates = async ({
       'pass_yds',
       'recv_yds',
       'rush_yds',
-      'psr_pid',
-      'trg_pid',
-      'bc_pid'
+      'passer_pid',
+      'target_pid',
+      'ball_carrier_pid'
     )
     .whereIn(
       'esbid',
@@ -271,25 +274,27 @@ const calculate_historical_hit_rates = async ({
       acc[play.esbid] = {}
     }
 
-    ;[play.psr_pid, play.bc_pid, play.trg_pid].forEach((pid) => {
-      if (!pid) return
-      if (!acc[play.esbid][pid]) {
-        acc[play.esbid][pid] = {
-          passing_yards: 0,
-          rushing_yards: 0,
-          receiving_yards: 0
+    ;[play.passer_pid, play.ball_carrier_pid, play.target_pid].forEach(
+      (pid) => {
+        if (!pid) return
+        if (!acc[play.esbid][pid]) {
+          acc[play.esbid][pid] = {
+            passing_yards: 0,
+            rushing_yards: 0,
+            receiving_yards: 0
+          }
         }
       }
-    })
+    )
 
-    if (play.psr_pid) {
-      acc[play.esbid][play.psr_pid].passing_yards += play.pass_yds || 0
+    if (play.passer_pid) {
+      acc[play.esbid][play.passer_pid].passing_yards += play.pass_yds || 0
     }
-    if (play.bc_pid) {
-      acc[play.esbid][play.bc_pid].rushing_yards += play.rush_yds || 0
+    if (play.ball_carrier_pid) {
+      acc[play.esbid][play.ball_carrier_pid].rushing_yards += play.rush_yds || 0
     }
-    if (play.trg_pid) {
-      acc[play.esbid][play.trg_pid].receiving_yards += play.recv_yds || 0
+    if (play.target_pid) {
+      acc[play.esbid][play.target_pid].receiving_yards += play.recv_yds || 0
     }
 
     return acc

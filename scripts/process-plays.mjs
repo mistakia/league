@@ -29,7 +29,7 @@ debug.enable('process-plays')
 // Build a week-accurate participation roster for the given games from nfl_snaps
 // (who was actually on the field), keyed esbid -> Map(normalized player name ->
 // [{ pid, gsisid }]). Consumed by enrich_player_identifications to recover the
-// actor on role stat rows whose gsisId the NFL feed left NULL, without mutating
+// actor on role stat rows whose gsis_player_id the NFL feed left NULL, without mutating
 // the NFL-owned nfl_play_stats table. See
 // user:text/league/data-quality-and-validation.md.
 const build_snap_roster_by_esbid = async (esbids) => {
@@ -59,13 +59,13 @@ const build_snap_roster_by_esbid = async (esbids) => {
 }
 
 const ENRICHED_FIELD_NAMES = [
-  'off',
-  'def',
+  'offense_nfl_team',
+  'defense_nfl_team',
   'play_type',
-  'bc_pid',
-  'psr_pid',
-  'trg_pid',
-  'intp_pid',
+  'ball_carrier_pid',
+  'passer_pid',
+  'target_pid',
+  'interceptor_pid',
   'player_fuml_pid',
   'penalty_player_pid',
   'solo_tackle_1_pid',
@@ -118,13 +118,13 @@ const role_clearable_fields = new Set([
   'tackle_assist_3_gsis',
   'tackle_assist_4_pid',
   'tackle_assist_4_gsis',
-  'bc_pid',
+  'ball_carrier_pid',
   'bc_gsis',
-  'psr_pid',
+  'passer_pid',
   'psr_gsis',
-  'trg_pid',
+  'target_pid',
   'trg_gsis',
-  'intp_pid',
+  'interceptor_pid',
   'intp_gsis',
   'player_fuml_pid',
   'player_fuml_gsis'
@@ -212,9 +212,9 @@ const process_plays = async ({
 
   const plays = await db('nfl_plays')
     .select('nfl_plays.*')
-    .where('nfl_plays.year', year)
+    .where('nfl_plays.season_year', year)
     .where('nfl_plays.week', week)
-    .where('nfl_plays.seas_type', seas_type)
+    .where('nfl_plays.season_type', seas_type)
     .whereIn('nfl_plays.esbid', completed_game_esbids)
 
   const games = await db('nfl_games').whereIn('esbid', completed_game_esbids)
@@ -227,7 +227,7 @@ const process_plays = async ({
 
   // Build the week-accurate snap-participation roster for these games so
   // enrichment can recover ball-carrier/passer/etc. identity on rows where the
-  // NFL feed emitted the role stat with a NULL gsisId. esbid -> Map(normalized
+  // NFL feed emitted the role stat with a NULL gsis_player_id. esbid -> Map(normalized
   // player name -> [{ pid, gsisid }]). See
   // user:text/league/data-quality-and-validation.md.
   const snap_roster_by_esbid = await build_snap_roster_by_esbid(
@@ -248,7 +248,7 @@ const process_plays = async ({
   // Build lookup map from already-fetched plays (eliminates N+1 queries)
   const plays_map = new Map()
   for (const play of plays) {
-    plays_map.set(`${play.esbid}-${play.playId}`, play)
+    plays_map.set(`${play.esbid}-${play.play_id}`, play)
   }
 
   log('Computing play changes')
@@ -259,7 +259,7 @@ const process_plays = async ({
 
   for (const enriched_play of enriched_plays) {
     const current_play = plays_map.get(
-      `${enriched_play.esbid}-${enriched_play.playId}`
+      `${enriched_play.esbid}-${enriched_play.play_id}`
     )
 
     if (!current_play) {
@@ -283,7 +283,7 @@ const process_plays = async ({
     if (changes_count > 0) {
       all_play_updates.push({
         esbid: enriched_play.esbid,
-        playId: enriched_play.playId,
+        play_id: enriched_play.play_id,
         field_updates
       })
 
@@ -301,8 +301,8 @@ const process_plays = async ({
   if (dry_run) {
     const sample_updates = all_play_updates.slice(0, 5)
     log(`\n=== DRY RUN - Sample of ${sample_updates.length} play updates ===`)
-    for (const { esbid, playId, field_updates } of sample_updates) {
-      log(`\nPlay ${esbid}-${playId}:`)
+    for (const { esbid, play_id, field_updates } of sample_updates) {
+      log(`\nPlay ${esbid}-${play_id}:`)
       log(JSON.stringify(field_updates, null, 2))
     }
     log(`\n=== END DRY RUN SAMPLE ===\n`)
@@ -341,8 +341,8 @@ const process_plays = async ({
 
       for (const chunk of update_chunks) {
         await Promise.all(
-          chunk.map(({ esbid, playId, field_updates }) =>
-            trx('nfl_plays').where({ esbid, playId }).update(field_updates)
+          chunk.map(({ esbid, play_id, field_updates }) =>
+            trx('nfl_plays').where({ esbid, play_id }).update(field_updates)
           )
         )
       }
@@ -396,7 +396,7 @@ const initialize_cli = () => {
       type: 'boolean',
       default: true,
       describe:
-        'Include all players (retired/free agents) in cache. Default true to avoid silent NULL bc_pid/psr_pid/trg_pid on plays whose player is currently INA. See user:text/league/data-quality-and-validation.md.'
+        'Include all players (retired/free agents) in cache. Default true to avoid silent NULL ball_carrier_pid/passer_pid/target_pid on plays whose player is currently INA. See user:text/league/data-quality-and-validation.md.'
     })
     .parse()
 }
@@ -420,11 +420,11 @@ const main = async () => {
     if (argv.all) {
       log('processing all plays')
       const results = await db('nfl_plays')
-        .select('year')
-        .groupBy('year')
-        .orderBy('year', 'desc')
+        .select('season_year')
+        .groupBy('season_year')
+        .orderBy('season_year', 'desc')
 
-      let years = results.map((r) => r.year)
+      let years = results.map((r) => r.season_year)
       if (argv.start) {
         years = years.filter((year) => year >= argv.start)
       }
@@ -435,7 +435,7 @@ const main = async () => {
         for (const seas_type of nfl_season_types) {
           const weeks = await db('nfl_plays')
             .select('week')
-            .where({ year, seas_type })
+            .where({ season_year: year, season_type: seas_type })
             .groupBy('week')
             .orderBy('week', 'asc')
           log(
@@ -459,7 +459,7 @@ const main = async () => {
     } else if (year && !week) {
       const weeks = await db('nfl_plays')
         .select('week')
-        .where({ year, seas_type })
+        .where({ season_year: year, season_type: seas_type })
         .groupBy('week')
       log(`processing plays for ${year} ${seas_type}: ${weeks.length} weeks`)
       for (const { week } of weeks) {

@@ -1320,12 +1320,12 @@ const options = {
               description: 'Game ID in format YYYYMMDDHH',
               example: '2024120801'
             },
-            playId: {
+            play_id: {
               type: 'integer',
               description: 'Unique play identifier within the game',
               example: 1
             },
-            year: {
+            season_year: {
               type: 'integer',
               description: 'Season year',
               example: 2024
@@ -1335,15 +1335,15 @@ const options = {
               description: 'Week number',
               example: 13
             },
-            seas_type: {
+            season_type: {
               $ref: '#/components/schemas/SeasonTypeEnum'
             },
-            off: {
+            offense_nfl_team: {
               type: 'string',
               description: 'Offensive team abbreviation',
               example: 'KC'
             },
-            def: {
+            defense_nfl_team: {
               type: 'string',
               description: 'Defensive team abbreviation',
               example: 'LV'
@@ -1381,12 +1381,12 @@ const options = {
           },
           required: [
             'esbid',
-            'playId',
-            'year',
+            'play_id',
+            'season_year',
             'week',
-            'seas_type',
-            'off',
-            'def'
+            'season_type',
+            'offense_nfl_team',
+            'defense_nfl_team'
           ]
         },
         NFLPlayCharted: {
@@ -1412,13 +1412,13 @@ const options = {
                   description: 'Player ID who fumbled',
                   example: 'PATR-MAHO-005785'
                 },
-                fuml: {
+                fumbles_lost: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether a fumble occurred',
                   example: false
                 },
-                bc_pid: {
+                ball_carrier_pid: {
                   type: 'string',
                   nullable: true,
                   description: 'Ball carrier player ID',
@@ -1454,19 +1454,19 @@ const options = {
                   description: 'Whether play was considered successful',
                   example: true
                 },
-                psr_pid: {
+                passer_pid: {
                   type: 'string',
                   nullable: true,
                   description: 'Passer player ID',
                   example: 'PATR-MAHO-005785'
                 },
-                trg_pid: {
+                target_pid: {
                   type: 'string',
                   nullable: true,
                   description: 'Target player ID',
                   example: 'TRAV-KELC-002004'
                 },
-                intp_pid: {
+                interceptor_pid: {
                   type: 'string',
                   nullable: true,
                   description: 'Intercepted by player ID',
@@ -1592,7 +1592,7 @@ const options = {
               description: 'Game ID',
               example: '2024120801'
             },
-            playId: {
+            play_id: {
               type: 'integer',
               description: 'Play identifier',
               example: 1
@@ -1642,7 +1642,7 @@ const options = {
           },
           required: [
             'esbid',
-            'playId',
+            'play_id',
             'pid',
             'stat_type',
             'touchdown',

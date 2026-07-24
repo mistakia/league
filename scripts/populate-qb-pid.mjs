@@ -29,10 +29,10 @@ const populate_qb_pid = async ({
 
   // For years with snap data (2016+), use nfl_snaps + player table to identify
   // the QB on the field for non-pass, non-scramble plays. For multi-QB snaps,
-  // prefer the QB who is psr_pid on a pass play in the same drive.
+  // prefer the QB who is passer_pid on a pass play in the same drive.
   //
   // For years without snap data (pre-2016), only set qb_pid on pass plays
-  // (psr_pid) and scramble/kneel plays (bc_pid). Leave other plays NULL.
+  // (passer_pid) and scramble/kneel plays (ball_carrier_pid). Leave other plays NULL.
 
   const esbid_list = esbids
     ? esbids.map((id) => parseInt(id, 10)).join(',')
@@ -47,11 +47,11 @@ const populate_qb_pid = async ({
     FROM (
       SELECT
         np.esbid,
-        np."playId",
-        np.year,
+        np.play_id,
+        np.season_year,
         CASE
-          WHEN np.pass = true AND np.psr_pid IS NOT NULL THEN np.psr_pid
-          WHEN (np.qb_scramble = true OR np.qb_kneel = true) AND np.bc_pid IS NOT NULL THEN np.bc_pid
+          WHEN np.pass = true AND np.passer_pid IS NOT NULL THEN np.passer_pid
+          WHEN (np.qb_scramble = true OR np.qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL THEN np.ball_carrier_pid
           ELSE snap_qb.pid
         END AS qb_pid
       FROM nfl_plays np
@@ -59,25 +59,25 @@ const populate_qb_pid = async ({
         SELECT p2.pid
         FROM nfl_snaps ns
         JOIN player p2 ON p2.gsis_it_player_id = ns.gsis_it_id AND p2.primary_position = 'QB'
-        JOIN player_gamelogs pg ON pg.pid = p2.pid AND pg.esbid = np.esbid AND pg.nfl_team = np.pos_team
+        JOIN player_gamelogs pg ON pg.pid = p2.pid AND pg.esbid = np.esbid AND pg.nfl_team = np.possession_nfl_team
         WHERE ns.esbid = np.esbid
-          AND ns."playId" = np."playId"
-          AND ns.year = :year
+          AND ns.play_id = np.play_id
+          AND ns.season_year = :year
         ORDER BY
           CASE WHEN p2.pid = (
-            SELECT gp.psr_pid FROM nfl_plays gp
+            SELECT gp.passer_pid FROM nfl_plays gp
             WHERE gp.esbid = np.esbid AND gp.drive_seq = np.drive_seq
-              AND gp.psr_pid IS NOT NULL AND gp.year = :year
+              AND gp.passer_pid IS NOT NULL AND gp.season_year = :year
             LIMIT 1
           ) THEN 0 ELSE 1 END
         LIMIT 1
       ) snap_qb ON np.pass IS NOT TRUE
-        AND NOT ((np.qb_scramble = true OR np.qb_kneel = true) AND np.bc_pid IS NOT NULL)
-      WHERE np.year = :year ${esbid_filter}
+        AND NOT ((np.qb_scramble = true OR np.qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL)
+      WHERE np.season_year = :year ${esbid_filter}
     ) derived
     WHERE p.esbid = derived.esbid
-      AND p."playId" = derived."playId"
-      AND p.year = :year
+      AND p.play_id = derived.play_id
+      AND p.season_year = :year
       AND derived.qb_pid IS NOT NULL
       ${outer_esbid_filter}
   `
@@ -87,19 +87,19 @@ const populate_qb_pid = async ({
     FROM (
       SELECT
         np.esbid,
-        np."playId",
-        np.year,
+        np.play_id,
+        np.season_year,
         CASE
-          WHEN np.pass = true AND np.psr_pid IS NOT NULL THEN np.psr_pid
-          WHEN (np.qb_scramble = true OR np.qb_kneel = true) AND np.bc_pid IS NOT NULL THEN np.bc_pid
+          WHEN np.pass = true AND np.passer_pid IS NOT NULL THEN np.passer_pid
+          WHEN (np.qb_scramble = true OR np.qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL THEN np.ball_carrier_pid
           ELSE NULL
         END AS qb_pid
       FROM nfl_plays np
-      WHERE np.year = :year ${esbid_filter}
+      WHERE np.season_year = :year ${esbid_filter}
     ) derived
     WHERE p.esbid = derived.esbid
-      AND p."playId" = derived."playId"
-      AND p.year = :year
+      AND p.play_id = derived.play_id
+      AND p.season_year = :year
       AND derived.qb_pid IS NOT NULL
       ${outer_esbid_filter}
   `
@@ -111,20 +111,20 @@ const populate_qb_pid = async ({
       : ''
     const snap_subquery = has_snap_data
       ? `,
-        (SELECT COUNT(DISTINCT ns.esbid || '-' || ns."playId")
+        (SELECT COUNT(DISTINCT ns.esbid || '-' || ns.play_id)
          FROM nfl_snaps ns
          JOIN player p ON p.gsis_it_player_id = ns.gsis_it_id AND p.primary_position = 'QB'
-         WHERE ns.year = ? ${snaps_esbid_filter}) as plays_with_qb_snap`
+         WHERE ns.season_year = ? ${snaps_esbid_filter}) as plays_with_qb_snap`
       : ''
     const snap_count_query = `
       SELECT
         COUNT(*) as total_plays,
-        COUNT(CASE WHEN pass = true AND psr_pid IS NOT NULL THEN 1 END) as pass_plays,
-        COUNT(CASE WHEN (qb_scramble = true OR qb_kneel = true) AND bc_pid IS NOT NULL THEN 1 END) as scramble_kneel_plays,
-        COUNT(CASE WHEN NOT (pass = true AND psr_pid IS NOT NULL)
-          AND NOT ((qb_scramble = true OR qb_kneel = true) AND bc_pid IS NOT NULL) THEN 1 END) as other_plays
+        COUNT(CASE WHEN pass = true AND passer_pid IS NOT NULL THEN 1 END) as pass_plays,
+        COUNT(CASE WHEN (qb_scramble = true OR qb_kneel = true) AND ball_carrier_pid IS NOT NULL THEN 1 END) as scramble_kneel_plays,
+        COUNT(CASE WHEN NOT (pass = true AND passer_pid IS NOT NULL)
+          AND NOT ((qb_scramble = true OR qb_kneel = true) AND ball_carrier_pid IS NOT NULL) THEN 1 END) as other_plays
         ${snap_subquery}
-      FROM nfl_plays WHERE year = ? ${plays_esbid_filter}
+      FROM nfl_plays WHERE season_year = ? ${plays_esbid_filter}
     `
 
     const params = has_snap_data ? [year, year] : [year]
@@ -132,8 +132,10 @@ const populate_qb_pid = async ({
     const counts = result.rows[0]
     log(`Dry run for ${scope}:`)
     log(`  Total plays: ${counts.total_plays}`)
-    log(`  Pass plays (psr_pid): ${counts.pass_plays}`)
-    log(`  Scramble/kneel plays (bc_pid): ${counts.scramble_kneel_plays}`)
+    log(`  Pass plays (passer_pid): ${counts.pass_plays}`)
+    log(
+      `  Scramble/kneel plays (ball_carrier_pid): ${counts.scramble_kneel_plays}`
+    )
     log(`  Other plays: ${counts.other_plays}`)
     if (has_snap_data) {
       log(`  Plays with QB in nfl_snaps: ${counts.plays_with_qb_snap}`)
