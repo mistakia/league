@@ -40,104 +40,105 @@ const calculateStatsFromPlays = (plays) => {
   }
 
   plays.forEach((play) => {
-    if (play.fuml) {
+    if (play.fumbles_lost) {
       addStat(play.player_fuml_pid, 'fumbles_lost', 1)
-      playerToTeam[play.player_fuml_pid] = play.off
+      playerToTeam[play.player_fuml_pid] = play.offense_nfl_team
     }
 
     switch (play.play_type) {
       case 'RUSH': {
-        playerToTeam[play.bc_pid] = play.off
-        addTeamStat(play.off, 'rushing_attempts', 1)
-        addTeamStat(play.off, 'rushing_yards', play.yds_gained)
-        addStat(play.bc_pid, 'rushing_attempts', 1)
-        addStat(play.bc_pid, 'rushing_yards', play.rush_yds)
+        playerToTeam[play.ball_carrier_pid] = play.offense_nfl_team
+        addTeamStat(play.offense_nfl_team, 'rushing_attempts', 1)
+        addTeamStat(play.offense_nfl_team, 'rushing_yards', play.yds_gained)
+        addStat(play.ball_carrier_pid, 'rushing_attempts', 1)
+        addStat(play.ball_carrier_pid, 'rushing_yards', play.rush_yds)
         if (play.yards_after_any_contact)
-          addStat(play.bc_pid, 'ryaco', play.yards_after_any_contact)
+          addStat(play.ball_carrier_pid, 'ryaco', play.yards_after_any_contact)
         if (play.first_down) {
-          addStat(play.bc_pid, 'first_down', 1)
-          addStat(play.bc_pid, 'rfd', 1)
+          addStat(play.ball_carrier_pid, 'first_down', 1)
+          addStat(play.ball_carrier_pid, 'rfd', 1)
         }
         if (play.successful_play) {
-          addStat(play.bc_pid, 'successful_play', 1)
-          addStat(play.bc_pid, 'rasucc', 1)
+          addStat(play.ball_carrier_pid, 'successful_play', 1)
+          addStat(play.ball_carrier_pid, 'rasucc', 1)
         }
-        if (play.mbt) addStat(play.bc_pid, 'mbt', play.mbt)
-        if (play.rush_yds > 0) addStat(play.bc_pid, 'posra', 1)
-        if (play.first_down) addStat(play.bc_pid, 'rfd', 1)
-        if (play.td) addStat(play.bc_pid, 'rushing_touchdowns', 1)
+        if (play.mbt) addStat(play.ball_carrier_pid, 'mbt', play.mbt)
+        if (play.rush_yds > 0) addStat(play.ball_carrier_pid, 'posra', 1)
+        if (play.first_down) addStat(play.ball_carrier_pid, 'rfd', 1)
+        if (play.td) addStat(play.ball_carrier_pid, 'rushing_touchdowns', 1)
         break
       }
 
       case 'PASS': {
         // passer
-        playerToTeam[play.psr_pid] = play.off
+        playerToTeam[play.passer_pid] = play.offense_nfl_team
         if (play.successful_play) {
-          addStat(play.psr_pid, 'psucc', 1)
-          addStat(play.psr_pid, 'successful_play', 1)
+          addStat(play.passer_pid, 'psucc', 1)
+          addStat(play.passer_pid, 'successful_play', 1)
         }
         if (play.dot) {
-          addStat(play.psr_pid, 'pdot', play.dot)
-          addTeamStat(play.off, 'rdot', play.dot)
+          addStat(play.passer_pid, 'pdot', play.dot)
+          addTeamStat(play.offense_nfl_team, 'rdot', play.dot)
         }
-        if (play.qb_pressure) addStat(play.psr_pid, 'qb_pressure', 1)
-        if (play.qb_hit) addStat(play.psr_pid, 'qb_hit', 1)
-        if (play.qb_hurry) addStat(play.psr_pid, 'qb_hurry', 1)
-        if (play.highlight_pass) addStat(play.psr_pid, 'highlight_pass', 1)
-        if (play.int_worthy) addStat(play.psr_pid, 'int_worthy', 1)
+        if (play.qb_pressure) addStat(play.passer_pid, 'qb_pressure', 1)
+        if (play.qb_hit) addStat(play.passer_pid, 'qb_hit', 1)
+        if (play.qb_hurry) addStat(play.passer_pid, 'qb_hurry', 1)
+        if (play.highlight_pass) addStat(play.passer_pid, 'highlight_pass', 1)
+        if (play.int_worthy) addStat(play.passer_pid, 'int_worthy', 1)
         if (play.dropped_pass) {
-          addStat(play.psr_pid, 'drpp', 1)
-          addStat(play.psr_pid, 'drppy', play.dot)
+          addStat(play.passer_pid, 'drpp', 1)
+          addStat(play.passer_pid, 'drppy', play.dot)
         }
 
         // receiver
-        if (play.trg_pid) {
-          playerToTeam[play.trg_pid] = play.off
-          addTeamStat(play.off, 'targets', 1)
-          addStat(play.trg_pid, 'targets', 1)
-          addStat(play.trg_pid, 'rdot', play.dot)
-          if (play.dot >= 20) addStat(play.trg_pid, 'dptrg', 1)
-          if (play.contested_ball) addStat(play.trg_pid, 'contested_ball', 1)
+        if (play.target_pid) {
+          playerToTeam[play.target_pid] = play.offense_nfl_team
+          addTeamStat(play.offense_nfl_team, 'targets', 1)
+          addStat(play.target_pid, 'targets', 1)
+          addStat(play.target_pid, 'rdot', play.dot)
+          if (play.dot >= 20) addStat(play.target_pid, 'dptrg', 1)
+          if (play.contested_ball) addStat(play.target_pid, 'contested_ball', 1)
           if (play.dropped_pass) {
-            addStat(play.trg_pid, 'drops', 1)
-            addStat(play.trg_pid, 'drprecy', play.dot)
+            addStat(play.target_pid, 'drops', 1)
+            addStat(play.target_pid, 'drprecy', play.dot)
           }
         }
 
         if (play.intp) {
-          addStat(play.psr_pid, 'passing_interceptions', 1)
-        } else if (play.comp && play.trg_pid) {
+          addStat(play.passer_pid, 'passing_interceptions', 1)
+        } else if (play.comp && play.target_pid) {
           // TODO deprecate - temp fix for missing trg
           // receiver
-          addStat(play.trg_pid, 'receptions', 1)
-          addStat(play.trg_pid, 'receiving_yards', play.recv_yds)
-          addStat(play.trg_pid, 'ryac', play.yards_after_catch)
-          addStat(play.trg_pid, 'rcay', play.dot)
-          if (play.mbt) addStat(play.trg_pid, 'mbt', play.mbt)
+          addStat(play.target_pid, 'receptions', 1)
+          addStat(play.target_pid, 'receiving_yards', play.recv_yds)
+          addStat(play.target_pid, 'ryac', play.yards_after_catch)
+          addStat(play.target_pid, 'rcay', play.dot)
+          if (play.mbt) addStat(play.target_pid, 'mbt', play.mbt)
 
           // passer
-          addStat(play.psr_pid, 'passing_attempts', 1)
-          addStat(play.psr_pid, 'passing_yards', play.pass_yds)
-          addStat(play.psr_pid, 'passing_completions', 1)
-          addStat(play.psr_pid, 'pcay', play.dot)
+          addStat(play.passer_pid, 'passing_attempts', 1)
+          addStat(play.passer_pid, 'passing_yards', play.pass_yds)
+          addStat(play.passer_pid, 'passing_completions', 1)
+          addStat(play.passer_pid, 'pcay', play.dot)
           if (play.yards_after_catch)
-            addStat(play.psr_pid, 'pyac', play.yards_after_catch)
+            addStat(play.passer_pid, 'pyac', play.yards_after_catch)
 
-          if (play.successful_play) addStat(play.trg_pid, 'successful_play', 1)
+          if (play.successful_play)
+            addStat(play.target_pid, 'successful_play', 1)
           if (play.first_down) {
-            addStat(play.psr_pid, 'first_down', 1)
-            addStat(play.trg_pid, 'first_down', 1)
+            addStat(play.passer_pid, 'first_down', 1)
+            addStat(play.target_pid, 'first_down', 1)
           }
 
           if (play.td) {
-            addStat(play.psr_pid, 'passing_touchdowns', 1)
-            addStat(play.trg_pid, 'receiving_touchdowns', 1)
+            addStat(play.passer_pid, 'passing_touchdowns', 1)
+            addStat(play.target_pid, 'receiving_touchdowns', 1)
           }
         } else if (play.sk) {
-          addStat(play.psr_pid, 'sk', 1)
-          addStat(play.psr_pid, 'sky', Math.abs(play.yds_gained))
+          addStat(play.passer_pid, 'sk', 1)
+          addStat(play.passer_pid, 'sky', Math.abs(play.yds_gained))
         } else {
-          addStat(play.psr_pid, 'passing_attempts', 1)
+          addStat(play.passer_pid, 'passing_attempts', 1)
         }
       }
     }

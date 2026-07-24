@@ -38,7 +38,7 @@ const calculate_dst_delta_from_play = ({
   if (
     play.drive_play_count === 3 &&
     play.play_type_nfl === 'PUNT' &&
-    fixTeam(play.pos_team) !== dst_team
+    fixTeam(play.possession_nfl_team) !== dst_team
   ) {
     delta_stats.defensive_three_and_outs = 1
   }
@@ -46,11 +46,11 @@ const calculate_dst_delta_from_play = ({
   const play_stats = play.playStats || []
 
   for (const play_stat of play_stats) {
-    const stat_club = fixTeam(play_stat.clubCode)
+    const stat_club = fixTeam(play_stat.nfl_team)
 
-    switch (play_stat.statId) {
+    switch (play_stat.stat_id) {
       case 2:
-        // punt block - clubCode belongs to possession team
+        // punt block - nfl_team belongs to possession team
         if (stat_club !== dst_team) {
           delta_stats.defensive_blocked_kicks += 1
         }

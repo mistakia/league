@@ -32,7 +32,7 @@ const calculateStatsFromPlayStats = (playStats) => {
   stats.rushing_yards_excluding_kneels = 0
 
   for (const playStat of playStats) {
-    switch (playStat.statId) {
+    switch (playStat.stat_id) {
       case 2:
         // Punt Blocked (Offense) - punt was blocked
         break

@@ -7,16 +7,16 @@ const calculateDstStatsFromPlays = (plays, team) => {
     (p) =>
       p.drive_play_count === 3 &&
       p.play_type_nfl === 'PUNT' &&
-      p.pos_team !== team
+      p.possession_nfl_team !== team
   ).length
   const playStats = plays.map((p) => p.playStats).flat()
 
   for (const playStat of playStats) {
-    switch (playStat.statId) {
+    switch (playStat.stat_id) {
       case 2:
         // punt block
-        // clubCode belongs to possession team
-        if (fixTeam(playStat.clubCode) !== team) {
+        // nfl_team belongs to possession team
+        if (fixTeam(playStat.nfl_team) !== team) {
           dstStats.defensive_blocked_kicks += 1
         }
         break
@@ -91,28 +91,28 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 34:
         // punt return touchdown
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.punt_return_touchdowns += 1
         }
         break
 
       case 36:
         // punt return touchdown (lateral)
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.punt_return_touchdowns += 1
         }
         break
 
       case 46:
         // kickoff return touchdown
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.kickoff_return_touchdowns += 1
         }
         break
 
       case 48:
         // kickoff return touchdown (lateral)
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.kickoff_return_touchdowns += 1
         }
         break
@@ -127,7 +127,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 56:
         // fumble recovery touchdown (offensive player)
-        if (fixTeam(playStat.clubCode) !== team) {
+        if (fixTeam(playStat.nfl_team) !== team) {
           dstStats.defensive_points_against += 6
         }
         break
@@ -148,7 +148,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 60:
         // fumble return for touchdown (defense)
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.defensive_recovered_fumbles += 1
           dstStats.defensive_touchdowns += 1
         }
@@ -165,35 +165,35 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 64:
         // touchdown (team)
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.defensive_touchdowns += 1
         }
         break
 
       case 70:
         // made field goal
-        if (fixTeam(playStat.clubCode) !== team) {
+        if (fixTeam(playStat.nfl_team) !== team) {
           dstStats.defensive_points_against += 3
         }
         break
 
       case 71:
         // blocked field goal
-        if (fixTeam(playStat.clubCode) !== team) {
+        if (fixTeam(playStat.nfl_team) !== team) {
           dstStats.defensive_blocked_kicks += 1
         }
         break
 
       case 72:
         // made extra point
-        if (fixTeam(playStat.clubCode) !== team) {
+        if (fixTeam(playStat.nfl_team) !== team) {
           dstStats.defensive_points_against += 1
         }
         break
 
       case 74:
         // blocked extra point
-        if (fixTeam(playStat.clubCode) !== team) {
+        if (fixTeam(playStat.nfl_team) !== team) {
           dstStats.defensive_blocked_kicks += 1
         }
         break
@@ -229,7 +229,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 91:
         // forced fumble player
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.defensive_forced_fumbles += 1
         }
         break
@@ -248,7 +248,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 404:
         // defender intercepted or recovered two point return
-        if (fixTeam(playStat.clubCode) === team) {
+        if (fixTeam(playStat.nfl_team) === team) {
           dstStats.defensive_two_point_returns += 1
         }
         break

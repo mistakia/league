@@ -17,7 +17,7 @@ export default function getPlayFromPlayStats(play) {
   }
 
   for (const playStat of play.playStats) {
-    switch (playStat.statId) {
+    switch (playStat.stat_id) {
       // Punt Blocked (Offense) - punt was blocked
       case 2:
         // playRow.punt_blocked = true
@@ -62,7 +62,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Rushing Yards - rushing yards with credit for rushing attempt
       case 10:
-        playRow.bc_gsis = playStat.gsisId
+        playRow.bc_gsis = playStat.gsis_player_id
         playRow.rush_yds = playStat.yards
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
@@ -72,7 +72,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.first_down = true
         playRow.td = true
         playRow.rush_td = true
-        playRow.bc_gsis = playStat.gsisId
+        playRow.bc_gsis = playStat.gsis_player_id
         playRow.rush_yds = playStat.yards
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.teamAbbr
@@ -95,13 +95,13 @@ export default function getPlayFromPlayStats(play) {
       // Passing Incomplete - incomplete pass attempt
       case 14:
         playRow.comp = false
-        playRow.psr_gsis = playStat.gsisId
+        playRow.psr_gsis = playStat.gsis_player_id
         break
 
       // Passing Yards - completed pass with yards
       case 15:
         playRow.comp = true
-        playRow.psr_gsis = playStat.gsisId
+        playRow.psr_gsis = playStat.gsis_player_id
         playRow.pass_yds = playStat.yards
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
@@ -112,7 +112,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.first_down = true
         playRow.td = true
         playRow.pass_td = true
-        playRow.psr_gsis = playStat.gsisId
+        playRow.psr_gsis = playStat.gsis_player_id
         playRow.pass_yds = playStat.yards
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
@@ -120,20 +120,20 @@ export default function getPlayFromPlayStats(play) {
       // Interception - pass intercepted
       case 19:
         playRow.int = true
-        playRow.psr_gsis = playStat.gsisId
+        playRow.psr_gsis = playStat.gsis_player_id
         break
 
       // Sack Yards (Team) - team sack yardage lost
       case 20:
         playRow.sk = true
-        playRow.psr_gsis = playStat.gsisId
+        playRow.psr_gsis = playStat.gsis_player_id
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
         break
 
       // Receiving Yards - reception with yards
       case 21:
         playRow.comp = true
-        playRow.trg_gsis = playStat.gsisId
+        playRow.trg_gsis = playStat.gsis_player_id
         playRow.recv_yds = playStat.yards
         break
 
@@ -143,7 +143,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.first_down = true
         playRow.td = true
         playRow.pass_td = true
-        playRow.trg_gsis = playStat.gsisId
+        playRow.trg_gsis = playStat.gsis_player_id
         playRow.recv_yds = playStat.yards
         playRow.td_tm = playStat.teamAbbr
         break
@@ -164,7 +164,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Interception Return - interception return with yards
       case 25:
-        playRow.intp_gsis = playStat.gsisId
+        playRow.intp_gsis = playStat.gsis_player_id
         playRow.ret_tm = playStat.teamAbbr
         playRow.ret_yds = playStat.yards
         break
@@ -174,7 +174,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.td = true
         playRow.ret_td = true
         playRow.td_tm = playStat.teamAbbr
-        playRow.intp_gsis = playStat.gsisId
+        playRow.intp_gsis = playStat.gsis_player_id
         playRow.ret_tm = playStat.teamAbbr
         playRow.ret_yds = playStat.yards
         break
@@ -294,17 +294,17 @@ export default function getPlayFromPlayStats(play) {
 
       // Forced Fumble - fumble forced by defender
       case 52:
-        playRow.player_fuml_gsis = playStat.gsisId
+        playRow.player_fuml_gsis = playStat.gsis_player_id
         break
 
       // Fumble Not Forced - fumble not forced
       case 53:
-        playRow.player_fuml_gsis = playStat.gsisId
+        playRow.player_fuml_gsis = playStat.gsis_player_id
         break
 
       // Fumble Out of Bounds - fumble went out of bounds
       case 54:
-        playRow.player_fuml_gsis = playStat.gsisId
+        playRow.player_fuml_gsis = playStat.gsis_player_id
         break
 
       // Fumble Recovery (Own) - own fumble recovered with return yards
@@ -398,13 +398,13 @@ export default function getPlayFromPlayStats(play) {
 
       // Solo Tackle - unassisted tackle
       case 79:
-        playRow.tacklers_solo.push(playStat.gsisId)
+        playRow.tacklers_solo.push(playStat.gsis_player_id)
         break
 
       // Assisted Tackle - tackle with assist
       // You made the tackle and got assisted by one or more team mates (h/t seb)
       case 80:
-        playRow.tacklers_with_assisters.push(playStat.gsisId)
+        playRow.tacklers_with_assisters.push(playStat.gsis_player_id)
         break
 
       // 1/2 Tackle - half tackle credit
@@ -414,7 +414,7 @@ export default function getPlayFromPlayStats(play) {
       // Tackle Assist - assist on a tackle
       // Your team mate made the tackle and you were among the players who assisted (h/t seb)
       case 82:
-        playRow.tackle_assisters.push(playStat.gsisId)
+        playRow.tackle_assisters.push(playStat.gsis_player_id)
         break
 
       // Sack (Player) - individual player sack
@@ -488,7 +488,7 @@ export default function getPlayFromPlayStats(play) {
       // Fumble Lost - fumble lost to opponent
       case 106:
         playRow.fuml = true
-        playRow.player_fuml_gsis = playStat.gsisId
+        playRow.player_fuml_gsis = playStat.gsis_player_id
         break
 
       // Own Kickoff Recovery - own kickoff recovered
@@ -507,26 +507,26 @@ export default function getPlayFromPlayStats(play) {
       // Air Yards Complete - completed pass air yards (depth of target)
       case 111:
         playRow.comp = true
-        playRow.psr_gsis = playStat.gsisId
+        playRow.psr_gsis = playStat.gsis_player_id
         playRow.dot = playStat.yards
         break
 
       // Air Yards Incomplete - incomplete pass air yards (depth of target)
       case 112:
-        playRow.psr_gsis = playStat.gsisId
+        playRow.psr_gsis = playStat.gsis_player_id
         playRow.dot = playStat.yards
         break
 
       // Yards After Catch - yards gained after the catch
       case 113:
         playRow.comp = true
-        playRow.trg_gsis = playStat.gsisId
+        playRow.trg_gsis = playStat.gsis_player_id
         playRow.yards_after_catch = playStat.yards
         break
 
       // Target - pass target (intended receiver)
       case 115:
-        playRow.trg_gsis = playStat.gsisId
+        playRow.trg_gsis = playStat.gsis_player_id
         break
 
       // Tackle for Loss (Player) - player who made tackle for loss

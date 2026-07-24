@@ -1576,8 +1576,8 @@ export function get_plays_for_player(state, { player_map, week }) {
       }
 
       return (
-        (Boolean(p.pos_team) &&
-          fixTeam(p.pos_team) !== player_map.get('pid')) ||
+        (Boolean(p.possession_nfl_team) &&
+          fixTeam(p.possession_nfl_team) !== player_map.get('pid')) ||
         p.play_type_nfl === 'PUNT' ||
         p.play_type_nfl === 'KICK_OFF' ||
         p.play_type_nfl === 'XP_KICK'
@@ -1587,7 +1587,7 @@ export function get_plays_for_player(state, { player_map, week }) {
 
   let filtered = new List()
   for (const play of formatted.valueSeq()) {
-    const pos = play.pos_team
+    const pos = play.possession_nfl_team
     if (
       !pos ||
       (fixTeam(pos) !== playerTeam &&
@@ -1599,8 +1599,10 @@ export function get_plays_for_player(state, { player_map, week }) {
 
     const playStats = play.playStats.filter(
       (ps) =>
-        (ps.gsisId && ps.gsisId === player_map.get('gsis_player_id')) ||
-        (ps.gsispid && ps.gsispid === player_map.get('smart_player_id'))
+        (ps.gsis_player_id &&
+          ps.gsis_player_id === player_map.get('gsis_player_id')) ||
+        (ps.smart_player_id &&
+          ps.smart_player_id === player_map.get('smart_player_id'))
     )
 
     if (!playStats.length) continue
@@ -2385,7 +2387,7 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
       if (gameStatus && gameStatus.lastPlay) {
         const lp = gameStatus.lastPlay
         const quarterMinutes =
-          lp.desc === 'END GAME'
+          lp.play_description === 'END GAME'
             ? 0
             : Number((lp.game_clock_start || '0:00').split(':')[0])
         const quartersRemaining = lp.qtr === 5 ? 0 : 4 - lp.qtr
@@ -2514,7 +2516,7 @@ export function getPlaysByMatchupId(state, { mid }) {
 
   const filteredPlays = all_plays_list.filter((play) => {
     // Check if DST team is on defense for this play
-    const play_def_team = fixTeam(play.def)
+    const play_def_team = fixTeam(play.defense_nfl_team)
     const is_dst_defensive_play = dst_teams.includes(play_def_team)
     if (is_dst_defensive_play) return true
 
@@ -2524,12 +2526,12 @@ export function getPlaysByMatchupId(state, { mid }) {
     }
 
     const matchSingleGsis = play.playStats.find((playStat) =>
-      gsisids.includes(playStat.gsisId)
+      gsisids.includes(playStat.gsis_player_id)
     )
     if (matchSingleGsis) return true
 
     const matchSingleGsisPid = play.playStats.find((playStat) =>
-      gsispids.includes(playStat.gsispid)
+      gsispids.includes(playStat.smart_player_id)
     )
     return Boolean(matchSingleGsisPid)
   })
@@ -2556,7 +2558,9 @@ export function getPlaysByMatchupId(state, { mid }) {
 
   for (const play of chronological_plays) {
     const game = get_game_by_team(state, {
-      nfl_team: play.pos_team ? fixTeam(play.pos_team) : fixTeam(play.def),
+      nfl_team: play.possession_nfl_team
+        ? fixTeam(play.possession_nfl_team)
+        : fixTeam(play.defense_nfl_team),
       week: matchup.week
     })
 
@@ -2566,19 +2570,19 @@ export function getPlaysByMatchupId(state, { mid }) {
 
     // Calculate individual player stats and points
     const play_stats_with_ids = (play.playStats || []).filter(
-      (p) => p.gsispid || p.gsisId
+      (p) => p.smart_player_id || p.gsis_player_id
     )
     const grouped_play_stats = {}
     for (const playStat of play_stats_with_ids) {
       const player_map = playerMaps.find((pMap) => {
         if (
-          playStat.gsispid &&
-          pMap.get('smart_player_id', false) === playStat.gsispid
+          playStat.smart_player_id &&
+          pMap.get('smart_player_id', false) === playStat.smart_player_id
         )
           return true
         if (
-          playStat.gsisId &&
-          pMap.get('gsis_player_id', false) === playStat.gsisId
+          playStat.gsis_player_id &&
+          pMap.get('gsis_player_id', false) === playStat.gsis_player_id
         )
           return true
         return false
@@ -2603,7 +2607,7 @@ export function getPlaysByMatchupId(state, { mid }) {
     }
 
     // Calculate DST points delta for this play
-    const play_def_team = fixTeam(play.def)
+    const play_def_team = fixTeam(play.defense_nfl_team)
     if (dst_teams.includes(play_def_team)) {
       const dst_player_map = dst_player_maps.find(
         (pMap) => fixTeam(pMap.get('team')) === play_def_team
@@ -2636,13 +2640,13 @@ export function getPlaysByMatchupId(state, { mid }) {
     let time
     try {
       time = dayjs.tz(
-        `${game.date} ${play.timestamp}`,
+        `${game.date} ${play.play_time_of_day}`,
         'YYYY-MM-DD HH:mm:ss',
         'America/New_York'
       )
     } catch (error) {
       console.error(
-        `Invalid or missing date for playId: ${play.playId}, esbid: ${play.esbid}`,
+        `Invalid or missing date for play_id: ${play.play_id}, esbid: ${play.esbid}`,
         error
       )
       time = dayjs()
@@ -2687,9 +2691,9 @@ export function getGameStatusByPlayerId(
   const plays = get_plays(state, { week })
   const player_map = getPlayerById(state, { pid })
   const play = plays.find((p) => {
-    if (!p.pos_team) return false
+    if (!p.possession_nfl_team) return false
 
-    const team = fixTeam(p.pos_team)
+    const team = fixTeam(p.possession_nfl_team)
     return team === game.h || team === game.v
   })
 
@@ -2697,16 +2701,19 @@ export function getGameStatusByPlayerId(
     return { game }
   }
 
-  const filteredPlays = plays.filter((p) => p.esbid === play.esbid && p.desc)
+  const filteredPlays = plays.filter(
+    (p) => p.esbid === play.esbid && p.play_description
+  )
   const lastPlay = filteredPlays.maxBy((p) => p.sequence)
-  if (!lastPlay.pos_team) {
+  if (!lastPlay.possession_nfl_team) {
     return { game, lastPlay }
   }
 
-  const hasPossession = fixTeam(lastPlay.pos_team) === player_map.get('team')
+  const hasPossession =
+    fixTeam(lastPlay.possession_nfl_team) === player_map.get('team')
   const yardline = getYardline(
     lastPlay.ydl_end || lastPlay.ydl_start,
-    lastPlay.pos_team
+    lastPlay.possession_nfl_team
   )
   const isRedzone = yardline >= 80
 
@@ -2736,7 +2743,7 @@ export function get_player_game_state(
 
   // Check if game is final - prefer play data (real-time) over schedule status (cached)
   // "END GAME" play is pushed via WebSocket, so this detects completion immediately
-  if (lastPlay && lastPlay.desc === 'END GAME') {
+  if (lastPlay && lastPlay.play_description === 'END GAME') {
     return 'completed'
   }
 
@@ -2776,7 +2783,7 @@ export function get_player_game_progress(
 
   // Check if game is final - prefer play data (real-time) over schedule status (cached)
   const is_final =
-    (lastPlay && lastPlay.desc === 'END GAME') ||
+    (lastPlay && lastPlay.play_description === 'END GAME') ||
     (game.status && game.status.toUpperCase().startsWith('FINAL'))
 
   if (!lastPlay) {

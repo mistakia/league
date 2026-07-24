@@ -834,18 +834,18 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
-  pos_team: {
+  possession_nfl_team: {
     values: nfl_team_param_values,
     value_groups: nfl_team_value_groups,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
-  off: {
+  offense_nfl_team: {
     values: nfl_team_param_values,
     value_groups: nfl_team_value_groups,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
-  def: {
+  defense_nfl_team: {
     values: nfl_team_param_values,
     value_groups: nfl_team_value_groups,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
@@ -872,11 +872,11 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  fuml: {
+  fumbles_lost: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  int: {
+  interceptions: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
@@ -1918,11 +1918,11 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
-  to: {
+  timeouts: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
-  to_team: {
+  timeout_team: {
     values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]

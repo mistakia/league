@@ -10,7 +10,7 @@ export function plays_reducer(state = new Map(), { payload, type }) {
     case play_actions.GET_PLAYS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((play) => {
-          const play_key = [play.week, `${play.esbid}:${play.playId}`]
+          const play_key = [play.week, `${play.esbid}:${play.play_id}`]
           const existing_play = state.getIn(play_key)
 
           // Preserve existing playStats if play already exists (e.g., from orphan playStat)
@@ -40,7 +40,7 @@ export function plays_reducer(state = new Map(), { payload, type }) {
 
           const play_key = [
             playStat.week,
-            `${playStat.esbid}:${playStat.playId}`
+            `${playStat.esbid}:${playStat.play_id}`
           ]
           let existing_play = state.getIn(play_key)
 
@@ -50,15 +50,15 @@ export function plays_reducer(state = new Map(), { payload, type }) {
               '[plays_reducer] Orphan playStat: play does not exist yet, creating minimal play entry',
               {
                 esbid: playStat.esbid,
-                playId: playStat.playId,
+                play_id: playStat.play_id,
                 week: playStat.week,
-                statId: playStat.statId,
-                playerName: playStat.playerName
+                stat_id: playStat.stat_id,
+                player_name: playStat.player_name
               }
             )
             existing_play = {
               esbid: playStat.esbid,
-              playId: playStat.playId,
+              play_id: playStat.play_id,
               week: playStat.week,
               playStats: []
             }
@@ -76,9 +76,9 @@ export function plays_reducer(state = new Map(), { payload, type }) {
           const playStat_exists = existing_playStats.some(
             (ps) =>
               ps.esbid === playStat.esbid &&
-              ps.playId === playStat.playId &&
-              ps.statId === playStat.statId &&
-              ps.playerName === playStat.playerName
+              ps.play_id === playStat.play_id &&
+              ps.stat_id === playStat.stat_id &&
+              ps.player_name === playStat.player_name
           )
           if (!playStat_exists) {
             const updated_playStats = [...existing_playStats, playStat]

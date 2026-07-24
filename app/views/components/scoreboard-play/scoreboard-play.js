@@ -43,7 +43,7 @@ export default function ScoreboardPlay({ play, style, playerMaps }) {
     const player_map = playerMaps.get(pid)
     return (
       <div
-        key={`${play.play?.playId}-${pid}`}
+        key={`${play.play?.play_id}-${pid}`}
         className='scoreboard__play-player'
       >
         <div className='scoreboard__play-player-name'>
@@ -70,7 +70,9 @@ export default function ScoreboardPlay({ play, style, playerMaps }) {
           {nth(play.play.dwn)} & {play.play.yards_to_go} - {play.play.ydl_start}
         </div>
       </div>
-      <div className='scoreboard__play-description'>{play.play.desc}</div>
+      <div className='scoreboard__play-description'>
+        {play.play.play_description}
+      </div>
       <div className='scoreboard__play-players'>{players}</div>
     </div>
   )
