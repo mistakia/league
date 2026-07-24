@@ -199,11 +199,9 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 3.  During the Regular Season, Teams may be required to cast votes in respect of such matters as would include, but not be limited to:
 
-<!-- -->
+    1.  Referenda or opinion polls as required by the Commissioner for his or her own guidance; and
 
-1.  Referenda or opinion polls as required by the Commissioner for his or her own guidance; and
-
-2.  Reviews of the Commissioner’s decisions within the Regular Season, as set out in [Article III, Section 6](#article-iii).
+    2.  Reviews of the Commissioner’s decisions within the Regular Season, as set out in [Article III, Section 6](#article-iii).
 
 ### No Contentious Constitutional Amendments During the Regular Season.
 
