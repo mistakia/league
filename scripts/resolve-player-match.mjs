@@ -12,6 +12,7 @@ import {
   updatePlayer,
   mergePlayer,
   find_player_row,
+  ensure_player_alias,
   player_name_utils
 } from '#libs-server'
 import { format_player_name, fixTeam, strings_are_similar } from '#libs-shared'
@@ -300,26 +301,21 @@ const action_add_alias = async (argv) => {
     throw new Error('--alias is required')
   }
 
-  const formatted_alias = format_player_name(alias)
+  log(`Adding alias "${format_player_name(alias)}" for player ${pid}`)
 
-  log(`Adding alias "${formatted_alias}" for player ${pid}`)
-
-  const existing = await db('player_aliases')
-    .where({ pid, formatted_alias })
-    .first()
-
-  if (existing) {
-    log('Alias already exists')
-    return 0
-  }
-
-  await db('player_aliases').insert({
+  const added = await ensure_player_alias({
     pid,
-    formatted_alias
+    name: alias,
+    source: 'manual'
   })
 
-  log('Successfully added alias')
-  return 1
+  if (added) {
+    log('Successfully added alias')
+  } else {
+    log('Alias already exists or matches the canonical name')
+  }
+
+  return added
 }
 
 const action_merge_players = async (argv) => {

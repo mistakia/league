@@ -10,6 +10,7 @@ import {
   find_player_row,
   updatePlayer,
   createPlayer,
+  ensure_player_alias,
   report_job,
   throw_if_shortfall
 } from '#libs-server'
@@ -129,6 +130,16 @@ const importPlayersNFL = async ({
         },
         source: 'nfl'
       })
+      // Record the football name (displayName) as an alias when it diverges
+      // from the stored name -- e.g. rows created from a fused legal firstName
+      // ("De'Zhaun-Ryan") whose displayName ("De'Zhaun Stribling") is what
+      // every other feed sends. Keeps name-fallback matching resolvable.
+      await ensure_player_alias({
+        pid: player_row.pid,
+        name,
+        formatted_name: player_row.formatted_name,
+        source: 'nfl'
+      })
     } else if (
       error instanceof Errors.MatchedMultiplePlayers === false &&
       name &&
@@ -160,7 +171,17 @@ const importPlayersNFL = async ({
         date_of_birth: dob,
         roster_status
       })
-      if (player_row) pids.push(player_row.pid)
+      if (player_row) {
+        pids.push(player_row.pid)
+        // Newly created rows take fname from the fused legal firstName; seed
+        // the football-name (displayName) alias so other feeds resolve them.
+        await ensure_player_alias({
+          pid: player_row.pid,
+          name,
+          formatted_name: player_row.formatted_name,
+          source: 'nfl'
+        })
+      }
     } else {
       log('unable to handle player')
       log(node)
