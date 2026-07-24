@@ -236,12 +236,32 @@ observations:
     Validated end-to-end against production (28,166 players, no status throws) plus KTC/Sleeper
     re-imports; De'Zhaun Stribling (DEZH-STRI-000156) confirmed present in the DynastyIM WR data
     view with keeptradecut_player_id 1976 and KTC value 2828.
+  - >-
+    [data-gap] 2026-07-24 nfl_plays.td_tm and ret_tm are NULL on 100% of rows across all 26 seasons
+    (0 of 1,483,695 plays; also 0 of 5,969 in nfl_plays_current_week):
+    libs-shared/get-play-from-play-stats.mjs is their only writer and assigned the nonexistent
+    playStat.teamAbbr from its 2021 introduction (f4cc6295) until 8a1aa708 repointed it to nfl_team,
+    so every write silently evaluated to undefined; no importer, charted-CSV path, or backfill
+    script ever populated them, so there is no partial-population era to reconcile.
+  - >-
+    [trap] 2026-07-24 Any backfill from nfl_play_stats into nfl_plays must fold SD->LAC: play-stat
+    nfl_team is the raw feed value while plays offense/defense_nfl_team run through fix-team.mjs,
+    and SD/LAC is the sole drifted pair (19,960 stat rows, 2002-2015).
+  - >-
+    [assessment] 2026-07-24 A bulk historical drive_seq recompute is NOT warranted after the td_tm
+    backfill: enrich_fixed_drives only assigns drive_seq where it is NULL, so no populated value can
+    change; only 1,270 already-NULL plays sit after an interception-return TD. If a recompute ever
+    runs it must follow the backfill, never precede it.
+  - >-
+    [defect] 2026-07-24 enrich_fixed_drives fills only NULL drive_seq while running its own counter
+    from zero, so in the 4,616 game-halves that mix populated and NULL drive_seq (21,310 NULL plays)
+    any fill emits values incoherent with their neighbors -- independent of td_tm.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-24T19:51:30.050Z'
+updated_at: '2026-07-24T20:00:41.460Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
