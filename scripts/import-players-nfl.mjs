@@ -6,7 +6,6 @@ import { Errors, formatHeight, format_nfl_status } from '#libs-shared'
 import { current_season } from '#constants'
 import {
   is_main,
-  nfl,
   find_player_row,
   updatePlayer,
   createPlayer,
@@ -14,6 +13,7 @@ import {
   report_job,
   throw_if_shortfall
 } from '#libs-server'
+import * as nfl_pro from '#private/libs-server/nfl-pro.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { validate_response_shape } from './import-players-nfl.validate.mjs'
 
@@ -22,49 +22,57 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-players-nfl')
-debug.enable('import-players-nfl,nfl,update-player,create-player,get-player')
+debug.enable(
+  'import-players-nfl,nfl-pro,update-player,create-player,get-player'
+)
 
 const importPlayersNFL = async ({
   year = current_season.year,
-  token,
   ignore_cache = false
 }) => {
-  log(`loading players for year: ${year}`)
-
-  if (!token) {
-    token = await nfl.get_session_token_v3()
-  }
+  log(`loading players for season: ${year}`)
 
   const pids = []
-  const data = await nfl.getPlayers({ year, token, ignore_cache })
+  // NFL Pro per-team rosters replace the decommissioned NFL FDL v3 shield
+  // players query. They carry roster status (including non-active players) and
+  // every player's footballName -- the clean common first name -- so newly
+  // created rows no longer inherit a fused legal firstName.
+  const players = await nfl_pro.get_teams_roster({ season: year, ignore_cache })
 
-  const shape = validate_response_shape({ edges: data })
+  const shape = validate_response_shape({ players })
   log(
-    `preflight ok: ${shape.players} players; status tokens=${Object.keys(shape.status_counts).join('|')}`
+    `preflight ok: ${shape.players} players; status tokens=${shape.status_tokens.join(
+      '|'
+    )}`
   )
 
-  for (const { node } of data) {
-    const name = node.person.displayName
-    const pos = node.position
-    const dob = node.person.birthDate
-    const gsisid = node.gsisId
-    const esbid = node.esbId
+  for (const player of players) {
+    const name = player.displayName
+    const pos = player.position
+    const dob = player.birthDate
+    const gsisid = player.gsisId
+    const esbid = player.esbId
+    const gsis_it_id = player.gsisItId
+    const smart_id = player.smartId
 
-    const high_school = node.person.highSchool
-    const col = node.person.collegeName
-    const dpos = node.person.draftNumberOverall
-    const round = node.person.draftRound
-    let start = node.person.draftYear
-    const weight = node.weight
-    const current_nfl_team = node.currentTeam
-      ? node.currentTeam.abbreviation
-      : null
-    const jnum = node.jerseyNumber
-    const height = formatHeight(node.height)
-    const roster_status = format_nfl_status(node.person.status)
+    const col = player.collegeName
+    const dpos = player.draftNumber
+    const round = player.draftround
+    let draft_year = player.entryYear
+    const weight = player.weight
+    const current_nfl_team = player.teamAbbr
+    const jnum = player.jerseyNumber
+    const height = formatHeight(player.height)
+    const roster_status = format_nfl_status(player.status)
 
-    if (!start && node.nflExperience === 0) {
-      start = year
+    // footballName is the clean common first name (e.g. "Shaq" for
+    // "Sha'Quille Thompson", "De'Zhaun" for a fused "De'Zhaun-Ryan"); fall back
+    // to the legal firstName when absent.
+    const first_name = player.footballName || player.firstName
+    const last_name = player.lastName
+
+    if (!draft_year && player.yearsOfExperience === 0) {
+      draft_year = year
     }
 
     let player_row
@@ -94,15 +102,14 @@ const importPlayersNFL = async ({
       }
     }
 
-    // Fallback for KTC/sleeper-seeded rookie rows that have dob='0000-00-00'
-    // and have not yet been matched by gsisid/esbid. The dob-OR-0000 clause
-    // in find_player_row can throw MatchedMultiplePlayers on common names;
-    // scoping by nfl_draft_year recovers those rows without requiring dob.
-    if (!player_row && start) {
+    // Recover rows not yet matched by gsisid/esbid/dob (e.g. rookie rows seeded
+    // by KTC/sleeper) by name scoped to draft year. find_player_row can throw
+    // MatchedMultiplePlayers on common names; the scope disambiguates.
+    if (!player_row && draft_year) {
       try {
         player_row = await find_player_row({
           name,
-          nfl_draft_year: start
+          nfl_draft_year: draft_year
         })
         if (player_row) error = undefined
       } catch (err) {
@@ -118,22 +125,23 @@ const importPlayersNFL = async ({
         update: {
           gsis_player_id: gsisid,
           esb_player_id: esbid,
+          gsis_it_player_id: gsis_it_id,
+          smart_player_id: smart_id,
           date_of_birth: dob,
-          high_school,
           college: col,
           draft_overall_pick: dpos,
           draft_round: round,
-          start,
           weight_pounds: weight,
           height_inches: height,
+          jersey_number: jnum,
+          current_nfl_team,
           roster_status
         },
         source: 'nfl'
       })
       // Record the football name (displayName) as an alias when it diverges
-      // from the stored name -- e.g. rows created from a fused legal firstName
-      // ("De'Zhaun-Ryan") whose displayName ("De'Zhaun Stribling") is what
-      // every other feed sends. Keeps name-fallback matching resolvable.
+      // from the stored name -- backfills rows created before footballName was
+      // adopted (fused legal firstName like "De'Zhaun-Ryan").
       await ensure_player_alias({
         pid: player_row.pid,
         name,
@@ -146,12 +154,9 @@ const importPlayersNFL = async ({
       pos &&
       dob
     ) {
-      const player_row = await createPlayer({
-        first_name: node.person.firstName,
-        last_name: node.person.suffix
-          ? `${node.person.lastName} ${node.person.suffix}`
-          : node.person.lastName,
-        start,
+      const created = await createPlayer({
+        first_name,
+        last_name,
 
         primary_position: pos,
         secondary_position: pos,
@@ -165,26 +170,31 @@ const importPlayersNFL = async ({
 
         draft_overall_pick: dpos,
         draft_round: round,
+        nfl_draft_year: draft_year,
 
         college: col,
-        high_school,
         date_of_birth: dob,
-        roster_status
+        roster_status,
+
+        // Seed the external IDs at creation so the next run matches by ID and
+        // never mints a duplicate (see league-player-resolution.md).
+        gsis_player_id: gsisid,
+        esb_player_id: esbid,
+        gsis_it_player_id: gsis_it_id,
+        smart_player_id: smart_id
       })
-      if (player_row) {
-        pids.push(player_row.pid)
-        // Newly created rows take fname from the fused legal firstName; seed
-        // the football-name (displayName) alias so other feeds resolve them.
+      if (created) {
+        pids.push(created.pid)
         await ensure_player_alias({
-          pid: player_row.pid,
+          pid: created.pid,
           name,
-          formatted_name: player_row.formatted_name,
+          formatted_name: created.formatted_name,
           source: 'nfl'
         })
       }
     } else {
       log('unable to handle player')
-      log(node)
+      log(player)
     }
   }
 
@@ -197,13 +207,7 @@ const main = async () => {
     const argv = initialize_cli()
 
     let shortfall = null
-    if (argv.all) {
-      const token = await nfl.get_session_token_v3()
-      let year = argv.start || 1970
-      for (; year < current_season.year; year++) {
-        await importPlayersNFL({ year, token })
-      }
-    } else if (argv.year) {
+    if (argv.year) {
       const pids = await importPlayersNFL({ year: argv.year })
       log(`processed ${pids.length} players from nfl`)
       if (pids.length === 0) {

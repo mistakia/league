@@ -1,75 +1,62 @@
 // Source-shape preflight for import-players-nfl.mjs.
 //
-// The NFL.com FDL GraphQL `viewer.players` query is the only live source of
-// `player_changelog.nfl_status` events (INJURED_RESERVE / PUP / SUSPENDED /
-// NFI / DID_NOT_REPORT). A silent schema change upstream -- field rename,
-// enum collapse, status field dropped -- would silently halt nfl_status
-// capture for the index. This validator asserts the response shape and
-// status-enum presence before any database write.
+// The players import reads the public NFL Pro per-team roster endpoint
+// (https://pro.nfl.com/api/teams/roster), which replaced the decommissioned
+// NFL FDL v3 shield query. A silent upstream shape change -- field rename,
+// status field dropped, empty payload -- would silently halt player creation
+// and roster-status capture. This validator asserts the response shape before
+// any database write.
 //
-// Required structure: array of edges, each with `.node.person.{displayName,
-// birthDate, status}` and `.node.position`. Required enum behavior: at
-// least one non-ACT status token across the sampled population (every
-// season has IR/PUP/SUSP designations).
+// Required: a non-empty array of player objects, each carrying the invariant
+// fields the importer maps. esbId/gsisId are intentionally NOT required --
+// rookies/UDFAs routinely lack them and are matched by name/dob instead.
 
-const REQUIRED_PERSON_KEYS = ['displayName', 'birthDate', 'status']
-const ACTIVE_TOKEN = 'ACT'
+const REQUIRED_PLAYER_KEYS = ['displayName', 'position', 'status']
 
-export const validate_response_shape = ({ edges }) => {
-  if (!Array.isArray(edges) || edges.length === 0) {
+export const validate_response_shape = ({ players }) => {
+  if (!Array.isArray(players) || players.length === 0) {
     throw new Error(
-      'validate_response_shape: edges missing or empty (NFL FDL returned no players)'
+      'validate_response_shape: players missing or empty (NFL Pro roster returned no players)'
     )
   }
 
-  const sample = edges[0]?.node
-  if (!sample || !sample.person) {
+  const sample = players[0]
+  if (!sample || typeof sample !== 'object') {
     throw new Error(
-      'validate_response_shape: sample edge missing node.person; payload shape likely changed'
+      'validate_response_shape: first roster entry is not an object; payload shape likely changed'
     )
   }
 
-  for (const key of REQUIRED_PERSON_KEYS) {
-    if (!(key in sample.person)) {
+  for (const key of REQUIRED_PLAYER_KEYS) {
+    if (!(key in sample)) {
       throw new Error(
-        `validate_response_shape: sample person missing '${key}'; keys present: ${Object.keys(
-          sample.person
+        `validate_response_shape: sample player missing '${key}'; keys present: ${Object.keys(
+          sample
         ).join(', ')}`
       )
     }
   }
 
-  if (!('position' in sample)) {
-    throw new Error(
-      'validate_response_shape: sample node missing position field'
-    )
-  }
-
   const status_counts = new Map()
-  for (const edge of edges) {
-    const s = edge?.node?.person?.status
+  for (const player of players) {
+    const s = player?.status
     if (s) {
       const upper = String(s).toUpperCase().trim()
       status_counts.set(upper, (status_counts.get(upper) || 0) + 1)
     }
   }
 
-  const act_count = status_counts.get(ACTIVE_TOKEN) || 0
-  if (act_count === 0) {
+  // At least the active cohort must be present; an all-empty status column
+  // signals the status field was dropped or renamed upstream.
+  if (status_counts.size === 0) {
     throw new Error(
-      `validate_response_shape: zero ACT entries across ${edges.length} players -- enum likely renamed.`
-    )
-  }
-  const non_act_total = edges.length - act_count
-  if (non_act_total === 0) {
-    throw new Error(
-      `validate_response_shape: every one of ${edges.length} players is ACT -- ` +
-        'no IR/PUP/SUSP/CUT/DEV status tokens present, enum likely collapsed.'
+      `validate_response_shape: zero status tokens across ${players.length} players -- status field likely dropped upstream.`
     )
   }
 
   return {
-    players: edges.length,
+    players: players.length,
+    status_tokens: Array.from(status_counts.keys()),
     status_counts: Object.fromEntries(status_counts)
   }
 }

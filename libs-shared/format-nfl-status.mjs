@@ -22,6 +22,7 @@ export default (status_string) => {
     case player_nfl_status.EXEMPT:
     case 'EXE': // NFL & Sportradar
     case 'EX':
+    case 'E14': // NFL Pro (international player exemption)
     case 'RESERVE-EX':
       return player_nfl_status.EXEMPT
 
