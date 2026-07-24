@@ -109,6 +109,8 @@ Deploy targets (SSH hosts): `league` (main: API + frontend), `digitalocean-0` (o
 4. Commit both the adhoc file (audit trail) and the schema diff
 5. The exported schema file (`db/schema.postgres.sql`) is the source of truth; `db/adhoc/` is the append-only history of how it got there
 
+**Column renames must sweep query call sites, not just the DDL.** A rename lands green while leaving code that still names the old column, because most such references only fail when their code path actually executes. The 2026 `year`/`seas_type` -> `season_year`/`season_type` conformance left four seasonlog and careerlog generators still filtering on `nfl_games.year` and `ng.seas_type`; each threw Postgres 42703 at runtime and had silently aborted every scoring and league format seasonlog build until it was found by a backfill months later. After renaming a column, grep the old name across `scripts/`, `libs-server/`, `jobs/`, and `api/` and run the affected generators once, rather than trusting the schema export to be the whole change. Beware unqualified object-literal predicates (`.where({ year, seas_type: 'REG' })`) — they read as local variables and do not grep like column references.
+
 Format identities (`league_scoring_formats.id`, `league_formats.id`) are opaque -- snake_case slugs for the named catalog, `gen_random_uuid()` for the long tail. Dedup is enforced by a `UNIQUE` index across the full config-field tuple on each table. Adding a new scoring or roster metric is a normal additive `ALTER TABLE ADD COLUMN` plus an index rebuild; existing identities are untouched. Never reintroduce a content-derived hash as an identifier -- see `user:guideline/schema/avoid-content-derived-identity.md`.
 
 ## Key Documentation
