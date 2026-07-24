@@ -3,6 +3,12 @@
 ## Every Sunday at 4:00AM — verify named-catalog rows match DB config (replaces retired drift-detector slot)
 0 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/verify-named-format-catalog.mjs >> /var/log/league/verify-named-format-catalog.log 2>&1
 
+## Every Sunday at 4:15AM — verify every named format carries derived gamelog data for
+## every season the base gamelogs cover. Catches a format silently dropping out of the
+## generation set (the 2025 gap that blanked the default league's gamelogs). Runs after
+## verify-named-format-catalog so catalog drift is reported first.
+15 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/verify-format-data-coverage.mjs >> /var/log/league/verify-format-data-coverage.log 2>&1
+
 ## Every day at 4:00AM
 0 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs >> /var/log/league/league-calculate-team-daily-ktc-value.log 2>&1
 
