@@ -7,6 +7,7 @@ import {
   calculateBaselines,
   calculateValues,
   calculatePrices,
+  calculatePlayerValuesRestOfSeason,
   getRosterSize,
   groupBy
 } from '#libs-shared'
@@ -35,7 +36,7 @@ const process_league_format_year = async ({
   league_format,
   player_rows
 }) => {
-  const league_format_id = league_format.id
+  const league_format_id = league_format.league_format_id
   const pricing_model = league_format.pricing_model || 'auction'
   log(
     `processing league format ${league_format_id} for year ${year} (${pricing_model})`
@@ -82,6 +83,12 @@ const process_league_format_year = async ({
       })
     }
   }
+
+  calculatePlayerValuesRestOfSeason({
+    players: player_rows,
+    league: league_format,
+    pricing_model
+  })
 
   const value_inserts = []
   for (const player_row of player_rows) {
