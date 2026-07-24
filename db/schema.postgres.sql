@@ -140,9 +140,9 @@ DROP INDEX IF EXISTS public.nfl_plays_sportradar_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_def_personnel_dl_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_def_personnel_db_count_idx;
-DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
+DROP INDEX IF EXISTS public.nfl_plays_current_week_play_id;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_off_personnel_counts_idx;
-DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
+DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid_play_id;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_dl_count_idx;
 DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_db_count_idx;
@@ -171,7 +171,7 @@ DROP INDEX IF EXISTS public.idx_super_priority_pid;
 DROP INDEX IF EXISTS public.idx_super_priority_lid;
 DROP INDEX IF EXISTS public.idx_super_priority_eligible;
 DROP INDEX IF EXISTS public.idx_super_priority_claimed;
-DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_year_week;
+DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_season_year_week;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_esbid;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_combination;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_lookup;
@@ -193,11 +193,11 @@ DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_lid;
 DROP INDEX IF EXISTS public.idx_props_index_hits_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_week;
 DROP INDEX IF EXISTS public.idx_prop_pairings_total_games;
-DROP INDEX IF EXISTS public.idx_prop_pairings_team;
 DROP INDEX IF EXISTS public.idx_prop_pairings_source_id;
 DROP INDEX IF EXISTS public.idx_prop_pairings_size;
 DROP INDEX IF EXISTS public.idx_prop_pairings_risk_total;
 DROP INDEX IF EXISTS public.idx_prop_pairings_opp_allow_rate;
+DROP INDEX IF EXISTS public.idx_prop_pairings_nfl_team;
 DROP INDEX IF EXISTS public.idx_prop_pairings_market_prob;
 DROP INDEX IF EXISTS public.idx_prop_pairings_lowest_payout;
 DROP INDEX IF EXISTS public.idx_prop_pairings_joint_hist_rate;
@@ -205,7 +205,7 @@ DROP INDEX IF EXISTS public.idx_prop_pairings_hist_rate_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_hist_edge_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_highest_payout;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
-DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
+DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_settled;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
@@ -278,10 +278,8 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_player_fuml_p
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_bc_trg_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_bc_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_esbid_play_id;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ydl_100;
-DROP INDEX IF EXISTS public.idx_nfl_plays_trg_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_target_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_4_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_3_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_2_pid;
@@ -290,19 +288,21 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_3_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_series_seq;
-DROP INDEX IF EXISTS public.idx_nfl_plays_seas_type;
+DROP INDEX IF EXISTS public.idx_nfl_plays_season_year_esbid_play_id;
+DROP INDEX IF EXISTS public.idx_nfl_plays_season_year_esbid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_season_type;
 DROP INDEX IF EXISTS public.idx_nfl_plays_route_ngs;
 DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
 DROP INDEX IF EXISTS public.idx_nfl_plays_qb_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_psr_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_play_type_seas_type_trg_pid_off_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_play_type;
 DROP INDEX IF EXISTS public.idx_nfl_plays_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_plays_play_action;
 DROP INDEX IF EXISTS public.idx_nfl_plays_pid_types;
+DROP INDEX IF EXISTS public.idx_nfl_plays_passer_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_pass_location;
-DROP INDEX IF EXISTS public.idx_nfl_plays_off_week;
-DROP INDEX IF EXISTS public.idx_nfl_plays_off;
+DROP INDEX IF EXISTS public.idx_nfl_plays_offense_nfl_team_week;
+DROP INDEX IF EXISTS public.idx_nfl_plays_offense_nfl_team;
 DROP INDEX IF EXISTS public.idx_nfl_plays_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_nfl_plays_motion;
 DROP INDEX IF EXISTS public.idx_nfl_plays_fuml_pid_week_year;
@@ -312,7 +312,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
 DROP INDEX IF EXISTS public.idx_nfl_plays_catchable_ball;
 DROP INDEX IF EXISTS public.idx_nfl_plays_box_defenders;
-DROP INDEX IF EXISTS public.idx_nfl_plays_bc_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_ball_carrier_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_nfl_play_stats_play_id;
@@ -4747,14 +4747,14 @@ CREATE TABLE public.nfl_matchup_stats (
 
 CREATE TABLE public.nfl_play_stats (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
-    "clubCode" character varying(10),
-    "playerName" character varying(36),
-    "statId" integer NOT NULL,
+    play_id integer NOT NULL,
+    nfl_team character varying(10),
+    player_name character varying(36),
+    stat_id integer NOT NULL,
     yards integer,
-    "gsisId" character varying(36),
-    gsispid character varying(47),
-    teamid character varying(36),
+    gsis_player_id character varying(36),
+    smart_player_id character varying(47),
+    nfl_team_id character varying(36),
     valid boolean
 );
 
@@ -4765,14 +4765,14 @@ CREATE TABLE public.nfl_play_stats (
 
 CREATE TABLE public.nfl_play_stats_current_week (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
-    "clubCode" character varying(10),
-    "playerName" character varying(36),
-    "statId" integer NOT NULL,
+    play_id integer NOT NULL,
+    nfl_team character varying(10),
+    player_name character varying(36),
+    stat_id integer NOT NULL,
     yards integer,
-    "gsisId" character varying(36),
-    gsispid character varying(47),
-    teamid character varying(36),
+    gsis_player_id character varying(36),
+    smart_player_id character varying(47),
+    nfl_team_id character varying(36),
     valid boolean
 );
 
@@ -4783,19 +4783,19 @@ CREATE TABLE public.nfl_play_stats_current_week (
 
 CREATE TABLE public.nfl_plays (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -4823,21 +4823,21 @@ CREATE TABLE public.nfl_plays (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -4852,8 +4852,8 @@ CREATE TABLE public.nfl_plays (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -5019,8 +5019,8 @@ CREATE TABLE public.nfl_plays (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -5164,7 +5164,7 @@ CREATE TABLE public.nfl_plays (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -5201,7 +5201,7 @@ CREATE TABLE public.nfl_plays (
     off_personnel_te_count_pp smallint,
     off_personnel_wr_count_pp smallint
 )
-PARTITION BY RANGE (year);
+PARTITION BY RANGE (season_year);
 
 
 --
@@ -5296,17 +5296,17 @@ COMMENT ON COLUMN public.nfl_plays.mbt IS 'missed or broken tackles';
 
 
 --
--- Name: COLUMN nfl_plays.fuml; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.fumbles_lost; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.fuml IS 'fumble lost';
+COMMENT ON COLUMN public.nfl_plays.fumbles_lost IS 'fumble lost';
 
 
 --
--- Name: COLUMN nfl_plays."int"; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.interceptions; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays."int" IS 'interception';
+COMMENT ON COLUMN public.nfl_plays.interceptions IS 'interception';
 
 
 --
@@ -5791,19 +5791,19 @@ COMMENT ON COLUMN public.nfl_plays.read_thrown IS 'The type of read thrown by th
 
 CREATE TABLE public.nfl_plays_current_week (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -5831,21 +5831,21 @@ CREATE TABLE public.nfl_plays_current_week (
     score_type character varying(10),
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -5860,8 +5860,8 @@ CREATE TABLE public.nfl_plays_current_week (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -6030,8 +6030,8 @@ CREATE TABLE public.nfl_plays_current_week (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -6134,11 +6134,11 @@ CREATE TABLE public.nfl_plays_current_week (
 
 CREATE TABLE public.nfl_plays_passer (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
-    year smallint NOT NULL,
+    play_id integer NOT NULL,
+    season_year smallint NOT NULL,
     gsis_it_id integer NOT NULL,
     player_esbid character varying(20),
-    gsis_id character varying(20),
+    gsis_player_id character varying(20),
     target_gsis_it_id integer,
     target_gsis_id character varying(25),
     passer_speed_at_pass_forward numeric(10,4),
@@ -6183,12 +6183,12 @@ CREATE TABLE public.nfl_plays_passer (
 
 CREATE TABLE public.nfl_plays_player (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
-    year smallint NOT NULL,
+    play_id integer NOT NULL,
+    season_year smallint NOT NULL,
     gsis_it_id integer NOT NULL,
     player_esbid character varying(20),
     first_name character varying(50),
-    gsis_id character varying(20),
+    gsis_player_id character varying(20),
     is_ball_carrier boolean,
     is_defense_play boolean,
     is_interceptor boolean,
@@ -6202,7 +6202,7 @@ CREATE TABLE public.nfl_plays_player (
     last_name character varying(50),
     pass_defended boolean,
     player_name character varying(100),
-    "position" character varying(10),
+    player_position character varying(10),
     position_group character varying(10),
     short_name character varying(50),
     smart_id uuid,
@@ -6237,11 +6237,11 @@ CREATE TABLE public.nfl_plays_player (
 
 CREATE TABLE public.nfl_plays_receiver (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
-    year smallint NOT NULL,
+    play_id integer NOT NULL,
+    season_year smallint NOT NULL,
     gsis_it_id integer,
     player_esbid character varying(20),
-    gsis_id character varying(20) NOT NULL,
+    gsis_player_id character varying(20) NOT NULL,
     receiver_location_type character varying(50),
     cushion numeric(10,2),
     route character varying(50),
@@ -6274,11 +6274,11 @@ CREATE TABLE public.nfl_plays_receiver (
 
 CREATE TABLE public.nfl_plays_rusher (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
-    year smallint NOT NULL,
+    play_id integer NOT NULL,
+    season_year smallint NOT NULL,
     gsis_it_id integer NOT NULL,
     player_esbid character varying(20),
-    gsis_id character varying(20),
+    gsis_player_id character varying(20),
     pre_snap_rush_location character varying(50),
     rush_location character varying(50),
     contact_time timestamp without time zone,
@@ -6309,19 +6309,19 @@ CREATE TABLE public.nfl_plays_rusher (
 
 CREATE TABLE public.nfl_plays_year_2000 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -6349,21 +6349,21 @@ CREATE TABLE public.nfl_plays_year_2000 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -6378,8 +6378,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -6545,8 +6545,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -6690,7 +6690,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -6743,19 +6743,19 @@ CREATE TABLE public.nfl_plays_year_2000 (
 
 CREATE TABLE public.nfl_plays_year_2001 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -6783,21 +6783,21 @@ CREATE TABLE public.nfl_plays_year_2001 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -6812,8 +6812,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -6979,8 +6979,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -7124,7 +7124,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -7177,19 +7177,19 @@ CREATE TABLE public.nfl_plays_year_2001 (
 
 CREATE TABLE public.nfl_plays_year_2002 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -7217,21 +7217,21 @@ CREATE TABLE public.nfl_plays_year_2002 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -7246,8 +7246,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -7413,8 +7413,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -7558,7 +7558,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -7611,19 +7611,19 @@ CREATE TABLE public.nfl_plays_year_2002 (
 
 CREATE TABLE public.nfl_plays_year_2003 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -7651,21 +7651,21 @@ CREATE TABLE public.nfl_plays_year_2003 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -7680,8 +7680,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -7847,8 +7847,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -7992,7 +7992,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -8045,19 +8045,19 @@ CREATE TABLE public.nfl_plays_year_2003 (
 
 CREATE TABLE public.nfl_plays_year_2004 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -8085,21 +8085,21 @@ CREATE TABLE public.nfl_plays_year_2004 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -8114,8 +8114,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -8281,8 +8281,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -8426,7 +8426,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -8479,19 +8479,19 @@ CREATE TABLE public.nfl_plays_year_2004 (
 
 CREATE TABLE public.nfl_plays_year_2005 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -8519,21 +8519,21 @@ CREATE TABLE public.nfl_plays_year_2005 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -8548,8 +8548,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -8715,8 +8715,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -8860,7 +8860,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -8913,19 +8913,19 @@ CREATE TABLE public.nfl_plays_year_2005 (
 
 CREATE TABLE public.nfl_plays_year_2006 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -8953,21 +8953,21 @@ CREATE TABLE public.nfl_plays_year_2006 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -8982,8 +8982,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -9149,8 +9149,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -9294,7 +9294,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -9347,19 +9347,19 @@ CREATE TABLE public.nfl_plays_year_2006 (
 
 CREATE TABLE public.nfl_plays_year_2007 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -9387,21 +9387,21 @@ CREATE TABLE public.nfl_plays_year_2007 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -9416,8 +9416,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -9583,8 +9583,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -9728,7 +9728,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -9781,19 +9781,19 @@ CREATE TABLE public.nfl_plays_year_2007 (
 
 CREATE TABLE public.nfl_plays_year_2008 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -9821,21 +9821,21 @@ CREATE TABLE public.nfl_plays_year_2008 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -9850,8 +9850,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -10017,8 +10017,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -10162,7 +10162,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -10215,19 +10215,19 @@ CREATE TABLE public.nfl_plays_year_2008 (
 
 CREATE TABLE public.nfl_plays_year_2009 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -10255,21 +10255,21 @@ CREATE TABLE public.nfl_plays_year_2009 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -10284,8 +10284,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -10451,8 +10451,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -10596,7 +10596,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -10649,19 +10649,19 @@ CREATE TABLE public.nfl_plays_year_2009 (
 
 CREATE TABLE public.nfl_plays_year_2010 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -10689,21 +10689,21 @@ CREATE TABLE public.nfl_plays_year_2010 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -10718,8 +10718,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -10885,8 +10885,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -11030,7 +11030,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -11083,19 +11083,19 @@ CREATE TABLE public.nfl_plays_year_2010 (
 
 CREATE TABLE public.nfl_plays_year_2011 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -11123,21 +11123,21 @@ CREATE TABLE public.nfl_plays_year_2011 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -11152,8 +11152,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -11319,8 +11319,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -11464,7 +11464,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -11517,19 +11517,19 @@ CREATE TABLE public.nfl_plays_year_2011 (
 
 CREATE TABLE public.nfl_plays_year_2012 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -11557,21 +11557,21 @@ CREATE TABLE public.nfl_plays_year_2012 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -11586,8 +11586,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -11753,8 +11753,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -11898,7 +11898,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -11951,19 +11951,19 @@ CREATE TABLE public.nfl_plays_year_2012 (
 
 CREATE TABLE public.nfl_plays_year_2013 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -11991,21 +11991,21 @@ CREATE TABLE public.nfl_plays_year_2013 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -12020,8 +12020,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -12187,8 +12187,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -12332,7 +12332,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -12385,19 +12385,19 @@ CREATE TABLE public.nfl_plays_year_2013 (
 
 CREATE TABLE public.nfl_plays_year_2014 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -12425,21 +12425,21 @@ CREATE TABLE public.nfl_plays_year_2014 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -12454,8 +12454,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -12621,8 +12621,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -12766,7 +12766,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -12819,19 +12819,19 @@ CREATE TABLE public.nfl_plays_year_2014 (
 
 CREATE TABLE public.nfl_plays_year_2015 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -12859,21 +12859,21 @@ CREATE TABLE public.nfl_plays_year_2015 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -12888,8 +12888,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -13055,8 +13055,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -13200,7 +13200,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -13253,19 +13253,19 @@ CREATE TABLE public.nfl_plays_year_2015 (
 
 CREATE TABLE public.nfl_plays_year_2016 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -13293,21 +13293,21 @@ CREATE TABLE public.nfl_plays_year_2016 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -13322,8 +13322,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -13489,8 +13489,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -13634,7 +13634,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -13687,19 +13687,19 @@ CREATE TABLE public.nfl_plays_year_2016 (
 
 CREATE TABLE public.nfl_plays_year_2017 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -13727,21 +13727,21 @@ CREATE TABLE public.nfl_plays_year_2017 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -13756,8 +13756,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -13923,8 +13923,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -14068,7 +14068,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -14121,19 +14121,19 @@ CREATE TABLE public.nfl_plays_year_2017 (
 
 CREATE TABLE public.nfl_plays_year_2018 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -14161,21 +14161,21 @@ CREATE TABLE public.nfl_plays_year_2018 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -14190,8 +14190,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -14357,8 +14357,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -14502,7 +14502,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -14555,19 +14555,19 @@ CREATE TABLE public.nfl_plays_year_2018 (
 
 CREATE TABLE public.nfl_plays_year_2019 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -14595,21 +14595,21 @@ CREATE TABLE public.nfl_plays_year_2019 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -14624,8 +14624,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -14791,8 +14791,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -14936,7 +14936,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -14989,19 +14989,19 @@ CREATE TABLE public.nfl_plays_year_2019 (
 
 CREATE TABLE public.nfl_plays_year_2020 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -15029,21 +15029,21 @@ CREATE TABLE public.nfl_plays_year_2020 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -15058,8 +15058,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -15225,8 +15225,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -15370,7 +15370,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -15423,19 +15423,19 @@ CREATE TABLE public.nfl_plays_year_2020 (
 
 CREATE TABLE public.nfl_plays_year_2021 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -15463,21 +15463,21 @@ CREATE TABLE public.nfl_plays_year_2021 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -15492,8 +15492,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -15659,8 +15659,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -15804,7 +15804,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -15857,19 +15857,19 @@ CREATE TABLE public.nfl_plays_year_2021 (
 
 CREATE TABLE public.nfl_plays_year_2022 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -15897,21 +15897,21 @@ CREATE TABLE public.nfl_plays_year_2022 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -15926,8 +15926,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -16093,8 +16093,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -16238,7 +16238,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -16291,19 +16291,19 @@ CREATE TABLE public.nfl_plays_year_2022 (
 
 CREATE TABLE public.nfl_plays_year_2023 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -16331,21 +16331,21 @@ CREATE TABLE public.nfl_plays_year_2023 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -16360,8 +16360,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -16527,8 +16527,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -16672,7 +16672,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -16725,19 +16725,19 @@ CREATE TABLE public.nfl_plays_year_2023 (
 
 CREATE TABLE public.nfl_plays_year_2024 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -16765,21 +16765,21 @@ CREATE TABLE public.nfl_plays_year_2024 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -16794,8 +16794,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -16961,8 +16961,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -17106,7 +17106,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -17159,19 +17159,19 @@ CREATE TABLE public.nfl_plays_year_2024 (
 
 CREATE TABLE public.nfl_plays_year_2025 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -17199,21 +17199,21 @@ CREATE TABLE public.nfl_plays_year_2025 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -17228,8 +17228,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -17395,8 +17395,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -17540,7 +17540,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -17593,19 +17593,19 @@ CREATE TABLE public.nfl_plays_year_2025 (
 
 CREATE TABLE public.nfl_plays_year_2026 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
     special boolean,
-    "desc" text,
+    play_description text,
     play_type_ngs character varying(36),
-    pos_team character varying(4),
-    pos_team_id character varying(36),
+    possession_nfl_team character varying(4),
+    possession_nfl_team_id character varying(36),
     qtr integer,
-    year smallint NOT NULL,
-    seas_type character varying(36),
+    season_year smallint NOT NULL,
+    season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
     ydl_num integer,
@@ -17633,21 +17633,21 @@ CREATE TABLE public.nfl_plays_year_2026 (
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
-    "timestamp" character varying(10),
+    play_time_of_day character varying(10),
     play_type_nfl character varying(36),
     updated integer NOT NULL,
-    off character varying(3),
-    def character varying(3),
+    offense_nfl_team character varying(3),
+    defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
+    ball_carrier_pid character varying(25),
     bc_gsis character varying(36),
-    psr_pid character varying(25),
+    passer_pid character varying(25),
     psr_gsis character varying(36),
-    trg_pid character varying(25),
+    target_pid character varying(25),
     trg_gsis character varying(36),
-    intp_pid character varying(25),
+    interceptor_pid character varying(25),
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
@@ -17662,8 +17662,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     dropped_pass boolean,
     contested_ball boolean,
     mbt smallint,
-    fuml boolean,
-    "int" boolean,
+    fumbles_lost boolean,
+    interceptions boolean,
     sk boolean,
     successful_play boolean,
     comp boolean,
@@ -17829,8 +17829,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    "to" boolean,
-    to_team character varying(3),
+    timeouts boolean,
+    timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -17974,7 +17974,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((year)::text || '_'::text) || (seas_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
     play_action_concept character varying(100),
@@ -18027,11 +18027,11 @@ CREATE TABLE public.nfl_plays_year_2026 (
 
 CREATE TABLE public.nfl_snaps (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 )
-PARTITION BY RANGE (year);
+PARTITION BY RANGE (season_year);
 
 
 --
@@ -18040,9 +18040,9 @@ PARTITION BY RANGE (year);
 
 CREATE TABLE public.nfl_snaps_year_2000 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18052,9 +18052,9 @@ CREATE TABLE public.nfl_snaps_year_2000 (
 
 CREATE TABLE public.nfl_snaps_year_2001 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18064,9 +18064,9 @@ CREATE TABLE public.nfl_snaps_year_2001 (
 
 CREATE TABLE public.nfl_snaps_year_2002 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18076,9 +18076,9 @@ CREATE TABLE public.nfl_snaps_year_2002 (
 
 CREATE TABLE public.nfl_snaps_year_2003 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18088,9 +18088,9 @@ CREATE TABLE public.nfl_snaps_year_2003 (
 
 CREATE TABLE public.nfl_snaps_year_2004 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18100,9 +18100,9 @@ CREATE TABLE public.nfl_snaps_year_2004 (
 
 CREATE TABLE public.nfl_snaps_year_2005 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18112,9 +18112,9 @@ CREATE TABLE public.nfl_snaps_year_2005 (
 
 CREATE TABLE public.nfl_snaps_year_2006 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18124,9 +18124,9 @@ CREATE TABLE public.nfl_snaps_year_2006 (
 
 CREATE TABLE public.nfl_snaps_year_2007 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18136,9 +18136,9 @@ CREATE TABLE public.nfl_snaps_year_2007 (
 
 CREATE TABLE public.nfl_snaps_year_2008 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18148,9 +18148,9 @@ CREATE TABLE public.nfl_snaps_year_2008 (
 
 CREATE TABLE public.nfl_snaps_year_2009 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18160,9 +18160,9 @@ CREATE TABLE public.nfl_snaps_year_2009 (
 
 CREATE TABLE public.nfl_snaps_year_2010 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18172,9 +18172,9 @@ CREATE TABLE public.nfl_snaps_year_2010 (
 
 CREATE TABLE public.nfl_snaps_year_2011 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18184,9 +18184,9 @@ CREATE TABLE public.nfl_snaps_year_2011 (
 
 CREATE TABLE public.nfl_snaps_year_2012 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18196,9 +18196,9 @@ CREATE TABLE public.nfl_snaps_year_2012 (
 
 CREATE TABLE public.nfl_snaps_year_2013 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18208,9 +18208,9 @@ CREATE TABLE public.nfl_snaps_year_2013 (
 
 CREATE TABLE public.nfl_snaps_year_2014 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18220,9 +18220,9 @@ CREATE TABLE public.nfl_snaps_year_2014 (
 
 CREATE TABLE public.nfl_snaps_year_2015 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18232,9 +18232,9 @@ CREATE TABLE public.nfl_snaps_year_2015 (
 
 CREATE TABLE public.nfl_snaps_year_2016 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18244,9 +18244,9 @@ CREATE TABLE public.nfl_snaps_year_2016 (
 
 CREATE TABLE public.nfl_snaps_year_2017 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18256,9 +18256,9 @@ CREATE TABLE public.nfl_snaps_year_2017 (
 
 CREATE TABLE public.nfl_snaps_year_2018 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18268,9 +18268,9 @@ CREATE TABLE public.nfl_snaps_year_2018 (
 
 CREATE TABLE public.nfl_snaps_year_2019 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18280,9 +18280,9 @@ CREATE TABLE public.nfl_snaps_year_2019 (
 
 CREATE TABLE public.nfl_snaps_year_2020 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18292,9 +18292,9 @@ CREATE TABLE public.nfl_snaps_year_2020 (
 
 CREATE TABLE public.nfl_snaps_year_2021 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18304,9 +18304,9 @@ CREATE TABLE public.nfl_snaps_year_2021 (
 
 CREATE TABLE public.nfl_snaps_year_2022 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18316,9 +18316,9 @@ CREATE TABLE public.nfl_snaps_year_2022 (
 
 CREATE TABLE public.nfl_snaps_year_2023 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18328,9 +18328,9 @@ CREATE TABLE public.nfl_snaps_year_2023 (
 
 CREATE TABLE public.nfl_snaps_year_2024 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18340,9 +18340,9 @@ CREATE TABLE public.nfl_snaps_year_2024 (
 
 CREATE TABLE public.nfl_snaps_year_2025 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18352,9 +18352,9 @@ CREATE TABLE public.nfl_snaps_year_2025 (
 
 CREATE TABLE public.nfl_snaps_year_2026 (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18364,9 +18364,9 @@ CREATE TABLE public.nfl_snaps_year_2026 (
 
 CREATE TABLE public.nfl_snaps_year_default (
     esbid integer NOT NULL,
-    "playId" integer NOT NULL,
+    play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -18945,7 +18945,7 @@ CREATE TABLE public.placed_wagers (
     userid integer NOT NULL,
     public smallint DEFAULT '0'::smallint,
     wager_type public.placed_wagers_wager_type NOT NULL,
-    placed_at integer NOT NULL,
+    placed_at timestamp with time zone NOT NULL,
     bet_count smallint NOT NULL,
     selection_count smallint NOT NULL,
     wager_status public.wager_status NOT NULL,
@@ -24943,7 +24943,7 @@ CREATE TABLE public.prop_market_selections_history (
     selection_metric_line numeric(6,1),
     odds_decimal numeric(15,3),
     odds_american integer,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     selection_type public.selection_type
 );
 
@@ -24962,7 +24962,7 @@ CREATE TABLE public.prop_market_selections_index (
     odds_decimal numeric(15,3),
     odds_american integer,
     selection_result public.wager_status,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     time_type public.time_type NOT NULL,
     current_season_hit_rate_hard numeric(5,4),
     current_season_hit_rate_soft numeric(5,4),
@@ -25000,7 +25000,7 @@ CREATE TABLE public.prop_markets_history (
     open boolean,
     live boolean,
     selection_count integer NOT NULL,
-    "timestamp" integer NOT NULL
+    observed_at timestamp with time zone NOT NULL
 );
 
 
@@ -25020,8 +25020,8 @@ CREATE TABLE public.prop_markets_index (
     live boolean,
     selection_count integer NOT NULL,
     time_type public.time_type NOT NULL,
-    "timestamp" integer NOT NULL,
-    year smallint,
+    observed_at timestamp with time zone NOT NULL,
+    season_year smallint,
     market_settled boolean DEFAULT false
 );
 
@@ -25045,7 +25045,7 @@ CREATE TABLE public.prop_pairings (
     pairing_id character varying(150) NOT NULL,
     source_id public.market_source_id NOT NULL,
     name character varying(150),
-    team character varying(3),
+    nfl_team character varying(3),
     week smallint NOT NULL,
     size smallint NOT NULL,
     market_prob numeric(5,4),
@@ -25092,7 +25092,7 @@ CREATE TABLE public.props (
     pid character varying(25),
     esbid bigint,
     week smallint NOT NULL,
-    year smallint,
+    season_year smallint,
     id character varying(100) NOT NULL,
     ln numeric(4,1),
     o numeric(5,2),
@@ -25100,7 +25100,7 @@ CREATE TABLE public.props (
     u numeric(5,2),
     u_am integer,
     sourceid integer NOT NULL,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     active boolean,
     live boolean,
     prop_type character varying(50)
@@ -25115,7 +25115,7 @@ CREATE TABLE public.props_index (
     pid character varying(25),
     esbid bigint,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     prop_type character varying(50),
     ln numeric(4,1),
     o numeric(5,2),
@@ -25123,12 +25123,12 @@ CREATE TABLE public.props_index (
     o_am integer,
     u_am integer,
     source_id public.market_source_id NOT NULL,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     time_type public.time_type NOT NULL,
     name character varying(50),
-    team character varying(3),
-    opp character varying(3),
-    pos character varying(4),
+    nfl_team character varying(3),
+    opponent_nfl_team character varying(3),
+    "position" character varying(4),
     hits_soft smallint,
     hit_weeks_soft json,
     hits_hard smallint,
@@ -25682,8 +25682,8 @@ CREATE TABLE public.selection_combination_definitions (
     combination_description text,
     selections jsonb NOT NULL,
     active boolean DEFAULT true,
-    created_at timestamp without time zone DEFAULT now(),
-    updated_at timestamp without time zone DEFAULT now()
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
 );
 
 
@@ -25717,12 +25717,12 @@ CREATE TABLE public.selection_combination_odds_history (
     source_id public.market_source_id NOT NULL,
     selection_ids text[] NOT NULL,
     esbid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     week smallint,
     decimal_odds numeric(15,3),
     american_odds integer,
     is_sgp boolean,
-    "timestamp" integer NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     previous_decimal_odds numeric(15,3),
     previous_american_odds integer
 );
@@ -25757,12 +25757,12 @@ CREATE TABLE public.selection_combination_odds_index (
     source_id public.market_source_id NOT NULL,
     selection_ids text[] NOT NULL,
     esbid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     week smallint,
     decimal_odds numeric(15,3),
     american_odds integer,
     is_sgp boolean,
-    "timestamp" integer NOT NULL
+    observed_at timestamp with time zone NOT NULL
 );
 
 
@@ -26272,9 +26272,9 @@ CREATE TABLE public.weekly_market_selections_analysis_cache (
     current_season_opp_hit_weeks jsonb,
     current_season_opp_weeks_played jsonb,
     name character varying(255),
-    team character varying(3),
-    pos character varying(4),
-    opp character varying(3),
+    nfl_team character varying(3),
+    "position" character varying(4),
+    opponent_nfl_team character varying(3),
     market_type character varying(50),
     esbid bigint
 );
@@ -27808,7 +27808,7 @@ ALTER TABLE ONLY public.nfl_matchup_stats
 --
 
 ALTER TABLE ONLY public.nfl_plays_passer
-    ADD CONSTRAINT nfl_plays_passer_pkey PRIMARY KEY (esbid, "playId", year, gsis_it_id);
+    ADD CONSTRAINT nfl_plays_passer_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_id);
 
 
 --
@@ -27816,7 +27816,7 @@ ALTER TABLE ONLY public.nfl_plays_passer
 --
 
 ALTER TABLE ONLY public.nfl_plays_player
-    ADD CONSTRAINT nfl_plays_player_pkey PRIMARY KEY (esbid, "playId", year, gsis_it_id);
+    ADD CONSTRAINT nfl_plays_player_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_id);
 
 
 --
@@ -27824,7 +27824,7 @@ ALTER TABLE ONLY public.nfl_plays_player
 --
 
 ALTER TABLE ONLY public.nfl_plays_receiver
-    ADD CONSTRAINT nfl_plays_receiver_pkey PRIMARY KEY (esbid, "playId", gsis_id);
+    ADD CONSTRAINT nfl_plays_receiver_pkey PRIMARY KEY (esbid, play_id, gsis_player_id);
 
 
 --
@@ -27832,7 +27832,7 @@ ALTER TABLE ONLY public.nfl_plays_receiver
 --
 
 ALTER TABLE ONLY public.nfl_plays_rusher
-    ADD CONSTRAINT nfl_plays_rusher_pkey PRIMARY KEY (esbid, "playId", year, gsis_it_id);
+    ADD CONSTRAINT nfl_plays_rusher_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_id);
 
 
 --
@@ -29058,14 +29058,14 @@ CREATE UNIQUE INDEX idx_24707_game ON public.nfl_games USING btree (v, h, week, 
 -- Name: idx_24719_play_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24719_play_stat ON public.nfl_play_stats USING btree (esbid, "playId", "statId", "playerName");
+CREATE UNIQUE INDEX idx_24719_play_stat ON public.nfl_play_stats USING btree (esbid, play_id, stat_id, player_name);
 
 
 --
 -- Name: idx_24722_play_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24722_play_stat ON public.nfl_play_stats_current_week USING btree (esbid, "playId", "statId", "playerName");
+CREATE UNIQUE INDEX idx_24722_play_stat ON public.nfl_play_stats_current_week USING btree (esbid, play_id, stat_id, player_name);
 
 
 --
@@ -29240,7 +29240,7 @@ CREATE UNIQUE INDEX idx_24932_projection ON public.projections_archive USING btr
 -- Name: idx_24944_market_selection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24944_market_selection ON public.prop_market_selections_history USING btree (source_id, source_market_id, source_selection_id, "timestamp");
+CREATE UNIQUE INDEX idx_24944_market_selection ON public.prop_market_selections_history USING btree (source_id, source_market_id, source_selection_id, observed_at);
 
 
 --
@@ -29254,7 +29254,7 @@ CREATE UNIQUE INDEX idx_24949_market ON public.prop_market_selections_index USIN
 -- Name: idx_24954_market; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24954_market ON public.prop_markets_history USING btree (source_id, source_market_id, "timestamp");
+CREATE UNIQUE INDEX idx_24954_market ON public.prop_markets_history USING btree (source_id, source_market_id, observed_at);
 
 
 --
@@ -29268,14 +29268,14 @@ CREATE UNIQUE INDEX idx_24959_market ON public.prop_markets_index USING btree (s
 -- Name: idx_24970_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24970_prop ON public.props USING btree (sourceid, id, pid, week, year, ln, "timestamp");
+CREATE UNIQUE INDEX idx_24970_prop ON public.props USING btree (sourceid, id, pid, week, season_year, ln, observed_at);
 
 
 --
 -- Name: idx_24974_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id, pid, week, year, prop_type, ln, time_type);
+CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id, pid, week, season_year, prop_type, ln, time_type);
 
 
 --
@@ -29765,14 +29765,14 @@ CREATE INDEX idx_nfl_matchup_stats_esbid ON public.nfl_matchup_stats USING btree
 -- Name: idx_nfl_play_stats_current_week_play_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_play_stats_current_week_play_id ON public.nfl_play_stats_current_week USING btree ("playId");
+CREATE INDEX idx_nfl_play_stats_current_week_play_id ON public.nfl_play_stats_current_week USING btree (play_id);
 
 
 --
 -- Name: idx_nfl_play_stats_play_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_play_stats_play_id ON public.nfl_play_stats USING btree ("playId");
+CREATE INDEX idx_nfl_play_stats_play_id ON public.nfl_play_stats USING btree (play_id);
 
 
 --
@@ -29790,10 +29790,10 @@ CREATE INDEX idx_nfl_plays_assisted_tackle_2_pid ON ONLY public.nfl_plays USING 
 
 
 --
--- Name: idx_nfl_plays_bc_pid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_plays_ball_carrier_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_bc_pid ON ONLY public.nfl_plays USING btree (bc_pid);
+CREATE INDEX idx_nfl_plays_ball_carrier_pid ON ONLY public.nfl_plays USING btree (ball_carrier_pid);
 
 
 --
@@ -29828,21 +29828,21 @@ CREATE INDEX idx_nfl_plays_esbid ON ONLY public.nfl_plays USING btree (esbid);
 -- Name: idx_nfl_plays_fantasy; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: idx_nfl_plays_fantasy_points; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fantasy_points ON ONLY public.nfl_plays USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX idx_nfl_plays_fantasy_points ON ONLY public.nfl_plays USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: idx_nfl_plays_fuml_pid_week_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fuml_pid_week_year ON ONLY public.nfl_plays USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX idx_nfl_plays_fuml_pid_week_year ON ONLY public.nfl_plays USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -29860,17 +29860,17 @@ CREATE INDEX idx_nfl_plays_nfl_week_id ON ONLY public.nfl_plays USING btree (nfl
 
 
 --
--- Name: idx_nfl_plays_off; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_plays_offense_nfl_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_off ON ONLY public.nfl_plays USING btree (off);
+CREATE INDEX idx_nfl_plays_offense_nfl_team ON ONLY public.nfl_plays USING btree (offense_nfl_team);
 
 
 --
--- Name: idx_nfl_plays_off_week; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_plays_offense_nfl_team_week; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_off_week ON ONLY public.nfl_plays USING btree (off, week);
+CREATE INDEX idx_nfl_plays_offense_nfl_team_week ON ONLY public.nfl_plays USING btree (offense_nfl_team, week);
 
 
 --
@@ -29881,10 +29881,17 @@ CREATE INDEX idx_nfl_plays_pass_location ON ONLY public.nfl_plays USING btree (p
 
 
 --
+-- Name: idx_nfl_plays_passer_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_passer_pid ON ONLY public.nfl_plays USING btree (passer_pid);
+
+
+--
 -- Name: idx_nfl_plays_pid_types; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_pid_types ON ONLY public.nfl_plays USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX idx_nfl_plays_pid_types ON ONLY public.nfl_plays USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -29898,7 +29905,7 @@ CREATE INDEX idx_nfl_plays_play_action ON ONLY public.nfl_plays USING btree (pla
 -- Name: idx_nfl_plays_play_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_play_id ON ONLY public.nfl_plays USING btree ("playId");
+CREATE INDEX idx_nfl_plays_play_id ON ONLY public.nfl_plays USING btree (play_id);
 
 
 --
@@ -29912,14 +29919,7 @@ CREATE INDEX idx_nfl_plays_play_type ON ONLY public.nfl_plays USING btree (play_
 -- Name: idx_nfl_plays_play_type_seas_type_trg_pid_off_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_play_type_seas_type_trg_pid_off_esbid ON ONLY public.nfl_plays USING btree (play_type, seas_type, trg_pid, off, esbid);
-
-
---
--- Name: idx_nfl_plays_psr_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_psr_pid ON ONLY public.nfl_plays USING btree (psr_pid);
+CREATE INDEX idx_nfl_plays_play_type_seas_type_trg_pid_off_esbid ON ONLY public.nfl_plays USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
@@ -29944,10 +29944,24 @@ CREATE INDEX idx_nfl_plays_route_ngs ON ONLY public.nfl_plays USING btree (route
 
 
 --
--- Name: idx_nfl_plays_seas_type; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_plays_season_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_seas_type ON ONLY public.nfl_plays USING btree (seas_type);
+CREATE INDEX idx_nfl_plays_season_type ON ONLY public.nfl_plays USING btree (season_type);
+
+
+--
+-- Name: idx_nfl_plays_season_year_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_season_year_esbid ON ONLY public.nfl_plays USING btree (season_year, esbid);
+
+
+--
+-- Name: idx_nfl_plays_season_year_esbid_play_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_nfl_plays_season_year_esbid_play_id ON ONLY public.nfl_plays USING btree (season_year, esbid, play_id);
 
 
 --
@@ -30007,10 +30021,10 @@ CREATE INDEX idx_nfl_plays_tackle_assist_4_pid ON ONLY public.nfl_plays USING bt
 
 
 --
--- Name: idx_nfl_plays_trg_pid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_plays_target_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_trg_pid ON ONLY public.nfl_plays USING btree (trg_pid);
+CREATE INDEX idx_nfl_plays_target_pid ON ONLY public.nfl_plays USING btree (target_pid);
 
 
 --
@@ -30021,101 +30035,87 @@ CREATE INDEX idx_nfl_plays_ydl_100 ON ONLY public.nfl_plays USING btree (ydl_100
 
 
 --
--- Name: idx_nfl_plays_year_esbid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_esbid ON ONLY public.nfl_plays USING btree (year, esbid);
-
-
---
--- Name: idx_nfl_plays_year_esbid_play_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_nfl_plays_year_esbid_play_id ON ONLY public.nfl_plays USING btree (year, esbid, "playId");
-
-
---
 -- Name: idx_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ON ONLY public.nfl_plays USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX idx_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ON ONLY public.nfl_plays USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_play_type_bc_trg_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_trg_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_trg_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_psr_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_psr_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_trg_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_trg_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_week_play_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type);
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type ON ONLY public.nfl_plays USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_week_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_bc_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_bc_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_week_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_psr_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_psr_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: idx_nfl_plays_year_seas_type_week_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_trg_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_trg_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
 -- Name: idx_nfl_snaps_partitioned; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_nfl_snaps_partitioned ON ONLY public.nfl_snaps USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX idx_nfl_snaps_partitioned ON ONLY public.nfl_snaps USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
@@ -30539,10 +30539,10 @@ CREATE INDEX idx_prop_markets_index_market_settled ON public.prop_markets_index 
 
 
 --
--- Name: idx_prop_markets_index_market_time_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_prop_markets_index_market_time_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_prop_markets_index_market_time_year ON public.prop_markets_index USING btree (market_type, time_type, year);
+CREATE INDEX idx_prop_markets_index_market_time_season_year ON public.prop_markets_index USING btree (market_type, time_type, season_year);
 
 
 --
@@ -30595,6 +30595,13 @@ CREATE INDEX idx_prop_pairings_market_prob ON public.prop_pairings USING btree (
 
 
 --
+-- Name: idx_prop_pairings_nfl_team; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_pairings_nfl_team ON public.prop_pairings USING btree (nfl_team);
+
+
+--
 -- Name: idx_prop_pairings_opp_allow_rate; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30620,13 +30627,6 @@ CREATE INDEX idx_prop_pairings_size ON public.prop_pairings USING btree (size);
 --
 
 CREATE INDEX idx_prop_pairings_source_id ON public.prop_pairings USING btree (source_id);
-
-
---
--- Name: idx_prop_pairings_team; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_team ON public.prop_pairings USING btree (team);
 
 
 --
@@ -30759,7 +30759,7 @@ CREATE INDEX idx_selection_combination_odds_history_esbid ON public.selection_co
 -- Name: idx_selection_combination_odds_history_lookup; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_selection_combination_odds_history_lookup ON public.selection_combination_odds_history USING btree (combination_id, source_id, selection_ids, "timestamp");
+CREATE INDEX idx_selection_combination_odds_history_lookup ON public.selection_combination_odds_history USING btree (combination_id, source_id, selection_ids, observed_at);
 
 
 --
@@ -30777,10 +30777,10 @@ CREATE INDEX idx_selection_combination_odds_index_esbid ON public.selection_comb
 
 
 --
--- Name: idx_selection_combination_odds_index_year_week; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_selection_combination_odds_index_season_year_week; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_selection_combination_odds_index_year_week ON public.selection_combination_odds_index USING btree (year, week);
+CREATE INDEX idx_selection_combination_odds_index_season_year_week ON public.selection_combination_odds_index USING btree (season_year, week);
 
 
 --
@@ -30980,10 +30980,10 @@ CREATE INDEX nfl_plays_current_week_esbid ON public.nfl_plays_current_week USING
 
 
 --
--- Name: nfl_plays_current_week_esbid_playId; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_current_week_esbid_play_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_current_week_esbid_playId" ON public.nfl_plays_current_week USING btree (esbid, "playId");
+CREATE UNIQUE INDEX nfl_plays_current_week_esbid_play_id ON public.nfl_plays_current_week USING btree (esbid, play_id);
 
 
 --
@@ -30994,10 +30994,10 @@ CREATE INDEX nfl_plays_current_week_off_personnel_counts_idx ON public.nfl_plays
 
 
 --
--- Name: nfl_plays_current_week_playId; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_current_week_play_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_current_week_playId" ON public.nfl_plays_current_week USING btree ("playId");
+CREATE INDEX nfl_plays_current_week_play_id ON public.nfl_plays_current_week USING btree (play_id);
 
 
 --
@@ -31046,14 +31046,14 @@ CREATE INDEX nfl_plays_year_2000_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2000_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2000_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2000 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2000 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -31123,7 +31123,7 @@ CREATE INDEX nfl_plays_year_2000_nfl_week_id_idx ON public.nfl_plays_year_2000 U
 -- Name: nfl_plays_year_2000_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_off_idx ON public.nfl_plays_year_2000 USING btree (off);
+CREATE INDEX nfl_plays_year_2000_off_idx ON public.nfl_plays_year_2000 USING btree (offense_nfl_team);
 
 
 --
@@ -31137,7 +31137,7 @@ CREATE INDEX nfl_plays_year_2000_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2000_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_off_week_idx ON public.nfl_plays_year_2000 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2000_off_week_idx ON public.nfl_plays_year_2000 USING btree (offense_nfl_team, week);
 
 
 --
@@ -31151,7 +31151,7 @@ CREATE INDEX nfl_plays_year_2000_pass_location_idx ON public.nfl_plays_year_2000
 -- Name: nfl_plays_year_2000_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2000_playId_idx" ON public.nfl_plays_year_2000 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2000_playId_idx" ON public.nfl_plays_year_2000 USING btree (play_id);
 
 
 --
@@ -31172,21 +31172,21 @@ CREATE INDEX nfl_plays_year_2000_play_type_idx ON public.nfl_plays_year_2000 USI
 -- Name: nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2000 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2000 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2000_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2000 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2000_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2000 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2000_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2000_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (passer_pid);
 
 
 --
@@ -31214,7 +31214,7 @@ CREATE INDEX nfl_plays_year_2000_route_idx ON public.nfl_plays_year_2000 USING b
 -- Name: nfl_plays_year_2000_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_seas_type_idx ON public.nfl_plays_year_2000 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2000_seas_type_idx ON public.nfl_plays_year_2000 USING btree (season_type);
 
 
 --
@@ -31291,7 +31291,7 @@ CREATE INDEX nfl_plays_year_2000_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2000_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2000_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (target_pid);
 
 
 --
@@ -31305,105 +31305,105 @@ CREATE INDEX nfl_plays_year_2000_ydl_100_idx ON public.nfl_plays_year_2000 USING
 -- Name: nfl_plays_year_2000_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_esbid_idx ON public.nfl_plays_year_2000 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2000_year_esbid_idx ON public.nfl_plays_year_2000 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2000_year_esbid_playId_idx" ON public.nfl_plays_year_2000 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2000_year_esbid_playId_idx" ON public.nfl_plays_year_2000 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2000 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2000 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -31424,14 +31424,14 @@ CREATE INDEX nfl_plays_year_2001_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2001_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2001_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2001 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2001 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -31501,7 +31501,7 @@ CREATE INDEX nfl_plays_year_2001_nfl_week_id_idx ON public.nfl_plays_year_2001 U
 -- Name: nfl_plays_year_2001_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_off_idx ON public.nfl_plays_year_2001 USING btree (off);
+CREATE INDEX nfl_plays_year_2001_off_idx ON public.nfl_plays_year_2001 USING btree (offense_nfl_team);
 
 
 --
@@ -31515,7 +31515,7 @@ CREATE INDEX nfl_plays_year_2001_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2001_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_off_week_idx ON public.nfl_plays_year_2001 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2001_off_week_idx ON public.nfl_plays_year_2001 USING btree (offense_nfl_team, week);
 
 
 --
@@ -31529,7 +31529,7 @@ CREATE INDEX nfl_plays_year_2001_pass_location_idx ON public.nfl_plays_year_2001
 -- Name: nfl_plays_year_2001_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2001_playId_idx" ON public.nfl_plays_year_2001 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2001_playId_idx" ON public.nfl_plays_year_2001 USING btree (play_id);
 
 
 --
@@ -31550,21 +31550,21 @@ CREATE INDEX nfl_plays_year_2001_play_type_idx ON public.nfl_plays_year_2001 USI
 -- Name: nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2001 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2001 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2001_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2001 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2001_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2001 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2001_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2001_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (passer_pid);
 
 
 --
@@ -31592,7 +31592,7 @@ CREATE INDEX nfl_plays_year_2001_route_idx ON public.nfl_plays_year_2001 USING b
 -- Name: nfl_plays_year_2001_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_seas_type_idx ON public.nfl_plays_year_2001 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2001_seas_type_idx ON public.nfl_plays_year_2001 USING btree (season_type);
 
 
 --
@@ -31669,7 +31669,7 @@ CREATE INDEX nfl_plays_year_2001_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2001_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2001_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (target_pid);
 
 
 --
@@ -31683,105 +31683,105 @@ CREATE INDEX nfl_plays_year_2001_ydl_100_idx ON public.nfl_plays_year_2001 USING
 -- Name: nfl_plays_year_2001_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_esbid_idx ON public.nfl_plays_year_2001 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2001_year_esbid_idx ON public.nfl_plays_year_2001 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2001_year_esbid_playId_idx" ON public.nfl_plays_year_2001 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2001_year_esbid_playId_idx" ON public.nfl_plays_year_2001 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2001 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2001 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -31802,14 +31802,14 @@ CREATE INDEX nfl_plays_year_2002_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2002_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2002_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2002 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2002 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -31879,7 +31879,7 @@ CREATE INDEX nfl_plays_year_2002_nfl_week_id_idx ON public.nfl_plays_year_2002 U
 -- Name: nfl_plays_year_2002_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_off_idx ON public.nfl_plays_year_2002 USING btree (off);
+CREATE INDEX nfl_plays_year_2002_off_idx ON public.nfl_plays_year_2002 USING btree (offense_nfl_team);
 
 
 --
@@ -31893,7 +31893,7 @@ CREATE INDEX nfl_plays_year_2002_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2002_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_off_week_idx ON public.nfl_plays_year_2002 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2002_off_week_idx ON public.nfl_plays_year_2002 USING btree (offense_nfl_team, week);
 
 
 --
@@ -31907,7 +31907,7 @@ CREATE INDEX nfl_plays_year_2002_pass_location_idx ON public.nfl_plays_year_2002
 -- Name: nfl_plays_year_2002_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2002_playId_idx" ON public.nfl_plays_year_2002 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2002_playId_idx" ON public.nfl_plays_year_2002 USING btree (play_id);
 
 
 --
@@ -31928,21 +31928,21 @@ CREATE INDEX nfl_plays_year_2002_play_type_idx ON public.nfl_plays_year_2002 USI
 -- Name: nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2002 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2002 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2002_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2002 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2002_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2002 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2002_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2002_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (passer_pid);
 
 
 --
@@ -31970,7 +31970,7 @@ CREATE INDEX nfl_plays_year_2002_route_idx ON public.nfl_plays_year_2002 USING b
 -- Name: nfl_plays_year_2002_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_seas_type_idx ON public.nfl_plays_year_2002 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2002_seas_type_idx ON public.nfl_plays_year_2002 USING btree (season_type);
 
 
 --
@@ -32047,7 +32047,7 @@ CREATE INDEX nfl_plays_year_2002_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2002_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2002_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (target_pid);
 
 
 --
@@ -32061,105 +32061,105 @@ CREATE INDEX nfl_plays_year_2002_ydl_100_idx ON public.nfl_plays_year_2002 USING
 -- Name: nfl_plays_year_2002_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_esbid_idx ON public.nfl_plays_year_2002 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2002_year_esbid_idx ON public.nfl_plays_year_2002 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2002_year_esbid_playId_idx" ON public.nfl_plays_year_2002 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2002_year_esbid_playId_idx" ON public.nfl_plays_year_2002 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2002 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2002 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -32180,14 +32180,14 @@ CREATE INDEX nfl_plays_year_2003_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2003_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2003_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2003 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2003 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -32257,7 +32257,7 @@ CREATE INDEX nfl_plays_year_2003_nfl_week_id_idx ON public.nfl_plays_year_2003 U
 -- Name: nfl_plays_year_2003_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_off_idx ON public.nfl_plays_year_2003 USING btree (off);
+CREATE INDEX nfl_plays_year_2003_off_idx ON public.nfl_plays_year_2003 USING btree (offense_nfl_team);
 
 
 --
@@ -32271,7 +32271,7 @@ CREATE INDEX nfl_plays_year_2003_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2003_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_off_week_idx ON public.nfl_plays_year_2003 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2003_off_week_idx ON public.nfl_plays_year_2003 USING btree (offense_nfl_team, week);
 
 
 --
@@ -32285,7 +32285,7 @@ CREATE INDEX nfl_plays_year_2003_pass_location_idx ON public.nfl_plays_year_2003
 -- Name: nfl_plays_year_2003_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2003_playId_idx" ON public.nfl_plays_year_2003 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2003_playId_idx" ON public.nfl_plays_year_2003 USING btree (play_id);
 
 
 --
@@ -32306,21 +32306,21 @@ CREATE INDEX nfl_plays_year_2003_play_type_idx ON public.nfl_plays_year_2003 USI
 -- Name: nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2003 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2003 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2003_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2003 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2003_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2003 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2003_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2003_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (passer_pid);
 
 
 --
@@ -32348,7 +32348,7 @@ CREATE INDEX nfl_plays_year_2003_route_idx ON public.nfl_plays_year_2003 USING b
 -- Name: nfl_plays_year_2003_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_seas_type_idx ON public.nfl_plays_year_2003 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2003_seas_type_idx ON public.nfl_plays_year_2003 USING btree (season_type);
 
 
 --
@@ -32425,7 +32425,7 @@ CREATE INDEX nfl_plays_year_2003_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2003_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2003_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (target_pid);
 
 
 --
@@ -32439,105 +32439,105 @@ CREATE INDEX nfl_plays_year_2003_ydl_100_idx ON public.nfl_plays_year_2003 USING
 -- Name: nfl_plays_year_2003_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_esbid_idx ON public.nfl_plays_year_2003 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2003_year_esbid_idx ON public.nfl_plays_year_2003 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2003_year_esbid_playId_idx" ON public.nfl_plays_year_2003 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2003_year_esbid_playId_idx" ON public.nfl_plays_year_2003 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2003 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2003 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -32558,14 +32558,14 @@ CREATE INDEX nfl_plays_year_2004_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2004_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2004_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2004 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2004 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -32635,7 +32635,7 @@ CREATE INDEX nfl_plays_year_2004_nfl_week_id_idx ON public.nfl_plays_year_2004 U
 -- Name: nfl_plays_year_2004_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_off_idx ON public.nfl_plays_year_2004 USING btree (off);
+CREATE INDEX nfl_plays_year_2004_off_idx ON public.nfl_plays_year_2004 USING btree (offense_nfl_team);
 
 
 --
@@ -32649,7 +32649,7 @@ CREATE INDEX nfl_plays_year_2004_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2004_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_off_week_idx ON public.nfl_plays_year_2004 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2004_off_week_idx ON public.nfl_plays_year_2004 USING btree (offense_nfl_team, week);
 
 
 --
@@ -32663,7 +32663,7 @@ CREATE INDEX nfl_plays_year_2004_pass_location_idx ON public.nfl_plays_year_2004
 -- Name: nfl_plays_year_2004_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2004_playId_idx" ON public.nfl_plays_year_2004 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2004_playId_idx" ON public.nfl_plays_year_2004 USING btree (play_id);
 
 
 --
@@ -32684,21 +32684,21 @@ CREATE INDEX nfl_plays_year_2004_play_type_idx ON public.nfl_plays_year_2004 USI
 -- Name: nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2004 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2004 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2004_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2004 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2004_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2004 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2004_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2004_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (passer_pid);
 
 
 --
@@ -32726,7 +32726,7 @@ CREATE INDEX nfl_plays_year_2004_route_idx ON public.nfl_plays_year_2004 USING b
 -- Name: nfl_plays_year_2004_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_seas_type_idx ON public.nfl_plays_year_2004 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2004_seas_type_idx ON public.nfl_plays_year_2004 USING btree (season_type);
 
 
 --
@@ -32803,7 +32803,7 @@ CREATE INDEX nfl_plays_year_2004_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2004_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2004_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (target_pid);
 
 
 --
@@ -32817,105 +32817,105 @@ CREATE INDEX nfl_plays_year_2004_ydl_100_idx ON public.nfl_plays_year_2004 USING
 -- Name: nfl_plays_year_2004_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_esbid_idx ON public.nfl_plays_year_2004 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2004_year_esbid_idx ON public.nfl_plays_year_2004 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2004_year_esbid_playId_idx" ON public.nfl_plays_year_2004 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2004_year_esbid_playId_idx" ON public.nfl_plays_year_2004 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2004 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2004 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -32936,14 +32936,14 @@ CREATE INDEX nfl_plays_year_2005_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2005_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2005_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2005 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2005 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -33013,7 +33013,7 @@ CREATE INDEX nfl_plays_year_2005_nfl_week_id_idx ON public.nfl_plays_year_2005 U
 -- Name: nfl_plays_year_2005_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_off_idx ON public.nfl_plays_year_2005 USING btree (off);
+CREATE INDEX nfl_plays_year_2005_off_idx ON public.nfl_plays_year_2005 USING btree (offense_nfl_team);
 
 
 --
@@ -33027,7 +33027,7 @@ CREATE INDEX nfl_plays_year_2005_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2005_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_off_week_idx ON public.nfl_plays_year_2005 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2005_off_week_idx ON public.nfl_plays_year_2005 USING btree (offense_nfl_team, week);
 
 
 --
@@ -33041,7 +33041,7 @@ CREATE INDEX nfl_plays_year_2005_pass_location_idx ON public.nfl_plays_year_2005
 -- Name: nfl_plays_year_2005_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2005_playId_idx" ON public.nfl_plays_year_2005 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2005_playId_idx" ON public.nfl_plays_year_2005 USING btree (play_id);
 
 
 --
@@ -33062,21 +33062,21 @@ CREATE INDEX nfl_plays_year_2005_play_type_idx ON public.nfl_plays_year_2005 USI
 -- Name: nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2005 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2005 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2005_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2005 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2005_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2005 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2005_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2005_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (passer_pid);
 
 
 --
@@ -33104,7 +33104,7 @@ CREATE INDEX nfl_plays_year_2005_route_idx ON public.nfl_plays_year_2005 USING b
 -- Name: nfl_plays_year_2005_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_seas_type_idx ON public.nfl_plays_year_2005 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2005_seas_type_idx ON public.nfl_plays_year_2005 USING btree (season_type);
 
 
 --
@@ -33181,7 +33181,7 @@ CREATE INDEX nfl_plays_year_2005_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2005_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2005_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (target_pid);
 
 
 --
@@ -33195,105 +33195,105 @@ CREATE INDEX nfl_plays_year_2005_ydl_100_idx ON public.nfl_plays_year_2005 USING
 -- Name: nfl_plays_year_2005_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_esbid_idx ON public.nfl_plays_year_2005 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2005_year_esbid_idx ON public.nfl_plays_year_2005 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2005_year_esbid_playId_idx" ON public.nfl_plays_year_2005 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2005_year_esbid_playId_idx" ON public.nfl_plays_year_2005 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2005 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2005 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -33314,14 +33314,14 @@ CREATE INDEX nfl_plays_year_2006_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2006_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2006_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2006 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2006 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -33391,7 +33391,7 @@ CREATE INDEX nfl_plays_year_2006_nfl_week_id_idx ON public.nfl_plays_year_2006 U
 -- Name: nfl_plays_year_2006_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_off_idx ON public.nfl_plays_year_2006 USING btree (off);
+CREATE INDEX nfl_plays_year_2006_off_idx ON public.nfl_plays_year_2006 USING btree (offense_nfl_team);
 
 
 --
@@ -33405,7 +33405,7 @@ CREATE INDEX nfl_plays_year_2006_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2006_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_off_week_idx ON public.nfl_plays_year_2006 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2006_off_week_idx ON public.nfl_plays_year_2006 USING btree (offense_nfl_team, week);
 
 
 --
@@ -33419,7 +33419,7 @@ CREATE INDEX nfl_plays_year_2006_pass_location_idx ON public.nfl_plays_year_2006
 -- Name: nfl_plays_year_2006_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2006_playId_idx" ON public.nfl_plays_year_2006 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2006_playId_idx" ON public.nfl_plays_year_2006 USING btree (play_id);
 
 
 --
@@ -33440,21 +33440,21 @@ CREATE INDEX nfl_plays_year_2006_play_type_idx ON public.nfl_plays_year_2006 USI
 -- Name: nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2006 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2006 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2006_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2006 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2006_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2006 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2006_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2006_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (passer_pid);
 
 
 --
@@ -33482,7 +33482,7 @@ CREATE INDEX nfl_plays_year_2006_route_idx ON public.nfl_plays_year_2006 USING b
 -- Name: nfl_plays_year_2006_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_seas_type_idx ON public.nfl_plays_year_2006 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2006_seas_type_idx ON public.nfl_plays_year_2006 USING btree (season_type);
 
 
 --
@@ -33559,7 +33559,7 @@ CREATE INDEX nfl_plays_year_2006_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2006_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2006_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (target_pid);
 
 
 --
@@ -33573,105 +33573,105 @@ CREATE INDEX nfl_plays_year_2006_ydl_100_idx ON public.nfl_plays_year_2006 USING
 -- Name: nfl_plays_year_2006_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_esbid_idx ON public.nfl_plays_year_2006 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2006_year_esbid_idx ON public.nfl_plays_year_2006 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2006_year_esbid_playId_idx" ON public.nfl_plays_year_2006 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2006_year_esbid_playId_idx" ON public.nfl_plays_year_2006 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2006 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2006 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -33692,14 +33692,14 @@ CREATE INDEX nfl_plays_year_2007_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2007_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2007_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2007 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2007 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -33769,7 +33769,7 @@ CREATE INDEX nfl_plays_year_2007_nfl_week_id_idx ON public.nfl_plays_year_2007 U
 -- Name: nfl_plays_year_2007_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_off_idx ON public.nfl_plays_year_2007 USING btree (off);
+CREATE INDEX nfl_plays_year_2007_off_idx ON public.nfl_plays_year_2007 USING btree (offense_nfl_team);
 
 
 --
@@ -33783,7 +33783,7 @@ CREATE INDEX nfl_plays_year_2007_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2007_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_off_week_idx ON public.nfl_plays_year_2007 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2007_off_week_idx ON public.nfl_plays_year_2007 USING btree (offense_nfl_team, week);
 
 
 --
@@ -33797,7 +33797,7 @@ CREATE INDEX nfl_plays_year_2007_pass_location_idx ON public.nfl_plays_year_2007
 -- Name: nfl_plays_year_2007_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2007_playId_idx" ON public.nfl_plays_year_2007 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2007_playId_idx" ON public.nfl_plays_year_2007 USING btree (play_id);
 
 
 --
@@ -33818,21 +33818,21 @@ CREATE INDEX nfl_plays_year_2007_play_type_idx ON public.nfl_plays_year_2007 USI
 -- Name: nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2007 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2007 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2007_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2007 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2007_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2007 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2007_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2007_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (passer_pid);
 
 
 --
@@ -33860,7 +33860,7 @@ CREATE INDEX nfl_plays_year_2007_route_idx ON public.nfl_plays_year_2007 USING b
 -- Name: nfl_plays_year_2007_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_seas_type_idx ON public.nfl_plays_year_2007 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2007_seas_type_idx ON public.nfl_plays_year_2007 USING btree (season_type);
 
 
 --
@@ -33937,7 +33937,7 @@ CREATE INDEX nfl_plays_year_2007_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2007_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2007_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (target_pid);
 
 
 --
@@ -33951,105 +33951,105 @@ CREATE INDEX nfl_plays_year_2007_ydl_100_idx ON public.nfl_plays_year_2007 USING
 -- Name: nfl_plays_year_2007_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_esbid_idx ON public.nfl_plays_year_2007 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2007_year_esbid_idx ON public.nfl_plays_year_2007 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2007_year_esbid_playId_idx" ON public.nfl_plays_year_2007 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2007_year_esbid_playId_idx" ON public.nfl_plays_year_2007 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2007 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2007 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -34070,14 +34070,14 @@ CREATE INDEX nfl_plays_year_2008_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2008_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2008_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2008 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2008 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -34147,7 +34147,7 @@ CREATE INDEX nfl_plays_year_2008_nfl_week_id_idx ON public.nfl_plays_year_2008 U
 -- Name: nfl_plays_year_2008_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_off_idx ON public.nfl_plays_year_2008 USING btree (off);
+CREATE INDEX nfl_plays_year_2008_off_idx ON public.nfl_plays_year_2008 USING btree (offense_nfl_team);
 
 
 --
@@ -34161,7 +34161,7 @@ CREATE INDEX nfl_plays_year_2008_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2008_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_off_week_idx ON public.nfl_plays_year_2008 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2008_off_week_idx ON public.nfl_plays_year_2008 USING btree (offense_nfl_team, week);
 
 
 --
@@ -34175,7 +34175,7 @@ CREATE INDEX nfl_plays_year_2008_pass_location_idx ON public.nfl_plays_year_2008
 -- Name: nfl_plays_year_2008_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2008_playId_idx" ON public.nfl_plays_year_2008 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2008_playId_idx" ON public.nfl_plays_year_2008 USING btree (play_id);
 
 
 --
@@ -34196,21 +34196,21 @@ CREATE INDEX nfl_plays_year_2008_play_type_idx ON public.nfl_plays_year_2008 USI
 -- Name: nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2008 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2008 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2008_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2008 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2008_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2008 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2008_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2008_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (passer_pid);
 
 
 --
@@ -34238,7 +34238,7 @@ CREATE INDEX nfl_plays_year_2008_route_idx ON public.nfl_plays_year_2008 USING b
 -- Name: nfl_plays_year_2008_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_seas_type_idx ON public.nfl_plays_year_2008 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2008_seas_type_idx ON public.nfl_plays_year_2008 USING btree (season_type);
 
 
 --
@@ -34315,7 +34315,7 @@ CREATE INDEX nfl_plays_year_2008_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2008_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2008_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (target_pid);
 
 
 --
@@ -34329,105 +34329,105 @@ CREATE INDEX nfl_plays_year_2008_ydl_100_idx ON public.nfl_plays_year_2008 USING
 -- Name: nfl_plays_year_2008_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_esbid_idx ON public.nfl_plays_year_2008 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2008_year_esbid_idx ON public.nfl_plays_year_2008 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2008_year_esbid_playId_idx" ON public.nfl_plays_year_2008 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2008_year_esbid_playId_idx" ON public.nfl_plays_year_2008 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2008 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2008 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -34448,14 +34448,14 @@ CREATE INDEX nfl_plays_year_2009_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2009_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2009_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2009 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2009 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -34525,7 +34525,7 @@ CREATE INDEX nfl_plays_year_2009_nfl_week_id_idx ON public.nfl_plays_year_2009 U
 -- Name: nfl_plays_year_2009_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_off_idx ON public.nfl_plays_year_2009 USING btree (off);
+CREATE INDEX nfl_plays_year_2009_off_idx ON public.nfl_plays_year_2009 USING btree (offense_nfl_team);
 
 
 --
@@ -34539,7 +34539,7 @@ CREATE INDEX nfl_plays_year_2009_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2009_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_off_week_idx ON public.nfl_plays_year_2009 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2009_off_week_idx ON public.nfl_plays_year_2009 USING btree (offense_nfl_team, week);
 
 
 --
@@ -34553,7 +34553,7 @@ CREATE INDEX nfl_plays_year_2009_pass_location_idx ON public.nfl_plays_year_2009
 -- Name: nfl_plays_year_2009_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2009_playId_idx" ON public.nfl_plays_year_2009 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2009_playId_idx" ON public.nfl_plays_year_2009 USING btree (play_id);
 
 
 --
@@ -34574,21 +34574,21 @@ CREATE INDEX nfl_plays_year_2009_play_type_idx ON public.nfl_plays_year_2009 USI
 -- Name: nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2009 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2009 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2009_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2009 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2009_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2009 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2009_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2009_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (passer_pid);
 
 
 --
@@ -34616,7 +34616,7 @@ CREATE INDEX nfl_plays_year_2009_route_idx ON public.nfl_plays_year_2009 USING b
 -- Name: nfl_plays_year_2009_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_seas_type_idx ON public.nfl_plays_year_2009 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2009_seas_type_idx ON public.nfl_plays_year_2009 USING btree (season_type);
 
 
 --
@@ -34693,7 +34693,7 @@ CREATE INDEX nfl_plays_year_2009_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2009_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2009_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (target_pid);
 
 
 --
@@ -34707,105 +34707,105 @@ CREATE INDEX nfl_plays_year_2009_ydl_100_idx ON public.nfl_plays_year_2009 USING
 -- Name: nfl_plays_year_2009_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_esbid_idx ON public.nfl_plays_year_2009 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2009_year_esbid_idx ON public.nfl_plays_year_2009 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2009_year_esbid_playId_idx" ON public.nfl_plays_year_2009 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2009_year_esbid_playId_idx" ON public.nfl_plays_year_2009 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2009 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2009 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -34826,14 +34826,14 @@ CREATE INDEX nfl_plays_year_2010_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2010_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2010_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2010 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2010 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -34903,7 +34903,7 @@ CREATE INDEX nfl_plays_year_2010_nfl_week_id_idx ON public.nfl_plays_year_2010 U
 -- Name: nfl_plays_year_2010_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_off_idx ON public.nfl_plays_year_2010 USING btree (off);
+CREATE INDEX nfl_plays_year_2010_off_idx ON public.nfl_plays_year_2010 USING btree (offense_nfl_team);
 
 
 --
@@ -34917,7 +34917,7 @@ CREATE INDEX nfl_plays_year_2010_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2010_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_off_week_idx ON public.nfl_plays_year_2010 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2010_off_week_idx ON public.nfl_plays_year_2010 USING btree (offense_nfl_team, week);
 
 
 --
@@ -34931,7 +34931,7 @@ CREATE INDEX nfl_plays_year_2010_pass_location_idx ON public.nfl_plays_year_2010
 -- Name: nfl_plays_year_2010_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2010_playId_idx" ON public.nfl_plays_year_2010 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2010_playId_idx" ON public.nfl_plays_year_2010 USING btree (play_id);
 
 
 --
@@ -34952,21 +34952,21 @@ CREATE INDEX nfl_plays_year_2010_play_type_idx ON public.nfl_plays_year_2010 USI
 -- Name: nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2010 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2010 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2010_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2010 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2010_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2010 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2010_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2010_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (passer_pid);
 
 
 --
@@ -34994,7 +34994,7 @@ CREATE INDEX nfl_plays_year_2010_route_idx ON public.nfl_plays_year_2010 USING b
 -- Name: nfl_plays_year_2010_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_seas_type_idx ON public.nfl_plays_year_2010 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2010_seas_type_idx ON public.nfl_plays_year_2010 USING btree (season_type);
 
 
 --
@@ -35071,7 +35071,7 @@ CREATE INDEX nfl_plays_year_2010_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2010_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2010_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (target_pid);
 
 
 --
@@ -35085,105 +35085,105 @@ CREATE INDEX nfl_plays_year_2010_ydl_100_idx ON public.nfl_plays_year_2010 USING
 -- Name: nfl_plays_year_2010_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_esbid_idx ON public.nfl_plays_year_2010 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2010_year_esbid_idx ON public.nfl_plays_year_2010 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2010_year_esbid_playId_idx" ON public.nfl_plays_year_2010 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2010_year_esbid_playId_idx" ON public.nfl_plays_year_2010 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2010 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2010 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -35204,14 +35204,14 @@ CREATE INDEX nfl_plays_year_2011_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2011_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2011_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2011 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2011 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -35281,7 +35281,7 @@ CREATE INDEX nfl_plays_year_2011_nfl_week_id_idx ON public.nfl_plays_year_2011 U
 -- Name: nfl_plays_year_2011_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_off_idx ON public.nfl_plays_year_2011 USING btree (off);
+CREATE INDEX nfl_plays_year_2011_off_idx ON public.nfl_plays_year_2011 USING btree (offense_nfl_team);
 
 
 --
@@ -35295,7 +35295,7 @@ CREATE INDEX nfl_plays_year_2011_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2011_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_off_week_idx ON public.nfl_plays_year_2011 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2011_off_week_idx ON public.nfl_plays_year_2011 USING btree (offense_nfl_team, week);
 
 
 --
@@ -35309,7 +35309,7 @@ CREATE INDEX nfl_plays_year_2011_pass_location_idx ON public.nfl_plays_year_2011
 -- Name: nfl_plays_year_2011_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2011_playId_idx" ON public.nfl_plays_year_2011 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2011_playId_idx" ON public.nfl_plays_year_2011 USING btree (play_id);
 
 
 --
@@ -35330,21 +35330,21 @@ CREATE INDEX nfl_plays_year_2011_play_type_idx ON public.nfl_plays_year_2011 USI
 -- Name: nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2011 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2011 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2011_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2011 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2011_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2011 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2011_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2011_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (passer_pid);
 
 
 --
@@ -35372,7 +35372,7 @@ CREATE INDEX nfl_plays_year_2011_route_idx ON public.nfl_plays_year_2011 USING b
 -- Name: nfl_plays_year_2011_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_seas_type_idx ON public.nfl_plays_year_2011 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2011_seas_type_idx ON public.nfl_plays_year_2011 USING btree (season_type);
 
 
 --
@@ -35449,7 +35449,7 @@ CREATE INDEX nfl_plays_year_2011_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2011_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2011_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (target_pid);
 
 
 --
@@ -35463,105 +35463,105 @@ CREATE INDEX nfl_plays_year_2011_ydl_100_idx ON public.nfl_plays_year_2011 USING
 -- Name: nfl_plays_year_2011_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_esbid_idx ON public.nfl_plays_year_2011 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2011_year_esbid_idx ON public.nfl_plays_year_2011 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2011_year_esbid_playId_idx" ON public.nfl_plays_year_2011 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2011_year_esbid_playId_idx" ON public.nfl_plays_year_2011 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2011 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2011 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -35582,14 +35582,14 @@ CREATE INDEX nfl_plays_year_2012_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2012_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2012_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2012 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2012 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -35659,7 +35659,7 @@ CREATE INDEX nfl_plays_year_2012_nfl_week_id_idx ON public.nfl_plays_year_2012 U
 -- Name: nfl_plays_year_2012_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_off_idx ON public.nfl_plays_year_2012 USING btree (off);
+CREATE INDEX nfl_plays_year_2012_off_idx ON public.nfl_plays_year_2012 USING btree (offense_nfl_team);
 
 
 --
@@ -35673,7 +35673,7 @@ CREATE INDEX nfl_plays_year_2012_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2012_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_off_week_idx ON public.nfl_plays_year_2012 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2012_off_week_idx ON public.nfl_plays_year_2012 USING btree (offense_nfl_team, week);
 
 
 --
@@ -35687,7 +35687,7 @@ CREATE INDEX nfl_plays_year_2012_pass_location_idx ON public.nfl_plays_year_2012
 -- Name: nfl_plays_year_2012_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2012_playId_idx" ON public.nfl_plays_year_2012 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2012_playId_idx" ON public.nfl_plays_year_2012 USING btree (play_id);
 
 
 --
@@ -35708,21 +35708,21 @@ CREATE INDEX nfl_plays_year_2012_play_type_idx ON public.nfl_plays_year_2012 USI
 -- Name: nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2012 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2012 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2012_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2012 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2012_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2012 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2012_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2012_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (passer_pid);
 
 
 --
@@ -35750,7 +35750,7 @@ CREATE INDEX nfl_plays_year_2012_route_idx ON public.nfl_plays_year_2012 USING b
 -- Name: nfl_plays_year_2012_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_seas_type_idx ON public.nfl_plays_year_2012 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2012_seas_type_idx ON public.nfl_plays_year_2012 USING btree (season_type);
 
 
 --
@@ -35827,7 +35827,7 @@ CREATE INDEX nfl_plays_year_2012_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2012_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2012_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (target_pid);
 
 
 --
@@ -35841,105 +35841,105 @@ CREATE INDEX nfl_plays_year_2012_ydl_100_idx ON public.nfl_plays_year_2012 USING
 -- Name: nfl_plays_year_2012_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_esbid_idx ON public.nfl_plays_year_2012 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2012_year_esbid_idx ON public.nfl_plays_year_2012 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2012_year_esbid_playId_idx" ON public.nfl_plays_year_2012 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2012_year_esbid_playId_idx" ON public.nfl_plays_year_2012 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2012 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2012 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -35960,14 +35960,14 @@ CREATE INDEX nfl_plays_year_2013_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2013_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2013_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2013 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2013 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -36037,7 +36037,7 @@ CREATE INDEX nfl_plays_year_2013_nfl_week_id_idx ON public.nfl_plays_year_2013 U
 -- Name: nfl_plays_year_2013_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_off_idx ON public.nfl_plays_year_2013 USING btree (off);
+CREATE INDEX nfl_plays_year_2013_off_idx ON public.nfl_plays_year_2013 USING btree (offense_nfl_team);
 
 
 --
@@ -36051,7 +36051,7 @@ CREATE INDEX nfl_plays_year_2013_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2013_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_off_week_idx ON public.nfl_plays_year_2013 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2013_off_week_idx ON public.nfl_plays_year_2013 USING btree (offense_nfl_team, week);
 
 
 --
@@ -36065,7 +36065,7 @@ CREATE INDEX nfl_plays_year_2013_pass_location_idx ON public.nfl_plays_year_2013
 -- Name: nfl_plays_year_2013_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2013_playId_idx" ON public.nfl_plays_year_2013 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2013_playId_idx" ON public.nfl_plays_year_2013 USING btree (play_id);
 
 
 --
@@ -36086,21 +36086,21 @@ CREATE INDEX nfl_plays_year_2013_play_type_idx ON public.nfl_plays_year_2013 USI
 -- Name: nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2013 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2013 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2013_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2013 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2013_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2013 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2013_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2013_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (passer_pid);
 
 
 --
@@ -36128,7 +36128,7 @@ CREATE INDEX nfl_plays_year_2013_route_idx ON public.nfl_plays_year_2013 USING b
 -- Name: nfl_plays_year_2013_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_seas_type_idx ON public.nfl_plays_year_2013 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2013_seas_type_idx ON public.nfl_plays_year_2013 USING btree (season_type);
 
 
 --
@@ -36205,7 +36205,7 @@ CREATE INDEX nfl_plays_year_2013_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2013_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2013_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (target_pid);
 
 
 --
@@ -36219,105 +36219,105 @@ CREATE INDEX nfl_plays_year_2013_ydl_100_idx ON public.nfl_plays_year_2013 USING
 -- Name: nfl_plays_year_2013_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_esbid_idx ON public.nfl_plays_year_2013 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2013_year_esbid_idx ON public.nfl_plays_year_2013 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2013_year_esbid_playId_idx" ON public.nfl_plays_year_2013 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2013_year_esbid_playId_idx" ON public.nfl_plays_year_2013 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2013 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2013 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -36338,14 +36338,14 @@ CREATE INDEX nfl_plays_year_2014_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2014_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2014_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2014 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2014 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -36415,7 +36415,7 @@ CREATE INDEX nfl_plays_year_2014_nfl_week_id_idx ON public.nfl_plays_year_2014 U
 -- Name: nfl_plays_year_2014_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_off_idx ON public.nfl_plays_year_2014 USING btree (off);
+CREATE INDEX nfl_plays_year_2014_off_idx ON public.nfl_plays_year_2014 USING btree (offense_nfl_team);
 
 
 --
@@ -36429,7 +36429,7 @@ CREATE INDEX nfl_plays_year_2014_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2014_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_off_week_idx ON public.nfl_plays_year_2014 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2014_off_week_idx ON public.nfl_plays_year_2014 USING btree (offense_nfl_team, week);
 
 
 --
@@ -36443,7 +36443,7 @@ CREATE INDEX nfl_plays_year_2014_pass_location_idx ON public.nfl_plays_year_2014
 -- Name: nfl_plays_year_2014_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2014_playId_idx" ON public.nfl_plays_year_2014 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2014_playId_idx" ON public.nfl_plays_year_2014 USING btree (play_id);
 
 
 --
@@ -36464,21 +36464,21 @@ CREATE INDEX nfl_plays_year_2014_play_type_idx ON public.nfl_plays_year_2014 USI
 -- Name: nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2014 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2014 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2014_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2014 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2014_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2014 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2014_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2014_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (passer_pid);
 
 
 --
@@ -36506,7 +36506,7 @@ CREATE INDEX nfl_plays_year_2014_route_idx ON public.nfl_plays_year_2014 USING b
 -- Name: nfl_plays_year_2014_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_seas_type_idx ON public.nfl_plays_year_2014 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2014_seas_type_idx ON public.nfl_plays_year_2014 USING btree (season_type);
 
 
 --
@@ -36583,7 +36583,7 @@ CREATE INDEX nfl_plays_year_2014_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2014_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2014_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (target_pid);
 
 
 --
@@ -36597,105 +36597,105 @@ CREATE INDEX nfl_plays_year_2014_ydl_100_idx ON public.nfl_plays_year_2014 USING
 -- Name: nfl_plays_year_2014_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_esbid_idx ON public.nfl_plays_year_2014 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2014_year_esbid_idx ON public.nfl_plays_year_2014 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2014_year_esbid_playId_idx" ON public.nfl_plays_year_2014 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2014_year_esbid_playId_idx" ON public.nfl_plays_year_2014 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2014 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2014 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -36716,14 +36716,14 @@ CREATE INDEX nfl_plays_year_2015_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2015_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2015_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2015 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2015 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -36793,7 +36793,7 @@ CREATE INDEX nfl_plays_year_2015_nfl_week_id_idx ON public.nfl_plays_year_2015 U
 -- Name: nfl_plays_year_2015_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_off_idx ON public.nfl_plays_year_2015 USING btree (off);
+CREATE INDEX nfl_plays_year_2015_off_idx ON public.nfl_plays_year_2015 USING btree (offense_nfl_team);
 
 
 --
@@ -36807,7 +36807,7 @@ CREATE INDEX nfl_plays_year_2015_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2015_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_off_week_idx ON public.nfl_plays_year_2015 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2015_off_week_idx ON public.nfl_plays_year_2015 USING btree (offense_nfl_team, week);
 
 
 --
@@ -36821,7 +36821,7 @@ CREATE INDEX nfl_plays_year_2015_pass_location_idx ON public.nfl_plays_year_2015
 -- Name: nfl_plays_year_2015_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2015_playId_idx" ON public.nfl_plays_year_2015 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2015_playId_idx" ON public.nfl_plays_year_2015 USING btree (play_id);
 
 
 --
@@ -36842,21 +36842,21 @@ CREATE INDEX nfl_plays_year_2015_play_type_idx ON public.nfl_plays_year_2015 USI
 -- Name: nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2015 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2015 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2015_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2015 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2015_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2015 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2015_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2015_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (passer_pid);
 
 
 --
@@ -36884,7 +36884,7 @@ CREATE INDEX nfl_plays_year_2015_route_idx ON public.nfl_plays_year_2015 USING b
 -- Name: nfl_plays_year_2015_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_seas_type_idx ON public.nfl_plays_year_2015 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2015_seas_type_idx ON public.nfl_plays_year_2015 USING btree (season_type);
 
 
 --
@@ -36961,7 +36961,7 @@ CREATE INDEX nfl_plays_year_2015_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2015_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2015_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (target_pid);
 
 
 --
@@ -36975,105 +36975,105 @@ CREATE INDEX nfl_plays_year_2015_ydl_100_idx ON public.nfl_plays_year_2015 USING
 -- Name: nfl_plays_year_2015_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_esbid_idx ON public.nfl_plays_year_2015 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2015_year_esbid_idx ON public.nfl_plays_year_2015 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2015_year_esbid_playId_idx" ON public.nfl_plays_year_2015 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2015_year_esbid_playId_idx" ON public.nfl_plays_year_2015 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2015 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2015 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -37094,14 +37094,14 @@ CREATE INDEX nfl_plays_year_2016_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2016_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2016_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2016 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2016 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -37171,7 +37171,7 @@ CREATE INDEX nfl_plays_year_2016_nfl_week_id_idx ON public.nfl_plays_year_2016 U
 -- Name: nfl_plays_year_2016_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_off_idx ON public.nfl_plays_year_2016 USING btree (off);
+CREATE INDEX nfl_plays_year_2016_off_idx ON public.nfl_plays_year_2016 USING btree (offense_nfl_team);
 
 
 --
@@ -37185,7 +37185,7 @@ CREATE INDEX nfl_plays_year_2016_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2016_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_off_week_idx ON public.nfl_plays_year_2016 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2016_off_week_idx ON public.nfl_plays_year_2016 USING btree (offense_nfl_team, week);
 
 
 --
@@ -37199,7 +37199,7 @@ CREATE INDEX nfl_plays_year_2016_pass_location_idx ON public.nfl_plays_year_2016
 -- Name: nfl_plays_year_2016_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2016_playId_idx" ON public.nfl_plays_year_2016 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2016_playId_idx" ON public.nfl_plays_year_2016 USING btree (play_id);
 
 
 --
@@ -37220,21 +37220,21 @@ CREATE INDEX nfl_plays_year_2016_play_type_idx ON public.nfl_plays_year_2016 USI
 -- Name: nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2016 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2016 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2016_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2016 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2016_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2016 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2016_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2016_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (passer_pid);
 
 
 --
@@ -37262,7 +37262,7 @@ CREATE INDEX nfl_plays_year_2016_route_idx ON public.nfl_plays_year_2016 USING b
 -- Name: nfl_plays_year_2016_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_seas_type_idx ON public.nfl_plays_year_2016 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2016_seas_type_idx ON public.nfl_plays_year_2016 USING btree (season_type);
 
 
 --
@@ -37339,7 +37339,7 @@ CREATE INDEX nfl_plays_year_2016_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2016_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2016_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (target_pid);
 
 
 --
@@ -37353,105 +37353,105 @@ CREATE INDEX nfl_plays_year_2016_ydl_100_idx ON public.nfl_plays_year_2016 USING
 -- Name: nfl_plays_year_2016_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_esbid_idx ON public.nfl_plays_year_2016 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2016_year_esbid_idx ON public.nfl_plays_year_2016 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2016_year_esbid_playId_idx" ON public.nfl_plays_year_2016 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2016_year_esbid_playId_idx" ON public.nfl_plays_year_2016 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2016 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2016 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -37472,14 +37472,14 @@ CREATE INDEX nfl_plays_year_2017_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2017_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2017_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2017 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2017 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -37549,7 +37549,7 @@ CREATE INDEX nfl_plays_year_2017_nfl_week_id_idx ON public.nfl_plays_year_2017 U
 -- Name: nfl_plays_year_2017_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_off_idx ON public.nfl_plays_year_2017 USING btree (off);
+CREATE INDEX nfl_plays_year_2017_off_idx ON public.nfl_plays_year_2017 USING btree (offense_nfl_team);
 
 
 --
@@ -37563,7 +37563,7 @@ CREATE INDEX nfl_plays_year_2017_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2017_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_off_week_idx ON public.nfl_plays_year_2017 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2017_off_week_idx ON public.nfl_plays_year_2017 USING btree (offense_nfl_team, week);
 
 
 --
@@ -37577,7 +37577,7 @@ CREATE INDEX nfl_plays_year_2017_pass_location_idx ON public.nfl_plays_year_2017
 -- Name: nfl_plays_year_2017_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2017_playId_idx" ON public.nfl_plays_year_2017 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2017_playId_idx" ON public.nfl_plays_year_2017 USING btree (play_id);
 
 
 --
@@ -37598,21 +37598,21 @@ CREATE INDEX nfl_plays_year_2017_play_type_idx ON public.nfl_plays_year_2017 USI
 -- Name: nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2017 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2017 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2017_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2017 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2017_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2017 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2017_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2017_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (passer_pid);
 
 
 --
@@ -37640,7 +37640,7 @@ CREATE INDEX nfl_plays_year_2017_route_idx ON public.nfl_plays_year_2017 USING b
 -- Name: nfl_plays_year_2017_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_seas_type_idx ON public.nfl_plays_year_2017 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2017_seas_type_idx ON public.nfl_plays_year_2017 USING btree (season_type);
 
 
 --
@@ -37717,7 +37717,7 @@ CREATE INDEX nfl_plays_year_2017_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2017_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2017_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (target_pid);
 
 
 --
@@ -37731,105 +37731,105 @@ CREATE INDEX nfl_plays_year_2017_ydl_100_idx ON public.nfl_plays_year_2017 USING
 -- Name: nfl_plays_year_2017_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_esbid_idx ON public.nfl_plays_year_2017 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2017_year_esbid_idx ON public.nfl_plays_year_2017 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2017_year_esbid_playId_idx" ON public.nfl_plays_year_2017 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2017_year_esbid_playId_idx" ON public.nfl_plays_year_2017 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2017 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2017 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -37850,14 +37850,14 @@ CREATE INDEX nfl_plays_year_2018_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2018_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2018_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2018 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2018 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -37927,7 +37927,7 @@ CREATE INDEX nfl_plays_year_2018_nfl_week_id_idx ON public.nfl_plays_year_2018 U
 -- Name: nfl_plays_year_2018_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_off_idx ON public.nfl_plays_year_2018 USING btree (off);
+CREATE INDEX nfl_plays_year_2018_off_idx ON public.nfl_plays_year_2018 USING btree (offense_nfl_team);
 
 
 --
@@ -37941,7 +37941,7 @@ CREATE INDEX nfl_plays_year_2018_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2018_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_off_week_idx ON public.nfl_plays_year_2018 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2018_off_week_idx ON public.nfl_plays_year_2018 USING btree (offense_nfl_team, week);
 
 
 --
@@ -37955,7 +37955,7 @@ CREATE INDEX nfl_plays_year_2018_pass_location_idx ON public.nfl_plays_year_2018
 -- Name: nfl_plays_year_2018_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2018_playId_idx" ON public.nfl_plays_year_2018 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2018_playId_idx" ON public.nfl_plays_year_2018 USING btree (play_id);
 
 
 --
@@ -37976,21 +37976,21 @@ CREATE INDEX nfl_plays_year_2018_play_type_idx ON public.nfl_plays_year_2018 USI
 -- Name: nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2018 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2018 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2018_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2018 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2018_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2018 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2018_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2018_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (passer_pid);
 
 
 --
@@ -38018,7 +38018,7 @@ CREATE INDEX nfl_plays_year_2018_route_idx ON public.nfl_plays_year_2018 USING b
 -- Name: nfl_plays_year_2018_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_seas_type_idx ON public.nfl_plays_year_2018 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2018_seas_type_idx ON public.nfl_plays_year_2018 USING btree (season_type);
 
 
 --
@@ -38095,7 +38095,7 @@ CREATE INDEX nfl_plays_year_2018_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2018_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2018_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (target_pid);
 
 
 --
@@ -38109,105 +38109,105 @@ CREATE INDEX nfl_plays_year_2018_ydl_100_idx ON public.nfl_plays_year_2018 USING
 -- Name: nfl_plays_year_2018_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_esbid_idx ON public.nfl_plays_year_2018 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2018_year_esbid_idx ON public.nfl_plays_year_2018 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2018_year_esbid_playId_idx" ON public.nfl_plays_year_2018 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2018_year_esbid_playId_idx" ON public.nfl_plays_year_2018 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2018 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2018 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -38228,14 +38228,14 @@ CREATE INDEX nfl_plays_year_2019_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2019_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2019_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2019 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2019 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -38305,7 +38305,7 @@ CREATE INDEX nfl_plays_year_2019_nfl_week_id_idx ON public.nfl_plays_year_2019 U
 -- Name: nfl_plays_year_2019_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_off_idx ON public.nfl_plays_year_2019 USING btree (off);
+CREATE INDEX nfl_plays_year_2019_off_idx ON public.nfl_plays_year_2019 USING btree (offense_nfl_team);
 
 
 --
@@ -38319,7 +38319,7 @@ CREATE INDEX nfl_plays_year_2019_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2019_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_off_week_idx ON public.nfl_plays_year_2019 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2019_off_week_idx ON public.nfl_plays_year_2019 USING btree (offense_nfl_team, week);
 
 
 --
@@ -38333,7 +38333,7 @@ CREATE INDEX nfl_plays_year_2019_pass_location_idx ON public.nfl_plays_year_2019
 -- Name: nfl_plays_year_2019_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2019_playId_idx" ON public.nfl_plays_year_2019 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2019_playId_idx" ON public.nfl_plays_year_2019 USING btree (play_id);
 
 
 --
@@ -38354,21 +38354,21 @@ CREATE INDEX nfl_plays_year_2019_play_type_idx ON public.nfl_plays_year_2019 USI
 -- Name: nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2019 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2019 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2019_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2019 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2019_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2019 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2019_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2019_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (passer_pid);
 
 
 --
@@ -38396,7 +38396,7 @@ CREATE INDEX nfl_plays_year_2019_route_idx ON public.nfl_plays_year_2019 USING b
 -- Name: nfl_plays_year_2019_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_seas_type_idx ON public.nfl_plays_year_2019 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2019_seas_type_idx ON public.nfl_plays_year_2019 USING btree (season_type);
 
 
 --
@@ -38473,7 +38473,7 @@ CREATE INDEX nfl_plays_year_2019_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2019_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2019_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (target_pid);
 
 
 --
@@ -38487,105 +38487,105 @@ CREATE INDEX nfl_plays_year_2019_ydl_100_idx ON public.nfl_plays_year_2019 USING
 -- Name: nfl_plays_year_2019_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_esbid_idx ON public.nfl_plays_year_2019 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2019_year_esbid_idx ON public.nfl_plays_year_2019 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2019_year_esbid_playId_idx" ON public.nfl_plays_year_2019 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2019_year_esbid_playId_idx" ON public.nfl_plays_year_2019 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2019 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2019 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -38606,14 +38606,14 @@ CREATE INDEX nfl_plays_year_2020_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2020_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2020_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2020 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2020 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -38683,7 +38683,7 @@ CREATE INDEX nfl_plays_year_2020_nfl_week_id_idx ON public.nfl_plays_year_2020 U
 -- Name: nfl_plays_year_2020_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_off_idx ON public.nfl_plays_year_2020 USING btree (off);
+CREATE INDEX nfl_plays_year_2020_off_idx ON public.nfl_plays_year_2020 USING btree (offense_nfl_team);
 
 
 --
@@ -38697,7 +38697,7 @@ CREATE INDEX nfl_plays_year_2020_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2020_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_off_week_idx ON public.nfl_plays_year_2020 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2020_off_week_idx ON public.nfl_plays_year_2020 USING btree (offense_nfl_team, week);
 
 
 --
@@ -38711,7 +38711,7 @@ CREATE INDEX nfl_plays_year_2020_pass_location_idx ON public.nfl_plays_year_2020
 -- Name: nfl_plays_year_2020_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2020_playId_idx" ON public.nfl_plays_year_2020 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2020_playId_idx" ON public.nfl_plays_year_2020 USING btree (play_id);
 
 
 --
@@ -38732,21 +38732,21 @@ CREATE INDEX nfl_plays_year_2020_play_type_idx ON public.nfl_plays_year_2020 USI
 -- Name: nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2020 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2020 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2020_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2020 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2020_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2020 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2020_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2020_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (passer_pid);
 
 
 --
@@ -38774,7 +38774,7 @@ CREATE INDEX nfl_plays_year_2020_route_idx ON public.nfl_plays_year_2020 USING b
 -- Name: nfl_plays_year_2020_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_seas_type_idx ON public.nfl_plays_year_2020 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2020_seas_type_idx ON public.nfl_plays_year_2020 USING btree (season_type);
 
 
 --
@@ -38851,7 +38851,7 @@ CREATE INDEX nfl_plays_year_2020_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2020_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2020_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (target_pid);
 
 
 --
@@ -38865,105 +38865,105 @@ CREATE INDEX nfl_plays_year_2020_ydl_100_idx ON public.nfl_plays_year_2020 USING
 -- Name: nfl_plays_year_2020_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_esbid_idx ON public.nfl_plays_year_2020 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2020_year_esbid_idx ON public.nfl_plays_year_2020 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2020_year_esbid_playId_idx" ON public.nfl_plays_year_2020 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2020_year_esbid_playId_idx" ON public.nfl_plays_year_2020 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2020 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2020 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -38984,14 +38984,14 @@ CREATE INDEX nfl_plays_year_2021_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2021_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2021_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2021 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2021 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -39061,7 +39061,7 @@ CREATE INDEX nfl_plays_year_2021_nfl_week_id_idx ON public.nfl_plays_year_2021 U
 -- Name: nfl_plays_year_2021_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_off_idx ON public.nfl_plays_year_2021 USING btree (off);
+CREATE INDEX nfl_plays_year_2021_off_idx ON public.nfl_plays_year_2021 USING btree (offense_nfl_team);
 
 
 --
@@ -39075,7 +39075,7 @@ CREATE INDEX nfl_plays_year_2021_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2021_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_off_week_idx ON public.nfl_plays_year_2021 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2021_off_week_idx ON public.nfl_plays_year_2021 USING btree (offense_nfl_team, week);
 
 
 --
@@ -39089,7 +39089,7 @@ CREATE INDEX nfl_plays_year_2021_pass_location_idx ON public.nfl_plays_year_2021
 -- Name: nfl_plays_year_2021_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2021_playId_idx" ON public.nfl_plays_year_2021 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2021_playId_idx" ON public.nfl_plays_year_2021 USING btree (play_id);
 
 
 --
@@ -39110,21 +39110,21 @@ CREATE INDEX nfl_plays_year_2021_play_type_idx ON public.nfl_plays_year_2021 USI
 -- Name: nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2021 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2021 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2021_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2021 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2021_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2021 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2021_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2021_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (passer_pid);
 
 
 --
@@ -39152,7 +39152,7 @@ CREATE INDEX nfl_plays_year_2021_route_idx ON public.nfl_plays_year_2021 USING b
 -- Name: nfl_plays_year_2021_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_seas_type_idx ON public.nfl_plays_year_2021 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2021_seas_type_idx ON public.nfl_plays_year_2021 USING btree (season_type);
 
 
 --
@@ -39229,7 +39229,7 @@ CREATE INDEX nfl_plays_year_2021_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2021_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2021_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (target_pid);
 
 
 --
@@ -39243,105 +39243,105 @@ CREATE INDEX nfl_plays_year_2021_ydl_100_idx ON public.nfl_plays_year_2021 USING
 -- Name: nfl_plays_year_2021_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_esbid_idx ON public.nfl_plays_year_2021 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2021_year_esbid_idx ON public.nfl_plays_year_2021 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2021_year_esbid_playId_idx" ON public.nfl_plays_year_2021 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2021_year_esbid_playId_idx" ON public.nfl_plays_year_2021 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2021 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2021 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -39362,14 +39362,14 @@ CREATE INDEX nfl_plays_year_2022_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2022_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2022_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2022 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2022 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -39439,7 +39439,7 @@ CREATE INDEX nfl_plays_year_2022_nfl_week_id_idx ON public.nfl_plays_year_2022 U
 -- Name: nfl_plays_year_2022_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_off_idx ON public.nfl_plays_year_2022 USING btree (off);
+CREATE INDEX nfl_plays_year_2022_off_idx ON public.nfl_plays_year_2022 USING btree (offense_nfl_team);
 
 
 --
@@ -39453,7 +39453,7 @@ CREATE INDEX nfl_plays_year_2022_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2022_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_off_week_idx ON public.nfl_plays_year_2022 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2022_off_week_idx ON public.nfl_plays_year_2022 USING btree (offense_nfl_team, week);
 
 
 --
@@ -39467,7 +39467,7 @@ CREATE INDEX nfl_plays_year_2022_pass_location_idx ON public.nfl_plays_year_2022
 -- Name: nfl_plays_year_2022_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2022_playId_idx" ON public.nfl_plays_year_2022 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2022_playId_idx" ON public.nfl_plays_year_2022 USING btree (play_id);
 
 
 --
@@ -39488,21 +39488,21 @@ CREATE INDEX nfl_plays_year_2022_play_type_idx ON public.nfl_plays_year_2022 USI
 -- Name: nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2022 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2022 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2022_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2022 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2022_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2022 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2022_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2022_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (passer_pid);
 
 
 --
@@ -39530,7 +39530,7 @@ CREATE INDEX nfl_plays_year_2022_route_idx ON public.nfl_plays_year_2022 USING b
 -- Name: nfl_plays_year_2022_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_seas_type_idx ON public.nfl_plays_year_2022 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2022_seas_type_idx ON public.nfl_plays_year_2022 USING btree (season_type);
 
 
 --
@@ -39607,7 +39607,7 @@ CREATE INDEX nfl_plays_year_2022_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2022_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2022_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (target_pid);
 
 
 --
@@ -39621,105 +39621,105 @@ CREATE INDEX nfl_plays_year_2022_ydl_100_idx ON public.nfl_plays_year_2022 USING
 -- Name: nfl_plays_year_2022_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_esbid_idx ON public.nfl_plays_year_2022 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2022_year_esbid_idx ON public.nfl_plays_year_2022 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2022_year_esbid_playId_idx" ON public.nfl_plays_year_2022 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2022_year_esbid_playId_idx" ON public.nfl_plays_year_2022 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2022 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2022 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -39740,14 +39740,14 @@ CREATE INDEX nfl_plays_year_2023_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2023_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2023_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2023 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2023 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -39817,7 +39817,7 @@ CREATE INDEX nfl_plays_year_2023_nfl_week_id_idx ON public.nfl_plays_year_2023 U
 -- Name: nfl_plays_year_2023_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_off_idx ON public.nfl_plays_year_2023 USING btree (off);
+CREATE INDEX nfl_plays_year_2023_off_idx ON public.nfl_plays_year_2023 USING btree (offense_nfl_team);
 
 
 --
@@ -39831,7 +39831,7 @@ CREATE INDEX nfl_plays_year_2023_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2023_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_off_week_idx ON public.nfl_plays_year_2023 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2023_off_week_idx ON public.nfl_plays_year_2023 USING btree (offense_nfl_team, week);
 
 
 --
@@ -39845,7 +39845,7 @@ CREATE INDEX nfl_plays_year_2023_pass_location_idx ON public.nfl_plays_year_2023
 -- Name: nfl_plays_year_2023_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2023_playId_idx" ON public.nfl_plays_year_2023 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2023_playId_idx" ON public.nfl_plays_year_2023 USING btree (play_id);
 
 
 --
@@ -39866,21 +39866,21 @@ CREATE INDEX nfl_plays_year_2023_play_type_idx ON public.nfl_plays_year_2023 USI
 -- Name: nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2023 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2023 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2023_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2023 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2023_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2023 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2023_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2023_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (passer_pid);
 
 
 --
@@ -39908,7 +39908,7 @@ CREATE INDEX nfl_plays_year_2023_route_idx ON public.nfl_plays_year_2023 USING b
 -- Name: nfl_plays_year_2023_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_seas_type_idx ON public.nfl_plays_year_2023 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2023_seas_type_idx ON public.nfl_plays_year_2023 USING btree (season_type);
 
 
 --
@@ -39985,7 +39985,7 @@ CREATE INDEX nfl_plays_year_2023_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2023_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2023_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (target_pid);
 
 
 --
@@ -39999,105 +39999,105 @@ CREATE INDEX nfl_plays_year_2023_ydl_100_idx ON public.nfl_plays_year_2023 USING
 -- Name: nfl_plays_year_2023_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_esbid_idx ON public.nfl_plays_year_2023 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2023_year_esbid_idx ON public.nfl_plays_year_2023 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2023_year_esbid_playId_idx" ON public.nfl_plays_year_2023 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2023_year_esbid_playId_idx" ON public.nfl_plays_year_2023 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2023 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2023 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -40118,14 +40118,14 @@ CREATE INDEX nfl_plays_year_2024_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2024_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2024_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2024 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2024 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -40195,7 +40195,7 @@ CREATE INDEX nfl_plays_year_2024_nfl_week_id_idx ON public.nfl_plays_year_2024 U
 -- Name: nfl_plays_year_2024_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_off_idx ON public.nfl_plays_year_2024 USING btree (off);
+CREATE INDEX nfl_plays_year_2024_off_idx ON public.nfl_plays_year_2024 USING btree (offense_nfl_team);
 
 
 --
@@ -40209,7 +40209,7 @@ CREATE INDEX nfl_plays_year_2024_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2024_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_off_week_idx ON public.nfl_plays_year_2024 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2024_off_week_idx ON public.nfl_plays_year_2024 USING btree (offense_nfl_team, week);
 
 
 --
@@ -40223,7 +40223,7 @@ CREATE INDEX nfl_plays_year_2024_pass_location_idx ON public.nfl_plays_year_2024
 -- Name: nfl_plays_year_2024_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2024_playId_idx" ON public.nfl_plays_year_2024 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2024_playId_idx" ON public.nfl_plays_year_2024 USING btree (play_id);
 
 
 --
@@ -40244,21 +40244,21 @@ CREATE INDEX nfl_plays_year_2024_play_type_idx ON public.nfl_plays_year_2024 USI
 -- Name: nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2024 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2024 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2024_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2024 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2024_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2024 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2024_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2024_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (passer_pid);
 
 
 --
@@ -40286,7 +40286,7 @@ CREATE INDEX nfl_plays_year_2024_route_idx ON public.nfl_plays_year_2024 USING b
 -- Name: nfl_plays_year_2024_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_seas_type_idx ON public.nfl_plays_year_2024 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2024_seas_type_idx ON public.nfl_plays_year_2024 USING btree (season_type);
 
 
 --
@@ -40363,7 +40363,7 @@ CREATE INDEX nfl_plays_year_2024_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2024_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2024_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (target_pid);
 
 
 --
@@ -40377,105 +40377,105 @@ CREATE INDEX nfl_plays_year_2024_ydl_100_idx ON public.nfl_plays_year_2024 USING
 -- Name: nfl_plays_year_2024_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_esbid_idx ON public.nfl_plays_year_2024 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2024_year_esbid_idx ON public.nfl_plays_year_2024 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2024_year_esbid_playId_idx" ON public.nfl_plays_year_2024 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2024_year_esbid_playId_idx" ON public.nfl_plays_year_2024 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2024 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2024 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -40496,14 +40496,14 @@ CREATE INDEX nfl_plays_year_2025_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2025_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_bc_pid_idx ON public.nfl_plays_year_2025 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2025_bc_pid_idx ON public.nfl_plays_year_2025 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2025 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2025 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -40573,7 +40573,7 @@ CREATE INDEX nfl_plays_year_2025_nfl_week_id_idx ON public.nfl_plays_year_2025 U
 -- Name: nfl_plays_year_2025_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_off_idx ON public.nfl_plays_year_2025 USING btree (off);
+CREATE INDEX nfl_plays_year_2025_off_idx ON public.nfl_plays_year_2025 USING btree (offense_nfl_team);
 
 
 --
@@ -40587,7 +40587,7 @@ CREATE INDEX nfl_plays_year_2025_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2025_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_off_week_idx ON public.nfl_plays_year_2025 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2025_off_week_idx ON public.nfl_plays_year_2025 USING btree (offense_nfl_team, week);
 
 
 --
@@ -40601,7 +40601,7 @@ CREATE INDEX nfl_plays_year_2025_pass_location_idx ON public.nfl_plays_year_2025
 -- Name: nfl_plays_year_2025_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2025_playId_idx" ON public.nfl_plays_year_2025 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2025_playId_idx" ON public.nfl_plays_year_2025 USING btree (play_id);
 
 
 --
@@ -40622,21 +40622,21 @@ CREATE INDEX nfl_plays_year_2025_play_type_idx ON public.nfl_plays_year_2025 USI
 -- Name: nfl_plays_year_2025_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2025 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2025_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2025 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2025_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2025 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2025_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2025 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2025_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2025_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (passer_pid);
 
 
 --
@@ -40664,7 +40664,7 @@ CREATE INDEX nfl_plays_year_2025_route_idx ON public.nfl_plays_year_2025 USING b
 -- Name: nfl_plays_year_2025_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_seas_type_idx ON public.nfl_plays_year_2025 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2025_seas_type_idx ON public.nfl_plays_year_2025 USING btree (season_type);
 
 
 --
@@ -40741,7 +40741,7 @@ CREATE INDEX nfl_plays_year_2025_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2025_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2025_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (target_pid);
 
 
 --
@@ -40755,105 +40755,105 @@ CREATE INDEX nfl_plays_year_2025_ydl_100_idx ON public.nfl_plays_year_2025 USING
 -- Name: nfl_plays_year_2025_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_esbid_idx ON public.nfl_plays_year_2025 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2025_year_esbid_idx ON public.nfl_plays_year_2025 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2025_year_esbid_playId_idx" ON public.nfl_plays_year_2025 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2025_year_esbid_playId_idx" ON public.nfl_plays_year_2025 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2025_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2025 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2025_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2025 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2025_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
@@ -40874,14 +40874,14 @@ CREATE INDEX nfl_plays_year_2026_assisted_tackle_2_pid_idx ON public.nfl_plays_y
 -- Name: nfl_plays_year_2026_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_bc_pid_idx ON public.nfl_plays_year_2026 USING btree (bc_pid);
+CREATE INDEX nfl_plays_year_2026_bc_pid_idx ON public.nfl_plays_year_2026 USING btree (ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2026 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2026 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
 
 
 --
@@ -40951,7 +40951,7 @@ CREATE INDEX nfl_plays_year_2026_nfl_week_id_idx ON public.nfl_plays_year_2026 U
 -- Name: nfl_plays_year_2026_off_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_off_idx ON public.nfl_plays_year_2026 USING btree (off);
+CREATE INDEX nfl_plays_year_2026_off_idx ON public.nfl_plays_year_2026 USING btree (offense_nfl_team);
 
 
 --
@@ -40965,7 +40965,7 @@ CREATE INDEX nfl_plays_year_2026_off_personnel_counts_idx ON public.nfl_plays_ye
 -- Name: nfl_plays_year_2026_off_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_off_week_idx ON public.nfl_plays_year_2026 USING btree (off, week);
+CREATE INDEX nfl_plays_year_2026_off_week_idx ON public.nfl_plays_year_2026 USING btree (offense_nfl_team, week);
 
 
 --
@@ -40979,7 +40979,7 @@ CREATE INDEX nfl_plays_year_2026_pass_location_idx ON public.nfl_plays_year_2026
 -- Name: nfl_plays_year_2026_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "nfl_plays_year_2026_playId_idx" ON public.nfl_plays_year_2026 USING btree ("playId");
+CREATE INDEX "nfl_plays_year_2026_playId_idx" ON public.nfl_plays_year_2026 USING btree (play_id);
 
 
 --
@@ -41000,21 +41000,21 @@ CREATE INDEX nfl_plays_year_2026_play_type_idx ON public.nfl_plays_year_2026 USI
 -- Name: nfl_plays_year_2026_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2026 USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2026_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2026 USING btree (play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2026_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2026 USING btree (player_fuml_pid, week, year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2026_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2026 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
 -- Name: nfl_plays_year_2026_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (psr_pid);
+CREATE INDEX nfl_plays_year_2026_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (passer_pid);
 
 
 --
@@ -41042,7 +41042,7 @@ CREATE INDEX nfl_plays_year_2026_route_idx ON public.nfl_plays_year_2026 USING b
 -- Name: nfl_plays_year_2026_seas_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_seas_type_idx ON public.nfl_plays_year_2026 USING btree (seas_type);
+CREATE INDEX nfl_plays_year_2026_seas_type_idx ON public.nfl_plays_year_2026 USING btree (season_type);
 
 
 --
@@ -41119,7 +41119,7 @@ CREATE INDEX nfl_plays_year_2026_tackle_assist_4_pid_idx ON public.nfl_plays_yea
 -- Name: nfl_plays_year_2026_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (trg_pid);
+CREATE INDEX nfl_plays_year_2026_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (target_pid);
 
 
 --
@@ -41133,301 +41133,301 @@ CREATE INDEX nfl_plays_year_2026_ydl_100_idx ON public.nfl_plays_year_2026 USING
 -- Name: nfl_plays_year_2026_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_esbid_idx ON public.nfl_plays_year_2026 USING btree (year, esbid);
+CREATE INDEX nfl_plays_year_2026_year_esbid_idx ON public.nfl_plays_year_2026 USING btree (season_year, esbid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_plays_year_2026_year_esbid_playId_idx" ON public.nfl_plays_year_2026 USING btree (year, esbid, "playId");
+CREATE UNIQUE INDEX "nfl_plays_year_2026_year_esbid_playId_idx" ON public.nfl_plays_year_2026 USING btree (season_year, esbid, play_id);
 
 
 --
 -- Name: nfl_plays_year_2026_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2026 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX nfl_plays_year_2026_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2026 USING btree (season_year, play_type, season_type, target_pid, offense_nfl_team, esbid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type) INCLUDE (bc_pid, psr_pid, trg_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, "int", recv_yds, comp, first_down, week, td, sk, off);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type, ball_carrier_pid, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type, target_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, week, bc_pid, psr_pid, trg_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, week, play_type, bc_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, play_type, ball_carrier_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, week, play_type);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, play_type);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, week, play_type, psr_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, play_type, passer_pid);
 
 
 --
 -- Name: nfl_plays_year_2026_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (year, seas_type, week, play_type, trg_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, play_type, target_pid);
 
 
 --
 -- Name: nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2000 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2000 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2001 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2001 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2002 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2002 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2003 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2003 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2004 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2004 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2005 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2005 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2006 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2006 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2007 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2007 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2008 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2008 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2009 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2009 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2010 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2010 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2011 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2011 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2012 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2012 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2013 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2013 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2014 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2014 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2015 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2015 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2016 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2016 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2017 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2017 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2018 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2018 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2019 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2019 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2020 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2020 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2021 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2021 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2022 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2022 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2023 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2023 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2024 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2024 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2025 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2025 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2026 USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2026 USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
 -- Name: nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_default USING btree (year, esbid, "playId", gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_default USING btree (season_year, esbid, play_id, gsis_it_id);
 
 
 --
@@ -43513,7 +43513,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2000_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2000_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2000_bc_pid_idx;
 
 
 --
@@ -43583,14 +43583,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2000_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2000_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2000_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2000_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2000_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2000_off_week_idx;
 
 
 --
@@ -43639,7 +43639,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2000_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2000_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2000_psr_pid_idx;
 
 
 --
@@ -43667,7 +43667,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2000_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2000_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2000_seas_type_idx;
 
 
 --
@@ -43744,7 +43744,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2000_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2000_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2000_trg_pid_idx;
 
 
 --
@@ -43758,14 +43758,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2000_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2000_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2000_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2000_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2000_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2000_year_esbid_playId_idx";
 
 
 --
@@ -43877,7 +43877,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2001_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2001_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2001_bc_pid_idx;
 
 
 --
@@ -43947,14 +43947,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2001_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2001_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2001_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2001_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2001_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2001_off_week_idx;
 
 
 --
@@ -44003,7 +44003,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2001_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2001_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2001_psr_pid_idx;
 
 
 --
@@ -44031,7 +44031,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2001_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2001_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2001_seas_type_idx;
 
 
 --
@@ -44108,7 +44108,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2001_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2001_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2001_trg_pid_idx;
 
 
 --
@@ -44122,14 +44122,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2001_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2001_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2001_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2001_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2001_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2001_year_esbid_playId_idx";
 
 
 --
@@ -44241,7 +44241,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2002_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2002_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2002_bc_pid_idx;
 
 
 --
@@ -44311,14 +44311,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2002_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2002_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2002_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2002_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2002_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2002_off_week_idx;
 
 
 --
@@ -44367,7 +44367,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2002_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2002_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2002_psr_pid_idx;
 
 
 --
@@ -44395,7 +44395,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2002_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2002_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2002_seas_type_idx;
 
 
 --
@@ -44472,7 +44472,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2002_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2002_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2002_trg_pid_idx;
 
 
 --
@@ -44486,14 +44486,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2002_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2002_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2002_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2002_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2002_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2002_year_esbid_playId_idx";
 
 
 --
@@ -44605,7 +44605,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2003_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2003_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2003_bc_pid_idx;
 
 
 --
@@ -44675,14 +44675,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2003_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2003_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2003_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2003_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2003_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2003_off_week_idx;
 
 
 --
@@ -44731,7 +44731,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2003_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2003_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2003_psr_pid_idx;
 
 
 --
@@ -44759,7 +44759,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2003_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2003_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2003_seas_type_idx;
 
 
 --
@@ -44836,7 +44836,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2003_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2003_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2003_trg_pid_idx;
 
 
 --
@@ -44850,14 +44850,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2003_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2003_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2003_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2003_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2003_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2003_year_esbid_playId_idx";
 
 
 --
@@ -44969,7 +44969,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2004_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2004_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2004_bc_pid_idx;
 
 
 --
@@ -45039,14 +45039,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2004_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2004_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2004_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2004_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2004_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2004_off_week_idx;
 
 
 --
@@ -45095,7 +45095,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2004_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2004_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2004_psr_pid_idx;
 
 
 --
@@ -45123,7 +45123,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2004_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2004_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2004_seas_type_idx;
 
 
 --
@@ -45200,7 +45200,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2004_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2004_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2004_trg_pid_idx;
 
 
 --
@@ -45214,14 +45214,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2004_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2004_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2004_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2004_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2004_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2004_year_esbid_playId_idx";
 
 
 --
@@ -45333,7 +45333,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2005_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2005_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2005_bc_pid_idx;
 
 
 --
@@ -45403,14 +45403,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2005_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2005_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2005_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2005_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2005_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2005_off_week_idx;
 
 
 --
@@ -45459,7 +45459,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2005_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2005_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2005_psr_pid_idx;
 
 
 --
@@ -45487,7 +45487,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2005_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2005_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2005_seas_type_idx;
 
 
 --
@@ -45564,7 +45564,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2005_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2005_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2005_trg_pid_idx;
 
 
 --
@@ -45578,14 +45578,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2005_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2005_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2005_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2005_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2005_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2005_year_esbid_playId_idx";
 
 
 --
@@ -45697,7 +45697,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2006_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2006_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2006_bc_pid_idx;
 
 
 --
@@ -45767,14 +45767,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2006_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2006_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2006_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2006_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2006_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2006_off_week_idx;
 
 
 --
@@ -45823,7 +45823,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2006_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2006_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2006_psr_pid_idx;
 
 
 --
@@ -45851,7 +45851,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2006_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2006_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2006_seas_type_idx;
 
 
 --
@@ -45928,7 +45928,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2006_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2006_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2006_trg_pid_idx;
 
 
 --
@@ -45942,14 +45942,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2006_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2006_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2006_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2006_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2006_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2006_year_esbid_playId_idx";
 
 
 --
@@ -46061,7 +46061,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2007_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2007_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2007_bc_pid_idx;
 
 
 --
@@ -46131,14 +46131,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2007_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2007_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2007_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2007_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2007_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2007_off_week_idx;
 
 
 --
@@ -46187,7 +46187,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2007_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2007_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2007_psr_pid_idx;
 
 
 --
@@ -46215,7 +46215,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2007_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2007_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2007_seas_type_idx;
 
 
 --
@@ -46292,7 +46292,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2007_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2007_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2007_trg_pid_idx;
 
 
 --
@@ -46306,14 +46306,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2007_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2007_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2007_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2007_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2007_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2007_year_esbid_playId_idx";
 
 
 --
@@ -46425,7 +46425,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2008_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2008_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2008_bc_pid_idx;
 
 
 --
@@ -46495,14 +46495,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2008_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2008_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2008_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2008_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2008_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2008_off_week_idx;
 
 
 --
@@ -46551,7 +46551,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2008_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2008_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2008_psr_pid_idx;
 
 
 --
@@ -46579,7 +46579,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2008_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2008_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2008_seas_type_idx;
 
 
 --
@@ -46656,7 +46656,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2008_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2008_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2008_trg_pid_idx;
 
 
 --
@@ -46670,14 +46670,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2008_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2008_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2008_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2008_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2008_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2008_year_esbid_playId_idx";
 
 
 --
@@ -46789,7 +46789,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2009_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2009_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2009_bc_pid_idx;
 
 
 --
@@ -46859,14 +46859,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2009_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2009_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2009_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2009_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2009_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2009_off_week_idx;
 
 
 --
@@ -46915,7 +46915,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2009_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2009_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2009_psr_pid_idx;
 
 
 --
@@ -46943,7 +46943,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2009_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2009_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2009_seas_type_idx;
 
 
 --
@@ -47020,7 +47020,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2009_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2009_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2009_trg_pid_idx;
 
 
 --
@@ -47034,14 +47034,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2009_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2009_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2009_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2009_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2009_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2009_year_esbid_playId_idx";
 
 
 --
@@ -47153,7 +47153,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2010_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2010_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2010_bc_pid_idx;
 
 
 --
@@ -47223,14 +47223,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2010_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2010_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2010_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2010_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2010_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2010_off_week_idx;
 
 
 --
@@ -47279,7 +47279,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2010_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2010_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2010_psr_pid_idx;
 
 
 --
@@ -47307,7 +47307,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2010_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2010_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2010_seas_type_idx;
 
 
 --
@@ -47384,7 +47384,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2010_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2010_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2010_trg_pid_idx;
 
 
 --
@@ -47398,14 +47398,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2010_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2010_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2010_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2010_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2010_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2010_year_esbid_playId_idx";
 
 
 --
@@ -47517,7 +47517,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2011_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2011_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2011_bc_pid_idx;
 
 
 --
@@ -47587,14 +47587,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2011_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2011_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2011_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2011_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2011_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2011_off_week_idx;
 
 
 --
@@ -47643,7 +47643,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2011_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2011_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2011_psr_pid_idx;
 
 
 --
@@ -47671,7 +47671,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2011_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2011_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2011_seas_type_idx;
 
 
 --
@@ -47748,7 +47748,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2011_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2011_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2011_trg_pid_idx;
 
 
 --
@@ -47762,14 +47762,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2011_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2011_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2011_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2011_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2011_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2011_year_esbid_playId_idx";
 
 
 --
@@ -47881,7 +47881,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2012_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2012_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2012_bc_pid_idx;
 
 
 --
@@ -47951,14 +47951,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2012_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2012_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2012_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2012_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2012_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2012_off_week_idx;
 
 
 --
@@ -48007,7 +48007,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2012_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2012_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2012_psr_pid_idx;
 
 
 --
@@ -48035,7 +48035,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2012_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2012_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2012_seas_type_idx;
 
 
 --
@@ -48112,7 +48112,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2012_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2012_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2012_trg_pid_idx;
 
 
 --
@@ -48126,14 +48126,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2012_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2012_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2012_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2012_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2012_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2012_year_esbid_playId_idx";
 
 
 --
@@ -48245,7 +48245,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2013_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2013_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2013_bc_pid_idx;
 
 
 --
@@ -48315,14 +48315,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2013_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2013_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2013_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2013_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2013_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2013_off_week_idx;
 
 
 --
@@ -48371,7 +48371,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2013_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2013_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2013_psr_pid_idx;
 
 
 --
@@ -48399,7 +48399,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2013_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2013_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2013_seas_type_idx;
 
 
 --
@@ -48476,7 +48476,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2013_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2013_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2013_trg_pid_idx;
 
 
 --
@@ -48490,14 +48490,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2013_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2013_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2013_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2013_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2013_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2013_year_esbid_playId_idx";
 
 
 --
@@ -48609,7 +48609,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2014_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2014_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2014_bc_pid_idx;
 
 
 --
@@ -48679,14 +48679,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2014_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2014_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2014_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2014_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2014_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2014_off_week_idx;
 
 
 --
@@ -48735,7 +48735,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2014_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2014_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2014_psr_pid_idx;
 
 
 --
@@ -48763,7 +48763,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2014_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2014_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2014_seas_type_idx;
 
 
 --
@@ -48840,7 +48840,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2014_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2014_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2014_trg_pid_idx;
 
 
 --
@@ -48854,14 +48854,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2014_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2014_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2014_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2014_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2014_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2014_year_esbid_playId_idx";
 
 
 --
@@ -48973,7 +48973,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2015_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2015_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2015_bc_pid_idx;
 
 
 --
@@ -49043,14 +49043,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2015_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2015_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2015_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2015_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2015_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2015_off_week_idx;
 
 
 --
@@ -49099,7 +49099,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2015_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2015_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2015_psr_pid_idx;
 
 
 --
@@ -49127,7 +49127,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2015_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2015_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2015_seas_type_idx;
 
 
 --
@@ -49204,7 +49204,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2015_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2015_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2015_trg_pid_idx;
 
 
 --
@@ -49218,14 +49218,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2015_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2015_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2015_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2015_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2015_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2015_year_esbid_playId_idx";
 
 
 --
@@ -49337,7 +49337,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2016_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2016_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2016_bc_pid_idx;
 
 
 --
@@ -49407,14 +49407,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2016_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2016_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2016_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2016_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2016_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2016_off_week_idx;
 
 
 --
@@ -49463,7 +49463,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2016_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2016_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2016_psr_pid_idx;
 
 
 --
@@ -49491,7 +49491,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2016_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2016_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2016_seas_type_idx;
 
 
 --
@@ -49568,7 +49568,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2016_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2016_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2016_trg_pid_idx;
 
 
 --
@@ -49582,14 +49582,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2016_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2016_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2016_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2016_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2016_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2016_year_esbid_playId_idx";
 
 
 --
@@ -49701,7 +49701,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2017_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2017_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2017_bc_pid_idx;
 
 
 --
@@ -49771,14 +49771,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2017_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2017_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2017_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2017_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2017_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2017_off_week_idx;
 
 
 --
@@ -49827,7 +49827,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2017_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2017_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2017_psr_pid_idx;
 
 
 --
@@ -49855,7 +49855,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2017_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2017_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2017_seas_type_idx;
 
 
 --
@@ -49932,7 +49932,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2017_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2017_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2017_trg_pid_idx;
 
 
 --
@@ -49946,14 +49946,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2017_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2017_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2017_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2017_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2017_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2017_year_esbid_playId_idx";
 
 
 --
@@ -50065,7 +50065,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2018_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2018_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2018_bc_pid_idx;
 
 
 --
@@ -50135,14 +50135,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2018_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2018_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2018_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2018_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2018_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2018_off_week_idx;
 
 
 --
@@ -50191,7 +50191,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2018_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2018_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2018_psr_pid_idx;
 
 
 --
@@ -50219,7 +50219,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2018_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2018_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2018_seas_type_idx;
 
 
 --
@@ -50296,7 +50296,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2018_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2018_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2018_trg_pid_idx;
 
 
 --
@@ -50310,14 +50310,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2018_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2018_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2018_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2018_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2018_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2018_year_esbid_playId_idx";
 
 
 --
@@ -50429,7 +50429,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2019_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2019_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2019_bc_pid_idx;
 
 
 --
@@ -50499,14 +50499,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2019_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2019_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2019_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2019_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2019_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2019_off_week_idx;
 
 
 --
@@ -50555,7 +50555,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2019_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2019_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2019_psr_pid_idx;
 
 
 --
@@ -50583,7 +50583,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2019_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2019_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2019_seas_type_idx;
 
 
 --
@@ -50660,7 +50660,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2019_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2019_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2019_trg_pid_idx;
 
 
 --
@@ -50674,14 +50674,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2019_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2019_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2019_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2019_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2019_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2019_year_esbid_playId_idx";
 
 
 --
@@ -50793,7 +50793,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2020_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2020_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2020_bc_pid_idx;
 
 
 --
@@ -50863,14 +50863,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2020_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2020_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2020_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2020_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2020_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2020_off_week_idx;
 
 
 --
@@ -50919,7 +50919,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2020_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2020_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2020_psr_pid_idx;
 
 
 --
@@ -50947,7 +50947,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2020_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2020_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2020_seas_type_idx;
 
 
 --
@@ -51024,7 +51024,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2020_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2020_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2020_trg_pid_idx;
 
 
 --
@@ -51038,14 +51038,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2020_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2020_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2020_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2020_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2020_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2020_year_esbid_playId_idx";
 
 
 --
@@ -51157,7 +51157,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2021_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2021_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2021_bc_pid_idx;
 
 
 --
@@ -51227,14 +51227,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2021_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2021_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2021_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2021_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2021_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2021_off_week_idx;
 
 
 --
@@ -51283,7 +51283,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2021_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2021_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2021_psr_pid_idx;
 
 
 --
@@ -51311,7 +51311,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2021_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2021_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2021_seas_type_idx;
 
 
 --
@@ -51388,7 +51388,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2021_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2021_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2021_trg_pid_idx;
 
 
 --
@@ -51402,14 +51402,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2021_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2021_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2021_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2021_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2021_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2021_year_esbid_playId_idx";
 
 
 --
@@ -51521,7 +51521,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2022_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2022_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2022_bc_pid_idx;
 
 
 --
@@ -51591,14 +51591,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2022_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2022_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2022_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2022_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2022_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2022_off_week_idx;
 
 
 --
@@ -51647,7 +51647,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2022_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2022_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2022_psr_pid_idx;
 
 
 --
@@ -51675,7 +51675,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2022_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2022_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2022_seas_type_idx;
 
 
 --
@@ -51752,7 +51752,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2022_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2022_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2022_trg_pid_idx;
 
 
 --
@@ -51766,14 +51766,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2022_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2022_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2022_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2022_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2022_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2022_year_esbid_playId_idx";
 
 
 --
@@ -51885,7 +51885,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2023_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2023_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2023_bc_pid_idx;
 
 
 --
@@ -51955,14 +51955,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2023_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2023_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2023_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2023_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2023_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2023_off_week_idx;
 
 
 --
@@ -52011,7 +52011,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2023_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2023_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2023_psr_pid_idx;
 
 
 --
@@ -52039,7 +52039,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2023_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2023_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2023_seas_type_idx;
 
 
 --
@@ -52116,7 +52116,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2023_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2023_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2023_trg_pid_idx;
 
 
 --
@@ -52130,14 +52130,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2023_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2023_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2023_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2023_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2023_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2023_year_esbid_playId_idx";
 
 
 --
@@ -52249,7 +52249,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2024_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2024_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2024_bc_pid_idx;
 
 
 --
@@ -52319,14 +52319,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2024_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2024_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2024_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2024_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2024_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2024_off_week_idx;
 
 
 --
@@ -52375,7 +52375,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2024_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2024_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2024_psr_pid_idx;
 
 
 --
@@ -52403,7 +52403,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2024_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2024_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2024_seas_type_idx;
 
 
 --
@@ -52480,7 +52480,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2024_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2024_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2024_trg_pid_idx;
 
 
 --
@@ -52494,14 +52494,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2024_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2024_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2024_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2024_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2024_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2024_year_esbid_playId_idx";
 
 
 --
@@ -52613,7 +52613,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2025_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2025_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2025_bc_pid_idx;
 
 
 --
@@ -52683,14 +52683,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2025_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2025_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2025_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2025_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2025_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2025_off_week_idx;
 
 
 --
@@ -52739,7 +52739,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2025_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2025_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2025_psr_pid_idx;
 
 
 --
@@ -52767,7 +52767,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2025_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2025_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2025_seas_type_idx;
 
 
 --
@@ -52844,7 +52844,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2025_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2025_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2025_trg_pid_idx;
 
 
 --
@@ -52858,14 +52858,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2025_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2025_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2025_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2025_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2025_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2025_year_esbid_playId_idx";
 
 
 --
@@ -52977,7 +52977,7 @@ ALTER INDEX public.idx_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.n
 -- Name: nfl_plays_year_2026_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2026_bc_pid_idx;
+ALTER INDEX public.idx_nfl_plays_ball_carrier_pid ATTACH PARTITION public.nfl_plays_year_2026_bc_pid_idx;
 
 
 --
@@ -53047,14 +53047,14 @@ ALTER INDEX public.idx_nfl_plays_nfl_week_id ATTACH PARTITION public.nfl_plays_y
 -- Name: nfl_plays_year_2026_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2026_off_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team ATTACH PARTITION public.nfl_plays_year_2026_off_idx;
 
 
 --
 -- Name: nfl_plays_year_2026_off_week_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_off_week ATTACH PARTITION public.nfl_plays_year_2026_off_week_idx;
+ALTER INDEX public.idx_nfl_plays_offense_nfl_team_week ATTACH PARTITION public.nfl_plays_year_2026_off_week_idx;
 
 
 --
@@ -53103,7 +53103,7 @@ ALTER INDEX public.idx_nfl_plays_fuml_pid_week_year ATTACH PARTITION public.nfl_
 -- Name: nfl_plays_year_2026_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2026_psr_pid_idx;
+ALTER INDEX public.idx_nfl_plays_passer_pid ATTACH PARTITION public.nfl_plays_year_2026_psr_pid_idx;
 
 
 --
@@ -53131,7 +53131,7 @@ ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_yea
 -- Name: nfl_plays_year_2026_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2026_seas_type_idx;
+ALTER INDEX public.idx_nfl_plays_season_type ATTACH PARTITION public.nfl_plays_year_2026_seas_type_idx;
 
 
 --
@@ -53208,7 +53208,7 @@ ALTER INDEX public.idx_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl
 -- Name: nfl_plays_year_2026_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2026_trg_pid_idx;
+ALTER INDEX public.idx_nfl_plays_target_pid ATTACH PARTITION public.nfl_plays_year_2026_trg_pid_idx;
 
 
 --
@@ -53222,14 +53222,14 @@ ALTER INDEX public.idx_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_
 -- Name: nfl_plays_year_2026_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2026_year_esbid_idx;
+ALTER INDEX public.idx_nfl_plays_season_year_esbid ATTACH PARTITION public.nfl_plays_year_2026_year_esbid_idx;
 
 
 --
 -- Name: nfl_plays_year_2026_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2026_year_esbid_playId_idx";
+ALTER INDEX public.idx_nfl_plays_season_year_esbid_play_id ATTACH PARTITION public."nfl_plays_year_2026_year_esbid_playId_idx";
 
 
 --
