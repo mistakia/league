@@ -7,6 +7,7 @@ import {
   getRestrictedFreeAgencyBids,
   getLeague
 } from '#libs-server'
+import attach_format_gamelog_columns from '#libs-server/attach-format-gamelog-columns.mjs'
 
 const router = express.Router()
 
@@ -719,47 +720,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    query
-      .leftJoin('scoring_format_player_gamelogs', function () {
-        this.on(
-          'scoring_format_player_gamelogs.pid',
-          '=',
-          'player_gamelogs.pid'
-        ).andOn(
-          'scoring_format_player_gamelogs.esbid',
-          '=',
-          'player_gamelogs.esbid'
-        )
-      })
-      .leftJoin('league_format_player_gamelogs', function () {
-        this.on(
-          'league_format_player_gamelogs.pid',
-          '=',
-          'player_gamelogs.pid'
-        ).andOn(
-          'league_format_player_gamelogs.esbid',
-          '=',
-          'player_gamelogs.esbid'
-        )
-      })
-      .select(
-        'scoring_format_player_gamelogs.points',
-        'scoring_format_player_gamelogs.pos_rnk',
-        'league_format_player_gamelogs.points_added_earned',
-        'league_format_player_gamelogs.points_added_net'
-      )
-      .where(function () {
-        this.where(
-          'scoring_format_player_gamelogs.scoring_format_id',
-          league.scoring_format_id
-        ).orWhereNull('scoring_format_player_gamelogs.scoring_format_id')
-      })
-      .where(function () {
-        this.where(
-          'league_format_player_gamelogs.league_format_id',
-          league.league_format_id
-        ).orWhereNull('league_format_player_gamelogs.league_format_id')
-      })
+    attach_format_gamelog_columns({ query, league })
 
     if (include_rushing) {
       query
