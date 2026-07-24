@@ -2958,9 +2958,9 @@ export function get_gamelog_for_player(
     pos === 'DST'
       ? calculateDstStatsFromPlays(plays, player_map.get('team'))
       : calculateStatsFromPlayStats(plays.flatMap((p) => p.playStats))
-  const play = plays.find((p) => p.possessionTeam)
+  const play = plays.find((p) => p.possession_nfl_team)
   const opp = play
-    ? fixTeam(play.possessionTeam) === fixTeam(play.h)
+    ? fixTeam(play.possession_nfl_team) === fixTeam(play.h)
       ? fixTeam(play.v)
       : fixTeam(play.h)
     : null
