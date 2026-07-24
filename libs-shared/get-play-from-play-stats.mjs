@@ -75,7 +75,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.bc_gsis = playStat.gsis_player_id
         playRow.rush_yds = playStat.yards
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
-        playRow.td_tm = playStat.teamAbbr
+        playRow.td_tm = playStat.nfl_team
         break
 
       // Lateral Rushing - yards after lateral (no attempt credit)
@@ -89,7 +89,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.td = true
         playRow.rush_td = true
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
-        playRow.td_tm = playStat.teamAbbr
+        playRow.td_tm = playStat.nfl_team
         break
 
       // Passing Incomplete - incomplete pass attempt
@@ -145,7 +145,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.pass_td = true
         playRow.trg_gsis = playStat.gsis_player_id
         playRow.recv_yds = playStat.yards
-        playRow.td_tm = playStat.teamAbbr
+        playRow.td_tm = playStat.nfl_team
         break
 
       // Lateral Receiving - yards after lateral (no reception credit)
@@ -159,13 +159,13 @@ export default function getPlayFromPlayStats(play) {
         playRow.first_down = true
         playRow.td = true
         playRow.pass_td = true
-        playRow.td_tm = playStat.teamAbbr
+        playRow.td_tm = playStat.nfl_team
         break
 
       // Interception Return - interception return with yards
       case 25:
         playRow.intp_gsis = playStat.gsis_player_id
-        playRow.ret_tm = playStat.teamAbbr
+        playRow.ret_tm = playStat.nfl_team
         playRow.ret_yds = playStat.yards
         break
 
@@ -173,15 +173,15 @@ export default function getPlayFromPlayStats(play) {
       case 26:
         playRow.td = true
         playRow.ret_td = true
-        playRow.td_tm = playStat.teamAbbr
+        playRow.td_tm = playStat.nfl_team
         playRow.intp_gsis = playStat.gsis_player_id
-        playRow.ret_tm = playStat.teamAbbr
+        playRow.ret_tm = playStat.nfl_team
         playRow.ret_yds = playStat.yards
         break
 
       // Lateral Interception Return - INT return yards after lateral
       case 27:
-        playRow.ret_tm = playStat.teamAbbr
+        playRow.ret_tm = playStat.nfl_team
         playRow.ret_yds = playStat.yards
         break
 
@@ -189,8 +189,8 @@ export default function getPlayFromPlayStats(play) {
       case 28:
         playRow.td = true
         playRow.ret_td = true
-        playRow.td_tm = playStat.teamAbbr
-        playRow.ret_tm = playStat.teamAbbr
+        playRow.td_tm = playStat.nfl_team
+        playRow.ret_tm = playStat.nfl_team
         playRow.ret_yds = playStat.yards
         break
 
