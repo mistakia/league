@@ -173,6 +173,9 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.yards_after_any_contact',
       'nfl_games.week',
       'nfl_games.day',
+      // Canonical week identifier, consumed by the client-side week filter in
+      // app/core/stats. Generated column, so it never drifts from the parts.
+      'nfl_games.nfl_week_id',
       'nfl_plays.cov_type',
       'nfl_plays.sep',
       'nfl_plays.ydl_100'

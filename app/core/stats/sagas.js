@@ -67,8 +67,7 @@ export function* calculateStats() {
   } = yield select(get_stats_state)
   const league = yield select(get_current_league)
   const filtered = plays.filter((play) => {
-    const play_identifier = `${play.year}_${play.seas_type}_WEEK_${play.week}`
-    if (!weeks.has(play_identifier)) return false
+    if (!weeks.has(play.nfl_week_id)) return false
     if (!days.includes(play.day)) return false
     if (!quarters.includes(play.qtr)) return false
     if (!downs.includes(play.dwn)) return false
