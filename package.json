@@ -6,6 +6,7 @@
     "dev:prod": "concurrently \"yarn start\" \"yarn start:api:prod\"",
     "prod:live": "cross-env NODE_ENV=production WEBPACK_SERVE=true webpack serve --mode=production --config webpack/webpack.config.prod.babel.mjs",
     "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs --static-directory ./static --static-public-path /static",
+    "invite": "NODE_ENV=production node scripts/generate-invite-code.mjs",
     "lint": "eslint .",
     "prettier": "prettier --write .",
     "test": "LEAGUE_DB_HOST= LEAGUE_DB_PORT= TZ=America/New_York NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --exclude test/libs-server.get-players-table-view-results-debug.mjs --require test/global.mjs",
