@@ -17,7 +17,7 @@
 -- scripts/export-data-nfl-plays.mjs / libs-server/play-enrichment/yardage-stat-enrichment.mjs
 -- only read or forward them.
 --
--- Verified against production 2026-07-24: 0 populated rows out of 1,443,196 plays across
+-- Verified against production 2026-07-24: 0 populated rows out of 1,483,695 plays across
 -- all 26 seasons (2000-2025), and 0 of 5,969 rows in nfl_plays_current_week.
 --
 -- Stat-id mapping (mirrors get-play-from-play-stats.mjs exactly)
