@@ -216,12 +216,17 @@ observations:
     [followup] 21 named league formats have never had derived gamelog data generated;
     verify-format-data-coverage reports them without signalling, and the stats-pipeline catalog
     union now populates them going forward but historical seasons remain unbackfilled.
+  - >-
+    [bug] 2026-07-24 Sweeping the bare row-var read blind spot that check-plays-column-repoint.mjs
+    documents it cannot gate found a sixth pre-existing instance (69e7567e): the charted-plays stats
+    filter keyed on play.year/play.seas_type, which getChartedPlayByPlayQuery has never selected, so
+    the week filter dropped every play and the view computed over an empty set.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-24T19:35:45.645Z'
+updated_at: '2026-07-24T19:37:14.401Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
