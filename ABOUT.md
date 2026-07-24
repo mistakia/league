@@ -182,12 +182,46 @@ observations:
     for its level) is a contract, cap is computed from a bid-populated per-team getRoster source,
     and the full filterable transaction log lives behind the separate
     add-transactions-markdown-output-format task.
+  - >-
+    [bug] 2026-07-24 Fixed five always-undefined play-field reads (master 8a1aa708..5cae5a97): raw
+    NFL vendor keys (teamAbbr, possessionTeam), untranslated nflfastR column names in the
+    fixed-drive port (fumble_lost, touchdown, td_team, own_kickoff_recovery), and one read the
+    2024-07-13 rename 5d9b7aec missed (intp); none were caused by the nfl-plays-snaps rename.
+  - >-
+    [risk] 2026-07-24 nfl_plays.td_tm/ret_tm are likely NULL for all history:
+    get-play-from-play-stats is their only writer and read a nonexistent teamAbbr column since 2021,
+    and both data-view column params are commented out; a backfill over historical play_stats is an
+    open operator decision, deliberately not run mid-cutover.
+  - >-
+    [bug] 2026-07-24 prop-market-settlement load_nfl_plays preloaded 8 of the 13 nfl_plays columns
+    its handler reads; a missing column settles rather than raises, so all 14 team-aggregate yardage
+    market types settled every OVER as LOST and every UNDER as WON — exposure limited to manual
+    scripts/process-market-results.mjs runs, which no crontab schedules.
+  - >-
+    [bug] The selected-player view dropped 2025 regular-season gamelogs because
+    api/routes/players.mjs and stats.mjs filtered scoring_format_id/league_format_id in WHERE with
+    an orWhereNull escape instead of inside the LEFT JOIN ON clause, which degrades the join to
+    INNER whenever a gamelog carries rows under any other format and deletes the row entirely rather
+    than returning null points.
+  - >-
+    [bug] stats-pipeline get_format_hashes built the generation set from live hosted leagues only,
+    so when league 1 moved to the genesis format for 2025 every named catalog format stopped being
+    generated, including the draftkings default backing the lid=0 league.
+  - >-
+    [fix] 2026-07-24 moved the format id into the join ON clause behind a shared
+    attach-format-gamelog-columns helper, unioned the named catalog into get_format_ids, repaired
+    four seasonlog generators still querying pre-conformance nfl_games year/seas_type, and
+    backfilled the 9 regressed formats.
+  - >-
+    [followup] 21 named league formats have never had derived gamelog data generated;
+    verify-format-data-coverage reports them without signalling, and the stats-pipeline catalog
+    union now populates them going forward but historical seasons remain unbackfilled.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-17T20:40:00.424Z'
+updated_at: '2026-07-24T19:35:45.645Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
