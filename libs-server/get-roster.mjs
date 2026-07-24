@@ -3,20 +3,31 @@ import { current_season, transaction_types, player_tag_types } from '#constants'
 import db from '#db'
 
 // A rostered player's salary is `transactions.value` -- `rosters_players` carries no
-// value column -- so the most recent transaction with this team is the only source of
-// the salary that `Roster` sums into `availableCap`. That makes this an INNER join by
-// design, not a degraded LEFT join: admitting a player with no team transaction would
-// hand `Roster` an undefined value and turn the cap arithmetic into NaN. The team id is
-// a join qualifier rather than a row filter, so it belongs in the ON clause.
-// The ordering feeds the `uniqBy` below, which keeps the newest row per player.
-export const build_roster_players_query = ({ db, rid, tid }) =>
+// value column -- so the transaction is the only source of the salary that `Roster`
+// sums into `availableCap`. That makes this an INNER join by design, not a degraded
+// LEFT join: admitting a player with no team transaction would hand `Roster` an
+// undefined value and turn the cap arithmetic into NaN.
+//
+// A roster is a snapshot of one (year, week), so the salary in force at that snapshot
+// comes from the newest transaction dated at or before it. Without the `(year, week)`
+// bound the lookup reaches forward in time and a historical roster reports a salary
+// that had not been agreed yet -- an extension signed in a later season would be
+// backdated onto every earlier roster the player appears on.
+//
+// Both the team id and the as-of bound qualify which transactions may match rather
+// than filtering the result, so both belong in the ON clause. The ordering feeds the
+// `uniqBy` below, which keeps the newest surviving row per player.
+export const build_roster_players_query = ({ db, rid, tid, year, week }) =>
   db('rosters_players')
     .join('transactions', function () {
-      this.on('rosters_players.pid', '=', 'transactions.pid').andOnVal(
-        'transactions.tid',
-        '=',
-        tid
-      )
+      this.on('rosters_players.pid', '=', 'transactions.pid')
+        .andOnVal('transactions.tid', '=', tid)
+        .andOn(
+          db.raw('(transactions.year, transactions.week) <= (?, ?)', [
+            year,
+            week
+          ])
+        )
     })
     .where('rid', rid)
     .orderBy('transactions.timestamp', 'desc')
@@ -37,7 +48,9 @@ export default async function ({
   const players = await build_roster_players_query({
     db,
     rid: roster_row.uid,
-    tid
+    tid,
+    year: roster_row.year,
+    week: roster_row.week
   })
 
   roster_row.players = uniqBy(players, 'pid')

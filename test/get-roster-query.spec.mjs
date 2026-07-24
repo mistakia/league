@@ -16,10 +16,19 @@ import { build_roster_players_query } from '#libs-server/get-roster.mjs'
 
 const { expect } = chai
 
+// Regression: the transaction lookup was also unbounded in time, so it returned the
+// newest transaction ever rather than the newest one in force at the roster's own
+// (year, week). 23,655 of 44,293 rostered-player rows in production resolved to a
+// transaction dated after the roster carrying them, backdating later salaries onto
+// historical rosters. The as-of bound belongs in the ON clause for the same reason
+// the team id does.
+
 const sql = build_roster_players_query({
   db: knex({ client: 'pg' }),
   rid: 9261,
-  tid: 7
+  tid: 7,
+  year: 2025,
+  week: 4
 }).toString()
 
 describe('build_roster_players_query', () => {
@@ -39,6 +48,21 @@ describe('build_roster_players_query', () => {
   it('keeps the team id out of the WHERE clause', () => {
     const where_clause = sql.slice(sql.indexOf(' where '))
     expect(where_clause).to.not.include('"transactions"."tid"')
+  })
+
+  it('bounds the transaction lookup to the roster snapshot inside the ON clause', () => {
+    const on_clause = sql.slice(
+      sql.indexOf('inner join "transactions"'),
+      sql.indexOf(' where ')
+    )
+    expect(on_clause).to.include(
+      '(transactions.year, transactions.week) <= (2025, 4)'
+    )
+  })
+
+  it('keeps the as-of bound out of the WHERE clause', () => {
+    const where_clause = sql.slice(sql.indexOf(' where '))
+    expect(where_clause).to.not.include('transactions.year')
   })
 
   it('orders so the newest transaction per player wins the uniqBy', () => {
