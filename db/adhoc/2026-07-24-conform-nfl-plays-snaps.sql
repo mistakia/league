@@ -53,6 +53,18 @@
 
 BEGIN;
 
+-- Bound the lock wait. Verified on prod: lock_timeout is 0 server-wide (source=default,
+-- no rolconfig override on league_writer), and the 40s statement_timeout cited above is
+-- the knex/app-layer setting, NOT this psql session -- so without this the ALTERs wait
+-- indefinitely. That matters because these renames take AccessExclusiveLock on nfl_plays
+-- + 27 children and nfl_snaps + 28 children: a single in-flight data-view query (these
+-- routinely run tens of seconds) holds AccessShareLock, the ALTER queues behind it, and a
+-- PENDING AccessExclusiveLock blocks every newly-arriving reader -- an unbounded lock
+-- convoy on the hottest table in the schema. On timeout the whole transaction aborts
+-- cleanly and the migration is simply retried.
+SET LOCAL lock_timeout = '3s';
+SET LOCAL statement_timeout = '60s';
+
 -- ---- nfl_plays (partitioned parent; cascades to 27 nfl_plays_year_* children) ----
 ALTER TABLE public.nfl_plays RENAME COLUMN year TO season_year;
 ALTER TABLE public.nfl_plays RENAME COLUMN seas_type TO season_type;
