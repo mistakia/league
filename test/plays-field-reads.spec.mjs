@@ -9,6 +9,7 @@
 import * as chai from 'chai'
 
 import getPlayFromPlayStats from '#libs-shared/get-play-from-play-stats.mjs'
+import { enrich_fixed_drives } from '#libs-server/play-enrichment/fixed-drive-enrichment.mjs'
 
 const expect = chai.expect
 
@@ -83,5 +84,137 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
     })
 
     expect(play_row.td_tm).to.equal(null)
+  })
+})
+
+// A nfl_plays row as the enrichment pipeline sees it at phase 7. drive_seq is
+// left unset so enrich_fixed_drives computes it.
+const build_play = ({ play_id, play_type, offense_nfl_team, ...rest }) => ({
+  esbid: 1,
+  qtr: 1,
+  play_id,
+  play_type,
+  offense_nfl_team,
+  ...rest
+})
+
+const drive_seqs = (plays) =>
+  enrich_fixed_drives(plays).map((play) => play.drive_seq)
+
+describe('fixed-drive-enrichment drive boundaries', function () {
+  it('starts a new drive when the same team regains possession after a lost fumble', () => {
+    // KC fumbles on a rush, KC recovers. nflfastR counts this as a new drive
+    // even though possession never changed hands.
+    const plays = [
+      build_play({ play_id: 1, play_type: 'RUSH', offense_nfl_team: 'KC' }),
+      build_play({
+        play_id: 2,
+        play_type: 'RUSH',
+        offense_nfl_team: 'KC',
+        fumbles_lost: true
+      }),
+      build_play({ play_id: 3, play_type: 'RUSH', offense_nfl_team: 'KC' })
+    ]
+
+    expect(drive_seqs(plays)).to.deep.equal([1, 1, 2])
+  })
+
+  it('does not start a new drive when the lost fumble was returned for a touchdown', () => {
+    const plays = [
+      build_play({ play_id: 1, play_type: 'RUSH', offense_nfl_team: 'KC' }),
+      build_play({
+        play_id: 2,
+        play_type: 'RUSH',
+        offense_nfl_team: 'KC',
+        fumbles_lost: true,
+        td: true
+      }),
+      build_play({ play_id: 3, play_type: 'RUSH', offense_nfl_team: 'KC' })
+    ]
+
+    expect(drive_seqs(plays)).to.deep.equal([1, 1, 1])
+  })
+
+  it('ignores the nflfastR spelling fumble_lost', () => {
+    const plays = [
+      build_play({ play_id: 1, play_type: 'RUSH', offense_nfl_team: 'KC' }),
+      build_play({
+        play_id: 2,
+        play_type: 'RUSH',
+        offense_nfl_team: 'KC',
+        fumble_lost: true
+      }),
+      build_play({ play_id: 3, play_type: 'RUSH', offense_nfl_team: 'KC' })
+    ]
+
+    expect(drive_seqs(plays)).to.deep.equal([1, 1, 1])
+  })
+
+  it('treats a kickoff recovered by the kicking team as its own drive', () => {
+    const plays = [
+      build_play({ play_id: 1, play_type: 'RUSH', offense_nfl_team: 'KC' }),
+      build_play({
+        play_id: 2,
+        play_type: 'KOFF',
+        offense_nfl_team: 'NE',
+        defense_nfl_team: 'KC',
+        fumbles_lost: true
+      }),
+      build_play({ play_id: 3, play_type: 'RUSH', offense_nfl_team: 'KC' })
+    ]
+
+    expect(drive_seqs(plays)).to.deep.equal([1, 2, 2])
+  })
+
+  it('does not treat a PAT after an offensive touchdown as the same drive', () => {
+    // KC scores, KC is credited -- the PAT is a possession change away from the
+    // scoring team's next unit, so the ordinary posteam rule applies.
+    const plays = [
+      build_play({
+        play_id: 1,
+        play_type: 'PASS',
+        offense_nfl_team: 'KC',
+        td: true,
+        td_tm: 'KC'
+      }),
+      build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
+    ]
+
+    expect(drive_seqs(plays)).to.deep.equal([1, 2])
+  })
+
+  it('does not start a new drive on a PAT following a defensive touchdown', () => {
+    // NE intercepts and scores; NE now has the PAT despite KC being the
+    // offense of record on the scoring play.
+    const plays = [
+      build_play({
+        play_id: 1,
+        play_type: 'PASS',
+        offense_nfl_team: 'KC',
+        td: true,
+        td_tm: 'NE'
+      }),
+      build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
+    ]
+
+    expect(drive_seqs(plays)).to.deep.equal([1, 1])
+  })
+
+  it('falls back to the possession rule when a touchdown has no scoring team', () => {
+    // td_tm is unpopulated for historical plays. An unattributed touchdown must
+    // not be read as a defensive touchdown, which would suppress the drive
+    // boundary on every play that follows a score.
+    const plays = [
+      build_play({
+        play_id: 1,
+        play_type: 'PASS',
+        offense_nfl_team: 'KC',
+        td: true,
+        td_tm: null
+      }),
+      build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
+    ]
+
+    expect(drive_seqs(plays)).to.deep.equal([1, 2])
   })
 })

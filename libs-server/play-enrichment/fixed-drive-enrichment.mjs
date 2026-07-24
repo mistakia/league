@@ -95,17 +95,29 @@ const is_new_drive = (play, prev_play, prev_play_2, prev_play_3) => {
  * @returns {string|null} Effective possession team
  */
 const get_effective_posteam = (play) => {
-  // On kickoffs where the kicking team recovers (onside kick or fumble),
-  // swap the possession team for drive calculation
-  if (
-    play.play_type === 'KOFF' &&
-    (play.own_kickoff_recovery || play.fumble_lost)
-  ) {
+  // On kickoffs where the kicking team recovers the ball, swap the possession
+  // team for drive calculation.
+  //
+  // nflfastR keys this off own_kickoff_recovery | fumble_lost. We have no
+  // own_kickoff_recovery equivalent on nfl_plays, so a lost fumble on the
+  // kickoff is the only signal available.
+  if (play.play_type === 'KOFF' && play.fumbles_lost) {
     return play.defense_nfl_team // Kicking team is listed as def on kickoffs
   }
 
   return play.offense_nfl_team || play.possession_nfl_team
 }
+
+/**
+ * Checks whether a touchdown was scored by the defense.
+ *
+ * Requires td_tm to be populated -- an unattributed touchdown is treated as
+ * not-defensive rather than defensive, so that plays with a missing scoring
+ * team fall through to the ordinary possession-change rule instead of
+ * suppressing every drive boundary that follows a touchdown.
+ */
+const is_defensive_td = (play) =>
+  Boolean(play.td && play.td_tm && play.offense_nfl_team !== play.td_tm)
 
 /**
  * Checks if play is a PAT following a defensive touchdown.
@@ -118,11 +130,7 @@ const is_pat_after_defensive_td = (
   prev_play_3
 ) => {
   // Check if previous play was a defensive TD
-  if (
-    prev_play &&
-    prev_play.touchdown &&
-    prev_play.offense_nfl_team !== prev_play.td_team
-  ) {
+  if (prev_play && is_defensive_td(prev_play)) {
     return true
   }
 
@@ -131,8 +139,7 @@ const is_pat_after_defensive_td = (
     prev_play &&
     is_timeout_or_warning(prev_play) &&
     prev_play_2 &&
-    prev_play_2.touchdown &&
-    prev_play_2.offense_nfl_team !== prev_play_2.td_team
+    is_defensive_td(prev_play_2)
   ) {
     return true
   }
@@ -144,8 +151,7 @@ const is_pat_after_defensive_td = (
     prev_play_2 &&
     is_timeout_or_warning(prev_play_2) &&
     prev_play_3 &&
-    prev_play_3.touchdown &&
-    prev_play_3.offense_nfl_team !== prev_play_3.td_team
+    is_defensive_td(prev_play_3)
   ) {
     return true
   }
@@ -157,9 +163,7 @@ const is_pat_after_defensive_td = (
  * Checks if play is a kickoff that was recovered by the kicking team
  */
 const is_kickoff_recovery = (play) => {
-  return (
-    play.play_type === 'KOFF' && (play.own_kickoff_recovery || play.fumble_lost)
-  )
+  return play.play_type === 'KOFF' && Boolean(play.fumbles_lost)
 }
 
 /**
@@ -199,9 +203,9 @@ const is_fumble_recovery_same_team = (play, prev_play, prev_play_2) => {
     prev_play &&
     current_posteam &&
     current_posteam === get_effective_posteam(prev_play) &&
-    prev_play.fumble_lost &&
+    prev_play.fumbles_lost &&
     ['PUNT', 'PASS', 'RUSH'].includes(prev_play.play_type) &&
-    !prev_play.touchdown // Not if it was a TD
+    !prev_play.td // Not if it was a TD
   ) {
     return true
   }
@@ -213,9 +217,9 @@ const is_fumble_recovery_same_team = (play, prev_play, prev_play_2) => {
     !get_effective_posteam(prev_play) &&
     current_posteam &&
     current_posteam === prev_posteam_2 &&
-    prev_play_2.fumble_lost &&
+    prev_play_2.fumbles_lost &&
     ['PUNT', 'PASS', 'RUSH'].includes(prev_play_2.play_type) &&
-    !prev_play_2.touchdown
+    !prev_play_2.td
   ) {
     return true
   }
