@@ -72,7 +72,7 @@ describe('LIBS-SERVER simulation integration', function () {
         esbid: test_esbid,
         market_type: player_game_prop_types.GAME_PASSING_YARDS,
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000),
+        observed_at: new Date(),
         selection_count: 2
       })
 
@@ -84,7 +84,7 @@ describe('LIBS-SERVER simulation integration', function () {
         selection_metric_line: 275.5,
         selection_type: 'OVER',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000)
+        observed_at: new Date()
       })
 
       const league = await getLeague({ lid: 1 })
@@ -117,7 +117,7 @@ describe('LIBS-SERVER simulation integration', function () {
         esbid: test_esbid,
         market_type: player_game_prop_types.GAME_PASSING_YARDS,
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000),
+        observed_at: new Date(),
         selection_count: 2
       })
 
@@ -129,7 +129,7 @@ describe('LIBS-SERVER simulation integration', function () {
         selection_metric_line: 280.0,
         selection_type: 'OVER',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000)
+        observed_at: new Date()
       })
 
       // Insert DraftKings market with different line
@@ -139,7 +139,7 @@ describe('LIBS-SERVER simulation integration', function () {
         esbid: test_esbid,
         market_type: player_game_prop_types.GAME_PASSING_YARDS,
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000),
+        observed_at: new Date(),
         selection_count: 2
       })
 
@@ -151,7 +151,7 @@ describe('LIBS-SERVER simulation integration', function () {
         selection_metric_line: 275.0,
         selection_type: 'OVER',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000)
+        observed_at: new Date()
       })
 
       const league = await getLeague({ lid: 1 })
@@ -214,7 +214,7 @@ describe('LIBS-SERVER simulation integration', function () {
         esbid: test_esbid,
         market_type: player_game_prop_types.GAME_PASSING_YARDS,
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000),
+        observed_at: new Date(),
         selection_count: 2
       })
 
@@ -226,7 +226,7 @@ describe('LIBS-SERVER simulation integration', function () {
         selection_metric_line: 275.5,
         selection_type: 'OVER',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000)
+        observed_at: new Date()
       })
 
       // Insert passing TDs market
@@ -236,7 +236,7 @@ describe('LIBS-SERVER simulation integration', function () {
         esbid: test_esbid,
         market_type: player_game_prop_types.GAME_PASSING_TOUCHDOWNS,
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000),
+        observed_at: new Date(),
         selection_count: 2
       })
 
@@ -248,7 +248,7 @@ describe('LIBS-SERVER simulation integration', function () {
         selection_metric_line: 2.5,
         selection_type: 'OVER',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000)
+        observed_at: new Date()
       })
 
       const league = await getLeague({ lid: 1 })
@@ -302,7 +302,7 @@ describe('LIBS-SERVER simulation integration', function () {
         esbid: test_esbid,
         market_type: 'GAME_TOTAL',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000),
+        observed_at: new Date(),
         selection_count: 2
       })
 
@@ -313,7 +313,7 @@ describe('LIBS-SERVER simulation integration', function () {
         selection_metric_line: 48.5,
         selection_type: 'OVER',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000)
+        observed_at: new Date()
       })
 
       const result = await load_game_environment({
@@ -337,7 +337,7 @@ describe('LIBS-SERVER simulation integration', function () {
         esbid: test_esbid,
         market_type: 'GAME_SPREAD',
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000),
+        observed_at: new Date(),
         selection_count: 2
       })
 
@@ -349,7 +349,7 @@ describe('LIBS-SERVER simulation integration', function () {
         selection_name: 'KC -3.5',
         selection_metric_line: -3.5,
         time_type: 'CLOSE',
-        timestamp: Math.floor(Date.now() / 1000)
+        observed_at: new Date()
       })
 
       const result = await load_game_environment({

@@ -174,13 +174,17 @@ const player_betting_market_with = ({
       .from('prop_markets_index')
       .where('market_type', market_type)
       .andWhere('time_type', time_type)
-      .andWhere('prop_markets_index.year', year)
+      .andWhere('prop_markets_index.season_year', year)
       .andWhere('source_id', source_id)
 
     if (week || career_year.length) {
       qb.join('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
-        this.andOn('nfl_games.season_year', '=', 'prop_markets_index.year')
+        this.andOn(
+          'nfl_games.season_year',
+          '=',
+          'prop_markets_index.season_year'
+        )
         this.andOn('nfl_games.season_type', '=', db.raw('?', [seas_type]))
         if (week) {
           this.andOn('nfl_games.week', '=', db.raw('?', [week]))
@@ -220,8 +224,8 @@ const player_betting_market_with = ({
     if (career_year.length) {
       qb.join('player_seasonlogs', function () {
         this.on('pms.selection_pid', '=', 'player_seasonlogs.pid')
-          .andOn('m.year', '=', 'player_seasonlogs.season_year')
-          .andOn('m.seas_type', '=', 'player_seasonlogs.season_type')
+          .andOn('m.season_year', '=', 'player_seasonlogs.season_year')
+          .andOn('m.season_type', '=', 'player_seasonlogs.season_type')
       })
       qb.whereBetween('player_seasonlogs.career_year', [
         Math.min(career_year[0], career_year[1]),
@@ -339,13 +343,17 @@ const team_betting_market_with = ({
       .from('prop_markets_index')
       .where('market_type', market_type)
       .andWhere('time_type', time_type)
-      .andWhere('prop_markets_index.year', year)
+      .andWhere('prop_markets_index.season_year', year)
       .andWhere('source_id', source_id)
 
     if (week) {
       qb.join('nfl_games', function () {
         this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
-        this.andOn(`nfl_games.season_year`, '=', `prop_markets_index.year`)
+        this.andOn(
+          `nfl_games.season_year`,
+          '=',
+          `prop_markets_index.season_year`
+        )
         this.andOn(`nfl_games.week`, '=', db.raw('?', [week]))
         this.andOn(`nfl_games.season_type`, '=', db.raw('?', [seas_type]))
       })
@@ -421,14 +429,18 @@ const team_game_implied_team_total_with = ({
       })
       .join('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
-        this.andOn('nfl_games.season_year', '=', 'prop_markets_index.year')
+        this.andOn(
+          'nfl_games.season_year',
+          '=',
+          'prop_markets_index.season_year'
+        )
       })
       .where(
         'market_type',
         bookmaker_constants.team_game_market_types.GAME_SPREAD
       )
       .andWhere('prop_markets_index.time_type', time_type)
-      .andWhere('prop_markets_index.year', year)
+      .andWhere('prop_markets_index.season_year', year)
       .andWhere('prop_markets_index.source_id', source_id)
       .andWhere('nfl_games.week', week)
       .andWhere('nfl_games.season_type', db.raw('?', [seas_type]))
@@ -448,14 +460,18 @@ const team_game_implied_team_total_with = ({
       })
       .join('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
-        this.andOn('nfl_games.season_year', '=', 'prop_markets_index.year')
+        this.andOn(
+          'nfl_games.season_year',
+          '=',
+          'prop_markets_index.season_year'
+        )
       })
       .where(
         'market_type',
         bookmaker_constants.team_game_market_types.GAME_TOTAL
       )
       .andWhere('prop_markets_index.time_type', time_type)
-      .andWhere('prop_markets_index.year', year)
+      .andWhere('prop_markets_index.season_year', year)
       .andWhere('prop_markets_index.source_id', source_id)
       .andWhere('nfl_games.week', week)
       .andWhere('nfl_games.season_type', db.raw('?', [seas_type]))

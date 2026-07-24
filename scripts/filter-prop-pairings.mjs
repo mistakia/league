@@ -208,7 +208,10 @@ const should_exclude_by_player_filters = (prop, opts) => {
   }
 
   // Check include teams
-  if (opts.include_teams.length && !opts.include_teams.includes(prop.team)) {
+  if (
+    opts.include_teams.length &&
+    !opts.include_teams.includes(prop.nfl_team)
+  ) {
     return true
   }
 
@@ -264,8 +267,8 @@ const check_opponent_allowed_stats = (prop, nfl_team_seasonlogs, opts) => {
   for (const single_prop of prop.props) {
     const opponent_seasonlog = nfl_team_seasonlogs.find(
       (s) =>
-        s.stat_key === `${single_prop.pos}_AGAINST_ADJ` &&
-        s.tm === single_prop.opp
+        s.stat_key === `${single_prop.position}_AGAINST_ADJ` &&
+        s.tm === single_prop.opponent_nfl_team
     )
 
     if (opponent_seasonlog) {
@@ -278,7 +281,7 @@ const check_opponent_allowed_stats = (prop, nfl_team_seasonlogs, opts) => {
         return true // Should exclude this prop
       }
     } else {
-      log(`missing seasonlog for ${single_prop.opp}`)
+      log(`missing seasonlog for ${single_prop.opponent_nfl_team}`)
     }
   }
   return false
@@ -301,14 +304,14 @@ const is_duplicate_prop = (prop, unique_index, team_index) => {
     return true
   }
 
-  if (team_index[prop.team]) {
-    team_index[prop.team] += 1
+  if (team_index[prop.nfl_team]) {
+    team_index[prop.nfl_team] += 1
     // TODO: re-enable unique by team
     // return true
   }
 
   unique_index[prop_key] = 1
-  team_index[prop.team] = 1
+  team_index[prop.nfl_team] = 1
   return false
 }
 
@@ -534,11 +537,11 @@ const apply_threshold_filters = (query, opts) => {
  */
 const apply_team_player_filters = (query, opts) => {
   if (opts.exclude_nfl_team.length) {
-    query.whereNotIn('team', opts.exclude_nfl_team)
+    query.whereNotIn('nfl_team', opts.exclude_nfl_team)
   }
 
   if (opts.include_teams.length) {
-    query.whereIn('team', opts.include_teams)
+    query.whereIn('nfl_team', opts.include_teams)
   }
 }
 
@@ -759,7 +762,7 @@ const filter_prop_pairings = async ({
 
   log('Plays')
 
-  const plays_grouped_by_team = groupBy(filtered, 'team')
+  const plays_grouped_by_team = groupBy(filtered, 'nfl_team')
   for (const team_name in plays_grouped_by_team) {
     const team_plays_table = new Table({
       title: `${team_name} plays`,
@@ -806,7 +809,7 @@ const filter_prop_pairings = async ({
   }
 
   log('Plays By Team')
-  const filtered_plays_by_team = groupBy(filtered, 'team')
+  const filtered_plays_by_team = groupBy(filtered, 'nfl_team')
   for (const team_name of Object.keys(filtered_plays_by_team)) {
     log(`${team_name}: ${filtered_plays_by_team[team_name].length}`)
   }

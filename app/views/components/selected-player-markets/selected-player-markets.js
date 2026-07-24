@@ -121,7 +121,7 @@ function create_table_data({ markets, is_alt_line, has_line }) {
       if (!combined_data[key]) {
         const data_point = {
           source: market.source_id,
-          timestamp: new Date(selection.timestamp * 1000).toLocaleString(),
+          timestamp: new Date(selection.timestamp).toLocaleString(),
           year: market.year,
           week: market.week,
           selection_type: selection.selection_type,
@@ -303,7 +303,7 @@ function create_combined_data(markets) {
 
   markets.forEach((market) => {
     market.selections.forEach((selection) => {
-      const timestamp = selection.timestamp * 1000
+      const timestamp = new Date(selection.timestamp).getTime()
       const type = selection.selection_name.toLowerCase().includes('over')
         ? 'over'
         : 'under'
@@ -427,7 +427,7 @@ function create_odds_only_chart({ markets }) {
 
   markets.forEach((market) => {
     market.selections.forEach((selection) => {
-      const timestamp = selection.timestamp * 1000
+      const timestamp = new Date(selection.timestamp).getTime()
       const odds = selection.odds_american
       series_data.push([timestamp, odds])
     })

@@ -66,7 +66,7 @@ export const extract_props_per_asset = async ({
     .select(
       's.selection_pid as pid',
       'm.market_type',
-      db.raw("TO_CHAR(TO_TIMESTAMP(h.timestamp), 'YYYY-MM-DD') AS date_iso"),
+      db.raw("TO_CHAR(h.observed_at, 'YYYY-MM-DD') AS date_iso"),
       'h.source_id',
       'h.selection_metric_line as line'
     )
@@ -84,15 +84,11 @@ export const extract_props_per_asset = async ({
     })
     .whereIn('m.market_type', SEASON_MARKETS)
     .whereIn('s.selection_pid', player_ids)
+    .where('h.observed_at', '>=', new Date(start_date))
     .where(
-      'h.timestamp',
-      '>=',
-      Math.floor(new Date(start_date).getTime() / 1000)
-    )
-    .where(
-      'h.timestamp',
+      'h.observed_at',
       '<=',
-      Math.floor(new Date(end_date).getTime() / 1000) + 86400
+      new Date(new Date(end_date).getTime() + 86400 * 1000)
     )
     .whereNotNull('h.selection_metric_line')
 

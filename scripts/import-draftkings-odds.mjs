@@ -133,7 +133,8 @@ const run = async () => {
   // Preload player cache for performance optimization
   await preload_player_cache()
 
-  const timestamp = Math.round(Date.now() / 1000)
+  const file_timestamp = Math.round(Date.now() / 1000)
+  const observed_at = new Date()
   const nfl_games = await db('nfl_games')
     .select('*', 'season_year as year', 'season_type as seas_type')
     .where({
@@ -152,7 +153,7 @@ const run = async () => {
   if (argv.mode === 'events') {
     results = await run_events_mode({
       nfl_games,
-      timestamp,
+      observed_at,
       category_filter,
       subcategory_filter,
       event_filter
@@ -160,7 +161,7 @@ const run = async () => {
   } else {
     results = await run_all_mode({
       nfl_games,
-      timestamp,
+      observed_at,
       category_filter,
       subcategory_filter
     })
@@ -181,7 +182,7 @@ const run = async () => {
   // Write output files if requested
   if (argv.write) {
     await write_output_files(
-      timestamp,
+      file_timestamp,
       all_markets,
       formatted_markets,
       failed_requests

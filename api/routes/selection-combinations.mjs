@@ -117,12 +117,12 @@ function transform_combination_odds_row({ row, player_lookup_map }) {
   const result = {
     combination_name: row.combination_name,
     source_id: row.source_id,
-    year: row.year,
+    season_year: row.season_year,
     week: row.week,
     esbid: row.esbid,
     decimal_odds: row.decimal_odds,
     american_odds: row.american_odds,
-    timestamp: row.timestamp
+    observed_at: row.observed_at
   }
 
   const selection_ids = row.selection_ids || []
@@ -191,21 +191,21 @@ router.get('/', async (req, res) => {
       .select(
         'scd.combination_name',
         'scoi.source_id',
-        'scoi.year',
+        'scoi.season_year',
         'scoi.week',
         'scoi.esbid',
         'scoi.decimal_odds',
         'scoi.american_odds',
-        'scoi.timestamp',
+        'scoi.observed_at',
         'scoi.selection_ids'
       )
-      .orderBy('scoi.timestamp', 'desc')
+      .orderBy('scoi.observed_at', 'desc')
       .limit(parsed_limit)
       .offset(parsed_offset)
 
     // Apply filters
     if (year) {
-      query = query.where('scoi.year', parseInt(year, 10))
+      query = query.where('scoi.season_year', parseInt(year, 10))
     }
     if (week) {
       query = query.where('scoi.week', parseInt(week, 10))

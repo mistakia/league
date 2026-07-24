@@ -13,7 +13,7 @@ const SELECTION_UPDATE_FIELDS = [
 ]
 
 // Extract fields needed for selection history inserts
-const get_selection_history_record = (selection, timestamp) => ({
+const get_selection_history_record = (selection, observed_at) => ({
   source_id: selection.source_id,
   source_market_id: selection.source_market_id,
   source_selection_id: selection.source_selection_id,
@@ -21,11 +21,11 @@ const get_selection_history_record = (selection, timestamp) => ({
   selection_metric_line: selection.selection_metric_line,
   odds_decimal: selection.odds_decimal,
   odds_american: selection.odds_american,
-  timestamp
+  observed_at
 })
 
 // Validate required selection fields
-const validate_selection = (selection, timestamp) => {
+const validate_selection = (selection, observed_at) => {
   if (!selection.source_id) {
     throw new Error('source_id is required')
   }
@@ -41,13 +41,13 @@ const validate_selection = (selection, timestamp) => {
   if (!selection.odds_decimal) {
     throw new Error('odds_decimal is required')
   }
-  if (!timestamp) {
-    throw new Error('timestamp is required')
+  if (!observed_at) {
+    throw new Error('observed_at is required')
   }
 }
 
 const process_market_selection = ({
-  timestamp,
+  observed_at,
   selection,
   existing_market,
   market
@@ -56,22 +56,22 @@ const process_market_selection = ({
   const selection_index_inserts = []
 
   const save_new_selection = () => {
-    validate_selection(selection, timestamp)
+    validate_selection(selection, observed_at)
 
     selection_history_inserts.push(
-      get_selection_history_record(selection, timestamp)
+      get_selection_history_record(selection, observed_at)
     )
 
     selection_index_inserts.push({
       ...selection,
-      timestamp,
+      observed_at,
       time_type: 'OPEN'
     })
 
     if (!market.live) {
       selection_index_inserts.push({
         ...selection,
-        timestamp,
+        observed_at,
         time_type: 'CLOSE'
       })
     }
@@ -102,8 +102,8 @@ const process_market_selection = ({
   }
 
   // Create a copy to avoid mutating cached object
-  const { timestamp: _, ...existing_without_timestamp } = existing_selection
-  const differences = diff(existing_without_timestamp, selection)
+  const { observed_at: _, ...existing_without_observed_at } = existing_selection
+  const differences = diff(existing_without_observed_at, selection)
 
   let odds_change_amount = 0
   let selection_name_changed = false
@@ -116,7 +116,7 @@ const process_market_selection = ({
 
     if (should_update) {
       selection_history_inserts.push(
-        get_selection_history_record(selection, timestamp)
+        get_selection_history_record(selection, observed_at)
       )
 
       for (const d of differences) {
@@ -134,7 +134,7 @@ const process_market_selection = ({
   if (!market.live) {
     selection_index_inserts.push({
       ...selection,
-      timestamp,
+      observed_at,
       time_type: 'CLOSE'
     })
   }
@@ -151,7 +151,7 @@ const process_market_selection = ({
 }
 
 export default async function ({
-  timestamp,
+  observed_at,
   selections,
   existing_market,
   market
@@ -177,7 +177,7 @@ export default async function ({
     const selection_results = await Promise.allSettled(
       selections.map((selection) =>
         process_market_selection({
-          timestamp,
+          observed_at,
           selection,
           existing_market,
           market

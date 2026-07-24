@@ -51,7 +51,7 @@ const get_selection_id_from_source = async ({
       'prop_market_selections_index.selection_type',
       'prop_markets_index.market_type',
       'prop_markets_index.esbid',
-      'prop_markets_index.year'
+      'prop_markets_index.season_year'
     )
     .first()
 

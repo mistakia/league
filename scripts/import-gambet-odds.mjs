@@ -50,7 +50,12 @@ const format_player_name = (str) => {
   return str.trim()
 }
 
-const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
+const format_market = async ({
+  gambet_market,
+  observed_at,
+  event,
+  nfl_game
+}) => {
   let player_row
   const selections = []
 
@@ -115,7 +120,7 @@ const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
     live: gambet_market.isLive,
     selection_count: gambet_market.odds.length,
 
-    timestamp,
+    observed_at,
     selections
   }
 }
@@ -127,6 +132,7 @@ const import_gambet_odds = async () => {
   const formatted_markets = []
   const all_markets = []
   const timestamp = Math.round(Date.now() / 1000)
+  const observed_at = new Date()
 
   const nfl_games = await db('nfl_games')
     .select('*', 'season_year as year', 'season_type as seas_type')
@@ -164,7 +170,7 @@ const import_gambet_odds = async () => {
       formatted_markets.push(
         await format_market({
           gambet_market: market,
-          timestamp,
+          observed_at,
           event,
           nfl_game
         })

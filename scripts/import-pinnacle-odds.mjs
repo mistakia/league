@@ -319,7 +319,7 @@ const process_market_selections = ({
 const process_market_odds = async (
   pinnacle_matchup,
   pinnacle_markets,
-  timestamp,
+  observed_at,
   nfl_games,
   unmatched_markets,
   unmatched_combinations
@@ -345,7 +345,7 @@ const process_market_odds = async (
     const formatted_market = await format_market({
       pinnacle_matchup: extended_pinnacle_matchup,
       market_selection_odds,
-      timestamp,
+      observed_at,
       nfl_games,
       unmatched_markets,
       unmatched_combinations
@@ -396,7 +396,7 @@ const track_unmatched_market = ({
 const format_market = async ({
   pinnacle_matchup,
   market_selection_odds,
-  timestamp,
+  observed_at,
   nfl_games = [],
   unmatched_markets,
   unmatched_combinations
@@ -455,7 +455,7 @@ const format_market = async ({
     source_market_id,
     source_market_name: `type: ${pinnacle_matchup.type} / units: ${pinnacle_matchup.units} / category: ${special_category} / description: ${special_description}`,
     esbid: nfl_game ? nfl_game.esbid : null,
-    year: nfl_game ? nfl_game.year : current_season.year,
+    season_year: nfl_game ? nfl_game.year : current_season.year,
     source_event_id: pinnacle_matchup.id,
     source_event_name: format_source_event_name({
       is_valid_matchup: team_info.is_valid_matchup,
@@ -468,7 +468,7 @@ const format_market = async ({
     open: true,
     live: pinnacle_matchup.isLive,
     selection_count: market_selection_odds.length,
-    timestamp,
+    observed_at,
     selections
   }
 }
@@ -523,7 +523,7 @@ const collect_unique_values = (matchups) => {
  */
 const process_single_matchup = async ({
   pinnacle_matchup,
-  timestamp,
+  observed_at,
   nfl_games,
   unmatched_markets,
   unmatched_combinations,
@@ -570,7 +570,7 @@ const process_single_matchup = async ({
     const formatted_markets = await process_market_odds(
       pinnacle_matchup,
       pinnacle_markets,
-      timestamp,
+      observed_at,
       nfl_games,
       unmatched_markets,
       unmatched_combinations
@@ -595,7 +595,7 @@ const process_single_matchup = async ({
  */
 const process_matchup_batches = async ({
   pinnacle_matchups,
-  timestamp,
+  observed_at,
   nfl_games,
   unmatched_markets,
   unmatched_combinations,
@@ -614,7 +614,7 @@ const process_matchup_batches = async ({
     const batch_promises = matchup_batch.map(async (pinnacle_matchup) => {
       return process_single_matchup({
         pinnacle_matchup,
-        timestamp,
+        observed_at,
         nfl_games,
         unmatched_markets,
         unmatched_combinations,
@@ -805,7 +805,8 @@ const import_pinnacle_odds = async ({
       throw error
     }
 
-    const timestamp = Math.round(Date.now() / 1000)
+    const file_timestamp = Math.round(Date.now() / 1000)
+    const observed_at = new Date()
     const nfl_games = await db('nfl_games')
       .select('*', 'season_year as year', 'season_type as seas_type')
       .where({ season_year: current_season.year })
@@ -869,7 +870,7 @@ const import_pinnacle_odds = async ({
     const { formatted_markets, all_matchups_with_markets, timed_out } =
       await process_matchup_batches({
         pinnacle_matchups,
-        timestamp,
+        observed_at,
         nfl_games,
         unmatched_markets,
         unmatched_combinations,
@@ -891,7 +892,7 @@ const import_pinnacle_odds = async ({
     // Save data files if requested
     if (save) {
       await save_data_files({
-        timestamp,
+        timestamp: file_timestamp,
         all_matchups_with_markets,
         formatted_markets
       })

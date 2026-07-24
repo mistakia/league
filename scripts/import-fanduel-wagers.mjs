@@ -346,7 +346,7 @@ const import_fanduel_wagers = async ({
       wager_item = {
         userid: user_id,
         wager_type,
-        placed_at: dayjs(wager.placedDate).unix(),
+        placed_at: dayjs(wager.placedDate).toDate(),
         bet_count,
         selection_count: wager.legs.length,
         selection_lost: wager.legs.filter((leg) => leg.result === 'LOST')

@@ -219,7 +219,7 @@ const process_selection = (
  * @param {Array} params.draftkings_events - Array of DraftKings events
  * @param {Object} params.draftkings_offer_category - The offer category
  * @param {Object} params.draftkings_offer_sub_category - The offer subcategory
- * @param {number} params.format_timestamp - Timestamp for formatting
+ * @param {Date} params.format_observed_at - Observation time for formatting
  * @param {Array} params.nfl_games - Array of NFL games
  * @returns {Object|null} - Formatted market object or null
  */
@@ -229,7 +229,7 @@ export const format_market = async ({
   draftkings_events,
   draftkings_offer_category,
   draftkings_offer_sub_category,
-  format_timestamp,
+  format_observed_at,
   nfl_games = []
 }) => {
   const draftkings_event = draftkings_events.find(
@@ -295,7 +295,7 @@ export const format_market = async ({
     ),
 
     esbid: nfl_game ? nfl_game.esbid : null,
-    year: nfl_game ? nfl_game.year : current_season.year,
+    season_year: nfl_game ? nfl_game.year : current_season.year,
     source_event_id: draftkings_market.eventId,
     source_event_name: clean_string(draftkings_event?.name) || null,
 
@@ -303,7 +303,7 @@ export const format_market = async ({
     live: null,
     selection_count: draftkings_market_selections.length,
 
-    timestamp: format_timestamp,
+    observed_at: format_observed_at,
     selections: formatted_selections
   }
 }

@@ -66,12 +66,12 @@ describe('API /selection-combinations', function () {
       'ESBID:2025120799|MARKET:GAME_ALT_RECEIVING_YARDS|PID:TEST-RECV-000919|SEL:OVER|LINE:99.5'
     ],
     esbid: 2025120799,
-    year: 2025,
+    season_year: 2025,
     week: 14,
     decimal_odds: '15.500',
     american_odds: 1450,
     is_sgp: true,
-    timestamp: 1764963500
+    observed_at: new Date(1764963500 * 1000)
   }
 
   beforeEach(async function () {
@@ -131,7 +131,7 @@ describe('API /selection-combinations', function () {
       const test_record = res.body.find((r) => r.esbid === 2025120799)
       if (test_record) {
         test_record.should.have.property('combination_name', 'TEST_QB_WR_COMBO')
-        test_record.should.have.property('year', 2025)
+        test_record.should.have.property('season_year', 2025)
         test_record.should.have.property('week', 14)
       }
     })
@@ -229,12 +229,12 @@ describe('API /selection-combinations', function () {
           'ESBID:2025120798|MARKET:GAME_ALT_PASSING_YARDS|PID:NONEXISTENT-PLAYER|SEL:OVER|LINE:250.5'
         ],
         esbid: 2025120798,
-        year: 2025,
+        season_year: 2025,
         week: 14,
         decimal_odds: '5.000',
         american_odds: 400,
         is_sgp: true,
-        timestamp: 1764963501
+        observed_at: new Date(1764963501 * 1000)
       }
 
       await knex('selection_combination_odds_index')
@@ -324,7 +324,7 @@ describe('API /selection-combinations', function () {
       // If we have at least 2 results, the first result with offset should match
       // the second result without offset
       if (all_res.body.length >= 2) {
-        offset_res.body[0].timestamp.should.equal(all_res.body[1].timestamp)
+        offset_res.body[0].observed_at.should.equal(all_res.body[1].observed_at)
       }
     })
 

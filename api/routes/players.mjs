@@ -1177,7 +1177,7 @@ router.get('/:pid/markets/?', async (req, res) => {
         'prop_market_selections_index.selection_result',
         'prop_market_selections_index.odds_decimal',
         'prop_market_selections_index.odds_american',
-        'prop_market_selections_index.timestamp as selection_timestamp',
+        'prop_market_selections_index.observed_at as selection_timestamp',
         'prop_market_selections_index.time_type as selection_time_type',
         'prop_market_selections_index.metric_result_value as selection_metric_result_value',
         'prop_market_selections_index.current_season_hit_rate_hard',
@@ -1209,7 +1209,7 @@ router.get('/:pid/markets/?', async (req, res) => {
       })
       .leftJoin('nfl_games', 'prop_markets_index.esbid', 'nfl_games.esbid')
       .where('prop_market_selections_index.selection_pid', pid)
-      .orderBy('prop_markets_index.timestamp', 'desc')
+      .orderBy('prop_markets_index.observed_at', 'desc')
 
     // Group selections by market
     const grouped_markets = markets_and_selections.reduce((acc, row) => {
@@ -1227,8 +1227,8 @@ router.get('/:pid/markets/?', async (req, res) => {
           live: row.live,
           market_settled: row.market_settled,
           time_type: row.time_type,
-          timestamp: row.timestamp,
-          year: row.year,
+          timestamp: row.observed_at,
+          year: row.season_year,
           week: row.week,
           event_date: row.date,
           event_time_est: row.time_est,

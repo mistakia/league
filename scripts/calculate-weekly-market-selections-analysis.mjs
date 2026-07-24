@@ -82,18 +82,18 @@ const format_prop_row = ({
     all_plays
       .filter(
         (p) =>
-          p.psr_pid === prop_row.selection_pid ||
-          p.bc_pid === prop_row.selection_pid ||
-          p.trg_pid === prop_row.selection_pid
+          p.passer_pid === prop_row.selection_pid ||
+          p.ball_carrier_pid === prop_row.selection_pid ||
+          p.target_pid === prop_row.selection_pid
       )
       .reduce((acc, play) => {
         if (!acc[play.esbid]) {
           acc[play.esbid] = {
             esbid: play.esbid,
             pid: prop_row.selection_pid,
-            year: play.year,
+            year: play.season_year,
             week: play.week,
-            seas_type: play.seas_type,
+            seas_type: play.season_type,
             pos: player_row.primary_position,
             first_quarter_stats: {
               passing_yards: 0,
@@ -104,17 +104,17 @@ const format_prop_row = ({
         }
 
         if (play.qtr === 1) {
-          if (play.psr_pid === prop_row.selection_pid) {
+          if (play.passer_pid === prop_row.selection_pid) {
             acc[play.esbid].first_quarter_stats.passing_yards +=
               play.pass_yds || 0
           }
-          if (play.bc_pid === prop_row.selection_pid) {
+          if (play.ball_carrier_pid === prop_row.selection_pid) {
             acc[play.esbid].first_quarter_stats.rushing_yards +=
               play.rush_yds || 0
           }
           if (
-            play.trg_pid === prop_row.selection_pid &&
-            play.bc_pid === prop_row.selection_pid
+            play.target_pid === prop_row.selection_pid &&
+            play.ball_carrier_pid === prop_row.selection_pid
           ) {
             acc[play.esbid].first_quarter_stats.receiving_yards +=
               play.recv_yds || 0
@@ -259,9 +259,9 @@ const format_prop_row = ({
     name: `${player_row.first_name} ${player_row.last_name} ${prop_row.selection_metric_line} ${
       prop_desc[prop_row.market_type]
     } ${prop_row.selection_type || 'OVER'}`,
-    team: player_row.current_nfl_team,
-    opp: opponent,
-    pos: player_row.primary_position,
+    nfl_team: player_row.current_nfl_team,
+    opponent_nfl_team: opponent,
+    position: player_row.primary_position,
 
     current_season_hits_soft: current_season_data.hits_soft,
     current_season_hit_weeks_soft: current_season_data.hit_weeks_soft,
@@ -366,19 +366,19 @@ const calculate_weekly_market_selections_analysis = async ({
     .select(
       'esbid',
       'week',
-      'year',
-      'seas_type',
+      'season_year',
+      'season_type',
       'qtr',
       'pass_yds',
       'recv_yds',
       'rush_yds',
-      'psr_pid',
-      'trg_pid',
-      'bc_pid'
+      'passer_pid',
+      'target_pid',
+      'ball_carrier_pid'
     )
     .where({
-      year,
-      seas_type
+      season_year: year,
+      season_type: seas_type
     })
     .whereNot('play_type', 'NOPL')
     .orderBy('esbid')

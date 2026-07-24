@@ -181,7 +181,7 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
     pairing_id,
     source_id: source,
     name: `${prop_names.join(' / ')} (${status})`,
-    team,
+    nfl_team: team,
     week,
     market_prob,
     ...props_totals,
@@ -333,7 +333,7 @@ const generate_prop_pairings = async ({
   const prop_pairing_inserts = []
   const prop_pairing_props_inserts = []
 
-  const props_by_team = groupBy(all_props, 'team')
+  const props_by_team = groupBy(all_props, 'nfl_team')
   for (const tm of Object.keys(props_by_team)) {
     const tm_props = props_by_team[tm]
     const props_by_pid = groupBy(tm_props, 'selection_pid')

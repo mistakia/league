@@ -25,7 +25,7 @@ debug.enable('import-prizepicks-odds,get-player,prizepicks')
 
 const format_market = async ({
   prizepicks_market,
-  timestamp,
+  observed_at,
   prizepicks_player,
   nfl_games = []
 }) => {
@@ -112,9 +112,9 @@ const format_market = async ({
     open: true,
     live: false,
     selection_count: 2,
-    year: current_season.year,
+    season_year: current_season.year,
 
-    timestamp,
+    observed_at,
     selections
   }
 }
@@ -136,6 +136,7 @@ const import_prizepicks_odds = async ({
   console.time('import-prizepicks-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
+  const observed_at = new Date()
   const formatted_markets = []
   const all_markets = []
   const missing_market_types = new Set()
@@ -168,7 +169,7 @@ const import_prizepicks_odds = async ({
       const market = await format_market({
         prizepicks_market: item,
         prizepicks_player,
-        timestamp,
+        observed_at,
         nfl_games
       })
 

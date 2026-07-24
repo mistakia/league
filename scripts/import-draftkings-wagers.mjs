@@ -116,7 +116,7 @@ const import_draftkings_wagers = async ({
       wager_item = {
         userid: user_id,
         wager_type: format_wager_type(wager.type),
-        placed_at: dayjs(wager.placementDate).unix(),
+        placed_at: dayjs(wager.placementDate).toDate(),
         bet_count: wager.numberOfBets,
         selection_count: wager.numberOfSelections,
         wager_status: format_wager_status(wager.settlementStatus),

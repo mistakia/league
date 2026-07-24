@@ -27,10 +27,11 @@ const log = debug('import-betonline')
 debug.enable('import-betonline,get-player,betonline')
 
 const timestamp = Math.round(Date.now() / 1000)
+const observed_at = new Date()
 
 const format_market = async ({
   betonline_market,
-  timestamp,
+  observed_at,
   player_row,
   nfl_game,
   source_event_id
@@ -72,7 +73,7 @@ const format_market = async ({
     live: null,
     selection_count: 1,
 
-    timestamp,
+    observed_at,
     selections
   }
 }
@@ -159,7 +160,7 @@ const run = async () => {
               formatted_markets.push(
                 await format_market({
                   betonline_market: market,
-                  timestamp,
+                  observed_at,
                   player_row,
                   nfl_game,
                   source_event_id: gameId

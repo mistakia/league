@@ -32,7 +32,7 @@ debug.enable('import-fanatics-odds,get-player,insert-prop-markets,fanatics')
 
 const format_market = async ({
   market,
-  timestamp,
+  observed_at,
   event = {},
   nfl_games = []
 }) => {
@@ -114,13 +114,13 @@ const format_market = async ({
     source_market_id: market.id,
     source_market_name: market.name,
     esbid: nfl_game?.esbid || null,
-    year: nfl_game?.year || current_season.year,
+    season_year: nfl_game?.year || current_season.year,
     source_event_id: String(event.id),
     source_event_name: event.name,
     open: market.state === 'OPEN',
     live: Boolean(market.live),
     selection_count: market.selection.length,
-    timestamp,
+    observed_at,
     selections
   }
 }
@@ -159,6 +159,7 @@ const run = async ({
   const missing_markets = new Set()
 
   const timestamp = Math.round(Date.now() / 1000)
+  const observed_at = new Date()
   const league_info = await fanatics.get_league_info({ ignore_cache })
 
   const nfl_games = await db('nfl_games')
@@ -207,7 +208,7 @@ const run = async ({
 
         const formatted_market = await format_market({
           market,
-          timestamp,
+          observed_at,
           event,
           nfl_games
         })

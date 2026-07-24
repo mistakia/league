@@ -221,7 +221,7 @@ const query_params_validator = v.compile({
  *                   - id: 12345
  *                     userid: 123
  *                     wager_type: PARLAY
- *                     placed_at: 1640995200
+ *                     placed_at: "2022-01-01T00:00:00.000Z"
  *                     bet_count: 1
  *                     selection_count: 3
  *                     selection_lost: 0
@@ -247,7 +247,7 @@ const query_params_validator = v.compile({
  *                   - id: 12346
  *                     userid: 123
  *                     wager_type: SINGLE
- *                     placed_at: 1641081600
+ *                     placed_at: "2022-01-02T00:00:00.000Z"
  *                     bet_count: 1
  *                     selection_count: 1
  *                     selection_lost: 0
@@ -316,12 +316,14 @@ router.get('/:user_id', async (req, res) => {
 
     const wagers_query = db('placed_wagers').where('userid', user_id)
 
+    // placed_before/placed_after remain Unix-second query params (wire contract);
+    // placed_at is now timestamptz, so compare against a Date.
     if (placed_before) {
-      wagers_query.where('placed_at', '<', placed_before)
+      wagers_query.where('placed_at', '<', new Date(placed_before * 1000))
     }
 
     if (placed_after) {
-      wagers_query.where('placed_at', '>', placed_after)
+      wagers_query.where('placed_at', '>', new Date(placed_after * 1000))
     }
 
     if (wager_type) {

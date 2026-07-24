@@ -27,7 +27,7 @@ debug.enable('import-betrivers-odds,insert-prop-markets')
 
 const format_market = async ({
   betrivers_market,
-  timestamp,
+  observed_at,
   event,
   nfl_game
 }) => {
@@ -96,7 +96,7 @@ const format_market = async ({
     live: null,
     selection_count: betrivers_market.outcomes.length,
 
-    timestamp,
+    observed_at,
     selections
   }
 }
@@ -106,6 +106,7 @@ const import_betrivers_odds = async () => {
   const formatted_markets = []
   const all_markets = []
   const timestamp = Math.round(Date.now() / 1000)
+  const observed_at = new Date()
 
   const nfl_games = await db('nfl_games')
     .select('*', 'season_year as year', 'season_type as seas_type')
@@ -145,7 +146,7 @@ const import_betrivers_odds = async () => {
               formatted_markets.push(
                 await format_market({
                   betrivers_market: offer,
-                  timestamp,
+                  observed_at,
                   event,
                   nfl_game
                 })
@@ -159,7 +160,7 @@ const import_betrivers_odds = async () => {
           formatted_markets.push(
             await format_market({
               betrivers_market: offer,
-              timestamp,
+              observed_at,
               event,
               nfl_game
             })

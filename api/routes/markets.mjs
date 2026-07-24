@@ -236,14 +236,14 @@ router.get('/?', async (req, res) => {
       .where('prop_markets_index.source_id', params.bookmaker)
       .where('prop_markets_index.time_type', params.time_type)
 
-    // Handle year filtering - use prop_markets_index.year if only year is provided
+    // Handle year filtering - use prop_markets_index.season_year if only year is provided
     if (
       params.year !== undefined &&
       params.week === undefined &&
       !params.seas_type
     ) {
       markets_query = markets_query.where(
-        'prop_markets_index.year',
+        'prop_markets_index.season_year',
         params.year
       )
     }
@@ -498,22 +498,22 @@ router.get('/:source_market_id/history', async (req, res) => {
 
     if (params.start_time) {
       query = query.where(
-        'prop_markets_history.timestamp',
+        'prop_markets_history.observed_at',
         '>=',
-        params.start_time
+        new Date(params.start_time)
       )
     }
 
     if (params.end_time) {
       query = query.where(
-        'prop_markets_history.timestamp',
+        'prop_markets_history.observed_at',
         '<=',
-        params.end_time
+        new Date(params.end_time)
       )
     }
 
     const markets_history = await query
-      .orderBy('prop_markets_history.timestamp', 'desc')
+      .orderBy('prop_markets_history.observed_at', 'desc')
       .limit(params.limit)
       .offset(params.offset)
 
@@ -1106,7 +1106,7 @@ router.get('/:source_market_id', async (req, res) => {
     const selections_data = await db(selections_table)
       .select(`${selections_table}.*`)
       .where(`${selections_table}.source_market_id`, source_market_id)
-      .orderBy(`${selections_table}.timestamp`, 'desc')
+      .orderBy(`${selections_table}.observed_at`, 'desc')
 
     market_data.selections = selections_data
 

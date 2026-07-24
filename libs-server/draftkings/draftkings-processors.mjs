@@ -22,7 +22,7 @@ const log = debug('import-draft-kings')
  */
 export const run_all_mode = async ({
   nfl_games,
-  timestamp,
+  observed_at,
   category_filter,
   subcategory_filter
 }) => {
@@ -75,7 +75,7 @@ export const run_all_mode = async ({
     const result = await process_subcategory(
       subcategory,
       nfl_games,
-      timestamp,
+      observed_at,
       stats,
       consecutive_empty_count
     )
@@ -103,7 +103,7 @@ export const run_all_mode = async ({
  */
 export const run_events_mode = async ({
   nfl_games,
-  timestamp,
+  observed_at,
   category_filter,
   subcategory_filter,
   event_filter
@@ -142,7 +142,7 @@ export const run_events_mode = async ({
     const result = await process_event(
       event,
       nfl_games,
-      timestamp,
+      observed_at,
       category_filter,
       subcategory_filter,
       subcategory_lookup
@@ -241,7 +241,7 @@ const log_processing_info = (
  * Processes a single subcategory
  * @param {Object} subcategory - Subcategory to process
  * @param {Array} nfl_games - Array of NFL games
- * @param {number} timestamp - Timestamp for formatting
+ * @param {Date} observed_at - Observation time for formatting
  * @param {Object} stats - Processing stats object
  * @param {number} consecutive_empty_count - Current consecutive empty count
  * @returns {Object} - Processing result
@@ -249,7 +249,7 @@ const log_processing_info = (
 const process_subcategory = async (
   subcategory,
   nfl_games,
-  timestamp,
+  observed_at,
   stats,
   consecutive_empty_count
 ) => {
@@ -350,7 +350,7 @@ const process_subcategory = async (
           subcategoryId: subcategory_id,
           name: subcategory_name
         },
-        format_timestamp: timestamp,
+        format_observed_at: observed_at,
         nfl_games
       })
 
@@ -390,7 +390,7 @@ const process_subcategory = async (
  * Processes a single event
  * @param {Object} event - Event to process
  * @param {Array} nfl_games - Array of NFL games
- * @param {number} timestamp - Timestamp for formatting
+ * @param {Date} observed_at - Observation time for formatting
  * @param {Array} category_filter - Optional category filter
  * @param {Array} subcategory_filter - Optional subcategory filter
  * @param {Object} subcategory_lookup - Subcategory lookup map
@@ -399,7 +399,7 @@ const process_subcategory = async (
 const process_event = async (
   event,
   nfl_games,
-  timestamp,
+  observed_at,
   category_filter,
   subcategory_filter,
   subcategory_lookup
@@ -430,7 +430,7 @@ const process_event = async (
         event,
         category,
         nfl_games,
-        timestamp,
+        observed_at,
         subcategory_filter,
         subcategory_lookup
       )
@@ -459,7 +459,7 @@ const process_event = async (
  * @param {Object} event - Event object
  * @param {Object} category - Category object
  * @param {Array} nfl_games - Array of NFL games
- * @param {number} timestamp - Timestamp for formatting
+ * @param {Date} observed_at - Observation time for formatting
  * @param {Array} subcategory_filter - Optional subcategory filter
  * @param {Object} subcategory_lookup - Subcategory lookup map
  * @returns {Object} - Processing result
@@ -468,7 +468,7 @@ const process_event_category = async (
   event,
   category,
   nfl_games,
-  timestamp,
+  observed_at,
   subcategory_filter,
   subcategory_lookup
 ) => {
@@ -526,7 +526,7 @@ const process_event_category = async (
         draftkings_events,
         draftkings_offer_category,
         draftkings_offer_sub_category,
-        format_timestamp: timestamp,
+        format_observed_at: observed_at,
         nfl_games
       })
 

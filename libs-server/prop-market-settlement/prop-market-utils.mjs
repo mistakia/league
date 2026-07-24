@@ -284,7 +284,7 @@ export const fetch_markets_for_games = async ({
       )
     })
     .whereIn('prop_markets_index.esbid', esbids)
-    .andWhere('prop_markets_index.year', year)
+    .andWhere('prop_markets_index.season_year', year)
     .andWhere('prop_market_selections_index.time_type', 'OPEN') // Only fetch OPEN markets since we generate both OPEN and CLOSE
     .modify((qb) => {
       if (supported_market_types && supported_market_types.length > 0) {

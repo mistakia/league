@@ -8,7 +8,7 @@ import {
   prefetch_existing_markets,
   prefetch_existing_selections,
   get_cached_market_latest,
-  get_cached_market_before_timestamp,
+  get_cached_market_before_observed_at,
   clear_cache,
   get_cache_stats
 } from './betting-market-cache.mjs'
@@ -27,7 +27,7 @@ const MARKET_HISTORY_UPDATE_FIELDS = [
 ]
 
 // Fields that trigger an index update when changed
-const MARKET_INDEX_UPDATE_FIELDS = ['esbid', 'year']
+const MARKET_INDEX_UPDATE_FIELDS = ['esbid', 'season_year']
 
 // Deduplicate inserts by generating a unique key for each record
 const deduplicate_inserts = (inserts, get_key) => {
@@ -103,17 +103,17 @@ const cleanup_stale_selections = async (cleanup_operations) => {
 }
 
 // Extract fields needed for market history inserts
-const get_market_history_record = (market, timestamp) => ({
+const get_market_history_record = (market, observed_at) => ({
   source_id: market.source_id,
   source_market_id: market.source_market_id,
   source_market_name: market.source_market_name,
   open: market.open,
   live: market.live,
   selection_count: market.selection_count,
-  timestamp
+  observed_at
 })
 
-const process_market = async ({ timestamp, selections, ...market }) => {
+const process_market = async ({ observed_at, selections, ...market }) => {
   const { source_id, source_market_id } = market
 
   if (!source_id) {
@@ -137,35 +137,37 @@ const process_market = async ({ timestamp, selections, ...market }) => {
 
   if (!existing_market) {
     // New market - insert history and index records
-    market_history_inserts.push(get_market_history_record(market, timestamp))
+    market_history_inserts.push(get_market_history_record(market, observed_at))
 
     market_index_inserts.push({
       ...market,
-      timestamp,
+      observed_at,
       time_type: 'OPEN'
     })
 
     if (!market.live) {
       market_index_inserts.push({
         ...market,
-        timestamp,
+        observed_at,
         time_type: 'CLOSE'
       })
     }
   } else {
-    // Existing market - find the version before this timestamp for comparison
-    const previous_market_row = get_cached_market_before_timestamp({
+    // Existing market - find the version before this observed_at for comparison
+    const previous_market_row = get_cached_market_before_observed_at({
       source_id,
       source_market_id,
-      timestamp
+      observed_at
     })
 
     if (!previous_market_row) {
-      // No market existed before this timestamp - insert as new history entry
-      market_history_inserts.push(get_market_history_record(market, timestamp))
+      // No market existed before this observed_at - insert as new history entry
+      market_history_inserts.push(
+        get_market_history_record(market, observed_at)
+      )
     } else {
       // Create a copy for comparison to avoid mutating cached object
-      const { timestamp: _, ...market_to_compare } = previous_market_row
+      const { observed_at: _, ...market_to_compare } = previous_market_row
       market_to_compare.open = Boolean(market_to_compare.open)
       market_to_compare.live = Boolean(market_to_compare.live)
 
@@ -178,7 +180,7 @@ const process_market = async ({ timestamp, selections, ...market }) => {
 
         if (should_update_history) {
           market_history_inserts.push(
-            get_market_history_record(market, timestamp)
+            get_market_history_record(market, observed_at)
           )
         }
 
@@ -189,12 +191,12 @@ const process_market = async ({ timestamp, selections, ...market }) => {
         if (should_update_index) {
           market_index_inserts.push({
             ...market,
-            timestamp,
+            observed_at,
             time_type: 'OPEN'
           })
           market_index_inserts.push({
             ...market,
-            timestamp,
+            observed_at,
             time_type: 'CLOSE'
           })
         }
@@ -205,10 +207,10 @@ const process_market = async ({ timestamp, selections, ...market }) => {
     }
 
     // Update CLOSE index if this is newer than existing and not live
-    if (!market.live && timestamp > existing_market.timestamp) {
+    if (!market.live && observed_at > existing_market.observed_at) {
       market_index_inserts.push({
         ...market,
-        timestamp,
+        observed_at,
         time_type: 'CLOSE'
       })
     }
@@ -216,7 +218,7 @@ const process_market = async ({ timestamp, selections, ...market }) => {
 
   // Process selections and get their operations
   const selection_operations = await insert_prop_market_selections({
-    timestamp,
+    observed_at,
     selections,
     existing_market: market_for_selection_lookup,
     market
@@ -314,7 +316,7 @@ export default async function (markets, { dry_run = false } = {}) {
       // Deduplicate all inserts to avoid constraint violations
       const unique_market_history = deduplicate_inserts(
         all_market_history_inserts,
-        (i) => `${i.source_id}_${i.source_market_id}_${i.timestamp}`
+        (i) => `${i.source_id}_${i.source_market_id}_${i.observed_at}`
       )
 
       const unique_market_index = deduplicate_inserts(
@@ -325,7 +327,7 @@ export default async function (markets, { dry_run = false } = {}) {
       const unique_selection_history = deduplicate_inserts(
         all_selection_history_inserts,
         (i) =>
-          `${i.source_id}_${i.source_market_id}_${i.source_selection_id}_${i.timestamp}`
+          `${i.source_id}_${i.source_market_id}_${i.source_selection_id}_${i.observed_at}`
       )
 
       const unique_selection_index = deduplicate_inserts(
@@ -350,7 +352,7 @@ export default async function (markets, { dry_run = false } = {}) {
           insert_promises.push(
             db('prop_markets_history')
               .insert(unique_market_history)
-              .onConflict(['source_id', 'source_market_id', 'timestamp'])
+              .onConflict(['source_id', 'source_market_id', 'observed_at'])
               .merge()
           )
         }
@@ -376,7 +378,7 @@ export default async function (markets, { dry_run = false } = {}) {
                     'source_id',
                     'source_market_id',
                     'source_selection_id',
-                    'timestamp'
+                    'observed_at'
                   ])
                   .merge()
               }

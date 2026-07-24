@@ -143,7 +143,7 @@ const import_fanatics_wagers = async ({
       wager_item = {
         userid: user_id,
         wager_type,
-        placed_at: Math.floor(wager.betMetaData.placementTime / 1000),
+        placed_at: new Date(wager.betMetaData.placementTime),
         bet_count: 1,
         selection_count: parlay_legs.length,
         wager_status: format_wager_status(wager.header.betStatus),
