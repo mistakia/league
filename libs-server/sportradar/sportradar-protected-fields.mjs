@@ -56,7 +56,7 @@ export const SPORTRADAR_PROTECTED_FIELDS = new Set([
   'pass_td',
   'rush_td',
   'td',
-  'int', // interception
+  'interceptions', // interception
   'sk', // sack
   'first_down',
   'first_down_pass',

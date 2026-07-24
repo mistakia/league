@@ -12,7 +12,7 @@ const log = debug('play-enrichment:qb-play')
  * - qb_kneel: RUSH plays with "kneel" in description
  * - qb_spike: PASS plays with "spike" in description
  *
- * @param {Array} plays - Array of play objects with desc and play_type_nfl fields
+ * @param {Array} plays - Array of play objects with play_description and play_type_nfl fields
  * @returns {Array} Plays with qb_kneel and qb_spike fields populated
  */
 export const enrich_qb_plays = (plays) => {
@@ -20,7 +20,7 @@ export const enrich_qb_plays = (plays) => {
   let qb_spike_count = 0
 
   const enriched_plays = plays.map((play) => {
-    const desc = play.desc || ''
+    const desc = play.play_description || ''
     const desc_lower = desc.toLowerCase()
     const play_type_nfl = (play.play_type_nfl || '').toUpperCase()
 

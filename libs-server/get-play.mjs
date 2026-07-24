@@ -4,12 +4,12 @@ import { fixTeam } from '#libs-shared'
 
 export default async function ({
   esbid,
-  playId,
+  play_id,
 
   week,
-  year,
-  off,
-  def,
+  season_year,
+  offense_nfl_team,
+  defense_nfl_team,
 
   qtr,
   game_clock_start,
@@ -27,24 +27,24 @@ export default async function ({
     query.where({ esbid })
   }
 
-  if (playId) {
-    query.where({ playId })
+  if (play_id) {
+    query.where({ play_id })
   }
 
   if (week) {
     query.where({ week })
   }
 
-  if (year) {
-    query.where({ year })
+  if (season_year) {
+    query.where({ season_year })
   }
 
-  if (off) {
-    query.where({ off: fixTeam(off) })
+  if (offense_nfl_team) {
+    query.where({ offense_nfl_team: fixTeam(offense_nfl_team) })
   }
 
-  if (def) {
-    query.where({ def: fixTeam(def) })
+  if (defense_nfl_team) {
+    query.where({ defense_nfl_team: fixTeam(defense_nfl_team) })
   }
 
   if (qtr) {

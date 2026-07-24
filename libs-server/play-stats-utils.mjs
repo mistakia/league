@@ -7,16 +7,16 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
       'nfl_plays.drive_play_count',
       'nfl_plays.play_type_ngs',
       'nfl_plays.play_type_nfl',
-      'nfl_plays.pos_team',
+      'nfl_plays.possession_nfl_team',
       'nfl_plays.ydl_100',
       'nfl_plays.dot',
       'nfl_plays.qb_kneel',
       'nfl_plays.first_down',
       'nfl_plays.play_type',
-      'nfl_plays.bc_pid',
-      'nfl_plays.psr_pid',
-      'nfl_plays.trg_pid',
-      'nfl_plays.intp_pid',
+      'nfl_plays.ball_carrier_pid',
+      'nfl_plays.passer_pid',
+      'nfl_plays.target_pid',
+      'nfl_plays.interceptor_pid',
       'nfl_plays.player_fuml_pid',
       'nfl_games.h',
       'nfl_games.v',
@@ -26,12 +26,12 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
     .join('nfl_games', 'nfl_play_stats.esbid', '=', 'nfl_games.esbid')
     .join('nfl_plays', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_play_stats.esbid')
-      this.andOn('nfl_plays.playId', '=', 'nfl_play_stats.playId')
+      this.andOn('nfl_plays.play_id', '=', 'nfl_play_stats.play_id')
     })
-    .where('nfl_plays.year', year)
+    .where('nfl_plays.season_year', year)
     .where('nfl_plays.week', week)
     .where('nfl_play_stats.valid', true)
-    .where('nfl_plays.seas_type', seas_type)
+    .where('nfl_plays.season_type', seas_type)
 }
 
 export const is_successful_play = ({ yds_gained, yards_to_go, dwn }) => {

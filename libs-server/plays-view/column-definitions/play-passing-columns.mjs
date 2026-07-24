@@ -2,19 +2,19 @@ import db from '#db'
 
 function join_player_passer({ query, join_state }) {
   if (!join_state.player_passer) {
-    query.leftJoin('player as passer', 'nfl_plays.psr_pid', 'passer.pid')
+    query.leftJoin('player as passer', 'nfl_plays.passer_pid', 'passer.pid')
     join_state.player_passer = true
   }
 }
 
 export default {
   play_passer: {
-    column_name: 'psr_pid',
+    column_name: 'passer_pid',
     table_name: 'nfl_plays',
     join: join_player_passer,
     main_select: () => [
       db.raw("passer.first_name || ' ' || passer.last_name as play_passer"),
-      'nfl_plays.psr_pid'
+      'nfl_plays.passer_pid'
     ],
     main_where: () => "passer.first_name || ' ' || passer.last_name",
     aggregate_select: ({ params } = {}) =>
@@ -24,10 +24,10 @@ export default {
     player_group_by: 'player_passer'
   },
   play_passer_pid: {
-    column_name: 'psr_pid',
+    column_name: 'passer_pid',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.psr_pid as play_passer_pid'],
-    main_where: () => 'nfl_plays.psr_pid'
+    main_select: () => ['nfl_plays.passer_pid as play_passer_pid'],
+    main_where: () => 'nfl_plays.passer_pid'
   },
   play_pass_yds: {
     column_name: 'pass_yds',

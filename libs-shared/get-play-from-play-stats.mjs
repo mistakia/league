@@ -119,7 +119,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Interception - pass intercepted
       case 19:
-        playRow.int = true
+        playRow.interceptions = true
         playRow.psr_gsis = playStat.gsis_player_id
         break
 
@@ -487,7 +487,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Fumble Lost - fumble lost to opponent
       case 106:
-        playRow.fuml = true
+        playRow.fumbles_lost = true
         playRow.player_fuml_gsis = playStat.gsis_player_id
         break
 

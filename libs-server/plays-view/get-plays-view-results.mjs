@@ -19,10 +19,10 @@ const VALID_GROUP_BY_VALUES = new Set([
 
 const GROUP_BY_COLUMNS = {
   overall: [],
-  player_passer: ['nfl_plays.psr_pid'],
-  player_rusher: ['nfl_plays.bc_pid'],
-  player_target: ['nfl_plays.trg_pid'],
-  team: ['nfl_plays.pos_team'],
+  player_passer: ['nfl_plays.passer_pid'],
+  player_rusher: ['nfl_plays.ball_carrier_pid'],
+  player_target: ['nfl_plays.target_pid'],
+  team: ['nfl_plays.possession_nfl_team'],
   game: []
 }
 
@@ -117,7 +117,7 @@ export async function get_plays_view_results_query({
       ? query_params.year
       : [query_params.year]
     if (year_values.length) {
-      query.whereIn('nfl_plays.year', year_values)
+      query.whereIn('nfl_plays.season_year', year_values)
     }
   }
 

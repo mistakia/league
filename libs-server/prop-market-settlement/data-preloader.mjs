@@ -109,9 +109,9 @@ const load_nfl_plays = async (esbids) => {
       'esbid',
       'qtr',
       // Player identification columns
-      'psr_pid',
-      'bc_pid',
-      'trg_pid',
+      'passer_pid',
+      'ball_carrier_pid',
+      'target_pid',
       // Yardage columns used in market calculations
       'pass_yds',
       'rush_yds',

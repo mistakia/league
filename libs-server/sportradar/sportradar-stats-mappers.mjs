@@ -40,7 +40,7 @@ export const map_passing_stats = async ({
       player_team_alias: pass_stats.team?.alias
     })
     if (passer) {
-      mapped.psr_pid = passer.pid
+      mapped.passer_pid = passer.pid
       mapped.psr_gsis = passer.gsisid
     }
   }
@@ -50,7 +50,7 @@ export const map_passing_stats = async ({
   mapped.comp = pass_stats.complete === 1
   mapped.incomp = pass_stats.complete === 0
   mapped.pass_td = pass_stats.touchdown === 1
-  mapped.int = pass_stats.interception === 1
+  mapped.interceptions = pass_stats.interception === 1
   mapped.sk = pass_stats.sack === 1
 
   // Sack yards (already negative from API)
@@ -97,7 +97,7 @@ export const map_receiving_stats = async ({
       player_team_alias: receive_stats.team?.alias
     })
     if (receiver) {
-      mapped.trg_pid = receiver.pid
+      mapped.target_pid = receiver.pid
       mapped.trg_gsis = receiver.gsisid
     }
   }
@@ -141,7 +141,7 @@ export const map_rushing_stats = async ({
       player_team_alias: rush_stats.team?.alias
     })
     if (ball_carrier) {
-      mapped.bc_pid = ball_carrier.pid
+      mapped.ball_carrier_pid = ball_carrier.pid
       mapped.bc_gsis = ball_carrier.gsisid
     }
   }
@@ -332,7 +332,7 @@ export const map_return_stats = async ({
       player_team_alias: return_stats.team?.alias
     })
     if (intercepter) {
-      mapped.intp_pid = intercepter.pid
+      mapped.interceptor_pid = intercepter.pid
       mapped.intp_gsis = intercepter.gsisid
     }
   }

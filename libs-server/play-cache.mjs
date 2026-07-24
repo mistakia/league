@@ -24,12 +24,12 @@ export class MultiplePlayMatchError extends Error {
 /**
  * PlayCache - A singleton class for caching and searching NFL plays
  *
- * Provides fast lookup of plays by exact identifiers (esbid + playId) or
+ * Provides fast lookup of plays by exact identifiers (esbid + play_id) or
  * by game context (down, distance, field position, etc).
  */
 class PlayCache {
   constructor() {
-    this.plays_by_composite_key = new Map() // "esbid_playId" -> Play
+    this.plays_by_composite_key = new Map() // "esbid_play_id" -> Play
     this.plays_by_esbid = new Map() // esbid -> Play[]
     this.plays_by_game_context = new Map() // context_key -> Play[]
     this.is_initialized = false
@@ -88,11 +88,11 @@ class PlayCache {
    * Finds a play by various identifiers
    * @param {Object} params - Search parameters
    * @param {number} params.esbid - Game esbid
-   * @param {number} params.playId - Play ID
+   * @param {number} params.play_id - Play ID
    * @param {number} params.week - Week number (for context search)
-   * @param {number} params.year - Year (for context search)
-   * @param {string} params.off - Offensive team abbreviation
-   * @param {string} params.def - Defensive team abbreviation
+   * @param {number} params.season_year - Year (for context search)
+   * @param {string} params.offense_nfl_team - Offensive team abbreviation
+   * @param {string} params.defense_nfl_team - Defensive team abbreviation
    * @param {number} params.qtr - Quarter
    * @param {string} params.game_clock_start - Game clock start time
    * @param {number} params.dwn - Down
@@ -104,7 +104,7 @@ class PlayCache {
    * @param {number} params.sec_rem_qtr - Seconds remaining in quarter
    * @param {number} params.sec_rem_qtr_tolerance - Tolerance for sec_rem_qtr matching (default: 0 for exact match)
    * @param {string} params.desc_contains - String that must be contained in play description (optional)
-   * @param {string} params.to_team - Timeout team abbreviation (optional)
+   * @param {string} params.timeout_team - Timeout team abbreviation (optional)
    * @param {number} params.home_score - Home team score (optional, for kickoff disambiguation)
    * @param {number} params.away_score - Away team score (optional, for kickoff disambiguation)
    * @param {boolean} params.return_all_matches - If true, return array of all matches instead of throwing on multiple matches (default: false)
@@ -114,11 +114,11 @@ class PlayCache {
    */
   find_play({
     esbid,
-    playId,
+    play_id,
     week,
-    year,
-    off,
-    def,
+    season_year,
+    offense_nfl_team,
+    defense_nfl_team,
     qtr,
     game_clock_start,
     dwn,
@@ -130,15 +130,15 @@ class PlayCache {
     sec_rem_qtr,
     sec_rem_qtr_tolerance,
     desc_contains,
-    to_team,
+    timeout_team,
     home_score,
     away_score,
     return_all_matches = false
   }) {
     this._ensure_initialized()
 
-    if (esbid && playId) {
-      const key = `${esbid}_${playId}`
+    if (esbid && play_id) {
+      const key = `${esbid}_${play_id}`
       return this.plays_by_composite_key.get(key) || null
     }
 
@@ -149,8 +149,8 @@ class PlayCache {
         dwn,
         yards_to_go,
         ydl_100,
-        off,
-        def,
+        offense_nfl_team,
+        defense_nfl_team,
         sec_rem_qtr,
         sec_rem_qtr_tolerance,
         game_clock_start,
@@ -158,7 +158,7 @@ class PlayCache {
         ydl_num,
         ydl_side,
         desc_contains,
-        to_team,
+        timeout_team,
         home_score,
         away_score,
         return_all_matches
@@ -210,7 +210,7 @@ class PlayCache {
       query.whereIn('esbid', esbids)
     } else {
       if (years.length > 0) {
-        query.whereIn('year', years)
+        query.whereIn('season_year', years)
       }
       if (weeks.length > 0) {
         query.whereIn('week', weeks)
@@ -237,7 +237,7 @@ class PlayCache {
    */
   _build_composite_index(plays) {
     for (const play of plays) {
-      const key = `${play.esbid}_${play.playId}`
+      const key = `${play.esbid}_${play.play_id}`
       this.plays_by_composite_key.set(key, play)
     }
   }
@@ -328,8 +328,8 @@ class PlayCache {
     dwn,
     yards_to_go,
     ydl_100,
-    off,
-    def,
+    offense_nfl_team,
+    defense_nfl_team,
     sec_rem_qtr,
     sec_rem_qtr_tolerance,
     game_clock_start,
@@ -337,7 +337,7 @@ class PlayCache {
     ydl_num,
     ydl_side,
     desc_contains,
-    to_team,
+    timeout_team,
     home_score,
     away_score,
     return_all_matches
@@ -357,8 +357,8 @@ class PlayCache {
 
       if (indexed_plays.length > 0) {
         const additional_filters = {
-          off,
-          def,
+          offense_nfl_team,
+          defense_nfl_team,
           sec_rem_qtr,
           sec_rem_qtr_tolerance,
           game_clock_start,
@@ -366,7 +366,7 @@ class PlayCache {
           ydl_num,
           ydl_side,
           desc_contains,
-          to_team,
+          timeout_team,
           home_score,
           away_score
         }
@@ -389,8 +389,8 @@ class PlayCache {
         dwn,
         yards_to_go,
         ydl_100,
-        off,
-        def,
+        offense_nfl_team,
+        defense_nfl_team,
         sec_rem_qtr,
         sec_rem_qtr_tolerance,
         game_clock_start,
@@ -398,7 +398,7 @@ class PlayCache {
         ydl_num,
         ydl_side,
         desc_contains,
-        to_team,
+        timeout_team,
         home_score,
         away_score
       },
@@ -460,7 +460,7 @@ class PlayCache {
       log(`Multiple plays matched (${matching_plays.length}):`)
       matching_plays.forEach((play, index) => {
         log(
-          `  [${index + 1}] esbid=${play.esbid} playId=${play.playId} qtr=${play.qtr} dwn=${play.dwn} ytg=${play.yards_to_go} ydl=${play.ydl_100}`
+          `  [${index + 1}] esbid=${play.esbid} play_id=${play.play_id} qtr=${play.qtr} dwn=${play.dwn} ytg=${play.yards_to_go} ydl=${play.ydl_100}`
         )
       })
       throw new MultiplePlayMatchError(
@@ -493,8 +493,14 @@ class PlayCache {
       filters.yards_to_go
     )
     const ydl_match = this._matches_numeric_field(play.ydl_100, filters.ydl_100)
-    const off_match = this._matches_team_field(play.off, filters.off)
-    const def_match = this._matches_team_field(play.def, filters.def)
+    const off_match = this._matches_team_field(
+      play.offense_nfl_team,
+      filters.offense_nfl_team
+    )
+    const def_match = this._matches_team_field(
+      play.defense_nfl_team,
+      filters.defense_nfl_team
+    )
     const time_match = this._matches_time_field(
       play.sec_rem_qtr,
       filters.sec_rem_qtr,
@@ -517,12 +523,12 @@ class PlayCache {
       filters.ydl_side
     )
     const desc_match = this._matches_desc_contains(
-      play.desc,
+      play.play_description,
       filters.desc_contains
     )
     const to_team_match = this._matches_team_field(
-      play.to_team,
-      filters.to_team
+      play.timeout_team,
+      filters.timeout_team
     )
 
     return (

@@ -9,16 +9,16 @@ const log = debug('play-enrichment:player-identification')
  * Enriches plays with player identifications by mapping GSIS IDs to internal PIDs
  *
  * Processes play_stats to extract GSIS IDs for all player roles:
- * - Ball carrier (bc_pid)
- * - Passer (psr_pid)
- * - Target receiver (trg_pid)
- * - Interceptor (intp_pid)
+ * - Ball carrier (ball_carrier_pid)
+ * - Passer (passer_pid)
+ * - Target receiver (target_pid)
+ * - Interceptor (interceptor_pid)
  * - Fumbler (player_fuml_pid)
  * - Solo tacklers (tacklers_solo arrays)
  * - Tacklers with assists (tacklers_with_assisters arrays)
  * - Tackle assisters (tackle_assisters arrays)
  *
- * @param {Array} plays - Array of play objects with esbid and playId
+ * @param {Array} plays - Array of play objects with esbid and play_id
  * @param {Array} play_stats - Array of play stat objects with GSIS IDs
  * @param {Object} player_cache - Player cache instance with find_player method
  * @param {Map} [snap_roster_by_esbid] - Optional week-accurate participation
@@ -65,12 +65,12 @@ export const enrich_player_identifications = (
     if (!roster) return null
     const stat = stats_for_play.find(
       (s) =>
-        stat_ids.includes(s.statId) &&
-        s.playerName &&
-        s.playerName.trim() !== ''
+        stat_ids.includes(s.stat_id) &&
+        s.player_name &&
+        s.player_name.trim() !== ''
     )
     if (!stat) return null
-    const candidates = roster.get(normalize_name(stat.playerName)) || []
+    const candidates = roster.get(normalize_name(stat.player_name)) || []
     const gsisids = [
       ...new Set(candidates.map((c) => c.gsisid).filter(Boolean))
     ]
@@ -181,22 +181,22 @@ export const enrich_player_identifications = (
   // evidence is an omitted statId (see below). Keep these in lockstep with
   // libs-shared/get-play-from-play-stats.mjs.
   const owned_single_player_families = [
-    { gsis: 'bc_gsis', pid: 'bc_pid', stat_ids: [10, 11] },
+    { gsis: 'bc_gsis', pid: 'ball_carrier_pid', stat_ids: [10, 11] },
     // psr_gsis is set by statIds 14/15/16 (incomplete/complete/TD passes), 19
     // (interception), 20 (sack, 2023+ feed omits 14/15/16), and 111/112 (air
     // yards complete/incomplete). Omitting 19 wiped the passer on every
     // interception; omitting 111/112 wiped air-yards-only pass rows.
     {
       gsis: 'psr_gsis',
-      pid: 'psr_pid',
+      pid: 'passer_pid',
       stat_ids: [14, 15, 16, 19, 20, 111, 112]
     },
     // trg_gsis is set by statIds 21/22 (reception/TD), 113 (yards after catch),
     // and 115 (target/intended receiver -- the ONLY target stat present on
     // incompletions). Omitting 113/115 collapsed targets-from-plays to
     // receptions, since incomplete-pass targets carry only statId 115.
-    { gsis: 'trg_gsis', pid: 'trg_pid', stat_ids: [21, 22, 113, 115] },
-    { gsis: 'intp_gsis', pid: 'intp_pid', stat_ids: [25, 26] },
+    { gsis: 'trg_gsis', pid: 'target_pid', stat_ids: [21, 22, 113, 115] },
+    { gsis: 'intp_gsis', pid: 'interceptor_pid', stat_ids: [25, 26] },
     {
       gsis: 'player_fuml_gsis',
       pid: 'player_fuml_pid',
@@ -205,7 +205,7 @@ export const enrich_player_identifications = (
   ]
 
   const enriched_plays = plays.map((play) => {
-    const play_key = `${play.esbid}-${play.playId}`
+    const play_key = `${play.esbid}-${play.play_id}`
     const stats_for_play = play_stats_by_play.get(play_key)
     const has_any_play_stats = Boolean(
       stats_for_play && stats_for_play.length > 0
@@ -264,7 +264,7 @@ export const enrich_player_identifications = (
       // writer NULL-clears both _gsis and _pid.
       for (const family of owned_single_player_families) {
         const has_family_stats = stats_for_play.some((s) =>
-          family.stat_ids.includes(s.statId)
+          family.stat_ids.includes(s.stat_id)
         )
         let family_play_data = has_family_stats ? play_data : {}
 

@@ -5,20 +5,21 @@ const log = debug('play-enrichment:team-assignment')
 /**
  * Enriches plays with offensive and defensive team assignments
  *
- * Calculates which team has possession (off) and which team is defending (def)
- * based on the play's pos_team and the game's home/visitor teams.
+ * Calculates which team has possession (offense_nfl_team) and which team is
+ * defending (defense_nfl_team) based on the play's possession_nfl_team and the
+ * game's home/visitor teams.
  *
- * @param {Array} plays - Array of play objects with esbid and pos_team
+ * @param {Array} plays - Array of play objects with esbid and possession_nfl_team
  * @param {Map|Object} games_map - Map or object of game data keyed by esbid with h (home) and v (visitor) properties
- * @returns {Array} Plays with off and def fields populated
+ * @returns {Array} Plays with offense_nfl_team and defense_nfl_team fields populated
  */
 export const enrich_team_assignments = (plays, games_map) => {
   let enriched_count = 0
   let skipped_count = 0
 
   const enriched_plays = plays.map((play) => {
-    // Skip plays without pos_team (likely timeout or two minute warning)
-    if (!play.pos_team || !play.esbid) {
+    // Skip plays without possession_nfl_team (likely timeout or two minute warning)
+    if (!play.possession_nfl_team || !play.esbid) {
       skipped_count++
       return play
     }
@@ -42,15 +43,15 @@ export const enrich_team_assignments = (plays, games_map) => {
     }
 
     // Calculate team assignments
-    const off = play.pos_team
-    const def = off === game.h ? game.v : game.h
+    const offense_nfl_team = play.possession_nfl_team
+    const defense_nfl_team = offense_nfl_team === game.h ? game.v : game.h
 
     enriched_count++
 
     return {
       ...play,
-      off,
-      def
+      offense_nfl_team,
+      defense_nfl_team
     }
   })
 

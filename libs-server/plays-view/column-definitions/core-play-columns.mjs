@@ -15,10 +15,10 @@ export default {
     main_where: () => 'nfl_plays.esbid'
   },
   play_timestamp: {
-    column_name: 'timestamp',
+    column_name: 'play_time_of_day',
     table_name: 'nfl_plays',
-    main_select: () => [db.raw('nfl_plays."timestamp" as play_timestamp')],
-    main_where: () => 'nfl_plays."timestamp"'
+    main_select: () => [db.raw('nfl_plays.play_time_of_day as play_timestamp')],
+    main_where: () => 'nfl_plays.play_time_of_day'
   },
   play_game_timestamp: {
     column_name: 'timestamp',
@@ -29,10 +29,10 @@ export default {
     join: join_nfl_games
   },
   play_desc: {
-    column_name: 'desc',
+    column_name: 'play_description',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.desc as play_desc'],
-    main_where: () => 'nfl_plays.desc'
+    main_select: () => ['nfl_plays.play_description as play_desc'],
+    main_where: () => 'nfl_plays.play_description'
   },
   play_type: {
     column_name: 'play_type',
@@ -42,18 +42,20 @@ export default {
     aggregate_select: () => db.raw('nfl_plays.play_type')
   },
   play_off_team: {
-    column_name: 'pos_team',
+    column_name: 'possession_nfl_team',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.pos_team as play_off_team'],
-    main_where: () => 'nfl_plays.pos_team',
+    main_select: () => ['nfl_plays.possession_nfl_team as play_off_team'],
+    main_where: () => 'nfl_plays.possession_nfl_team',
     group_by_select: ({ group_by }) =>
-      group_by === 'team' ? 'nfl_plays.pos_team as play_off_team' : null
+      group_by === 'team'
+        ? 'nfl_plays.possession_nfl_team as play_off_team'
+        : null
   },
   play_def_team: {
-    column_name: 'def',
+    column_name: 'defense_nfl_team',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.def as play_def_team'],
-    main_where: () => 'nfl_plays.def'
+    main_select: () => ['nfl_plays.defense_nfl_team as play_def_team'],
+    main_where: () => 'nfl_plays.defense_nfl_team'
   },
   play_down: {
     column_name: 'dwn',
@@ -97,10 +99,10 @@ export default {
     main_where: () => 'nfl_plays.sequence'
   },
   play_year: {
-    column_name: 'year',
+    column_name: 'season_year',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.year as play_year'],
-    main_where: () => 'nfl_plays.year'
+    main_select: () => ['nfl_plays.season_year as play_year'],
+    main_where: () => 'nfl_plays.season_year'
   },
   play_week: {
     column_name: 'week',

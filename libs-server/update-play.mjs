@@ -11,7 +11,7 @@ import { normalize_game_clock } from './play-enum-utils.mjs'
 const log = debug('update-play')
 debug.enable('update-play')
 
-const excluded_props = ['esbid', 'playId', 'updated']
+const excluded_props = ['esbid', 'play_id', 'updated']
 
 // EPA/WPA cumulative fields where floating-point drift is expected
 // Differences below the tolerance threshold are suppressed
@@ -216,7 +216,7 @@ export const compute_play_changes = ({
     if (edit.lhs) {
       changelog_entries.push({
         esbid: play_row.esbid,
-        play_id: play_row.playId,
+        play_id: play_row.play_id,
         column_name: prop,
         previous_value: edit.lhs,
         new_value: edit.rhs,
@@ -240,7 +240,7 @@ export const compute_play_changes = ({
  *
  * @param {Object} play_row - Existing play record from database
  * @param {number} esbid - Game ID (alternative to play_row)
- * @param {number} playId - Play ID (alternative to play_row)
+ * @param {number} play_id - Play ID (alternative to play_row)
  * @param {Object} update - Field updates to apply
  * @param {boolean} overwrite_existing - If true, overwrite all existing values
  * @param {Array<string>} overwrite_fields - Specific fields to overwrite (e.g., ['game_clock_end', 'sec_rem_qtr'])
@@ -251,7 +251,7 @@ export const compute_play_changes = ({
 const update_play = async ({
   play_row,
   esbid,
-  playId,
+  play_id,
   update,
   overwrite_existing = false,
   overwrite_fields = [],
@@ -259,8 +259,8 @@ const update_play = async ({
   protected_fields = new Set(),
   source = null
 }) => {
-  if (!play_row && esbid && playId) {
-    const play_rows = await db('nfl_plays').where({ esbid, playId })
+  if (!play_row && esbid && play_id) {
+    const play_rows = await db('nfl_plays').where({ esbid, play_id })
     play_row = play_rows[0]
   }
 
@@ -302,7 +302,7 @@ const update_play = async ({
   if (Object.keys(field_updates).length > 0) {
     await db('nfl_plays')
       .update(field_updates)
-      .where({ esbid: play_row.esbid, playId: play_row.playId })
+      .where({ esbid: play_row.esbid, play_id: play_row.play_id })
   }
 
   return changes_count
@@ -317,7 +317,7 @@ const initialize_cli = () => {
       type: 'string',
       demandOption: true
     })
-    .option('playId', {
+    .option('play_id', {
       describe: 'Play ID',
       type: 'string',
       demandOption: true
@@ -330,12 +330,12 @@ const main = async () => {
   try {
     const argv = initialize_cli()
 
-    if (!argv.esbid || !argv.playId) {
-      log('missing --esbid or --playId')
+    if (!argv.esbid || !argv.play_id) {
+      log('missing --esbid or --play_id')
       process.exit()
     }
 
-    const ignore = ['_', '$0', 'esbid', 'playId']
+    const ignore = ['_', '$0', 'esbid', 'play_id']
     const keys = Object.keys(argv).filter((key) => !ignore.includes(key))
     const update = {}
     keys.forEach((key) => {
@@ -344,7 +344,7 @@ const main = async () => {
 
     const changes = await update_play({
       esbid: argv.esbid,
-      playId: argv.playId,
+      play_id: argv.play_id,
       update,
       source: 'manual'
     })

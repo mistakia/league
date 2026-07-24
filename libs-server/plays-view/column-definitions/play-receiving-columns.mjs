@@ -2,19 +2,19 @@ import db from '#db'
 
 function join_player_target({ query, join_state }) {
   if (!join_state.player_target) {
-    query.leftJoin('player as target', 'nfl_plays.trg_pid', 'target.pid')
+    query.leftJoin('player as target', 'nfl_plays.target_pid', 'target.pid')
     join_state.player_target = true
   }
 }
 
 export default {
   play_target: {
-    column_name: 'trg_pid',
+    column_name: 'target_pid',
     table_name: 'nfl_plays',
     join: join_player_target,
     main_select: () => [
       db.raw("target.first_name || ' ' || target.last_name as play_target"),
-      'nfl_plays.trg_pid'
+      'nfl_plays.target_pid'
     ],
     main_where: () => "target.first_name || ' ' || target.last_name",
     aggregate_select: ({ params } = {}) =>
@@ -24,10 +24,10 @@ export default {
     player_group_by: 'player_target'
   },
   play_target_pid: {
-    column_name: 'trg_pid',
+    column_name: 'target_pid',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.trg_pid as play_target_pid'],
-    main_where: () => 'nfl_plays.trg_pid'
+    main_select: () => ['nfl_plays.target_pid as play_target_pid'],
+    main_where: () => 'nfl_plays.target_pid'
   },
   play_recv_yds: {
     column_name: 'recv_yds',

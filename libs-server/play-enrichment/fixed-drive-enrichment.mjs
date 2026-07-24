@@ -101,10 +101,10 @@ const get_effective_posteam = (play) => {
     play.play_type === 'KOFF' &&
     (play.own_kickoff_recovery || play.fumble_lost)
   ) {
-    return play.def // Kicking team is listed as def on kickoffs
+    return play.defense_nfl_team // Kicking team is listed as def on kickoffs
   }
 
-  return play.off || play.pos_team
+  return play.offense_nfl_team || play.possession_nfl_team
 }
 
 /**
@@ -118,7 +118,11 @@ const is_pat_after_defensive_td = (
   prev_play_3
 ) => {
   // Check if previous play was a defensive TD
-  if (prev_play && prev_play.touchdown && prev_play.off !== prev_play.td_team) {
+  if (
+    prev_play &&
+    prev_play.touchdown &&
+    prev_play.offense_nfl_team !== prev_play.td_team
+  ) {
     return true
   }
 
@@ -128,7 +132,7 @@ const is_pat_after_defensive_td = (
     is_timeout_or_warning(prev_play) &&
     prev_play_2 &&
     prev_play_2.touchdown &&
-    prev_play_2.off !== prev_play_2.td_team
+    prev_play_2.offense_nfl_team !== prev_play_2.td_team
   ) {
     return true
   }
@@ -141,7 +145,7 @@ const is_pat_after_defensive_td = (
     is_timeout_or_warning(prev_play_2) &&
     prev_play_3 &&
     prev_play_3.touchdown &&
-    prev_play_3.off !== prev_play_3.td_team
+    prev_play_3.offense_nfl_team !== prev_play_3.td_team
   ) {
     return true
   }
@@ -223,14 +227,14 @@ const is_fumble_recovery_same_team = (play, prev_play, prev_play_2) => {
  * Checks if a play is a timeout or two-minute warning
  */
 const is_timeout_or_warning = (play) => {
-  if (!play.desc) return false
-  return /Timeout|Two-Minute Warning/i.test(play.desc)
+  if (!play.play_description) return false
+  return /Timeout|Two-Minute Warning/i.test(play.play_description)
 }
 
 /**
  * Calculates drive_seq for all plays in a game using nflfastr's fixed_drive methodology
  *
- * @param {Array} plays - Array of play objects for a single game, sorted by playId
+ * @param {Array} plays - Array of play objects for a single game, sorted by play_id
  * @returns {Array} Plays with drive_seq set (if not already present)
  */
 export const enrich_fixed_drives = (plays) => {
@@ -257,8 +261,8 @@ export const enrich_fixed_drives = (plays) => {
   let total_drives = 0
 
   for (const [game_half_key, half_plays] of games_map.entries()) {
-    // Sort by playId to ensure correct order
-    half_plays.sort((a, b) => a.playId - b.playId)
+    // Sort by play_id to ensure correct order
+    half_plays.sort((a, b) => a.play_id - b.play_id)
 
     let drive_number = 0
 

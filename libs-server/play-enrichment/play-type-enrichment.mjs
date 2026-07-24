@@ -23,7 +23,7 @@ export const enrich_play_types = (plays) => {
   const enriched_plays = plays.map((play) => {
     let play_type = null
 
-    const desc = play.desc || ''
+    const desc = play.play_description || ''
     const desc_upper = desc.toUpperCase()
     const desc_lower = desc.toLowerCase()
 

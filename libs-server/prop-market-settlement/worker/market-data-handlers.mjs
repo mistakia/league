@@ -187,22 +187,22 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
         metric_value = 0 // No touchdowns in the game
       } else {
         // Check if this player scored the first TD
-        // For rushing TDs: bc_pid is the scorer
-        // For passing TDs: trg_pid is the scorer (receiver)
+        // For rushing TDs: ball_carrier_pid is the scorer
+        // For passing TDs: target_pid is the scorer (receiver)
         // TODO: Use td_pid field once it's available in nfl_plays table
         let is_scorer = false
 
         if (first_td_play.rush === true) {
-          // Rushing TD - bc_pid is the scorer
-          is_scorer = first_td_play.bc_pid === market.selection_pid
+          // Rushing TD - ball_carrier_pid is the scorer
+          is_scorer = first_td_play.ball_carrier_pid === market.selection_pid
         } else if (first_td_play.pass === true) {
-          // Passing TD - trg_pid is the scorer (receiver)
-          is_scorer = first_td_play.trg_pid === market.selection_pid
+          // Passing TD - target_pid is the scorer (receiver)
+          is_scorer = first_td_play.target_pid === market.selection_pid
         } else {
           // Other types of TDs - check both fields as fallback
           is_scorer =
-            first_td_play.bc_pid === market.selection_pid ||
-            first_td_play.trg_pid === market.selection_pid
+            first_td_play.ball_carrier_pid === market.selection_pid ||
+            first_td_play.target_pid === market.selection_pid
         }
 
         metric_value = is_scorer ? 1 : 0
@@ -247,7 +247,7 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
         return []
       }
       let filtered_plays = game_plays.filter(
-        (play) => play.off === market.selection_pid
+        (play) => play.offense_nfl_team === market.selection_pid
       )
 
       // Apply quarter filter if specified

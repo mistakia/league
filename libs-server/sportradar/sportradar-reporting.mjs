@@ -120,7 +120,7 @@ export const print_dry_mode_comparison = ({ sample_plays_by_type }) => {
     log(
       `Game: ${sample.db_play.esbid} | Q${sample.db_play.qtr} | ${sample.db_play.game_clock_start || 'N/A'}`
     )
-    log(`Play ID: ${sample.db_play.playId}`)
+    log(`Play ID: ${sample.db_play.play_id}`)
     log('')
 
     const changes = []
@@ -266,7 +266,7 @@ export const print_collision_summary = ({ all_collisions }) => {
           ? ` [SR Game: ${ex.play_info.sportradar_game_id}, SR Play: ${ex.play_info.sportradar_play_id}]`
           : ''
       log(
-        `    ${ex.play_info.esbid} Play ${ex.play_info.playId} Q${ex.play_info.qtr} - ${ex.play_info.description || 'N/A'}${timing_note}${sportradar_info}`
+        `    ${ex.play_info.esbid} Play ${ex.play_info.play_id} Q${ex.play_info.qtr} - ${ex.play_info.description || 'N/A'}${timing_note}${sportradar_info}`
       )
     }
   }
@@ -396,8 +396,8 @@ export const should_track_collision = ({
   // Skip excluded fields
   const excluded_fields = [
     'esbid',
-    'playId',
-    'year',
+    'play_id',
+    'season_year',
     'week',
     'updated',
     'sequence', // Different methodology

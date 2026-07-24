@@ -93,8 +93,8 @@ const FIELD_MAPPINGS = {
   penaltyYards: 'pen_yds',
   isTouchdown: 'td',
   isFumble: 'fum',
-  fumbleLost: 'fuml',
-  isInterception: 'int',
+  fumbleLost: 'fumbles_lost',
+  isInterception: 'interceptions',
   isSack: 'sk',
   offensiveYards: 'yds_gained',
   isCompletePass: 'comp',
@@ -258,11 +258,11 @@ export function map_charting_play_to_db_fields(source_play) {
   // Team fields from sumer team UUIDs
   if (source_play.sumerOffenseTeamId) {
     const off = resolve_sumer_team(source_play.sumerOffenseTeamId)
-    if (off) result.off = off
+    if (off) result.offense_nfl_team = off
   }
   if (source_play.sumerDefenseTeamId) {
     const def = resolve_sumer_team(source_play.sumerDefenseTeamId)
-    if (def) result.def = def
+    if (def) result.defense_nfl_team = def
   }
 
   return result

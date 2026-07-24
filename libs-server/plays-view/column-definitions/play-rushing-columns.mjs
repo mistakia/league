@@ -2,19 +2,23 @@ import db from '#db'
 
 function join_player_rusher({ query, join_state }) {
   if (!join_state.player_rusher) {
-    query.leftJoin('player as rusher', 'nfl_plays.bc_pid', 'rusher.pid')
+    query.leftJoin(
+      'player as rusher',
+      'nfl_plays.ball_carrier_pid',
+      'rusher.pid'
+    )
     join_state.player_rusher = true
   }
 }
 
 export default {
   play_rusher: {
-    column_name: 'bc_pid',
+    column_name: 'ball_carrier_pid',
     table_name: 'nfl_plays',
     join: join_player_rusher,
     main_select: () => [
       db.raw("rusher.first_name || ' ' || rusher.last_name as play_rusher"),
-      'nfl_plays.bc_pid'
+      'nfl_plays.ball_carrier_pid'
     ],
     main_where: () => "rusher.first_name || ' ' || rusher.last_name",
     aggregate_select: ({ params } = {}) =>
@@ -24,10 +28,10 @@ export default {
     player_group_by: 'player_rusher'
   },
   play_rusher_pid: {
-    column_name: 'bc_pid',
+    column_name: 'ball_carrier_pid',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.bc_pid as play_rusher_pid'],
-    main_where: () => 'nfl_plays.bc_pid'
+    main_select: () => ['nfl_plays.ball_carrier_pid as play_rusher_pid'],
+    main_where: () => 'nfl_plays.ball_carrier_pid'
   },
   play_rush_yds: {
     column_name: 'rush_yds',

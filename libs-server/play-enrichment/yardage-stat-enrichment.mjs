@@ -17,7 +17,7 @@ const log = debug('play-enrichment:yardage-stats')
  * Also enriches completion status (comp), touchdowns (td, rush_td, pass_td),
  * and other play outcome fields from playStats.
  *
- * @param {Array} plays - Array of play objects with esbid and playId
+ * @param {Array} plays - Array of play objects with esbid and play_id
  * @param {Array} play_stats - Array of play stat objects from NFL API
  * @returns {Array} Plays with yardage and outcome fields populated
  */
@@ -36,7 +36,7 @@ export const enrich_yardage_stats = (plays, play_stats) => {
   let skipped_count = 0
 
   const enriched_plays = plays.map((play) => {
-    const play_key = `${play.esbid}-${play.playId}`
+    const play_key = `${play.esbid}-${play.play_id}`
     const stats_for_play = play_stats_by_play.get(play_key)
 
     if (!stats_for_play || stats_for_play.length === 0) {
@@ -73,9 +73,11 @@ export const enrich_yardage_stats = (plays, play_stats) => {
     if (stats_data.rush_td != null) enrichment_data.rush_td = stats_data.rush_td
     if (stats_data.pass_td != null) enrichment_data.pass_td = stats_data.pass_td
     if (stats_data.ret_td != null) enrichment_data.ret_td = stats_data.ret_td
-    if (stats_data.int != null) enrichment_data.int = stats_data.int
+    if (stats_data.interceptions != null)
+      enrichment_data.interceptions = stats_data.interceptions
     if (stats_data.sk != null) enrichment_data.sk = stats_data.sk
-    if (stats_data.fuml != null) enrichment_data.fuml = stats_data.fuml
+    if (stats_data.fumbles_lost != null)
+      enrichment_data.fumbles_lost = stats_data.fumbles_lost
     if (stats_data.first_down != null)
       enrichment_data.first_down = stats_data.first_down
 

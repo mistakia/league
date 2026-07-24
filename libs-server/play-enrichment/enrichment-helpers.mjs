@@ -5,18 +5,18 @@ const log = debug('play-enrichment:helpers')
 /**
  * Groups play_stats by play for efficient lookup
  *
- * @param {Array} play_stats - Array of play stat objects with esbid and playId
- * @returns {Map} Map keyed by "${esbid}-${playId}" with array of play_stats as values
+ * @param {Array} play_stats - Array of play stat objects with esbid and play_id
+ * @returns {Map} Map keyed by "${esbid}-${play_id}" with array of play_stats as values
  */
 export const group_play_stats_by_play = (play_stats) => {
   const grouped = new Map()
 
   for (const stat of play_stats) {
-    if (!stat.esbid || !stat.playId) {
+    if (!stat.esbid || !stat.play_id) {
       continue
     }
 
-    const play_key = `${stat.esbid}-${stat.playId}`
+    const play_key = `${stat.esbid}-${stat.play_id}`
 
     if (!grouped.has(play_key)) {
       grouped.set(play_key, [])
