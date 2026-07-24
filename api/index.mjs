@@ -185,6 +185,33 @@ api.use(
     }
   }
 )
+// Repository markdown backing the in-app doc pages (/about, /constitution,
+// /glossary, ...). These were fetched from the GitHub contents API, which is
+// rate limited to 60 requests/hour/IP unauthenticated — once a visitor tripped
+// that, every doc page rendered "Failed to Load". Serving them from the deploy
+// tree removes the runtime dependency on github.com. Short max-age so a
+// `yarn deploy` (which git pulls) propagates doc edits without a rebuild.
+const docs_max_age_seconds = 300
+api.get('/docs/README.md', (req, res) => {
+  res.set('Cache-Control', `public, max-age=${docs_max_age_seconds}`)
+  res.sendFile(path.join(__dirname, '../', 'README.md'))
+})
+api.use(
+  '/docs',
+  express.static(path.join(__dirname, '../', 'docs'), {
+    fallthrough: false,
+    setHeaders: (res) => {
+      res.set('Cache-Control', `public, max-age=${docs_max_age_seconds}`)
+    }
+  }),
+  (err, req, res, next) => {
+    if (err) {
+      res.status(404).send('Document not found')
+    } else {
+      next()
+    }
+  }
+)
 // Markdown context documents served at human-path + `.md` (not under /api).
 // Mounted after the static handlers and before the SPA catch-all.
 api.use('/', routes.context_docs)

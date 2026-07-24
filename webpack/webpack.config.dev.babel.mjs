@@ -1,10 +1,13 @@
-import path from 'path'
+import path, { dirname } from 'path'
 import os from 'os'
 import webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import { fileURLToPath } from 'url'
 
 import baseConfig from './webpack.config.base.mjs'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // The dev API host the SPA calls. Defaults to the machine's LAN IP so the app
 // can be reached from other devices on the network (e.g. a phone). Override
@@ -85,6 +88,26 @@ export default merge(baseConfig, {
     historyApiFallback: {
       verbose: true,
       disableDotRule: false
+    },
+    // Mirrors the production mounts in api/index.mjs so the doc pages resolve
+    // same-origin in dev too, and render the working-tree markdown.
+    static: [
+      {
+        directory: path.join(__dirname, '..', 'static'),
+        publicPath: '/static'
+      },
+      {
+        directory: path.join(__dirname, '..', 'docs'),
+        publicPath: '/docs'
+      }
+    ],
+    // README.md lives at the repo root, not in docs/, so it needs an explicit
+    // route rather than a static directory mount.
+    setupMiddlewares: (middlewares, devServer) => {
+      devServer.app.get('/docs/README.md', (req, res) => {
+        res.sendFile(path.join(__dirname, '..', 'README.md'))
+      })
+      return middlewares
     }
   }
 })

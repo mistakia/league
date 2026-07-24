@@ -5,7 +5,7 @@
     "dev:smoke": "bash scripts/dev-smoke.sh",
     "dev:prod": "concurrently \"yarn start\" \"yarn start:api:prod\"",
     "prod:live": "cross-env NODE_ENV=production WEBPACK_SERVE=true webpack serve --mode=production --config webpack/webpack.config.prod.babel.mjs",
-    "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs --static-directory ./static --static-public-path /static",
+    "start": "cross-env START_HOT=1 NODE_ENV=development webpack serve --mode=development --config webpack/webpack.config.dev.babel.mjs",
     "invite": "NODE_ENV=production node scripts/generate-invite-code.mjs",
     "lint": "eslint .",
     "prettier": "prettier --write .",

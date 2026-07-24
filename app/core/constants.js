@@ -12,11 +12,11 @@ export const API_URL = `${BASE_URL}/api`
 export const WS_URL = IS_DEV
   ? 'ws://' + MACHINE_IP + ':8082'
   : 'wss://xo.football'
-export const DOCS_URL =
-  'https://api.github.com/repos/mistakia/league/contents/docs'
+// Repository markdown is served same-origin from the deploy tree — see the
+// /docs mount in api/index.mjs (dev is served by webpack devServer).
+export const DOCS_URL = '/docs'
 
-export const README_URL =
-  'https://api.github.com/repos/mistakia/league/contents/README.md'
+export const README_URL = '/docs/README.md'
 
 export const TRANSACTIONS_PER_LOAD = 100
 

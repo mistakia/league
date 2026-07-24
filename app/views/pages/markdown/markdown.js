@@ -45,15 +45,9 @@ export default class MarkdownPage extends React.Component {
           throw error
         }
       })
-      .then((res) => res.json())
-      .then((json) => {
-        // GitHub returns base64; atob yields a Latin-1 binary string, so decode
-        // the bytes as UTF-8 to preserve em dashes and smart quotes.
-        const binary = window.atob(json.content)
-        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
-        const content = strip_frontmatter(
-          new TextDecoder('utf-8').decode(bytes)
-        )
+      .then((res) => res.text())
+      .then((text) => {
+        const content = strip_frontmatter(text)
         const renderer = new marked.Renderer()
         const linkRenderer = renderer.link
 
