@@ -256,12 +256,21 @@ observations:
     [defect] 2026-07-24 enrich_fixed_drives fills only NULL drive_seq while running its own counter
     from zero, so in the 4,616 game-halves that mix populated and NULL drive_seq (21,310 NULL plays)
     any fill emits values incoherent with their neighbors -- independent of td_tm.
+  - >-
+    [bug] libs-server/get-roster.mjs sourced each rostered player salary through a leftJoin whose
+    transactions.tid predicate sat in the WHERE (silently an inner join, dropping 306 rows, all of
+    them league 54 which has zero transactions) and with no year/week bound, so 23,655 of 44,293
+    rostered-player rows resolved to a transaction dated after the roster carrying them.
+  - >-
+    [fix] Commits 455656c6 and bd2f038b declare the get-roster transactions join INNER and move both
+    the team id and a (year, week) as-of bound into the ON clause; inner is correct because
+    transactions.value is the only source of the salary Roster sums into availableCap.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-24T20:00:41.460Z'
+updated_at: '2026-07-24T21:05:05.778Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
