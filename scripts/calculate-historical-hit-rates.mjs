@@ -109,7 +109,7 @@ const calculate_historical_hit_rates = async ({
     )
     .whereNotNull('prop_market_selections_index.selection_pid')
     .whereNotNull('prop_markets_index.esbid')
-    .where('prop_markets_index.season_year', year)
+    .where('prop_markets_index.year', year)
     .join('prop_markets_index', function () {
       this.on(
         'prop_markets_index.source_id',
