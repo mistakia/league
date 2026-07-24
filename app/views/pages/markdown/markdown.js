@@ -8,6 +8,19 @@ import PageLayout from '@layouts/page'
 
 import './markdown.styl'
 
+// Docs are entity-managed and may carry a YAML frontmatter block. marked has no
+// frontmatter support, so an unstripped block renders as a wall of body text at
+// the top of the page.
+const strip_frontmatter = (content) =>
+  content.replace(/^\uFEFF?---\r?\n[\s\S]*?\r?\n---[ \t]*(\r?\n|$)/, '')
+
+// Per-document class so a single doc can be styled without leaking into the
+// others: '/README.md' -> 'about', '/guides/data-views.md' -> 'guides-data-views'
+const page_modifier = (path) =>
+  path === '/README.md'
+    ? 'about'
+    : path.replace(/^\//, '').replace(/\.md$/, '').replace(/\//g, '-')
+
 export default class MarkdownPage extends React.Component {
   constructor(props) {
     super(props)
@@ -38,7 +51,9 @@ export default class MarkdownPage extends React.Component {
         // the bytes as UTF-8 to preserve em dashes and smart quotes.
         const binary = window.atob(json.content)
         const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
-        const content = new TextDecoder('utf-8').decode(bytes)
+        const content = strip_frontmatter(
+          new TextDecoder('utf-8').decode(bytes)
+        )
         const renderer = new marked.Renderer()
         const linkRenderer = renderer.link
 
@@ -52,7 +67,7 @@ export default class MarkdownPage extends React.Component {
         const markdown = marked(content, { renderer })
         const html = (
           <div
-            className='markdown'
+            className={`markdown markdown__${page_modifier(this.props.path)}`}
             dangerouslySetInnerHTML={{ __html: markdown }}
           />
         )

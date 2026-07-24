@@ -1,35 +1,67 @@
+$markdown_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
+$markdown_mono = 'IBM Plex Mono', monospace
+// Legal documents read as serif; system faces only — no extra webfont payload.
+$markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif
+
 .markdown
   padding 16px
-  margin-bottom 150px
-  font 400 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
-  margin 0 auto
+  margin 0 auto 150px
+  font 400 16px/1.7 $markdown_sans
+  color $textColor
   max-width 1300px
 
   // Plain docs (constitution, rules) have no authored two-column layout; keep
   // them in a single readable column rather than the full 1300px.
   &:not(:has(.table-of-contents))
-    max-width 900px
+    max-width 860px
 
+  // The first block sits directly under the page chrome; its heading margin
+  // would otherwise open a large gap above the title.
+  > :first-child
+  .body > :first-child
+    margin-top 0
+
+  // The global bare `p` rule in styles/general.styl pins font, leading and
+  // tracking; take them back so a document can set its own type.
   p
-    padding-bottom 16px
+    margin 0 0 1em
+    font-family inherit
+    line-height inherit
+    letter-spacing normal
+
   ul
-    list-style-type none
-    padding-left 16px
+  ol
+    margin 0 0 1em
+    padding-left 1.5em
     ul
-      margin-block-start 16px
-      padding-left 32px
+    ol
+      margin-top 0.5em
+      margin-bottom 0.5em
+
+  ul
+    list-style-type disc
+
+  ol
+    list-style-type decimal
+
+  li
+    margin-bottom 0.4em
+
+  // The table of contents is a navigation column, not prose — markers would
+  // compete with the link text.
+  .table-of-contents
+    ul
+    ol
+      list-style-type none
+      padding-left 1em
+
   a
     color $accentColor
     font-weight 700
-    font-family 'IBM Plex Mono', monospace
+    font-family $markdown_mono
     border-bottom none
     &:hover
-      font-weight 900
       border-bottom 1px solid $accentColor
-  li
-    padding-bottom 8px
-  a:hover
-    color $accentColor
 
   h1
   h2
@@ -37,23 +69,36 @@
   h4
   h5
   h6
-    font-family 'IBM Plex Mono', monospace
+    font-family $markdown_mono
+    color $textColorDark
+    line-height 1.25
+    margin 1.6em 0 0.5em
 
   h1
-  h2
-  h3
-    margin-top 1.4em
-    font-size 1.875em
-  h4
-  h5
-  h6
+    font-size 2.125em
     margin-top 1em
-    font-size 1.25em
+  h2
+    font-size 1.625em
+  h3
+    font-size 1.3125em
+  h4
+    font-size 1.125em
+  h5
+    font-size 1em
+  h6
+    font-size 0.9375em
+
+  blockquote
+    margin 0 0 1em
+    padding 0.25em 0 0.25em 1.25em
+    border-left 3px solid $borderColor
+    color lighten($textColor, 15%)
 
   table
     width 100%
     padding 8px
-    font-family 'Inter', sans-serif
+    font-family $markdown_sans
+    font-size 0.9375em
     margin 0 auto 16px
     background white
     box-shadow 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12)
@@ -69,8 +114,8 @@
     text-align start
     padding 4px 16px
     border-bottom 1px solid $borderColor
-    font-family 'IBM Plex Mono', monospace
-    font-weight 900
+    font-family $markdown_mono
+    font-weight 700
 
   td
     padding 4px 16px
@@ -85,13 +130,111 @@
     margin 16px 0
     overflow-x scroll
     white-space break-spaces
+    font-size 0.875em
 
   code:not(pre > code)
     background white
     border 1px solid $borderColor
     border-radius 6px
-    padding 4px
+    padding 2px 4px
+    font-size 0.875em
     white-space nowrap
+
+  hr
+    border none
+    border-top 1px solid $borderColor
+    margin 2em 0
+
+  // Constitution — styled as a legal instrument: serif text, centered article
+  // headings, and lettered subsections. The document references its own
+  // subsections by letter ("Article III, Section 2, Subsection f"), so the
+  // nested ordered lists must be lettered rather than numbered to match.
+  &.markdown__constitution
+    max-width 800px
+    font-family $markdown_serif
+    font-size 17px
+    line-height 1.75
+
+    p
+    li
+      text-align justify
+      hyphens auto
+
+    h1
+    h2
+    h3
+    h4
+    h5
+    h6
+      font-family $markdown_serif
+
+    h1
+      margin 0.5em 0 0.25em
+      font-size 1.875em
+      font-weight 700
+      text-align center
+      text-transform uppercase
+      letter-spacing 0.08em
+      line-height 1.3
+
+    // "(Originally adopted 2020)" — the document's attestation line.
+    h1 + p
+      margin-bottom 2em
+      text-align center
+      font-style italic
+      color lighten($textColor, 25%)
+      border-bottom 4px double darken($borderColor, 25%)
+      padding-bottom 1.25em
+
+    // "Article I"
+    h2
+      margin 2.25em 0 0.4em
+      font-size 1.375em
+      font-weight 700
+      text-align center
+      text-transform uppercase
+      letter-spacing 0.16em
+
+    // The article title, authored as a bold paragraph under each "Article N".
+    h2 + p
+      margin-bottom 1.75em
+      text-align center
+      text-transform uppercase
+      letter-spacing 0.06em
+      font-size 0.9375em
+      strong
+        font-weight 700
+
+    // Section headings within an article.
+    h3
+      margin 2em 0 0.6em
+      font-size 1.0625em
+      font-weight 700
+      font-style italic
+
+    // Top-level items carry the section number the document cites.
+    ol
+      padding-left 2.25em
+      > li::marker
+        font-weight 700
+
+    ol ol
+      list-style-type lower-alpha
+    ol ol ol
+      list-style-type lower-roman
+
+    blockquote
+      margin 0 0 1em 1.5em
+      padding-left 1.25em
+      font-style italic
+
+    // Schedules and the amendment history are tabular data, not prose.
+    table
+      font-family $markdown_sans
+      text-align left
+
+    a
+      font-family $markdown_serif
 
 @media (min-width: 960px)
   .markdown:has(.table-of-contents)
