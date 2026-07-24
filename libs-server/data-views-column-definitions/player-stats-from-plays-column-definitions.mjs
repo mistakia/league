@@ -442,6 +442,14 @@ export default {
     },
     stat_name: 'pass_ints_from_plays'
   }),
+  player_pass_completions_from_plays: player_stat_from_plays({
+    pid_columns: ['passer_pid'],
+    measure: {
+      kind: 'additive',
+      expr: `CASE WHEN comp = true THEN 1 ELSE 0 END`
+    },
+    stat_name: 'pass_comps_from_plays'
+  }),
   player_pass_first_downs_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
     measure: {
