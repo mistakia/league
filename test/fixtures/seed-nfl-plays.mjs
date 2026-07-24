@@ -16,12 +16,12 @@ const NOW = () => Math.round(Date.now() / 1000)
 
 const build_play_row = ({ year, seas_type, week, esbid, play_id, off }) => ({
   esbid,
-  playId: play_id,
-  year,
-  seas_type,
+  play_id,
+  season_year: year,
+  season_type: seas_type,
   week,
   updated: NOW(),
-  off,
+  offense_nfl_team: off,
   play_type: 'RUSH',
   qb_kneel: false,
   first_down: false,
@@ -32,12 +32,12 @@ const build_play_row = ({ year, seas_type, week, esbid, play_id, off }) => ({
 
 const build_stat_row = ({ esbid, play_id, club_code }) => ({
   esbid,
-  playId: play_id,
-  statId: play_id,
-  playerName: `test-player-${play_id}`,
+  play_id,
+  stat_id: play_id,
+  player_name: `test-player-${play_id}`,
   valid: true,
   yards: 7,
-  clubCode: club_code
+  nfl_team: club_code
 })
 
 const build_rows = ({ year, seas_type, week, plays_per_game, game_count }) => {
@@ -99,12 +99,14 @@ export const seed_nfl_plays = async ({
 
 export const clear_nfl_plays = async ({ year } = {}) => {
   if (year) {
-    const esbids = await knex('nfl_plays').select('esbid').where({ year })
+    const esbids = await knex('nfl_plays')
+      .select('esbid')
+      .where({ season_year: year })
     const esbid_list = esbids.map((r) => r.esbid)
     if (esbid_list.length) {
       await knex('nfl_play_stats').whereIn('esbid', esbid_list).del()
     }
-    await knex('nfl_plays').where({ year }).del()
+    await knex('nfl_plays').where({ season_year: year }).del()
   } else {
     await knex('nfl_play_stats').del()
     await knex('nfl_plays').del()

@@ -56,7 +56,7 @@ describe('SOCKET /scoreboard postseason poll query', function () {
         })
         expect(plays.length).to.be.greaterThan(0)
         for (const play of plays) {
-          expect(play.year).to.equal(current_season.year)
+          expect(play.season_year).to.equal(current_season.year)
           expect(play.week).to.equal(current_season.nfl_seas_week)
         }
       })

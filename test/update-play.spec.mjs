@@ -6,11 +6,11 @@ import { compute_play_changes } from '#libs-server/update-play.mjs'
 
 const expect = chai.expect
 
-// Minimal play_row stub — compute_play_changes only reads esbid/playId for
+// Minimal play_row stub — compute_play_changes only reads esbid/play_id for
 // changelog identity and diffs the remaining props.
 const make_play_row = (overrides = {}) => ({
   esbid: 1001,
-  playId: 5,
+  play_id: 5,
   ...overrides
 })
 

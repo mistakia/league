@@ -300,8 +300,8 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       }
 
       const result = map_charting_play_to_db_fields(source)
-      expect(result.off).to.equal('BUF')
-      expect(result.def).to.equal('HOU')
+      expect(result.offense_nfl_team).to.equal('BUF')
+      expect(result.defense_nfl_team).to.equal('HOU')
     })
 
     it('handles unknown sumer team IDs gracefully', () => {

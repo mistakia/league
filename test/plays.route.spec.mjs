@@ -65,7 +65,7 @@ describe('API /plays postseason', function () {
         res.body.should.be.an('array')
         expect(res.body.length).to.be.greaterThan(0)
         for (const play of res.body) {
-          expect(play.year).to.be.a('number')
+          expect(play.season_year).to.be.a('number')
           expect(play.week).to.equal(1)
           // Under POST mockdate, the current-week query must filter to POST.
           // The seeded REG week 18 plays must not leak into this response.
@@ -87,7 +87,7 @@ describe('API /plays postseason', function () {
         res.body.should.be.an('array')
         expect(res.body.length).to.equal(1)
         for (const play of res.body) {
-          expect(play.year).to.equal(2020)
+          expect(play.season_year).to.equal(2020)
         }
       })
 
@@ -99,7 +99,7 @@ describe('API /plays postseason', function () {
         res.body.should.be.an('array')
         expect(res.body.length).to.equal(1)
         for (const play of res.body) {
-          expect(play.year).to.equal(2020)
+          expect(play.season_year).to.equal(2020)
         }
       })
 
