@@ -219,6 +219,10 @@ export default async function ({
       selection.source_selection_id.toString()
     )
     cleanup_operations.push({
+      // source_id scopes the cleanup to the emitting book. Betting sources reuse
+      // each other's source_market_id strings, so a cleanup keyed on the market
+      // id alone would reap another book's selections.
+      source_id: existing_market.source_id,
       source_market_id: existing_market.source_market_id,
       new_selection_ids,
       missing_selection_ids: [] // Determined during batch execution in insert-prop-markets

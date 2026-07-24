@@ -12,6 +12,14 @@ import {
   clear_cache,
   get_cache_stats
 } from './betting-market-cache.mjs'
+import {
+  build_market_key,
+  build_market_index_key,
+  build_market_history_key,
+  build_selection_index_key,
+  build_selection_history_key
+} from './betting-market-keys.mjs'
+import emit_signal from './emit-signal.mjs'
 
 const log = debug('insert-prop-markets')
 
@@ -38,68 +46,117 @@ const deduplicate_inserts = (inserts, get_key) => {
   return [...unique.values()]
 }
 
-// Clean up stale selections that are no longer in the current market snapshot
-const cleanup_stale_selections = async (cleanup_operations) => {
+// Clean up stale selections that are no longer in the current market snapshot.
+//
+// Every query here is scoped by source_id. Betting sources reuse each other's
+// source_market_id strings (33 are shared between DRAFTKINGS and FANATICS in
+// production), so a reaper keyed on the market id alone treats another book's
+// rows as stale and deletes them.
+//
+// Returns { deleted_count, violations }. A violation is a row the database
+// reported deleted whose source_id is not the book the delete was scoped to --
+// structurally impossible while the source_id predicate is present, and
+// therefore the oracle that fires if it is ever dropped again.
+export const cleanup_stale_selections = async (cleanup_operations) => {
+  const result = { deleted_count: 0, violations: [] }
+
   if (cleanup_operations.length === 0) {
-    return
+    return result
   }
 
-  const cleanup_market_ids = cleanup_operations
-    .filter((op) => op.source_market_id && op.new_selection_ids)
-    .map((op) => op.source_market_id)
-
-  if (cleanup_market_ids.length === 0) {
-    return
-  }
-
-  // Build a map of market_id -> valid selection_ids (merge duplicates)
+  // Group valid selection ids per (source_id, source_market_id), merging
+  // duplicate operations for the same market.
   const valid_selections_by_market = new Map()
+  const market_ids_by_source = new Map()
   for (const op of cleanup_operations) {
-    if (op.source_market_id && op.new_selection_ids) {
-      const existing_set = valid_selections_by_market.get(op.source_market_id)
-      if (existing_set) {
-        for (const id of op.new_selection_ids) {
-          existing_set.add(id)
-        }
-      } else {
-        valid_selections_by_market.set(
-          op.source_market_id,
-          new Set(op.new_selection_ids)
-        )
+    if (!op.source_id || !op.source_market_id || !op.new_selection_ids) {
+      continue
+    }
+
+    const market_key = build_market_key(op)
+    const existing_set = valid_selections_by_market.get(market_key)
+    if (existing_set) {
+      for (const id of op.new_selection_ids) {
+        existing_set.add(id)
       }
+    } else {
+      valid_selections_by_market.set(market_key, new Set(op.new_selection_ids))
+    }
+
+    if (!market_ids_by_source.has(op.source_id)) {
+      market_ids_by_source.set(op.source_id, new Set())
+    }
+    market_ids_by_source.get(op.source_id).add(op.source_market_id)
+  }
+
+  if (market_ids_by_source.size === 0) {
+    return result
+  }
+
+  // One scoped query per book. Imports are per-book, so this is normally a
+  // single query, preserving the previous batch shape.
+  const delete_targets = new Map()
+  for (const [source_id, market_ids] of market_ids_by_source.entries()) {
+    const existing_selections = await db('prop_market_selections_index')
+      .where('source_id', source_id)
+      .whereIn('source_market_id', [...market_ids])
+      .where('time_type', 'CLOSE')
+      .select('source_id', 'source_market_id', 'source_selection_id')
+
+    for (const selection of existing_selections) {
+      const valid_ids = valid_selections_by_market.get(
+        build_market_key(selection)
+      )
+      if (!valid_ids || valid_ids.has(String(selection.source_selection_id))) {
+        continue
+      }
+
+      const market_key = build_market_key(selection)
+      if (!delete_targets.has(market_key)) {
+        delete_targets.set(market_key, {
+          source_id: selection.source_id,
+          source_market_id: selection.source_market_id,
+          selection_ids: []
+        })
+      }
+      delete_targets
+        .get(market_key)
+        .selection_ids.push(selection.source_selection_id)
     }
   }
 
-  // Single query to get all existing selections for cleanup markets
-  const existing_selections = await db('prop_market_selections_index')
-    .whereIn('source_market_id', cleanup_market_ids)
-    .where('time_type', 'CLOSE')
-    .select('source_market_id', 'source_selection_id')
-
-  // Group selections to delete by market_id
-  const delete_by_market = new Map()
-  for (const sel of existing_selections) {
-    const valid_ids = valid_selections_by_market.get(sel.source_market_id)
-    const sel_id_str = String(sel.source_selection_id)
-    if (valid_ids && !valid_ids.has(sel_id_str)) {
-      if (!delete_by_market.has(sel.source_market_id)) {
-        delete_by_market.set(sel.source_market_id, [])
-      }
-      delete_by_market.get(sel.source_market_id).push(sel.source_selection_id)
-    }
+  if (delete_targets.size === 0) {
+    return result
   }
 
-  // Execute deletes in parallel
-  if (delete_by_market.size > 0) {
-    await Promise.all(
-      [...delete_by_market.entries()].map(([market_id, selection_ids]) =>
+  const deleted_rows_per_target = await Promise.all(
+    [...delete_targets.values()].map(
+      ({ source_id, source_market_id, selection_ids }) =>
         db('prop_market_selections_index')
-          .where({ source_market_id: market_id, time_type: 'CLOSE' })
+          .where({ source_id, source_market_id, time_type: 'CLOSE' })
           .whereIn('source_selection_id', selection_ids)
           .del()
-      )
+          .returning(['source_id', 'source_market_id', 'source_selection_id'])
     )
+  )
+
+  const targets = [...delete_targets.values()]
+  for (let i = 0; i < deleted_rows_per_target.length; i++) {
+    const deleted_rows = deleted_rows_per_target[i]
+    result.deleted_count += deleted_rows.length
+    for (const row of deleted_rows) {
+      if (row.source_id !== targets[i].source_id) {
+        result.violations.push({
+          scoped_source_id: targets[i].source_id,
+          deleted_source_id: row.source_id,
+          source_market_id: row.source_market_id,
+          source_selection_id: row.source_selection_id
+        })
+      }
+    }
   }
+
+  return result
 }
 
 // Extract fields needed for market history inserts
@@ -243,7 +300,8 @@ export default async function (markets, { dry_run = false } = {}) {
     market_index_inserts: 0,
     selection_history_inserts: 0,
     selection_index_inserts: 0,
-    cleanup_operations: 0
+    cleanup_operations: 0,
+    selection_deletes: 0
   }
 
   const total_start = Date.now()
@@ -316,24 +374,22 @@ export default async function (markets, { dry_run = false } = {}) {
       // Deduplicate all inserts to avoid constraint violations
       const unique_market_history = deduplicate_inserts(
         all_market_history_inserts,
-        (i) => `${i.source_id}_${i.source_market_id}_${i.observed_at}`
+        build_market_history_key
       )
 
       const unique_market_index = deduplicate_inserts(
         all_market_index_inserts,
-        (i) => `${i.source_id}_${i.source_market_id}_${i.time_type}`
+        build_market_index_key
       )
 
       const unique_selection_history = deduplicate_inserts(
         all_selection_history_inserts,
-        (i) =>
-          `${i.source_id}_${i.source_market_id}_${i.source_selection_id}_${i.observed_at}`
+        build_selection_history_key
       )
 
       const unique_selection_index = deduplicate_inserts(
         all_selection_index_inserts,
-        (i) =>
-          `${i.source_id}_${i.source_market_id}_${i.source_selection_id}_${i.time_type}`
+        build_selection_index_key
       )
 
       // Accumulate stats
@@ -410,12 +466,32 @@ export default async function (markets, { dry_run = false } = {}) {
         await Promise.all(insert_promises)
 
         // Clean up stale selections
-        await cleanup_stale_selections(all_selection_cleanup_operations)
+        const cleanup_result = await cleanup_stale_selections(
+          all_selection_cleanup_operations
+        )
+        stats.selection_deletes += cleanup_result.deleted_count
+
+        // The reaper deleted 5.3M rows over its lifetime with nothing reporting
+        // a single one. Surface the count, and signal if a delete ever escaped
+        // the book it was scoped to.
+        if (cleanup_result.violations.length > 0) {
+          await emit_signal({
+            source: 'libs-server/insert-prop-markets.mjs',
+            kind: 'data_integrity',
+            severity: 'high',
+            title: `prop selection reaper deleted ${cleanup_result.violations.length} row(s) outside the emitting book`,
+            payload: {
+              deleted_count: cleanup_result.deleted_count,
+              violations: cleanup_result.violations.slice(0, 20)
+            },
+            dedup_key: 'prop-selection-reaper:cross-book-delete'
+          })
+        }
       }
 
       const batch_duration = ((Date.now() - batch_start) / 1000).toFixed(2)
       log(
-        `Batch ${batch_count}/${total_batches} completed in ${batch_duration}s (${market_batch.length} markets, ${unique_selection_history.length} selection inserts)`
+        `Batch ${batch_count}/${total_batches} completed in ${batch_duration}s (${market_batch.length} markets, ${unique_selection_history.length} selection inserts, ${stats.selection_deletes} cumulative selection deletes)`
       )
     }
   })
@@ -434,7 +510,9 @@ export default async function (markets, { dry_run = false } = {}) {
     log(`  - Selection index records: ${stats.selection_index_inserts}`)
     log(`  - Cleanup operations: ${stats.cleanup_operations}`)
   } else {
-    log(`Market insertion completed in ${total_duration}s`)
+    log(
+      `Market insertion completed in ${total_duration}s (${stats.selection_deletes} stale selections deleted)`
+    )
   }
 
   return { stats }
