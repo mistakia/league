@@ -67,7 +67,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
         'p.current_nfl_team'
       )
     })
-    .where('g.year', year)
+    .where('g.season_year', year)
     .whereNull('ps.gsis_player_id')
     .whereNotNull('ps.player_name')
     .where('ps.player_name', '!=', '')
@@ -120,7 +120,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
   // Only accept unique pname matches to avoid ambiguity
   const pass2_candidates = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
-    .where('g.year', year)
+    .where('g.season_year', year)
     .whereNull('ps.gsis_player_id')
     .whereNotNull('ps.player_name')
     .where('ps.player_name', '!=', '')
@@ -204,7 +204,7 @@ const backfill_play_stats_gsisid = async ({ year, dry_run = false } = {}) => {
   // Check remaining unresolved
   const remaining = await db('nfl_play_stats as ps')
     .join('nfl_games as g', 'ps.esbid', 'g.esbid')
-    .where('g.year', year)
+    .where('g.season_year', year)
     .whereNull('ps.gsis_player_id')
     .whereNotNull('ps.player_name')
     .where('ps.player_name', '!=', '')

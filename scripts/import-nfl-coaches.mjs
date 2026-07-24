@@ -724,7 +724,7 @@ const import_nfl_coaches = async ({
     if (!dry_run) {
       const matched_row = await db('nfl_game_coaches as gc')
         .join('nfl_games as g', 'g.nflverse_game_id', 'gc.nflverse_game_id')
-        .where('g.year', year)
+        .where('g.season_year', year)
         .countDistinct('gc.nflverse_game_id as matched')
         .first()
       matched = Number(matched_row?.matched || 0)
