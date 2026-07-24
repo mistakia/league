@@ -102,12 +102,20 @@ const load_player_gamelogs = async (esbids) => {
 
 /**
  * Load NFL plays for specified games
+ *
+ * The select list must cover every column the NFL_PLAYS handler reads: each
+ * mapping's metric_columns and player_column, plus qtr for the quarter/half
+ * filters and offense_nfl_team for the team_aggregate filter. A column missing
+ * here does not raise -- the handler reads undefined and silently settles the
+ * market against a zero metric. Keep it in sync with market-type-mappings.mjs.
  */
 const load_nfl_plays = async (esbids) => {
   return await db('nfl_plays')
     .select(
       'esbid',
       'qtr',
+      // Team attribution for team_aggregate markets
+      'offense_nfl_team',
       // Player identification columns
       'passer_pid',
       'ball_carrier_pid',
@@ -115,7 +123,13 @@ const load_nfl_plays = async (esbids) => {
       // Yardage columns used in market calculations
       'pass_yds',
       'rush_yds',
-      'recv_yds'
+      'recv_yds',
+      // Play outcome flags used by count and first-scorer market logic
+      'comp',
+      'td',
+      'rush',
+      'pass',
+      'interceptions'
     )
     .whereIn('esbid', esbids)
 }
