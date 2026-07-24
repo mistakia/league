@@ -91,7 +91,7 @@ const get_team_yardage_markets = async ({ year, current_week_only }) => {
     )
     .whereNotNull('prop_markets_index.esbid')
     .whereNotNull('prop_market_selections_index.selection_pid')
-    .where('prop_markets_index.year', year)
+    .where('prop_markets_index.season_year', year)
     .whereIn('prop_markets_index.market_type', TEAM_YARDAGE_MARKET_TYPES)
     .join('prop_markets_index', function () {
       this.on(
