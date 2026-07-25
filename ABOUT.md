@@ -309,12 +309,18 @@ observations:
   - >-
     [decision] Residue 3 is open: td_tm stays NULL for fumble-recovery (755), punt-return (404) and
     kickoff-return (328) touchdowns, leaving is_defensive_td blind for 1,487 plays.
+  - >-
+    [finding] GitHub Actions Test never checks out the private submodule (.github/workflows/test.yml
+    uses actions/checkout with no submodules option), so any spec whose import chain reaches
+    #private/... fails in CI with ERR_MODULE_NOT_FOUND while passing locally where private/ exists.
+    Hit 2026-07-24 by test/plays-field-reads.spec.mjs importing scripts/import-plays-nfl-v1.mjs,
+    which transitively reaches #private/libs-server/ngs.mjs via import-nfl-games-ngs.mjs.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T00:15:29.048Z'
+updated_at: '2026-07-25T00:21:24.044Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
