@@ -435,12 +435,19 @@ observations:
     abbreviation drift like the SD/LAC fold) -- needs dedicated investigation of the historical NFL
     play import pipeline. This is a separate, much larger issue than the td_tm/ret_tm backfill and
     is NOT fixed by anything in this session; escalating to operator rather than attempting a fix.
+  - >-
+    [data-defect] 2026-07-25 The JAX home-game offense/defense swap has a hard boundary: every
+    season 2001-2015 is affected and every season 2016 onward is clean, verified by comparing
+    JAX-offense against JAX-defense play counts per season over nfl_games.h='JAX'. Affected seasons
+    run 15-to-74 JAX-offense plays against 1322-to-1707 JAX-defense; from 2016 the same measure is
+    balanced. 144 home games across the 15 seasons. JAX away games are balanced in every season, so
+    the defect is keyed to home venue, not to the franchise.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T04:46:22.095Z'
+updated_at: '2026-07-25T05:25:50.979Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
