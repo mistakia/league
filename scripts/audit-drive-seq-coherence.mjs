@@ -37,10 +37,13 @@ const signal_log = create_logger('audit-drive-seq-coherence', {
 // still surfaces. LOWER THESE as repairs land -- a baseline left stale after a
 // repair silently re-admits the same volume of corruption.
 const KNOWN_VIOLATION_BASELINE = {
-  // 48 games (2025: 32 PRE, 13 POST, 3 REG) where half 2 restarts numbering at
-  // 1. Repaired by db/adhoc/<date>-repair-drive-seq-game-continuity.sql, which
-  // is authored but NOT yet executed. Drop to 0 once it runs.
-  restart_at_1: 48,
+  // Was 48 games (2025: 32 PRE, 13 POST, 3 REG) where half 2 restarted
+  // numbering at 1. Repaired 2026-07-24 by
+  // db/adhoc/2026-07-24-repair-drive-seq-game-continuity.sql: 9,119 rows
+  // renumbered across all 48, 1,174 true drives recovered, verified 0 remaining
+  // by this auditor against production. At 0 the class is now a real gate --
+  // any future restart game fails this check immediately.
+  restart_at_1: 0,
   // 22 games carrying a mixed-authority splice: enrichment-written values
   // interleaved among source-numbered plays. A renumber does not fix these;
   // they are tracked as their own task.

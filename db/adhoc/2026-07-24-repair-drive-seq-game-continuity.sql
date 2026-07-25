@@ -1,27 +1,43 @@
 -- Repair drive_seq game-continuity for the 48 half-restart games
 --
 -- ============================================================================
--- THIS SCRIPT HAS NOT BEEN EXECUTED. Executing it is an operator decision.
+-- EXECUTED 2026-07-24 21:42 EDT against league_production. Results below.
 -- ============================================================================
 --
--- Every other file in db/adhoc/ is an append-only record of SQL that has
--- already run, dated by its run date. This one breaks that convention
--- deliberately, on operator instruction, so the repair can be reviewed before
--- it is run. ON EXECUTION, RENAME THIS FILE TO THE ACTUAL RUN DATE
--- (db/adhoc/YYYY-MM-DD-repair-drive-seq-game-continuity.sql) so the directory's
--- semantics are restored rather than silently broken.
+-- The filename already carries the run date, so no rename was needed: this was
+-- authored and executed on the same day, and db/adhoc/ dates by local date (the
+-- convention every file from 2026-07-20 onward follows, and the timezone both
+-- the operator's machine and the league host run in).
 --
--- PRECONDITION -- DO NOT RUN BEFORE THIS HOLDS:
+-- MEASURED RESULT, and it matched the projection below exactly:
+--   48 games targeted, 9,144 rows carrying drive_seq, 9,119 renumbered, 25 left
+--   alone. 1,174 true drives recovered, 18 to 39 per game (the projection said
+--   19 to 39; the true minimum is 18). All four guards passed. Both
+--   must-be-empty verification SELECTs returned zero rows, and the unmapped set
+--   was exactly the 25 expected deleted malformed rows with no live row among
+--   them.
+--
+--   Cross-half violations fell from 70 to 22: restart_at_1 went 48 -> 0 and the
+--   out-of-scope splice class stayed at 22, confirmed by
+--   scripts/audit-drive-seq-coherence.mjs on the host. Consumer harm recovered
+--   as predicted -- 2025 PRE distinct drive keys 443 -> 763, POST 190 -> 328.
+--
+--   Run as a full dry run first (this file with ROLLBACK appended) against
+--   production, because yarn db:exec uses psql --single-transaction and commits
+--   automatically on success, so the Step 5 SELECTs below are printed AFTER the
+--   commit rather than before it. The dry run produced byte-identical output to
+--   the real run.
+--
+-- PRECONDITION -- was required before this ran:
 --   The nfl_plays/nfl_snaps rename DDL must be applied. This script names the
 --   POST-rename column season_year; against a pre-rename database it fails with
 --   Postgres 42703 on the first statement. Every other column it touches
 --   (esbid, qtr, drive_seq, drive_play_count, deleted, play_type,
 --   play_type_nfl, pass, rush) is untouched by that rename.
 --
---   SATISFIED as of 2026-07-25: league_production reports play_id, season_year,
---   offense_nfl_team, defense_nfl_team and possession_nfl_team on nfl_plays,
---   with no pre-rename name remaining. Re-confirm before running rather than
---   trusting this line.
+--   CONFIRMED SATISFIED immediately before execution: league_production reports
+--   play_id, season_year, offense_nfl_team, defense_nfl_team and
+--   possession_nfl_team on nfl_plays, with no pre-rename name remaining.
 --
 -- NOT a precondition: the td_tm/ret_tm backfill. This repair renumbers existing
 -- drive_seq values with DENSE_RANK and takes td_tm as no input, so drive
@@ -67,11 +83,13 @@
 --   shift every subsequent number. They stay deleted and uncounted.
 --
 -- The target set is re-derived at run time rather than hardcoded, because
--- corruption keeps accruing under the currently-deployed pre-fix code until the
--- deploy hold lifts. 48 is a floor, not a fixed list.
+-- corruption was still accruing under the deployed pre-fix code while this sat
+-- unexecuted. 48 was a floor, not a fixed list -- it re-derived to exactly 48 at
+-- run time, because the writer fix (f496423c) was deployed to both hosts before
+-- this ran and the live plays worker was idle in the preseason gap.
 --
 -- yarn db:exec wraps this whole file in a single transaction.
--- Run with: yarn db:exec db/adhoc/<run-date>-repair-drive-seq-game-continuity.sql
+-- Ran with: yarn db:exec db/adhoc/2026-07-24-repair-drive-seq-game-continuity.sql
 
 -- ---------------------------------------------------------------------------
 -- Step 1: the games to repair
