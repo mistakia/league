@@ -404,12 +404,43 @@ observations:
   - >-
     [state] 2026-07-24 drive_seq baseline restart_at_1 is now 0 and gates: any future half-restart
     game fails the weekly auditor immediately. other stays 22 (splice class).
+  - >-
+    [data-fix] 2026-07-25 Residue 1 (127 plays: td_tm set but td not true) resolved: all 127 have
+    play_description containing the literal word TOUCHDOWN with corroborating valid nfl_play_stats
+    rows, so td_tm/ret_tm are correct and td is the wrong/missing field. 100 are 2024 PRE-week-3 (75
+    rows, also play_type NULL, a wider partial import) and POST-weeks-3-4 (25 rows) plays where td
+    was never set; 27 are 2025 in-season plays where play_changelog shows td flipped true->false in
+    a narrow 2026-05-24 18:03-18:20 batch touching only the td column (source recorded as the
+    changelog-unification sentinel historical_backfill, true origin unrecoverable) -- unlike 5
+    sibling flips that day with companion corrections (legitimately not TDs), these 27 have no
+    companion changes and are erroneous. Unexecuted fix authored:
+    db/adhoc/2026-07-25-backfill-nfl-plays-td-flag-from-td-tm.sql (sets td=true for all 127,
+    ret_td=true for the 5 with ret_tm set and ret_td NULL); needs operator apply authorization.
+  - >-
+    [correction] 2026-07-25 The 2026-07-24 assessment that Residue 2 (239 ret_tm=offense plays) is
+    old-feed noise spread across many teams is wrong: defense_nfl_team is JAX on all 239 rows, zero
+    exceptions. ret_tm is actually correct (verified against play_description and player identity,
+    e.g. Corey Graham is Buffalo not Jacksonville); the wrong column is
+    offense_nfl_team/defense_nfl_team, not ret_tm/td_tm -- no td_tm/ret_tm fix applies.
+  - >-
+    [bug] 2026-07-25 Discovered via Residue 2: nfl_plays.offense_nfl_team/defense_nfl_team are
+    systematically swapped for essentially every Jacksonville HOME game from 2001-2015 (JAX offense
+    snaps land on defense_nfl_team instead) -- e.g. esbid 2015102500 shows 179 plays as
+    BUF-offense/JAX-defense vs only 8 as JAX-offense/BUF-defense, confirmed against play_description
+    (T.Yeldon rush, L.Joeckel false start are unambiguously JAX offensive plays). Season aggregates
+    confirm the shape: JAX-home games show ~60 JAX-offense plays per 10 games vs ~1600 JAX-defense
+    (should be roughly equal); JAX-away games and all seasons from 2016 onward are balanced/correct.
+    Likely 20,000+ plays affected across ~150 games. Root cause not yet localized
+    (possession_nfl_team and nfl_games.h/v both read JAX consistently, so it is not a simple JAC/JAX
+    abbreviation drift like the SD/LAC fold) -- needs dedicated investigation of the historical NFL
+    play import pipeline. This is a separate, much larger issue than the td_tm/ret_tm backfill and
+    is NOT fixed by anything in this session; escalating to operator rather than attempting a fix.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T01:45:13.856Z'
+updated_at: '2026-07-25T04:46:22.095Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
