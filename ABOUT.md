@@ -398,12 +398,18 @@ observations:
     [data-gap] 37 games carry the orphaned-td signature of td being entirely NULL across the whole
     game despite touchdown-worded descriptions, and one further game misses only its touchdown rows
     through a different mechanism.
+  - >-
+    [completion] 2026-07-24 The 48-game drive_seq restart class is repaired: 9,119 rows renumbered,
+    cross-half violations 70 to 22, 2025 PRE drive keys 443 to 763.
+  - >-
+    [state] 2026-07-24 drive_seq baseline restart_at_1 is now 0 and gates: any future half-restart
+    game fails the weekly auditor immediately. other stays 22 (splice class).
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T00:55:33.332Z'
+updated_at: '2026-07-25T01:45:13.856Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
