@@ -363,9 +363,10 @@ describe('import-plays-nfl-v1 live upsert drive_seq protection', function () {
   // all-or-nothing enrichment rule into active data loss rather than a gap.
 
   // Imported from libs-server rather than from the importer script: that
-  // script's transitive graph reaches #private/libs-server/ngs.mjs, and the
-  // private submodule is not checked out in CI, so importing it here passes
-  // locally and dies with ERR_MODULE_NOT_FOUND on the runner.
+  // script's transitive graph reaches the private submodule's NGS module (via
+  // finalize-game.mjs -> import-nfl-games-ngs.mjs), and CI checks out without
+  // submodules, so importing it here passes locally and dies with
+  // ERR_MODULE_NOT_FOUND on the runner.
   const load_build_plays_merge = async () => {
     const module = await import('../libs-server/build-plays-merge.mjs')
     return module.build_plays_merge
