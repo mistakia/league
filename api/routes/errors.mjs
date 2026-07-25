@@ -47,9 +47,13 @@ const CRAWLER_UA_RE =
 //   - ChunkLoadError: a stale-client/post-deploy condition already recovered
 //     client-side (app/core/bugsnag.js); crawlers and pre-fix bundles can't run
 //     that recovery, so they still POST here
-//   - 'Failed to fetch': a client-side network/abort condition (adblock, navigate
-//     away, crawler abandons the request) with no actionable server signal — real
-//     API outages are caught by server-side run monitoring
+//   - 'Failed to fetch' / 'Load failed': a client-side network/abort condition
+//     (adblock, navigate away, crawler abandons the request) with no actionable
+//     server signal — real API outages are caught by server-side run monitoring.
+//     The two spellings are the same condition in different engines: Chrome and
+//     Firefox say 'Failed to fetch', Safari/iOS says 'Load failed'. Matching only
+//     the first left every mobile-Safari network blip arriving as a high-severity
+//     TypeError.
 export const is_non_actionable_client_error = ({
   error_class,
   message,
@@ -59,6 +63,11 @@ export const is_non_actionable_client_error = ({
   if (!message) return true
   if (error_class === 'ChunkLoadError') return true
   if (/failed to fetch/i.test(message)) return true
+  // Safari's spelling of the same condition. Anchored rather than substring-
+  // matched: 'load failed' is a common fragment of genuine app errors
+  // ('Image load failed', 'Chunk load failed'), and only the bare message is
+  // the fetch network error.
+  if (/^\s*load failed\.?\s*$/i.test(message)) return true
   return false
 }
 

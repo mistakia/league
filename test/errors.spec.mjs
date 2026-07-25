@@ -62,6 +62,26 @@ describe('api/errors - is_non_actionable_client_error', function () {
     ).to.equal(true)
   })
 
+  it("suppresses Safari's 'Load failed' client network condition", function () {
+    expect(
+      is_non_actionable_client_error({
+        error_class: 'TypeError',
+        message: 'Load failed',
+        user_agent: REAL_USER_UA
+      })
+    ).to.equal(true)
+  })
+
+  it("does not suppress genuine errors merely containing 'load failed'", function () {
+    expect(
+      is_non_actionable_client_error({
+        error_class: 'TypeError',
+        message: 'Image load failed for player headshot',
+        user_agent: REAL_USER_UA
+      })
+    ).to.equal(false)
+  })
+
   it('emits a genuine app error from a real user', function () {
     expect(
       is_non_actionable_client_error({
