@@ -3,15 +3,22 @@
 // Aggregates the per-cluster progress trackers against the immutable inventory
 // to prove -- by machine, not by human reading -- that nothing is overlooked:
 // every table is assigned to exactly one cluster, no table is orphaned or
-// double-claimed, and (with --require-done) every table has reached `done` and
-// no dropped old name still has a live consumer.
+// double-claimed, and (with --require-done) every table has reached `done`.
+//
+// --check-dangling proves that a table the redesign DROPPED has no consumer
+// left behind. It is scoped to dropped tables on purpose: the redesign renames
+// COLUMNS, not tables, so a tracker name that still exists in the schema is a
+// live table whose consumers are supposed to name it. Grepping every done
+// table's name (as this did before) only measured how common the word is --
+// `teams` matched 293 files and none of them were debt. Column-level residue is
+// covered by db/adhoc/audit-schema-conformance.mjs and the repoint detectors.
 //
 // Reads scratch/league/schema-redesign/{inventory.json, progress/*.md}.
 //
 // Usage:
 //   node db/adhoc/check-migration-coverage.mjs                  # structural + progress report
 //   node db/adhoc/check-migration-coverage.mjs --require-done   # final gate: all tables done
-//   node db/adhoc/check-migration-coverage.mjs --check-dangling # re-grep old names of done tables
+//   node db/adhoc/check-migration-coverage.mjs --check-dangling # dropped tables have no consumers
 //
 // Exit non-zero on any structural violation, and (under --require-done) on any
 // open table or lingering old name.
@@ -99,6 +106,18 @@ function grep_consumer_count(table) {
   }
 }
 
+// Tables the exported schema still defines. Anything in the inventory but not
+// here was dropped over the course of the redesign.
+function load_schema_tables() {
+  const file = path.join(repo_root, 'db', 'schema.postgres.sql')
+  const text = fs.readFileSync(file, 'utf8')
+  const tables = new Set()
+  for (const m of text.matchAll(/^CREATE TABLE public\.(\w+) \(/gm)) {
+    tables.add(m[1])
+  }
+  return tables
+}
+
 function main() {
   const argv = yargs(hideBin(process.argv))
     .option('require-done', { type: 'boolean', default: false })
@@ -137,11 +156,11 @@ function main() {
 
   // Progress rollup.
   const state_totals = new Map()
-  const done_tables = []
+  const tracked_tables = new Set()
   for (const [, rows] of trackers) {
     for (const [table, state] of rows) {
       state_totals.set(state, (state_totals.get(state) || 0) + 1)
-      if (state === 'done') done_tables.push(table)
+      tracked_tables.add(table)
     }
   }
 
@@ -155,14 +174,21 @@ function main() {
     )
   }
 
-  // Optional: a done table's old name must have zero live consumers.
-  if (argv['check-dangling'] && done_tables.length) {
-    console.log('\nchecking dropped old names for lingering consumers...')
-    for (const table of done_tables) {
+  // Optional: a dropped table must have zero live consumers.
+  if (argv['check-dangling']) {
+    // Scoped to every tracked table, not just `done` ones: a table can be
+    // dropped by operator ruling while its cluster is still in_progress, and
+    // that is exactly when a stale consumer is most likely to survive.
+    const schema_tables = load_schema_tables()
+    const dropped = [...tracked_tables].filter((t) => !schema_tables.has(t))
+    console.log(
+      `\nchecking ${dropped.length} dropped table(s) for lingering consumers...`
+    )
+    for (const table of dropped) {
       const n = grep_consumer_count(table)
       if (n > 0) {
         errors.push(
-          `done table ${table} still has ${n} consumer file(s) referencing the old name`
+          `dropped table ${table} still has ${n} consumer file(s) referencing it`
         )
       }
     }
