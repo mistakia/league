@@ -131,7 +131,14 @@ const accepted_non_timestamp_columns = new Set([
   'player_college_careerlogs.bounce_pct_when_run_at',
   'player_college_careerlogs.pos_pct_when_run_at',
   'player_college_seasonlogs.bounce_pct_when_run_at',
-  'player_college_seasonlogs.pos_pct_when_run_at'
+  'player_college_seasonlogs.pos_pct_when_run_at',
+  // Numeric DURATIONS, not instants: seconds elapsed within a play. The name
+  // rule matches the _time suffix, but there is no instant to make tz-aware.
+  // Operator-ruled keeps (2026-07-24, nfl-plays-snaps cluster) -- recorded here
+  // so a later audit reads them as settled rather than as unfinished retypes.
+  'nfl_plays.punt_hang_time',
+  'nfl_plays.pocket_time',
+  'nfl_plays_passer.air_time'
 ])
 
 // External-id columns that end in _id but do not follow {system}_{entitytype}_id.
