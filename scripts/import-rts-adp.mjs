@@ -92,7 +92,7 @@ const import_rts_adp = async ({
         matched_rts_ids.add(Number(player.player_id))
         adp_inserts.push({
           pid: player_row.pid,
-          pos: player_row.pos,
+          pos: player_row.primary_position,
           season_year: year,
           adp: Number(player.avg),
           min_pick: null,
@@ -148,7 +148,7 @@ const import_rts_adp = async ({
         matched_rts_ids.add(Number(player.player_id))
         adp_inserts.push({
           pid: player_row.pid,
-          pos: player_row.pos,
+          pos: player_row.primary_position,
           season_year: year,
           adp: Number(player.avg),
           min_pick: null,

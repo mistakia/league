@@ -25,7 +25,7 @@ export default async function compute_optimal_metrics({
 
   const gamelog_rows = await db('league_format_player_gamelogs as g')
     .join('nfl_games as n', 'n.esbid', 'g.esbid')
-    .where('n.year', year)
+    .where('n.season_year', year)
     .where('g.league_format_id', league_format_id)
     .select('g.pid', 'n.week', 'g.points_added_earned', 'g.points_added_net')
 

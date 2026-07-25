@@ -55,7 +55,7 @@ export async function compute_actuals_optimal_lineup({
   const points_rows = await db('scoring_format_player_gamelogs as g')
     .join('nfl_games as n', 'n.esbid', 'g.esbid')
     .where('g.scoring_format_id', scoring_format_id)
-    .where('n.year', year)
+    .where('n.season_year', year)
     .where('n.week', week)
     .whereIn('g.pid', roster_pids)
     .select('g.pid', 'g.points')

@@ -31,11 +31,11 @@ export default async function compute_roster_slot_metrics({
     .join('nfl_games as n', 'n.esbid', 'g.esbid')
     .join('rosters_players as r', function () {
       this.on('r.pid', '=', 'g.pid')
-        .andOn('r.year', '=', 'n.year')
+        .andOn('r.year', '=', 'n.season_year')
         .andOn('r.week', '=', 'n.week')
     })
     .where('r.lid', lid)
-    .where('n.year', year)
+    .where('n.season_year', year)
     .where('g.league_format_id', league_format_id)
     .whereIn('r.slot', slots)
     .groupBy('r.tid', 'g.pid')
