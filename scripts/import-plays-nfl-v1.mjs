@@ -19,6 +19,7 @@ import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
 import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
+import { build_plays_merge } from '#libs-server/build-plays-merge.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   standardize_score_type,
@@ -102,47 +103,6 @@ const parse_clock_time = (clockTime, quarter) => {
   }
 
   return time_fields
-}
-
-/**
- * Build the ON CONFLICT update set for a plays upsert, protecting drive_seq
- * from being erased by a null.
- *
- * The live worker re-polls the full playlist for an in-progress game every 60
- * seconds and re-upserts every play, and getPlayData always sets the drive_seq
- * key -- null for any play the NFL feed has not yet tagged with a
- * driveSequenceNumber. A blanket .merge() therefore writes those nulls over
- * whatever is already stored, so a value the enrichment (or an earlier poll)
- * had correctly computed is destroyed on the next poll. That is live data loss,
- * not a stale read.
- *
- * Every other column keeps blanket-merge semantics; only drive_seq resolves as
- * COALESCE(EXCLUDED.drive_seq, <table>.drive_seq), which makes the write
- * monotonic: a real value may replace a null, never the reverse. A genuine
- * renumber still lands, because a source supplying drive_seq supplies a
- * non-null value.
- *
- * @param {string} table - Target table name, for the qualified column reference
- * @param {Array} rows - The rows being inserted, for the column set
- * @returns {Object} knex merge object mapping every column to its update value
- */
-export const build_plays_merge = (table, rows) => {
-  const columns = new Set()
-  for (const row of rows) {
-    for (const column of Object.keys(row)) {
-      columns.add(column)
-    }
-  }
-
-  const merge = {}
-  for (const column of columns) {
-    merge[column] =
-      column === 'drive_seq'
-        ? db.raw('coalesce(EXCLUDED.??, ??.??)', [column, table, column])
-        : db.raw('EXCLUDED.??', [column])
-  }
-
-  return merge
 }
 
 const getPlayData = ({ play, year, week, seas_type, game }) => {
