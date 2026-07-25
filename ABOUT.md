@@ -315,12 +315,40 @@ observations:
     #private/... fails in CI with ERR_MODULE_NOT_FOUND while passing locally where private/ exists.
     Hit 2026-07-24 by test/plays-field-reads.spec.mjs importing scripts/import-plays-nfl-v1.mjs,
     which transitively reaches #private/libs-server/ngs.mjs via import-nfl-games-ngs.mjs.
+  - >-
+    [correction] The residue-1 figure of 100 plays in 2024 weeks 3-4 conflated season_type, since
+    week numbering resets per type: it is 75 plays in preseason week 3 plus 25 across the final
+    three postseason games.
+  - >-
+    [data-gap] All 2,964 plays of 2024 preseason week 3 are unenriched (play_type, offense_nfl_team,
+    defense_nfl_team and td all NULL) because the enrichment pass never ran after a late catch-up
+    re-import.
+  - >-
+    [data-gap] Unenriched weeks are a recurring failure family, not a 2024 one-off: 41 games across
+    12 season/type groups carry zero td despite touchdown play descriptions, and 18 season/week
+    groups show anomalous NULL rates.
+  - >-
+    [trap] A 2026-05-24 sportradar re-import with overwrite_existing cleared td on 32 plays; 5 are
+    stat-60 fumble-recovery touchdowns left with td false, ret_td null and td_tm null, so they are
+    invisible to every structured check.
+  - >-
+    [correction] My count of 349 unexplained ret_tm rows was wrong: it compared the raw team against
+    defense while folding for offense. The correct figure is 82, being 63 true mismatches and 19
+    rows with a null team.
+  - >-
+    [data-gap] 798 plays across 10 games in season 2001 have offense_nfl_team equal to
+    defense_nfl_team, losing the actual opponent and breaking any opponent-keyed query for those
+    games.
+  - >-
+    [assessment] The SD-to-LAC drift is not the only normalization gap, but the remaining drift
+    lives in nfl_plays own team columns (raw STL beside normalized LA in 2001), so td_tm and ret_tm
+    hold correct values and need no corrective pass.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T00:21:24.044Z'
+updated_at: '2026-07-25T00:43:07.780Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
