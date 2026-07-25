@@ -13,11 +13,15 @@
 --
 -- PRECONDITION -- DO NOT RUN BEFORE THIS HOLDS:
 --   The nfl_plays/nfl_snaps rename DDL must be applied. This script names the
---   POST-rename column season_year. Production was still pre-rename (`year`) as
---   of 2026-07-24, so running it before the rename window closes fails with
+--   POST-rename column season_year; against a pre-rename database it fails with
 --   Postgres 42703 on the first statement. Every other column it touches
 --   (esbid, qtr, drive_seq, drive_play_count, deleted, play_type,
 --   play_type_nfl, pass, rush) is untouched by that rename.
+--
+--   SATISFIED as of 2026-07-25: league_production reports play_id, season_year,
+--   offense_nfl_team, defense_nfl_team and possession_nfl_team on nfl_plays,
+--   with no pre-rename name remaining. Re-confirm before running rather than
+--   trusting this line.
 --
 -- NOT a precondition: the td_tm/ret_tm backfill. This repair renumbers existing
 -- drive_seq values with DENSE_RANK and takes td_tm as no input, so drive
