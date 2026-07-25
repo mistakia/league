@@ -378,12 +378,32 @@ observations:
     [data-gap] Raw team codes are systemic rather than a curiosity: 51,918 plays carry STL or SD in
     offense_nfl_team or defense_nfl_team across 2001-2016, so the clean end state normalizes all
     four team columns in one pass.
+  - >-
+    [trap] nfl_plays.td has exactly one writer, sportradar-stats-mappers.mjs line 110, which scopes
+    it to receive_stats.touchdown and is therefore wrong by construction for every defensive and
+    return touchdown.
+  - >-
+    [trap] process-plays ENRICHED_FIELD_NAMES omits td, comp and yds_gained, so
+    yardage-stat-enrichment derives td correctly from play stats and the persistence layer silently
+    discards it; re-running process-plays cannot repair td.
+  - >-
+    [correction] My claim of 18 anomalous enrichment groups was an over-read of normal preseason
+    variance: 2024 preseason week 3 is the only true hollow-row week, distinguished by a 100 percent
+    step function rather than the usual 0-17 percent noise floor.
+  - >-
+    [assessment] The 2024 preseason week 3 hollow rows do not affect fantasy scoring: gamelogs
+    derive from nfl_play_stats which is healthy, and the only real casualty is targeted_air_yards,
+    which calculate-points never references.
+  - >-
+    [data-gap] 37 games carry the orphaned-td signature of td being entirely NULL across the whole
+    game despite touchdown-worded descriptions, and one further game misses only its touchdown rows
+    through a different mechanism.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T00:50:49.734Z'
+updated_at: '2026-07-25T00:55:33.332Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
