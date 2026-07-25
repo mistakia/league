@@ -287,12 +287,34 @@ observations:
     [supersedes] 2026-07-24 The earlier [assessment] that enrich_fixed_drives 'only assigns
     drive_seq where it is NULL' no longer holds: the module now declines for a whole game if any
     play in the batch carries a value, so it never splices two numbering authorities.
+  - >-
+    [backfill] The td_tm/ret_tm backfill (db/adhoc/2026-07-24-backfill-nfl-plays-td-tm-ret-tm.sql)
+    executed against production 2026-07-24 after the nfl-plays-snaps rename landed, updating 50,723
+    plays across all 26 seasons and leaving td_tm populated on 37,706 plays and ret_tm on 14,512,
+    both exactly matching the pre-run projection.
+  - >-
+    [assessment] The expected 1,596 interception-return touchdowns was wrong; the verified value is
+    1,439, reconciling from 1,495 stat-26/28 plays less 32 without td and 24 carrying the offense.
+  - >-
+    [trap] Production statement_timeout is 30s and a DO block is one top-level statement, so a
+    per-season loop inside it never resets the clock; the loop buys partition pruning, not timeout
+    batching.
+  - >-
+    [data-gap] Residue 1 is 127 plays with td_tm but not td=true, not 27: 100 in 2024 weeks 3-4 with
+    td NULL (75 also play_type NULL, a partial import) and 27 in 2025 with td false but ret_td true.
+  - >-
+    [assessment] Residue 2 (239 plays whose ret_tm matches the offense) is old-feed noise, not a
+    mapping error: none occur after 2015, they spread across many teams, and only 5 involve the
+    SD-to-LAC fold.
+  - >-
+    [decision] Residue 3 is open: td_tm stays NULL for fumble-recovery (755), punt-return (404) and
+    kickoff-return (328) touchdowns, leaving is_defensive_td blind for 1,487 plays.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-24T23:45:46.855Z'
+updated_at: '2026-07-25T00:15:29.048Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
