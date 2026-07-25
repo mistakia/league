@@ -267,7 +267,7 @@ const check_opponent_allowed_stats = (prop, nfl_team_seasonlogs, opts) => {
   for (const single_prop of prop.props) {
     const opponent_seasonlog = nfl_team_seasonlogs.find(
       (s) =>
-        s.stat_key === `${single_prop.position}_AGAINST_ADJ` &&
+        s.stat_key === `${single_prop.player_position}_AGAINST_ADJ` &&
         s.tm === single_prop.opponent_nfl_team
     )
 

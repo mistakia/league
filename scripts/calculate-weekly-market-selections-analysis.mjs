@@ -261,7 +261,7 @@ const format_prop_row = ({
     } ${prop_row.selection_type || 'OVER'}`,
     nfl_team: player_row.current_nfl_team,
     opponent_nfl_team: opponent,
-    position: player_row.primary_position,
+    player_position: player_row.primary_position,
 
     current_season_hits_soft: current_season_data.hits_soft,
     current_season_hit_weeks_soft: current_season_data.hit_weeks_soft,
