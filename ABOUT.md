@@ -343,12 +343,35 @@ observations:
     [assessment] The SD-to-LAC drift is not the only normalization gap, but the remaining drift
     lives in nfl_plays own team columns (raw STL beside normalized LA in 2001), so td_tm and ret_tm
     hold correct values and need no corrective pass.
+  - >-
+    [correction] Residue 3 is 1,698 plays across six stat families, not 1,487 across three: own
+    fumble-recovery TD (84 plays), team TD from blocked punts and field goals (169) and own
+    kickoff-recovery TD (2) were missed by the original switch-statement reading.
+  - >-
+    [trap] nfl_plays.offense_nfl_team itself retains raw SD (1,561 rows) and STL (23,579),
+    concentrated ~97-100% on kickoff plays, so a kickoff-heavy backfill must fold only to compare
+    and write back the row's own spelling.
+  - >-
+    [assessment] The td_tm rule is attribute whichever team's player has the ball, not assume the
+    defense: a kicking team recovering a muffed return is a real case that is_defensive_td sorts
+    correctly by comparing against offense.
+  - >-
+    [assessment] ret_tm has zero computational consumers, so it should be neither extended nor
+    dropped inside a mapper fix; removal is a candidate for a dedicated cleanup touching schema, the
+    export script and the data-view catalog.
+  - >-
+    [data-gap] Three plays in game 2021122201 have td true but zero nfl_play_stats rows, so no
+    backfill can attribute them; they need a play-stats re-import for that game.
+  - >-
+    [assessment] The executed td_tm backfill is verified clean against the SD and STL drift: zero
+    false-positive defensive touchdowns, because its stat families contain no kickoff plays where
+    the raw codes concentrate.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T00:43:07.780Z'
+updated_at: '2026-07-25T00:46:30.372Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
