@@ -1,4 +1,4 @@
-/* global describe it */
+/* global describe it before */
 
 // Regression coverage for a class of latent bug in the plays surface: code
 // reading a field name that exists on no schema version -- a raw vendor key, a
@@ -496,12 +496,20 @@ describe('audit-drive-seq-coherence classification', function () {
     drive_seq_values.map((drive_seq) => ({ esbid, qtr, drive_seq }))
   )
 
-  const classify = async (rows) => {
-    const { classify_drive_seq_coherence } = await import(
+  // Hoisted into a before hook with its own timeout: the auditor pulls in
+  // #libs-server, which takes over a second to load cold. Importing it inside
+  // an `it` runs that against mocha's 2000ms default and has intermittently
+  // timed out, which would put master red on a slow runner for no defect.
+  let classify_drive_seq_coherence
+
+  before(async function () {
+    this.timeout(30000)
+    ;({ classify_drive_seq_coherence } = await import(
       '../scripts/audit-drive-seq-coherence.mjs'
-    )
-    return classify_drive_seq_coherence(rows)
-  }
+    ))
+  })
+
+  const classify = (rows) => classify_drive_seq_coherence(rows)
 
   it('separates the two corruption classes and leaves coherent games alone', async () => {
     const { games_checked, violations, violation_counts_by_class } =
