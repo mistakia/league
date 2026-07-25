@@ -366,12 +366,24 @@ observations:
     [assessment] The executed td_tm backfill is verified clean against the SD and STL drift: zero
     false-positive defensive touchdowns, because its stat families contain no kickoff plays where
     the raw codes concentrate.
+  - >-
+    [correction] The executed backfill did write raw team codes after all: td_tm holds 536 STL
+    values and ret_tm 236, because the script folded SD to LAC only and never STL to LA. SD itself
+    is clean at zero in both columns.
+  - >-
+    [assessment] Those 772 raw STL values cause no misclassification — a check folding both pairs
+    finds zero plays where td_tm differs from offense_nfl_team by spelling alone — but they are
+    normalization debt that a repair pass should fold with the other columns.
+  - >-
+    [data-gap] Raw team codes are systemic rather than a curiosity: 51,918 plays carry STL or SD in
+    offense_nfl_team or defense_nfl_team across 2001-2016, so the clean end state normalizes all
+    four team columns in one pass.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T00:46:30.372Z'
+updated_at: '2026-07-25T00:50:49.734Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
