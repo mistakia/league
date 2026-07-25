@@ -97,7 +97,15 @@ const SHARED_TOKENS = new Set([
 // Verified feed-key / non-column sites: a match that is a raw upstream feed key or
 // an unrelated column, so it stays. Populated from the discovery reports.
 // { oldToken: [file substrings...] }
-const ACCEPTED_SITES = {}
+const ACCEPTED_SITES = {
+  // core-play-columns.mjs `column_name: 'timestamp'` belongs to
+  // play_game_timestamp, which reads nfl_games."timestamp" -- a different table
+  // that this cluster never touched and that is still an unconformed epoch
+  // integer awaiting its own cluster. The adjacent play_timestamp definition
+  // already reads the renamed nfl_plays.play_time_of_day. Repointing this site
+  // at play_time_of_day would be a live defect, not a fix.
+  timestamp: ['libs-server/plays-view/column-definitions/core-play-columns.mjs']
+}
 
 const SCAN_DIRS = [
   'libs-server',
