@@ -75,21 +75,30 @@
 -- Gating
 -- ------
 -- * Column names below are POST-cutover (nfl_team, stat_id, play_id, season_year). The
---   nfl-plays-snaps rename has NOT been applied to production as of 2026-07-24. Run this
---   only AFTER that cutover lands. To run it BEFORE, substitute: nfl_team -> "clubCode",
---   stat_id -> "statId", play_id -> "playId", season_year -> year.
---   Note that td_tm / ret_tm themselves are NOT part of the rename cluster (absent from
---   PLAYS_COLUMN_RENAMES in db/adhoc/check-plays-column-repoint.mjs) — their names are
---   identical on both sides.
--- * Run BEFORE any drive_seq recompute. enrich_fixed_drives() only assigns drive_seq
+--   nfl-plays-snaps rename landed on production 2026-07-24 19:24:31-19:24:40, so these
+--   names are live and this file runs as written. td_tm / ret_tm were never part of the
+--   rename cluster (absent from PLAYS_COLUMN_RENAMES in
+--   db/adhoc/check-plays-column-repoint.mjs) — their names are identical on both sides.
+-- * Run BEFORE any drive_seq RECOMPUTE. enrich_fixed_drives() only assigns drive_seq
 --   where it is currently NULL, so populating td_tm changes no existing value on its own;
 --   but a recompute run BEFORE this backfill would bake in the unattributed-TD fallback.
+--   Note this does NOT constrain a pure renumber-style repair (e.g. DENSE_RANK over
+--   existing drive_seq values), which takes td_tm as no input.
 --
--- Idempotent: only writes where the target column IS NULL.
--- Batched per season to stay under the production 40s statement_timeout; nfl_plays is
--- RANGE partitioned on season_year, so each statement prunes to one partition.
+-- Idempotent: only writes where the target column IS NULL, so a partial run resumes safely.
+--
+-- Timeout: production statement_timeout is 30s. The per-season loop below does NOT reset
+-- that clock — statement_timeout applies per TOP-LEVEL statement and the whole DO block is
+-- one such statement — so the transaction raises it explicitly. The loop's real benefit is
+-- partition pruning: nfl_plays is RANGE partitioned on season_year and
+-- idx_nfl_plays_season_year_esbid_play_id is UNIQUE on (season_year, esbid, play_id), so
+-- each iteration index-scans a single partition instead of seq-scanning the parent.
 
 BEGIN;
+
+-- The DO block is a single statement under a 30s server default; 600s is generous headroom
+-- for ~37.7k updated rows while still bounding a pathological hang.
+SET LOCAL statement_timeout = '600s';
 
 CREATE TEMP TABLE play_scoring_teams ON COMMIT DROP AS
 SELECT
