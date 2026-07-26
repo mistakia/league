@@ -271,10 +271,20 @@ export const job = async () => {
       error
     })
   }
+
+  // Rethrow so the exit code matches the outcome -- reporting the error and
+  // then returning normally made main() exit 0, writing a failed import to the
+  // runs ledger as a success.
+  if (error) throw error
 }
 
 const main = async () => {
-  await job()
+  try {
+    await job()
+  } catch (err) {
+    console.error(err)
+    process.exit(1)
+  }
   process.exit()
 }
 
