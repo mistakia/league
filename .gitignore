@@ -40,3 +40,6 @@ tmp
 
 # Cached git worktree used by scripts/data-view-regression-check.mjs
 .cache/
+
+# Working-tier artifacts (scratch tier lives outside version control)
+scratch/
