@@ -714,9 +714,17 @@ const check_oracle = async ({ seas_type }) => {
   return null
 }
 
+// The dedup keys MUST be `<kind>:<source>`. The pipeline_success recovery arm
+// in the signals route resolves `pipeline_failure:${signal.source}` -- it
+// derives the key from the source, not from the success signal's own key. A
+// hand-shortened failure key (this file used
+// `pipeline_failure:league:process-projections`) therefore never matches, so
+// the recovery is structurally incapable of closing it and the signal stays
+// open forever on a healthy pipeline. Signal 122353 sat open that way from
+// 2026-07-23 while every run after it was clean.
 const SIGNAL_SOURCE = 'user:scheduled-command/league/process-projections.md'
-const SIGNAL_DEDUP_FAILURE = 'pipeline_failure:league:process-projections'
-const SIGNAL_DEDUP_SUCCESS = 'pipeline_success:league:process-projections'
+const SIGNAL_DEDUP_FAILURE = `pipeline_failure:${SIGNAL_SOURCE}`
+const SIGNAL_DEDUP_SUCCESS = `pipeline_success:${SIGNAL_SOURCE}`
 
 const main = async () => {
   debug.enable('process-projections,project-lineups,simulation:*')
