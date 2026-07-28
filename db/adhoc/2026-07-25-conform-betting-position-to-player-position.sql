@@ -2,9 +2,10 @@
 -- clusters left behind, in favour of player_position.
 --
 -- ############################################################################
--- ## NOT APPLIED, AND NOT YET RULED. This needs an operator ruling on the    ##
--- ## direction before it needs an apply-go, and it has neither. Do not run   ##
--- ## it without the operator's own explicit go in the applying session.      ##
+-- ## RULED AND APPLIED 2026-07-25 (262f91d7), in favour of player_position.  ##
+-- ## Verified applied: props_index.player_position is present in             ##
+-- ## db/schema.postgres.sql. This is no longer an open decision -- do not    ##
+-- ## reopen it from this file. Retained as append-only audit history.        ##
 -- ############################################################################
 --
 -- The contradiction: betting-props-timeseries renamed pos -> position on

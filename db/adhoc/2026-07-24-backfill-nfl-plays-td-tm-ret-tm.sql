@@ -1,7 +1,10 @@
 -- Backfill nfl_plays.td_tm (scoring team) and nfl_plays.ret_tm (return team) from
 -- the retained nfl_play_stats source rows.
 --
--- !! NOT YET EXECUTED — REQUIRES AN OPERATOR DECISION. See "Gating" below. !!
+-- !! EXECUTED 2026-07-24. Operator decision granted; the "Gating" section below
+-- !! is retained as the historical rationale, not an open question. The run
+-- !! touched 50,723 plays across all 26 seasons, leaving td_tm populated on
+-- !! 37,706 plays and ret_tm on 14,512. Memorialized in ABOUT.md (413294af).
 --
 -- Why both columns are empty
 -- --------------------------

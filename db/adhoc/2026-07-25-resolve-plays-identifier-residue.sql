@@ -2,9 +2,11 @@
 -- left unruled, so a later audit cannot reopen it.
 --
 -- ############################################################################
--- ## NOT APPLIED. Prepared and verified, but it has NO operator apply        ##
--- ## authorization. It contains two DROP COLUMN statements and must not be   ##
--- ## run without the operator's own explicit go for this specific file.      ##
+-- ## APPLIED 2026-07-25 (262f91d7). Do NOT re-run: it contains two DROP      ##
+-- ## COLUMN statements and is not idempotent. Verified applied against       ##
+-- ## db/schema.postgres.sql -- player_position (6203), smart_player_id       ##
+-- ## (6206) and targeted_defender_gsis (5098) all reflect the post-apply     ##
+-- ## state. Retained as append-only audit history.                           ##
 -- ############################################################################
 --
 -- None of these columns is flagged by db/adhoc/audit-schema-conformance.mjs --
