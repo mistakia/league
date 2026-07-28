@@ -465,12 +465,31 @@ observations:
   - >-
     [deploy] Dropping a seasons column leaves /root/league writing it until yarn deploy;
     generate-seasons.mjs runs 7am on the 1st of Feb-Aug and throws in that gap.
+  - >-
+    [bug] The test suite had no .mocharc, so mocha's 2000ms unit-test default governed DB-backed
+    integration specs -- that margin, not the code, made CI fail on a different spec each run.
+  - >-
+    [bug] A transactions_pkey violation is downstream of a test timeout, not its cause: mocha cannot
+    cancel an abandoned test's queries, so orphaned inserts race the next test's ALTER SEQUENCE
+    RESTART WITH 1.
+  - >-
+    [gotcha] The PG16 test container on :5433 is a shared singleton; a sibling session running the
+    suite drops all tables mid-run, so check for concurrent mocha before trusting any local test
+    result.
+  - >-
+    [fix] 2026-07-28 Batched the league and draft fixture inserts and set a 10000ms mocha floor; the
+    suite went from 2149 passing/19 failing to 2237 passing/0 failing at the default budget
+    (197e39de).
+  - >-
+    [gotcha] About 47 test assertions compare a server-recorded timestamp against
+    Math.round(Date.now()/1000) at assert time, a latent second-boundary flake independent of the
+    2026-07-28 timeout fix.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-28T17:20:51.348Z'
+updated_at: '2026-07-28T17:34:45.195Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
