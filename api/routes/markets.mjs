@@ -285,11 +285,24 @@ router.get('/?', async (req, res) => {
       )
     }
 
+    // selection_pid lives on prop_market_selections_index, not on
+    // prop_markets_index. Correlate on the market key rather than joining, so a
+    // market with several selections for the player stays a single row.
     if (params.player_id) {
-      markets_query = markets_query.where(
-        'prop_markets_index.selection_pid',
-        params.player_id
-      )
+      markets_query = markets_query.whereExists(function () {
+        this.select(1)
+          .from('prop_market_selections_index')
+          .whereRaw(
+            'prop_market_selections_index.source_id = prop_markets_index.source_id'
+          )
+          .whereRaw(
+            'prop_market_selections_index.source_market_id = prop_markets_index.source_market_id'
+          )
+          .whereRaw(
+            'prop_market_selections_index.time_type = prop_markets_index.time_type'
+          )
+          .where('prop_market_selections_index.selection_pid', params.player_id)
+      })
     }
 
     if (params.game_id) {
@@ -679,10 +692,26 @@ router.get('/players/:pid', async (req, res) => {
       return res.send(cached_data)
     }
 
+    // selection_pid lives on prop_market_selections_index, not on
+    // prop_markets_index. Correlate on the market key rather than joining, so a
+    // market with several selections for the player stays a single row.
     let markets_query = db('prop_markets_index')
       .select('prop_markets_index.*')
       .where('prop_markets_index.source_id', params.bookmaker)
-      .where('prop_markets_index.selection_pid', pid)
+      .whereExists(function () {
+        this.select(1)
+          .from('prop_market_selections_index')
+          .whereRaw(
+            'prop_market_selections_index.source_id = prop_markets_index.source_id'
+          )
+          .whereRaw(
+            'prop_market_selections_index.source_market_id = prop_markets_index.source_market_id'
+          )
+          .whereRaw(
+            'prop_market_selections_index.time_type = prop_markets_index.time_type'
+          )
+          .where('prop_market_selections_index.selection_pid', pid)
+      })
 
     // Only join with nfl_games if we need to filter by week/year/seas_type
     if (
@@ -730,6 +759,9 @@ router.get('/players/:pid', async (req, res) => {
       const markets_index = {}
       for (const market of markets_data) {
         market.selections = []
+        // Documented on this route's response but not a prop_markets_index
+        // column; every market here matched this player by construction.
+        market.selection_pid = pid
         markets_index[market.source_market_id] = market
       }
 
