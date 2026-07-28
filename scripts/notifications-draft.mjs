@@ -11,6 +11,7 @@ import {
   record_league_notification_sent,
   throw_if_shortfall
 } from '#libs-server'
+import { getDraftWindow } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('notifications-draft')
@@ -18,15 +19,11 @@ debug.enable('notifications-draft')
 
 const NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK = 'draft_pick_on_clock'
 
-// Fallback only — the window length is data-driven from seasons.draft_pick_clock_hours.
-const DEFAULT_PICK_CLOCK_HOURS = 24
-
 const run = async () => {
   const now = dayjs().unix()
 
-  // Leagues whose draft has started (draft_start in the past). draft_start and
-  // the per-season pick clock (draft_pick_clock_hours) both live on the
-  // seasons row, so a single left join carries the configured window length.
+  // Leagues whose draft has started (draft_start in the past). draft_start
+  // lives on the seasons row, so a single left join carries it.
   const league_seasons = await db('leagues')
     .leftJoin('seasons', function () {
       this.on('leagues.uid', '=', 'seasons.lid')
@@ -41,9 +38,6 @@ const run = async () => {
 
   for (const league_season of league_seasons) {
     const { lid, draft_start } = league_season
-    const clock_hours =
-      league_season.draft_pick_clock_hours || DEFAULT_PICK_CLOCK_HOURS
-    const clock_seconds = clock_hours * 3600
 
     const league = await getLeague({ lid })
 
@@ -96,8 +90,26 @@ const run = async () => {
       continue
     }
 
-    const deadline = on_clock_at + clock_seconds
-    const message = `${frontier.name} (${frontier.abbrv}) is now on the clock with the #${frontier.pick} pick in the ${current_season.year} draft. The ${clock_hours}-hour window closes ${dayjs.unix(deadline).format('ddd MMM D h:mm A')}.`
+    // The deadline is not a standalone setting: it is exactly the moment the
+    // NEXT pick's window opens, because that is when another team may jump
+    // this one. Deriving it from getDraftWindow — the same function the draft
+    // route gates on — keeps the announced deadline and the enforced deadline
+    // from drifting apart, and reports the real length across the overnight
+    // gap, where a slot is worth more than an hour.
+    const deadline = getDraftWindow({
+      start: draft_start,
+      type: league.draft_type,
+      min: league.draft_hour_min,
+      max: league.draft_hour_max,
+      pickNum: frontier.pick + 1,
+      last_consecutive_pick:
+        frontier.pick > 1
+          ? { pick: frontier.pick - 1, selection_timestamp: on_clock_at }
+          : null
+    }).unix()
+
+    const clock_hours = Math.round(((deadline - on_clock_at) / 3600) * 10) / 10
+    const message = `${frontier.name} (${frontier.abbrv}) is now on the clock with the #${frontier.pick} pick in the ${current_season.year} draft. The window closes ${dayjs.unix(deadline).format('ddd MMM D h:mm A')} (${clock_hours} hours).`
 
     log(message)
 
