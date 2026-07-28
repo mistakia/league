@@ -18,10 +18,10 @@
 # Add a host = add its recipient here + `sops updatekeys config/config-production.json`.
 #
 # Only the production config is sops/age-migrated. config-development.json and
-# config-test.json stay on the legacy symmetric @tsmx/secure-config scheme
-# (dereferenced via CONFIG_ENCRYPTION_KEY_FILE) because their consumers — local
-# dev and CI — are NOT league age recipients; config-test.json is decrypted with
-# the committed in-repo test fixture key. Both are intentionally unmatched here.
+# config-test.json are read plaintext off disk (config/index.mjs) because their
+# consumers — local dev and CI — are NOT league age recipients; the legacy
+# symmetric @tsmx/secure-config scheme they used to sit behind was retired
+# 2026-07-15 (Phase D). Both are intentionally unmatched here.
 # external-league-credentials-key.sops.json holds the dedicated 32-byte
 # AES-256-GCM column key for external_league_connections.credentials_encrypted
 # (users' third-party fantasy-platform logins). Compartmentalized to {league}
