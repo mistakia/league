@@ -211,6 +211,10 @@ LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=5433 TZ=America/New_York NODE_ENV=test T
   node_modules/.bin/mocha --exit --require test/global.mjs --reporter min test/<file>.spec.mjs
 ```
 
+**The test container is a shared singleton — check for a concurrent run before trusting a result.** `mochaGlobalSetup` drops every table and reloads the schema, so a sibling session starting the suite mid-run pulls the tables out from under yours. It does not fail cleanly: you get a scatter of `relation "player" does not exist` and duplicate-key errors across unrelated specs, which reads like a real regression in whatever you happened to be editing. On 2026-07-28 this produced a 65-failure run that was entirely an artifact of two sessions sharing :5433. Check `ps aux | grep [m]ocha` first, and re-run alone before concluding anything. For the same reason, treat single-run timings as unreliable — this is a shared workstation and load averages above 50 are normal, so compare a change against a baseline measured back-to-back, not against a number from an hour ago.
+
+**Timeouts are the suite's dominant failure mode, and they lie about their cause.** `.mocharc.yml` sets a 10000ms floor because mocha's 2000ms default is a unit-test budget and these specs query a real Postgres. When a test does exceed its budget, mocha fails it but cannot cancel its in-flight queries, so the abandoned work keeps writing and collides with the next test's fixture reset — surfacing as a duplicate-key violation on a later, innocent spec. Read a `transactions_pkey` error in the suite as a downstream symptom of a timeout, not as the defect. `test/global.mjs` prints unhandled rejections with their Postgres `detail`/`constraint` so the real error is visible rather than swallowed.
+
 ### League Context
 
 Most operations occur within league context (`/leagues/:lid/`). Check user permissions for team operations using helper functions from `libs-server/verify-user-team.mjs` and related utilities.
