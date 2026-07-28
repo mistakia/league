@@ -480,7 +480,7 @@ const calculate_team_historical_hit_rates = async ({
       )
     })
     .whereIn('pmi.market_type', TEAM_YARDAGE_MARKET_TYPES)
-    .where('pmi.year', year)
+    .where('pmi.season_year', year)
     .whereNull('pmsi.overall_hit_rate_soft')
     .count({ null_count: 'pmsi.source_selection_id' })
     .first()
