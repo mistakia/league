@@ -6,9 +6,10 @@
 -- authorization. 16 of the 22 target games are now coherent; the 6 residual
 -- games named in "WHAT THIS DOES NOT FIX" below are unchanged, exactly as
 -- predicted. The auditor baseline in scripts/audit-drive-seq-coherence.mjs was
--- lowered 22 -> 6 in the same commit. Before-state captured in
--- public.bak_2026_07_28_drive_seq_splice (4,078 rows across all 22 games:
--- esbid, season_year, play_id, drive_seq, drive_play_count).
+-- lowered 22 -> 6 in the same commit. Before-state (drive_seq and
+-- drive_play_count for all 4,078 plays across the 22 target games) was
+-- captured to a scratch table for the duration of the apply window and
+-- dropped once verified; this file did not ship a rollback of its own.
 -- ============================================================================
 --
 -- PRECONDITION -- confirmed satisfied 2026-07-25, read-only against

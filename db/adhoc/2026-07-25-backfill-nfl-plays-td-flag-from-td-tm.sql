@@ -5,9 +5,9 @@
 --
 -- APPLIED 2026-07-28 against league_production under direct operator
 -- authorization: UPDATE 127 (td) and UPDATE 5 (ret_td), both verification
--- queries below now return 0. Before-state captured in
--- public.bak_2026_07_28_td_backfill (127 rows: esbid, season_year, play_id,
--- td, ret_td, td_tm, ret_tm).
+-- queries below now return 0. Before-state was captured to a scratch table for
+-- the duration of the apply window and dropped once verified; this file did
+-- not ship a rollback of its own.
 --
 -- What Residue 1 actually is
 -- --------------------------
