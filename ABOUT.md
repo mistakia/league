@@ -462,12 +462,15 @@ observations:
     [resolved] The clock-derived next-week-opponent golden is fixed in league commit a0738bb1: it
     now templates next_week.week/seas_type, and update-data-view-snapshots.mjs takes filename
     filters and honors LEAGUE_MOCK_DATE.
+  - >-
+    [deploy] Dropping a seasons column leaves /root/league writing it until yarn deploy;
+    generate-seasons.mjs runs 7am on the 1st of Feb-Aug and throws in that gap.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-28T04:23:17.878Z'
+updated_at: '2026-07-28T17:20:51.348Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
