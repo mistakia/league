@@ -1,0 +1,14 @@
+# Mocha's 2000ms default is sized for pure unit tests. Most of this suite is
+# integration tests that seed and query a real Postgres over TCP, so a test doing
+# nothing unusual can sit close to that budget and then cross it whenever CI's
+# runner is loaded. That is what made CI fail on a different spec each run while
+# the same commit passed locally -- the failures were runner speed, not the code
+# under test. Individual specs had been raising `this.timeout(60 * 1000)` on
+# their heavier hooks one at a time; this sets a floor for the whole suite so the
+# workaround does not have to be rediscovered per spec.
+#
+# This is headroom for legitimately DB-bound work, not cover for slow fixtures:
+# 10s still fails a genuine hang quickly, and `test/global.mjs` now prints any
+# unhandled rejection so a swallowed Postgres error surfaces as itself rather
+# than as a timeout.
+timeout: 10000

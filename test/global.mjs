@@ -22,6 +22,32 @@ const schema_file = process.env.LEAGUE_SCHEMA_FILE
 
 let original_server_close
 
+// A rejection with no listener is otherwise dropped silently, and the case that
+// matters is the one that is hardest to read without this: when a test exceeds
+// its timeout, mocha fails it and moves on but cannot cancel the queries it
+// left in flight, so the real error surfaces later on a promise nobody is
+// awaiting. That is how a Postgres unique violation ends up reported as nothing
+// more than "Timeout of 2000ms exceeded". Postgres detail (`detail`,
+// `constraint`, `table`) lives on the error object rather than in its message,
+// so it is printed explicitly.
+process.on('unhandledRejection', (reason) => {
+  const pg_context = [
+    reason?.code && `code=${reason.code}`,
+    reason?.constraint && `constraint=${reason.constraint}`,
+    reason?.table && `table=${reason.table}`,
+    reason?.detail && `detail=${reason.detail}`
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  console.error(
+    '\nUnhandled rejection (may be orphaned work from a timed-out test):',
+    reason?.message || reason
+  )
+  if (pg_context) console.error('  postgres:', pg_context)
+  if (reason?.stack) console.error(reason.stack)
+})
+
 export async function mochaGlobalSetup() {
   // Clear all tables in the database
   const tables = await knex.raw(
