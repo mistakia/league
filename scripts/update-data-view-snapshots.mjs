@@ -2,6 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import MockDate from 'mockdate'
 import prettier from 'prettier'
 
 import {
@@ -14,11 +15,38 @@ import { compare_queries } from '#test/utils/index.mjs'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fixtures_dir = path.join(__dirname, '..', 'test', 'data-view-queries')
 
+// This script runs outside test/global.mjs, so it has no clock mock of its own.
+// Honor the same LEAGUE_MOCK_DATE the suite honors, so a regeneration and a
+// verification run can be pinned to the same instant.
+if (process.env.LEAGUE_MOCK_DATE) {
+  MockDate.set(process.env.LEAGUE_MOCK_DATE)
+}
+
+// Optional filename filters. Without them this rewrites every fixture that
+// currently mismatches -- including drift from a sibling session's uncommitted
+// edits in this shared tree. Pass the fixtures you actually intend to bless:
+//   node scripts/update-data-view-snapshots.mjs some-fixture.json other.json
+const filters = process.argv.slice(2).map((arg) => path.basename(arg))
+
 const main = async () => {
   const cases = await load_data_view_test_queries()
+  const selected = filters.length
+    ? cases.filter((test_case) => filters.includes(test_case.filename))
+    : cases
+
+  if (filters.length) {
+    const matched = new Set(selected.map((test_case) => test_case.filename))
+    for (const filter of filters) {
+      if (!matched.has(filter)) {
+        console.error(`no such fixture: ${filter}`)
+        process.exit(1)
+      }
+    }
+  }
+
   let updated = 0
   let skipped = 0
-  for (const test_case of cases) {
+  for (const test_case of selected) {
     if (test_case.expected_query && test_case.expected_query.includes('${')) {
       skipped++
       continue

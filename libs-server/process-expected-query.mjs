@@ -26,6 +26,14 @@ export function process_expected_query(expected_query_string) {
       last_3_years.push(i)
     }
 
+    // Mirror of the next_week_opponent_total branch in get-data-view-results:
+    // the week/seas_type a "next week" matchup column resolves to right now.
+    // Goldens that embed those values must template them or they self-break on
+    // the next date rollover that moves the derived week.
+    const next_week = constants.current_season.calculate_week(
+      constants.current_season.now.add(1, 'week')
+    )
+
     // Create a template literal by wrapping in backticks and evaluating
     // Provide both current_season (for new syntax) and constants (for old syntax compatibility)
     // eslint-disable-next-line no-new-func
@@ -34,13 +42,15 @@ export function process_expected_query(expected_query_string) {
       'constants',
       'all_years',
       'last_3_years',
+      'next_week',
       `return \`${expected_query_string}\``
     )
     return template_function(
       constants.current_season,
       constants,
       all_years,
-      last_3_years
+      last_3_years,
+      next_week
     )
   }
 

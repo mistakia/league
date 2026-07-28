@@ -2,8 +2,18 @@ import knex from '#db'
 import path, { dirname } from 'path'
 import fs from 'fs/promises'
 import { fileURLToPath } from 'url'
+import MockDate from 'mockdate'
 import scoring_formats_seed from '#db/fixtures/scoring-formats.mjs'
 import server from '#api'
+
+// Pin the suite's clock. Anything clock-derived (data view "next week"
+// matchups, current_season week/seas_type) otherwise varies with the real
+// date, so this is how a golden is checked on both sides of a week boundary:
+//   LEAGUE_MOCK_DATE=2026-12-01T12:00:00Z ... mocha --require test/global.mjs
+// Set at module load so it lands before any test file reads the clock.
+if (process.env.LEAGUE_MOCK_DATE) {
+  MockDate.set(process.env.LEAGUE_MOCK_DATE)
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const schema_file = process.env.LEAGUE_SCHEMA_FILE
