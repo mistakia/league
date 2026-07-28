@@ -44,10 +44,16 @@ const KNOWN_VIOLATION_BASELINE = {
   // by this auditor against production. At 0 the class is now a real gate --
   // any future restart game fails this check immediately.
   restart_at_1: 0,
-  // 22 games carrying a mixed-authority splice: enrichment-written values
-  // interleaved among source-numbered plays. A renumber does not fix these;
-  // they are tracked as their own task.
-  other: 22
+  // Was 22 games carrying a mixed-authority splice: enrichment-written values
+  // interleaved among source-numbered plays. A renumber does not fix these.
+  // Repaired 2026-07-28 by
+  // db/adhoc/2026-07-25-repair-drive-seq-mixed-authority-splice.sql, which
+  // carries forward the neighboring source-supplied anchor: 16 of 22 resolved.
+  // The residual 6 (2001092311, 2014110209, 2021101013, 2023121005,
+  // 2025101902, 2026010300) are unresolved BY DESIGN, not by defect -- two
+  // distinct mechanisms, a block-level Sportradar coverage drop across a
+  // contiguous run of real plays and isolated single-anchor corruption.
+  other: 6
 }
 
 /**

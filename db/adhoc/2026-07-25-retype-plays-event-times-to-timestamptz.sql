@@ -3,9 +3,12 @@
 -- no index change, no consumer repoint.
 --
 -- ############################################################################
--- ## NOT APPLIED. Prepared and verified read-only against production, but it ##
--- ## has NO operator apply authorization. Do not run without the operator's  ##
--- ## own explicit go, typed in the applying session's pane.                  ##
+-- ## APPLIED 2026-07-28 against league_production under direct operator     ##
+-- ## authorization. All four columns are now timestamp with time zone;      ##
+-- ## 975/975 nfl_plays_passer.snap_time values survived intact, and the     ##
+-- ## minimum lands 00:47 UTC on 2024-09-06, 27 minutes after that game's    ##
+-- ## 00:20 UTC kickoff -- inside the 4-27 minute window documented below,   ##
+-- ## confirming no timezone shift. Plays-family residual dropped 10 -> 6.   ##
 -- ############################################################################
 --
 -- Scope (the 4 timestamp_type flags in the plays residual 13):

@@ -2,12 +2,13 @@
 -- corruption class
 --
 -- ============================================================================
--- NOT EXECUTED. NO APPLY AUTHORIZATION. Authored per operator instruction to be
--- committed unexecuted; sibling task fix-drive-seq-game-continuity established
--- the precedent (db/adhoc/2026-07-24-repair-drive-seq-game-continuity.sql) and
--- this follows its shape. Do not run against league_production without an
--- explicit operator decision -- see "WHAT THIS DOES NOT FIX" below, which is
--- the reason this cannot be treated as a drop-in replacement for that decision.
+-- APPLIED 2026-07-28 against league_production under direct operator
+-- authorization. 16 of the 22 target games are now coherent; the 6 residual
+-- games named in "WHAT THIS DOES NOT FIX" below are unchanged, exactly as
+-- predicted. The auditor baseline in scripts/audit-drive-seq-coherence.mjs was
+-- lowered 22 -> 6 in the same commit. Before-state captured in
+-- public.bak_2026_07_28_drive_seq_splice (4,078 rows across all 22 games:
+-- esbid, season_year, play_id, drive_seq, drive_play_count).
 -- ============================================================================
 --
 -- PRECONDITION -- confirmed satisfied 2026-07-25, read-only against

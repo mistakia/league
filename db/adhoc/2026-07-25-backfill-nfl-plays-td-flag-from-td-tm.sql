@@ -3,8 +3,11 @@
 -- (db/adhoc/2026-07-24-backfill-nfl-plays-td-tm-ret-tm.sql, see its header
 -- item 1 and league ABOUT.md [data-gap] observation dated 2026-07-24).
 --
--- !! NOT YET EXECUTED — NO APPLY AUTHORIZATION. This file is a proposal only;
--- it must not be run against production without an explicit operator go-ahead. !!
+-- APPLIED 2026-07-28 against league_production under direct operator
+-- authorization: UPDATE 127 (td) and UPDATE 5 (ret_td), both verification
+-- queries below now return 0. Before-state captured in
+-- public.bak_2026_07_28_td_backfill (127 rows: esbid, season_year, play_id,
+-- td, ret_td, td_tm, ret_tm).
 --
 -- What Residue 1 actually is
 -- --------------------------
