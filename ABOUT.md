@@ -442,12 +442,19 @@ observations:
     run 15-to-74 JAX-offense plays against 1322-to-1707 JAX-defense; from 2016 the same measure is
     balanced. 144 home games across the 15 seasons. JAX away games are balanced in every season, so
     the defect is keyed to home venue, not to the franchise.
+  - >-
+    [defect] The defensive play-by-play with-statement
+    (libs-server/data-views/add-defensive-play-by-play-with-statement.mjs) selects and groups by an
+    unqualified pid, which becomes ambiguous once the career_year or career_game branch joins
+    player_seasonlogs or player_gamelogs, so all three tackle-from-plays columns throw Postgres
+    42702 on any request passing career_year or career_game; found by EXPLAIN sweep 2026-07-27,
+    confirmed pre-existing, left unfixed as out of scope.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-25T05:25:50.979Z'
+updated_at: '2026-07-28T03:14:06.289Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
