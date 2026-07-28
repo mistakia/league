@@ -132,6 +132,11 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
 
 const player_adp_source = {
   grain: 'player_year',
+  // The CTE projects season_year (see the join predicate below), so the
+  // correlated-aggregate path in param-utils must be told that name -- it
+  // defaults to 'year' when a source omits key_columns, which emitted
+  // `<cte>.year BETWEEN ...` against a CTE that has no such column.
+  key_columns: { pid: 'pid', year: 'season_year' },
   // The offset-base year(s) the CTE is built around. select-string's
   // correlated-aggregate path crosses these with the year_offset range to emit
   // an explicit `year IN (...)` predicate on the subquery -- matching the

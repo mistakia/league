@@ -2,6 +2,8 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import prettier from 'prettier'
+
 import {
   get_data_view_results_query,
   load_data_view_test_queries,
@@ -35,10 +37,16 @@ const main = async () => {
       )
       const parsed = JSON.parse(raw)
       parsed.expected_query = actual
-      await fs.writeFile(
-        path.join(fixtures_dir, test_case.filename),
-        JSON.stringify(parsed, null, 2) + '\n'
-      )
+      const fixture_path = path.join(fixtures_dir, test_case.filename)
+      // Format through prettier, not bare JSON.stringify: stringify always
+      // expands short arrays while prettier collapses them, so the committed
+      // goldens and a freshly regenerated one disagreed on every regeneration
+      // and the pre-commit prettier guard blocked the commit.
+      const formatted = await prettier.format(JSON.stringify(parsed), {
+        ...(await prettier.resolveConfig(fixture_path)),
+        filepath: fixture_path
+      })
+      await fs.writeFile(fixture_path, formatted)
       updated++
       console.log(`updated: ${test_case.filename}`)
     } catch (e) {
