@@ -40,7 +40,12 @@ export const add_defensive_play_by_play_with_statement = ({
       base_columns.add('year')
     } else if (param_name === 'career_game') {
       base_columns.add('esbid')
-    } else if (nfl_plays_column_params[param_name]) {
+    } else if (
+      nfl_plays_column_params[param_name] &&
+      // year_offset is a window pseudo-param, not an nfl_plays column; adding
+      // it here projects a non-existent column into the inner SELECT.
+      param_name !== 'year_offset'
+    ) {
       base_columns.add(param_name)
     }
   }

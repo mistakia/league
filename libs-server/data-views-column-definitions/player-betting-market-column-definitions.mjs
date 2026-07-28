@@ -177,6 +177,12 @@ const player_betting_market_with = ({
       .andWhere('prop_markets_index.season_year', year)
       .andWhere('source_id', source_id)
 
+    // The career_game join below correlates on m.esbid, so the CTE has to
+    // carry it.
+    if (career_game.length) {
+      qb.select('prop_markets_index.esbid')
+    }
+
     if (week || career_year.length) {
       qb.join('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
@@ -346,18 +352,17 @@ const team_betting_market_with = ({
       .andWhere('prop_markets_index.season_year', year)
       .andWhere('source_id', source_id)
 
-    if (week) {
-      qb.join('nfl_games', function () {
-        this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
-        this.andOn(
-          `nfl_games.season_year`,
-          '=',
-          `prop_markets_index.season_year`
-        )
+    // h/v are projected unconditionally above (and read as m.h/m.v downstream),
+    // so nfl_games must always be joined; only the week/season_type narrowing
+    // is conditional.
+    qb.join('nfl_games', function () {
+      this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
+      this.andOn(`nfl_games.season_year`, '=', `prop_markets_index.season_year`)
+      if (week) {
         this.andOn(`nfl_games.week`, '=', db.raw('?', [week]))
         this.andOn(`nfl_games.season_type`, '=', db.raw('?', [seas_type]))
-      })
-    }
+      }
+    })
   })
 
   query.with(with_table_name, (qb) => {

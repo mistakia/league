@@ -1021,7 +1021,16 @@ export default {
       params,
       data_view_options = {}
     }) => {
-      return `(SELECT ROUND((1.5 * SUM(${table_name}.player_targets) / NULLIF(SUM(${table_name}.team_targets), 0)) + (0.7 * SUM(${table_name}.player_air_yards) / NULLIF(SUM(${table_name}.team_air_yards), 0)), 4) FROM ${table_name} WHERE ${table_name}.pid = ${data_view_options.pid_reference} AND ${table_name}.year BETWEEN ${data_view_options.year_reference} + ${Math.min(...params.year_offset)} AND ${data_view_options.year_reference} + ${Math.max(...params.year_offset)})`
+      // The CTE only projects `year` when a year split exposes a
+      // year_reference to correlate against; without one it groups to pid
+      // grain and is already scoped to the offset window by its own effective
+      // years, so the window predicate is both invalid and redundant. Mirrors
+      // the year_reference guard in player-team-column-definition.
+      const year_reference = data_view_options.year_reference
+      const year_predicate = year_reference
+        ? ` AND ${table_name}.year BETWEEN ${year_reference} + ${Math.min(...params.year_offset)} AND ${year_reference} + ${Math.max(...params.year_offset)}`
+        : ''
+      return `(SELECT ROUND((1.5 * SUM(${table_name}.player_targets) / NULLIF(SUM(${table_name}.team_targets), 0)) + (0.7 * SUM(${table_name}.player_air_yards) / NULLIF(SUM(${table_name}.team_air_yards), 0)), 4) FROM ${table_name} WHERE ${table_name}.pid = ${data_view_options.pid_reference}${year_predicate})`
     }
   }),
   player_receiving_first_down_share_from_plays: create_team_share_stat({
