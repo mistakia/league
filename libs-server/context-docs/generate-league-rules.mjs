@@ -131,9 +131,9 @@ export default async function generate_league_rules({
       ]
     ),
     `Restricted free agency window: ${format_date_et(
-      league.tran_start
+      league.restricted_free_agency_period_start
     )} to ${format_date_et(
-      league.tran_end
+      league.restricted_free_agency_period_end
     )} (announcement hour ${league.restricted_free_agency_announcement_hour} ET, processing hour ${league.restricted_free_agency_processing_hour} ET).`
   ])
 

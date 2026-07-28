@@ -86,8 +86,8 @@ export const League = new Record({
   fwr: null,
   fte: null,
 
-  tran_start: null,
-  tran_end: null,
+  restricted_free_agency_period_start: null,
+  restricted_free_agency_period_end: null,
   ext_date: null,
 
   b_QB: null,
@@ -215,8 +215,8 @@ export function createLeague({
   fwr,
   fte,
 
-  tran_start,
-  tran_end,
+  restricted_free_agency_period_start,
+  restricted_free_agency_period_end,
   ext_date,
 
   processed_at,
@@ -336,8 +336,8 @@ export function createLeague({
     fwr,
     fte,
 
-    tran_start,
-    tran_end,
+    restricted_free_agency_period_start,
+    restricted_free_agency_period_end,
     ext_date,
 
     processed_at,

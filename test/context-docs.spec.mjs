@@ -183,8 +183,8 @@ const seed_full_league = async () => {
       free_agency_live_auction_start: t.subtract(5, 'weeks').unix(),
       free_agency_live_auction_end: t.subtract(5, 'weeks').add(1, 'day').unix(),
       free_agency_period_end: t.subtract(2, 'weeks').unix(),
-      tran_start: t.subtract(4, 'weeks').unix(),
-      tran_end: t.subtract(3, 'weeks').unix(),
+      restricted_free_agency_period_start: t.subtract(4, 'weeks').unix(),
+      restricted_free_agency_period_end: t.subtract(3, 'weeks').unix(),
       season_finalized_at: t.add(20, 'weeks').unix(),
       wildcard_round: 15,
       championship_round: [16, 17]

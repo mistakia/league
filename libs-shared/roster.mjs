@@ -36,7 +36,10 @@ export default class Roster {
         current_season.now.isBefore(dayjs.unix(league.ext_date)))
 
     const is_after_restricted_free_agency_end =
-      league.tran_end && current_season.now.isAfter(dayjs.unix(league.tran_end))
+      league.restricted_free_agency_period_end &&
+      current_season.now.isAfter(
+        dayjs.unix(league.restricted_free_agency_period_end)
+      )
     for (const {
       slot,
       pid,

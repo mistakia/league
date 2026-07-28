@@ -54,8 +54,10 @@ describe('SCRIPTS - restricted free agency bids', function () {
       await knex('seasons')
         .update({
           year: current_season.year,
-          tran_start: tran_date,
-          tran_end: regular_season_start.subtract('1', 'month').unix(),
+          restricted_free_agency_period_start: tran_date,
+          restricted_free_agency_period_end: regular_season_start
+            .subtract('1', 'month')
+            .unix(),
           ext_date,
           restricted_free_agency_announcement_hour: 10, // 10 AM
           restricted_free_agency_processing_hour: 12 // 12 PM (noon)
@@ -310,8 +312,10 @@ describe('SCRIPTS - restricted free agency bids', function () {
       await knex('seasons')
         .update({
           year: current_season.year,
-          tran_start: tran_date,
-          tran_end: regular_season_start.subtract('1', 'month').unix(),
+          restricted_free_agency_period_start: tran_date,
+          restricted_free_agency_period_end: regular_season_start
+            .subtract('1', 'month')
+            .unix(),
           restricted_free_agency_announcement_hour: 10, // 10 AM
           restricted_free_agency_processing_hour: 12 // 12 PM (noon)
         })

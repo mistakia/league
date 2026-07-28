@@ -7,7 +7,7 @@ import { league_default_rfa_announcement_hour } from '#constants'
  * Also calculates the nomination deadlines and whether they're approaching soon
  *
  * @param {Object} params - Parameters
- * @param {Object} params.league - League object with tran_start timestamp and restricted_free_agency_announcement_hour
+ * @param {Object} params.league - League object with restricted_free_agency_period_start timestamp and restricted_free_agency_announcement_hour
  * @param {Array} params.teams - Teams array with uid and draft_order properties
  * @param {Number} [params.current_timestamp] - Current timestamp in seconds (defaults to now)
  * @param {Number} [params.nomination_warning_hours=48] - Hours before deadline to trigger warning
@@ -21,7 +21,7 @@ const get_restricted_free_agency_nomination_info = ({
 }) => {
   if (
     !league ||
-    !league.tran_start ||
+    !league.restricted_free_agency_period_start ||
     !Array.isArray(teams) ||
     !teams.length ||
     league.num_teams !== teams.length
@@ -36,11 +36,16 @@ const get_restricted_free_agency_nomination_info = ({
       ? league.restricted_free_agency_announcement_hour
       : league_default_rfa_announcement_hour
 
-  // Calculate a default tran_end if it doesn't exist (30 days after tran_start)
-  const tran_end = league.tran_end || league.tran_start + 30 * 24 * 60 * 60
+  // Calculate a default restricted_free_agency_period_end if it doesn't exist (30 days after restricted_free_agency_period_start)
+  const restricted_free_agency_period_end =
+    league.restricted_free_agency_period_end ||
+    league.restricted_free_agency_period_start + 30 * 24 * 60 * 60
 
   // Check if we are in RFA period
-  if (current_timestamp < league.tran_start || current_timestamp > tran_end) {
+  if (
+    current_timestamp < league.restricted_free_agency_period_start ||
+    current_timestamp > restricted_free_agency_period_end
+  ) {
     return null
   }
 
@@ -53,10 +58,15 @@ const get_restricted_free_agency_nomination_info = ({
   })
 
   const current_date = dayjs.unix(current_timestamp)
-  const tran_start_date = dayjs.unix(league.tran_start)
+  const restricted_free_agency_period_start_date = dayjs.unix(
+    league.restricted_free_agency_period_start
+  )
 
   // Calculate days since start (may be negative if before start)
-  const days_since_start = current_date.diff(tran_start_date, 'day')
+  const days_since_start = current_date.diff(
+    restricted_free_agency_period_start_date,
+    'day'
+  )
 
   // Calculate which teams should be nominating based on day number
   const upcoming_nominations = []

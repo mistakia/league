@@ -156,9 +156,9 @@ const run = async ({ dry_run = false } = {}) => {
     .where({
       'seasons.year': current_season.year
     })
-    .whereNotNull('tran_start')
-    .where('tran_start', '<=', timestamp)
-    .where('tran_end', '>=', timestamp)
+    .whereNotNull('restricted_free_agency_period_start')
+    .where('restricted_free_agency_period_start', '<=', timestamp)
+    .where('restricted_free_agency_period_end', '>=', timestamp)
     .groupBy('seasons.lid', 'seasons.year', 'leagues.name')
     .whereNull('restricted_free_agency_bids.processed')
     .whereNull('restricted_free_agency_bids.cancelled')
@@ -470,9 +470,9 @@ const run = async ({ dry_run = false } = {}) => {
       .whereNull('rfab.processed')
       .whereNull('rfab.cancelled')
       .whereNotNull('rfab.announced')
-      .whereNotNull('seasons.tran_start')
-      .where('seasons.tran_start', '<=', timestamp)
-      .where('seasons.tran_end', '>=', timestamp)
+      .whereNotNull('seasons.restricted_free_agency_period_start')
+      .where('seasons.restricted_free_agency_period_start', '<=', timestamp)
+      .where('seasons.restricted_free_agency_period_end', '>=', timestamp)
       .where(function () {
         // bid meets the time-since-announcement requirement
         this.whereRaw(

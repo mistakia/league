@@ -18,8 +18,14 @@ export const league_calendar_events = [
   },
   { field: 'free_agency_live_auction_end', label: 'Free Agency Auction Ends' },
   { field: 'free_agency_period_end', label: 'Free Agency Period Ends' },
-  { field: 'tran_start', label: 'Restricted Free Agency Begins' },
-  { field: 'tran_end', label: 'Restricted Free Agency Ends' },
+  {
+    field: 'restricted_free_agency_period_start',
+    label: 'Restricted Free Agency Begins'
+  },
+  {
+    field: 'restricted_free_agency_period_end',
+    label: 'Restricted Free Agency Ends'
+  },
   { field: 'tddate', label: 'Trade Deadline' },
   { field: 'season_finalized_at', label: 'Season Finalized' }
 ]
@@ -98,10 +104,10 @@ export function resolve_current_phase({ league, now_unix }) {
   }
 
   if (
-    league.tran_start &&
-    league.tran_end &&
-    now >= league.tran_start &&
-    now <= league.tran_end
+    league.restricted_free_agency_period_start &&
+    league.restricted_free_agency_period_end &&
+    now >= league.restricted_free_agency_period_start &&
+    now <= league.restricted_free_agency_period_end
   ) {
     return 'Restricted Free Agency'
   }

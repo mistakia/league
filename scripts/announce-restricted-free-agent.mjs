@@ -117,9 +117,9 @@ const get_eligible_leagues = async ({
     .where({
       'seasons.year': current_season.year
     })
-    .whereNotNull('tran_start')
-    .where('tran_start', '<=', current_timestamp)
-    .where('tran_end', '>=', current_timestamp)
+    .whereNotNull('restricted_free_agency_period_start')
+    .where('restricted_free_agency_period_start', '<=', current_timestamp)
+    .where('restricted_free_agency_period_end', '>=', current_timestamp)
 
   log(`Found ${active_leagues.length} active leagues in RFA period`)
 
@@ -164,15 +164,22 @@ const get_eligible_leagues = async ({
  */
 const get_nominating_team = async ({ league, teams, lid, day_offset = 0 }) => {
   const current_date = dayjs().format('YYYY-MM-DD')
-  const tran_start_date = dayjs.unix(league.tran_start).format('YYYY-MM-DD')
+  const restricted_free_agency_period_start_date = dayjs
+    .unix(league.restricted_free_agency_period_start)
+    .format('YYYY-MM-DD')
   const days_since_start =
-    dayjs(current_date).diff(dayjs(tran_start_date), 'day') + day_offset
+    dayjs(current_date).diff(
+      dayjs(restricted_free_agency_period_start_date),
+      'day'
+    ) + day_offset
 
   log(`Days since start (with offset ${day_offset}): ${days_since_start}`)
 
-  // If calculated date is before tran_start, select the first team
+  // If calculated date is before restricted_free_agency_period_start, select the first team
   if (days_since_start < 0) {
-    log('Calculated date is before tran_start, selecting first team')
+    log(
+      'Calculated date is before restricted_free_agency_period_start, selecting first team'
+    )
     return teams[0]
   }
 
@@ -207,15 +214,19 @@ const announce_restricted_free_agent = async ({
     throw new Error(`League with lid ${lid} not found`)
   }
 
-  if (!league.tran_start) {
-    throw new Error(`League with lid ${lid} does not have a tran_start date`)
+  if (!league.restricted_free_agency_period_start) {
+    throw new Error(
+      `League with lid ${lid} does not have a restricted_free_agency_period_start date`
+    )
   }
 
   const current_date = dayjs().format('YYYY-MM-DD')
-  const tran_end_date = dayjs.unix(league.tran_end).format('YYYY-MM-DD')
-  if (dayjs(current_date).isAfter(tran_end_date)) {
+  const restricted_free_agency_period_end_date = dayjs
+    .unix(league.restricted_free_agency_period_end)
+    .format('YYYY-MM-DD')
+  if (dayjs(current_date).isAfter(restricted_free_agency_period_end_date)) {
     throw new Error(
-      `The restricted free agency period has ended on ${tran_end_date}`
+      `The restricted free agency period has ended on ${restricted_free_agency_period_end_date}`
     )
   }
 

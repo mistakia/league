@@ -624,26 +624,34 @@ export const is_before_extension_deadline = createSelector(
 
 export const is_before_restricted_free_agency_start = createSelector(
   (state) =>
-    state.getIn(['leagues', state.getIn(['app', 'leagueId']), 'tran_start']),
-  (tran_start) => {
-    if (!tran_start) {
+    state.getIn([
+      'leagues',
+      state.getIn(['app', 'leagueId']),
+      'restricted_free_agency_period_start'
+    ]),
+  (restricted_free_agency_period_start) => {
+    if (!restricted_free_agency_period_start) {
       return false
     }
 
-    const deadline = dayjs.unix(tran_start)
+    const deadline = dayjs.unix(restricted_free_agency_period_start)
     return current_season.now.isBefore(deadline)
   }
 )
 
 export const is_before_restricted_free_agency_end = createSelector(
   (state) =>
-    state.getIn(['leagues', state.getIn(['app', 'leagueId']), 'tran_end']),
-  (tran_end) => {
-    if (!tran_end) {
+    state.getIn([
+      'leagues',
+      state.getIn(['app', 'leagueId']),
+      'restricted_free_agency_period_end'
+    ]),
+  (restricted_free_agency_period_end) => {
+    if (!restricted_free_agency_period_end) {
       return false
     }
 
-    const deadline = dayjs.unix(tran_end)
+    const deadline = dayjs.unix(restricted_free_agency_period_end)
     return current_season.now.isBefore(deadline)
   }
 )
@@ -673,22 +681,26 @@ export const get_league_events = createSelector(
       }
     }
 
-    if (league.tran_start) {
-      const tran_start = dayjs.unix(league.tran_start)
-      if (now.isBefore(tran_start)) {
+    if (league.restricted_free_agency_period_start) {
+      const restricted_free_agency_period_start = dayjs.unix(
+        league.restricted_free_agency_period_start
+      )
+      if (now.isBefore(restricted_free_agency_period_start)) {
         events.push({
           detail: 'Restricted FA Begins',
-          date: tran_start
+          date: restricted_free_agency_period_start
         })
       }
     }
 
-    if (league.tran_end) {
-      const tran_end = dayjs.unix(league.tran_end)
-      if (now.isBefore(tran_end)) {
+    if (league.restricted_free_agency_period_end) {
+      const restricted_free_agency_period_end = dayjs.unix(
+        league.restricted_free_agency_period_end
+      )
+      if (now.isBefore(restricted_free_agency_period_end)) {
         events.push({
           detail: 'Restricted FA Ends',
-          date: tran_end
+          date: restricted_free_agency_period_end
         })
       }
     }

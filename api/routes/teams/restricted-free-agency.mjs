@@ -348,8 +348,10 @@ router.post('/?', async (req, res) => {
 
       // make sure restricted free agency period has not passed
       if (
-        league.tran_end &&
-        current_season.now.isAfter(dayjs.unix(league.tran_end))
+        league.restricted_free_agency_period_end &&
+        current_season.now.isAfter(
+          dayjs.unix(league.restricted_free_agency_period_end)
+        )
       ) {
         return res
           .status(400)
@@ -619,8 +621,10 @@ router.delete('/?', async (req, res) => {
 
     // make sure restricted free agency deadline has not passed
     if (
-      league.tran_end &&
-      current_season.now.isAfter(dayjs.unix(league.tran_end))
+      league.restricted_free_agency_period_end &&
+      current_season.now.isAfter(
+        dayjs.unix(league.restricted_free_agency_period_end)
+      )
     ) {
       return res
         .status(400)

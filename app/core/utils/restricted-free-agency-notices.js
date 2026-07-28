@@ -22,7 +22,12 @@ export function get_restricted_free_agency_notices({
   restricted_free_agency_players,
   is_team_manager
 }) {
-  if (!league?.tran_start || !teams || teams.size === 0) return []
+  if (
+    !league?.restricted_free_agency_period_start ||
+    !teams ||
+    teams.size === 0
+  )
+    return []
 
   const teams_array = teams_to_array(teams)
   let rfa_info = null

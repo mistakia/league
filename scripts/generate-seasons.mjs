@@ -36,8 +36,8 @@ const generate_seasons = async () => {
         ...season,
 
         // reset
-        tran_start: null,
-        tran_end: null,
+        restricted_free_agency_period_start: null,
+        restricted_free_agency_period_end: null,
         draft_start: null,
         draft_type: null,
         draft_hour_min: null,

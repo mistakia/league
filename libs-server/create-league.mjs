@@ -82,8 +82,10 @@ export default async function ({ lid, commishid, ...params } = {}) {
     fwr: league_params.fwr,
     fte: league_params.fte,
 
-    tran_start: league_params.tran_start,
-    tran_end: league_params.tran_end,
+    restricted_free_agency_period_start:
+      league_params.restricted_free_agency_period_start,
+    restricted_free_agency_period_end:
+      league_params.restricted_free_agency_period_end,
 
     ext_date: league_params.ext_date,
 

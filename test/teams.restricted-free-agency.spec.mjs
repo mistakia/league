@@ -290,10 +290,13 @@ describe('API /teams - restricted free agency', function () {
         userId
       })
 
-      // Set league tran_end to a past date
+      // Set league restricted_free_agency_period_end to a past date
       await knex('seasons')
         .where({ lid: leagueId, year: current_season.year })
-        .update({ tran_end: Math.floor(Date.now() / 1000) - 86400 }) // 1 day ago
+        .update({
+          restricted_free_agency_period_end:
+            Math.floor(Date.now() / 1000) - 86400
+        }) // 1 day ago
 
       const res = await chai_request
         .execute(server)
@@ -309,10 +312,10 @@ describe('API /teams - restricted free agency', function () {
       res.should.have.status(400)
       res.body.error.should.equal('restricted free agency deadline has passed')
 
-      // Reset the league tran_end
+      // Reset the league restricted_free_agency_period_end
       await knex('seasons')
         .where({ lid: leagueId, year: current_season.year })
-        .update({ tran_end: null })
+        .update({ restricted_free_agency_period_end: null })
     })
 
     it('should not allow competing RFA bid for a player whose bid has already been processed', async () => {
@@ -1207,7 +1210,8 @@ describe('API /teams - restricted free agency', function () {
       await knex('seasons')
         .where({ lid: leagueId, year: current_season.year })
         .update({
-          tran_end: Math.floor(Date.now() / 1000) - 86400
+          restricted_free_agency_period_end:
+            Math.floor(Date.now() / 1000) - 86400
         })
 
       const request = chai_request
