@@ -458,12 +458,16 @@ observations:
     failing when 2026-07-27 became 2026-07-28) and scripts/update-data-view-snapshots.mjs silently
     rewrites it whenever run outside mocha MockDate; it needs the template form the regen script
     already skips.
+  - >-
+    [resolved] The clock-derived next-week-opponent golden is fixed in league commit a0738bb1: it
+    now templates next_week.week/seas_type, and update-data-view-snapshots.mjs takes filename
+    filters and honors LEAGUE_MOCK_DATE.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-28T04:02:53.515Z'
+updated_at: '2026-07-28T04:23:17.878Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
