@@ -99,7 +99,7 @@ export const update_market_settlement_status = async ({
   const bindings = {}
 
   if (year) {
-    conditions.push('pmi.year = :year')
+    conditions.push('pmi.season_year = :year')
     bindings.year = year
   }
 
@@ -141,7 +141,7 @@ export const update_market_settlement_status = async ({
         pmi.time_type,
         pmi.market_settled,
         pmi.esbid,
-        pmi.year,
+        pmi.season_year,
         pmi.market_type,
         ${needs_game_join ? 'ng.week, ng.season_type as seas_type,' : ''}
         COUNT(DISTINCT pms.source_selection_id) as total_selections,
@@ -163,7 +163,7 @@ export const update_market_settlement_status = async ({
         pmi.time_type,
         pmi.market_settled,
         pmi.esbid,
-        pmi.year,
+        pmi.season_year,
         pmi.market_type
         ${needs_game_join ? ', ng.week, ng.season_type' : ''}
     )
@@ -175,7 +175,7 @@ export const update_market_settlement_status = async ({
       settled_selections,
       market_settled,
       esbid,
-      year,
+      season_year,
       ${needs_game_join ? 'week, seas_type::text,' : ''}
       market_type
     FROM market_settlement_check
