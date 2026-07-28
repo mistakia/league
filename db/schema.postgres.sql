@@ -310,6 +310,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_fantasy_points;
 DROP INDEX IF EXISTS public.idx_nfl_plays_fantasy;
 DROP INDEX IF EXISTS public.idx_nfl_plays_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
+DROP INDEX IF EXISTS public.idx_nfl_plays_drive_seq_coherence;
 DROP INDEX IF EXISTS public.idx_nfl_plays_catchable_ball;
 DROP INDEX IF EXISTS public.idx_nfl_plays_box_defenders;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ball_carrier_pid;
@@ -29808,6 +29809,13 @@ CREATE INDEX idx_nfl_plays_catchable_ball ON ONLY public.nfl_plays USING btree (
 
 
 --
+-- Name: idx_nfl_plays_drive_seq_coherence; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_drive_seq_coherence ON ONLY public.nfl_plays USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: idx_nfl_plays_dwn; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31089,6 +31097,13 @@ CREATE INDEX nfl_plays_year_2000_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2000_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_ds_coherence_idx ON public.nfl_plays_year_2000 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2000_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31464,6 +31479,13 @@ CREATE INDEX nfl_plays_year_2001_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2001_def_personnel_dl_count_idx ON public.nfl_plays_year_2001 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2001_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_ds_coherence_idx ON public.nfl_plays_year_2001 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -31845,6 +31867,13 @@ CREATE INDEX nfl_plays_year_2002_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2002_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_ds_coherence_idx ON public.nfl_plays_year_2002 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2002_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32220,6 +32249,13 @@ CREATE INDEX nfl_plays_year_2003_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2003_def_personnel_dl_count_idx ON public.nfl_plays_year_2003 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2003_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_ds_coherence_idx ON public.nfl_plays_year_2003 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -32601,6 +32637,13 @@ CREATE INDEX nfl_plays_year_2004_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2004_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_ds_coherence_idx ON public.nfl_plays_year_2004 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2004_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32976,6 +33019,13 @@ CREATE INDEX nfl_plays_year_2005_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2005_def_personnel_dl_count_idx ON public.nfl_plays_year_2005 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2005_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_ds_coherence_idx ON public.nfl_plays_year_2005 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -33357,6 +33407,13 @@ CREATE INDEX nfl_plays_year_2006_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2006_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_ds_coherence_idx ON public.nfl_plays_year_2006 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2006_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33732,6 +33789,13 @@ CREATE INDEX nfl_plays_year_2007_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2007_def_personnel_dl_count_idx ON public.nfl_plays_year_2007 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2007_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_ds_coherence_idx ON public.nfl_plays_year_2007 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -34113,6 +34177,13 @@ CREATE INDEX nfl_plays_year_2008_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2008_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_ds_coherence_idx ON public.nfl_plays_year_2008 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2008_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34488,6 +34559,13 @@ CREATE INDEX nfl_plays_year_2009_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2009_def_personnel_dl_count_idx ON public.nfl_plays_year_2009 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2009_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_ds_coherence_idx ON public.nfl_plays_year_2009 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -34869,6 +34947,13 @@ CREATE INDEX nfl_plays_year_2010_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2010_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_ds_coherence_idx ON public.nfl_plays_year_2010 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2010_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35244,6 +35329,13 @@ CREATE INDEX nfl_plays_year_2011_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2011_def_personnel_dl_count_idx ON public.nfl_plays_year_2011 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2011_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_ds_coherence_idx ON public.nfl_plays_year_2011 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -35625,6 +35717,13 @@ CREATE INDEX nfl_plays_year_2012_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2012_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_ds_coherence_idx ON public.nfl_plays_year_2012 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2012_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36000,6 +36099,13 @@ CREATE INDEX nfl_plays_year_2013_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2013_def_personnel_dl_count_idx ON public.nfl_plays_year_2013 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2013_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_ds_coherence_idx ON public.nfl_plays_year_2013 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -36381,6 +36487,13 @@ CREATE INDEX nfl_plays_year_2014_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2014_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_ds_coherence_idx ON public.nfl_plays_year_2014 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2014_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36756,6 +36869,13 @@ CREATE INDEX nfl_plays_year_2015_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2015_def_personnel_dl_count_idx ON public.nfl_plays_year_2015 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2015_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_ds_coherence_idx ON public.nfl_plays_year_2015 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -37137,6 +37257,13 @@ CREATE INDEX nfl_plays_year_2016_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2016_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_ds_coherence_idx ON public.nfl_plays_year_2016 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2016_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37512,6 +37639,13 @@ CREATE INDEX nfl_plays_year_2017_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2017_def_personnel_dl_count_idx ON public.nfl_plays_year_2017 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2017_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_ds_coherence_idx ON public.nfl_plays_year_2017 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -37893,6 +38027,13 @@ CREATE INDEX nfl_plays_year_2018_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2018_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_ds_coherence_idx ON public.nfl_plays_year_2018 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2018_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -38268,6 +38409,13 @@ CREATE INDEX nfl_plays_year_2019_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2019_def_personnel_dl_count_idx ON public.nfl_plays_year_2019 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2019_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_ds_coherence_idx ON public.nfl_plays_year_2019 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -38649,6 +38797,13 @@ CREATE INDEX nfl_plays_year_2020_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2020_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_ds_coherence_idx ON public.nfl_plays_year_2020 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2020_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -39024,6 +39179,13 @@ CREATE INDEX nfl_plays_year_2021_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2021_def_personnel_dl_count_idx ON public.nfl_plays_year_2021 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2021_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_ds_coherence_idx ON public.nfl_plays_year_2021 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -39405,6 +39567,13 @@ CREATE INDEX nfl_plays_year_2022_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2022_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_ds_coherence_idx ON public.nfl_plays_year_2022 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2022_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -39780,6 +39949,13 @@ CREATE INDEX nfl_plays_year_2023_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2023_def_personnel_dl_count_idx ON public.nfl_plays_year_2023 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2023_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_ds_coherence_idx ON public.nfl_plays_year_2023 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -40161,6 +40337,13 @@ CREATE INDEX nfl_plays_year_2024_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2024_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_ds_coherence_idx ON public.nfl_plays_year_2024 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2024_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -40539,6 +40722,13 @@ CREATE INDEX nfl_plays_year_2025_def_personnel_dl_count_idx ON public.nfl_plays_
 
 
 --
+-- Name: nfl_plays_year_2025_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_ds_coherence_idx ON public.nfl_plays_year_2025 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+
+--
 -- Name: nfl_plays_year_2025_dwn_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -40914,6 +41104,13 @@ CREATE INDEX nfl_plays_year_2026_def_personnel_db_count_idx ON public.nfl_plays_
 --
 
 CREATE INDEX nfl_plays_year_2026_def_personnel_dl_count_idx ON public.nfl_plays_year_2026 USING btree (def_personnel_dl_count);
+
+
+--
+-- Name: nfl_plays_year_2026_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_ds_coherence_idx ON public.nfl_plays_year_2026 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
 
 
 --
@@ -43549,6 +43746,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2000_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2000_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2000_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43910,6 +44114,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2001_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2001_ds_coherence_idx;
 
 
 --
@@ -44277,6 +44488,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2002_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2002_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2002_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44638,6 +44856,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2003_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2003_ds_coherence_idx;
 
 
 --
@@ -45005,6 +45230,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2004_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2004_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2004_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -45366,6 +45598,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2005_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2005_ds_coherence_idx;
 
 
 --
@@ -45733,6 +45972,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2006_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2006_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2006_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46094,6 +46340,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2007_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2007_ds_coherence_idx;
 
 
 --
@@ -46461,6 +46714,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2008_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2008_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2008_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46822,6 +47082,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2009_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2009_ds_coherence_idx;
 
 
 --
@@ -47189,6 +47456,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2010_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2010_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2010_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47550,6 +47824,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2011_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2011_ds_coherence_idx;
 
 
 --
@@ -47917,6 +48198,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2012_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2012_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2012_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48278,6 +48566,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2013_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2013_ds_coherence_idx;
 
 
 --
@@ -48645,6 +48940,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2014_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2014_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2014_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -49006,6 +49308,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2015_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2015_ds_coherence_idx;
 
 
 --
@@ -49373,6 +49682,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2016_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2016_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2016_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -49734,6 +50050,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2017_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2017_ds_coherence_idx;
 
 
 --
@@ -50101,6 +50424,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2018_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2018_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2018_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -50462,6 +50792,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2019_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2019_ds_coherence_idx;
 
 
 --
@@ -50829,6 +51166,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2020_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2020_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2020_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -51190,6 +51534,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2021_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2021_ds_coherence_idx;
 
 
 --
@@ -51557,6 +51908,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2022_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2022_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2022_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -51918,6 +52276,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2023_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2023_ds_coherence_idx;
 
 
 --
@@ -52285,6 +52650,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2024_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2024_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2024_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -52649,6 +53021,13 @@ ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.
 
 
 --
+-- Name: nfl_plays_year_2025_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2025_ds_coherence_idx;
+
+
+--
 -- Name: nfl_plays_year_2025_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -53010,6 +53389,13 @@ ALTER INDEX public.nfl_plays_def_personnel_db_count_idx ATTACH PARTITION public.
 --
 
 ALTER INDEX public.nfl_plays_def_personnel_dl_count_idx ATTACH PARTITION public.nfl_plays_year_2026_def_personnel_dl_count_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_ds_coherence_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_drive_seq_coherence ATTACH PARTITION public.nfl_plays_year_2026_ds_coherence_idx;
 
 
 --

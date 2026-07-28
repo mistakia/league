@@ -1,0 +1,54 @@
+-- Covering index for the weekly drive_seq cross-half coherence audit
+--
+-- ============================================================================
+-- APPLIED 2026-07-28 against league_production. Built with CREATE INDEX
+-- CONCURRENTLY per partition, then ATTACHed to the parent, so no read or write
+-- traffic was blocked. A VACUUM (ANALYZE) on nfl_plays followed, to set the
+-- visibility map that index-only scans depend on. This file is the audit-trail
+-- record of DDL that was executed interactively; re-running it is a no-op
+-- thanks to IF NOT EXISTS.
+-- ============================================================================
+--
+-- WHY
+--
+-- scripts/audit-drive-seq-coherence.mjs reads the distinct (esbid, qtr,
+-- drive_seq) triples from nfl_plays every Sunday at 04:45. Its read had no
+-- usable index and degenerated to an Append of sequential scans across all 27
+-- year partitions -- an 8.4 GB heap scan to produce 204,111 narrow rows, with
+-- JIT compiling 120 functions on top. The scan crossed the 40s server
+-- statement_timeout on 2026-07-26 and the job failed (signal #122992); warm, it
+-- still took 17s, so the margin had been shrinking for some time and would keep
+-- shrinking as plays accumulate.
+--
+-- The predicate is not selective -- 1,449,947 of 1,483,695 rows match -- so no
+-- partial or filtered index helps. What makes it fast is that the three
+-- projected columns plus the filter column are all narrow integers/boolean: a
+-- covering index lets the whole audit run as an index-only scan and never touch
+-- the wide heap at all.
+--
+-- deleted is an INCLUDE payload rather than a key column: it is only ever
+-- filtered (`deleted is not true`), never used for ordering or as a search
+-- bound, and INCLUDE columns are available to index-only scan filters. Keeping
+-- it out of the key also keeps the index a clean prefix on (esbid, qtr,
+-- drive_seq).
+--
+-- MEASURED EFFECT (league_production, warm cache)
+--
+--   before:  Append of 27 seq scans -> HashAggregate, 8.4 GB read, 17s
+--   after:   27 index-only scans (Heap Fetches: 0) -> Unique, 45 MB read, 0.98s
+--
+-- The index is 45 MB against an 8.4 GB table, and the audit now runs with a
+-- ~40x margin against statement_timeout instead of exceeding it.
+--
+-- NOTE ON RE-RUNNING: the statements below are written as a plain (non-
+-- CONCURRENT) parent-level CREATE INDEX, which is what a fresh schema load
+-- wants. Against a live production table, build it CONCURRENTLY per partition
+-- and ATTACH instead -- a parent-level CREATE INDEX takes ACCESS EXCLUSIVE on
+-- every partition for the duration of the build.
+
+CREATE INDEX IF NOT EXISTS idx_nfl_plays_drive_seq_coherence
+  ON nfl_plays (esbid, qtr, drive_seq) INCLUDE (deleted);
+
+-- Index-only scans read the visibility map; without this the plan still uses
+-- the index but pays a heap fetch per not-all-visible page.
+VACUUM (ANALYZE) nfl_plays;
