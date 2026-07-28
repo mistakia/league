@@ -68,9 +68,12 @@ export const add_defensive_play_by_play_with_statement = ({
   // push is the sole source of partition pruning for those scans.
   const effective_years = get_effective_years({ params, data_view_options })
 
+  // Qualified: the career_year / career_game branches below join
+  // player_seasonlogs / player_gamelogs, which also carry pid, so a bare `pid`
+  // here is ambiguous (42702).
   const with_query = db
     .queryBuilder()
-    .select(db.raw('pid'))
+    .select(db.raw('defensive_plays.pid'))
     .from(function () {
       const select_columns_array =
         Array.from(select_columns).map(to_inner_select_expr)
@@ -168,7 +171,7 @@ export const add_defensive_play_by_play_with_statement = ({
   })
 
   // Add groupBy clause
-  with_query.groupBy('pid')
+  with_query.groupBy('defensive_plays.pid')
 
   // Add having clauses
   for (const having_clause of having_clauses) {
