@@ -9,6 +9,7 @@ import {
   isSantuaryPeriod,
   get_free_agent_period
 } from '#libs-shared'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import {
   current_season,
   roster_slot_types,
@@ -443,11 +444,8 @@ router.post('/?', async (req, res) => {
             .first()
 
           const draft_dates = getDraftDates({
-            start: league.draft_start,
-            type: league.draft_type,
-            min: league.draft_hour_min,
-            max: league.draft_hour_max,
-            picks: last_pick?.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+            ...get_draft_window_config(league),
+            total_picks: last_pick?.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
             last_selection_timestamp: last_pick
               ? last_pick.selection_timestamp
               : null,

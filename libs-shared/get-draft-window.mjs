@@ -5,182 +5,267 @@ import timezone from 'dayjs/plugin/timezone.js'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const TIMEZONE = 'America/New_York'
+export const DRAFT_TIMEZONE = 'America/New_York'
 
-const DEFAULT_MIN_HOUR = 11
-const DEFAULT_MAX_HOUR = 16
-const DEFAULT_TYPE = 'hour'
+export const CADENCE_UNITS = Object.freeze(['hour', 'day'])
+
+export const DEFAULT_CADENCE_UNIT = 'hour'
+export const DEFAULT_CADENCE_INTERVAL = 1
+export const DEFAULT_DAILY_WINDOW_START_HOUR = 11
+export const DEFAULT_DAILY_WINDOW_END_HOUR = 16
+
+const FIRST_HOUR_OF_DAY = 0
+const HOURS_PER_DAY = 24
 
 /**
- * Calculates the draft window start time for a given pick in a fantasy league draft.
+ * Calculates when a given pick's draft window opens.
  *
  * A pick's window is the moment that pick becomes eligible to be taken *out of
- * order* — i.e. when its team may select even though an earlier pick is still
- * unmade. A team whose previous pick has already been made is always on the
+ * order* — when its team may select even though an earlier pick is still
+ * unmade. A team whose preceding pick has already been made is always on the
  * clock regardless of the window; the window only governs jumping a stalled
  * team ahead of you.
  *
- * Semantics:
+ * The rule, shared by every cadence:
  *
- *   window(pickNum) = reference advanced by (pickNum - reference_pick - 1) steps
+ *   window(pick_number) = reference advanced by (pick_number - reference_pick - 1) steps
  *
- * where the reference is the last consecutively-made pick's selection time
- * (mid-draft) or the draft start (pre-draft, treated as the completion of a
- * notional pick 0). The immediate next unmade pick therefore has a window of
- * "now" — it opened the instant the pick before it was made — and each
- * subsequent pick opens one cadence step later.
+ * The reference is the last consecutively-made pick's selection time, or the
+ * draft start pre-draft (treated as the completion of a notional pick 0). The
+ * immediate next unmade pick therefore opens at "now" — the instant the pick
+ * before it landed — and each subsequent pick opens one step later.
  *
- * A step is one hour (`type = 'hour'`) or one day (`type = 'day'`). Steps only
- * ever land on an hour of the day within the half-open interval
- * `[min, max)`; hours outside it are skipped. `max` is EXCLUSIVE, so
- * `min = 0, max = 24` means every hour is valid and `min = 9, max = 22` gives
- * thirteen slots per day (09:00 through 21:00 inclusive).
+ * A step is `cadence_interval` units of `cadence_unit`, and every step lands on
+ * an hour inside the daily window `[daily_window_start_hour,
+ * daily_window_end_hour)`; hours outside it are skipped. The two units differ
+ * in more than scale: `hour` steps consume open slots and so skip the overnight
+ * gap, while `day` steps hold the time of day across the step.
  *
- * @param {Object} args - The arguments object.
- * @param {number} args.start - Unix timestamp (seconds) for the draft start time.
- * @param {number} [args.min=11] - First valid hour of the day (inclusive).
- * @param {number} [args.max=16] - First invalid hour of the day (exclusive).
- * @param {number} args.pickNum - The pick number (1-based) for which to calculate the window.
- * @param {string} [args.type='hour'] - 'hour' or 'day'. Cadence between consecutive picks.
- * @param {Object} [args.last_consecutive_pick] - Last consecutive pick made { pick, selection_timestamp }.
+ * @param {Object} args
+ * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
+ * @param {number} args.pick_number - 1-based pick number to calculate the window for.
+ * @param {string} [args.cadence_unit='hour'] - 'hour' or 'day'; what one step is measured in.
+ * @param {number} [args.cadence_interval=1] - Units of `cadence_unit` between consecutive windows.
+ * @param {number} [args.daily_window_start_hour=11] - First hour of the day a window may open (inclusive).
+ * @param {number} [args.daily_window_end_hour=16] - Hour of the day windows stop opening (EXCLUSIVE).
+ * @param {Object} [args.last_consecutive_pick] - `{ pick, selection_timestamp }` of the last
+ *   pick made with no gap behind it. Omit pre-draft.
  *
- * @returns {import('dayjs').Dayjs} Start time of the draft window for the given pick.
+ * @returns {import('dayjs').Dayjs} The moment the pick's window opens.
  *
  * @example
- * // Pre-draft: window for pick 5 in an hourly draft
- * getDraftWindow({ start: 1625130000, pickNum: 5, type: 'hour' })
+ * // Pre-draft, hourly, windows open 9am through 9pm Eastern
+ * getDraftWindow({
+ *   draft_start_timestamp: 1787371200,
+ *   pick_number: 5,
+ *   cadence_unit: 'hour',
+ *   daily_window_start_hour: 9,
+ *   daily_window_end_hour: 22
+ * })
  *
  * @example
  * // Mid-draft: pick 9 is the immediate next pick, so its window is already open
  * getDraftWindow({
- *   start: 1625130000,
- *   pickNum: 9,
- *   type: 'day',
- *   last_consecutive_pick: { pick: 8, selection_timestamp: 1625133600 }
+ *   draft_start_timestamp: 1787371200,
+ *   pick_number: 9,
+ *   last_consecutive_pick: { pick: 8, selection_timestamp: 1787400000 }
+ * })
+ *
+ * @example
+ * // Every other day, same time of day each step
+ * getDraftWindow({
+ *   draft_start_timestamp: 1787371200,
+ *   pick_number: 4,
+ *   cadence_unit: 'day',
+ *   cadence_interval: 2
  * })
  */
 export default function getDraftWindow({
-  start,
-  min = DEFAULT_MIN_HOUR,
-  max = DEFAULT_MAX_HOUR,
-  pickNum,
-  type = DEFAULT_TYPE,
+  draft_start_timestamp,
+  pick_number,
+  cadence_unit,
+  cadence_interval,
+  daily_window_start_hour,
+  daily_window_end_hour,
   last_consecutive_pick
 }) {
-  // Normalize null values — callers pass league columns straight through and
-  // those are nullable.
-  if (type === null || type === undefined) type = DEFAULT_TYPE
-  if (min === null || min === undefined) min = DEFAULT_MIN_HOUR
-  if (max === null || max === undefined) max = DEFAULT_MAX_HOUR
-  ;[min, max] = normalize_hour_bounds(min, max)
+  const cadence = resolve_cadence({ cadence_unit, cadence_interval })
+  const daily_window = resolve_daily_window({
+    daily_window_start_hour,
+    daily_window_end_hour
+  })
 
-  // Guard against invalid pick numbers
-  if (pickNum <= 0) {
-    console.warn('[getDraftWindow] Invalid pickNum:', pickNum)
-    return dayjs.unix(start).tz(TIMEZONE)
+  if (!Number.isFinite(pick_number) || pick_number <= 0) {
+    console.warn('[getDraftWindow] Invalid pick_number:', pick_number)
+    return dayjs.unix(draft_start_timestamp).tz(DRAFT_TIMEZONE)
   }
 
-  const { reference_timestamp, steps } = get_reference(
-    start,
+  const { reference_timestamp, step_count } = resolve_reference({
+    draft_start_timestamp,
     last_consecutive_pick,
-    pickNum
+    pick_number
+  })
+
+  let window_open_at = advance_to_open_hour(
+    dayjs.unix(reference_timestamp).tz(DRAFT_TIMEZONE),
+    daily_window
   )
 
-  const unit = type === 'day' ? 'day' : 'hour'
-
-  let window_start = advance_to_valid_hour(
-    dayjs.unix(reference_timestamp).tz(TIMEZONE),
-    min,
-    max
-  )
-
-  for (let i = 0; i < steps; i++) {
-    window_start = advance_to_valid_hour(window_start.add(1, unit), min, max)
+  for (let step = 0; step < step_count; step++) {
+    window_open_at = advance_one_step({
+      window_open_at,
+      cadence,
+      daily_window
+    })
   }
 
-  return window_start
+  return window_open_at
 }
 
 /**
- * Resolves the timestamp to measure from and how many cadence steps past it
- * the requested pick sits.
+ * Resolves the timestamp to measure from and how many cadence steps past it the
+ * requested pick sits.
  *
  * Mid-draft the reference is the last consecutively-made pick; pre-draft it is
  * the draft start, which stands in for the completion of a notional pick 0.
  */
-function get_reference(start, last_consecutive_pick, pickNum) {
+function resolve_reference({
+  draft_start_timestamp,
+  last_consecutive_pick,
+  pick_number
+}) {
   if (last_consecutive_pick && last_consecutive_pick.selection_timestamp) {
-    const pick_diff = pickNum - last_consecutive_pick.pick
+    const picks_ahead = pick_number - last_consecutive_pick.pick
 
-    if (pick_diff > 0) {
+    if (picks_ahead > 0) {
       return {
         reference_timestamp: last_consecutive_pick.selection_timestamp,
-        steps: pick_diff - 1
+        step_count: picks_ahead - 1
       }
     }
 
-    // Asking for a pick at or behind the last consecutive pick means the
-    // caller's view of the draft is inconsistent (or the pick is already
-    // made). Fall back to the pre-draft calculation.
+    // A pick at or behind the last consecutive pick means the caller's view of
+    // the draft is inconsistent (or the pick is already made). Measuring from
+    // the reference would place the window behind it, so fall back to the
+    // pre-draft calculation.
     console.warn(
-      '[getDraftWindow] Invalid pick_diff:',
-      pick_diff,
-      'falling back to start'
+      '[getDraftWindow] pick_number',
+      pick_number,
+      'is not ahead of last_consecutive_pick',
+      last_consecutive_pick.pick,
+      '- measuring from the draft start instead'
     )
   }
 
-  return { reference_timestamp: start, steps: pickNum - 1 }
+  return {
+    reference_timestamp: draft_start_timestamp,
+    step_count: pick_number - 1
+  }
 }
 
 /**
- * Coerces the hour bounds to a usable half-open interval within [0, 24].
- *
- * An empty or inverted interval would leave no valid hour to advance to, so it
- * is rejected in favor of "every hour is valid" rather than left to strand the
- * caller.
+ * Validates the cadence, falling back to the default rather than silently
+ * accepting a unit the caller misspelled.
  */
-function normalize_hour_bounds(min, max) {
-  const valid =
-    Number.isInteger(min) &&
-    Number.isInteger(max) &&
-    min >= 0 &&
-    max <= 24 &&
-    min < max
+function resolve_cadence({ cadence_unit, cadence_interval }) {
+  let unit = cadence_unit ?? DEFAULT_CADENCE_UNIT
+  let interval = cadence_interval ?? DEFAULT_CADENCE_INTERVAL
 
-  if (!valid) {
+  if (!CADENCE_UNITS.includes(unit)) {
     console.warn(
-      '[getDraftWindow] Invalid hour bounds:',
-      { min, max },
-      'falling back to [0, 24)'
+      '[getDraftWindow] Unrecognized cadence_unit:',
+      cadence_unit,
+      `- falling back to '${DEFAULT_CADENCE_UNIT}'`
     )
-    return [0, 24]
+    unit = DEFAULT_CADENCE_UNIT
   }
 
-  return [min, max]
+  if (!Number.isInteger(interval) || interval < 1) {
+    console.warn(
+      '[getDraftWindow] Invalid cadence_interval:',
+      cadence_interval,
+      `- falling back to ${DEFAULT_CADENCE_INTERVAL}`
+    )
+    interval = DEFAULT_CADENCE_INTERVAL
+  }
+
+  return { unit, interval }
 }
 
-const is_valid_hour = (hour, min, max) => hour >= min && hour < max
+/**
+ * Coerces the daily window to a usable half-open hour interval.
+ *
+ * `end_hour` is exclusive, so `[0, 24)` means every hour is open and
+ * `[9, 22)` opens thirteen slots a day (09:00 through 21:00). An empty or
+ * inverted interval would leave no hour to advance to, so it is widened to the
+ * whole day rather than left to strand the caller.
+ */
+function resolve_daily_window({
+  daily_window_start_hour,
+  daily_window_end_hour
+}) {
+  const start_hour = daily_window_start_hour ?? DEFAULT_DAILY_WINDOW_START_HOUR
+  const end_hour = daily_window_end_hour ?? DEFAULT_DAILY_WINDOW_END_HOUR
+
+  const is_usable =
+    Number.isInteger(start_hour) &&
+    Number.isInteger(end_hour) &&
+    start_hour >= FIRST_HOUR_OF_DAY &&
+    end_hour <= HOURS_PER_DAY &&
+    start_hour < end_hour
+
+  if (!is_usable) {
+    console.warn(
+      '[getDraftWindow] Invalid daily window:',
+      { daily_window_start_hour, daily_window_end_hour },
+      `- falling back to [${FIRST_HOUR_OF_DAY}, ${HOURS_PER_DAY})`
+    )
+    return { start_hour: FIRST_HOUR_OF_DAY, end_hour: HOURS_PER_DAY }
+  }
+
+  return { start_hour, end_hour }
+}
+
+const is_open_hour = (hour, { start_hour, end_hour }) =>
+  hour >= start_hour && hour < end_hour
 
 /**
- * Rolls forward to the next hour of the day within [min, max).
+ * Advances one cadence step, landing on an open hour.
  *
- * Returns the time untouched when it is already valid, so a window derived
- * from a real selection timestamp keeps that timestamp's minutes rather than
- * being rounded away. When it does have to move it snaps to the top of the
- * hour, since the destination is a slot boundary rather than an event.
- *
- * Bounded at 24 iterations: with a non-empty [min, max) some hour of the next
- * day always qualifies, so this cannot spin.
+ * An `hour` step consumes open slots, so a step taken at the end of the day
+ * lands on the next morning. A `day` step holds the time of day, which is
+ * already open, so the skip is a no-op.
  */
-function advance_to_valid_hour(time, min, max) {
-  if (is_valid_hour(time.hour(), min, max)) {
+function advance_one_step({ window_open_at, cadence, daily_window }) {
+  let advanced = window_open_at
+
+  for (let unit = 0; unit < cadence.interval; unit++) {
+    advanced = advance_to_open_hour(advanced.add(1, cadence.unit), daily_window)
+  }
+
+  return advanced
+}
+
+/**
+ * Rolls forward to the next hour inside the daily window.
+ *
+ * A time already inside the window is returned untouched, so a window derived
+ * from a real selection timestamp keeps that timestamp's minutes instead of
+ * being rounded away. A time outside it snaps to the top of the destination
+ * hour, since that destination is a slot boundary rather than an event.
+ *
+ * Bounded by the length of a day: a non-empty daily window always has a
+ * qualifying hour within the next 24, so this cannot spin.
+ */
+function advance_to_open_hour(time, daily_window) {
+  if (is_open_hour(time.hour(), daily_window)) {
     return time
   }
 
   let candidate = time.startOf('hour')
-  for (let i = 0; i < 24; i++) {
+  for (let hour = 0; hour < HOURS_PER_DAY; hour++) {
     candidate = candidate.add(1, 'hour')
-    if (is_valid_hour(candidate.hour(), min, max)) {
+    if (is_open_hour(candidate.hour(), daily_window)) {
       return candidate
     }
   }

@@ -12,6 +12,7 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { getDraftWindow } from '#libs-shared'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('notifications-draft')
@@ -97,11 +98,8 @@ const run = async () => {
     // from drifting apart, and reports the real length across the overnight
     // gap, where a slot is worth more than an hour.
     const deadline = getDraftWindow({
-      start: draft_start,
-      type: league.draft_type,
-      min: league.draft_hour_min,
-      max: league.draft_hour_max,
-      pickNum: frontier.pick + 1,
+      ...get_draft_window_config(league),
+      pick_number: frontier.pick + 1,
       last_consecutive_pick:
         frontier.pick > 1
           ? { pick: frontier.pick - 1, selection_timestamp: on_clock_at }

@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 
 import db from '#db'
 import { getDraftDates } from '#libs-shared'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import { current_season, waiver_types, transaction_types } from '#constants'
 import getLeague from './get-league.mjs'
 import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
@@ -26,11 +27,8 @@ export default async function (lid) {
     .first()
 
   const draft_dates = getDraftDates({
-    start: league.draft_start,
-    picks: picks.length,
-    type: league.draft_type,
-    min: league.draft_hour_min,
-    max: league.draft_hour_max,
+    ...get_draft_window_config(league),
+    total_picks: picks.length,
     last_selection_timestamp: last_pick ? last_pick.selection_timestamp : null,
     rookie_draft_completed_at: season ? season.rookie_draft_completed_at : null
   })

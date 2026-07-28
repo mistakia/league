@@ -6,259 +6,366 @@ import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
 import { getDraftWindow } from '#libs-shared'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 chai.should()
 const expect = chai.expect
 
-const TIMEZONE = 'America/New_York'
+const DRAFT_TIMEZONE = 'America/New_York'
 
-// Fixed dates rather than "today" — the hour bounds and the overnight rollover
-// make these assertions sensitive to both DST and the wall-clock time the
-// suite happens to run at.
-const et = (str) => dayjs.tz(str, TIMEZONE)
+// Fixed dates rather than "today" — the daily window and the overnight
+// rollover make these assertions sensitive to both DST and the wall-clock time
+// the suite happens to run at.
+const eastern = (date_string) => dayjs.tz(date_string, DRAFT_TIMEZONE)
 
 // Sat Aug 22 2026 00:00 ET — the real 2026 rookie draft start.
-const draft_start = et('2026-08-22 00:00')
+const draft_start_timestamp = eastern('2026-08-22 00:00').unix()
+
+// The settings elected for the 2026 rookie draft.
+const hourly_9_to_22 = {
+  draft_start_timestamp,
+  cadence_unit: 'hour',
+  daily_window_start_hour: 9,
+  daily_window_end_hour: 22
+}
 
 const format = (window) => window.format('YYYY-MM-DD HH:mm')
 
 describe('LIBS-SHARED getDraftWindow', function () {
   describe('hourly cadence, pre-draft', function () {
-    // Defaults are min = 11, max = 16. max is exclusive, so the valid start
-    // hours are 11, 12, 13, 14, 15 — five slots per day.
-    const start = et('2026-08-22 00:00').unix()
-
-    it('first pick rolls forward from midnight to the first valid hour', () => {
-      const window = getDraftWindow({ start, pickNum: 1 })
-      expect(format(window)).to.equal('2026-08-22 11:00')
+    // Defaults open windows 11:00 through 15:00 — end hour 16 is exclusive.
+    it('first pick rolls forward from midnight to the first open hour', () => {
+      expect(
+        format(getDraftWindow({ draft_start_timestamp, pick_number: 1 }))
+      ).to.equal('2026-08-22 11:00')
     })
 
     it('second pick advances one hour', () => {
-      const window = getDraftWindow({ start, pickNum: 2 })
-      expect(format(window)).to.equal('2026-08-22 12:00')
+      expect(
+        format(getDraftWindow({ draft_start_timestamp, pick_number: 2 }))
+      ).to.equal('2026-08-22 12:00')
     })
 
-    it('fifth pick lands on the last valid hour of the day', () => {
-      const window = getDraftWindow({ start, pickNum: 5 })
-      expect(format(window)).to.equal('2026-08-22 15:00')
+    it('fifth pick lands on the last open hour of the day', () => {
+      expect(
+        format(getDraftWindow({ draft_start_timestamp, pick_number: 5 }))
+      ).to.equal('2026-08-22 15:00')
     })
 
-    it('sixth pick crosses the day boundary to the first valid hour', () => {
-      // max is exclusive: 16:00 is NOT a valid start hour, so pick 6 is the
+    it('sixth pick crosses the day boundary to the first open hour', () => {
+      // The end hour is exclusive: 16:00 is NOT an open hour, so pick 6 is the
       // first to roll over rather than pick 7.
-      const window = getDraftWindow({ start, pickNum: 6 })
-      expect(format(window)).to.equal('2026-08-23 11:00')
+      expect(
+        format(getDraftWindow({ draft_start_timestamp, pick_number: 6 }))
+      ).to.equal('2026-08-23 11:00')
     })
 
     it('seventh pick continues on the following day', () => {
-      const window = getDraftWindow({ start, pickNum: 7 })
-      expect(format(window)).to.equal('2026-08-23 12:00')
+      expect(
+        format(getDraftWindow({ draft_start_timestamp, pick_number: 7 }))
+      ).to.equal('2026-08-23 12:00')
     })
   })
 
-  describe('hour bound semantics', function () {
-    const start = et('2026-08-22 00:00').unix()
-
-    it('min is inclusive', () => {
-      const window = getDraftWindow({ start, pickNum: 1, min: 9, max: 22 })
-      expect(window.hour()).to.equal(9)
+  describe('daily window bounds', function () {
+    it('the start hour is inclusive', () => {
+      expect(
+        getDraftWindow({ ...hourly_9_to_22, pick_number: 1 }).hour()
+      ).to.equal(9)
     })
 
-    it('max is exclusive', () => {
+    it('the end hour is exclusive', () => {
       // [9, 22) is thirteen slots: 09:00 through 21:00. Pick 13 is the last of
       // the day and pick 14 rolls over.
       expect(
-        format(getDraftWindow({ start, pickNum: 13, min: 9, max: 22 }))
+        format(getDraftWindow({ ...hourly_9_to_22, pick_number: 13 }))
       ).to.equal('2026-08-22 21:00')
       expect(
-        format(getDraftWindow({ start, pickNum: 14, min: 9, max: 22 }))
+        format(getDraftWindow({ ...hourly_9_to_22, pick_number: 14 }))
       ).to.equal('2026-08-23 09:00')
     })
 
-    it('min = 0, max = 24 treats every hour as valid', () => {
-      const window = getDraftWindow({ start, pickNum: 1, min: 0, max: 24 })
-      expect(format(window)).to.equal('2026-08-22 00:00')
+    it('[0, 24) treats every hour as open', () => {
+      expect(
+        format(
+          getDraftWindow({
+            draft_start_timestamp,
+            pick_number: 1,
+            daily_window_start_hour: 0,
+            daily_window_end_hour: 24
+          })
+        )
+      ).to.equal('2026-08-22 00:00')
     })
 
-    it('falls back to [0, 24) when the interval is empty or inverted', () => {
-      expect(
-        format(getDraftWindow({ start, pickNum: 1, min: 16, max: 16 }))
-      ).to.equal('2026-08-22 00:00')
-      expect(
-        format(getDraftWindow({ start, pickNum: 1, min: 20, max: 8 }))
-      ).to.equal('2026-08-22 00:00')
+    it('widens an empty or inverted window to the whole day', () => {
+      for (const [start_hour, end_hour] of [
+        [16, 16],
+        [20, 8]
+      ]) {
+        expect(
+          format(
+            getDraftWindow({
+              draft_start_timestamp,
+              pick_number: 1,
+              daily_window_start_hour: start_hour,
+              daily_window_end_hour: end_hour
+            })
+          )
+        ).to.equal('2026-08-22 00:00')
+      }
     })
   })
 
   describe('daily cadence', function () {
-    const start = et('2026-08-22 00:00').unix()
+    const daily = {
+      draft_start_timestamp,
+      cadence_unit: 'day',
+      daily_window_start_hour: 0,
+      daily_window_end_hour: 24
+    }
 
-    it('advances one calendar day per pick, preserving the hour', () => {
-      expect(
-        format(
-          getDraftWindow({ start, pickNum: 1, type: 'day', min: 0, max: 24 })
-        )
-      ).to.equal('2026-08-22 00:00')
-      expect(
-        format(
-          getDraftWindow({ start, pickNum: 2, type: 'day', min: 0, max: 24 })
-        )
-      ).to.equal('2026-08-23 00:00')
-      expect(
-        format(
-          getDraftWindow({ start, pickNum: 58, type: 'day', min: 0, max: 24 })
-        )
-      ).to.equal('2026-10-18 00:00')
+    it('advances one calendar day per pick, holding the time of day', () => {
+      expect(format(getDraftWindow({ ...daily, pick_number: 1 }))).to.equal(
+        '2026-08-22 00:00'
+      )
+      expect(format(getDraftWindow({ ...daily, pick_number: 2 }))).to.equal(
+        '2026-08-23 00:00'
+      )
+      expect(format(getDraftWindow({ ...daily, pick_number: 58 }))).to.equal(
+        '2026-10-18 00:00'
+      )
     })
 
-    it('terminates when the start hour is outside the bounds', function () {
-      // Regression: ensureValidHours used to advance by whole days looking for
-      // a valid HOUR, which never changes the hour of day — this call spun
-      // forever and, running inside the draft POST handler, blocked the API
-      // event loop. There is no way to make this fail fast: a synchronous
-      // infinite loop starves mocha's own timer, so on the old code this hangs
-      // the entire suite rather than reporting a failure.
+    it('terminates when the start hour is outside the daily window', function () {
+      // Regression: ensureValidHours advanced by whole DAYS looking for a valid
+      // HOUR, which never changes the hour of day, so this call spun forever.
+      // Running inside the draft POST handler, it blocked the API event loop
+      // rather than just the request. There is no way to make this fail fast —
+      // a synchronous infinite loop starves mocha's own timer, so against the
+      // old code this hangs the entire suite instead of reporting a failure.
       this.timeout(5000)
-      const window = getDraftWindow({
-        start,
-        pickNum: 2,
-        type: 'day',
-        min: 11,
-        max: 16
-      })
-      expect(format(window)).to.equal('2026-08-23 11:00')
+      expect(
+        format(
+          getDraftWindow({
+            draft_start_timestamp,
+            pick_number: 2,
+            cadence_unit: 'day',
+            daily_window_start_hour: 11,
+            daily_window_end_hour: 16
+          })
+        )
+      ).to.equal('2026-08-23 11:00')
+    })
+  })
+
+  describe('cadence interval', function () {
+    const every_two_hours = { ...hourly_9_to_22, cadence_interval: 2 }
+
+    it('spaces hourly windows by the interval', () => {
+      expect(
+        format(getDraftWindow({ ...every_two_hours, pick_number: 1 }))
+      ).to.equal('2026-08-22 09:00')
+      expect(
+        format(getDraftWindow({ ...every_two_hours, pick_number: 2 }))
+      ).to.equal('2026-08-22 11:00')
+      expect(
+        format(getDraftWindow({ ...every_two_hours, pick_number: 3 }))
+      ).to.equal('2026-08-22 13:00')
+    })
+
+    it('carries a partial interval across the overnight gap', () => {
+      // Seven slots a day at [9, 22) with a two-hour interval: 9, 11, 13, 15,
+      // 17, 19, 21. The eighth pick steps past 22:00 and resumes next morning.
+      expect(
+        format(getDraftWindow({ ...every_two_hours, pick_number: 7 }))
+      ).to.equal('2026-08-22 21:00')
+      expect(
+        format(getDraftWindow({ ...every_two_hours, pick_number: 8 }))
+      ).to.equal('2026-08-23 10:00')
+    })
+
+    it('spaces daily windows by the interval', () => {
+      expect(
+        format(
+          getDraftWindow({
+            draft_start_timestamp,
+            pick_number: 4,
+            cadence_unit: 'day',
+            cadence_interval: 2,
+            daily_window_start_hour: 0,
+            daily_window_end_hour: 24
+          })
+        )
+      ).to.equal('2026-08-28 00:00')
+    })
+
+    it('falls back to 1 for a non-positive or fractional interval', () => {
+      for (const cadence_interval of [0, -3, 1.5]) {
+        expect(
+          format(
+            getDraftWindow({
+              ...hourly_9_to_22,
+              cadence_interval,
+              pick_number: 2
+            })
+          )
+        ).to.equal('2026-08-22 10:00')
+      }
+    })
+  })
+
+  describe('unrecognized cadence unit', function () {
+    it('falls back to hourly rather than silently accepting it', () => {
+      expect(
+        format(
+          getDraftWindow({
+            ...hourly_9_to_22,
+            cadence_unit: 'HOUR',
+            pick_number: 2
+          })
+        )
+      ).to.equal('2026-08-22 10:00')
     })
   })
 
   describe('mid-draft, measured from the last consecutive pick', function () {
-    const start = draft_start.unix()
     const last_consecutive_pick = {
       pick: 29,
-      selection_timestamp: et('2026-08-25 14:37').unix()
+      selection_timestamp: eastern('2026-08-25 14:37').unix()
     }
-    const hourly = {
-      start,
-      type: 'hour',
-      min: 9,
-      max: 22,
-      last_consecutive_pick
-    }
+    const mid_draft = { ...hourly_9_to_22, last_consecutive_pick }
 
-    it('pick_diff of 1 is open immediately', () => {
-      // The team on the clock is on it the instant the pick before them lands.
+    it('the immediate next pick is open on the instant', () => {
+      // The team on the clock is on it the moment the pick before them lands.
       // The selection's own minutes are preserved rather than rounded away.
-      expect(format(getDraftWindow({ ...hourly, pickNum: 30 }))).to.equal(
-        '2026-08-25 14:37'
-      )
+      expect(
+        format(getDraftWindow({ ...mid_draft, pick_number: 30 }))
+      ).to.equal('2026-08-25 14:37')
     })
 
-    it('pick_diff of 2 opens one step later', () => {
-      expect(format(getDraftWindow({ ...hourly, pickNum: 31 }))).to.equal(
-        '2026-08-25 15:37'
-      )
+    it('two picks ahead opens one step later', () => {
+      expect(
+        format(getDraftWindow({ ...mid_draft, pick_number: 31 }))
+      ).to.equal('2026-08-25 15:37')
     })
 
-    it('pick_diff greater than 2 opens one step per intervening pick', () => {
-      expect(format(getDraftWindow({ ...hourly, pickNum: 34 }))).to.equal(
-        '2026-08-25 18:37'
-      )
+    it('more than two picks ahead opens one step per intervening pick', () => {
+      expect(
+        format(getDraftWindow({ ...mid_draft, pick_number: 34 }))
+      ).to.equal('2026-08-25 18:37')
     })
 
     it('does not regress to the absolute pick number', () => {
       // Regression: the hourly path ignored last_consecutive_pick.pick and
-      // advanced by pickNum - 1 hours from midnight of the last pick's day, so
-      // making a pick pushed the next team's window HOURS INTO THE FUTURE
-      // instead of opening it. Deep in the draft the error was ~2 days.
-      const window = getDraftWindow({ ...hourly, pickNum: 30 })
-      expect(window.unix()).to.equal(last_consecutive_pick.selection_timestamp)
+      // advanced by pick_number - 1 hours from midnight of the last pick's day,
+      // so making a pick pushed the next team's window HOURS INTO THE FUTURE
+      // instead of opening it. Deep in the draft the error approached two days.
+      expect(getDraftWindow({ ...mid_draft, pick_number: 30 }).unix()).to.equal(
+        last_consecutive_pick.selection_timestamp
+      )
     })
 
     it('skips the overnight gap', () => {
-      const late = {
-        pick: 29,
-        selection_timestamp: et('2026-08-25 21:30').unix()
+      const after_hours = {
+        ...hourly_9_to_22,
+        last_consecutive_pick: {
+          pick: 29,
+          selection_timestamp: eastern('2026-08-25 21:30').unix()
+        }
       }
-      const args = {
-        start,
-        type: 'hour',
-        min: 9,
-        max: 22,
-        last_consecutive_pick: late
-      }
-      expect(format(getDraftWindow({ ...args, pickNum: 30 }))).to.equal(
-        '2026-08-25 21:30'
-      )
-      expect(format(getDraftWindow({ ...args, pickNum: 31 }))).to.equal(
-        '2026-08-26 09:00'
-      )
+      expect(
+        format(getDraftWindow({ ...after_hours, pick_number: 30 }))
+      ).to.equal('2026-08-25 21:30')
+      expect(
+        format(getDraftWindow({ ...after_hours, pick_number: 31 }))
+      ).to.equal('2026-08-26 09:00')
     })
 
     it('daily cadence holds the time of day across the step', () => {
       expect(
         format(
           getDraftWindow({
-            start,
-            type: 'day',
-            min: 0,
-            max: 24,
-            last_consecutive_pick,
-            pickNum: 31
+            draft_start_timestamp,
+            pick_number: 31,
+            cadence_unit: 'day',
+            daily_window_start_hour: 0,
+            daily_window_end_hour: 24,
+            last_consecutive_pick
           })
         )
       ).to.equal('2026-08-26 14:37')
     })
 
-    it('falls back to the pre-draft calculation when pick_diff is not positive', () => {
-      // Asking for a pick that is already made means the caller's view of the
-      // draft is inconsistent; we measure from the draft start instead of
-      // producing a window behind the reference.
-      const window = getDraftWindow({ ...hourly, pickNum: 29 })
-      const pre_draft = getDraftWindow({
-        start,
-        type: 'hour',
-        min: 9,
-        max: 22,
-        pickNum: 29
-      })
-      expect(format(window)).to.equal(format(pre_draft))
+    it('measures from the draft start when the pick is not ahead', () => {
+      // A pick at or behind the reference means the caller's view of the draft
+      // is inconsistent; measuring from the reference would place the window
+      // behind it.
+      expect(
+        format(getDraftWindow({ ...mid_draft, pick_number: 29 }))
+      ).to.equal(format(getDraftWindow({ ...hourly_9_to_22, pick_number: 29 })))
     })
   })
 
   describe('2026 rookie draft projection', function () {
-    const start = draft_start.unix()
-
-    it('completes all 58 picks before free agency opens Sep 2', () => {
+    it('opens all 58 windows before free agency opens Sep 2', () => {
       // Worst case: nobody picks and every window opens on the cadence alone.
       // [9, 22) is thirteen slots a day, so 58 picks span five calendar days.
-      const settings = { start, type: 'hour', min: 9, max: 22 }
+      expect(
+        format(getDraftWindow({ ...hourly_9_to_22, pick_number: 1 }))
+      ).to.equal('2026-08-22 09:00')
 
-      expect(format(getDraftWindow({ ...settings, pickNum: 1 }))).to.equal(
-        '2026-08-22 09:00'
-      )
-      expect(format(getDraftWindow({ ...settings, pickNum: 58 }))).to.equal(
-        '2026-08-26 14:00'
-      )
-
-      const free_agency_opens = et('2026-09-02 00:00')
-      const final_window = getDraftWindow({ ...settings, pickNum: 58 })
-      expect(final_window.isBefore(free_agency_opens)).to.equal(true)
+      const final_window = getDraftWindow({
+        ...hourly_9_to_22,
+        pick_number: 58
+      })
+      expect(format(final_window)).to.equal('2026-08-26 14:00')
+      expect(final_window.isBefore(eastern('2026-09-02 00:00'))).to.equal(true)
     })
 
-    it('every window is strictly ordered and inside the hour bounds', () => {
-      const settings = { start, type: 'hour', min: 9, max: 22 }
-      let previous = null
+    it('orders every window strictly and inside the daily window', () => {
+      let previous_window = null
 
-      for (let pick = 1; pick <= 58; pick++) {
-        const window = getDraftWindow({ ...settings, pickNum: pick })
+      for (let pick_number = 1; pick_number <= 58; pick_number++) {
+        const window = getDraftWindow({ ...hourly_9_to_22, pick_number })
         expect(window.hour()).to.be.at.least(9)
         expect(window.hour()).to.be.below(22)
-        if (previous) {
-          expect(window.isAfter(previous)).to.equal(true)
+        if (previous_window) {
+          expect(window.isAfter(previous_window)).to.equal(true)
         }
-        previous = window
+        previous_window = window
       }
+    })
+  })
+
+  describe('get_draft_window_config', function () {
+    const season_row = {
+      draft_start: draft_start_timestamp,
+      draft_type: 'hour',
+      draft_hour_min: 9,
+      draft_hour_max: 22
+    }
+
+    it('maps the persisted season columns onto the window arguments', () => {
+      expect(get_draft_window_config(season_row)).to.deep.equal({
+        draft_start_timestamp,
+        cadence_unit: 'hour',
+        daily_window_start_hour: 9,
+        daily_window_end_hour: 22
+      })
+    })
+
+    it('produces the 2026 windows when spread into getDraftWindow', () => {
+      expect(
+        format(
+          getDraftWindow({
+            ...get_draft_window_config(season_row),
+            pick_number: 58
+          })
+        )
+      ).to.equal('2026-08-26 14:00')
     })
   })
 })

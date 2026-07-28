@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 
 import db from '#db'
 import { Roster, getDraftDates, get_free_agent_period } from '#libs-shared'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import {
   current_season,
   roster_slot_types,
@@ -101,11 +102,8 @@ export default async function ({
       .first()
 
     const draft_dates = getDraftDates({
-      start: league.draft_start,
-      type: league.draft_type,
-      min: league.draft_hour_min,
-      max: league.draft_hour_max,
-      picks: picks.length,
+      ...get_draft_window_config(league),
+      total_picks: picks.length,
       last_selection_timestamp: last_pick
         ? last_pick.selection_timestamp
         : null,

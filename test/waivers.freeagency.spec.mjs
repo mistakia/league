@@ -434,8 +434,8 @@ describe('API /waivers - free agency', function () {
     it('rookie free agent waiver w/ full practice squad and no release', async () => {
       const picks = await knex('draft')
       const draftDates = getDraftDates({
-        start: current_season.now.unix(),
-        picks: picks.length
+        draft_start_timestamp: current_season.now.unix(),
+        total_picks: picks.length
       })
       MockDate.set(draftDates.draftEnd.toISOString())
       const leagueId = 1

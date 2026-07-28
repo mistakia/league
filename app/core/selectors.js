@@ -30,6 +30,7 @@ import {
   calculate_live_projection,
   optimizeStandingsLineup
 } from '@libs-shared'
+import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
 import {
   current_season,
   roster_slot_types,
@@ -378,8 +379,7 @@ export const getPicks = createSelector(
   get_draft_state,
   (state) => state.get('app'),
   (draft, app) => {
-    const { picks, draft_start, draft_type, draft_hour_min, draft_hour_max } =
-      draft
+    const { picks, draft_start, draft_type } = draft
     const { teamId } = app
     let previousSelected = true
     let previousActive = true
@@ -395,12 +395,9 @@ export const getPicks = createSelector(
 
         if (draft_start && draft_type) {
           p.draftWindow = getDraftWindow({
+            ...get_draft_window_config(draft),
             last_consecutive_pick,
-            start: draft_start,
-            type: draft_type,
-            min: draft_hour_min,
-            max: draft_hour_max,
-            pickNum: p.pick
+            pick_number: p.pick
           })
         }
 
@@ -479,12 +476,9 @@ export const get_rookie_draft_end = createSelector(
     const { picks } = draft
     const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     const rookie_draft_end = getDraftWindow({
+      ...get_draft_window_config(league),
       last_consecutive_pick,
-      start: league.draft_start,
-      pickNum: last_pick.pick + 1,
-      type: league.draft_type,
-      min: league.draft_hour_min,
-      max: league.draft_hour_max
+      pick_number: last_pick.pick + 1
     })
 
     return rookie_draft_end
@@ -527,11 +521,8 @@ export const get_rookie_draft_next_pick = createSelector(
   (draft, app, lastPick, league) => {
     if (lastPick) {
       const draftDates = getDraftDates({
-        start: league.draft_start,
-        type: league.draft_type,
-        min: league.draft_hour_min,
-        max: league.draft_hour_max,
-        picks: lastPick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+        ...get_draft_window_config(league),
+        total_picks: lastPick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
         last_selection_timestamp: lastPick.selection_timestamp
       })
 
@@ -540,8 +531,7 @@ export const get_rookie_draft_next_pick = createSelector(
       }
     }
 
-    const { draft_start, draft_type, draft_hour_min, draft_hour_max, picks } =
-      draft
+    const { draft_start, draft_type, picks } = draft
     const { teamId } = app
     const team_picks = picks
       .filter((p) => p.tid === teamId)
@@ -552,12 +542,9 @@ export const get_rookie_draft_next_pick = createSelector(
     const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     if (draft_start && draft_type) {
       pick.draftWindow = getDraftWindow({
+        ...get_draft_window_config(draft),
         last_consecutive_pick,
-        start: draft_start,
-        type: draft_type,
-        min: draft_hour_min,
-        max: draft_hour_max,
-        pickNum: pick.pick
+        pick_number: pick.pick
       })
     }
 
@@ -716,11 +703,8 @@ export const get_league_events = createSelector(
 
       if (lastPick) {
         const draftDates = getDraftDates({
-          start: league.draft_start,
-          type: league.draft_type,
-          min: league.draft_hour_min,
-          max: league.draft_hour_max,
-          picks: lastPick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+          ...get_draft_window_config(league),
+          total_picks: lastPick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
           last_selection_timestamp: lastPick.selection_timestamp
         })
 
