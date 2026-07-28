@@ -449,12 +449,21 @@ observations:
     player_seasonlogs or player_gamelogs, so all three tackle-from-plays columns throw Postgres
     42702 on any request passing career_year or career_game; found by EXPLAIN sweep 2026-07-27,
     confirmed pre-existing, left unfixed as out of scope.
+  - >-
+    [resolved] The defensive with-statement ambiguous-pid 42702 recorded above is fixed in league
+    commit d2b427aa by qualifying both references to defensive_plays.pid.
+  - >-
+    [defect] The golden test/data-view-queries/pff-team-grades-next-week-opponent.json hardcodes a
+    next-week value derived from the real clock, so it self-breaks on date rollover (it began
+    failing when 2026-07-27 became 2026-07-28) and scripts/update-data-view-snapshots.mjs silently
+    rewrites it whenever run outside mocha MockDate; it needs the template form the regen script
+    already skips.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-28T03:14:06.289Z'
+updated_at: '2026-07-28T04:02:53.515Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
