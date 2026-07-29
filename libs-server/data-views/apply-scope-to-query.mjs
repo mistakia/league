@@ -26,6 +26,10 @@ import {
   parse_nfl_week_identifier
 } from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_params_contribution } from './resolve-view-scope.mjs'
+import {
+  physical_year_column,
+  physical_seas_type_column
+} from './physical-season-columns.mjs'
 
 const sort_deterministic = (ids) => [...ids].sort()
 
@@ -93,6 +97,14 @@ export const compute_effective_scope = ({
   return sort_deterministic(column_contribution.filter((x) => view_set.has(x)))
 }
 
+// year_column / seas_type_column default to NULL rather than to the vocabulary
+// names, and are resolved through physical-season-columns below. Hardcoded
+// vocabulary defaults were the drift hazard this helper exists to close: an
+// emitter targeting a physical table that simply omitted them got
+// nfl_plays.year, which is a 42703 against the conformed schema and which the
+// regenerated query-match goldens happily blessed. Resolving by table name makes
+// forgetting them the CORRECT behaviour instead of a silent defect. The explicit
+// arguments remain for the cases the map cannot know about.
 export const apply_scope_to_query = ({
   query,
   table_name,
@@ -100,8 +112,8 @@ export const apply_scope_to_query = ({
   column_params = null,
   has_seas_type = true,
   has_nfl_week_id = true,
-  year_column = 'year',
-  seas_type_column = 'seas_type'
+  year_column = null,
+  seas_type_column = null
 }) => {
   const effective = compute_effective_scope({ query_context, column_params })
   if (!effective.length) return
@@ -122,10 +134,19 @@ export const apply_scope_to_query = ({
     query.whereIn(`${table_name}.nfl_week_id`, effective)
   }
   if (has_seas_type && sorted_seas_types.length) {
-    query.whereIn(`${table_name}.${seas_type_column}`, sorted_seas_types)
+    // Resolved here rather than in the parameter list so that a caller passing
+    // has_seas_type: false against a table with no season-type column never
+    // reaches physical_seas_type_column's guard.
+    const resolved_seas_type_column =
+      seas_type_column || physical_seas_type_column(table_name)
+    query.whereIn(
+      `${table_name}.${resolved_seas_type_column}`,
+      sorted_seas_types
+    )
   }
   if (sorted_years.length) {
-    query.whereIn(`${table_name}.${year_column}`, sorted_years)
+    const resolved_year_column = year_column || physical_year_column(table_name)
+    query.whereIn(`${table_name}.${resolved_year_column}`, sorted_years)
   }
 }
 

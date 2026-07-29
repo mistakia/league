@@ -43,9 +43,7 @@ export default function ({
       query,
       table_name,
       query_context,
-      column_params: params,
-      year_column: physical_year_column(table_name),
-      seas_type_column: physical_seas_type_column(table_name)
+      column_params: params
     })
     params = { ...params }
     delete params.nfl_week_id

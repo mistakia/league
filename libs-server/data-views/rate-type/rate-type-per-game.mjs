@@ -119,9 +119,7 @@ const add_player_per_game_cte = ({
       query: cte_query,
       table_name: 'nfl_games',
       query_context,
-      column_params: params,
-      year_column: 'season_year',
-      seas_type_column: 'season_type'
+      column_params: params
     })
   }
 
@@ -197,9 +195,7 @@ export const build_team_sides_union = ({
       query: sub,
       table_name: 'nfl_games',
       query_context,
-      column_params: params,
-      year_column: 'season_year',
-      seas_type_column: 'season_type'
+      column_params: params
     })
     return sub
   }

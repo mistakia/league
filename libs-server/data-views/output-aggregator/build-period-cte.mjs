@@ -10,10 +10,6 @@ import {
 } from './measure-batch.mjs'
 import { normalize_career_year_range } from '../param-utils.mjs'
 import { apply_scope_to_query } from '../apply-scope-to-query.mjs'
-import {
-  physical_year_column,
-  physical_seas_type_column
-} from '../physical-season-columns.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid)"
@@ -182,12 +178,10 @@ const build_role_union_period_cte = ({
         query: sub,
         table_name: source_table,
         query_context,
-        column_params: params,
-        // source_table is the PHYSICAL nfl_plays here, not a CTE alias, so the
-        // conformed column names must be emitted -- the vocabulary defaults would
-        // produce nfl_plays.year / nfl_plays.seas_type and 42703 at runtime.
-        year_column: physical_year_column(source_table),
-        seas_type_column: physical_seas_type_column(source_table)
+        // source_table is the PHYSICAL nfl_plays here, not a CTE alias.
+        // apply_scope_to_query resolves the conformed column names by table
+        // name through physical-season-columns.
+        column_params: params
       })
       if (apply_filters) apply_filters({ query: sub })
       return sub
@@ -217,9 +211,7 @@ const build_role_union_period_cte = ({
     query: outer,
     table_name: 'nfl_games',
     query_context,
-    column_params: params,
-    year_column: physical_year_column('nfl_games'),
-    seas_type_column: physical_seas_type_column('nfl_games')
+    column_params: params
   })
   // career_year / career_game: legacy with_func joined player_seasonlogs on
   // (pid, year, seas_type) and filtered between bounds. Mirror that here so
@@ -395,9 +387,7 @@ export const build_batched_period_cte = ({
     query: sub,
     table_name: 'nfl_games',
     query_context,
-    column_params: params,
-    year_column: physical_year_column('nfl_games'),
-    seas_type_column: physical_seas_type_column('nfl_games')
+    column_params: params
   })
 
   if (apply_filters) apply_filters({ query: sub })
