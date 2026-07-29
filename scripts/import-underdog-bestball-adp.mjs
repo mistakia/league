@@ -14,6 +14,11 @@ import {
 } from '#libs-server'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { create_logger } from '#libs-shared/log.mjs'
+
+const signal_log = create_logger('import-underdog-bestball-adp', {
+  service: 'league-imports'
+})
 
 const log = debug('import-underdog-bestball-adp')
 debug.enable('import-underdog-bestball-adp,underdog,underdog-session-manager')
@@ -217,6 +222,34 @@ const import_underdog_bestball_adp = async ({
 
   log('=== SUMMARY ===')
   for (const entry of summary) log(JSON.stringify(entry))
+
+  // Content oracle: the exit code alone cannot see a run that fetches fine and
+  // matches nothing. Every per-player failure inside the Phase 2 loop is caught
+  // and counted as unmatched, so a broken find_player_row (e.g. the 2026-07
+  // player.formatted -> formatted_name rename against a stale checkout) yields
+  // zero inserts and still exits 0. That shape stalled best-ball ADP for three
+  // weeks while the job reported success daily. Treat zero ingested slates or
+  // zero matched players across every slate as a failure, not a quiet no-op.
+  const ingested = summary.filter((entry) => !entry.skipped)
+  const total_matched = ingested.reduce(
+    (sum, entry) => sum + (entry.matched || 0),
+    0
+  )
+
+  if (!ingested.length || !total_matched) {
+    const message = !ingested.length
+      ? 'Underdog best-ball ADP import found 0 ingestable best-ball slates. Likely CloakBrowser session failure, region block, or slates API drift.'
+      : 'Underdog best-ball ADP import matched 0 players across every slate. Likely a player-lookup/schema mismatch (stale checkout) or DB failure.'
+    const emitted = signal_log.error(new Error(message), {
+      severity: 'high',
+      context: { year, dry_run, summary }
+    })
+    if (emitted?.promise) {
+      await emitted.promise
+    }
+    throw new Error(message)
+  }
+
   return summary
 }
 
