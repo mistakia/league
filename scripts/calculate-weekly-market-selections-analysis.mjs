@@ -405,7 +405,9 @@ const calculate_weekly_market_selections_analysis = async ({
     }
 
     const opponent =
-      player_row.current_nfl_team === nfl_game.h ? nfl_game.v : nfl_game.h
+      player_row.current_nfl_team === nfl_game.home_nfl_team
+        ? nfl_game.away_nfl_team
+        : nfl_game.home_nfl_team
 
     // skip props on bye
     if (!opponent) {

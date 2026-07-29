@@ -207,7 +207,7 @@ Scripts for bulk importing player data:
 
 ### `player_gamelogs.started` provenance
 
-The `started` column is owned by `scripts/import-nfl-gamebook-starters.mjs`. Coverage: 2002-current. Source: NFL gamebook PDFs (the pregame-declared starter list), cached at `/root/cache/nfl/gamebook/{esbid}.pdf` by `scripts/archive-nfl-gamebooks.mjs`. The PDF URL is `https://static.www.nfl.com/image/upload/gamecenter/{shieldid}.pdf`; `nfl_games.shieldid` is populated by `scripts/import-nfl-games-ngs.mjs`. Player resolution: `(team, week, jersey_number) -> gsis_id` via the per-year `roster_weekly_{year}.csv` nflverse release, then `gsis_id -> pid` via `player.gsisid`. Per-game floor: writes are skipped when resolution drops below 95%. Non-starter sweep: each touched esbid has its remaining dressed roster set to `started=false` (`active IS TRUE OR active IS NULL`).
+The `started` column is owned by `scripts/import-nfl-gamebook-starters.mjs`. Coverage: 2002-current. Source: NFL gamebook PDFs (the pregame-declared starter list), cached at `/root/cache/nfl/gamebook/{esbid}.pdf` by `scripts/archive-nfl-gamebooks.mjs`. The PDF URL is `https://static.www.nfl.com/image/upload/gamecenter/{shield_game_id}.pdf`; `nfl_games.shield_game_id` is populated by `scripts/import-nfl-games-ngs.mjs`. Player resolution: `(team, week, jersey_number) -> gsis_id` via the per-year `roster_weekly_{year}.csv` nflverse release, then `gsis_id -> pid` via `player.gsisid`. Per-game floor: writes are skipped when resolution drops below 95%. Non-starter sweep: each touched esbid has its remaining dressed roster set to `started=false` (`active IS TRUE OR active IS NULL`).
 
 ### PFR Audit Workflow
 

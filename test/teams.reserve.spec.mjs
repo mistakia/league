@@ -583,11 +583,11 @@ describe('API /teams - reserve', function () {
       this.timeout(60 * 1000)
       await league(knex)
       // Clean up test games and related gamelogs to avoid duplicate key constraints
-      // Delete games with v='OPP' (test opponent) for current season year
+      // Delete games with away_nfl_team='OPP' (test opponent) for current season year
       const test_game_esbids = await knex('nfl_games')
         .select('esbid')
         .where('season_year', current_season.year)
-        .where('v', 'OPP')
+        .where('away_nfl_team', 'OPP')
 
       if (test_game_esbids.length > 0) {
         const esbids = test_game_esbids.map((row) => row.esbid)
@@ -665,8 +665,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'SUN',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         timestamp: Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago from mocked date
       })
 
@@ -693,8 +693,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'SUN',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '13:00:00',
         timestamp: Math.round(Date.now() / 1000) + 3 * 24 * 60 * 60 // 3 days from now (Sunday)
@@ -760,8 +760,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'SUN',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         timestamp: 1640000000 // Static timestamp for prior week game
       })
 
@@ -786,8 +786,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'SUN',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '13:00:00',
         timestamp: 1640700000 // Static timestamp for current week game
@@ -851,8 +851,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'SUN',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         timestamp: 1640000000 // Static timestamp for prior week game
       })
 
@@ -877,8 +877,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'SUN',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '13:00:00',
         timestamp: 1640700000 // Static timestamp for current week game
@@ -940,8 +940,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'SUN',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         timestamp: 1640000000 // Static timestamp for prior week game
       })
 
@@ -966,8 +966,8 @@ describe('API /teams - reserve', function () {
         season_year: current_season.year,
         day: 'THU',
         season_type: 'REG',
-        h: player.current_nfl_team,
-        v: 'OPP',
+        home_nfl_team: player.current_nfl_team,
+        away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '20:15:00',
         timestamp: 1640700000 // Static timestamp for current week game

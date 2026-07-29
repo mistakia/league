@@ -45,7 +45,7 @@ export async function load_game_environment({ esbids, week, year }) {
   // Get game info for home/away teams
   const games = await db('nfl_games')
     .whereIn('esbid', game_filter_esbids)
-    .select('esbid', 'h as home_team', 'v as away_team')
+    .select('esbid', 'home_nfl_team as home_team', 'away_nfl_team as away_team')
 
   const game_info_map = new Map()
   for (const game of games) {

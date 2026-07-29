@@ -50,8 +50,8 @@ describe('LIBS-SERVER simulation integration', function () {
         week: test_week,
         season_year: test_year,
         season_type: 'REG',
-        v: 'DEN',
-        h: 'KC',
+        away_nfl_team: 'DEN',
+        home_nfl_team: 'KC',
         time_est: '13:00:00'
       })
     })
@@ -281,8 +281,8 @@ describe('LIBS-SERVER simulation integration', function () {
         week: test_week,
         season_year: test_year,
         season_type: 'REG',
-        v: 'DEN',
-        h: 'KC',
+        away_nfl_team: 'DEN',
+        home_nfl_team: 'KC',
         time_est: '13:00:00'
       })
     })

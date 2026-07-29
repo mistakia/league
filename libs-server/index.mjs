@@ -207,8 +207,8 @@ const fields = [
   'nfl_plays_current_week.updated',
   'nfl_plays_current_week.qb_kneel',
 
-  'nfl_games.h',
-  'nfl_games.v'
+  'nfl_games.home_nfl_team as h',
+  'nfl_games.away_nfl_team as v'
 ]
 
 export const getPlayByPlayQuery = (db) =>

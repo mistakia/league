@@ -21,8 +21,8 @@ const processNflGames = async () => {
   for (const {
     date,
     time_est,
-    v,
-    h,
+    away_nfl_team,
+    home_nfl_team,
     week,
     season_year: year,
     season_type: seas_type,
@@ -36,8 +36,8 @@ const processNflGames = async () => {
       )
 
       const update = {
-        v,
-        h,
+        away_nfl_team,
+        home_nfl_team,
         week,
         season_year: year,
         season_type: seas_type,

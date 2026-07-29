@@ -86,8 +86,8 @@ export async function load_nfl_schedules_for_weeks({
     .whereIn('week', weeks)
     .whereIn('season_type', seas_type === 'POST' ? ['POST'] : ['REG', 'POST'])
     .select(
-      'v',
-      'h',
+      'away_nfl_team',
+      'home_nfl_team',
       'esbid',
       'week',
       'home_score',
@@ -112,8 +112,8 @@ export async function load_nfl_schedules_for_weeks({
     const has_started = game.timestamp && now >= game.timestamp
 
     // Home team entry
-    schedule[game.h] = {
-      opponent: game.v,
+    schedule[game.home_nfl_team] = {
+      opponent: game.away_nfl_team,
       esbid: game.esbid,
       is_home: true,
       is_final,
@@ -122,8 +122,8 @@ export async function load_nfl_schedules_for_weeks({
     }
 
     // Visitor/away team entry
-    schedule[game.v] = {
-      opponent: game.h,
+    schedule[game.away_nfl_team] = {
+      opponent: game.home_nfl_team,
       esbid: game.esbid,
       is_home: false,
       is_final,

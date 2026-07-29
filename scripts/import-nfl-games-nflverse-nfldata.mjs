@@ -50,11 +50,20 @@ const format_number = (num) => {
 const format_game = (game) => ({
   nflverse_game_id: game.game_id?.trim() || null,
   // esbid: game.old_game_id,
-  gsisid: format_number(game.gsis),
-  pfr_game_id: game.pfr?.trim() || null,
+  gsis_game_id: format_number(game.gsis),
   pff_game_id: game.pff?.trim() || null,
-  espn_game_id: game.espn?.trim() || null,
-  ftn_game_id: game.ftn?.trim() || null,
+
+  // pfr_game_id / espn_game_id / ftn_game_id are available from this feed and
+  // deliberately NOT written. Until the 2026-07-29 conform they were inert: no
+  // such column existed, and update_nfl_game keeps only `kind === 'E'` diffs, so
+  // a key with no matching column was classified new and dropped. The rename of
+  // pfrid/espnid CREATES two of those columns, which would have silently turned
+  // this into a backfill of two 100%-NULL columns (0 of 15,622 rows populated) —
+  // and one that records nothing, since update_nfl_game only writes a changelog
+  // entry when the previous value is truthy. espnid is also `integer` while the
+  // feed supplies a trimmed string. Enabling this is its own deliberate pass:
+  // validate every feed value is numeric, settle the changelog `source`
+  // behavior, and run it intentionally. ftn has no column either way.
 
   // total: game.total,
   // year: game.season,
@@ -186,8 +195,8 @@ const import_nfl_games_nflverse_nfldata = async ({
       year: item.season,
       week: item.week,
       seas_type: item.game_type,
-      v: fixTeam(item.away_team),
-      h: fixTeam(item.home_team)
+      away_nfl_team: fixTeam(item.away_team),
+      home_nfl_team: fixTeam(item.home_team)
     }
 
     let db_game
@@ -213,13 +222,13 @@ const import_nfl_games_nflverse_nfldata = async ({
         const nflverse_away = fixTeam(item.away_team)
         const nflverse_home = fixTeam(item.home_team)
         if (
-          esbid_match.v === nflverse_away &&
-          esbid_match.h === nflverse_home
+          esbid_match.away_nfl_team === nflverse_away &&
+          esbid_match.home_nfl_team === nflverse_home
         ) {
           db_game = esbid_match
         } else {
           log(
-            `esbid-only fallback team mismatch for ${item.old_game_id}: nflverse=${nflverse_away}@${nflverse_home} db=${esbid_match.v}@${esbid_match.h} — skipping update`
+            `esbid-only fallback team mismatch for ${item.old_game_id}: nflverse=${nflverse_away}@${nflverse_home} db=${esbid_match.away_nfl_team}@${esbid_match.home_nfl_team} — skipping update`
           )
           if (collector) {
             collector.add_warning(
@@ -228,7 +237,7 @@ const import_nfl_games_nflverse_nfldata = async ({
                 old_game_id: item.old_game_id,
                 game_id: item.game_id,
                 nflverse_teams: `${nflverse_away}@${nflverse_home}`,
-                db_teams: `${esbid_match.v}@${esbid_match.h}`
+                db_teams: `${esbid_match.away_nfl_team}@${esbid_match.home_nfl_team}`
               }
             )
           }

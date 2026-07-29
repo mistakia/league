@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-07-29 against league_production
 --
 -- Conform the nfl_games dimension: team roles and external ids.
 --

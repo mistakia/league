@@ -62,7 +62,7 @@ const format_market = async ({
   if (gambet_market.playerId) {
     const params = {
       name: format_player_name(gambet_market.name),
-      teams: nfl_game ? [nfl_game.v, nfl_game.h] : [],
+      teams: nfl_game ? [nfl_game.away_nfl_team, nfl_game.home_nfl_team] : [],
       ignore_free_agent: true,
       ignore_retired: true
     }
@@ -160,8 +160,8 @@ const import_gambet_odds = async () => {
           game.week === week &&
           game.seas_type === seas_type &&
           game.year === current_season.year &&
-          game.v === visitor &&
-          game.h === home
+          game.away_nfl_team === visitor &&
+          game.home_nfl_team === home
       )
     }
 

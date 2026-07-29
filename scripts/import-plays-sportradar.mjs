@@ -1110,8 +1110,8 @@ const build_game_context = (game, period_number) => ({
   esbid: game.esbid,
   sportradar_game_id: game.sportradar_game_id,
   period_number,
-  home_team: game.h,
-  away_team: game.v
+  home_team: game.home_nfl_team,
+  away_team: game.away_nfl_team
 })
 
 const build_drive_context = (pbp_item) => ({
@@ -1272,7 +1272,9 @@ const process_game = async ({
 }) => {
   const game_start_time = Date.now()
   let game_plays_processed = 0
-  log(`\nProcessing game ${game.esbid} (${game.v} @ ${game.h})...`)
+  log(
+    `\nProcessing game ${game.esbid} (${game.away_nfl_team} @ ${game.home_nfl_team})...`
+  )
 
   if (should_skip_game(game)) {
     log(`skipping esbid: ${game.esbid}, game hasn't started`)

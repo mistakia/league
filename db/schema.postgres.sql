@@ -4604,7 +4604,7 @@ CREATE TABLE public.nfl_draft_rankings_index (
 
 CREATE TABLE public.nfl_game_coaches (
     nflverse_game_id character varying(15) NOT NULL,
-    team character varying(3) NOT NULL,
+    nfl_team character varying(3) NOT NULL,
     ingested_at timestamp with time zone DEFAULT now() NOT NULL,
     head_coach_id character varying(32),
     off_play_caller_id character varying(32),
@@ -4618,14 +4618,14 @@ CREATE TABLE public.nfl_game_coaches (
 
 CREATE TABLE public.nfl_games (
     esbid integer,
-    gsisid integer,
+    gsis_game_id integer,
     nflverse_game_id character varying(15),
-    espnid integer,
-    ngsid integer,
-    shieldid character varying(36),
-    detailid_v3 character varying(36),
-    detailid_v1 character varying(36),
-    pfrid character varying(20),
+    espn_game_id integer,
+    ngs_game_id integer,
+    shield_game_id character varying(36),
+    detail_v3_game_id character varying(36),
+    detail_v1_game_id character varying(36),
+    pfr_game_id character varying(20),
     season_year smallint,
     week smallint NOT NULL,
     day character varying(5),
@@ -4635,20 +4635,20 @@ CREATE TABLE public.nfl_games (
     time_start character varying(36),
     time_end character varying(36),
     "timestamp" integer,
-    v character varying(3) NOT NULL,
-    h character varying(3) NOT NULL,
+    away_nfl_team character varying(3) NOT NULL,
+    home_nfl_team character varying(3) NOT NULL,
     season_type character varying(10) NOT NULL,
     ot boolean,
     div boolean,
     home_team_id character varying(36),
     away_team_id character varying(36),
-    home_ngsid character varying(10),
-    away_ngsid character varying(10),
+    home_ngs_team_id character varying(10),
+    away_ngs_team_id character varying(10),
     home_score integer DEFAULT 0,
     away_score integer DEFAULT 0,
     stad character varying(45),
     stad_nfl_id character varying(36),
-    site_ngsid integer,
+    ngs_site_id integer,
     clock character varying(10),
     status character varying(20),
     away_rest integer,
@@ -27782,7 +27782,7 @@ ALTER TABLE ONLY public.nfl_coaches
 --
 
 ALTER TABLE ONLY public.nfl_game_coaches
-    ADD CONSTRAINT nfl_game_coaches_pkey PRIMARY KEY (nflverse_game_id, team);
+    ADD CONSTRAINT nfl_game_coaches_pkey PRIMARY KEY (nflverse_game_id, nfl_team);
 
 
 --
@@ -29049,7 +29049,7 @@ CREATE UNIQUE INDEX idx_24707_esbid ON public.nfl_games USING btree (esbid);
 -- Name: idx_24707_game; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24707_game ON public.nfl_games USING btree (v, h, week, season_year, season_type);
+CREATE UNIQUE INDEX idx_24707_game ON public.nfl_games USING btree (away_nfl_team, home_nfl_team, week, season_year, season_type);
 
 
 --
@@ -30939,7 +30939,7 @@ CREATE INDEX league_team_player_seasonlogs_lid_tid_year_idx ON public.league_tea
 -- Name: nfl_game_coaches_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_game_coaches_team ON public.nfl_game_coaches USING btree (team);
+CREATE INDEX nfl_game_coaches_team ON public.nfl_game_coaches USING btree (nfl_team);
 
 
 --

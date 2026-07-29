@@ -187,7 +187,10 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     // NFL v1 API uses receiving team for kickoffs, but database convention
     // uses kicking team. Swap to kicking team by using opposite team.
     if (play_type_nfl === 'KICK_OFF' && pos_team && game) {
-      pos_team = pos_team === game.h ? game.v : game.h
+      pos_team =
+        pos_team === game.home_nfl_team
+          ? game.away_nfl_team
+          : game.home_nfl_team
     }
 
     data.possession_nfl_team = pos_team
@@ -333,8 +336,8 @@ const importPlaysForWeek = async ({
       continue
     }
 
-    if (!game.detailid_v1) {
-      log(`skipping esbid: ${game.esbid}, missing detailid_v1`)
+    if (!game.detail_v1_game_id) {
+      log(`skipping esbid: ${game.esbid}, missing detail_v1_game_id`)
       skip_count += 1
       continue
     }
@@ -361,7 +364,7 @@ const importPlaysForWeek = async ({
     result.games_processed++
 
     const data = await nfl.get_plays_v1({
-      id: game.detailid_v1,
+      id: game.detail_v1_game_id,
       token,
       ignore_cache
     })

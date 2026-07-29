@@ -32,11 +32,11 @@ const calculate_player_correlations = async ({
   // Get all games for the year
   const games = await db('nfl_games')
     .where({ season_year: year, season_type: 'REG' })
-    .select('esbid', 'v', 'h')
+    .select('esbid', 'away_nfl_team', 'home_nfl_team')
 
   const game_map = new Map()
   for (const game of games) {
-    game_map.set(game.esbid, { v: game.v, h: game.h })
+    game_map.set(game.esbid, { v: game.away_nfl_team, h: game.home_nfl_team })
   }
 
   log(`Found ${games.length} regular season games`)

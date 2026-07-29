@@ -37,18 +37,18 @@ export default {
     main_where: () => 'nfl_plays.sec_rem_gm'
   },
   play_home_team: {
-    column_name: 'h',
+    column_name: 'home_nfl_team',
     table_name: 'nfl_games',
     join: join_nfl_games,
-    main_select: () => ['nfl_games.h as play_home_team'],
-    main_where: () => 'nfl_games.h'
+    main_select: () => ['nfl_games.home_nfl_team as play_home_team'],
+    main_where: () => 'nfl_games.home_nfl_team'
   },
   play_away_team: {
-    column_name: 'v',
+    column_name: 'away_nfl_team',
     table_name: 'nfl_games',
     join: join_nfl_games,
-    main_select: () => ['nfl_games.v as play_away_team'],
-    main_where: () => 'nfl_games.v'
+    main_select: () => ['nfl_games.away_nfl_team as play_away_team'],
+    main_where: () => 'nfl_games.away_nfl_team'
   },
   play_goal_to_go: {
     column_name: 'goal_to_go',

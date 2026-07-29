@@ -150,13 +150,13 @@ export async function load_player_points_with_game_status({
   // Load NFL schedule to check game status
   const games = await db('nfl_games')
     .where({ season_year: year, week })
-    .select('h', 'v', 'esbid', 'status')
+    .select('home_nfl_team', 'away_nfl_team', 'esbid', 'status')
 
   const team_game_map = new Map()
   for (const game of games) {
     const is_final = game.status?.toUpperCase()?.startsWith('FINAL') ?? false
-    team_game_map.set(game.h, { esbid: game.esbid, is_final })
-    team_game_map.set(game.v, { esbid: game.esbid, is_final })
+    team_game_map.set(game.home_nfl_team, { esbid: game.esbid, is_final })
+    team_game_map.set(game.away_nfl_team, { esbid: game.esbid, is_final })
   }
 
   // Categorize players by game status

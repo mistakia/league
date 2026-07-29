@@ -49,8 +49,8 @@ const format_market = async ({
   if (player_row) {
     nfl_game = nfl_games.find(
       (game) =>
-        game.v === player_row.current_nfl_team ||
-        game.h === player_row.current_nfl_team
+        game.away_nfl_team === player_row.current_nfl_team ||
+        game.home_nfl_team === player_row.current_nfl_team
     )
   }
 

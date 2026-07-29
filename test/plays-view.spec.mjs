@@ -181,7 +181,7 @@ describe('Plays View', () => {
         params: { year: [2023] }
       })
 
-      const expected_query = `select "nfl_plays"."esbid", "nfl_games"."week", "nfl_games"."h", "nfl_games"."v", SUM(nfl_plays.pass_yds) as play_pass_yds, COUNT(*) as play_count from "nfl_plays" left join "nfl_games" on "nfl_plays"."esbid" = "nfl_games"."esbid" where "nfl_plays"."season_year" in (2023) and "nfl_plays"."season_type" in ('REG') group by "nfl_plays"."esbid", "nfl_games"."week", "nfl_games"."h", "nfl_games"."v" limit 500`
+      const expected_query = `select "nfl_plays"."esbid", "nfl_games"."week", "nfl_games"."home_nfl_team", "nfl_games"."away_nfl_team", SUM(nfl_plays.pass_yds) as play_pass_yds, COUNT(*) as play_count from "nfl_plays" left join "nfl_games" on "nfl_plays"."esbid" = "nfl_games"."esbid" where "nfl_plays"."season_year" in (2023) and "nfl_plays"."season_type" in ('REG') group by "nfl_plays"."esbid", "nfl_games"."week", "nfl_games"."home_nfl_team", "nfl_games"."away_nfl_team" limit 500`
 
       compare_queries(query.toString(), expected_query)
     })

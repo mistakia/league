@@ -127,8 +127,8 @@ const run = async () => {
           game.week === week &&
           game.seas_type === seas_type &&
           game.year === current_season.year &&
-          game.v === visitor &&
-          game.h === home
+          game.away_nfl_team === visitor &&
+          game.home_nfl_team === home
       )
     }
 

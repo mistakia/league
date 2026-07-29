@@ -46,8 +46,8 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
       game.week === week &&
       game.seas_type === seas_type &&
       game.year === current_season.year &&
-      game.v === visitor_team &&
-      game.h === home_team
+      game.away_nfl_team === visitor_team &&
+      game.home_nfl_team === home_team
   )
 
   if (!nfl_game) {
@@ -57,8 +57,8 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
         game.week === week &&
         game.seas_type === seas_type &&
         game.year === current_season.year &&
-        game.v === home_team &&
-        game.h === visitor_team
+        game.away_nfl_team === home_team &&
+        game.home_nfl_team === visitor_team
     )
   }
 

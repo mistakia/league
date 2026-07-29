@@ -123,8 +123,8 @@ const game_source = {
       .select(
         'season_year',
         'week',
-        db.raw('v as nfl_team'),
-        db.raw('h as game_opponent'),
+        db.raw('away_nfl_team as nfl_team'),
+        db.raw('home_nfl_team as game_opponent'),
         db.raw('true as game_is_home')
       )
       .whereIn('nfl_week_id', nfl_week)
@@ -132,8 +132,8 @@ const game_source = {
         this.select(
           'season_year',
           'week',
-          db.raw('h as nfl_team'),
-          db.raw('v as game_opponent'),
+          db.raw('home_nfl_team as nfl_team'),
+          db.raw('away_nfl_team as game_opponent'),
           db.raw('false as game_is_home')
         )
           .from('nfl_games')

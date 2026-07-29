@@ -7,7 +7,7 @@
 export const rebuild_sql = `
 WITH reg_games AS (
   SELECT esbid, season_year AS year, week,
-         h AS home_team, v AS away_team,
+         home_nfl_team AS home_team, away_nfl_team AS away_team,
          home_qb_pid, away_qb_pid, timestamp AS game_timestamp
   FROM nfl_games
   WHERE season_type = 'REG' AND season_year BETWEEN :start_year AND :end_year

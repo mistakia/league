@@ -170,8 +170,8 @@ const find_nfl_game = (team_info, pinnacle_matchup, nfl_games) => {
       game.week === week &&
       game.seas_type === seas_type &&
       game.year === current_season.year &&
-      game.v === fixTeam(team_info.away_team) &&
-      game.h === fixTeam(team_info.home_team)
+      game.away_nfl_team === fixTeam(team_info.away_team) &&
+      game.home_nfl_team === fixTeam(team_info.home_team)
   )
 }
 

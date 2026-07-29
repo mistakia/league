@@ -16,14 +16,14 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
   const query = db('nfl_games')
     .select(
       'esbid',
-      'shieldid',
+      'shield_game_id',
       'season_year as year',
       'week',
       'season_type as seas_type',
-      'h',
-      'v'
+      'home_nfl_team',
+      'away_nfl_team'
     )
-    .whereNotNull('shieldid')
+    .whereNotNull('shield_game_id')
 
   if (esbid) {
     query.where('esbid', esbid)
@@ -121,15 +121,15 @@ function determine_matchup_type(matchup) {
 const BATCH_SIZE = 500
 
 async function process_game({ game, client, stats, dry = false }) {
-  const { esbid, shieldid, week } = game
+  const { esbid, shield_game_id, week } = game
 
   log(
-    `processing matchup stats for game ${esbid} (shield: ${shieldid}, week ${week})`
+    `processing matchup stats for game ${esbid} (shield: ${shield_game_id}, week ${week})`
   )
 
   let matchup_data
   try {
-    matchup_data = await client.get_matchup_stats({ game_id: shieldid })
+    matchup_data = await client.get_matchup_stats({ game_id: shield_game_id })
   } catch (error) {
     log(`failed to fetch matchup stats for game ${esbid}: ${error.message}`)
     stats.games_failed += 1

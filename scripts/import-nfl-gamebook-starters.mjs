@@ -412,15 +412,15 @@ const process_game = async ({ game, index, dry_run }) => {
   let h_abbr
   let v_abbr
   try {
-    h_abbr = fixTeam(game.h)
-    v_abbr = fixTeam(game.v)
+    h_abbr = fixTeam(game.home_nfl_team)
+    v_abbr = fixTeam(game.away_nfl_team)
   } catch {
     return { skipped: 'team_mismatch', starters_written: 0 }
   }
   const game_teams = new Set([h_abbr, v_abbr])
   if (!game_teams.has(parsed.left.abbr) || !game_teams.has(parsed.right.abbr)) {
     log(
-      `team-mismatch esbid=${game.esbid} pdf=[${parsed.left.abbr},${parsed.right.abbr}] db=[${game.h},${game.v}]`
+      `team-mismatch esbid=${game.esbid} pdf=[${parsed.left.abbr},${parsed.right.abbr}] db=[${game.home_nfl_team},${game.away_nfl_team}]`
     )
     return { skipped: 'team_mismatch', starters_written: 0 }
   }
@@ -516,13 +516,13 @@ const import_for_year = async ({
       'esbid',
       'season_year as year',
       'week',
-      'h',
-      'v',
+      'home_nfl_team',
+      'away_nfl_team',
       'season_type as seas_type',
-      'shieldid'
+      'shield_game_id'
     )
     .where({ season_year: year })
-    .whereNotNull('shieldid')
+    .whereNotNull('shield_game_id')
   if (week !== undefined) query.where({ week })
   if (seas_type) query.where({ season_type: seas_type })
   const games = await query

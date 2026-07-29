@@ -288,8 +288,8 @@ const import_fanduel_wagers = async ({
 
       const nfl_game = nfl_games.find(
         (game) =>
-          game.h === home_team &&
-          game.v === away_team &&
+          game.home_nfl_team === home_team &&
+          game.away_nfl_team === away_team &&
           game.week === event_week
       )
 
@@ -309,7 +309,7 @@ const import_fanduel_wagers = async ({
             try {
               player_row = await find_player_row({
                 name: player_name,
-                teams: [nfl_game.h, nfl_game.v]
+                teams: [nfl_game.home_nfl_team, nfl_game.away_nfl_team]
               })
             } catch (err) {
               log(err)

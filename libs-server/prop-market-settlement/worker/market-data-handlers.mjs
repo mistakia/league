@@ -425,14 +425,14 @@ export class NFLGamesMarketHandler {
   /**
    * Validate team selection against game participants
    * @param {string} selection_pid - Selected team ID
-   * @param {Object} game - Game data with h (home) and v (visitor) team codes
+   * @param {Object} game - Game data with home_nfl_team and away_nfl_team team codes
    * @returns {{ is_home_team: boolean }|null} Team info or null if not found
    */
   _validate_team_selection(selection_pid, game) {
-    if (selection_pid === game.h) {
+    if (selection_pid === game.home_nfl_team) {
       return { is_home_team: true }
     }
-    if (selection_pid === game.v) {
+    if (selection_pid === game.away_nfl_team) {
       return { is_home_team: false }
     }
     return null
@@ -442,7 +442,7 @@ export class NFLGamesMarketHandler {
    * Process game outcome markets (spread, total, moneyline)
    * @param {Object} params - Named parameters
    * @param {Object} params.market - Market object
-   * @param {Object} params.game - Game data with h, v, home_score, away_score
+   * @param {Object} params.game - Game data with home_nfl_team, away_nfl_team, home_score, away_score
    * @param {Object} params.mapping - Market mapping configuration
    * @returns {Array<Object>} Array with OPEN and CLOSE result objects
    */
@@ -477,7 +477,7 @@ export class NFLGamesMarketHandler {
         if (!team_info) {
           return this._create_error_results(
             market,
-            `Selection ${market.selection_pid} not found in game (h: ${game.h}, v: ${game.v})`
+            `Selection ${market.selection_pid} not found in game (home: ${game.home_nfl_team}, away: ${game.away_nfl_team})`
           )
         }
 
@@ -513,7 +513,7 @@ export class NFLGamesMarketHandler {
         if (!team_info) {
           return this._create_error_results(
             market,
-            `Selection ${market.selection_pid} not found in game (h: ${game.h}, v: ${game.v})`
+            `Selection ${market.selection_pid} not found in game (home: ${game.home_nfl_team}, away: ${game.away_nfl_team})`
           )
         }
 

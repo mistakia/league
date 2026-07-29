@@ -44,8 +44,8 @@ const format = (item) => {
 
   return {
     ...(esbid && { esbid }),
-    ...(shieldid && { shieldid }),
-    ...(item.id && { detailid_v1: item.id }),
+    ...(shieldid && { shield_game_id: shieldid }),
+    ...(item.id && { detail_v1_game_id: item.id }),
 
     ...(year && { season_year: year }),
     ...(item.week && { week: item.week }),
@@ -55,10 +55,10 @@ const format = (item) => {
     ...(datetime && { timestamp: datetime.unix() }),
 
     ...(item.awayTeam.abbreviation && {
-      v: fixTeam(item.awayTeam.abbreviation)
+      away_nfl_team: fixTeam(item.awayTeam.abbreviation)
     }),
     ...(item.homeTeam.abbreviation && {
-      h: fixTeam(item.homeTeam.abbreviation)
+      home_nfl_team: fixTeam(item.homeTeam.abbreviation)
     }),
 
     ...(seas_type && { season_type: seas_type }),
@@ -96,7 +96,7 @@ const run = async ({
     season_type: seas_type
   })
 
-  const game_missing_detailid_v1 = games.find((game) => !game.detailid_v1)
+  const game_missing_detailid_v1 = games.find((game) => !game.detail_v1_game_id)
 
   if (!ignore_cache && games.length && !game_missing_detailid_v1) {
     log('found no games with missing ids')

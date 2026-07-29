@@ -249,14 +249,14 @@ export async function get_plays_view_results_query({
       select_columns.unshift(
         'nfl_plays.esbid',
         'nfl_games.week',
-        'nfl_games.h',
-        'nfl_games.v'
+        'nfl_games.home_nfl_team',
+        'nfl_games.away_nfl_team'
       )
       query.groupBy(
         'nfl_plays.esbid',
         'nfl_games.week',
-        'nfl_games.h',
-        'nfl_games.v'
+        'nfl_games.home_nfl_team',
+        'nfl_games.away_nfl_team'
       )
     }
 

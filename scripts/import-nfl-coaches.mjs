@@ -510,7 +510,7 @@ const process_week = async ({
     }
     bridge_rows.push({
       nflverse_game_id: game_id,
-      team,
+      nfl_team: team,
       head_coach_id: resolve_coach({
         ...ctx,
         name: row.head_coach,
@@ -542,7 +542,7 @@ const process_week = async ({
   await db.transaction(async (trx) => {
     await trx('nfl_game_coaches')
       .insert(bridge_rows)
-      .onConflict(['nflverse_game_id', 'team'])
+      .onConflict(['nflverse_game_id', 'nfl_team'])
       .merge([
         'head_coach_id',
         'off_play_caller_id',
@@ -561,7 +561,7 @@ const process_week = async ({
        FROM nfl_game_coaches gc
        JOIN nfl_coaches c ON c.coach_id = gc.off_play_caller_id
        WHERE gc.nflverse_game_id = g.nflverse_game_id
-         AND gc.team = g.h
+         AND gc.nfl_team = g.home_nfl_team
          AND g.nflverse_game_id = ANY(?)`,
       [game_ids]
     )
@@ -571,7 +571,7 @@ const process_week = async ({
        FROM nfl_game_coaches gc
        JOIN nfl_coaches c ON c.coach_id = gc.off_play_caller_id
        WHERE gc.nflverse_game_id = g.nflverse_game_id
-         AND gc.team = g.v
+         AND gc.nfl_team = g.away_nfl_team
          AND g.nflverse_game_id = ANY(?)`,
       [game_ids]
     )

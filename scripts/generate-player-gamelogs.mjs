@@ -562,8 +562,8 @@ const generate_snap_based_gamelogs = async ({
       )
       const opponent = calculate_opponent({
         team,
-        home_team: game.h,
-        away_team: game.v
+        home_team: game.home_nfl_team,
+        away_team: game.away_nfl_team
       })
 
       player_gamelog_inserts.push({
@@ -670,8 +670,8 @@ const process_player_gamelogs = ({
 
     const opp = calculate_opponent({
       team: play_stat.nfl_team,
-      home_team: play_stat.h,
-      away_team: play_stat.v
+      home_team: play_stat.home_nfl_team,
+      away_team: play_stat.away_nfl_team
     })
 
     const stats = calculateStatsFromPlayStats(play_stats_by_player[player_id])
@@ -722,8 +722,8 @@ const generate_team_gamelogs = ({ playStats, team_gamelog_inserts }) => {
     const play_stat = team_play_stats[0]
     const opp = calculate_opponent({
       team,
-      home_team: play_stat.h,
-      away_team: play_stat.v
+      home_team: play_stat.home_nfl_team,
+      away_team: play_stat.away_nfl_team
     })
 
     // TODO format to match table schema
@@ -744,7 +744,10 @@ const generate_team_gamelogs = ({ playStats, team_gamelog_inserts }) => {
 const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
   for (const team of nfl_team_abbreviations) {
     const opponentPlays = playStats.filter((p) => {
-      if (fixTeam(p.h) !== team && fixTeam(p.v) !== team) {
+      if (
+        fixTeam(p.home_nfl_team) !== team &&
+        fixTeam(p.away_nfl_team) !== team
+      ) {
         return false
       }
 
@@ -759,7 +762,10 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
     if (!opponentPlays.length) continue
 
     const play = opponentPlays[0]
-    const opp = fixTeam(play.h) === team ? play.v : play.h
+    const opp =
+      fixTeam(play.home_nfl_team) === team
+        ? play.away_nfl_team
+        : play.home_nfl_team
     const groupedPlays = groupBy(opponentPlays, 'play_id')
     const formattedPlays = []
     for (const playId in groupedPlays) {

@@ -200,7 +200,7 @@ export const build_team_sides_union = ({
     return sub
   }
 
-  return make_side('h').unionAll(make_side('v'), true)
+  return make_side('home_nfl_team').unionAll(make_side('away_nfl_team'), true)
 }
 
 // DISTINCT (team, year, week) set of the REG weeks each team played within the

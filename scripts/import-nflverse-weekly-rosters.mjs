@@ -142,12 +142,12 @@ const build_name_year_index = async () => {
 
 const build_game_index = async ({ year }) => {
   const rows = await db('nfl_games')
-    .select('esbid', 'week', 'h', 'v')
+    .select('esbid', 'week', 'home_nfl_team', 'away_nfl_team')
     .where({ season_year: year, season_type: 'REG' })
   const idx = new Map()
   for (const g of rows) {
-    const h = fixTeam(g.h)
-    const v = fixTeam(g.v)
+    const h = fixTeam(g.home_nfl_team)
+    const v = fixTeam(g.away_nfl_team)
     idx.set(`${g.week}|${h}`, { esbid: g.esbid, tm: h, opp: v })
     idx.set(`${g.week}|${v}`, { esbid: g.esbid, tm: v, opp: h })
   }

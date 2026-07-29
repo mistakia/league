@@ -86,8 +86,8 @@ const preload_games = async ({ year, week = null }) => {
       'season_year as year',
       'week',
       'date',
-      'h',
-      'v',
+      'home_nfl_team',
+      'away_nfl_team',
       'sportradar_game_id',
       'sportradar_season_id'
     )
@@ -103,7 +103,7 @@ const preload_games = async ({ year, week = null }) => {
   // We'll match by teams and then verify the date is close
   const games_map = new Map()
   for (const game of games) {
-    const lookup_key = `${game.h}-${game.v}`
+    const lookup_key = `${game.home_nfl_team}-${game.away_nfl_team}`
 
     // If there are duplicate matchups in the same year, store as array
     if (games_map.has(lookup_key)) {

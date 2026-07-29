@@ -19,14 +19,14 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
   const query = db('nfl_games')
     .select(
       'esbid',
-      'shieldid',
+      'shield_game_id',
       'season_year as year',
       'week',
       'season_type as seas_type',
-      'h',
-      'v'
+      'home_nfl_team',
+      'away_nfl_team'
     )
-    .whereNotNull('shieldid')
+    .whereNotNull('shield_game_id')
 
   if (esbid) {
     query.where('esbid', esbid)
@@ -45,13 +45,15 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
 }
 
 async function process_game({ game, client, stats, dry = false }) {
-  const { esbid, shieldid, week, h, v } = game
+  const { esbid, shield_game_id, week, home_nfl_team, away_nfl_team } = game
 
-  log(`processing game ${esbid} (shield: ${shieldid}, week ${week}, ${v}@${h})`)
+  log(
+    `processing game ${esbid} (shield: ${shield_game_id}, week ${week}, ${away_nfl_team}@${home_nfl_team})`
+  )
 
   let plays_data
   try {
-    plays_data = await client.get_plays({ game_id: shieldid })
+    plays_data = await client.get_plays({ game_id: shield_game_id })
   } catch (error) {
     log(`failed to fetch plays for game ${esbid}: ${error.message}`)
     stats.games_failed += 1

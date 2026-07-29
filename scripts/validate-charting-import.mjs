@@ -12,8 +12,13 @@ async function validate_play_match_rates({ year }) {
   log('checking play match rates per game...')
 
   const games = await db('nfl_games')
-    .select('nfl_games.esbid', 'nfl_games.week', 'nfl_games.h', 'nfl_games.v')
-    .whereNotNull('nfl_games.shieldid')
+    .select(
+      'nfl_games.esbid',
+      'nfl_games.week',
+      'nfl_games.home_nfl_team',
+      'nfl_games.away_nfl_team'
+    )
+    .whereNotNull('nfl_games.shield_game_id')
     .where('nfl_games.season_year', year)
 
   const results = []
@@ -37,7 +42,7 @@ async function validate_play_match_rates({ year }) {
     results.push({
       esbid: game.esbid,
       week: game.week,
-      matchup: `${game.v}@${game.h}`,
+      matchup: `${game.away_nfl_team}@${game.home_nfl_team}`,
       total_plays: total,
       charted_plays: charted,
       match_rate: parseFloat(rate)

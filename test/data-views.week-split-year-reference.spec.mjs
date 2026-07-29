@@ -40,8 +40,8 @@ describe('data-views week-split year_reference reachability', () => {
           week: WEEK,
           season_type: 'REG',
           date: '2025/09/07',
-          v: 'KC',
-          h: 'BAL'
+          away_nfl_team: 'KC',
+          home_nfl_team: 'BAL'
         },
         {
           esbid: ESBID_B,
@@ -49,8 +49,8 @@ describe('data-views week-split year_reference reachability', () => {
           week: WEEK,
           season_type: 'REG',
           date: '2025/09/07',
-          v: 'NYG',
-          h: 'DAL'
+          away_nfl_team: 'NYG',
+          home_nfl_team: 'DAL'
         }
       ])
       .onConflict('esbid')

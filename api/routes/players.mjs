@@ -1190,8 +1190,8 @@ router.get('/:pid/markets/?', async (req, res) => {
         'prop_market_selections_index.last_season_edge_hard',
         'prop_market_selections_index.overall_hit_rate_hard',
         'prop_market_selections_index.overall_edge_hard',
-        'nfl_games.h',
-        'nfl_games.v',
+        'nfl_games.home_nfl_team',
+        'nfl_games.away_nfl_team',
         'nfl_games.week',
         'nfl_games.date',
         'nfl_games.time_est'
@@ -1232,8 +1232,8 @@ router.get('/:pid/markets/?', async (req, res) => {
           week: row.week,
           event_date: row.date,
           event_time_est: row.time_est,
-          home_team: row.h,
-          away_team: row.v,
+          home_team: row.home_nfl_team,
+          away_team: row.away_nfl_team,
           selections: []
         }
       }

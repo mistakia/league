@@ -37,7 +37,7 @@ const format_market = async ({
   if (betrivers_market.participant) {
     const params = {
       name: betrivers_market.participant,
-      teams: nfl_game ? [nfl_game.v, nfl_game.h] : [],
+      teams: nfl_game ? [nfl_game.away_nfl_team, nfl_game.home_nfl_team] : [],
       ignore_free_agent: true,
       ignore_retired: true
     }
@@ -132,8 +132,8 @@ const import_betrivers_odds = async () => {
             game.week === week &&
             game.seas_type === seas_type &&
             game.year === current_season.year &&
-            game.v === visitor &&
-            game.h === home
+            game.away_nfl_team === visitor &&
+            game.home_nfl_team === home
         )
       }
 

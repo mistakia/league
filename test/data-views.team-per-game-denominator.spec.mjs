@@ -40,10 +40,12 @@ describe('data-views team per-game denominator grain', () => {
     const sql = query.toString()
 
     // home/away sides project team only -- no per-year partition
-    expect(sql).to.match(/select "h" as "team" from "nfl_games"/)
-    expect(sql).to.match(/select "v" as "team" from "nfl_games"/)
+    expect(sql).to.match(/select "home_nfl_team" as "team" from "nfl_games"/)
+    expect(sql).to.match(/select "away_nfl_team" as "team" from "nfl_games"/)
     // and crucially do NOT carry year into the union (the bug shape)
-    expect(sql).to.not.match(/select "h" as "team", "year" from "nfl_games"/)
+    expect(sql).to.not.match(
+      /select "home_nfl_team" as "team", "year" from "nfl_games"/
+    )
     // the denominator collapses to one row per team (full-window game count)
     expect(sql).to.match(/group by "team"(?!, "year")/)
   })
@@ -56,7 +58,7 @@ describe('data-views team per-game denominator grain', () => {
 
     // under a year split the union must carry year so the join correlates 1:1
     expect(sql).to.match(
-      /select "h" as "team", "season_year" as "year" from "nfl_games"/
+      /select "home_nfl_team" as "team", "season_year" as "year" from "nfl_games"/
     )
     expect(sql).to.match(/group by "team", "year"/)
   })

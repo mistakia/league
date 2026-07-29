@@ -216,8 +216,8 @@ const process_matched_player = async ({
   const game = nfl_games.find((game) => {
     const game_date = dayjs(fanduel_game.start_date).format('YYYY/MM/DD')
     return (
-      game.v === fixTeam(away_team_abbreviation) &&
-      game.h === fixTeam(home_team_abbreviation) &&
+      game.away_nfl_team === fixTeam(away_team_abbreviation) &&
+      game.home_nfl_team === fixTeam(home_team_abbreviation) &&
       game.date === game_date
     )
   })

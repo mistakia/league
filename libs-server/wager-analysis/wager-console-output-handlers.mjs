@@ -211,7 +211,7 @@ export const print_exposures_by_game = async ({
   const esbids = new Set([...event_id_to_esbid.values()])
   const game_titles = await db('nfl_games')
     .whereIn('esbid', Array.from(esbids))
-    .select('esbid', db.raw("v || ' @ ' || h AS title"))
+    .select('esbid', db.raw("away_nfl_team || ' @ ' || home_nfl_team AS title"))
 
   const esbid_to_title = new Map(
     game_titles.map((row) => [row.esbid, row.title])

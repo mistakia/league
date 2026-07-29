@@ -40,8 +40,12 @@ export default async function ({ team_id, league_id }) {
 
     player_query.leftJoin('nfl_games as reference_week_game', function () {
       this.on(function () {
-        this.on('reference_week_game.h', '=', 'player.current_nfl_team').orOn(
-          'reference_week_game.v',
+        this.on(
+          'reference_week_game.home_nfl_team',
+          '=',
+          'player.current_nfl_team'
+        ).orOn(
+          'reference_week_game.away_nfl_team',
           '=',
           'player.current_nfl_team'
         )

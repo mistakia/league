@@ -15,8 +15,8 @@ export default function apply_nfl_games_offset_week_join({
 
   query.leftJoin(table_expr, function () {
     this.on(function () {
-      this.on(`${alias}.h`, '=', team_column).orOn(
-        `${alias}.v`,
+      this.on(`${alias}.home_nfl_team`, '=', team_column).orOn(
+        `${alias}.away_nfl_team`,
         '=',
         team_column
       )

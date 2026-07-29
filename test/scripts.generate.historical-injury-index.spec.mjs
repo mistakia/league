@@ -40,12 +40,12 @@ describe('SCRIPTS /generate-historical-injury-index SQL string', function () {
     )
   })
 
-  it('keys schedule_spine on team via h/v varchar(3) columns', function () {
-    // Per the plan: reg_games CTE exposes h AS home_team and v AS away_team.
-    // The schedule_spine MUST NOT key on home_team_id / away_team_id (the
-    // mostly-NULL varchar(36) UUID columns).
-    expect(rebuild_sql).to.include('h AS home_team')
-    expect(rebuild_sql).to.include('v AS away_team')
+  it('keys schedule_spine on team via home_nfl_team/away_nfl_team varchar(3) columns', function () {
+    // Per the plan: reg_games CTE exposes home_nfl_team AS home_team and
+    // away_nfl_team AS away_team. The schedule_spine MUST NOT key on
+    // home_team_id / away_team_id (the mostly-NULL varchar(36) UUID columns).
+    expect(rebuild_sql).to.include('home_nfl_team AS home_team')
+    expect(rebuild_sql).to.include('away_nfl_team AS away_team')
     expect(rebuild_sql).to.not.include('home_team_id')
     expect(rebuild_sql).to.not.include('away_team_id')
   })

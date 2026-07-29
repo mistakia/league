@@ -304,11 +304,11 @@ const team_betting_market_join = ({
     ) {
       this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
     } else {
-      this.on(`${table_name}.h`, '=', 'player.current_nfl_team').orOn(
-        `${table_name}.v`,
+      this.on(
+        `${table_name}.home_nfl_team`,
         '=',
         'player.current_nfl_team'
-      )
+      ).orOn(`${table_name}.away_nfl_team`, '=', 'player.current_nfl_team')
     }
   })
 }
@@ -343,8 +343,8 @@ const team_betting_market_with = ({
       'source_id',
       'source_market_id',
       'time_type',
-      'nfl_games.h',
-      'nfl_games.v'
+      'nfl_games.home_nfl_team',
+      'nfl_games.away_nfl_team'
     )
       .from('prop_markets_index')
       .where('market_type', market_type)
@@ -352,9 +352,9 @@ const team_betting_market_with = ({
       .andWhere('prop_markets_index.season_year', year)
       .andWhere('source_id', source_id)
 
-    // h/v are projected unconditionally above (and read as m.h/m.v downstream),
-    // so nfl_games must always be joined; only the week/season_type narrowing
-    // is conditional.
+    // home_nfl_team/away_nfl_team are projected unconditionally above (and read
+    // as m.home_nfl_team/m.away_nfl_team downstream), so nfl_games must always
+    // be joined; only the week/season_type narrowing is conditional.
     qb.join('nfl_games', function () {
       this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
       this.andOn(`nfl_games.season_year`, '=', `prop_markets_index.season_year`)
@@ -366,7 +366,7 @@ const team_betting_market_with = ({
   })
 
   query.with(with_table_name, (qb) => {
-    qb.select('pms.selection_pid', 'm.h', 'm.v')
+    qb.select('pms.selection_pid', 'm.home_nfl_team', 'm.away_nfl_team')
       .from(`${markets_cte} as m`)
       .join('prop_market_selections_index as pms', function () {
         this.on('pms.source_id', '=', 'm.source_id')

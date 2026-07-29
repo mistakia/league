@@ -643,9 +643,9 @@ if (team_unit === 'def' && matchup_opponent_type) {
 
 ```sql
 WITH ${table_name} AS (
-  SELECT h as nfl_team, v as opponent FROM nfl_games WHERE ...
+  SELECT home_nfl_team as nfl_team, away_nfl_team as opponent FROM nfl_games WHERE ...
   UNION ALL
-  SELECT v as nfl_team, h as opponent FROM nfl_games WHERE ...
+  SELECT away_nfl_team as nfl_team, home_nfl_team as opponent FROM nfl_games WHERE ...
 )
 ```
 
@@ -796,15 +796,15 @@ WITH rate_type_per_game_2024_REG AS (
 
 **Team Version**:
 
-Games per team are counted from `nfl_games` (~7K rows for 24 years), not via `COUNT(DISTINCT esbid)` over `nfl_plays` (~1.3M rows). Every game appears as both home (`h`) and away (`v`) exactly once, so a `UNION ALL` of the two sides with `COUNT(*)` per team yields the same denominator far more cheaply (measured 5.8s → 2.3s on a year-split column set):
+Games per team are counted from `nfl_games` (~7K rows for 24 years), not via `COUNT(DISTINCT esbid)` over `nfl_plays` (~1.3M rows). Every game appears as both home (`home_nfl_team`) and away (`away_nfl_team`) exactly once, so a `UNION ALL` of the two sides with `COUNT(*)` per team yields the same denominator far more cheaply (measured 5.8s → 2.3s on a year-split column set):
 
 ```sql
 WITH rate_type_per_team_game_off_2023_2024_2025_REG AS (
   SELECT team, COUNT(*) as rate_type_total_count
   FROM (
-    SELECT h as team FROM nfl_games WHERE seas_type = 'REG' AND year IN (2023, 2024, 2025)
+    SELECT home_nfl_team as team FROM nfl_games WHERE season_type = 'REG' AND season_year IN (2023, 2024, 2025)
     UNION ALL
-    SELECT v as team FROM nfl_games WHERE seas_type = 'REG' AND year IN (2023, 2024, 2025)
+    SELECT away_nfl_team as team FROM nfl_games WHERE season_type = 'REG' AND season_year IN (2023, 2024, 2025)
   ) g
   GROUP BY team
 )

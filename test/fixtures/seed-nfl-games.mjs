@@ -25,14 +25,14 @@ const build_rows_for_weeks = ({ year, seas_type, min_week, max_week }) => {
   const rows = []
   for (let week = min_week; week <= max_week; week++) {
     for (let index = 1; index <= TEAMS.length; index++) {
-      const [v, h] = TEAMS[index - 1]
+      const [away_nfl_team, home_nfl_team] = TEAMS[index - 1]
       rows.push({
         esbid: make_esbid({ year, seas_type, week, index }),
         season_year: year,
         week,
         season_type: seas_type,
-        v,
-        h,
+        away_nfl_team,
+        home_nfl_team,
         // Plausible non-null date/time so downstream consumers that filter
         // on kickoff time (e.g. get-top-practice-squad-waiver) receive
         // populated values. Date is set far in the future to avoid

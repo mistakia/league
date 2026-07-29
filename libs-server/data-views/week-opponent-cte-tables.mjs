@@ -6,7 +6,7 @@ export const add_week_opponent_cte_tables = ({
   seas_type = 'REG'
 }) => {
   players_query.with(table_name, (qb) => {
-    qb.select('h as nfl_team', 'v as opponent')
+    qb.select('home_nfl_team as nfl_team', 'away_nfl_team as opponent')
       .from('public.nfl_games')
       .where({
         season_year: year,
@@ -14,7 +14,7 @@ export const add_week_opponent_cte_tables = ({
         season_type: seas_type
       })
       .union((qb) => {
-        qb.select('v as nfl_team', 'h as opponent')
+        qb.select('away_nfl_team as nfl_team', 'home_nfl_team as opponent')
           .from('public.nfl_games')
           .where({
             season_year: year,

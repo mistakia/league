@@ -169,8 +169,8 @@ const process_matched_player = async ({
     }
     const game_date = dayjs(start_time).format('YYYY/MM/DD')
     return (
-      game.v === fixTeam(away_team) &&
-      game.h === fixTeam(home_team) &&
+      game.away_nfl_team === fixTeam(away_team) &&
+      game.home_nfl_team === fixTeam(home_team) &&
       game.date === game_date
     )
   })

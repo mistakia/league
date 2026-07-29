@@ -69,9 +69,9 @@ const format = (item) => {
 
   return {
     esbid: item.gameId,
-    gsisid: item.gameKey,
-    shieldid: item.smartId,
-    ngsid: item.gameId,
+    gsis_game_id: item.gameKey,
+    shield_game_id: item.smartId,
+    ngs_game_id: item.gameId,
 
     season_year: year,
     week,
@@ -80,8 +80,8 @@ const format = (item) => {
     day,
     timestamp: datetime.unix() || null,
 
-    v: fixTeam(item.visitorTeamAbbr),
-    h: fixTeam(item.homeTeamAbbr),
+    away_nfl_team: fixTeam(item.visitorTeamAbbr),
+    home_nfl_team: fixTeam(item.homeTeamAbbr),
 
     season_type: seas_type,
     week_type,
@@ -91,7 +91,7 @@ const format = (item) => {
     away_score: (score.visitorTeamScore || {}).pointTotal,
 
     stad: item.site.siteFullName,
-    site_ngsid: item.site.siteId,
+    ngs_site_id: item.site.siteId,
 
     clock: score.time,
     status: score.phase
@@ -132,7 +132,13 @@ const run = async ({ year = current_season.year, collector = null } = {}) => {
   if (inserts.length) {
     await db('nfl_games')
       .insert(inserts)
-      .onConflict(['v', 'h', 'week', 'season_year', 'season_type'])
+      .onConflict([
+        'away_nfl_team',
+        'home_nfl_team',
+        'week',
+        'season_year',
+        'season_type'
+      ])
       .merge()
     log(`saved data for ${inserts.length} games`)
     result.games_updated = inserts.length

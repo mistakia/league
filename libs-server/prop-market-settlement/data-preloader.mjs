@@ -145,8 +145,8 @@ const load_nfl_games = async (esbids) => {
       'week',
       'season_type as seas_type',
       'date',
-      'h',
-      'v',
+      'home_nfl_team',
+      'away_nfl_team',
       'home_score',
       'away_score',
       'status'

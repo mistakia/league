@@ -2,9 +2,9 @@
  * Archive NFL Gamebook PDFs
  *
  * Downloads pregame-declared starter sheets ("gamebooks") from
- * https://static.www.nfl.com/image/upload/gamecenter/{shieldid}.pdf
+ * https://static.www.nfl.com/image/upload/gamecenter/{shield_game_id}.pdf
  * to /root/cache/nfl/gamebook/{esbid}.pdf for every nfl_games row
- * with a populated shieldid in the requested year range.
+ * with a populated shield_game_id in the requested year range.
  *
  * Usage:
  *   node scripts/archive-nfl-gamebooks.mjs --year 2024
@@ -32,8 +32,8 @@ debug.enable('archive-nfl-gamebooks')
 
 const stream_pipeline = promisify(pipeline)
 
-const GAMEBOOK_URL = (shieldid) =>
-  `https://static.www.nfl.com/image/upload/gamecenter/${shieldid}.pdf`
+const GAMEBOOK_URL = (shield_game_id) =>
+  `https://static.www.nfl.com/image/upload/gamecenter/${shield_game_id}.pdf`
 
 const cache_path_for = (esbid) =>
   path.join(os.homedir(), 'cache/nfl/gamebook', `${esbid}.pdf`)
@@ -69,14 +69,14 @@ const fetch_pdf = async ({ url, max_retries = 3 }) => {
 
 const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
   const query = db('nfl_games')
-    .select('esbid', 'shieldid', 'season_type as seas_type', 'week')
+    .select('esbid', 'shield_game_id', 'season_type as seas_type', 'week')
     .where({ season_year: year })
-    .whereNotNull('shieldid')
+    .whereNotNull('shield_game_id')
   if (week !== undefined) query.where({ week })
 
   const games = await query
   log(
-    `${year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games with shieldid`
+    `${year}${week !== undefined ? ` W${week}` : ''}: ${games.length} games with shield_game_id`
   )
 
   const counts = {
@@ -102,11 +102,11 @@ const archive_year = async ({ year, week, ignore_cache, dry_run }) => {
     }
 
     try {
-      const result = await fetch_pdf({ url: GAMEBOOK_URL(game.shieldid) })
+      const result = await fetch_pdf({ url: GAMEBOOK_URL(game.shield_game_id) })
       if (result.status === 404) {
         counts.not_found += 1
         log(
-          `404 ${game.esbid} (${game.seas_type} W${game.week}) shieldid=${game.shieldid}`
+          `404 ${game.esbid} (${game.seas_type} W${game.week}) shield_game_id=${game.shield_game_id}`
         )
         continue
       }

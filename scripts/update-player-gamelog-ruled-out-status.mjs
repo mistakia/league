@@ -114,7 +114,7 @@ const get_following_wednesday_timestamp = (game_timestamp) => {
  */
 const load_games = async ({ year, week, seas_type }) => {
   const query = db('nfl_games')
-    .select('esbid', 'timestamp', 'week', 'h', 'v')
+    .select('esbid', 'timestamp', 'week', 'home_nfl_team', 'away_nfl_team')
     .where({ season_year: year, season_type: seas_type })
     .whereNotNull('timestamp')
 
@@ -184,10 +184,18 @@ const find_out_status_records = async ({
  * @returns {Promise<Object>} Results object with updates and stats
  */
 const process_game = async (game, gamelogs) => {
-  const { esbid, timestamp: game_timestamp, week, h, v } = game
+  const {
+    esbid,
+    timestamp: game_timestamp,
+    week,
+    home_nfl_team,
+    away_nfl_team
+  } = game
 
   if (!game_timestamp) {
-    log(`Skipping game ${esbid} (week ${week} ${v}@${h}): no timestamp`)
+    log(
+      `Skipping game ${esbid} (week ${week} ${away_nfl_team}@${home_nfl_team}): no timestamp`
+    )
     return { updates: [], skipped: true }
   }
 
@@ -198,7 +206,7 @@ const process_game = async (game, gamelogs) => {
     .split('T')[0]
 
   log(
-    `Processing game ${esbid} (week ${week} ${v}@${h}) on ${game_date}, detection window until ${wednesday_date}`
+    `Processing game ${esbid} (week ${week} ${away_nfl_team}@${home_nfl_team}) on ${game_date}, detection window until ${wednesday_date}`
   )
 
   // Get all player IDs from active gamelogs

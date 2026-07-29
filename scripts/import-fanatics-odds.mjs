@@ -51,15 +51,15 @@ const format_market = async ({
         game.week === week &&
         game.seas_type === seas_type &&
         game.year === current_season.year &&
-        game.v === fixTeam(away_team) &&
-        game.h === fixTeam(home_team)
+        game.away_nfl_team === fixTeam(away_team) &&
+        game.home_nfl_team === fixTeam(home_team)
     )
   }
 
   const market_type = fanatics.format_market_type({ market_type: market.type })
   const is_game_spread = market_type === team_game_market_types.GAME_SPREAD
   const selections = []
-  const teams = nfl_game ? [nfl_game.h, nfl_game.v] : []
+  const teams = nfl_game ? [nfl_game.home_nfl_team, nfl_game.away_nfl_team] : []
   const use_selection_name = [
     player_game_prop_types.ANYTIME_TOUCHDOWN,
     player_game_prop_types.GAME_FIRST_TOUCHDOWN_SCORER,

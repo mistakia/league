@@ -18,8 +18,8 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
       'nfl_plays.target_pid',
       'nfl_plays.interceptor_pid',
       'nfl_plays.player_fuml_pid',
-      'nfl_games.h',
-      'nfl_games.v',
+      'nfl_games.home_nfl_team',
+      'nfl_games.away_nfl_team',
       'nfl_games.esbid',
       'nfl_games.season_year as year'
     )

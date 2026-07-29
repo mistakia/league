@@ -214,8 +214,8 @@ router.get('/?', async (req, res) => {
         'week',
         'date',
         'time_est',
-        'v',
-        'h',
+        'away_nfl_team as v',
+        'home_nfl_team as h',
         'status'
       )
       .where('season_year', current_season.year)
