@@ -1,3 +1,12 @@
+-- STATUS: APPLIED 2026-07-28 against league_production
+--
+-- Banner added retroactively on 2026-07-28. This file landed in 2039e6cd before
+-- scripts/db-exec.sh owned the status banner, so it advertised nothing about
+-- whether it had run -- the same gap that left three headers reading pending over
+-- applied work until 2026-07-27. Confirmed applied by reading production
+-- directly: information_schema reports restricted_free_agency_period_start /
+-- _end on seasons and no tran_start / tran_end.
+--
 -- Rename seasons.tran_start / seasons.tran_end to name what they actually gate.
 --
 -- These columns read as a "transaction window" but they are not one. They are

@@ -115,11 +115,13 @@ The tunnel's local port comes from `config.databases.instances.league.tunnel.loc
 
 **Schema Change Workflow:**
 
-1. Author the SQL in `db/adhoc/YYYY-MM-DD-<slug>.sql`
+1. Author the SQL in `db/adhoc/YYYY-MM-DD-<slug>.sql`, including a `-- STATUS: PENDING` line in the header
 2. Run it against production with `yarn db:exec db/adhoc/<file>.sql` (wraps the file in a single transaction with `ON_ERROR_STOP=1`)
 3. Export the updated schema using `yarn export:schema`
-4. Commit both the adhoc file (audit trail) and the schema diff
+4. Commit both the adhoc file (audit trail, banner now rewritten to APPLIED) and the schema diff
 5. The exported schema file (`db/schema.postgres.sql`) is the source of truth; `db/adhoc/` is the append-only history of how it got there
+
+**The status banner is machine-owned — `db:exec` refuses a `db/adhoc` file without one.** It rewrites `-- STATUS: PENDING` to `-- STATUS: APPLIED <date> against league_production` in place on success, so there is no window where the apply has happened and the file still reads pending, and it REFUSES a file already marked APPLIED (`--reapply` overrides). That refusal is the real point: three headers advertised applied work as pending until 2026-07-27, one of them a non-idempotent two-`DROP COLUMN` file that a second run would have failed or half-applied. Commit the rewritten header in the same commit as the apply; the script prints the command.
 
 **Column renames must sweep query call sites, not just the DDL.** A rename lands green while leaving code that still names the old column, because most such references only fail when their code path actually executes. The 2026 `year`/`seas_type` -> `season_year`/`season_type` conformance left four seasonlog and careerlog generators still filtering on `nfl_games.year` and `ng.seas_type`; each threw Postgres 42703 at runtime and had silently aborted every scoring and league format seasonlog build until it was found by a backfill months later. After renaming a column, grep the old name across `scripts/`, `libs-server/`, `jobs/`, and `api/` and run the affected generators once, rather than trusting the schema export to be the whole change. Beware unqualified object-literal predicates (`.where({ year, seas_type: 'REG' })`) — they read as local variables and do not grep like column references.
 
@@ -127,7 +129,29 @@ The tunnel's local port comes from `config.databases.instances.league.tunnel.loc
 
 **Grep proves the absence of a string; only EXPLAIN proves the query is valid.** The golden-grep above is necessary but not sufficient, and on 2026-07-27 it missed a live defect twice. Correlated-subquery predicates are emitted as raw SQL against a generated CTE alias, so they appear _unquoted_ and _hash-named_ — `t22c9a76f62c8a62fec52ad076663a982.year IN (2024,2025)` — and match neither `nfl_plays\\".\\"<old>` nor any table-qualified pattern. A reviewer sweeping for `prop_markets_index.year` plus a fixed alias list that omitted `pmi.` likewise returned a confident zero on `pmi.year` in `update-market-settlement-status.mjs`, which had thrown 42703 on every game finalize for four days.
 
-The gate that does work, and that should run per cluster on any grain-column rename: load `db/schema.postgres.sql` into the PG16 test DB (`yarn test:db:up`, port 5433), generate the SQL for every data-view column across both the plain and `year_offset` range shapes, and `EXPLAIN` each one. It takes about two minutes and it found six defects that 232 goldens and a fully green 2214-test suite did not — because nothing in the suite ever asks Postgres whether the SQL it generated will parse. To validate a single golden, extract its `expected_query` and run `EXPLAIN` against the container directly (`docker exec -u postgres -i league-test-pg psql -U league_test -d league_test`; the `postgres` and `league_writer` DB roles are GRANT targets and cannot log in, so `-U league_test` is the only usable login role).
+The gate that does work is now committed as **`db/adhoc/check-data-view-sql-validity.mjs`**, and it must run per cluster on any grain-column rename:
+
+```
+yarn test:db:up
+node db/adhoc/check-data-view-sql-validity.mjs      # exit 1 on any invalid statement
+```
+
+It provisions its own database on the shared :5433 container (so it cannot collide with a sibling's suite run), loads `db/schema.postgres.sql`, generates SQL for all 551 data-view columns across the plain and `year_offset` range shapes, and `EXPLAIN`s each of the 1102 statements in about five seconds. Run ad hoc on 2026-07-27 it found six defects that 232 goldens and a fully green 2214-test suite did not; on its first committed run it found two more, both pre-existing (`player_pro_bowl_selections` naming a physical column that does not exist, and a `NaN` interpolated raw into the keeptradecut `year_offset` range SQL).
+
+**Read its findings by reachability, not by how broken the SQL looks.** Every finding carries a tier — `system_view` (ships in a default view, so it is on a page-load path), `saved_view`, `golden`, `catalog_only` — and the report sorts by it. Ranking the 2026-07-27 findings by severity alone inverted the call: a dormant seasonal path was ranked BLOCKER above `GET /api/markets/players/:pid`, which had been returning 500 on every call for a year. A `catalog_only` failure still fails the gate; the tier orders triage, it does not excuse anything. Feed the `saved_view` tier from production with `--saved-view-columns` (see `check-saved-view-param-coverage.mjs --column-ids`).
+
+To validate a single golden by hand, extract its `expected_query` and run `EXPLAIN` against the container directly (`docker exec -u postgres -i league-test-pg psql -U league_test -d league_test`; the `postgres` and `league_writer` DB roles are GRANT targets and cannot log in, so `-U league_test` is the only usable login role).
+
+**A renamed column PARAM silently drops the filter — sweep saved views at apply time, not authoring time.** `apply_play_by_play_column_params_to_query` iterates the param registry and skips any key it does not recognise, so a param renamed code-side leaves every saved view still persisting the old key with a filter that is quietly ignored: no error, no failed test, just a wrong answer. `db/adhoc/check-saved-view-param-coverage.mjs` finds them against production:
+
+```
+NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
+  node db/adhoc/check-saved-view-param-coverage.mjs
+```
+
+The remedy for anything it reports is a rule in `libs-shared/data-views-saved-view-migration.mjs`, which rewrites persisted params at read time. A one-shot SQL migration written when the rename is AUTHORED cannot cover a view saved between that check and cutover — which is precisely the hole the 2026-07-24 plays/snaps saved-view migration left. This check found 196 orphaned occurrences across 13 saved views from a 2025-07-24 rename that shipped with no saved-view migration at all.
+
+**`apply_scope_to_query` resolves physical column names by table name; do not hardcode them.** `libs-server/data-views/physical-season-columns.mjs` maps physical tables to their conformed `season_year` / `season_type` columns, and `apply_scope_to_query` consults it by default, so an emitter that simply omits `year_column` gets the right name instead of the vocabulary `year`. Any cluster that conforms another physical table must register it there — `test/libs-server.physical-season-columns.spec.mjs` checks the map against `db/schema.postgres.sql` in both directions and fails the suite on a table that is conformed but unregistered. Tables with no season-type column at all (`nfl_snaps`, the `nfl_plays_*` participant tables) are declared explicitly and throw rather than falling back, so a `seas_type` predicate against them is a loud error rather than a runtime 42703.
 
 When a rename does turn up a bad golden: **fix the code first, regenerate second, EXPLAIN third.** Regenerating first only re-blesses the defect. And declare `key_columns: { pid, year }` on any data-view source whose CTE projects `season_year` — `param-utils.mjs` silently defaults `year_column` to `'year'` when a source omits it, which is a rename that no grep of the source tree will ever surface.
 
