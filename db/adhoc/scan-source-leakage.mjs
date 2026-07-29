@@ -171,7 +171,7 @@ const excluded_files = new Set([
   'audit-schema-conformance.mjs',
   'scan-source-leakage.mjs',
   'generate-migration-inventory.mjs',
-  'check-migration-coverage.mjs'
+  'check-dropped-table-consumers.mjs'
 ])
 
 function walk_dir(abs, exts, out) {

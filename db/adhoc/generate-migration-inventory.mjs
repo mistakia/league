@@ -7,13 +7,14 @@
 // branched session claims a whole cluster from it.
 //
 // The inventory is IMMUTABLE and REGENERABLE -- never hand-edit inventory.json;
-// re-run this to refresh it. Mutable per-cluster state lives in the separate
-// progress/<cluster>.md trackers (see --emit-trackers).
+// re-run this to refresh it. It carried a companion --emit-trackers mode that
+// stubbed mutable per-cluster progress/<cluster>.md trackers; that substrate was
+// retired on 2026-07-29 (see db/adhoc/check-dropped-table-consumers.mjs), and
+// the conformance audit plus the task plan checkboxes carry cluster state now.
 //
 // Usage:
 //   node db/adhoc/generate-migration-inventory.mjs                 # write inventory.json
 //   node db/adhoc/generate-migration-inventory.mjs --no-consumers  # skip the repo grep (fast)
-//   node db/adhoc/generate-migration-inventory.mjs --emit-trackers # also stub progress/<cluster>.md
 //   node db/adhoc/generate-migration-inventory.mjs --summary       # print cluster distribution only
 //
 // Output roots resolve to the user-base scratch slug when run inside user-base,
@@ -222,7 +223,7 @@ const CONSUMER_DIRS = [
 const TOOL_FILES = new Set([
   'db/adhoc/generate-migration-inventory.mjs',
   'db/adhoc/audit-schema-conformance.mjs',
-  'db/adhoc/check-migration-coverage.mjs'
+  'db/adhoc/check-dropped-table-consumers.mjs'
 ])
 
 // One rg pass per table with a word boundary so `player` does not match
@@ -283,44 +284,9 @@ function cluster_distribution(records) {
   return [...dist].sort((a, b) => b[1] - a[1])
 }
 
-function emit_trackers(records) {
-  const progress_dir = path.join(scratch_dir, 'progress')
-  fs.mkdirSync(progress_dir, { recursive: true })
-  const by_cluster = new Map()
-  for (const r of records) {
-    if (!by_cluster.has(r.domain_cluster)) by_cluster.set(r.domain_cluster, [])
-    by_cluster.get(r.domain_cluster).push(r)
-  }
-  for (const [cluster, rows] of by_cluster) {
-    const file = path.join(progress_dir, `${cluster}.md`)
-    if (fs.existsSync(file)) {
-      // Never clobber a tracker a session may be mid-claim on. Regeneration
-      // only stubs clusters that have no tracker yet.
-      continue
-    }
-    const lines = [
-      `# Cluster progress: ${cluster}`,
-      '',
-      '- Owning thread: (unclaimed)',
-      '- State legend: todo -> in_progress -> in_review -> done',
-      '',
-      '| table | state | target table | notes |',
-      '| --- | --- | --- | --- |'
-    ]
-    for (const r of rows.sort((a, b) =>
-      a.current_table.localeCompare(b.current_table)
-    )) {
-      lines.push(`| ${r.current_table} | todo |  |  |`)
-    }
-    fs.writeFileSync(file, lines.join('\n') + '\n')
-  }
-  return [...by_cluster.keys()]
-}
-
 function main() {
   const argv = yargs(hideBin(process.argv))
     .option('consumers', { type: 'boolean', default: true })
-    .option('emit-trackers', { type: 'boolean', default: false })
     .option('summary', { type: 'boolean', default: false })
     .help().argv
 
@@ -346,13 +312,6 @@ function main() {
   const out_path = path.join(scratch_dir, 'inventory.json')
   fs.writeFileSync(out_path, JSON.stringify(records, null, 2) + '\n')
   console.log(`\nwrote ${out_path}`)
-
-  if (argv['emit-trackers']) {
-    const clusters = emit_trackers(records)
-    console.log(
-      `stubbed ${clusters.length} cluster trackers under ${path.join(scratch_dir, 'progress')}`
-    )
-  }
 }
 
 main()

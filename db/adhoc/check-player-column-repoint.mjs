@@ -4,8 +4,8 @@
 // The player cutover renamed 62 columns behind an updatable dual-name compat
 // view `player` (old + new names both resolve). The CONTRACT phase (DROP VIEW +
 // rename player_dimension -> player) may run ONLY once every consumer has been
-// repointed off the old names. check-migration-coverage --check-dangling is
-// blind to this: it re-greps the old *table* name, which is unchanged here, so
+// repointed off the old names. check-dropped-table-consumers.mjs is blind to
+// this: it greps for dropped *table* names, and this table was never dropped, so
 // it cannot see lingering old *column* names. This tool closes that gap.
 //
 // It scans consumer code for two high-confidence dangling patterns and gates on
