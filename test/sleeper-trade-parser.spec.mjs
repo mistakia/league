@@ -134,6 +134,23 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
     it('returns null for an empty payload', function () {
       expect(parse_sleeper_league({ league: null })).to.equal(null)
     })
+
+    // Sleeper ends a league-season chain with the STRING "0" rather than null.
+    // Treating that as a real id sends the history crawl off to fetch league 0,
+    // which 404s and books a phantom "skipped" league on every chain walked.
+    it('treats a "0" previous_league_id as end-of-chain', function () {
+      const row = parse_sleeper_league({
+        league: { ...dynasty_superflex_league, previous_league_id: '0' }
+      })
+      expect(row.previous_external_league_id).to.equal(null)
+    })
+
+    it('treats a missing previous_league_id as end-of-chain', function () {
+      const row = parse_sleeper_league({
+        league: { ...dynasty_superflex_league, previous_league_id: null }
+      })
+      expect(row.previous_external_league_id).to.equal(null)
+    })
   })
 
   describe('parse_sleeper_trade', function () {

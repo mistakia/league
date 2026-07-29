@@ -17,6 +17,11 @@ const SLEEPER_LEAGUE_TYPE = {
 // matter: the effect on QB value is the same either way, and a check for only
 // the SUPER_FLEX literal would misclassify 2QB leagues as single-QB, which is
 // exactly the misread that makes a QB trade uncomparable.
+// Sleeper uses both null and the string "0" to mean "no such league", so a
+// bare truthiness test is not enough to tell a real id from an absence.
+const is_league_id = (value) =>
+  value !== null && value !== undefined && String(value) !== '0'
+
 export const derive_is_superflex = (roster_positions) => {
   if (!Array.isArray(roster_positions)) {
     return false
@@ -78,7 +83,11 @@ export const parse_sleeper_league = ({ league, discovered_via = null }) => {
     taxi_slots: league.settings?.taxi_slots ?? null,
     roster_positions: JSON.stringify(roster_positions),
     scoring_settings: JSON.stringify(scoring_settings),
-    previous_external_league_id: league.previous_league_id
+    // Sleeper terminates a league-season chain with the STRING "0", not null,
+    // so a plain truthiness check reads the terminator as a real league id and
+    // sends the crawler off to fetch league 0. Normalised to null here so the
+    // chain walk has a single end-of-chain signal.
+    previous_external_league_id: is_league_id(league.previous_league_id)
       ? String(league.previous_league_id)
       : null,
     discovered_via

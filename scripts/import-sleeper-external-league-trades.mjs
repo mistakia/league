@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main, report_job, batch_insert } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { current_season } from '#constants'
 import {
   parse_sleeper_league,
   parse_sleeper_transactions
@@ -55,10 +56,16 @@ const sleeper_get = async (path) => {
  * Resolve Sleeper player ids to internal pids in one query.
  *
  * Direct sleeper_player_id join only -- no name/position fallback. Measured
- * match rate on real traded players was 176/176, so a fallback would add a
- * fuzzy-match failure mode to buy approximately nothing. Unresolved ids are
+ * match rate on real traded skill players was 176/176, so a fallback would add
+ * a fuzzy-match failure mode to buy approximately nothing. Unresolved ids are
  * returned as null pids and stored that way, which makes a future regression
  * countable via idx_external_league_trade_legs_unresolved.
+ *
+ * Team defenses are the one exception, and they are still not fuzzy. Sleeper
+ * identifies a DEF by bare team abbreviation ('PHI'), our DST pids ARE the bare
+ * team abbreviation, and no DST row carries a sleeper_player_id -- all 32 are
+ * null -- so the join above cannot match them and every traded defense would
+ * land unresolved. The mapping is an exact identity, so it is resolved as one.
  */
 const resolve_player_ids = async (external_player_ids) => {
   if (!external_player_ids.length) {
@@ -69,7 +76,26 @@ const resolve_player_ids = async (external_player_ids) => {
     .select('pid', 'sleeper_player_id')
     .whereIn('sleeper_player_id', external_player_ids)
 
-  return new Map(rows.map((row) => [String(row.sleeper_player_id), row.pid]))
+  const pid_by_external_id = new Map(
+    rows.map((row) => [String(row.sleeper_player_id), row.pid])
+  )
+
+  const unmatched = external_player_ids.filter(
+    (id) => !pid_by_external_id.has(id)
+  )
+
+  if (unmatched.length) {
+    const dst_rows = await db('player')
+      .select('pid')
+      .where({ primary_position: 'DST' })
+      .whereIn('pid', unmatched)
+
+    for (const row of dst_rows) {
+      pid_by_external_id.set(row.pid, row.pid)
+    }
+  }
+
+  return pid_by_external_id
 }
 
 /**
@@ -203,7 +229,7 @@ export const import_sleeper_league_trades = async ({
  */
 export const discover_sleeper_leagues = async ({
   seed_league_ids,
-  season_year,
+  season_year = current_season.year,
   limit,
   dynasty_only = true
 }) => {
@@ -264,8 +290,9 @@ export const discover_sleeper_leagues = async ({
 
 const import_sleeper_external_league_trades = async ({
   seed_league_ids,
-  season_year,
+  season_year = current_season.year,
   limit = 25,
+  history_depth = 4,
   dry_run = false,
   dynasty_only = true
 } = {}) => {
@@ -284,7 +311,22 @@ const import_sleeper_external_league_trades = async ({
 
   const totals = { leagues: 0, skipped: 0, trades: 0, legs: 0, unresolved: 0 }
 
-  for (const [external_league_id, discovered_via] of discovered) {
+  // Discovery only sees ONE season, because /user/{id}/leagues/nfl/{season} is
+  // season-scoped. Each league payload carries previous_league_id, so walking
+  // that chain harvests prior league-seasons for one request each -- by far the
+  // cheapest volume available, and it extends the observation window backward
+  // in time, which a value fit wants. Seeded from discovery and consumed as a
+  // queue so the chain is followed to history_depth without recursion.
+  const pending = [...discovered].map(([league_id, discovered_via]) => ({
+    external_league_id: league_id,
+    discovered_via,
+    depth: 0
+  }))
+  const seen = new Set(discovered.keys())
+
+  while (pending.length) {
+    const { external_league_id, discovered_via, depth } = pending.shift()
+
     // One bad league must not abort a crawl of hundreds. The failure is logged
     // and counted rather than swallowed silently.
     try {
@@ -303,6 +345,18 @@ const import_sleeper_external_league_trades = async ({
       totals.trades += result.trades
       totals.legs += result.legs
       totals.unresolved += result.unresolved
+
+      const previous_league_id = result.league_row?.previous_external_league_id
+      if (previous_league_id && depth < history_depth) {
+        if (!seen.has(previous_league_id)) {
+          seen.add(previous_league_id)
+          pending.push({
+            external_league_id: previous_league_id,
+            discovered_via: 'previous_season',
+            depth: depth + 1
+          })
+        }
+      }
     } catch (error) {
       totals.skipped += 1
       log(`league ${external_league_id} failed: ${error.message}`)
@@ -335,8 +389,12 @@ const main = async () => {
 
     await import_sleeper_external_league_trades({
       seed_league_ids,
-      season_year: argv.season_year,
+      season_year: argv.season_year ? Number(argv.season_year) : undefined,
       limit: argv.limit ? Number(argv.limit) : undefined,
+      history_depth:
+        argv.history_depth === undefined
+          ? undefined
+          : Number(argv.history_depth),
       dry_run: Boolean(argv.dry),
       dynasty_only: argv.dynasty_only !== false
     })

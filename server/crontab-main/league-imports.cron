@@ -235,4 +235,9 @@ JOB_PROJECT=league
 ## deliberate: trades are immutable once complete and the importer is
 ## idempotent, so this only needs to outpace trade creation, and a low cadence
 ## keeps us far under Sleeper's documented rate ceiling.
-10 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --season_year 2025 --limit 250 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
+## Deliberately NOT scoped by month and deliberately passing no --season_year:
+## dynasty trading runs year round (the heaviest week in the sampled league was
+## the offseason bucket), and the script defaults to current_season.year. A
+## pinned year here would silently crawl a stale frontier forever once the
+## season rolled over.
+10 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --limit 250 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
