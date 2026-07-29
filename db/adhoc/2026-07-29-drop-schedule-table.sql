@@ -39,10 +39,15 @@
 -- `gid` is an unreferenced legacy identifier with 5,580 distinct values and no
 -- consumer; it is not preserved.
 --
--- Full pre-drop backup (schema + all 5,580 rows) captured to
--- scratch/league/schema-redesign/schedule-drop/schedule-full-backup.sql. There is
--- no rollback file because a DROP cannot be reversed from SQL alone; restore from
--- that dump if ever needed.
+-- There is no rollback file because a DROP cannot be reversed from SQL alone.
+--
+-- The authoritative recovery path is `nfl_games` itself: every value this table
+-- held is proven present there (see above), so the table is reconstructible from
+-- it apart from `gid`, an unreferenced legacy identifier with no consumer. A full
+-- pre-drop dump was also taken to
+-- scratch/league/schema-redesign/schedule-drop/schedule-full-backup.sql, but note
+-- that path is GITIGNORED and therefore ephemeral -- treat it as belt-and-braces
+-- for the apply window, not as a durable archive.
 --
 -- yarn db:exec db/adhoc/2026-07-29-drop-schedule-table.sql
 -- yarn export:schema
