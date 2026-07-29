@@ -253,6 +253,10 @@ Format identities (`league_scoring_formats.id`, `league_formats.id`) are opaque 
 
 **Cron schedules in `/server/crontab-*.cron`** for different server roles
 
+**`yarn deploy` does NOT update cron — the crontab is a separate deploy.** A code deploy ships the scripts but leaves the schedule and its ARGUMENTS untouched, so a script whose flags changed will keep running under the old ones with no error anywhere. On 2026-07-29 an external-league importer was deployed with new `--import_limit`/`--resync_limit` budgets while the installed crontab still passed a removed `--limit 250`; the job would have run weekly with stale arguments indefinitely. Ship both: `yarn deploy` then `server/deploy-crontab.sh league server/crontab-main`. Note the installed file is machine-built (`base crontab build`, which injects `JOB_SCHEDULE`/`JOB_SCHEDULE_TYPE`), so never hand-edit `~/crontab/*` on the host — and before deploying, diff the installed job lines against the source with the injection stripped, since the crontab directory is shared and carries every session's committed changes, not just yours.
+
+**A fixed sleep between requests does not rate-limit anything.** It ADDS to network latency rather than bounding a rate, so the achieved rate depends entirely on which host runs the job — and the fast host is always the one that ships. Measured 2026-07-29 on the Sleeper importer with a fixed 120ms sleep: round trip was ~670ms from a workstation (~76 req/min) but ~43ms from the production VPS, which would have run the identical code at ~350 req/min, roughly 4x the vendor's conservative published figure. The workstation measurement looked reassuring and was pure artifact of a slow link, which is the real trap: it is easy to "verify" a throttle somewhere it will never run. Pace against elapsed time instead — hold a `next_request_at` timestamp and advance it from `max(now, next_request_at) + interval`, so the ceiling is deterministic on any host and a slow response cannot bank credit toward a later burst. See `scripts/import-sleeper-external-league-trades.mjs`.
+
 ### Testing
 
 - Mocha with Chai assertions
