@@ -471,7 +471,8 @@ const crawl_user_leagues = async ({ external_user_id, season_year }) => {
 export const crawl_sleeper_league_graph = async ({
   seed_league_ids = [],
   season_year = current_season.year,
-  new_league_limit
+  new_league_limit,
+  max_runtime_minutes = null
 }) => {
   const previous_stage = request_stage
   request_stage = 'crawl'
@@ -480,9 +481,27 @@ export const crawl_sleeper_league_graph = async ({
   let users_expanded = 0
   let member_lists_crawled = 0
   let bootstrapped = false
+  let stopped_on_time = false
+
+  // The league budget alone does not bound wall clock, because it is denominated
+  // in the OUTPUT of a request while the rate limit prices the INPUT. Yield per
+  // request is measured at ~5 new leagues now, but it falls as the graph
+  // saturates and the same budget then costs several times longer -- at a yield
+  // of 1, a 20,000-league budget is 20,000 requests, which at 60/min is over two
+  // weeks and would still be running when the next run starts. A deadline is the
+  // only bound that holds regardless of yield, so time is the intended binding
+  // constraint and the league budget is the safety ceiling above it.
+  const deadline_at = max_runtime_minutes
+    ? Date.now() + max_runtime_minutes * 60 * 1000
+    : null
 
   try {
     while (new_leagues < new_league_limit) {
+      if (deadline_at && Date.now() >= deadline_at) {
+        stopped_on_time = true
+        break
+      }
+
       const frontier_user = await db('external_league_users')
         .select('external_user_id')
         .where({ platform: 'sleeper' })
@@ -531,10 +550,10 @@ export const crawl_sleeper_league_graph = async ({
   }
 
   log(
-    `crawl: ${new_leagues} new leagues from ${users_expanded} managers expanded and ${member_lists_crawled} member lists read (${request_counts.crawl} requests)`
+    `crawl: ${new_leagues} new leagues from ${users_expanded} managers expanded and ${member_lists_crawled} member lists read (${request_counts.crawl} requests)${stopped_on_time ? `, stopped on the ${max_runtime_minutes}m deadline` : ''}`
   )
 
-  return { new_leagues, users_expanded, member_lists_crawled }
+  return { new_leagues, users_expanded, member_lists_crawled, stopped_on_time }
 }
 
 /**
@@ -676,6 +695,7 @@ const import_sleeper_external_league_trades = async ({
   import_limit = 25,
   resync_limit = 25,
   history_depth = 4,
+  max_runtime_minutes = null,
   dry_run = false,
   dynasty_only = true,
   lid = 1
@@ -698,7 +718,8 @@ const import_sleeper_external_league_trades = async ({
     : await crawl_sleeper_league_graph({
         seed_league_ids,
         season_year,
-        new_league_limit: limit
+        new_league_limit: limit,
+        max_runtime_minutes
       })
 
   const selected = await select_leagues_to_import({
@@ -798,6 +819,28 @@ const import_sleeper_external_league_trades = async ({
     )
   }
 
+  // The import oracle above goes INERT whenever imports are paused: with
+  // import_limit 0 no league is ever selected, so totals.leagues is 0 and the
+  // condition cannot fire. A graph-only run would then report green no matter
+  // what Sleeper returned. This is the crawl-stage equivalent -- the crawl's
+  // product is new graph rows, so spending a run's worth of requests and
+  // acquiring nothing is the same class of silent failure.
+  //
+  // Thresholded at 20 requests and gated on new_leagues specifically, because
+  // the honest non-failures all sit below that line: an exhausted graph makes no
+  // requests at all, and a deadline that fires early makes only a few. A run
+  // that expands managers 20+ times and finds not one league absent from a
+  // corpus this small is a payload-shape break, not a saturated neighbourhood.
+  if (
+    !dry_run &&
+    request_counts.crawl >= 20 &&
+    crawl_totals.new_leagues === 0
+  ) {
+    throw new Error(
+      `crawl spent ${request_counts.crawl} requests and discovered zero new leagues -- payload shape may have changed`
+    )
+  }
+
   return { ...totals, ...crawl_totals, frontier }
 }
 
@@ -819,6 +862,12 @@ const main = async () => {
     // --resync_limit is how many ALREADY-imported leagues to refresh for new
     //   trades, stalest first. Separate budget so refresh work cannot starve
     //   frontier expansion.
+    // --max_runtime_minutes is a DEADLINE on the crawl stage. It exists because
+    //   --limit counts leagues while the rate limit prices requests, so the two
+    //   are related only by a yield that drifts downward as the graph
+    //   saturates; only a deadline bounds wall clock no matter what the yield
+    //   does. Set it whenever --limit is large enough that the run could
+    //   otherwise still be going when the next one starts.
     const seed_league_ids = argv.seed_league_id
       ? [].concat(argv.seed_league_id).map(String)
       : []
@@ -839,6 +888,10 @@ const main = async () => {
         argv.history_depth === undefined
           ? undefined
           : Number(argv.history_depth),
+      max_runtime_minutes:
+        argv.max_runtime_minutes === undefined
+          ? undefined
+          : Number(argv.max_runtime_minutes),
       dry_run: Boolean(argv.dry),
       dynasty_only: argv.dynasty_only !== false
     })

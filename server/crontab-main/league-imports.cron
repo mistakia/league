@@ -230,31 +230,60 @@ JOB_PROJECT=league
 
 # External League Trades
 
-## At 5:10AM on Monday. Sleeper's public read-only API -- see
-## scripts/import-sleeper-external-league-trades.mjs. Weekly is deliberate:
-## trades are immutable once complete and the importer is idempotent, so this
-## only needs to outpace trade creation, and a low cadence keeps us far under
-## Sleeper's documented rate ceiling.
-## THE CRAWL ACCUMULATES. --limit is how many NEW leagues to take into the
-## graph each run, NOT the total crawl size, so each Monday extends the
-## frontier by that many leagues instead of re-walking the same neighbourhood.
-## THE MAP RUNS AHEAD OF THE IMPORT. A graph node costs one or two requests and
-## an import costs up to nineteen, so --limit is set far above --import_limit
-## deliberately: crawl broadly, import narrowly, let the backlog buffer them.
-## Imports are filtered to leagues comparable to ours (dynasty, superflex
-## matched to our own format, no IDP, no best-ball), which is why the map is
-## worth building out well beyond what any one run reads.
+## At 5:10AM daily. Sleeper's public read-only API -- see
+## scripts/import-sleeper-external-league-trades.mjs.
+##
+## GRAPH-FIRST POSTURE, set 2026-07-29 on operator instruction. Trade imports
+## are PAUSED and the crawl runs wide. 17,718 already-imported trades stay put;
+## pausing only stops acquiring more. The corpus was 834 leagues against 21
+## known managers and 424 membership edges -- the map was far behind the trade
+## data, so the map is what gets the requests until the operator decides which
+## leagues are worth importing from.
+##
+## IMPORTS ARE PAUSED BY BUDGET, NOT BY A MODE FLAG. --import_limit 0 and
+## --resync_limit 0 are honored as real values, not fallen through to defaults
+## (main() compares each against undefined rather than testing truthiness).
+## Verified on production: a run with both at 0 makes 0 import-stage requests,
+## counted separately from crawl requests in the job's own output. To resume
+## imports, restore the budgets -- nothing else needs changing.
+## This also stops the previous_league_id chain walk, which lives INSIDE the
+## import stage and is unbudgeted (33 selected leagues once produced 54
+## imports). With no leagues selected there is nothing for it to walk.
+##
+## THE FRONTIER CANNOT BE DRAINED, so --limit is a corpus-growth policy and not
+## a completion target. Every league discovered arrives with its own uncrawled
+## member list, and reading one member list yields ~10 managers who each yield
+## ~5 more leagues, so the frontier GROWS as it is worked: a measured 2-minute
+## run took the uncrawled member lists from 837 to 3,266. Do not read a large
+## remaining frontier as a backlog to be finished.
+##
+## --max_runtime_minutes IS THE REAL BOUND. --limit counts leagues while the
+## rate limit prices requests, and the two are related only through a yield
+## (~15 new leagues per request measured 2026-07-29) that falls as the graph
+## saturates. At a yield of 1, --limit 5000 would be 5000 requests -- 83 minutes
+## -- so only a deadline keeps a run from overlapping the next one. 45 minutes
+## caps a run at ~2,700 requests; --limit 5000 is expected to bind first at
+## roughly 6 minutes while the yield stays high.
+##
+## Daily rather than weekly because a graph-only run is cheap: no imports means
+## no 19-request league fetches, so this is ~6 minutes of paced traffic a day
+## and it gives a frontier reading every morning instead of every Monday.
+## Restore the weekly cadence when imports resume.
+##
+## Rate limit unchanged and not to be raised: 60 req/min paced against elapsed
+## time in throttle_request, deliberately under a conservative published 90/min
+## (Sleeper documents ~1000/min). The 2-minute verification run made exactly
+## 120 requests.
+##
 ## The crawl graph (external_league_users, external_league_memberships, and the
 ## crawl-state timestamps on external_leagues) is persisted, so a run resumes
 ## from wherever the last one stopped. --seed_league_id is only consulted when
 ## the graph offers no frontier at all, which in practice means the first run
 ## ever; it is a bootstrap, not an anchor, and is retained only so the job can
 ## re-bootstrap itself if the graph is ever emptied.
-## --resync_limit refreshes already-imported leagues stalest-first, on its own
-## budget so it cannot starve frontier expansion.
 ## Deliberately NOT scoped by month and deliberately passing no --season_year:
 ## dynasty trading runs year round (the heaviest week in the sampled league was
 ## the offseason bucket), and the script defaults to current_season.year. A
 ## pinned year here would silently crawl a stale frontier forever once the
 ## season rolled over.
-10 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --limit 1000 --import_limit 100 --resync_limit 50 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
+10 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --limit 5000 --import_limit 0 --resync_limit 0 --max_runtime_minutes 45 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
