@@ -21,16 +21,42 @@ const argv = yargs(hideBin(process.argv)).argv
 const SLEEPER_API_URL = 'https://api.sleeper.app/v1'
 
 // Sleeper documents a ~1000 req/min ceiling before IP blocking, and a
-// third-party source reports 90/min. We sit far under both: this is a
-// background enrichment job with no deadline, and being cheap to host is worth
-// more than finishing an hour sooner.
-const REQUEST_DELAY_MS = 120
+// third-party source reports 90/min. We target 60/min, comfortably under both.
+// This is a background enrichment job with no deadline, so being cheap and
+// polite is worth more than finishing sooner.
+//
+// PACED AGAINST ELAPSED TIME, NOT A FIXED SLEEP BETWEEN REQUESTS. A fixed sleep
+// does not control a rate -- it ADDS to network latency, so the achieved rate
+// depends entirely on where the job runs, and the fast host is the one that
+// ships. Measured 2026-07-29 with the previous fixed 120ms sleep: round trip to
+// Sleeper was ~670ms from a workstation (~76 req/min actual) but ~43ms from the
+// production VPS, which would have run the identical code at ~350 req/min --
+// nearly 4x the conservative published figure. Worse, the workstation
+// measurement looked reassuring and was pure artifact of a slow link. Enforcing
+// a floor on the interval between request STARTS makes the rate the same
+// everywhere and independent of how fast the upstream answers.
+const MIN_REQUEST_INTERVAL_MS = 1000
 
 // Sleeper files transactions in per-week buckets; bucket 1 also carries the
 // entire offseason, which is where most dynasty trading happens.
 const TRANSACTION_BUCKETS = 18
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// Timestamp the next request is allowed to START. Advancing it from
+// max(now, next_request_at) rather than from `now` means a slow response does
+// not "bank" credit toward firing a burst afterwards, while an idle gap does
+// not push the schedule into the past.
+let next_request_at = 0
+
+const throttle_request = async () => {
+  const now = Date.now()
+  const wait_ms = next_request_at - now
+  if (wait_ms > 0) {
+    await sleep(wait_ms)
+  }
+  next_request_at = Math.max(now, next_request_at) + MIN_REQUEST_INTERVAL_MS
+}
 
 // Counted per stage rather than in one total, because the whole point of
 // persisting the crawl graph is that repeated runs spend their requests on NEW
@@ -41,7 +67,7 @@ const request_counts = { crawl: 0, import: 0 }
 let request_stage = 'import'
 
 const sleeper_get = async (path) => {
-  await sleep(REQUEST_DELAY_MS)
+  await throttle_request()
   request_counts[request_stage] += 1
 
   const res = await fetch(`${SLEEPER_API_URL}${path}`)
