@@ -38,33 +38,24 @@ const franchise_price_for = ({ pos, season }) => {
 /**
  * Salary a roster row carries once the extension deadline fires.
  *
- * Two tags REPLACE the contract value rather than freezing it, and a tagged
- * player still shows his pre-tag value in the database until the deadline, so
- * reading live state without this mapping misstates every tagged franchise.
+ * A franchise tag REPLACES the contract value rather than freezing it, and a
+ * tagged player still shows his pre-tag value in the database until the
+ * deadline, so reading live state without this mapping misstates every tagged
+ * franchise.
  *
- * The rookie case departs from `get_extension_amount`, which returns the
- * unchanged value. Constitution Article VIII §3 states a rookie tag extends the
- * player for $0, and the cap line follows the constitution.
+ * Note what Constitution Article VIII §3 means by extending a rookie "for $0":
+ * the EXTENSION costs $0 where a regular extension adds $5 — the contract keeps
+ * its recorded value, it does not become a $0 salary. `get_extension_amount`
+ * already encodes that, so this delegates rather than special-casing it.
  */
-export const post_deadline_salary = ({
-  tag,
-  pos,
-  extensions,
-  value,
-  season
-}) => {
-  if (tag === player_tag_types.ROOKIE) {
-    return 0
-  }
-
-  return get_extension_amount({
+export const post_deadline_salary = ({ tag, pos, extensions, value, season }) =>
+  get_extension_amount({
     extensions,
     tag,
     pos,
     league: season,
     value
   })
-}
 
 /**
  * Franchise tag eligibility, scoped to the tagging team.
@@ -235,9 +226,10 @@ export default function build_tag_board({
       row.franchise_price === null
         ? null
         : row.extension_price - row.franchise_price
-    // A rookie tag sets the contract to $0, so the saving is the whole
-    // extension price it replaces.
-    row.rookie_saving = row.extension_price
+    // A rookie tag buys the extension for $0 rather than zeroing the contract,
+    // so it saves exactly the extension cost it avoids — the value itself still
+    // sits on the cap line either way.
+    row.rookie_saving = row.extension_price - row.value
     row.franchise_consecutive_year_ok = passes_consecutive_year_check({
       tid: row.tid,
       pid: row.pid,

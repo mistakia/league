@@ -147,17 +147,16 @@ describe('tag board', function () {
       }).should.equal(41)
     })
 
-    it('zeroes a rookie-tagged contract', function () {
-      // Constitution Article VIII §3. get_extension_amount returns the
-      // unchanged value here, and following it understates nothing but
-      // overstates the tagged team's cap line.
+    it('leaves a rookie-tagged contract at its recorded value', function () {
+      // Constitution Article VIII §3 prices the EXTENSION at $0 — the contract
+      // is not extended by $5, it does not become a $0 salary. Not 15, not 0.
       post_deadline_salary({
         tag: 3,
         pos: 'RB',
         extensions: 0,
         value: 10,
         season
-      }).should.equal(0)
+      }).should.equal(10)
     })
 
     it('leaves a restricted free agency contract pending', function () {
@@ -181,7 +180,7 @@ describe('tag board', function () {
             { tid: 1, pid: 'REG', pos: 'WR', tag: 1, extensions: 0, value: 20 },
             // franchise RB -> 41, replacing 61
             { tid: 1, pid: 'FRA', pos: 'RB', tag: 2, value: 61 },
-            // rookie -> 0, replacing 10
+            // rookie -> unchanged 10 (the extension is free, the salary stays)
             { tid: 1, pid: 'ROO', pos: 'RB', tag: 3, value: 10 },
             // restricted free agency -> unchanged 21
             { tid: 1, pid: 'RFA', pos: 'WR', tag: 4, value: 21 },
@@ -192,9 +191,10 @@ describe('tag board', function () {
 
       const exposure = team_exposure(board, 1)
       exposure.current_salary.should.equal(112)
-      exposure.post_extension_salary.should.equal(87)
+      // 25 (regular) + 41 (franchise price) + 10 (rookie, unchanged) + 21 (RFA)
+      exposure.post_extension_salary.should.equal(97)
       exposure.current_room.should.equal(88)
-      exposure.post_extension_room.should.equal(113)
+      exposure.post_extension_room.should.equal(103)
     })
 
     it('reports an overage as negative post-extension room', function () {
@@ -518,8 +518,9 @@ describe('tag board', function () {
       const rows = team_board(board, 1).players
       rows.find((p) => p.pid === 'R25').eligibility.rookie.should.equal(true)
       rows.find((p) => p.pid === 'R26').eligibility.rookie.should.equal(false)
-      // Saving is the whole extension price the $0 tag replaces.
-      rows.find((p) => p.pid === 'R25').rookie_saving.should.equal(13)
+      // The tag buys the extension for $0, so it saves the $5 extension cost,
+      // not the $8 value that stays on the cap line either way.
+      rows.find((p) => p.pid === 'R25').rookie_saving.should.equal(5)
     })
   })
 
