@@ -535,13 +535,30 @@ export default function build_tag_board({
         }))
         .sort((a, b) => a.post_extension_room - b.post_extension_room)
     },
-    unspent_levers: {
+    // two distinct quantities, and they differ wherever a lever's per-team
+    // limit exceeds one. franchise and rookie are capped at one apiece so the
+    // team count and the tag count coincide; restricted free agency allows two
+    // nominations, so nine teams holding a nomination is eighteen unspent
+    // nominations. rendering one as the other understates available supply by
+    // half, which is why the key names the unit rather than saying "unspent".
+    teams_with_unspent_lever: {
       franchise: lever_budget.filter((row) => row.franchise.remaining > 0)
         .length,
       rookie: lever_budget.filter((row) => row.rookie.remaining > 0).length,
       restricted_free_agency: lever_budget.filter(
         (row) => row.restricted_free_agency.remaining > 0
       ).length
+    },
+    unspent_lever_count: {
+      franchise: lever_budget.reduce(
+        (sum, row) => sum + row.franchise.remaining,
+        0
+      ),
+      rookie: lever_budget.reduce((sum, row) => sum + row.rookie.remaining, 0),
+      restricted_free_agency: lever_budget.reduce(
+        (sum, row) => sum + row.restricted_free_agency.remaining,
+        0
+      )
     },
     teams_with_franchise_candidate: team_ids.filter(
       (tid) => franchise_candidates_by_tid.get(tid).length > 0

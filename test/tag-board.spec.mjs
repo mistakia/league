@@ -258,8 +258,18 @@ describe('tag board', function () {
       unspent.rookie.remaining.should.equal(1)
       unspent.restricted_free_agency.remaining.should.equal(2)
 
-      board.league_market.unspent_levers.franchise.should.equal(1)
-      board.league_market.unspent_levers.restricted_free_agency.should.equal(1)
+      board.league_market.teams_with_unspent_lever.franchise.should.equal(1)
+      board.league_market.unspent_lever_count.franchise.should.equal(1)
+
+      // the discriminating case: one team holds two unspent nominations, so
+      // the team count and the tag count must not agree. rendering the team
+      // count as a tag count halves the stated supply.
+      board.league_market.teams_with_unspent_lever.restricted_free_agency.should.equal(
+        1
+      )
+      board.league_market.unspent_lever_count.restricted_free_agency.should.equal(
+        2
+      )
     })
 
     it('counts tags on practice squad and reserve rows against the limit', function () {
