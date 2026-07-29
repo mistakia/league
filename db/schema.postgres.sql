@@ -736,6 +736,14 @@ DROP TABLE IF EXISTS public.projections_index_y2021;
 DROP TABLE IF EXISTS public.projections_index_y2020;
 DROP TABLE IF EXISTS public.projections_index_default;
 DROP TABLE IF EXISTS public.projections_index;
+DROP TABLE IF EXISTS public.projections_history_y2026;
+DROP TABLE IF EXISTS public.projections_history_y2025;
+DROP TABLE IF EXISTS public.projections_history_y2024;
+DROP TABLE IF EXISTS public.projections_history_y2023;
+DROP TABLE IF EXISTS public.projections_history_y2022;
+DROP TABLE IF EXISTS public.projections_history_y2021;
+DROP TABLE IF EXISTS public.projections_history_y2020;
+DROP TABLE IF EXISTS public.projections_history_default;
 DROP TABLE IF EXISTS public.projections_history;
 DROP TABLE IF EXISTS public.practice;
 DROP TABLE IF EXISTS public.position_game_outcome_defaults;
@@ -24610,6 +24618,423 @@ CREATE TABLE public.projections_history (
     punt_return_touchdowns numeric(4,1),
     season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+)
+PARTITION BY RANGE (season_year);
+
+
+--
+-- Name: projections_history_default; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_default (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+);
+
+
+--
+-- Name: projections_history_y2020; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_y2020 (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+);
+
+
+--
+-- Name: projections_history_y2021; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_y2021 (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+);
+
+
+--
+-- Name: projections_history_y2022; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_y2022 (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+);
+
+
+--
+-- Name: projections_history_y2023; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_y2023 (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+);
+
+
+--
+-- Name: projections_history_y2024; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_y2024 (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+);
+
+
+--
+-- Name: projections_history_y2025; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_y2025 (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
+);
+
+
+--
+-- Name: projections_history_y2026; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history_y2026 (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -27119,6 +27544,62 @@ ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_
 --
 
 ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2026 FOR VALUES FROM ('2026') TO ('2027');
+
+
+--
+-- Name: projections_history_default; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_default DEFAULT;
+
+
+--
+-- Name: projections_history_y2020; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_y2020 FOR VALUES FROM ('2020') TO ('2021');
+
+
+--
+-- Name: projections_history_y2021; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_y2021 FOR VALUES FROM ('2021') TO ('2022');
+
+
+--
+-- Name: projections_history_y2022; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_y2022 FOR VALUES FROM ('2022') TO ('2023');
+
+
+--
+-- Name: projections_history_y2023; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_y2023 FOR VALUES FROM ('2023') TO ('2024');
+
+
+--
+-- Name: projections_history_y2024; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_y2024 FOR VALUES FROM ('2024') TO ('2025');
+
+
+--
+-- Name: projections_history_y2025; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_y2025 FOR VALUES FROM ('2025') TO ('2026');
+
+
+--
+-- Name: projections_history_y2026; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_history ATTACH PARTITION public.projections_history_y2026 FOR VALUES FROM ('2026') TO ('2027');
 
 
 --
@@ -30730,21 +31211,21 @@ CREATE INDEX idx_practice_nfl_week_id ON public.practice USING btree (nfl_week_i
 -- Name: idx_projections_history_natural_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_projections_history_natural_key ON public.projections_history USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX idx_projections_history_natural_key ON ONLY public.projections_history USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
 
 
 --
 -- Name: idx_projections_history_nfl_week_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_projections_history_nfl_week_id ON public.projections_history USING btree (nfl_week_id);
+CREATE INDEX idx_projections_history_nfl_week_id ON ONLY public.projections_history USING btree (nfl_week_id);
 
 
 --
 -- Name: idx_projections_history_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_projections_history_pid ON public.projections_history USING btree (pid);
+CREATE INDEX idx_projections_history_pid ON ONLY public.projections_history USING btree (pid);
 
 
 --
@@ -43327,6 +43808,174 @@ CREATE UNIQUE INDEX players_status_pid_observed_at_key ON public.players_status 
 
 
 --
+-- Name: projections_history_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_default_natural_key_idx ON public.projections_history_default USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_default_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_default_nfl_week_id_idx ON public.projections_history_default USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_default_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_default_pid_idx ON public.projections_history_default USING btree (pid);
+
+
+--
+-- Name: projections_history_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_y2020_natural_key_idx ON public.projections_history_y2020 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_y2020_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2020_nfl_week_id_idx ON public.projections_history_y2020 USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_y2020_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2020_pid_idx ON public.projections_history_y2020 USING btree (pid);
+
+
+--
+-- Name: projections_history_y2021_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_y2021_natural_key_idx ON public.projections_history_y2021 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_y2021_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2021_nfl_week_id_idx ON public.projections_history_y2021 USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_y2021_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2021_pid_idx ON public.projections_history_y2021 USING btree (pid);
+
+
+--
+-- Name: projections_history_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_y2022_natural_key_idx ON public.projections_history_y2022 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_y2022_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2022_nfl_week_id_idx ON public.projections_history_y2022 USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_y2022_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2022_pid_idx ON public.projections_history_y2022 USING btree (pid);
+
+
+--
+-- Name: projections_history_y2023_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_y2023_natural_key_idx ON public.projections_history_y2023 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_y2023_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2023_nfl_week_id_idx ON public.projections_history_y2023 USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_y2023_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2023_pid_idx ON public.projections_history_y2023 USING btree (pid);
+
+
+--
+-- Name: projections_history_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_y2024_natural_key_idx ON public.projections_history_y2024 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_y2024_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2024_nfl_week_id_idx ON public.projections_history_y2024 USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_y2024_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2024_pid_idx ON public.projections_history_y2024 USING btree (pid);
+
+
+--
+-- Name: projections_history_y2025_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_y2025_natural_key_idx ON public.projections_history_y2025 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_y2025_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2025_nfl_week_id_idx ON public.projections_history_y2025 USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_y2025_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2025_pid_idx ON public.projections_history_y2025 USING btree (pid);
+
+
+--
+-- Name: projections_history_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_history_y2026_natural_key_idx ON public.projections_history_y2026 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: projections_history_y2026_nfl_week_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2026_nfl_week_id_idx ON public.projections_history_y2026 USING btree (nfl_week_id);
+
+
+--
+-- Name: projections_history_y2026_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_history_y2026_pid_idx ON public.projections_history_y2026 USING btree (pid);
+
+
+--
 -- Name: projections_index_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -55717,6 +56366,174 @@ ALTER INDEX public.idx_player_gamelogs_season_year_esbid_pid ATTACH PARTITION pu
 
 
 --
+-- Name: projections_history_default_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_default_natural_key_idx;
+
+
+--
+-- Name: projections_history_default_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_default_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_default_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_default_pid_idx;
+
+
+--
+-- Name: projections_history_y2020_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_y2020_natural_key_idx;
+
+
+--
+-- Name: projections_history_y2020_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_y2020_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_y2020_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_y2020_pid_idx;
+
+
+--
+-- Name: projections_history_y2021_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_y2021_natural_key_idx;
+
+
+--
+-- Name: projections_history_y2021_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_y2021_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_y2021_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_y2021_pid_idx;
+
+
+--
+-- Name: projections_history_y2022_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_y2022_natural_key_idx;
+
+
+--
+-- Name: projections_history_y2022_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_y2022_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_y2022_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_y2022_pid_idx;
+
+
+--
+-- Name: projections_history_y2023_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_y2023_natural_key_idx;
+
+
+--
+-- Name: projections_history_y2023_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_y2023_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_y2023_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_y2023_pid_idx;
+
+
+--
+-- Name: projections_history_y2024_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_y2024_natural_key_idx;
+
+
+--
+-- Name: projections_history_y2024_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_y2024_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_y2024_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_y2024_pid_idx;
+
+
+--
+-- Name: projections_history_y2025_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_y2025_natural_key_idx;
+
+
+--
+-- Name: projections_history_y2025_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_y2025_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_y2025_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_y2025_pid_idx;
+
+
+--
+-- Name: projections_history_y2026_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_natural_key ATTACH PARTITION public.projections_history_y2026_natural_key_idx;
+
+
+--
+-- Name: projections_history_y2026_nfl_week_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_nfl_week_id ATTACH PARTITION public.projections_history_y2026_nfl_week_id_idx;
+
+
+--
+-- Name: projections_history_y2026_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_projections_history_pid ATTACH PARTITION public.projections_history_y2026_pid_idx;
+
+
+--
 -- Name: projections_index_default_natural_key_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -57963,6 +58780,62 @@ GRANT SELECT ON TABLE public.practice TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.projections_history TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_default; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_default TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_y2020; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_y2020 TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_y2021; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_y2021 TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_y2022; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_y2022 TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_y2023; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_y2023 TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_y2024; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_y2024 TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_y2025; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_y2025 TO league_reader;
+
+
+--
+-- Name: TABLE projections_history_y2026; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history_y2026 TO league_reader;
 
 
 --
