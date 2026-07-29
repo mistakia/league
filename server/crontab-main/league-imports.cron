@@ -238,6 +238,12 @@ JOB_PROJECT=league
 ## THE CRAWL ACCUMULATES. --limit is how many NEW leagues to take into the
 ## graph each run, NOT the total crawl size, so each Monday extends the
 ## frontier by that many leagues instead of re-walking the same neighbourhood.
+## THE MAP RUNS AHEAD OF THE IMPORT. A graph node costs one or two requests and
+## an import costs up to nineteen, so --limit is set far above --import_limit
+## deliberately: crawl broadly, import narrowly, let the backlog buffer them.
+## Imports are filtered to leagues comparable to ours (dynasty, superflex
+## matched to our own format, no IDP, no best-ball), which is why the map is
+## worth building out well beyond what any one run reads.
 ## The crawl graph (external_league_users, external_league_memberships, and the
 ## crawl-state timestamps on external_leagues) is persisted, so a run resumes
 ## from wherever the last one stopped. --seed_league_id is only consulted when
@@ -251,4 +257,4 @@ JOB_PROJECT=league
 ## the offseason bucket), and the script defaults to current_season.year. A
 ## pinned year here would silently crawl a stale frontier forever once the
 ## season rolled over.
-10 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --limit 250 --resync_limit 50 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
+10 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --limit 1000 --import_limit 100 --resync_limit 50 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1

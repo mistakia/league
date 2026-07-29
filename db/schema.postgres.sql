@@ -357,6 +357,7 @@ DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
 DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
 DROP INDEX IF EXISTS public.idx_external_leagues_member_list_frontier;
 DROP INDEX IF EXISTS public.idx_external_leagues_last_synced;
+DROP INDEX IF EXISTS public.idx_external_leagues_import_appetite;
 DROP INDEX IF EXISTS public.idx_external_leagues_format;
 DROP INDEX IF EXISTS public.idx_external_league_users_frontier;
 DROP INDEX IF EXISTS public.idx_external_league_trades_processed_at;
@@ -3118,6 +3119,7 @@ CREATE TABLE public.external_leagues (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     member_list_crawled_at timestamp with time zone,
     discovered_from_external_user_id character varying(64),
+    has_individual_defensive_players boolean DEFAULT false NOT NULL,
     CONSTRAINT external_leagues_league_format_check CHECK (((league_format)::text = ANY ((ARRAY['dynasty'::character varying, 'keeper'::character varying, 'redraft'::character varying])::text[])))
 );
 
@@ -3141,6 +3143,13 @@ COMMENT ON COLUMN public.external_leagues.member_list_crawled_at IS 'When /leagu
 --
 
 COMMENT ON COLUMN public.external_leagues.discovered_from_external_user_id IS 'The manager whose league list surfaced this league. NULL for seed, previous-season chain links, and pre-crawl-graph rows.';
+
+
+--
+-- Name: COLUMN external_leagues.has_individual_defensive_players; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_leagues.has_individual_defensive_players IS 'League starts individual defensive players. Excluded from the value fit: IDP legs resolve to a NULL pid, which biases the affected side cheap in a one-directional way.';
 
 
 --
@@ -29802,6 +29811,13 @@ CREATE INDEX idx_external_league_users_frontier ON public.external_league_users 
 --
 
 CREATE INDEX idx_external_leagues_format ON public.external_leagues USING btree (league_format, is_superflex, season_year);
+
+
+--
+-- Name: idx_external_leagues_import_appetite; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_leagues_import_appetite ON public.external_leagues USING btree (platform, league_format, is_superflex, has_individual_defensive_players, is_best_ball);
 
 
 --

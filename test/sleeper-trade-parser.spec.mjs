@@ -13,13 +13,15 @@
 import * as chai from 'chai'
 
 import {
+  derive_has_individual_defensive_players,
   derive_is_superflex,
   is_sleeper_identifier,
   parse_sleeper_league,
   parse_sleeper_league_member_users,
   parse_sleeper_trade,
   parse_sleeper_transactions,
-  parse_sleeper_user_leagues
+  parse_sleeper_user_leagues,
+  sleeper_transaction_buckets_to_fetch
 } from '#libs-server/external-league-trades/sleeper-trade-parser.mjs'
 
 const expect = chai.expect
@@ -387,6 +389,115 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
           platform_transaction_bucket: 1
         })
       ).to.have.lengthOf(0)
+    })
+  })
+
+  describe('derive_has_individual_defensive_players', function () {
+    it('detects grouped IDP slots', function () {
+      expect(
+        derive_has_individual_defensive_players([
+          'QB',
+          'RB',
+          'WR',
+          'TE',
+          'DL',
+          'LB',
+          'DB',
+          'BN'
+        ])
+      ).to.equal(true)
+    })
+
+    it('detects specific defensive positions', function () {
+      expect(
+        derive_has_individual_defensive_players(['QB', 'RB', 'CB', 'BN'])
+      ).to.equal(true)
+      expect(
+        derive_has_individual_defensive_players(['QB', 'IDP_FLEX'])
+      ).to.equal(true)
+    })
+
+    // DST is a team defense, not an individual defender -- it resolves exactly
+    // via the bare team abbreviation, so a DST league is NOT an IDP league and
+    // must not be excluded as one.
+    it('does not treat a team-defense slot as IDP', function () {
+      expect(
+        derive_has_individual_defensive_players([
+          'QB',
+          'RB',
+          'WR',
+          'TE',
+          'FLEX',
+          'SUPER_FLEX',
+          'K',
+          'DEF',
+          'BN'
+        ])
+      ).to.equal(false)
+    })
+
+    it('handles a missing roster_positions array', function () {
+      expect(derive_has_individual_defensive_players(null)).to.equal(false)
+    })
+  })
+
+  describe('sleeper_transaction_buckets_to_fetch', function () {
+    // Bucket 1 carries the entire offseason on top of week 1, so it is never
+    // the one to economise on. Every assertion below starts from 1.
+    it('fetches bucket 1 only for a current season that has not started', function () {
+      expect(
+        sleeper_transaction_buckets_to_fetch({
+          league_season_year: 2026,
+          current_season_year: 2026,
+          current_season_week: 0
+        })
+      ).to.deep.equal([1])
+    })
+
+    it('fetches every bucket for a completed season', function () {
+      const buckets = sleeper_transaction_buckets_to_fetch({
+        league_season_year: 2025,
+        current_season_year: 2026,
+        current_season_week: 0
+      })
+
+      expect(buckets).to.have.lengthOf(18)
+      expect(buckets[0]).to.equal(1)
+      expect(buckets[17]).to.equal(18)
+    })
+
+    // One bucket of margin past the current week: our week boundary and
+    // Sleeper's need not roll at the same instant, and a bucket we declined to
+    // ask for is indistinguishable afterwards from one that held nothing.
+    it('carries one bucket of margin past the current week', function () {
+      expect(
+        sleeper_transaction_buckets_to_fetch({
+          league_season_year: 2026,
+          current_season_year: 2026,
+          current_season_week: 5
+        })
+      ).to.deep.equal([1, 2, 3, 4, 5, 6])
+    })
+
+    it('never exceeds bucket 18 once the postseason counter runs past it', function () {
+      expect(
+        sleeper_transaction_buckets_to_fetch({
+          league_season_year: 2026,
+          current_season_year: 2026,
+          current_season_week: 22
+        })
+      ).to.have.lengthOf(18)
+    })
+
+    // A league-season ahead of the current one can only hold offseason trades.
+    it('bounds a future league-season to bucket 1', function () {
+      expect(
+        sleeper_transaction_buckets_to_fetch({
+          league_season_year: 2027,
+          current_season_year: 2026,
+          current_season_week: 0
+        })
+      ).to.deep.equal([1])
     })
   })
 

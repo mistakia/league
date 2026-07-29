@@ -31,6 +31,91 @@ export const is_sleeper_identifier = (value) =>
 
 const is_league_id = is_sleeper_identifier
 
+// Sleeper files transactions in per-week buckets numbered 1..18 within a
+// league-season.
+export const SLEEPER_MAX_TRANSACTION_BUCKET = 18
+
+/**
+ * Which transaction buckets are worth fetching for one league-season.
+ *
+ * A league-season that has not finished cannot have transactions filed under
+ * weeks that have not happened, so fetching all 18 buckets for a current-season
+ * league spends 17 requests to be told "no" 17 times. Measured on the live
+ * corpus 2026-07-29: every one of the 3,000 trades in 2026 leagues sat in
+ * bucket 1, while 2025 leagues -- a completed season -- spread across buckets 1
+ * through 17. At corpus scale that was 4,233 wasted requests and it grows
+ * linearly with the crawl.
+ *
+ * Bucket 1 is ALWAYS fetched. It carries the entire offseason on top of week 1,
+ * which is where most dynasty trading happens, so it is never the bucket to
+ * economise on.
+ *
+ * The bound carries one bucket of margin past the current week. Our week
+ * boundary and Sleeper's need not roll at the same instant, and one spare
+ * request is a much cheaper error than silently missing the newest trades of
+ * the week -- which would be invisible, since a bucket that does not exist and
+ * a bucket we declined to ask for look identical afterwards.
+ *
+ * @param {Object} params
+ * @param {number} params.league_season_year - The league-season being imported
+ * @param {number} params.current_season_year
+ * @param {number} params.current_season_week - Continuous counter from
+ *   regular_season_start; 0 in the offseason and preseason
+ * @returns {Array<number>} Bucket numbers to fetch, ascending from 1
+ */
+export const sleeper_transaction_buckets_to_fetch = ({
+  league_season_year,
+  current_season_year,
+  current_season_week
+}) => {
+  // A completed season is closed: every bucket that will ever hold a trade
+  // already does, so all of them are worth reading.
+  const is_complete = league_season_year < current_season_year
+
+  const max_bucket = is_complete
+    ? SLEEPER_MAX_TRANSACTION_BUCKET
+    : Math.min(
+        SLEEPER_MAX_TRANSACTION_BUCKET,
+        Math.max(1, (current_season_week || 0) + 1)
+      )
+
+  return Array.from({ length: max_bucket }, (_, index) => index + 1)
+}
+
+// Sleeper's individual-defensive-player roster slots, both the grouped forms
+// and the specific positions. A league starting any of these trades defenders.
+const INDIVIDUAL_DEFENSIVE_PLAYER_SLOTS = new Set([
+  'DL',
+  'LB',
+  'DB',
+  'DE',
+  'DT',
+  'CB',
+  'SS',
+  'FS',
+  'IDP_FLEX'
+])
+
+/**
+ * Does this league start individual defensive players?
+ *
+ * Worth promoting to a column because it is an EXCLUSION criterion for the
+ * fit, not a curiosity. Individual defenders (DT, DB, LB) are largely absent
+ * from our player table, so their legs land unresolved -- and an unresolved leg
+ * is not merely missing, it is BIASED: a side whose received bundle is missing
+ * a player looks cheaper than it actually was, and that error is one-directional
+ * so it does not average out across trades.
+ */
+export const derive_has_individual_defensive_players = (roster_positions) => {
+  if (!Array.isArray(roster_positions)) {
+    return false
+  }
+
+  return roster_positions.some((slot) =>
+    INDIVIDUAL_DEFENSIVE_PLAYER_SLOTS.has(slot)
+  )
+}
+
 export const derive_is_superflex = (roster_positions) => {
   if (!Array.isArray(roster_positions)) {
     return false
@@ -81,6 +166,8 @@ export const parse_sleeper_league = ({ league, discovered_via = null }) => {
     num_teams: league.total_rosters ?? league.settings?.num_teams ?? null,
     league_format,
     is_superflex: derive_is_superflex(roster_positions),
+    has_individual_defensive_players:
+      derive_has_individual_defensive_players(roster_positions),
     is_best_ball: Boolean(league.settings?.best_ball),
     points_per_reception:
       scoring_settings.rec == null ? null : Number(scoring_settings.rec),

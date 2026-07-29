@@ -10,7 +10,8 @@ import {
   parse_sleeper_league,
   parse_sleeper_league_member_users,
   parse_sleeper_transactions,
-  parse_sleeper_user_leagues
+  parse_sleeper_user_leagues,
+  sleeper_transaction_buckets_to_fetch
 } from '#libs-server/external-league-trades/sleeper-trade-parser.mjs'
 
 const log = debug('import-sleeper-external-league-trades')
@@ -36,10 +37,6 @@ const SLEEPER_API_URL = 'https://api.sleeper.app/v1'
 // a floor on the interval between request STARTS makes the rate the same
 // everywhere and independent of how fast the upstream answers.
 const MIN_REQUEST_INTERVAL_MS = 1000
-
-// Sleeper files transactions in per-week buckets; bucket 1 also carries the
-// entire offseason, which is where most dynasty trading happens.
-const TRANSACTION_BUCKETS = 18
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -153,8 +150,18 @@ export const import_sleeper_league_trades = async ({
     return { skipped: true, trades: 0, legs: 0, unresolved: 0 }
   }
 
+  // Bounded by the current week rather than fixed at 18: a season in progress
+  // cannot have filed transactions under weeks that have not happened yet. See
+  // sleeper_transaction_buckets_to_fetch -- this turns a 19-request import into
+  // a 2-request one for most of the corpus.
+  const buckets = sleeper_transaction_buckets_to_fetch({
+    league_season_year: league_row.season_year,
+    current_season_year: current_season.year,
+    current_season_week: current_season.week
+  })
+
   const parsed_trades = []
-  for (let bucket = 1; bucket <= TRANSACTION_BUCKETS; bucket++) {
+  for (const bucket of buckets) {
     const transactions = await sleeper_get(
       `/league/${external_league_id}/transactions/${bucket}`
     )
@@ -399,14 +406,11 @@ const crawl_league_member_list = async (external_league_id) => {
  * expensive edge: one request buys every league that manager is in for the
  * season, and those edges are exactly what was being thrown away before.
  *
- * @returns {Promise<number>} Count of leagues new to the graph and eligible for
- *   import under the current appetite
+ * @returns {Promise<number>} Count of leagues new to the graph. Deliberately
+ *   NOT filtered by the import appetite: crawling is cheap and importing is
+ *   not, so the map is allowed to run ahead of what we currently want to read.
  */
-const crawl_user_leagues = async ({
-  external_user_id,
-  season_year,
-  dynasty_only
-}) => {
+const crawl_user_leagues = async ({ external_user_id, season_year }) => {
   const payload = await sleeper_get(
     `/user/${external_user_id}/leagues/nfl/${season_year}`
   )
@@ -440,11 +444,7 @@ const crawl_user_leagues = async ({
     .where({ platform: 'sleeper', external_user_id })
     .update({ last_crawled_at: new Date() })
 
-  return leagues.filter(
-    (row) =>
-      !known_ids.has(row.external_league_id) &&
-      (!dynasty_only || row.league_format === 'dynasty')
-  ).length
+  return leagues.filter((row) => !known_ids.has(row.external_league_id)).length
 }
 
 /**
@@ -471,8 +471,7 @@ const crawl_user_leagues = async ({
 export const crawl_sleeper_league_graph = async ({
   seed_league_ids = [],
   season_year = current_season.year,
-  new_league_limit,
-  dynasty_only = true
+  new_league_limit
 }) => {
   const previous_stage = request_stage
   request_stage = 'crawl'
@@ -494,8 +493,7 @@ export const crawl_sleeper_league_graph = async ({
       if (frontier_user) {
         new_leagues += await crawl_user_leagues({
           external_user_id: frontier_user.external_user_id,
-          season_year,
-          dynasty_only
+          season_year
         })
         users_expanded += 1
         continue
@@ -540,6 +538,38 @@ export const crawl_sleeper_league_graph = async ({
 }
 
 /**
+ * Derive the import appetite from OUR league's own roster format.
+ *
+ * An external trade is only comparable to ours if the format matches, so the
+ * filter has to follow our configuration rather than assume a direction --
+ * selecting single-QB leagues for a superflex league (or the reverse) would
+ * gather precisely the wrong corpus while looking like it was working. Read
+ * from league_formats via seasons.league_format_id rather than hard-coded, so
+ * a format change here retargets the crawl instead of silently invalidating it.
+ *
+ * A league is superflex if it starts a QB/RB/WR/TE flex slot, or two or more
+ * dedicated QBs -- the same test derive_is_superflex applies to the external
+ * side, so both sides of the comparison are defined identically.
+ */
+const derive_import_appetite = async ({ lid, season_year }) => {
+  const format = await db('seasons')
+    .join('league_formats', 'league_formats.id', 'seasons.league_format_id')
+    .select('league_formats.sqb', 'league_formats.sqbrbwrte')
+    .where({ 'seasons.lid': lid, 'seasons.year': season_year })
+    .first()
+
+  if (!format) {
+    throw new Error(
+      `no league format found for lid ${lid} season ${season_year} -- cannot derive an import appetite, and guessing one would gather the wrong corpus`
+    )
+  }
+
+  return {
+    is_superflex: format.sqbrbwrte > 0 || format.sqb >= 2
+  }
+}
+
+/**
  * Size the unexplored frontier.
  *
  * Logged at the end of every run so the crawl's health is observable without a
@@ -576,20 +606,45 @@ const measure_frontier = async () => {
 /**
  * Select the leagues this run will import trades for.
  *
- * Two separate budgets, because one shared budget would let refresh work starve
+ * Separate budgets, because one shared budget would let refresh work starve
  * frontier expansion (or the reverse) depending only on how the ordering
- * happened to fall. new_league_limit takes never-imported leagues off the
- * backlog oldest-first; resync_limit refreshes already-imported leagues
- * stalest-first, which is how new trades in leagues we already know still get
- * picked up.
+ * happened to fall. import_limit takes never-imported leagues off the backlog
+ * oldest-first; resync_limit refreshes already-imported leagues stalest-first,
+ * which is how new trades in leagues we already know still get picked up -- and
+ * during a live season, how buckets that did not exist at first import get
+ * read once their weeks have happened.
+ *
+ * Note import_limit is deliberately NOT the crawl budget. A graph node costs
+ * one or two requests to acquire and an import costs up to nineteen, so the
+ * cheap thing should run far ahead of the expensive one: crawl broadly, import
+ * narrowly, and let the backlog be the buffer between them.
  */
 const select_leagues_to_import = async ({
-  new_league_limit,
+  import_limit,
   resync_limit,
-  dynasty_only
+  dynasty_only,
+  appetite
 }) => {
-  const apply_appetite = (query) =>
-    dynasty_only ? query.where({ league_format: 'dynasty' }) : query
+  const apply_appetite = (query) => {
+    if (!dynasty_only) {
+      return query
+    }
+
+    return query.where({
+      league_format: 'dynasty',
+      // Superflex vs single-QB changes QB value by multiples, so the two are
+      // not the same market and mixing them pollutes the fit. Matched to OUR
+      // league rather than assumed -- getting the direction backwards would
+      // select precisely the wrong corpus.
+      is_superflex: appetite.is_superflex,
+      // Both exclusions are about bundles that misrepresent the exchange:
+      // an IDP league's unresolvable defender legs bias a side cheap, and
+      // best-ball leagues barely trade in-season and price on a different
+      // regime entirely.
+      has_individual_defensive_players: false,
+      is_best_ball: false
+    })
+  }
 
   const never_imported = await apply_appetite(
     db('external_leagues')
@@ -598,7 +653,7 @@ const select_leagues_to_import = async ({
       .whereNull('last_synced_at')
   )
     .orderBy('created_at', 'asc')
-    .limit(new_league_limit)
+    .limit(import_limit)
 
   const stalest_imported = resync_limit
     ? await apply_appetite(
@@ -617,12 +672,22 @@ const select_leagues_to_import = async ({
 const import_sleeper_external_league_trades = async ({
   seed_league_ids = [],
   season_year = current_season.year,
-  limit = 25,
+  limit = 200,
+  import_limit = 25,
   resync_limit = 25,
   history_depth = 4,
   dry_run = false,
-  dynasty_only = true
+  dynasty_only = true,
+  lid = 1
 } = {}) => {
+  const appetite = await derive_import_appetite({ lid, season_year })
+
+  // Logged rather than assumed silently: if this ever reads backwards, the run
+  // that gathered the wrong corpus should say so in its own output.
+  log(
+    `import appetite: dynasty, ${appetite.is_superflex ? 'superflex' : 'single-QB'}, no IDP, no best-ball (derived from lid ${lid} ${season_year})`
+  )
+
   // The crawl IS persistence -- its whole product is graph rows, and it reads
   // its own frontier back to decide where to go next -- so there is no coherent
   // dry version of it. A dry run therefore skips it entirely and reports what
@@ -633,14 +698,14 @@ const import_sleeper_external_league_trades = async ({
     : await crawl_sleeper_league_graph({
         seed_league_ids,
         season_year,
-        new_league_limit: limit,
-        dynasty_only
+        new_league_limit: limit
       })
 
   const selected = await select_leagues_to_import({
-    new_league_limit: limit,
+    import_limit,
     resync_limit,
-    dynasty_only
+    dynasty_only,
+    appetite
   })
 
   log(`importing ${selected.length} leagues`)
@@ -742,9 +807,15 @@ const main = async () => {
     // --seed_league_id is a BOOTSTRAP for an empty graph, not a permanent
     //   anchor: once anything is persisted the crawl resumes from the frontier
     //   and this argument is never consulted.
-    // --limit is how many NEW leagues to take into the graph this run, NOT the
-    //   total crawl size. A weekly cron therefore extends the frontier by that
-    //   many leagues each time instead of re-walking the same neighbourhood.
+    // --limit is the CRAWL budget: how many NEW leagues to take into the graph
+    //   this run, NOT the total crawl size and NOT how many get imported. A
+    //   weekly cron therefore extends the frontier by that many leagues each
+    //   time instead of re-walking the same neighbourhood.
+    // --import_limit is the IMPORT budget: how many never-imported leagues to
+    //   pull trades for, oldest-discovered first. Deliberately much smaller
+    //   than --limit -- a graph node costs one or two requests and an import
+    //   costs up to nineteen, so the map should run well ahead of the import
+    //   and the backlog absorbs the difference.
     // --resync_limit is how many ALREADY-imported leagues to refresh for new
     //   trades, stalest first. Separate budget so refresh work cannot starve
     //   frontier expansion.
@@ -756,9 +827,12 @@ const main = async () => {
       seed_league_ids,
       season_year: argv.season_year ? Number(argv.season_year) : undefined,
       // Compared against undefined rather than tested for truthiness: `0` is a
-      // meaningful value for both budgets (skip the crawl / skip the refresh)
-      // and a truthiness test would silently substitute the default instead.
+      // meaningful value for every budget (skip the crawl / skip the import /
+      // skip the refresh) and a truthiness test would silently substitute the
+      // default instead.
       limit: argv.limit === undefined ? undefined : Number(argv.limit),
+      import_limit:
+        argv.import_limit === undefined ? undefined : Number(argv.import_limit),
       resync_limit:
         argv.resync_limit === undefined ? undefined : Number(argv.resync_limit),
       history_depth:
