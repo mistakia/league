@@ -137,6 +137,22 @@ const run_season_forecast = async (lid) => {
   }
 }
 
+// The AVERAGE (sourceid 18) consensus is deliberately CURRENT-STATE ONLY. It is
+// written to projections_index (and ros_projections) and NOT to
+// projections_history. This is a decision, not an oversight: giving it a real
+// generated_at at the hourly cadence this script runs at would append ~184M
+// rows/year to projections_history, and the consensus is exactly derivable from
+// the per-source history that already exists there.
+//
+// To reconstruct the consensus as of some instant D, take the latest observation
+// of each real source at or before D and re-run weightProjections over it:
+//
+//   SELECT DISTINCT ON (sourceid, pid, week, season_year, season_type) *
+//   FROM projections_history
+//   WHERE generated_at <= D
+//   ORDER BY sourceid, pid, week, season_year, season_type, generated_at DESC
+//
+// See user:text/league/projection-history-system.md for the full rationale.
 const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   log(`processing projections for year ${year} and seas_type ${seas_type}`)
   const projections = await get_player_projections({ year, seas_type })
@@ -218,7 +234,6 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
         pid: player_row.pid,
         sourceid: external_data_sources.AVERAGE,
         season_year: current_season.year,
-        generated_at: new Date(0), // epoch-0 sentinel marking the AVERAGE-source row
         ...ros
       })
     }
@@ -227,7 +242,6 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   if (projectionInserts.length) {
     log(`processing ${projectionInserts.length} projections`)
 
-    const generated_at = new Date(0) // epoch-0 sentinel, part of the projections unique key
     await batch_insert({
       items: projectionInserts,
       save: (items) =>
@@ -237,23 +251,6 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
             'sourceid',
             'pid',
             'userid',
-            'week',
-            'season_year',
-            'season_type'
-          ])
-          .merge(),
-      batch_size: 100
-    })
-    await batch_insert({
-      items: projectionInserts.map((i) => ({ ...i, generated_at })),
-      save: (items) =>
-        db('projections_history')
-          .insert(items)
-          .onConflict([
-            'sourceid',
-            'pid',
-            'userid',
-            'generated_at',
             'week',
             'season_year',
             'season_type'
