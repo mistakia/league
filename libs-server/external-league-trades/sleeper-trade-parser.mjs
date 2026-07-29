@@ -17,10 +17,19 @@ const SLEEPER_LEAGUE_TYPE = {
 // matter: the effect on QB value is the same either way, and a check for only
 // the SUPER_FLEX literal would misclassify 2QB leagues as single-QB, which is
 // exactly the misread that makes a QB trade uncomparable.
-// Sleeper uses both null and the string "0" to mean "no such league", so a
-// bare truthiness test is not enough to tell a real id from an absence.
-const is_league_id = (value) =>
-  value !== null && value !== undefined && String(value) !== '0'
+// Sleeper uses null, the empty string, and the STRING "0" interchangeably to
+// mean "no such entity", so a bare truthiness test is not enough to tell a real
+// id from an absence -- `"0"` is truthy and would be followed as a real id.
+// This applies to user ids as well as league ids: a league member list can
+// carry an entry with no usable user_id, and inserting it would create a graph
+// node that can never be expanded.
+export const is_sleeper_identifier = (value) =>
+  value !== null &&
+  value !== undefined &&
+  String(value) !== '0' &&
+  String(value) !== ''
+
+const is_league_id = is_sleeper_identifier
 
 export const derive_is_superflex = (roster_positions) => {
   if (!Array.isArray(roster_positions)) {
@@ -92,6 +101,93 @@ export const parse_sleeper_league = ({ league, discovered_via = null }) => {
       : null,
     discovered_via
   }
+}
+
+/**
+ * Map a Sleeper /league/{id}/users payload to crawl-graph rows.
+ *
+ * This is the league -> members direction of the graph. The users it yields are
+ * frontier nodes: known to exist, never expanded.
+ *
+ * @param {Object} params
+ * @param {Array<Object>} params.users - Raw /league/{id}/users payload
+ * @param {string} params.external_league_id
+ * @returns {{ users: Array<Object>, memberships: Array<Object> }}
+ */
+export const parse_sleeper_league_member_users = ({
+  users,
+  external_league_id
+}) => {
+  const external_user_ids = [
+    ...new Set(
+      (users || [])
+        .map((user) => user?.user_id)
+        .filter(is_sleeper_identifier)
+        .map(String)
+    )
+  ]
+
+  return {
+    // No display_name, avatar or team name is carried through. They are on
+    // every payload and none of them informs a value fit, so they would be
+    // permanent read-tax on a table whose only jobs are identity and cursor.
+    users: external_user_ids.map((external_user_id) => ({
+      platform: 'sleeper',
+      external_user_id
+    })),
+    memberships: external_user_ids.map((external_user_id) => ({
+      platform: 'sleeper',
+      external_league_id: String(external_league_id),
+      external_user_id
+    }))
+  }
+}
+
+/**
+ * Map a Sleeper /user/{id}/leagues/nfl/{season} payload to crawl-graph rows.
+ *
+ * This is the members -> leagues direction, and it is where new leagues enter
+ * the graph. The payload contains FULL league objects, so a complete
+ * external_leagues row is derivable here for zero additional requests -- which
+ * is what lets a discovered league be persisted immediately rather than held in
+ * memory until a later stage gets around to fetching it.
+ *
+ * @param {Object} params
+ * @param {Array<Object>} params.leagues - Raw user-leagues payload
+ * @param {string} params.external_user_id - The manager whose list this is
+ * @returns {{ leagues: Array<Object>, memberships: Array<Object> }}
+ */
+export const parse_sleeper_user_leagues = ({ leagues, external_user_id }) => {
+  const league_rows = []
+  const memberships = []
+  const seen = new Set()
+
+  for (const league of leagues || []) {
+    const league_row = parse_sleeper_league({
+      league,
+      discovered_via: 'user_leagues'
+    })
+
+    // parse_sleeper_league returns null for an unusable format, which is a
+    // league we could never use as evidence -- so it is not worth a graph node
+    // either.
+    if (!league_row || seen.has(league_row.external_league_id)) {
+      continue
+    }
+    seen.add(league_row.external_league_id)
+
+    league_rows.push({
+      ...league_row,
+      discovered_from_external_user_id: String(external_user_id)
+    })
+    memberships.push({
+      platform: 'sleeper',
+      external_league_id: league_row.external_league_id,
+      external_user_id: String(external_user_id)
+    })
+  }
+
+  return { leagues: league_rows, memberships }
 }
 
 /**

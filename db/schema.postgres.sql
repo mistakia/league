@@ -50,6 +50,8 @@ ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTR
 ALTER TABLE IF EXISTS ONLY public.external_league_trades DROP CONSTRAINT IF EXISTS external_league_trades_league_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_trade_legs DROP CONSTRAINT IF EXISTS external_league_trade_legs_trade_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_trade_legs DROP CONSTRAINT IF EXISTS external_league_trade_legs_pid_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_memberships DROP CONSTRAINT IF EXISTS external_league_memberships_user_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_memberships DROP CONSTRAINT IF EXISTS external_league_memberships_league_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_lid_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_initiated_by_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_connection_id_fkey;
@@ -353,12 +355,15 @@ DROP INDEX IF EXISTS public.idx_keeptradecut_liquidity_d_superflex;
 DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
 DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
+DROP INDEX IF EXISTS public.idx_external_leagues_member_list_frontier;
 DROP INDEX IF EXISTS public.idx_external_leagues_last_synced;
 DROP INDEX IF EXISTS public.idx_external_leagues_format;
+DROP INDEX IF EXISTS public.idx_external_league_users_frontier;
 DROP INDEX IF EXISTS public.idx_external_league_trades_processed_at;
 DROP INDEX IF EXISTS public.idx_external_league_trades_league;
 DROP INDEX IF EXISTS public.idx_external_league_trade_legs_unresolved;
 DROP INDEX IF EXISTS public.idx_external_league_trade_legs_pid;
+DROP INDEX IF EXISTS public.idx_external_league_memberships_user;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_status;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_queued_at;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_lid;
@@ -614,8 +619,10 @@ ALTER TABLE IF EXISTS ONLY public.historical_injury_index_2009 DROP CONSTRAINT I
 ALTER TABLE IF EXISTS ONLY public.historical_injury_index DROP CONSTRAINT IF EXISTS historical_injury_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.format_category_signal_mapping DROP CONSTRAINT IF EXISTS format_category_signal_mapping_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_leagues DROP CONSTRAINT IF EXISTS external_leagues_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_users DROP CONSTRAINT IF EXISTS external_league_users_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_trades DROP CONSTRAINT IF EXISTS external_league_trades_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_trade_legs DROP CONSTRAINT IF EXISTS external_league_trade_legs_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_memberships DROP CONSTRAINT IF EXISTS external_league_memberships_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_job_history DROP CONSTRAINT IF EXISTS external_league_import_job_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_pkey;
@@ -943,8 +950,10 @@ DROP TABLE IF EXISTS public.historical_injury_index;
 DROP TABLE IF EXISTS public.format_category_signal_mapping;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP TABLE IF EXISTS public.external_leagues;
+DROP TABLE IF EXISTS public.external_league_users;
 DROP TABLE IF EXISTS public.external_league_trades;
 DROP TABLE IF EXISTS public.external_league_trade_legs;
+DROP TABLE IF EXISTS public.external_league_memberships;
 DROP TABLE IF EXISTS public.external_league_import_jobs;
 DROP TABLE IF EXISTS public.external_league_import_job_history;
 DROP TABLE IF EXISTS public.external_league_connections;
@@ -2994,6 +3003,25 @@ COMMENT ON COLUMN public.external_league_import_jobs.mapped_data IS 'Processed/m
 
 
 --
+-- Name: external_league_memberships; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_league_memberships (
+    platform character varying(20) NOT NULL,
+    external_league_id character varying(64) NOT NULL,
+    external_user_id character varying(64) NOT NULL,
+    first_seen_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE external_league_memberships; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_league_memberships IS 'Manager-to-league edges of the external-league crawl graph. The expensive artifact: each edge cost a request to acquire, and together they make the frontier resumable and the same manager detectable across leagues.';
+
+
+--
 -- Name: external_league_trade_legs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3047,6 +3075,25 @@ COMMENT ON TABLE public.external_league_trades IS 'Completed trades observed in 
 
 
 --
+-- Name: external_league_users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_league_users (
+    platform character varying(20) NOT NULL,
+    external_user_id character varying(64) NOT NULL,
+    last_crawled_at timestamp with time zone,
+    first_seen_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE external_league_users; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_league_users IS 'Managers observed in external leagues, as crawl-graph nodes. last_crawled_at NULL is the unexplored frontier. Deliberately carries no profile fields.';
+
+
+--
 -- Name: external_leagues; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3069,6 +3116,8 @@ CREATE TABLE public.external_leagues (
     discovered_via character varying(20),
     last_synced_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    member_list_crawled_at timestamp with time zone,
+    discovered_from_external_user_id character varying(64),
     CONSTRAINT external_leagues_league_format_check CHECK (((league_format)::text = ANY ((ARRAY['dynasty'::character varying, 'keeper'::character varying, 'redraft'::character varying])::text[])))
 );
 
@@ -3078,6 +3127,20 @@ CREATE TABLE public.external_leagues (
 --
 
 COMMENT ON TABLE public.external_leagues IS 'Fantasy leagues on external platforms observed for realized trade data. We are not members of these leagues; they are read from public read-only APIs.';
+
+
+--
+-- Name: COLUMN external_leagues.member_list_crawled_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_leagues.member_list_crawled_at IS 'When /league/{id}/users was last fetched for this league. NULL = frontier league whose member list has never been read.';
+
+
+--
+-- Name: COLUMN external_leagues.discovered_from_external_user_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_leagues.discovered_from_external_user_id IS 'The manager whose league list surfaced this league. NULL for seed, previous-season chain links, and pre-crawl-graph rows.';
 
 
 --
@@ -27481,6 +27544,14 @@ ALTER TABLE ONLY public.external_league_import_jobs
 
 
 --
+-- Name: external_league_memberships external_league_memberships_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_memberships
+    ADD CONSTRAINT external_league_memberships_pkey PRIMARY KEY (platform, external_league_id, external_user_id);
+
+
+--
 -- Name: external_league_trade_legs external_league_trade_legs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -27494,6 +27565,14 @@ ALTER TABLE ONLY public.external_league_trade_legs
 
 ALTER TABLE ONLY public.external_league_trades
     ADD CONSTRAINT external_league_trades_pkey PRIMARY KEY (platform, external_transaction_id);
+
+
+--
+-- Name: external_league_users external_league_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_users
+    ADD CONSTRAINT external_league_users_pkey PRIMARY KEY (platform, external_user_id);
 
 
 --
@@ -29677,6 +29756,13 @@ CREATE INDEX idx_external_league_import_jobs_status ON public.external_league_im
 
 
 --
+-- Name: idx_external_league_memberships_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_memberships_user ON public.external_league_memberships USING btree (platform, external_user_id);
+
+
+--
 -- Name: idx_external_league_trade_legs_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29705,6 +29791,13 @@ CREATE INDEX idx_external_league_trades_processed_at ON public.external_league_t
 
 
 --
+-- Name: idx_external_league_users_frontier; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_users_frontier ON public.external_league_users USING btree (platform, first_seen_at) WHERE (last_crawled_at IS NULL);
+
+
+--
 -- Name: idx_external_leagues_format; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29716,6 +29809,13 @@ CREATE INDEX idx_external_leagues_format ON public.external_leagues USING btree 
 --
 
 CREATE INDEX idx_external_leagues_last_synced ON public.external_leagues USING btree (last_synced_at NULLS FIRST);
+
+
+--
+-- Name: idx_external_leagues_member_list_frontier; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_leagues_member_list_frontier ON public.external_leagues USING btree (platform, created_at) WHERE (member_list_crawled_at IS NULL);
 
 
 --
@@ -55905,6 +56005,22 @@ ALTER TABLE ONLY public.external_league_import_jobs
 
 
 --
+-- Name: external_league_memberships external_league_memberships_league_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_memberships
+    ADD CONSTRAINT external_league_memberships_league_fkey FOREIGN KEY (platform, external_league_id) REFERENCES public.external_leagues(platform, external_league_id) ON DELETE CASCADE;
+
+
+--
+-- Name: external_league_memberships external_league_memberships_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_memberships
+    ADD CONSTRAINT external_league_memberships_user_fkey FOREIGN KEY (platform, external_user_id) REFERENCES public.external_league_users(platform, external_user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: external_league_trade_legs external_league_trade_legs_pid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -56336,6 +56452,13 @@ GRANT SELECT ON TABLE public.external_league_import_jobs TO league_reader;
 
 
 --
+-- Name: TABLE external_league_memberships; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.external_league_memberships TO league_reader;
+
+
+--
 -- Name: TABLE external_league_trade_legs; Type: ACL; Schema: public; Owner: -
 --
 
@@ -56347,6 +56470,13 @@ GRANT SELECT ON TABLE public.external_league_trade_legs TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.external_league_trades TO league_reader;
+
+
+--
+-- Name: TABLE external_league_users; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.external_league_users TO league_reader;
 
 
 --

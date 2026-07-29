@@ -14,9 +14,12 @@ import * as chai from 'chai'
 
 import {
   derive_is_superflex,
+  is_sleeper_identifier,
   parse_sleeper_league,
+  parse_sleeper_league_member_users,
   parse_sleeper_trade,
-  parse_sleeper_transactions
+  parse_sleeper_transactions,
+  parse_sleeper_user_leagues
 } from '#libs-server/external-league-trades/sleeper-trade-parser.mjs'
 
 const expect = chai.expect
@@ -384,6 +387,220 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
           platform_transaction_bucket: 1
         })
       ).to.have.lengthOf(0)
+    })
+  })
+
+  describe('is_sleeper_identifier', function () {
+    // The string "0" is Sleeper's absence sentinel and it is TRUTHY, which is
+    // the trap this guard exists for -- a bare check sends the crawler off to
+    // fetch entity 0 and creates a graph node that can never be expanded.
+    it('rejects the string "0" absence sentinel', function () {
+      expect(is_sleeper_identifier('0')).to.equal(false)
+    })
+
+    it('rejects null, undefined, and the empty string', function () {
+      expect(is_sleeper_identifier(null)).to.equal(false)
+      expect(is_sleeper_identifier(undefined)).to.equal(false)
+      expect(is_sleeper_identifier('')).to.equal(false)
+    })
+
+    it('accepts a real id in either string or numeric form', function () {
+      expect(is_sleeper_identifier('1182953443152855040')).to.equal(true)
+      expect(is_sleeper_identifier(12503)).to.equal(true)
+    })
+  })
+
+  describe('parse_sleeper_league_member_users', function () {
+    const member_list = [
+      { user_id: '331590801586524160', display_name: 'alpha' },
+      { user_id: '469952154498334720', display_name: 'beta' }
+    ]
+
+    it('yields a user node and a membership edge per member', function () {
+      const { users, memberships } = parse_sleeper_league_member_users({
+        users: member_list,
+        external_league_id: '1182953443152855040'
+      })
+
+      expect(users).to.deep.equal([
+        { platform: 'sleeper', external_user_id: '331590801586524160' },
+        { platform: 'sleeper', external_user_id: '469952154498334720' }
+      ])
+      expect(memberships).to.deep.equal([
+        {
+          platform: 'sleeper',
+          external_league_id: '1182953443152855040',
+          external_user_id: '331590801586524160'
+        },
+        {
+          platform: 'sleeper',
+          external_league_id: '1182953443152855040',
+          external_user_id: '469952154498334720'
+        }
+      ])
+    })
+
+    // Profile fields are on every payload and none of them informs a value fit.
+    // Carrying them would be permanent read-tax on a table whose only jobs are
+    // identity and crawl cursor, so their absence is asserted, not incidental.
+    it('carries no profile fields through', function () {
+      const { users } = parse_sleeper_league_member_users({
+        users: [
+          {
+            user_id: 'U1',
+            display_name: 'alpha',
+            avatar: 'abc',
+            metadata: { team_name: 'Team Alpha' }
+          }
+        ],
+        external_league_id: 'L1'
+      })
+
+      expect(Object.keys(users[0])).to.deep.equal([
+        'platform',
+        'external_user_id'
+      ])
+    })
+
+    it('drops members whose user_id is absent or the "0" sentinel', function () {
+      const { users, memberships } = parse_sleeper_league_member_users({
+        users: [
+          { user_id: 'U1' },
+          { user_id: '0' },
+          { user_id: null },
+          { display_name: 'no id at all' }
+        ],
+        external_league_id: 'L1'
+      })
+
+      expect(users).to.have.lengthOf(1)
+      expect(users[0].external_user_id).to.equal('U1')
+      expect(memberships).to.have.lengthOf(1)
+    })
+
+    it('deduplicates a member appearing twice', function () {
+      const { users, memberships } = parse_sleeper_league_member_users({
+        users: [{ user_id: 'U1' }, { user_id: 'U1' }],
+        external_league_id: 'L1'
+      })
+
+      expect(users).to.have.lengthOf(1)
+      expect(memberships).to.have.lengthOf(1)
+    })
+
+    it('handles a 404 (null) member list', function () {
+      const { users, memberships } = parse_sleeper_league_member_users({
+        users: null,
+        external_league_id: 'L1'
+      })
+
+      expect(users).to.have.lengthOf(0)
+      expect(memberships).to.have.lengthOf(0)
+    })
+  })
+
+  describe('parse_sleeper_user_leagues', function () {
+    const redraft_league = {
+      league_id: '9999999999999999999',
+      name: 'Some Redraft',
+      season: '2025',
+      total_rosters: 10,
+      settings: { type: 0 },
+      roster_positions: ['QB', 'RB', 'WR', 'TE', 'BN'],
+      scoring_settings: { rec: 0.5 }
+    }
+
+    it('derives a full league row from the user-leagues payload alone', function () {
+      const { leagues } = parse_sleeper_user_leagues({
+        leagues: [dynasty_superflex_league],
+        external_user_id: 'U1'
+      })
+
+      expect(leagues).to.have.lengthOf(1)
+      expect(leagues[0]).to.include({
+        platform: 'sleeper',
+        external_league_id: '1182953443152855040',
+        season_year: 2025,
+        league_format: 'dynasty',
+        is_superflex: true,
+        num_teams: 12,
+        previous_external_league_id: '1048178518657568768'
+      })
+    })
+
+    it('records the mechanism and the manager it was reached from', function () {
+      const { leagues } = parse_sleeper_user_leagues({
+        leagues: [dynasty_superflex_league],
+        external_user_id: 'U1'
+      })
+
+      expect(leagues[0].discovered_via).to.equal('user_leagues')
+      expect(leagues[0].discovered_from_external_user_id).to.equal('U1')
+    })
+
+    it('emits a membership edge per league', function () {
+      const { memberships } = parse_sleeper_user_leagues({
+        leagues: [dynasty_superflex_league, redraft_league],
+        external_user_id: 'U1'
+      })
+
+      expect(memberships).to.deep.equal([
+        {
+          platform: 'sleeper',
+          external_league_id: '1182953443152855040',
+          external_user_id: 'U1'
+        },
+        {
+          platform: 'sleeper',
+          external_league_id: '9999999999999999999',
+          external_user_id: 'U1'
+        }
+      ])
+    })
+
+    // Appetite filtering belongs at import, not at discovery: the row is free
+    // here, and persisting it means the league is never rediscovered even if a
+    // later run decides it does want redraft after all.
+    it('persists leagues of every format, filtering nothing on appetite', function () {
+      const { leagues } = parse_sleeper_user_leagues({
+        leagues: [dynasty_superflex_league, redraft_league],
+        external_user_id: 'U1'
+      })
+
+      expect(leagues.map((row) => row.league_format)).to.deep.equal([
+        'dynasty',
+        'redraft'
+      ])
+    })
+
+    it('drops a league whose format is unusable rather than guessing', function () {
+      const { leagues, memberships } = parse_sleeper_user_leagues({
+        leagues: [{ league_id: 'L1', season: '2025', settings: { type: 77 } }],
+        external_user_id: 'U1'
+      })
+
+      expect(leagues).to.have.lengthOf(0)
+      expect(memberships).to.have.lengthOf(0)
+    })
+
+    it('deduplicates a league listed twice for one manager', function () {
+      const { leagues, memberships } = parse_sleeper_user_leagues({
+        leagues: [dynasty_superflex_league, dynasty_superflex_league],
+        external_user_id: 'U1'
+      })
+
+      expect(leagues).to.have.lengthOf(1)
+      expect(memberships).to.have.lengthOf(1)
+    })
+
+    it('handles a 404 (null) user-leagues payload', function () {
+      const { leagues, memberships } = parse_sleeper_user_leagues({
+        leagues: null,
+        external_user_id: 'U1'
+      })
+
+      expect(leagues).to.have.lengthOf(0)
+      expect(memberships).to.have.lengthOf(0)
     })
   })
 })

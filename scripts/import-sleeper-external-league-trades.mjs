@@ -8,7 +8,9 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
 import {
   parse_sleeper_league,
-  parse_sleeper_transactions
+  parse_sleeper_league_member_users,
+  parse_sleeper_transactions,
+  parse_sleeper_user_leagues
 } from '#libs-server/external-league-trades/sleeper-trade-parser.mjs'
 
 const log = debug('import-sleeper-external-league-trades')
@@ -30,11 +32,17 @@ const TRANSACTION_BUCKETS = 18
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-let request_count = 0
+// Counted per stage rather than in one total, because the whole point of
+// persisting the crawl graph is that repeated runs spend their requests on NEW
+// work instead of re-deriving what is already known. A run whose crawl cost is
+// climbing while its new-league count is flat is a run that has started
+// re-walking, and only a per-stage count makes that visible.
+const request_counts = { crawl: 0, import: 0 }
+let request_stage = 'import'
 
 const sleeper_get = async (path) => {
   await sleep(REQUEST_DELAY_MS)
-  request_count += 1
+  request_counts[request_stage] += 1
 
   const res = await fetch(`${SLEEPER_API_URL}${path}`)
 
@@ -170,10 +178,15 @@ export const import_sleeper_league_trades = async ({
     }
   }
 
-  await db('external_leagues')
-    .insert({ ...league_row, last_synced_at: new Date() })
-    .onConflict(['platform', 'external_league_id'])
-    .merge()
+  await upsert_league_nodes({
+    league_rows: [{ ...league_row, last_synced_at: new Date() }],
+    // A league is usually already a graph node by the time it is imported --
+    // the crawl put it there. Refresh its format metadata, but never overwrite
+    // how we FIRST reached it: the import stage does not know the answer, and
+    // clobbering it would erase the crawl tree that makes the sampling bias
+    // measurable.
+    preserve_provenance: true
+  })
 
   if (parsed_trades.length) {
     // Trades are immutable once complete, so a re-run should be a no-op rather
@@ -213,101 +226,398 @@ export const import_sleeper_league_trades = async ({
   }
 }
 
-/**
- * Expand the set of known leagues by snowball crawl.
- *
- * Sleeper has no "list public leagues" endpoint, but the graph is traversable
- * from any seed: /league/{id}/users gives every member's user_id, and
- * /user/{user_id}/leagues/nfl/{season} gives every league that user is in. The
- * frontier grows on its own, so the corpus is bounded by our appetite rather
- * than by anything Sleeper exposes. All of it is public read-only data and no
- * membership is required.
- *
- * Note this biases toward leagues whose managers play in many leagues.
- * discovered_via is recorded per league so that bias is measurable later rather
- * than baked in invisibly.
- */
-export const discover_sleeper_leagues = async ({
-  seed_league_ids,
-  season_year = current_season.year,
-  limit,
-  dynasty_only = true
-}) => {
-  const discovered = new Map()
-  const visited_users = new Set()
-  const queue = [...seed_league_ids]
+// Columns the import stage is allowed to refresh on an existing league node.
+// Everything about how the league was DISCOVERED is first-write-wins and is
+// absent from this list on purpose.
+const LEAGUE_REFRESH_COLUMNS = [
+  'season_year',
+  'league_name',
+  'num_teams',
+  'league_format',
+  'is_superflex',
+  'is_best_ball',
+  'points_per_reception',
+  'tight_end_premium',
+  'passing_touchdown_points',
+  'taxi_slots',
+  'roster_positions',
+  'scoring_settings',
+  'previous_external_league_id',
+  'last_synced_at'
+]
 
-  for (const seed of seed_league_ids) {
-    discovered.set(String(seed), 'seed')
+/**
+ * Persist league graph nodes.
+ *
+ * preserve_provenance distinguishes the two callers. The crawl inserts a league
+ * it has just discovered and must not overwrite an earlier discovery record, so
+ * it ignores conflicts outright. The import stage has fresh format metadata
+ * worth writing but no provenance knowledge, so it merges everything except the
+ * discovery columns.
+ */
+const upsert_league_nodes = async ({ league_rows, preserve_provenance }) => {
+  if (!league_rows.length) {
+    return
   }
 
-  while (queue.length && discovered.size < limit) {
-    const league_id = queue.shift()
+  await batch_insert({
+    items: league_rows,
+    batch_size: 500,
+    save: (batch) => {
+      const query = db('external_leagues')
+        .insert(batch)
+        .onConflict(['platform', 'external_league_id'])
 
-    const users = await sleeper_get(`/league/${league_id}/users`)
-    if (!users) {
+      return preserve_provenance
+        ? query.merge(LEAGUE_REFRESH_COLUMNS)
+        : query.ignore()
+    }
+  })
+}
+
+const upsert_user_nodes = async (user_rows) => {
+  if (!user_rows.length) {
+    return
+  }
+
+  await batch_insert({
+    items: user_rows,
+    batch_size: 500,
+    save: (batch) =>
+      db('external_league_users')
+        .insert(batch)
+        .onConflict(['platform', 'external_user_id'])
+        // last_crawled_at lives on this row. Re-seeing a manager in another
+        // league must never reset them to unexplored, or the crawl would
+        // revisit its own history forever.
+        .ignore()
+  })
+}
+
+const upsert_membership_edges = async (memberships) => {
+  if (!memberships.length) {
+    return
+  }
+
+  await batch_insert({
+    items: memberships,
+    batch_size: 500,
+    save: (batch) =>
+      db('external_league_memberships')
+        .insert(batch)
+        .onConflict(['platform', 'external_league_id', 'external_user_id'])
+        .ignore()
+  })
+}
+
+/**
+ * Fetch a seed league and persist it as a graph node.
+ *
+ * The seed is a BOOTSTRAP, not a permanent anchor: it is only consulted when
+ * the persisted graph offers no frontier at all, which in practice means the
+ * very first run. Every run after that resumes from persisted state and the
+ * seed argument is inert.
+ */
+const bootstrap_seed_leagues = async (seed_league_ids) => {
+  const league_rows = []
+
+  for (const seed_league_id of seed_league_ids) {
+    const league = await sleeper_get(`/league/${seed_league_id}`)
+    const league_row = parse_sleeper_league({ league, discovered_via: 'seed' })
+
+    if (!league_row) {
+      log(`seed league ${seed_league_id} unusable, skipping`)
       continue
     }
 
-    for (const user of users) {
-      if (discovered.size >= limit) {
-        break
-      }
-      if (!user.user_id || visited_users.has(user.user_id)) {
-        continue
-      }
-      visited_users.add(user.user_id)
-
-      const user_leagues = await sleeper_get(
-        `/user/${user.user_id}/leagues/nfl/${season_year}`
-      )
-      if (!user_leagues) {
-        continue
-      }
-
-      for (const user_league of user_leagues) {
-        if (discovered.size >= limit) {
-          break
-        }
-        if (discovered.has(String(user_league.league_id))) {
-          continue
-        }
-        // Filter on the cheap payload we already have rather than fetching the
-        // league again. Redraft leagues price players completely differently
-        // and are not the signal the dynasty valuation wants.
-        if (dynasty_only && user_league.settings?.type !== 2) {
-          continue
-        }
-
-        discovered.set(String(user_league.league_id), 'user_leagues')
-        queue.push(String(user_league.league_id))
-      }
-    }
+    league_rows.push(league_row)
   }
 
-  return discovered
+  await upsert_league_nodes({ league_rows, preserve_provenance: false })
+
+  return league_rows.length
+}
+
+/**
+ * Expand one league into its member managers.
+ *
+ * This is the half of the crawl that produces new FRONTIER USERS. It costs one
+ * request and is recorded as done via member_list_crawled_at, so no later run
+ * pays for it again.
+ */
+const crawl_league_member_list = async (external_league_id) => {
+  const payload = await sleeper_get(`/league/${external_league_id}/users`)
+
+  // A 404 here is a deleted or privatised league, which is a permanent state,
+  // not a transient one. Marking it crawled anyway is what stops every future
+  // run from re-requesting the same dead league forever.
+  const { users, memberships } = parse_sleeper_league_member_users({
+    users: payload,
+    external_league_id
+  })
+
+  await upsert_user_nodes(users)
+  await upsert_membership_edges(memberships)
+
+  await db('external_leagues')
+    .where({ platform: 'sleeper', external_league_id })
+    .update({ member_list_crawled_at: new Date() })
+
+  return users.length
+}
+
+/**
+ * Expand one manager into the leagues they play in.
+ *
+ * This is the half of the crawl that produces new LEAGUES, and it is the
+ * expensive edge: one request buys every league that manager is in for the
+ * season, and those edges are exactly what was being thrown away before.
+ *
+ * @returns {Promise<number>} Count of leagues new to the graph and eligible for
+ *   import under the current appetite
+ */
+const crawl_user_leagues = async ({
+  external_user_id,
+  season_year,
+  dynasty_only
+}) => {
+  const payload = await sleeper_get(
+    `/user/${external_user_id}/leagues/nfl/${season_year}`
+  )
+
+  const { leagues, memberships } = parse_sleeper_user_leagues({
+    leagues: payload,
+    external_user_id
+  })
+
+  const external_league_ids = leagues.map((row) => row.external_league_id)
+
+  const already_known = external_league_ids.length
+    ? await db('external_leagues')
+        .select('external_league_id')
+        .where({ platform: 'sleeper' })
+        .whereIn('external_league_id', external_league_ids)
+    : []
+  const known_ids = new Set(already_known.map((row) => row.external_league_id))
+
+  // Every discovered league is persisted, including formats the current
+  // appetite does not want. The payload is already in hand, so the row is free,
+  // and a league recorded once is never rediscovered -- a later run that widens
+  // its appetite reads them from the graph instead of re-crawling for them.
+  await upsert_league_nodes({
+    league_rows: leagues,
+    preserve_provenance: false
+  })
+  await upsert_membership_edges(memberships)
+
+  await db('external_league_users')
+    .where({ platform: 'sleeper', external_user_id })
+    .update({ last_crawled_at: new Date() })
+
+  return leagues.filter(
+    (row) =>
+      !known_ids.has(row.external_league_id) &&
+      (!dynasty_only || row.league_format === 'dynasty')
+  ).length
+}
+
+/**
+ * Extend the persisted crawl graph by new_league_limit leagues.
+ *
+ * Sleeper has no "list public leagues" endpoint, but the graph is traversable:
+ * /league/{id}/users gives every member's user_id, and
+ * /user/{user_id}/leagues/nfl/{season} gives every league that user is in. All
+ * of it is public read-only data and no membership is required.
+ *
+ * The graph is PERSISTED, which is what makes the frontier resumable. Two
+ * null-valued timestamps define it -- external_league_users.last_crawled_at for
+ * managers never expanded, external_leagues.member_list_crawled_at for leagues
+ * whose member list was never read -- so a run starts from wherever the last
+ * one stopped instead of re-walking from the seed. Managers are expanded before
+ * league member lists because manager expansion is the step that yields new
+ * leagues; reading a member list only replenishes the supply of managers.
+ *
+ * Note this biases toward leagues whose managers play in many leagues. The
+ * membership edges plus external_leagues.discovered_from_external_user_id
+ * record the crawl tree, so the bias is measurable after the fact rather than
+ * baked in invisibly.
+ */
+export const crawl_sleeper_league_graph = async ({
+  seed_league_ids = [],
+  season_year = current_season.year,
+  new_league_limit,
+  dynasty_only = true
+}) => {
+  const previous_stage = request_stage
+  request_stage = 'crawl'
+
+  let new_leagues = 0
+  let users_expanded = 0
+  let member_lists_crawled = 0
+  let bootstrapped = false
+
+  try {
+    while (new_leagues < new_league_limit) {
+      const frontier_user = await db('external_league_users')
+        .select('external_user_id')
+        .where({ platform: 'sleeper' })
+        .whereNull('last_crawled_at')
+        .orderBy('first_seen_at', 'asc')
+        .first()
+
+      if (frontier_user) {
+        new_leagues += await crawl_user_leagues({
+          external_user_id: frontier_user.external_user_id,
+          season_year,
+          dynasty_only
+        })
+        users_expanded += 1
+        continue
+      }
+
+      const frontier_league = await db('external_leagues')
+        .select('external_league_id')
+        .where({ platform: 'sleeper' })
+        .whereNull('member_list_crawled_at')
+        .orderBy('created_at', 'asc')
+        .first()
+
+      if (frontier_league) {
+        await crawl_league_member_list(frontier_league.external_league_id)
+        member_lists_crawled += 1
+        continue
+      }
+
+      // No frontier on either side. Only now does the seed matter, and only
+      // once per run -- re-running the bootstrap against an exhausted graph
+      // would spin without ever producing a new node.
+      if (bootstrapped || !seed_league_ids.length) {
+        log('crawl graph fully explored, no frontier remains')
+        break
+      }
+
+      bootstrapped = true
+      const seeded = await bootstrap_seed_leagues(seed_league_ids)
+      if (!seeded) {
+        break
+      }
+    }
+  } finally {
+    request_stage = previous_stage
+  }
+
+  log(
+    `crawl: ${new_leagues} new leagues from ${users_expanded} managers expanded and ${member_lists_crawled} member lists read (${request_counts.crawl} requests)`
+  )
+
+  return { new_leagues, users_expanded, member_lists_crawled }
+}
+
+/**
+ * Size the unexplored frontier.
+ *
+ * Logged at the end of every run so the crawl's health is observable without a
+ * query: a frontier that is growing means the corpus can still expand, and one
+ * that has collapsed to zero means the reachable graph is exhausted and a wider
+ * appetite or a new seed is needed.
+ */
+const measure_frontier = async () => {
+  const [users, member_lists, unimported] = await Promise.all([
+    db('external_league_users')
+      .where({ platform: 'sleeper' })
+      .whereNull('last_crawled_at')
+      .count('* as count')
+      .first(),
+    db('external_leagues')
+      .where({ platform: 'sleeper' })
+      .whereNull('member_list_crawled_at')
+      .count('* as count')
+      .first(),
+    db('external_leagues')
+      .where({ platform: 'sleeper' })
+      .whereNull('last_synced_at')
+      .count('* as count')
+      .first()
+  ])
+
+  return {
+    uncrawled_users: Number(users.count),
+    uncrawled_league_member_lists: Number(member_lists.count),
+    unimported_leagues: Number(unimported.count)
+  }
+}
+
+/**
+ * Select the leagues this run will import trades for.
+ *
+ * Two separate budgets, because one shared budget would let refresh work starve
+ * frontier expansion (or the reverse) depending only on how the ordering
+ * happened to fall. new_league_limit takes never-imported leagues off the
+ * backlog oldest-first; resync_limit refreshes already-imported leagues
+ * stalest-first, which is how new trades in leagues we already know still get
+ * picked up.
+ */
+const select_leagues_to_import = async ({
+  new_league_limit,
+  resync_limit,
+  dynasty_only
+}) => {
+  const apply_appetite = (query) =>
+    dynasty_only ? query.where({ league_format: 'dynasty' }) : query
+
+  const never_imported = await apply_appetite(
+    db('external_leagues')
+      .select('external_league_id', 'discovered_via')
+      .where({ platform: 'sleeper' })
+      .whereNull('last_synced_at')
+  )
+    .orderBy('created_at', 'asc')
+    .limit(new_league_limit)
+
+  const stalest_imported = resync_limit
+    ? await apply_appetite(
+        db('external_leagues')
+          .select('external_league_id', 'discovered_via')
+          .where({ platform: 'sleeper' })
+          .whereNotNull('last_synced_at')
+      )
+        .orderBy('last_synced_at', 'asc')
+        .limit(resync_limit)
+    : []
+
+  return [...never_imported, ...stalest_imported]
 }
 
 const import_sleeper_external_league_trades = async ({
-  seed_league_ids,
+  seed_league_ids = [],
   season_year = current_season.year,
   limit = 25,
+  resync_limit = 25,
   history_depth = 4,
   dry_run = false,
   dynasty_only = true
 } = {}) => {
-  if (!seed_league_ids?.length) {
-    throw new Error('at least one --seed-league-id is required')
-  }
+  // The crawl IS persistence -- its whole product is graph rows, and it reads
+  // its own frontier back to decide where to go next -- so there is no coherent
+  // dry version of it. A dry run therefore skips it entirely and reports what
+  // importing the existing backlog would do, which keeps --dry meaning exactly
+  // "makes no writes".
+  const crawl_totals = dry_run
+    ? { new_leagues: 0, users_expanded: 0, member_lists_crawled: 0 }
+    : await crawl_sleeper_league_graph({
+        seed_league_ids,
+        season_year,
+        new_league_limit: limit,
+        dynasty_only
+      })
 
-  const discovered = await discover_sleeper_leagues({
-    seed_league_ids,
-    season_year,
-    limit,
+  const selected = await select_leagues_to_import({
+    new_league_limit: limit,
+    resync_limit,
     dynasty_only
   })
 
-  log(`discovered ${discovered.size} leagues, importing`)
+  log(`importing ${selected.length} leagues`)
 
   const totals = { leagues: 0, skipped: 0, trades: 0, legs: 0, unresolved: 0 }
 
@@ -315,14 +625,26 @@ const import_sleeper_external_league_trades = async ({
   // season-scoped. Each league payload carries previous_league_id, so walking
   // that chain harvests prior league-seasons for one request each -- by far the
   // cheapest volume available, and it extends the observation window backward
-  // in time, which a value fit wants. Seeded from discovery and consumed as a
-  // queue so the chain is followed to history_depth without recursion.
-  const pending = [...discovered].map(([league_id, discovered_via]) => ({
-    external_league_id: league_id,
-    discovered_via,
+  // in time, which a value fit wants. Consumed as a queue so the chain is
+  // followed to history_depth without recursion.
+  const pending = selected.map((row) => ({
+    external_league_id: row.external_league_id,
+    discovered_via: row.discovered_via,
     depth: 0
   }))
-  const seen = new Set(discovered.keys())
+  const seen = new Set(selected.map((row) => row.external_league_id))
+
+  // Prior league-seasons are complete and immutable, so one already imported is
+  // never worth 19 requests again. Without this the chain walk re-paid for the
+  // entire back-catalogue on every single run.
+  const previously_imported_chain_links = new Set(
+    (
+      await db('external_leagues')
+        .select('external_league_id')
+        .where({ platform: 'sleeper' })
+        .whereNotNull('last_synced_at')
+    ).map((row) => row.external_league_id)
+  )
 
   while (pending.length) {
     const { external_league_id, discovered_via, depth } = pending.shift()
@@ -348,7 +670,10 @@ const import_sleeper_external_league_trades = async ({
 
       const previous_league_id = result.league_row?.previous_external_league_id
       if (previous_league_id && depth < history_depth) {
-        if (!seen.has(previous_league_id)) {
+        if (
+          !seen.has(previous_league_id) &&
+          !previously_imported_chain_links.has(previous_league_id)
+        ) {
           seen.add(previous_league_id)
           pending.push({
             external_league_id: previous_league_id,
@@ -363,8 +688,13 @@ const import_sleeper_external_league_trades = async ({
     }
   }
 
+  const frontier = await measure_frontier()
+
   log(
-    `imported ${totals.trades} trades / ${totals.legs} legs from ${totals.leagues} leagues (${totals.skipped} skipped, ${totals.unresolved} unresolved players, ${request_count} requests)`
+    `imported ${totals.trades} trades / ${totals.legs} legs from ${totals.leagues} leagues (${totals.skipped} skipped, ${totals.unresolved} unresolved players, ${request_counts.crawl} crawl + ${request_counts.import} import requests)`
+  )
+  log(
+    `frontier: ${frontier.uncrawled_users} managers and ${frontier.uncrawled_league_member_lists} league member lists unexplored, ${frontier.unimported_leagues} leagues known but not imported`
   )
 
   // The output oracle is distinct from the exit code: a run that discovers
@@ -377,12 +707,21 @@ const import_sleeper_external_league_trades = async ({
     )
   }
 
-  return totals
+  return { ...totals, ...crawl_totals, frontier }
 }
 
 const main = async () => {
   let error
   try {
+    // --seed_league_id is a BOOTSTRAP for an empty graph, not a permanent
+    //   anchor: once anything is persisted the crawl resumes from the frontier
+    //   and this argument is never consulted.
+    // --limit is how many NEW leagues to take into the graph this run, NOT the
+    //   total crawl size. A weekly cron therefore extends the frontier by that
+    //   many leagues each time instead of re-walking the same neighbourhood.
+    // --resync_limit is how many ALREADY-imported leagues to refresh for new
+    //   trades, stalest first. Separate budget so refresh work cannot starve
+    //   frontier expansion.
     const seed_league_ids = argv.seed_league_id
       ? [].concat(argv.seed_league_id).map(String)
       : []
@@ -390,7 +729,12 @@ const main = async () => {
     await import_sleeper_external_league_trades({
       seed_league_ids,
       season_year: argv.season_year ? Number(argv.season_year) : undefined,
-      limit: argv.limit ? Number(argv.limit) : undefined,
+      // Compared against undefined rather than tested for truthiness: `0` is a
+      // meaningful value for both budgets (skip the crawl / skip the refresh)
+      // and a truthiness test would silently substitute the default instead.
+      limit: argv.limit === undefined ? undefined : Number(argv.limit),
+      resync_limit:
+        argv.resync_limit === undefined ? undefined : Number(argv.resync_limit),
       history_depth:
         argv.history_depth === undefined
           ? undefined
