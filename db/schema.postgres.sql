@@ -221,7 +221,6 @@ DROP INDEX IF EXISTS public.idx_projections_index_natural_key;
 DROP INDEX IF EXISTS public.idx_projections_history_pid;
 DROP INDEX IF EXISTS public.idx_projections_history_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_history_natural_key;
-DROP INDEX IF EXISTS public.idx_projections_archive_pid;
 DROP INDEX IF EXISTS public.idx_practice_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_position_game_outcome_defaults_season_year;
 DROP INDEX IF EXISTS public.idx_poaches_lid;
@@ -411,7 +410,6 @@ DROP INDEX IF EXISTS public.idx_24959_market;
 DROP INDEX IF EXISTS public.idx_24954_market;
 DROP INDEX IF EXISTS public.idx_24949_market;
 DROP INDEX IF EXISTS public.idx_24944_market_selection;
-DROP INDEX IF EXISTS public.idx_24932_projection;
 DROP INDEX IF EXISTS public.idx_24923_pid;
 DROP INDEX IF EXISTS public.idx_24913_pid;
 DROP INDEX IF EXISTS public.idx_24910_tid;
@@ -739,7 +737,6 @@ DROP TABLE IF EXISTS public.projections_index_y2020;
 DROP TABLE IF EXISTS public.projections_index_default;
 DROP TABLE IF EXISTS public.projections_index;
 DROP TABLE IF EXISTS public.projections_history;
-DROP TABLE IF EXISTS public.projections_archive;
 DROP TABLE IF EXISTS public.practice;
 DROP TABLE IF EXISTS public.position_game_outcome_defaults;
 DROP SEQUENCE IF EXISTS public.poaches_uid_seq;
@@ -24543,56 +24540,6 @@ CREATE TABLE public.practice (
 
 
 --
--- Name: projections_archive; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.projections_archive (
-    pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
-    passing_attempts numeric(5,1),
-    passing_completions numeric(5,1),
-    passing_yards numeric(5,1),
-    passing_interceptions numeric(3,1),
-    passing_touchdowns numeric(3,1),
-    rushing_attempts numeric(4,1),
-    rushing_yards numeric(5,1),
-    rushing_touchdowns numeric(3,1),
-    targets numeric(4,1),
-    receptions numeric(4,1),
-    receiving_yards numeric(5,1),
-    receiving_touchdowns numeric(3,1),
-    fumbles_lost numeric(3,1),
-    two_point_conversions numeric(3,1),
-    week smallint,
-    season_year smallint,
-    generated_at timestamp with time zone NOT NULL,
-    field_goals_made numeric(4,1),
-    field_goal_yards integer DEFAULT 0,
-    field_goals_made_0_19_yards numeric(3,1),
-    field_goals_made_20_29_yards numeric(3,1),
-    field_goals_made_30_39_yards numeric(3,1),
-    field_goals_made_40_49_yards numeric(3,1),
-    field_goals_made_50_plus_yards numeric(3,1),
-    extra_points_made numeric(3,1),
-    defensive_sacks numeric(4,1),
-    defensive_interceptions numeric(4,1),
-    defensive_forced_fumbles numeric(4,1),
-    defensive_recovered_fumbles numeric(4,1),
-    defensive_three_and_outs numeric(4,1),
-    defensive_fourth_down_stops numeric(4,1),
-    defensive_points_against numeric(4,1),
-    defensive_yards_against numeric(5,1),
-    defensive_blocked_kicks numeric(4,1),
-    defensive_safeties numeric(4,1),
-    defensive_two_point_returns numeric(4,1),
-    defensive_touchdowns numeric(4,1),
-    kickoff_return_touchdowns numeric(4,1),
-    punt_return_touchdowns numeric(4,1)
-);
-
-
---
 -- Name: projections_history; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -29436,13 +29383,6 @@ CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, sea
 
 
 --
--- Name: idx_24932_projection; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24932_projection ON public.projections_archive USING btree (sourceid, pid, userid, week, season_year, generated_at);
-
-
---
 -- Name: idx_24944_market_selection; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30763,13 +30703,6 @@ CREATE INDEX idx_position_game_outcome_defaults_season_year ON public.position_g
 --
 
 CREATE INDEX idx_practice_nfl_week_id ON public.practice USING btree (nfl_week_id);
-
-
---
--- Name: idx_projections_archive_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_projections_archive_pid ON public.projections_archive USING btree (pid);
 
 
 --
@@ -58002,13 +57935,6 @@ GRANT SELECT ON TABLE public.position_game_outcome_defaults TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.practice TO league_reader;
-
-
---
--- Name: TABLE projections_archive; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.projections_archive TO league_reader;
 
 
 --
