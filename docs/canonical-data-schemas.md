@@ -601,12 +601,12 @@ Tables with weekly NFL data include a `nfl_week_id` stored generated column that
 
 **Tables with nfl_week_id**:
 
-| Table                 | Generated Expression                                                                             | Notes                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `nfl_games`           | `year::text \|\| '_' \|\| seas_type \|\| '_WEEK_' \|\| week::text`                               |                                                                                         |
-| `nfl_plays`           | `year::text \|\| '_' \|\| seas_type \|\| '_WEEK_' \|\| week::text`                               | Partitioned by year; queries must include `whereIn('year', ...)` for partition pruning  |
-| `projections_history` | `season_year::text \|\| '_' \|\| season_type_to_text(season_type) \|\| '_WEEK_' \|\| week::text` | Dated observation history; `season_type` is ENUM, converted via `season_type_to_text()` |
-| `projections_index`   | Same as `projections_history`                                                                    | Current state; partitioned by `season_year`; requires partition pruning hint            |
-| `practice`            | `year::text \|\| '_' \|\| seas_type \|\| '_WEEK_' \|\| week::text`                               | `seas_type` column added with `DEFAULT 'REG'`                                           |
+| Table                 | Generated Expression                                                                             | Notes                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `nfl_games`           | `season_year::text \|\| '_' \|\| season_type \|\| '_WEEK_' \|\| week::text`                      |                                                                                                        |
+| `nfl_plays`           | `season_year::text \|\| '_' \|\| season_type \|\| '_WEEK_' \|\| week::text`                      | Partitioned by `season_year`; queries must include `whereIn('season_year', ...)` for partition pruning |
+| `projections_history` | `season_year::text \|\| '_' \|\| season_type_to_text(season_type) \|\| '_WEEK_' \|\| week::text` | Dated observation history; `season_type` is ENUM, converted via `season_type_to_text()`                |
+| `projections_index`   | Same as `projections_history`                                                                    | Current state; partitioned by `season_year`; requires partition pruning hint                           |
+| `practice`            | `season_year::text \|\| '_' \|\| season_type \|\| '_WEEK_' \|\| week::text`                      | `season_type` column added with `DEFAULT 'REG'`                                                        |
 
 **Utility Module**: `libs-shared/nfl-week-identifier.mjs` provides parsing, formatting, validation, and generation functions for nfl_week_id values.
