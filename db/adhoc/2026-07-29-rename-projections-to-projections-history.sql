@@ -33,7 +33,7 @@
 --   overlap reads as coordinated rather than as two clusters racing.
 --
 -- No BEGIN/COMMIT: yarn db:exec already wraps the file in one transaction.
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-07-29 against league_production
 
 ALTER TABLE public.projections RENAME TO projections_history;
 

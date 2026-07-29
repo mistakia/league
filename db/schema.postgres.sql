@@ -47,6 +47,9 @@ ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_
 ALTER TABLE IF EXISTS ONLY public.format_category_signal_mapping DROP CONSTRAINT IF EXISTS format_category_signal_mapping_adp_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_index DROP CONSTRAINT IF EXISTS fk_combination_odds_index_combination;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTRAINT IF EXISTS fk_combination_odds_history_combination;
+ALTER TABLE IF EXISTS ONLY public.external_league_trades DROP CONSTRAINT IF EXISTS external_league_trades_league_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_trade_legs DROP CONSTRAINT IF EXISTS external_league_trade_legs_trade_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_trade_legs DROP CONSTRAINT IF EXISTS external_league_trade_legs_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_lid_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_initiated_by_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_connection_id_fkey;
@@ -210,11 +213,12 @@ DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_settled;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
-DROP INDEX IF EXISTS public.idx_projections_pid;
-DROP INDEX IF EXISTS public.idx_projections_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_index_natural_key;
+DROP INDEX IF EXISTS public.idx_projections_history_pid;
+DROP INDEX IF EXISTS public.idx_projections_history_nfl_week_id;
+DROP INDEX IF EXISTS public.idx_projections_history_natural_key;
 DROP INDEX IF EXISTS public.idx_projections_archive_pid;
 DROP INDEX IF EXISTS public.idx_practice_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_position_game_outcome_defaults_season_year;
@@ -349,6 +353,12 @@ DROP INDEX IF EXISTS public.idx_keeptradecut_liquidity_d_superflex;
 DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
 DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
+DROP INDEX IF EXISTS public.idx_external_leagues_last_synced;
+DROP INDEX IF EXISTS public.idx_external_leagues_format;
+DROP INDEX IF EXISTS public.idx_external_league_trades_processed_at;
+DROP INDEX IF EXISTS public.idx_external_league_trades_league;
+DROP INDEX IF EXISTS public.idx_external_league_trade_legs_unresolved;
+DROP INDEX IF EXISTS public.idx_external_league_trade_legs_pid;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_status;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_queued_at;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_lid;
@@ -396,7 +406,6 @@ DROP INDEX IF EXISTS public.idx_24954_market;
 DROP INDEX IF EXISTS public.idx_24949_market;
 DROP INDEX IF EXISTS public.idx_24944_market_selection;
 DROP INDEX IF EXISTS public.idx_24932_projection;
-DROP INDEX IF EXISTS public.idx_24926_projection;
 DROP INDEX IF EXISTS public.idx_24923_pid;
 DROP INDEX IF EXISTS public.idx_24913_pid;
 DROP INDEX IF EXISTS public.idx_24910_tid;
@@ -604,6 +613,9 @@ ALTER TABLE IF EXISTS ONLY public.historical_injury_index_2010 DROP CONSTRAINT I
 ALTER TABLE IF EXISTS ONLY public.historical_injury_index_2009 DROP CONSTRAINT IF EXISTS historical_injury_index_2009_pkey;
 ALTER TABLE IF EXISTS ONLY public.historical_injury_index DROP CONSTRAINT IF EXISTS historical_injury_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.format_category_signal_mapping DROP CONSTRAINT IF EXISTS format_category_signal_mapping_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_leagues DROP CONSTRAINT IF EXISTS external_leagues_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_trades DROP CONSTRAINT IF EXISTS external_league_trades_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_trade_legs DROP CONSTRAINT IF EXISTS external_league_trade_legs_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_job_history DROP CONSTRAINT IF EXISTS external_league_import_job_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_pkey;
@@ -718,8 +730,8 @@ DROP TABLE IF EXISTS public.projections_index_y2021;
 DROP TABLE IF EXISTS public.projections_index_y2020;
 DROP TABLE IF EXISTS public.projections_index_default;
 DROP TABLE IF EXISTS public.projections_index;
+DROP TABLE IF EXISTS public.projections_history;
 DROP TABLE IF EXISTS public.projections_archive;
-DROP TABLE IF EXISTS public.projections;
 DROP TABLE IF EXISTS public.practice;
 DROP TABLE IF EXISTS public.position_game_outcome_defaults;
 DROP SEQUENCE IF EXISTS public.poaches_uid_seq;
@@ -930,6 +942,9 @@ DROP TABLE IF EXISTS public.historical_injury_index_2009;
 DROP TABLE IF EXISTS public.historical_injury_index;
 DROP TABLE IF EXISTS public.format_category_signal_mapping;
 DROP TABLE IF EXISTS public.footballoutsiders;
+DROP TABLE IF EXISTS public.external_leagues;
+DROP TABLE IF EXISTS public.external_league_trades;
+DROP TABLE IF EXISTS public.external_league_trade_legs;
 DROP TABLE IF EXISTS public.external_league_import_jobs;
 DROP TABLE IF EXISTS public.external_league_import_job_history;
 DROP TABLE IF EXISTS public.external_league_connections;
@@ -2979,6 +2994,93 @@ COMMENT ON COLUMN public.external_league_import_jobs.mapped_data IS 'Processed/m
 
 
 --
+-- Name: external_league_trade_legs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_league_trade_legs (
+    platform character varying(20) NOT NULL,
+    external_transaction_id character varying(64) NOT NULL,
+    leg_index smallint NOT NULL,
+    leg_type character varying(10) NOT NULL,
+    from_roster_id smallint,
+    to_roster_id smallint NOT NULL,
+    pid character varying(25),
+    external_player_id character varying(32),
+    pick_season_year smallint,
+    pick_round smallint,
+    pick_original_roster_id smallint,
+    faab_amount integer,
+    CONSTRAINT external_league_trade_legs_leg_type_check CHECK (((leg_type)::text = ANY ((ARRAY['player'::character varying, 'pick'::character varying, 'faab'::character varying])::text[]))),
+    CONSTRAINT external_league_trade_legs_payload_check CHECK (((((leg_type)::text = 'player'::text) AND (external_player_id IS NOT NULL) AND (pick_round IS NULL) AND (faab_amount IS NULL)) OR (((leg_type)::text = 'pick'::text) AND (pick_season_year IS NOT NULL) AND (pick_round IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (faab_amount IS NULL)) OR (((leg_type)::text = 'faab'::text) AND (faab_amount IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (pick_round IS NULL))))
+);
+
+
+--
+-- Name: TABLE external_league_trade_legs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_league_trade_legs IS 'Individual assets moved by an external trade: players, future draft picks, and FAAB. Grouping by to_roster_id yields the bundle each side received.';
+
+
+--
+-- Name: external_league_trades; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_league_trades (
+    platform character varying(20) NOT NULL,
+    external_transaction_id character varying(64) NOT NULL,
+    external_league_id character varying(64) NOT NULL,
+    season_year smallint NOT NULL,
+    platform_transaction_bucket smallint NOT NULL,
+    processed_at timestamp with time zone NOT NULL,
+    num_sides smallint NOT NULL,
+    imported_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT external_league_trades_num_sides_check CHECK ((num_sides >= 2))
+);
+
+
+--
+-- Name: TABLE external_league_trades; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_league_trades IS 'Completed trades observed in external leagues. One row per trade; the exchanged bundles live in external_league_trade_legs.';
+
+
+--
+-- Name: external_leagues; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_leagues (
+    platform character varying(20) NOT NULL,
+    external_league_id character varying(64) NOT NULL,
+    season_year smallint NOT NULL,
+    league_name text,
+    num_teams smallint,
+    league_format character varying(10) NOT NULL,
+    is_superflex boolean DEFAULT false NOT NULL,
+    is_best_ball boolean DEFAULT false NOT NULL,
+    points_per_reception numeric(4,2),
+    tight_end_premium numeric(4,2),
+    passing_touchdown_points numeric(4,2),
+    taxi_slots smallint,
+    roster_positions jsonb,
+    scoring_settings jsonb,
+    previous_external_league_id character varying(64),
+    discovered_via character varying(20),
+    last_synced_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT external_leagues_league_format_check CHECK (((league_format)::text = ANY ((ARRAY['dynasty'::character varying, 'keeper'::character varying, 'redraft'::character varying])::text[])))
+);
+
+
+--
+-- Name: TABLE external_leagues; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_leagues IS 'Fantasy leagues on external platforms observed for realized trade data. We are not members of these leagues; they are read from public read-only APIs.';
+
+
+--
 -- Name: footballoutsiders; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4652,7 +4754,7 @@ CREATE TABLE public.nfl_games (
     time_tz_offset smallint,
     time_start character varying(36),
     time_end character varying(36),
-    "timestamp" integer,
+    kickoff_at timestamp with time zone,
     away_nfl_team character varying(3) NOT NULL,
     home_nfl_team character varying(3) NOT NULL,
     season_type character varying(10) NOT NULL,
@@ -24369,58 +24471,6 @@ CREATE TABLE public.practice (
 
 
 --
--- Name: projections; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.projections (
-    pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
-    passing_attempts numeric(5,1),
-    passing_completions numeric(5,1),
-    passing_yards numeric(5,1),
-    passing_interceptions numeric(3,1),
-    passing_touchdowns numeric(3,1),
-    rushing_attempts numeric(4,1),
-    rushing_yards numeric(5,1),
-    rushing_touchdowns numeric(3,1),
-    targets numeric(4,1),
-    receptions numeric(4,1),
-    receiving_yards numeric(5,1),
-    receiving_touchdowns numeric(3,1),
-    fumbles_lost numeric(3,1),
-    two_point_conversions numeric(3,1),
-    week smallint,
-    season_year smallint,
-    generated_at timestamp with time zone NOT NULL,
-    field_goals_made numeric(4,1),
-    field_goal_yards integer DEFAULT 0,
-    field_goals_made_0_19_yards numeric(3,1),
-    field_goals_made_20_29_yards numeric(3,1),
-    field_goals_made_30_39_yards numeric(3,1),
-    field_goals_made_40_49_yards numeric(3,1),
-    field_goals_made_50_plus_yards numeric(3,1),
-    extra_points_made numeric(3,1),
-    defensive_sacks numeric(4,1),
-    defensive_interceptions numeric(4,1),
-    defensive_forced_fumbles numeric(4,1),
-    defensive_recovered_fumbles numeric(4,1),
-    defensive_three_and_outs numeric(4,1),
-    defensive_fourth_down_stops numeric(4,1),
-    defensive_points_against numeric(4,1),
-    defensive_yards_against numeric(5,1),
-    defensive_blocked_kicks numeric(4,1),
-    defensive_safeties numeric(4,1),
-    defensive_two_point_returns numeric(4,1),
-    defensive_touchdowns numeric(4,1),
-    kickoff_return_touchdowns numeric(4,1),
-    punt_return_touchdowns numeric(4,1),
-    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
-    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
-);
-
-
---
 -- Name: projections_archive; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -24467,6 +24517,58 @@ CREATE TABLE public.projections_archive (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1)
+);
+
+
+--
+-- Name: projections_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_history (
+    pid character varying(25),
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    passing_attempts numeric(5,1),
+    passing_completions numeric(5,1),
+    passing_yards numeric(5,1),
+    passing_interceptions numeric(3,1),
+    passing_touchdowns numeric(3,1),
+    rushing_attempts numeric(4,1),
+    rushing_yards numeric(5,1),
+    rushing_touchdowns numeric(3,1),
+    targets numeric(4,1),
+    receptions numeric(4,1),
+    receiving_yards numeric(5,1),
+    receiving_touchdowns numeric(3,1),
+    fumbles_lost numeric(3,1),
+    two_point_conversions numeric(3,1),
+    week smallint,
+    season_year smallint,
+    generated_at timestamp with time zone NOT NULL,
+    field_goals_made numeric(4,1),
+    field_goal_yards integer DEFAULT 0,
+    field_goals_made_0_19_yards numeric(3,1),
+    field_goals_made_20_29_yards numeric(3,1),
+    field_goals_made_30_39_yards numeric(3,1),
+    field_goals_made_40_49_yards numeric(3,1),
+    field_goals_made_50_plus_yards numeric(3,1),
+    extra_points_made numeric(3,1),
+    defensive_sacks numeric(4,1),
+    defensive_interceptions numeric(4,1),
+    defensive_forced_fumbles numeric(4,1),
+    defensive_recovered_fumbles numeric(4,1),
+    defensive_three_and_outs numeric(4,1),
+    defensive_fourth_down_stops numeric(4,1),
+    defensive_points_against numeric(4,1),
+    defensive_yards_against numeric(5,1),
+    defensive_blocked_kicks numeric(4,1),
+    defensive_safeties numeric(4,1),
+    defensive_two_point_returns numeric(4,1),
+    defensive_touchdowns numeric(4,1),
+    kickoff_return_touchdowns numeric(4,1),
+    punt_return_touchdowns numeric(4,1),
+    season_type public.season_type DEFAULT 'REG'::public.season_type NOT NULL,
+    nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || public.season_type_to_text(season_type)) || '_WEEK_'::text) || (week)::text)) STORED
 );
 
 
@@ -27379,6 +27481,30 @@ ALTER TABLE ONLY public.external_league_import_jobs
 
 
 --
+-- Name: external_league_trade_legs external_league_trade_legs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_trade_legs
+    ADD CONSTRAINT external_league_trade_legs_pkey PRIMARY KEY (platform, external_transaction_id, leg_index);
+
+
+--
+-- Name: external_league_trades external_league_trades_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_trades
+    ADD CONSTRAINT external_league_trades_pkey PRIMARY KEY (platform, external_transaction_id);
+
+
+--
+-- Name: external_leagues external_leagues_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_leagues
+    ADD CONSTRAINT external_leagues_pkey PRIMARY KEY (platform, external_league_id);
+
+
+--
 -- Name: format_category_signal_mapping format_category_signal_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -29222,13 +29348,6 @@ CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, sea
 
 
 --
--- Name: idx_24926_projection; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24926_projection ON public.projections USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
-
-
---
 -- Name: idx_24932_projection; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29555,6 +29674,48 @@ CREATE INDEX idx_external_league_import_jobs_queued_at ON public.external_league
 --
 
 CREATE INDEX idx_external_league_import_jobs_status ON public.external_league_import_jobs USING btree (status);
+
+
+--
+-- Name: idx_external_league_trade_legs_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_trade_legs_pid ON public.external_league_trade_legs USING btree (pid) WHERE (pid IS NOT NULL);
+
+
+--
+-- Name: idx_external_league_trade_legs_unresolved; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_trade_legs_unresolved ON public.external_league_trade_legs USING btree (external_player_id) WHERE (((leg_type)::text = 'player'::text) AND (pid IS NULL));
+
+
+--
+-- Name: idx_external_league_trades_league; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_trades_league ON public.external_league_trades USING btree (platform, external_league_id);
+
+
+--
+-- Name: idx_external_league_trades_processed_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_trades_processed_at ON public.external_league_trades USING btree (processed_at);
+
+
+--
+-- Name: idx_external_leagues_format; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_leagues_format ON public.external_leagues USING btree (league_format, is_superflex, season_year);
+
+
+--
+-- Name: idx_external_leagues_last_synced; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_leagues_last_synced ON public.external_leagues USING btree (last_synced_at NULLS FIRST);
 
 
 --
@@ -30496,6 +30657,27 @@ CREATE INDEX idx_projections_archive_pid ON public.projections_archive USING btr
 
 
 --
+-- Name: idx_projections_history_natural_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_projections_history_natural_key ON public.projections_history USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+
+
+--
+-- Name: idx_projections_history_nfl_week_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_projections_history_nfl_week_id ON public.projections_history USING btree (nfl_week_id);
+
+
+--
+-- Name: idx_projections_history_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_projections_history_pid ON public.projections_history USING btree (pid);
+
+
+--
 -- Name: idx_projections_index_natural_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30514,20 +30696,6 @@ CREATE INDEX idx_projections_index_nfl_week_id ON ONLY public.projections_index 
 --
 
 CREATE INDEX idx_projections_index_pid ON ONLY public.projections_index USING btree (pid);
-
-
---
--- Name: idx_projections_nfl_week_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_projections_nfl_week_id ON public.projections USING btree (nfl_week_id);
-
-
---
--- Name: idx_projections_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_projections_pid ON public.projections USING btree (pid);
 
 
 --
@@ -55737,6 +55905,30 @@ ALTER TABLE ONLY public.external_league_import_jobs
 
 
 --
+-- Name: external_league_trade_legs external_league_trade_legs_pid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_trade_legs
+    ADD CONSTRAINT external_league_trade_legs_pid_fkey FOREIGN KEY (pid) REFERENCES public.player(pid);
+
+
+--
+-- Name: external_league_trade_legs external_league_trade_legs_trade_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_trade_legs
+    ADD CONSTRAINT external_league_trade_legs_trade_fkey FOREIGN KEY (platform, external_transaction_id) REFERENCES public.external_league_trades(platform, external_transaction_id) ON DELETE CASCADE;
+
+
+--
+-- Name: external_league_trades external_league_trades_league_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_trades
+    ADD CONSTRAINT external_league_trades_league_fkey FOREIGN KEY (platform, external_league_id) REFERENCES public.external_leagues(platform, external_league_id) ON DELETE CASCADE;
+
+
+--
 -- Name: selection_combination_odds_history fk_combination_odds_history_combination; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -56141,6 +56333,27 @@ GRANT SELECT ON TABLE public.external_league_import_job_history TO league_reader
 --
 
 GRANT SELECT ON TABLE public.external_league_import_jobs TO league_reader;
+
+
+--
+-- Name: TABLE external_league_trade_legs; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.external_league_trade_legs TO league_reader;
+
+
+--
+-- Name: TABLE external_league_trades; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.external_league_trades TO league_reader;
+
+
+--
+-- Name: TABLE external_leagues; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.external_leagues TO league_reader;
 
 
 --
@@ -57646,17 +57859,17 @@ GRANT SELECT ON TABLE public.practice TO league_reader;
 
 
 --
--- Name: TABLE projections; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.projections TO league_reader;
-
-
---
 -- Name: TABLE projections_archive; Type: ACL; Schema: public; Owner: -
 --
 
 GRANT SELECT ON TABLE public.projections_archive TO league_reader;
+
+
+--
+-- Name: TABLE projections_history; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.projections_history TO league_reader;
 
 
 --
