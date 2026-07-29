@@ -12,10 +12,19 @@
 // query-match goldens blessed it, because a golden regenerated from buggy code
 // agrees with the buggy code.
 //
-// These assertions read db/schema.postgres.sql directly, in BOTH directions, so
-// the failure mode that matters is covered: a future cluster that conforms
-// another physical table to season_year but forgets to register it here fails the
-// suite rather than shipping vocabulary names against a conformed table.
+// Two directions, both derived rather than hand-listed:
+//
+//   1. Every table registered in the map really carries the column the map claims,
+//      read from db/schema.postgres.sql.
+//   2. Every table an apply_scope_to_query call site names by literal, found by
+//      scanning libs-server, is registered if it carries season_year.
+//
+// Direction 2 is the one that prevents the next 791c2393, and it has to be
+// derived to mean anything. An earlier version of this spec checked it against a
+// hand-maintained array of target tables, which enforced nothing: a cluster that
+// conformed a table and added it to neither the array nor the map passed green.
+// Both directions are negative-controlled -- adding an emitter that targets an
+// unregistered season_year table, or a new dynamic call site, each fail this spec.
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -49,15 +58,74 @@ const table_columns = (table_name) => {
   return columns
 }
 
-// Physical tables an apply_scope_to_query call site targets by name today. A new
-// physical-table emitter belongs here and in the map; the map-completeness
-// assertion below is what catches one that is added to neither.
-const EMITTER_TARGET_TABLES = [
-  'nfl_games',
-  'nfl_plays',
-  'nfl_plays_current_week',
-  'nfl_plays_receiver',
-  'nfl_snaps'
+// The tables an apply_scope_to_query call site targets are DERIVED FROM SOURCE,
+// not listed by hand. A hand-maintained list cannot enforce map completeness: a
+// cluster that conforms a table and registers it in neither the list nor the map
+// passes green, which is the original 791c2393 failure mode surviving the guard
+// built to stop it. Scanning the call sites means adding an emitter automatically
+// enters it into the check.
+//
+// Note the criterion is "an emitter targets this table", NOT "this table carries
+// season_year". 70 base tables carry season_year and only the handful an
+// apply_scope_to_query call site names belong in the map; historical_injury_index
+// carries it and is correctly absent, because it is writer-only and no emitter
+// targets it.
+const scan_apply_scope_call_sites = () => {
+  const literal_tables = new Set()
+  const dynamic_sites = []
+
+  const walk = (directory) => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const full = path.join(directory, entry.name)
+      if (entry.isDirectory()) walk(full)
+      else if (entry.name.endsWith('.mjs')) scan_file(full)
+    }
+  }
+
+  const scan_file = (file) => {
+    const text = fs.readFileSync(file, 'utf8')
+    // The helper's own definition and default export are not call sites.
+    if (file.endsWith('apply-scope-to-query.mjs')) return
+    const call = /apply_scope_to_query\(\{/g
+    let match
+    while ((match = call.exec(text))) {
+      const window = text.slice(match.index, match.index + 600)
+      const literal = /\n\s*table_name:\s*'([a-z0-9_]+)'/.exec(window)
+      if (literal) {
+        literal_tables.add(literal[1])
+        continue
+      }
+      const dynamic = /\n\s*table_name(?::\s*([A-Za-z0-9_.]+))?\s*,/.exec(
+        window
+      )
+      if (dynamic) {
+        dynamic_sites.push({
+          file: path.basename(file),
+          expression: dynamic[1] || 'table_name'
+        })
+      }
+    }
+  }
+
+  walk(path.resolve(__dirname, '../libs-server'))
+  return { literal_tables: [...literal_tables].sort(), dynamic_sites }
+}
+
+// Call sites that pass a variable rather than a literal cannot be resolved
+// statically, so they are reviewed once and pinned here. A NEW dynamic call site
+// fails this list and forces the same review rather than slipping through.
+//
+// Both entries resolve at runtime to tables already in the map (the plays family
+// and nfl_games) or to a hash-named CTE alias, for which the map's fallback to
+// the vocabulary names is the correct answer. Their real safety net is
+// db/adhoc/check-data-view-sql-validity.mjs, which EXPLAINs the emitted SQL and
+// so catches a wrong column name whatever the table turns out to be.
+const REVIEWED_DYNAMIC_CALL_SITES = [
+  {
+    file: 'apply-play-by-play-column-params-to-query.mjs',
+    expression: 'table_name'
+  },
+  { file: 'build-period-cte.mjs', expression: 'source_table' }
 ]
 
 describe('physical season columns', () => {
@@ -109,21 +177,43 @@ describe('physical season columns', () => {
   // season_year but never registered resolves to the vocabulary 'year' and emits
   // a 42703 that no golden can catch.
   describe('map completeness', () => {
-    for (const table_name of EMITTER_TARGET_TABLES) {
-      it(`${table_name} is registered`, () => {
+    const { literal_tables, dynamic_sites } = scan_apply_scope_call_sites()
+
+    it('finds the call sites at all', () => {
+      // Guards the scanner itself. A regex that silently stops matching would
+      // make every assertion below vacuously pass, which is the failure mode
+      // this whole describe block exists to prevent.
+      expect(literal_tables.length).to.be.greaterThan(0)
+      expect(dynamic_sites.length).to.be.greaterThan(0)
+    })
+
+    it('every table an emitter names by literal is registered', () => {
+      for (const table_name of literal_tables) {
         const columns = table_columns(table_name)
         expect(
           columns,
-          `${table_name} is missing from the schema`
+          `apply_scope_to_query targets ${table_name}, which is not in the schema`
         ).to.not.equal(null)
-        if (columns.has('season_year')) {
-          expect(
-            physical_year_column(table_name),
-            `${table_name} carries season_year but resolves to the vocabulary name`
-          ).to.equal('season_year')
-        }
-      })
-    }
+        if (!columns.has('season_year')) continue
+        expect(
+          physical_year_column(table_name),
+          `${table_name} is targeted by an apply_scope_to_query call site and carries season_year, but is not registered in physical-season-columns -- it will emit the vocabulary name and 42703`
+        ).to.equal('season_year')
+      }
+    })
+
+    it('every dynamic call site has been reviewed', () => {
+      const seen = dynamic_sites
+        .map(({ file, expression }) => `${file}:${expression}`)
+        .sort()
+      const reviewed = REVIEWED_DYNAMIC_CALL_SITES.map(
+        ({ file, expression }) => `${file}:${expression}`
+      ).sort()
+      expect(
+        seen,
+        'an apply_scope_to_query call site passes a table_name this spec cannot resolve statically; review what it resolves to and add it to REVIEWED_DYNAMIC_CALL_SITES'
+      ).to.deep.equal(reviewed)
+    })
 
     it('every registered table resolves away from the vocabulary default', () => {
       for (const table_name of physical_table_names()) {
