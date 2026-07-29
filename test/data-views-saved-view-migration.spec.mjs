@@ -60,6 +60,73 @@ describe('data-views saved-view migrator', () => {
     })
   })
 
+  describe('ngs play-filter param renames (8a4b6e4a)', () => {
+    it('renames every legacy _ngs key, preserving the value', () => {
+      const result = migrate_column_entry({
+        column_id: 'team_pass_attempts_from_plays',
+        params: {
+          route_ngs: ['GO'],
+          cov_type_ngs: ['COVER_1'],
+          man_zone_ngs: ['MAN_COVERAGE'],
+          time_to_throw_ngs: [0, 3],
+          air_yards_ngs: [5, 20],
+          pru_ngs: [1, 4],
+          box_ngs: [6, 8]
+        }
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.params).to.deep.equal({
+        route: ['GO'],
+        cov_type: ['COVER_1'],
+        man_zone: ['MAN_COVERAGE'],
+        time_to_throw: [0, 3],
+        air_yards: [5, 20],
+        pru: [1, 4],
+        box_defenders: [6, 8]
+      })
+    })
+
+    // qb_pressure and qb_pressure_tracking both exist in the registry today and
+    // are different params. The legacy qb_pressure_ngs is the tracking one.
+    it('maps qb_pressure_ngs to qb_pressure_tracking, not qb_pressure', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { qb_pressure_ngs: true }
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.params).to.deep.equal({ qb_pressure_tracking: true })
+    })
+
+    it('preserves a false value rather than dropping the filter', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { qb_pressure_ngs: false }
+      })
+      expect(result.params).to.deep.equal({ qb_pressure_tracking: false })
+    })
+
+    it('keeps the current key when both are present', () => {
+      const result = migrate_column_entry({
+        column_id: 'team_pass_attempts_from_plays',
+        params: { route_ngs: ['GO'], route: ['SLANT'] }
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.params).to.deep.equal({ route: ['SLANT'] })
+    })
+
+    // box_defenders is ambiguous across that commit (box_ngs became
+    // box_defenders while the old box_defenders became box_defenders_charted),
+    // so it must pass through untouched rather than be guessed at.
+    it('leaves a bare box_defenders key alone', () => {
+      const result = migrate_column_entry({
+        column_id: 'team_pass_attempts_from_plays',
+        params: { box_defenders: [6, 8] }
+      })
+      expect(result.changed).to.equal(false)
+      expect(result.params).to.deep.equal({ box_defenders: [6, 8] })
+    })
+  })
+
   describe('param_override_config key rename', () => {
     it('renames rate_type_match_column_params and rate_type_column_params', () => {
       const result = migrate_column_entry({

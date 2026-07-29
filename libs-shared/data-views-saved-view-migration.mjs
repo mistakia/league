@@ -2,9 +2,52 @@ import { translate_rate_type_to_output } from './data-views-output-tokens.mjs'
 
 const TEAM_FROM_PLAYS_RE = /^team_(.+)_from_plays$/
 
+// Play-filter param keys renamed in 8a4b6e4a (2025-07-24, "standardize variable
+// naming"). That was a code-side rename with no saved-view migration, so every
+// view still persisting an old key silently lost its filter:
+// apply_play_by_play_column_params_to_query iterates the registry and skips
+// anything it does not recognise, which produces a wrong answer rather than an
+// error. As of 2026-07-28 production still carried 131 such occurrences across
+// 13 saved views, found by db/adhoc/check-saved-view-param-coverage.mjs.
+//
+// The value vocabularies are unchanged across each rename, so rewriting the key
+// alone is lossless. Note qb_pressure_ngs maps to qb_pressure_tracking, NOT to
+// qb_pressure -- both exist in the registry today and they are different params.
+//
+// box_defenders is deliberately absent. The same commit renamed box_ngs ->
+// box_defenders while also renaming the pre-existing box_defenders ->
+// box_defenders_charted, so a persisted box_defenders key is AMBIGUOUS: it means
+// the charted param in a view last saved before the rename and the NGS param in
+// one saved after. A read-time migration cannot see the save date, so that case
+// needs a dated one-shot migration and an explicit decision rather than a rule
+// here.
+const PLAY_FILTER_PARAM_RENAMES = {
+  air_yards_ngs: 'air_yards',
+  box_ngs: 'box_defenders',
+  cov_type_ngs: 'cov_type',
+  man_zone_ngs: 'man_zone',
+  pru_ngs: 'pru',
+  qb_pressure_ngs: 'qb_pressure_tracking',
+  route_ngs: 'route',
+  time_to_throw_ngs: 'time_to_throw'
+}
+
 const migrate_params = (params) => {
   let next = params
   let changed = false
+
+  for (const [legacy_key, current_key] of Object.entries(
+    PLAY_FILTER_PARAM_RENAMES
+  )) {
+    if (!Object.prototype.hasOwnProperty.call(next, legacy_key)) continue
+    const { [legacy_key]: value, ...rest } = next
+    // A view that somehow carries both keys keeps the current one; the legacy
+    // key is the stale copy by construction.
+    next = Object.prototype.hasOwnProperty.call(rest, current_key)
+      ? rest
+      : { ...rest, [current_key]: value }
+    changed = true
+  }
 
   if (next.rate_type != null && next.output == null) {
     const token = Array.isArray(next.rate_type) ? next.rate_type[0] : null
