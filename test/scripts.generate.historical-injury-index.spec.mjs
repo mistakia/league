@@ -1,6 +1,7 @@
 /* global describe it */
 import * as chai from 'chai'
 
+import db from '#db'
 import { rebuild_sql } from '#scripts/historical-injury-index-sql.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -60,6 +61,64 @@ describe('SCRIPTS /generate-historical-injury-index SQL string', function () {
     // returning NULL) and snap_count explicitly NULL (not 0).
     expect(rebuild_sql).to.match(/WHEN gl\.pid IS NULL THEN false/)
     expect(rebuild_sql).to.match(/WHEN gl\.pid IS NULL THEN NULL/)
+  })
+
+  // Everything above this point only string-matches, and that is exactly how
+  // this script shipped a broken rebuild. When `practice` was conformed to
+  // season_year / season_type, the practice_signal CTE kept asking for year and
+  // seas_type; the rebuild threw 42703 on every run while all seven assertions
+  // above stayed green. Grep proves the absence of a string. Only the database
+  // can say whether the query is valid, so these two assertions execute it.
+  describe('executes against the real schema', function () {
+    it('plans without error -- every column reference resolves', async function () {
+      // EXPLAIN is enough: it resolves and type-checks every reference without
+      // scanning. Bindings are inlined because EXPLAIN of a raw string is not a
+      // prepared statement.
+      const sql = rebuild_sql
+        .replace(/:start_year/g, '2024')
+        .replace(/:end_year/g, '2024')
+      await db.raw(`EXPLAIN ${sql}`)
+    })
+
+    it('projects exactly the columns historical_injury_index accepts', async function () {
+      // The generator spreads these rows straight into an insert
+      // (generate-historical-injury-index.mjs), so the SELECT's output aliases
+      // ARE the insert contract. An alias that is not a column on the table is
+      // a 42703 at write time that no string assertion can see.
+      const sql = rebuild_sql
+        .replace(/:start_year/g, '2024')
+        .replace(/:end_year/g, '2024')
+
+      await db.raw(`CREATE TEMP VIEW rebuild_shape AS ${sql}`)
+      try {
+        // Checked in BOTH directions. Projected-but-absent is the 42703 at
+        // write time. Absent-from-projection is quieter and worse: drop
+        // s.nfl_team from the SELECT and every row still inserts, with the
+        // column silently NULL on all 526k of them. inserted_at/updated_at are
+        // the only legitimate absences -- the generator supplies those in JS.
+        const { rows } = await db.raw(
+          `SELECT COALESCE(v.column_name, t.column_name) AS column_name,
+                  CASE WHEN t.column_name IS NULL THEN 'not a column on the table'
+                       ELSE 'missing from the projection' END AS problem
+             FROM (SELECT column_name FROM information_schema.columns
+                    WHERE table_name = 'rebuild_shape'
+                      AND table_schema LIKE 'pg_temp%') v
+             FULL OUTER JOIN (SELECT column_name FROM information_schema.columns
+                    WHERE table_name = 'historical_injury_index'
+                      AND table_schema = 'public'
+                      AND column_name NOT IN ('inserted_at', 'updated_at')) t
+               ON v.column_name = t.column_name
+            WHERE v.column_name IS NULL OR t.column_name IS NULL
+            ORDER BY 1`
+        )
+        expect(
+          rows.map((r) => `${r.column_name}: ${r.problem}`),
+          'rebuild projection disagrees with historical_injury_index'
+        ).to.eql([])
+      } finally {
+        await db.raw('DROP VIEW IF EXISTS rebuild_shape')
+      }
+    })
   })
 
   it('orders missed_reason cascade with no-gamelog-row first', function () {

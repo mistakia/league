@@ -1,0 +1,30 @@
+-- STATUS: PENDING
+--
+-- Rollback for 2026-07-28-conform-historical-injury-index-team-column.sql.
+--
+-- THE CODE REVERT IS PART OF THIS ROLLBACK, NOT AN OPTIONAL COMPANION. The
+-- rebuild SQL's output aliases are the insert contract -- scripts/generate-
+-- historical-injury-index.mjs spreads the SELECT's rows straight into
+-- db('historical_injury_index').insert() -- so reverting this DDL while the
+-- conformed scripts/historical-injury-index-sql.mjs is still deployed swaps one
+-- 42703 for another rather than restoring service. Revert both together, or
+-- neither.
+--
+-- Note that reverting to `tm` also restores a SEPARATE pre-existing defect if
+-- the code revert is done by reverting the whole commit: the same commit fixed
+-- practice_signal, which had been selecting `year` / `seas_type` from a
+-- `practice` table conformed to season_year / season_type on 2026-07-23 and so
+-- threw 42703 on every rebuild. If you are rolling back the rename only, keep
+-- the practice_signal fix -- it is independent of the team column and the
+-- rebuild is broken without it.
+--
+-- Mechanics mirror the forward file: one statement against the partitioned
+-- parent, cascading by attnum to all 17 partitions, catalog-only with no table
+-- rewrite. Renaming a partition child directly is rejected by Postgres
+-- ("cannot rename inherited column"), so the parent is the only correct target.
+--
+-- Re-export db/schema.postgres.sql after running this, or the committed schema
+-- and production disagree and the suite fails on the shape assertion in
+-- test/scripts.generate.historical-injury-index.spec.mjs.
+
+ALTER TABLE historical_injury_index RENAME COLUMN nfl_team TO tm;

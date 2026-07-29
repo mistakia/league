@@ -1,0 +1,36 @@
+-- STATUS: APPLIED 2026-07-29 against league_production
+--
+-- Conform historical_injury_index.tm to nfl_team.
+--
+-- The last `tm` spelling of a team code in the schema. Per
+-- user:guideline/league/database-schema-standards.md a team code is `nfl_team`,
+-- with explicit role qualifiers where a row carries more than one; this table
+-- carries exactly one team per row (the team the player was rostered on for that
+-- game), so the unqualified `nfl_team` is the correct name rather than a
+-- team_nfl_team / opponent_nfl_team pair.
+--
+-- The family is the parent plus 17 year partitions (2009-2025), 526,514 rows,
+-- `tm` populated on every row across 32 distinct codes. This accounts for 18 of
+-- the 97 open conformance violations -- the audit counts the parent and each
+-- partition separately because it parses the schema dump, where the partition
+-- bodies repeat the parent's column list.
+--
+-- The rename is a single statement against the partitioned parent. Postgres
+-- cascades a RENAME COLUMN on a partitioned table to every partition by attnum,
+-- so the 17 children follow automatically; renaming them individually would in
+-- fact be rejected. It is a catalog-only change with no table rewrite, so the
+-- 526k rows are not touched and the 40s statement_timeout is not a factor.
+--
+-- Verified against production before authoring:
+--   - no index or constraint references `tm` (the two indexes on the family are
+--     (pid, season_year) and (season_year, week), plus the primary key)
+--   - zero dependent views or materialized views on any table in the family
+--     (pg_depend/pg_rewrite walk returned 0 rows)
+--   - season_year is already conformed on this table; `tm` was the only
+--     remaining violation
+--
+-- This table is not a data-view physical target -- no apply_scope_to_query call
+-- site names it -- so it is deliberately NOT registered in
+-- libs-server/data-views/physical-season-columns.mjs.
+
+ALTER TABLE historical_injury_index RENAME COLUMN tm TO nfl_team;

@@ -13,7 +13,7 @@ WITH reg_games AS (
   WHERE season_type = 'REG' AND season_year BETWEEN :start_year AND :end_year
 ),
 gl AS (
-  SELECT pg.pid, pg.esbid, pg.season_year AS year, pg.nfl_team AS tm, pg.active,
+  SELECT pg.pid, pg.esbid, pg.season_year AS year, pg.nfl_team, pg.active,
          pg.snaps_off, pg.snaps_def, pg.snaps_st,
          pg.ruled_out_in_game,
          (COALESCE(pg.passing_attempts,0)+COALESCE(pg.rushing_attempts,0)+COALESCE(pg.targets,0)
@@ -23,13 +23,13 @@ gl AS (
   WHERE pg.season_year BETWEEN :start_year AND :end_year
 ),
 practice_signal AS (
-  SELECT pid, year, week,
+  SELECT pid, season_year, week,
          BOOL_OR(inj IS NOT NULL AND inj <> '') AS practice_listed_injury,
          BOOL_OR(UPPER(game_designation) IN ('OUT','DOUBTFUL','QUESTIONABLE')) AS practice_questionable_or_worse,
          MAX(UPPER(game_designation)) AS practice_designation
   FROM practice
-  WHERE seas_type = 'REG'
-  GROUP BY pid, year, week
+  WHERE season_type = 'REG'
+  GROUP BY pid, season_year, week
 ),
 changelog_signal AS (
   -- Asymmetric per-game window: -7d back, +3h forward. pc.changed_at is
@@ -52,18 +52,18 @@ changelog_signal AS (
   GROUP BY gl_inner.pid, gl_inner.esbid
 ),
 team_spans AS (
-  SELECT gl.pid, gl.year, gl.tm,
+  SELECT gl.pid, gl.year, gl.nfl_team,
          MIN(g.game_timestamp) AS span_start,
          MAX(g.game_timestamp) AS span_end
   FROM gl JOIN reg_games g ON g.esbid = gl.esbid
-  GROUP BY gl.pid, gl.year, gl.tm
+  GROUP BY gl.pid, gl.year, gl.nfl_team
 ),
 schedule_spine AS (
-  SELECT ts.pid, ts.year AS spine_year, g.week, g.esbid, ts.tm
+  SELECT ts.pid, ts.year AS spine_year, g.week, g.esbid, ts.nfl_team
   FROM team_spans ts
   JOIN reg_games g
     ON g.year = ts.year
-   AND (g.home_team = ts.tm OR g.away_team = ts.tm)
+   AND (g.home_team = ts.nfl_team OR g.away_team = ts.nfl_team)
    AND g.game_timestamp BETWEEN ts.span_start AND ts.span_end
 )
 SELECT
@@ -71,7 +71,7 @@ SELECT
   s.spine_year AS season_year,
   s.week,
   s.esbid,
-  s.tm,
+  s.nfl_team,
   CASE
     WHEN gl.pid IS NULL THEN false
     WHEN gl.snaps_off IS NULL AND gl.snaps_def IS NULL AND gl.snaps_st IS NULL
@@ -125,6 +125,6 @@ SELECT
   END AS confidence
 FROM schedule_spine s
 LEFT JOIN gl              ON gl.pid = s.pid AND gl.esbid = s.esbid
-LEFT JOIN practice_signal ps ON ps.pid = s.pid AND ps.year = s.spine_year AND ps.week = s.week
+LEFT JOIN practice_signal ps ON ps.pid = s.pid AND ps.season_year = s.spine_year AND ps.week = s.week
 LEFT JOIN changelog_signal cs ON cs.pid = s.pid AND cs.esbid = s.esbid
 `
