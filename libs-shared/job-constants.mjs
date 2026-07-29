@@ -152,7 +152,8 @@ export const job_types = {
 
   IMPORT_UNDERDOG_BESTBALL_ADP: 127,
   VERIFY_FORMAT_DATA_COVERAGE: 128,
-  AUDIT_DRIVE_SEQ_COHERENCE: 129
+  AUDIT_DRIVE_SEQ_COHERENCE: 129,
+  IMPORT_SLEEPER_EXTERNAL_LEAGUE_TRADES: 130
 }
 
 export const job_title_by_id = {
@@ -284,5 +285,6 @@ export const job_title_by_id = {
   126: 'Import NFL Gamebook Starters',
   127: 'Import Underdog Best Ball ADP',
   128: 'Verify Format Data Coverage',
-  129: 'Audit drive_seq Coherence'
+  129: 'Audit drive_seq Coherence',
+  130: 'Import Sleeper External League Trades'
 }

@@ -227,3 +227,12 @@ JOB_PROJECT=league
 
 ## Every 20 minutes - Team yardage hit rates calculation
 */20 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-historical-hit-rates.mjs --current_week_only >> /var/log/league/league-calculate-team-hit-rates.log 2>&1
+
+# External League Trades
+
+## At 5:10AM on Monday. Sleeper's public read-only API, crawled from seed
+## leagues -- see scripts/import-sleeper-external-league-trades.mjs. Weekly is
+## deliberate: trades are immutable once complete and the importer is
+## idempotent, so this only needs to outpace trade creation, and a low cadence
+## keeps us far under Sleeper's documented rate ceiling.
+10 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --season_year 2025 --limit 250 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
