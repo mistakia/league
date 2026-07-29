@@ -119,8 +119,8 @@ const team_board = (board, tid) =>
   board.tag_board.find((row) => row.tid === tid)
 const team_exposure = (board, tid) =>
   board.cap_exposure.find((row) => row.tid === tid)
-const team_levers = (board, tid) =>
-  board.lever_budget.find((row) => row.tid === tid)
+const team_tag_budget = (board, tid) =>
+  board.tag_budget.find((row) => row.tid === tid)
 const rules_fired = (board, tid) =>
   board.considerations[tid].map((row) => row.rule)
 
@@ -233,7 +233,7 @@ describe('tag board', function () {
     })
   })
 
-  describe('lever budget', function () {
+  describe('tag budget', function () {
     it('nets the limits against tags already consumed', function () {
       const board = build_tag_board(
         build_fixture({
@@ -248,26 +248,26 @@ describe('tag board', function () {
         })
       )
 
-      const spent = team_levers(board, 1)
+      const spent = team_tag_budget(board, 1)
       spent.franchise.remaining.should.equal(0)
       spent.rookie.remaining.should.equal(0)
       spent.restricted_free_agency.remaining.should.equal(0)
 
-      const unspent = team_levers(board, 2)
+      const unspent = team_tag_budget(board, 2)
       unspent.franchise.remaining.should.equal(1)
       unspent.rookie.remaining.should.equal(1)
       unspent.restricted_free_agency.remaining.should.equal(2)
 
-      board.league_market.teams_with_unspent_lever.franchise.should.equal(1)
-      board.league_market.unspent_lever_count.franchise.should.equal(1)
+      board.league_market.teams_with_unspent_tag.franchise.should.equal(1)
+      board.league_market.unspent_tag_count.franchise.should.equal(1)
 
       // the discriminating case: one team holds two unspent nominations, so
       // the team count and the tag count must not agree. rendering the team
       // count as a tag count halves the stated supply.
-      board.league_market.teams_with_unspent_lever.restricted_free_agency.should.equal(
+      board.league_market.teams_with_unspent_tag.restricted_free_agency.should.equal(
         1
       )
-      board.league_market.unspent_lever_count.restricted_free_agency.should.equal(
+      board.league_market.unspent_tag_count.restricted_free_agency.should.equal(
         2
       )
     })
@@ -284,16 +284,16 @@ describe('tag board', function () {
         })
       )
 
-      team_levers(board, 1).franchise.remaining.should.equal(0)
+      team_tag_budget(board, 1).franchise.remaining.should.equal(0)
     })
 
-    it('withholds candidate eligibility once the lever is spent', function () {
+    it('withholds candidate eligibility once the tag is spent', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
           players: [
             // extension price 60 > the $41 RB franchise price, so the price
-            // screen passes; the lever is gone regardless.
+            // screen passes; the tag is gone regardless.
             { tid: 1, pid: 'BIG', pos: 'RB', value: 55, extensions: 0 },
             { tid: 1, pid: 'FRA', pos: 'RB', tag: 2, value: 50 },
             { tid: 2, pid: 'B1', value: 10 }
@@ -405,7 +405,7 @@ describe('tag board', function () {
       rules_fired(board, 1).should.include('empty_screen')
 
       const fired = board.considerations[1].filter(
-        (row) => row.rule === 'empty_screen' && row.inputs.lever === 'franchise'
+        (row) => row.rule === 'empty_screen' && row.inputs.tag === 'franchise'
       )
       fired.should.have.length(1)
       fired[0].inputs.rivals.should.eql([2])
@@ -432,14 +432,14 @@ describe('tag board', function () {
       // ...but the budget is exhausted, so eligibility and every rival-facing
       // aggregate agree that there is no candidate.
       row.eligibility.franchise.should.equal(false)
-      board.lever_budget
+      board.tag_budget
         .find((r) => r.tid === 2)
         .franchise.remaining.should.equal(0)
       board.league_market.teams_with_franchise_candidate.should.not.include(2)
       expect(board.league_market.candidate_concentration.WR).to.equal(undefined)
 
       const fired = board.considerations[1].filter(
-        (row) => row.rule === 'empty_screen' && row.inputs.lever === 'franchise'
+        (row) => row.rule === 'empty_screen' && row.inputs.tag === 'franchise'
       )
       fired.should.have.length(1)
       fired[0].inputs.rivals.should.eql([])
@@ -465,7 +465,7 @@ describe('tag board', function () {
       board.league_market.teams_with_rookie_candidate.should.not.include(2)
 
       const fired = board.considerations[1].filter(
-        (row) => row.rule === 'empty_screen' && row.inputs.lever === 'rookie'
+        (row) => row.rule === 'empty_screen' && row.inputs.tag === 'rookie'
       )
       fired.should.have.length(1)
       fired[0].inputs.rivals.should.eql([])
@@ -792,7 +792,7 @@ describe('tag board', function () {
   })
 
   describe('considerations', function () {
-    it('states whether the remaining levers close the overage', function () {
+    it('states whether the remaining tags close the overage', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -805,7 +805,7 @@ describe('tag board', function () {
       )
 
       const rule = board.considerations[1].find(
-        (row) => row.rule === 'lever_sufficiency'
+        (row) => row.rule === 'tag_sufficiency'
       )
       // 170 + 65 = 235 against 200.
       rule.inputs.overage.should.equal(35)
@@ -964,7 +964,7 @@ describe('tag board', function () {
         })
       )
 
-      board.lever_budget
+      board.tag_budget
         .find((row) => row.tid === 1)
         .franchise.remaining.should.equal(0)
       rules_fired(board, 1).should.not.include('saving_and_quality_diverge')

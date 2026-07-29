@@ -186,7 +186,7 @@ export default function build_tag_board({
     WR: season.fwr,
     TE: season.fte
   }
-  const lever_limits = {
+  const tag_limits = {
     franchise: season.tag2,
     rookie: season.tag3,
     restricted_free_agency: season.tag4
@@ -360,7 +360,7 @@ export default function build_tag_board({
   })
   const cap_exposure_by_tid = new Map(cap_exposure.map((row) => [row.tid, row]))
 
-  const lever_budget = team_ids.map((tid) => {
+  const tag_budget = team_ids.map((tid) => {
     // Tag counts are taken over the whole roster, matching `roster.mjs`
     // `isEligibleForTag`, not just the active roster.
     const rows = all_rows_by_tid.get(tid)
@@ -372,26 +372,26 @@ export default function build_tag_board({
       tid,
       name: team_name_by_tid.get(tid),
       franchise: {
-        limit: lever_limits.franchise,
+        limit: tag_limits.franchise,
         spent: franchise_spent,
-        remaining: Math.max(0, lever_limits.franchise - franchise_spent)
+        remaining: Math.max(0, tag_limits.franchise - franchise_spent)
       },
       rookie: {
-        limit: lever_limits.rookie,
+        limit: tag_limits.rookie,
         spent: rookie_spent,
-        remaining: Math.max(0, lever_limits.rookie - rookie_spent)
+        remaining: Math.max(0, tag_limits.rookie - rookie_spent)
       },
       restricted_free_agency: {
-        limit: lever_limits.restricted_free_agency,
+        limit: tag_limits.restricted_free_agency,
         spent: rfa_spent,
-        remaining: Math.max(0, lever_limits.restricted_free_agency - rfa_spent)
+        remaining: Math.max(0, tag_limits.restricted_free_agency - rfa_spent)
       }
     }
   })
-  const lever_budget_by_tid = new Map(lever_budget.map((row) => [row.tid, row]))
+  const tag_budget_by_tid = new Map(tag_budget.map((row) => [row.tid, row]))
 
   const tag_board = team_ids.map((tid) => {
-    const budget = lever_budget_by_tid.get(tid)
+    const budget = tag_budget_by_tid.get(tid)
     const rows = rows_by_tid.get(tid)
     return {
       tid,
@@ -473,7 +473,7 @@ export default function build_tag_board({
     positional_supply[row.pos] = (positional_supply[row.pos] || 0) + 1
   }
 
-  // Candidate lists are lever-netted: a team that has already spent its
+  // Candidate lists are tag-budget-netted: a team that has already spent its
   // franchise tag holds no franchise candidate, because it cannot act on one.
   // `row.franchise_eligible` is the mechanical screen alone and says nothing
   // about the budget, so every rival-facing aggregate below — candidate
@@ -484,7 +484,7 @@ export default function build_tag_board({
   const franchise_candidates_by_tid = new Map(
     team_ids.map((tid) => [
       tid,
-      lever_budget_by_tid.get(tid).franchise.remaining > 0
+      tag_budget_by_tid.get(tid).franchise.remaining > 0
         ? rows_by_tid.get(tid).filter((row) => row.franchise_eligible)
         : []
     ])
@@ -492,7 +492,7 @@ export default function build_tag_board({
   const rookie_candidates_by_tid = new Map(
     team_ids.map((tid) => [
       tid,
-      lever_budget_by_tid.get(tid).rookie.remaining > 0
+      tag_budget_by_tid.get(tid).rookie.remaining > 0
         ? rows_by_tid.get(tid).filter((row) => row.rookie_eligible)
         : []
     ])
@@ -535,27 +535,26 @@ export default function build_tag_board({
         }))
         .sort((a, b) => a.post_extension_room - b.post_extension_room)
     },
-    // two distinct quantities, and they differ wherever a lever's per-team
+    // two distinct quantities, and they differ wherever a tag's per-team
     // limit exceeds one. franchise and rookie are capped at one apiece so the
     // team count and the tag count coincide; restricted free agency allows two
     // nominations, so nine teams holding a nomination is eighteen unspent
     // nominations. rendering one as the other understates available supply by
     // half, which is why the key names the unit rather than saying "unspent".
-    teams_with_unspent_lever: {
-      franchise: lever_budget.filter((row) => row.franchise.remaining > 0)
-        .length,
-      rookie: lever_budget.filter((row) => row.rookie.remaining > 0).length,
-      restricted_free_agency: lever_budget.filter(
+    teams_with_unspent_tag: {
+      franchise: tag_budget.filter((row) => row.franchise.remaining > 0).length,
+      rookie: tag_budget.filter((row) => row.rookie.remaining > 0).length,
+      restricted_free_agency: tag_budget.filter(
         (row) => row.restricted_free_agency.remaining > 0
       ).length
     },
-    unspent_lever_count: {
-      franchise: lever_budget.reduce(
+    unspent_tag_count: {
+      franchise: tag_budget.reduce(
         (sum, row) => sum + row.franchise.remaining,
         0
       ),
-      rookie: lever_budget.reduce((sum, row) => sum + row.rookie.remaining, 0),
-      restricted_free_agency: lever_budget.reduce(
+      rookie: tag_budget.reduce((sum, row) => sum + row.rookie.remaining, 0),
+      restricted_free_agency: tag_budget.reduce(
         (sum, row) => sum + row.restricted_free_agency.remaining,
         0
       )
@@ -575,7 +574,7 @@ export default function build_tag_board({
     considerations[tid] = build_considerations({
       tid,
       exposure: cap_exposure_by_tid.get(tid),
-      budget: lever_budget_by_tid.get(tid),
+      budget: tag_budget_by_tid.get(tid),
       capacity: bid_capacity_by_tid.get(tid),
       franchise_candidates: franchise_candidates_by_tid.get(tid),
       rookie_candidates: rookie_candidates_by_tid.get(tid),
@@ -598,7 +597,7 @@ export default function build_tag_board({
     cap_total,
     active_roster_limit,
     franchise_prices,
-    lever_limits,
+    tag_limits,
     rookie_eligible_draft_class: rookie_class_year,
     dynasty_market_pool_size: pool_size,
     coverage_precise_min: COVERAGE_PRECISE_MIN,
@@ -610,7 +609,7 @@ export default function build_tag_board({
     })),
     cap_exposure,
     tag_board,
-    lever_budget,
+    tag_budget,
     bid_capacity,
     divergence,
     rfa_schedule,
@@ -731,7 +730,7 @@ export const build_calendar_freshness = ({ season, now_unix }) => {
  * with a sentence naming a tension, constraint or comparison.
  *
  * The boundary every sentence must hold: it remains true whatever the manager
- * decides. "Your levers cannot close the gap" passes. "Franchise this player"
+ * decides. "Your tags cannot close the gap" passes. "Franchise this player"
  * does not. Rules ship here rather than as flags a prompt phrases, because
  * drift in the phrasing is drift into prescription.
  */
@@ -768,7 +767,7 @@ export const build_considerations = ({
         : 0
     const total = best_franchise + best_rookie
     fired.push({
-      rule: 'lever_sufficiency',
+      rule: 'tag_sufficiency',
       sentence:
         total >= overage
           ? `Your remaining tags can remove up to $${total} from a post-extension salary that sits $${overage} over the cap.`
@@ -777,7 +776,7 @@ export const build_considerations = ({
         overage,
         best_franchise_saving: best_franchise,
         best_rookie_saving: best_rookie,
-        total_lever_saving: total,
+        total_tag_saving: total,
         closes_gap: total >= overage
       }
     })
@@ -791,7 +790,7 @@ export const build_considerations = ({
     fired.push({
       rule: 'empty_screen',
       sentence: `No contract on your active roster prices above its position's franchise amount, so the franchise tag has no application for you this year. ${rivals.length} of the other ${team_count - 1} teams hold an eligible candidate and still have the tag to spend.`,
-      inputs: { lever: 'franchise', rival_count: rivals.length, rivals }
+      inputs: { tag: 'franchise', rival_count: rivals.length, rivals }
     })
   }
   if (budget.rookie.remaining > 0 && rookie_candidates.length === 0) {
@@ -801,12 +800,12 @@ export const build_considerations = ({
     fired.push({
       rule: 'empty_screen',
       sentence: `Your active roster carries no untagged player from the most recent completed draft class, so the rookie tag has no application for you this year. ${rivals.length} of the other ${team_count - 1} teams hold an eligible candidate and still have the tag to spend.`,
-      inputs: { lever: 'rookie', rival_count: rivals.length, rivals }
+      inputs: { tag: 'rookie', rival_count: rivals.length, rivals }
     })
   }
 
-  // Saving and quality diverge. Gated on the lever still being available, like
-  // lever_sufficiency and empty_screen above — a team that has already spent its
+  // Saving and quality diverge. Gated on the tag still being available, like
+  // tag_sufficiency and empty_screen above — a team that has already spent its
   // franchise tag cannot act on the tension, so naming it is noise.
   if (budget.franchise.remaining > 0 && franchise_candidates.length > 1) {
     const by_saving = [...franchise_candidates].sort(
