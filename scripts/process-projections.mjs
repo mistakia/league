@@ -39,6 +39,7 @@ import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
 import { process_scoring_format_year } from './process-projections-for-scoring-format.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import first_projection_week_to_recompute from '#libs-shared/first-projection-week-to-recompute.mjs'
 
 dayjs.extend(dayOfYear)
 
@@ -175,7 +176,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     }
 
     // Regular season processing
-    let week = year === current_season.year ? current_season.week : 0
+    let week = first_projection_week_to_recompute({ year })
     for (; week <= current_season.nflFinalWeek; week++) {
       player_row.projection[week] = {}
 
@@ -305,7 +306,7 @@ const process_league_format = async ({
   })
 
   const baselines = {}
-  let week = year === current_season.year ? current_season.week : 0
+  let week = first_projection_week_to_recompute({ year })
   for (; week <= current_season.nflFinalWeek; week++) {
     const baseline = calculateBaselines({
       players: player_rows,
@@ -385,7 +386,7 @@ const process_league_format = async ({
 }
 
 const process_league = async ({ year, lid }) => {
-  let week = year === current_season.year ? current_season.week : 0
+  let week = first_projection_week_to_recompute({ year })
 
   const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid, year })
@@ -442,7 +443,7 @@ const process_league = async ({ year, lid }) => {
     player_row.value = tran.value
   }
 
-  week = year === current_season.year ? current_season.week : 0
+  week = first_projection_week_to_recompute({ year })
 
   const baselines = {}
   for (; week <= current_season.nflFinalWeek; week++) {
