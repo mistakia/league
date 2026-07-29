@@ -125,7 +125,7 @@ const game_source = {
         'week',
         db.raw('away_nfl_team as nfl_team'),
         db.raw('home_nfl_team as game_opponent'),
-        db.raw('true as game_is_home')
+        db.raw('false as game_is_home')
       )
       .whereIn('nfl_week_id', nfl_week)
       .union(function () {
@@ -134,7 +134,7 @@ const game_source = {
           'week',
           db.raw('home_nfl_team as nfl_team'),
           db.raw('away_nfl_team as game_opponent'),
-          db.raw('false as game_is_home')
+          db.raw('true as game_is_home')
         )
           .from('nfl_games')
           .whereIn('nfl_week_id', nfl_week)
