@@ -318,7 +318,7 @@ const import_sleeper_adp_and_projections = async ({
       items: projection_inserts.map((i) => ({ ...i, generated_at })),
       batch_size: BATCH_SIZE,
       save: async (batch) => {
-        await db('projections').insert(batch)
+        await db('projections_history').insert(batch)
       }
     })
   }

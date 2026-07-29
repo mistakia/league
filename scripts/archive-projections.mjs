@@ -21,13 +21,13 @@ const archiveProjections = async () => {
   // deliberately -- a half-fixed DELETE against a 4.6M-row live table is more
   // dangerous than an inert script. Full rewrite tracked separately.
   const insert_result = await db.raw(
-    `INSERT IGNORE INTO projections_archive SELECT * FROM projections where season_year != ${current_season.year};`
+    `INSERT IGNORE INTO projections_archive SELECT * FROM projections_history where season_year != ${current_season.year};`
   )
   log(insert_result)
 
   const delete_result = await db.raw(
     `DELETE p
-    FROM projections p
+    FROM projections_history p
     INNER JOIN projections_archive pa
     ON p.sourceid = pa.sourceid
     AND p.pid = pa.pid

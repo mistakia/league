@@ -409,7 +409,7 @@ router.put(
             season_type: season_type
           })
 
-        await db('projections').insert({
+        await db('projections_history').insert({
           ...existing_projection,
           [type]: value,
           generated_at: new Date()
@@ -425,7 +425,7 @@ router.put(
         }
         await db('projections_index').insert(insert_data)
 
-        await db('projections').insert({
+        await db('projections_history').insert({
           ...insert_data,
           generated_at: new Date()
         })

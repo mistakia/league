@@ -246,7 +246,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     await batch_insert({
       items: projectionInserts.map((i) => ({ ...i, generated_at })),
       save: (items) =>
-        db('projections')
+        db('projections_history')
           .insert(items)
           .onConflict([
             'sourceid',

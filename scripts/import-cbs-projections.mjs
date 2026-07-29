@@ -178,7 +178,9 @@ const run = async ({ season = false, dry = false } = {}) => {
         'season_type'
       ])
       .merge()
-    await db('projections').insert(inserts.map((i) => ({ ...i, generated_at })))
+    await db('projections_history').insert(
+      inserts.map((i) => ({ ...i, generated_at }))
+    )
   }
 
   return {
