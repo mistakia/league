@@ -257,11 +257,19 @@ const import_player_draft_position_pfr = async ({
       draft_overall_pick: draft_player.overall_pick,
       pfr_player_id: draft_player.pfr_id,
       all_pro_first_team_selections: draft_player.all_pro_first_team_selections,
-      pro_bowl_selections: draft_player.pro_bowl_selections,
+      // These two keys must match the PHYSICAL column names on `player`.
+      // update-player.mjs diffs the update against the existing row, so a key
+      // that is not a column produces no edit at all -- the value is discarded
+      // silently, with no error and nothing in the log. Both were wrong:
+      // pro_bowl_selections (the column is pro_bowls_selections, plural "bowls")
+      // and pfr_draft_team_approximate_value (the column is
+      // pfr_weighted_career_approximate_value_drafted_team), so every run of this
+      // importer has been dropping both fields on the floor.
+      pro_bowls_selections: draft_player.pro_bowl_selections,
       pfr_years_as_primary_starter: draft_player.years_as_primary_starter,
       pfr_weighted_career_approximate_value:
         draft_player.pfr_weighted_career_approximate_value,
-      pfr_draft_team_approximate_value:
+      pfr_weighted_career_approximate_value_drafted_team:
         draft_player.pfr_weighted_career_approximate_value_drafted_team
     }
 
