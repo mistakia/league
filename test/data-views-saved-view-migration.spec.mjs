@@ -127,6 +127,73 @@ describe('data-views saved-view migrator', () => {
     })
   })
 
+  describe('scoring_format_hash -> scoring_format_id (44cf7fd9)', () => {
+    it('maps a named-catalog hash to its slug', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_fantasy_points_from_plays',
+        params: {
+          scoring_format_hash: [
+            'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e'
+          ]
+        }
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.params).to.deep.equal({
+        scoring_format_id: ['draftkings']
+      })
+    })
+
+    it('maps the user-created hash to its uuid', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_fantasy_points_from_plays',
+        params: {
+          scoring_format_hash: [
+            '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+          ]
+        }
+      })
+      expect(result.params).to.deep.equal({
+        scoring_format_id: ['b7855f1f-9f5e-47c4-ba3a-3e906272a60c']
+      })
+    })
+
+    it('preserves a scalar value as a scalar', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_games_played',
+        params: {
+          scoring_format_hash:
+            'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e'
+        }
+      })
+      expect(result.params).to.deep.equal({ scoring_format_id: 'draftkings' })
+    })
+
+    // Dropping an unknown hash would turn a filter the coverage oracle can still
+    // find into one it cannot.
+    it('leaves an unrecognised hash in place rather than dropping the filter', () => {
+      const params = { scoring_format_hash: ['deadbeef'] }
+      const result = migrate_column_entry({
+        column_id: 'player_fantasy_points_from_plays',
+        params
+      })
+      expect(result.changed).to.equal(false)
+      expect(result.params).to.deep.equal(params)
+    })
+
+    it('does not overwrite an existing scoring_format_id', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_fantasy_points_from_plays',
+        params: {
+          scoring_format_hash: [
+            'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e'
+          ],
+          scoring_format_id: ['genesis']
+        }
+      })
+      expect(result.params).to.deep.equal({ scoring_format_id: ['genesis'] })
+    })
+  })
+
   describe('param_override_config key rename', () => {
     it('renames rate_type_match_column_params and rate_type_column_params', () => {
       const result = migrate_column_entry({

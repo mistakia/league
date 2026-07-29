@@ -32,9 +32,56 @@ const PLAY_FILTER_PARAM_RENAMES = {
   time_to_throw_ngs: 'time_to_throw'
 }
 
+// scoring_format_hash -> scoring_format_id, stranded by the format-id migration
+// (44cf7fd9 code-side, db/adhoc/2026-05-28-format-id-migration.sql). Unlike the
+// renames above this needs a VALUE mapping, not just a key rename: the persisted
+// values are the retired content-derived hashes and the current identities are
+// opaque (catalog slugs plus gen_random_uuid for the user-created tail). Until
+// this landed, 27 production saved views silently fell back to the default
+// scoring format -- a wrong answer rather than an error.
+//
+// These are the only two hashes any saved view persists (65 occurrences, checked
+// against production 2026-07-28). Both were resolved by recomputing the retired
+// hash function over the current league_scoring_formats rows, validated by
+// reproducing all nine named-catalog hashes documented in the migration file
+// byte-for-byte.
+//
+// That recomputation has a trap worth recording: fumble_return_touchdowns is
+// uniformly 6 on every live row but was backfilled AFTER these hashes were
+// frozen, and the hash function only mixes fum_ret_td into the key when it is
+// non-zero. Recomputing with the live 6 fails all nine controls; forcing it to 0
+// reproduces all nine. The DDL default of 0 is what the column meant when the
+// hash was last valid.
+const SCORING_FORMAT_HASH_TO_ID = {
+  ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e:
+    'draftkings',
+  '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d':
+    'b7855f1f-9f5e-47c4-ba3a-3e906272a60c'
+}
+
 const migrate_params = (params) => {
   let next = params
   let changed = false
+
+  if (Object.prototype.hasOwnProperty.call(next, 'scoring_format_hash')) {
+    const raw = next.scoring_format_hash
+    const values = raw == null ? [] : [].concat(raw)
+    const mapped = values.map((value) => SCORING_FORMAT_HASH_TO_ID[value])
+    // An unrecognised hash is left in place deliberately: mapping it to nothing
+    // would convert a detectable dead filter into an undetectable one, and
+    // check-saved-view-param-coverage.mjs keeps reporting it until it is
+    // resolved the same way these two were.
+    if (values.length && mapped.every(Boolean)) {
+      const { scoring_format_hash: _drop, ...rest } = next
+      next = Object.prototype.hasOwnProperty.call(rest, 'scoring_format_id')
+        ? rest
+        : {
+            ...rest,
+            scoring_format_id: Array.isArray(raw) ? mapped : mapped[0]
+          }
+      changed = true
+    }
+  }
 
   for (const [legacy_key, current_key] of Object.entries(
     PLAY_FILTER_PARAM_RENAMES
