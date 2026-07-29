@@ -281,7 +281,7 @@ function check_column(table, col) {
   // external-league keys conform once renamed (leagues.espn_id -> espn_league_id,
   // .sleeper_id -> sleeper_league_id).
   const conforms_external =
-    /^[a-z0-9]+(_[a-z0-9]+)*_(player|team|game|league)_id$/.test(lower) ||
+    /^[a-z0-9]+(_[a-z0-9]+)*_(player|team|game|league|site)_id$/.test(lower) ||
     /^[a-z0-9]+_[a-z0-9]+_id$/.test(lower) ||
     /_pid$/.test(lower)
   if (
@@ -317,11 +317,76 @@ function check_column(table, col) {
   return findings
 }
 
-// Heuristic: an id column referencing an external system (has a vendor token or
-// a system-ish prefix) rather than an internal app key.
+// Heuristic: an id column referencing an external system rather than an internal
+// app key.
+//
+// The vendor vocabulary below is matched two ways: as a separated segment
+// (`pff_id`, `home_ngs_team_id`) and as a GLUED prefix with no separator
+// (`espnid`, `pfrid`, `ngsid`, `home_ngsid`). The glued form is the one this rule
+// used to miss. Its predecessor tested `/^(gsis|sleeper|yahoo|roto|cbs|shield|
+// nfl)_?/`, a short hardcoded list that happened to catch `gsisid` and `shieldid`
+// and missed `espnid`, `pfrid`, `ngsid`, `detailid_*` and the three `*_ngsid`
+// columns -- 8 of the 10 no-separator vendor ids on nfl_games, every one of them
+// real debt the gate reported as clean.
+//
+// Deliberately NOT a pure shape rule. "an id column with no separator before the
+// id" sounds recurrence-proof and is not usable here: the schema is full of
+// internal keys and ordinary words with that shape (`bid`, `min_bid`,
+// `cash_paid`, `salary_paid`, `aid`, `hid`, `rid`, `commishid`, `pickid`,
+// `poachid`), and flagging them would fill the gate with non-defects -- the
+// failure operation-log 004 records for the vendor_leak rule. Distinguishing
+// `espnid` from `poachid` requires knowing that espn is a vendor and poach is a
+// domain verb, so a vocabulary is the honest mechanism. Keeping it in one place,
+// used by both match shapes, is what stops the class recurring: adding a vendor
+// here covers every spelling of it at once.
+const external_vendor_tokens = [
+  ...external_system_tokens,
+  'gsis',
+  'espn',
+  'pfr',
+  'sleeper',
+  'yahoo',
+  'roto',
+  'rotoworld',
+  'rotowire',
+  'cbs',
+  'shield',
+  'nfl',
+  'nflverse',
+  'sportradar',
+  'sis',
+  'cfbref',
+  'keeptradecut',
+  'fantasypros',
+  'fantasy_data',
+  'detail',
+  'ftn',
+  'otc',
+  'mfl',
+  'ffpc',
+  'nffc',
+  'fantrax',
+  'fleaflicker',
+  'rtsports',
+  'draftkings',
+  'fanduel',
+  'betmgm',
+  'caesars',
+  'pinnacle',
+  'prizepicks',
+  'betonline',
+  'betrivers',
+  'fanatics',
+  'gambet'
+]
+
 function looks_like_external(name) {
-  if (external_system_tokens.some((t) => name_has_token(name, t))) return true
-  return /^(gsis|sleeper|yahoo|roto|cbs|shield|nfl)_?/.test(name)
+  if (external_vendor_tokens.some((t) => name_has_token(name, t))) return true
+  // Glued form: vendor token running straight into the rest of the name, either
+  // at the start (`espnid`) or after a separator (`home_ngsid`, `site_ngsid`).
+  return external_vendor_tokens.some((t) =>
+    new RegExp(`(^|_)${t}[a-z0-9]`).test(name)
+  )
 }
 
 // Token appears as a word-boundary segment in a snake/qualified name, so `pff`
