@@ -44,7 +44,7 @@ dayjs.extend(dayOfYear)
 
 const log = debug('process-projections')
 debug.enable(
-  'process-projections,project-lineups,simulation:*,calculate-matchup-projection'
+  'process-projections,project-lineups,simulation:*,calculate-matchup-projection,record-league-format-projection-value-history'
 )
 
 const timestamp = Math.round(Date.now() / 1000)
@@ -740,7 +740,9 @@ const SIGNAL_DEDUP_FAILURE = `pipeline_failure:${SIGNAL_SOURCE}`
 const SIGNAL_DEDUP_SUCCESS = `pipeline_success:${SIGNAL_SOURCE}`
 
 const main = async () => {
-  debug.enable('process-projections,project-lineups,simulation:*')
+  debug.enable(
+    'process-projections,project-lineups,simulation:*,record-league-format-projection-value-history'
+  )
   const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
   let error
   let per_format_failures = []

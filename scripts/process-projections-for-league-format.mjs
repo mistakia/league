@@ -24,7 +24,9 @@ const initialize_cli = () => {
 }
 
 const log = debug('process-projections-for-league-format')
-debug.enable('process-projections-for-league-format')
+debug.enable(
+  'process-projections-for-league-format,record-league-format-projection-value-history'
+)
 
 // Resolve pricing_model from the table. league_formats.pricing_model is a
 // regular column (added by the format-id migration); no derived-map lookup.
