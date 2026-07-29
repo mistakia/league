@@ -60,6 +60,9 @@ jobs:
           # Ensure league_test role has necessary permissions
           psql -c "GRANT ALL PRIVILEGES ON DATABASE league_test TO league_test;" || true
 
+      - name: Schema conformance ratchet
+        run: node db/adhoc/check-schema-conformance-ratchet.mjs
+
       - name: yarn test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,417 @@
+{
+  "note": "Checked-in ratchet baseline for db/adhoc/audit-schema-conformance.mjs, enforced by db/adhoc/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/adhoc/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
+  "generated_at": "2026-07-29T17:10:13.297Z",
+  "count": 82,
+  "violations": [
+    {
+      "table": "config",
+      "column": "updated_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "draft",
+      "column": "selection_timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "draft",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "espn_player_win_rates_history",
+      "column": "espn_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "espn_player_win_rates_history",
+      "column": "team",
+      "rule": "ambiguous_team"
+    },
+    {
+      "table": "espn_player_win_rates_index",
+      "column": "espn_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "espn_player_win_rates_index",
+      "column": "team",
+      "rule": "ambiguous_team"
+    },
+    {
+      "table": "espn_team_win_rates_history",
+      "column": "team",
+      "rule": "ambiguous_team"
+    },
+    {
+      "table": "espn_team_win_rates_index",
+      "column": "team",
+      "rule": "ambiguous_team"
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "team",
+      "rule": "ambiguous_team"
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "jobs",
+      "column": "timestamp",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "jobs",
+      "column": "timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "keeptradecut_rankings",
+      "column": "v",
+      "rule": "ambiguous_team"
+    },
+    {
+      "table": "league_baselines",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_divisions",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_format_player_projection_values_history",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_format_player_projection_values",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_format_player_seasonlogs",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_notifications",
+      "column": "event_timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "league_notifications",
+      "column": "sent_timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "league_notifications",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_player_projection_values",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_player_seasonlogs",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_team_daily_values",
+      "column": "timestamp",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "league_team_daily_values",
+      "column": "timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "league_team_forecast",
+      "column": "timestamp",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "league_team_forecast",
+      "column": "timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "league_team_forecast",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_team_lineup_contribution_weeks",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_team_lineup_contributions",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_team_lineup_starters",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_team_lineups",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "leagues",
+      "column": "archived_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "leagues",
+      "column": "espn_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "leagues",
+      "column": "fleaflicker_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "leagues",
+      "column": "mfl_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "leagues",
+      "column": "processed_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "leagues",
+      "column": "sleeper_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "matchups",
+      "column": "simulation_timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "matchups",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "nfl_draft_rankings_history",
+      "column": "position",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "nfl_draft_rankings_index",
+      "column": "position",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "nfl_games",
+      "column": "timestamp",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "nfl_games",
+      "column": "timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "fumble_forced_1_sportradar_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "fumble_recovered_1_sportradar_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "penalty_player_sportradar_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "sack_player_1_sportradar_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "sack_player_2_sportradar_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "tackle_for_loss_1_sportradar_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "tackle_for_loss_2_sportradar_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "pff_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "position",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "pff_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "position",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "pff_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "position",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "pff_unresolved_players",
+      "column": "position",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "player_contracts",
+      "column": "team",
+      "rule": "ambiguous_team"
+    },
+    {
+      "table": "playoffs",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "roster_asset_transformation",
+      "column": "occurred_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "rosters_players",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "rosters",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "scoring_format_player_projection_points",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "seasons",
+      "column": "ext_date",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "seasons",
+      "column": "rookie_draft_completed_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "seasons",
+      "column": "season_finalized_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "seasons",
+      "column": "season_started_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "seasons",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "super_priority",
+      "column": "claimed_at",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "super_priority",
+      "column": "poach_timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "teams",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "trades",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "transactions",
+      "column": "timestamp",
+      "rule": "quoted_camelcase"
+    },
+    {
+      "table": "transactions",
+      "column": "timestamp",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "transactions",
+      "column": "year",
+      "rule": "season_grain"
+    },
+    {
+      "table": "users_teams",
+      "column": "year",
+      "rule": "season_grain"
+    }
+  ]
+}
