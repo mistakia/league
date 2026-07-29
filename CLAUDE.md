@@ -43,6 +43,14 @@ Deploy targets (SSH hosts): `league` (main: API + frontend), `digitalocean-0` (o
 
 **Submodule policy:** Only `private` is initialized on the production servers. The `data` submodule is **dev-only** — it is a large git-lfs reference dataset and git-lfs is not installed on production. Never run plain `git submodule update --init` (without an explicit path) on a production server; always target `private` specifically. The `load:main`, `load:worker1`, and `load:logrotate:main` scripts use `--init private` for this reason.
 
+**Running a script host-side against the live database:** `NODE_ENV=development` does not work — `config/config-development.json` carries an empty password and names the production host directly, so `#db` fails with either a connection-pool timeout or `SASL: client password must be a string`. Use the production config (sops-decrypted at load) redirected onto the `base db` league SSH tunnel:
+
+```bash
+NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 node scripts/<script>.mjs
+```
+
+The tunnel's local port comes from `config.databases.instances.league.tunnel.local_port` in user-base and is what `base db query league` already uses, so a working `base db query league` means the tunnel is up. Never pass a credential on the command line.
+
 **Testing:**
 
 - Individual tests: `yarn test --reporter min test/auth.spec.mjs`
