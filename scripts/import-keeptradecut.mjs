@@ -57,6 +57,50 @@ const parse_compressed_value = (compressed_str) => {
   }
 }
 
+// KTC publishes rawLiquidity/stdLiquidity/tradeCount inline on the dynasty-rankings
+// page, for every player, on every request. Intermittently — 15 of the first 70
+// collected days — it serves that page with all three fields zeroed for every player,
+// which is indistinguishable, row by row, from a player KTC genuinely reports no
+// trades for. A stored zero must mean "KTC reported zero", never "we did not
+// collect it", so a wholly-zeroed payload is treated as uncollected and no liquidity
+// rows are written for that run.
+export const has_liquidity_data = (players_array) =>
+  (players_array || []).some(
+    (player) =>
+      Number(player?.oneQBValues?.tradeCount) > 0 ||
+      Number(player?.superflexValues?.tradeCount) > 0
+  )
+
+export const build_liquidity_inserts = ({ pid, keeptradecut_player, d }) => {
+  const rows = []
+  const by_format = [
+    [false, keeptradecut_player.oneQBValues],
+    [true, keeptradecut_player.superflexValues]
+  ]
+
+  for (const [superflex, values] of by_format) {
+    if (!values) continue
+
+    const raw_liquidity = Number(values.rawLiquidity)
+    const std_liquidity = Number(values.stdLiquidity)
+    const trade_count = Number(values.tradeCount)
+
+    // absent fields arrive as undefined; writing them as 0 would fabricate a
+    // measurement, so skip the row entirely
+    if (
+      !Number.isFinite(raw_liquidity) ||
+      !Number.isFinite(std_liquidity) ||
+      !Number.isFinite(trade_count)
+    ) {
+      continue
+    }
+
+    rows.push({ pid, superflex, d, raw_liquidity, std_liquidity, trade_count })
+  }
+
+  return rows
+}
+
 const get_keeptradecut_config = async () => {
   const config_row = await db('config')
     .where('key', 'keeptradecut_config')
@@ -77,6 +121,13 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   const players_index = {}
   for (const player of playersArray) {
     players_index[player.playerID] = player
+  }
+
+  const liquidity_collected = has_liquidity_data(playersArray)
+  if (!liquidity_collected) {
+    log(
+      'keeptradecut published zero liquidity for every player; skipping liquidity writes for this run'
+    )
   }
 
   const keeptradecut_config = await get_keeptradecut_config()
@@ -294,30 +345,14 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       })
     }
 
-    // Liquidity is cheap-path-only; KTC publishes no liquidityHistory on per-slug HTML.
-    if (keeptradecut_player.position !== 'RDP') {
-      const liquidity_inserts = []
-
-      if (keeptradecut_player.oneQBValues) {
-        liquidity_inserts.push({
-          pid,
-          superflex: false,
-          d: liquidity_d,
-          raw_liquidity: keeptradecut_player.oneQBValues.rawLiquidity,
-          std_liquidity: keeptradecut_player.oneQBValues.stdLiquidity,
-          trade_count: keeptradecut_player.oneQBValues.tradeCount
-        })
-      }
-      if (keeptradecut_player.superflexValues) {
-        liquidity_inserts.push({
-          pid,
-          superflex: true,
-          d: liquidity_d,
-          raw_liquidity: keeptradecut_player.superflexValues.rawLiquidity,
-          std_liquidity: keeptradecut_player.superflexValues.stdLiquidity,
-          trade_count: keeptradecut_player.superflexValues.tradeCount
-        })
-      }
+    // Liquidity is a same-day snapshot, not a history: KTC exposes only the current
+    // value on the dynasty-rankings payload, so there is nothing to backfill.
+    if (liquidity_collected && keeptradecut_player.position !== 'RDP') {
+      const liquidity_inserts = build_liquidity_inserts({
+        pid,
+        keeptradecut_player,
+        d: liquidity_d
+      })
 
       log(
         `liquidity playerID ${item.playerID} rows: ${liquidity_inserts.length}`
@@ -357,6 +392,14 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     if (full) await wait(4000)
   }
 
+  const shortfalls = []
+
+  if (!liquidity_collected) {
+    shortfalls.push(
+      `liquidity: keeptradecut published zero liquidity for all ${playersArray.length} players; no rows written for d=${dayjs.unix(liquidity_d).format('YYYY-MM-DD')}`
+    )
+  }
+
   // Freshness oracle: after running, max(d) in keeptradecut_rankings should be
   // within 48h of now. Cron runs daily at 04:30; a stale max means the script
   // completed without writing any new rows — silent partial-success.
@@ -367,18 +410,18 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       .first()
     const max_d = max_row?.max_d
     if (!max_d) {
-      return {
-        shortfall: 'no rows found in keeptradecut_rankings after run'
-      }
-    }
-    const stale_hours = dayjs().diff(dayjs.unix(max_d), 'hour')
-    if (stale_hours > freshness_threshold_hours) {
-      return {
-        shortfall: `staleness: max(d)=${dayjs.unix(max_d).format('YYYY-MM-DD')} is ${stale_hours}h > threshold=${freshness_threshold_hours}h`
+      shortfalls.push('no rows found in keeptradecut_rankings after run')
+    } else {
+      const stale_hours = dayjs().diff(dayjs.unix(max_d), 'hour')
+      if (stale_hours > freshness_threshold_hours) {
+        shortfalls.push(
+          `staleness: max(d)=${dayjs.unix(max_d).format('YYYY-MM-DD')} is ${stale_hours}h > threshold=${freshness_threshold_hours}h`
+        )
       }
     }
   }
-  return { shortfall: null }
+
+  return { shortfall: shortfalls.length ? shortfalls.join('; ') : null }
 }
 
 const main = async () => {
