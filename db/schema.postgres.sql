@@ -3008,7 +3008,8 @@ CREATE TABLE public.external_league_memberships (
     platform character varying(20) NOT NULL,
     external_league_id character varying(64) NOT NULL,
     external_user_id character varying(64) NOT NULL,
-    first_seen_at timestamp with time zone DEFAULT now() NOT NULL
+    first_seen_at timestamp with time zone DEFAULT now() NOT NULL,
+    is_owner boolean
 );
 
 
@@ -3017,6 +3018,13 @@ CREATE TABLE public.external_league_memberships (
 --
 
 COMMENT ON TABLE public.external_league_memberships IS 'Manager-to-league edges of the external-league crawl graph. The expensive artifact: each edge cost a request to acquire, and together they make the frontier resumable and the same manager detectable across leagues.';
+
+
+--
+-- Name: COLUMN external_league_memberships.is_owner; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_memberships.is_owner IS 'null = member list not yet crawled for this league; only /league/{id}/users populates it';
 
 
 --
@@ -3080,7 +3088,9 @@ CREATE TABLE public.external_league_users (
     platform character varying(20) NOT NULL,
     external_user_id character varying(64) NOT NULL,
     last_crawled_at timestamp with time zone,
-    first_seen_at timestamp with time zone DEFAULT now() NOT NULL
+    first_seen_at timestamp with time zone DEFAULT now() NOT NULL,
+    display_name text,
+    is_bot boolean
 );
 
 
@@ -3117,6 +3127,11 @@ CREATE TABLE public.external_leagues (
     member_list_crawled_at timestamp with time zone,
     discovered_from_external_user_id character varying(64),
     has_individual_defensive_players boolean DEFAULT false NOT NULL,
+    league_status character varying(20),
+    last_message_at timestamp with time zone,
+    external_draft_id character varying(32),
+    league_settings jsonb,
+    league_metadata jsonb,
     CONSTRAINT external_leagues_league_format_check CHECK (((league_format)::text = ANY ((ARRAY['dynasty'::character varying, 'keeper'::character varying, 'redraft'::character varying])::text[])))
 );
 
@@ -3147,6 +3162,13 @@ COMMENT ON COLUMN public.external_leagues.discovered_from_external_user_id IS 'T
 --
 
 COMMENT ON COLUMN public.external_leagues.has_individual_defensive_players IS 'League starts individual defensive players. Excluded from the value fit: IDP legs resolve to a NULL pid, which biases the affected side cheap in a one-directional way.';
+
+
+--
+-- Name: COLUMN external_leagues.last_message_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_leagues.last_message_at IS 'Weak liveness proxy: Sleeper system messages (waiver runs) bump this, so it partly measures automation rather than human engagement';
 
 
 --

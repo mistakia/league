@@ -94,6 +94,74 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
   })
 
   describe('parse_sleeper_league', function () {
+    // These fields ride along on a payload the crawl already fetches. The unit
+    // conversion is the part worth pinning: Sleeper sends last_message_time in
+    // epoch MILLISECONDS, and reading it as seconds lands the timestamp in 1970,
+    // which would make every liveness comparison quietly wrong rather than loud.
+    describe('crawl-captured payload fields', function () {
+      it('converts last_message_time from epoch milliseconds', function () {
+        const row = parse_sleeper_league({
+          league: {
+            league_id: 'L1',
+            season: '2026',
+            settings: { type: 2 },
+            last_message_time: 1785222390958
+          }
+        })
+
+        expect(row.last_message_at).to.be.instanceOf(Date)
+        expect(row.last_message_at.getTime()).to.equal(1785222390958)
+        expect(row.last_message_at.getUTCFullYear()).to.equal(2026)
+      })
+
+      it('captures status, draft id, settings and metadata', function () {
+        const row = parse_sleeper_league({
+          league: {
+            league_id: 'L1',
+            season: '2026',
+            status: 'in_season',
+            draft_id: '1312541013801209856',
+            settings: { type: 2, trade_deadline: 99 },
+            metadata: { division_1: 'East' }
+          }
+        })
+
+        expect(row.league_status).to.equal('in_season')
+        expect(row.external_draft_id).to.equal('1312541013801209856')
+        expect(JSON.parse(row.league_settings).trade_deadline).to.equal(99)
+        expect(JSON.parse(row.league_metadata).division_1).to.equal('East')
+      })
+
+      it('leaves the optional fields null rather than inventing values', function () {
+        const row = parse_sleeper_league({
+          league: { league_id: 'L1', season: '2026', settings: { type: 2 } }
+        })
+
+        expect(row.league_status).to.equal(null)
+        expect(row.external_draft_id).to.equal(null)
+        expect(row.last_message_at).to.equal(null)
+        // Absent objects still serialise, so a read site never has to branch
+        // between null and '{}'.
+        expect(row.league_settings).to.be.a('string')
+        expect(row.league_metadata).to.equal('{}')
+      })
+
+      // Same "0" sentinel Sleeper uses to terminate a league chain. Storing it
+      // would hand a later draft fetch a request guaranteed to 404.
+      it('rejects a "0" sentinel draft id', function () {
+        const row = parse_sleeper_league({
+          league: {
+            league_id: 'L1',
+            season: '2026',
+            settings: { type: 2 },
+            draft_id: '0'
+          }
+        })
+
+        expect(row.external_draft_id).to.equal(null)
+      })
+    })
+
     it('maps format metadata from a real dynasty superflex payload', function () {
       const row = parse_sleeper_league({
         league: dynasty_superflex_league,
@@ -534,27 +602,41 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
       })
 
       expect(users).to.deep.equal([
-        { platform: 'sleeper', external_user_id: '331590801586524160' },
-        { platform: 'sleeper', external_user_id: '469952154498334720' }
+        {
+          platform: 'sleeper',
+          external_user_id: '331590801586524160',
+          display_name: 'alpha',
+          is_bot: false
+        },
+        {
+          platform: 'sleeper',
+          external_user_id: '469952154498334720',
+          display_name: 'beta',
+          is_bot: false
+        }
       ])
       expect(memberships).to.deep.equal([
         {
           platform: 'sleeper',
           external_league_id: '1182953443152855040',
-          external_user_id: '331590801586524160'
+          external_user_id: '331590801586524160',
+          is_owner: false
         },
         {
           platform: 'sleeper',
           external_league_id: '1182953443152855040',
-          external_user_id: '469952154498334720'
+          external_user_id: '469952154498334720',
+          is_owner: false
         }
       ])
     })
 
-    // Profile fields are on every payload and none of them informs a value fit.
-    // Carrying them would be permanent read-tax on a table whose only jobs are
-    // identity and crawl cursor, so their absence is asserted, not incidental.
-    it('carries no profile fields through', function () {
+    // display_name and is_bot ARE carried (reversed 2026-07-29 on operator
+    // instruction: the graph is now the deliverable and has to be human-readable).
+    // avatar and metadata are still dropped -- a content hash and notification
+    // preferences inform nothing -- so the boundary is asserted rather than left
+    // to drift the next time the payload grows a field.
+    it('carries display_name and is_bot but not avatar or metadata', function () {
       const { users } = parse_sleeper_league_member_users({
         users: [
           {
@@ -567,10 +649,52 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
         external_league_id: 'L1'
       })
 
-      expect(Object.keys(users[0])).to.deep.equal([
-        'platform',
-        'external_user_id'
+      expect(Object.keys(users[0]).sort()).to.deep.equal([
+        'display_name',
+        'external_user_id',
+        'is_bot',
+        'platform'
       ])
+    })
+
+    // Sleeper omits is_bot/is_owner entirely on some payloads. They must land as
+    // a known false, not null: null reads as "not learned yet", which is the
+    // meaning reserved for a league whose member list has never been crawled.
+    it('normalises absent is_bot and is_owner to false, not null', function () {
+      const { users, memberships } = parse_sleeper_league_member_users({
+        users: [{ user_id: 'U1', display_name: 'alpha' }],
+        external_league_id: 'L1'
+      })
+
+      expect(users[0].is_bot).to.equal(false)
+      expect(memberships[0].is_owner).to.equal(false)
+    })
+
+    it('carries is_bot and is_owner through when set', function () {
+      const { users, memberships } = parse_sleeper_league_member_users({
+        users: [
+          { user_id: 'U1', display_name: 'alpha', is_bot: true, is_owner: true }
+        ],
+        external_league_id: 'L1'
+      })
+
+      expect(users[0].is_bot).to.equal(true)
+      expect(memberships[0].is_owner).to.equal(true)
+    })
+
+    // A manager owning two teams appears twice, and the retained entry must be
+    // the first -- otherwise which row wins depends on payload order.
+    it('keeps the first payload entry when a member appears twice', function () {
+      const { users } = parse_sleeper_league_member_users({
+        users: [
+          { user_id: 'U1', display_name: 'first', is_owner: true },
+          { user_id: 'U1', display_name: 'second', is_owner: false }
+        ],
+        external_league_id: 'L1'
+      })
+
+      expect(users).to.have.lengthOf(1)
+      expect(users[0].display_name).to.equal('first')
     })
 
     it('drops members whose user_id is absent or the "0" sentinel', function () {

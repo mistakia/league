@@ -213,12 +213,9 @@ export const import_sleeper_league_trades = async ({
 
   await upsert_league_nodes({
     league_rows: [{ ...league_row, last_synced_at: new Date() }],
-    // A league is usually already a graph node by the time it is imported --
-    // the crawl put it there. Refresh its format metadata, but never overwrite
-    // how we FIRST reached it: the import stage does not know the answer, and
-    // clobbering it would erase the crawl tree that makes the sampling bias
-    // measurable.
-    preserve_provenance: true
+    // The only caller that may advance last_synced_at, because it is the only
+    // one that actually read the league's trades.
+    is_import: true
   })
 
   if (parsed_trades.length) {
@@ -276,19 +273,41 @@ const LEAGUE_REFRESH_COLUMNS = [
   'roster_positions',
   'scoring_settings',
   'previous_external_league_id',
-  'last_synced_at'
+  // Refreshed like the rest of the format metadata. league_status and
+  // last_message_at in particular are the fields most worth having CURRENT --
+  // a league that was pre_draft when first crawled and is in_season now is
+  // exactly the state change a later selection rule cares about.
+  'league_status',
+  'last_message_at',
+  'external_draft_id',
+  'league_settings',
+  'league_metadata'
 ]
+
+// last_synced_at is the IMPORT CURSOR and is deliberately not in the list above,
+// because merging it from the crawl would be actively destructive rather than
+// merely redundant. `merge([col])` compiles to `SET col = excluded.col`, and the
+// crawl's rows have no last_synced_at key at all, so excluded.last_synced_at is
+// null -- every re-sighting of an already-imported league would reset it to
+// never-imported and put the league back on the import backlog forever.
+const IMPORT_REFRESH_COLUMNS = [...LEAGUE_REFRESH_COLUMNS, 'last_synced_at']
 
 /**
  * Persist league graph nodes.
  *
- * preserve_provenance distinguishes the two callers. The crawl inserts a league
- * it has just discovered and must not overwrite an earlier discovery record, so
- * it ignores conflicts outright. The import stage has fresh format metadata
- * worth writing but no provenance knowledge, so it merges everything except the
- * discovery columns.
+ * Both callers refresh the descriptive columns and neither touches the discovery
+ * columns, which are first-write-wins: the crawl tree is what makes the sampling
+ * bias measurable, and the import stage does not know how the league was reached.
+ *
+ * The crawl used to ignore conflicts outright, which threw away good data for no
+ * reason -- /user/{id}/leagues returns FULL league objects, so a re-sighting
+ * carries metadata at least as fresh as what is stored. That mattered little
+ * while the row was just format fields, and matters a lot now that it carries
+ * league_status and last_message_at: under `ignore`, the 3,620 leagues already in
+ * the graph could never acquire the newly-captured fields at all, because the
+ * only path that would refresh them is the import stage and imports are paused.
  */
-const upsert_league_nodes = async ({ league_rows, preserve_provenance }) => {
+const upsert_league_nodes = async ({ league_rows, is_import }) => {
   if (!league_rows.length) {
     return
   }
@@ -296,15 +315,11 @@ const upsert_league_nodes = async ({ league_rows, preserve_provenance }) => {
   await batch_insert({
     items: league_rows,
     batch_size: 500,
-    save: (batch) => {
-      const query = db('external_leagues')
+    save: (batch) =>
+      db('external_leagues')
         .insert(batch)
         .onConflict(['platform', 'external_league_id'])
-
-      return preserve_provenance
-        ? query.merge(LEAGUE_REFRESH_COLUMNS)
-        : query.ignore()
-    }
+        .merge(is_import ? IMPORT_REFRESH_COLUMNS : LEAGUE_REFRESH_COLUMNS)
   })
 }
 
@@ -320,14 +335,29 @@ const upsert_user_nodes = async (user_rows) => {
       db('external_league_users')
         .insert(batch)
         .onConflict(['platform', 'external_user_id'])
-        // last_crawled_at lives on this row. Re-seeing a manager in another
-        // league must never reset them to unexplored, or the crawl would
-        // revisit its own history forever.
-        .ignore()
+        // Only the descriptive columns are merged. last_crawled_at and
+        // first_seen_at are cursors that live on this row, and re-seeing a
+        // manager in another league must never reset them -- merging
+        // last_crawled_at would hand back a null (the crawl's rows do not carry
+        // it), marking every re-seen manager unexplored and sending the crawl
+        // around its own history forever.
+        .merge(['display_name', 'is_bot'])
   })
 }
 
-const upsert_membership_edges = async (memberships) => {
+/**
+ * Persist league <-> manager edges.
+ *
+ * merge_is_owner is false for the manager -> leagues direction, which yields the
+ * edge but never says who owns the team. Merging is_owner from there would
+ * overwrite a known true with a null, because the column is simply absent from
+ * those rows -- so only the member-list path, which actually reads it, is
+ * allowed to write it.
+ */
+const upsert_membership_edges = async (
+  memberships,
+  { merge_is_owner = false } = {}
+) => {
   if (!memberships.length) {
     return
   }
@@ -335,11 +365,13 @@ const upsert_membership_edges = async (memberships) => {
   await batch_insert({
     items: memberships,
     batch_size: 500,
-    save: (batch) =>
-      db('external_league_memberships')
+    save: (batch) => {
+      const query = db('external_league_memberships')
         .insert(batch)
         .onConflict(['platform', 'external_league_id', 'external_user_id'])
-        .ignore()
+
+      return merge_is_owner ? query.merge(['is_owner']) : query.ignore()
+    }
   })
 }
 
@@ -366,7 +398,7 @@ const bootstrap_seed_leagues = async (seed_league_ids) => {
     league_rows.push(league_row)
   }
 
-  await upsert_league_nodes({ league_rows, preserve_provenance: false })
+  await upsert_league_nodes({ league_rows, is_import: false })
 
   return league_rows.length
 }
@@ -390,7 +422,8 @@ const crawl_league_member_list = async (external_league_id) => {
   })
 
   await upsert_user_nodes(users)
-  await upsert_membership_edges(memberships)
+  // The only path that reads is_owner, so the only one allowed to write it.
+  await upsert_membership_edges(memberships, { merge_is_owner: true })
 
   await db('external_leagues')
     .where({ platform: 'sleeper', external_league_id })
@@ -436,7 +469,7 @@ const crawl_user_leagues = async ({ external_user_id, season_year }) => {
   // its appetite reads them from the graph instead of re-crawling for them.
   await upsert_league_nodes({
     league_rows: leagues,
-    preserve_provenance: false
+    is_import: false
   })
   await upsert_membership_edges(memberships)
 

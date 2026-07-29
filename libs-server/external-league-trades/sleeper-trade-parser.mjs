@@ -179,6 +179,24 @@ export const parse_sleeper_league = ({ league, discovered_via = null }) => {
     taxi_slots: league.settings?.taxi_slots ?? null,
     roster_positions: JSON.stringify(roster_positions),
     scoring_settings: JSON.stringify(scoring_settings),
+    // Everything from here down arrives in a payload the crawl already fetches
+    // and used to discard. Storing it costs no extra request; NOT storing it
+    // costs a full re-crawl the next time a selection question needs it.
+    league_status: league.status || null,
+    external_draft_id: is_sleeper_identifier(league.draft_id)
+      ? String(league.draft_id)
+      : null,
+    // Epoch MILLISECONDS, not seconds -- a Date built from the raw number as
+    // seconds lands in 1970. Converted here so no read site has to know the unit.
+    last_message_at: league.last_message_time
+      ? new Date(Number(league.last_message_time))
+      : null,
+    // Kept raw and whole rather than promoted field by field. `settings` carries
+    // ~52 keys (playoff shape, waiver mode, trade deadline, draft rounds) and we
+    // do not yet know which of them a selection rule will want; promoting a
+    // guess now and re-crawling later for the rest is the expensive order.
+    league_settings: JSON.stringify(league.settings || {}),
+    league_metadata: JSON.stringify(league.metadata || {}),
     // Sleeper terminates a league-season chain with the STRING "0", not null,
     // so a plain truthiness check reads the terminator as a real league id and
     // sends the crawler off to fetch league 0. Normalised to null here so the
@@ -205,27 +223,44 @@ export const parse_sleeper_league_member_users = ({
   users,
   external_league_id
 }) => {
-  const external_user_ids = [
-    ...new Set(
-      (users || [])
-        .map((user) => user?.user_id)
-        .filter(is_sleeper_identifier)
-        .map(String)
-    )
-  ]
+  // Deduplicated by user id, keeping the FIRST payload entry per id. A manager
+  // appears once per team, so a two-team owner would otherwise yield two rows
+  // that differ only by which team was read last.
+  const member_by_id = new Map()
+  for (const user of users || []) {
+    if (!is_sleeper_identifier(user?.user_id)) {
+      continue
+    }
+    const external_user_id = String(user.user_id)
+    if (!member_by_id.has(external_user_id)) {
+      member_by_id.set(external_user_id, user)
+    }
+  }
+
+  const members = [...member_by_id.entries()]
 
   return {
-    // No display_name, avatar or team name is carried through. They are on
-    // every payload and none of them informs a value fit, so they would be
-    // permanent read-tax on a table whose only jobs are identity and cursor.
-    users: external_user_ids.map((external_user_id) => ({
+    // display_name and is_bot ARE carried now. This reverses the previous rule
+    // here ("no display_name... permanent read-tax on a table whose only jobs
+    // are identity and cursor"), which was right while the table was purely a
+    // crawl cursor and is wrong now that the graph itself is the deliverable:
+    // a manager table nobody can read without a second API call is not much of
+    // a map. avatar is still dropped -- it is a content hash with no analytic
+    // or human use.
+    users: members.map(([external_user_id, user]) => ({
       platform: 'sleeper',
-      external_user_id
+      external_user_id,
+      display_name: user.display_name || null,
+      // Boolean() rather than passing through: Sleeper omits the key entirely
+      // on some payloads, and undefined would insert null ("unknown") for what
+      // is actually a known-false.
+      is_bot: Boolean(user.is_bot)
     })),
-    memberships: external_user_ids.map((external_user_id) => ({
+    memberships: members.map(([external_user_id, user]) => ({
       platform: 'sleeper',
       external_league_id: String(external_league_id),
-      external_user_id
+      external_user_id,
+      is_owner: Boolean(user.is_owner)
     }))
   }
 }
