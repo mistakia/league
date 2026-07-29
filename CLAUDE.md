@@ -172,8 +172,12 @@ The remedy for anything it reports is a rule in `libs-shared/data-views-saved-vi
 **A cluster is not done when its sweep lands — it is done when the sweep is DEPLOYED.** Every gate above examines the working tree or master; none of them can see what production is actually executing. So an applied DDL plus a correct, committed, undeployed consumer sweep leaves production running stale code against a conformed schema, and the whole suite stays green while it does. This is not hypothetical: on 2026-07-29 production was 20 commits behind with `practice` already conformed to `season_year`/`season_type` while the deployed `historical-injury-index-sql.mjs` still queried `practice.seas_type` — a 42703 waiting on that script's next cron fire in early September. Treat the DDL apply and its consumer deploy as one unit, and before declaring a cluster complete check what production is on:
 
 ```bash
-ssh league "cd /root/league && git rev-parse --short HEAD"   # against origin/master
+ssh league "cd /root/league && git rev-parse --short HEAD"           # against origin/master
+ssh digitalocean-0 "cd /root/league && git rev-parse --short HEAD"   # odds/plays import workers
+ssh base-storage "cd /home/user/league && git rev-parse --short HEAD" # seasonal Underdog ADP ingest
 ```
+
+**Check all THREE checkouts — `base-storage` is the one that bites.** It is a functional code checkout running a production importer, but it sits outside the `yarn deploy` fan-out entirely, so nothing auto-pulls it and no deploy step touches it. On 2026-07-29 it was 238 commits behind: its `find_player_row` still named `player.formatted` after the rename to `formatted_name`, so every player lookup threw. Because the Underdog best-ball ADP importer catches per-player lookup failures and counts them as unmatched, the run produced zero inserts, exited 0, and reported success **daily for three weeks** while writing nothing — the rename's blast radius reached a host the sweep never considered, and the exit-code oracle could not see it. A rename sweep that checks only `league` is not complete. See [[user:task/league/keep-base-storage-league-checkout-current.md]].
 
 Note the cron schedules make this class of defect latent until the season starts (`0 9 * 1,2,9-12 2` for the injury index), which is the same shape as the prop-settlement 42703 — offseason silence is not evidence that a sweep landed.
 
