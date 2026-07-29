@@ -17,7 +17,8 @@ const defense_stats = [
   'defensive_two_point_returns',
   'defensive_touchdowns',
   'punt_return_touchdowns',
-  'kickoff_return_touchdowns'
+  'kickoff_return_touchdowns',
+  'fumble_return_touchdowns'
 ]
 const kicker_stats = [
   'extra_points_made',

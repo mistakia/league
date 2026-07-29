@@ -10,6 +10,10 @@ import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/ge
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
+import {
+  fumble_return_touchdown_pid_expr,
+  apply_fumble_return_touchdown_joins
+} from '#libs-server/data-views/fumble-return-touchdown-attribution.mjs'
 
 const FP_OUTPUT_PERIODS = [
   'game',
@@ -176,6 +180,14 @@ const fantasy_points_from_plays_with = async ({
     requires_position_data
   )
   const fuml_scoring = await generate_fumble_scoring_sql(scoring_format)
+  const fumble_return_touchdown_scoring =
+    await generate_fumble_return_touchdown_scoring_sql(scoring_format)
+  // Mirrors the role-union path: a format that does not score fumble return
+  // touchdowns emits no recoverer subquery, so its SQL is unchanged.
+  const scores_fumble_return_touchdowns =
+    Number(
+      await generate_fumble_return_touchdown_scoring_inner(scoring_format)
+    ) !== 0
 
   // Apply parameter-based filters to each union query using proper query builder
   const filtered_params = { ...params, seas_type }
@@ -220,6 +232,15 @@ const fantasy_points_from_plays_with = async ({
   // Add additional columns needed for params (week and seas_type already included above)
   if (params.career_game) {
     select_columns.push('nfl_plays.esbid')
+  }
+
+  // The recoverer subquery joins nfl_play_stats on (esbid, play_id), so the CTE
+  // has to carry both.
+  if (scores_fumble_return_touchdowns) {
+    if (!select_columns.includes('nfl_plays.esbid')) {
+      select_columns.push('nfl_plays.esbid')
+    }
+    select_columns.push('nfl_plays.play_id')
   }
 
   // Add any other param-based columns
@@ -336,6 +357,31 @@ const fantasy_points_from_plays_with = async ({
     .whereNotNull('player_fuml_pid')
     .groupBy(fuml_group_by)
 
+  // Fumble return touchdowns are credited to the recoverer, whose identity
+  // lives in nfl_play_stats rather than on nfl_plays -- see
+  // fumble-return-touchdown-attribution.mjs. Columns are qualified because the
+  // joined nfl_play_stats shares esbid / play_id with the CTE.
+  const fumble_return_touchdown_columns = subquery_output_columns_list.map(
+    (col) => `filtered_plays.${col}`
+  )
+  const fumble_return_touchdown_subquery = db
+    .select(
+      db.raw(`${fumble_return_touchdown_pid_expr} as pid`),
+      db.raw(`${fumble_return_touchdown_scoring} as fantasy_points_from_plays`),
+      ...fumble_return_touchdown_columns
+    )
+    .from('filtered_plays')
+  apply_fumble_return_touchdown_joins({
+    query: fumble_return_touchdown_subquery,
+    plays_table: 'filtered_plays'
+  })
+  fumble_return_touchdown_subquery
+    .whereRaw(`${fumble_return_touchdown_pid_expr} IS NOT NULL`)
+    .groupBy([
+      db.raw(fumble_return_touchdown_pid_expr),
+      ...fumble_return_touchdown_columns
+    ])
+
   // Combine with UNION ALL
   // Use subquery_output_columns_list if we have career parameters, otherwise use output_columns_list
   const union_columns_list =
@@ -361,6 +407,17 @@ const fantasy_points_from_plays_with = async ({
         })
         .unionAll(function () {
           this.select('*').from(fuml_subquery.as('fuml_stats'))
+        })
+        .modify((builder) => {
+          if (scores_fumble_return_touchdowns) {
+            builder.unionAll(function () {
+              this.select('*').from(
+                fumble_return_touchdown_subquery.as(
+                  'fumble_return_touchdown_stats'
+                )
+              )
+            })
+          }
         })
         .as('combined_stats')
     })
@@ -546,8 +603,11 @@ const generate_receiving_scoring_sql = async (
 ) =>
   `ROUND(SUM(${await generate_receiving_scoring_inner(scoring_format, has_position_data)}), 2)`
 
-// NOTE: only handles fumble lost penalties (fuml). Fum return TDs are credited
-// to the recoverer (different pid) and would require joining nfl_play_stats.
+// Scores the fumble-lost penalty, charged to nfl_plays.player_fuml_pid. Fumble
+// return touchdowns are a separate role: they are credited to the RECOVERER,
+// who is a different pid and is not named by any column on nfl_plays, so they
+// are scored by generate_fumble_return_touchdown_scoring_inner below against a
+// join onto nfl_play_stats.
 const generate_fumble_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
@@ -562,6 +622,26 @@ const generate_fumble_scoring_inner = async (scoring_format) => {
 
 const generate_fumble_scoring_sql = async (scoring_format) =>
   `ROUND(SUM(${await generate_fumble_scoring_inner(scoring_format)}), 2)`
+
+// Per-row fumble return touchdown value. The join in
+// apply_fumble_return_touchdown_joins already restricts to plays carrying one of
+// the fumble-return-TD stat rows, so the expression is the flat per-touchdown
+// value rather than a conditional.
+const generate_fumble_return_touchdown_scoring_inner = async (
+  scoring_format
+) => {
+  if (!scoring_format) {
+    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
+    if (!scoring_format) {
+      return '6'
+    }
+  }
+
+  return String(scoring_format.fumble_return_touchdowns || 0)
+}
+
+const generate_fumble_return_touchdown_scoring_sql = async (scoring_format) =>
+  `ROUND(SUM(${await generate_fumble_return_touchdown_scoring_inner(scoring_format)}), 2)`
 
 const should_use_main_where = ({ params }) => {
   // Equal-endpoint offsets ([k,k]) are a single-year shift, not a range: the
@@ -589,12 +669,26 @@ const fp_role_attributions = async ({ params }) => {
     false
   )
   const fumble_inner = await generate_fumble_scoring_inner(scoring_format)
-  return [
+  const fumble_return_touchdown_inner =
+    await generate_fumble_return_touchdown_scoring_inner(scoring_format)
+  const roles = [
     { pid_column: 'ball_carrier_pid', measure_expr: rushing_inner },
     { pid_column: 'passer_pid', measure_expr: passing_inner },
     { pid_column: 'target_pid', measure_expr: receiving_inner },
     { pid_column: 'player_fuml_pid', measure_expr: fumble_inner }
   ]
+  // Skip the role entirely when the format does not score fumble return
+  // touchdowns -- the joins are pure cost for a term that is always zero, and
+  // omitting them keeps the emitted SQL unchanged for the formats (existing
+  // user leagues) that carry 0.
+  if (Number(fumble_return_touchdown_inner) !== 0) {
+    roles.push({
+      pid_expr: fumble_return_touchdown_pid_expr,
+      apply_joins: apply_fumble_return_touchdown_joins,
+      measure_expr: fumble_return_touchdown_inner
+    })
+  }
+  return roles
 }
 
 // Apply the same param-driven filters that the legacy `with` builder

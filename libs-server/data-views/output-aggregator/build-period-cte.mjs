@@ -75,8 +75,10 @@ const SOURCES = {
   },
   // role_union: one column-def attributes a single play row to multiple
   // pids via per-role UNION ALL. Each role contributes a `{ pid_column,
-  // measure_expr }` tuple; build_period_cte materializes the inner UNION
-  // ALL and groups by (pid, period_key, year). Used by
+  // measure_expr }` tuple -- or, when the credited player is not named by any
+  // column on nfl_plays, a `{ pid_expr, apply_joins, measure_expr }` tuple that
+  // reaches the table that does name them. build_period_cte materializes the
+  // inner UNION ALL and groups by (pid, period_key, year). Used by
   // player_fantasy_points_from_plays where a play credits QB + receiver
   // simultaneously and a COALESCE(pid_columns) shape would drop one
   // attribution.
@@ -162,12 +164,23 @@ const build_role_union_period_cte = ({
     )
   }
   const union_subs = role_attributions.map(
-    ({ pid_column, measure_expr: role_measure_expr }) => {
+    ({
+      pid_column,
+      pid_expr,
+      apply_joins,
+      measure_expr: role_measure_expr
+    }) => {
+      // A role normally names a pid column on the source table. A role whose
+      // player is not identified by any column on nfl_plays (the fumble
+      // recoverer) instead supplies `pid_expr` plus `apply_joins` to reach the
+      // table that does identify them.
+      const pid_reference = pid_expr || `${source_table}.${pid_column}`
       const sub = db(source_table)
-        .select(db.raw(`${source_table}.${pid_column} AS pid`))
+        .select(db.raw(`${pid_reference} AS pid`))
         .select(`${source_table}.esbid`)
         .select(db.raw(`${role_measure_expr} AS pts`))
-        .whereRaw(`${source_table}.${pid_column} IS NOT NULL`)
+      if (apply_joins) apply_joins({ query: sub, plays_table: source_table })
+      sub.whereRaw(`${pid_reference} IS NOT NULL`)
       if (measure_predicate) sub.whereRaw(measure_predicate)
       // Emit view-scope (year + seas_type + optional nfl_week_id) on the inner
       // sub against the source table. nfl_plays carries seas_type / nfl_week_id

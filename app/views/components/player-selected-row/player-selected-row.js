@@ -33,7 +33,8 @@ const DEFENSE_STATS = [
   'defensive_two_point_returns',
   'defensive_touchdowns',
   'punt_return_touchdowns',
-  'kickoff_return_touchdowns'
+  'kickoff_return_touchdowns',
+  'fumble_return_touchdowns'
 ]
 
 const KICKER_STATS = [

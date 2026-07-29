@@ -51,6 +51,7 @@ export const League = new Record({
   fumbles_lost: null,
   punt_return_touchdowns: null,
   kickoff_return_touchdowns: null,
+  fumble_return_touchdowns: null,
 
   targets: null,
   rushing_first_downs: null,
@@ -173,6 +174,7 @@ export function createLeague({
   fumbles_lost,
   punt_return_touchdowns,
   kickoff_return_touchdowns,
+  fumble_return_touchdowns,
 
   targets,
   rushing_first_downs,
@@ -294,6 +296,7 @@ export function createLeague({
     fumbles_lost,
     punt_return_touchdowns,
     kickoff_return_touchdowns,
+    fumble_return_touchdowns,
 
     targets,
     rushing_first_downs,
