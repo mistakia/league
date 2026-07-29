@@ -187,9 +187,57 @@ export default async function report_job({
   ]
   if (job_reason) args.push('--reason', job_reason)
 
+  // Forward this job's cadence so the staleness sweep can compute a next
+  // expected fire for it instead of falling back to the flat 3-day window. A
+  // weekly or seasonal source under the flat window is effectively unmonitored:
+  // it reads as stale for most of its own normal cycle.
+  //
+  // Until 2026-07-29 this was impossible from here -- league ran a compiled base
+  // CLI predating the --schedule flag, so the cadence for league's sources had
+  // to be declared writer-side in user-base config/runs-source-cadence.json
+  // instead. The fleet is now uniformly on 2026.07.29, which accepts the flag.
+  //
+  // Cadence is taken from the environment, not inferred: the crontab is the
+  // source of truth for WHEN a job runs, so the crontab line is what states it.
+  // Nothing is sent when JOB_SCHEDULE is unset, which makes this safe to deploy
+  // ahead of any crontab carrying it.
+  //
+  // NOTE for whoever adds JOB_SCHEDULE to the league crontabs: a source with
+  // SEVERAL crontab lines must declare the LOOSEST of them on every one of its
+  // lines, not each line's own expression. The ledger keeps one cadence per
+  // source, so per-line values let whichever line ran last set the window --
+  // and a too-tight window false-flags the source. That is the rule the
+  // writer-side registry encodes in its authoring_rules, and it does not
+  // survive a naive mechanical edit.
+  const schedule_args = []
+  if (process.env.JOB_SCHEDULE) {
+    schedule_args.push(
+      '--schedule',
+      process.env.JOB_SCHEDULE,
+      '--schedule-type',
+      process.env.JOB_SCHEDULE_TYPE || 'expr'
+    )
+  }
+
   try {
-    await exec_file(BASE_CLI, args, { timeout: 5000 })
+    await exec_file(BASE_CLI, [...args, ...schedule_args], { timeout: 5000 })
   } catch (err) {
+    // Cadence flags must never be able to break reporting. yargs .strict()
+    // rejects an unknown flag with rc=1, which is how the --schedule rollout
+    // killed all 31 cron:database: ledger rows for 39 hours (bulletin #48). If
+    // this CLI is ever rolled back below the flag, degrade to the report that
+    // always worked rather than losing the row: losing cadence costs a source
+    // its precise window, losing the report costs the row entirely.
+    if (schedule_args.length && /unknown argument/i.test(err.message || '')) {
+      console.error('run report rejected cadence flags; retrying without them')
+      try {
+        await exec_file(BASE_CLI, args, { timeout: 5000 })
+        return
+      } catch (retry_err) {
+        console.error(`run report failed: ${retry_err.message}`)
+        return
+      }
+    }
     console.error(`run report failed: ${err.message}`)
   }
 }
