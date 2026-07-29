@@ -55,6 +55,21 @@ const swagger_options = {
  *         $ref: '#/components/responses/InternalServerError'
  */
 
+/**
+ * GET /api/docs/openapi.json
+ * Serves the OpenAPI specification as a fetchable JSON document.
+ *
+ * Swagger UI is a browser application — an agent reading the API contract
+ * cannot use it, and the specification is otherwise reachable only from inside
+ * the rendered page. This is the machine-readable representation of the same
+ * document, and it is what the documentation index links for programmatic
+ * readers.
+ */
+router.get('/openapi.json', (req, res) => {
+  res.set('Content-Type', 'application/json; charset=utf-8')
+  res.send(specs)
+})
+
 // Mount Swagger UI middleware
 router.use('/', swaggerUi.serve)
 

@@ -3,6 +3,7 @@
 // registry. `generate_league_rosters_csv` renders the machine-readable sibling
 // of the rosters page from the same loader.
 
+export { default as generate_docs_index } from './generate-docs-index.mjs'
 export { default as generate_league_context } from './generate-league-context.mjs'
 export { default as generate_league_rules } from './generate-league-rules.mjs'
 export { default as generate_league_schedule } from './generate-league-schedule.mjs'

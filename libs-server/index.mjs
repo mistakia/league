@@ -218,6 +218,7 @@ export const getPlayByPlayQuery = (db) =>
     .join('nfl_games', 'nfl_plays_current_week.esbid', '=', 'nfl_games.esbid')
 
 export {
+  generate_docs_index,
   generate_league_context,
   generate_league_rules,
   generate_league_schedule,

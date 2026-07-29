@@ -13,7 +13,8 @@ import {
   markdown_table,
   cross_link_footer,
   format_date_et,
-  doc_url
+  doc_url,
+  docs_index_url
 } from './markdown.mjs'
 
 const DEFAULT_BASE_URL = 'https://xo.football'
@@ -231,6 +232,7 @@ export default async function generate_team_context({
       label: 'League rosters',
       url: doc_url(base_url, { lid, view: 'rosters' })
     },
+    { label: 'Documentation index', url: docs_index_url(base_url) },
     ...other_teams.map((t) => ({
       label: `Team: ${t.name}`,
       url: doc_url(base_url, { lid, tid: t.uid })

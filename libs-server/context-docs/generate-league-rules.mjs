@@ -15,6 +15,7 @@ import {
   format_date_et,
   doc_url,
   constitution_url,
+  docs_index_url,
   CONSTITUTION_LEAGUE_ID
 } from './markdown.mjs'
 
@@ -165,7 +166,8 @@ export default async function generate_league_rules({
     lid === CONSTITUTION_LEAGUE_ID && {
       label: 'League constitution',
       url: constitution_url(base_url)
-    }
+    },
+    { label: 'Documentation index', url: docs_index_url(base_url) }
   ])
 
   return [

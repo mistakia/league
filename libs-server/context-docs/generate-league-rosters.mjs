@@ -11,6 +11,7 @@ import {
   cross_link_footer,
   doc_url,
   constitution_url,
+  docs_index_url,
   CONSTITUTION_LEAGUE_ID
 } from './markdown.mjs'
 
@@ -153,6 +154,7 @@ export default async function generate_league_rosters({
       label: 'League constitution',
       url: constitution_url(base_url)
     },
+    { label: 'Documentation index', url: docs_index_url(base_url) },
     ...team_rosters.map(({ team }) => ({
       label: `Team: ${team.name}`,
       url: doc_url(base_url, { lid, tid: team.uid })

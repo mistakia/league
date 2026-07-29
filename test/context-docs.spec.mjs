@@ -3,6 +3,8 @@ import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 import yaml from 'js-yaml'
+import fs from 'fs/promises'
+import { fileURLToPath } from 'url'
 
 import server from '#api'
 import knex from '#db'
@@ -14,6 +16,7 @@ import {
   transaction_types
 } from '#constants'
 import {
+  generate_docs_index,
   generate_league_context,
   generate_league_rules,
   generate_league_schedule,
@@ -251,6 +254,49 @@ describe('context documents', function () {
     })
   })
 
+  describe('documentation index', function () {
+    it('describes every published document from the file itself', async function () {
+      const doc = await generate_docs_index({ base_url })
+      const fm = parse_frontmatter(doc)
+      fm.type.should.equal('docs_index')
+      fm.canonical_url.should.equal(`${base_url}/docs.md`)
+
+      // completeness: every markdown/JSON file at the top of docs/ is listed,
+      // so a document added to the repository cannot go unpublished here
+      const docs_dir = fileURLToPath(new URL('../docs/', import.meta.url))
+      const files = (await fs.readdir(docs_dir, { withFileTypes: true }))
+        .filter(
+          (entry) =>
+            entry.isFile() &&
+            (entry.name.endsWith('.md') || entry.name.endsWith('.json'))
+        )
+        .map((entry) => entry.name)
+      files.length.should.be.above(0)
+      for (const file of files) {
+        // the constitution is published at its own canonical path
+        const url =
+          file === 'constitution.md'
+            ? `${base_url}/constitution.md`
+            : `${base_url}/docs/${file}`
+        doc.should.include(url)
+      }
+
+      // the API surfaces: browser explorer and its fetchable JSON sibling
+      doc.should.include(`${base_url}/api/docs/`)
+      doc.should.include(`${base_url}/api/docs/openapi.json`)
+
+      // descriptions come from each file — entity frontmatter, an H1 paragraph,
+      // or a JSON schema's own title/description
+      doc.should.include('Create Data View Link')
+      doc.should.include('Generate valid data view links for the league system')
+      doc.should.include('Data View Specifications Master Index')
+
+      // and the league doc set is described by shape, not for one league
+      doc.should.include('## League context documents')
+      doc.should.include('`/leagues/:lid/rosters.md`')
+    })
+  })
+
   describe('fully-configured league', function () {
     beforeEach(async function () {
       await league_fixture(knex, league_params)
@@ -275,6 +321,20 @@ describe('context documents', function () {
 
       // the Genesis league (lid 1) cross-links the authored constitution
       doc.should.include(`${base_url}/constitution.md`)
+    })
+
+    it('league context: surfaces the docs index, API explorer, and OpenAPI', async function () {
+      const doc = await generate_league_context({ db: knex, lid: 1, base_url })
+      const fm = parse_frontmatter(doc)
+
+      fm.related.should.include(`${base_url}/docs.md`)
+      fm.related.should.include(`${base_url}/api/docs/openapi.json`)
+
+      doc.should.include('## Documentation and API')
+      doc.should.include(`${base_url}/api/docs/`)
+      doc.should.include(`${base_url}/docs/workflow-create-data-view-link.md`)
+      doc.should.include(`${base_url}/docs/data-views-system.md`)
+      doc.should.include(`${base_url}/docs/glossary.md`)
     })
 
     it('rules: labeled scoring/roster (no raw keys), cap, franchise amounts', async function () {
@@ -581,6 +641,7 @@ describe('context documents', function () {
     })
 
     const markdown_routes = [
+      '/docs.md',
       '/leagues/1.md',
       '/leagues/1/rules.md',
       '/leagues/1/schedule.md',
@@ -604,6 +665,16 @@ describe('context documents', function () {
       res.should.have.status(200)
       res.should.have.header('content-type', /text\/csv/)
       res.text.should.match(/^league_id,year,team_id,team_name,/)
+    })
+
+    it('GET /api/docs/openapi.json → 200 JSON specification', async function () {
+      const res = await chai_request
+        .execute(server)
+        .get('/api/docs/openapi.json')
+      res.should.have.status(200)
+      res.should.have.header('content-type', /application\/json/)
+      res.body.should.have.property('openapi')
+      res.body.should.have.property('paths')
     })
 
     it('GET /constitution.md → 200 text/markdown (authored doc, no frontmatter)', async function () {

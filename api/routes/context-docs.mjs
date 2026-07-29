@@ -3,6 +3,7 @@ import fs from 'fs/promises'
 import { fileURLToPath } from 'url'
 
 import {
+  generate_docs_index,
   generate_league_context,
   generate_league_rules,
   generate_league_schedule,
@@ -44,6 +45,12 @@ const send_doc = async (
     res.status(500).send({ error: error.toString() })
   }
 }
+
+// The documentation index is platform-wide, not per-league: `/docs/` is the
+// static documentation tree and `/docs.md` is the generated index over it.
+router.get('/docs.md', (req, res) =>
+  send_doc(req, res, generate_docs_index, {})
+)
 
 router.get('/leagues/:lid(\\d+).md', (req, res) =>
   send_doc(req, res, generate_league_context, {

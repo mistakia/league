@@ -8,7 +8,8 @@ import {
   markdown_table,
   cross_link_footer,
   format_date_et,
-  doc_url
+  doc_url,
+  docs_index_url
 } from './markdown.mjs'
 import {
   build_league_calendar,
@@ -135,7 +136,8 @@ export default async function generate_league_schedule({
     {
       label: 'League rosters',
       url: doc_url(base_url, { lid, view: 'rosters' })
-    }
+    },
+    { label: 'Documentation index', url: docs_index_url(base_url) }
   ])
 
   return [

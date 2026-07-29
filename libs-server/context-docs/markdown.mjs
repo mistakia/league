@@ -90,6 +90,27 @@ export function constitution_url(base_url) {
   return `${base_url}/constitution.md`
 }
 
+/**
+ * Platform-wide (not per-league) documentation URLs. `/docs.md` is the
+ * generated index over the static `/docs/` tree; the API publishes a browser
+ * explorer and, for programmatic readers, the same specification as JSON.
+ */
+export function docs_index_url(base_url) {
+  return `${base_url}/docs.md`
+}
+
+export function docs_file_url(base_url, file) {
+  return `${base_url}/docs/${file}`
+}
+
+export function api_explorer_url(base_url) {
+  return `${base_url}/api/docs/`
+}
+
+export function openapi_url(base_url) {
+  return `${base_url}/api/docs/openapi.json`
+}
+
 export function heading(level, text) {
   return `${'#'.repeat(level)} ${text}`
 }

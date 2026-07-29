@@ -11,14 +11,15 @@ docs work for every league with no tokens.
 
 ## The documents
 
-| Document        | URL                           | Contents                                                                 |
-| --------------- | ----------------------------- | ------------------------------------------------------------------------ |
-| League index    | `/leagues/:lid.md`            | Identity, standings table, divisions, current phase, recent transactions |
-| League rules    | `/leagues/:lid/rules.md`      | Roster construction, scoring, cap/FAAB, extensions, franchise tags, RFA  |
-| League schedule | `/leagues/:lid/schedule.md`   | Current-phase banner, full league calendar, playoffs, matchup grid       |
-| League rosters  | `/leagues/:lid/rosters.md`    | Per-team cap summary and every team's roster, priced on a stated basis   |
-| Rosters CSV     | `/leagues/:lid/rosters.csv`   | The same rows as `text/csv`, one row per rostered player                 |
-| Team            | `/leagues/:lid/teams/:tid.md` | Manager, record, cap space, roster by slot, draft picks, schedule        |
+| Document        | URL                           | Contents                                                                  |
+| --------------- | ----------------------------- | ------------------------------------------------------------------------- |
+| Docs index      | `/docs.md`                    | Every published reference document and API surface, grouped and described |
+| League index    | `/leagues/:lid.md`            | Identity, standings table, divisions, current phase, recent transactions  |
+| League rules    | `/leagues/:lid/rules.md`      | Roster construction, scoring, cap/FAAB, extensions, franchise tags, RFA   |
+| League schedule | `/leagues/:lid/schedule.md`   | Current-phase banner, full league calendar, playoffs, matchup grid        |
+| League rosters  | `/leagues/:lid/rosters.md`    | Per-team cap summary and every team's roster, priced on a stated basis    |
+| Rosters CSV     | `/leagues/:lid/rosters.csv`   | The same rows as `text/csv`, one row per rostered player                  |
+| Team            | `/leagues/:lid/teams/:tid.md` | Manager, record, cap space, roster by slot, draft picks, schedule         |
 
 Each is served at the human path plus a format suffix; `.md` returns
 `text/markdown` and `.csv` returns `text/csv`. The routes live in
@@ -30,6 +31,30 @@ SPA catch-all in `api/index.mjs` (they are NOT under `/api`). Generators live in
 The rosters page and its CSV render from one loader (`rosters.mjs`), which is
 also what the team doc prices its own roster from, so the three can never
 disagree about roster state or salary.
+
+## Documentation index and API
+
+`/docs.md` is the platform-wide entry point, the sibling of the per-league
+index: league state lives under `/leagues/`, and the reference material
+explaining how that state is produced lives in `docs/`. The index is generated
+by scanning `docs/` at request time and reading each file's own description —
+entity frontmatter `title`/`description`, else the H1 and opening paragraph,
+else a JSON schema's `title`/`description`. Nothing is transcribed, so the index
+cannot drift from the documents, and a file added to `docs/` appears without
+anyone editing the generator. `generate-docs-index.mjs` only declares grouping
+(and a label where a file cannot describe itself); unplaced files fall into
+"Other documents". A spec asserts every top-level file in `docs/` is listed.
+
+The API is surfaced two ways because the explorer at `/api/docs/` is a browser
+application an agent cannot read. `/api/docs/openapi.json` serves the same
+specification as fetchable JSON, and that is what the index and the league
+index link for programmatic readers.
+
+The league index carries a "Documentation and API" section — the docs index,
+both API surfaces, the data-view link workflow, the data-views system, and the
+glossary — so an agent that enters at the root learns the query surface exists
+without a second fetch. Every other league doc links the docs index from its
+footer.
 
 ## URL rule: entity, sub-view, format
 

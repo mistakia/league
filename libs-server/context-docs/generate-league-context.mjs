@@ -13,6 +13,10 @@ import {
   format_date_et,
   doc_url,
   constitution_url,
+  docs_index_url,
+  docs_file_url,
+  api_explorer_url,
+  openapi_url,
   CONSTITUTION_LEAGUE_ID
 } from './markdown.mjs'
 import {
@@ -105,7 +109,9 @@ export default async function generate_league_context({
       related: [
         doc_url(base_url, { lid, view: 'rules' }),
         doc_url(base_url, { lid, view: 'schedule' }),
-        doc_url(base_url, { lid, view: 'rosters' })
+        doc_url(base_url, { lid, view: 'rosters' }),
+        docs_index_url(base_url),
+        openapi_url(base_url)
       ]
     }
   })
@@ -170,6 +176,48 @@ export default async function generate_league_context({
       : '_No transactions yet._'
   ])
 
+  // The root entry point also has to answer "what else can I read, and how do I
+  // query this platform" — otherwise an agent that starts here never learns the
+  // API or the data-view surface exists.
+  const documentation_section = section('Documentation and API', [
+    markdown_table(
+      ['Resource', 'Covers'],
+      [
+        [
+          `[Documentation index](${docs_index_url(base_url)})`,
+          'Every published reference document, grouped and described — start here'
+        ],
+        [
+          `[API explorer](${api_explorer_url(base_url)})`,
+          'Interactive Swagger UI over every endpoint (browser UI)'
+        ],
+        [
+          `[OpenAPI document](${openapi_url(base_url)})`,
+          'The same specification as fetchable JSON, for programmatic readers'
+        ],
+        [
+          `[Data view link workflow](${docs_file_url(
+            base_url,
+            'workflow-create-data-view-link.md'
+          )})`,
+          'How to build a valid data view link — the platform query surface'
+        ],
+        [
+          `[Data views system](${docs_file_url(
+            base_url,
+            'data-views-system.md'
+          )})`,
+          'Column definitions, filters, and how a view resolves to SQL'
+        ],
+        [
+          `[Glossary](${docs_file_url(base_url, 'glossary.md')})`,
+          'Fantasy football terminology and stat abbreviations'
+        ]
+      ]
+    ),
+    'League read data is public and needs no token; only mutations are authenticated.'
+  ])
+
   const footer = cross_link_footer([
     { label: 'League rules', url: doc_url(base_url, { lid, view: 'rules' }) },
     {
@@ -188,6 +236,7 @@ export default async function generate_league_context({
       label: 'League constitution',
       url: constitution_url(base_url)
     },
+    { label: 'Documentation index', url: docs_index_url(base_url) },
     ...teams.map((team) => ({
       label: `Team: ${team.name}`,
       url: doc_url(base_url, { lid, tid: team.uid })
@@ -200,6 +249,7 @@ export default async function generate_league_context({
     standings_section,
     calendar_section,
     transactions_section,
+    documentation_section,
     footer
   ].join('\n\n')
 }
