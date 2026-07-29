@@ -21,9 +21,16 @@ describe('SCRIPTS /generate-historical-injury-index SQL string', function () {
     }
   })
 
-  it('uses the asymmetric (-7d, +3h) changelog window', function () {
-    expect(rebuild_sql).to.include("gm.kickoff_at - interval '7 days'")
+  it('states the changelog window in absolute units, not calendar days', function () {
+    expect(rebuild_sql).to.include("gm.kickoff_at - interval '168 hours'")
     expect(rebuild_sql).to.include("gm.kickoff_at + interval '3 hours'")
+    // Regression guard, not a style preference. `interval '7 days'` on a
+    // timestamptz is calendar arithmetic in the session timezone, so across the
+    // November fall-back it spans 169 hours -- widening the lookback for exactly
+    // one week of every season and no other, which is a seasonal artifact in a
+    // table built for cross-season comparison. Assert the day form is absent so
+    // a future "simplification" back to 7 days fails here.
+    expect(rebuild_sql).to.not.include("interval '7 days'")
   })
 
   it('binds start_year and end_year on every base-table scan', function () {

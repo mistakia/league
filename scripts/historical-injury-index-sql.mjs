@@ -32,8 +32,15 @@ practice_signal AS (
   GROUP BY pid, season_year, week
 ),
 changelog_signal AS (
-  -- Asymmetric per-game window: -7d back, +3h forward. Both pc.changed_at and
-  -- gm.kickoff_at are timestamptz, so the window is native interval arithmetic.
+  -- Asymmetric per-game window: 168h back, 3h forward. Both bounds are stated in
+  -- absolute units DELIBERATELY. pc.changed_at and gm.kickoff_at are timestamptz,
+  -- so a DAY-unit interval would be CALENDAR arithmetic in the session timezone
+  -- (production runs America/New_York): across the November fall-back transition
+  -- it spans 169 hours, widening the window for exactly one week of every season
+  -- and no other -- a seasonal artifact in a table built for cross-season
+  -- comparison. Hour units are absolute and carry no such drift. Do not
+  -- "simplify" 168h to the equivalent-looking day form; the spec asserts against
+  -- it, and this comment avoids the literal so that guard stays meaningful.
   SELECT gl_inner.pid, gl_inner.esbid,
          BOOL_OR(pc.column_name = 'injury_status'
                  AND UPPER(pc.new_value) IN ('OUT','DOUBTFUL','IR','PUP','SUS','COV')) AS changelog_unavailable,
@@ -47,7 +54,7 @@ changelog_signal AS (
   JOIN player_changelog pc
     ON pc.pid = gl_inner.pid
    AND pc.column_name IN ('injury_status','nfl_status','roster_status','status')
-   AND pc.changed_at BETWEEN gm.kickoff_at - interval '7 days' AND gm.kickoff_at + interval '3 hours'
+   AND pc.changed_at BETWEEN gm.kickoff_at - interval '168 hours' AND gm.kickoff_at + interval '3 hours'
   WHERE gl_inner.season_year BETWEEN :start_year AND :end_year AND gm.season_type = 'REG'
   GROUP BY gl_inner.pid, gl_inner.esbid
 ),
