@@ -433,7 +433,6 @@ export default function build_tag_board({
         .sort((a, b) => b.post_deadline_salary - a.post_deadline_salary)
     }
   })
-  const tag_board_by_tid = new Map(tag_board.map((row) => [row.tid, row]))
 
   const bid_capacity = team_ids.map((tid) => {
     const exposure = cap_exposure_by_tid.get(tid)
@@ -474,16 +473,28 @@ export default function build_tag_board({
     positional_supply[row.pos] = (positional_supply[row.pos] || 0) + 1
   }
 
+  // Candidate lists are lever-netted: a team that has already spent its
+  // franchise tag holds no franchise candidate, because it cannot act on one.
+  // `row.franchise_eligible` is the mechanical screen alone and says nothing
+  // about the budget, so every rival-facing aggregate below — candidate
+  // concentration, the teams_with_* lists, and the empty_screen rival count —
+  // must apply the budget here rather than read the screen directly. Netting
+  // once at construction is what keeps them from disagreeing with the
+  // `eligibility.*` flags on the tag_board rows, which have always netted it.
   const franchise_candidates_by_tid = new Map(
     team_ids.map((tid) => [
       tid,
-      rows_by_tid.get(tid).filter((row) => row.franchise_eligible)
+      lever_budget_by_tid.get(tid).franchise.remaining > 0
+        ? rows_by_tid.get(tid).filter((row) => row.franchise_eligible)
+        : []
     ])
   )
   const rookie_candidates_by_tid = new Map(
     team_ids.map((tid) => [
       tid,
-      rows_by_tid.get(tid).filter((row) => row.rookie_eligible)
+      lever_budget_by_tid.get(tid).rookie.remaining > 0
+        ? rows_by_tid.get(tid).filter((row) => row.rookie_eligible)
+        : []
     ])
   )
 
@@ -556,7 +567,7 @@ export default function build_tag_board({
       rfa_window: rfa_schedule_by_tid.get(tid),
       now_unix,
       season,
-      tag_board_by_tid
+      team_count: team_ids.length
     })
   }
 
@@ -718,7 +729,8 @@ export const build_considerations = ({
   league_market,
   rfa_window,
   now_unix,
-  season
+  season,
+  team_count
 }) => {
   const fired = []
   const overage =
@@ -761,7 +773,7 @@ export const build_considerations = ({
     )
     fired.push({
       rule: 'empty_screen',
-      sentence: `No contract on your active roster prices above its position's franchise amount, so the franchise tag has no application for you this year. ${rivals.length} of the other nine teams hold at least one eligible candidate.`,
+      sentence: `No contract on your active roster prices above its position's franchise amount, so the franchise tag has no application for you this year. ${rivals.length} of the other ${team_count - 1} teams hold an eligible candidate and still have the tag to spend.`,
       inputs: { lever: 'franchise', rival_count: rivals.length, rivals }
     })
   }
@@ -771,7 +783,7 @@ export const build_considerations = ({
     )
     fired.push({
       rule: 'empty_screen',
-      sentence: `Your active roster carries no untagged player from the most recent completed draft class, so the rookie tag has no application for you this year. ${rivals.length} of the other nine teams hold at least one eligible candidate.`,
+      sentence: `Your active roster carries no untagged player from the most recent completed draft class, so the rookie tag has no application for you this year. ${rivals.length} of the other ${team_count - 1} teams hold an eligible candidate and still have the tag to spend.`,
       inputs: { lever: 'rookie', rival_count: rivals.length, rivals }
     })
   }
@@ -819,7 +831,7 @@ export const build_considerations = ({
     if (in_period) {
       fired.push({
         rule: 'nomination_windows',
-        sentence: `Your two restricted free agency nomination turns fall on ${rfa_window.windows.map((w) => w.at_iso.slice(0, 10)).join(' and ')}, fixed by descending draft order.`,
+        sentence: `Your ${rfa_window.windows.length} restricted free agency nomination turns fall on ${rfa_window.windows.map((w) => w.at_iso.slice(0, 10)).join(' and ')}, fixed by descending draft order.`,
         inputs: rfa_window
       })
     }

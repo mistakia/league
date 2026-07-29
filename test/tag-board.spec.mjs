@@ -400,6 +400,66 @@ describe('tag board', function () {
       fired.should.have.length(1)
       fired[0].inputs.rivals.should.eql([2])
     })
+
+    it('omits a rival whose franchise tag is already spent from the candidate lists', function () {
+      // Team 2 holds a player who clears the price screen, but has already
+      // spent its one franchise tag on someone else. It cannot act on the
+      // candidate, so it is not a rival for team 1's empty-screen count.
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            { tid: 1, pid: 'A1', pos: 'WR', value: 5 },
+            { tid: 2, pid: 'B_TAGGED', pos: 'RB', tag: 2, value: 50 },
+            { tid: 2, pid: 'B_CLEARS', pos: 'WR', value: 40, extensions: 0 }
+          ]
+        })
+      )
+
+      // The mechanical screen still passes on the row itself...
+      const row = team_board(board, 2).players.find((p) => p.pid === 'B_CLEARS')
+      row.franchise_saving.should.be.above(0)
+      // ...but the budget is exhausted, so eligibility and every rival-facing
+      // aggregate agree that there is no candidate.
+      row.eligibility.franchise.should.equal(false)
+      board.lever_budget
+        .find((r) => r.tid === 2)
+        .franchise.remaining.should.equal(0)
+      board.league_market.teams_with_franchise_candidate.should.not.include(2)
+      expect(board.league_market.candidate_concentration.WR).to.equal(undefined)
+
+      const fired = board.considerations[1].filter(
+        (row) => row.rule === 'empty_screen' && row.inputs.lever === 'franchise'
+      )
+      fired.should.have.length(1)
+      fired[0].inputs.rivals.should.eql([])
+      fired[0].inputs.rival_count.should.equal(0)
+      fired[0].sentence.should.contain('0 of the other 1 teams')
+    })
+
+    it('omits a rival whose rookie tag is already spent from the rookie candidate list', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            { tid: 1, pid: 'A1', pos: 'WR', value: 5, nfl_draft_year: 2020 },
+            { tid: 2, pid: 'B_TAGGED', tag: 3, value: 6, nfl_draft_year: 2025 },
+            { tid: 2, pid: 'B_CLASS', value: 6, nfl_draft_year: 2025 }
+          ]
+        })
+      )
+
+      team_board(board, 2)
+        .players.find((p) => p.pid === 'B_CLASS')
+        .eligibility.rookie.should.equal(false)
+      board.league_market.teams_with_rookie_candidate.should.not.include(2)
+
+      const fired = board.considerations[1].filter(
+        (row) => row.rule === 'empty_screen' && row.inputs.lever === 'rookie'
+      )
+      fired.should.have.length(1)
+      fired[0].inputs.rivals.should.eql([])
+    })
   })
 
   describe('rookie screen', function () {
