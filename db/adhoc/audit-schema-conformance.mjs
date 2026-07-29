@@ -95,33 +95,20 @@ const season_grain_columns = new Map([
 // Bare single-letter / ambiguous team-role spellings (checked as exact names).
 const ambiguous_team_columns = new Set(['v', 'h', 'team', 'club', 'clubcode'])
 
-// Source-revealing vendor terms the audit flags in identifiers. Per the operator
-// ruling (2026-07-20), obfuscation is scoped to the three premium charted/tracking
-// sources only — NGS, NFL Pro, PFF — NOT every integration we legitimately name
-// (ESPN, Sleeper, the sportsbooks, the projection providers). Kept in-code and
-// non-secret: these are the names being retired to obfuscated codes. The full
-// private term list lives in the scan legend (private/source-legend.json).
-const vendor_tokens = ['pff', 'ngs', 'nfl_pro', 'nflpro']
-
-// Operator-ratified kept identifiers (2026-07-20): columns that legitimately
-// retain a vendor token because the operator chose to keep them un-obfuscated.
-// Keyed by table.column so the exemption is narrow -- the same token in ANY other
-// table still flags. `player_dimension` covers the compat-view window (the base
-// table is renamed player -> player_dimension until the CONTRACT phase); `player`
-// covers the final state. See the identity-crosswalk cluster of
-// user:task/league/redesign-league-database-schema.md.
-const accepted_kept_identifiers = new Set([
-  'player.pff_player_id',
-  'player.ngs_athleticism_score',
-  'player.ngs_draft_grade',
-  'player.ngs_production_score',
-  'player.ngs_size_score',
-  'player_dimension.pff_player_id',
-  'player_dimension.ngs_athleticism_score',
-  'player_dimension.ngs_draft_grade',
-  'player_dimension.ngs_production_score',
-  'player_dimension.ngs_size_score'
-])
+// Source-system name fragments, used ONLY to recognise an id column as pointing
+// at an external system rather than at an internal app key (see
+// looks_like_external). This audit does NOT flag these names as violations.
+//
+// Source obfuscation was dialled back by operator ruling (2026-07-22 ruling 1,
+// 2026-07-23 NGS ruling, reaffirmed 2026-07-28): it is OFF BY DEFAULT and applies
+// only to select play-by-play / charted source data, per identifier, with prior
+// operator approval. Obfuscating a vendor whose identity is self-evident from the
+// data is theater. `pff_*` and `ngs_*` names therefore STAY, and a blanket
+// vendor-token rule was removed from this audit — a completion gate must only
+// flag genuine defects, and 30 of its findings were names the operator had
+// already ruled to keep. Candidate surfacing lives in the advisory
+// db/adhoc/scan-source-leakage.mjs, which is deliberately not a gate.
+const external_system_tokens = ['pff', 'ngs', 'nfl_pro', 'nflpro']
 
 // Operator-ratified metric columns whose name legitimately ends in a word that
 // collides with the timestamp `_at` heuristic. These are SIS run-direction
@@ -233,8 +220,7 @@ const RULES = {
     'Non-conforming season grain (season_year/season_type required)',
   ambiguous_team: 'Ambiguous team-role spelling (qualify explicitly)',
   external_id: 'External-id column not following {system}_{entitytype}_id',
-  timestamp_type: 'Non-timestamptz timestamp representation',
-  vendor_leak: 'Source-revealing vendor token in identifier'
+  timestamp_type: 'Non-timestamptz timestamp representation'
 }
 
 function looks_like_time_column(name) {
@@ -246,8 +232,8 @@ function check_column(table, col) {
   const lower = col.name.toLowerCase()
 
   if (allowlisted_identifiers.has(lower)) {
-    // canonical retained key -- only the vendor/time checks below still apply,
-    // and none match an allowlisted key, so return clean.
+    // canonical retained key -- only the time check below still applies, and no
+    // allowlisted key matches it, so return clean.
     return findings
   }
 
@@ -328,25 +314,13 @@ function check_column(table, col) {
     }
   }
 
-  // Vendor leak in a column name -- unless the operator ratified keeping this
-  // specific table.column un-obfuscated.
-  const vendor = vendor_tokens.find((t) => name_has_token(lower, t))
-  if (vendor && !accepted_kept_identifiers.has(`${table}.${lower}`)) {
-    findings.push({
-      rule: 'vendor_leak',
-      table,
-      column: col.name,
-      token: vendor
-    })
-  }
-
   return findings
 }
 
 // Heuristic: an id column referencing an external system (has a vendor token or
 // a system-ish prefix) rather than an internal app key.
 function looks_like_external(name) {
-  if (vendor_tokens.some((t) => name_has_token(name, t))) return true
+  if (external_system_tokens.some((t) => name_has_token(name, t))) return true
   return /^(gsis|sleeper|yahoo|roto|cbs|shield|nfl)_?/.test(name)
 }
 
@@ -358,13 +332,8 @@ function name_has_token(name, token) {
 
 function check_table_name(table) {
   const findings = []
-  const lower = table.toLowerCase()
   if (/[A-Z]/.test(table)) {
     findings.push({ rule: 'quoted_camelcase', table, column: null })
-  }
-  const vendor = vendor_tokens.find((t) => name_has_token(lower, t))
-  if (vendor) {
-    findings.push({ rule: 'vendor_leak', table, column: null, token: vendor })
   }
   return findings
 }

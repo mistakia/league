@@ -1,12 +1,22 @@
-// Source-leakage scan for the league four-layer redesign publish gate.
+// Source-leakage scan — ADVISORY, not a gate.
 //
-// The schema-standards guideline (user:guideline/league/database-schema-standards.md
-// § Source obfuscation, § Publish gate) requires that no data-source vendor name,
-// abbreviation, or allusion appears in any PUBLIC artifact — schema, migrations,
-// data-view definition files and field ids, fixtures, seed data, comments. This is
-// the tool that enforces it, the sibling of audit-schema-conformance.mjs: run it
-// whole to see the standing leakage debt, or scoped (--path) to prove a migrated
-// cluster's surface is clean before publish.
+// Reports where data-source vendor names appear in public artifacts (schema,
+// migrations, data-view definition files and field ids, fixtures, seed data,
+// comments), so obfuscation CANDIDATES can be surfaced for review.
+//
+// It does NOT define a defect. Source obfuscation was dialled back by operator
+// ruling (2026-07-22 ruling 1, 2026-07-23 NGS ruling, reaffirmed 2026-07-28): it
+// is OFF BY DEFAULT and applies only to select play-by-play / charted source
+// data, per identifier, with PRIOR OPERATOR APPROVAL. Nothing is currently
+// approved for obfuscation, so a non-zero finding count here is expected and is
+// not a failure — `pff_*` and `ngs_*` names are ratified keeps.
+//
+// Consequently this scan MUST NOT be wired into a publish gate, a CI check, or a
+// per-cluster clean check, and a non-empty result MUST NOT trigger a rename. Read
+// it, decide whether any hit is worth obfuscating, and take that decision to the
+// operator before renaming anything. The completion gate for the schema redesign
+// is audit-schema-conformance.mjs, which deliberately no longer flags vendor
+// tokens at all.
 //
 // This file is PUBLIC and committed, so it deliberately contains NO vendor names.
 // The vendor legend — the code-to-vendor map and the full term list to scan for —
@@ -23,7 +33,10 @@
 //   node db/adhoc/scan-source-leakage.mjs --selftest            # verify the matcher
 //   node db/adhoc/scan-source-leakage.mjs --legend <path>       # override legend
 //
-// Exit codes: 0 = clean, 1 = leak(s) found (gate-friendly), 2 = legend unavailable.
+// Exit codes: 0 = ran successfully (WITH OR WITHOUT findings — findings are not a
+// failure), 1 = --selftest matcher failure, 2 = legend unavailable. Findings
+// deliberately do NOT set a non-zero code, so this cannot be wired up as a gate by
+// accident. No caller currently treats its exit code as a gate; keep it that way.
 
 import fs from 'fs'
 import path from 'path'
@@ -272,7 +285,8 @@ function report(findings, targets, argv) {
         2
       )
     )
-    process.exitCode = findings.length ? 1 : 0
+    // Advisory: findings are candidates for review, not failures.
+    process.exitCode = 0
     return
   }
 
@@ -320,7 +334,12 @@ function report(findings, targets, argv) {
     )
   }
 
-  process.exitCode = 1
+  console.log(
+    '\nadvisory only -- these are obfuscation CANDIDATES, not defects. Nothing is\n' +
+      'currently approved for obfuscation; renaming any of them needs prior operator\n' +
+      'approval. Exiting 0 deliberately so this cannot be used as a gate.'
+  )
+  process.exitCode = 0
 }
 
 // --- runner ------------------------------------------------------------------
