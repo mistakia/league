@@ -133,7 +133,7 @@ const run = async ({ lid }) => {
 // (1) `run({ lid })` itself rebuilds the year's tag/extension transactions from
 // rosters_players state (DELETE-then-INSERT); (2) the notification marker below
 // short-circuits subsequent cron firings; (3) the unique constraint on
-// (lid, year, notification_type, event_timestamp) guards against races.
+// (lid, season_year, notification_type, event_timestamp) guards against races.
 //
 // Returns { shortfall } where shortfall is null when there was no due work
 // (empty-queue) or all due leagues were successfully processed, and a
@@ -168,7 +168,7 @@ const process_extensions_for_due_leagues = async () => {
     }
     const already_processed = await has_league_notification_been_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
       event_timestamp: ext_date
     })
@@ -185,7 +185,7 @@ const process_extensions_for_due_leagues = async () => {
     await run({ lid })
     await record_league_notification_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
       event_timestamp: ext_date,
       message: `Extensions auto-applied at ext_date for league ${lid}`,
@@ -206,7 +206,7 @@ const process_extensions_for_due_leagues = async () => {
   for (const { lid, ext_date } of due_leagues) {
     const marker_written = await has_league_notification_been_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
       event_timestamp: ext_date
     })

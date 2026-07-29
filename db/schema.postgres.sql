@@ -337,7 +337,7 @@ DROP INDEX IF EXISTS public.idx_leagues_commishid;
 DROP INDEX IF EXISTS public.idx_league_player_projection_values_pid;
 DROP INDEX IF EXISTS public.idx_league_notifications_type;
 DROP INDEX IF EXISTS public.idx_league_notifications_sent_timestamp;
-DROP INDEX IF EXISTS public.idx_league_notifications_lid_year;
+DROP INDEX IF EXISTS public.idx_league_notifications_lid_season_year;
 DROP INDEX IF EXISTS public.idx_league_notifications_event_timestamp;
 DROP INDEX IF EXISTS public.idx_league_format_player_seasonlogs_pid_year_id;
 DROP INDEX IF EXISTS public.idx_league_format_player_projection_values_pid_id_week_year;
@@ -4273,10 +4273,10 @@ CREATE TABLE public.league_nfl_team_seasonlogs (
 CREATE TABLE public.league_notifications (
     uid integer NOT NULL,
     lid integer NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     notification_type character varying(100) NOT NULL,
-    event_timestamp integer NOT NULL,
-    sent_timestamp integer NOT NULL,
+    event_timestamp timestamp with time zone NOT NULL,
+    sent_timestamp timestamp with time zone NOT NULL,
     message text,
     metadata jsonb,
     created_at timestamp with time zone DEFAULT now()
@@ -27925,7 +27925,7 @@ ALTER TABLE ONLY public.league_notifications
 --
 
 ALTER TABLE ONLY public.league_notifications
-    ADD CONSTRAINT league_notifications_unique UNIQUE (lid, year, notification_type, event_timestamp);
+    ADD CONSTRAINT league_notifications_unique UNIQUE (lid, season_year, notification_type, event_timestamp);
 
 
 --
@@ -29954,10 +29954,10 @@ CREATE INDEX idx_league_notifications_event_timestamp ON public.league_notificat
 
 
 --
--- Name: idx_league_notifications_lid_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_league_notifications_lid_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_league_notifications_lid_year ON public.league_notifications USING btree (lid, year);
+CREATE INDEX idx_league_notifications_lid_season_year ON public.league_notifications USING btree (lid, season_year);
 
 
 --

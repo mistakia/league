@@ -80,7 +80,7 @@ const run = async () => {
 
     const already_sent = await has_league_notification_been_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK,
       event_timestamp
     })
@@ -122,7 +122,7 @@ const run = async () => {
 
     await record_league_notification_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK,
       event_timestamp,
       message,
@@ -150,7 +150,7 @@ const run = async () => {
   for (const { lid, event_timestamp, pick_number } of due_announcements) {
     const marker_written = await has_league_notification_been_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK,
       event_timestamp
     })

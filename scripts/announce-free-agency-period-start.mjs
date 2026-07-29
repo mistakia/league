@@ -237,7 +237,7 @@ const announce_free_agency_period_notification = async ({
   // check passes (e.g., if the script runs multiple times within the check window)
   const notification_already_sent = await has_league_notification_been_sent({
     lid,
-    year: current_year,
+    season_year: current_year,
     notification_type,
     event_timestamp
   })
@@ -278,7 +278,7 @@ const announce_free_agency_period_notification = async ({
     // Record that the notification was sent in the database
     await record_league_notification_sent({
       lid,
-      year: current_year,
+      season_year: current_year,
       notification_type,
       event_timestamp,
       message: notification_message,
@@ -349,7 +349,7 @@ const process_all_eligible_leagues = async ({
 
     const already_sent = await has_league_notification_been_sent({
       lid: league.lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type,
       event_timestamp
     })
@@ -404,7 +404,7 @@ const process_all_eligible_leagues = async ({
   } of due_leagues) {
     const marker_written = await has_league_notification_been_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type,
       event_timestamp
     })

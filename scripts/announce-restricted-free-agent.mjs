@@ -351,7 +351,7 @@ const announce_restricted_free_agent = async ({
 
       await record_league_notification_sent({
         lid,
-        year: current_season.year,
+        season_year: current_season.year,
         notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
         event_timestamp: announcement_timestamp,
         message,
@@ -374,7 +374,7 @@ const announce_restricted_free_agent = async ({
     if (!dry_run) {
       await record_league_notification_sent({
         lid,
-        year: current_season.year,
+        season_year: current_season.year,
         notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
         event_timestamp: announcement_info.correct_timestamp,
         message: `No RFA nomination pending for team ${nominating_team.uid} on slot ${announcement_info.correct_timestamp}`,
@@ -412,7 +412,7 @@ const process_all_leagues = async ({
     }
     const already_sent = await has_league_notification_been_sent({
       lid: league.lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
       event_timestamp: announcement_timestamp
     })
@@ -457,7 +457,7 @@ const process_all_leagues = async ({
   for (const { lid, announcement_timestamp } of due_leagues) {
     const marker_written = await has_league_notification_been_sent({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
       event_timestamp: announcement_timestamp
     })
