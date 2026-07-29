@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-07-29 against league_production
 --
 -- Stop storing the AVERAGE consensus source in projection history, and remove
 -- the vestigial `generated_at` column from `ros_projections`.
@@ -73,6 +73,10 @@
 
 -- `yarn db:exec` already wraps this file in a single transaction with
 -- ON_ERROR_STOP=1, so no explicit BEGIN/COMMIT here.
+
+-- The DELETE scans a 9.5M-row table; the server's 40s statement_timeout would
+-- cancel it mid-flight and roll the whole transaction back.
+SET LOCAL statement_timeout = 0;
 
 -- Guard: if any AVERAGE row has picked up a real timestamp, then real consensus
 -- history now exists and deleting on this predicate is no longer safe. Stop.

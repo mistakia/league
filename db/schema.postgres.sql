@@ -25426,8 +25426,7 @@ CREATE TABLE public.ros_projections (
     defensive_touchdowns numeric(4,1),
     kickoff_return_touchdowns numeric(4,1),
     punt_return_touchdowns numeric(4,1),
-    season_year smallint,
-    generated_at timestamp with time zone NOT NULL
+    season_year smallint
 );
 
 
