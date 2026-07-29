@@ -138,15 +138,26 @@ const assign_ranks = (rows, value_of) => {
 /**
  * Build the league-wide computed board.
  *
- * Every dollar quantity here is mechanical — contract values, the extension
- * formula, stored franchise prices, tag counts. The only modelled input is
- * dynasty market standing, which is emitted as an ordinal rank and a coverage
- * band and never as a dollar figure, so no consumer can reintroduce a cardinal
- * player valuation.
+ * Every dollar quantity on the tag board is mechanical — contract values, the
+ * extension formula, stored franchise prices, tag counts. Two modelled inputs
+ * are admitted, each confined to the decision its horizon can carry:
  *
- * `viewer_tid` scopes the private block. Cutlists and unprocessed restricted
- * free agency offers are loaded only for that franchise, so a rival's private
- * intent has no path into the artifact.
+ *   dynasty market standing — emitted as an ordinal rank and a coverage band,
+ *     never as a dollar figure, so no tag comparison can become cardinal.
+ *   projected points added  — sign only, as the franchise screen's worth floor.
+ *
+ * The one dollar-denominated player value, `projected_market_salary`, appears
+ * on divergence rows and nowhere else. Those rows describe the pool likely to
+ * reach a single-season auction, which is the only decision a single-season
+ * projection can price. Do not carry it onto tag_board rows: differenced
+ * against a franchise price it reconstructs a multi-year surplus no oracle in
+ * this league supports.
+ *
+ * `viewer_tid` scopes the private block. Cutlists are loaded only for that
+ * franchise, so a rival's standing intent has no path into the artifact.
+ * Restricted free agency offer AMOUNTS are absent for everyone: the loader
+ * never selects the bid column, so no retention threshold can be derived
+ * downstream even for the offering manager.
  */
 export default function build_tag_board({
   lid,
