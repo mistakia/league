@@ -491,12 +491,17 @@ observations:
     salary, while libs-server/tag-board post_deadline_salary returns 0 citing Constitution Article
     VIII section 3 -- 2026 Ashton Jeanty reads $10 on the team doc and $0 on the tag board, and the
     platform's actual deadline behavior is the $10.
+  - >-
+    [fix] 2026-07-29 Resolved the rookie-tag divergence: Article VIII section 3's $0 is the
+    EXTENSION price (a rookie extension adds $0 where a regular adds $5), not a $0 salary, so
+    get_extension_amount was right and the tag board was wrong -- post_deadline_salary now delegates
+    to it and rookie_saving is extension_price minus value (commit 343518af).
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-29T18:14:38.206Z'
+updated_at: '2026-07-29T18:44:43.132Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
