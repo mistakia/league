@@ -484,12 +484,19 @@ observations:
     [gotcha] About 47 test assertions compare a server-recorded timestamp against
     Math.round(Date.now()/1000) at assert time, a latent second-boundary flake independent of the
     2026-07-28 timeout fix.
+  - >-
+    [inconsistency] Rookie-tag salary disagrees across two agent-facing surfaces:
+    get_extension_amount (so Roster, cap space, the SPA, the team context doc, and
+    scripts/process-extensions.mjs, which writes the deadline transaction) holds the recorded
+    salary, while libs-server/tag-board post_deadline_salary returns 0 citing Constitution Article
+    VIII section 3 -- 2026 Ashton Jeanty reads $10 on the team doc and $0 on the tag board, and the
+    platform's actual deadline behavior is the $10.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-28T17:34:45.195Z'
+updated_at: '2026-07-29T18:14:38.206Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
