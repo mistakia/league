@@ -12,7 +12,12 @@ import {
   groupBy
 } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
-import { is_main, batch_insert, get_league_format } from '#libs-server'
+import {
+  is_main,
+  batch_insert,
+  get_league_format,
+  record_league_format_projection_value_history
+} from '#libs-server'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -108,6 +113,15 @@ const process_league_format_year = async ({
   }
 
   if (value_inserts.length) {
+    // Record the dated observation BEFORE the destructive rewrite below. The
+    // current-state table is delete-then-reinsert, so history has to be captured
+    // from the computed values rather than read back afterwards.
+    await record_league_format_projection_value_history({
+      league_format_id,
+      year,
+      value_rows: value_inserts
+    })
+
     await db('league_format_player_projection_values')
       .del()
       .where({ league_format_id, year })

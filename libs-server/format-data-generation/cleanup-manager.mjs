@@ -25,6 +25,7 @@ const get_format_tables = ({ format_type }) => {
       tables: [
         'league_format_draft_pick_value',
         'league_format_player_projection_values',
+        'league_format_player_projection_values_history',
         'league_format_player_careerlogs',
         'league_format_player_seasonlogs',
         'league_format_player_gamelogs'

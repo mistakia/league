@@ -35,6 +35,7 @@ ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_off_play_caller_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_head_coach_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_def_play_caller_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.league_format_player_projection_values_history DROP CONSTRAINT IF EXISTS lf_player_projection_values_history_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_league_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_formats DROP CONSTRAINT IF EXISTS league_formats_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.league_format_player_seasonlogs DROP CONSTRAINT IF EXISTS league_format_player_seasonlogs_league_format_id_fkey;
@@ -324,6 +325,8 @@ DROP INDEX IF EXISTS public.idx_nfl_games_season_year_season_type_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_matchups_simulation_timestamp;
 DROP INDEX IF EXISTS public.idx_matchups_lid;
+DROP INDEX IF EXISTS public.idx_lf_player_projection_values_history_natural_key;
+DROP INDEX IF EXISTS public.idx_lf_player_projection_values_history_as_of;
 DROP INDEX IF EXISTS public.idx_leagues_commishid;
 DROP INDEX IF EXISTS public.idx_league_player_projection_values_pid;
 DROP INDEX IF EXISTS public.idx_league_notifications_type;
@@ -893,6 +896,7 @@ DROP SEQUENCE IF EXISTS public.league_migrations_id_seq;
 DROP TABLE IF EXISTS public.league_migrations;
 DROP TABLE IF EXISTS public.league_formats;
 DROP TABLE IF EXISTS public.league_format_player_seasonlogs;
+DROP TABLE IF EXISTS public.league_format_player_projection_values_history;
 DROP TABLE IF EXISTS public.league_format_player_projection_values;
 DROP TABLE IF EXISTS public.league_format_player_gamelogs;
 DROP TABLE IF EXISTS public.league_format_player_careerlogs;
@@ -3842,6 +3846,22 @@ CREATE TABLE public.league_format_player_projection_values (
     pts_added numeric(7,2),
     market_salary numeric(6,2),
     league_format_id text NOT NULL
+);
+
+
+--
+-- Name: league_format_player_projection_values_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_format_player_projection_values_history (
+    pid character varying(25) NOT NULL,
+    league_format_id text NOT NULL,
+    week character varying(10) NOT NULL,
+    year smallint NOT NULL,
+    pts_added numeric(7,2),
+    market_salary numeric(6,2),
+    removed boolean DEFAULT false NOT NULL,
+    observed_at timestamp with time zone NOT NULL
 );
 
 
@@ -29689,6 +29709,20 @@ CREATE INDEX idx_league_player_projection_values_pid ON public.league_player_pro
 --
 
 CREATE INDEX idx_leagues_commishid ON public.leagues USING btree (commishid);
+
+
+--
+-- Name: idx_lf_player_projection_values_history_as_of; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_lf_player_projection_values_history_as_of ON public.league_format_player_projection_values_history USING btree (league_format_id, year, observed_at);
+
+
+--
+-- Name: idx_lf_player_projection_values_history_natural_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_lf_player_projection_values_history_natural_key ON public.league_format_player_projection_values_history USING btree (pid, league_format_id, year, week, observed_at);
 
 
 --
@@ -55791,6 +55825,14 @@ ALTER TABLE ONLY public.league_team_player_seasonlogs
 
 
 --
+-- Name: league_format_player_projection_values_history lf_player_projection_values_history_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_format_player_projection_values_history
+    ADD CONSTRAINT lf_player_projection_values_history_league_format_id_fkey FOREIGN KEY (league_format_id) REFERENCES public.league_formats(id) ON UPDATE CASCADE;
+
+
+--
 -- Name: nfl_game_coaches nfl_game_coaches_def_play_caller_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -56330,6 +56372,13 @@ GRANT SELECT ON TABLE public.league_format_player_gamelogs TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.league_format_player_projection_values TO league_reader;
+
+
+--
+-- Name: TABLE league_format_player_projection_values_history; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.league_format_player_projection_values_history TO league_reader;
 
 
 --

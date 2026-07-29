@@ -31,7 +31,8 @@ import {
   batch_insert,
   report_job,
   simulation,
-  emit_signal
+  emit_signal,
+  record_league_format_projection_value_history
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
@@ -358,9 +359,21 @@ const process_league_format = async ({
   }
 
   if (valueInserts.length) {
+    // Record the dated observation BEFORE the destructive rewrite below. The
+    // current-state table is delete-then-reinsert, so history has to be captured
+    // from the computed values rather than read back afterwards.
+    await record_league_format_projection_value_history({
+      league_format_id,
+      year: current_season.year,
+      value_rows: valueInserts
+    })
+
+    // Scoped to the year being rewritten. This delete was previously unscoped and
+    // wiped every prior season's values for the format on each hourly run, while
+    // the reinsert below only ever restores current_season.year.
     await db('league_format_player_projection_values')
       .del()
-      .where({ league_format_id })
+      .where({ league_format_id, year: current_season.year })
     await batch_insert({
       items: valueInserts,
       save: (items) =>
