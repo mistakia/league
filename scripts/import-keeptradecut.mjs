@@ -1,3 +1,6 @@
+import fs from 'fs/promises'
+import path from 'path'
+
 import { JSDOM } from 'jsdom'
 import dayjs from 'dayjs'
 import debug from 'debug'
@@ -71,6 +74,75 @@ export const has_liquidity_data = (players_array) =>
       Number(player?.superflexValues?.tradeCount) > 0
   )
 
+// Summarise a zeroed liquidity payload so the NEXT occurrence is diagnosable
+// rather than merely detectable. has_liquidity_data tells us the payload was
+// uncollectable; it cannot tell us WHY, and the leading hypothesis (KTC's
+// liquidity recompute is mid-flight when the 04:30 ET cron fires) is inference,
+// not evidence. The distinguishing question is whether the fields were present
+// and zero, or absent entirely -- a recompute-in-flight should look different
+// from a schema change or a stripped response. Counting the shapes separates
+// them; the sample carries a handful of verbatim value objects for the case
+// where neither explanation fits.
+export const summarize_zero_liquidity_payload = (
+  players_array,
+  sample_size = 5
+) => {
+  const players = players_array || []
+  // Buckets are mutually exclusive and must describe what was OBSERVED, not what
+  // we expect. all_three_zero is deliberately distinct from present_nonzero:
+  // KTC legitimately serves rawLiquidity=0 alongside a nonzero stdLiquidity and
+  // tradeCount, so collapsing every finite triple into a single "zero" bucket
+  // would record a claim the data does not support.
+  const shape_counts = {
+    missing_values_object: 0,
+    fields_absent: 0,
+    all_three_zero: 0,
+    present_nonzero: 0,
+    fields_non_numeric: 0
+  }
+
+  for (const player of players) {
+    for (const values of [player?.oneQBValues, player?.superflexValues]) {
+      if (!values) {
+        shape_counts.missing_values_object++
+        continue
+      }
+      const has_all_keys =
+        'rawLiquidity' in values &&
+        'stdLiquidity' in values &&
+        'tradeCount' in values
+      if (!has_all_keys) {
+        shape_counts.fields_absent++
+        continue
+      }
+      const numbers = [
+        Number(values.rawLiquidity),
+        Number(values.stdLiquidity),
+        Number(values.tradeCount)
+      ]
+      if (numbers.some((n) => !Number.isFinite(n))) {
+        shape_counts.fields_non_numeric++
+      } else if (numbers.every((n) => n === 0)) {
+        shape_counts.all_three_zero++
+      } else {
+        shape_counts.present_nonzero++
+      }
+    }
+  }
+
+  return {
+    captured_at: new Date().toISOString(),
+    player_count: players.length,
+    shape_counts,
+    sample: players.slice(0, sample_size).map((player) => ({
+      playerID: player?.playerID,
+      playerName: player?.playerName,
+      oneQBValues: player?.oneQBValues,
+      superflexValues: player?.superflexValues
+    }))
+  }
+}
+
 export const build_liquidity_inserts = ({ pid, keeptradecut_player, d }) => {
   const rows = []
   const by_format = [
@@ -128,6 +200,32 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     log(
       'keeptradecut published zero liquidity for every player; skipping liquidity writes for this run'
     )
+    // Preserve the offending payload. The shortfall below makes the skip
+    // DETECTABLE; without this it is not DIAGNOSABLE -- the page is fetched
+    // fresh each run, so by the time anyone looks the evidence is gone and the
+    // cause stays a hypothesis. Best-effort: a forensics write must never be
+    // able to fail the import it is describing.
+    try {
+      // Beside the league logs, not /tmp: this evidence must survive a reboot to
+      // be worth writing, and the next occurrence may be weeks out. One small
+      // JSON per zeroed run; not matched by the *.log logrotate glob, so it is
+      // not rotated away before anyone reads it.
+      const forensics_dir =
+        process.env.LEAGUE_FORENSICS_DIR ||
+        '/var/log/league/keeptradecut-zero-liquidity'
+      await fs.mkdir(forensics_dir, { recursive: true })
+      const forensics_path = path.join(
+        forensics_dir,
+        `${dayjs().format('YYYY-MM-DD-HHmmss')}.json`
+      )
+      await fs.writeFile(
+        forensics_path,
+        JSON.stringify(summarize_zero_liquidity_payload(playersArray), null, 2)
+      )
+      log(`zero-liquidity payload summary written to ${forensics_path}`)
+    } catch (err) {
+      log(`failed to persist zero-liquidity payload summary: ${err.message}`)
+    }
   }
 
   const keeptradecut_config = await get_keeptradecut_config()

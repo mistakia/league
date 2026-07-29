@@ -8,11 +8,26 @@
 #           (latest overwritten in place) for ≤15-min on-prem RPO.
 #
 # No season gate, no table-subset jobs — every table has a ≤3-4-day whole-DB copy
-# year-round. The full's Tue+Fri schedule has a 4-day Fri→Tue gap; the runs-staleness
-# oracle ignores JOB_SCHEDULE for cron:* sources and applies a flat 3-day default, so
-# the full's line reports under a scheduled-command carrier entity via
-# JOB_SCHEDULE_ENTITY_URI, whose staleness_window_seconds (5 days) tolerates the gap.
+# year-round. The full's Tue+Fri schedule has a 4-day Fri→Tue gap, which would
+# false-fire against a flat 3-day staleness default, so the full's line reports
+# under a scheduled-command carrier entity via JOB_SCHEDULE_ENTITY_URI, whose
+# staleness_window_seconds (5 days) tolerates the gap.
 # The user dumps stay cron:* sources (daily / 15-min cadence < the 3-day default).
+#
+# Two corrections to what this comment used to claim (2026-07-29):
+#   - "the oracle ignores JOB_SCHEDULE for cron:* sources" is no longer true in
+#     general: check-stale-runs computes a next-expected-fire from the cadence
+#     `base run report --schedule` puts on the ledger row. It is still true in
+#     EFFECT on this host, for a different reason -- league's base CLI is the
+#     compiled 2026.07.05 build with no --schedule flag, so job-wrapper.sh's
+#     degrade path strips the cadence and every cron:league:* row has schedule
+#     NULL. Do not rely on JOB_SCHEDULE here until that CLI is upgraded.
+#   - The carrier below is NOT currently being monitored. league-backup-full.md
+#     carries `enabled: false` (correct: no dispatcher should fire it, the line
+#     below does), but check-stale-runs treats enabled:false as a deliberate
+#     stand-down and skips the source before any staleness math. So its 5-day
+#     window is inert. The backup itself is still covered by the content-freshness
+#     checks on base-storage; it is the runs-layer redundancy that is missing.
 
 # Full whole-DB dump (directory format, parallel) — Tuesday + Friday 08:00 UTC (off-peak)
 0 8 * * 2,5 JOB_SCHEDULE_ENTITY_URI=user:scheduled-command/league/league-backup-full.md job-wrapper.sh league-backup-full /bin/bash /root/league/scripts/postgres-backup.sh -f >> /var/log/league/league-postgres-backup.log 2>&1
