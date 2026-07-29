@@ -1,5 +1,7 @@
 import crypto from 'crypto'
 import { existsSync, readFileSync } from 'fs'
+import { join } from 'path'
+import { homedir } from 'os'
 import debug from 'debug'
 
 import config from '#config'
@@ -70,6 +72,45 @@ const first_line = (text) => String(text ?? '').split('\n')[0]
 
 const MACHINE_TOKEN_TTL_MS = 30 * 1000
 
+// Key-file resolution mirrors libs-server/auth/machine-key-loader in the base
+// repo (resolve_instance_key_path) rather than requiring BASE_INSTANCE_KEY_FILE
+// outright. Being stricter than the loader we sit next to is what made every
+// cron-invoked oracle mute on hosts that set only USER_BASE_DIRECTORY: the key
+// was on disk at the canonical path the whole time and nothing looked there.
+const resolve_key_path = () => {
+  const explicit = process.env.BASE_INSTANCE_KEY_FILE
+  if (explicit) return explicit
+  const user_base_directory = process.env.USER_BASE_DIRECTORY
+  if (user_base_directory) {
+    return join(user_base_directory, 'config', 'instance-private.key')
+  }
+  return join(homedir(), '.base-instance-private.key')
+}
+
+// The slug is deliberately NOT derived from os.hostname(). Across this fleet
+// the short hostname disagrees with the machine_registry slug on three of four
+// hosts (macbook2025/macbook, league-production/league, parcels-0/digitalocean-0),
+// so a hostname fallback would sign tokens for slugs that do not exist and fail
+// one gate later at the API instead of here. Machine identity is genuinely
+// per-host configuration; it belongs in the host's cron/service env.
+const resolve_machine_slug = () => process.env.BASE_MACHINE_SLUG
+
+// A debug-level line nobody reads is why silent muteness survived: an oracle
+// that cannot emit reads as wired in code review. Warn on stderr instead, once
+// per distinct reason per process, so cron captures it in the job log on the
+// very first run without flooding a hot caller.
+const warned_reasons = new Set()
+
+// Exported for tests: the once-per-reason dedup is process-lifetime state, so a
+// spec asserting the warning needs to clear it rather than depend on spec order.
+export const reset_emission_warnings = () => warned_reasons.clear()
+
+const warn_cannot_emit = (reason) => {
+  if (warned_reasons.has(reason)) return
+  warned_reasons.add(reason)
+  process.stderr.write(`[log_error] signal emission disabled: ${reason}\n`)
+}
+
 const sign_machine_token = ({ slug, key_path }) => {
   if (!slug || !key_path || !existsSync(key_path)) return null
   const private_key = crypto.createPrivateKey(readFileSync(key_path, 'utf8'))
@@ -127,18 +168,22 @@ export const create_logger = (namespace, { service } = {}) => {
     }
 
     const signals_api_url = config?.signals_api_url
-    const slug = process.env.BASE_MACHINE_SLUG
-    const key_path = process.env.BASE_INSTANCE_KEY_FILE
+    const slug = resolve_machine_slug()
+    const key_path = resolve_key_path()
     if (!signals_api_url) {
+      warn_cannot_emit('signals_api_url not configured')
       debug_log(
         'signals_api_url not configured; log_error not emitted (fingerprint=%s)',
         fingerprint
       )
       return null
     }
-    if (!slug || !key_path) {
+    if (!slug) {
+      warn_cannot_emit(
+        'BASE_MACHINE_SLUG unset (set it in this host cron/service env)'
+      )
       debug_log(
-        'BASE_MACHINE_SLUG/BASE_INSTANCE_KEY_FILE unset; log_error not emitted (fingerprint=%s)',
+        'BASE_MACHINE_SLUG unset; log_error not emitted (fingerprint=%s)',
         fingerprint
       )
       return null
@@ -151,8 +196,10 @@ export const create_logger = (namespace, { service } = {}) => {
       return null
     }
     if (!token) {
+      warn_cannot_emit(`instance private key missing at ${key_path}`)
       debug_log(
-        'machine token unavailable (missing key file); log_error not emitted (fingerprint=%s)',
+        'machine token unavailable (missing key file at %s); log_error not emitted (fingerprint=%s)',
+        key_path,
         fingerprint
       )
       return null
@@ -192,7 +239,20 @@ export const create_logger = (namespace, { service } = {}) => {
 
     const promise = Promise.resolve()
       .then(() => post_signal_via_fetch({ signals_api_url, token, body }))
+      .then((response) => {
+        // A rejected POST -- unregistered slug, key not matching the registry
+        // pubkey -- is the same silent muteness one gate later, so it warns
+        // rather than only reaching debug.
+        if (response && !response.ok) {
+          warn_cannot_emit(
+            `signal POST rejected with ${response.status} (slug=${slug})`
+          )
+          debug_log('signal POST rejected: %s', response.status)
+        }
+        return response
+      })
       .catch((transport_error) => {
+        warn_cannot_emit(`signal POST failed: ${transport_error.message}`)
         debug_log('signal POST failed: %s', transport_error.message)
       })
 

@@ -1,6 +1,6 @@
 /* global describe, it, beforeEach, afterEach */
 import crypto from 'crypto'
-import { mkdtempSync, writeFileSync, rmSync } from 'fs'
+import { mkdtempSync, writeFileSync, rmSync, mkdirSync, copyFileSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { expect } from 'chai'
@@ -9,7 +9,8 @@ import config from '#config'
 import {
   create_logger,
   compute_fingerprint,
-  normalize_fingerprint_input
+  normalize_fingerprint_input,
+  reset_emission_warnings
 } from '#libs-shared/log.mjs'
 
 const make_fetch_recorder = () => {
@@ -33,6 +34,7 @@ describe('libs-shared/log', function () {
   let original_service_env
   let original_machine_slug
   let original_key_file
+  let original_user_base_directory
   let original_fetch
   let key_dir
   let key_path
@@ -43,8 +45,10 @@ describe('libs-shared/log', function () {
     original_service_env = process.env.SERVICE_NAME
     original_machine_slug = process.env.BASE_MACHINE_SLUG
     original_key_file = process.env.BASE_INSTANCE_KEY_FILE
+    original_user_base_directory = process.env.USER_BASE_DIRECTORY
     original_fetch = globalThis.fetch
     config.signals_api_url = 'http://localhost:9999'
+    reset_emission_warnings()
 
     key_dir = mkdtempSync(join(tmpdir(), 'log-spec-'))
     key_path = join(key_dir, 'instance-private.key')
@@ -75,6 +79,11 @@ describe('libs-shared/log', function () {
       delete process.env.BASE_INSTANCE_KEY_FILE
     } else {
       process.env.BASE_INSTANCE_KEY_FILE = original_key_file
+    }
+    if (original_user_base_directory === undefined) {
+      delete process.env.USER_BASE_DIRECTORY
+    } else {
+      process.env.USER_BASE_DIRECTORY = original_user_base_directory
     }
     globalThis.fetch = original_fetch
     rmSync(key_dir, { recursive: true, force: true })
@@ -223,8 +232,30 @@ describe('libs-shared/log', function () {
       expect(result).to.equal(null)
     })
 
-    it('is a no-op when BASE_INSTANCE_KEY_FILE is unset', () => {
+    it('falls back to $USER_BASE_DIRECTORY/config/instance-private.key when BASE_INSTANCE_KEY_FILE is unset', async () => {
+      // Mirrors libs-server/auth/machine-key-loader resolution. Requiring the
+      // explicit var is what made every cron oracle mute on hosts that set only
+      // USER_BASE_DIRECTORY.
+      const { calls, fetch_stub } = make_fetch_recorder()
+      globalThis.fetch = fetch_stub
       delete process.env.BASE_INSTANCE_KEY_FILE
+      mkdirSync(join(key_dir, 'config'), { recursive: true })
+      copyFileSync(key_path, join(key_dir, 'config', 'instance-private.key'))
+      process.env.USER_BASE_DIRECTORY = key_dir
+
+      const log = create_logger('test:ubd-key', { service: 'unit-test' })
+      const result = log.error('boom')
+      await result.promise
+
+      expect(calls).to.have.lengthOf(1)
+      expect(calls[0].headers.authorization).to.match(
+        /^Machine unit-test-slug\./
+      )
+    })
+
+    it('is a no-op when neither BASE_INSTANCE_KEY_FILE nor USER_BASE_DIRECTORY resolves a key', () => {
+      delete process.env.BASE_INSTANCE_KEY_FILE
+      process.env.USER_BASE_DIRECTORY = join(key_dir, 'absent-user-base')
       const log = create_logger('test:no-key', { service: 'unit-test' })
       const result = log.error('boom')
       expect(result).to.equal(null)
@@ -235,6 +266,26 @@ describe('libs-shared/log', function () {
       const log = create_logger('test:missing-key', { service: 'unit-test' })
       const result = log.error('boom')
       expect(result).to.equal(null)
+    })
+
+    it('warns on stderr when it cannot emit', () => {
+      // The acceptance bar for the wiring audit: a surface that cannot emit
+      // must say so where cron captures it, not only at debug level.
+      const written = []
+      const original_write = process.stderr.write
+      process.stderr.write = (chunk) => {
+        written.push(String(chunk))
+        return true
+      }
+      try {
+        delete process.env.BASE_MACHINE_SLUG
+        const log = create_logger('test:loud', { service: 'unit-test' })
+        expect(log.error('boom')).to.equal(null)
+      } finally {
+        process.stderr.write = original_write
+      }
+      expect(written.join('')).to.include('signal emission disabled')
+      expect(written.join('')).to.include('BASE_MACHINE_SLUG')
     })
 
     it('coerces unknown severity to medium', async () => {
