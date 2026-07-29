@@ -575,7 +575,14 @@ export default {
   },
   player_pro_bowl_selections: {
     table_name: 'player',
-    column_name: 'pro_bowl_selections',
+    // Physical vs vocabulary split. The physical column is pro_bowls_selections
+    // (plural "bowls"), inherited from the pfr_pro_bowls rename in 5fb100e0;
+    // this definition named the singular form and so emitted a 42703 on every
+    // request for the column since it was added. select_as pins the OUTPUT key
+    // to the singular vocabulary name, which is what the frontend field's
+    // player_value_path reads -- only the physical name moves.
+    column_name: 'pro_bowls_selections',
+    select_as: () => 'pro_bowl_selections',
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },

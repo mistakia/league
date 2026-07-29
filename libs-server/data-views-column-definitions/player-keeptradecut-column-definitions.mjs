@@ -160,9 +160,15 @@ const keeptradecut_year_offset_range_select =
     const [min_off, max_off] = offset_range
     const pid_reference = data_view_options.pid_reference
     const qb = Number(params.qb || 2)
+    // `anchor` is interpolated raw into the SQL, so it must always be a real
+    // number: with no year_reference and no year param, Number(undefined) is NaN
+    // and the emitted `od_o.year = NaN` parses as a reference to a column named
+    // "nan" -- a 42703 on any year_offset range request that omits year. Default
+    // to the current season, matching get_default_params and every other year
+    // basis in this file.
     const anchor = data_view_options.year_reference
       ? `(${data_view_options.year_reference})`
-      : Number(Array.isArray(params.year) ? params.year[0] : params.year)
+      : get_default_params({ params }).year
     const day_targets = []
     for (let off = min_off; off <= max_off; off++) {
       day_targets.push(
