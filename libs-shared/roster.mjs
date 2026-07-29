@@ -7,6 +7,7 @@ import {
   current_season
 } from '#constants'
 import getExtensionAmount from './get-extension-amount.mjs'
+import is_before_extension_deadline from './is-before-extension-deadline.mjs'
 import getActiveRosterLimit from './get-active-roster-limit.mjs'
 import isSlotActive from './is-slot-active.mjs'
 
@@ -30,10 +31,7 @@ export default class Roster {
 
     this.activeRosterLimit = getActiveRosterLimit(league)
 
-    const is_before_extension_deadline =
-      (!current_season.isRegularSeason && !league.ext_date) ||
-      (league.ext_date &&
-        current_season.now.isBefore(dayjs.unix(league.ext_date)))
+    const before_extension_deadline = is_before_extension_deadline({ league })
 
     const is_after_restricted_free_agency_end =
       league.restricted_free_agency_period_end &&
@@ -53,7 +51,7 @@ export default class Roster {
       restricted_free_agency_tag_announced,
       restricted_free_agency_original_team
     } of roster.players) {
-      const salary = is_before_extension_deadline
+      const salary = before_extension_deadline
         ? getExtensionAmount({
             pos,
             tag,

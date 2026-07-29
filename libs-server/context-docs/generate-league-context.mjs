@@ -151,11 +151,13 @@ export default async function generate_league_context({
     })}).`
   ])
 
-  const transactions_section = section(
-    'Recent transactions',
+  const transactions_section = section('Recent transactions', [
+    recent_transactions.length
+      ? 'Amounts are the salary recorded by each transaction, not the current contract salary. Per-team docs carry current salaries.'
+      : null,
     recent_transactions.length
       ? markdown_table(
-          ['Date', 'Team', 'Action', 'Player', 'Value'],
+          ['Date', 'Team', 'Action', 'Player', 'Amount'],
           recent_transactions.map((t) => [
             format_date_et(t.timestamp),
             team_name_by_tid.get(t.tid) || `Team ${t.tid}`,
@@ -165,7 +167,7 @@ export default async function generate_league_context({
           ])
         )
       : '_No transactions yet._'
-  )
+  ])
 
   const footer = cross_link_footer([
     { label: 'League rules', url: doc_url(base_url, { lid, view: 'rules' }) },

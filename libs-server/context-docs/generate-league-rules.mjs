@@ -120,6 +120,18 @@ export default async function generate_league_rules({
     )
   ])
 
+  const extension_section = section('Contract extensions', [
+    markdown_table(
+      ['Setting', 'Value'],
+      [
+        ['Extension deadline', format_date_et(league.ext_date)],
+        ['Cost per extension', '$5 over the prior season salary']
+      ]
+    ),
+    `Until the deadline passes, a rostered contract carries two different numbers: the salary recorded on it and the ${year} salary it will carry once extended. Salaries in the team docs are reported on the post-extension ${year} basis while the window is open, and as recorded once it closes; each doc states its basis explicitly.`,
+    'Tags reprice a contract rather than extending it: a franchise tag sets the salary to the position amount below, a restricted-free-agency tag sets it to the winning bid, and a rookie tag holds the salary. Practice-squad contracts are not extended.'
+  ])
+
   const franchise_section = section('Franchise tag salaries', [
     markdown_table(
       ['Position', 'Salary'],
@@ -155,6 +167,7 @@ export default async function generate_league_rules({
     roster_section,
     scoring_section,
     cap_section,
+    extension_section,
     franchise_section,
     footer
   ].join('\n\n')

@@ -61,6 +61,28 @@ Cap space is computed from a per-team `getRoster` source (its week-0 branch
 populates the RFA `bid`), never from the userId-less league-wide rosters helper,
 so figures are correct during the RFA/pre-extension window.
 
+## Salary basis
+
+A rostered contract carries two different numbers while the extension window is
+open — the salary recorded on it, and the salary it will carry for the season
+once extensions and tags are applied — so no doc may print a bare "Salary".
+`Roster` decides which basis applies from
+`libs-shared/is-before-extension-deadline.mjs` (the single definition of the
+boundary), and the team doc mirrors that decision three ways:
+
+- a year-labeled column header — `2026 Salary (post-extension)` while the
+  window is open, `2026 Salary` once it closes;
+- a prose note above the roster tables stating the basis, the deadline, and how
+  extensions and each tag are priced;
+- a machine-readable `salary_basis` (`post_extension` / `as_recorded`),
+  `salary_year`, and `extension_deadline` in the frontmatter.
+
+Cap space in the Overview carries the same label, since it is summed from the
+same figures. Transaction tables report an **Amount** — the salary recorded by
+that transaction — which is never the contract's current salary; the docs say
+so inline. The rules doc carries the mechanics (deadline, $5 per extension, tag
+repricing) so a reader who fetched only that doc can interpret the numbers.
+
 ## Docs vs. API output-format boundary
 
 These context docs are curated, self-contained, human/agent-readable summaries.

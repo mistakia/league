@@ -10,6 +10,7 @@ import {
   transaction_type_display_names
 } from '#constants'
 import Roster from '#libs-shared/roster.mjs'
+import is_before_extension_deadline from '#libs-shared/is-before-extension-deadline.mjs'
 
 import getRoster from '../get-roster.mjs'
 import { load_configured_league } from './generate-league-context.mjs'
@@ -54,7 +55,32 @@ async function load_team_roster({ tid, year, lid, league }) {
   return new Roster({ roster: roster_row, league })
 }
 
-function render_roster_groups(roster, players) {
+/**
+ * Resolve which salary basis the doc is reporting, so the number a reader sees
+ * is never ambiguous about the extension deadline. `Roster` prices every row on
+ * the post-extension basis while the extension window is open and on the
+ * as-recorded basis once it closes; this mirrors that single decision into a
+ * column label, a prose note, and a machine-readable frontmatter field.
+ */
+function resolve_salary_basis({ league, year }) {
+  const before_deadline = is_before_extension_deadline({ league })
+  const deadline = league.ext_date
+    ? format_date_et(league.ext_date)
+    : 'not configured'
+
+  return {
+    before_deadline,
+    frontmatter_value: before_deadline ? 'post_extension' : 'as_recorded',
+    column_label: before_deadline
+      ? `${year} Salary (post-extension)`
+      : `${year} Salary`,
+    note: before_deadline
+      ? `Salary basis: **post-extension ${year}**. The extension deadline (${deadline}) has not passed, so every salary below is what the contract will carry in ${year} once extensions and tags are applied — each extension adds $5 over the prior season, a franchise tag is repriced to the position's franchise amount, and a restricted-free-agency tag is priced at its winning bid. Practice-squad contracts are not extended and show their recorded salary. These figures differ from the pre-extension salary currently recorded on the contract, and cap space below is computed on the same post-extension basis.`
+      : `Salary basis: **${year} as recorded**. The extension deadline (${deadline}) has passed, so every salary below is the contract's current ${year} salary with extensions and tags already applied. Cap space below is computed on the same basis.`
+  }
+}
+
+function render_roster_groups(roster, players, salary_basis) {
   const all = roster.all
   return slot_groups
     .map((group) => {
@@ -79,7 +105,7 @@ function render_roster_groups(roster, players) {
         })
       const body = rows.length
         ? markdown_table(
-            ['Slot', 'Player', 'Pos', 'NFL', 'Salary', 'Tag'],
+            ['Slot', 'Player', 'Pos', 'NFL', salary_basis.column_label, 'Tag'],
             rows
           )
         : '_Empty._'
@@ -143,6 +169,8 @@ export default async function generate_team_context({
     ...other_teams.map((t) => [t.uid, t.name])
   ])
 
+  const salary_basis = resolve_salary_basis({ league, year })
+
   const frontmatter = build_frontmatter({
     type: 'team_context',
     fields: {
@@ -150,7 +178,12 @@ export default async function generate_team_context({
       league_id: league.uid,
       team_id: team.uid,
       team_name: team.name,
-      year
+      year,
+      salary_basis: salary_basis.frontmatter_value,
+      salary_year: year,
+      extension_deadline: league.ext_date
+        ? new Date(Number(league.ext_date) * 1000).toISOString()
+        : null
     },
     related: {
       parent: doc_url(base_url, { lid }),
@@ -182,16 +215,21 @@ export default async function generate_team_context({
         ['Division', division],
         ['Record (W-L-T)', record],
         ['Overall finish', finish],
-        ['Cap space', `$${roster.availableCap} of $${league.cap}`],
+        [
+          salary_basis.before_deadline
+            ? `Cap space (post-extension ${year})`
+            : `Cap space (${year})`,
+          `$${roster.availableCap} of $${league.cap}`
+        ],
         ['FAAB remaining', `$${team.faab}`]
       ]
     )
   ])
 
-  const roster_section = section(
-    'Roster',
-    render_roster_groups(roster, players)
-  )
+  const roster_section = section('Roster', [
+    salary_basis.note,
+    render_roster_groups(roster, players, salary_basis)
+  ])
 
   const picks_section = section(
     'Unused draft picks',
@@ -226,11 +264,13 @@ export default async function generate_team_context({
       : '_No matchups scheduled yet._'
   )
 
-  const transactions_section = section(
-    'Recent transactions',
+  const transactions_section = section('Recent transactions', [
+    recent_transactions.length
+      ? 'Amounts are the salary recorded by each transaction, not the current contract salary.'
+      : null,
     recent_transactions.length
       ? markdown_table(
-          ['Date', 'Action', 'Player', 'Value'],
+          ['Date', 'Action', 'Player', 'Amount'],
           recent_transactions.map((t) => [
             format_date_et(t.timestamp),
             transaction_type_display_names[t.type] || `Type ${t.type}`,
@@ -239,7 +279,7 @@ export default async function generate_team_context({
           ])
         )
       : '_No transactions yet._'
-  )
+  ])
 
   const footer = cross_link_footer([
     { label: 'League index', url: doc_url(base_url, { lid }) },

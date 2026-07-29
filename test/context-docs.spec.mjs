@@ -346,6 +346,87 @@ describe('context documents', function () {
       doc.should.match(/\| PS \|/)
     })
 
+    it('team: extension deadline passed → as-recorded salary basis', async function () {
+      const doc = await generate_team_context({
+        db: knex,
+        lid: 1,
+        tid: 1,
+        base_url
+      })
+      const fm = parse_frontmatter(doc)
+      fm.salary_basis.should.equal('as_recorded')
+      fm.salary_year.should.equal(current_season.year)
+      fm.should.have.property('extension_deadline')
+
+      doc.should.include(`| ${current_season.year} Salary |`)
+      doc.should.include(`Salary basis: **${current_season.year} as recorded**`)
+      doc.should.include(`Cap space (${current_season.year})`)
+      doc.should.not.include('post-extension')
+    })
+
+    it('team: extension window open → post-extension salary basis and prices', async function () {
+      const year = current_season.year
+      await knex('seasons')
+        .where({ lid: 1, year })
+        .update({ ext_date: current_season.now.add(1, 'week').unix() })
+
+      // A regular contract with one extension already used: the recorded $20
+      // becomes $20 + (1 + 1) * 5 = $30 on the post-extension basis.
+      const player = await knex('player')
+        .whereNot('primary_position', 'DST')
+        .orderBy('pid')
+        .offset(2)
+        .first()
+      const roster0 = await knex('rosters')
+        .where({ tid: 1, lid: 1, week: 0, year })
+        .first()
+      await knex('transactions').insert({
+        pid: player.pid,
+        tid: 1,
+        lid: 1,
+        type: transaction_types.AUCTION_PROCESSED,
+        value: 20,
+        week: 0,
+        year,
+        timestamp: Math.round(Date.now() / 1000) - 300,
+        userid: 1
+      })
+      await knex('rosters_players').insert({
+        rid: roster0.uid,
+        slot: roster_slot_types.BENCH,
+        pid: player.pid,
+        pos: player.primary_position,
+        tag: player_tag_types.REGULAR,
+        extensions: 1,
+        tid: 1,
+        lid: 1,
+        week: 0,
+        year
+      })
+
+      const doc = await generate_team_context({
+        db: knex,
+        lid: 1,
+        tid: 1,
+        base_url
+      })
+      const fm = parse_frontmatter(doc)
+      fm.salary_basis.should.equal('post_extension')
+
+      doc.should.include(`| ${year} Salary (post-extension) |`)
+      doc.should.include(`Salary basis: **post-extension ${year}**`)
+      doc.should.include(`Cap space (post-extension ${year})`)
+
+      // the extended salary, not the recorded $20
+      const player_name = `${player.first_name} ${player.last_name}`.trim()
+      const bench_row = doc
+        .split('\n')
+        .find((line) => line.startsWith('| BE |') && line.includes(player_name))
+      expect(bench_row, 'bench row rendered').to.exist
+      bench_row.should.include('$30')
+      bench_row.should.not.include('$20')
+    })
+
     it('population-level self-sufficiency', async function () {
       const { rfa_player, ps_player } = {
         rfa_player: await knex('rosters_players')
