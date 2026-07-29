@@ -739,8 +739,10 @@ export const build_considerations = ({
     })
   }
 
-  // Saving and quality diverge
-  if (franchise_candidates.length > 1) {
+  // Saving and quality diverge. Gated on the lever still being available, like
+  // lever_sufficiency and empty_screen above — a team that has already spent its
+  // franchise tag cannot act on the tension, so naming it is noise.
+  if (budget.franchise.remaining > 0 && franchise_candidates.length > 1) {
     const by_saving = [...franchise_candidates].sort(
       (a, b) => b.franchise_saving - a.franchise_saving
     )[0]

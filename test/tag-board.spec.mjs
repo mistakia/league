@@ -800,5 +800,46 @@ describe('tag board', function () {
       rule.inputs.largest_saving.pid.should.equal('SAVER')
       rule.inputs.best_ranked.pid.should.equal('BEST')
     })
+
+    it('withholds the divergence once the franchise tag is already spent', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            {
+              tid: 1,
+              pid: 'SAVER',
+              pos: 'TE',
+              value: 40,
+              extensions: 0,
+              dynasty_value: 100
+            },
+            {
+              tid: 1,
+              pid: 'BEST',
+              pos: 'WR',
+              value: 30,
+              extensions: 0,
+              dynasty_value: 9999
+            },
+            // consumes the team's single franchise tag
+            {
+              tid: 1,
+              pid: 'TAGGED',
+              pos: 'RB',
+              tag: 2,
+              value: 50,
+              dynasty_value: 4000
+            },
+            { tid: 2, pid: 'B1', value: 10, dynasty_value: 5000 }
+          ]
+        })
+      )
+
+      board.lever_budget
+        .find((row) => row.tid === 1)
+        .franchise.remaining.should.equal(0)
+      rules_fired(board, 1).should.not.include('saving_and_quality_diverge')
+    })
   })
 })
