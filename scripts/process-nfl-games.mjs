@@ -41,7 +41,7 @@ const processNflGames = async () => {
         week,
         season_year: year,
         season_type: seas_type,
-        timestamp: datetime.unix()
+        kickoff_at: datetime.toDate()
       }
 
       if (week_type) {

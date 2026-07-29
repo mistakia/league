@@ -46,7 +46,10 @@ const plays_view_fields = {
   play_game_timestamp: play_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],
     header_label: 'GTIME',
-    size: 90
+    size: 90,
+    // nfl_games.kickoff_at is timestamptz, so this arrives as an ISO string,
+    // not the epoch number the play_field default assumes.
+    data_type: table_constants.TABLE_DATA_TYPES.DATE
   }),
   play_desc: play_text_field({
     column_groups: [PLAYS_COLUMN_GROUPS.CORE],

@@ -2857,7 +2857,7 @@ export const getGamelogsForSelectedPlayer = createSelector(
     const pid = player_map.get('pid')
     const games = gamelogs
       .filter((p) => p.pid === pid)
-      .sort((a, b) => b.timestamp - a.timestamp)
+      .sort((a, b) => new Date(b.kickoff_at) - new Date(a.kickoff_at))
     return games.toJS()
   }
 )

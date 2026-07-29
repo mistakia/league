@@ -8,7 +8,7 @@ export const rebuild_sql = `
 WITH reg_games AS (
   SELECT esbid, season_year AS year, week,
          home_nfl_team AS home_team, away_nfl_team AS away_team,
-         home_qb_pid, away_qb_pid, timestamp AS game_timestamp
+         home_qb_pid, away_qb_pid, kickoff_at AS game_kickoff_at
   FROM nfl_games
   WHERE season_type = 'REG' AND season_year BETWEEN :start_year AND :end_year
 ),
@@ -32,8 +32,8 @@ practice_signal AS (
   GROUP BY pid, season_year, week
 ),
 changelog_signal AS (
-  -- Asymmetric per-game window: -7d back, +3h forward. pc.changed_at is
-  -- timestamptz; gm.timestamp is epoch seconds, bridged via to_timestamp().
+  -- Asymmetric per-game window: -7d back, +3h forward. Both pc.changed_at and
+  -- gm.kickoff_at are timestamptz, so the window is native interval arithmetic.
   SELECT gl_inner.pid, gl_inner.esbid,
          BOOL_OR(pc.column_name = 'injury_status'
                  AND UPPER(pc.new_value) IN ('OUT','DOUBTFUL','IR','PUP','SUS','COV')) AS changelog_unavailable,
@@ -47,14 +47,14 @@ changelog_signal AS (
   JOIN player_changelog pc
     ON pc.pid = gl_inner.pid
    AND pc.column_name IN ('injury_status','nfl_status','roster_status','status')
-   AND pc.changed_at BETWEEN to_timestamp(gm.timestamp - 7*86400) AND to_timestamp(gm.timestamp + 3*3600)
+   AND pc.changed_at BETWEEN gm.kickoff_at - interval '7 days' AND gm.kickoff_at + interval '3 hours'
   WHERE gl_inner.season_year BETWEEN :start_year AND :end_year AND gm.season_type = 'REG'
   GROUP BY gl_inner.pid, gl_inner.esbid
 ),
 team_spans AS (
   SELECT gl.pid, gl.year, gl.nfl_team,
-         MIN(g.game_timestamp) AS span_start,
-         MAX(g.game_timestamp) AS span_end
+         MIN(g.game_kickoff_at) AS span_start,
+         MAX(g.game_kickoff_at) AS span_end
   FROM gl JOIN reg_games g ON g.esbid = gl.esbid
   GROUP BY gl.pid, gl.year, gl.nfl_team
 ),
@@ -64,7 +64,7 @@ schedule_spine AS (
   JOIN reg_games g
     ON g.year = ts.year
    AND (g.home_team = ts.nfl_team OR g.away_team = ts.nfl_team)
-   AND g.game_timestamp BETWEEN ts.span_start AND ts.span_end
+   AND g.game_kickoff_at BETWEEN ts.span_start AND ts.span_end
 )
 SELECT
   s.pid,

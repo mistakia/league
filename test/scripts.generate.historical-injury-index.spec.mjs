@@ -22,8 +22,8 @@ describe('SCRIPTS /generate-historical-injury-index SQL string', function () {
   })
 
   it('uses the asymmetric (-7d, +3h) changelog window', function () {
-    expect(rebuild_sql).to.include('gm.timestamp - 7*86400')
-    expect(rebuild_sql).to.include('gm.timestamp + 3*3600')
+    expect(rebuild_sql).to.include("gm.kickoff_at - interval '7 days'")
+    expect(rebuild_sql).to.include("gm.kickoff_at + interval '3 hours'")
   })
 
   it('binds start_year and end_year on every base-table scan', function () {

@@ -93,14 +93,14 @@ export async function load_nfl_schedules_for_weeks({
       'home_score',
       'away_score',
       'status',
-      'timestamp'
+      'kickoff_at'
     )
 
   // Group games by week
   const schedules = new Map()
   weeks.forEach((week) => schedules.set(week, {}))
 
-  const now = Math.floor(Date.now() / 1000)
+  const now = Date.now()
 
   for (const game of games) {
     const schedule = schedules.get(game.week)
@@ -108,8 +108,9 @@ export async function load_nfl_schedules_for_weeks({
     // Game is final if status indicates final
     const is_final = game.status?.toUpperCase()?.startsWith('FINAL') ?? false
 
-    // Game has started if current time is past the game timestamp
-    const has_started = game.timestamp && now >= game.timestamp
+    // Game has started if current time is past kickoff
+    const has_started =
+      Boolean(game.kickoff_at) && now >= game.kickoff_at.getTime()
 
     // Home team entry
     schedule[game.home_nfl_team] = {
@@ -118,7 +119,7 @@ export async function load_nfl_schedules_for_weeks({
       is_home: true,
       is_final,
       has_started,
-      timestamp: game.timestamp
+      kickoff_at: game.kickoff_at
     }
 
     // Visitor/away team entry
@@ -128,7 +129,7 @@ export async function load_nfl_schedules_for_weeks({
       is_home: false,
       is_final,
       has_started,
-      timestamp: game.timestamp
+      kickoff_at: game.kickoff_at
     }
   }
 

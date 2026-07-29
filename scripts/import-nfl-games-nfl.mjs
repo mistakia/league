@@ -52,7 +52,7 @@ const format = (item) => {
     ...(date && { date }),
     ...(time_est && { time_est }),
     ...(day && { day }),
-    ...(datetime && { timestamp: datetime.unix() }),
+    ...(datetime && { kickoff_at: datetime.toDate() }),
 
     ...(item.awayTeam.abbreviation && {
       away_nfl_team: fixTeam(item.awayTeam.abbreviation)

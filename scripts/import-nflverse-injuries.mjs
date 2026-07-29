@@ -11,8 +11,8 @@
  * ON CONFLICT cannot be used -- we delete this source's prior rows for
  * the targeted year, then batch_insert fresh.
  *
- * Timestamps are synthetic: nfl_games.timestamp - 86400 (one day before
- * kickoff) so the row lands inside the changelog_signal CTE's (-7d, +3h)
+ * Timestamps are synthetic: nfl_games.kickoff_at minus one day, so the row
+ * lands inside the changelog_signal CTE's (-7d, +3h)
  * window. Real-time consumers needing genuine event ordering must filter
  * on source.
  *
@@ -186,14 +186,22 @@ const build_name_index = async () => {
 
 const build_game_index = async ({ year }) => {
   const rows = await db('nfl_games')
-    .select('esbid', 'week', 'home_nfl_team', 'away_nfl_team', 'timestamp')
+    .select('esbid', 'week', 'home_nfl_team', 'away_nfl_team', 'kickoff_at')
     .where({ season_year: year, season_type: 'REG' })
   const idx = new Map()
   for (const g of rows) {
     const h = fixTeam(g.home_nfl_team)
     const v = fixTeam(g.away_nfl_team)
-    idx.set(`${g.week}|${h}`, { esbid: g.esbid, tm: h, timestamp: g.timestamp })
-    idx.set(`${g.week}|${v}`, { esbid: g.esbid, tm: v, timestamp: g.timestamp })
+    idx.set(`${g.week}|${h}`, {
+      esbid: g.esbid,
+      tm: h,
+      kickoff_at: g.kickoff_at
+    })
+    idx.set(`${g.week}|${v}`, {
+      esbid: g.esbid,
+      tm: v,
+      kickoff_at: g.kickoff_at
+    })
   }
   return idx
 }
@@ -213,14 +221,18 @@ const resolve_pid = ({ row, player_by_gsis_id, name_idx }) => {
 
 const season_bounds = async ({ year }) => {
   const rows = await db('nfl_games')
-    .min({ min_ts: 'timestamp' })
-    .max({ max_ts: 'timestamp' })
+    .min({ min_kickoff: 'kickoff_at' })
+    .max({ max_kickoff: 'kickoff_at' })
     .where({ season_year: year, season_type: 'REG' })
-  const min_ts = rows[0]?.min_ts
-  const max_ts = rows[0]?.max_ts
-  if (!min_ts || !max_ts) return null
-  // Widen by a week on each side to capture synthetic kickoff-minus-day rows.
-  return { start: min_ts - 14 * 86400, end: max_ts + 14 * 86400 }
+  const min_kickoff = rows[0]?.min_kickoff
+  const max_kickoff = rows[0]?.max_kickoff
+  if (!min_kickoff || !max_kickoff) return null
+  // Widen by two weeks on each side to capture synthetic kickoff-minus-day rows.
+  const widen_ms = 14 * 86400 * 1000
+  return {
+    start: new Date(min_kickoff.getTime() - widen_ms),
+    end: new Date(max_kickoff.getTime() + widen_ms)
+  }
 }
 
 const import_for_year = async ({
@@ -308,22 +320,22 @@ const import_for_year = async ({
       continue
     }
     const game = game_idx.get(`${row.week}|${team}`)
-    if (!game || !game.timestamp) {
+    if (!game || !game.kickoff_at) {
       counts.unresolved_game += 1
       continue
     }
 
     if (changelog_status) {
       // Synthetic event time: kickoff-minus-day, so the row lands inside the
-      // historical-injury-index changelog window. game.timestamp is epoch
-      // seconds; changed_at is timestamptz.
+      // historical-injury-index changelog window. Both game.kickoff_at and
+      // changed_at are timestamptz.
       changelog_inserts.push({
         pid: pid_match.pid,
         column_name: 'injury_status',
         previous_value: '',
         new_value: changelog_status,
         source: source_sentinel,
-        changed_at: new Date((game.timestamp - 86400) * 1000)
+        changed_at: new Date(game.kickoff_at.getTime() - 86400 * 1000)
       })
     }
 
@@ -422,20 +434,17 @@ const import_for_year = async ({
   const bounds = await season_bounds({ year })
   if (!bounds) {
     return {
-      shortfall: `nflverse injuries ${year}: no REG games found in nfl_games -- cannot derive timestamp bounds`,
+      shortfall: `nflverse injuries ${year}: no REG games found in nfl_games -- cannot derive kickoff bounds`,
       inserts_written: 0
     }
   }
-  // bounds are epoch seconds (from nfl_games.timestamp); changed_at is tstz.
+  // bounds are timestamptz (from nfl_games.kickoff_at), as is changed_at.
   const cl_deleted = await db('player_changelog')
     .where({ source: source_sentinel })
-    .whereBetween('changed_at', [
-      new Date(bounds.start * 1000),
-      new Date(bounds.end * 1000)
-    ])
+    .whereBetween('changed_at', [bounds.start, bounds.end])
     .del()
   log(
-    `deleted ${cl_deleted} prior changelog rows where source='${source_sentinel}' and changed_at in [${bounds.start}, ${bounds.end}]`
+    `deleted ${cl_deleted} prior changelog rows where source='${source_sentinel}' and changed_at in [${bounds.start.toISOString()}, ${bounds.end.toISOString()}]`
   )
 
   await batch_insert({

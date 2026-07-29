@@ -165,7 +165,7 @@ router.get('/gamelogs/players', async (req, res) => {
       'nfl_games.day',
       'nfl_games.date',
       'nfl_games.season_type as seas_type',
-      'nfl_games.timestamp'
+      'nfl_games.kickoff_at'
     )
 
     const data = await query

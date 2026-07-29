@@ -21,11 +21,11 @@ export default {
     main_where: () => 'nfl_plays.play_time_of_day'
   },
   play_game_timestamp: {
-    column_name: 'timestamp',
+    column_name: 'kickoff_at',
     table_name: 'nfl_games',
-    sort_column_name: 'nfl_games."timestamp"',
-    main_select: () => [db.raw('nfl_games."timestamp" as play_game_timestamp')],
-    main_where: () => 'nfl_games."timestamp"',
+    sort_column_name: 'nfl_games.kickoff_at',
+    main_select: () => [db.raw('nfl_games.kickoff_at as play_game_timestamp')],
+    main_where: () => 'nfl_games.kickoff_at',
     join: join_nfl_games
   },
   play_desc: {

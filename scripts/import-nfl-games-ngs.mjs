@@ -78,7 +78,7 @@ const format = (item) => {
     date,
     time_est,
     day,
-    timestamp: datetime.unix() || null,
+    kickoff_at: datetime.isValid() ? datetime.toDate() : null,
 
     away_nfl_team: fixTeam(item.visitorTeamAbbr),
     home_nfl_team: fixTeam(item.homeTeamAbbr),

@@ -114,9 +114,9 @@ const get_following_wednesday_timestamp = (game_timestamp) => {
  */
 const load_games = async ({ year, week, seas_type }) => {
   const query = db('nfl_games')
-    .select('esbid', 'timestamp', 'week', 'home_nfl_team', 'away_nfl_team')
+    .select('esbid', 'kickoff_at', 'week', 'home_nfl_team', 'away_nfl_team')
     .where({ season_year: year, season_type: seas_type })
-    .whereNotNull('timestamp')
+    .whereNotNull('kickoff_at')
 
   if (week) {
     query.where({ week })
@@ -184,20 +184,18 @@ const find_out_status_records = async ({
  * @returns {Promise<Object>} Results object with updates and stats
  */
 const process_game = async (game, gamelogs) => {
-  const {
-    esbid,
-    timestamp: game_timestamp,
-    week,
-    home_nfl_team,
-    away_nfl_team
-  } = game
+  const { esbid, kickoff_at, week, home_nfl_team, away_nfl_team } = game
 
-  if (!game_timestamp) {
+  if (!kickoff_at) {
     log(
-      `Skipping game ${esbid} (week ${week} ${away_nfl_team}@${home_nfl_team}): no timestamp`
+      `Skipping game ${esbid} (week ${week} ${away_nfl_team}@${home_nfl_team}): no kickoff_at`
     )
     return { updates: [], skipped: true }
   }
+
+  // The detection-window helpers below work in epoch seconds throughout, so
+  // convert once here at the read boundary rather than threading Dates through.
+  const game_timestamp = Math.floor(kickoff_at.getTime() / 1000)
 
   const following_wednesday = get_following_wednesday_timestamp(game_timestamp)
   const game_date = new Date(game_timestamp * 1000).toISOString().split('T')[0]

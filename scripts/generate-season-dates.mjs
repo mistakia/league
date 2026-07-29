@@ -40,11 +40,10 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
   }
 
   const sorted = games
-    .filter((g) => g.timestamp)
-    .sort((a, b) => a.timestamp - b.timestamp)
+    .filter((g) => g.kickoff_at)
+    .sort((a, b) => a.kickoff_at - b.kickoff_at)
   const first_game = sorted[0]
-  const first_game_day = dayjs
-    .unix(first_game.timestamp)
+  const first_game_day = dayjs(first_game.kickoff_at)
     .utc()
     .utcOffset(-4)
     .startOf('day')
@@ -60,7 +59,7 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
 
   // current season super bowl
   const super_bowl = games.find((g) => g.day === 'SB')
-  if (!super_bowl || !super_bowl.timestamp) {
+  if (!super_bowl || !super_bowl.kickoff_at) {
     result.end = dayjs
       .tz(`${year}/02/01`, 'YYYY/MM/DD', 'America/New_York')
       .utc()
@@ -68,8 +67,7 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
       .startOf('week')
       .unix()
   } else {
-    result.end = dayjs
-      .unix(super_bowl.timestamp)
+    result.end = dayjs(super_bowl.kickoff_at)
       .utc()
       .utcOffset(-5)
       .startOf('day')
@@ -82,7 +80,7 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
     season_year: year - 1
   })
   const previous_super_bowl = previous_super_bowl_query[0]
-  if (!previous_super_bowl || !previous_super_bowl.timestamp) {
+  if (!previous_super_bowl || !previous_super_bowl.kickoff_at) {
     result.offseason = dayjs
       .tz(`${year}/02/01`, 'YYYY/MM/DD', 'America/New_York')
       .utc()
@@ -90,8 +88,7 @@ const generateSeasonDates = async ({ year = current_season.year } = {}) => {
       .startOf('week')
       .unix()
   } else {
-    result.offseason = dayjs
-      .unix(previous_super_bowl.timestamp)
+    result.offseason = dayjs(previous_super_bowl.kickoff_at)
       .utc()
       .utcOffset(-5)
       .endOf('day')

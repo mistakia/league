@@ -769,7 +769,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       'nfl_games.date',
       'nfl_games.week',
       'nfl_games.season_type as seas_type',
-      'nfl_games.timestamp'
+      'nfl_games.kickoff_at'
     )
 
     const data = await query

@@ -667,7 +667,7 @@ describe('API /teams - reserve', function () {
         season_type: 'REG',
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
-        timestamp: Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago from mocked date
+        kickoff_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 1 week ago from mocked date
       })
 
       // Create gamelog for prior week with active = false (player was inactive)
@@ -697,7 +697,7 @@ describe('API /teams - reserve', function () {
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '13:00:00',
-        timestamp: Math.round(Date.now() / 1000) + 3 * 24 * 60 * 60 // 3 days from now (Sunday)
+        kickoff_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 days from now (Sunday)
       })
 
       const res = await chai_request
@@ -762,7 +762,7 @@ describe('API /teams - reserve', function () {
         season_type: 'REG',
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
-        timestamp: 1640000000 // Static timestamp for prior week game
+        kickoff_at: new Date(1640000000 * 1000) // Static kickoff for prior week game
       })
 
       // Create gamelog for prior week with active = false (player was inactive)
@@ -790,7 +790,7 @@ describe('API /teams - reserve', function () {
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '13:00:00',
-        timestamp: 1640700000 // Static timestamp for current week game
+        kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
       const request = chai_request
@@ -853,7 +853,7 @@ describe('API /teams - reserve', function () {
         season_type: 'REG',
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
-        timestamp: 1640000000 // Static timestamp for prior week game
+        kickoff_at: new Date(1640000000 * 1000) // Static kickoff for prior week game
       })
 
       // Create gamelog for prior week with active = false (player was inactive)
@@ -881,7 +881,7 @@ describe('API /teams - reserve', function () {
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '13:00:00',
-        timestamp: 1640700000 // Static timestamp for current week game
+        kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
       const request = chai_request
@@ -942,7 +942,7 @@ describe('API /teams - reserve', function () {
         season_type: 'REG',
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
-        timestamp: 1640000000 // Static timestamp for prior week game
+        kickoff_at: new Date(1640000000 * 1000) // Static kickoff for prior week game
       })
 
       // Create gamelog for prior week with active = false (player was inactive)
@@ -970,7 +970,7 @@ describe('API /teams - reserve', function () {
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
         time_est: '20:15:00',
-        timestamp: 1640700000 // Static timestamp for current week game
+        kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
       const res = await chai_request

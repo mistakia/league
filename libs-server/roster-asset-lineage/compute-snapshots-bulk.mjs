@@ -147,7 +147,7 @@ const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
   idx.week_anchor = new Map()
   if (years.length) {
     const games = await db('nfl_games')
-      .select('esbid', 'season_year', 'week', 'season_type', 'timestamp')
+      .select('esbid', 'season_year', 'week', 'season_type', 'kickoff_at')
       .whereIn('season_year', years)
       .whereIn('season_type', ['REG', 'POST'])
     for (const g of games) {
@@ -155,7 +155,10 @@ const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
         idx.esbid_to_yw.set(g.esbid, { year: g.season_year, week: g.week })
       }
       const k = `${g.season_year}__${g.week}`
-      const ts = g.timestamp != null ? Number(g.timestamp) : null
+      // week_anchor stays in epoch seconds: it is compared against start_unix
+      // and period_end_unix, which derive from holding periods, not from games.
+      const ts =
+        g.kickoff_at != null ? Math.floor(g.kickoff_at.getTime() / 1000) : null
       if (ts == null) continue
       const prior = idx.week_anchor.get(k)
       if (prior == null || ts < prior) idx.week_anchor.set(k, ts)
