@@ -53,8 +53,39 @@ const DROPPED_TABLES = [
   'player_gamelogs_active_snapshot_2026_05_23',
   'prop_markets',
   'props_index_new',
+  'schedule',
   'worker_heartbeat'
 ]
+
+// Match the SYNTAX of a table reference rather than the bare word.
+//
+// A bare `\btable\b` grep only works while every dropped name is a distinctive
+// coinage, which is an accident of the names dropped so far. `schedule` broke
+// it: the word appears in 76 files -- fantasy schedule generation, cron
+// "schedule", route and variable names -- and not one of them referenced the
+// dropped SQL table. A gate that reports 76 non-defects is one readers learn to
+// discount, which is the failure operation-log 004 records for the vendor_leak
+// rule.
+//
+// These patterns cover how a table is actually named in this codebase: as a
+// knex builder argument, as an argument to knex's from/into/join family, or as
+// the object of a SQL keyword in raw text. Aliases (`schedule as s`) and an
+// explicit `public.` qualifier are both allowed for.
+function table_reference_patterns(table) {
+  const t = table.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const quoted = `['"\`]${t}(?:\\s+as\\s+\\w+)?['"\`]`
+  const joins =
+    'from|into|table|join|leftJoin|rightJoin|innerJoin|outerJoin|' +
+    'fullOuterJoin|leftOuterJoin|rightOuterJoin|crossJoin|joinRaw'
+  return [
+    // db('schedule'), trx("schedule as s")
+    `\\b(?:db|trx|knex)\\s*\\(\\s*${quoted}`,
+    // .from('schedule'), .leftJoin('schedule as s', ...)
+    `\\.(?:${joins})\\s*\\(\\s*${quoted}`,
+    // raw SQL: FROM schedule, JOIN public.schedule, INSERT INTO schedule, ...
+    `(?i)\\b(?:from|join|into|update|table)\\s+(?:public\\.)?${t}\\b`
+  ]
+}
 
 function grep_consumer_files(table) {
   const dirs = [
@@ -66,10 +97,11 @@ function grep_consumer_files(table) {
     'jobs',
     'scripts'
   ].filter((d) => fs.existsSync(path.join(repo_root, d)))
+  const patterns = table_reference_patterns(table).flatMap((p) => ['-e', p])
   try {
     const out = execFileSync(
       'rg',
-      ['-l', '--no-messages', `\\b${table}\\b`, ...dirs],
+      ['-l', '--no-messages', ...patterns, ...dirs],
       {
         cwd: repo_root,
         encoding: 'utf8',

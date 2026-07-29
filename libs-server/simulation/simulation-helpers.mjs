@@ -104,7 +104,7 @@ export function build_simulation_players({
         continue
       }
 
-      // Get esbid from schedule if provided
+      // Resolve esbid from the provided schedule map (team -> game)
       let esbid = null
       if (schedule && info.nfl_team) {
         const game = schedule[info.nfl_team]

@@ -1,0 +1,50 @@
+-- STATUS: APPLIED 2026-07-29 against league_production
+--
+-- Drop the legacy `schedule` table (operator approved 2026-07-29, schema-redesign task).
+--
+-- 5,580 rows frozen at seasons 2000-2020, zero inserts/updates/deletes in pg_stat,
+-- superseded by `nfl_games`. Zero consumers in libs-server, libs-shared, app, api,
+-- jobs, scripts or the private submodule. Standalone: no inbound FKs, no own
+-- constraints, no dependent views, one index and a single league_reader SELECT grant.
+--
+-- Dropping it also clears the last two `ambiguous_team` conformance findings
+-- (schedule.v / schedule.h), which is why it belongs to this cluster.
+--
+-- LOSSLESS, AND WITH NO BACKFILL. This corrects the earlier finding that the table
+-- held 2 unique `surf` values needing backfill first. It does not, and performing
+-- that backfill would have CORRUPTED data rather than preserved it.
+--
+-- The earlier check joined schedule to nfl_games on (season, week, v, h) without
+-- filtering season_type. `schedule` contains only REG and POST rows -- verified, it
+-- has no preseason at all -- so its regular-season "week 1" rows matched nfl_games
+-- PRESEASON "week 1" rows for the same teams. The two games reported as carrying
+-- unique surf were:
+--
+--   schedule gid 4    (2000-09-03 NYJ@GB)  -> nfl_games 2000090307 REG, surf='grass'
+--   schedule gid 2695 (2010-09-26 DAL@HOU) -> nfl_games 2010092608 REG, surf='grass'
+--
+-- Both nfl_games rows already carry the value. The esbids named in the finding
+-- (2000080403, 2010082851) are the PRESEASON meetings of those same teams, which
+-- `schedule` never described; backfilling them from these rows would have invented
+-- surface data for two games the source has no record of.
+--
+-- Re-verified by matching every schedule row to nfl_games on (season, teams,
+-- nearest date), which resolves the OAK/LV code drift and the postseason week
+-- renumbering that broke the naive join: all 5,580 rows match, and there are zero
+-- rows where schedule holds a non-empty surf or stad that its nfl_games counterpart
+-- lacks. The single row outside a 7-day window is the Hurricane Irma postponement
+-- (TB@MIA, scheduled 2017-09-10, played 2017-11-19), which resolves to nfl_games
+-- 2017111911 carrying surf='grass' and stad='Hard Rock Stadium'.
+--
+-- `gid` is an unreferenced legacy identifier with 5,580 distinct values and no
+-- consumer; it is not preserved.
+--
+-- Full pre-drop backup (schema + all 5,580 rows) captured to
+-- scratch/league/schema-redesign/schedule-drop/schedule-full-backup.sql. There is
+-- no rollback file because a DROP cannot be reversed from SQL alone; restore from
+-- that dump if ever needed.
+--
+-- yarn db:exec db/adhoc/2026-07-29-drop-schedule-table.sql
+-- yarn export:schema
+
+DROP TABLE IF EXISTS public.schedule;

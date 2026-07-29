@@ -383,7 +383,6 @@ DROP INDEX IF EXISTS public.idx_25085_pid;
 DROP INDEX IF EXISTS public.idx_25075_team_year;
 DROP INDEX IF EXISTS public.idx_25029_team;
 DROP INDEX IF EXISTS public.idx_25012_season;
-DROP INDEX IF EXISTS public.idx_25004_gid;
 DROP INDEX IF EXISTS public.idx_24999_player_team;
 DROP INDEX IF EXISTS public.idx_24999_pid;
 DROP INDEX IF EXISTS public.idx_24990_sourceid;
@@ -687,7 +686,6 @@ DROP TABLE IF EXISTS public.scoring_format_player_seasonlogs;
 DROP TABLE IF EXISTS public.scoring_format_player_projection_points;
 DROP TABLE IF EXISTS public.scoring_format_player_gamelogs;
 DROP TABLE IF EXISTS public.scoring_format_player_careerlogs;
-DROP TABLE IF EXISTS public.schedule;
 DROP SEQUENCE IF EXISTS public.rosters_uid_seq;
 DROP TABLE IF EXISTS public.rosters_players;
 DROP TABLE IF EXISTS public.rosters;
@@ -25504,23 +25502,6 @@ ALTER SEQUENCE public.rosters_uid_seq OWNED BY public.rosters.uid;
 
 
 --
--- Name: schedule; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.schedule (
-    gid integer NOT NULL,
-    seas integer NOT NULL,
-    wk smallint NOT NULL,
-    day character varying(3) NOT NULL,
-    date text NOT NULL,
-    v character varying(3) NOT NULL,
-    h character varying(3) NOT NULL,
-    stad character varying(45) NOT NULL,
-    surf character varying(30) NOT NULL
-);
-
-
---
 -- Name: scoring_format_player_careerlogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -29295,13 +29276,6 @@ CREATE UNIQUE INDEX idx_24999_pid ON public.rosters_players USING btree (rid, pi
 --
 
 CREATE UNIQUE INDEX idx_24999_player_team ON public.rosters_players USING btree (pid, week, year, tid);
-
-
---
--- Name: idx_25004_gid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_25004_gid ON public.schedule USING btree (gid);
 
 
 --
@@ -57837,13 +57811,6 @@ GRANT SELECT ON TABLE public.rosters_players TO league_reader;
 --
 
 GRANT SELECT ON SEQUENCE public.rosters_uid_seq TO league_reader;
-
-
---
--- Name: TABLE schedule; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.schedule TO league_reader;
 
 
 --
