@@ -25,6 +25,13 @@
 --   league-imports runs 00:00-02:45 UTC) and of process-projections (hourly at
 --   :30). The compatibility-view alternative was rejected as transitional cruft.
 --
+-- APPLY COORDINATION -- this apply runs OUTSIDE the league domain's serialized
+--   apply slot, which was held at the time by the concurrent nfl_games
+--   kickoff_at retype cluster. That cluster's session explicitly acknowledged
+--   this rename as a separate, non-colliding apply on a table it does not touch,
+--   and declined to have the two sequenced together. Recorded here so the
+--   overlap reads as coordinated rather than as two clusters racing.
+--
 -- No BEGIN/COMMIT: yarn db:exec already wraps the file in one transaction.
 -- STATUS: PENDING
 
