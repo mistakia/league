@@ -96,6 +96,23 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
     dynasty_rows.map((row) => [row.player_id, row])
   )
 
+  // Season-long projection, week '0'. Two columns with two distinct uses:
+  //   pts_added     — the worth floor on the franchise screen; sign only.
+  //   market_salary — a single-season price, carried ONLY for the auction
+  //                   supply view, where the horizon matches. It must never sit
+  //                   beside a franchise or rookie price as a surplus; those
+  //                   are multi-year decisions this column cannot price.
+  const projection_rows = await db('league_format_player_projection_values')
+    .select('pid', 'pts_added', 'market_salary')
+    .where({ league_format_id: season.league_format_id, year, week: '0' })
+    .whereIn('pid', pids)
+  const projected_points_added = new Map(
+    projection_rows.map((row) => [row.pid, Number(row.pts_added)])
+  )
+  const projected_market_salary = new Map(
+    projection_rows.map((row) => [row.pid, Number(row.market_salary)])
+  )
+
   const player_rows = await db('player')
     .select('pid', 'short_name', 'primary_position', 'nfl_draft_year')
     .whereIn('pid', pids)
@@ -123,8 +140,13 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
       .where({ tid: viewer_tid })
       .orderBy('sort_order')
 
+    // The bid column is deliberately NOT selected. A restricted free agency
+    // offer is blind under Article IX §2, and the amount is the one number that
+    // must never travel — not to a rival, and not back to the offering manager
+    // through a rendered page that could be shown, shared or mis-scoped. The
+    // board reports THAT a nomination exists, never what it is worth.
     viewer_rfa_bids = await db('restricted_free_agency_bids')
-      .select('tid', 'pid', 'bid', 'submitted', 'announced')
+      .select('tid', 'pid', 'submitted', 'announced')
       .where({ lid, year, tid: viewer_tid })
       .whereNull('cancelled')
   }
@@ -140,6 +162,8 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
     contracts,
     franchise_tag_history,
     dynasty_values,
+    projected_points_added,
+    projected_market_salary,
     players,
     rookie_class_year: resolve_rookie_class_year({ season_rows, now_unix }),
     viewer_tid,

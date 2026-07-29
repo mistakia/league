@@ -159,6 +159,8 @@ export default function build_tag_board({
   contracts,
   franchise_tag_history,
   dynasty_values,
+  projected_points_added = new Map(),
+  projected_market_salary = new Map(),
   players,
   rookie_class_year,
   viewer_tid = null,
@@ -231,11 +233,31 @@ export default function build_tag_board({
       year,
       franchise_tag_history
     })
+    // Worth floor. A saving is not a reason to tag a player the league's own
+    // projection puts below the starting baseline — the franchise price is then
+    // being paid to retain negative production, and the ladder saving measures
+    // only how overpaid the contract already was. Points added is the veto
+    // because it is the canonical value metric and carries no dollar mapping;
+    // the redraft market_salary normalization is deliberately not used here.
+    //
+    // A missing projection does NOT veto. Coverage annotates rather than
+    // suppresses, so an unprojected player stays eligible and carries
+    // projection_missing for the page to state.
+    row.projected_points_added = projected_points_added.has(row.pid)
+      ? projected_points_added.get(row.pid)
+      : null
+    row.projected_market_salary = projected_market_salary.has(row.pid)
+      ? projected_market_salary.get(row.pid)
+      : null
+    row.projection_missing = row.projected_points_added === null
+    row.below_replacement =
+      row.projected_points_added !== null && row.projected_points_added <= 0
     row.franchise_eligible = Boolean(
       row.untagged &&
         row.franchise_price !== null &&
         row.franchise_saving > 0 &&
-        row.franchise_consecutive_year_ok
+        row.franchise_consecutive_year_ok &&
+        !row.below_replacement
     )
     row.rookie_eligible = Boolean(
       row.untagged && row.nfl_draft_year === rookie_class_year
@@ -283,7 +305,11 @@ export default function build_tag_board({
       dynasty_band: row.dynasty_band,
       rank_precision: row.rank_precision,
       divergence: row.divergence,
-      post_deadline_salary: row.post_deadline_salary
+      post_deadline_salary: row.post_deadline_salary,
+      // Auction-horizon price. Present here and nowhere else on the board:
+      // this list is the pool likely to reach a single-season auction, which
+      // is the one decision a single-season projection can price.
+      projected_market_salary: row.projected_market_salary
     }))
     .sort((a, b) => b.divergence - a.divergence)
 
@@ -373,9 +399,13 @@ export default function build_tag_board({
           franchise_saving: row.franchise_saving,
           rookie_saving: row.rookie_saving,
           nfl_draft_year: row.nfl_draft_year,
+          projected_points_added: row.projected_points_added,
+          below_replacement: row.below_replacement,
+          projection_missing: row.projection_missing,
           eligibility: {
             franchise: row.franchise_eligible && budget.franchise.remaining > 0,
             franchise_consecutive_year_ok: row.franchise_consecutive_year_ok,
+            franchise_worth_ok: !row.below_replacement,
             rookie: row.rookie_eligible && budget.rookie.remaining > 0,
             restricted_free_agency:
               row.restricted_free_agency_eligible &&
@@ -515,8 +545,6 @@ export default function build_tag_board({
       rfa_window: rfa_schedule_by_tid.get(tid),
       now_unix,
       season,
-      viewer_tid,
-      viewer_rfa_bids,
       tag_board_by_tid
     })
   }
@@ -563,14 +591,14 @@ export default function build_tag_board({
           sort_order: row.sort_order
         }))
         .sort((a, b) => a.sort_order - b.sort_order),
+      // Offer AMOUNTS never enter the board. The loader does not select the bid
+      // column, so no retention threshold can be derived here either — both are
+      // absent by construction rather than filtered downstream.
       restricted_free_agency_offers: (viewer_rfa_bids || [])
         .filter((row) => row.tid === viewer_tid)
         .map((row) => ({
           pid: row.pid,
           name: players.get(row.pid)?.name || row.pid,
-          bid: row.bid,
-          // Article IX §4: an outside bid wins only if it strictly exceeds this.
-          retention_threshold: row.bid + Math.max(2, Math.round(row.bid * 0.2)),
           submitted: row.submitted,
           announced: row.announced
         }))
@@ -679,9 +707,7 @@ export const build_considerations = ({
   league_market,
   rfa_window,
   now_unix,
-  season,
-  viewer_tid,
-  viewer_rfa_bids
+  season
 }) => {
   const fired = []
   const overage =
@@ -788,17 +814,11 @@ export const build_considerations = ({
     }
   }
 
-  // Your own nomination exposure (viewer-scoped)
-  if (viewer_tid === tid && viewer_rfa_bids && viewer_rfa_bids.length) {
-    for (const bid of viewer_rfa_bids.filter((row) => row.tid === tid)) {
-      const threshold = bid.bid + Math.max(2, Math.round(bid.bid * 0.2))
-      fired.push({
-        rule: 'own_nomination_exposure',
-        sentence: `You have an offer in on ${bid.name || bid.pid}. An outside bid takes him only by strictly exceeding $${threshold}; ties go to you.`,
-        inputs: { pid: bid.pid, offer: bid.bid, retention_threshold: threshold }
-      })
-    }
-  }
+  // There is deliberately no own-nomination-exposure rule. It existed to state
+  // a retention threshold derived from the offer amount, and the amount no
+  // longer reaches this code. The threshold is Article IX arithmetic the
+  // manager can apply themselves; restating it per page was never the board's
+  // job. The private block reports that a nomination exists.
 
   // Bidding capacity
   fired.push({

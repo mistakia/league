@@ -694,7 +694,7 @@ describe('tag board', function () {
       JSON.stringify(board).should.not.include('40')
     })
 
-    it('exposes the retention threshold only for the viewer, with the $2 floor', function () {
+    it('emits no offer amount or retention threshold, not even for the viewer', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -708,12 +708,16 @@ describe('tag board', function () {
       )
 
       const offers = board.private.restricted_free_agency_offers
-      // round(0.2 * 21) = 4, above the floor.
-      offers[0].retention_threshold.should.equal(25)
-      // round(0.2 * 5) = 1, so the $2 floor binds.
-      offers[1].retention_threshold.should.equal(7)
-      rules_fired(board, 1).should.include('own_nomination_exposure')
-      rules_fired(board, 2).should.not.include('own_nomination_exposure')
+      offers.map((row) => row.pid).should.eql(['A1', 'A2'])
+      for (const offer of offers) {
+        expect(offer.bid).to.equal(undefined)
+        expect(offer.retention_threshold).to.equal(undefined)
+      }
+      // The amounts and both derived thresholds (25 and 7) stay out entirely.
+      const serialized = JSON.stringify(board)
+      serialized.should.not.include('retention_threshold')
+      serialized.should.not.include('"bid"')
+      rules_fired(board, 1).should.not.include('own_nomination_exposure')
     })
   })
 
@@ -799,6 +803,60 @@ describe('tag board', function () {
       // TE: 45 - 10 = 35. WR: 35 - 28 = 7.
       rule.inputs.largest_saving.pid.should.equal('SAVER')
       rule.inputs.best_ranked.pid.should.equal('BEST')
+    })
+
+    it('vetoes a franchise candidate the projection puts below replacement', function () {
+      const fixture = build_fixture({
+        teams: two_teams,
+        players: [
+          // Screens on price: extension 32 against a TE franchise price of 10.
+          {
+            tid: 1,
+            pid: 'BELOW',
+            pos: 'TE',
+            value: 17,
+            extensions: 2,
+            dynasty_value: 500
+          },
+          { tid: 2, pid: 'B1', value: 10, dynasty_value: 5000 }
+        ]
+      })
+      fixture.projected_points_added = new Map([['BELOW', -15.09]])
+      const board = build_tag_board(fixture)
+
+      const row = board.tag_board
+        .find((team) => team.tid === 1)
+        .players.find((player) => player.pid === 'BELOW')
+      row.franchise_saving.should.be.above(0)
+      row.below_replacement.should.equal(true)
+      row.eligibility.franchise.should.equal(false)
+      row.eligibility.franchise_worth_ok.should.equal(false)
+    })
+
+    it('keeps an unprojected player eligible rather than suppressing him', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            {
+              tid: 1,
+              pid: 'NOPROJ',
+              pos: 'TE',
+              value: 17,
+              extensions: 2,
+              dynasty_value: 500
+            },
+            { tid: 2, pid: 'B1', value: 10, dynasty_value: 5000 }
+          ]
+        })
+      )
+
+      const row = board.tag_board
+        .find((team) => team.tid === 1)
+        .players.find((player) => player.pid === 'NOPROJ')
+      row.projection_missing.should.equal(true)
+      row.below_replacement.should.equal(false)
+      row.eligibility.franchise.should.equal(true)
     })
 
     it('withholds the divergence once the franchise tag is already spent', function () {
