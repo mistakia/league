@@ -306,6 +306,17 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
   }
 }
 
+// Offer category 1759 is DraftKings' season-long player-totals category, the
+// only source of the season player props the dynasty valuation consumes. An
+// unmapped subcategory here is silently dropped to a null market_type, so the
+// selections keep landing but nothing can query them by type -- which is how
+// SEASON_RECEPTIONS (18435) sat unclassified while DraftKings published 43
+// markets for it. The importer emits one signal per run naming whatever lands
+// here. Deliberately scoped to this one category: most other categories carry
+// exotic markets that are unmapped on purpose, so a global collector would be
+// pure noise.
+export const unmapped_season_player_prop_subcategories = new Set()
+
 export const get_market_type_offer_1759 = (subcategoryId) => {
   switch (subcategoryId) {
     case 17147:
@@ -317,14 +328,24 @@ export const get_market_type_offer_1759 = (subcategoryId) => {
     case 17223:
       return player_prop_types.SEASON_RUSHING_YARDS
 
+    case 17224:
+      return player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+
     case 17314:
       return player_prop_types.SEASON_RECEIVING_YARDS
 
     case 17315:
       return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
 
+    case 18435:
+      return player_prop_types.SEASON_RECEPTIONS
+
+    case 17316:
+      return player_prop_types.SEASON_DEFENSE_SACKS
+
     default:
       log(`unknown offercategoryId 1759 subcategoryId ${subcategoryId}`)
+      unmapped_season_player_prop_subcategories.add(subcategoryId)
       return null
   }
 }

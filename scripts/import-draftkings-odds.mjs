@@ -21,8 +21,14 @@ import {
   run_events_mode,
   analyze_formatted_markets,
   log_failed_requests_summary,
-  log_processing_summary
+  log_processing_summary,
+  unmapped_season_player_prop_subcategories
 } from '#libs-server/draftkings/index.mjs'
+import { create_logger } from '#libs-shared/log.mjs'
+
+const signal_log = create_logger('import-draftkings-odds', {
+  service: 'league-imports'
+})
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv))
@@ -267,6 +273,27 @@ export const job = async () => {
   } catch (err) {
     error = err
     console.log(error)
+  }
+
+  // Classification oracle, deliberately not fatal: a new season-long
+  // subcategory is drift to be wired up, not a failed run, and this importer
+  // drives the continuous live-odds worker. Without it a new subcategory only
+  // reaches a debug namespace that is off in production, so the selections land
+  // with a null market_type and no consumer can ever see them.
+  if (unmapped_season_player_prop_subcategories.size) {
+    const subcategory_ids = [
+      ...unmapped_season_player_prop_subcategories
+    ].sort()
+    const emitted = signal_log.error(
+      new Error(
+        `DraftKings offer category 1759 (season-long player totals) returned unmapped subcategoryIds: ${subcategory_ids.join(', ')}. Their markets are ingested with a null market_type and are invisible to consumers until mapped in draftkings-market-types.mjs.`
+      ),
+      { severity: 'low', context: { subcategory_ids } }
+    )
+    if (emitted?.promise) {
+      await emitted.promise
+    }
+    unmapped_season_player_prop_subcategories.clear()
   }
 
   await report_job({
