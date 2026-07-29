@@ -1,21 +1,10 @@
-import {
-  current_season,
-  roster_slot_types,
-  roster_slot_display_names,
-  starting_lineup_slots,
-  practice_squad_slots,
-  reserve_slots,
-  player_tag_display_names,
-  player_tag_types,
-  transaction_type_display_names
-} from '#constants'
-import Roster from '#libs-shared/roster.mjs'
-import is_before_extension_deadline from '#libs-shared/is-before-extension-deadline.mjs'
+import { current_season, transaction_type_display_names } from '#constants'
 
-import getRoster from '../get-roster.mjs'
 import { load_configured_league } from './generate-league-context.mjs'
 import get_team_managers from './get-team-managers.mjs'
 import get_players from './get-players.mjs'
+import { slot_groups, load_team_roster, build_roster_rows } from './rosters.mjs'
+import { resolve_salary_basis } from './salary-basis.mjs'
 import { ContextDocError } from './errors.mjs'
 import {
   build_frontmatter,
@@ -29,80 +18,20 @@ import {
 
 const DEFAULT_BASE_URL = 'https://xo.football'
 
-const slot_groups = [
-  { title: 'Starters', slots: starting_lineup_slots },
-  { title: 'Bench', slots: [roster_slot_types.BENCH] },
-  { title: 'Practice Squad', slots: practice_squad_slots },
-  { title: 'Injured Reserve', slots: reserve_slots }
-]
-
-/**
- * Load the team's week-0 roster (the branch that populates RFA `bid`) so the
- * cap is computed from a bid-aware source. A team with no roster row yet (new
- * team, pre-draft) yields an empty roster rather than an error.
- */
-async function load_team_roster({ tid, year, lid, league }) {
-  let roster_row
-  try {
-    roster_row = await getRoster({ tid, week: 0, year })
-  } catch (err) {
-    if (/No roster found/.test(err.message)) {
-      roster_row = { uid: null, tid, week: 0, year, lid, players: [] }
-    } else {
-      throw err
-    }
-  }
-  return new Roster({ roster: roster_row, league })
-}
-
-/**
- * Resolve which salary basis the doc is reporting, so the number a reader sees
- * is never ambiguous about the extension deadline. `Roster` prices every row on
- * the post-extension basis while the extension window is open and on the
- * as-recorded basis once it closes; this mirrors that single decision into a
- * column label, a prose note, and a machine-readable frontmatter field.
- */
-function resolve_salary_basis({ league, year }) {
-  const before_deadline = is_before_extension_deadline({ league })
-  const deadline = league.ext_date
-    ? format_date_et(league.ext_date)
-    : 'not configured'
-
-  return {
-    before_deadline,
-    frontmatter_value: before_deadline ? 'post_extension' : 'as_recorded',
-    column_label: before_deadline
-      ? `${year} Salary (post-extension)`
-      : `${year} Salary`,
-    note: before_deadline
-      ? `Salary basis: **post-extension ${year}**. The extension deadline (${deadline}) has not passed, so every salary below is what the contract will carry in ${year} once extensions and tags are applied — each extension adds $5 over the prior season, a franchise tag is repriced to the position's franchise amount, and a restricted-free-agency tag is priced at its winning bid. Practice-squad contracts are not extended and show their recorded salary. These figures differ from the pre-extension salary currently recorded on the contract, and cap space below is computed on the same post-extension basis.`
-      : `Salary basis: **${year} as recorded**. The extension deadline (${deadline}) has passed, so every salary below is the contract's current ${year} salary with extensions and tags already applied. Cap space below is computed on the same basis.`
-  }
-}
-
-function render_roster_groups(roster, players, salary_basis) {
-  const all = roster.all
+export function render_roster_groups(roster_rows, salary_basis) {
   return slot_groups
     .map((group) => {
-      const rows = all
-        .filter((roster_entry) => group.slots.includes(roster_entry.slot))
-        .map((roster_entry) => {
-          const info = players[roster_entry.pid] || {}
-          const tag =
-            roster_entry.tag && roster_entry.tag !== player_tag_types.REGULAR
-              ? player_tag_display_names[roster_entry.tag]
-              : roster_entry.extensions
-                ? `Ext x${roster_entry.extensions}`
-                : ''
-          return [
-            roster_slot_display_names[roster_entry.slot] || roster_entry.slot,
-            info.name || roster_entry.pid,
-            info.primary_position || roster_entry.pos,
-            info.nfl_team || '—',
-            `$${roster_entry.value}`,
-            tag
-          ]
-        })
+      const rows = roster_rows
+        .filter((roster_row) => roster_row.group === group.title)
+        .map((roster_row) => [
+          roster_row.slot,
+          roster_row.name,
+          roster_row.pos,
+          roster_row.nfl_team || '—',
+          `$${roster_row.salary}`,
+          roster_row.tag ||
+            (roster_row.extensions ? `Ext x${roster_row.extensions}` : '')
+        ])
       const body = rows.length
         ? markdown_table(
             ['Slot', 'Player', 'Pos', 'NFL', salary_basis.column_label, 'Tag'],
@@ -189,7 +118,8 @@ export default async function generate_team_context({
       parent: doc_url(base_url, { lid }),
       related: [
         doc_url(base_url, { lid, view: 'rules' }),
-        doc_url(base_url, { lid, view: 'schedule' })
+        doc_url(base_url, { lid, view: 'schedule' }),
+        doc_url(base_url, { lid, view: 'rosters' })
       ]
     }
   })
@@ -226,9 +156,18 @@ export default async function generate_team_context({
     )
   ])
 
+  const roster_rows = build_roster_rows({ team, roster, players })
   const roster_section = section('Roster', [
     salary_basis.note,
-    render_roster_groups(roster, players, salary_basis)
+    `Every team's roster in one document: [league rosters](${doc_url(base_url, {
+      lid,
+      view: 'rosters'
+    })}) (machine-readable: [rosters.csv](${doc_url(base_url, {
+      lid,
+      view: 'rosters',
+      format: 'csv'
+    })})).`,
+    render_roster_groups(roster_rows, salary_basis)
   ])
 
   const picks_section = section(
@@ -287,6 +226,10 @@ export default async function generate_team_context({
     {
       label: 'League schedule',
       url: doc_url(base_url, { lid, view: 'schedule' })
+    },
+    {
+      label: 'League rosters',
+      url: doc_url(base_url, { lid, view: 'rosters' })
     },
     ...other_teams.map((t) => ({
       label: `Team: ${t.name}`,

@@ -63,15 +63,19 @@ export function build_frontmatter({ type, fields = {}, related = {} }) {
  * (`/leagues/1.md`, `/leagues/1/teams/5.md`); a named sub-view of a league is
  * `<path>/<view>.md` (`/leagues/1/rules.md`). Pass `tid` for a team doc, or
  * `view` for a league sub-view; both unset yields the league index.
+ *
+ * `format` selects the representation of the same resource — `md` is the
+ * readable document, `csv` its machine-readable sibling at the identical path
+ * (`/leagues/1/rosters.csv`). Only views that publish one accept it.
  */
-export function doc_url(base_url, { lid, tid, view } = {}) {
+export function doc_url(base_url, { lid, tid, view, format = 'md' } = {}) {
   if (tid !== undefined && tid !== null) {
-    return `${base_url}/leagues/${lid}/teams/${tid}.md`
+    return `${base_url}/leagues/${lid}/teams/${tid}.${format}`
   }
   if (view) {
-    return `${base_url}/leagues/${lid}/${view}.md`
+    return `${base_url}/leagues/${lid}/${view}.${format}`
   }
-  return `${base_url}/leagues/${lid}.md`
+  return `${base_url}/leagues/${lid}.${format}`
 }
 
 /**

@@ -104,7 +104,8 @@ export default async function generate_league_context({
       children: teams.map((team) => doc_url(base_url, { lid, tid: team.uid })),
       related: [
         doc_url(base_url, { lid, view: 'rules' }),
-        doc_url(base_url, { lid, view: 'schedule' })
+        doc_url(base_url, { lid, view: 'schedule' }),
+        doc_url(base_url, { lid, view: 'rosters' })
       ]
     }
   })
@@ -171,6 +172,14 @@ export default async function generate_league_context({
 
   const footer = cross_link_footer([
     { label: 'League rules', url: doc_url(base_url, { lid, view: 'rules' }) },
+    {
+      label: 'League rosters',
+      url: doc_url(base_url, { lid, view: 'rosters' })
+    },
+    {
+      label: 'League rosters (CSV)',
+      url: doc_url(base_url, { lid, view: 'rosters', format: 'csv' })
+    },
     {
       label: 'League schedule',
       url: doc_url(base_url, { lid, view: 'schedule' })

@@ -78,7 +78,10 @@ export default async function generate_league_schedule({
     },
     related: {
       parent: doc_url(base_url, { lid }),
-      related: [doc_url(base_url, { lid, view: 'rules' })]
+      related: [
+        doc_url(base_url, { lid, view: 'rules' }),
+        doc_url(base_url, { lid, view: 'rosters' })
+      ]
     }
   })
 
@@ -128,7 +131,11 @@ export default async function generate_league_schedule({
 
   const footer = cross_link_footer([
     { label: 'League index', url: doc_url(base_url, { lid }) },
-    { label: 'League rules', url: doc_url(base_url, { lid, view: 'rules' }) }
+    { label: 'League rules', url: doc_url(base_url, { lid, view: 'rules' }) },
+    {
+      label: 'League rosters',
+      url: doc_url(base_url, { lid, view: 'rosters' })
+    }
   ])
 
   return [

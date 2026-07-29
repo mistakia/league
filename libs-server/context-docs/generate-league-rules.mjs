@@ -69,7 +69,10 @@ export default async function generate_league_rules({
     },
     related: {
       parent: doc_url(base_url, { lid }),
-      related: [doc_url(base_url, { lid, view: 'schedule' })]
+      related: [
+        doc_url(base_url, { lid, view: 'schedule' }),
+        doc_url(base_url, { lid, view: 'rosters' })
+      ]
     }
   })
 
@@ -154,6 +157,10 @@ export default async function generate_league_rules({
     {
       label: 'League schedule',
       url: doc_url(base_url, { lid, view: 'schedule' })
+    },
+    {
+      label: 'League rosters',
+      url: doc_url(base_url, { lid, view: 'rosters' })
     },
     lid === CONSTITUTION_LEAGUE_ID && {
       label: 'League constitution',

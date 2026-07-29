@@ -221,6 +221,8 @@ export {
   generate_league_context,
   generate_league_rules,
   generate_league_schedule,
+  generate_league_rosters,
+  generate_league_rosters_csv,
   generate_team_context,
   ContextDocError
 } from './context-docs/index.mjs'

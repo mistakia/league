@@ -9,26 +9,37 @@ authenticated API calls.
 All league read data is already public (auth guards only mutations), so these
 docs work for every league with no tokens.
 
-## The four documents
+## The documents
 
 | Document        | URL                           | Contents                                                                 |
 | --------------- | ----------------------------- | ------------------------------------------------------------------------ |
 | League index    | `/leagues/:lid.md`            | Identity, standings table, divisions, current phase, recent transactions |
-| League rules    | `/leagues/:lid/rules.md`      | Roster construction, scoring, cap/FAAB, franchise tags, RFA timing       |
+| League rules    | `/leagues/:lid/rules.md`      | Roster construction, scoring, cap/FAAB, extensions, franchise tags, RFA  |
 | League schedule | `/leagues/:lid/schedule.md`   | Current-phase banner, full league calendar, playoffs, matchup grid       |
+| League rosters  | `/leagues/:lid/rosters.md`    | Per-team cap summary and every team's roster, priced on a stated basis   |
+| Rosters CSV     | `/leagues/:lid/rosters.csv`   | The same rows as `text/csv`, one row per rostered player                 |
 | Team            | `/leagues/:lid/teams/:tid.md` | Manager, record, cap space, roster by slot, draft picks, schedule        |
 
-Each is served at the human path plus a `.md` suffix and returns
-`text/markdown`. The routes live in `api/routes/context-docs.mjs`, mounted after
-the static handlers and before the SPA catch-all in `api/index.mjs` (they are
-NOT under `/api`). Generators live in `libs-server/context-docs/`; the shared
-markdown primitives are in `libs-server/context-docs/markdown.mjs`.
+Each is served at the human path plus a format suffix; `.md` returns
+`text/markdown` and `.csv` returns `text/csv`. The routes live in
+`api/routes/context-docs.mjs`, mounted after the static handlers and before the
+SPA catch-all in `api/index.mjs` (they are NOT under `/api`). Generators live in
+`libs-server/context-docs/`; the shared markdown primitives are in
+`libs-server/context-docs/markdown.mjs`.
 
-## URL rule: entity vs. sub-view
+The rosters page and its CSV render from one loader (`rosters.mjs`), which is
+also what the team doc prices its own roster from, so the three can never
+disagree about roster state or salary.
+
+## URL rule: entity, sub-view, format
 
 - An entity is `<path>.md` — `/leagues/1.md`, `/leagues/1/teams/5.md`.
 - A named sub-view of an entity is `<path>/<view>.md` — `/leagues/1/rules.md`,
   `/leagues/1/schedule.md`.
+- A machine-readable representation of the SAME resource is the same path under
+  a different suffix — `/leagues/1/rosters.csv`. The suffix selects a format, it
+  never selects different content; `doc_url(base_url, { lid, view, format })`
+  builds both.
 
 Sub-views are named for the reader: `rules.md` (not `settings.md`) describes the
 format/scoring/cap/calendar content, versus the SPA's editing surface. Follow
@@ -41,14 +52,20 @@ and `canonical_url`. Traversal uses a fixed relation vocabulary of fetchable
 absolute URLs — `parent`, `children`, `related` — making the doc set a
 traversable graph (the `base entity tree` analog) while remaining WebFetch-able
 by an external agent. The league index is the root; its `children` are the team
-docs; rules and schedule are `related`.
+docs; rules, schedule, and rosters are `related`. The rosters page also declares
+the team docs as `children` (it is the other route to them) and carries its CSV
+sibling as `csv_url` — a format alternate, not a graph edge, so it stays out of
+the relation vocabulary.
 
 ## Self-sufficiency contract
 
 Each doc carries enough for its level with no follow-up call required, while
 staying compact (progressive disclosure). The league index summarizes
 teams/standings and links to per-team docs (full rosters live there, not
-inlined). Lifecycle states are first-class, not edge cases:
+inlined) and to the rosters page, which is the deliberate exception: it inlines
+every roster because its purpose is the cross-team question that would otherwise
+cost one fetch per team. Lifecycle states are first-class, not edge
+cases:
 
 - A league with no configured season for the year returns 404 ("season not yet
   configured"), never a degenerate doc.
@@ -68,7 +85,8 @@ open — the salary recorded on it, and the salary it will carry for the season
 once extensions and tags are applied — so no doc may print a bare "Salary".
 `Roster` decides which basis applies from
 `libs-shared/is-before-extension-deadline.mjs` (the single definition of the
-boundary), and the team doc mirrors that decision three ways:
+boundary), and `salary-basis.mjs` turns that one decision into the three forms
+every salary-bearing surface renders:
 
 - a year-labeled column header — `2026 Salary (post-extension)` while the
   window is open, `2026 Salary` once it closes;
@@ -77,8 +95,11 @@ boundary), and the team doc mirrors that decision three ways:
 - a machine-readable `salary_basis` (`post_extension` / `as_recorded`),
   `salary_year`, and `extension_deadline` in the frontmatter.
 
-Cap space in the Overview carries the same label, since it is summed from the
-same figures. Transaction tables report an **Amount** — the salary recorded by
+The team doc and the rosters page both render all three. The CSV cannot carry
+frontmatter, so `salary_basis` and `salary_year` ride on every row instead — a
+reader who fetched only the CSV still knows what the number means. Cap space
+carries the same label wherever it appears, since it is summed from the same
+figures. Transaction tables report an **Amount** — the salary recorded by
 that transaction — which is never the contract's current salary; the docs say
 so inline. The rules doc carries the mechanics (deadline, $5 per extension, tag
 repricing) so a reader who fetched only that doc can interpret the numbers.
@@ -91,6 +112,11 @@ They are distinct from the API's `?export_format=` output-format convention
 csv/json/md/html. The full, filterable transaction log is served by the
 transactions API markdown output-format, not inlined here — the league index
 summarizes only the most recent transactions.
+
+`rosters.csv` does not blur that line: it is a fixed, curated projection of one
+context doc at a stable URL with no query parameters, not a filterable result
+set. A request to slice or filter rosters belongs in a data view, not in a new
+CSV route.
 
 The directory is named `context-docs/`, following the repo's existing `docs/`
 shorthand.

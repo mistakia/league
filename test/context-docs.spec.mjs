@@ -17,6 +17,8 @@ import {
   generate_league_context,
   generate_league_rules,
   generate_league_schedule,
+  generate_league_rosters,
+  generate_league_rosters_csv,
   generate_team_context
 } from '#libs-server'
 import {
@@ -427,6 +429,49 @@ describe('context documents', function () {
       bench_row.should.not.include('$20')
     })
 
+    it('rosters: every team, cap summary, salary basis, CSV link', async function () {
+      const doc = await generate_league_rosters({ db: knex, lid: 1, base_url })
+      const fm = parse_frontmatter(doc)
+      fm.type.should.equal('league_rosters')
+      fm.num_teams.should.equal(12)
+      fm.num_rostered_players.should.equal(2)
+      fm.salary_basis.should.equal('as_recorded')
+      fm.csv_url.should.equal(`${base_url}/leagues/1/rosters.csv`)
+      fm.children.length.should.equal(12)
+
+      // one section per team, and the cap summary carries a row per team
+      for (let tid = 1; tid <= 12; tid++) {
+        doc.should.include(`### Team${tid} (team ${tid})`)
+      }
+      doc.should.include('## Cap summary')
+      doc.should.include(`| ${current_season.year} Salary |`)
+      doc.should.include(`Salary basis: **${current_season.year} as recorded**`)
+
+      // team 1 holds the seeded RFA contract at its $10 bid; the other eleven
+      // teams are empty
+      doc.should.include('$190')
+      doc.should.include('_Empty._')
+    })
+
+    it('rosters csv: one row per rostered player, salary basis on every row', async function () {
+      const csv = await generate_league_rosters_csv({ db: knex, lid: 1 })
+      const lines = csv.trim().split('\r\n')
+
+      lines[0].should.equal(
+        'league_id,year,team_id,team_name,group,slot,player_id,player_name,position,nfl_team,salary,salary_basis,salary_year,tag,extensions'
+      )
+      // two seeded rostered players (one RFA-tagged starter, one on the
+      // practice squad); every other team is empty
+      lines.length.should.equal(3)
+
+      for (const line of lines.slice(1)) {
+        line.should.include('as_recorded')
+        line.should.include(`,${current_season.year},`)
+      }
+      csv.should.include('Restricted Free Agency')
+      csv.should.include('Practice Squad')
+    })
+
     it('population-level self-sufficiency', async function () {
       const { rfa_player, ps_player } = {
         rfa_player: await knex('rosters_players')
@@ -539,6 +584,7 @@ describe('context documents', function () {
       '/leagues/1.md',
       '/leagues/1/rules.md',
       '/leagues/1/schedule.md',
+      '/leagues/1/rosters.md',
       '/leagues/1/teams/1.md'
     ]
 
@@ -550,6 +596,15 @@ describe('context documents', function () {
         res.text.should.match(/^---\n/)
       })
     }
+
+    it('GET /leagues/1/rosters.csv → 200 text/csv with a header row', async function () {
+      const res = await chai_request
+        .execute(server)
+        .get('/leagues/1/rosters.csv')
+      res.should.have.status(200)
+      res.should.have.header('content-type', /text\/csv/)
+      res.text.should.match(/^league_id,year,team_id,team_name,/)
+    })
 
     it('GET /constitution.md → 200 text/markdown (authored doc, no frontmatter)', async function () {
       const res = await chai_request.execute(server).get('/constitution.md')
