@@ -858,6 +858,8 @@ export default {
   player_weight: "The player's weight in pounds",
   player_jersey_number: "The player's current jersey number",
   player_current_nfl_team: "The player's current NFL team abbreviation",
+  player_nfl_status:
+    "The player's current NFL roster status (e.g., active, practice squad, injured reserve, retired), sourced from Sleeper",
   player_position_depth: "The player's depth chart position",
   player_nfl_teams: 'NFL teams the player has been on',
   player_starting_nfl_year: 'The year the player entered the NFL (draft year)',

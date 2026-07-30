@@ -5,7 +5,12 @@ import PlayerRowNFLTeam from '@components/player-row-nfl-team'
 import PlayerRowPositionColumn from '@components/player-row-position-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { build_nfl_team_values, nfl_team_value_groups } from '@constants'
+import {
+  build_nfl_team_values,
+  nfl_team_value_groups,
+  player_nfl_status,
+  nfl_player_status_display_names
+} from '@constants'
 
 const contract_field = (props) => ({
   ...props,
@@ -17,6 +22,15 @@ const contract_field = (props) => ({
 const nfl_team_column_values = build_nfl_team_values([
   { value: 'INA', label: 'Inactive / No Team', group: null }
 ])
+
+// Derived from the constant rather than listed here, so a status added to
+// player_nfl_status cannot silently go unfilterable.
+const nfl_status_column_values = Object.values(player_nfl_status).map(
+  (value) => ({
+    value,
+    label: nfl_player_status_display_names[value] || value
+  })
+)
 
 export default function ({ is_logged_in }) {
   return {
@@ -267,6 +281,21 @@ export default function ({ is_logged_in }) {
       ],
       column_values: nfl_team_column_values,
       column_value_groups: nfl_team_value_groups
+    },
+    player_nfl_status: {
+      column_title: 'NFL Roster Status',
+      header_label: 'NFL Status',
+      size: 100,
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      player_value_path: 'roster_status',
+      column_groups: [COLUMN_GROUPS.NFL_TEAM],
+      operators: [
+        table_constants.TABLE_OPERATORS.IN,
+        table_constants.TABLE_OPERATORS.NOT_IN,
+        table_constants.TABLE_OPERATORS.IS_NULL,
+        table_constants.TABLE_OPERATORS.IS_NOT_NULL
+      ],
+      column_values: nfl_status_column_values
     },
     player_position_depth: {
       column_title: 'Position Depth',

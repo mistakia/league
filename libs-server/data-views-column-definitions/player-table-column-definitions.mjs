@@ -330,6 +330,12 @@ export default {
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
+  player_nfl_status: {
+    table_name: 'player',
+    column_name: 'roster_status',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
   player_position_depth: {
     table_name: 'player',
     column_name: 'position_depth',
