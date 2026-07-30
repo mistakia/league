@@ -795,6 +795,24 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
 /**
  * Save gamelogs to database
  */
+// `player_gamelogs.active` is owned by import-nflverse-weekly-rosters.mjs,
+// which maps game-day roster status onto it (ACT -> true; INA / RES / DEV ->
+// false). This script hardcodes `active: true` on every gamelog it builds,
+// because a player with counting stats was dressed. Asserting that on INSERT is
+// right; carrying it into the UPDATE half of the upsert is not -- a blanket
+// .merge() reverted every game-day-inactive flag for any player the run
+// touched, silently undoing the roster import. Regenerating one 2014 game flipped
+// six such rows. So merge every column EXCEPT active: a new gamelog still gets
+// its insert value, and an existing one keeps whatever the roster import set.
+const merge_columns_excluding_active = (batch) => {
+  const columns = new Set()
+  for (const item of batch) {
+    for (const column of Object.keys(item)) columns.add(column)
+  }
+  columns.delete('active')
+  return [...columns]
+}
+
 const save_gamelogs = async ({
   player_gamelog_inserts,
   player_receiving_gamelog_inserts,
@@ -808,7 +826,7 @@ const save_gamelogs = async ({
         await db('player_gamelogs')
           .insert(batch)
           .onConflict(['esbid', 'pid', 'season_year'])
-          .merge()
+          .merge(merge_columns_excluding_active(batch))
       },
       batch_size: 500
     })
@@ -902,13 +920,26 @@ const generate_player_gamelogs = async ({
     `loading plays for ${year} week ${week}${esbid ? ` (esbid: ${esbid})` : ''}`
   )
 
-  const playStats = await get_play_stats({ year, week, seas_type })
-  let unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
+  const all_play_stats = await get_play_stats({ year, week, seas_type })
 
-  // Filter to specific game if esbid provided
-  if (esbid) {
-    unique_esbids = unique_esbids.filter((id) => id === esbid)
+  // `--esbid` has to narrow playStats itself, not just unique_esbids: every
+  // collection below (player, team, defense gamelogs) is derived from
+  // playStats, while unique_esbids only feeds the routes / dropbacks / snap
+  // loads. Filtering the latter alone left the flag writing the ENTIRE week
+  // while reporting one game, which is the opposite of what a single-game
+  // backfill wants. Compared as strings because the CLI option is a string and
+  // the column comes back as a number.
+  const playStats = esbid
+    ? all_play_stats.filter((p) => String(p.esbid) === String(esbid))
+    : all_play_stats
+
+  if (esbid && !playStats.length) {
+    throw new Error(
+      `no play stats for esbid ${esbid} in ${year} week ${week} ${seas_type} -- check the year/week match the game`
+    )
   }
+
+  const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
 
   log(`loaded play stats for ${unique_esbids.length} games`)
   log(unique_esbids.join(', '))
