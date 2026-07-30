@@ -14,6 +14,16 @@ import {
 // transactions + accepted trades + draft picks + RFA wins, then emit
 // holding drafts and transformation drafts in chronological order.
 //
+// A change here does NOT reach production by being deployed. The only writer
+// of roster_asset_holding / roster_asset_transformation is
+// scripts/generate-roster-asset-lineage.mjs, which is in no crontab, so
+// nothing re-runs it on its own and existing rows keep whatever the previous
+// rebuild computed. Finish a walker change by rebuilding the affected league:
+//   NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
+//     node scripts/generate-roster-asset-lineage.mjs --lid <n> --rebuild
+// (--rebuild clears that lid's existing holding/transformation/extension-state
+// rows before regenerating, which is what makes a re-derivation take effect.)
+//
 // Scope of v1 walker:
 //   Players: auction, draft, PS/FA add, poach, release, extension, RFA win,
 //            franchise tag, rookie tag, plus trade legs (handled via the
