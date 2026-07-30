@@ -1,21 +1,13 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
-function SelectedPlayerSeasonStats({
-  player_map,
-  player_seasonlogs,
-  pos,
-  load_seasonlogs
-}) {
-  useEffect(() => {
-    const pid = player_map.get('pid')
-    load_seasonlogs({ pid })
-  }, [player_map, load_seasonlogs])
-
+// Seasonlogs are loaded by the parent selected-player component, which needs
+// them for its header regardless of which tab is open.
+function SelectedPlayerSeasonStats({ player_seasonlogs, pos }) {
   const seasonlogs = player_seasonlogs.toJS()
   const items = seasonlogs.map((seasonlog, index) => (
     <PlayerSelectedRow
@@ -44,9 +36,7 @@ function SelectedPlayerSeasonStats({
 
 SelectedPlayerSeasonStats.propTypes = {
   pos: PropTypes.string,
-  player_map: ImmutablePropTypes.map,
-  player_seasonlogs: ImmutablePropTypes.list,
-  load_seasonlogs: PropTypes.func
+  player_seasonlogs: ImmutablePropTypes.list
 }
 
 export default SelectedPlayerSeasonStats
