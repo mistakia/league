@@ -4,7 +4,11 @@
 
 # node.js
 #
-node_modules/
+# No trailing slash: the documented throwaway-worktree deploy recipe symlinks
+# node_modules rather than reinstalling it, and `node_modules/` matches only a
+# real directory -- so the symlink showed up as untracked and preflight:deploy
+# refused its own recipe as a dirty tree.
+node_modules
 npm-debug.log
 yarn-error.log
 
