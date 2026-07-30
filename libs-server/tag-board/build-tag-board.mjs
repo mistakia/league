@@ -134,15 +134,26 @@ const assign_ranks = (rows, value_of) => {
  * are admitted, each confined to the decision its horizon can carry:
  *
  *   dynasty market standing — emitted as an ordinal rank and a coverage band,
- *     never as a dollar figure, so no tag comparison can become cardinal.
- *   projected points added  — sign only, as the franchise screen's worth floor.
+ *     never as a dollar figure, so no MULTI-YEAR (tag) comparison can become
+ *     cardinal. It orders the franchise and rookie screens and nothing else.
+ *   projected points added  — the replacement floor. Sign only: it vetoes a
+ *     franchise candidate and it separates a contract under pressure from a
+ *     player who is simply a cut.
  *
  * The one dollar-denominated player value, `projected_market_salary`, appears
- * on divergence rows and nowhere else. Those rows describe the pool likely to
- * reach a single-season auction, which is the only decision a single-season
- * projection can price. Do not carry it onto tag_board rows: differenced
- * against a franchise price it reconstructs a multi-year surplus no oracle in
- * this league supports.
+ * on `market_pool` rows and nowhere else, where it is differenced against the
+ * post-deadline salary to give `market_gap`. Both sides of that subtraction are
+ * SINGLE-SEASON dollars on this league's cap, which is the horizon the column
+ * prices and the horizon an auction settles — so the gap is in bounds. Do not
+ * carry the column onto tag_board rows: differenced against a franchise or
+ * rookie price it would reconstruct a multi-year surplus no oracle here
+ * supports.
+ *
+ * There is deliberately NO rank-divergence screen. Ranking a player's dynasty
+ * standing against his salary rank mixed a multi-year oracle with a one-season
+ * cost, ignored replacement level entirely, and put minimum-salary contracts
+ * nobody would think about at the top of a "contracts under pressure" list —
+ * 49 of 112 such rows were below replacement. The market gap replaced it.
  *
  * `viewer_tid` scopes the private block. Cutlists are loaded only for that
  * franchise, so a rival's standing intent has no path into the artifact.
@@ -268,57 +279,34 @@ export default function build_tag_board({
     row.restricted_free_agency_eligible = row.untagged
   }
 
-  // ---- ordinal dynasty standing and rank divergence -----------------------
+  // ---- ordinal dynasty standing -------------------------------------------
+  //
+  // Dynasty rank orders MULTI-YEAR decisions (the franchise and rookie screens)
+  // and is emitted as an ordinal only. It does not screen contracts: comparing
+  // a player's dynasty rank against his salary rank was the board's original
+  // "divergence" screen and has been removed — see the market gap below.
 
   const ranked_pool = active_rows.filter((row) => row.dynasty_value !== null)
   const pool_size = ranked_pool.length
   const dynasty_ranks = assign_ranks(ranked_pool, (row) => row.dynasty_value)
-  const salary_ranks = assign_ranks(
-    ranked_pool,
-    (row) => row.post_deadline_salary
-  )
 
   for (const row of active_rows) {
     row.dynasty_rank = dynasty_ranks.get(row.pid) ?? null
-    row.salary_rank = salary_ranks.get(row.pid) ?? null
     row.no_market_value = row.dynasty_value === null
     row.rank_precision =
       row.coverage !== null && row.coverage >= COVERAGE_PRECISE_MIN
         ? 'precise'
         : 'band'
     row.dynasty_band = band_for_rank(row.dynasty_rank, pool_size)
-    // Positive divergence = paid above market standing. Both ranks run 1 = most
-    // (highest salary, highest dynasty value) over the same pool, so a player
-    // ranked far worse by the market than by his salary reads positive.
-    row.divergence =
-      row.dynasty_rank === null || row.salary_rank === null
+    // Single-season market gap: what this contract costs above what the
+    // auction would pay for the same player this season. Both sides are
+    // one-season dollars normalized to this league's cap, which is the one
+    // horizon `market_salary` can price. Null when the player carries no
+    // projection row — unscreenable, never dropped.
+    row.market_gap =
+      row.projected_market_salary === null
         ? null
-        : row.dynasty_rank - row.salary_rank
-  }
-
-  const divergence = active_rows
-    .filter((row) => row.divergence !== null && row.untagged)
-    .map((row) => ({
-      tid: row.tid,
-      pid: row.pid,
-      name: row.name,
-      pos: row.pos,
-      salary_rank: row.salary_rank,
-      dynasty_rank: row.dynasty_rank,
-      dynasty_band: row.dynasty_band,
-      rank_precision: row.rank_precision,
-      divergence: row.divergence,
-      post_deadline_salary: row.post_deadline_salary,
-      // Auction-horizon price. Present here and nowhere else on the board:
-      // this list is the pool likely to reach a single-season auction, which
-      // is the one decision a single-season projection can price.
-      projected_market_salary: row.projected_market_salary
-    }))
-    .sort((a, b) => b.divergence - a.divergence)
-
-  const divergence_by_tid = new Map(team_ids.map((tid) => [tid, []]))
-  for (const row of divergence) {
-    divergence_by_tid.get(row.tid)?.push(row)
+        : row.post_deadline_salary - row.projected_market_salary
   }
 
   // ---- per-team aggregates -----------------------------------------------
@@ -382,6 +370,74 @@ export default function build_tag_board({
   })
   const tag_budget_by_tid = new Map(tag_budget.map((row) => [row.tid, row]))
 
+  // ---- market pool --------------------------------------------------------
+  //
+  // Every untagged active-roster contract, priced against the single-season
+  // market. Two nested subsets come off it, and they are deliberately not the
+  // same set:
+  //
+  //   gap > 0            — the SHED pool. Salary a team could plausibly clear,
+  //                        which is what funds a bid. Below-replacement
+  //                        contracts all land here (their market price is at or
+  //                        near zero), and they are the easiest releases, so
+  //                        this set must stay wide.
+  //   ...and pts_added>0 — UNDER PRESSURE. The decision-bearing subset: players
+  //                        who help the roster but are priced above what a
+  //                        season of them is worth. A below-replacement player
+  //                        is not under pressure, he is simply a cut, and
+  //                        listing him as a decision buried the real ones.
+  //
+  // The under-pressure set is also the restricted-free-agency nomination pool:
+  // the gap is exactly the reason an owner would send a player to auction (the
+  // ladder price exceeds a season's worth of him) and the reason a rival would
+  // bid (the owner is unlikely to retain at that price).
+  const market_pool = active_rows
+    .filter((row) => row.untagged)
+    .map((row) => {
+      const under_pressure =
+        row.market_gap !== null &&
+        row.market_gap > 0 &&
+        row.projected_points_added !== null &&
+        row.projected_points_added > 0
+      return {
+        tid: row.tid,
+        pid: row.pid,
+        name: row.name,
+        pos: row.pos,
+        post_deadline_salary: row.post_deadline_salary,
+        // Auction-horizon price. Present here and nowhere else on the board:
+        // this pool describes contracts that could reach a single-season
+        // auction, which is the only decision a single-season projection can
+        // price. Never carried onto tag_board rows, where differencing it
+        // against a franchise price would reconstruct a multi-year surplus.
+        projected_market_salary: row.projected_market_salary,
+        market_gap: row.market_gap,
+        projected_points_added: row.projected_points_added,
+        below_replacement: row.below_replacement,
+        projection_missing: row.projection_missing,
+        under_pressure,
+        rfa_nomination_target:
+          under_pressure &&
+          tag_budget_by_tid.get(row.tid).restricted_free_agency.remaining > 0,
+        dynasty_rank: row.dynasty_rank,
+        dynasty_band: row.dynasty_band,
+        rank_precision: row.rank_precision,
+        no_market_value: row.no_market_value
+      }
+    })
+    // Widest gap first; an unscreenable row (no market price) sorts last rather
+    // than dropping out.
+    .sort((a, b) => {
+      if (a.market_gap === null) return b.market_gap === null ? 0 : 1
+      if (b.market_gap === null) return -1
+      return b.market_gap - a.market_gap
+    })
+
+  const market_pool_by_tid = new Map(team_ids.map((tid) => [tid, []]))
+  for (const row of market_pool) {
+    market_pool_by_tid.get(row.tid)?.push(row)
+  }
+
   const tag_board = team_ids.map((tid) => {
     const budget = tag_budget_by_tid.get(tid)
     const rows = rows_by_tid.get(tid)
@@ -418,9 +474,7 @@ export default function build_tag_board({
           dynasty_band: row.dynasty_band,
           rank_precision: row.rank_precision,
           coverage: row.coverage,
-          no_market_value: row.no_market_value,
-          salary_rank: row.salary_rank,
-          divergence: row.divergence
+          no_market_value: row.no_market_value
         }))
         .sort((a, b) => b.post_deadline_salary - a.post_deadline_salary)
     }
@@ -431,11 +485,11 @@ export default function build_tag_board({
     // Bids clear after the extension deadline, so the room that binds them is
     // the post-extension room, not today's. Room alone is not the constraint:
     // conditional releases and the cutlist drain at execution, so the public
-    // substitute for private shed intent is the divergence screen — the
-    // contracts the market says are overpaid.
-    const attachable_rows = divergence_by_tid
+    // substitute for private shed intent is the shed pool — every contract
+    // priced above the single-season market, below-replacement ones included.
+    const attachable_rows = market_pool_by_tid
       .get(tid)
-      .filter((row) => row.divergence > 0)
+      .filter((row) => row.market_gap > 0)
     const attachable_release_salary = attachable_rows.reduce(
       (sum, row) => sum + row.post_deadline_salary,
       0
@@ -503,9 +557,12 @@ export default function build_tag_board({
     }
   }
 
+  // Incoming supply counts the UNDER-PRESSURE subset, not the whole shed pool:
+  // it answers "who could reach the auction", and a below-replacement contract
+  // reaching free agency is not supply anyone competes for.
   const incoming_supply = {}
-  for (const row of divergence) {
-    if (row.divergence > 0) {
+  for (const row of market_pool) {
+    if (row.under_pressure) {
       incoming_supply[row.pos] = (incoming_supply[row.pos] || 0) + 1
     }
   }
@@ -570,7 +627,7 @@ export default function build_tag_board({
       capacity: bid_capacity_by_tid.get(tid),
       franchise_candidates: franchise_candidates_by_tid.get(tid),
       rookie_candidates: rookie_candidates_by_tid.get(tid),
-      team_divergence: divergence_by_tid.get(tid),
+      team_market_pool: market_pool_by_tid.get(tid),
       league_market,
       rfa_window: rfa_schedule_by_tid.get(tid),
       now_unix,
@@ -603,7 +660,7 @@ export default function build_tag_board({
     tag_board,
     tag_budget,
     bid_capacity,
-    divergence,
+    market_pool,
     rfa_schedule,
     league_market,
     considerations
@@ -733,7 +790,7 @@ export const build_considerations = ({
   capacity,
   franchise_candidates,
   rookie_candidates,
-  team_divergence,
+  team_market_pool,
   league_market,
   rfa_window,
   now_unix,
@@ -856,8 +913,8 @@ export const build_considerations = ({
     rule: 'bidding_capacity',
     sentence:
       capacity.cap_room >= 0
-        ? `After extensions you hold $${capacity.cap_room} of room, and shedding your ${capacity.attachable_contract_count} contracts the market ranks below their salary would take that to $${capacity.capacity}.`
-        : `After extensions you are $${-capacity.cap_room} over the cap, and shedding your ${capacity.attachable_contract_count} contracts the market ranks below their salary would move you to $${capacity.capacity}.`,
+        ? `After extensions you hold $${capacity.cap_room} of room, and shedding your ${capacity.attachable_contract_count} contracts priced above the single-season market would take that to $${capacity.capacity}.`
+        : `After extensions you are $${-capacity.cap_room} over the cap, and shedding your ${capacity.attachable_contract_count} contracts priced above the single-season market would move you to $${capacity.capacity}.`,
     inputs: {
       cap_room: capacity.cap_room,
       attachable_release_salary: capacity.attachable_release_salary,
@@ -869,18 +926,23 @@ export const build_considerations = ({
   if (capacity.capacity < 0) {
     fired.push({
       rule: 'constrained_bidder',
-      sentence: `Shedding every contract the market ranks below its salary still leaves you $${-capacity.capacity} over the cap, so any bid you win has to come out of contracts the market rates.`,
+      sentence: `Shedding every contract priced above the single-season market still leaves you $${-capacity.capacity} over the cap, so any bid you win has to come out of contracts the market rates.`,
       inputs: { capacity: capacity.capacity }
     })
   }
 
   // Contracts under pressure
-  if (team_divergence.some((row) => row.divergence > 0)) {
-    const rows = team_divergence.filter((row) => row.divergence > 0)
+  if (team_market_pool.some((row) => row.under_pressure)) {
+    const rows = team_market_pool.filter((row) => row.under_pressure)
+    const total_gap = rows.reduce((sum, row) => sum + row.market_gap, 0)
     fired.push({
       rule: 'contracts_under_pressure',
-      sentence: `${rows.length} of your untagged contracts are paid higher than the dynasty market ranks the player.`,
-      inputs: { count: rows.length, pids: rows.map((row) => row.pid) }
+      sentence: `${rows.length} of your untagged contracts pay a player who helps the roster more than a season of him is worth, $${total_gap} above the market in total.`,
+      inputs: {
+        count: rows.length,
+        total_market_gap: total_gap,
+        pids: rows.map((row) => row.pid)
+      }
     })
   }
 
@@ -889,7 +951,7 @@ export const build_considerations = ({
   if (supply_entries.length) {
     fired.push({
       rule: 'incoming_supply',
-      sentence: `League-wide, ${supply_entries.map(([pos, n]) => `${n} ${pos}`).join(', ')} untagged contracts are paid above their market standing — the pool most likely to reach the market when teams shed salary.`,
+      sentence: `League-wide, ${supply_entries.map(([pos, n]) => `${n} ${pos}`).join(', ')} untagged contracts are priced above a season of the player — the pool a nomination or a release is most likely to move.`,
       inputs: league_market.incoming_supply
     })
   }

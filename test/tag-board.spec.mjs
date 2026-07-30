@@ -62,10 +62,18 @@ const make_player = ({
   value = 10,
   dynasty_value = 5000,
   coverage = 0.89,
-  nfl_draft_year = 2020
+  nfl_draft_year = 2020,
+  // Both projection inputs use `null` for "no projection row at all", which is
+  // distinct from a real value of 0. Market salary defaults to absent so a
+  // fixture opts into the shed pool; points added defaults above replacement so
+  // a fixture opts into below-replacement rather than tripping over it.
+  market_salary = null,
+  pts_added = 25
 }) => ({
   row: { tid, pid, pos, slot, tag, extensions },
   contract: [contract_key(tid, pid), value],
+  market_salary: market_salary === null ? null : [pid, market_salary],
+  pts_added: pts_added === null ? null : [pid, pts_added],
   dynasty:
     dynasty_value === null
       ? null
@@ -103,6 +111,14 @@ const build_fixture = ({
       specs.filter((spec) => spec.dynasty).map((spec) => spec.dynasty)
     ),
     players: new Map(specs.map((spec) => spec.player)),
+    projected_market_salary: new Map(
+      specs
+        .filter((spec) => spec.market_salary)
+        .map((spec) => spec.market_salary)
+    ),
+    projected_points_added: new Map(
+      specs.filter((spec) => spec.pts_added).map((spec) => spec.pts_added)
+    ),
     rookie_class_year: 2025,
     viewer_tid,
     viewer_cutlist,
@@ -579,33 +595,114 @@ describe('tag board', function () {
       const row = team_board(board, 1).players.find((p) => p.pid === 'RETIRED')
       row.no_market_value.should.equal(true)
       expect(row.dynasty_rank).to.equal(null)
-      expect(row.divergence).to.equal(null)
-      board.divergence.map((r) => r.pid).should.not.include('RETIRED')
     })
   })
 
-  describe('rank divergence', function () {
-    it('reads positive when a contract is paid above its market standing', function () {
+  describe('market gap', function () {
+    it('measures the post-deadline salary against the single-season price', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
           players: [
-            // Highest salary, worst market standing.
-            { tid: 1, pid: 'OVER', value: 90, dynasty_value: 100 },
-            { tid: 1, pid: 'FAIR', value: 5, dynasty_value: 9000 },
-            { tid: 2, pid: 'B1', value: 20, dynasty_value: 5000 }
+            { tid: 1, pid: 'OVER', value: 90, market_salary: 20 },
+            { tid: 1, pid: 'FAIR', value: 5, market_salary: 30 },
+            { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
           ]
         })
       )
 
-      const over = board.divergence.find((row) => row.pid === 'OVER')
-      over.salary_rank.should.equal(1)
-      over.dynasty_rank.should.equal(3)
-      over.divergence.should.equal(2)
-      board.divergence[0].pid.should.equal('OVER')
+      // 90 + (0 + 1) * 5 = 95 against a $20 price.
+      const over = board.market_pool.find((row) => row.pid === 'OVER')
+      over.market_gap.should.equal(75)
+      over.under_pressure.should.equal(true)
+
+      // 5 + 5 = 10 against a $30 price — paid below the market, not shed.
+      const fair = board.market_pool.find((row) => row.pid === 'FAIR')
+      fair.market_gap.should.equal(-20)
+      fair.under_pressure.should.equal(false)
+
+      board.market_pool[0].pid.should.equal('OVER')
     })
 
-    it('excludes tagged contracts from the screen', function () {
+    it('excludes a below-replacement contract from under pressure but keeps it shed-eligible', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            // Overpaid AND below replacement: a cut, not a decision.
+            {
+              tid: 1,
+              pid: 'CUT',
+              value: 20,
+              market_salary: 0,
+              pts_added: -80
+            },
+            { tid: 1, pid: 'PRESSURE', value: 40, market_salary: 15 },
+            { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
+          ]
+        })
+      )
+
+      const cut = board.market_pool.find((row) => row.pid === 'CUT')
+      cut.market_gap.should.equal(25)
+      cut.below_replacement.should.equal(true)
+      cut.under_pressure.should.equal(false)
+      cut.rfa_nomination_target.should.equal(false)
+
+      const pressure = board.market_pool.find((row) => row.pid === 'PRESSURE')
+      pressure.under_pressure.should.equal(true)
+
+      // The shed pool still carries the cut — it is the easiest release there
+      // is, and capacity would understate without it.
+      const capacity = board.bid_capacity.find((row) => row.tid === 1)
+      capacity.attachable_contract_count.should.equal(2)
+      capacity.attachable_release_salary.should.equal(25 + 45)
+    })
+
+    it('keeps a contract with no projection, marked unscreenable and sorted last', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            { tid: 1, pid: 'NOPROJ', value: 30, market_salary: null },
+            { tid: 1, pid: 'OVER', value: 40, market_salary: 5 },
+            { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
+          ]
+        })
+      )
+
+      const row = board.market_pool.find((r) => r.pid === 'NOPROJ')
+      expect(row.market_gap).to.equal(null)
+      row.under_pressure.should.equal(false)
+      board.market_pool.map((r) => r.pid).should.include('NOPROJ')
+      board.market_pool[board.market_pool.length - 1].pid.should.equal('NOPROJ')
+    })
+
+    it('gates a nomination target on the owner holding a nomination', function () {
+      const spent_both = build_fixture({
+        teams: two_teams,
+        players: [
+          { tid: 1, pid: 'TARGET', value: 40, market_salary: 5 },
+          { tid: 2, pid: 'B1', value: 20, market_salary: 10 },
+          { tid: 2, pid: 'B2', tag: 4, value: 20, market_salary: 10 },
+          { tid: 2, pid: 'B3', tag: 4, value: 20, market_salary: 10 }
+        ]
+      })
+      const board = build_tag_board(spent_both)
+
+      board.market_pool
+        .find((row) => row.pid === 'TARGET')
+        .rfa_nomination_target.should.equal(true)
+
+      const beta = board.tag_budget.find((row) => row.tid === 2)
+      beta.restricted_free_agency.remaining.should.equal(0)
+      board.market_pool
+        .filter((row) => row.tid === 2)
+        .every((row) => row.rfa_nomination_target === false)
+        .should.equal(true)
+    })
+
+    it('excludes tagged contracts from the pool', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -616,15 +713,15 @@ describe('tag board', function () {
               pos: 'RB',
               tag: 2,
               value: 90,
-              dynasty_value: 100
+              market_salary: 5
             },
-            { tid: 1, pid: 'FAIR', value: 5, dynasty_value: 9000 },
-            { tid: 2, pid: 'B1', value: 20, dynasty_value: 5000 }
+            { tid: 1, pid: 'FAIR', value: 5, market_salary: 30 },
+            { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
           ]
         })
       )
 
-      board.divergence.map((row) => row.pid).should.not.include('TAGGED')
+      board.market_pool.map((row) => row.pid).should.not.include('TAGGED')
     })
   })
 
@@ -634,15 +731,16 @@ describe('tag board', function () {
         build_fixture({
           teams: two_teams,
           players: [
-            { tid: 1, pid: 'OVER', value: 90, dynasty_value: 100 },
-            { tid: 1, pid: 'FAIR', value: 5, dynasty_value: 9000 },
-            { tid: 2, pid: 'B1', value: 20, dynasty_value: 5000 }
+            { tid: 1, pid: 'OVER', value: 90, market_salary: 20 },
+            { tid: 1, pid: 'FAIR', value: 5, market_salary: 30 },
+            { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
           ]
         })
       )
 
       const capacity = board.bid_capacity.find((row) => row.tid === 1)
-      // 200 - (95 + 10) = 95 of room, plus the $95 overpaid contract.
+      // 200 - (95 + 10) = 95 of room, plus the $95 contract priced above the
+      // market. FAIR is paid below its price and is not shed-eligible.
       capacity.cap_room.should.equal(95)
       capacity.attachable_release_salary.should.equal(95)
       capacity.capacity.should.equal(190)
@@ -842,7 +940,7 @@ describe('tag board', function () {
       rules_fired(board, 2).should.not.include('constrained_bidder')
     })
 
-    it('names the divergence between the largest saving and the best-ranked candidate', function () {
+    it('names the tension between the largest saving and the best-ranked candidate', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -915,7 +1013,8 @@ describe('tag board', function () {
               pos: 'TE',
               value: 17,
               extensions: 2,
-              dynasty_value: 500
+              dynasty_value: 500,
+              pts_added: null
             },
             { tid: 2, pid: 'B1', value: 10, dynasty_value: 5000 }
           ]
@@ -930,7 +1029,7 @@ describe('tag board', function () {
       row.eligibility.franchise.should.equal(true)
     })
 
-    it('withholds the divergence once the franchise tag is already spent', function () {
+    it('withholds the saving-versus-quality tension once the franchise tag is set', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
