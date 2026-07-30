@@ -4420,7 +4420,7 @@ CREATE TABLE public.league_scoring_formats (
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     exclude_quarterback_kneels boolean DEFAULT false NOT NULL,
-    fumble_return_touchdowns numeric DEFAULT 0 NOT NULL,
+    fumble_return_touchdowns smallint NOT NULL,
     id text NOT NULL
 );
 
