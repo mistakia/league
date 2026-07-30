@@ -326,11 +326,36 @@ const walk_transactions = async ({ lid }) => {
       } else {
         note_warning('super_priority_no_released_holding')
       }
+      // The restored salary AMOUNT is already resolved at write time by
+      // process-super-priority.mjs, which walks back to the last PRACTICE_ADD /
+      // DRAFT / ROSTER_DEACTIVATE on the original team and stamps it on the
+      // transaction, so event.value is authoritative and needs no re-derivation
+      // here. The BASIS is not carried on the transaction, and it is not always
+      // the PS rate: ROSTER_DEACTIVATE copies the salary forward untouched, so
+      // a drafted rookie returns on a rookie contract and a free-agent signing
+      // demoted to the practice squad returns on its auction basis. Recover it
+      // from the last holding this team held on the player.
+      let pre_poach
+      for (const candidate of ctx.holding_drafts) {
+        if (candidate.asset_type !== ASSET_TYPE.PLAYER) continue
+        if (candidate.player_id !== event.player_id) continue
+        if (candidate.tid !== event.tid) continue
+        if (candidate.period_start.getTime() > event.occurred_at.getTime())
+          continue
+        if (!pre_poach || candidate.period_start > pre_poach.period_start) {
+          pre_poach = candidate
+        }
+      }
+      if (!pre_poach) {
+        note_warning('super_priority_resign_no_pre_poach_holding')
+      }
       const opened = open_player_holding({
         tid: event.tid,
         player_id: event.player_id,
         occurred_at: event.occurred_at,
-        salary_basis: SALARY_BASIS.PS_SALARY,
+        salary_basis: pre_poach
+          ? pre_poach.salary_basis
+          : SALARY_BASIS.PS_SALARY,
         salary_paid: event.value ?? released?.salary_paid ?? null,
         year: event.year
       })
