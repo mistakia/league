@@ -157,15 +157,29 @@ api.use('/api/*', (req, res, next) => {
 api.use('/api/scoreboard', routes.scoreboard)
 api.use('/api/me', routes.me)
 api.use('/api/settings', routes.settings)
+// `fallthrough: false` so a MISSING bundle asset 404s here instead of reaching
+// the SPA catch-all below. With fallthrough the catch-all answered every absent
+// chunk with `200 text/html` and index.html's body, so the browser parsed
+// `<!doctype html>` as JavaScript and reported `SyntaxError: Unexpected token
+// '<'` — an error naming neither the asset nor the deploy that dropped it
+// (signal #123576). A 404 is what webpack's chunk loader expects and what makes
+// served-client drift diagnosable. Matches the `/static` and `/docs` mounts.
 api.use(
   '/dist',
   express.static(path.join(__dirname, '../', 'dist'), {
-    fallthrough: true,
+    fallthrough: false,
     setHeaders: (res, path) => {
       // Set Cache-Control to cache forever
       res.set('Cache-Control', 'public, max-age=31536000, immutable')
     }
-  })
+  }),
+  (err, req, res, next) => {
+    if (err) {
+      res.status(404).send('Asset not found')
+    } else {
+      next()
+    }
+  }
 )
 api.use(
   '/static',
