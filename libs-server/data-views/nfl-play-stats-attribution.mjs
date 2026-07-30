@@ -107,10 +107,29 @@ export const FUMBLE_RETURN_TOUCHDOWN_STAT_IDS = [56, 58, 60, 62]
 // rows are the source of truth here as everywhere else in this module.
 export const FUMBLE_LOST_STAT_IDS = [106]
 
+// stat_ids that credit a punt return touchdown (34) or the same after a lateral
+// (36), and a kickoff return touchdown (46) or the same after a lateral (48).
+// Like the fumble-return-TD stat_ids, none of these appear in
+// generate-player-gamelogs.mjs STAT_ID_TO_ROLE_PID_COLUMN, so neither role
+// carries a fallback: nfl_plays names no returner column these could read.
+export const PUNT_RETURN_TOUCHDOWN_STAT_IDS = [34, 36]
+export const KICKOFF_RETURN_TOUCHDOWN_STAT_IDS = [46, 48]
+
 export const fumble_return_touchdown_attribution =
   create_play_stats_attribution({
     stat_ids: FUMBLE_RETURN_TOUCHDOWN_STAT_IDS,
     alias_prefix: 'fumble_return_td'
+  })
+
+export const punt_return_touchdown_attribution = create_play_stats_attribution({
+  stat_ids: PUNT_RETURN_TOUCHDOWN_STAT_IDS,
+  alias_prefix: 'punt_return_td'
+})
+
+export const kickoff_return_touchdown_attribution =
+  create_play_stats_attribution({
+    stat_ids: KICKOFF_RETURN_TOUCHDOWN_STAT_IDS,
+    alias_prefix: 'kickoff_return_td'
   })
 
 export const fumble_lost_attribution = create_play_stats_attribution({

@@ -12,7 +12,11 @@ import get_effective_years from '#libs-server/data-views/get-effective-years.mjs
 import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 import {
   fumble_return_touchdown_attribution,
-  fumble_lost_attribution
+  fumble_lost_attribution,
+  punt_return_touchdown_attribution,
+  kickoff_return_touchdown_attribution,
+  PUNT_RETURN_TOUCHDOWN_STAT_IDS,
+  KICKOFF_RETURN_TOUCHDOWN_STAT_IDS
 } from '#libs-server/data-views/nfl-play-stats-attribution.mjs'
 
 const FP_OUTPUT_PERIODS = [
@@ -190,11 +194,38 @@ const fantasy_points_from_plays_with = async ({
     Number(
       await generate_fumble_return_touchdown_scoring_inner(scoring_format)
     ) !== 0
+  const punt_return_touchdown_scoring =
+    await generate_punt_return_touchdown_scoring_sql(scoring_format)
+  const kickoff_return_touchdown_scoring =
+    await generate_kickoff_return_touchdown_scoring_sql(scoring_format)
+  const scores_punt_return_touchdowns =
+    Number(
+      await generate_punt_return_touchdown_scoring_inner(scoring_format)
+    ) !== 0
+  const scores_kickoff_return_touchdowns =
+    Number(
+      await generate_kickoff_return_touchdown_scoring_inner(scoring_format)
+    ) !== 0
 
   // Apply parameter-based filters to each union query using proper query builder
   const filtered_params = { ...params, seas_type }
   delete filtered_params.career_year
   delete filtered_params.career_game
+
+  // The return-touchdown roles are the only ones whose plays carry NONE of the
+  // four pid columns below: a punt or kickoff return is not a rush, pass,
+  // target or fumble, and nfl_plays names no returner. Measured against
+  // production, only 4 of the 732 valid return-TD stat rows sit on a play that
+  // satisfies the pid predicate, so without widening it the roles would be
+  // correct and find nothing. The EXISTS is emitted only when a role is
+  // actually scored, so a format scoring return TDs at zero gets byte-identical
+  // SQL to before.
+  const return_touchdown_stat_ids = [
+    ...(scores_punt_return_touchdowns ? PUNT_RETURN_TOUCHDOWN_STAT_IDS : []),
+    ...(scores_kickoff_return_touchdowns
+      ? KICKOFF_RETURN_TOUCHDOWN_STAT_IDS
+      : [])
+  ]
 
   // Create shared CTE with basic filtering
   const filtered_plays_cte = db('nfl_plays')
@@ -205,6 +236,16 @@ const fantasy_points_from_plays_with = async ({
         .orWhereNotNull('nfl_plays.passer_pid')
         .orWhereNotNull('nfl_plays.target_pid')
         .orWhereNotNull('nfl_plays.player_fuml_pid')
+      if (return_touchdown_stat_ids.length) {
+        this.orWhereExists(function () {
+          this.select(db.raw('1'))
+            .from('nfl_play_stats as return_td_gate')
+            .whereRaw('"return_td_gate"."esbid" = "nfl_plays"."esbid"')
+            .whereRaw('"return_td_gate"."play_id" = "nfl_plays"."play_id"')
+            .whereIn('return_td_gate.stat_id', return_touchdown_stat_ids)
+            .where('return_td_gate.valid', true)
+        })
+      }
     })
 
   // Select only the columns we need to reduce data transfer
@@ -240,9 +281,13 @@ const fantasy_points_from_plays_with = async ({
     select_columns.push('nfl_plays.player_fuml_pid')
   }
 
-  // The stat-sourced fumble subqueries join nfl_play_stats on
-  // (esbid, play_id), so the CTE has to carry both.
-  if (scores_fumbles_lost || scores_fumble_return_touchdowns) {
+  // The stat-sourced fumble and return-touchdown subqueries join
+  // nfl_play_stats on (esbid, play_id), so the CTE has to carry both.
+  if (
+    scores_fumbles_lost ||
+    scores_fumble_return_touchdowns ||
+    return_touchdown_stat_ids.length
+  ) {
     if (!select_columns.includes('nfl_plays.esbid')) {
       select_columns.push('nfl_plays.esbid')
     }
@@ -384,6 +429,16 @@ const fantasy_points_from_plays_with = async ({
     scoring: fumble_return_touchdown_scoring
   })
 
+  const punt_return_touchdown_subquery = build_play_stats_subquery({
+    attribution: punt_return_touchdown_attribution,
+    scoring: punt_return_touchdown_scoring
+  })
+
+  const kickoff_return_touchdown_subquery = build_play_stats_subquery({
+    attribution: kickoff_return_touchdown_attribution,
+    scoring: kickoff_return_touchdown_scoring
+  })
+
   // Combine with UNION ALL
   // Use subquery_output_columns_list if we have career parameters, otherwise use output_columns_list
   const union_columns_list =
@@ -418,6 +473,22 @@ const fantasy_points_from_plays_with = async ({
               this.select('*').from(
                 fumble_return_touchdown_subquery.as(
                   'fumble_return_touchdown_stats'
+                )
+              )
+            })
+          }
+          if (scores_punt_return_touchdowns) {
+            builder.unionAll(function () {
+              this.select('*').from(
+                punt_return_touchdown_subquery.as('punt_return_touchdown_stats')
+              )
+            })
+          }
+          if (scores_kickoff_return_touchdowns) {
+            builder.unionAll(function () {
+              this.select('*').from(
+                kickoff_return_touchdown_subquery.as(
+                  'kickoff_return_touchdown_stats'
                 )
               )
             })
@@ -648,6 +719,44 @@ const generate_fumble_return_touchdown_scoring_inner = async (
 const generate_fumble_return_touchdown_scoring_sql = async (scoring_format) =>
   `ROUND(SUM(${await generate_fumble_return_touchdown_scoring_inner(scoring_format)}), 2)`
 
+// Per-row punt / kickoff return touchdown value. Same shape as the fumble
+// return touchdown above: the role's join restricts to plays carrying the
+// relevant stat row, so the expression is the flat per-touchdown value.
+//
+// nfl_plays names no returner column, so these roles exist only because the
+// player identity is read from nfl_play_stats. Without them the from-plays
+// path credited return touchdowns to nobody, which is the source of the
+// recurring -6 and -12 per-player deltas against gamelog fantasy points.
+const generate_punt_return_touchdown_scoring_inner = async (scoring_format) => {
+  if (!scoring_format) {
+    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
+    if (!scoring_format) {
+      return '6'
+    }
+  }
+
+  return String(scoring_format.punt_return_touchdowns || 0)
+}
+
+const generate_punt_return_touchdown_scoring_sql = async (scoring_format) =>
+  `ROUND(SUM(${await generate_punt_return_touchdown_scoring_inner(scoring_format)}), 2)`
+
+const generate_kickoff_return_touchdown_scoring_inner = async (
+  scoring_format
+) => {
+  if (!scoring_format) {
+    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
+    if (!scoring_format) {
+      return '6'
+    }
+  }
+
+  return String(scoring_format.kickoff_return_touchdowns || 0)
+}
+
+const generate_kickoff_return_touchdown_scoring_sql = async (scoring_format) =>
+  `ROUND(SUM(${await generate_kickoff_return_touchdown_scoring_inner(scoring_format)}), 2)`
+
 const should_use_main_where = ({ params }) => {
   // Equal-endpoint offsets ([k,k]) are a single-year shift, not a range: the
   // CTE stays collapsed and the source join correlates the single year, so the
@@ -676,6 +785,10 @@ const fp_role_attributions = async ({ params }) => {
   const fumble_inner = await generate_fumble_scoring_inner(scoring_format)
   const fumble_return_touchdown_inner =
     await generate_fumble_return_touchdown_scoring_inner(scoring_format)
+  const punt_return_touchdown_inner =
+    await generate_punt_return_touchdown_scoring_inner(scoring_format)
+  const kickoff_return_touchdown_inner =
+    await generate_kickoff_return_touchdown_scoring_inner(scoring_format)
   const roles = [
     { pid_column: 'ball_carrier_pid', measure_expr: rushing_inner },
     { pid_column: 'passer_pid', measure_expr: passing_inner },
@@ -683,8 +796,7 @@ const fp_role_attributions = async ({ params }) => {
   ]
   // Skip a stat-sourced role entirely when the format scores it at zero -- the
   // joins are pure cost for a term that is always zero, and omitting them keeps
-  // the emitted SQL unchanged for the formats that carry 0 (existing user
-  // leagues, in the fumble-return-TD case).
+  // the emitted SQL unchanged for the formats that carry 0.
   if (Number(fumble_inner) !== 0) {
     roles.push({
       pid_expr: fumble_lost_attribution.pid_expr,
@@ -697,6 +809,20 @@ const fp_role_attributions = async ({ params }) => {
       pid_expr: fumble_return_touchdown_attribution.pid_expr,
       apply_joins: fumble_return_touchdown_attribution.apply_joins,
       measure_expr: fumble_return_touchdown_inner
+    })
+  }
+  if (Number(punt_return_touchdown_inner) !== 0) {
+    roles.push({
+      pid_expr: punt_return_touchdown_attribution.pid_expr,
+      apply_joins: punt_return_touchdown_attribution.apply_joins,
+      measure_expr: punt_return_touchdown_inner
+    })
+  }
+  if (Number(kickoff_return_touchdown_inner) !== 0) {
+    roles.push({
+      pid_expr: kickoff_return_touchdown_attribution.pid_expr,
+      apply_joins: kickoff_return_touchdown_attribution.apply_joins,
+      measure_expr: kickoff_return_touchdown_inner
     })
   }
   return roles
