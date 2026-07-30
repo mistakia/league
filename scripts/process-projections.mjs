@@ -484,6 +484,8 @@ const process_league = async ({ year, lid }) => {
   }
 
   const valueInserts = []
+  const season_value_inserts = []
+  const rest_of_season_value_inserts = []
   for (const player_row of player_rows) {
     if (!projection_pids.includes(player_row.pid)) {
       continue
@@ -500,21 +502,42 @@ const process_league = async ({ year, lid }) => {
     )
     player_row.market_salary_adj = market_salary_adj
 
+    // The period sentinels are no longer written into the week column. This loop
+    // was period-blind by construction -- calculatePlayerValuesRestOfSeason adds
+    // a 'ros' key and calculatePrices adds a '0' key to the same map the numeric
+    // weeks live in -- which is exactly what let the sentinels accumulate. Each
+    // period now routes to its own table.
     for (const [week, salary_adj_pts_added] of Object.entries(
       player_row.salary_adj_pts_added
     )) {
-      const params = {
+      if (week === '0') {
+        season_value_inserts.push({
+          pid: player_row.pid,
+          year: current_season.year,
+          lid,
+          salary_adj_pts_added,
+          market_salary_adj
+        })
+        continue
+      }
+
+      if (week === 'ros') {
+        rest_of_season_value_inserts.push({
+          pid: player_row.pid,
+          year: current_season.year,
+          lid,
+          salary_adj_pts_added
+        })
+        continue
+      }
+
+      valueInserts.push({
         pid: player_row.pid,
         year: current_season.year,
         lid,
         week,
         salary_adj_pts_added
-      }
-
-      if (week === '0') {
-        params.market_salary_adj = market_salary_adj
-      }
-      valueInserts.push(params)
+      })
     }
   }
 
@@ -561,6 +584,41 @@ const process_league = async ({ year, lid }) => {
       batch_size: 100
     })
     log(`processed and saved ${valueInserts.length} player values`)
+  }
+
+  // Each period table is refreshed with the same delete-by-lid then reinsert
+  // shape as the week table above, so a player dropping out of the projection
+  // set does not leave a stale row behind.
+  if (season_value_inserts.length) {
+    await db('league_player_season_projection_values').del().where({ lid })
+    await batch_insert({
+      items: season_value_inserts,
+      save: (items) =>
+        db('league_player_season_projection_values')
+          .insert(items)
+          .onConflict(['pid', 'lid', 'year'])
+          .merge(),
+      batch_size: 100
+    })
+    log(`saved ${season_value_inserts.length} season player values`)
+  }
+
+  if (rest_of_season_value_inserts.length) {
+    await db('league_player_rest_of_season_projection_values')
+      .del()
+      .where({ lid })
+    await batch_insert({
+      items: rest_of_season_value_inserts,
+      save: (items) =>
+        db('league_player_rest_of_season_projection_values')
+          .insert(items)
+          .onConflict(['pid', 'lid', 'year'])
+          .merge(),
+      batch_size: 100
+    })
+    log(
+      `saved ${rest_of_season_value_inserts.length} rest of season player values`
+    )
   }
 
   if (current_season.week <= current_season.finalWeek) {

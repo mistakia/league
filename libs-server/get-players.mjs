@@ -412,6 +412,12 @@ export default async function ({
 
   if (leagueId) {
     // include salary adjusted points added and inflation adjusted market salary
+    // Three periods, three tables, since the period sentinels were hoisted out
+    // of the week column. The payload KEYS are deliberately unchanged -- '0' for
+    // the season snapshot and 'ros' for rest of season -- because the SPA period
+    // conditionals (trade-player.js:11, player-roster.js:67 and siblings) index
+    // this map by those strings. Renaming the keys is a separate coordinated
+    // change; doing it here would break the client without a matching bundle.
     const leagueValuesProj = await db('league_player_projection_values')
       .where({
         lid: leagueId,
@@ -419,14 +425,39 @@ export default async function ({
       })
       .whereIn('pid', returnedPlayerIds)
 
-    for (const pointProjection of leagueValuesProj) {
-      const { pid, week, salary_adj_pts_added, market_salary_adj } =
-        pointProjection
+    for (const { pid, week, salary_adj_pts_added } of leagueValuesProj) {
       players_by_pid[pid].salary_adj_pts_added[week] = salary_adj_pts_added
+    }
 
-      if (pointProjection.week === '0') {
-        players_by_pid[pid].market_salary_adj = market_salary_adj
-      }
+    const league_season_values = await db(
+      'league_player_season_projection_values'
+    )
+      .where({
+        lid: leagueId,
+        year: current_season.year
+      })
+      .whereIn('pid', returnedPlayerIds)
+
+    for (const {
+      pid,
+      salary_adj_pts_added,
+      market_salary_adj
+    } of league_season_values) {
+      players_by_pid[pid].salary_adj_pts_added['0'] = salary_adj_pts_added
+      players_by_pid[pid].market_salary_adj = market_salary_adj
+    }
+
+    const league_rest_of_season_values = await db(
+      'league_player_rest_of_season_projection_values'
+    )
+      .where({
+        lid: leagueId,
+        year: current_season.year
+      })
+      .whereIn('pid', returnedPlayerIds)
+
+    for (const { pid, salary_adj_pts_added } of league_rest_of_season_values) {
+      players_by_pid[pid].salary_adj_pts_added.ros = salary_adj_pts_added
     }
   }
 

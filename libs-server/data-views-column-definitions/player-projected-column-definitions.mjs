@@ -114,6 +114,27 @@ const league_player_projection_values_table_alias = ({ params = {} }) => {
   )
 }
 
+// The two period tables carry no week column, so their aliases key on year and
+// league only. Including the week dimension the way the week table's alias does
+// would split one join into one-per-requested-week for no benefit.
+const league_player_season_projection_values_table_alias = ({
+  params = {}
+}) => {
+  const p = get_default_params({ params })
+  return get_table_hash(
+    `league_player_season_projection_values_${p.year}_league_${p.league_id}`
+  )
+}
+
+const league_player_rest_of_season_projection_values_table_alias = ({
+  params = {}
+}) => {
+  const p = get_default_params({ params })
+  return get_table_hash(
+    `league_player_rest_of_season_projection_values_${p.year}_league_${p.league_id}`
+  )
+}
+
 const league_format_player_projection_values_table_alias = ({
   params = {}
 }) => {
@@ -259,6 +280,48 @@ const make_league_player_projection_source = () => ({
     })
   }
 })
+
+// Season and rest-of-season share a shape: grained (pid, lid, year) with no week
+// column. `join_week: false` is load-bearing rather than tidy -- apply_projected_join
+// defaults it to true and falls back to `params.week || 0`, so omitting it emits a
+// week predicate against a column that does not exist.
+const make_league_player_period_projection_source =
+  ({ table }) =>
+  () => ({
+    grain: 'player',
+    table,
+    attach_owns_join: true,
+    year_default: (params) => [get_default_params({ params }).year],
+    extra_predicates: (params) => {
+      const { league_id } = get_default_params({ params })
+      return [{ column: 'lid', value: league_id }]
+    },
+    attach: ({ query_context, params, table_alias, join_type }) => {
+      const { league_id } = get_default_params({ params })
+      apply_projected_join({
+        query_context,
+        params,
+        table_alias,
+        join_type,
+        join_table_clause: `${table} as ${table_alias}`,
+        join_year: true,
+        join_week: false,
+        additional_conditions() {
+          this.andOn(`${table_alias}.lid`, '=', db.raw('?', [league_id]))
+        }
+      })
+    }
+  })
+
+const make_league_player_season_projection_source =
+  make_league_player_period_projection_source({
+    table: 'league_player_season_projection_values'
+  })
+
+const make_league_player_rest_of_season_projection_source =
+  make_league_player_period_projection_source({
+    table: 'league_player_rest_of_season_projection_values'
+  })
 
 const make_league_format_player_projection_source = ({
   is_rest_of_season = false
@@ -567,10 +630,34 @@ const player_projected_market_salary = {
   source_factory: make_league_format_player_projection_source
 }
 
-const player_projected_salary_adjusted_points_added = {
-  column_name: 'salary_adj_pts_added',
-  table_alias: league_player_projection_values_table_alias,
-  source_factory: make_league_player_projection_source
+// Registered explicitly per period below rather than fanned out by
+// create_projected_stat. The fan-out shares one table_alias and one source across
+// all three prefixes, which is what produced the latent defect here: every prefix
+// resolved to whatever params.week was (default 0), so the season and
+// rest-of-season columns silently returned a per-week value instead of their own
+// period. Now each period reads its own table.
+const player_projected_salary_adjusted_points_added_periods = {
+  player_week_projected_salary_adjusted_points_added: {
+    column_name: 'salary_adj_pts_added',
+    table_alias: league_player_projection_values_table_alias,
+    select_as: () => 'week_projected_salary_adjusted_points_added',
+    source: make_league_player_projection_source(),
+    get_cache_info: get_cache_info_for_player_projected_stats
+  },
+  player_season_projected_salary_adjusted_points_added: {
+    column_name: 'salary_adj_pts_added',
+    table_alias: league_player_season_projection_values_table_alias,
+    select_as: () => 'season_projected_salary_adjusted_points_added',
+    source: make_league_player_season_projection_source(),
+    get_cache_info: get_cache_info_for_player_projected_stats
+  },
+  player_rest_of_season_projected_salary_adjusted_points_added: {
+    column_name: 'salary_adj_pts_added',
+    table_alias: league_player_rest_of_season_projection_values_table_alias,
+    select_as: () => 'rest_of_season_projected_salary_adjusted_points_added',
+    source: make_league_player_rest_of_season_projection_source(),
+    get_cache_info: get_cache_info_for_player_projected_stats
+  }
 }
 
 // Projected fantasy points are computed in-query from the projections_index /
@@ -673,10 +760,7 @@ const create_projected_stat = (base, stat_name) => {
 
 const projected_stat_column_defintions = {
   ...create_projected_stat(player_projected_market_salary, 'market_salary'),
-  ...create_projected_stat(
-    player_projected_salary_adjusted_points_added,
-    'salary_adjusted_points_added'
-  ),
+  ...player_projected_salary_adjusted_points_added_periods,
   ...create_projected_stat(player_projected_points_added, 'points_added'),
   ...create_projected_stat(player_projected_points, 'points'),
   ...create_projected_stat(
@@ -722,11 +806,15 @@ const projected_stat_column_defintions = {
 }
 
 export default {
+  // market_salary_adj moved to the season table: it was non-null on the week='0'
+  // row only and NULL on every other week, so it was a sentinel-only column on a
+  // per-week table. This column was already reading the season period by way of
+  // the week=0 default; it now says so, and survives the week narrowing.
   player_season_projected_inflation_adjusted_market_salary: {
     column_name: 'market_salary_adj',
-    table_alias: league_player_projection_values_table_alias,
+    table_alias: league_player_season_projection_values_table_alias,
     select_as: () => 'player_season_projected_inflation_adjusted_market_salary',
-    source: make_league_player_projection_source(),
+    source: make_league_player_season_projection_source(),
     get_cache_info: get_cache_info_for_player_projected_stats
   },
 
