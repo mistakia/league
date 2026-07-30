@@ -1030,6 +1030,18 @@ const generate_player_gamelogs = async ({
     player_gamelog_inserts
   })
 
+  // Hand the caller the generated rows before any write, so a before/after
+  // comparison of a generator change can diff them column by column without
+  // touching the database. The parameter existed but was never read.
+  if (collector) {
+    collector({
+      player_gamelog_inserts,
+      player_receiving_gamelog_inserts,
+      player_rushing_gamelog_inserts,
+      team_gamelog_inserts
+    })
+  }
+
   if (dry_run) {
     log(player_gamelog_inserts[0])
     log(player_receiving_gamelog_inserts[0])
