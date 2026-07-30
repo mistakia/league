@@ -59,10 +59,12 @@ if [ -n "$dirty" ]; then
     "yours. If the dirt belongs to someone else, build from a throwaway worktree" \
     "pinned to the pushed ref instead:" \
     "" \
-    "  git worktree add /tmp/league-deploy origin/master" \
-    "  ln -s \"\$PWD/node_modules\" /tmp/league-deploy/node_modules" \
-    "  cd /tmp/league-deploy && yarn build && yarn deploy:dist && yarn deploy:sourcemaps" \
-    "  cd - && git worktree remove /tmp/league-deploy"
+    "  WT=/tmp/league-deploy-\$\$   # unique per run: several sessions share this" \
+    "                             # checkout and a fixed path collides" \
+    "  git worktree add \"\$WT\" origin/master" \
+    "  ln -s \"\$PWD/node_modules\" \"\$WT/node_modules\"" \
+    "  cd \"\$WT\" && yarn build && yarn deploy:dist && yarn deploy:sourcemaps" \
+    "  cd - && rm -f \"\$WT/node_modules\" && git worktree remove \"\$WT\""
 fi
 
 # (1) unpushed / behind
