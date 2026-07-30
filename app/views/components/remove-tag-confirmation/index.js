@@ -19,7 +19,7 @@ const map_state_to_props = createSelector(
 )
 
 const map_dispatch_to_props = {
-  remove: roster_actions.removeTag
+  remove: roster_actions.remove_tag
 }
 
 export default connect(

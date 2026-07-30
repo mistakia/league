@@ -16,7 +16,7 @@ const map_state_to_props = createSelector(
 )
 
 const map_dispatch_to_props = {
-  update: stat_actions.updateQualifier
+  update: stat_actions.update_qualifier
 }
 
 export default connect(
