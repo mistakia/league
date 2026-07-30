@@ -596,7 +596,7 @@ const process_league = async ({ year, lid }) => {
       save: (items) =>
         db('league_player_season_projection_values')
           .insert(items)
-          .onConflict(['pid', 'lid', 'year'])
+          .onConflict(['pid', 'lid', 'season_year'])
           .merge(),
       batch_size: 100
     })
@@ -612,7 +612,7 @@ const process_league = async ({ year, lid }) => {
       save: (items) =>
         db('league_player_rest_of_season_projection_values')
           .insert(items)
-          .onConflict(['pid', 'lid', 'year'])
+          .onConflict(['pid', 'lid', 'season_year'])
           .merge(),
       batch_size: 100
     })
