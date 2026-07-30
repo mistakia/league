@@ -517,6 +517,12 @@ export default {
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
+  player_fantasypoints_id: {
+    table_name: 'player',
+    column_name: 'fantasypoints_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
   player_sumer_id: {
     table_name: 'player',
     column_name: 'sumer_player_id',

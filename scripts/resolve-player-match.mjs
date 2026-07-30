@@ -113,7 +113,8 @@ const EXTERNAL_ID_COLUMNS = [
   'fantasy_data_player_id',
   'rts_player_id',
   'fleaflicker_player_id',
-  'underdog_player_id'
+  'underdog_player_id',
+  'fantasypoints_player_id'
 ]
 
 const column_to_flag = (column) => column.replace(/_/g, '-')

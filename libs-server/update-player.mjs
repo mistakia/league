@@ -38,7 +38,8 @@ const protected_props = [
   'draftkings_player_id',
   'fantasylabs_player_id',
   'cfbref_player_id',
-  'underdog_player_id'
+  'underdog_player_id',
+  'fantasypoints_player_id'
 ]
 
 const combine_protected_props = ['height_inches', 'weight_pounds']

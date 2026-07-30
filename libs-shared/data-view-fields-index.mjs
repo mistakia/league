@@ -970,6 +970,7 @@ export default {
   player_cfbref_id: "Player's ID in the College Football Reference database",
   player_swish_id: "Player's ID in the Swish Analytics database",
   player_underdog_id: "Player's ID in the Underdog Fantasy platform",
+  player_fantasypoints_id: "Player's ID in the FantasyPoints data suite",
   player_sumer_id: "Player's ID in the Sumer Sports database",
   player_fantasylabs_id: "Player's ID in the FantasyLabs database",
   player_fantrax_id: "Player's ID in the Fantrax platform",

@@ -141,6 +141,7 @@ const find_player_row = async ({
   ffpc_player_id,
   nffc_player_id,
   fantrax_player_id,
+  fantasypoints_player_id,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -203,6 +204,8 @@ const find_player_row = async ({
     query.where({ nffc_player_id })
   } else if (fantrax_player_id) {
     query.where({ fantrax_player_id })
+  } else if (fantasypoints_player_id) {
+    query.where({ fantasypoints_player_id })
   } else {
     if (name) {
       const formatted = format_player_name(name)
