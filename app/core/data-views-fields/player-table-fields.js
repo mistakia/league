@@ -148,6 +148,13 @@ export default function ({ is_logged_in }) {
       data_type: table_constants.TABLE_DATA_TYPES.DATE,
       player_value_path: 'date_of_birth'
     },
+    player_hometown: {
+      column_title: 'Hometown',
+      header_label: 'Hometown',
+      size: 140,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'hometown'
+    },
     player_age: {
       column_title: 'Age',
       header_label: 'Age',
@@ -164,6 +171,73 @@ export default function ({ is_logged_in }) {
       column_groups: [COLUMN_GROUPS.MEASURABLES],
       player_value_path: 'forty_yard_dash_seconds',
       reverse_percentiles: true
+    },
+    player_forty_yard_dash_designation: {
+      column_title: '40 Yard Dash Designation',
+      header_label: 'Forty Desig',
+      size: 90,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'forty_yard_dash_designation'
+    },
+    player_ten_yard_split: {
+      column_title: '10 Yard Split',
+      header_label: '10 Split',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'ten_yard_split_seconds',
+      reverse_percentiles: true
+    },
+    player_ten_yard_split_designation: {
+      column_title: '10 Yard Split Designation',
+      header_label: '10 Split Desig',
+      size: 90,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'ten_yard_split_designation'
+    },
+    player_pro_forty_yard_dash: {
+      column_title: 'Pro Day 40 Yard Dash',
+      header_label: 'Pro Forty',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'pro_day_forty_seconds',
+      reverse_percentiles: true
+    },
+    player_pro_forty_yard_dash_designation: {
+      column_title: 'Pro Day 40 Yard Dash Designation',
+      header_label: 'Pro Forty Desig',
+      size: 90,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'pro_day_forty_designation'
+    },
+    player_sixty_yard_shuttle: {
+      column_title: '60 Yard Shuttle',
+      header_label: '60 Shuttle',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'sixty_yard_shuttle_seconds',
+      reverse_percentiles: true
+    },
+    player_sixty_yard_shuttle_designation: {
+      column_title: '60 Yard Shuttle Designation',
+      header_label: '60 Shuttle Desig',
+      size: 90,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'sixty_yard_shuttle_designation'
+    },
+    player_combine_attendance: {
+      column_title: 'Combine Attendance',
+      header_label: 'Combine',
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'combine_attendance'
     },
     player_bench_press: {
       column_title: 'Bench Press',
@@ -538,12 +612,76 @@ export default function ({ is_logged_in }) {
       player_value_path: 'swish_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
+    player_underdog_id: {
+      column_title: 'Underdog Player ID',
+      header_label: 'Underdog ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'underdog_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_fantasypoints_id: {
+      column_title: 'FantasyPoints Player ID',
+      header_label: 'FantasyPoints ID',
+      size: 110,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'fantasypoints_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_sumer_id: {
+      column_title: 'Sumer Player ID',
+      header_label: 'Sumer ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'sumer_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_fantasylabs_id: {
+      column_title: 'FantasyLabs Player ID',
+      header_label: 'FantasyLabs ID',
+      size: 90,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'fantasylabs_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_fantrax_id: {
+      column_title: 'Fantrax Player ID',
+      header_label: 'Fantrax ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'fantrax_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_ffpc_id: {
+      column_title: 'FFPC Player ID',
+      header_label: 'FFPC ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'ffpc_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_nffc_id: {
+      column_title: 'NFFC Player ID',
+      header_label: 'NFFC ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'nffc_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_sis_id: {
+      column_title: 'SIS Player ID',
+      header_label: 'SIS ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'sis_player_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
     player_rts_id: {
       column_title: 'RTS Player ID',
       header_label: 'RTS ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-      player_value_path: 'rts_id',
+      player_value_path: 'rts_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_fanduel_id: {
@@ -551,7 +689,7 @@ export default function ({ is_logged_in }) {
       header_label: 'FanDuel ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'fanduel_id',
+      player_value_path: 'fanduel_player_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
 
