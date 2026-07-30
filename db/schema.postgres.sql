@@ -79,6 +79,7 @@ DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.players_status_pid_observed_at_key;
 DROP INDEX IF EXISTS public.player_underdog_id_unique;
 DROP INDEX IF EXISTS public.player_name_search_idx;
+DROP INDEX IF EXISTS public.player_fantasypoints_id_unique;
 DROP INDEX IF EXISTS public.play_changelog_natural_key;
 DROP INDEX IF EXISTS public.pff_unresolved_players_season_year_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_season_year_facet_idx;
@@ -19329,6 +19330,7 @@ CREATE TABLE public.player (
     fantasylabs_player_id integer,
     underdog_player_id character varying(36),
     pid character varying(25) NOT NULL,
+    fantasypoints_player_id character varying(12),
     CONSTRAINT player_pid_format CHECK ((((pid)::text ~ '^[A-Z]{1,4}-[A-Z]{1,4}-[0-9]{6,}$'::text) OR ((pid)::text ~ '^[A-Z]{2,3}(-(OFF|DEF|DST))?$'::text)))
 );
 
@@ -42412,6 +42414,13 @@ CREATE INDEX pff_unresolved_players_season_year_idx ON public.pff_unresolved_pla
 --
 
 CREATE UNIQUE INDEX play_changelog_natural_key ON public.play_changelog USING btree (esbid, play_id, column_name, changed_at);
+
+
+--
+-- Name: player_fantasypoints_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_fantasypoints_id_unique ON public.player USING btree (fantasypoints_player_id);
 
 
 --
