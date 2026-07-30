@@ -57,6 +57,19 @@ const expand_position = (pos) => {
     case 'ED':
       normalized = 'DL'
       break
+    // Full-word specialist positions. FantasyPoints emits these for a handful of
+    // rows where every other row uses the abbreviation, and an unnormalized
+    // 'PUNTER' expands only to itself and never matches anything. Normalizing is
+    // safe in a way a K/P/LS expansion group is not: the player table carries
+    // BOTH conventions (207 rows 'P', 557 'K'), and 38 name groups hold the same
+    // punter under each, so cross-matching K and P would turn 38 currently-clean
+    // lookups into MatchedMultiplePlayers across every find_player_row caller.
+    case 'PUNTER':
+      normalized = 'P'
+      break
+    case 'KICKER':
+      normalized = 'K'
+      break
     default:
       normalized = normalized_pos
   }
@@ -78,7 +91,13 @@ const expand_position = (pos) => {
     case 'DT':
     case 'NT':
     case 'EDGE':
-      return ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB']
+      // 'ED' and 'DI' are normalized above but must also appear here as STORED
+      // values: normalization rewrites the incoming query position, while these
+      // lists are matched against primary/secondary/tertiary_position in the
+      // table. Omitting them made every player stored as 'ED' unreachable from
+      // any other position code -- 3 players, including Chop Robinson, who the
+      // FantasyPoints import reported as an unresolvable no-match.
+      return ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB']
 
     // Offensive line - all OL variants including long snappers (often listed as C)
     case 'OL':
@@ -103,7 +122,7 @@ const expand_position = (pos) => {
     case 'OLB':
     case 'ILB':
     case 'MLB':
-      return ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL']
+      return ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'ED', 'DI', 'DE', 'DL']
 
     default:
       return [normalized]
