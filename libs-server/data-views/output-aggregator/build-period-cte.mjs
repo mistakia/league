@@ -171,10 +171,13 @@ const build_role_union_period_cte = ({
       measure_expr: role_measure_expr
     }) => {
       // A role normally names a pid column on the source table. A role whose
-      // player is not identified by any column on nfl_plays (the fumble
-      // recoverer) instead supplies `pid_expr` plus `apply_joins` to reach the
-      // table that does identify them.
-      const pid_reference = pid_expr || `${source_table}.${pid_column}`
+      // player is not identified by any column on nfl_plays (the fumble roles,
+      // sourced from nfl_play_stats) instead supplies `pid_expr` plus
+      // `apply_joins` to reach the table that does identify them. `pid_expr` is
+      // a function of the base relation so it can reference columns on it.
+      const pid_reference = pid_expr
+        ? pid_expr({ plays_table: source_table })
+        : `${source_table}.${pid_column}`
       const sub = db(source_table)
         .select(db.raw(`${pid_reference} AS pid`))
         .select(`${source_table}.esbid`)
