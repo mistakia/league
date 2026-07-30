@@ -43,8 +43,6 @@ import {
   waiver_types,
   fantasy_positions,
   player_nfl_status,
-  all_fantasy_stats,
-  base_fantasy_stats,
   default_points_added
 } from '@constants'
 import { League } from '@core/leagues'
@@ -1070,49 +1068,6 @@ export function getPlayerById(state, { pid, player_map }) {
   if (player_map) return player_map
   const playerMaps = get_player_maps(state)
   return playerMaps.get(pid, Map())
-}
-
-export function getGamesByYearForSelectedPlayer(state) {
-  const pid = state.get('players').get('selected')
-  const player_map = getPlayerById(state, { pid })
-  const gamelogs = get_player_gamelogs(state)
-  const games = gamelogs.filter((p) => p.pid === pid && p.seas_type === 'REG')
-
-  const years = {}
-  for (const game of games) {
-    if (!years[game.year]) years[game.year] = []
-    years[game.year].push(game)
-  }
-
-  // sum yearly values
-  const { leagueId } = get_app(state)
-  const league = state.get('leagues').get(leagueId)
-  const overall = {}
-  for (const year in years) {
-    const initialValue = {}
-    for (const stat of all_fantasy_stats) {
-      initialValue[stat] = 0
-    }
-
-    const sum = years[year].reduce((sums, obj) => {
-      const stats = Object.keys(obj).filter((k) =>
-        base_fantasy_stats.includes(k)
-      )
-      stats.forEach((k) => {
-        sums[k] += obj[k] || 0
-      })
-      return sums
-    }, initialValue)
-    const points = calculatePoints({
-      stats: sum,
-      position: player_map.get('primary_position'),
-      league: league.toJS()
-    })
-    sum.total = points.total
-    overall[year] = sum
-  }
-
-  return { years, overall }
 }
 
 export function get_player_seasonlogs_for_selected_player(state) {

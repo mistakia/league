@@ -9,15 +9,12 @@ function SelectedPlayerSeasonStats({
   player_map,
   player_seasonlogs,
   pos,
-  load,
   load_seasonlogs
 }) {
   useEffect(() => {
     const pid = player_map.get('pid')
-    const position = player_map.get('primary_position')
-    load({ pid, position })
     load_seasonlogs({ pid })
-  }, [player_map, load, load_seasonlogs])
+  }, [player_map, load_seasonlogs])
 
   const seasonlogs = player_seasonlogs.toJS()
   const items = seasonlogs.map((seasonlog, index) => (
@@ -49,7 +46,6 @@ SelectedPlayerSeasonStats.propTypes = {
   pos: PropTypes.string,
   player_map: ImmutablePropTypes.map,
   player_seasonlogs: ImmutablePropTypes.list,
-  load: PropTypes.func,
   load_seasonlogs: PropTypes.func
 }
 
