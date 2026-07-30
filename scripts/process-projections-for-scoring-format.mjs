@@ -65,33 +65,38 @@ export const process_scoring_format_year = async ({
 
     for (const proj of projections_by_pid[pid] || []) {
       const { week, ...stats } = proj
+      // Only `total` is persisted. calculatePoints also returns a per-stat
+      // breakdown of point contributions, but nothing reads it -- see
+      // db/adhoc/2026-07-30-drop-dead-projection-contribution-columns.sql.
+      const { total } = calculatePoints({
+        stats,
+        position: player.primary_position,
+        league: league_scoring_format,
+        use_projected_stats: true
+      })
       points_inserts.push({
         pid,
         year,
         scoring_format_id,
         week,
-        ...calculatePoints({
-          stats,
-          position: player.primary_position,
-          league: league_scoring_format,
-          use_projected_stats: true
-        })
+        total
       })
     }
 
     const ros_row = (ros_by_pid[pid] || [])[0]
     if (ros_row) {
+      const { total } = calculatePoints({
+        stats: ros_row,
+        position: player.primary_position,
+        league: league_scoring_format,
+        use_projected_stats: true
+      })
       points_inserts.push({
         pid,
         year,
         scoring_format_id,
         week: 'ros',
-        ...calculatePoints({
-          stats: ros_row,
-          position: player.primary_position,
-          league: league_scoring_format,
-          use_projected_stats: true
-        })
+        total
       })
     }
   }
