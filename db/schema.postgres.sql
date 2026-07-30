@@ -4358,7 +4358,7 @@ CREATE TABLE public.league_player_projection_values (
 CREATE TABLE public.league_player_rest_of_season_projection_values (
     pid character varying(25),
     lid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     salary_adj_pts_added numeric(5,2)
 );
 
@@ -4370,7 +4370,7 @@ CREATE TABLE public.league_player_rest_of_season_projection_values (
 CREATE TABLE public.league_player_season_projection_values (
     pid character varying(25),
     lid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     salary_adj_pts_added numeric(5,2),
     market_salary_adj numeric(6,2)
 );
@@ -28380,7 +28380,7 @@ ALTER TABLE ONLY public.league_notifications
 --
 
 ALTER TABLE ONLY public.league_player_rest_of_season_projection_values
-    ADD CONSTRAINT league_player_rest_of_season_projection_values_pkey UNIQUE (pid, lid, year);
+    ADD CONSTRAINT league_player_rest_of_season_projection_values_pkey UNIQUE (pid, lid, season_year);
 
 
 --
@@ -28388,7 +28388,7 @@ ALTER TABLE ONLY public.league_player_rest_of_season_projection_values
 --
 
 ALTER TABLE ONLY public.league_player_season_projection_values
-    ADD CONSTRAINT league_player_season_projection_values_pkey UNIQUE (pid, lid, year);
+    ADD CONSTRAINT league_player_season_projection_values_pkey UNIQUE (pid, lid, season_year);
 
 
 --

@@ -513,7 +513,7 @@ const process_league = async ({ year, lid }) => {
       if (week === '0') {
         season_value_inserts.push({
           pid: player_row.pid,
-          year: current_season.year,
+          season_year: current_season.year,
           lid,
           salary_adj_pts_added,
           market_salary_adj
@@ -524,7 +524,7 @@ const process_league = async ({ year, lid }) => {
       if (week === 'ros') {
         rest_of_season_value_inserts.push({
           pid: player_row.pid,
-          year: current_season.year,
+          season_year: current_season.year,
           lid,
           salary_adj_pts_added
         })

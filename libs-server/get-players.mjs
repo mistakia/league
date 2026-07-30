@@ -434,7 +434,7 @@ export default async function ({
     )
       .where({
         lid: leagueId,
-        year: current_season.year
+        season_year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
@@ -452,7 +452,7 @@ export default async function ({
     )
       .where({
         lid: leagueId,
-        year: current_season.year
+        season_year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 

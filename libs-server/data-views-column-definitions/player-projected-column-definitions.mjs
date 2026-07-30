@@ -291,6 +291,10 @@ const make_league_player_period_projection_source =
     grain: 'player',
     table,
     attach_owns_join: true,
+    // season_year, not year -- same reason as make_projections_index_source: the
+    // generic year_offset_range correlated-subquery path re-scans source.table
+    // directly and needs the real column name.
+    key_columns: { year: 'season_year' },
     year_default: (params) => [get_default_params({ params }).year],
     extra_predicates: (params) => {
       const { league_id } = get_default_params({ params })
@@ -306,6 +310,10 @@ const make_league_player_period_projection_source =
         join_table_clause: `${table} as ${table_alias}`,
         join_year: true,
         join_week: false,
+        // These two tables are conformed to season_year. apply_projected_join
+        // defaults join_year_column to 'year', which would emit a predicate on a
+        // column that does not exist here.
+        join_year_column: 'season_year',
         additional_conditions() {
           this.andOn(`${table_alias}.lid`, '=', db.raw('?', [league_id]))
         }
