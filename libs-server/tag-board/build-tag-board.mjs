@@ -47,15 +47,35 @@ const franchise_price_for = ({ pos, season }) => {
  * the EXTENSION costs $0 where a regular extension adds $5 — the contract keeps
  * its recorded value, it does not become a $0 salary. `get_extension_amount`
  * already encodes that, so this delegates rather than special-casing it.
+ *
+ * The projection is only valid BEFORE the deadline. Once `ext_date` passes,
+ * `scripts/process-extensions.mjs` writes a new transaction carrying the
+ * already-extended value AND increments `extensions`, and the board reads
+ * contract value as the latest transaction per team/player — so projecting
+ * again would apply the ladder a second time off a taller base. A $15 contract
+ * with two extensions renders $30 before the deadline and, unguarded, $50
+ * after against a true $30. Nothing fails: every regular contract, the cap
+ * exposure and the market gap all inflate plausibly. After the deadline the
+ * stored value IS the post-deadline salary, for every tag.
  */
-export const post_deadline_salary = ({ tag, pos, extensions, value, season }) =>
-  get_extension_amount({
+export const post_deadline_salary = ({
+  tag,
+  pos,
+  extensions,
+  value,
+  season,
+  now_unix
+}) => {
+  if (now_unix >= season.ext_date) return value
+
+  return get_extension_amount({
     extensions,
     tag,
     pos,
     league: season,
     value
   })
+}
 
 /**
  * Franchise tag eligibility, scoped to the tagging team.
@@ -227,7 +247,8 @@ export default function build_tag_board({
       pos: row.pos,
       extensions: row.extensions,
       value: row.value,
-      season
+      season,
+      now_unix
     })
     row.untagged = row.tag === player_tag_types.REGULAR
     // Franchise saving is the whole screen: the tag replaces the value, so it

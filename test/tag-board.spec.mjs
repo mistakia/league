@@ -94,13 +94,16 @@ const build_fixture = ({
   franchise_tag_history = [],
   viewer_tid = null,
   viewer_cutlist = null,
-  viewer_rfa_bids = null
+  viewer_rfa_bids = null,
+  // Default is pre-deadline; a fixture opts into post-deadline state by passing
+  // an instant at or after `season.ext_date`.
+  now_unix: fixture_now_unix = now_unix
 }) => {
   const specs = player_specs.map(make_player)
   return {
     lid: 1,
     year: 2026,
-    now_unix,
+    now_unix: fixture_now_unix,
     season,
     league_format,
     teams,
@@ -148,7 +151,8 @@ describe('tag board', function () {
         pos: 'WR',
         extensions: 2,
         value: 30,
-        season
+        season,
+        now_unix
       }).should.equal(45)
     })
 
@@ -159,7 +163,8 @@ describe('tag board', function () {
         pos: 'RB',
         extensions: 0,
         value: 61,
-        season
+        season,
+        now_unix
       }).should.equal(41)
     })
 
@@ -171,7 +176,8 @@ describe('tag board', function () {
         pos: 'RB',
         extensions: 0,
         value: 10,
-        season
+        season,
+        now_unix
       }).should.equal(10)
     })
 
@@ -181,8 +187,53 @@ describe('tag board', function () {
         pos: 'WR',
         extensions: 1,
         value: 21,
-        season
+        season,
+        now_unix
       }).should.equal(21)
+    })
+
+    // The ladder is a PROJECTION of an extension that has not happened yet.
+    // Past `ext_date`, process-extensions.mjs has written the extended value as
+    // a new transaction and incremented `extensions`, so the stored value is
+    // already the post-deadline salary and applying the ladder again would
+    // double-extend every regular contract off a taller base.
+    it('applies the ladder one second before the deadline', function () {
+      post_deadline_salary({
+        tag: 1,
+        pos: 'WR',
+        extensions: 2,
+        value: 15,
+        season,
+        now_unix: season.ext_date - 1
+      }).should.equal(30)
+    })
+
+    it('returns the stored value once the deadline has fired', function () {
+      // Not 15 + (3+1)*5 = 35, and not the 30 + (3+1)*5 = 50 the processed row
+      // would produce: after the deadline the transaction carries $30 with
+      // `extensions` already incremented, and $30 is the answer.
+      post_deadline_salary({
+        tag: 1,
+        pos: 'WR',
+        extensions: 3,
+        value: 30,
+        season,
+        now_unix: season.ext_date
+      }).should.equal(30)
+    })
+
+    it('leaves a processed franchise contract at its stored price', function () {
+      // The FRANCHISE_TAG transaction already carries the position price, so
+      // re-deriving it is a no-op here — but a franchise price that had since
+      // moved would otherwise silently overwrite the signed one.
+      post_deadline_salary({
+        tag: 2,
+        pos: 'RB',
+        extensions: 0,
+        value: 41,
+        season,
+        now_unix: season.ext_date + 1
+      }).should.equal(41)
     })
   })
 
@@ -228,6 +279,46 @@ describe('tag board', function () {
       // (150 + 20) + (60 + 5) = 235 against a 200 cap.
       team_exposure(board, 1).post_extension_room.should.equal(-35)
       board.league_market.post_extension_room.teams_over_cap.should.equal(1)
+    })
+
+    // The N.Collins case from the live 2026 board: $15 raw with two extensions
+    // reads $30 before the deadline. Once processed, the transaction carries
+    // $30 and `extensions` is 3, and an ungated ladder would render $50.
+    it('carries the ladder into cap exposure before the deadline', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            { tid: 1, pid: 'COL', value: 15, extensions: 2, market_salary: 12 },
+            { tid: 2, pid: 'B1', value: 10 }
+          ],
+          now_unix: season.ext_date - 1
+        })
+      )
+
+      team_exposure(board, 1).post_extension_salary.should.equal(30)
+      const row = board.market_pool.find((entry) => entry.pid === 'COL')
+      row.post_deadline_salary.should.equal(30)
+      row.market_gap.should.equal(18)
+    })
+
+    it('does not re-apply the ladder to a processed contract', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            { tid: 1, pid: 'COL', value: 30, extensions: 3, market_salary: 12 },
+            { tid: 2, pid: 'B1', value: 10 }
+          ],
+          now_unix: season.ext_date
+        })
+      )
+
+      // 30, not 30 + (3 + 1) * 5 = 50.
+      team_exposure(board, 1).post_extension_salary.should.equal(30)
+      const row = board.market_pool.find((entry) => entry.pid === 'COL')
+      row.post_deadline_salary.should.equal(30)
+      row.market_gap.should.equal(18)
     })
 
     it('counts only active-roster slots', function () {
