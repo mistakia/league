@@ -8,7 +8,8 @@ import build_tag_board, {
   passes_consecutive_year_check,
   build_rfa_schedule,
   resolve_rookie_class_year,
-  COVERAGE_PRECISE_MIN
+  COVERAGE_PRECISE_MIN,
+  RFA_NOMINATION_GAP_FLOOR
 } from '#libs-server/tag-board/build-tag-board.mjs'
 
 chai.should()
@@ -715,18 +716,25 @@ describe('tag board', function () {
       board.market_pool[0].pid.should.equal('OVER')
     })
 
-    it('excludes a below-replacement contract from under pressure but keeps it shed-eligible', function () {
+    // The replacement floor came off `under_pressure` on 2026-07-30: a
+    // one-season price cannot separate a rising rookie from a finished veteran,
+    // so gating on it dropped the ascending players the band exists to surface.
+    // `pts_added` stays on the row as the continuous signal that separates them.
+    it('keeps a below-replacement contract under pressure and annotates it', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
           players: [
-            // Overpaid AND below replacement: a cut, not a decision.
+            // Finished veteran.
+            { tid: 1, pid: 'CUT', value: 20, market_salary: 0, pts_added: -80 },
+            // Ascending rookie: the same $0 price, a very different contract.
             {
               tid: 1,
-              pid: 'CUT',
+              pid: 'RISING',
               value: 20,
               market_salary: 0,
-              pts_added: -80
+              pts_added: -7,
+              dynasty_value: 9000
             },
             { tid: 1, pid: 'PRESSURE', value: 40, market_salary: 15 },
             { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
@@ -737,17 +745,119 @@ describe('tag board', function () {
       const cut = board.market_pool.find((row) => row.pid === 'CUT')
       cut.market_gap.should.equal(25)
       cut.below_replacement.should.equal(true)
-      cut.under_pressure.should.equal(false)
-      cut.rfa_nomination_target.should.equal(false)
+      cut.under_pressure.should.equal(true)
+      cut.projected_points_added.should.equal(-80)
 
-      const pressure = board.market_pool.find((row) => row.pid === 'PRESSURE')
-      pressure.under_pressure.should.equal(true)
+      const rising = board.market_pool.find((row) => row.pid === 'RISING')
+      rising.under_pressure.should.equal(true)
+      rising.projected_points_added.should.equal(-7)
+      // The one signal that orders them: the price clips at $0 for both.
+      rising.projected_market_salary.should.equal(cut.projected_market_salary)
 
-      // The shed pool still carries the cut — it is the easiest release there
-      // is, and capacity would understate without it.
+      board.market_pool
+        .find((row) => row.pid === 'PRESSURE')
+        .under_pressure.should.equal(true)
+
+      // Capacity is unchanged by the screen revision — it has always been the
+      // shed pool, and the shed pool is what `under_pressure` now names.
       const capacity = board.bid_capacity.find((row) => row.tid === 1)
-      capacity.attachable_contract_count.should.equal(2)
-      capacity.attachable_release_salary.should.equal(25 + 45)
+      capacity.attachable_contract_count.should.equal(3)
+      capacity.attachable_release_salary.should.equal(25 + 25 + 45)
+    })
+
+    it('ranks a row against the shed pool, not the league', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            // Highest dynasty value on the board, but paid below the market, so
+            // it is not in the shed pool and carries no pool rank.
+            {
+              tid: 1,
+              pid: 'KEPT',
+              value: 5,
+              market_salary: 60,
+              dynasty_value: 9500
+            },
+            {
+              tid: 1,
+              pid: 'BEST',
+              value: 40,
+              market_salary: 5,
+              dynasty_value: 9000
+            },
+            {
+              tid: 1,
+              pid: 'MID',
+              value: 40,
+              market_salary: 5,
+              dynasty_value: 6000
+            },
+            {
+              tid: 2,
+              pid: 'WORST',
+              value: 40,
+              market_salary: 5,
+              dynasty_value: 1000
+            },
+            // No dynasty row: ranked nowhere, annotated, never dropped.
+            {
+              tid: 2,
+              pid: 'NOVALUE',
+              value: 40,
+              market_salary: 5,
+              dynasty_value: null
+            }
+          ]
+        })
+      )
+
+      const pool_row = (pid) => board.market_pool.find((row) => row.pid === pid)
+
+      pool_row('BEST').pool_rank.should.equal(1)
+      pool_row('MID').pool_rank.should.equal(2)
+      pool_row('WORST').pool_rank.should.equal(3)
+      // Four shed-pool rows, three of them carrying a dynasty value.
+      pool_row('BEST').pool_size.should.equal(3)
+
+      expect(pool_row('NOVALUE').pool_rank).to.equal(null)
+      pool_row('NOVALUE').no_market_value.should.equal(true)
+      pool_row('NOVALUE').under_pressure.should.equal(true)
+
+      // Outside the shed pool entirely, despite leading the league on dynasty
+      // value — the pool answers "what could become available".
+      pool_row('KEPT').under_pressure.should.equal(false)
+      expect(pool_row('KEPT').pool_rank).to.equal(null)
+      pool_row('KEPT').dynasty_rank.should.equal(1)
+    })
+
+    it('does not mark a nomination target below the materiality floor', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            // The live R.Dowdle case: a $5 contract with a $3 gap. A ratio bar
+            // would keep it at 0.60; no owner nominates a minimum contract.
+            { tid: 1, pid: 'CHEAP', value: 1, market_salary: 3 },
+            // One dollar short of the floor, and one dollar over it.
+            { tid: 1, pid: 'UNDER', value: 20, market_salary: 16 },
+            { tid: 1, pid: 'AT', value: 20, market_salary: 15 },
+            { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
+          ]
+        })
+      )
+
+      const pool_row = (pid) => board.market_pool.find((row) => row.pid === pid)
+
+      pool_row('CHEAP').market_gap.should.equal(3)
+      pool_row('CHEAP').under_pressure.should.equal(true)
+      pool_row('CHEAP').rfa_nomination_target.should.equal(false)
+
+      pool_row('UNDER').market_gap.should.equal(9)
+      pool_row('UNDER').rfa_nomination_target.should.equal(false)
+
+      pool_row('AT').market_gap.should.equal(RFA_NOMINATION_GAP_FLOOR)
+      pool_row('AT').rfa_nomination_target.should.equal(true)
     })
 
     it('keeps a contract with no projection, marked unscreenable and sorted last', function () {

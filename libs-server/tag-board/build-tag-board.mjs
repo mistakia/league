@@ -8,6 +8,15 @@ import { player_tag_types, roster_slot_types } from '#constants'
 // ranks are noise, so the board reports a band instead of a precise rank.
 export const COVERAGE_PRECISE_MIN = 0.6
 
+// Materiality floor on the restricted-free-agency nomination marker, in cap
+// dollars of `market_gap`. No owner nominates a minimum-salary contract however
+// overpriced it looks in proportion — the motive is the salary shed, which is
+// the gap itself. Set at the break in the live 2026 distribution: 82 of the 88
+// shed-pool rows clear $5 and only 39 clear $10, and $10 reads as two extension
+// steps. Deliberately a flat dollar floor rather than a gap-to-salary ratio,
+// which is noisiest exactly at the cheap end it would be introduced to fix.
+export const RFA_NOMINATION_GAP_FLOOR = 10
+
 const RANK_BANDS = [
   'top fifth',
   'second fifth',
@@ -394,58 +403,93 @@ export default function build_tag_board({
   // ---- market pool --------------------------------------------------------
   //
   // Every untagged active-roster contract, priced against the single-season
-  // market. Two nested subsets come off it, and they are deliberately not the
-  // same set:
+  // market. The shed pool — `market_gap > 0` — is what funds a bid, and it is
+  // also the set of contracts that could plausibly become available. It stays
+  // wide on purpose: below-replacement contracts land in it (their market price
+  // is at or near zero) and are the easiest releases of all.
   //
-  //   gap > 0            — the SHED pool. Salary a team could plausibly clear,
-  //                        which is what funds a bid. Below-replacement
-  //                        contracts all land here (their market price is at or
-  //                        near zero), and they are the easiest releases, so
-  //                        this set must stay wide.
-  //   ...and pts_added>0 — UNDER PRESSURE. The decision-bearing subset: players
-  //                        who help the roster but are priced above what a
-  //                        season of them is worth. A below-replacement player
-  //                        is not under pressure, he is simply a cut, and
-  //                        listing him as a decision buried the real ones.
+  // `under_pressure` was `market_gap > 0 AND pts_added > 0` until 2026-07-30.
+  // The second condition tested nothing the first had not: `market_salary` is
+  // DERIVED from `pts_added`, so across the live board 0 of 121 rows differed
+  // either way. What it did do was drop every young ascending player, because a
+  // one-season price cannot separate a rising rookie from a finished veteran —
+  // both price at $0. L.Burden III (dynasty 34), R.Odunze (48), B.Thomas (51)
+  // and M.Harrison (56) were screened out alongside J.Tonges at −83.9 points.
   //
-  // The under-pressure set is also the restricted-free-agency nomination pool:
-  // the gap is exactly the reason an owner would send a player to auction (the
-  // ladder price exceeds a season's worth of him) and the reason a rival would
-  // bid (the owner is unlikely to retain at that price).
-  const market_pool = active_rows
+  // `pts_added` survives as a CONTINUOUS signal rather than a gate, and it is
+  // the better one at the low end: `market_salary` clips at exactly $0 for
+  // every below-replacement row and carries no ordering there, while
+  // `pts_added` still separates −6.9 from −83.9.
+  //
+  // Two axes, deliberately separate, because one screen was answering both
+  // questions badly:
+  //
+  //   pool_rank  — is he worth acquiring? Dynasty standing WITHIN the shed
+  //                pool, so the comparison set is what could become available
+  //                rather than the whole league.
+  //   market_gap — will his owner let him go? What the contract costs above a
+  //                season of the player.
+  const market_pool_rows = active_rows
     .filter((row) => row.untagged)
-    .map((row) => {
-      const under_pressure =
-        row.market_gap !== null &&
-        row.market_gap > 0 &&
-        row.projected_points_added !== null &&
-        row.projected_points_added > 0
-      return {
-        tid: row.tid,
-        pid: row.pid,
-        name: row.name,
-        pos: row.pos,
-        post_deadline_salary: row.post_deadline_salary,
-        // Auction-horizon price. Present here and nowhere else on the board:
-        // this pool describes contracts that could reach a single-season
-        // auction, which is the only decision a single-season projection can
-        // price. Never carried onto tag_board rows, where differencing it
-        // against a franchise price would reconstruct a multi-year surplus.
-        projected_market_salary: row.projected_market_salary,
-        market_gap: row.market_gap,
-        projected_points_added: row.projected_points_added,
-        below_replacement: row.below_replacement,
-        projection_missing: row.projection_missing,
-        under_pressure,
-        rfa_nomination_target:
-          under_pressure &&
-          tag_budget_by_tid.get(row.tid).restricted_free_agency.remaining > 0,
-        dynasty_rank: row.dynasty_rank,
-        dynasty_band: row.dynasty_band,
-        rank_precision: row.rank_precision,
-        no_market_value: row.no_market_value
-      }
-    })
+    .map((row) => ({
+      tid: row.tid,
+      pid: row.pid,
+      name: row.name,
+      pos: row.pos,
+      post_deadline_salary: row.post_deadline_salary,
+      // Auction-horizon price. Present here and nowhere else on the board:
+      // this pool describes contracts that could reach a single-season
+      // auction, which is the only decision a single-season projection can
+      // price. Never carried onto tag_board rows, where differencing it
+      // against a franchise price would reconstruct a multi-year surplus.
+      projected_market_salary: row.projected_market_salary,
+      market_gap: row.market_gap,
+      projected_points_added: row.projected_points_added,
+      below_replacement: row.below_replacement,
+      projection_missing: row.projection_missing,
+      under_pressure: row.market_gap !== null && row.market_gap > 0,
+      dynasty_value: row.dynasty_value,
+      dynasty_rank: row.dynasty_rank,
+      dynasty_band: row.dynasty_band,
+      rank_precision: row.rank_precision,
+      no_market_value: row.no_market_value
+    }))
+
+  // Standing within the shed pool. A row carrying no dynasty value is ranked
+  // nowhere and annotated instead — coverage never suppresses.
+  const shed_pool = market_pool_rows.filter((row) => row.under_pressure)
+  const shed_pool_ranked = shed_pool.filter((row) => row.dynasty_value !== null)
+  const shed_pool_size = shed_pool_ranked.length
+  const shed_pool_ranks = assign_ranks(
+    shed_pool_ranked,
+    (row) => row.dynasty_value
+  )
+
+  const market_pool = market_pool_rows
+    .map(({ dynasty_value, ...row }) => ({
+      ...row,
+      pool_rank: shed_pool_ranks.get(row.pid) ?? null,
+      pool_size: shed_pool_size,
+      // Precision is reported the same way as the league-wide dynasty rank and
+      // off the same coverage score: narrowing the comparison set does not make
+      // a thin-coverage player's neighbours any less noisy, so a row the board
+      // will not rank precisely league-wide is banded within the pool too.
+      pool_band: band_for_rank(
+        shed_pool_ranks.get(row.pid) ?? null,
+        shed_pool_size
+      ),
+      // A minimum-salary contract is never a nomination motive whatever its
+      // gap, so the marker carries a materiality floor rather than the old
+      // replacement floor. R.Dowdle was marked a target at a $5 salary with a
+      // $3 gap — the mirror of the Burden exclusion. A flat dollar floor and
+      // not a ratio: the quantity an owner actually sheds is the gap itself,
+      // and a ratio inverts this very case, keeping Dowdle at 0.60 while
+      // dropping T.Henderson at 0.18.
+      rfa_nomination_target:
+        row.under_pressure &&
+        row.market_gap >= RFA_NOMINATION_GAP_FLOOR &&
+        tag_budget_by_tid.get(row.tid).restricted_free_agency.remaining > 0
+    }))
     // Widest gap first; an unscreenable row (no market price) sorts last rather
     // than dropping out.
     .sort((a, b) => {
@@ -578,9 +622,10 @@ export default function build_tag_board({
     }
   }
 
-  // Incoming supply counts the UNDER-PRESSURE subset, not the whole shed pool:
-  // it answers "who could reach the auction", and a below-replacement contract
-  // reaching free agency is not supply anyone competes for.
+  // Incoming supply counts the under-pressure set, which since 2026-07-30 is
+  // the shed pool itself. A cheap below-replacement contract belongs in it: a
+  // rival releasing a $5 player opens the roster spot, and with rosters at the
+  // limit that is the scarce thing rather than the cap dollars.
   const incoming_supply = {}
   for (const row of market_pool) {
     if (row.under_pressure) {
@@ -958,7 +1003,7 @@ export const build_considerations = ({
     const total_gap = rows.reduce((sum, row) => sum + row.market_gap, 0)
     fired.push({
       rule: 'contracts_under_pressure',
-      sentence: `${rows.length} of your untagged contracts pay a player who helps the roster more than a season of him is worth, $${total_gap} above the market in total.`,
+      sentence: `${rows.length} of your untagged contracts cost more than a season of the player prices at, $${total_gap} above the market in total.`,
       inputs: {
         count: rows.length,
         total_market_gap: total_gap,
