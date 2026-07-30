@@ -511,6 +511,60 @@ export default {
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
+  player_underdog_id: {
+    table_name: 'player',
+    column_name: 'underdog_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_sumer_id: {
+    table_name: 'player',
+    column_name: 'sumer_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_fantasylabs_id: {
+    table_name: 'player',
+    column_name: 'fantasylabs_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_fantrax_id: {
+    table_name: 'player',
+    column_name: 'fantrax_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_ffpc_id: {
+    table_name: 'player',
+    column_name: 'ffpc_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_nffc_id: {
+    table_name: 'player',
+    column_name: 'nffc_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_rts_id: {
+    table_name: 'player',
+    column_name: 'rts_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_sis_id: {
+    table_name: 'player',
+    column_name: 'sis_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
+  player_fanduel_id: {
+    table_name: 'player',
+    column_name: 'fanduel_player_id',
+    source: { grain: 'player' },
+    get_cache_info: player_table_get_cache_info
+  },
 
   player_contract_year_signed: {
     table_name: 'player',

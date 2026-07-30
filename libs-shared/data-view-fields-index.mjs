@@ -969,6 +969,17 @@ export default {
   player_cbs_id: "Player's ID in the CBS Sports database",
   player_cfbref_id: "Player's ID in the College Football Reference database",
   player_swish_id: "Player's ID in the Swish Analytics database",
+  player_underdog_id: "Player's ID in the Underdog Fantasy platform",
+  player_sumer_id: "Player's ID in the Sumer Sports database",
+  player_fantasylabs_id: "Player's ID in the FantasyLabs database",
+  player_fantrax_id: "Player's ID in the Fantrax platform",
+  player_ffpc_id:
+    "Player's ID in the Fantasy Football Players Championship (FFPC) platform",
+  player_nffc_id:
+    "Player's ID in the National Fantasy Football Championship (NFFC) platform",
+  player_rts_id: "Player's ID in the RealTime Sports (RTS) platform",
+  player_sis_id: "Player's ID in the Sports Info Solutions database",
+  player_fanduel_id: "Player's ID in the FanDuel platform",
   player_twitter_username: "Player's Twitter/X username",
 
   // Additional Player Stats from Plays
