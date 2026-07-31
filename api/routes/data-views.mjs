@@ -450,40 +450,25 @@ ${normalized_results.map((row) => `<tr>${fields.map((h) => `<td>${escape_html(ro
  *         minimum: 1
  *       description: 'Maximum number of records to export'
  *       example: 1000
- *
- *     userId:
- *       name: user_id
- *       in: query
- *       required: false
- *       schema:
- *         type: integer
- *       description: 'Filter data views by user ID'
- *       example: 123
- *
- *     username:
- *       name: username
- *       in: query
- *       required: false
- *       schema:
- *         type: string
- *       description: 'Filter data views by username'
- *       example: 'johndoe'
  */
 
 /**
  * @swagger
  * /data-views:
  *   get:
- *     summary: List data views
+ *     summary: List the authenticated user's data views
  *     description: |
- *       Retrieves a list of user data views. Can be filtered by user ID or username.
- *       Data views are custom table configurations that allow users to create, save,
- *       and share specific data queries with custom columns, filters, and sorting.
+ *       Retrieves the data views owned by the authenticated user. Data views are custom
+ *       table configurations that allow users to create, save, and share specific data
+ *       queries with custom columns, filters, and sorting.
+ *
+ *       **Authentication required**: This endpoint requires a valid JWT token. There is no
+ *       way to list another user's views — a view is shared by its `view_id` (or a short
+ *       URL), both of which resolve without authentication.
  *     tags:
  *       - Data Views
- *     parameters:
- *       - $ref: '#/components/parameters/userId'
- *       - $ref: '#/components/parameters/username'
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       '200':
  *         description: List of data views retrieved successfully
@@ -511,33 +496,19 @@ ${normalized_results.map((row) => `<tr>${fields.map((h) => `<td>${escape_html(ro
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { user_id, username } = req.query
-    const user_ids = []
-
-    if (username) {
-      const user = await db('users')
-        .where({
-          username
-        })
-        .first()
-      if (user) {
-        user_ids.push(user.id)
-      }
+    // This route is mounted before the blanket auth guard in api/index.mjs, so
+    // it must self-enforce. It is owner-scoped with no filter parameters: a
+    // caller can only ever list their own views. Sharing goes through the
+    // view_id (or a short URL), both of which resolve unauthenticated.
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
     }
 
-    if (user_id) {
-      user_ids.push(user_id)
-    }
-
-    const query = db('user_data_views')
+    const views = await db('user_data_views')
       .select('user_data_views.*', 'users.username as view_username')
       .leftJoin('users', 'user_data_views.user_id', 'users.id')
+      .where('user_data_views.user_id', req.auth.userId)
 
-    if (user_ids.length) {
-      query.whereIn('user_data_views.user_id', user_ids)
-    }
-
-    const views = await query
     return res.status(200).send(views)
   } catch (error) {
     logger(error)

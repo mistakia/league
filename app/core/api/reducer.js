@@ -129,13 +129,7 @@ export function api_reducer(state = initialState, { payload, type }) {
       ])
 
     case data_views_actions.GET_DATA_VIEWS_FULFILLED:
-      return state.setIn(
-        [
-          'request_history',
-          `GET_DATA_VIEWS${payload.opts.user_id ? `_USER_ID_${payload.opts.user_id}` : payload.opts.username ? `_USERNAME_${payload.opts.username}` : ''}`
-        ],
-        true
-      )
+      return state.setIn(['request_history', 'GET_DATA_VIEWS'], true)
 
     case seasons_actions.GET_SEASON_PENDING:
       return state.setIn(

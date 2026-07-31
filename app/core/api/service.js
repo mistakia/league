@@ -395,12 +395,8 @@ export const api = {
     const url = `${API_URL}/data-views/${view_id}/tags/${encodeURIComponent(tag_name)}`
     return { url, method: 'DELETE' }
   },
-  get_data_views({ user_id, username }) {
-    let url = `${API_URL}/data-views`
-    const params = new URLSearchParams()
-    if (user_id) params.append('user_id', user_id)
-    if (username) params.append('username', username)
-    if (params.toString()) url += `?${params.toString()}`
+  get_data_views() {
+    const url = `${API_URL}/data-views`
     return { url }
   },
   get_data_view({ data_view_id }) {

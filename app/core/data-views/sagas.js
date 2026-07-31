@@ -185,14 +185,12 @@ export function* handle_delete_data_view({ payload }) {
   yield call(api_delete_data_view, { view_id })
 }
 
-export function* load_data_views({ payload }) {
+export function* load_data_views() {
   const request_history = yield select(get_request_history)
-  const { user_id, username } = payload
-  const key = `GET_DATA_VIEWS${user_id ? `_USER_ID_${user_id}` : username ? `_USERNAME_${username}` : ''}`
-  if (request_history[key]) {
+  if (request_history.has('GET_DATA_VIEWS')) {
     return
   }
-  yield call(api_get_data_views, { user_id, username })
+  yield call(api_get_data_views)
 }
 
 export function* load_data_view({ payload }) {

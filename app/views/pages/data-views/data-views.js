@@ -104,11 +104,16 @@ export default function DataViewsPage({
   const [filter_controls_open, set_filter_controls_open] = useState(false)
 
   useEffect(() => {
-    load_data_views()
+    // The saved-view list is owner-scoped and requires auth, so a logged-out
+    // visitor has nothing to list. A shared view still resolves for them
+    // through load_data_view below, which fetches by view_id.
+    if (isLoggedIn) {
+      load_data_views()
+    }
     if (view_id) {
       load_data_view(view_id)
     }
-  }, [load_data_views, load_data_view, view_id])
+  }, [isLoggedIn, load_data_views, load_data_view, view_id])
 
   useEffect(() => {
     if (!view_id) {

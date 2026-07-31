@@ -215,6 +215,15 @@ POST /data-views/search
 }
 ```
 
+### Saved View Access Model
+
+The three saved-view read routes are deliberately asymmetric, and the asymmetry is the security model:
+
+- `GET /data-views` requires auth and returns **only the caller's own views**. It takes no filter parameters, because any parameter that selects another user's views re-opens platform-wide enumeration. Until 2026-07-31 it had neither an auth check nor a mandatory filter, so an anonymous caller could retrieve every saved view on the platform along with its name, description and `table_state`.
+- `GET /data-views/:view_id` and `POST /data-views/search` are unauthenticated by design. An unguessable `view_id` is what makes a view shareable, and a short URL (`/u/{hash}`) resolves through `search` alone. Requiring auth on either would break every link already sent.
+
+That combination only holds while the list route cannot enumerate ids. Do not add a filter parameter back to it. Note these routes mount before the blanket auth guard in `api/index.mjs`, so each one must self-enforce.
+
 ### Column Configuration Patterns
 
 ```javascript
