@@ -33,6 +33,54 @@ export const RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP = 6
 //    earlier two-sided form excluded that whole population.
 export const RESTRICTED_FREE_AGENCY_NOMINATION_REPLACEMENT_FLOOR_POINTS = -25
 
+// The shed pool's entry condition: a contract priced at least this much above
+// the single-season market. It replaced a bare `market_gap > 0` on 2026-07-31,
+// because a $1–$2 gap is not a contract anyone sheds — B.Bowers at a $2 gap was
+// the second-ranked player in the whole pool and still counted $18 toward his
+// owner's releasable salary, which is what "releasable" must never claim.
+//
+// $3 is the LARGEST buffer that is not secretly a salary floor, and that is the
+// whole reason it is $3 rather than the $6 the nomination screen uses. A $5
+// minimum contract prices at $0 at best, so its gap can never exceed $5: any
+// threshold above $5 removes every minimum contract from the pool, not for
+// being fairly priced but for being cheap. That is exactly the cut
+// user:guideline/home-dynasty-league/write-team-homepage.md forbids, and at $6
+// it would have deleted 25 of 76 live rows — the rows that matter most when
+// rosters are full and a rival shedding a $5 player opens the roster spot.
+//
+// The nomination screen's $6 minimum is NOT the same mistake. A nomination is a
+// scarce resource (two per franchise), so a flat dollar minimum is a real screen
+// there: spending one of two nominations to reclaim $5 is not a move. Capacity
+// has no such scarcity, so the same figure would be doing a different job.
+export const SHED_POOL_MINIMUM_MARKET_GAP = 3
+
+// What separates a contract its owner would actually shed from one merely priced
+// above the market. The test is a RATIO, not a dollar figure: the market prices
+// him at half or less of what the contract costs, so an auction — open free
+// agency, or the owner's own restricted-free-agency nomination — plausibly
+// returns him below the current salary. A manager sheds a contract he can
+// re-acquire cheaper; he does not shed one the market rates at what he is paying,
+// however large the absolute gap.
+//
+// This is deliberately the opposite shape from the nomination minimum above, and
+// for the opposite reason. There the question is "is the saving worth a scarce
+// nomination", which is an absolute amount. Here it is "could this player be
+// had for less", which is proportional and has no scarce resource to spend.
+//
+// 0.5 is where the live board separates the two populations cleanly: it keeps
+// J.Jacobs ($60 against a $26 market, 0.43) and N.Collins ($30/$11, 0.37), and
+// drops L.Jackson ($55/$48, 0.87), B.Purdy ($44/$38, 0.86) and C.Stroud
+// ($23/$22, 0.96) — contracts with a real gap and nothing to recover.
+//
+// A second condition was specified and then dropped as provably redundant:
+// "significantly below replacement AND priced at $0–2" selects ZERO rows this
+// ratio does not already select. `market_salary` is DERIVED from `pts_added`, so
+// a below-replacement player always prices at $0–2, and $0–2 against any
+// contract of $5 or more is always under half. Live check: 0 of 106 rows sit
+// below replacement priced above $2. If `market_salary` ever stops being derived
+// from `pts_added`, that redundancy breaks and the second condition must return.
+export const RELEASABLE_MARKET_PRICE_RATIO = 0.5
+
 const RANK_BANDS = [
   'top fifth',
   'second fifth',
@@ -433,11 +481,20 @@ export default function build_tag_board({
 
   // ---- market pool --------------------------------------------------------
   //
-  // Every untagged active-roster contract, priced against the single-season
-  // market. The shed pool — `market_gap > 0` — is what funds a bid, and it is
-  // also the set of contracts that could plausibly become available. It stays
-  // wide on purpose: below-replacement contracts land in it (their market price
-  // is at or near zero) and are the easiest releases of all.
+  // Every active-roster contract that could change hands this period: untagged
+  // contracts priced against the single-season market, plus the players carrying
+  // the restricted-free-agency tag. Three nested sets, each answering a
+  // different question, and keeping them distinct is the whole point:
+  //
+  //   market_pool     — everything a manager might see move.
+  //   under_pressure  — priced at least SHED_POOL_MINIMUM_MARKET_GAP above the
+  //                     single-season market. A fact about the contract.
+  //   releasable      — of those, the ones an owner would plausibly shed. A
+  //                     claim about the owner, and the only one that funds
+  //                     `capacity`.
+  //
+  // The pool stays wide on purpose: below-replacement contracts land in it
+  // (their market price is at or near zero) and are the easiest releases of all.
   //
   // `under_pressure` was `market_gap > 0 AND pts_added > 0` until 2026-07-30.
   // The second condition tested nothing the first had not: `market_salary` is
@@ -455,59 +512,116 @@ export default function build_tag_board({
   // Two axes, deliberately separate, because one screen was answering both
   // questions badly:
   //
-  //   pool_rank  — is he worth acquiring? Dynasty standing WITHIN the shed
+  //   pool_rank  — is he worth acquiring? Dynasty standing WITHIN the supply
   //                pool, so the comparison set is what could become available
   //                rather than the whole league.
   //   market_gap — will his owner let him go? What the contract costs above a
   //                season of the player.
+  //
+  // RESTRICTED-FREE-AGENCY-TAGGED ROWS BELONG HERE (2026-07-31). They were
+  // excluded while the pool was defined as untagged contracts, which left the
+  // one pool a manager can actually bid on during the nomination period sitting
+  // in a separate table with its own rank scale — two tables answering "who
+  // might I acquire" in two different units. They join the pool as members with
+  // `tag_state: 'restricted_free_agency'` and carry NO salary and NO gap: the
+  // auction settles the contract, so the current value describes a contract
+  // about to be replaced, and the offer that would settle it is blind under
+  // Article IX §2 and never enters this artifact. Both fields are null, which is
+  // rendered as an em dash and is the same treatment an unscreenable row gets.
+  //
+  // They are therefore in no shed pool, fund no capacity, and can carry no
+  // nomination-profile flag — every one of those requires a salary to difference
+  // against. What they do carry is a market price and a rank, which is what a
+  // bidder acts on.
   const market_pool_rows = active_rows
-    .filter((row) => row.untagged)
-    .map((row) => ({
-      tid: row.tid,
-      pid: row.pid,
-      name: row.name,
-      pos: row.pos,
-      post_deadline_salary: row.post_deadline_salary,
-      // Auction-horizon price. Present here and nowhere else on the board:
-      // this pool describes contracts that could reach a single-season
-      // auction, which is the only decision a single-season projection can
-      // price. Never carried onto tag_board rows, where differencing it
-      // against a franchise price would reconstruct a multi-year surplus.
-      projected_market_salary: row.projected_market_salary,
-      market_gap: row.market_gap,
-      projected_points_added: row.projected_points_added,
-      below_replacement: row.below_replacement,
-      projection_missing: row.projection_missing,
-      under_pressure: row.market_gap !== null && row.market_gap > 0,
-      dynasty_value: row.dynasty_value,
-      dynasty_rank: row.dynasty_rank,
-      dynasty_band: row.dynasty_band,
-      rank_precision: row.rank_precision,
-      no_market_value: row.no_market_value
-    }))
+    .filter(
+      (row) =>
+        row.untagged || row.tag === player_tag_types.RESTRICTED_FREE_AGENCY
+    )
+    .map((row) => {
+      const restricted_free_agency =
+        row.tag === player_tag_types.RESTRICTED_FREE_AGENCY
+      const post_deadline_salary = restricted_free_agency
+        ? null
+        : row.post_deadline_salary
+      const market_gap = restricted_free_agency ? null : row.market_gap
+      return {
+        tid: row.tid,
+        // Carried on the row rather than joined page-side: the merged supply
+        // table names a team per row, and a render that maps tid to name itself
+        // is one more place the two can disagree.
+        team_name: team_name_by_tid.get(row.tid),
+        pid: row.pid,
+        name: row.name,
+        pos: row.pos,
+        // 'untagged' | 'restricted_free_agency'. The page distinguishes the two
+        // visually; nothing else on the board branches on it.
+        tag_state: restricted_free_agency
+          ? 'restricted_free_agency'
+          : 'untagged',
+        post_deadline_salary,
+        // Auction-horizon price. Present here and nowhere else on the board:
+        // this pool describes contracts that could reach a single-season
+        // auction, which is the only decision a single-season projection can
+        // price. Never carried onto tag_board rows, where differencing it
+        // against a franchise price would reconstruct a multi-year surplus.
+        projected_market_salary: row.projected_market_salary,
+        market_gap,
+        projected_points_added: row.projected_points_added,
+        below_replacement: row.below_replacement,
+        projection_missing: row.projection_missing,
+        // Pool 1: priced at least SHED_POOL_MINIMUM_MARKET_GAP above the
+        // single-season market. Funds nothing on its own — it is the set the
+        // two market bands render.
+        under_pressure:
+          market_gap !== null && market_gap >= SHED_POOL_MINIMUM_MARKET_GAP,
+        // Pool 2: the subset an owner would plausibly shed, because the market
+        // prices him at RELEASABLE_MARKET_PRICE_RATIO or less of the contract
+        // and an auction could return him for less than it costs today. THIS is
+        // what funds `capacity`; `under_pressure` no longer does.
+        releasable:
+          market_gap !== null &&
+          market_gap >= SHED_POOL_MINIMUM_MARKET_GAP &&
+          row.projected_market_salary <=
+            RELEASABLE_MARKET_PRICE_RATIO * post_deadline_salary,
+        dynasty_value: row.dynasty_value,
+        dynasty_rank: row.dynasty_rank,
+        dynasty_band: row.dynasty_band,
+        rank_precision: row.rank_precision,
+        no_market_value: row.no_market_value
+      }
+    })
 
-  // Standing within the shed pool. A row carrying no dynasty value is ranked
-  // nowhere and annotated instead — coverage never suppresses.
-  const shed_pool = market_pool_rows.filter((row) => row.under_pressure)
-  const shed_pool_ranked = shed_pool.filter((row) => row.dynasty_value !== null)
-  const shed_pool_size = shed_pool_ranked.length
-  const shed_pool_ranks = assign_ranks(
-    shed_pool_ranked,
+  // Standing within the SUPPLY pool — the shed pool plus the tagged players
+  // heading to auction, which together are everything that could change hands
+  // this period. Ranking the two separately is what forced the page to run two
+  // rank scales side by side and caption which was which. A row carrying no
+  // dynasty value is ranked nowhere and annotated instead — coverage never
+  // suppresses.
+  const supply_pool = market_pool_rows.filter(
+    (row) => row.under_pressure || row.tag_state === 'restricted_free_agency'
+  )
+  const supply_pool_ranked = supply_pool.filter(
+    (row) => row.dynasty_value !== null
+  )
+  const supply_pool_size = supply_pool_ranked.length
+  const supply_pool_ranks = assign_ranks(
+    supply_pool_ranked,
     (row) => row.dynasty_value
   )
 
   const market_pool = market_pool_rows
     .map(({ dynasty_value, ...row }) => ({
       ...row,
-      pool_rank: shed_pool_ranks.get(row.pid) ?? null,
-      pool_size: shed_pool_size,
+      pool_rank: supply_pool_ranks.get(row.pid) ?? null,
+      pool_size: supply_pool_size,
       // Precision is reported the same way as the league-wide dynasty rank and
       // off the same coverage score: narrowing the comparison set does not make
       // a thin-coverage player's neighbours any less noisy, so a row the board
       // will not rank precisely league-wide is banded within the pool too.
       pool_band: band_for_rank(
-        shed_pool_ranks.get(row.pid) ?? null,
-        shed_pool_size
+        supply_pool_ranks.get(row.pid) ?? null,
+        supply_pool_size
       ),
       // Both threshold conditions above, and nothing else. This is a PROFILE
       // flag — the contract fits what a nomination is for — not a statement
@@ -520,7 +634,13 @@ export default function build_tag_board({
       // deadline would empty the flag on every roster in the league, which is
       // the one thing it must not do — who fits the profile is exactly what a
       // manager reviews when the window is closed. Who is actually going to
-      // auction is `restricted_free_agency_pool`, which reads the roster tag.
+      // auction is `tag_state`, which reads the roster tag.
+      //
+      // A tagged row is never marked either, and for a structural reason rather
+      // than a policy one: it carries no salary and so no gap, so the first
+      // condition is unevaluable. The two markers are disjoint by construction —
+      // a player is going to auction, or he fits the profile of one who could
+      // have, never both.
       //
       // A row with no projection is never marked. It is unscreenable on the
       // replacement condition rather than failing it, and coverage annotates
@@ -533,11 +653,18 @@ export default function build_tag_board({
         row.projected_points_added >=
           RESTRICTED_FREE_AGENCY_NOMINATION_REPLACEMENT_FLOOR_POINTS
     }))
-    // Widest gap first; an unscreenable row (no market price) sorts last rather
-    // than dropping out.
+    // Widest gap first; a row with no gap — unscreenable, or tagged and awaiting
+    // the auction — sorts last rather than dropping out, ordered among itself by
+    // market price so the artifact is deterministic. Render ORDER is owned by
+    // `market_bands`; this sort only makes the flat pool stable.
     .sort((a, b) => {
-      if (a.market_gap === null) return b.market_gap === null ? 0 : 1
-      if (b.market_gap === null) return -1
+      if (a.market_gap === null || b.market_gap === null) {
+        if (a.market_gap !== null) return -1
+        if (b.market_gap !== null) return 1
+        return (
+          (b.projected_market_salary ?? -1) - (a.projected_market_salary ?? -1)
+        )
+      }
       return b.market_gap - a.market_gap
     })
 
@@ -550,37 +677,21 @@ export default function build_tag_board({
   //
   // Every player carrying the restricted-free-agency tag, league-wide: the
   // supply that actually reaches the auction during the nomination period.
-  // These rows are NOT in `market_pool`, which is untagged contracts only, so
-  // without this band the one pool a manager can bid on during the period is
-  // absent from the board entirely.
   //
-  // No salary column. The auction settles what this player costs, so his
-  // current contract value describes a contract that is about to be replaced,
-  // and the offer that would settle it is blind under Article IX §2 and never
-  // enters this artifact. What a bidder can act on is the single-season price
-  // and the player's league-wide dynasty standing, both of which are public
-  // state computed identically for all ten franchises.
+  // An ordered list of pids into `market_pool`, not a second copy of the rows.
+  // Until 2026-07-31 it WAS a second copy, because tagged players were excluded
+  // from `market_pool` — which meant two sets of rows for the same players, with
+  // different field sets and their own rank scale, and a page that had to run
+  // two tables to show one question. Now the rows live in the pool like any
+  // other supply and this names which of them carry the tag, in the order the
+  // auction table wants them: most expensive season first.
   //
-  // Ranked league-wide (`dynasty_rank`) rather than within the shed pool: these
-  // are acquisition targets rather than contracts under pressure, so the
-  // comparison set a bidder faces is the whole league.
-  const restricted_free_agency_pool = active_rows
-    .filter((row) => row.tag === player_tag_types.RESTRICTED_FREE_AGENCY)
-    .map((row) => ({
-      tid: row.tid,
-      team_name: team_name_by_tid.get(row.tid),
-      pid: row.pid,
-      name: row.name,
-      pos: row.pos,
-      projected_market_salary: row.projected_market_salary,
-      projected_points_added: row.projected_points_added,
-      below_replacement: row.below_replacement,
-      projection_missing: row.projection_missing,
-      dynasty_rank: row.dynasty_rank,
-      dynasty_band: row.dynasty_band,
-      rank_precision: row.rank_precision,
-      no_market_value: row.no_market_value
-    }))
+  // Those rows carry no salary by construction (see the pool above). What a
+  // bidder can act on is the single-season price and the player's standing in
+  // the supply pool, both public state computed identically for all ten
+  // franchises.
+  const restricted_free_agency_pool_rows = market_pool
+    .filter((row) => row.tag_state === 'restricted_free_agency')
     // Most expensive season first; an unpriced row sorts last rather than
     // dropping out.
     .sort((a, b) => {
@@ -638,11 +749,21 @@ export default function build_tag_board({
     // Bids clear after the extension deadline, so the room that binds them is
     // the post-extension room, not today's. Room alone is not the constraint:
     // conditional releases and the cutlist drain at execution, so the public
-    // substitute for private shed intent is the shed pool — every contract
-    // priced above the single-season market, below-replacement ones included.
+    // substitute for private shed intent is the RELEASABLE pool.
+    //
+    // It is `releasable`, not `under_pressure` — the two were the same set until
+    // 2026-07-31 and are now deliberately different. "Priced above the market"
+    // is a fact about a contract; "releasable" is a claim about what its owner
+    // would do, and only the second belongs in a figure a manager reads as
+    // spending power. Summing the wider set credited every franchise with money
+    // it would never free: Gråkappan's $79 counted $18 for B.Bowers at a $2 gap,
+    // the second-ranked player in the entire pool. The narrowing costs the
+    // league $311 of paper capacity and moves three franchises negative, which
+    // is the honest reading — $133 over with $121 you would actually shed means
+    // you cannot reach compliance without cutting someone you want.
     const attachable_rows = market_pool_by_tid
       .get(tid)
-      .filter((row) => row.market_gap > 0)
+      .filter((row) => row.releasable)
     const attachable_release_salary = attachable_rows.reduce(
       (sum, row) => sum + row.post_deadline_salary,
       0
@@ -733,10 +854,17 @@ export default function build_tag_board({
 
   const under_pressure_rows = market_pool.filter((row) => row.under_pressure)
 
-  // Grouped by position, widest gap first within each — the same sort the
-  // single-team band uses, so the two tables order a shared player identically.
+  // Grouped by position. Within each position the TAGGED rows come first,
+  // ordered by market price, then the shed-pool rows by widest gap. Tagged
+  // players lead because they are the live supply — an auction is running for
+  // them now, while a shed-pool contract is only a contract someone might
+  // release. Ordering them by gap instead would sort every one of them to the
+  // bottom, since a tagged row carries no gap at all.
   const incoming_supply_by_position = {}
-  for (const row of by_gap_desc(under_pressure_rows)) {
+  for (const row of [
+    ...restricted_free_agency_pool_rows,
+    ...by_gap_desc(under_pressure_rows)
+  ]) {
     ;(incoming_supply_by_position[row.pos] ||= []).push(row.pid)
   }
 
@@ -750,6 +878,20 @@ export default function build_tag_board({
             under_pressure_rows.filter((row) => row.tid === viewer_tid)
           ).map((row) => row.pid),
     incoming_supply: incoming_supply_by_position,
+    // Who actually carries the tag, league-wide, most expensive season first.
+    // A subset of incoming_supply rather than a separate table's contents: the
+    // page marks these rows in place.
+    restricted_free_agency_pool: restricted_free_agency_pool_rows.map(
+      (row) => row.pid
+    ),
+    // This viewer's own tagged players — what THIS franchise is sending to
+    // auction. Absent, not empty, when built with no viewer.
+    restricted_free_agency_tagged:
+      viewer_tid === null
+        ? null
+        : restricted_free_agency_pool_rows
+            .filter((row) => row.tid === viewer_tid)
+            .map((row) => row.pid),
     // The daggered subset. A strict subset of incoming supply, carried
     // separately because it is the set a manager acts on, and scanning the
     // whole pool for a flag is not the same as being handed the candidates.
@@ -824,12 +966,13 @@ export default function build_tag_board({
     // `by_tid` designated nobody before the deadline and enters the period as a
     // bidder only.
     restricted_free_agency_auction: {
-      total: restricted_free_agency_pool.length,
+      total: restricted_free_agency_pool_rows.length,
       by_tid: team_ids
         .map((tid) => ({
           tid,
-          count: restricted_free_agency_pool.filter((row) => row.tid === tid)
-            .length
+          count: restricted_free_agency_pool_rows.filter(
+            (row) => row.tid === tid
+          ).length
         }))
         .filter((row) => row.count > 0)
     },
@@ -855,7 +998,7 @@ export default function build_tag_board({
       team_market_pool: market_pool_by_tid.get(tid),
       league_market,
       rfa_window: rfa_schedule_by_tid.get(tid),
-      restricted_free_agency_pool,
+      restricted_free_agency_pool: restricted_free_agency_pool_rows,
       extensions_processed,
       now_unix,
       season,
@@ -889,7 +1032,6 @@ export default function build_tag_board({
     bid_capacity,
     market_pool,
     market_bands,
-    restricted_free_agency_pool,
     rfa_schedule,
     league_market,
     considerations
@@ -1187,8 +1329,8 @@ export const build_considerations = ({
     rule: 'bidding_capacity',
     sentence:
       capacity.cap_room >= 0
-        ? `After extensions you hold $${capacity.cap_room} of room, and shedding your ${capacity.attachable_contract_count} contracts priced above the single-season market would take that to $${capacity.capacity}.`
-        : `After extensions you are $${-capacity.cap_room} over the cap, and shedding your ${capacity.attachable_contract_count} contracts priced above the single-season market would move you to $${capacity.capacity}.`,
+        ? `After extensions you hold $${capacity.cap_room} of room, and shedding your ${capacity.attachable_contract_count} contracts the market prices well below what you pay would take that to $${capacity.capacity}.`
+        : `After extensions you are $${-capacity.cap_room} over the cap, and shedding your ${capacity.attachable_contract_count} contracts the market prices well below what you pay would move you to $${capacity.capacity}.`,
     inputs: {
       cap_room: capacity.cap_room,
       attachable_release_salary: capacity.attachable_release_salary,
@@ -1200,7 +1342,7 @@ export const build_considerations = ({
   if (capacity.capacity < 0) {
     fired.push({
       rule: 'constrained_bidder',
-      sentence: `Shedding every contract priced above the single-season market still leaves you $${-capacity.capacity} over the cap, so any bid you win has to come out of contracts the market rates.`,
+      sentence: `Shedding every contract you could plausibly release still leaves you $${-capacity.capacity} over the cap, so reaching compliance means cutting a contract the market rates at what you pay.`,
       inputs: { capacity: capacity.capacity }
     })
   }
@@ -1225,7 +1367,7 @@ export const build_considerations = ({
   if (supply_entries.length) {
     fired.push({
       rule: 'incoming_supply',
-      sentence: `League-wide, ${supply_entries.map(([pos, n]) => `${n} ${pos}`).join(', ')} untagged contracts are priced above a season of the player — the pool a nomination or a release is most likely to move.`,
+      sentence: `League-wide, ${supply_entries.map(([pos, n]) => `${n} ${pos}`).join(', ')} players could change hands this period — the tagged players heading to auction plus every contract priced above a season of the player.`,
       inputs: league_market.incoming_supply
     })
   }

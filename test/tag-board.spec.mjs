@@ -1095,10 +1095,10 @@ describe('tag board', function () {
       expect(board.market_bands.rfa_nomination_candidates).to.equal(null)
     })
 
-    // The auction supply. These rows are absent from market_pool, which carries
-    // untagged contracts only, so without this band the one pool a manager can
-    // bid on during the nomination period is missing from the board entirely.
-    it('collects the tagged players as the restricted free agency pool', function () {
+    // The auction supply. These rows joined market_pool on 2026-07-31; before
+    // that they sat in a separate top-level key with their own rank scale, which
+    // forced the page to render two tables answering one question in two units.
+    it('carries the tagged players in the pool, marked and without a salary', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -1123,24 +1123,178 @@ describe('tag board', function () {
         })
       )
 
-      // Most expensive season first, and only the restricted-free-agency tag.
-      board.restricted_free_agency_pool
-        .map((row) => row.pid)
-        .should.eql(['RFA_RICH', 'RFA_CHEAP'])
+      const pool_row = (pid) => board.market_pool.find((row) => row.pid === pid)
 
-      const row = board.restricted_free_agency_pool[0]
+      // Most expensive season first, and only the restricted-free-agency tag.
+      // A franchise-tagged contract is settled and unavailable, so it stays out
+      // of the pool entirely.
+      board.market_bands.restricted_free_agency_pool.should.eql([
+        'RFA_RICH',
+        'RFA_CHEAP'
+      ])
+      expect(pool_row('FRANCHISED')).to.equal(undefined)
+
+      const row = pool_row('RFA_RICH')
+      row.tag_state.should.equal('restricted_free_agency')
       row.team_name.should.equal('Beta')
       row.projected_market_salary.should.equal(30)
-      // No salary column: the auction settles what he costs, and the offer that
-      // would settle it is blind.
-      expect(row.post_deadline_salary).to.equal(undefined)
+
+      // No salary and no gap: the auction settles what he costs, so the current
+      // value describes a contract about to be replaced, and the offer that
+      // would settle it is blind under Article IX §2.
+      expect(row.post_deadline_salary).to.equal(null)
+      expect(row.market_gap).to.equal(null)
       expect(row.value).to.equal(undefined)
+
+      // Carrying no gap, a tagged row can be in neither pool and can never be
+      // marked as a nomination profile — the two markers are disjoint.
+      row.under_pressure.should.equal(false)
+      row.releasable.should.equal(false)
+      row.rfa_nomination_target.should.equal(false)
+
+      // ...and so contributes nothing to its owner's capacity.
+      board.bid_capacity
+        .find((cap) => cap.tid === 2)
+        .attachable_release_salary.should.equal(0)
+
+      pool_row('PLAIN').tag_state.should.equal('untagged')
 
       board.league_market.restricted_free_agency_auction.total.should.equal(2)
       board.league_market.restricted_free_agency_auction.by_tid.should.eql([
         { tid: 1, count: 1 },
         { tid: 2, count: 1 }
       ])
+
+      // The former top-level key is gone rather than kept alongside the band:
+      // two copies of the same rows is exactly the drift the bands exist to
+      // prevent.
+      expect(board.restricted_free_agency_pool).to.equal(undefined)
+    })
+
+    // Pool 1. The buffer is $3 and not $6 for a structural reason: a $5 minimum
+    // contract prices at $0 at best, so its gap cannot exceed $5, and any
+    // threshold above $5 removes every minimum contract from the pool for being
+    // cheap rather than for being fairly priced.
+    it('holds a contract out of the shed pool below the market-gap buffer', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            // $18 against a $16 price: a $2 gap. Real, and not a contract
+            // anyone sheds -- this is the B.Bowers case that established the
+            // buffer, and it counted $18 of "releasable" salary before it.
+            { tid: 1, pid: 'NEARLY_FAIR', value: 13, market_salary: 16 },
+            // A $5 minimum contract at a $0 price: a $5 gap, and it STAYS. At a
+            // $6 buffer this row could not qualify at any price.
+            { tid: 1, pid: 'MINIMUM', value: 0, market_salary: 0 },
+            { tid: 2, pid: 'B1', value: 40, market_salary: 5 }
+          ]
+        })
+      )
+
+      const pool_row = (pid) => board.market_pool.find((row) => row.pid === pid)
+
+      pool_row('NEARLY_FAIR').market_gap.should.equal(2)
+      pool_row('NEARLY_FAIR').under_pressure.should.equal(false)
+      pool_row('NEARLY_FAIR').releasable.should.equal(false)
+
+      pool_row('MINIMUM').post_deadline_salary.should.equal(5)
+      pool_row('MINIMUM').market_gap.should.equal(5)
+      pool_row('MINIMUM').under_pressure.should.equal(true)
+
+      // Only the minimum contract funds capacity; the $2-gap row funds nothing.
+      board.bid_capacity
+        .find((row) => row.tid === 1)
+        .attachable_release_salary.should.equal(5)
+    })
+
+    // Pool 2. `releasable` is a claim about the OWNER, `under_pressure` a fact
+    // about the contract, and only the first belongs in a spending-power figure.
+    it('separates a releasable contract from one merely priced above the market', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            // $60 against a $26 price: a $34 gap at ratio 0.43. An auction
+            // plausibly returns him below what the contract costs today.
+            { tid: 1, pid: 'REACQUIRABLE', value: 55, market_salary: 26 },
+            // $55 against a $48 price: a $7 gap at ratio 0.87. A real gap, and
+            // nothing to recover -- the market rates him at what he is paid.
+            { tid: 1, pid: 'PRICED_FAIRLY', value: 50, market_salary: 48 },
+            { tid: 2, pid: 'B1', value: 40, market_salary: 5 }
+          ]
+        })
+      )
+
+      const pool_row = (pid) => board.market_pool.find((row) => row.pid === pid)
+
+      pool_row('REACQUIRABLE').market_gap.should.equal(34)
+      pool_row('REACQUIRABLE').under_pressure.should.equal(true)
+      pool_row('REACQUIRABLE').releasable.should.equal(true)
+
+      pool_row('PRICED_FAIRLY').market_gap.should.equal(7)
+      pool_row('PRICED_FAIRLY').under_pressure.should.equal(true)
+      pool_row('PRICED_FAIRLY').releasable.should.equal(false)
+
+      // Capacity counts the releasable contract alone. Summing the wider set
+      // would credit this franchise with $55 it would never free.
+      const capacity = board.bid_capacity.find((row) => row.tid === 1)
+      capacity.attachable_contract_count.should.equal(1)
+      capacity.attachable_release_salary.should.equal(60)
+    })
+
+    // Pool rank spans the shed pool AND the tagged players, because they are one
+    // question: what could change hands this period. Ranking them separately is
+    // what forced two rank scales onto one page.
+    it('ranks tagged players and shed-pool contracts on one scale', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            {
+              tid: 1,
+              pid: 'TAGGED_BEST',
+              tag: 4,
+              value: 20,
+              market_salary: 30,
+              dynasty_value: 9500
+            },
+            {
+              tid: 1,
+              pid: 'SHED_MID',
+              value: 40,
+              market_salary: 5,
+              dynasty_value: 7000
+            },
+            {
+              tid: 2,
+              pid: 'SHED_WORST',
+              value: 40,
+              market_salary: 5,
+              dynasty_value: 2000
+            },
+            // Paid below the market and untagged: in neither set, so ranked
+            // nowhere despite leading the league on dynasty value.
+            {
+              tid: 2,
+              pid: 'KEPT',
+              value: 5,
+              market_salary: 60,
+              dynasty_value: 9900
+            }
+          ]
+        })
+      )
+
+      const pool_row = (pid) => board.market_pool.find((row) => row.pid === pid)
+
+      pool_row('TAGGED_BEST').pool_rank.should.equal(1)
+      pool_row('SHED_MID').pool_rank.should.equal(2)
+      pool_row('SHED_WORST').pool_rank.should.equal(3)
+      pool_row('TAGGED_BEST').pool_size.should.equal(3)
+
+      expect(pool_row('KEPT').pool_rank).to.equal(null)
+      pool_row('KEPT').dynasty_rank.should.equal(1)
     })
 
     it('declares band membership and order as pids into the pool', function () {
