@@ -9,6 +9,7 @@ import {
 import { ASSET_TYPE } from '#libs-server/roster-asset-lineage/constants.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
+import { get_single_value } from '#libs-server/data-views/param-utils.mjs'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_cache_info = create_static_cache_info({
@@ -22,9 +23,15 @@ const ps_slots = [
   roster_slot_types.PSDP
 ]
 
-const player_extended_salary_table_alias = ({ params = {} } = {}) => {
-  const year = params.year || current_season.year
-  const lid = params.lid || 1
+// Explicit column params arrive normalized to arrays, so both the alias and the
+// join must unwrap before using either value in a scalar position.
+const get_scope = ({ params = {} } = {}) => ({
+  year: get_single_value(params.year, current_season.year),
+  lid: get_single_value(params.lid, 1)
+})
+
+export const player_extended_salary_table_alias = ({ params = {} } = {}) => {
+  const { lid, year } = get_scope({ params })
   return get_table_hash(`player_extended_salary_${lid}_${year}`)
 }
 
@@ -51,8 +58,7 @@ const player_extended_salary_join = async ({
   data_view_options = {}
 } = {}) => {
   const join_func = get_join_func(join_type)
-  const year = params.year || current_season.year
-  const lid = params.lid || 1
+  const { lid, year } = get_scope({ params })
 
   const ps_slot_list = ps_slots.join(',')
 
