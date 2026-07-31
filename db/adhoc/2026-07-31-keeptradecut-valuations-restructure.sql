@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-07-31 against league_production
 --
 -- Restructure keeptradecut_rankings (EAV) into keeptradecut_valuations (wide),
 -- and conform keeptradecut_liquidity in the same pass.
