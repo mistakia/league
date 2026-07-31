@@ -622,16 +622,64 @@ export default function build_tag_board({
     }
   }
 
-  // Incoming supply counts the under-pressure set, which since 2026-07-30 is
-  // the shed pool itself. A cheap below-replacement contract belongs in it: a
-  // rival releasing a $5 player opens the roster spot, and with rosters at the
-  // limit that is the scarce thing rather than the cap dollars.
-  const incoming_supply = {}
-  for (const row of market_pool) {
-    if (row.under_pressure) {
-      incoming_supply[row.pos] = (incoming_supply[row.pos] || 0) + 1
-    }
+  // ---- market bands -------------------------------------------------------
+  //
+  // Membership and ORDER for the three sets the page renders, declared here
+  // rather than re-derived by each render. They are ordered lists of pids into
+  // `market_pool`, not copies of the rows: one source of truth for the row
+  // data, so a band and the pool cannot drift apart, and a 218KB artifact does
+  // not triple.
+  //
+  // The render errors these exist to remove are membership and ordering, not
+  // arithmetic — a page that filters `market_pool` itself is re-implementing a
+  // screen it has already been given, which is how a tagged player lingered in
+  // incoming supply and how the shed pool got rendered as contracts under
+  // pressure. The checker gates on these lists for the same reason.
+  const by_gap_desc = (rows) =>
+    [...rows].sort((a, b) => {
+      if (a.market_gap === null) return b.market_gap === null ? 0 : 1
+      if (b.market_gap === null) return -1
+      if (b.market_gap !== a.market_gap) return b.market_gap - a.market_gap
+      return a.pid < b.pid ? -1 : 1
+    })
+
+  const under_pressure_rows = market_pool.filter((row) => row.under_pressure)
+
+  // Grouped by position, widest gap first within each — the same sort the
+  // single-team band uses, so the two tables order a shared player identically.
+  const incoming_supply_by_position = {}
+  for (const row of by_gap_desc(under_pressure_rows)) {
+    ;(incoming_supply_by_position[row.pos] ||= []).push(row.pid)
   }
+
+  const market_bands = {
+    // This viewer's own rows. Absent when the board is built league-wide with
+    // no viewer, rather than silently empty.
+    contracts_under_pressure:
+      viewer_tid === null
+        ? null
+        : by_gap_desc(
+            under_pressure_rows.filter((row) => row.tid === viewer_tid)
+          ).map((row) => row.pid),
+    incoming_supply: incoming_supply_by_position,
+    // The daggered subset: under pressure, gap at or above the materiality
+    // floor, and the owner still holding a nomination. A strict subset of
+    // incoming supply, carried separately because it is the set a manager acts
+    // on and scanning 88 rows for a flag is not the same as being handed 35.
+    rfa_nomination_pool: by_gap_desc(
+      market_pool.filter((row) => row.rfa_nomination_target)
+    ).map((row) => row.pid),
+    rfa_nomination_gap_floor: RFA_NOMINATION_GAP_FLOOR
+  }
+
+  // Derived from the band rather than counted independently, so the headline
+  // count and the named rows under it cannot disagree.
+  const incoming_supply = Object.fromEntries(
+    Object.entries(incoming_supply_by_position).map(([pos, pids]) => [
+      pos,
+      pids.length
+    ])
+  )
 
   const overages = cap_exposure.map((row) => row.post_extension_room)
   const league_market = {
@@ -727,6 +775,7 @@ export default function build_tag_board({
     tag_budget,
     bid_capacity,
     market_pool,
+    market_bands,
     rfa_schedule,
     league_market,
     considerations

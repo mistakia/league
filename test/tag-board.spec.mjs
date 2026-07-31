@@ -903,6 +903,64 @@ describe('tag board', function () {
         .should.equal(true)
     })
 
+    it('declares band membership and order as pids into the pool', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          viewer_tid: 1,
+          players: [
+            // tid 1: two under pressure at different gaps, one paid under.
+            { tid: 1, pid: 'WIDE', pos: 'WR', value: 40, market_salary: 5 },
+            { tid: 1, pid: 'NARROW', pos: 'WR', value: 20, market_salary: 16 },
+            { tid: 1, pid: 'FAIR', pos: 'WR', value: 5, market_salary: 40 },
+            { tid: 2, pid: 'RIVAL', pos: 'RB', value: 30, market_salary: 5 }
+          ]
+        })
+      )
+
+      const bands = board.market_bands
+
+      // Viewer-scoped, widest gap first, and the under-market contract is out.
+      bands.contracts_under_pressure.should.eql(['WIDE', 'NARROW'])
+
+      // League-wide, grouped by position, same ordering within each group.
+      bands.incoming_supply.should.eql({
+        WR: ['WIDE', 'NARROW'],
+        RB: ['RIVAL']
+      })
+
+      // The headline count is derived from the band, never counted separately.
+      board.league_market.incoming_supply.should.eql({ WR: 2, RB: 1 })
+
+      // NARROW's gap is 25 - 16 = 9, below the floor, so it is not a target.
+      bands.rfa_nomination_pool.should.eql(['WIDE', 'RIVAL'])
+      bands.rfa_nomination_gap_floor.should.equal(RFA_NOMINATION_GAP_FLOOR)
+
+      // Every pid resolves into market_pool -- the bands are references, not
+      // copies, so a band naming a row the pool does not carry is a defect.
+      const pool_pids = new Set(board.market_pool.map((row) => row.pid))
+      const all_band_pids = [
+        ...bands.contracts_under_pressure,
+        ...Object.values(bands.incoming_supply).flat(),
+        ...bands.rfa_nomination_pool
+      ]
+      all_band_pids.every((pid) => pool_pids.has(pid)).should.equal(true)
+    })
+
+    it('reports no contracts-under-pressure band without a viewer', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [{ tid: 1, pid: 'A1', value: 40, market_salary: 5 }]
+        })
+      )
+
+      // Null rather than an empty array: absent because nobody is viewing is a
+      // different fact from a viewer holding no such contracts.
+      expect(board.market_bands.contracts_under_pressure).to.equal(null)
+      board.market_bands.incoming_supply.should.eql({ WR: ['A1'] })
+    })
+
     it('excludes tagged contracts from the pool', function () {
       const board = build_tag_board(
         build_fixture({
