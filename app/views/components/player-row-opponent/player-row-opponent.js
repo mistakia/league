@@ -8,8 +8,8 @@ export default function PlayerRowOpponent({ game, nfl_team }) {
     return <div className='game-opponent' />
   }
 
-  const is_home = game.h === nfl_team
-  const opponent = is_home ? game.v : game.h
+  const is_home = game.home_nfl_team === nfl_team
+  const opponent = is_home ? game.away_nfl_team : game.home_nfl_team
 
   return <GameOpponent {...{ is_home, opponent }} />
 }

@@ -64,8 +64,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
           return null
         }
 
-        const isHome = game.h === nfl_team
-        const opp = isHome ? game.v : game.h
+        const isHome = game.home_nfl_team === nfl_team
+        const opp = isHome ? game.away_nfl_team : game.home_nfl_team
         const stat_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
         const value = seasonlogs.getIn(
           ['nfl_teams', opp, stat_key, stat_field],
@@ -91,8 +91,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
           return null
         }
 
-        const isHome = game.h === nfl_team
-        const opp = isHome ? game.v : game.h
+        const isHome = game.home_nfl_team === nfl_team
+        const opp = isHome ? game.away_nfl_team : game.home_nfl_team
         return opp
       }
     },
@@ -124,8 +124,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
           return null
         }
 
-        const isHome = game.h === nfl_team
-        const opp = isHome ? game.v : game.h
+        const isHome = game.home_nfl_team === nfl_team
+        const opp = isHome ? game.away_nfl_team : game.home_nfl_team
         const stat_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
         const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'points'], 0)
 
@@ -159,8 +159,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
           return null
         }
 
-        const isHome = game.h === nfl_team
-        const opp = isHome ? game.v : game.h
+        const isHome = game.home_nfl_team === nfl_team
+        const opp = isHome ? game.away_nfl_team : game.home_nfl_team
         const stat_key = `${pos}_AGAINST_AVG${time_period_suffix}`
         const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'points'], 0)
 

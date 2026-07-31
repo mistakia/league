@@ -54,9 +54,9 @@ function GameStatus({ status, player_map }) {
   }
 
   const opponent =
-    player_map.get('team') === status.game.h
-      ? `v${status.game.v}`
-      : `@${status.game.h}`
+    player_map.get('team') === status.game.home_nfl_team
+      ? `v${status.game.away_nfl_team}`
+      : `@${status.game.home_nfl_team}`
 
   if (!status.lastPlay) {
     let game_time = 'TBD'

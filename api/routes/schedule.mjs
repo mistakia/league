@@ -33,12 +33,12 @@ const router = express.Router()
  *           type: string
  *           description: Game time in EST (24-hour format HH:MM)
  *           example: "13:00"
- *         v:
+ *         away_nfl_team:
  *           type: string
  *           enum: ['ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE', 'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 'LA', 'LAC', 'LV', 'MIA', 'MIN', 'NE', 'NO', 'NYG', 'NYJ', 'PHI', 'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS']
  *           description: Visiting team abbreviation (NFL team code)
  *           example: "ARI"
- *         h:
+ *         home_nfl_team:
  *           type: string
  *           enum: ['ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE', 'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 'LA', 'LAC', 'LV', 'MIA', 'MIN', 'NE', 'NO', 'NYG', 'NYJ', 'PHI', 'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS']
  *           description: Home team abbreviation (NFL team code)
@@ -48,8 +48,8 @@ const router = express.Router()
  *         - week
  *         - date
  *         - time_est
- *         - v
- *         - h
+ *         - away_nfl_team
+ *         - home_nfl_team
  *     NFLTeamSchedule:
  *       type: object
  *       properties:
@@ -70,14 +70,14 @@ const router = express.Router()
  *               week: 1
  *               date: "2024-09-08"
  *               time_est: "13:00"
- *               v: "ARI"
- *               h: "BUF"
+ *               away_nfl_team: "ARI"
+ *               home_nfl_team: "BUF"
  *             - year: 2024
  *               week: 2
  *               date: "2024-09-15"
  *               time_est: "16:25"
- *               v: "LAR"
- *               h: "ARI"
+ *               away_nfl_team: "LAR"
+ *               home_nfl_team: "ARI"
  *       required:
  *         - bye
  *         - games
@@ -94,8 +94,8 @@ const router = express.Router()
  *               week: 1
  *               date: "2024-09-08"
  *               time_est: "13:00"
- *               v: "ARI"
- *               h: "BUF"
+ *               away_nfl_team: "ARI"
+ *               home_nfl_team: "BUF"
  *         KC:
  *           bye: 6
  *           games:
@@ -103,8 +103,8 @@ const router = express.Router()
  *               week: 1
  *               date: "2024-09-05"
  *               time_est: "20:20"
- *               v: "BAL"
- *               h: "KC"
+ *               away_nfl_team: "BAL"
+ *               home_nfl_team: "KC"
  *
  * /schedule:
  *   get:
@@ -159,14 +159,14 @@ const router = express.Router()
  *                         week: 1
  *                         date: "2024-09-08"
  *                         time_est: "13:00"
- *                         v: "ARI"
- *                         h: "BUF"
+ *                         away_nfl_team: "ARI"
+ *                         home_nfl_team: "BUF"
  *                       - year: 2024
  *                         week: 2
  *                         date: "2024-09-15"
  *                         time_est: "16:25"
- *                         v: "LAR"
- *                         h: "ARI"
+ *                         away_nfl_team: "LAR"
+ *                         home_nfl_team: "ARI"
  *                   KC:
  *                     bye: 6
  *                     games:
@@ -174,14 +174,14 @@ const router = express.Router()
  *                         week: 1
  *                         date: "2024-09-05"
  *                         time_est: "20:20"
- *                         v: "BAL"
- *                         h: "KC"
+ *                         away_nfl_team: "BAL"
+ *                         home_nfl_team: "KC"
  *                       - year: 2024
  *                         week: 2
  *                         date: "2024-09-12"
  *                         time_est: "17:00"
- *                         v: "KC"
- *                         h: "CIN"
+ *                         away_nfl_team: "KC"
+ *                         home_nfl_team: "CIN"
  *               bye_week_example:
  *                 summary: Team with bye week
  *                 description: Example showing how bye weeks are represented
@@ -193,8 +193,8 @@ const router = express.Router()
  *                         week: 1
  *                         date: "2024-09-08"
  *                         time_est: "13:00"
- *                         v: "TB"
- *                         h: "WAS"
+ *                         away_nfl_team: "TB"
+ *                         home_nfl_team: "WAS"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -214,8 +214,8 @@ router.get('/?', async (req, res) => {
         'week',
         'date',
         'time_est',
-        'away_nfl_team as v',
-        'home_nfl_team as h',
+        'away_nfl_team',
+        'home_nfl_team',
         'status'
       )
       .where('season_year', current_season.year)
@@ -232,8 +232,8 @@ router.get('/?', async (req, res) => {
     const weeks = {}
     for (const game of games) {
       weeks[game.week] = true
-      teams[game.v].games.push(game)
-      teams[game.h].games.push(game)
+      teams[game.away_nfl_team].games.push(game)
+      teams[game.home_nfl_team].games.push(game)
     }
 
     const week_keys = Object.keys(weeks).map((x) => Number(x))

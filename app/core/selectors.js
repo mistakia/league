@@ -2645,7 +2645,7 @@ export function getGameStatusByPlayerId(
     if (!p.possession_nfl_team) return false
 
     const team = fixTeam(p.possession_nfl_team)
-    return team === game.h || team === game.v
+    return team === game.home_nfl_team || team === game.away_nfl_team
   })
 
   if (!play) {
