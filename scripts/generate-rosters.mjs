@@ -157,6 +157,59 @@ const run = async () => {
         )
       }
     }
+
+    // Post-write invariant: the generated slice must MATCH its source, and it
+    // must be the highest slice that exists for the year.
+    //
+    // The row-count oracle above only asks whether each populated source team
+    // produced any rows at all, so it is blind to a slice that exists but has
+    // drifted from its source. That is the failure this catches: `nextWeek` is
+    // `week + 1` and `week` reads 0 for the whole offseason, so a week-1 slice
+    // is materialized in February and then frozen at whatever week 0 held that
+    // day. In 2026 it sat six months stale -- still carrying the prior season's
+    // tags -- and would have gone live at kickoff, because the last week-0
+    // Monday fell in August and this job's month-pinned schedule skipped it.
+    // Whether the schedule is dense enough to keep the slice fresh is now
+    // measured here rather than assumed from the crontab.
+    const key_of = ({ tid, pid }) => `${tid}:${pid}`
+    const source_keys = new Set(
+      (
+        await db('rosters_players')
+          .select('tid', 'pid')
+          .where({ lid: league.uid, year: previousYear, week: previousWeek })
+      ).map(key_of)
+    )
+    const generated_keys = new Set(
+      (
+        await db('rosters_players').select('tid', 'pid').where({
+          lid: league.uid,
+          year: current_season.year,
+          week: nextWeek
+        })
+      ).map(key_of)
+    )
+
+    const missing = [...source_keys].filter((k) => !generated_keys.has(k))
+    const extra = [...generated_keys].filter((k) => !source_keys.has(k))
+    if (missing.length || extra.length) {
+      slice_failures.push(
+        `slice divergence for (lid=${league.uid}, year=${current_season.year}, week=${nextWeek}): ${missing.length} missing, ${extra.length} extra vs source (year=${previousYear}, week=${previousWeek})`
+      )
+    }
+
+    // Measured over rosters_players rather than rosters: an empty roster shell
+    // beyond the generated week holds no state and cannot be served as one, and
+    // the test fixture pre-seeds a shell for every week of the season.
+    const max_week_row = await db('rosters_players')
+      .where({ lid: league.uid, year: current_season.year })
+      .max({ max_week: 'week' })
+      .first()
+    const max_week = max_week_row?.max_week
+    if (max_week !== null && max_week !== undefined && max_week > nextWeek) {
+      slice_failures.push(
+        `orphan roster slice for (lid=${league.uid}, year=${current_season.year}): populated week ${max_week} exists beyond the generated week ${nextWeek}`
+      )
+    }
   }
 
   throw_if_shortfall(

@@ -44,20 +44,22 @@
 ## Process restricted free agency bids at 6pm
 0 18 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
 
-## Reset stale RFA tags (defense-in-depth) — daily at 5am Feb-May. Idempotent: preserves any tag=4 backed by an un-cancelled current-year bid in restricted_free_agency_bids.
-0 5 * 2-5 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/reset-player-restricted-free-agency-tags.mjs >> /var/log/league/reset-player-restricted-free-agency-tags.log 2>&1
+## Reset stale RFA tags (defense-in-depth) — daily at 5am, year-round. Idempotent: preserves any tag=4 backed by an un-cancelled current-year bid in restricted_free_agency_bids.
+## NOT month-pinned. The window it guards moves with the offseason schedule: a Feb-May pin could not see the 2026 RFA window at all once it shifted to August, so the guard was dark for the one period it exists to cover. The script self-gates cheaply.
+0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/reset-player-restricted-free-agency-tags.mjs >> /var/log/league/reset-player-restricted-free-agency-tags.log 2>&1
 
 ## Announce free agency period start (check every 30 minutes in August and September)
 */30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-free-agency-period-start.mjs >> /var/log/league/announce-free-agency-period-start.log 2>&1
 
-## Process extensions at ext_date (check every 5 minutes May-Aug; self-gating fires once per league per ext_date via league_notifications marker).
-## Month range MUST cover the extension deadline AND its 14-day auto-process retry tail (AUTO_PROCESS_WINDOW_DAYS in process-extensions.mjs). Widen if a schedule shift pushes ext_date outside May-Aug — a single-month pin (was `5`) silently skipped the 2026 Jul-6 deadline.
-*/5 * * 5-8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-extensions.mjs >> /var/log/league/process-extensions.log 2>&1
+## Process extensions at ext_date (check every 5 minutes, year-round; self-gating fires once per league per ext_date via league_notifications marker).
+## NOT month-pinned. The deadline moves — a single-month pin (`5`) silently skipped the 2026 Jul-6 deadline and a 5-8 range would have skipped any shift past August. The gate is ext_date plus its 14-day auto-process retry tail (AUTO_PROCESS_WINDOW_DAYS in process-extensions.mjs), which the script evaluates itself in two cheap queries.
+*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-extensions.mjs >> /var/log/league/process-extensions.log 2>&1
 
 # League Each Season Week
 
-## At 23:55 on Monday during the NFL Season
-55 23 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-rosters.mjs >> /var/log/league/league-generate-rosters.log 2>&1
+## Generate the upcoming week's roster slice — daily at 23:55, year-round.
+## NOT month-pinned, and NOT weekly. The job writes only the FUTURE slice (nextWeek = current week + 1), never the live one, so running it daily cannot clobber a manager's roster; it just bounds how stale that slice can get. Under the old `1,2,9-12` Monday pin the offseason week-1 slice was created in February and then frozen until September: in 2026 the last Monday reading week 0 fell on Aug 31, outside the month range, so the February snapshot — pre-draft, pre-auction, still carrying 2025 tags — would have gone live at kickoff and propagated into week 2.
+55 23 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-rosters.mjs >> /var/log/league/league-generate-rosters.log 2>&1
 
 
 
