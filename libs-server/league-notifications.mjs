@@ -39,6 +39,59 @@ export async function has_league_notification_been_sent({
 }
 
 /**
+ * Atomically claim the right to send a league notification.
+ *
+ * The read-then-write pair of `has_league_notification_been_sent` followed by
+ * `record_league_notification_sent` cannot prevent a duplicate send: two
+ * processes can both read absent, and the loser's unique violation is swallowed
+ * by the recorder, so both go on to send. That window is harmless for a
+ * notification whose duplicate is merely noise, but not for one where a repeat
+ * post to the league channel is the failure being designed against.
+ *
+ * This inserts the marker first and reports whether THIS caller created it, so
+ * exactly one process proceeds to send. Callers that claim must treat a send
+ * failure as loud -- the marker is already written, so nothing will retry.
+ *
+ * @param {Object} params - Parameters
+ * @param {number} params.lid - League ID
+ * @param {number} params.season_year - Season year
+ * @param {string} params.notification_type - Type of notification
+ * @param {number} params.event_timestamp - Unix timestamp (seconds) of the event being notified about
+ * @param {string} params.message - The notification message being sent
+ * @param {Object} params.metadata - Optional metadata to store with the notification
+ * @returns {Promise<boolean>} True when this caller won the claim and should send
+ */
+export async function claim_league_notification({
+  lid,
+  season_year,
+  notification_type,
+  event_timestamp,
+  message,
+  metadata = null
+}) {
+  const inserted = await db('league_notifications')
+    .insert({
+      lid,
+      season_year,
+      notification_type,
+      event_timestamp: to_timestamptz(event_timestamp),
+      sent_timestamp: new Date(),
+      message,
+      metadata: metadata || null
+    })
+    .onConflict(['lid', 'season_year', 'notification_type', 'event_timestamp'])
+    .ignore()
+    .returning('uid')
+
+  const claimed = inserted.length > 0
+  log(
+    `${claimed ? 'Claimed' : 'Declined'} ${notification_type} notification for league ${lid}, season_year ${season_year}, event_timestamp ${event_timestamp}`
+  )
+
+  return claimed
+}
+
+/**
  * Record that a league notification has been sent in the database
  * @param {Object} params - Parameters
  * @param {number} params.lid - League ID

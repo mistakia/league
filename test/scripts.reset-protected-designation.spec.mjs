@@ -62,6 +62,14 @@ const seed_slice = async ({ lid = 1, tid = 1, week }) => {
   ])
 }
 
+const NOTIFICATION_TYPE = 'practice_squad_protections_expired'
+
+const announcements = async () =>
+  knex('league_notifications').where({
+    lid: 1,
+    notification_type: NOTIFICATION_TYPE
+  })
+
 const slots_by_pid = async ({ week }) => {
   const rows = await knex('rosters_players')
     .select('pid', 'slot')
@@ -84,6 +92,7 @@ describe('SCRIPTS /reset-protected-designation', function () {
     beforeEach(async function () {
       MockDate.set(offseason_date())
       await league(knex)
+      await knex('league_notifications').del()
       // Both slices that exist during the offseason: week 0 and the week-1
       // slice generate-rosters materializes ahead of kickoff.
       await seed_slice({ week: 0 })
@@ -117,14 +126,53 @@ describe('SCRIPTS /reset-protected-designation', function () {
       expect(slots['TEST-PSPP-000001']).to.equal(roster_slot_types.PS)
       expect(slots['TEST-PSDP-000002']).to.equal(roster_slot_types.PSD)
     })
+
+    it('announces the expiry once, counting players not roster rows', async () => {
+      await run()
+
+      const sent = await announcements()
+      expect(sent.length).to.equal(1)
+      // Two players across two slices — the message must not report four.
+      expect(sent[0].message).to.include('2 practice squad players')
+      expect(sent[0].metadata.expired_count).to.equal(2)
+    })
+
+    // The reset converges to nothing on the second run, so a marker-free
+    // implementation would look correct here for the wrong reason. Re-protecting
+    // between runs is what separates "nothing left to announce" from "already
+    // announced", and only the marker survives it.
+    it('does not announce twice when protections reappear', async () => {
+      await run()
+      await seed_slice({ week: 2 })
+
+      await run()
+
+      const sent = await announcements()
+      expect(sent.length).to.equal(1)
+    })
   })
 
   describe('gates', function () {
+    // Every league passes its deadline every year and most hold nothing
+    // protected. Announcing on the deadline alone would post an empty-handed
+    // message to every channel annually.
+    it('stays silent when a due league had nothing protected', async () => {
+      MockDate.set(offseason_date())
+      await league(knex)
+      await knex('league_notifications').del()
+
+      await run()
+
+      const sent = await announcements()
+      expect(sent.length).to.equal(0)
+    })
+
     it('leaves protections in place before the extension deadline', async () => {
       MockDate.set(offseason_date())
       await league(knex, {
         ext_date: current_season.now.add('1', 'week').unix()
       })
+      await knex('league_notifications').del()
       await seed_slice({ week: 0 })
 
       await run()

@@ -104,6 +104,7 @@ export { default as throw_if_shortfall } from './throw-if-shortfall.mjs'
 export { default as check_projections_index_floor } from './check-projections-index-floor.mjs'
 export {
   has_league_notification_been_sent,
+  claim_league_notification,
   record_league_notification_sent
 } from './league-notifications.mjs'
 export {
