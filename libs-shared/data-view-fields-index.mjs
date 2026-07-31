@@ -23,7 +23,7 @@ export default {
     "The player's current roster status in the fantasy league (e.g., free agent, active roster, practice squad, injured reserve)",
   player_league_salary: "The player's current salary in the fantasy league",
   player_league_extended_salary:
-    "The player's projected next-year salary in the fantasy league, applying the extension formula (current salary + (extensions + 1) * $5), franchise-tag values, rookie-tag carryover, and slot-based zeroing",
+    "The player's next-year salary in the fantasy league. Once the season's extensions are processed, this is the settled salary the roster carries. Before then it is projected, applying the extension formula (current salary + (extensions + 1) * $5), franchise-tag values, rookie-tag carryover, and slot-based zeroing",
   player_week_projected_market_salary:
     'The projected market salary for the player in a specific week',
   player_season_projected_inflation_adjusted_market_salary:

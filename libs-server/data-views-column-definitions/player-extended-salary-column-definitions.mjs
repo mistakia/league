@@ -1,6 +1,11 @@
 import db from '#db'
 
-import { current_season, player_tag_types, roster_slot_types } from '#constants'
+import {
+  current_season,
+  player_tag_types,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import { ASSET_TYPE } from '#libs-server/roster-asset-lineage/constants.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
@@ -23,7 +28,22 @@ const player_extended_salary_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(`player_extended_salary_${lid}_${year}`)
 }
 
-const player_extended_salary_join = ({
+// Whether the season's extensions have been PROCESSED, which is a database
+// question and not a clock question. `scripts/process-extensions.mjs` runs on a
+// */5 cron, so there is a window in which now is past `seasons.ext_date` and no
+// extension transaction has been written yet. Keying the branch on the clock
+// would understate every contract by its ladder step for the length of that
+// window. See `libs-server/tag-board/build-tag-board.mjs` `post_deadline_salary`
+// for the same predicate and the full reasoning.
+const get_extensions_processed = async ({ lid, year }) => {
+  const extension_row = await db('transactions')
+    .where({ lid, year, type: transaction_types.EXTENSION })
+    .first()
+
+  return Boolean(extension_row)
+}
+
+const player_extended_salary_join = async ({
   query,
   table_name,
   join_type = 'LEFT',
@@ -36,11 +56,14 @@ const player_extended_salary_join = ({
 
   const ps_slot_list = ps_slots.join(',')
 
-  const subquery = db
-    .select(
-      'rp.pid',
-      db.raw(
-        `CASE
+  const extensions_processed = await get_extensions_processed({ lid, year })
+
+  // Once the extensions are processed the stored salary IS the post-deadline
+  // salary for every tag — applying the ladder again would compound it off an
+  // already-extended base.
+  const salary_expression = extensions_processed
+    ? 'COALESCE(s.salary_paid, 0) AS extended_salary'
+    : `CASE
           WHEN rp.slot IN (${ps_slot_list}) THEN COALESCE(s.salary_paid, 0)
           WHEN rp.tag = ${player_tag_types.FRANCHISE} THEN
             CASE rp.pos
@@ -54,8 +77,9 @@ const player_extended_salary_join = ({
           WHEN rp.tag = ${player_tag_types.RESTRICTED_FREE_AGENCY} THEN COALESCE(s.salary_paid, 0)
           ELSE COALESCE(s.salary_paid, 0) + (COALESCE(rp.extensions, 0) + 1) * 5
         END AS extended_salary`
-      )
-    )
+
+  const subquery = db
+    .select('rp.pid', db.raw(salary_expression))
     .from('rosters_players as rp')
     .leftJoin('roster_asset_holding as s', function () {
       this.on('s.player_id', '=', 'rp.pid')
@@ -64,12 +88,16 @@ const player_extended_salary_join = ({
         .andOn('s.asset_type', '=', db.raw('?', [ASSET_TYPE.PLAYER]))
         .andOnNull('s.period_end')
     })
-    .leftJoin('seasons as ssn', function () {
-      this.on('ssn.lid', '=', 'rp.lid').andOn('ssn.year', '=', 'rp.year')
-    })
     .where('rp.lid', lid)
     .where('rp.year', year)
     .where('rp.week', 0)
+
+  // Only the projected branch reads the franchise tag prices off `seasons`.
+  if (!extensions_processed) {
+    subquery.leftJoin('seasons as ssn', function () {
+      this.on('ssn.lid', '=', 'rp.lid').andOn('ssn.year', '=', 'rp.year')
+    })
+  }
 
   query[join_func](subquery.as(table_name), function () {
     this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
