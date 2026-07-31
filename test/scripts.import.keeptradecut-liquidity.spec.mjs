@@ -10,6 +10,10 @@ import {
 chai.should()
 const expect = chai.expect
 
+// keeptradecut_liquidity.observed_at is timestamptz, so the importer passes a
+// Date rather than the integer epoch the column used to hold.
+const OBSERVED_AT = new Date(1_769_644_800 * 1000)
+
 const make_values = ({
   rawLiquidity = 0,
   stdLiquidity = 0,
@@ -60,22 +64,22 @@ describe('SCRIPTS import-keeptradecut liquidity', function () {
             tradeCount: 41
           })
         },
-        d: 1_769_644_800
+        observed_at: OBSERVED_AT
       })
 
       expect(rows).to.deep.equal([
         {
           pid: 'JAMA-CHAS-000001',
-          superflex: false,
-          d: 1_769_644_800,
+          is_superflex: false,
+          observed_at: OBSERVED_AT,
           raw_liquidity: 0,
           std_liquidity: 31,
           trade_count: 38
         },
         {
           pid: 'JAMA-CHAS-000001',
-          superflex: true,
-          d: 1_769_644_800,
+          is_superflex: true,
+          observed_at: OBSERVED_AT,
           raw_liquidity: 4.5,
           std_liquidity: 29,
           trade_count: 41
@@ -90,7 +94,7 @@ describe('SCRIPTS import-keeptradecut liquidity', function () {
           oneQBValues: make_values(),
           superflexValues: make_values()
         },
-        d: 1_769_644_800
+        observed_at: OBSERVED_AT
       })
 
       rows.should.have.length(2)
@@ -104,11 +108,11 @@ describe('SCRIPTS import-keeptradecut liquidity', function () {
           oneQBValues: { value: 9999 },
           superflexValues: make_values({ tradeCount: 41 })
         },
-        d: 1_769_644_800
+        observed_at: OBSERVED_AT
       })
 
       rows.should.have.length(1)
-      rows[0].superflex.should.equal(true)
+      rows[0].is_superflex.should.equal(true)
     })
 
     it('skips a format absent from the payload', () => {
@@ -117,11 +121,11 @@ describe('SCRIPTS import-keeptradecut liquidity', function () {
         keeptradecut_player: {
           oneQBValues: make_values({ tradeCount: 38 })
         },
-        d: 1_769_644_800
+        observed_at: OBSERVED_AT
       })
 
       rows.should.have.length(1)
-      rows[0].superflex.should.equal(false)
+      rows[0].is_superflex.should.equal(false)
     })
   })
 })

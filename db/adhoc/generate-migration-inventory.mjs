@@ -183,7 +183,11 @@ const CLUSTER_RULES = [
         t
       )
   ],
-  // Genuine temporal feeds get the _history/_index time-series pair.
+  // Genuine temporal feeds get the _history/_index time-series pair, with two
+  // ratified exceptions that stay in this cluster because they ARE temporal
+  // feeds: espn_receiving_metrics_history's sibling and keeptradecut_valuations,
+  // whose only latest-read path is already an index-only scan that stops on the
+  // first entry, so an _index would buy nothing.
   [
     'rankings-adp-timeseries',
     (t) =>

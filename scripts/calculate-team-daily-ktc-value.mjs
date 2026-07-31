@@ -4,11 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import {
-  keeptradecut_metric_types,
-  transaction_types,
-  transaction_type_display_names
-} from '#constants'
+import { transaction_types, transaction_type_display_names } from '#constants'
 import {
   is_main,
   get_trades,
@@ -58,18 +54,22 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
 
   log('building keeptradecut index')
   const keeptradecut_index = {}
-  const ktc_values = await db('keeptradecut_rankings')
-    .select(db.raw("pid, TO_CHAR(TO_TIMESTAMP(d), 'YYYY-MM-DD') AS date, v"))
+  const ktc_values = await db('keeptradecut_valuations')
+    .select(
+      db.raw(
+        "pid, TO_CHAR(observed_at, 'YYYY-MM-DD') AS date, keeptradecut_value"
+      )
+    )
     .whereIn('pid', transaction_pids)
-    .where('qb', 2) // choose based on league settings
-    .where('type', keeptradecut_metric_types.VALUE)
-    .orderBy('d', 'asc')
+    .where('is_superflex', true) // choose based on league settings
+    .orderBy('observed_at', 'asc')
 
   for (const ktc_value of ktc_values) {
     if (!keeptradecut_index[ktc_value.pid]) {
       keeptradecut_index[ktc_value.pid] = {}
     }
-    keeptradecut_index[ktc_value.pid][ktc_value.date] = ktc_value.v
+    keeptradecut_index[ktc_value.pid][ktc_value.date] =
+      ktc_value.keeptradecut_value
   }
 
   const team_daily_value_inserts = []

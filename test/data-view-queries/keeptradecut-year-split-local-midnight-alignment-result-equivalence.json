@@ -1,0 +1,36 @@
+{
+  "name": "player_keeptradecut_value year split resolves the boundary at the unshifted start of opening day (executed-result parity)",
+  "description": "The year-split boundary is `date_trunc('day', opening_days.opening_day)`. opening_day is a `date`, so date_trunc yields a timestamp WITHOUT time zone, which Postgres resolves against timestamptz observed_at in the SESSION time zone -- America/New_York on production, where it lands on the same local midnight the old integer `d` column encoded. This fixture cannot assert THAT property: the test container runs Etc/UTC, so the session-TZ alignment is pinned by the migration's own oracle blocks and by the assumption recorded on the task, not here. What it does pin, under any session TZ, is that the boundary is the UNSHIFTED start of opening day. Seed one observation exactly at the boundary (5000) and a distractor four hours later (9999) -- four hours being the size of the shift a reintroduced `AT TIME ZONE 'UTC'` would impose. As-of takes the latest observation at or before the boundary, so the answer is 5000: a boundary shifted forward returns 9999, one shifted backward returns NULL, and only an inclusive comparison at the exact day start returns 5000.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2023]
+        }
+      }
+    ],
+    "row_axes": ["year"],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["ZY"]
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('ZY')) select \"player\".\"pid\", player.first_name, player.last_name, \"t074b75751b530bdf960cb111dcd1e62f\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_valuations\" as \"t074b75751b530bdf960cb111dcd1e62f\" on \"t074b75751b530bdf960cb111dcd1e62f\".\"pid\" = \"player\".\"pid\" and \"t074b75751b530bdf960cb111dcd1e62f\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t074b75751b530bdf960cb111dcd1e62f\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= (date_trunc('day', opening_days.opening_day) + interval '0 year')) where player.primary_position IN ('ZY') group by player.first_name, player.last_name, \"t074b75751b530bdf960cb111dcd1e62f\".\"keeptradecut_value\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTC-000908', 'Test', 'Ktcy', 'T.Ktcy', 'Test Ktcy', 'ZY', 'ZY', '2000-01-01', 2020, 'ZYA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (970801, 2023, 1, 'REG', 'ZYA', 'ZYX', '2023-09-07')",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) SELECT 'TEST-KTC-000908', true, date_trunc('day', opening_day)::timestamptz, 5000 FROM opening_days WHERE year = 2023",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) SELECT 'TEST-KTC-000908', true, date_trunc('day', opening_day)::timestamptz + interval '4 hours', 9999 FROM opening_days WHERE year = 2023"
+    ],
+    "reference_sql": "SELECT keeptradecut_value AS player_keeptradecut_value_0 FROM keeptradecut_valuations WHERE pid = 'TEST-KTC-000908' AND keeptradecut_value < 9000",
+    "compare_columns": ["player_keeptradecut_value_0"]
+  },
+  "tags": ["keeptradecut", "year_split", "timezone", "result-equivalence"]
+}

@@ -2,7 +2,6 @@ import dayjs from 'dayjs'
 
 import db from '#db'
 import { roster_slot_types } from '#constants/roster-constants.mjs'
-import { keeptradecut_metric_types } from '#constants'
 import {
   load_pick_ktc_indexes,
   ktc_pick_at
@@ -82,18 +81,24 @@ const ps_subtype = (slot) => {
 const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
   const idx = {}
 
-  // KTC: keyed pid -> sorted array of {d, v}
+  // KTC: keyed pid -> sorted array of {d, v}, where `d` is epoch SECONDS.
+  // observed_at is timestamptz and returns as a JS Date, so it is normalised
+  // here the same way kickoff_at is below -- everything downstream (start_unix,
+  // period_end_unix, week_anchor) is epoch seconds, and a Date compared against
+  // a number coerces to MILLISECONDS and is silently always false.
   if (player_ids.length) {
-    const ktc_rows = await db('keeptradecut_rankings')
-      .select('pid', 'v', 'd')
+    const ktc_rows = await db('keeptradecut_valuations')
+      .select('pid', 'keeptradecut_value', 'observed_at')
       .whereIn('pid', player_ids)
-      .where('qb', 2)
-      .where('type', keeptradecut_metric_types.VALUE)
-      .orderBy('d', 'asc')
+      .where('is_superflex', true)
+      .orderBy('observed_at', 'asc')
     idx.ktc = new Map()
     for (const r of ktc_rows) {
       if (!idx.ktc.has(r.pid)) idx.ktc.set(r.pid, [])
-      idx.ktc.get(r.pid).push({ d: r.d, v: Number(r.v) })
+      idx.ktc.get(r.pid).push({
+        d: Math.floor(r.observed_at.getTime() / 1000),
+        v: Number(r.keeptradecut_value)
+      })
     }
   } else {
     idx.ktc = new Map()
@@ -229,14 +234,20 @@ const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
     }
   }
 
-  // Pick KTC indexes (superflex qb-axis; matches the player-side query above).
+  // Pick KTC indexes (superflex; matches the player-side query above).
   // Loaded once across all picks the snapshot pass will touch.
-  idx.pick_ktc = await load_pick_ktc_indexes({ qb_axis: 2 })
+  idx.pick_ktc = await load_pick_ktc_indexes({ is_superflex: true })
 
   return idx
 }
 
-const ktc_at = (idx, pid, target_unix) => {
+// Latest KTC value at or before `target_unix` (epoch seconds). When the target
+// predates the whole series it falls through to the earliest observation --
+// pre-existing behaviour, deliberately retained. The retype makes that
+// fall-through the hazard to watch: `idx.ktc` rows must already be normalised
+// to epoch seconds, or every comparison is false and every asset in every
+// lineage snapshot silently reads the earliest KTC value ever recorded.
+export const ktc_at = (idx, pid, target_unix) => {
   const rows = idx.ktc.get(pid)
   if (!rows || !rows.length) return null
   // Binary search for largest d <= target_unix; small N typical, linear OK.

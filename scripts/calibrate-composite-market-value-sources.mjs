@@ -178,10 +178,14 @@ const calibrate_composite_market_value_sources = async ({
   const fc_format = await load_fc_format_map()
 
   const player_ids = (
-    await db('keeptradecut_rankings')
+    await db('keeptradecut_valuations')
       .distinct('pid')
-      .where('d', '>=', Math.floor(new Date(start_date).getTime() / 1000))
-      .where('d', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
+      .where('observed_at', '>=', new Date(start_date))
+      .where(
+        'observed_at',
+        '<=',
+        new Date(new Date(end_date).getTime() + 86400 * 1000)
+      )
       .where('pid', 'NOT LIKE', 'KTCPICK%')
   ).map((r) => r.pid)
 

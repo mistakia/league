@@ -24,8 +24,10 @@ export const run_cmv_script = async ({ job_type, fn, log }) => {
     const end_date = argv['end-date'] || dayjs().format('YYYY-MM-DD')
 
     if (argv['all-history']) {
-      const min = await db('keeptradecut_rankings').min('d as min').first()
-      start_date = dayjs.unix(min.min).format('YYYY-MM-DD')
+      const min = await db('keeptradecut_valuations')
+        .min('observed_at as min')
+        .first()
+      start_date = dayjs(min.min).format('YYYY-MM-DD')
     } else if (!start_date) {
       start_date = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
     }

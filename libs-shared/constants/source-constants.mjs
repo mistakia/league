@@ -98,12 +98,6 @@ export const projection_data_source_ids = [
   external_data_sources.SLEEPER
 ]
 
-export const keeptradecut_metric_types = {
-  VALUE: 1,
-  POSITION_RANK: 2,
-  OVERALL_RANK: 3
-}
-
 export const default_points_added = -999
 
 export const team_id_regex = /^([A-Z]{1,3})$/gi

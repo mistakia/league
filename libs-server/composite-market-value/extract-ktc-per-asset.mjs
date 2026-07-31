@@ -1,9 +1,10 @@
 import db from '#db'
-import { keeptradecut_metric_types } from '#constants'
 
 // Player KTC values per (pid, date), filtered by the format category's
-// qb_axis (qb=1 single-QB, qb=2 superflex). v1 ships players only; KTC pick
-// values exist in keeptradecut_rankings (KTCPICK% pids) but mapping
+// qb_axis (qb=1 single-QB, qb=2 superflex -- a
+// format_category_signal_mapping column, translated to the is_superflex
+// boolean at the query boundary). v1 ships players only; KTC pick
+// values exist in keeptradecut_valuations (KTCPICK% pids) but mapping
 // (year, round, slot) to (pick_original_owner_tid) requires a standings-based
 // pick-order projection that is deferred to a follow-up. See plan
 // "Round-three review findings applied".
@@ -18,18 +19,25 @@ export const extract_ktc_per_asset = async ({
 }) => {
   const result = new Map()
   if (!player_ids.length) return result
-  const rows = await db('keeptradecut_rankings')
+  // `new Date('YYYY-MM-DD')` is UTC midnight while observed_at holds NY local
+  // midnight, so these bounds carry a 4-5h skew. That is pre-existing and
+  // absorbed by the day of slack on the upper bound; tightening it would lose
+  // the boundary day, so the instants are preserved exactly as the epoch
+  // arithmetic they replace produced.
+  const end_bound = new Date(new Date(end_date).getTime() + 86400 * 1000)
+  const rows = await db('keeptradecut_valuations')
     .select(
-      db.raw("pid, TO_CHAR(TO_TIMESTAMP(d), 'YYYY-MM-DD') AS date_iso, v")
+      db.raw(
+        "pid, TO_CHAR(observed_at, 'YYYY-MM-DD') AS date_iso, keeptradecut_value"
+      )
     )
     .whereIn('pid', player_ids)
-    .where('qb', ktc_qb_axis)
-    .where('type', keeptradecut_metric_types.VALUE)
-    .where('d', '>=', Math.floor(new Date(start_date).getTime() / 1000))
-    .where('d', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
-    .orderBy('d', 'asc')
+    .where('is_superflex', ktc_qb_axis === 2)
+    .where('observed_at', '>=', new Date(start_date))
+    .where('observed_at', '<=', end_bound)
+    .orderBy('observed_at', 'asc')
   for (const r of rows) {
-    result.set(`${r.pid}__${r.date_iso}`, Number(r.v))
+    result.set(`${r.pid}__${r.date_iso}`, Number(r.keeptradecut_value))
   }
   return result
 }

@@ -102,18 +102,12 @@ const shorthand_columns = new Map([
 // Replacement hints for columns whose right name depends on the TABLE, not just
 // the spelling. Keyed table.column and consulted before the map above, so a bare
 // name that means one thing here and another elsewhere is not given one global
-// answer -- the mistake that put `keeptradecut_rankings.v` under the team rule
-// in the first place.
-const column_specific_shorthand = new Map([
-  // NOT `value`: the column is polymorphic on the sibling `type` column, and
-  // 3.28M of its 5.63M rows hold a RANK, not a value (type 2 POSITION_RANK
-  // ranges 1-421, type 3 OVERALL_RANK ranges 1-1574, against type 1 VALUE at
-  // -2..9999). A name asserting "value" would be wrong for 58% of the table --
-  // the same class of error as the ambiguous_team false positive this rule
-  // replaced, pointing the other way. `metric_value` is what it holds: the value
-  // of whichever metric `type` names.
-  ['keeptradecut_rankings.v', 'metric_value']
-])
+// answer -- the mistake that once put `keeptradecut_rankings.v` under the team
+// rule, before that table was restructured into keeptradecut_valuations and the
+// polymorphic column ceased to exist. Empty is the correct state: an entry here
+// describes live debt, so a gate that kept naming a removed column could never
+// reach zero.
+const column_specific_shorthand = new Map([])
 
 // The shorthand rule above is an ENUMERATION, and an enumeration of already-known
 // names can only ever report the debt it can name. It listed 25 fantasy-stat
@@ -225,15 +219,14 @@ const ambiguous_team_columns = new Set(['v', 'h', 'team', 'club', 'clubcode'])
 // whose name collides with that list but whose MEANING is something else, so the
 // team rule must not claim them.
 //
-// This is not a suppression: the column is still non-conforming and is still
-// reported, under the rule that actually describes it (`v` is shorthand for a
-// value, so the bare-short-name rule takes it). Suppressing it would hide real
-// debt; leaving it under ambiguous_team would tell a worker to rename a value
-// column to a team name, which corrupts the meaning of the data rather than the
-// spelling of it. keeptradecut_rankings.v is written by scripts/import-keeptradecut.mjs
-// as `v: i.v` under `type: keeptradecut_metric_types.VALUE` / `.OVERALL_RANK` /
-// `.POSITION_RANK` -- a KeepTradeCut player value, never a visiting team.
-const non_team_columns = new Set(['keeptradecut_rankings.v'])
+// An entry here is not a suppression: the column is still non-conforming and is
+// still reported, under the rule that actually describes it. Suppressing it
+// would hide real debt; leaving a value column under ambiguous_team would tell a
+// worker to rename it to a team name, corrupting the meaning of the data rather
+// than the spelling of it. The sole entry was keeptradecut_rankings.v, removed
+// when that table was restructured into keeptradecut_valuations and its
+// polymorphic value column was replaced by three named ones.
+const non_team_columns = new Set([])
 
 // Source-system name fragments, used ONLY to recognise an id column as pointing
 // at an external system rather than at an internal app key (see
@@ -364,13 +357,11 @@ const RULES = {
 }
 
 // Known instants whose NAME carries no time suffix, so the pattern below cannot
-// see them. Keyed table.column. Both keeptradecut columns are integer epochs --
-// prohibited representations that the suffix rule reported as clean because the
-// name is a single letter.
-const known_time_columns = new Set([
-  'keeptradecut_rankings.d',
-  'keeptradecut_liquidity.d'
-])
+// see them. Keyed table.column. Both keeptradecut `d` columns lived here --
+// integer epochs the suffix rule reported as clean because the name is a single
+// letter -- until the valuations restructure retyped them to
+// `observed_at timestamptz`, which the pattern recognises on its own.
+const known_time_columns = new Set([])
 
 function looks_like_time_column(table, name) {
   if (known_time_columns.has(`${table}.${name}`)) return true

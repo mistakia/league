@@ -1,4 +1,3 @@
-import { keeptradecut_metric_types } from '#libs-shared/constants/source-constants.mjs'
 import db from '#db'
 
 // Point-in-time KTC value for a draft pick keyed by
@@ -6,7 +5,7 @@ import db from '#db'
 //
 // KTC publishes pick rankings as synthetic "players" registered in
 // `keeptradecut_pick` -- `(year, round, slot)` where slot is 1=Early / 2=Mid /
-// 3=Late. Their daily KTC values live in `keeptradecut_rankings`. The earliest
+// 3=Late. Their daily KTC values live in `keeptradecut_valuations`. The earliest
 // record in this database is 2023-09-08; pre-2023 trades therefore have no
 // direct KTC pick data and require an analog-year fallback.
 //
@@ -27,8 +26,8 @@ export const slot_from_position = (overall_position, num_teams) => {
 // Load all KTCPICK indexes once. Keys:
 //   idx.pick_pid_by_yrs.get(`${year}__${round}__${slot}`) -> pid
 //   idx.pick_pid_meta.get(pid) -> { year, round, slot }
-//   idx.ktc_picks.get(pid) -> [{ d, v }] sorted by d asc
-export const load_pick_ktc_indexes = async ({ qb_axis }) => {
+//   idx.ktc_picks.get(pid) -> [{ d, v }] sorted by d asc, d in epoch SECONDS
+export const load_pick_ktc_indexes = async ({ is_superflex }) => {
   const idx = {
     pick_pid_by_yrs: new Map(),
     pick_pid_meta: new Map(),
@@ -51,15 +50,21 @@ export const load_pick_ktc_indexes = async ({ qb_axis }) => {
   }
   if (!pids_rows.length) return idx
   const pids = pids_rows.map((r) => r.pid)
-  const ktc_rows = await db('keeptradecut_rankings')
-    .select('pid', 'd', 'v')
+  const ktc_rows = await db('keeptradecut_valuations')
+    .select('pid', 'observed_at', 'keeptradecut_value')
     .whereIn('pid', pids)
-    .where('qb', qb_axis)
-    .where('type', keeptradecut_metric_types.VALUE)
-    .orderBy('d', 'asc')
+    .where('is_superflex', is_superflex)
+    .orderBy('observed_at', 'asc')
+  // observed_at is timestamptz and arrives as a JS Date. Every comparison and
+  // every piece of arithmetic below -- lookup_le, unix_of_ymd, the centrality
+  // window -- is in epoch seconds, and a Date compared against a number coerces
+  // to milliseconds and is silently always false, so normalise at the boundary.
   for (const r of ktc_rows) {
     if (!idx.ktc_picks.has(r.pid)) idx.ktc_picks.set(r.pid, [])
-    idx.ktc_picks.get(r.pid).push({ d: r.d, v: Number(r.v) })
+    idx.ktc_picks.get(r.pid).push({
+      d: Math.floor(r.observed_at.getTime() / 1000),
+      v: Number(r.keeptradecut_value)
+    })
   }
   return idx
 }

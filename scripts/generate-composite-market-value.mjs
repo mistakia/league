@@ -204,14 +204,18 @@ const generate_composite_market_value = async ({
   if (!default_weights) throw new Error('no default blend weights configured')
 
   const player_ids = (
-    await db('keeptradecut_rankings')
+    await db('keeptradecut_valuations')
       .distinct('pid')
       .where(
-        'd',
+        'observed_at',
         '>=',
-        Math.floor(new Date(start_date).getTime() / 1000) - 86400 * 35
+        new Date(new Date(start_date).getTime() - 86400 * 35 * 1000)
       )
-      .where('d', '<=', Math.floor(new Date(end_date).getTime() / 1000) + 86400)
+      .where(
+        'observed_at',
+        '<=',
+        new Date(new Date(end_date).getTime() + 86400 * 1000)
+      )
       .where('pid', 'NOT LIKE', 'KTCPICK%')
   ).map((r) => r.pid)
   log(`player universe size: ${player_ids.length}`)

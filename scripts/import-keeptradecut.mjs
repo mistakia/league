@@ -8,7 +8,6 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { keeptradecut_metric_types } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -42,7 +41,11 @@ const parse_ktc_pick_name = (name) => {
   }
 }
 
-const parse_keeptradecut_date = (date_str) => {
+// Returns a Date, not an epoch integer: keeptradecut_valuations.observed_at is
+// timestamptz. dayjs parses a bare 'YYYY-MM-DD' at LOCAL midnight, and the
+// process runs TZ=America/New_York, so this reproduces exactly the instant the
+// old integer `d` encoded -- the conversion is a unit change, not a shift.
+export const parse_keeptradecut_date = (date_str) => {
   const formatted_date =
     '20' +
     date_str.substring(0, 2) +
@@ -50,14 +53,69 @@ const parse_keeptradecut_date = (date_str) => {
     date_str.substring(2, 4) +
     '-' +
     date_str.substring(4, 6)
-  return dayjs(formatted_date, 'YYYY-MM-DD').unix()
+  return dayjs(formatted_date, 'YYYY-MM-DD').toDate()
 }
 
 const parse_compressed_value = (compressed_str) => {
   return {
-    d: parse_keeptradecut_date(compressed_str),
+    observed_at: parse_keeptradecut_date(compressed_str),
     v: Number(compressed_str.substring(6))
   }
+}
+
+// Column sets each importer branch is entitled to write, and therefore the
+// exact `onConflict().merge()` list for that branch's batch.
+//
+// These are deliberately NOT unified. The RDP page carries no
+// positionalRankHistory, so an RDP batch that merged position_rank would write
+// NULL over a rank a non-RDP scrape had established. That is inert today (no
+// pick pid has ever carried a position rank) but the safety rests on the vendor
+// classifying each pid as RDP consistently across scrapes, which is not an
+// invariant this code controls -- and `.merge()` (unlike the old `.ignore()`)
+// makes such a mistake destructive rather than inert.
+export const MERGE_COLUMNS_FULL = [
+  'keeptradecut_value',
+  'position_rank',
+  'overall_rank'
+]
+export const MERGE_COLUMNS_FULL_RDP = ['keeptradecut_value', 'overall_rank']
+export const MERGE_COLUMNS_DAILY = ['keeptradecut_value']
+
+export const merge_columns_for_branch = ({ full, is_rdp }) => {
+  if (!full) return MERGE_COLUMNS_DAILY
+  return is_rdp ? MERGE_COLUMNS_FULL_RDP : MERGE_COLUMNS_FULL
+}
+
+// Accumulates one wide row per (is_superflex, observed_at) out of the vendor's
+// independent per-metric arrays. Keyed on the instant's epoch ms because two
+// equal Dates are distinct Map keys by identity.
+export const create_valuation_accumulator = ({ pid, merge_columns }) => {
+  const rows_by_key = new Map()
+
+  const add = ({ is_superflex, observed_at, column, value }) => {
+    const key = `${is_superflex}|${observed_at.getTime()}`
+    let row = rows_by_key.get(key)
+    if (!row) {
+      // Seed every column this branch may write, so each batch presents a
+      // uniform key set to knex regardless of which vendor arrays were short.
+      row = { pid, is_superflex, observed_at }
+      for (const merge_column of merge_columns) row[merge_column] = null
+      rows_by_key.set(key, row)
+    }
+    row[column] = value
+  }
+
+  // keeptradecut_value is NOT NULL, and a batch is per player, so one value-less
+  // entry would abort that player's whole write with a 23502. The vendor's
+  // arrays are parsed independently and their date sets are never cross-checked,
+  // so the shortfall is enforced here and NOT NULL is only the backstop.
+  const complete_rows = () => {
+    const all = Array.from(rows_by_key.values())
+    const rows = all.filter((row) => row.keeptradecut_value != null)
+    return { rows, skipped: all.length - rows.length }
+  }
+
+  return { add, complete_rows }
 }
 
 // KTC publishes rawLiquidity/stdLiquidity/tradeCount inline on the dynasty-rankings
@@ -143,14 +201,18 @@ export const summarize_zero_liquidity_payload = (
   }
 }
 
-export const build_liquidity_inserts = ({ pid, keeptradecut_player, d }) => {
+export const build_liquidity_inserts = ({
+  pid,
+  keeptradecut_player,
+  observed_at
+}) => {
   const rows = []
   const by_format = [
     [false, keeptradecut_player.oneQBValues],
     [true, keeptradecut_player.superflexValues]
   ]
 
-  for (const [superflex, values] of by_format) {
+  for (const [is_superflex, values] of by_format) {
     if (!values) continue
 
     const raw_liquidity = Number(values.rawLiquidity)
@@ -167,7 +229,14 @@ export const build_liquidity_inserts = ({ pid, keeptradecut_player, d }) => {
       continue
     }
 
-    rows.push({ pid, superflex, d, raw_liquidity, std_liquidity, trade_count })
+    rows.push({
+      pid,
+      is_superflex,
+      observed_at,
+      raw_liquidity,
+      std_liquidity,
+      trade_count
+    })
   }
 
   return rows
@@ -238,14 +307,16 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
   log(`Processing ${data.length} players`)
 
-  const liquidity_d = dayjs().startOf('day').unix()
+  const liquidity_observed_at = dayjs().startOf('day').toDate()
+
+  let value_less_entries_skipped = 0
 
   for (const item of data) {
     const keeptradecut_player = players_index[item.playerID]
-    const inserts = []
+    const is_rdp = keeptradecut_player.position === 'RDP'
     let pid
 
-    if (keeptradecut_player.position === 'RDP') {
+    if (is_rdp) {
       const meta = parse_ktc_pick_name(keeptradecut_player.playerName)
       if (!meta) {
         log(
@@ -310,6 +381,9 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       pid = player_row.pid
     }
 
+    const merge_columns = merge_columns_for_branch({ full, is_rdp })
+    const accumulator = create_valuation_accumulator({ pid, merge_columns })
+
     if (full) {
       const slug = keeptradecut_player.slug
       const html = await fetch_with_retry({
@@ -318,138 +392,133 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       })
 
       const dom = new JSDOM(html, { runScripts: 'dangerously' })
-      if (keeptradecut_player.position === 'RDP') {
+      if (is_rdp) {
+        // Optional chaining here and NOT on the non-RDP branch below is
+        // deliberate and pre-existing: a pick page legitimately omits these
+        // arrays, while a player page missing one is a vendor-shape change that
+        // must throw loudly rather than silently import a partial history.
         dom.window.playerOneQB?.overallValue?.forEach((i) => {
-          inserts.push({
-            qb: 1,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.VALUE
+          accumulator.add({
+            is_superflex: false,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'keeptradecut_value',
+            value: i.v
           })
         })
 
         dom.window.playerOneQB?.overallRankHistory?.forEach((i) => {
-          inserts.push({
-            qb: 1,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.OVERALL_RANK
+          accumulator.add({
+            is_superflex: false,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'overall_rank',
+            value: i.v
           })
         })
 
         dom.window.playerSuperflex?.overallValue?.forEach((i) => {
-          inserts.push({
-            qb: 2,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.VALUE
+          accumulator.add({
+            is_superflex: true,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'keeptradecut_value',
+            value: i.v
           })
         })
 
         dom.window.playerSuperflex?.overallRankHistory?.forEach((i) => {
-          inserts.push({
-            qb: 2,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.OVERALL_RANK
+          accumulator.add({
+            is_superflex: true,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'overall_rank',
+            value: i.v
           })
         })
       } else {
         dom.window.playerOneQB.overallValue.forEach((i) => {
-          inserts.push({
-            qb: 1,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.VALUE
+          accumulator.add({
+            is_superflex: false,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'keeptradecut_value',
+            value: i.v
           })
         })
 
         dom.window.playerOneQB.overallRankHistory.forEach((i) => {
-          inserts.push({
-            qb: 1,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.OVERALL_RANK
+          accumulator.add({
+            is_superflex: false,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'overall_rank',
+            value: i.v
           })
         })
 
         dom.window.playerOneQB.positionalRankHistory.forEach((i) => {
-          inserts.push({
-            qb: 1,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.POSITION_RANK
+          accumulator.add({
+            is_superflex: false,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'position_rank',
+            value: i.v
           })
         })
 
         dom.window.playerSuperflex.overallValue.forEach((i) => {
-          inserts.push({
-            qb: 2,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.VALUE
+          accumulator.add({
+            is_superflex: true,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'keeptradecut_value',
+            value: i.v
           })
         })
 
         dom.window.playerSuperflex.overallRankHistory.forEach((i) => {
-          inserts.push({
-            qb: 2,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.OVERALL_RANK
+          accumulator.add({
+            is_superflex: true,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'overall_rank',
+            value: i.v
           })
         })
 
         dom.window.playerSuperflex.positionalRankHistory.forEach((i) => {
-          inserts.push({
-            qb: 2,
-            pid,
-            d: parse_keeptradecut_date(i.d),
-            v: i.v,
-            type: keeptradecut_metric_types.POSITION_RANK
+          accumulator.add({
+            is_superflex: true,
+            observed_at: parse_keeptradecut_date(i.d),
+            column: 'position_rank',
+            value: i.v
           })
         })
       }
     } else {
       item.oneQB?.valueHistory?.forEach((compressed_str) => {
-        const { d, v } = parse_compressed_value(compressed_str)
-        inserts.push({
-          qb: 1,
-          pid,
-          d,
-          v,
-          type: keeptradecut_metric_types.VALUE
+        const { observed_at, v } = parse_compressed_value(compressed_str)
+        accumulator.add({
+          is_superflex: false,
+          observed_at,
+          column: 'keeptradecut_value',
+          value: v
         })
       })
 
       item.superflex?.valueHistory?.forEach((compressed_str) => {
-        const { d, v } = parse_compressed_value(compressed_str)
-        inserts.push({
-          qb: 2,
-          pid,
-          d,
-          v,
-          type: keeptradecut_metric_types.VALUE
+        const { observed_at, v } = parse_compressed_value(compressed_str)
+        accumulator.add({
+          is_superflex: true,
+          observed_at,
+          column: 'keeptradecut_value',
+          value: v
         })
       })
     }
 
+    const { rows: inserts, skipped } = accumulator.complete_rows()
+    value_less_entries_skipped += skipped
+
     // Liquidity is a same-day snapshot, not a history: KTC exposes only the current
     // value on the dynasty-rankings payload, so there is nothing to backfill.
-    if (liquidity_collected && keeptradecut_player.position !== 'RDP') {
+    if (liquidity_collected && !is_rdp) {
       const liquidity_inserts = build_liquidity_inserts({
         pid,
         keeptradecut_player,
-        d: liquidity_d
+        observed_at: liquidity_observed_at
       })
 
       log(
@@ -463,7 +532,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           save: (batch) =>
             db('keeptradecut_liquidity')
               .insert(batch)
-              .onConflict(['pid', 'superflex', 'd'])
+              .onConflict(['pid', 'is_superflex', 'observed_at'])
               .merge(['raw_liquidity', 'std_liquidity', 'trade_count'])
         })
       }
@@ -479,10 +548,15 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       items: inserts,
       batch_size: 5000,
       save: (batch) =>
-        db('keeptradecut_rankings')
+        db('keeptradecut_valuations')
           .insert(batch)
-          .onConflict(['pid', 'd', 'qb', 'type'])
-          .ignore()
+          .onConflict(['pid', 'is_superflex', 'observed_at'])
+          // Was `.ignore()` under the EAV shape, where history was immutable
+          // and first-write-wins. A wide row is assembled from several arrays,
+          // so a later full scrape must be able to fill in ranks a daily run
+          // wrote value-only -- which requires merging. The consequence is that
+          // a full re-scrape now also overwrites revised historical values.
+          .merge(merge_columns)
     })
 
     log(`Inserted ${inserts.length} values for playerID ${item.playerID}`)
@@ -494,26 +568,32 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
   if (!liquidity_collected) {
     shortfalls.push(
-      `liquidity: keeptradecut published zero liquidity for all ${playersArray.length} players; no rows written for d=${dayjs.unix(liquidity_d).format('YYYY-MM-DD')}`
+      `liquidity: keeptradecut published zero liquidity for all ${playersArray.length} players; no rows written for observed_at=${dayjs(liquidity_observed_at).format('YYYY-MM-DD')}`
     )
   }
 
-  // Freshness oracle: after running, max(d) in keeptradecut_rankings should be
-  // within 48h of now. Cron runs daily at 04:30; a stale max means the script
-  // completed without writing any new rows — silent partial-success.
+  if (value_less_entries_skipped) {
+    shortfalls.push(
+      `assembly: ${value_less_entries_skipped} observation(s) carried a rank with no keeptradecut_value and were skipped`
+    )
+  }
+
+  // Freshness oracle: after running, max(observed_at) in keeptradecut_valuations
+  // should be within 48h of now. Cron runs daily at 04:30; a stale max means the
+  // script completed without writing any new rows — silent partial-success.
   if (!dry) {
     const freshness_threshold_hours = 48
-    const max_row = await db('keeptradecut_rankings')
-      .max({ max_d: 'd' })
+    const max_row = await db('keeptradecut_valuations')
+      .max({ max_observed_at: 'observed_at' })
       .first()
-    const max_d = max_row?.max_d
-    if (!max_d) {
-      shortfalls.push('no rows found in keeptradecut_rankings after run')
+    const max_observed_at = max_row?.max_observed_at
+    if (!max_observed_at) {
+      shortfalls.push('no rows found in keeptradecut_valuations after run')
     } else {
-      const stale_hours = dayjs().diff(dayjs.unix(max_d), 'hour')
+      const stale_hours = dayjs().diff(dayjs(max_observed_at), 'hour')
       if (stale_hours > freshness_threshold_hours) {
         shortfalls.push(
-          `staleness: max(d)=${dayjs.unix(max_d).format('YYYY-MM-DD')} is ${stale_hours}h > threshold=${freshness_threshold_hours}h`
+          `staleness: max(observed_at)=${dayjs(max_observed_at).format('YYYY-MM-DD')} is ${stale_hours}h > threshold=${freshness_threshold_hours}h`
         )
       }
     }
