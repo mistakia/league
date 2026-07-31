@@ -1807,6 +1807,19 @@ Rule #2 includes a minimal client-side resolver for the `nfl_week_id` `dynamic_t
 
 Add another `find_*` function inside `data-view-notices.mjs` and concat its output in the exported selector. Promote to a registry only at three rules (rule of three).
 
+## A column's `source.grain` silently determines which row axes it can ever see
+
+`derive_supported_row_axes_from_source` (`libs-server/get-data-view-results.mjs`) resolves a column's supported axes from `source.grain` unless the column declares an explicit `source.supports_row_axes` override, and `group_tables_by_supported_row_axes` then INTERSECTS the request's `row_axes` with that set. An axis the grain does not declare is dropped before the column definition ever runs.
+
+**The failure mode is dead code that looks live.** A column definition can carry a fully written `row_axes.includes('week')` branch -- joins, boundary predicates, a `week_select` -- and never execute a line of it, with nothing anywhere reporting a problem. The KeepTradeCut columns carried exactly that for an unknown length of time: `grain: 'player_year'` resolves to `row_axes: ['year']`, so their entire week branch was unreachable, including a `leftJoin(..., on true)` cross join that would have been a defect the moment it ran.
+
+Two things make this hard to see, both worth knowing before you trust a search:
+
+- **A grep for the column can match only the table name.** Searching the goldens for `week_timestamp` returns a dozen files, every hit being the substring inside `nfl_year_week_timestamp`. The column was projected by nothing. Anchor such a grep on the qualified form (`\.week_timestamp`) or read the hits.
+- **The request field is `row_axes`, not `splits`.** A probe passing `splits: ['year','week']` exercises the YEAR path while reading as a week test, and every case returns valid SQL. Assert on the emitted SQL -- is the axis-specific join actually present -- rather than on the absence of an error.
+
+When a column should support an axis its grain does not declare, add `supports_row_axes` to its `source` and update the column-family spec under `docs/data-view-specs/` to match; the spec and the code disagreeing is itself invisible to every gate.
+
 ## Related Documentation
 
 ### Schema and Validation
