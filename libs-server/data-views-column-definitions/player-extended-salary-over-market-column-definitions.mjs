@@ -44,32 +44,37 @@ const roster_tag_sql = ({ params, data_view_options }) => {
   return `(SELECT tag FROM rosters_players WHERE pid = ${data_view_options.pid_reference} AND lid = ${lid} AND year = ${year} AND week = 0)`
 }
 
-// Only a REGULAR tag gets a number. Every other tag is NULL, deliberately, and
-// for two distinct reasons.
+// REGULAR and RESTRICTED_FREE_AGENCY tags get a number. FRANCHISE and ROOKIE
+// are NULL, deliberately.
 //
 // Franchise and rookie: `market_salary` prices ONE season, and both tags are
 // multi-year commitments, so a difference against them would be a
 // plausible-looking wrong answer rather than a missing one -- the same failure
 // shape as the extension ladder defect this column follows.
 // `generate-tag-board.mjs:111-114` records the same reasoning for the figure.
+// `build-tag-board.mjs` drops both from `market_pool` outright, so leaving them
+// NULL here is what keeps the two surfaces in agreement.
 //
-// Restricted free agency: the auction settles the contract, so the stored
-// salary describes a contract about to be replaced, and the offer that would
-// settle it is blind under Constitution Article IX section 2 and never becomes
-// visible. The manager homepage board carries salary and gap null for exactly
-// these rows; emitting a number here would put this column in disagreement with
-// all ten homepages on the players the restricted free agency period is about.
-// Note the extension-ladder fix made this a live hazard rather than a
-// theoretical one -- post-fix the join returns a real `salary_paid` for tag 4,
-// so the difference computes unless nulled explicitly.
+// Restricted free agency emitted NULL until 2026-07-31, on the reasoning that
+// the auction settles the contract and the settling offer is blind under
+// Constitution Article IX section 2. That withheld PUBLIC state in order to
+// protect PRIVATE state: the stored salary is the contract the owner carries
+// today and is what a nomination is priced against, while the thing actually
+// blind is the settling BID, which never enters this column or the board.
+// `build-tag-board.mjs` stopped nulling `post_deadline_salary`/`market_gap` for
+// tag 4 in league 411c94bb8, and all ten manager homepages now render those
+// figures with `check-manager-homepages.mjs` enforcing it -- so the null here
+// had inverted into the very disagreement it was written to prevent, printing
+// blank for ten rostered players the homepages give a number for.
 //
-// A user who wants any of these rows reads the two operand columns side by side.
+// A user who wants a franchise or rookie row reads the two operand columns side
+// by side.
 const extended_salary_over_market_sql = ({
   table_name,
   params,
   data_view_options
 }) =>
-  `CASE WHEN ${roster_tag_sql({ params, data_view_options })} = ${player_tag_types.REGULAR} THEN "${table_name}"."extended_salary" - ${market_salary_sql({ params, data_view_options })} END`
+  `CASE WHEN ${roster_tag_sql({ params, data_view_options })} IN (${player_tag_types.REGULAR}, ${player_tag_types.RESTRICTED_FREE_AGENCY}) THEN "${table_name}"."extended_salary" - ${market_salary_sql({ params, data_view_options })} END`
 
 export default {
   player_league_extended_salary_over_market: {
