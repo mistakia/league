@@ -111,8 +111,6 @@ function* handle_data_view_request({
     }
   })
 
-  console.log(`Sending data view request: ${opts.view_id}`)
-
   yield put(data_view_request_actions.data_view_request(opts))
 }
 
@@ -224,8 +222,11 @@ export function* handle_delete_data_view_fulfilled({ payload }) {
 }
 
 export function* handle_get_data_view_fulfilled({ payload }) {
+  // set_selected_data_view carries view_state_changed, and the
+  // SET_SELECTED_DATA_VIEW watcher runs data_view_changed -> the results
+  // request. Issuing one here too put two identical requests on the wire for
+  // every direct link to a saved view.
   yield put(data_views_actions.set_selected_data_view(payload.data.view_id))
-  yield call(handle_data_view_request, { data_view: payload.data })
 }
 
 export function* handle_get_data_views_fulfilled({ payload }) {

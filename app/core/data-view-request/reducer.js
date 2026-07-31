@@ -70,15 +70,14 @@ export function data_view_request_reducer(
       return state.set('status', payload.status)
 
     case data_view_request_actions.DATA_VIEW_RESULT: {
-      const current_request = state.get('current_request')
-      const is_append =
-        payload.append_results ||
-        (payload.request_id === current_request &&
-          state.get('result') &&
-          state.get('result').size > 0)
+      // Append only when the request asked to append. request_id is the
+      // VIEW id, not a per-request identity, so an "already have rows for
+      // this view" heuristic cannot tell a second concurrent load of the
+      // same view from a pagination page -- it concatenated the two, and a
+      // direct link to any saved view rendered every row twice.
+      const is_append = Boolean(payload.append_results)
 
       const current_metadata = state.get('metadata')
-      console.log('current_metadata', current_metadata)
       const new_metadata = payload.metadata || {}
       // When appending results, keep existing total_count if new response doesn't have one
       // This handles pagination requests which don't calculate total_count
