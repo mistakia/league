@@ -72,15 +72,25 @@ const franchise_price_for = ({ pos, season }) => {
  * its recorded value, it does not become a $0 salary. `get_extension_amount`
  * already encodes that, so this delegates rather than special-casing it.
  *
- * The projection is only valid BEFORE the deadline. Once `ext_date` passes,
+ * The projection is only valid until the extensions are PROCESSED.
  * `scripts/process-extensions.mjs` writes a new transaction carrying the
  * already-extended value AND increments `extensions`, and the board reads
  * contract value as the latest transaction per team/player — so projecting
  * again would apply the ladder a second time off a taller base. A $15 contract
- * with two extensions renders $30 before the deadline and, unguarded, $50
- * after against a true $30. Nothing fails: every regular contract, the cap
- * exposure and the market gap all inflate plausibly. After the deadline the
- * stored value IS the post-deadline salary, for every tag.
+ * with two extensions renders $30 before processing and, unguarded, $50 after
+ * against a true $30. Once processed, the stored value IS the post-deadline
+ * salary, for every tag.
+ *
+ * The predicate is whether those transactions EXIST, never the clock. Keying it
+ * on `now_unix >= season.ext_date` is wrong for the whole window between the
+ * deadline and the five-minute cron that processes it: the branch flips on time,
+ * the data lands minutes later, and in between the board returns a value that
+ * has not been extended yet. That understates every regular contract by its
+ * ladder step, and reads a franchise-tagged player at his pre-tag value rather
+ * than the settled position price. Nothing fails — cap exposure, the market gap,
+ * the shed pool and every capacity ranking derived from them simply move
+ * together in the understating direction, which is the same silent-plausible
+ * failure as the double-ladder it replaced.
  */
 export const post_deadline_salary = ({
   tag,
@@ -88,9 +98,9 @@ export const post_deadline_salary = ({
   extensions,
   value,
   season,
-  now_unix
+  extensions_processed
 }) => {
-  if (now_unix >= season.ext_date) return value
+  if (extensions_processed) return value
 
   return get_extension_amount({
     extensions,
@@ -214,6 +224,11 @@ export default function build_tag_board({
   teams,
   roster_rows,
   contracts,
+  // Whether process-extensions.mjs has written this season's EXTENSION
+  // transactions yet. Defaults to the unprocessed state, in which the board
+  // projects the ladder — the correct reading both before the deadline and in
+  // the window after it while the cron has not yet run.
+  extensions_processed = false,
   franchise_tag_history,
   dynasty_values,
   projected_points_added = new Map(),
@@ -272,7 +287,7 @@ export default function build_tag_board({
       extensions: row.extensions,
       value: row.value,
       season,
-      now_unix
+      extensions_processed
     })
     row.untagged = row.tag === player_tag_types.REGULAR
     // Franchise saving is the whole screen: the tag replaces the value, so it

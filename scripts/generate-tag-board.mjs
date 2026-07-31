@@ -65,6 +65,16 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
     contract_rows.map((row) => [contract_key(row.tid, row.pid), row.value])
   )
 
+  // Whether the extension deadline has actually been PROCESSED, which is a
+  // database question and not a clock question. process-extensions.mjs runs on a
+  // */5 cron, so there is a window in which now is past `season.ext_date` and no
+  // extension has been written. Reading the deadline off the clock makes the
+  // board understate every contract for the length of that window.
+  const extension_row = await db('transactions')
+    .where({ lid, year, type: transaction_types.EXTENSION })
+    .first()
+  const extensions_processed = Boolean(extension_row)
+
   const franchise_tag_history = await db('transactions')
     .select('tid', 'pid', 'year')
     .where({ lid, type: transaction_types.FRANCHISE_TAG })
@@ -160,6 +170,7 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
     teams,
     roster_rows,
     contracts,
+    extensions_processed,
     franchise_tag_history,
     dynasty_values,
     projected_points_added,

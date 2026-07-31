@@ -100,8 +100,11 @@ const build_fixture = ({
   viewer_tid = null,
   viewer_cutlist = null,
   viewer_rfa_bids = null,
-  // Default is pre-deadline; a fixture opts into post-deadline state by passing
-  // an instant at or after `season.ext_date`.
+  // Default is the unprocessed state, in which the board projects the ladder; a
+  // fixture opts into processed state explicitly. This is deliberately NOT
+  // derived from `now_unix` — the clock and the transactions move at different
+  // moments, and the window between them is the bug this predicate exists for.
+  extensions_processed = false,
   now_unix: fixture_now_unix = now_unix
 }) => {
   const specs = player_specs.map(make_player)
@@ -109,6 +112,7 @@ const build_fixture = ({
     lid: 1,
     year: 2026,
     now_unix: fixture_now_unix,
+    extensions_processed,
     season,
     league_format,
     teams,
@@ -157,7 +161,7 @@ describe('tag board', function () {
         extensions: 2,
         value: 30,
         season,
-        now_unix
+        extensions_processed: false
       }).should.equal(45)
     })
 
@@ -169,7 +173,7 @@ describe('tag board', function () {
         extensions: 0,
         value: 61,
         season,
-        now_unix
+        extensions_processed: false
       }).should.equal(41)
     })
 
@@ -182,7 +186,7 @@ describe('tag board', function () {
         extensions: 0,
         value: 10,
         season,
-        now_unix
+        extensions_processed: false
       }).should.equal(10)
     })
 
@@ -193,37 +197,37 @@ describe('tag board', function () {
         extensions: 1,
         value: 21,
         season,
-        now_unix
+        extensions_processed: false
       }).should.equal(21)
     })
 
     // The ladder is a PROJECTION of an extension that has not happened yet.
-    // Past `ext_date`, process-extensions.mjs has written the extended value as
-    // a new transaction and incremented `extensions`, so the stored value is
-    // already the post-deadline salary and applying the ladder again would
-    // double-extend every regular contract off a taller base.
-    it('applies the ladder one second before the deadline', function () {
+    // Once process-extensions.mjs has written the extended value as a new
+    // transaction and incremented `extensions`, the stored value is already the
+    // post-deadline salary and applying the ladder again would double-extend
+    // every regular contract off a taller base.
+    it('applies the ladder while the extensions are unprocessed', function () {
       post_deadline_salary({
         tag: 1,
         pos: 'WR',
         extensions: 2,
         value: 15,
         season,
-        now_unix: season.ext_date - 1
+        extensions_processed: false
       }).should.equal(30)
     })
 
-    it('returns the stored value once the deadline has fired', function () {
+    it('returns the stored value once the extensions are processed', function () {
       // Not 15 + (3+1)*5 = 35, and not the 30 + (3+1)*5 = 50 the processed row
-      // would produce: after the deadline the transaction carries $30 with
-      // `extensions` already incremented, and $30 is the answer.
+      // would produce: the transaction carries $30 with `extensions` already
+      // incremented, and $30 is the answer.
       post_deadline_salary({
         tag: 1,
         pos: 'WR',
         extensions: 3,
         value: 30,
         season,
-        now_unix: season.ext_date
+        extensions_processed: true
       }).should.equal(30)
     })
 
@@ -237,7 +241,7 @@ describe('tag board', function () {
         extensions: 0,
         value: 41,
         season,
-        now_unix: season.ext_date + 1
+        extensions_processed: true
       }).should.equal(41)
     })
   })
@@ -287,9 +291,9 @@ describe('tag board', function () {
     })
 
     // The N.Collins case from the live 2026 board: $15 raw with two extensions
-    // reads $30 before the deadline. Once processed, the transaction carries
-    // $30 and `extensions` is 3, and an ungated ladder would render $50.
-    it('carries the ladder into cap exposure before the deadline', function () {
+    // reads $30 while unprocessed. Once processed, the transaction carries $30
+    // and `extensions` is 3, and an ungated ladder would render $50.
+    it('carries the ladder into cap exposure while unprocessed', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -297,7 +301,7 @@ describe('tag board', function () {
             { tid: 1, pid: 'COL', value: 15, extensions: 2, market_salary: 12 },
             { tid: 2, pid: 'B1', value: 10 }
           ],
-          now_unix: season.ext_date - 1
+          extensions_processed: false
         })
       )
 
@@ -315,12 +319,40 @@ describe('tag board', function () {
             { tid: 1, pid: 'COL', value: 30, extensions: 3, market_salary: 12 },
             { tid: 2, pid: 'B1', value: 10 }
           ],
+          extensions_processed: true,
           now_unix: season.ext_date
         })
       )
 
       // 30, not 30 + (3 + 1) * 5 = 50.
       team_exposure(board, 1).post_extension_salary.should.equal(30)
+      const row = board.market_pool.find((entry) => entry.pid === 'COL')
+      row.post_deadline_salary.should.equal(30)
+      row.market_gap.should.equal(18)
+    })
+
+    // The regression this predicate exists for: the deadline has passed on the
+    // clock and the cron has not yet run, so no EXTENSION transaction exists and
+    // the stored values are still pre-extension. A clock-keyed branch returns
+    // them as-is and understates the whole board. Both the ladder and the
+    // franchise price must still be projected here.
+    it('projects the ladder past ext_date while nothing is processed', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            { tid: 1, pid: 'COL', value: 15, extensions: 2, market_salary: 12 },
+            { tid: 1, pid: 'FRA', pos: 'RB', tag: 2, value: 61 },
+            { tid: 2, pid: 'B1', value: 10 }
+          ],
+          extensions_processed: false,
+          now_unix: season.ext_date + 1
+        })
+      )
+
+      // 30 (projected ladder, not the stored 15) + 41 (franchise price, not the
+      // stored pre-tag 61).
+      team_exposure(board, 1).post_extension_salary.should.equal(71)
       const row = board.market_pool.find((entry) => entry.pid === 'COL')
       row.post_deadline_salary.should.equal(30)
       row.market_gap.should.equal(18)
