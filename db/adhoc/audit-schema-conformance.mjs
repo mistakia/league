@@ -92,7 +92,27 @@ const shorthand_columns = new Map([
   ['trg_pid', 'target_pid'],
   ['intp_pid', 'interceptor_pid'],
   ['pos', 'position'],
-  ['d', 'observed_on']
+  // Every other temporal feed here names its observation instant `observed_at`
+  // (espn win rates, espn receiving metrics, the projection-value history), and
+  // this one retypes to timestamptz under the timestamp rule, so `observed_at`
+  // is the conforming name rather than a date-flavoured variant.
+  ['d', 'observed_at']
+])
+
+// Replacement hints for columns whose right name depends on the TABLE, not just
+// the spelling. Keyed table.column and consulted before the map above, so a bare
+// name that means one thing here and another elsewhere is not given one global
+// answer -- the mistake that put `keeptradecut_rankings.v` under the team rule
+// in the first place.
+const column_specific_shorthand = new Map([
+  // NOT `value`: the column is polymorphic on the sibling `type` column, and
+  // 3.28M of its 5.63M rows hold a RANK, not a value (type 2 POSITION_RANK
+  // ranges 1-421, type 3 OVERALL_RANK ranges 1-1574, against type 1 VALUE at
+  // -2..9999). A name asserting "value" would be wrong for 58% of the table --
+  // the same class of error as the ambiguous_team false positive this rule
+  // replaced, pointing the other way. `metric_value` is what it holds: the value
+  // of whichever metric `type` names.
+  ['keeptradecut_rankings.v', 'metric_value']
 ])
 
 // The shorthand rule above is an ENUMERATION, and an enumeration of already-known
@@ -115,77 +135,61 @@ const shorthand_columns = new Map([
 // "A name SHOULD be specific enough to be globally unique across the schema so
 // that a grep for it returns exactly its real uses."
 //
-// Membership test is "is this a real word", not "is this a word we like". Domain
-// acronyms (`adp`, `faab`, `epa`, `cpoe`) are NOT exempt -- they are exactly the
-// shorthand the standard prohibits. Bare `snaps` is likewise NOT exempt: the
-// standard calls it out by name as needing a role qualifier.
+// Membership test: a bare name is exempt only if it names a STRUCTURAL attribute
+// or identifier -- a category, a key, a label, an ordinal position. A bare name
+// that denotes a QUANTITY (count, rate, score, rank, measurement) is flagged,
+// because a quantity is the thing that needs a qualifier to say what it counts
+// and in what unit. That is the standard's own rule, generalised from its two
+// worked examples: "not a bare `snaps` repeated with different meanings;
+// `passing_yards` not `yards`".
+//
+// An earlier version of this list described its test as "is this a real word"
+// and did not apply it: `snaps` was flagged and `yards` exempted, though the
+// standard names both. It also exempted names the schema itself proves are
+// ambiguous -- `value` is integer on one table and jsonb on another, `pass` is
+// boolean on 29 tables and numeric on a thirtieth, `route` is an enum on 29 and
+// varchar on a thirtieth. Differing types under one name is the schema stating
+// outright that the name carries more than one meaning.
+//
+// Domain acronyms (`adp`, `faab`, `epa`, `cpoe`) are likewise not exempt -- they
+// are exactly the shorthand the standard prohibits.
+//
+// Some names this rule flags are bare BOOLEANS (`blitz`, `hurry`, `spike`,
+// `stunt`, `open`, `start`), whose more precise defect is the standard's
+// "prefixed is_/has_ for predicates" rule -- which this audit does not yet
+// implement at all. There are 300 such columns across 179 distinct names on the
+// logical tables. They are genuinely non-conforming either way and the remedy is
+// the same rename (`score` -> `is_scoring_play`), so flagging them here surfaces
+// them rather than losing them; when the boolean rule lands they reclassify to
+// it, exactly as `position` and `timestamp` moved off the camelCase rule.
 const accepted_short_words = new Set([
-  'arms',
-  'back',
   'batch',
-  'bench',
-  'bid',
-  'blitz',
-  'box',
-  'cap',
   'class',
-  'clock',
   'code',
   'date',
   'day',
-  'drops',
   'email',
   'facet',
   'field',
-  'games',
-  'grade',
-  'hands',
-  'hits',
-  'hurry',
   'id',
   'image',
   'index',
   'key',
-  'live',
-  'max',
-  'min',
   'name',
   'notes',
-  'open',
-  'pass',
   'pick',
-  'plays',
-  'rank',
-  'risk',
   'roof',
   'round',
-  'route',
-  'run',
-  'rush',
-  'sacks',
-  'score',
   'size',
   'slot',
   'slug',
-  'speed',
-  'spike',
   'sport',
-  'start',
   'state',
-  'stunt',
   'tag',
-  'temp',
-  'ties',
-  'total',
   'type',
   'unit',
   'url',
-  'valid',
-  'value',
-  'week',
-  'wind',
-  'wins',
-  'yards'
+  'week'
 ])
 
 // A bare name of five characters or fewer that is not a recognised word, not a
@@ -404,9 +408,17 @@ function check_column(table, col) {
     findings.push({ rule: 'ambiguous_team', table, column: col.name })
   }
 
-  // Shorthand: the named-abbreviation map first (it carries a replacement hint),
-  // then the general bare-short-name rule for everything the map cannot name.
-  if (shorthand_columns.has(lower)) {
+  // Shorthand: the table-specific hint first, then the named-abbreviation map,
+  // then the general bare-short-name rule for everything neither can name.
+  const specific_hint = column_specific_shorthand.get(`${table}.${lower}`)
+  if (specific_hint) {
+    findings.push({
+      rule: 'shorthand',
+      table,
+      column: col.name,
+      hint: specific_hint
+    })
+  } else if (shorthand_columns.has(lower)) {
     findings.push({
       rule: 'shorthand',
       table,

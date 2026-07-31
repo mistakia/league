@@ -1,12 +1,17 @@
 {
   "note": "Checked-in ratchet baseline for db/adhoc/audit-schema-conformance.mjs, enforced by db/adhoc/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/adhoc/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-07-31T15:20:14.492Z",
-  "count": 268,
+  "generated_at": "2026-07-31T16:10:19.088Z",
+  "count": 356,
   "violations": [
     {
       "table": "config",
       "column": "updated_at",
       "rule": "timestamp_type"
+    },
+    {
+      "table": "config",
+      "column": "value",
+      "rule": "shorthand"
     },
     {
       "table": "draft",
@@ -27,6 +32,26 @@
       "table": "draft",
       "column": "year",
       "rule": "season_grain"
+    },
+    {
+      "table": "espn_player_win_rates_history",
+      "column": "plays",
+      "rule": "shorthand"
+    },
+    {
+      "table": "espn_player_win_rates_history",
+      "column": "wins",
+      "rule": "shorthand"
+    },
+    {
+      "table": "espn_player_win_rates_index",
+      "column": "plays",
+      "rule": "shorthand"
+    },
+    {
+      "table": "espn_player_win_rates_index",
+      "column": "wins",
+      "rule": "shorthand"
     },
     {
       "table": "espn_receiving_metrics_history",
@@ -214,6 +239,11 @@
       "rule": "season_grain"
     },
     {
+      "table": "league_format_draft_pick_value",
+      "column": "rank",
+      "rule": "shorthand"
+    },
+    {
       "table": "league_format_player_projection_values_history",
       "column": "year",
       "rule": "season_grain"
@@ -227,6 +257,16 @@
       "table": "league_format_player_seasonlogs",
       "column": "year",
       "rule": "season_grain"
+    },
+    {
+      "table": "league_formats",
+      "column": "bench",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "cap",
+      "rule": "shorthand"
     },
     {
       "table": "league_formats",
@@ -274,6 +314,11 @@
       "rule": "shorthand"
     },
     {
+      "table": "league_nfl_team_seasonlogs",
+      "column": "rank",
+      "rule": "shorthand"
+    },
+    {
       "table": "league_player_projection_values",
       "column": "year",
       "rule": "season_grain"
@@ -282,6 +327,16 @@
       "table": "league_player_seasonlogs",
       "column": "year",
       "rule": "season_grain"
+    },
+    {
+      "table": "league_team_careerlogs",
+      "column": "ties",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_careerlogs",
+      "column": "wins",
+      "rule": "shorthand"
     },
     {
       "table": "league_team_daily_values",
@@ -316,6 +371,11 @@
     {
       "table": "league_team_lineup_contribution_weeks",
       "column": "sp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_lineup_contribution_weeks",
+      "column": "start",
       "rule": "shorthand"
     },
     {
@@ -345,6 +405,11 @@
     },
     {
       "table": "league_team_lineups",
+      "column": "total",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_lineups",
       "column": "year",
       "rule": "season_grain"
     },
@@ -355,8 +420,28 @@
     },
     {
       "table": "league_team_seasonlogs",
+      "column": "ties",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "wins",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
       "column": "year",
       "rule": "season_grain"
+    },
+    {
+      "table": "league_user_careerlogs",
+      "column": "ties",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_user_careerlogs",
+      "column": "wins",
+      "rule": "shorthand"
     },
     {
       "table": "leagues",
@@ -440,6 +525,11 @@
     },
     {
       "table": "nfl_games",
+      "column": "clock",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_games",
       "column": "div",
       "rule": "shorthand"
     },
@@ -459,8 +549,48 @@
       "rule": "shorthand"
     },
     {
+      "table": "nfl_games",
+      "column": "temp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_games",
+      "column": "wind",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_play_stats_current_week",
+      "column": "valid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_play_stats_current_week",
+      "column": "yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_play_stats",
+      "column": "valid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_play_stats",
+      "column": "yards",
+      "rule": "shorthand"
+    },
+    {
       "table": "nfl_plays_current_week",
       "column": "avsk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "back",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "box",
       "rule": "shorthand"
     },
     {
@@ -535,6 +665,11 @@
     },
     {
       "table": "nfl_plays_current_week",
+      "column": "pass",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
       "column": "phyb",
       "rule": "shorthand"
     },
@@ -550,12 +685,32 @@
     },
     {
       "table": "nfl_plays_current_week",
+      "column": "route",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "rush",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "score",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
       "column": "sep",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
       "column": "sk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "stunt",
       "rule": "shorthand"
     },
     {
@@ -594,8 +749,33 @@
       "rule": "shorthand"
     },
     {
+      "table": "nfl_plays_passer",
+      "column": "hurry",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_passer",
+      "column": "spike",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_receiver",
+      "column": "route",
+      "rule": "shorthand"
+    },
+    {
       "table": "nfl_plays",
       "column": "avsk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "back",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "blitz",
       "rule": "shorthand"
     },
     {
@@ -680,6 +860,11 @@
     },
     {
       "table": "nfl_plays",
+      "column": "pass",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
       "column": "penalty_player_sportradar_id",
       "rule": "external_id"
     },
@@ -700,6 +885,16 @@
     },
     {
       "table": "nfl_plays",
+      "column": "route",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "rush",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
       "column": "sack_player_1_sportradar_id",
       "rule": "external_id"
     },
@@ -710,12 +905,22 @@
     },
     {
       "table": "nfl_plays",
+      "column": "score",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
       "column": "sep",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
       "column": "sk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "stunt",
       "rule": "shorthand"
     },
     {
@@ -769,6 +974,21 @@
       "rule": "shorthand"
     },
     {
+      "table": "nfl_team_seasonlogs",
+      "column": "sacks",
+      "rule": "shorthand"
+    },
+    {
+      "table": "percentiles",
+      "column": "max",
+      "rule": "shorthand"
+    },
+    {
+      "table": "percentiles",
+      "column": "min",
+      "rule": "shorthand"
+    },
+    {
       "table": "percentiles",
       "column": "p25",
       "rule": "shorthand"
@@ -805,6 +1025,11 @@
     },
     {
       "table": "pff_player_facet_gamelogs",
+      "column": "grade",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
       "column": "pbe",
       "rule": "shorthand"
     },
@@ -829,6 +1054,16 @@
       "rule": "shorthand"
     },
     {
+      "table": "pff_player_facet_gamelogs",
+      "column": "yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "grade",
+      "rule": "shorthand"
+    },
+    {
       "table": "pff_player_facet_seasonlogs",
       "column": "pbe",
       "rule": "shorthand"
@@ -854,6 +1089,16 @@
       "rule": "shorthand"
     },
     {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "pass",
+      "rule": "shorthand"
+    },
+    {
       "table": "pff_player_seasonlogs",
       "column": "pff_id",
       "rule": "external_id"
@@ -862,6 +1107,36 @@
       "table": "pff_player_seasonlogs",
       "column": "position",
       "rule": "reserved_word"
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "run",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "speed",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_team_gamelogs",
+      "column": "ties",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_team_gamelogs",
+      "column": "wins",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_team_seasonlogs",
+      "column": "ties",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_team_seasonlogs",
+      "column": "wins",
+      "rule": "shorthand"
     },
     {
       "table": "pff_unresolved_players",
@@ -900,12 +1175,47 @@
     },
     {
       "table": "player_college_careerlogs",
+      "column": "arms",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "bench",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "drops",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
       "column": "epa",
       "rule": "shorthand"
     },
     {
       "table": "player_college_careerlogs",
+      "column": "games",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "hands",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "hits",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
       "column": "iqr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "sacks",
       "rule": "shorthand"
     },
     {
@@ -930,12 +1240,47 @@
     },
     {
       "table": "player_college_seasonlogs",
+      "column": "arms",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "bench",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "drops",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
       "column": "epa",
       "rule": "shorthand"
     },
     {
       "table": "player_college_seasonlogs",
+      "column": "games",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "hands",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "hits",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
       "column": "iqr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "sacks",
       "rule": "shorthand"
     },
     {
@@ -959,6 +1304,11 @@
       "rule": "shorthand"
     },
     {
+      "table": "player_defender_gamelogs",
+      "column": "sacks",
+      "rule": "shorthand"
+    },
+    {
       "table": "player_dfs_ownership",
       "column": "fpts",
       "rule": "shorthand"
@@ -979,8 +1329,23 @@
       "rule": "shorthand"
     },
     {
+      "table": "player_passing_gamelogs",
+      "column": "sacks",
+      "rule": "shorthand"
+    },
+    {
       "table": "player_rankings_history",
       "column": "avg",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_rankings_history",
+      "column": "max",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_rankings_history",
+      "column": "min",
       "rule": "shorthand"
     },
     {
@@ -996,6 +1361,16 @@
     {
       "table": "player_rankings_index",
       "column": "avg",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_rankings_index",
+      "column": "max",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_rankings_index",
+      "column": "min",
       "rule": "shorthand"
     },
     {
@@ -1069,6 +1444,26 @@
       "rule": "shorthand"
     },
     {
+      "table": "prop_markets_history",
+      "column": "live",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_markets_history",
+      "column": "open",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_markets_index",
+      "column": "live",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_markets_index",
+      "column": "open",
+      "rule": "shorthand"
+    },
+    {
       "table": "props_index",
       "column": "ln",
       "rule": "shorthand"
@@ -1080,7 +1475,17 @@
     },
     {
       "table": "props_index",
+      "column": "risk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
       "column": "u",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props",
+      "column": "live",
       "rule": "shorthand"
     },
     {
@@ -1096,6 +1501,11 @@
     {
       "table": "props",
       "column": "u",
+      "rule": "shorthand"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "bid",
       "rule": "shorthand"
     },
     {
@@ -1134,9 +1544,24 @@
       "rule": "season_grain"
     },
     {
+      "table": "scoring_format_player_careerlogs",
+      "column": "games",
+      "rule": "shorthand"
+    },
+    {
+      "table": "scoring_format_player_projection_points",
+      "column": "total",
+      "rule": "shorthand"
+    },
+    {
       "table": "scoring_format_player_projection_points",
       "column": "year",
       "rule": "season_grain"
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "games",
+      "rule": "shorthand"
     },
     {
       "table": "scoring_format_player_seasonlogs",
@@ -1275,6 +1700,11 @@
     },
     {
       "table": "teams",
+      "column": "cap",
+      "rule": "shorthand"
+    },
+    {
+      "table": "teams",
       "column": "div",
       "rule": "shorthand"
     },
@@ -1305,6 +1735,11 @@
     },
     {
       "table": "transactions",
+      "column": "value",
+      "rule": "shorthand"
+    },
+    {
+      "table": "transactions",
       "column": "year",
       "rule": "season_grain"
     },
@@ -1331,6 +1766,11 @@
     {
       "table": "users",
       "column": "wrb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "waivers",
+      "column": "bid",
       "rule": "shorthand"
     },
     {
