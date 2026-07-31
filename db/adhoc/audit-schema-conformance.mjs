@@ -23,6 +23,8 @@ import { fileURLToPath } from 'url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import { parse_partition_children } from './schema-partitions.mjs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const schema_path = path.join(__dirname, '..', 'schema.postgres.sql')
 
@@ -39,6 +41,13 @@ const allowlisted_identifiers = new Set([
 ])
 
 // Reserved words used as identifiers (must be quoted in SQL, which is the tell).
+//
+// `position` and `timestamp` belong here, not in the camelCase rule. pg_dump
+// quotes them because they are keywords, and the quoted_camelcase rule used to
+// read that quoting as evidence of camelCase -- reporting ten lower snake_case
+// names (`position` x6, `timestamp` x4) as "quoted/camelCase identifier
+// (snake_case required)". They ARE reserved-word violations, but a worker acting
+// on the camelCase label would look for a case change that does not exist.
 const reserved_word_columns = new Set([
   'desc',
   'int',
@@ -51,7 +60,9 @@ const reserved_word_columns = new Set([
   'from',
   'select',
   'user',
-  'check'
+  'check',
+  'position',
+  'timestamp'
 ])
 
 // Known fantasy-stat / role shorthand that must be spelled in full words.
@@ -79,8 +90,118 @@ const shorthand_columns = new Map([
   ['bc_pid', 'ball_carrier_pid'],
   ['psr_pid', 'passer_pid'],
   ['trg_pid', 'target_pid'],
-  ['intp_pid', 'interceptor_pid']
+  ['intp_pid', 'interceptor_pid'],
+  ['pos', 'position'],
+  ['d', 'observed_on']
 ])
+
+// The shorthand rule above is an ENUMERATION, and an enumeration of already-known
+// names can only ever report the debt it can name. It listed 25 fantasy-stat
+// abbreviations, every one of them already migrated, and so reported 0 shorthand
+// schema-wide while `pos` sat on 10 logical tables and `avsk`/`cpoe`/`yfog`/`oopd`
+// sat on nfl_plays. That is the failure mode the standards guideline names: "a
+// gate whose rules are enumerations reports the debt it can name, never the debt."
+//
+// So the rule is INVERTED below. The default for a bare short column name is
+// FLAG, and this closed list is the set of legitimate short English words that
+// are exempt. New shorthand introduced by a future migration is caught with no
+// edit to this file, which is the ratchet property the enumeration lacked.
+//
+// Scope is deliberately narrow: a BARE name (no underscore) of five characters
+// or fewer. A token-level rule was measured and is unusable -- 1991 of 2595
+// distinct column names contain some token of four characters or fewer, because
+// legitimate compounds (`is_home`, `pass_yards`, `player_id`) are built from
+// short tokens. The bare short name is the actual hazard the standard names:
+// "A name SHOULD be specific enough to be globally unique across the schema so
+// that a grep for it returns exactly its real uses."
+//
+// Membership test is "is this a real word", not "is this a word we like". Domain
+// acronyms (`adp`, `faab`, `epa`, `cpoe`) are NOT exempt -- they are exactly the
+// shorthand the standard prohibits. Bare `snaps` is likewise NOT exempt: the
+// standard calls it out by name as needing a role qualifier.
+const accepted_short_words = new Set([
+  'arms',
+  'back',
+  'batch',
+  'bench',
+  'bid',
+  'blitz',
+  'box',
+  'cap',
+  'class',
+  'clock',
+  'code',
+  'date',
+  'day',
+  'drops',
+  'email',
+  'facet',
+  'field',
+  'games',
+  'grade',
+  'hands',
+  'hits',
+  'hurry',
+  'id',
+  'image',
+  'index',
+  'key',
+  'live',
+  'max',
+  'min',
+  'name',
+  'notes',
+  'open',
+  'pass',
+  'pick',
+  'plays',
+  'rank',
+  'risk',
+  'roof',
+  'round',
+  'route',
+  'run',
+  'rush',
+  'sacks',
+  'score',
+  'size',
+  'slot',
+  'slug',
+  'speed',
+  'spike',
+  'sport',
+  'start',
+  'state',
+  'stunt',
+  'tag',
+  'temp',
+  'ties',
+  'total',
+  'type',
+  'unit',
+  'url',
+  'valid',
+  'value',
+  'week',
+  'wind',
+  'wins',
+  'yards'
+])
+
+// A bare name of five characters or fewer that is not a recognised word, not a
+// canonical app key, and not already covered by a more specific rule.
+function is_bare_shorthand(name) {
+  if (name.includes('_')) return false
+  if (name.length > 5) return false
+  if (accepted_short_words.has(name)) return false
+  if (allowlisted_identifiers.has(name)) return false
+  // `year` is the season-grain rule's business; reserved words their own rule's.
+  // The ambiguous-team names are handled by the caller, which knows whether the
+  // team rule actually claimed this column (see non_team_columns).
+  if (season_grain_columns.has(name)) return false
+  if (reserved_word_columns.has(name)) return false
+  return true
+}
 
 // Season-grain naming: the standard is `season_year` + `season_type`, so a bare
 // `year` column and the abbreviated `seas_type` both violate it. Exact-name
@@ -94,6 +215,21 @@ const season_grain_columns = new Map([
 
 // Bare single-letter / ambiguous team-role spellings (checked as exact names).
 const ambiguous_team_columns = new Set(['v', 'h', 'team', 'club', 'clubcode'])
+
+// The team-role rule matches on NAME alone, and `v`/`h` are only team spellings
+// when the column actually holds a team. Keyed table.column, these are columns
+// whose name collides with that list but whose MEANING is something else, so the
+// team rule must not claim them.
+//
+// This is not a suppression: the column is still non-conforming and is still
+// reported, under the rule that actually describes it (`v` is shorthand for a
+// value, so the bare-short-name rule takes it). Suppressing it would hide real
+// debt; leaving it under ambiguous_team would tell a worker to rename a value
+// column to a team name, which corrupts the meaning of the data rather than the
+// spelling of it. keeptradecut_rankings.v is written by scripts/import-keeptradecut.mjs
+// as `v: i.v` under `type: keeptradecut_metric_types.VALUE` / `.OVERALL_RANK` /
+// `.POSITION_RANK` -- a KeepTradeCut player value, never a visiting team.
+const non_team_columns = new Set(['keeptradecut_rankings.v'])
 
 // Source-system name fragments, used ONLY to recognise an id column as pointing
 // at an external system rather than at an internal app key (see
@@ -223,7 +359,17 @@ const RULES = {
   timestamp_type: 'Non-timestamptz timestamp representation'
 }
 
-function looks_like_time_column(name) {
+// Known instants whose NAME carries no time suffix, so the pattern below cannot
+// see them. Keyed table.column. Both keeptradecut columns are integer epochs --
+// prohibited representations that the suffix rule reported as clean because the
+// name is a single letter.
+const known_time_columns = new Set([
+  'keeptradecut_rankings.d',
+  'keeptradecut_liquidity.d'
+])
+
+function looks_like_time_column(table, name) {
+  if (known_time_columns.has(`${table}.${name}`)) return true
   return /(_at|_time|_ts|timestamp|_date)$/.test(name) || name === 'timestamp'
 }
 
@@ -237,8 +383,10 @@ function check_column(table, col) {
     return findings
   }
 
-  // Quoted / camelCase.
-  if (col.quoted || /[A-Z]/.test(col.name)) {
+  // Quoted / camelCase. Tested on the NAME, not on whether pg_dump quoted it:
+  // the dump also quotes lower snake_case keywords, and reading that quoting as
+  // camelCase mislabelled `position` and `timestamp` (see reserved_word_columns).
+  if (/[A-Z]/.test(col.name)) {
     findings.push({ rule: 'quoted_camelcase', table, column: col.name })
   }
 
@@ -247,7 +395,17 @@ function check_column(table, col) {
     findings.push({ rule: 'reserved_word', table, column: col.name })
   }
 
-  // Shorthand.
+  // Ambiguous team-role bare names, unless this column only shares the spelling
+  // and means something else entirely.
+  const is_team_column =
+    ambiguous_team_columns.has(lower) &&
+    !non_team_columns.has(`${table}.${lower}`)
+  if (is_team_column) {
+    findings.push({ rule: 'ambiguous_team', table, column: col.name })
+  }
+
+  // Shorthand: the named-abbreviation map first (it carries a replacement hint),
+  // then the general bare-short-name rule for everything the map cannot name.
   if (shorthand_columns.has(lower)) {
     findings.push({
       rule: 'shorthand',
@@ -255,6 +413,8 @@ function check_column(table, col) {
       column: col.name,
       hint: shorthand_columns.get(lower)
     })
+  } else if (!is_team_column && is_bare_shorthand(lower)) {
+    findings.push({ rule: 'shorthand', table, column: col.name })
   }
 
   // Season grain (bare `year` / abbreviated `seas_type`).
@@ -265,11 +425,6 @@ function check_column(table, col) {
       column: col.name,
       hint: season_grain_columns.get(lower)
     })
-  }
-
-  // Ambiguous team-role bare names.
-  if (ambiguous_team_columns.has(lower)) {
-    findings.push({ rule: 'ambiguous_team', table, column: col.name })
   }
 
   // External id naming: ends in _id (or is a known id) but is not {a}_{b}_id.
@@ -294,7 +449,7 @@ function check_column(table, col) {
 
   // Timestamp representation.
   const type = col.type.toLowerCase()
-  if (looks_like_time_column(lower)) {
+  if (looks_like_time_column(table, lower)) {
     const is_tztimestamp = /timestamp with time zone|timestamptz/.test(type)
     const is_epoch_int = /^(integer|bigint|numeric)/.test(type)
     const is_varchar = /character varying|text/.test(type)
@@ -405,21 +560,17 @@ function check_table_name(table) {
 
 // --- runner ------------------------------------------------------------------
 
-// pg_dump emits every year-range partition child with a full duplicate column
-// list. Auditing each child would count the same violation ~27x and drown the
-// report in per-partition noise, so a `<base>_year_YYYY` child is skipped when
-// its base parent is present -- the parent carries the columns and is audited
-// once.
-function is_partition_child(table, tables) {
-  const m = table.match(/^(.+)_year_\d{4}$/)
-  return m ? tables.has(m[1]) : false
-}
+// Partition children duplicate their parent's whole column list in the dump, so
+// auditing them would count the same violation once per partition. They are
+// skipped -- the parent carries the columns and is audited once. Membership is
+// derived from the dump's ATTACH PARTITION lines by db/adhoc/schema-partitions.mjs;
+// see that file for why the previous `<base>_year_YYYY` regex was wrong.
 
-function audit(tables, filter) {
+function audit(tables, partition_children, filter) {
   const all = []
   for (const [table, columns] of tables) {
     if (filter && table !== filter) continue
-    if (!filter && is_partition_child(table, tables)) continue
+    if (!filter && partition_children.has(table)) continue
     all.push(...check_table_name(table))
     for (const col of columns) {
       all.push(...check_column(table, col))
@@ -437,13 +588,25 @@ function main() {
 
   const sql = fs.readFileSync(schema_path, 'utf8')
   const tables = parse_schema(sql)
-  const findings = audit(tables, argv.table)
+  const partition_children = parse_partition_children(sql)
+  const findings = audit(tables, partition_children, argv.table)
+  const logical_table_count = tables.size - partition_children.size
 
   // Set exitCode rather than calling process.exit(): a large JSON payload is
   // still buffering when process.exit() would fire, and the abrupt exit
   // truncates stdout mid-write. exitCode lets the write drain naturally.
   if (argv.json) {
-    console.log(JSON.stringify({ tables: tables.size, findings }, null, 2))
+    console.log(
+      JSON.stringify(
+        {
+          tables: logical_table_count,
+          partition_children: partition_children.size,
+          findings
+        },
+        null,
+        2
+      )
+    )
     process.exitCode = findings.length ? 1 : 0
     return
   }
@@ -454,7 +617,7 @@ function main() {
   }
 
   console.log(
-    `schema conformance audit -- ${tables.size} tables parsed${argv.table ? ` (filtered to ${argv.table})` : ''}`
+    `schema conformance audit -- ${logical_table_count} logical tables (${partition_children.size} partition children skipped)${argv.table ? ` (filtered to ${argv.table})` : ''}`
   )
   console.log(`total violations: ${findings.length}`)
   console.log('')

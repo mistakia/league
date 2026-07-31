@@ -27,6 +27,8 @@ import { fileURLToPath } from 'url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import { parse_partition_map } from './schema-partitions.mjs'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
 const schema_path = path.join(__dirname, '..', 'schema.postgres.sql')
@@ -92,22 +94,28 @@ function parse_schema(sql) {
   return tables
 }
 
-// A `<base>_year_YYYY` child duplicates its parent's columns; fold it into the
-// parent so the inventory records the logical table once and lists its children.
-function fold_partitions(tables) {
-  const folded = new Map()
-  const children = new Map()
-  for (const [table, columns] of tables) {
-    const m = table.match(/^(.+)_year_\d{4}$/)
-    if (m && tables.has(m[1])) {
-      if (!children.has(m[1])) children.set(m[1], [])
-      children.get(m[1]).push(table)
-    } else {
-      folded.set(table, { columns })
-    }
+// A partition child duplicates its parent's columns; fold it into the parent so
+// the inventory records the logical table once and lists its children.
+//
+// Membership comes from the dump's ATTACH PARTITION lines, not from a name
+// pattern. The previous `<base>_year_YYYY` regex folded only 81 of the 116
+// children and left the other 27 standing as top-level inventory entries --
+// seventeen `historical_injury_index_YYYY`, the eight `projections_index_y*`,
+// and two `_default` catch-alls -- so a worker sizing a cluster from this file
+// saw partitions of an already-listed table as separate migration targets.
+function fold_partitions(tables, partition_map) {
+  const children = new Set()
+  for (const kids of partition_map.values()) {
+    for (const kid of kids) children.add(kid)
   }
-  for (const [parent, kids] of children) {
-    if (folded.has(parent)) folded.get(parent).partitions = kids.sort()
+
+  const folded = new Map()
+  for (const [table, columns] of tables) {
+    if (children.has(table)) continue
+    folded.set(table, { columns })
+  }
+  for (const [parent, kids] of partition_map) {
+    if (folded.has(parent)) folded.get(parent).partitions = kids
   }
   return folded
 }
@@ -261,7 +269,7 @@ function find_consumers(table) {
 
 function build_inventory({ with_consumers }) {
   const sql = fs.readFileSync(schema_path, 'utf8')
-  const tables = fold_partitions(parse_schema(sql))
+  const tables = fold_partitions(parse_schema(sql), parse_partition_map(sql))
   const records = []
   for (const [table, meta] of [...tables].sort()) {
     records.push({
@@ -284,11 +292,72 @@ function cluster_distribution(records) {
   return [...dist].sort((a, b) => b[1] - a[1])
 }
 
+// The inventory is regenerable, but nothing was RE-running it, so it drifted
+// silently: by 2026-07-31 it was missing 9 live tables and still listing 3 that
+// had been dropped, while reading as authoritative to every worker sizing a
+// cluster from it. Drift in an oracle is worse than absence, because absence is
+// obvious. This mode makes it loud -- it compares the checked-in file against a
+// fresh generation of the TABLE SET and exits non-zero on any difference.
+//
+// Deliberately compares table membership only, not the whole record. Column
+// lists and the consumer grep shift with ordinary code edits, so a full-record
+// comparison would fail constantly and get muted. Membership is the property the
+// anti-omission role actually depends on: a cluster cannot be bounded from a file
+// that does not know which tables exist.
+function check_inventory(records) {
+  const out_path = path.join(scratch_dir, 'inventory.json')
+  if (!fs.existsSync(out_path)) {
+    console.error(
+      `inventory check -- ${out_path} does not exist; run without --check`
+    )
+    return 1
+  }
+
+  const on_disk = new Set(
+    JSON.parse(fs.readFileSync(out_path, 'utf8')).map((r) => r.current_table)
+  )
+  const fresh = new Set(records.map((r) => r.current_table))
+  const missing = [...fresh].filter((t) => !on_disk.has(t)).sort()
+  const phantom = [...on_disk].filter((t) => !fresh.has(t)).sort()
+
+  if (!missing.length && !phantom.length) {
+    console.log(
+      `inventory check -- ${fresh.size} logical tables, inventory.json is current.`
+    )
+    return 0
+  }
+
+  console.error('inventory check -- inventory.json is STALE:\n')
+  for (const t of missing) {
+    console.error(`  missing (live table not listed):        ${t}`)
+  }
+  for (const t of phantom) {
+    console.error(`  phantom (dropped, or now a partition):  ${t}`)
+  }
+  console.error(
+    '\nRegenerate with `node db/adhoc/generate-migration-inventory.mjs` and commit the result.'
+  )
+  return 1
+}
+
 function main() {
   const argv = yargs(hideBin(process.argv))
     .option('consumers', { type: 'boolean', default: true })
     .option('summary', { type: 'boolean', default: false })
+    .option('check', {
+      type: 'boolean',
+      default: false,
+      description:
+        'Fail if the checked-in inventory.json does not match the current schema'
+    })
     .help().argv
+
+  if (argv.check) {
+    process.exitCode = check_inventory(
+      build_inventory({ with_consumers: false })
+    )
+    return
+  }
 
   const records = build_inventory({ with_consumers: argv.consumers })
   const dist = cluster_distribution(records)
