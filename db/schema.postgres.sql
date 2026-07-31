@@ -350,10 +350,6 @@ DROP INDEX IF EXISTS public.idx_league_format_draft_pick_value_rank_id;
 DROP INDEX IF EXISTS public.idx_league_cutlist_tid;
 DROP INDEX IF EXISTS public.idx_league_cutlist_pid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_valuations_is_superflex_observed_at_pid;
-DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pre_valuations_type_qb_d_v;
-DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pre_valuations_qb_type_d_pid;
-DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pre_valuations_pid_qb_type_d;
-DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pre_valuations_pid_d_qb_type;
 DROP INDEX IF EXISTS public.idx_keeptradecut_pick_season_years;
 DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
@@ -938,7 +934,6 @@ DROP TABLE IF EXISTS public.league_divisions;
 DROP TABLE IF EXISTS public.league_cutlist;
 DROP TABLE IF EXISTS public.league_baselines;
 DROP TABLE IF EXISTS public.keeptradecut_valuations;
-DROP TABLE IF EXISTS public.keeptradecut_rankings_pre_valuations;
 DROP TABLE IF EXISTS public.keeptradecut_pick;
 DROP TABLE IF EXISTS public.keeptradecut_liquidity;
 DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
@@ -3935,19 +3930,6 @@ CREATE TABLE public.keeptradecut_pick (
     updated_at timestamp with time zone NOT NULL,
     CONSTRAINT keeptradecut_pick_round_chk CHECK (((round >= 1) AND (round <= 4))),
     CONSTRAINT keeptradecut_pick_slot_chk CHECK (((slot >= 1) AND (slot <= 3)))
-);
-
-
---
--- Name: keeptradecut_rankings_pre_valuations; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.keeptradecut_rankings_pre_valuations (
-    pid character varying(25),
-    qb smallint NOT NULL,
-    d integer NOT NULL,
-    v integer NOT NULL,
-    type smallint NOT NULL
 );
 
 
@@ -30333,34 +30315,6 @@ CREATE INDEX idx_invite_codes_used_by ON public.invite_codes USING btree (used_b
 --
 
 CREATE INDEX idx_keeptradecut_pick_season_years ON public.keeptradecut_pick USING btree (season_year, round, slot);
-
-
---
--- Name: idx_keeptradecut_rankings_pre_valuations_pid_d_qb_type; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_keeptradecut_rankings_pre_valuations_pid_d_qb_type ON public.keeptradecut_rankings_pre_valuations USING btree (pid, d, qb, type);
-
-
---
--- Name: idx_keeptradecut_rankings_pre_valuations_pid_qb_type_d; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_keeptradecut_rankings_pre_valuations_pid_qb_type_d ON public.keeptradecut_rankings_pre_valuations USING btree (pid, qb, type, d);
-
-
---
--- Name: idx_keeptradecut_rankings_pre_valuations_qb_type_d_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_keeptradecut_rankings_pre_valuations_qb_type_d_pid ON public.keeptradecut_rankings_pre_valuations USING btree (qb, type, d, pid);
-
-
---
--- Name: idx_keeptradecut_rankings_pre_valuations_type_qb_d_v; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_keeptradecut_rankings_pre_valuations_type_qb_d_v ON public.keeptradecut_rankings_pre_valuations USING btree (type, qb, d, v);
 
 
 --
@@ -57505,13 +57459,6 @@ GRANT SELECT ON TABLE public.keeptradecut_liquidity TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.keeptradecut_pick TO league_reader;
-
-
---
--- Name: TABLE keeptradecut_rankings_pre_valuations; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.keeptradecut_rankings_pre_valuations TO league_reader;
 
 
 --
