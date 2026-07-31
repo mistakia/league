@@ -3,6 +3,7 @@ import { current_season, player_tag_types, roster_slot_types } from '#constants'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import { sql_integer_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 import db from '#db'
 import player_projected_column_definitions from './player-projected-column-definitions.mjs'
@@ -60,7 +61,10 @@ const player_league_roster_join = async ({
   params = {},
   data_view_options = {}
 }) => {
-  const { lid = 1 } = params
+  const lid = sql_integer_param({
+    value: params.lid === undefined ? 1 : params.lid,
+    param_name: 'lid'
+  })
 
   // Roster year defaults to current_season.year (current fantasy year),
   // NOT the week-identifier year which tracks stats_season_year during offseason.
@@ -76,7 +80,11 @@ const player_league_roster_join = async ({
     year = parsed.year
     week = parsed.week
   } else {
-    year = params.year || current_season.year
+    const year_param = Array.isArray(params.year) ? params.year[0] : params.year
+    year =
+      year_param === undefined || year_param === null
+        ? current_season.year
+        : sql_integer_param({ value: year_param, param_name: 'year' })
     const league = await getLeague({ lid, year })
     if (league) {
       const championship_round = Array.isArray(league.championship_round)
@@ -104,7 +112,11 @@ const player_league_roster_join = async ({
 // existing roster-status view untouched. `teams_pkey` is UNIQUE on (uid, year),
 // so the subquery is a single index lookup and cannot fan out a row.
 const player_league_fantasy_team_sql = ({ params = {} }) => {
-  const year = params.year || current_season.year
+  const year_param = Array.isArray(params.year) ? params.year[0] : params.year
+  const year =
+    year_param === undefined || year_param === null
+      ? current_season.year
+      : sql_integer_param({ value: year_param, param_name: 'year' })
   return `(SELECT name FROM teams WHERE uid = rosters_players.tid AND year = ${year})`
 }
 

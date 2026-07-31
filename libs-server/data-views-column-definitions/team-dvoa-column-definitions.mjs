@@ -2,6 +2,7 @@ import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_aggregate_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { team_year_offset_range_select } from '#libs-server/data-views/param-utils.mjs'
+import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || [current_season.stats_season_year]
@@ -32,9 +33,18 @@ const get_default_params = ({ params = {} } = {}) => {
     team_unit = 'OFFENSE'
   }
 
-  const dvoa_type = Array.isArray(params.dvoa_type)
-    ? params.dvoa_type[0] || 'total_dvoa'
-    : params.dvoa_type || 'total_dvoa'
+  // dvoa_type becomes the column NAME in get_dvoa_column_name below, so it is
+  // spliced into identifier position where quoting does not apply. The table
+  // carries ~175 dvoa columns, so this validates the shape rather than
+  // enumerating them: an unknown-but-wellformed name fails as "column does not
+  // exist", which is the correct outcome, while anything that could break out
+  // of the identifier is rejected outright.
+  const dvoa_type_param = Array.isArray(params.dvoa_type)
+    ? params.dvoa_type[0]
+    : params.dvoa_type
+  const dvoa_type = dvoa_type_param
+    ? sql_identifier_param({ value: dvoa_type_param, param_name: 'dvoa_type' })
+    : 'total_dvoa'
 
   return { year, team_unit, matchup_opponent_type, dvoa_type }
 }

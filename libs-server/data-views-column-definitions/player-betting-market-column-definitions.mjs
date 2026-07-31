@@ -6,6 +6,7 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_betting_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
+import { sql_identifier_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 const get_default_params = ({
   params,
@@ -37,13 +38,24 @@ const get_default_params = ({
       ? params.seas_type[0]
       : params.seas_type || current_season.nfl_seas_type
 
-  const hit_type = Array.isArray(params.hit_type)
-    ? params.hit_type[0].toLowerCase()
-    : (params.hit_type || 'hard').toLowerCase()
+  // hit_type and historical_range are concatenated into the column NAME by the
+  // historical_* builders below, so they land in identifier position where no
+  // quoting applies. Validate the lowercased form that actually reaches SQL.
+  const hit_type = sql_identifier_param({
+    value: (Array.isArray(params.hit_type)
+      ? params.hit_type[0] || 'hard'
+      : params.hit_type || 'hard'
+    ).toLowerCase(),
+    param_name: 'hit_type'
+  })
 
-  const historical_range = Array.isArray(params.historical_range)
-    ? params.historical_range[0].toLowerCase()
-    : (params.historical_range || 'current_season').toLowerCase()
+  const historical_range = sql_identifier_param({
+    value: (Array.isArray(params.historical_range)
+      ? params.historical_range[0] || 'current_season'
+      : params.historical_range || 'current_season'
+    ).toLowerCase(),
+    param_name: 'historical_range'
+  })
 
   let week, market_type
 

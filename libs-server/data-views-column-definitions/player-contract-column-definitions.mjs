@@ -4,18 +4,21 @@ import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import { sql_integer_param } from '#libs-server/data-views/sanitize-sql-param.mjs'
 
 // TODO career_year
 // refactor to use with/cte table to handle career_year
 
 const get_cache_info = create_static_cache_info()
 
+// The return value is spliced into SQL text by player_contract_join, so it is
+// either the literal 'Total' sentinel or a validated integer year.
 const get_contract_year = (value = current_season.year) => {
   const year = Array.isArray(value) ? value[0] : value
   if (typeof year === 'string' && year.toLowerCase() === 'total') {
     return 'Total'
   }
-  return year
+  return sql_integer_param({ value: year, param_name: 'contract_year' })
 }
 
 const player_contract_table_alias = ({ params = {} } = {}) => {

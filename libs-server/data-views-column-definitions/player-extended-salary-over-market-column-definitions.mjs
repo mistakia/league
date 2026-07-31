@@ -5,6 +5,10 @@ import {
 } from '#libs-server/data-views/param-utils.mjs'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import {
+  sql_integer_param,
+  sql_slug_param
+} from '#libs-server/data-views/sanitize-sql-param.mjs'
+import {
   player_extended_salary_table_alias,
   player_extended_salary_join
 } from './player-extended-salary-column-definitions.mjs'
@@ -13,10 +17,21 @@ const get_cache_info = create_static_cache_info({
   ttl: 1000 * 60 * 60 * 12
 })
 
+// Every field here is spliced into SQL text by market_salary_sql and
+// roster_tag_sql below, so each is validated at the point it is resolved.
 const get_scope = ({ params = {} } = {}) => ({
-  year: get_single_value(params.year, current_season.year),
-  lid: get_single_value(params.lid, 1),
-  league_format_id: get_league_format_id(params)
+  year: sql_integer_param({
+    value: get_single_value(params.year, current_season.year),
+    param_name: 'year'
+  }),
+  lid: sql_integer_param({
+    value: get_single_value(params.lid, 1),
+    param_name: 'lid'
+  }),
+  league_format_id: sql_slug_param({
+    value: get_league_format_id(params),
+    param_name: 'league_format_id'
+  })
 })
 
 // The market price a single season of this player is worth, read at week 0 --

@@ -1018,6 +1018,9 @@ router.post('/search/?', async (req, res) => {
     res.send(data_view_results)
   } catch (error) {
     logger(error)
+    if (error.is_invalid_param) {
+      return res.status(400).send({ error: error.message })
+    }
     res.status(500).send({ error: error.toString() })
   }
 })
@@ -1140,6 +1143,9 @@ router.post('/debug/?', async (req, res) => {
     })
   } catch (error) {
     logger(error)
+    if (error.is_invalid_param) {
+      return res.status(400).send({ error: error.message })
+    }
     res.status(500).send({ error: error.toString() })
   }
 })
@@ -1382,6 +1388,9 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
     res.send(formatted_results)
   } catch (error) {
     logger(error)
+    if (error.is_invalid_param) {
+      return res.status(400).send({ error: error.message })
+    }
     res.status(500).send({ error: error.toString() })
   }
 })
@@ -1430,6 +1439,9 @@ router.post('/param-option-counts', async (req, res) => {
     res.send(result)
   } catch (error) {
     logger(error)
+    if (error.is_invalid_param) {
+      return res.status(400).send({ error: error.message })
+    }
     res.status(500).send({ error: error.toString() })
   }
 })

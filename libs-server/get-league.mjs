@@ -16,6 +16,13 @@ async function get_league_divisions({ lid, year }) {
 export default async function ({ lid, year = current_season.year } = {}) {
   lid = Number(lid)
 
+  // `year` is spliced into the join predicate below as raw SQL, so it gets the
+  // same coercion `lid` already has. Callers reach this from request input --
+  // notably the unauthenticated data-view search route, via the league roster
+  // join -- and an uncoerced year was a live injection path.
+  const parsed_year = Number(year)
+  year = Number.isInteger(parsed_year) ? parsed_year : current_season.year
+
   if (!lid) {
     const league = create_default_league()
     return { uid: 0, ...league }
