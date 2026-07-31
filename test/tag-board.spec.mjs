@@ -10,7 +10,7 @@ import build_tag_board, {
   resolve_rookie_class_year,
   COVERAGE_PRECISE_MIN,
   RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP,
-  RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT
+  RESTRICTED_FREE_AGENCY_NOMINATION_REPLACEMENT_FLOOR_POINTS
 } from '#libs-server/tag-board/build-tag-board.mjs'
 
 chai.should()
@@ -898,17 +898,19 @@ describe('tag board', function () {
       pool_row('AT').rfa_nomination_target.should.equal(true)
     })
 
-    // The gap says the contract is mispriced; it does not say anyone would move
-    // on it. Both tails of a gap-only screen are wrong, in opposite directions.
-    it('requires the player to be near replacement level, in either direction', function () {
-      const band =
-        RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT
+    // The gap says the contract is mispriced; it does not say the player is
+    // worth the nomination. The floor cuts the lower tail only — above
+    // replacement there is no ceiling, because a nomination re-prices the
+    // owner's own contract whatever the player's quality.
+    it('requires the player to be near replacement level or better', function () {
+      const floor = RESTRICTED_FREE_AGENCY_NOMINATION_REPLACEMENT_FLOOR_POINTS
+      const band = -floor
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
           players: [
-            // The L.Jackson case: a real gap on a player his owner simply keeps
-            // and pays for. Overpriced is not the same as available.
+            // A star paid above the single-season market. He is a candidate:
+            // the owner is overpaying, and the auction is what re-prices him.
             {
               tid: 1,
               pid: 'STAR',
@@ -925,7 +927,7 @@ describe('tag board', function () {
               market_salary: 5,
               pts_added: -218
             },
-            // Inside the band on each side of replacement.
+            // Just inside the floor on each side of replacement.
             {
               tid: 1,
               pid: 'FRINGE_UP',
@@ -940,7 +942,8 @@ describe('tag board', function () {
               market_salary: 5,
               pts_added: -band
             },
-            // One point outside it, on each side.
+            // One point outside the old two-sided band, on each side. Above
+            // replacement there is no bound, so this one is still a candidate.
             {
               tid: 1,
               pid: 'JUST_OVER',
@@ -983,11 +986,11 @@ describe('tag board', function () {
         )
         .should.equal(true)
 
-      target('STAR').should.equal(false)
+      target('STAR').should.equal(true)
       target('DEAD').should.equal(false)
       target('FRINGE_UP').should.equal(true)
       target('FRINGE_DOWN').should.equal(true)
-      target('JUST_OVER').should.equal(false)
+      target('JUST_OVER').should.equal(true)
       target('JUST_UNDER').should.equal(false)
       target('NOPTS').should.equal(false)
 
@@ -1025,28 +1028,119 @@ describe('tag board', function () {
       board.market_pool[board.market_pool.length - 1].pid.should.equal('NOPROJ')
     })
 
-    it('gates a nomination target on the owner holding a nomination', function () {
-      const spent_both = build_fixture({
-        teams: two_teams,
-        players: [
-          { tid: 1, pid: 'TARGET', value: 40, market_salary: 5 },
-          { tid: 2, pid: 'B1', value: 20, market_salary: 10 },
-          { tid: 2, pid: 'B2', tag: 4, value: 20, market_salary: 10 },
-          { tid: 2, pid: 'B3', tag: 4, value: 20, market_salary: 10 }
-        ]
-      })
-      const board = build_tag_board(spent_both)
+    // The flag states that a contract FITS the nomination profile, not that its
+    // owner may still designate one. The tag is applied before the extension
+    // deadline, so a budget gate would empty the flag league-wide for the whole
+    // nomination period — which is exactly when a manager reviews the screen.
+    it('marks the profile whatever the owner tag budget says', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            { tid: 1, pid: 'TARGET', value: 40, market_salary: 5 },
+            { tid: 2, pid: 'B1', value: 40, market_salary: 5 },
+            { tid: 2, pid: 'B2', tag: 4, value: 20, market_salary: 10 },
+            { tid: 2, pid: 'B3', tag: 4, value: 20, market_salary: 10 }
+          ]
+        })
+      )
+
+      const beta = board.tag_budget.find((row) => row.tid === 2)
+      beta.restricted_free_agency.remaining.should.equal(0)
 
       board.market_pool
         .find((row) => row.pid === 'TARGET')
         .rfa_nomination_target.should.equal(true)
-
-      const beta = board.tag_budget.find((row) => row.tid === 2)
-      beta.restricted_free_agency.remaining.should.equal(0)
       board.market_pool
-        .filter((row) => row.tid === 2)
-        .every((row) => row.rfa_nomination_target === false)
-        .should.equal(true)
+        .find((row) => row.pid === 'B1')
+        .rfa_nomination_target.should.equal(true)
+    })
+
+    it('hands the viewer their own nomination candidates as a band', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          viewer_tid: 1,
+          players: [
+            { tid: 1, pid: 'WIDE', value: 40, market_salary: 5 },
+            { tid: 1, pid: 'NARROW', value: 20, market_salary: 16 },
+            // Below the replacement floor: in the pool, out of the candidates.
+            {
+              tid: 1,
+              pid: 'DEAD',
+              value: 40,
+              market_salary: 5,
+              pts_added: -200
+            },
+            { tid: 2, pid: 'RIVAL', value: 30, market_salary: 5 }
+          ]
+        })
+      )
+
+      board.market_bands.rfa_nomination_candidates.should.eql([
+        'WIDE',
+        'NARROW'
+      ])
+      board.market_bands.rfa_nomination_pool.should.include('RIVAL')
+    })
+
+    it('reports no nomination candidates band without a viewer', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [{ tid: 1, pid: 'A1', value: 40, market_salary: 5 }]
+        })
+      )
+
+      expect(board.market_bands.rfa_nomination_candidates).to.equal(null)
+    })
+
+    // The auction supply. These rows are absent from market_pool, which carries
+    // untagged contracts only, so without this band the one pool a manager can
+    // bid on during the nomination period is missing from the board entirely.
+    it('collects the tagged players as the restricted free agency pool', function () {
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            {
+              tid: 1,
+              pid: 'RFA_CHEAP',
+              tag: 4,
+              value: 20,
+              market_salary: 8
+            },
+            {
+              tid: 2,
+              pid: 'RFA_RICH',
+              tag: 4,
+              value: 20,
+              market_salary: 30
+            },
+            { tid: 1, pid: 'PLAIN', value: 40, market_salary: 5 },
+            { tid: 2, pid: 'FRANCHISED', tag: 2, value: 40, market_salary: 5 }
+          ]
+        })
+      )
+
+      // Most expensive season first, and only the restricted-free-agency tag.
+      board.restricted_free_agency_pool
+        .map((row) => row.pid)
+        .should.eql(['RFA_RICH', 'RFA_CHEAP'])
+
+      const row = board.restricted_free_agency_pool[0]
+      row.team_name.should.equal('Beta')
+      row.projected_market_salary.should.equal(30)
+      // No salary column: the auction settles what he costs, and the offer that
+      // would settle it is blind.
+      expect(row.post_deadline_salary).to.equal(undefined)
+      expect(row.value).to.equal(undefined)
+
+      board.league_market.restricted_free_agency_auction.total.should.equal(2)
+      board.league_market.restricted_free_agency_auction.by_tid.should.eql([
+        { tid: 1, count: 1 },
+        { tid: 2, count: 1 }
+      ])
     })
 
     it('declares band membership and order as pids into the pool', function () {

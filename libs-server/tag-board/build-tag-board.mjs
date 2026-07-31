@@ -10,8 +10,7 @@ export const COVERAGE_PRECISE_MIN = 0.6
 
 // What makes a contract a restricted-free-agency nomination candidate. The gap
 // alone does not: it says the contract is mispriced, not that anyone would move
-// on it. Two conditions have to hold together, and each excludes a different
-// population that a gap-only screen wrongly marked.
+// on it. Two conditions hold together.
 //
 // 1. The owner is paying real money — at least this much above the single-season
 //    market. Below it the salary shed is not worth a nomination whatever the
@@ -21,16 +20,18 @@ export const COVERAGE_PRECISE_MIN = 0.6
 //    while dropping an $11 contract with a $2 gap at 0.18.
 export const RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP = 6
 
-// 2. The player is NEAR replacement level — within this many projected points
-//    added of it, in either direction. This is the condition the gap cannot
-//    supply, and it cuts both tails of a gap-only screen. Far above replacement
-//    is a star whose owner keeps him and pays the difference: L.Jackson carries
-//    a $7 gap at +124.6 points and is nobody's nomination. Far below is a
-//    contract with no bidders at any price, so the owner releases rather than
-//    nominates: K.Pickett is -218.4. The candidates are in between — starter
-//    money for replacement-level production, which is exactly the contract an
-//    owner wants off the books and a rival might take.
-export const RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT = 25
+// 2. The player is NEAR replacement level OR BETTER — no further than this many
+//    projected points added BELOW it, with no ceiling above. This is the
+//    condition the gap cannot supply, and it cuts the lower tail only: a
+//    contract far below replacement has no bidder at any price, so its owner
+//    releases rather than nominates (K.Pickett is −218.4). There is deliberately
+//    no upper bound. A nomination re-prices the owner's own contract through the
+//    auction and resets the extension count on a successful acquisition, so a
+//    star paid above the single-season market is a candidate on exactly the same
+//    reasoning as a marginal starter — the owner is overpaying either way, and
+//    Article IX's retention margin is what he uses to keep the player. The
+//    earlier two-sided form excluded that whole population.
+export const RESTRICTED_FREE_AGENCY_NOMINATION_REPLACEMENT_FLOOR_POINTS = -25
 
 const RANK_BANDS = [
   'top fifth',
@@ -508,9 +509,18 @@ export default function build_tag_board({
         shed_pool_ranks.get(row.pid) ?? null,
         shed_pool_size
       ),
-      // Both threshold conditions above, plus the hard eligibility gate: a
-      // franchise that has named both nominations cannot send anyone to
-      // auction, so its rows stay in the table unmarked.
+      // Both threshold conditions above, and nothing else. This is a PROFILE
+      // flag — the contract fits what a nomination is for — not a statement
+      // that the owner may still designate one. It used to carry the tag-budget
+      // gate as a third condition, which was meaningful only while the
+      // designation window was open: the restricted-free-agency tag is applied
+      // BEFORE the extension deadline (`api/routes/teams/tag.mjs` refuses every
+      // tag once `ext_date` passes) and the nomination schedule then governs
+      // when an already-tagged player is announced. Carrying the gate past the
+      // deadline would empty the flag on every roster in the league, which is
+      // the one thing it must not do — who fits the profile is exactly what a
+      // manager reviews when the window is closed. Who is actually going to
+      // auction is `restricted_free_agency_pool`, which reads the roster tag.
       //
       // A row with no projection is never marked. It is unscreenable on the
       // replacement condition rather than failing it, and coverage annotates
@@ -520,9 +530,8 @@ export default function build_tag_board({
         row.market_gap >=
           RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP &&
         row.projected_points_added !== null &&
-        Math.abs(row.projected_points_added) <=
-          RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT &&
-        tag_budget_by_tid.get(row.tid).restricted_free_agency.remaining > 0
+        row.projected_points_added >=
+          RESTRICTED_FREE_AGENCY_NOMINATION_REPLACEMENT_FLOOR_POINTS
     }))
     // Widest gap first; an unscreenable row (no market price) sorts last rather
     // than dropping out.
@@ -536,6 +545,51 @@ export default function build_tag_board({
   for (const row of market_pool) {
     market_pool_by_tid.get(row.tid)?.push(row)
   }
+
+  // ---- restricted free agency pool ----------------------------------------
+  //
+  // Every player carrying the restricted-free-agency tag, league-wide: the
+  // supply that actually reaches the auction during the nomination period.
+  // These rows are NOT in `market_pool`, which is untagged contracts only, so
+  // without this band the one pool a manager can bid on during the period is
+  // absent from the board entirely.
+  //
+  // No salary column. The auction settles what this player costs, so his
+  // current contract value describes a contract that is about to be replaced,
+  // and the offer that would settle it is blind under Article IX §2 and never
+  // enters this artifact. What a bidder can act on is the single-season price
+  // and the player's league-wide dynasty standing, both of which are public
+  // state computed identically for all ten franchises.
+  //
+  // Ranked league-wide (`dynasty_rank`) rather than within the shed pool: these
+  // are acquisition targets rather than contracts under pressure, so the
+  // comparison set a bidder faces is the whole league.
+  const restricted_free_agency_pool = active_rows
+    .filter((row) => row.tag === player_tag_types.RESTRICTED_FREE_AGENCY)
+    .map((row) => ({
+      tid: row.tid,
+      team_name: team_name_by_tid.get(row.tid),
+      pid: row.pid,
+      name: row.name,
+      pos: row.pos,
+      projected_market_salary: row.projected_market_salary,
+      projected_points_added: row.projected_points_added,
+      below_replacement: row.below_replacement,
+      projection_missing: row.projection_missing,
+      dynasty_rank: row.dynasty_rank,
+      dynasty_band: row.dynasty_band,
+      rank_precision: row.rank_precision,
+      no_market_value: row.no_market_value
+    }))
+    // Most expensive season first; an unpriced row sorts last rather than
+    // dropping out.
+    .sort((a, b) => {
+      if (a.projected_market_salary === null) {
+        return b.projected_market_salary === null ? 0 : 1
+      }
+      if (b.projected_market_salary === null) return -1
+      return b.projected_market_salary - a.projected_market_salary
+    })
 
   const tag_board = team_ids.map((tid) => {
     const budget = tag_budget_by_tid.get(tid)
@@ -701,7 +755,18 @@ export default function build_tag_board({
     // whole pool for a flag is not the same as being handed the candidates.
     rfa_nomination_pool: by_gap_desc(
       market_pool.filter((row) => row.rfa_nomination_target)
-    ).map((row) => row.pid)
+    ).map((row) => row.pid),
+    // This viewer's own rows that fit the nomination profile — the "which of my
+    // players is this tag for" question, handed over rather than left to a page
+    // to intersect two bands. Absent, not empty, when built with no viewer.
+    rfa_nomination_candidates:
+      viewer_tid === null
+        ? null
+        : by_gap_desc(
+            market_pool.filter(
+              (row) => row.rfa_nomination_target && row.tid === viewer_tid
+            )
+          ).map((row) => row.pid)
   }
 
   // Derived from the band rather than counted independently, so the headline
@@ -754,6 +819,20 @@ export default function build_tag_board({
         0
       )
     },
+    // The auction supply itself: how many tagged players each franchise sends,
+    // counted from the roster tag rather than from a screen. A team absent from
+    // `by_tid` designated nobody before the deadline and enters the period as a
+    // bidder only.
+    restricted_free_agency_auction: {
+      total: restricted_free_agency_pool.length,
+      by_tid: team_ids
+        .map((tid) => ({
+          tid,
+          count: restricted_free_agency_pool.filter((row) => row.tid === tid)
+            .length
+        }))
+        .filter((row) => row.count > 0)
+    },
     teams_with_franchise_candidate: team_ids.filter(
       (tid) => franchise_candidates_by_tid.get(tid).length > 0
     ),
@@ -776,6 +855,8 @@ export default function build_tag_board({
       team_market_pool: market_pool_by_tid.get(tid),
       league_market,
       rfa_window: rfa_schedule_by_tid.get(tid),
+      restricted_free_agency_pool,
+      extensions_processed,
       now_unix,
       season,
       team_count: team_ids.length
@@ -808,6 +889,7 @@ export default function build_tag_board({
     bid_capacity,
     market_pool,
     market_bands,
+    restricted_free_agency_pool,
     rfa_schedule,
     league_market,
     considerations
@@ -940,6 +1022,8 @@ export const build_considerations = ({
   team_market_pool,
   league_market,
   rfa_window,
+  restricted_free_agency_pool = [],
+  extensions_processed = false,
   now_unix,
   season,
   team_count
@@ -948,8 +1032,16 @@ export const build_considerations = ({
   const overage =
     exposure.post_extension_room < 0 ? -exposure.post_extension_room : 0
 
+  // The franchise and rookie tags are extension-window designations: the tag
+  // route refuses every application once `ext_date` passes, and by then the
+  // ladder has already been applied. Every rule below that reasons about them
+  // is therefore gated on the window still being open, or it fires post-deadline
+  // stating a lever that does not exist — "your remaining tags can remove at
+  // most $0" reads as advice about a decision that closed.
+  const designation_window_open = !extensions_processed
+
   // Lever sufficiency
-  if (overage > 0) {
+  if (designation_window_open && overage > 0) {
     const best_franchise =
       budget.franchise.remaining > 0
         ? Math.max(
@@ -979,7 +1071,11 @@ export const build_considerations = ({
   }
 
   // Empty screen
-  if (budget.franchise.remaining > 0 && franchise_candidates.length === 0) {
+  if (
+    designation_window_open &&
+    budget.franchise.remaining > 0 &&
+    franchise_candidates.length === 0
+  ) {
     const rivals = league_market.teams_with_franchise_candidate.filter(
       (other) => other !== tid
     )
@@ -989,7 +1085,11 @@ export const build_considerations = ({
       inputs: { tag: 'franchise', rival_count: rivals.length, rivals }
     })
   }
-  if (budget.rookie.remaining > 0 && rookie_candidates.length === 0) {
+  if (
+    designation_window_open &&
+    budget.rookie.remaining > 0 &&
+    rookie_candidates.length === 0
+  ) {
     const rivals = league_market.teams_with_rookie_candidate.filter(
       (other) => other !== tid
     )
@@ -1003,7 +1103,11 @@ export const build_considerations = ({
   // Saving and quality diverge. Gated on the tag still being available, like
   // tag_sufficiency and empty_screen above — a team that has already spent its
   // franchise tag cannot act on the tension, so naming it is noise.
-  if (budget.franchise.remaining > 0 && franchise_candidates.length > 1) {
+  if (
+    designation_window_open &&
+    budget.franchise.remaining > 0 &&
+    franchise_candidates.length > 1
+  ) {
     const by_saving = [...franchise_candidates].sort(
       (a, b) => b.franchise_saving - a.franchise_saving
     )[0]
@@ -1034,19 +1138,42 @@ export const build_considerations = ({
     }
   }
 
-  // Your nomination windows
+  // Your nomination windows. Fires from the extension deadline through the end
+  // of the period rather than only inside it: the turns are fixed by draft
+  // order and knowable in advance, and the days before the period opens are
+  // exactly when a manager plans against them.
   if (rfa_window && rfa_window.windows.length) {
-    const in_period =
-      season.restricted_free_agency_period_start &&
-      now_unix >= season.restricted_free_agency_period_start &&
+    const period_open =
+      season.restricted_free_agency_period_end &&
       now_unix <= season.restricted_free_agency_period_end
-    if (in_period) {
+    if (period_open) {
       fired.push({
         rule: 'nomination_windows',
         sentence: `Your ${rfa_window.windows.length} restricted free agency nomination turns fall on ${rfa_window.windows.map((w) => w.at_iso.slice(0, 10)).join(' and ')}, fixed by descending draft order.`,
         inputs: rfa_window
       })
     }
+  }
+
+  // The auction supply itself. Distinct from incoming_supply below, which is
+  // the shed pool — a forecast of what MIGHT become available. This one is
+  // settled: these players carry the tag and go to auction.
+  if (restricted_free_agency_pool.length) {
+    const own = restricted_free_agency_pool.filter((row) => row.tid === tid)
+    const owning_teams = new Set(
+      restricted_free_agency_pool.map((row) => row.tid)
+    )
+    fired.push({
+      rule: 'restricted_free_agency_auction_pool',
+      sentence: own.length
+        ? `${restricted_free_agency_pool.length} players across ${owning_teams.size} franchises carry the restricted free agency tag, ${own.length} of them yours: ${own.map((row) => row.name).join(', ')}.`
+        : `${restricted_free_agency_pool.length} players across ${owning_teams.size} franchises carry the restricted free agency tag, none of them yours, so you enter the period as a bidder only.`,
+      inputs: {
+        total: restricted_free_agency_pool.length,
+        owning_team_count: owning_teams.size,
+        own_pids: own.map((row) => row.pid)
+      }
+    })
   }
 
   // There is deliberately no own-nomination-exposure rule. It existed to state
