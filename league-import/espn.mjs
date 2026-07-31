@@ -1,5 +1,3 @@
-import fetch from 'node-fetch'
-
 const API_URL =
   'https://registerdisney.go.com/jgc/v5/client/ESPN-FANTASYLM-PROD/api-key?langPref=en-US'
 const LOGIN_URL =
