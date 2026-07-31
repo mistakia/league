@@ -349,8 +349,11 @@ DROP INDEX IF EXISTS public.idx_league_format_player_careerlogs_pid_id;
 DROP INDEX IF EXISTS public.idx_league_format_draft_pick_value_rank_id;
 DROP INDEX IF EXISTS public.idx_league_cutlist_tid;
 DROP INDEX IF EXISTS public.idx_league_cutlist_pid;
-DROP INDEX IF EXISTS public.idx_keeptradecut_valuations_is_superflex_observed_at_pid;
+DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
+DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_qb_type_d_pid;
+DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pid_qb_type_d;
 DROP INDEX IF EXISTS public.idx_keeptradecut_pick_season_years;
+DROP INDEX IF EXISTS public.idx_keeptradecut_liquidity_d_superflex;
 DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
 DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
@@ -584,7 +587,6 @@ ALTER TABLE IF EXISTS ONLY public.league_formats DROP CONSTRAINT IF EXISTS leagu
 ALTER TABLE IF EXISTS ONLY public.league_divisions DROP CONSTRAINT IF EXISTS league_divisions_pkey;
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_pick DROP CONSTRAINT IF EXISTS keeptradecut_pick_pkey;
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_pick DROP CONSTRAINT IF EXISTS keeptradecut_pick_ktc_player_id_key;
-ALTER TABLE IF EXISTS ONLY public.keeptradecut_valuations DROP CONSTRAINT IF EXISTS keeptradecut_valuations_pkey;
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_liquidity DROP CONSTRAINT IF EXISTS keeptradecut_liquidity_pkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
@@ -934,7 +936,7 @@ DROP TABLE IF EXISTS public.league_format_draft_pick_value;
 DROP TABLE IF EXISTS public.league_divisions;
 DROP TABLE IF EXISTS public.league_cutlist;
 DROP TABLE IF EXISTS public.league_baselines;
-DROP TABLE IF EXISTS public.keeptradecut_valuations;
+DROP TABLE IF EXISTS public.keeptradecut_rankings;
 DROP TABLE IF EXISTS public.keeptradecut_pick;
 DROP TABLE IF EXISTS public.keeptradecut_liquidity;
 DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
@@ -3908,8 +3910,8 @@ ALTER SEQUENCE public.jobs_uid_seq OWNED BY public.jobs.uid;
 
 CREATE TABLE public.keeptradecut_liquidity (
     pid character varying(25) NOT NULL,
-    is_superflex boolean NOT NULL,
-    observed_at timestamp with time zone NOT NULL,
+    superflex boolean NOT NULL,
+    d integer NOT NULL,
     raw_liquidity numeric NOT NULL,
     std_liquidity numeric NOT NULL,
     trade_count integer NOT NULL
@@ -3935,16 +3937,15 @@ CREATE TABLE public.keeptradecut_pick (
 
 
 --
--- Name: keeptradecut_valuations; Type: TABLE; Schema: public; Owner: -
+-- Name: keeptradecut_rankings; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.keeptradecut_valuations (
-    pid character varying(25) NOT NULL,
-    is_superflex boolean NOT NULL,
-    observed_at timestamp with time zone NOT NULL,
-    keeptradecut_value integer NOT NULL,
-    position_rank smallint,
-    overall_rank smallint
+CREATE TABLE public.keeptradecut_rankings (
+    pid character varying(25),
+    qb smallint NOT NULL,
+    d integer NOT NULL,
+    v integer NOT NULL,
+    type smallint NOT NULL
 );
 
 
@@ -28311,19 +28312,11 @@ ALTER TABLE ONLY public.invite_codes
 
 
 --
--- Name: keeptradecut_valuations keeptradecut_valuations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.keeptradecut_valuations
-    ADD CONSTRAINT keeptradecut_valuations_pkey PRIMARY KEY (pid, is_superflex, observed_at);
-
-
---
 -- Name: keeptradecut_liquidity keeptradecut_liquidity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.keeptradecut_liquidity
-    ADD CONSTRAINT keeptradecut_liquidity_pkey PRIMARY KEY (pid, is_superflex, observed_at);
+    ADD CONSTRAINT keeptradecut_liquidity_pkey PRIMARY KEY (pid, superflex, d);
 
 
 --
@@ -29629,7 +29622,7 @@ CREATE UNIQUE INDEX idx_24613_team ON public.footballoutsiders USING btree (team
 -- Name: idx_24623_player_value; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_keeptradecut_valuations_is_superflex_observed_at_pid ON public.keeptradecut_valuations USING btree (is_superflex, observed_at, pid);
+CREATE UNIQUE INDEX idx_24623_player_value ON public.keeptradecut_rankings USING btree (pid, d, qb, type);
 
 
 --
@@ -30319,10 +30312,38 @@ CREATE INDEX idx_invite_codes_used_by ON public.invite_codes USING btree (used_b
 
 
 --
+-- Name: idx_keeptradecut_liquidity_d_superflex; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_keeptradecut_liquidity_d_superflex ON public.keeptradecut_liquidity USING btree (d, superflex);
+
+
+--
 -- Name: idx_keeptradecut_pick_season_years; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_keeptradecut_pick_season_years ON public.keeptradecut_pick USING btree (season_year, round, slot);
+
+
+--
+-- Name: idx_keeptradecut_rankings_pid_qb_type_d; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_keeptradecut_rankings_pid_qb_type_d ON public.keeptradecut_rankings USING btree (pid, qb, type, d);
+
+
+--
+-- Name: idx_keeptradecut_rankings_qb_type_d_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_keeptradecut_rankings_qb_type_d_pid ON public.keeptradecut_rankings USING btree (qb, type, d, pid);
+
+
+--
+-- Name: idx_keeptradecut_rankings_type_qb_d_v; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_keeptradecut_rankings_type_qb_d_v ON public.keeptradecut_rankings USING btree (type, qb, d, v);
 
 
 --
@@ -57463,10 +57484,10 @@ GRANT SELECT ON TABLE public.keeptradecut_pick TO league_reader;
 
 
 --
--- Name: TABLE keeptradecut_valuations; Type: ACL; Schema: public; Owner: -
+-- Name: TABLE keeptradecut_rankings; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON TABLE public.keeptradecut_valuations TO league_reader;
+GRANT SELECT ON TABLE public.keeptradecut_rankings TO league_reader;
 
 
 --
