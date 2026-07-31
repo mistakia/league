@@ -9,7 +9,8 @@ import build_tag_board, {
   build_rfa_schedule,
   resolve_rookie_class_year,
   COVERAGE_PRECISE_MIN,
-  RFA_NOMINATION_GAP_FLOOR
+  RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP,
+  RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT
 } from '#libs-server/tag-board/build-tag-board.mjs'
 
 chai.should()
@@ -66,10 +67,13 @@ const make_player = ({
   nfl_draft_year = 2020,
   // Both projection inputs use `null` for "no projection row at all", which is
   // distinct from a real value of 0. Market salary defaults to absent so a
-  // fixture opts into the shed pool; points added defaults above replacement so
-  // a fixture opts into below-replacement rather than tripping over it.
+  // fixture opts into the shed pool.
   market_salary = null,
-  pts_added = 25
+  // Above replacement and inside the nomination band, with room on both sides,
+  // so a fixture that cares about either opts in explicitly. Do NOT set this to
+  // a threshold value: a default sitting on a boundary makes every unrelated
+  // test silently sensitive to that threshold moving.
+  pts_added = 10
 }) => ({
   row: { tid, pid, pos, slot, tag, extensions },
   contract: [contract_key(tid, pid), value],
@@ -831,7 +835,7 @@ describe('tag board', function () {
       pool_row('KEPT').dynasty_rank.should.equal(1)
     })
 
-    it('does not mark a nomination target below the materiality floor', function () {
+    it('requires the owner to be paying real money above the market', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -839,9 +843,9 @@ describe('tag board', function () {
             // The live R.Dowdle case: a $5 contract with a $3 gap. A ratio bar
             // would keep it at 0.60; no owner nominates a minimum contract.
             { tid: 1, pid: 'CHEAP', value: 1, market_salary: 3 },
-            // One dollar short of the floor, and one dollar over it.
-            { tid: 1, pid: 'UNDER', value: 20, market_salary: 16 },
-            { tid: 1, pid: 'AT', value: 20, market_salary: 15 },
+            // One dollar short of the minimum, and exactly at it.
+            { tid: 1, pid: 'UNDER', value: 20, market_salary: 20 },
+            { tid: 1, pid: 'AT', value: 20, market_salary: 19 },
             { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
           ]
         })
@@ -853,11 +857,121 @@ describe('tag board', function () {
       pool_row('CHEAP').under_pressure.should.equal(true)
       pool_row('CHEAP').rfa_nomination_target.should.equal(false)
 
-      pool_row('UNDER').market_gap.should.equal(9)
+      pool_row('UNDER').market_gap.should.equal(5)
       pool_row('UNDER').rfa_nomination_target.should.equal(false)
 
-      pool_row('AT').market_gap.should.equal(RFA_NOMINATION_GAP_FLOOR)
+      pool_row('AT').market_gap.should.equal(
+        RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP
+      )
       pool_row('AT').rfa_nomination_target.should.equal(true)
+    })
+
+    // The gap says the contract is mispriced; it does not say anyone would move
+    // on it. Both tails of a gap-only screen are wrong, in opposite directions.
+    it('requires the player to be near replacement level, in either direction', function () {
+      const band =
+        RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT
+      const board = build_tag_board(
+        build_fixture({
+          teams: two_teams,
+          players: [
+            // The L.Jackson case: a real gap on a player his owner simply keeps
+            // and pays for. Overpriced is not the same as available.
+            {
+              tid: 1,
+              pid: 'STAR',
+              value: 50,
+              market_salary: 20,
+              pts_added: 125
+            },
+            // The K.Pickett case: no bidder at any price, so the owner releases
+            // rather than nominates.
+            {
+              tid: 1,
+              pid: 'DEAD',
+              value: 20,
+              market_salary: 5,
+              pts_added: -218
+            },
+            // Inside the band on each side of replacement.
+            {
+              tid: 1,
+              pid: 'FRINGE_UP',
+              value: 20,
+              market_salary: 5,
+              pts_added: band
+            },
+            {
+              tid: 1,
+              pid: 'FRINGE_DOWN',
+              value: 20,
+              market_salary: 5,
+              pts_added: -band
+            },
+            // One point outside it, on each side.
+            {
+              tid: 1,
+              pid: 'JUST_OVER',
+              value: 20,
+              market_salary: 5,
+              pts_added: band + 1
+            },
+            {
+              tid: 1,
+              pid: 'JUST_UNDER',
+              value: 20,
+              market_salary: 5,
+              pts_added: -band - 1
+            },
+            // No projection at all: unscreenable on this condition rather than
+            // failing it, so it stays in the table unmarked.
+            {
+              tid: 1,
+              pid: 'NOPTS',
+              value: 20,
+              market_salary: 5,
+              pts_added: null
+            },
+            { tid: 2, pid: 'B1', value: 20, market_salary: 10 }
+          ]
+        })
+      )
+
+      const target = (pid) =>
+        board.market_pool.find((row) => row.pid === pid).rfa_nomination_target
+
+      // Every one of these clears the gap minimum, so the gap is not what
+      // separates them.
+      board.market_pool
+        .filter((row) => row.tid === 1)
+        .every(
+          (row) =>
+            row.market_gap >=
+            RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP
+        )
+        .should.equal(true)
+
+      target('STAR').should.equal(false)
+      target('DEAD').should.equal(false)
+      target('FRINGE_UP').should.equal(true)
+      target('FRINGE_DOWN').should.equal(true)
+      target('JUST_OVER').should.equal(false)
+      target('JUST_UNDER').should.equal(false)
+      target('NOPTS').should.equal(false)
+
+      // Unmarked is not dropped: all seven stay in the pool and in the band.
+      const supply = Object.values(board.market_bands.incoming_supply).flat()
+      for (const pid of [
+        'STAR',
+        'DEAD',
+        'FRINGE_UP',
+        'FRINGE_DOWN',
+        'JUST_OVER',
+        'JUST_UNDER',
+        'NOPTS'
+      ]) {
+        supply.should.include(pid)
+      }
     })
 
     it('keeps a contract with no projection, marked unscreenable and sorted last', function () {
@@ -932,9 +1046,9 @@ describe('tag board', function () {
       // The headline count is derived from the band, never counted separately.
       board.league_market.incoming_supply.should.eql({ WR: 2, RB: 1 })
 
-      // NARROW's gap is 25 - 16 = 9, below the floor, so it is not a target.
-      bands.rfa_nomination_pool.should.eql(['WIDE', 'RIVAL'])
-      bands.rfa_nomination_gap_floor.should.equal(RFA_NOMINATION_GAP_FLOOR)
+      // All three clear both nomination conditions, and the pool is ordered by
+      // gap rather than by team: 40, 30, then NARROW's 25 - 16 = 9.
+      bands.rfa_nomination_pool.should.eql(['WIDE', 'RIVAL', 'NARROW'])
 
       // Every pid resolves into market_pool -- the bands are references, not
       // copies, so a band naming a row the pool does not carry is a defect.

@@ -8,14 +8,29 @@ import { player_tag_types, roster_slot_types } from '#constants'
 // ranks are noise, so the board reports a band instead of a precise rank.
 export const COVERAGE_PRECISE_MIN = 0.6
 
-// Materiality floor on the restricted-free-agency nomination marker, in cap
-// dollars of `market_gap`. No owner nominates a minimum-salary contract however
-// overpriced it looks in proportion — the motive is the salary shed, which is
-// the gap itself. Set at the break in the live 2026 distribution: 82 of the 88
-// shed-pool rows clear $5 and only 39 clear $10, and $10 reads as two extension
-// steps. Deliberately a flat dollar floor rather than a gap-to-salary ratio,
-// which is noisiest exactly at the cheap end it would be introduced to fix.
-export const RFA_NOMINATION_GAP_FLOOR = 10
+// What makes a contract a restricted-free-agency nomination candidate. The gap
+// alone does not: it says the contract is mispriced, not that anyone would move
+// on it. Two conditions have to hold together, and each excludes a different
+// population that a gap-only screen wrongly marked.
+//
+// 1. The owner is paying real money — at least this much above the single-season
+//    market. Below it the salary shed is not worth a nomination whatever the
+//    proportion, which is why this is a flat dollar figure and not a
+//    gap-to-salary ratio: a ratio is noisiest exactly at the cheap end, and it
+//    inverts the motivating case, keeping a $5 contract with a $3 gap at 0.60
+//    while dropping an $11 contract with a $2 gap at 0.18.
+export const RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP = 6
+
+// 2. The player is NEAR replacement level — within this many projected points
+//    added of it, in either direction. This is the condition the gap cannot
+//    supply, and it cuts both tails of a gap-only screen. Far above replacement
+//    is a star whose owner keeps him and pays the difference: L.Jackson carries
+//    a $7 gap at +124.6 points and is nobody's nomination. Far below is a
+//    contract with no bidders at any price, so the owner releases rather than
+//    nominates: K.Pickett is -218.4. The candidates are in between — starter
+//    money for replacement-level production, which is exactly the contract an
+//    owner wants off the books and a rival might take.
+export const RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT = 25
 
 const RANK_BANDS = [
   'top fifth',
@@ -478,16 +493,20 @@ export default function build_tag_board({
         shed_pool_ranks.get(row.pid) ?? null,
         shed_pool_size
       ),
-      // A minimum-salary contract is never a nomination motive whatever its
-      // gap, so the marker carries a materiality floor rather than the old
-      // replacement floor. R.Dowdle was marked a target at a $5 salary with a
-      // $3 gap — the mirror of the Burden exclusion. A flat dollar floor and
-      // not a ratio: the quantity an owner actually sheds is the gap itself,
-      // and a ratio inverts this very case, keeping Dowdle at 0.60 while
-      // dropping T.Henderson at 0.18.
+      // Both threshold conditions above, plus the hard eligibility gate: a
+      // franchise that has named both nominations cannot send anyone to
+      // auction, so its rows stay in the table unmarked.
+      //
+      // A row with no projection is never marked. It is unscreenable on the
+      // replacement condition rather than failing it, and coverage annotates
+      // rather than suppresses — the row keeps its place in the table.
       rfa_nomination_target:
         row.under_pressure &&
-        row.market_gap >= RFA_NOMINATION_GAP_FLOOR &&
+        row.market_gap >=
+          RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP &&
+        row.projected_points_added !== null &&
+        Math.abs(row.projected_points_added) <=
+          RESTRICTED_FREE_AGENCY_NOMINATION_MAXIMUM_POINTS_FROM_REPLACEMENT &&
         tag_budget_by_tid.get(row.tid).restricted_free_agency.remaining > 0
     }))
     // Widest gap first; an unscreenable row (no market price) sorts last rather
@@ -662,14 +681,12 @@ export default function build_tag_board({
             under_pressure_rows.filter((row) => row.tid === viewer_tid)
           ).map((row) => row.pid),
     incoming_supply: incoming_supply_by_position,
-    // The daggered subset: under pressure, gap at or above the materiality
-    // floor, and the owner still holding a nomination. A strict subset of
-    // incoming supply, carried separately because it is the set a manager acts
-    // on and scanning 88 rows for a flag is not the same as being handed 35.
+    // The daggered subset. A strict subset of incoming supply, carried
+    // separately because it is the set a manager acts on, and scanning the
+    // whole pool for a flag is not the same as being handed the candidates.
     rfa_nomination_pool: by_gap_desc(
       market_pool.filter((row) => row.rfa_nomination_target)
-    ).map((row) => row.pid),
-    rfa_nomination_gap_floor: RFA_NOMINATION_GAP_FLOOR
+    ).map((row) => row.pid)
   }
 
   // Derived from the band rather than counted independently, so the headline
