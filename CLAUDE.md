@@ -305,6 +305,8 @@ Format identities (`league_scoring_formats.id`, `league_formats.id`) are opaque 
 
 **Local test database requires Postgres >= 15.** `db/schema.postgres.sql` uses `NULLS NOT DISTINCT` (Postgres 15+); loading it against an older server fails in `test/global.mjs` with `syntax error at or near "NULLS"`. `config/config-test.json` connects to `127.0.0.1:5432`; `db/index.mjs` honors `LEAGUE_DB_HOST`/`LEAGUE_DB_PORT`/`LEAGUE_DB_USER`/`LEAGUE_DB_PASSWORD`/`LEAGUE_DB_DATABASE` overrides (note: the `yarn test` script blanks `LEAGUE_DB_HOST`/`LEAGUE_DB_PORT`, so to target a non-default port invoke mocha directly rather than through `yarn test`).
 
+**With nothing listening on :5432, `yarn test` HANGS rather than failing.** The connection pool retries until its timeout instead of surfacing `ECONNREFUSED`, and `--reporter min` prints nothing until the run ends, so a suite that will never start is indistinguishable from a slow one — on 2026-07-30 this ate a 15-minute background task before anyone checked. If a `yarn test` run produces no output for more than a minute, check `psql -h 127.0.0.1 -p 5432 -c 'select 1'` before debugging the suite, and use the `:5433` container path below.
+
 If your local default Postgres on :5432 is < 15, use the bundled throwaway PG16 (`compose.test.yaml`, listens on :5433). It auto-creates the roles the schema GRANTs to (`postgres`/`league_writer`/`league_reader`) via `db/test/init-roles.sql`, so no manual `docker exec` step is needed:
 
 ```
