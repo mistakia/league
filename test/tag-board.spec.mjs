@@ -1098,7 +1098,7 @@ describe('tag board', function () {
     // The auction supply. These rows joined market_pool on 2026-07-31; before
     // that they sat in a separate top-level key with their own rank scale, which
     // forced the page to render two tables answering one question in two units.
-    it('carries the tagged players in the pool, marked and without a salary', function () {
+    it('carries the tagged players in the pool with their salary and gap', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -1139,18 +1139,29 @@ describe('tag board', function () {
       row.team_name.should.equal('Beta')
       row.projected_market_salary.should.equal(30)
 
-      // No salary and no gap: the auction settles what he costs, so the current
-      // value describes a contract about to be replaced, and the offer that
-      // would settle it is blind under Article IX §2.
-      expect(row.post_deadline_salary).to.equal(null)
-      expect(row.market_gap).to.equal(null)
+      // The salary and gap he actually carries. Both are public state: the
+      // contract the owner holds today, differenced against a published
+      // single-season projection. Neither is the settling offer, which is blind
+      // under Article IX §2 and never enters the artifact at all.
+      row.post_deadline_salary.should.equal(20)
+      row.market_gap.should.equal(-10)
       expect(row.value).to.equal(undefined)
 
-      // Carrying no gap, a tagged row can be in neither pool and can never be
-      // marked as a nomination profile — the two markers are disjoint.
+      // Still in neither shed pool: those describe a contract an owner might
+      // shed for cap relief, and the auction is already re-settling this one.
       row.under_pressure.should.equal(false)
       row.releasable.should.equal(false)
+
+      // Priced BELOW the market, so he does not fit the nomination profile —
+      // excluded on the gap, which is now evaluable, rather than structurally.
       row.rfa_nomination_target.should.equal(false)
+
+      // A tagged row CAN fit the profile, and does when its gap clears the
+      // minimum. This is the change: the players most obviously in the
+      // restricted-free-agency pool used to be the only ones it could never
+      // describe, because their gap was nulled away.
+      pool_row('RFA_CHEAP').market_gap.should.equal(12)
+      pool_row('RFA_CHEAP').rfa_nomination_target.should.equal(true)
 
       // ...and so contributes nothing to its owner's capacity.
       board.bid_capacity
@@ -1317,9 +1328,12 @@ describe('tag board', function () {
       // Viewer-scoped, widest gap first, and the under-market contract is out.
       bands.contracts_under_pressure.should.eql(['WIDE', 'NARROW'])
 
-      // League-wide, grouped by position, same ordering within each group.
+      // League-wide, grouped by position, ordered by MARKET PRICE descending —
+      // a different key from the band above. NARROW leads on a $16 price
+      // despite the narrower gap, because this band answers what a bidder could
+      // acquire rather than whose owner is overpaying most.
       bands.incoming_supply.should.eql({
-        WR: ['WIDE', 'NARROW'],
+        WR: ['NARROW', 'WIDE'],
         RB: ['RIVAL']
       })
 

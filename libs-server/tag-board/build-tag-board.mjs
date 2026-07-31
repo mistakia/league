@@ -522,17 +522,28 @@ export default function build_tag_board({
   // excluded while the pool was defined as untagged contracts, which left the
   // one pool a manager can actually bid on during the nomination period sitting
   // in a separate table with its own rank scale — two tables answering "who
-  // might I acquire" in two different units. They join the pool as members with
-  // `tag_state: 'restricted_free_agency'` and carry NO salary and NO gap: the
-  // auction settles the contract, so the current value describes a contract
-  // about to be replaced, and the offer that would settle it is blind under
-  // Article IX §2 and never enters this artifact. Both fields are null, which is
-  // rendered as an em dash and is the same treatment an unscreenable row gets.
+  // might I acquire" in two different units.
   //
-  // They are therefore in no shed pool, fund no capacity, and can carry no
-  // nomination-profile flag — every one of those requires a salary to difference
-  // against. What they do carry is a market price and a rank, which is what a
-  // bidder acts on.
+  // THEY CARRY THEIR SALARY AND GAP (2026-07-31, second revision). Both were
+  // nulled until a tagged player was nominated, on the reasoning that the
+  // auction settles the contract so the current value describes a contract
+  // about to be replaced. That withheld public state to avoid implying a
+  // private one: `post_deadline_salary` is the contract the owner is carrying
+  // TODAY and what a nomination is priced against, and `market_gap` differences
+  // it against a published single-season projection. Neither is the settling
+  // offer, which is blind under Article IX §2 and never enters this artifact —
+  // the boundary is the BID, and nulling the salary never protected it.
+  //
+  // Nulling them also cost the reader more than it saved: the nomination screen
+  // needs a gap, so every tagged row was structurally unscreenable and could
+  // never be flagged as fitting the profile it most obviously fits.
+  //
+  // What tagged rows still do NOT get is `under_pressure` and `releasable`.
+  // Those describe a contract its owner might shed for cap relief, and a player
+  // whose contract the auction is about to re-settle is not one — he is already
+  // moving through a different mechanism. Keeping both false also keeps him out
+  // of `contracts_under_pressure` and out of `under_pressure_rows`, so he is
+  // listed in incoming supply exactly once, by way of the tagged pool.
   const market_pool_rows = active_rows
     .filter(
       (row) =>
@@ -541,10 +552,8 @@ export default function build_tag_board({
     .map((row) => {
       const restricted_free_agency =
         row.tag === player_tag_types.RESTRICTED_FREE_AGENCY
-      const post_deadline_salary = restricted_free_agency
-        ? null
-        : row.post_deadline_salary
-      const market_gap = restricted_free_agency ? null : row.market_gap
+      const post_deadline_salary = row.post_deadline_salary
+      const market_gap = row.market_gap
       return {
         tid: row.tid,
         // Carried on the row rather than joined page-side: the merged supply
@@ -574,12 +583,15 @@ export default function build_tag_board({
         // single-season market. Funds nothing on its own — it is the set the
         // two market bands render.
         under_pressure:
-          market_gap !== null && market_gap >= SHED_POOL_MINIMUM_MARKET_GAP,
+          !restricted_free_agency &&
+          market_gap !== null &&
+          market_gap >= SHED_POOL_MINIMUM_MARKET_GAP,
         // Pool 2: the subset an owner would plausibly shed, because the market
         // prices him at RELEASABLE_MARKET_PRICE_RATIO or less of the contract
         // and an auction could return him for less than it costs today. THIS is
         // what funds `capacity`; `under_pressure` no longer does.
         releasable:
+          !restricted_free_agency &&
           market_gap !== null &&
           market_gap >= SHED_POOL_MINIMUM_MARKET_GAP &&
           row.projected_market_salary <=
@@ -636,17 +648,29 @@ export default function build_tag_board({
       // manager reviews when the window is closed. Who is actually going to
       // auction is `tag_state`, which reads the roster tag.
       //
-      // A tagged row is never marked either, and for a structural reason rather
-      // than a policy one: it carries no salary and so no gap, so the first
-      // condition is unevaluable. The two markers are disjoint by construction —
-      // a player is going to auction, or he fits the profile of one who could
-      // have, never both.
+      // A TAGGED ROW CAN CARRY THIS FLAG (2026-07-31, second revision). It could
+      // not while its salary and gap were nulled, which made every tagged row
+      // structurally unscreenable — the players most obviously in the
+      // restricted-free-agency pool were the only ones the pool flag could never
+      // describe. Now that they carry both fields they are screened like any
+      // other contract, and those that fit are in the pool and shaded with it.
+      //
+      // The flag reads "fits the profile a nomination is for", across the whole
+      // pool. It does NOT read "untagged and fits the profile", and it is not a
+      // statement that the owner may still designate one — though as of
+      // 2026-07-31 he generally may, since `restricted-free-agency.mjs` carries
+      // no `ext_date` guard and designations stay open to the period end.
+      //
+      // The `under_pressure` precondition was dropped with the same change and
+      // was always redundant: the nomination minimum gap ($6) is strictly above
+      // the shed-pool minimum ($3), so any row clearing the first cleared the
+      // second. All it did was inherit the shed pool's tagged-row exclusion.
       //
       // A row with no projection is never marked. It is unscreenable on the
       // replacement condition rather than failing it, and coverage annotates
       // rather than suppresses — the row keeps its place in the table.
       rfa_nomination_target:
-        row.under_pressure &&
+        row.market_gap !== null &&
         row.market_gap >=
           RESTRICTED_FREE_AGENCY_NOMINATION_MINIMUM_MARKET_GAP &&
         row.projected_points_added !== null &&
@@ -854,17 +878,46 @@ export default function build_tag_board({
 
   const under_pressure_rows = market_pool.filter((row) => row.under_pressure)
 
-  // Grouped by position. Within each position the TAGGED rows come first,
-  // ordered by market price, then the shed-pool rows by widest gap. Tagged
-  // players lead because they are the live supply — an auction is running for
-  // them now, while a shed-pool contract is only a contract someone might
-  // release. Ordering them by gap instead would sort every one of them to the
-  // bottom, since a tagged row carries no gap at all.
+  // Grouped by position, ordered by MARKET PRICE descending within each — one
+  // scale over the whole position, tagged and shed-pool rows interleaved.
+  //
+  // It was tagged-first-then-widest-gap until 2026-07-31. Tagged rows led
+  // because they carried no gap and would otherwise have sorted to the bottom,
+  // which made the order a consequence of a null rather than a judgement. They
+  // carry a gap now, so that reason is gone, and market price is the better key
+  // regardless: the band answers "what could I acquire", and the reader is
+  // scanning for the best player available at a position, not for whose owner is
+  // most overpaying. The gap belongs to the owner's decision; the price is the
+  // bidder's. A null price sorts last.
+  //
+  // Ties break on the widest gap, then on pid for determinism. The tie-break is
+  // load-bearing rather than cosmetic: `projected_market_salary` clips at $0, so
+  // whole positions pile up there — 8 of 11 tight ends on the live board — and
+  // an alphabetical tie-break scatters the flagged rows through the unflagged
+  // ones for no reason a reader can see, putting a $5 contract above a $25 one
+  // that fits the nomination profile. The gap is the only field that still
+  // orders rows the price has flattened.
+  const by_market_price_desc = (rows) =>
+    [...rows].sort((a, b) => {
+      const a_price = a.projected_market_salary
+      const b_price = b.projected_market_salary
+      if (a_price === null || b_price === null) {
+        if (a_price !== null) return -1
+        if (b_price !== null) return 1
+      } else if (b_price !== a_price) {
+        return b_price - a_price
+      }
+      const a_gap = a.market_gap ?? -Infinity
+      const b_gap = b.market_gap ?? -Infinity
+      if (b_gap !== a_gap) return b_gap - a_gap
+      return a.pid < b.pid ? -1 : 1
+    })
+
   const incoming_supply_by_position = {}
-  for (const row of [
+  for (const row of by_market_price_desc([
     ...restricted_free_agency_pool_rows,
-    ...by_gap_desc(under_pressure_rows)
-  ]) {
+    ...under_pressure_rows
+  ])) {
     ;(incoming_supply_by_position[row.pos] ||= []).push(row.pid)
   }
 
@@ -898,15 +951,27 @@ export default function build_tag_board({
     rfa_nomination_pool: by_gap_desc(
       market_pool.filter((row) => row.rfa_nomination_target)
     ).map((row) => row.pid),
-    // This viewer's own rows that fit the nomination profile — the "which of my
-    // players is this tag for" question, handed over rather than left to a page
-    // to intersect two bands. Absent, not empty, when built with no viewer.
+    // This viewer's own rows that fit the nomination profile and are NOT
+    // already tagged — the "which of my players could I still nominate"
+    // question, handed over rather than left to a page to intersect two bands.
+    // Absent, not empty, when built with no viewer.
+    //
+    // The tag-state exclusion is this band's alone and does not belong on the
+    // flag. Since 2026-07-31 a tagged row can carry `rfa_nomination_target`,
+    // which is what puts it in the league-wide pool the supply table shades —
+    // but the restricted free agency band already names this viewer's tagged
+    // players one list above, so admitting them here would print the same
+    // players twice in the same band, under a heading that reads as an action
+    // still available on a player who has already had it taken.
     rfa_nomination_candidates:
       viewer_tid === null
         ? null
         : by_gap_desc(
             market_pool.filter(
-              (row) => row.rfa_nomination_target && row.tid === viewer_tid
+              (row) =>
+                row.rfa_nomination_target &&
+                row.tag_state !== 'restricted_free_agency' &&
+                row.tid === viewer_tid
             )
           ).map((row) => row.pid)
   }
