@@ -108,6 +108,8 @@ When touching a dispatch map, verify each referenced name exists on the actions 
 - Node-cache for performance optimization (10-min TTL)
 - Database access via Knex.js ORM at `req.app.locals.db`
 
+**Twenty routers mount BEFORE the blanket auth guard, so each of their routes must self-enforce.** `api/index.mjs` mounts `docs`, `status`, `errors`, `stats`, `players`, `projections`, `plays`, `schedule`, `sources`, `auth`, `leagues`, `teams`, `markets`, `percentiles`, `seasonlogs`, `cache`, `data-views`, `u`, `wagers` and `selection-combinations` above the `if (!req.auth) return 401` catch-all, which therefore covers only what mounts after it (`scoreboard`, `me`, `settings`). Most of those routers are legitimately public NFL data, but any route in one of them that reads USER-owned rows needs its own `req.auth` check, and the guard's presence in the file makes it easy to assume otherwise. `GET /api/data-views` had neither an auth check nor a mandatory filter for that reason and returned every saved view on the platform to an anonymous caller until 2026-07-31 (`216c1a5d0`). Its sibling `GET /api/plays/views` still has the identical shape against `user_plays_views`, latent only because that table is empty. When adding a route to any pre-guard router, check whether it touches user-owned data and enforce ownership in the handler.
+
 ### Shared Libraries
 
 **`libs-shared/`** - Isomorphic code (runs on both client and server):
