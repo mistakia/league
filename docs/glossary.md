@@ -583,21 +583,21 @@
 
 ### Player Identification
 
-| column          | name                      | description                                                                                                                             | coverage |
-| --------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| nfl_id          | NFL ID                    | NFL ID                                                                                                                                  | 47.67%   |
-| gsisid          | GSIS ID                   | GSIS ID                                                                                                                                 | 53.99%   |
-| gsispid         | Smart Player ID           | nflverse smart_id — the long encoded NFL player id in play-by-play (2022+), distinct from the GSIS ID; canonical column smart_player_id | 40.39%   |
-| gsis_it_id      | GSIS It ID                | GSIS It ID                                                                                                                              | 28.40%   |
-| sleeper_id      | Sleeper ID                | Sleeper ID                                                                                                                              | 29.04%   |
-| rotoworld_id    | Rotoworld ID              | Rotoworld ID                                                                                                                            | 19.40%   |
-| rotowire_id     | Rotowire ID               | Rotowire ID                                                                                                                             | 34.18%   |
-| sportradar_id   | Sportradar ID             | Sportradar ID                                                                                                                           | 30.20%   |
-| espn_id         | ESPN ID                   | ESPN ID                                                                                                                                 | 28.16%   |
-| fantasy_data_id | Fantasy Data ID           | Fantasy Data ID                                                                                                                         | 23.21%   |
-| yahoo_id        | Yahoo ID                  | Yahoo ID                                                                                                                                | 26.52%   |
-| keeptradecut_id | Keep Trade Cut ID         | Keep Trade Cut ID                                                                                                                       | 2.60%    |
-| pfr_id          | Pro Football Reference ID | Pro Football Reference ID                                                                                                               | 46.96%   |
+| column                 | name                      | description                                                                                           | coverage |
+| ---------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------- | -------- |
+| nfl_player_id          | NFL ID                    | NFL ID                                                                                                | 47.67%   |
+| gsis_player_id         | GSIS ID                   | GSIS ID                                                                                               | 53.99%   |
+| smart_player_id        | Smart Player ID           | nflverse smart_id — the long encoded NFL player id in play-by-play (2022+), distinct from the GSIS ID | 40.39%   |
+| gsis_it_player_id      | GSIS It ID                | GSIS It ID                                                                                            | 28.40%   |
+| sleeper_player_id      | Sleeper ID                | Sleeper ID                                                                                            | 29.04%   |
+| rotoworld_player_id    | Rotoworld ID              | Rotoworld ID                                                                                          | 19.40%   |
+| rotowire_player_id     | Rotowire ID               | Rotowire ID                                                                                           | 34.18%   |
+| sportradar_player_id   | Sportradar ID             | Sportradar ID                                                                                         | 30.20%   |
+| espn_player_id         | ESPN ID                   | ESPN ID                                                                                               | 28.16%   |
+| fantasy_data_player_id | Fantasy Data ID           | Fantasy Data ID                                                                                       | 23.21%   |
+| yahoo_player_id        | Yahoo ID                  | Yahoo ID                                                                                              | 26.52%   |
+| keeptradecut_player_id | Keep Trade Cut ID         | Keep Trade Cut ID                                                                                     | 2.60%    |
+| pfr_player_id          | Pro Football Reference ID | Pro Football Reference ID                                                                             | 46.96%   |
 
 ### Player Awards & Value
 

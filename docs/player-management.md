@@ -197,17 +197,17 @@ Scripts for bulk importing player data:
 
 ## Audit and Gamelog Scripts
 
-| Script                                     | Purpose                                                    |
-| ------------------------------------------ | ---------------------------------------------------------- |
-| `scripts/audit-player-gamelogs.mjs`        | Compare DB gamelogs against PFR; requires pfr_id on player |
-| `scripts/generate-player-gamelogs.mjs`     | Aggregate play stats into player gamelogs                  |
-| `scripts/update-player-gsispid.mjs`        | Backfill gsispid on player table from nfl_play_stats       |
-| `scripts/archive-nfl-gamebooks.mjs`        | Download NFL gamebook PDFs to `/root/cache/nfl/gamebook/`  |
-| `scripts/import-nfl-gamebook-starters.mjs` | Parse gamebooks; write `player_gamelogs.started`           |
+| Script                                     | Purpose                                                      |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `scripts/audit-player-gamelogs.mjs`        | Compare DB gamelogs against PFR; requires pfr_id on player   |
+| `scripts/generate-player-gamelogs.mjs`     | Aggregate play stats into player gamelogs                    |
+| `scripts/update-player-gsispid.mjs`        | Backfill smart_player_id on player table from nfl_play_stats |
+| `scripts/archive-nfl-gamebooks.mjs`        | Download NFL gamebook PDFs to `/root/cache/nfl/gamebook/`    |
+| `scripts/import-nfl-gamebook-starters.mjs` | Parse gamebooks; write `player_gamelogs.started`             |
 
 ### `player_gamelogs.started` provenance
 
-The `started` column is owned by `scripts/import-nfl-gamebook-starters.mjs`. Coverage: 2002-current. Source: NFL gamebook PDFs (the pregame-declared starter list), cached at `/root/cache/nfl/gamebook/{esbid}.pdf` by `scripts/archive-nfl-gamebooks.mjs`. The PDF URL is `https://static.www.nfl.com/image/upload/gamecenter/{shield_game_id}.pdf`; `nfl_games.shield_game_id` is populated by `scripts/import-nfl-games-ngs.mjs`. Player resolution: `(team, week, jersey_number) -> gsis_id` via the per-year `roster_weekly_{year}.csv` nflverse release, then `gsis_id -> pid` via `player.gsisid`. Per-game floor: writes are skipped when resolution drops below 95%. Non-starter sweep: each touched esbid has its remaining dressed roster set to `started=false` (`active IS TRUE OR active IS NULL`).
+The `started` column is owned by `scripts/import-nfl-gamebook-starters.mjs`. Coverage: 2002-current. Source: NFL gamebook PDFs (the pregame-declared starter list), cached at `/root/cache/nfl/gamebook/{esbid}.pdf` by `scripts/archive-nfl-gamebooks.mjs`. The PDF URL is `https://static.www.nfl.com/image/upload/gamecenter/{shield_game_id}.pdf`; `nfl_games.shield_game_id` is populated by `scripts/import-nfl-games-ngs.mjs`. Player resolution: `(team, week, jersey_number) -> gsis_id` via the per-year `roster_weekly_{year}.csv` nflverse release, then `gsis_id -> pid` via `player.gsis_player_id`. Per-game floor: writes are skipped when resolution drops below 95%. Non-starter sweep: each touched esbid has its remaining dressed roster set to `started=false` (`active IS TRUE OR active IS NULL`).
 
 ### PFR Audit Workflow
 
@@ -219,7 +219,7 @@ The PFR audit (`audit-player-gamelogs.mjs`) matches gamelogs by `pfr_player_id`,
 
 - Missing pfr_player_id: use `update --pid PID --pfr-player-id VALUE` to populate
 - Stale PFR cache: re-run with `--ignore_cache` to refresh
-- Gamelog zeros despite plays existing: check gsisid/gsispid linkage in `nfl_play_stats`
+- Gamelog zeros despite plays existing: check gsis_player_id/smart_player_id linkage in `nfl_play_stats`
 
 ## Troubleshooting
 
