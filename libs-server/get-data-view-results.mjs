@@ -551,6 +551,43 @@ const get_year_range = (columns, where) => {
   return Array.from(years).sort((a, b) => a - b)
 }
 
+// Union of the `week` params across columns and where clauses, scoping the week
+// row axis the same way get_year_range scopes the year axis. A column that
+// omits `week` contributes nothing rather than widening the union back to every
+// week, matching the year precedent.
+//
+// Out-of-range weeks are deliberately NOT clamped to the 1-18 regular-season
+// domain. Dropping them would collapse the union to empty and emit no filter at
+// all, turning a request for a week that does not exist into every week -- the
+// exact defect this scoping fixes. Passing them through yields zero rows, which
+// is the honest answer.
+const get_week_range = (columns, where) => {
+  const weeks = new Set()
+
+  const check_params = (params) => {
+    if (!params || params.week == null) return
+    const week_array = Array.isArray(params.week) ? params.week : [params.week]
+    for (const week of week_array) {
+      const parsed = parseInt(week, 10)
+      if (Number.isFinite(parsed)) weeks.add(parsed)
+    }
+  }
+
+  columns.forEach((column) => {
+    if (typeof column === 'object' && column.params) {
+      check_params(column.params)
+    }
+  })
+
+  where.forEach((clause) => {
+    if (clause.params) {
+      check_params(clause.params)
+    }
+  })
+
+  return Array.from(weeks).sort((a, b) => a - b)
+}
+
 const get_column_index = ({ column_id, index, columns }) => {
   const columns_with_same_id = columns.filter(
     ({ column: c }) => (typeof c === 'string' ? c : c.column_id) === column_id
@@ -1744,6 +1781,10 @@ export const get_data_view_results_query = async ({
     const year_range = get_year_range([...prefix_columns, ...columns], where)
     data_view_options.year_range = year_range
     query_context.year_range = year_range
+
+    const week_range = get_week_range([...prefix_columns, ...columns], where)
+    data_view_options.week_range = week_range
+    query_context.week_range = week_range
 
     if (query_context.row_grain_id === 'team') {
       const team_year_bridge = resolve_bridge('team', 'team_year')

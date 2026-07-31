@@ -572,19 +572,31 @@ WITH player_years_weeks AS (
          nfl_year_week_timestamp.week
   FROM player_years
   INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year
-  WHERE nfl_year_week_timestamp.year = 2024  -- Single year optimization
+  WHERE nfl_year_week_timestamp.year = 2024        -- Single year optimization
+    AND nfl_year_week_timestamp.week IN (1, 2, 3)  -- Requested weeks only
 )
 ```
+
+Both predicates are optional and independent. The year clause appears only when
+the resolved year range is a single year; the week clause appears only when at
+least one column or where clause carries a `week` param, and it holds the union
+of those params across the request — the same scoping `get_year_range` applies to
+the year axis, so a column that omits `week` contributes nothing rather than
+widening the union back to every week.
+
+The team analogue (`team_years_weeks`) is built by the same rule.
 
 **Performance Benefits**:
 
 - Single-year filtering reduces CTE size significantly
+- Week filtering drops the row universe to the requested weeks (a three-week
+  request scans 3 of 18 weeks rather than all of them)
 - INNER JOIN on timestamp table leverages indexes
 - Eliminates redundant player-week combinations
 
 #### Participation Signal (inactive vs zero vs bye)
 
-At week grain the row universe (`player_years_weeks`) emits a row for every REG week, including weeks a player did not play. Stat CTEs are `LEFT JOIN`ed with no outer `COALESCE`, so a no-contribution week yields `NULL` — indistinguishable from an inactive/DNP/bye week. To disambiguate, the query builder auto-injects one hidden value per `(pid, year, week)` row under the literal alias `participation_status`:
+At week grain the row universe (`player_years_weeks`) emits a row for every REG week in scope, including weeks a player did not play. Stat CTEs are `LEFT JOIN`ed with no outer `COALESCE`, so a no-contribution week yields `NULL` — indistinguishable from an inactive/DNP/bye week. To disambiguate, the query builder auto-injects one hidden value per `(pid, year, week)` row under the literal alias `participation_status`:
 
 - `active` — a `player_gamelogs` row exists with `active = true`. A null/zero numeric stat means the player **played but recorded zero** → renders **`0`**.
 - `bye` — no gamelog row **and** none of the player's season teams played that week → renders **`BYE`**.
