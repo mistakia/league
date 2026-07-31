@@ -1,5 +1,5 @@
 import { getLeague } from '#libs-server'
-import { current_season, roster_slot_types } from '#constants'
+import { current_season, player_tag_types, roster_slot_types } from '#constants'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 import { resolve_single_nfl_week_id_if_explicit } from '#libs-server/data-views/resolve-single-nfl-week-id.mjs'
@@ -36,9 +36,77 @@ import pff_team_grades_column_definitions from './pff-team-grades-column-definit
 import player_pfr_season_value_column_definitions from './player-pfr-season-value-column-definitions.mjs'
 import player_seasonlogs_column_definitions from './player-seasonlogs-column-definitions.mjs'
 import player_extended_salary_column_definitions from './player-extended-salary-column-definitions.mjs'
+import player_extended_salary_over_market_column_definitions from './player-extended-salary-over-market-column-definitions.mjs'
 
 // TODO include RESERVE_LONG_TERM
 const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${roster_slot_types.RESERVE_SHORT_TERM} THEN 'injured_reserve' WHEN rosters_players.slot = ${roster_slot_types.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
+
+// A free agent has no roster row, so `tag` is NULL and the CASE falls through to
+// NULL rather than to 'regular' -- an unrostered player carries no tag at all.
+const player_league_roster_tag_select = `CASE rosters_players.tag WHEN ${player_tag_types.REGULAR} THEN 'regular' WHEN ${player_tag_types.FRANCHISE} THEN 'franchise' WHEN ${player_tag_types.ROOKIE} THEN 'rookie' WHEN ${player_tag_types.RESTRICTED_FREE_AGENCY} THEN 'restricted_free_agency' END`
+
+// One join shared by every column in the `rosters_players` group.
+//
+// `get_grouped_clauses_by_table` keys groups on table_name and keeps a SINGLE
+// join_func per group -- whichever column definition is processed last wins
+// (get-data-view-results.mjs:1096-1098). So every column in this group must
+// declare the SAME function, or the emitted join depends on column order.
+// Deliberately unchanged from what `player_league_roster_status` alone used to
+// emit: `player_league_fantasy_team` reads the team name through a correlated
+// subquery rather than a second join here, so no view that carries roster
+// status sees its SQL change.
+const player_league_roster_join = async ({
+  query,
+  params = {},
+  data_view_options = {}
+}) => {
+  const { lid = 1 } = params
+
+  // Roster year defaults to current_season.year (current fantasy year),
+  // NOT the week-identifier year which tracks stats_season_year during offseason.
+  const resolved_nfl_week_id = resolve_single_nfl_week_id_if_explicit({
+    params
+  })
+  let year
+  let week
+  if (resolved_nfl_week_id) {
+    const parsed = parse_nfl_week_identifier({
+      identifier: resolved_nfl_week_id
+    })
+    year = parsed.year
+    week = parsed.week
+  } else {
+    year = params.year || current_season.year
+    const league = await getLeague({ lid, year })
+    if (league) {
+      const championship_round = Array.isArray(league.championship_round)
+        ? Math.max(...league.championship_round)
+        : league.championship_round
+      week = Math.min(
+        current_season.week,
+        championship_round || current_season.finalWeek
+      )
+    } else {
+      week = Math.min(current_season.week, current_season.finalWeek)
+    }
+  }
+
+  query.leftJoin('rosters_players', function () {
+    this.on('rosters_players.pid', '=', data_view_options.pid_reference)
+    this.andOn('rosters_players.year', '=', year)
+    this.andOn('rosters_players.week', '=', week)
+    this.andOn('rosters_players.lid', '=', lid)
+  })
+}
+
+// `teams` is reached by correlated subquery rather than by a second join in
+// `player_league_roster_join`, so adding this column leaves the SQL of every
+// existing roster-status view untouched. `teams_pkey` is UNIQUE on (uid, year),
+// so the subquery is a single index lookup and cannot fan out a row.
+const player_league_fantasy_team_sql = ({ params = {} }) => {
+  const year = params.year || current_season.year
+  return `(SELECT name FROM teams WHERE uid = rosters_players.tid AND year = ${year})`
+}
 
 export default {
   ...player_projected_column_definitions,
@@ -72,6 +140,7 @@ export default {
   ...player_pfr_season_value_column_definitions,
   ...player_seasonlogs_column_definitions,
   ...player_extended_salary_column_definitions,
+  ...player_extended_salary_over_market_column_definitions,
 
   player_league_roster_status: {
     table_name: 'rosters_players',
@@ -88,45 +157,39 @@ export default {
       'rosters_players.tid',
       'rosters_players.tag'
     ],
-    join: async ({ query, params = {}, data_view_options = {} }) => {
-      const { lid = 1 } = params
-
-      // Roster year defaults to current_season.year (current fantasy year),
-      // NOT the week-identifier year which tracks stats_season_year during offseason.
-      const resolved_nfl_week_id = resolve_single_nfl_week_id_if_explicit({
-        params
-      })
-      let year
-      let week
-      if (resolved_nfl_week_id) {
-        const parsed = parse_nfl_week_identifier({
-          identifier: resolved_nfl_week_id
-        })
-        year = parsed.year
-        week = parsed.week
-      } else {
-        year = params.year || current_season.year
-        const league = await getLeague({ lid, year })
-        if (league) {
-          const championship_round = Array.isArray(league.championship_round)
-            ? Math.max(...league.championship_round)
-            : league.championship_round
-          week = Math.min(
-            current_season.week,
-            championship_round || current_season.finalWeek
-          )
-        } else {
-          week = Math.min(current_season.week, current_season.finalWeek)
-        }
-      }
-
-      query.leftJoin('rosters_players', function () {
-        this.on('rosters_players.pid', '=', data_view_options.pid_reference)
-        this.andOn('rosters_players.year', '=', year)
-        this.andOn('rosters_players.week', '=', week)
-        this.andOn('rosters_players.lid', '=', lid)
-      })
-    },
+    join: player_league_roster_join,
+    get_cache_info: create_static_cache_info({
+      ttl: 1000 * 60 * 60 * 12 // 12 hours
+    })
+  },
+  // `select_as` plus the `_${column_index}` select alias is what makes sorting
+  // resolve: add_sort_clauses looks up `${select_as()}_${column_index}` by
+  // position in the SELECT list (get-data-view-results.mjs:2156,2172-2182) and
+  // silently falls back to ordering by pid when it cannot find it.
+  player_league_roster_tag: {
+    table_name: 'rosters_players',
+    source: { grain: 'player' },
+    select_as: () => 'player_league_roster_tag',
+    main_where: () => player_league_roster_tag_select,
+    main_select: ({ column_index }) => [
+      `${player_league_roster_tag_select} AS player_league_roster_tag_${column_index}`
+    ],
+    main_group_by: () => ['rosters_players.tag'],
+    join: player_league_roster_join,
+    get_cache_info: create_static_cache_info({
+      ttl: 1000 * 60 * 60 * 12 // 12 hours
+    })
+  },
+  player_league_fantasy_team: {
+    table_name: 'rosters_players',
+    source: { grain: 'player' },
+    select_as: () => 'player_league_fantasy_team',
+    main_where: ({ params }) => player_league_fantasy_team_sql({ params }),
+    main_select: ({ params, column_index }) => [
+      `${player_league_fantasy_team_sql({ params })} AS player_league_fantasy_team_${column_index}`
+    ],
+    main_group_by: ({ params }) => [player_league_fantasy_team_sql({ params })],
+    join: player_league_roster_join,
     get_cache_info: create_static_cache_info({
       ttl: 1000 * 60 * 60 * 12 // 12 hours
     })

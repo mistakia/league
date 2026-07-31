@@ -23,6 +23,28 @@ export default function ({ week, is_logged_in }) {
       ]
     },
 
+    player_league_roster_tag: {
+      column_title: 'Roster Tag',
+      column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
+      header_label: 'Tag',
+      size: 90,
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      column_values: [
+        'regular',
+        'franchise',
+        'rookie',
+        'restricted_free_agency'
+      ]
+    },
+
+    player_league_fantasy_team: {
+      column_title: 'Fantasy Team',
+      column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
+      header_label: 'Team',
+      size: 140,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT
+    },
+
     player_league_salary: {
       column_title: 'Player Salary',
       column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
@@ -38,6 +60,16 @@ export default function ({ week, is_logged_in }) {
       header_label: 'Ext Salary',
       player_value_path: 'extended_salary',
       size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+    },
+
+    // Populated only for a regular roster tag. Null for franchise, rookie, and
+    // restricted free agency by design. See the column definition for why each.
+    player_league_extended_salary_over_market: {
+      column_title: 'Extended Salary Over Market',
+      column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
+      header_label: 'Over Market',
+      size: 90,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
 

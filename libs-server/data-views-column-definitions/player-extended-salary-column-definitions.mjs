@@ -50,7 +50,7 @@ const get_extensions_processed = async ({ lid, year }) => {
   return Boolean(extension_row)
 }
 
-const player_extended_salary_join = async ({
+export const player_extended_salary_join = async ({
   query,
   table_name,
   join_type = 'LEFT',

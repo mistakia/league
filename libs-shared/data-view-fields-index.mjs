@@ -21,9 +21,15 @@ export default {
 
   player_league_roster_status:
     "The player's current roster status in the fantasy league (e.g., free agent, active roster, practice squad, injured reserve)",
+  player_league_roster_tag:
+    "The contract tag the player's roster spot carries in the fantasy league: regular, franchise, rookie, or restricted_free_agency. Null for a player who is not rostered",
+  player_league_fantasy_team:
+    "The fantasy franchise that currently holds the player's contract. Null for a free agent. This is the fantasy team, not the NFL team — see player_nfl_team for that",
   player_league_salary: "The player's current salary in the fantasy league",
   player_league_extended_salary:
     "The player's next-year salary in the fantasy league. Once the season's extensions are processed, this is the settled salary the roster carries. Before then it is projected, applying the extension formula (current salary + (extensions + 1) * $5), franchise-tag values, rookie-tag carryover, and slot-based zeroing",
+  player_league_extended_salary_over_market:
+    "The player's extended salary minus their projected market salary. Positive means the contract is priced above what one season of the player is worth. Populated only for a regular roster tag. Null for franchise and rookie tags, because market salary prices a single season and those are multi-year commitments; null for restricted free agency, because the auction settles that contract and the offer is blind. Also null where no market projection exists for the player",
   player_week_projected_market_salary:
     'The projected market salary for the player in a specific week',
   player_season_projected_inflation_adjusted_market_salary:
