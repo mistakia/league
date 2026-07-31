@@ -2690,8 +2690,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
 CREATE TABLE public.espn_player_win_rates_history (
     pid character varying(25),
     player_name character varying(255) NOT NULL,
-    espn_id integer NOT NULL,
-    team character varying(3) NOT NULL,
+    espn_player_id integer NOT NULL,
+    nfl_team character varying(3) NOT NULL,
     wins integer NOT NULL,
     plays integer NOT NULL,
     win_rate numeric(5,4) NOT NULL,
@@ -2709,8 +2709,8 @@ CREATE TABLE public.espn_player_win_rates_history (
 CREATE TABLE public.espn_player_win_rates_index (
     pid character varying(25),
     player_name character varying(255) NOT NULL,
-    espn_id integer NOT NULL,
-    team character varying(3) NOT NULL,
+    espn_player_id integer NOT NULL,
+    nfl_team character varying(3) NOT NULL,
     wins integer NOT NULL,
     plays integer NOT NULL,
     win_rate numeric(5,4) NOT NULL,
@@ -2746,7 +2746,7 @@ CREATE TABLE public.espn_receiving_metrics_history (
 --
 
 CREATE TABLE public.espn_team_win_rates_history (
-    team character varying(3) NOT NULL,
+    nfl_team character varying(3) NOT NULL,
     pass_rush_win_rate numeric(5,4),
     run_stop_win_rate numeric(5,4),
     pass_block_win_rate numeric(5,4),
@@ -2761,7 +2761,7 @@ CREATE TABLE public.espn_team_win_rates_history (
 --
 
 CREATE TABLE public.espn_team_win_rates_index (
-    team character varying(3) NOT NULL,
+    nfl_team character varying(3) NOT NULL,
     pass_rush_win_rate numeric(5,4),
     run_stop_win_rate numeric(5,4),
     pass_block_win_rate numeric(5,4),
@@ -27940,7 +27940,7 @@ ALTER TABLE ONLY public.dvoa_team_unit_seasonlogs_index
 --
 
 ALTER TABLE ONLY public.espn_player_win_rates_history
-    ADD CONSTRAINT espn_player_win_rates_history_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, observed_at);
+    ADD CONSTRAINT espn_player_win_rates_history_pkey PRIMARY KEY (player_name, espn_player_id, espn_win_rate_type, observed_at);
 
 
 --
@@ -27948,7 +27948,7 @@ ALTER TABLE ONLY public.espn_player_win_rates_history
 --
 
 ALTER TABLE ONLY public.espn_player_win_rates_index
-    ADD CONSTRAINT espn_player_win_rates_index_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, season_year);
+    ADD CONSTRAINT espn_player_win_rates_index_pkey PRIMARY KEY (player_name, espn_player_id, espn_win_rate_type, season_year);
 
 
 --
@@ -27956,7 +27956,7 @@ ALTER TABLE ONLY public.espn_player_win_rates_index
 --
 
 ALTER TABLE ONLY public.espn_team_win_rates_history
-    ADD CONSTRAINT espn_team_win_rates_history_pkey PRIMARY KEY (team, observed_at);
+    ADD CONSTRAINT espn_team_win_rates_history_pkey PRIMARY KEY (nfl_team, observed_at);
 
 
 --
@@ -27964,7 +27964,7 @@ ALTER TABLE ONLY public.espn_team_win_rates_history
 --
 
 ALTER TABLE ONLY public.espn_team_win_rates_index
-    ADD CONSTRAINT espn_team_win_rates_index_pkey PRIMARY KEY (team, season_year);
+    ADD CONSTRAINT espn_team_win_rates_index_pkey PRIMARY KEY (nfl_team, season_year);
 
 
 --

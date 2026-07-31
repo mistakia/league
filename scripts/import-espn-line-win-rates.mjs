@@ -121,7 +121,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
       .map((_, row) => {
         const cells = $(row).find('td')
         return {
-          team: fixTeam($(cells[0]).find('a').text()),
+          nfl_team: fixTeam($(cells[0]).find('a').text()),
           pass_rush_win_rate: parse_percentage($(cells[1]).text()),
           run_stop_win_rate: parse_percentage($(cells[2]).text()),
           pass_block_win_rate: parse_percentage($(cells[3]).text()),
@@ -190,8 +190,8 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
       const insert_data = {
         pid: win_rate_entry.pid,
         player_name: win_rate_entry.player_name,
-        espn_id: win_rate_entry.espn_id,
-        team: win_rate_entry.team,
+        espn_player_id: win_rate_entry.espn_id,
+        nfl_team: win_rate_entry.team,
         wins: win_rate_entry.wins,
         plays: win_rate_entry.plays,
         win_rate: win_rate_entry[`${data_key}_win_rate`],
@@ -209,7 +209,12 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   await db('espn_player_win_rates_history').insert(player_history_inserts)
   await db('espn_player_win_rates_index')
     .insert(player_index_inserts)
-    .onConflict(['player_name', 'espn_id', 'espn_win_rate_type', 'season_year'])
+    .onConflict([
+      'player_name',
+      'espn_player_id',
+      'espn_win_rate_type',
+      'season_year'
+    ])
     .merge()
 
   result.player_win_rates_inserted = player_history_inserts.length
@@ -232,7 +237,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
   await db('espn_team_win_rates_history').insert(team_history_inserts)
   await db('espn_team_win_rates_index')
     .insert(team_index_inserts)
-    .onConflict(['team', 'season_year'])
+    .onConflict(['nfl_team', 'season_year'])
     .merge()
 
   result.team_win_rates_inserted = team_history_inserts.length

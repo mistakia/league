@@ -153,9 +153,9 @@ const get_select_string = ({
     // correlated subquery must use the same projection target that
     // apply_team_stats_join would use in the non-offset-range JOIN path
     // (matchup opponent, per-season team, or current_nfl_team). The team
-    // column is source-specific (nfl_team_seasonlogs uses `tm`,
-    // espn_team_win_rates_index uses `team`, the dvoa/pff seasonlogs use
-    // `nfl_team`) -- read it from source.key_columns.team rather than assuming
+    // column is source-specific (nfl_team_seasonlogs uses `tm`, while the espn
+    // win-rates indexes and the dvoa/pff seasonlogs use `nfl_team`) -- read it
+    // from source.key_columns.team rather than assuming
     // `nfl_team`, which emitted a non-existent column for the `tm`/`team`
     // sources (invalid SQL the snapshot harness could not catch).
     const is_team_grain =
