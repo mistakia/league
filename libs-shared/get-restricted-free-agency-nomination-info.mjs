@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import {
   get_restricted_free_agency_window_config,
   get_restricted_free_agency_window_start,
@@ -39,7 +41,10 @@ const get_restricted_free_agency_nomination_info = ({
   }
 
   const period_start = Number(league.restricted_free_agency_period_start)
-  const first_window_at = Number(league.restricted_free_agency_first_window_at)
+  // timestamptz, so parse rather than coerce — Number(Date) yields milliseconds
+  const first_window_at = dayjs(
+    league.restricted_free_agency_first_window_at
+  ).unix()
   const period_end =
     Number(league.restricted_free_agency_period_end) ||
     first_window_at + 30 * 24 * 60 * 60

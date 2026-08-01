@@ -37,8 +37,15 @@ const initialize_cli = () => {
 const log = debug('announce-restricted-free-agent')
 debug.enable('announce-restricted-free-agent')
 
+const ET_FORMAT = 'YYYY-MM-DD HH:mm:ss [ET]'
+
+// Window boundaries are unix seconds
 const format_et = (timestamp) =>
-  dayjs.unix(timestamp).tz(league_timezone).format('YYYY-MM-DD HH:mm:ss [ET]')
+  dayjs.unix(timestamp).tz(league_timezone).format(ET_FORMAT)
+
+// The anchor column is timestamptz, so it arrives as a Date rather than a number
+const format_timestamptz_et = (value) =>
+  dayjs(value).tz(league_timezone).format(ET_FORMAT)
 
 /**
  * Leagues whose restricted free agency period is currently open.
@@ -112,7 +119,7 @@ const announce_restricted_free_agent = async ({
 
   if (target_window_index < 0) {
     log(
-      `No nomination window has opened yet for league ${lid} — the first opens ${format_et(
+      `No nomination window has opened yet for league ${lid} — the first opens ${format_timestamptz_et(
         league.restricted_free_agency_first_window_at
       )}`
     )
