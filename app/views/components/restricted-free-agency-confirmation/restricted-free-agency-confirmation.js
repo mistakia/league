@@ -31,9 +31,9 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     const { team, player_map } = props
 
     // Immutable's notSetValue only applies when the key is ABSENT — a key
-    // present with an explicit null still returns null, so `get(key, [])` is
-    // not a guarantee. Coalesce instead: release_ids is iterated unguarded in
-    // render() and get_max_bid().
+    // present with an explicit null still returns null, and
+    // DELETE_RESTRICTED_FREE_AGENCY_TAG_FULFILLED writes exactly that. So
+    // `get(key, [])` is not a guarantee and release_ids must be coalesced.
     this.state = {
       release_ids:
         player_map.get('restricted_free_agency_conditional_releases') || [],
@@ -76,12 +76,10 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       })
   }
 
-  // What a player currently costs this team against the cap, taken from the
-  // roster rather than re-derived from the player map. `Roster` applies the
-  // extension and restricted free agency pricing that `availableCap` sums, so
-  // reading it here is the only way the two halves of `get_bid_limits` cannot
-  // disagree. A player in a practice squad or reserve slot is not charged at
-  // all, so releasing them frees nothing.
+  // Read from the roster, never re-derived from the player map: `Roster` applies
+  // the pricing `availableCap` sums, so this is what keeps the ceiling and the
+  // cap it offsets on one basis. Non-active slots are uncharged, so releasing
+  // one frees nothing.
   get_active_charge = (pid) => {
     const roster_player = this.props.team.roster.get(pid)
     return roster_player && isSlotActive(roster_player.slot)
@@ -89,10 +87,9 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       : 0
   }
 
-  // The components of the ceiling, kept separate so the dialog can show the
-  // manager the arithmetic instead of a bare number. The total matches what
-  // `process-restricted-free-agency-bid` will allow at processing time: the cap
-  // left over once everything this bid clears is no longer charged.
+  // Parts kept separate so the dialog can show the arithmetic, not just a
+  // number. The total must equal what `process-restricted-free-agency-bid`
+  // allows at processing time, or the dialog promises a bid that later fails.
   get_bid_limits = () => {
     const { team, player_map, cutlist, cutlist_total_salary } = this.props
     const pid = player_map.get('pid')
@@ -124,12 +121,10 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     }
   }
 
-  get_max_bid = () => this.get_bid_limits().max_bid
-
   // A bid on your OWN restricted free agent may not sit more than $10 under the
-  // player's market salary -- enforced in the API route, and invisible here until
-  // the request came back as an opaque failure. Mirrors the server's own
-  // behavior of skipping the rule when no market salary has been generated.
+  // player's market salary — enforced in the API route, so surfacing it here is
+  // what keeps it from arriving as an opaque request failure. Returns null when
+  // no market salary exists, matching the server's own skip of the rule.
   get_market_salary = () => {
     if (!this._isOriginalTeam) {
       return null
@@ -227,9 +222,8 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
         pos,
         team: player_map.get('team'),
         pname: player_map.get('short_name'),
-        // The cap charge, not the raw contract value -- this is the number that
-        // moves the max bid when the player is selected, so showing anything
-        // else makes the ceiling appear to move by the wrong amount.
+        // The charge, not the contract value — selecting this player moves the
+        // max bid by exactly this much, so any other number misleads.
         value: this.get_active_charge(pid_i)
       })
     })
@@ -295,8 +289,6 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     const market_salary = this.get_market_salary()
     const min_bid = this.get_min_bid()
 
-    // Both bounds are derived on every render from the same limits, so the
-    // message and the number it quotes can never disagree.
     const numeric_bid = Number(this.state.bid)
     const has_numeric_bid = this.state.bid !== '' && !isNaN(numeric_bid)
     const bid_exceeds_max = has_numeric_bid && numeric_bid > max_bid

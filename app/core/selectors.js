@@ -999,12 +999,9 @@ export function get_cutlist_players(state) {
   return cutlist.map((pid) => getPlayerById(state, { pid }))
 }
 
-// The cap space cutting the cutlist would free. Read each charge off the roster
-// rather than re-deriving it from the player map: `Roster` already applies the
-// extension and restricted free agency pricing that `availableCap` sums, so
-// taking the number from there is the only way this cannot drift from the cap it
-// offsets. Only active players are charged against the cap, so a practice squad
-// or reserve player on the cutlist frees nothing and must not be counted.
+// The cap space cutting the cutlist would free. Charges come from the roster,
+// never re-derived from the player map, so this cannot drift from the
+// `availableCap` it offsets. Non-active slots are uncharged and free nothing.
 export function get_cutlist_total_salary(state) {
   const { teamId } = get_app(state)
   const cutlist = state.getIn(['players', 'cutlist'])
