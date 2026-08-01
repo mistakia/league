@@ -28,13 +28,15 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 
     const { team, player_map } = props
 
+    // Immutable's notSetValue only applies when the key is ABSENT — a key
+    // present with an explicit null still returns null, so `get(key, [])` is
+    // not a guarantee. Coalesce instead: release_ids is iterated unguarded in
+    // render() and get_max_bid().
     this.state = {
-      release_ids: player_map.get(
-        'restricted_free_agency_conditional_releases',
-        []
-      ),
+      release_ids:
+        player_map.get('restricted_free_agency_conditional_releases') || [],
       untag: '',
-      bid: player_map.get('bid', 0),
+      bid: player_map.get('bid') ?? 0,
       error: false,
       missing_release: false,
       missing_untag: false,

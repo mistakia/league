@@ -472,9 +472,13 @@ export function players_reducer(state = initialState, { payload, type }) {
 
     case roster_actions.DELETE_RESTRICTED_FREE_AGENCY_TAG_FULFILLED:
     case roster_actions.DELETE_TAG_FULFILLED: {
+      // The conditional-releases field is an array everywhere the server
+      // produces it (every players route coalesces it with `|| []`), so clear
+      // it to an empty list rather than null — a null here is a shape the API
+      // never returns and read sites do not expect.
       const data = {
         bid: null,
-        restricted_free_agency_conditional_releases: null
+        restricted_free_agency_conditional_releases: []
       }
       if (
         !payload.data.player_tid ||
