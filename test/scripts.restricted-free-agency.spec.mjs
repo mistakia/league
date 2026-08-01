@@ -50,7 +50,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       const tran_date = regular_season_start.subtract('3', 'month').unix()
       const ext_date = regular_season_start.subtract('4', 'month').unix()
 
-      // Set restricted_free_agency_announcement_hour and processing_hour
+      // 24-hour nomination windows, bids processed 3 hours before the next one
       await knex('seasons')
         .update({
           year: current_season.year,
@@ -59,8 +59,9 @@ describe('SCRIPTS - restricted free agency bids', function () {
             .subtract('1', 'month')
             .unix(),
           ext_date,
-          restricted_free_agency_announcement_hour: 10, // 10 AM
-          restricted_free_agency_processing_hour: 12 // 12 PM (noon)
+          restricted_free_agency_first_window_at: tran_date,
+          restricted_free_agency_window_hours: 24,
+          restricted_free_agency_processing_lead_hours: 3
         })
         .where({
           lid: leagueId
@@ -308,7 +309,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       await league(knex)
 
-      // Set restricted_free_agency_announcement_hour and processing_hour
+      // 24-hour nomination windows, bids processed 3 hours before the next one
       await knex('seasons')
         .update({
           year: current_season.year,
@@ -316,8 +317,9 @@ describe('SCRIPTS - restricted free agency bids', function () {
           restricted_free_agency_period_end: regular_season_start
             .subtract('1', 'month')
             .unix(),
-          restricted_free_agency_announcement_hour: 10, // 10 AM
-          restricted_free_agency_processing_hour: 12 // 12 PM (noon)
+          restricted_free_agency_first_window_at: tran_date,
+          restricted_free_agency_window_hours: 24,
+          restricted_free_agency_processing_lead_hours: 3
         })
         .where({
           lid: leagueId

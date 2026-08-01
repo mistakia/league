@@ -89,6 +89,7 @@ export const League = new Record({
 
   restricted_free_agency_period_start: null,
   restricted_free_agency_period_end: null,
+  restricted_free_agency_first_window_at: null,
   ext_date: null,
 
   b_QB: null,
@@ -118,8 +119,8 @@ export const League = new Record({
   wildcard_round: null,
   championship_round: new List(),
 
-  restricted_free_agency_announcement_hour: null,
-  restricted_free_agency_processing_hour: null,
+  restricted_free_agency_window_hours: null,
+  restricted_free_agency_processing_lead_hours: null,
 
   isLoading: false,
   isLoaded: false
@@ -219,6 +220,7 @@ export function createLeague({
 
   restricted_free_agency_period_start,
   restricted_free_agency_period_end,
+  restricted_free_agency_first_window_at,
   ext_date,
 
   processed_at,
@@ -241,8 +243,8 @@ export function createLeague({
   wildcard_round,
   championship_round,
 
-  restricted_free_agency_announcement_hour,
-  restricted_free_agency_processing_hour,
+  restricted_free_agency_window_hours,
+  restricted_free_agency_processing_lead_hours,
 
   isLoaded,
   isLoading
@@ -341,6 +343,7 @@ export function createLeague({
 
     restricted_free_agency_period_start,
     restricted_free_agency_period_end,
+    restricted_free_agency_first_window_at,
     ext_date,
 
     processed_at,
@@ -363,8 +366,8 @@ export function createLeague({
     wildcard_round,
     championship_round: new List(championship_round),
 
-    restricted_free_agency_announcement_hour,
-    restricted_free_agency_processing_hour,
+    restricted_free_agency_window_hours,
+    restricted_free_agency_processing_lead_hours,
 
     isLoading,
     isLoaded

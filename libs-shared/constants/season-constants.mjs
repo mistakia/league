@@ -7,8 +7,8 @@ export const current_year = current_season.year
 export const current_fantasy_season_week = current_season.fantasy_season_week
 export const is_offseason = current_season.isOffseason
 export const is_regular_season = current_season.isRegularSeason
-export const league_default_rfa_announcement_hour = 24
-export const league_default_rfa_processing_hour = 0
+export const league_default_rfa_window_hours = 24
+export const league_default_rfa_processing_lead_hours = 3
 
 export const nfl_draft_rounds = [0, 1, 2, 3, 4, 5, 6, 7]
 

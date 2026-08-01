@@ -6,17 +6,20 @@ import db from '#db'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import { current_season } from '#constants'
 import {
-  current_season,
-  league_default_rfa_announcement_hour
-} from '#constants'
+  get_restricted_free_agency_window_start,
+  get_restricted_free_agency_window_index,
+  get_restricted_free_agency_nominating_team_index,
+  league_timezone
+} from '#libs-shared'
 import {
   is_main,
   sendNotifications,
   getLeague,
   report_job,
+  claim_league_notification,
   has_league_notification_been_sent,
-  record_league_notification_sent,
   throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -34,170 +37,33 @@ const initialize_cli = () => {
 const log = debug('announce-restricted-free-agent')
 debug.enable('announce-restricted-free-agent')
 
-/**
- * Calculate the correct announced timestamp based on the league's announcement hour
- * @param {Object} params - Parameters object
- * @param {Object} params.league - League object with announcement hour settings
- * @param {number} params.day_offset - Optional offset to adjust which day to calculate for (0 = today, -1 = yesterday, etc.)
- * @returns {Object} - The correct timestamp and information about announcement timing
- */
-const calculate_announcement_timestamp = ({ league, day_offset = 0 }) => {
-  // Get current date and time in EST, adjusted by day_offset
-  const current_date_est = dayjs().tz('America/New_York').add(day_offset, 'day')
-  const actual_current_date_est = dayjs().tz('America/New_York')
-  const current_hour_est = actual_current_date_est.hour()
-
-  // Get the configured announcement hour or use default
-  const announcement_hour =
-    league.restricted_free_agency_announcement_hour !== undefined
-      ? league.restricted_free_agency_announcement_hour
-      : league_default_rfa_announcement_hour
-
-  // Handle special case for hour 24 (midnight)
-  const target_hour = announcement_hour === 24 ? 0 : announcement_hour
-
-  // Calculate the timestamp for the target day's announcement time
-  const target_announcement_time = dayjs(current_date_est)
-    .hour(target_hour)
-    .minute(0)
-    .second(0)
-    .unix()
-
-  // For offset days, we can always announce (since we're overriding the time)
-  // For today (day_offset = 0), check if we've passed the announcement time
-  const is_after_announcement_time =
-    day_offset !== 0 || current_hour_est >= target_hour
-  const can_announce = is_after_announcement_time
-
-  // Calculate the correct timestamp for the announcement
-  const correct_timestamp = target_announcement_time
-
-  // Calculate the next valid announcement time (either today or tomorrow)
-  const next_announcement_time = is_after_announcement_time
-    ? dayjs(actual_current_date_est)
-        .add(1, 'day')
-        .hour(target_hour)
-        .minute(0)
-        .second(0)
-        .unix()
-    : dayjs(actual_current_date_est)
-        .hour(target_hour)
-        .minute(0)
-        .second(0)
-        .unix()
-
-  return {
-    announcement_hour,
-    correct_timestamp,
-    next_announcement_time,
-    can_announce,
-    is_after_announcement_time,
-    current_hour_est,
-    day_offset
-  }
-}
+const format_et = (timestamp) =>
+  dayjs.unix(timestamp).tz(league_timezone).format('YYYY-MM-DD HH:mm:ss [ET]')
 
 /**
- * Get all leagues that are currently in their restricted free agency period
- * and should be announcing today
- * @param {Object} params - Parameters object
- * @param {boolean} params.use_previous - Whether to check eligibility for previous day announcements
- * @returns {Promise<Array>} Array of eligible league objects
+ * Leagues whose restricted free agency period is currently open.
  */
-const get_eligible_leagues = async ({
-  use_previous = false,
-  dry_run = false
-} = {}) => {
+const get_active_leagues = async () => {
   const current_timestamp = Math.round(Date.now() / 1000)
 
-  // Get leagues currently in RFA period
   const active_leagues = await db('seasons')
     .select('seasons.*', 'leagues.name as name')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
-    .where({
-      'seasons.year': current_season.year
-    })
+    .where({ 'seasons.year': current_season.year })
     .whereNotNull('restricted_free_agency_period_start')
+    .whereNotNull('restricted_free_agency_first_window_at')
     .where('restricted_free_agency_period_start', '<=', current_timestamp)
     .where('restricted_free_agency_period_end', '>=', current_timestamp)
 
   log(`Found ${active_leagues.length} active leagues in RFA period`)
 
-  if (!active_leagues.length) {
-    return []
-  }
-
-  // Get announcement timing info for each league and filter those eligible
-  const eligible_leagues = []
-  const day_offset = use_previous ? -1 : 0
-
-  for (const league of active_leagues) {
-    const timing_info = calculate_announcement_timestamp({ league, day_offset })
-    league.announcement_info = timing_info
-
-    log(
-      `League ${league.lid} (${league.name || 'Unnamed'}) announcement hour: ${timing_info.announcement_hour}, ` +
-        `current hour: ${timing_info.current_hour_est}, can announce: ${timing_info.can_announce}, ` +
-        `day offset: ${day_offset}, ` +
-        `next announcement time: ${dayjs.unix(timing_info.next_announcement_time).format('YYYY-MM-DD HH:mm:ss')}`
-    )
-
-    if (timing_info.can_announce || dry_run) {
-      eligible_leagues.push(league)
-    }
-  }
-
-  log(
-    `${eligible_leagues.length} leagues are eligible for announcements at the current hour or included in dry run output`
-  )
-
-  return eligible_leagues
-}
-
-/**
- * Determines which team should nominate a restricted free agent based on league start date and draft order
- * @param {Object} params - Parameters
- * @param {Object} params.league - League object
- * @param {Array} params.teams - Teams array sorted by draft_order desc
- * @param {number} params.day_offset - Optional offset to adjust which day to calculate for (0 = today, -1 = yesterday, etc.)
- * @returns {Object} The team that should nominate for the specified day
- */
-const get_nominating_team = async ({ league, teams, lid, day_offset = 0 }) => {
-  const current_date = dayjs().format('YYYY-MM-DD')
-  const restricted_free_agency_period_start_date = dayjs
-    .unix(league.restricted_free_agency_period_start)
-    .format('YYYY-MM-DD')
-  const days_since_start =
-    dayjs(current_date).diff(
-      dayjs(restricted_free_agency_period_start_date),
-      'day'
-    ) + day_offset
-
-  log(`Days since start (with offset ${day_offset}): ${days_since_start}`)
-
-  // If calculated date is before restricted_free_agency_period_start, select the first team
-  if (days_since_start < 0) {
-    log(
-      'Calculated date is before restricted_free_agency_period_start, selecting first team'
-    )
-    return teams[0]
-  }
-
-  // Always select based on rotation schedule, regardless of who has or hasn't nominated
-  const expected_team_index = days_since_start % teams.length
-  const selected_team = teams[expected_team_index]
-
-  log(
-    `Selected team based on rotation: ${selected_team.name} (${selected_team.abbrv}) - index ${expected_team_index}`
-  )
-
-  return selected_team
+  return active_leagues
 }
 
 const announce_restricted_free_agent = async ({
   lid,
   tid = null,
-  use_previous = false,
+  window_index = null,
   dry_run = false
 }) => {
   if (!lid) {
@@ -220,44 +86,59 @@ const announce_restricted_free_agent = async ({
     )
   }
 
-  const current_date = dayjs().format('YYYY-MM-DD')
-  const restricted_free_agency_period_end_date = dayjs
-    .unix(league.restricted_free_agency_period_end)
-    .format('YYYY-MM-DD')
-  if (dayjs(current_date).isAfter(restricted_free_agency_period_end_date)) {
+  if (!league.restricted_free_agency_first_window_at) {
     throw new Error(
-      `The restricted free agency period has ended on ${restricted_free_agency_period_end_date}`
+      `League with lid ${lid} does not have a restricted_free_agency_first_window_at anchor`
     )
   }
 
-  // Determine the day offset based on use_previous flag
-  const day_offset = use_previous ? -1 : 0
+  const current_timestamp = Math.round(Date.now() / 1000)
 
-  // Calculate the correct timestamp for the announcement
-  const announcement_info = calculate_announcement_timestamp({
+  if (current_timestamp > Number(league.restricted_free_agency_period_end)) {
+    throw new Error(
+      `The restricted free agency period ended on ${format_et(
+        league.restricted_free_agency_period_end
+      )}`
+    )
+  }
+
+  const target_window_index =
+    window_index === null
+      ? get_restricted_free_agency_window_index({
+          league,
+          timestamp: current_timestamp
+        })
+      : Number(window_index)
+
+  if (target_window_index < 0) {
+    log(
+      `Restricted free agency has not opened yet for league ${lid} — opens ${format_et(
+        league.restricted_free_agency_period_start
+      )}`
+    )
+    return
+  }
+
+  const announcement_timestamp = get_restricted_free_agency_window_start({
     league,
-    day_offset
+    window_index: target_window_index
   })
 
-  if (!dry_run && !announcement_info.can_announce) {
-    const next_time = dayjs
-      .unix(announcement_info.next_announcement_time)
-      .format('YYYY-MM-DD HH:mm:ss')
+  if (!dry_run && current_timestamp < announcement_timestamp) {
     throw new Error(
-      `Cannot announce yet. The next valid announcement time is ${next_time} (hour: ${announcement_info.announcement_hour})`
+      `Cannot announce window ${target_window_index} yet — it opens ${format_et(
+        announcement_timestamp
+      )}`
     )
   }
 
-  // Get teams sorted by draft_order desc (highest to lowest)
   const teams = await db('teams')
     .where({ lid, year: current_season.year })
     .orderBy('draft_order', 'desc')
 
-  // Determine the nominating team based on provided parameters
   let nominating_team
 
   if (tid) {
-    // Use the specified team ID to override the nominating team
     nominating_team = teams.find((team) => team.uid === tid)
 
     if (!nominating_team) {
@@ -268,20 +149,11 @@ const announce_restricted_free_agent = async ({
       `Using overridden nominating team: ${nominating_team.name} (${nominating_team.abbrv})`
     )
   } else {
-    // Use rotation logic with appropriate day offset
-    const team_day_offset = use_previous ? -1 : 0
-    nominating_team = await get_nominating_team({
-      league,
-      teams,
-      lid,
-      day_offset: team_day_offset
+    const team_index = get_restricted_free_agency_nominating_team_index({
+      window_index: target_window_index,
+      num_teams: teams.length
     })
-
-    if (use_previous) {
-      log(
-        `Using previous day's nominating team: ${nominating_team.name} (${nominating_team.abbrv})`
-      )
-    }
+    nominating_team = teams[team_index]
   }
 
   if (!nominating_team) {
@@ -289,7 +161,9 @@ const announce_restricted_free_agent = async ({
   }
 
   log(
-    `Today's nominating team is ${nominating_team.name} (${nominating_team.abbrv})`
+    `Window ${target_window_index} (opens ${format_et(
+      announcement_timestamp
+    )}) belongs to ${nominating_team.name} (${nominating_team.abbrv})`
   )
 
   const restricted_free_agency_bid = await db('restricted_free_agency_bids')
@@ -304,6 +178,9 @@ const announce_restricted_free_agent = async ({
     .whereNotNull('nominated')
     .first()
 
+  let message
+  let metadata
+
   if (restricted_free_agency_bid) {
     const player_row = await db('player')
       .where({ pid: restricted_free_agency_bid.pid })
@@ -315,129 +192,126 @@ const announce_restricted_free_agent = async ({
       )
     }
 
-    // Use the calculated correct timestamp for the announcement
-    const announcement_timestamp = announcement_info.correct_timestamp
-
-    const message = `${nominating_team.name} (${nominating_team.abbrv}) has announced ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a restricted free agent`
-
-    if (dry_run) {
-      const announcement_time = dayjs
-        .unix(announcement_timestamp)
-        .format('YYYY-MM-DD HH:mm:ss')
-      log(
-        `DRY RUN: Would announce at ${announcement_time} with timestamp ${announcement_timestamp}`
-      )
-      log(`DRY RUN: Would send notification: ${message}`)
-
-      if (!announcement_info.can_announce) {
-        const next_time = dayjs
-          .unix(announcement_info.next_announcement_time)
-          .format('YYYY-MM-DD HH:mm:ss')
-        log(
-          `DRY RUN: Cannot announce yet. The next valid announcement time would be ${next_time}`
-        )
-      }
-    } else {
-      // Update the database with the calculated announcement timestamp
-      await db('restricted_free_agency_bids')
-        .where({ uid: restricted_free_agency_bid.uid })
-        .update({ announced: announcement_timestamp })
-
-      await sendNotifications({
-        league,
-        notifyLeague: true,
-        message
-      })
-
-      await record_league_notification_sent({
-        lid,
-        season_year: current_season.year,
-        notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
-        event_timestamp: announcement_timestamp,
-        message,
-        metadata: {
-          tid: nominating_team.uid,
-          pid: restricted_free_agency_bid.pid,
-          bid_uid: restricted_free_agency_bid.uid
-        }
-      })
-
-      const formatted_time = dayjs
-        .unix(announcement_timestamp)
-        .format('YYYY-MM-DD HH:mm:ss')
-      log(`Announcement timestamp set to ${formatted_time}`)
-      log(`Notification sent: ${message}`)
+    message = `${nominating_team.name} (${nominating_team.abbrv}) has announced ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a restricted free agent`
+    metadata = {
+      tid: nominating_team.uid,
+      pid: restricted_free_agency_bid.pid,
+      bid_uid: restricted_free_agency_bid.uid,
+      window_index: target_window_index
     }
   } else {
-    // No nominated player for today's slot: write a no-nomination marker so
-    // the oracle can confirm the slot was visited, not silently skipped.
-    if (!dry_run) {
-      await record_league_notification_sent({
-        lid,
-        season_year: current_season.year,
-        notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
-        event_timestamp: announcement_info.correct_timestamp,
-        message: `No RFA nomination pending for team ${nominating_team.uid} on slot ${announcement_info.correct_timestamp}`,
-        metadata: { tid: nominating_team.uid, no_nomination: true }
-      })
+    // No nomination for this window: record a marker so the oracle can confirm
+    // the window was visited rather than silently skipped.
+    message = `No RFA nomination pending for team ${nominating_team.uid} in window ${target_window_index}`
+    metadata = {
+      tid: nominating_team.uid,
+      no_nomination: true,
+      window_index: target_window_index
     }
-    log(`No unprocessed nominated player found for team ${nominating_team.uid}`)
+  }
+
+  if (dry_run) {
+    log(`DRY RUN: Would announce at ${format_et(announcement_timestamp)}`)
+    log(`DRY RUN: Would send notification: ${message}`)
+    return
+  }
+
+  const claimed = await claim_league_notification({
+    lid,
+    season_year: current_season.year,
+    notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
+    event_timestamp: announcement_timestamp,
+    message,
+    metadata
+  })
+
+  if (!claimed) {
+    log(
+      `Window ${target_window_index} already announced for league ${lid}; skipping`
+    )
+    return
+  }
+
+  if (restricted_free_agency_bid) {
+    await db('restricted_free_agency_bids')
+      .where({ uid: restricted_free_agency_bid.uid })
+      .update({ announced: announcement_timestamp })
+
+    await sendNotifications({
+      league,
+      notifyLeague: true,
+      message
+    })
+
+    log(`Announcement timestamp set to ${format_et(announcement_timestamp)}`)
+    log(`Notification sent: ${message}`)
+  } else {
+    log(
+      `No unprocessed nominated player found for team ${nominating_team.uid} in window ${target_window_index}`
+    )
   }
 }
 
-// Returns { shortfall } where shortfall is null when there was no due work
-// (empty-queue) or all due leagues were successfully processed, and a
-// descriptive string when a league was due but its notification marker was not
-// written (silent partial-success).
-const process_all_leagues = async ({
-  dry_run = false,
-  use_previous = false
-} = {}) => {
-  const eligible_leagues = await get_eligible_leagues({ use_previous, dry_run })
+// Returns { shortfall } where shortfall is null when there was no due work or
+// all due leagues were processed, and a descriptive string when a league was
+// due but its notification marker was not written (silent partial-success).
+const process_all_leagues = async ({ dry_run = false } = {}) => {
+  const active_leagues = await get_active_leagues()
 
-  if (!eligible_leagues.length) {
-    log('No eligible leagues found for RFA announcements at the current hour')
-    // Empty-queue: legitimate no-op, no failure to surface.
+  if (!active_leagues.length) {
+    log('No active leagues found in an RFA period')
     return { shortfall: null }
   }
 
-  // Snapshot which leagues are not yet marked before this run so we know
-  // exactly which ones we are responsible for verifying.
+  const current_timestamp = Math.round(Date.now() / 1000)
   const due_leagues = []
-  for (const league of eligible_leagues) {
-    const announcement_timestamp = league.announcement_info.correct_timestamp
+
+  for (const league of active_leagues) {
+    const window_index = get_restricted_free_agency_window_index({
+      league,
+      timestamp: current_timestamp
+    })
+
+    if (window_index < 0) {
+      continue
+    }
+
+    const announcement_timestamp = get_restricted_free_agency_window_start({
+      league,
+      window_index
+    })
+
     if (dry_run) {
       due_leagues.push({ lid: league.lid, announcement_timestamp })
       continue
     }
+
     const already_sent = await has_league_notification_been_sent({
       lid: league.lid,
       season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_RFA_ANNOUNCED,
       event_timestamp: announcement_timestamp
     })
+
     if (already_sent) {
       log(
-        `league ${league.lid}: RFA announcement already sent for slot ${announcement_timestamp}; skipping`
+        `league ${league.lid}: window ${window_index} already announced; skipping`
       )
       continue
     }
+
     due_leagues.push({ lid: league.lid, announcement_timestamp })
   }
 
   if (!due_leagues.length) {
-    log('All eligible leagues already announced for the current slot')
+    log('All active leagues already announced for their current window')
     return { shortfall: null }
   }
 
   for (const { lid } of due_leagues) {
     try {
       log(`Processing league ${lid}`)
-      await announce_restricted_free_agent({
-        lid,
-        use_previous,
-        dry_run
-      })
+      await announce_restricted_free_agent({ lid, dry_run })
     } catch (err) {
       log(`Error processing league ${lid}: ${err.message}`)
     }
@@ -449,10 +323,9 @@ const process_all_leagues = async ({
     return { shortfall: null }
   }
 
-  // Oracle: for every due league, the notification marker must now exist.
-  // A missing marker means announce_restricted_free_agent completed without
-  // throwing but the record_league_notification_sent path was never reached —
-  // silent partial-success.
+  // Oracle: every due league must now carry a marker for its window. A missing
+  // marker means the run completed without throwing but never reached the
+  // claim path — silent partial-success.
   const shortfalls = []
   for (const { lid, announcement_timestamp } of due_leagues) {
     const marker_written = await has_league_notification_been_sent({
@@ -463,7 +336,7 @@ const process_all_leagues = async ({
     })
     if (!marker_written) {
       shortfalls.push(
-        `league ${lid}: RFA announcement due (slot=${announcement_timestamp}) but notification marker absent after run`
+        `league ${lid}: RFA announcement due (window opens ${announcement_timestamp}) but notification marker absent after run`
       )
     }
   }
@@ -474,15 +347,18 @@ const process_all_leagues = async ({
 const main = async () => {
   let error
   const argv = initialize_cli()
-  const { lid, tid, use_previous = false, dry_run = false } = argv
+  const { lid, tid, window_index, dry_run = false } = argv
 
   try {
     if (lid) {
-      // Process specific league if lid is provided
-      await announce_restricted_free_agent({ lid, tid, use_previous, dry_run })
+      await announce_restricted_free_agent({
+        lid,
+        tid,
+        window_index: window_index === undefined ? null : window_index,
+        dry_run
+      })
     } else {
-      // Process all eligible leagues
-      const { shortfall } = await process_all_leagues({ dry_run, use_previous })
+      const { shortfall } = await process_all_leagues({ dry_run })
       throw_if_shortfall(shortfall)
     }
   } catch (err) {

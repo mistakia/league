@@ -26224,13 +26224,16 @@ CREATE TABLE public.seasons (
     free_agency_live_auction_end bigint,
     wildcard_round smallint,
     championship_round integer[],
-    restricted_free_agency_announcement_hour smallint DEFAULT 24 NOT NULL,
-    restricted_free_agency_processing_hour smallint DEFAULT 0 NOT NULL,
     rookie_draft_completed_at bigint,
     free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
     season_finalized_at bigint,
     scoring_format_id text NOT NULL,
-    league_format_id text NOT NULL
+    league_format_id text NOT NULL,
+    restricted_free_agency_first_window_at bigint,
+    restricted_free_agency_window_hours smallint DEFAULT 24 NOT NULL,
+    restricted_free_agency_processing_lead_hours smallint DEFAULT 3 NOT NULL,
+    CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
+    CONSTRAINT rfa_window_divides_day CHECK ((restricted_free_agency_window_hours = ANY (ARRAY[1, 2, 3, 4, 6, 8, 12, 24])))
 );
 
 

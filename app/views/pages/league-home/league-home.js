@@ -24,6 +24,7 @@ import {
   get_free_agent_period
 } from '@libs-shared'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
+import RestrictedFreeAgencySchedule from '@components/restricted-free-agency-schedule'
 
 import './league-home.styl'
 
@@ -268,6 +269,11 @@ export default function LeagueHomePage({
               />
             </Grid>
           )}
+        {is_before_restricted_free_agency_end && (
+          <Grid item xs={12}>
+            <RestrictedFreeAgencySchedule />
+          </Grid>
+        )}
         {Boolean(waivers.poach.size) && (
           <Grid item xs={12}>
             <DashboardPlayersTable

@@ -150,7 +150,7 @@ export default async function generate_league_rules({
       league.restricted_free_agency_period_start
     )} to ${format_date_et(
       league.restricted_free_agency_period_end
-    )} (announcement hour ${league.restricted_free_agency_announcement_hour} ET, processing hour ${league.restricted_free_agency_processing_hour} ET).`
+    )} — one nomination announced every ${league.restricted_free_agency_window_hours} hours, with bids on it processed ${league.restricted_free_agency_processing_lead_hours} hour(s) before the next announcement.`
   ])
 
   const footer = cross_link_footer([

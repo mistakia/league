@@ -5,9 +5,15 @@ import timezone from 'dayjs/plugin/timezone.js'
 import db from '#db'
 import {
   current_season,
-  league_default_rfa_announcement_hour,
-  league_default_rfa_processing_hour
+  league_default_rfa_window_hours,
+  league_default_rfa_processing_lead_hours
 } from '#constants'
+import {
+  get_restricted_free_agency_window_config,
+  get_restricted_free_agency_window_index,
+  get_restricted_free_agency_processing_time,
+  league_timezone
+} from '#libs-shared'
 import {
   get_top_restricted_free_agency_bids,
   processRestrictedFreeAgencyBid,
@@ -55,78 +61,24 @@ async function sort_bids_by_waiver_order(bids) {
 }
 
 /**
- * Check if a league is eligible for processing bids
- * @param {Object} league - League data object
- * @param {Object} current_date_est - Current date object in EST
- * @returns {Object} Eligibility status and timing information
+ * When bids on the window a bid was announced in are due to be processed.
+ *
+ * Processing is defined relative to the NEXT announcement rather than as a
+ * duration after this one, so it always strictly precedes the next window
+ * opening — by `restricted_free_agency_processing_lead_hours`.
+ *
+ * @param {Object} params
+ * @param {Object} params.league - League with window configuration
+ * @param {number} params.announced - When the bid was announced
+ * @returns {number} Timestamp at which the bid becomes processable
  */
-function check_league_eligibility(league, current_date_est) {
-  const current_hour_est = current_date_est.hour()
-  const current_timestamp = Math.round(Date.now() / 1000)
+function get_bid_processing_due({ league, announced }) {
+  const window_index = get_restricted_free_agency_window_index({
+    league,
+    timestamp: Number(announced)
+  })
 
-  // Get the configured processing hour or use default
-  const processing_hour =
-    league.restricted_free_agency_processing_hour !== undefined
-      ? league.restricted_free_agency_processing_hour
-      : league_default_rfa_processing_hour
-
-  // Get the configured announcement hour or use default
-  const announcement_hour =
-    league.restricted_free_agency_announcement_hour !== undefined
-      ? league.restricted_free_agency_announcement_hour
-      : league_default_rfa_announcement_hour
-
-  // Calculate time difference needed between announcement and processing
-  // Processing always happens on the following day
-  const hours_between = 24 - announcement_hour + processing_hour
-
-  // Calculate the minimum seconds that must pass after announcement
-  const min_seconds_after_announcement = hours_between * 60 * 60
-
-  // Get the earliest eligible processing timestamp for today
-  let earliest_processing_time
-  if (current_hour_est >= processing_hour) {
-    // We're past the processing hour today
-    earliest_processing_time = dayjs(current_date_est)
-      .hour(processing_hour)
-      .minute(0)
-      .second(0)
-      .unix()
-  } else {
-    // We're before the processing hour today, use yesterday's time
-    earliest_processing_time = dayjs(current_date_est)
-      .subtract(1, 'day')
-      .hour(processing_hour)
-      .minute(0)
-      .second(0)
-      .unix()
-  }
-
-  const should_process =
-    current_hour_est >= processing_hour &&
-    current_timestamp >= earliest_processing_time
-
-  return {
-    should_process,
-    earliest_processing_time,
-    processing_hour,
-    announcement_hour,
-    hours_between,
-    min_seconds_after_announcement
-  }
-}
-
-/**
- * Check if enough time has passed since the announcement
- * @param {number} announcement_timestamp - When the bid was announced
- * @param {number} min_seconds_required - Minimum seconds required between announcement and processing
- * @returns {boolean} Whether enough time has passed
- */
-function has_enough_time_passed(announcement_timestamp, min_seconds_required) {
-  const current_timestamp = Math.round(Date.now() / 1000)
-  const seconds_since_announcement = current_timestamp - announcement_timestamp
-
-  return seconds_since_announcement >= min_seconds_required
+  return get_restricted_free_agency_processing_time({ league, window_index })
 }
 
 const run = async ({ dry_run = false } = {}) => {
@@ -136,11 +88,10 @@ const run = async ({ dry_run = false } = {}) => {
 
   const timestamp = Math.round(Date.now() / 1000)
 
-  // Get current date in EST
-  const current_date_est = dayjs().tz('America/New_York')
-
   log(
-    `Current EST date/time: ${current_date_est.format('YYYY-MM-DD HH:mm:ss')}`
+    `Current ET date/time: ${dayjs()
+      .tz(league_timezone)
+      .format('YYYY-MM-DD HH:mm:ss [ET]')}`
   )
 
   // Get leagues currently in RFA period with unprocessed bids
@@ -157,6 +108,7 @@ const run = async ({ dry_run = false } = {}) => {
       'seasons.year': current_season.year
     })
     .whereNotNull('restricted_free_agency_period_start')
+    .whereNotNull('restricted_free_agency_first_window_at')
     .where('restricted_free_agency_period_start', '<=', timestamp)
     .where('restricted_free_agency_period_end', '>=', timestamp)
     .groupBy('seasons.lid', 'seasons.year', 'leagues.name')
@@ -172,59 +124,19 @@ const run = async ({ dry_run = false } = {}) => {
     return
   }
 
-  // Filter leagues that are eligible for processing
-  const eligible_leagues = []
+  // Every league with announced, unprocessed bids is examined. Whether any
+  // particular bid is due is decided per bid against its own window's
+  // processing time, so there is no league-level hour gate to apply here.
   for (const league of active_leagues) {
-    const eligibility = check_league_eligibility(league, current_date_est)
-
-    league.eligibility = eligibility
+    const { lid } = league
+    const { window_hours, processing_lead_hours, bid_window_hours } =
+      get_restricted_free_agency_window_config({ league })
 
     log(
-      `League ${league.lid} (${league.name || 'Unnamed'}) - ` +
-        `Announcement hour: ${eligibility.announcement_hour}, Processing hour: ${eligibility.processing_hour}, ` +
-        `Current hour: ${current_date_est.hour()}, Should process: ${eligibility.should_process}, ` +
-        `Hours between announcement and processing: ${eligibility.hours_between}`
+      `Processing league ${lid} (${league.name || 'Unnamed'}) - ` +
+        `window ${window_hours}h, processing lead ${processing_lead_hours}h, ` +
+        `bid window ${bid_window_hours}h`
     )
-
-    if (eligibility.should_process) {
-      eligible_leagues.push(league)
-    } else if (dry_run) {
-      // In dry run, include leagues that aren't ready yet to show when they would be processed
-      eligible_leagues.push(league)
-    }
-  }
-
-  log(
-    `${eligible_leagues.length} leagues are eligible for processing or included in dry run output`
-  )
-
-  if (!eligible_leagues.length) {
-    log('No eligible leagues found for RFA processing at the current hour')
-    return
-  }
-
-  for (const league of eligible_leagues) {
-    const { lid } = league
-
-    if (!league.eligibility.should_process) {
-      const next_time = dayjs
-        .unix(league.eligibility.earliest_processing_time)
-        .format('YYYY-MM-DD HH:mm:ss')
-      log(
-        `DRY RUN: League ${lid} (${league.name || 'Unnamed'}) would be processed at ${next_time}`
-      )
-
-      // Only continue if in dry run mode
-      if (!dry_run) {
-        continue
-      }
-
-      log(
-        `DRY RUN: Continuing with dry run processing for league ${lid} despite not being time to process yet`
-      )
-    }
-
-    log(`Processing league ${lid} (${league.name || 'Unnamed'})`)
 
     let restricted_free_agency_bids =
       await get_top_restricted_free_agency_bids(lid)
@@ -234,65 +146,38 @@ const run = async ({ dry_run = false } = {}) => {
       continue
     }
 
-    // Check if bids meet the minimum time requirement
-    const min_seconds_required =
-      league.eligibility.min_seconds_after_announcement
-
-    // Filter bids that meet the time requirement
+    // A bid is due once its own window's processing time has arrived
     const eligible_bids = []
     const ineligible_bids = []
 
     for (const bid of restricted_free_agency_bids) {
-      if (has_enough_time_passed(bid.announced, min_seconds_required)) {
+      const processing_due = get_bid_processing_due({
+        league,
+        announced: bid.announced
+      })
+
+      if (timestamp >= processing_due) {
         eligible_bids.push(bid)
       } else {
-        ineligible_bids.push(bid)
+        ineligible_bids.push({ ...bid, processing_due })
       }
     }
 
     if (!eligible_bids.length) {
-      if (dry_run) {
-        // Find the earliest bid announcement to show when it would be eligible
-        const earliest_announced = Math.min(
-          ...restricted_free_agency_bids.map((bid) => bid.announced)
-        )
-        const time_since_announcement = timestamp - earliest_announced
-        const time_remaining = min_seconds_required - time_since_announcement
-        const eligible_time = dayjs
-          .unix(earliest_announced + min_seconds_required)
-          .format('YYYY-MM-DD HH:mm:ss')
-
-        const player = await db('player')
-          .where('pid', restricted_free_agency_bids[0].pid)
-          .first()
-        if (player) {
-          log(
-            `DRY RUN: Bid for ${player.first_name} ${player.last_name} (${player.primary_position}) is not eligible yet`
-          )
-        } else {
-          log(
-            `DRY RUN: Bid for player ${restricted_free_agency_bids[0].pid} is not eligible yet`
-          )
-        }
-
-        log(
-          `DRY RUN: This bid would be eligible for processing at ${eligible_time} (${Math.ceil(time_remaining / 3600)} hours from now)`
-        )
-
-        // For dry run, continue with processing using ineligible bids
-        log(`DRY RUN: Continuing with dry run processing using ineligible bids`)
-      } else {
-        log(
-          `No bids meet the time requirement for league ${lid}. Need to wait at least ${Math.ceil(min_seconds_required / 3600)} hours after announcement.`
-        )
-        continue
-      }
-    } else {
-      // Use the eligible bids instead of all bids
-      restricted_free_agency_bids = eligible_bids
+      const next_due = Math.min(
+        ...ineligible_bids.map((bid) => bid.processing_due)
+      )
+      log(
+        `No bids due for league ${lid}. Next processing time is ${dayjs
+          .unix(next_due)
+          .tz(league_timezone)
+          .format('YYYY-MM-DD HH:mm:ss [ET]')} (${Math.ceil(
+          (next_due - timestamp) / 3600
+        )} hours from now).`
+      )
+      continue
     }
 
-    // Use the eligible bids instead of all bids
     restricted_free_agency_bids = eligible_bids
 
     if (dry_run) {
@@ -343,8 +228,7 @@ const run = async ({ dry_run = false } = {}) => {
           `DRY RUN: ${ineligible_bids.length} bid(s) are not yet eligible for processing`
         )
         for (const bid of ineligible_bids) {
-          const time_since_announcement = timestamp - bid.announced
-          const time_remaining = min_seconds_required - time_since_announcement
+          const time_remaining = bid.processing_due - timestamp
           const player = await db('player').where('pid', bid.pid).first()
           const player_name = player
             ? `${player.first_name} ${player.last_name} (${player.primary_position})`
@@ -449,8 +333,10 @@ const run = async ({ dry_run = false } = {}) => {
       const next_bids = await get_top_restricted_free_agency_bids(lid)
 
       // Filter the next bids by time requirement
-      restricted_free_agency_bids = next_bids.filter((bid) =>
-        has_enough_time_passed(bid.announced, min_seconds_required)
+      restricted_free_agency_bids = next_bids.filter(
+        (bid) =>
+          timestamp >=
+          get_bid_processing_due({ league, announced: bid.announced })
       )
     }
   }
@@ -471,16 +357,20 @@ const run = async ({ dry_run = false } = {}) => {
       .whereNull('rfab.cancelled')
       .whereNotNull('rfab.announced')
       .whereNotNull('seasons.restricted_free_agency_period_start')
+      .whereNotNull('seasons.restricted_free_agency_first_window_at')
       .where('seasons.restricted_free_agency_period_start', '<=', timestamp)
       .where('seasons.restricted_free_agency_period_end', '>=', timestamp)
       .where(function () {
         // bid meets the time-since-announcement requirement
+        // Epoch approximation of the calendar-aware boundary, with an hour of
+        // slack so a DST transition inside a bid window cannot manufacture a
+        // false shortfall. Costs an hour of detection latency, never a miss.
         this.whereRaw(
-          '? - rfab.announced >= (24 - COALESCE(seasons.restricted_free_agency_announcement_hour, ?) + COALESCE(seasons.restricted_free_agency_processing_hour, ?)) * 3600',
+          '? - rfab.announced >= (COALESCE(seasons.restricted_free_agency_window_hours, ?) - COALESCE(seasons.restricted_free_agency_processing_lead_hours, ?)) * 3600 + 3600',
           [
             timestamp,
-            league_default_rfa_announcement_hour,
-            league_default_rfa_processing_hour
+            league_default_rfa_window_hours,
+            league_default_rfa_processing_lead_hours
           ]
         )
       })

@@ -38,11 +38,21 @@
 ## Generate composite market value daily (45 5; runs after calibration)
 45 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-composite-market-value.mjs >> /var/log/league/generate-composite-market-value.log 2>&1
 
-## Announce restricted free agent at 9pm
-0 21 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
+## Announce restricted free agent (check every 5 minutes, year-round; self-gating).
+## NOT hour-pinned. The announcement schedule is derived from the league's own window
+## configuration (restricted_free_agency_period_start + restricted_free_agency_window_hours),
+## so a single daily slot cannot serve a sub-24h cadence — a 12-hour window announces twice
+## a day and an hour-pinned cron would silently skip every second nomination. The script
+## claims each window exactly once via the league_notifications unique constraint, so
+## running it every 5 minutes is idempotent. This also removes the dependence on the host
+## clock matching the league timezone.
+*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
 
-## Process restricted free agency bids at 6pm
-0 18 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
+## Process restricted free agency bids (check every 5 minutes, year-round; self-gating).
+## Same reasoning as above: each bid's processing time is derived from its own window and
+## falls restricted_free_agency_processing_lead_hours before the next announcement, so
+## processing always strictly precedes the next nomination. Bids not yet due are skipped.
+*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs >> /var/log/league/process-restricted-free-agency-bids.log 2>&1
 
 ## Reset stale RFA tags (defense-in-depth) — daily at 5am, year-round. Idempotent: preserves any tag=4 backed by an un-cancelled current-year bid in restricted_free_agency_bids.
 ## NOT month-pinned. The window it guards moves with the offseason schedule: a Feb-May pin could not see the 2026 RFA window at all once it shifted to August, so the guard was dark for the one period it exists to cover. The script self-gates cheaply.

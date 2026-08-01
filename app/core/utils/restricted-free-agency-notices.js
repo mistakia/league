@@ -65,26 +65,32 @@ export function get_restricted_free_agency_notices({
       if (is_team_manager) {
         const deadline_str = deadline.format('dddd [at] h:mm A')
         const time_left = timeago.format(deadline.toDate(), 'league_short')
+        const bids_close_str = dayjs
+          .unix(nomination.bids_close_at)
+          .format('dddd [at] h:mm A')
         return (
           <Alert
-            key={`rfa-nomination-deadline-${nomination.team_index}`}
+            key={`rfa-nomination-deadline-${nomination.window_index}`}
             severity='warning'
           >
             <AlertTitle>RFA Nomination Deadline Approaching</AlertTitle>
-            You need to designate a restricted free agent nominee by{' '}
-            {deadline_str} ({time_left}). If you don't nominate a player by the
-            deadline, you will lose your nomination opportunity.
+            Your nomination window opens {deadline_str} ({time_left}) — you need
+            to designate a restricted free agent nominee before then. Your
+            nominee is announced when the window opens and bids on them are
+            processed {bids_close_str}. If you don't nominate a player in time,
+            you will lose this nomination opportunity.
           </Alert>
         )
       } else {
         return (
           <Alert
-            key={`rfa-nomination-deadline-${nomination.team_index}`}
+            key={`rfa-nomination-deadline-${nomination.window_index}`}
             severity='info'
           >
             <AlertTitle>RFA Nomination Pending</AlertTitle>
-            This team needs to designate a restricted free agent nominee before{' '}
-            {deadline.format('dddd [at] h:mm A')}.
+            This team's nomination window opens{' '}
+            {deadline.format('dddd [at] h:mm A')} and they need to designate a
+            restricted free agent nominee before then.
           </Alert>
         )
       }

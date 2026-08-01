@@ -1,0 +1,68 @@
+.restricted-free-agency-schedule
+  display flex
+  flex-direction column
+  gap 8px
+  padding 12px
+
+  .rfa-schedule__title
+    font-size 15px
+    font-weight 600
+
+  .rfa-schedule__summary
+    font-size 13px
+    line-height 1.5
+    color rgba(0, 0, 0, 0.6)
+
+  .rfa-schedule__next
+    display flex
+    align-items center
+    gap 8px
+    padding 8px
+    border-radius 4px
+    background rgba(25, 118, 210, 0.08)
+    font-size 13px
+
+  .rfa-schedule__next-label
+    text-transform uppercase
+    font-size 11px
+    letter-spacing 0.5px
+    color rgba(0, 0, 0, 0.6)
+
+  .rfa-schedule__next-time
+    margin-left auto
+    font-variant-numeric tabular-nums
+
+  .rfa-schedule__table
+    display flex
+    flex-direction column
+
+  .rfa-schedule__row
+    display flex
+    align-items center
+    padding 6px 4px
+    border-bottom 1px solid rgba(0, 0, 0, 0.08)
+    font-size 13px
+
+    &--header
+      font-size 11px
+      text-transform uppercase
+      letter-spacing 0.5px
+      color rgba(0, 0, 0, 0.6)
+
+    &--current
+      background rgba(25, 118, 210, 0.08)
+
+    &--complete
+      opacity 0.5
+
+    &--mine
+      font-weight 600
+
+  .rfa-schedule__cell
+    flex 1
+    font-variant-numeric tabular-nums
+
+    &--team
+      flex 1.4
+      display flex
+      align-items center
