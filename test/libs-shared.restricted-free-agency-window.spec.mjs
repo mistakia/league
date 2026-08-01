@@ -201,7 +201,7 @@ describe('LIBS-SHARED restricted free agency windows', function () {
   describe('nominating team rotation', function () {
     const num_teams = 10
 
-    it('repeats draft order in the same direction every round', () => {
+    it('repeats descending draft order every round', () => {
       const order = [...Array(20)].map((ignore, window_index) =>
         get_restricted_free_agency_nominating_team_index({
           window_index,
@@ -215,11 +215,10 @@ describe('LIBS-SHARED restricted free agency windows', function () {
     })
 
     it('holds every team to a single slot-of-day', () => {
-      // The accepted consequence of the straight repeating order: with the team
-      // count a multiple of the windows per day, a team's two turns land on the
-      // same parity, so half the league nominates overnight both times. The
-      // schedule is published on that basis, so pin it rather than leave it
-      // untested.
+      // With the team count a multiple of the windows per day, a team's turns
+      // all land on the same parity, so half the league nominates overnight
+      // every time. The published schedule states each team's slot-of-day on
+      // this basis.
       const slots_by_team = {}
 
       for (let window_index = 0; window_index < 20; window_index++) {

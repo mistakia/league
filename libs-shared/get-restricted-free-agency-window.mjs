@@ -133,13 +133,12 @@ export const get_restricted_free_agency_processing_time = ({
  * Team position (index into teams sorted by draft_order desc) nominating in
  * window `window_index`.
  *
- * Every round runs the same direction — descending draft order, repeating.
+ * Descending draft order, repeating each round.
  *
- * A consequence worth stating wherever the schedule is published: when
- * `num_teams` is a multiple of the windows per day, a team's slot-of-day never
- * changes. Team `k` draws windows `k`, `k + num_teams`, ..., which all share a
- * slot, so under a 12-hour cadence half the league nominates at the afternoon
- * hour every time and half holds the overnight hour every time.
+ * When `num_teams` is a multiple of the windows per day, a team's slot-of-day
+ * never changes: team `k` draws windows `k`, `k + num_teams`, ..., which all
+ * share a slot. Under a 12-hour cadence half the league nominates at the
+ * afternoon hour every time and half holds the overnight hour every time.
  */
 export const get_restricted_free_agency_nominating_team_index = ({
   window_index,
