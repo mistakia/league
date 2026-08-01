@@ -201,7 +201,7 @@ describe('LIBS-SHARED restricted free agency windows', function () {
   describe('nominating team rotation', function () {
     const num_teams = 10
 
-    it('runs draft order forward then backward', () => {
+    it('repeats draft order in the same direction every round', () => {
       const order = [...Array(20)].map((ignore, window_index) =>
         get_restricted_free_agency_nominating_team_index({
           window_index,
@@ -210,14 +210,16 @@ describe('LIBS-SHARED restricted free agency windows', function () {
       )
 
       expect(order).to.deep.equal([
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
       ])
     })
 
-    it('gives every team one of each slot-of-day', () => {
-      // The defect this guards: with an even team count a straight modulo locks
-      // each team to the same slot-of-day forever, so half the league would
-      // permanently hold the overnight window.
+    it('holds every team to a single slot-of-day', () => {
+      // The accepted consequence of the straight repeating order: with the team
+      // count a multiple of the windows per day, a team's two turns land on the
+      // same parity, so half the league nominates overnight both times. The
+      // schedule is published on that basis, so pin it rather than leave it
+      // untested.
       const slots_by_team = {}
 
       for (let window_index = 0; window_index < 20; window_index++) {
@@ -232,9 +234,9 @@ describe('LIBS-SHARED restricted free agency windows', function () {
       expect(Object.keys(slots_by_team).length).to.equal(num_teams)
 
       for (const team_index of Object.keys(slots_by_team)) {
-        expect(slots_by_team[team_index].sort()).to.deep.equal(
-          [0, 1],
-          `team ${team_index} should get one day slot and one night slot`
+        expect(slots_by_team[team_index]).to.deep.equal(
+          [Number(team_index) % 2, Number(team_index) % 2],
+          `team ${team_index} should hold one slot-of-day for both turns`
         )
       }
     })

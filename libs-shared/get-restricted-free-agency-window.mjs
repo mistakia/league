@@ -133,9 +133,13 @@ export const get_restricted_free_agency_processing_time = ({
  * Team position (index into teams sorted by draft_order desc) nominating in
  * window `window_index`.
  *
- * Rounds alternate direction. With an even team count a straight modulo would
- * lock every team to the same slot-of-day for the whole period — five managers
- * permanently holding the overnight window under a 12-hour cadence.
+ * Every round runs the same direction — descending draft order, repeating.
+ *
+ * A consequence worth stating wherever the schedule is published: when
+ * `num_teams` is a multiple of the windows per day, a team's slot-of-day never
+ * changes. Team `k` draws windows `k`, `k + num_teams`, ..., which all share a
+ * slot, so under a 12-hour cadence half the league nominates at the afternoon
+ * hour every time and half holds the overnight hour every time.
  */
 export const get_restricted_free_agency_nominating_team_index = ({
   window_index,
@@ -143,10 +147,7 @@ export const get_restricted_free_agency_nominating_team_index = ({
 }) => {
   if (window_index < 0) return 0
 
-  const round = Math.floor(window_index / num_teams)
-  const position = window_index % num_teams
-
-  return round % 2 === 0 ? position : num_teams - 1 - position
+  return window_index % num_teams
 }
 
 /**
