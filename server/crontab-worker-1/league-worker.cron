@@ -1,3 +1,7 @@
+# Managed by league repo -- do not edit deployed copy
+# Source: league/server/crontab-worker-1/league-worker.cron
+# Deploy: yarn load:crontab:worker1  (scope league-worker-1 -> digitalocean-0:~/crontab/league-worker.cron)
+#
 ################################### GAMES ########################################
 
 ## Update NFL Schedule At 03:00 every day (Regular Season)

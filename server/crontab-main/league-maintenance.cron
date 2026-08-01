@@ -1,3 +1,7 @@
+# Managed by league repo -- do not edit deployed copy
+# Source: league/server/crontab-main/league-maintenance.cron
+# Deploy: yarn load:crontab:main  (scope league-main -> league:~/crontab/league-maintenance.cron)
+#
 # League
 
 ## Every Sunday at 4:00AM — verify named-catalog rows match DB config (replaces retired drift-detector slot)

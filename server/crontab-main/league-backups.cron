@@ -1,3 +1,7 @@
+# Managed by league repo -- do not edit deployed copy
+# Source: league/server/crontab-main/league-backups.cron
+# Deploy: yarn load:crontab:main  (scope league-main -> league:~/crontab/league-backups.cron)
+#
 # League production Postgres backups — two year-round pipelines.
 #
 #   full  — whole-DB pg_dump -Fd -j directory dump (ephemeral prop-pairing DATA

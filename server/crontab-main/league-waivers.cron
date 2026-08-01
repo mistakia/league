@@ -1,3 +1,7 @@
+# Managed by league repo -- do not edit deployed copy
+# Source: league/server/crontab-main/league-waivers.cron
+# Deploy: yarn load:crontab:main  (scope league-main -> league:~/crontab/league-waivers.cron)
+#
 # Waivers - Poaching
 
 ## Process Poaching Waivers Every 15 Minutes (except at 15:00)
