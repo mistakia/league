@@ -21,6 +21,7 @@ import { isReserveEligible, isReserveCovEligible } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 import Notices from '@components/notices'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
+import CopyMarkdownButton from '@components/copy-markdown-button'
 
 import './league-team.styl'
 
@@ -373,6 +374,9 @@ export default function LeagueTeam({
         </div>
       </div>
       <div className='league-team-sidebar'>
+        <div className='copy-markdown-button-row'>
+          <CopyMarkdownButton path={`/leagues/${lid}/teams/${teamId}.md`} />
+        </div>
         {is_hosted_league && <DashboardTeamSummary tid={teamId} />}
         <DashboardTeamValue tid={teamId} />
         <DashboardByeWeeks tid={teamId} />
