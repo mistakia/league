@@ -18,14 +18,17 @@ dayjs.extend(timezone)
 const expect = chai.expect
 const league_timezone = 'America/New_York'
 
-const et = (value) => dayjs.tz(value, league_timezone).unix()
+// The anchor column is timestamptz, so it arrives as a Date; window index
+// probes are unix seconds.
+const et_date = (value) => dayjs.tz(value, league_timezone).toDate()
+const et_unix = (value) => dayjs.tz(value, league_timezone).unix()
 const format_et = (timestamp) =>
   dayjs.unix(timestamp).tz(league_timezone).format('YYYY-MM-DD HH:mm')
 
 // Reproduces the pre-2026-08 production configuration: one nomination a day
 // announced at 9 PM ET, bids processed at 6 PM ET the following day.
 const legacy_league = {
-  restricted_free_agency_first_window_at: et('2026-08-01 21:00'),
+  restricted_free_agency_first_window_at: et_date('2026-08-01 21:00'),
   restricted_free_agency_window_hours: 24,
   restricted_free_agency_processing_lead_hours: 3
 }
@@ -33,7 +36,7 @@ const legacy_league = {
 // League 1's 2026 configuration: two nominations a day at 5 PM and 5 AM ET,
 // bids processed one hour before the next announcement.
 const twelve_hour_league = {
-  restricted_free_agency_first_window_at: et('2026-08-01 17:00'),
+  restricted_free_agency_first_window_at: et_date('2026-08-01 17:00'),
   restricted_free_agency_window_hours: 12,
   restricted_free_agency_processing_lead_hours: 1
 }
@@ -63,7 +66,7 @@ describe('LIBS-SHARED restricted free agency windows', function () {
     it('falls back to the 24h / 3h defaults', () => {
       const config = get_restricted_free_agency_window_config({
         league: {
-          restricted_free_agency_first_window_at: et('2026-08-01 21:00')
+          restricted_free_agency_first_window_at: et_date('2026-08-01 21:00')
         }
       })
 
@@ -86,7 +89,7 @@ describe('LIBS-SHARED restricted free agency windows', function () {
 
         expect(format_et(announce_at)).to.equal(
           dayjs
-            .unix(et('2026-08-01 21:00'))
+            .unix(et_unix('2026-08-01 21:00'))
             .tz(league_timezone)
             .add(window_index, 'day')
             .format('YYYY-MM-DD HH:mm')
@@ -134,7 +137,7 @@ describe('LIBS-SHARED restricted free agency windows', function () {
     it('keeps the wall-clock hour across a DST transition', () => {
       // 2026 fall-back is Nov 1
       const november_league = {
-        restricted_free_agency_first_window_at: et('2026-10-30 17:00'),
+        restricted_free_agency_first_window_at: et_date('2026-10-30 17:00'),
         restricted_free_agency_window_hours: 12,
         restricted_free_agency_processing_lead_hours: 1
       }
@@ -189,7 +192,7 @@ describe('LIBS-SHARED restricted free agency windows', function () {
       expect(
         get_restricted_free_agency_window_index({
           league: twelve_hour_league,
-          timestamp: et('2026-08-01 12:00')
+          timestamp: et_unix('2026-08-01 12:00')
         })
       ).to.equal(-1)
     })

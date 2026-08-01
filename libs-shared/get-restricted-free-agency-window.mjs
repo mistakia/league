@@ -58,9 +58,10 @@ export const get_restricted_free_agency_window_start = ({
   const { window_hours, windows_per_day } =
     get_restricted_free_agency_window_config({ league })
 
-  const anchor = dayjs
-    .unix(Number(league.restricted_free_agency_first_window_at))
-    .tz(league_timezone)
+  // timestamptz: a Date server-side, an ISO string once it has been through JSON
+  const anchor = dayjs(league.restricted_free_agency_first_window_at).tz(
+    league_timezone
+  )
 
   const day_index = Math.floor(window_index / windows_per_day)
   const slot_of_day =
@@ -93,7 +94,7 @@ export const get_restricted_free_agency_window_index = ({
   timestamp = Math.round(Date.now() / 1000)
 }) => {
   const { window_hours } = get_restricted_free_agency_window_config({ league })
-  const anchor = Number(league.restricted_free_agency_first_window_at)
+  const anchor = dayjs(league.restricted_free_agency_first_window_at).unix()
 
   const window_start = (window_index) =>
     get_restricted_free_agency_window_start({ league, window_index })

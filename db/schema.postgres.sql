@@ -26229,7 +26229,7 @@ CREATE TABLE public.seasons (
     season_finalized_at bigint,
     scoring_format_id text NOT NULL,
     league_format_id text NOT NULL,
-    restricted_free_agency_first_window_at bigint,
+    restricted_free_agency_first_window_at timestamp with time zone,
     restricted_free_agency_window_hours smallint DEFAULT 24 NOT NULL,
     restricted_free_agency_processing_lead_hours smallint DEFAULT 3 NOT NULL,
     CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
