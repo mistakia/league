@@ -68,18 +68,46 @@ const generate_table_alias = ({ type, params = {}, row_axes = [] } = {}) => {
   // params emits a different boundary per axis; without it a week-split and a
   // year-split request for one column would collide on one alias.
   const axes = [...row_axes].sort().join('-')
-  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset_single || ''}_axes_${axes}`
+  // is_superflex participates for the same reason: it is a join PREDICATE (see
+  // keeptradecut_join), so two requests for one metric differing only by qb
+  // emit different SQL. Omitting it collapsed them onto one alias and rendered
+  // the 1QB value under the superflex column -- silently, with no error.
+  // Derived rather than read raw, so qb absent and qb=2 share an alias exactly
+  // as they share a predicate.
+  const is_superflex = is_superflex_from_params(params)
+  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset_single || ''}_axes_${axes}_superflex_${is_superflex}`
   return get_table_hash(key)
 }
 
+// How far back a year-axis as-of lookup may reach from its boundary.
+//
+// The as-of rule exists so a scraper that missed the boundary day falls back to
+// the previous reading instead of returning nothing. Unbounded, it also carries
+// DELISTED players forward forever: KeepTradeCut drops retired players from its
+// board, and their final rank was then served for every later season -- Tom
+// Brady rendered QB23 for 2025, last actually ranked 2021-12-21.
+//
+// 30 days is ~10x the largest real gap in the feed (measured 2026-07-31 over
+// 2,237 scrape days: median gap 1 day, max 3), so it absorbs any genuine
+// scraper outage while dropping a player who has been off the board a month.
+// Measured effect on production: position_rank pid counts return to exactly
+// their pre-as-of values for every year 2020-2026, and the tail disappears.
+//
+// Year axis ONLY. The week axis needs the unbounded reach (17 of 124 NFL weeks
+// carry no observation on the week's own start day) and the default branch is
+// "latest outright" by definition.
+const YEAR_AXIS_AS_OF_WINDOW = '30 days'
+
 // The single as-of lookup every axis uses: the most recent observation at or
 // before `boundary_sql` that actually carries `metric_column`. A null boundary
-// means "no upper bound" -- the latest observation outright.
+// means "no upper bound" -- the latest observation outright. A null
+// `lower_bound_sql` means "no recency floor" -- reach back arbitrarily far.
 const as_of_observed_at = ({
   metric_column,
   params,
   data_view_options,
-  boundary_sql = null
+  boundary_sql = null,
+  lower_bound_sql = null
 }) =>
   function () {
     this.select(db.raw('MAX(observed_at)'))
@@ -90,6 +118,10 @@ const as_of_observed_at = ({
 
     if (boundary_sql) {
       this.where('observed_at', '<=', db.raw(boundary_sql))
+    }
+
+    if (lower_bound_sql) {
+      this.where('observed_at', '>', db.raw(lower_bound_sql))
     }
   }
 
@@ -140,6 +172,7 @@ const keeptradecut_join = ({
     )
 
     let boundary_sql = null
+    let lower_bound_sql = null
 
     if (row_axes.includes('week')) {
       // TODO handle year_offset_single and week_offset_single
@@ -152,6 +185,10 @@ const keeptradecut_join = ({
       boundary_sql = 'to_timestamp(nfl_year_week_timestamp.week_timestamp)'
     } else if (row_axes.includes('year')) {
       boundary_sql = `(date_trunc('day', opening_days.opening_day) + interval '${year_offset_single} year')`
+      // Recency floor -- see YEAR_AXIS_AS_OF_WINDOW. Without it a delisted
+      // player's final rank is carried into every later season, and a FUTURE
+      // opening day renders today's value for a season that has not started.
+      lower_bound_sql = `(${boundary_sql} - interval '${YEAR_AXIS_AS_OF_WINDOW}')`
 
       // TODO pretty sure this is always truthy
       if (data_view_options.year_reference) {
@@ -188,7 +225,8 @@ const keeptradecut_join = ({
         metric_column,
         params,
         data_view_options,
-        boundary_sql
+        boundary_sql,
+        lower_bound_sql
       })
     )
   }
@@ -238,6 +276,10 @@ const keeptradecut_year_offset_range_select =
           `WHERE ktc_o.pid = ${pid_reference} AND ktc_o.is_superflex = ${is_superflex} ` +
           `AND ktc_o.${metric_column} IS NOT NULL ` +
           `AND ktc_o.observed_at <= (date_trunc('day', od_o.opening_day) + interval '${off} year') ` +
+          // Same recency floor as the year-axis join -- this IS the year axis,
+          // reduced across a range of offsets, so an unbounded reach here would
+          // reintroduce the delisted-player tail one offset at a time.
+          `AND ktc_o.observed_at > (date_trunc('day', od_o.opening_day) + interval '${off} year' - interval '${YEAR_AXIS_AS_OF_WINDOW}') ` +
           `ORDER BY ktc_o.observed_at DESC LIMIT 1)`
       )
     }

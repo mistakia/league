@@ -1,0 +1,47 @@
+{
+  "name": "player_keeptradecut_position_rank requested twice differing only by qb emits two distinct joins (executed-result parity)",
+  "description": "generate_table_alias keys on is_superflex because it is a join PREDICATE, not just a display parameter -- before this fix, two requests for one metric differing only by params.qb collapsed onto one alias and silently rendered the 1QB value under the superflex column. Seed a player with a clearly different position_rank at is_superflex=false (qb=1, rank 15) vs is_superflex=true (qb=2, rank 3), and request the same column twice with params.qb 1 and 2. The two output columns must resolve to two DISTINCT joins in the SQL (visible as two differently-predicated aliases in expected_query) and must return two DIFFERENT values (15 and 3) rather than one value duplicated onto both columns.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_position_rank",
+        "params": {
+          "qb": 1
+        }
+      },
+      {
+        "column_id": "player_keeptradecut_position_rank",
+        "params": {
+          "qb": 2
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["QC"]
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t7c0566345ba7c64f33a955806666e789\".\"position_rank\" AS \"player_keeptradecut_position_rank_0\", \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"position_rank\" AS \"player_keeptradecut_position_rank_1\", \"player\".\"primary_position\" from \"player\" left join \"keeptradecut_valuations\" as \"t7c0566345ba7c64f33a955806666e789\" on \"t7c0566345ba7c64f33a955806666e789\".\"pid\" = \"player\".\"pid\" and \"t7c0566345ba7c64f33a955806666e789\".\"is_superflex\" = false and \"t7c0566345ba7c64f33a955806666e789\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = false and \"position_rank\" is not null) left join \"keeptradecut_valuations\" as \"tbf04492c2be2dffcbb2d34ce116d8cdf\" on \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"pid\" = \"player\".\"pid\" and \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"is_superflex\" = true and \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"position_rank\" is not null) where player.primary_position IN ('QC') group by player.first_name, player.last_name, \"t7c0566345ba7c64f33a955806666e789\".\"position_rank\", \"tbf04492c2be2dffcbb2d34ce116d8cdf\".\"position_rank\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCQ-910001', 'Test', 'Ktcqb', 'T.Ktcqb', 'Test Ktcqb', 'QC', 'QC', '2000-01-01', 2020, 'QCA')",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value, position_rank, overall_rank) VALUES ('TEST-KTCQ-910001', true, TIMESTAMPTZ '2025-06-01 00:00:00-04', 5000, 3, 10)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value, position_rank, overall_rank) VALUES ('TEST-KTCQ-910001', false, TIMESTAMPTZ '2025-06-01 00:00:00-04', 3000, 15, 40)"
+    ],
+    "expected_rows": [
+      {
+        "player_keeptradecut_position_rank_0": 15,
+        "player_keeptradecut_position_rank_1": 3
+      }
+    ],
+    "compare_columns": [
+      "player_keeptradecut_position_rank_0",
+      "player_keeptradecut_position_rank_1"
+    ]
+  },
+  "tags": ["keeptradecut", "alias-collision", "qb", "result-equivalence"]
+}

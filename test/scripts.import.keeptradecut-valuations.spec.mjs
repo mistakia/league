@@ -11,7 +11,10 @@ import {
   create_valuation_accumulator,
   parse_keeptradecut_date
 } from '#scripts/import-keeptradecut.mjs'
-import { ktc_at } from '#libs-server/roster-asset-lineage/compute-snapshots-bulk.mjs'
+import compute_snapshots_bulk, {
+  ktc_at
+} from '#libs-server/roster-asset-lineage/compute-snapshots-bulk.mjs'
+import { ASSET_TYPE } from '#libs-server/roster-asset-lineage/constants.mjs'
 
 chai.should()
 const expect = chai.expect
@@ -245,6 +248,61 @@ describe('SCRIPTS import-keeptradecut valuations', function () {
 
     it('returns null for an unknown pid', () => {
       expect(ktc_at(idx, 'TEST-KTCV-999999', rows[0].d)).to.equal(null)
+    })
+
+    it('normalizes real Date rows from the loader before ktc_at compares them', async () => {
+      // The block above hand-builds an already-normalized index, so it never
+      // drives a real observed_at Date through load_indexes. This exercises
+      // the actual load boundary: keeptradecut_valuations.observed_at is
+      // timestamptz and returns as a JS Date (db/index.mjs only retypes
+      // NUMERIC/INT8). If load_indexes ever stops normalizing it to epoch
+      // seconds, `r.d <= target_unix` becomes Date-vs-number, coerces to
+      // milliseconds, and is silently always false -- every lookup then falls
+      // through to rows[0], the earliest value ever recorded.
+      const LOADER_PID = 'TEST-KTCV-000003'
+      await db('keeptradecut_valuations').where({ pid: LOADER_PID }).del()
+      const observations = [
+        { observed_at: new Date('2024-01-01T00:00:00Z'), value: 100 },
+        { observed_at: new Date('2024-06-01T00:00:00Z'), value: 200 },
+        { observed_at: new Date('2024-12-01T00:00:00Z'), value: 300 }
+      ]
+
+      try {
+        await db('keeptradecut_valuations').insert(
+          observations.map((o) => ({
+            pid: LOADER_PID,
+            is_superflex: true,
+            observed_at: o.observed_at,
+            keeptradecut_value: o.value
+          }))
+        )
+
+        const [{ snapshot }] = await compute_snapshots_bulk({
+          lid: 999999,
+          holding_drafts: [
+            {
+              draft_id: 1,
+              asset_type: ASSET_TYPE.PLAYER,
+              player_id: LOADER_PID,
+              tid: 1,
+              year: 2024,
+              period_start: new Date('2024-12-31T00:00:00Z'),
+              period_end: null,
+              league_format_id: null
+            }
+          ]
+        })
+
+        // The bug's signature: silently falling through to the earliest
+        // observation (100) for a target well after it, instead of the
+        // latest-at-or-before value (300).
+        expect(snapshot.composite_market_value_at_acquisition).to.not.equal(
+          observations[0].value
+        )
+        expect(snapshot.composite_market_value_at_acquisition).to.equal(300)
+      } finally {
+        await db('keeptradecut_valuations').where({ pid: LOADER_PID }).del()
+      }
     })
   })
 })

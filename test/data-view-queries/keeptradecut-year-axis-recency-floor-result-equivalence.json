@@ -1,0 +1,50 @@
+{
+  "name": "player_keeptradecut_position_rank year axis carries a 30-day recency floor (executed-result parity)",
+  "description": "Without a recency floor, the year-axis as-of lookup reaches back unbounded, so a player who was delisted years ago keeps rendering their final rank for every later season -- measured on production 2026-07-31, Tom Brady (last ranked 2021-12-21) was rendered QB23 for the 2025 season. Seed a stale player whose only observation carrying a rank sits 2 years before the 2025 opening-day boundary (well outside the 30-day window) and a fresh player whose only observation sits 5 days before it (inside the window). The stale player's rank must read NULL and the fresh player's must read populated. This fixture fails if the two `lower_bound_sql` lines in the year-axis branch of keeptradecut_join are removed: the stale player's rank then resolves to its 2-year-old value instead of NULL.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_position_rank",
+        "params": {
+          "year": [2025]
+        }
+      }
+    ],
+    "row_axes": ["year"],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["ZF"]
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('ZF')) select \"player\".\"pid\", player.first_name, player.last_name, \"t73dd9be5b5b4954d409c2145e9f1aa2c\".\"position_rank\" AS \"player_keeptradecut_position_rank_0\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_valuations\" as \"t73dd9be5b5b4954d409c2145e9f1aa2c\" on \"t73dd9be5b5b4954d409c2145e9f1aa2c\".\"pid\" = \"player\".\"pid\" and \"t73dd9be5b5b4954d409c2145e9f1aa2c\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t73dd9be5b5b4954d409c2145e9f1aa2c\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"position_rank\" is not null and \"observed_at\" <= (date_trunc('day', opening_days.opening_day) + interval '0 year') and \"observed_at\" > ((date_trunc('day', opening_days.opening_day) + interval '0 year') - interval '30 days')) where player.primary_position IN ('ZF') group by player.first_name, player.last_name, \"t73dd9be5b5b4954d409c2145e9f1aa2c\".\"position_rank\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCF-910001', 'Test', 'Ktcfs', 'T.Ktcfs', 'Test Ktcfs', 'ZF', 'ZF', '2000-01-01', 2020, 'ZFA')",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCF-910002', 'Test', 'Ktcff', 'T.Ktcff', 'Test Ktcff', 'ZF', 'ZF', '2001-01-01', 2021, 'ZFA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (970950, 2025, 1, 'REG', 'ZFA', 'ZFX', '2025-09-04')",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value, position_rank, overall_rank) SELECT 'TEST-KTCF-910001', true, date_trunc('day', opening_day) - interval '2 years', 3000, 5, 20 FROM opening_days WHERE year = 2025",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value, position_rank, overall_rank) SELECT 'TEST-KTCF-910002', true, date_trunc('day', opening_day) - interval '5 days', 2500, 12, 45 FROM opening_days WHERE year = 2025"
+    ],
+    "expected_rows": [
+      {
+        "player_keeptradecut_position_rank_0": null
+      },
+      {
+        "player_keeptradecut_position_rank_0": 12
+      }
+    ],
+    "compare_columns": ["player_keeptradecut_position_rank_0"]
+  },
+  "tags": [
+    "keeptradecut",
+    "as-of",
+    "year_split",
+    "recency-floor",
+    "result-equivalence"
+  ]
+}
