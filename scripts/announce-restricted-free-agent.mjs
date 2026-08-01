@@ -112,8 +112,8 @@ const announce_restricted_free_agent = async ({
 
   if (target_window_index < 0) {
     log(
-      `Restricted free agency has not opened yet for league ${lid} — opens ${format_et(
-        league.restricted_free_agency_period_start
+      `No nomination window has opened yet for league ${lid} — the first opens ${format_et(
+        league.restricted_free_agency_first_window_at
       )}`
     )
     return
