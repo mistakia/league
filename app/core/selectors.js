@@ -10,7 +10,6 @@ import {
   isSlotActive,
   calculatePoints,
   isOnReleaseWaivers,
-  getExtensionAmount,
   calculateStatsFromPlayStats,
   calculateDstStatsFromPlays,
   calculate_dst_delta_from_play,
@@ -1000,27 +999,24 @@ export function get_cutlist_players(state) {
   return cutlist.map((pid) => getPlayerById(state, { pid }))
 }
 
+// The cap space cutting the cutlist would free. Read each charge off the roster
+// rather than re-deriving it from the player map: `Roster` already applies the
+// extension and restricted free agency pricing that `availableCap` sums, so
+// taking the number from there is the only way this cannot drift from the cap it
+// offsets. Only active players are charged against the cap, so a practice squad
+// or reserve player on the cutlist frees nothing and must not be counted.
 export function get_cutlist_total_salary(state) {
-  const playerMaps = get_cutlist_players(state)
-  const league = get_current_league(state)
-  const isBeforeExtension = is_before_extension_deadline(state)
+  const { teamId } = get_app(state)
+  const cutlist = state.getIn(['players', 'cutlist'])
+  const roster = getRosterByTeamId(state, { tid: teamId })
 
-  return playerMaps.reduce((sum, player_map) => {
-    const value = player_map.get('value')
-    const extensions = player_map.get('extensions', 0)
-    const bid = player_map.get('bid', 0)
-    const salary = isBeforeExtension
-      ? getExtensionAmount({
-          pos: player_map.get('primary_position'),
-          tag: player_map.get('tag'),
-          extensions,
-          league,
-          value,
-          bid
-        })
-      : bid || value
+  return cutlist.reduce((sum, pid) => {
+    const roster_player = roster.get(pid)
+    if (!roster_player || !isSlotActive(roster_player.slot)) {
+      return sum
+    }
 
-    return sum + salary
+    return sum + roster_player.value
   }, 0)
 }
 

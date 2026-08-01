@@ -51,9 +51,13 @@ export default class Roster {
       restricted_free_agency_tag_announced,
       restricted_free_agency_original_team
     } of roster.players) {
+      // `bid ?? value`, not `bid || value` -- a $0 restricted free agency bid is a
+      // real bid, and coalescing on falsiness charges the cap the player's prior
+      // salary instead of the $0 the team actually committed to.
       const salary = before_extension_deadline
         ? getExtensionAmount({
             pos,
+            slot,
             tag,
             extensions,
             league,
@@ -62,7 +66,7 @@ export default class Roster {
           })
         : is_after_restricted_free_agency_end
           ? value
-          : bid || value
+          : (bid ?? value)
 
       this._players.set(pid, {
         slot,

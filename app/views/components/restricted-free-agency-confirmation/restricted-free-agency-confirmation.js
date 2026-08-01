@@ -15,6 +15,8 @@ import TextField from '@mui/material/TextField'
 import Autocomplete from '@mui/material/Autocomplete'
 import Chip from '@mui/material/Chip'
 
+import { isSlotActive } from '@libs-shared'
+
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
@@ -39,8 +41,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       bid: player_map.get('bid') ?? 0,
       error: false,
       missing_release: false,
-      missing_untag: false,
-      bid_exceeds_max: false
+      missing_untag: false
     }
 
     this._untags = []
@@ -73,75 +74,88 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       team.roster.isEligibleForTag({
         tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
+  }
 
-    // Check if initial bid exceeds max bid
-    const initial_bid = player_map.get('bid', 0)
-    if (initial_bid > 0) {
-      const max_bid = this.get_max_bid()
-      if (initial_bid > max_bid) {
-        this.state.bid_exceeds_max = true
-      }
+  // What a player currently costs this team against the cap, taken from the
+  // roster rather than re-derived from the player map. `Roster` applies the
+  // extension and restricted free agency pricing that `availableCap` sums, so
+  // reading it here is the only way the two halves of `get_bid_limits` cannot
+  // disagree. A player in a practice squad or reserve slot is not charged at
+  // all, so releasing them frees nothing.
+  get_active_charge = (pid) => {
+    const roster_player = this.props.team.roster.get(pid)
+    return roster_player && isSlotActive(roster_player.slot)
+      ? roster_player.value
+      : 0
+  }
+
+  // The components of the ceiling, kept separate so the dialog can show the
+  // manager the arithmetic instead of a bare number. The total matches what
+  // `process-restricted-free-agency-bid` will allow at processing time: the cap
+  // left over once everything this bid clears is no longer charged.
+  get_bid_limits = () => {
+    const { team, player_map, cutlist, cutlist_total_salary } = this.props
+    const pid = player_map.get('pid')
+
+    const release_total_salary = this.state.release_ids
+      .filter((release_pid) => !cutlist.includes(release_pid))
+      .reduce(
+        (sum, release_pid) => sum + this.get_active_charge(release_pid),
+        0
+      )
+
+    const own_player_charge =
+      this._isOriginalTeam && !cutlist.includes(pid)
+        ? this.get_active_charge(pid)
+        : 0
+
+    const available_cap = team.roster.availableCap
+
+    return {
+      available_cap,
+      cutlist_total_salary,
+      release_total_salary,
+      own_player_charge,
+      max_bid:
+        available_cap +
+        cutlist_total_salary +
+        release_total_salary +
+        own_player_charge
     }
   }
 
-  get_max_bid = () => {
-    const available_salary = this.props.team.roster.availableCap
-    const { player_map, cutlist_total_salary } = this.props
-    const value = player_map.get('value', 0)
-    const bid = player_map.get('bid', 0)
-    const player_salary = bid || value
+  get_max_bid = () => this.get_bid_limits().max_bid
 
-    const not_in_cutlist = this.state.release_ids.filter(
-      (pid) => !this.props.cutlist.includes(pid)
-    )
-    const release_total_salary = not_in_cutlist.reduce((sum, pid) => {
-      const player_map = this.props.team.players.find(
-        (player_map) => player_map.get('pid') === pid
-      )
-      const value = player_map.get('value', 0)
+  // A bid on your OWN restricted free agent may not sit more than $10 under the
+  // player's market salary -- enforced in the API route, and invisible here until
+  // the request came back as an opaque failure. Mirrors the server's own
+  // behavior of skipping the rule when no market salary has been generated.
+  get_market_salary = () => {
+    if (!this._isOriginalTeam) {
+      return null
+    }
 
-      return sum + value
-    }, 0)
+    const market_salary = this.props.player_map.getIn(['market_salary', '0'])
+    return market_salary === null || market_salary === undefined
+      ? null
+      : Number(market_salary)
+  }
 
-    const salary_space_total =
-      available_salary + cutlist_total_salary + release_total_salary
-    const on_cutlist = this.props.cutlist.includes(player_map.get('pid'))
-    return (
-      salary_space_total +
-      (this._isOriginalTeam && !on_cutlist ? player_salary : 0)
-    )
+  get_min_bid = () => {
+    const market_salary = this.get_market_salary()
+    return market_salary === null
+      ? 0
+      : Math.max(0, Math.ceil(market_salary - 10))
   }
 
   handleBid = (event) => {
     const { value } = event.target
-    const max_bid = this.get_max_bid()
-
-    if (isNaN(value) || value % 1 !== 0) {
-      this.setState({ error: true, bid_exceeds_max: false })
-    } else if (value < 0) {
-      this.setState({ error: true, bid_exceeds_max: false })
-    } else {
-      const bid_exceeds_max = Number(value) > max_bid
-      this.setState({
-        error: false,
-        bid_exceeds_max
-      })
-    }
-
-    this.setState({ bid: value })
+    const error = isNaN(value) || value % 1 !== 0 || value < 0
+    this.setState({ bid: value, error })
   }
 
   handleRelease = (event, value) => {
-    const pids = value.map((p) => p.id)
-    this.setState({ release_ids: pids }, () => {
-      // Recalculate if bid exceeds max after release changes
-      const current_bid = Number(this.state.bid)
-      if (current_bid > 0) {
-        const max_bid = this.get_max_bid()
-        const bid_exceeds_max = current_bid > max_bid
-        this.setState({ bid_exceeds_max })
-      }
-    })
+    this.setState({ release_ids: value.map((p) => p.id) })
   }
 
   handleUntag = (event) => {
@@ -213,7 +227,10 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
         pos,
         team: player_map.get('team'),
         pname: player_map.get('short_name'),
-        value: player_map.get('value')
+        // The cap charge, not the raw contract value -- this is the number that
+        // moves the max bid when the player is selected, so showing anything
+        // else makes the ceiling appear to move by the wrong amount.
+        value: this.get_active_charge(pid_i)
       })
     })
     const is_option_equal_to_value = (option, value) => option.id === value.id
@@ -248,19 +265,55 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       />
     )
     const release_players = []
-    this.state.release_ids.forEach((pid) => {
-      const player_map = this.props.team.players.find(
-        (player_map) => player_map.get('pid') === pid
+    this.state.release_ids.forEach((release_pid) => {
+      const release_player_map = this.props.team.players.find(
+        (player_map) => player_map.get('pid') === release_pid
       )
+      // A stored release can name a player who has since left the roster, and an
+      // unguarded read here takes the whole page down rather than the one row.
+      if (!release_player_map) {
+        return
+      }
+
       release_players.push({
-        id: player_map.get('pid'),
-        label: player_map.get('name'),
-        pos: player_map.get('primary_position'),
-        team: player_map.get('team'),
-        pname: player_map.get('short_name'),
-        value: player_map.get('value')
+        id: release_pid,
+        label: release_player_map.get('name'),
+        pos: release_player_map.get('primary_position'),
+        team: release_player_map.get('team'),
+        pname: release_player_map.get('short_name'),
+        value: this.get_active_charge(release_pid)
       })
     })
+
+    const {
+      available_cap,
+      cutlist_total_salary,
+      release_total_salary,
+      own_player_charge,
+      max_bid
+    } = this.get_bid_limits()
+    const market_salary = this.get_market_salary()
+    const min_bid = this.get_min_bid()
+
+    // Both bounds are derived on every render from the same limits, so the
+    // message and the number it quotes can never disagree.
+    const numeric_bid = Number(this.state.bid)
+    const has_numeric_bid = this.state.bid !== '' && !isNaN(numeric_bid)
+    const bid_exceeds_max = has_numeric_bid && numeric_bid > max_bid
+    const bid_below_min = has_numeric_bid && numeric_bid < min_bid
+
+    const max_bid_parts = [`$${available_cap} cap space`]
+    if (cutlist_total_salary) {
+      max_bid_parts.push(`$${cutlist_total_salary} cutlist`)
+    }
+    if (release_total_salary) {
+      max_bid_parts.push(`$${release_total_salary} conditional releases`)
+    }
+    if (own_player_charge) {
+      max_bid_parts.push(
+        `$${own_player_charge} currently charged for this player`
+      )
+    }
 
     return (
       <Dialog open onClose={this.props.onClose}>
@@ -272,7 +325,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
           <div className='restricted-free-agency__bid-inputs'>
             <TextField
               label='Bid'
-              helperText={`Max Bid: ${this.get_max_bid()}`}
+              helperText={`Max bid $${max_bid} — ${max_bid_parts.join(' + ')}`}
               error={this.state.error}
               value={this.state.bid}
               onChange={this.handleBid}
@@ -284,12 +337,20 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
               size='small'
               variant='outlined'
             />
-            {this.state.bid_exceeds_max && (
+            {bid_exceeds_max && (
               <div className='restricted-free-agency__bid-warning'>
-                <strong>⚠️ WARNING:</strong> Your bid of ${this.state.bid}{' '}
-                exceeds the maximum available bid of ${this.get_max_bid()}. You
-                may not have sufficient salary cap space to successfully process
-                this transaction.
+                <strong>Over the cap:</strong> ${numeric_bid} is more than the $
+                {max_bid} you can commit to this player, so this bid will fail
+                when it is processed. Free up room by adding conditional
+                releases below, using the cutlist, or lowering another bid.
+              </div>
+            )}
+            {bid_below_min && (
+              <div className='restricted-free-agency__bid-warning'>
+                <strong>Below the market salary floor:</strong> a bid on your
+                own player may not be more than $10 under their market salary of
+                ${market_salary}. The lowest bid this league accepts for them is
+                ${min_bid}.
               </div>
             )}
             {!this._isEligible && (

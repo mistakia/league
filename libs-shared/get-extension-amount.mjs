@@ -35,7 +35,9 @@ export default function ({ extensions, tag, pos, league, value, bid, slot }) {
       return value
 
     case player_tag_types.RESTRICTED_FREE_AGENCY:
-      return bid || value
+      // A $0 bid is a real bid -- coalesce on absence, not on falsiness, or the
+      // player is priced at their prior salary instead of the committed $0.
+      return bid ?? value
 
     case player_tag_types.REGULAR:
     default:

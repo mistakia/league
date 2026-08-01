@@ -1,7 +1,7 @@
 /* global describe it */
 import * as chai from 'chai'
 
-import { roster_slot_types } from '#constants'
+import { roster_slot_types, player_tag_types } from '#constants'
 import { Roster } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
@@ -578,5 +578,114 @@ describe('LIBS-SHARED Roster', function () {
 
   it('isEligibleForSlot', () => {
     // TODO
+  })
+
+  describe('salary pricing', function () {
+    const base_league = {
+      cap: 200,
+      sqb: 1,
+      srb: 2,
+      swr: 2,
+      ste: 1,
+      srbwr: 1,
+      srbwrte: 1,
+      srqbrbwrte: 1,
+      swrte: 1,
+      sdst: 1,
+      sk: 1,
+      bench: 6,
+      ps: 4,
+      reserve_short_term_limit: 3,
+      mqb: 0,
+      mrb: 0,
+      mwr: 0,
+      mte: 0,
+      mk: 3,
+      mdst: 3,
+      ext1: 5,
+      ext2: 10,
+      ext3: 20,
+      ext4: 35
+    }
+
+    // 1970 and 2100 -- far enough either side of any mocked clock that these
+    // stay on the intended branch of `is_before_extension_deadline`.
+    const past = 1
+    const future = 4102444800
+
+    it('charges a $0 restricted free agency bid as $0, not the prior salary', () => {
+      const league = {
+        ...base_league,
+        ext_date: past,
+        restricted_free_agency_period_end: future
+      }
+
+      const roster = {
+        uid: 0,
+        players: [
+          {
+            slot: roster_slot_types.BENCH,
+            pid: 'restricted',
+            pos: 'WR',
+            value: 42,
+            tag: player_tag_types.RESTRICTED_FREE_AGENCY,
+            extensions: 0,
+            bid: 0
+          },
+          {
+            slot: roster_slot_types.BENCH,
+            pid: 'regular',
+            pos: 'RB',
+            value: 10,
+            tag: player_tag_types.REGULAR,
+            extensions: 0
+          }
+        ]
+      }
+
+      const r = new Roster({ roster, league })
+
+      r.get('restricted').value.should.equal(0)
+      // A player with no bid at all still falls back to their contract value.
+      r.get('regular').value.should.equal(10)
+      r.availableCap.should.equal(190)
+    })
+
+    it('charges a practice squad player their value during the extension window', () => {
+      const league = {
+        ...base_league,
+        ext_date: future,
+        restricted_free_agency_period_end: future
+      }
+
+      const roster = {
+        uid: 0,
+        players: [
+          {
+            slot: roster_slot_types.PS,
+            pid: 'practice',
+            pos: 'WR',
+            value: 10,
+            tag: player_tag_types.REGULAR,
+            extensions: 0
+          },
+          {
+            slot: roster_slot_types.BENCH,
+            pid: 'active',
+            pos: 'WR',
+            value: 10,
+            tag: player_tag_types.REGULAR,
+            extensions: 0
+          }
+        ]
+      }
+
+      const r = new Roster({ roster, league })
+
+      // A practice squad contract carries no extension ladder, so it prices at
+      // value while an active contract picks up the next extension step.
+      r.get('practice').value.should.equal(10)
+      r.get('active').value.should.equal(15)
+    })
   })
 })
