@@ -148,14 +148,14 @@ const column_specific_shorthand = new Map([])
 // Domain acronyms (`adp`, `faab`, `epa`, `cpoe`) are likewise not exempt -- they
 // are exactly the shorthand the standard prohibits.
 //
-// Some names this rule flags are bare BOOLEANS (`blitz`, `hurry`, `spike`,
-// `stunt`, `open`, `start`), whose more precise defect is the standard's
-// "prefixed is_/has_ for predicates" rule -- which this audit does not yet
-// implement at all. There are 300 such columns across 179 distinct names on the
-// logical tables. They are genuinely non-conforming either way and the remedy is
-// the same rename (`score` -> `is_scoring_play`), so flagging them here surfaces
-// them rather than losing them; when the boolean rule lands they reclassify to
-// it, exactly as `position` and `timestamp` moved off the camelCase rule.
+// Some names this rule used to flag are bare BOOLEANS (`blitz`, `hurry`,
+// `spike`, `stunt`, `open`, `start`), whose more precise defect is the standard's
+// "prefixed is_/has_ for predicates" rule. That rule now exists (see
+// is_unprefixed_boolean below) and OWNS them: 40 columns across 21 names
+// reclassified off this rule onto boolean_prefix when it landed, exactly as
+// `position` and `timestamp` moved off the camelCase rule. They were never
+// double-reported and are not lost -- the remedy is the same rename
+// (`score` -> `is_scoring_play`), now filed under the rule that describes it.
 const accepted_short_words = new Set([
   'batch',
   'class',
@@ -198,6 +198,39 @@ function is_bare_shorthand(name) {
   // team rule actually claimed this column (see non_team_columns).
   if (season_grain_columns.has(name)) return false
   if (reserved_word_columns.has(name)) return false
+  return true
+}
+
+// Boolean predicate naming: "Boolean columns MUST be SQL `boolean`, prefixed
+// `is_` / `has_` for predicates."
+//
+// This rule is TYPE-DRIVEN, not name-driven, which is what makes it a real
+// ratchet rather than another enumeration: it reads the declared type out of the
+// dump, so a boolean added by a future migration under any name at all is caught
+// with no edit to this file. It is the counterpart to the inverted bare-short-name
+// rule above -- both replace a list of names someone thought of with a property
+// the schema states about itself.
+//
+// The carve-out is SHAPE, not identity. A name carrying `_is_` / `_has_` in the
+// middle is a qualified predicate -- a subject followed by the predicate marker,
+// as in `combine_height_is_pro_day` or `forty_yd_dash_is_unofficial`. Those read
+// correctly, are unambiguously boolean at a glance, and the prefixed rewrite
+// (`is_combine_height_pro_day`) is strictly worse English: it detaches the
+// predicate from the measurement it qualifies. 50 columns across 30 names take
+// this form, all of them combine/pro-day measurement flags. Exempting the SHAPE
+// rather than listing the 30 names keeps the rule recurrence-proof -- a new
+// measurement flag conforms on arrival instead of needing an allowlist entry.
+//
+// TEXT booleans ("Y"/"N" varchar columns) are prohibited by the same sentence of
+// the standard and are NOT covered here: nothing in the dump distinguishes a
+// varchar flag from any other varchar, so detecting them needs value sampling
+// against production rather than a schema parse. That is a separate instrument,
+// not a widening of this one.
+function is_unprefixed_boolean(col) {
+  if (!/^boolean\b/.test(col.type.trim().toLowerCase())) return false
+  const name = col.name.toLowerCase()
+  if (/^(is|has)_/.test(name)) return false
+  if (/_(is|has)_/.test(name)) return false
   return true
 }
 
@@ -352,6 +385,7 @@ const RULES = {
   season_grain:
     'Non-conforming season grain (season_year/season_type required)',
   ambiguous_team: 'Ambiguous team-role spelling (qualify explicitly)',
+  boolean_prefix: 'Boolean column not prefixed is_/has_',
   external_id: 'External-id column not following {system}_{entitytype}_id',
   timestamp_type: 'Non-timestamptz timestamp representation'
 }
@@ -399,8 +433,20 @@ function check_column(table, col) {
     findings.push({ rule: 'ambiguous_team', table, column: col.name })
   }
 
+  // Boolean predicate prefix. Computed before the shorthand block because it
+  // CLAIMS the bare-short-name branch: a bare boolean like `spike` or `score` is
+  // one defect with one remedy, and reporting it under both rules would inflate
+  // the count and hand a worker two tickets for one rename.
+  const unprefixed_boolean = is_unprefixed_boolean(col)
+  if (unprefixed_boolean) {
+    findings.push({ rule: 'boolean_prefix', table, column: col.name })
+  }
+
   // Shorthand: the table-specific hint first, then the named-abbreviation map,
-  // then the general bare-short-name rule for everything neither can name.
+  // then the general bare-short-name rule for everything neither can name. The
+  // first two branches survive on a boolean -- they carry a concrete full-word
+  // replacement the boolean rule cannot supply -- but the bare-name branch does
+  // not, per the reclassification above.
   const specific_hint = column_specific_shorthand.get(`${table}.${lower}`)
   if (specific_hint) {
     findings.push({
@@ -416,7 +462,11 @@ function check_column(table, col) {
       column: col.name,
       hint: shorthand_columns.get(lower)
     })
-  } else if (!is_team_column && is_bare_shorthand(lower)) {
+  } else if (
+    !is_team_column &&
+    !unprefixed_boolean &&
+    is_bare_shorthand(lower)
+  ) {
     findings.push({ rule: 'shorthand', table, column: col.name })
   }
 
