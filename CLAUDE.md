@@ -94,6 +94,8 @@ The recurring cause is the project's camelCase → snake_case action rename pass
 
 When touching a dispatch map, verify each referenced name exists on the actions module rather than trusting it — `grep -nE "^\s+<name>[:(]" app/core/<domain>/actions.js`. A same-named saga or a `SCREAMING_CASE` type constant is not the creator: `removeTag` existed as both a saga export and `REMOVE_TAG`, which is exactly what made the wrong name look plausible. There is currently **no automated guard** for this class; the modules are not Node-importable as-is (they resolve webpack aliases like `@core/utils`), so a test would need its own alias harness.
 
+**`player_map.get(key, default)` is not a null guard, and it reads exactly like one.** Immutable substitutes `notSetValue` only when the key is ABSENT; a key present with an explicit `null` returns `null`. Several reducer branches write explicit nulls when clearing a field — `DELETE_RESTRICTED_FREE_AGENCY_TAG_FULFILLED` sets `bid` and `restricted_free_agency_conditional_releases` — so `get('restricted_free_agency_conditional_releases', [])` handed the RFA dialog a null it then iterated, crashing the page for a real user on 2026-08-01 (signal #123965). Coalesce with `|| []` / `?? 0` when the field is one a reducer clears; a 2026-08-01 sweep of the other array-defaulted reads (`championship_round`, `deltas`) found no second live instance, but nothing prevents the next one. Clearing a field to the empty shape the API already returns — every players route coalesces this one with `|| []` — is the better half of the fix, since it keeps client state in the shape every read site expects.
+
 **Frontend Import Aliases** (configured in webpack):
 
 - `@core` → `app/core`
