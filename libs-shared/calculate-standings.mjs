@@ -2,7 +2,7 @@ import debug from 'debug'
 import { current_season, create_empty_fantasy_team_stats } from '#constants'
 import calculatePoints from './calculate-points.mjs'
 import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
-import compare_playoff_seed from './compare-playoff-seed.mjs'
+import get_playoff_seeding from './get-playoff-seeding.mjs'
 
 const log = debug('calculate-standings')
 debug.enable('calculate-standings')
@@ -272,16 +272,21 @@ const calculateStandings = ({
 
   // calculate regular season finish
   //
-  // Seeds run on head-to-head record, then all-play wins, then points for --
-  // the same ladder at every league size. Division standing is not an input,
-  // so this holds identically for a single division and for four divisions of
-  // three; division_finish above remains a reported standing, nothing more.
-  const seeded_team_ids = Object.values(teamStats)
-    .sort((a, b) => compare_playoff_seed(a.stats, b.stats))
-    .map((p) => p.tid)
+  // The playoff format comes from the league's season settings, not from this
+  // module. division_finish above remains a reported standing either way.
+  const { seeded_tids } = get_playoff_seeding({
+    teams: Object.values(teamStats).map((p) => ({
+      tid: p.tid,
+      div: p.div,
+      ...p.stats
+    })),
+    playoff_team_count: league.playoff_team_count,
+    bye_count: league.bye_count,
+    division_winners_qualify: league.division_winners_qualify
+  })
 
-  for (let i = 0; i < seeded_team_ids.length; i++) {
-    teamStats[seeded_team_ids[i]].stats.regular_season_finish = i + 1
+  for (let i = 0; i < seeded_tids.length; i++) {
+    teamStats[seeded_tids[i]].stats.regular_season_finish = i + 1
   }
 
   return teamStats

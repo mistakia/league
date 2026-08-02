@@ -15,6 +15,10 @@ const expect = chai.expect
 const into_week_2_unix = season_dates.regular_season_start + 15 * 24 * 60 * 60
 
 const make_league = () => ({
+  // playoff format -- calculateStandings reads these off the league/season row
+  playoff_team_count: 6,
+  bye_count: 2,
+  division_winners_qualify: false,
   // starter slot counts -- required_starter_count = 7
   sqb: 1,
   srb: 2,

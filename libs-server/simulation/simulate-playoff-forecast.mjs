@@ -10,6 +10,7 @@ import { current_season } from '#constants'
 
 import { load_actual_playoff_points } from './load-simulation-data.mjs'
 import { simulate_playoff_weeks_correlated } from './simulate-playoff-weeks.mjs'
+import { load_simulation_context } from './simulation-helpers.mjs'
 
 const log = debug('simulation:playoff-forecast')
 
@@ -35,17 +36,22 @@ export async function simulate_wildcard_forecast({
   const start_time = Date.now()
   log(`Starting wildcard forecast for league ${league_id}`)
 
+  const { playoff_format } = await load_simulation_context({ league_id, year })
+  const { playoff_team_count, bye_count } = playoff_format
+
   // Get playoff teams
   const team_stats = await db('league_team_seasonlogs')
     .where({ lid: league_id, year })
-    .whereIn('regular_season_finish', [1, 2, 3, 4, 5, 6])
+    .whereBetween('regular_season_finish', [1, playoff_team_count])
 
-  if (team_stats.length !== 6) {
-    throw new Error(`Expected 6 playoff teams, found ${team_stats.length}`)
+  if (team_stats.length !== playoff_team_count) {
+    throw new Error(
+      `Expected ${playoff_team_count} playoff teams, found ${team_stats.length}`
+    )
   }
 
   const bye_tids = team_stats
-    .filter((t) => [1, 2].includes(t.regular_season_finish))
+    .filter((t) => t.regular_season_finish <= bye_count)
     .map((t) => t.tid)
 
   const wildcard_tids = team_stats
@@ -278,9 +284,15 @@ export async function simulate_championship_forecast({
 
   const championship_tids = [...new Set(playoffs.map((p) => p.tid))]
 
-  if (championship_tids.length !== 4) {
+  const { playoff_format } = await load_simulation_context({ league_id, year })
+  const { bye_count } = playoff_format
+  // Byes plus the wildcard survivors, which is one winner per wildcard pairing.
+  const championship_team_count =
+    bye_count + Math.floor((playoff_format.playoff_team_count - bye_count) / 2)
+
+  if (championship_tids.length !== championship_team_count) {
     throw new Error(
-      `Expected 4 championship teams, found ${championship_tids.length}`
+      `Expected ${championship_team_count} championship teams, found ${championship_tids.length}`
     )
   }
 
@@ -292,7 +304,7 @@ export async function simulate_championship_forecast({
     )
   ]
 
-  // Load team stats for division winner determination
+  // Load team stats to identify which seeds received a bye
   const team_stats_list = await db('league_team_seasonlogs').where({
     lid: league_id,
     year
@@ -308,7 +320,7 @@ export async function simulate_championship_forecast({
   for (const team of all_teams) {
     const team_stats = team_stats_by_tid[team.uid]
     // Top two seeds receive the bye; divisions confer no berth.
-    const has_bye = [1, 2].includes(team_stats?.regular_season_finish)
+    const has_bye = team_stats?.regular_season_finish <= bye_count
 
     result[team.uid] = {
       tid: team.uid,

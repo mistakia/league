@@ -28,7 +28,7 @@ import {
   get_game_progress,
   calculate_live_projection,
   optimizeStandingsLineup,
-  compare_playoff_seed
+  get_playoff_seeding
 } from '@libs-shared'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
 import {
@@ -2950,27 +2950,32 @@ export const get_draft_pick_trade_counts = createSelector(
 
 // gets the overall standings for the current league and year
 //
-// Seeding runs one league-wide ladder -- head-to-head record, then all-play
-// wins, then points for -- matching libs-shared/compare-playoff-seed.mjs.
-// Division standing is not an input, so this is correct for a single division
-// and for four alike.
+// Seeding is whatever the league's own settings say -- field size, bye count,
+// and whether division winners are guaranteed a berth -- resolved by
+// libs-shared/get-playoff-seeding.mjs. Nothing here assumes a format.
 export function get_overall_standings(state) {
   const teams = get_teams_for_current_league_and_year(state)
+  const league = get_current_league(state)
   const divisionTeams = teams.groupBy((x) => x.getIn(['div'], 0))
 
-  const overall = teams
-    .toList()
-    .sort((a, b) =>
-      compare_playoff_seed(
-        a.get('stats', new Map()).toJS(),
-        b.get('stats', new Map()).toJS()
-      )
-    )
+  const { seeded_tids, bye_tids, playoff_tids } = get_playoff_seeding({
+    teams: teams
+      .toList()
+      .toJS()
+      .map((team) => ({ tid: team.uid, div: team.div, ...team.stats })),
+    playoff_team_count: league.playoff_team_count,
+    bye_count: league.bye_count,
+    division_winners_qualify: league.division_winners_qualify
+  })
+
+  const overall = new List(seeded_tids.map((tid) => teams.get(tid)))
 
   return {
     teams,
     divisionTeams,
-    overall
+    overall,
+    bye_count: bye_tids.length,
+    playoff_team_count: playoff_tids.length
   }
 }
 

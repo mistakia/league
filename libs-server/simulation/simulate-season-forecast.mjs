@@ -7,7 +7,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { current_season } from '#constants'
-import { groupBy, compare_playoff_seed } from '#libs-shared'
+import { groupBy, get_playoff_seeding } from '#libs-shared'
 
 import { simulate_league_week } from './simulate-league-week.mjs'
 import { load_simulation_context } from './simulation-helpers.mjs'
@@ -15,12 +15,6 @@ import { load_simulation_context } from './simulation-helpers.mjs'
 const log = debug('simulation:season-forecast')
 
 const SIMULATIONS = 10000
-
-// Playoff shape is fixed by the constitution and does not vary with league
-// size: six teams qualify, the top two receive a bye to the championship, and
-// the remaining four play the wildcard round.
-const PLAYOFF_TEAM_COUNT = 6
-const BYE_COUNT = 2
 
 /**
  * Simulate season forecast for a league.
@@ -51,8 +45,8 @@ export async function simulate_season_forecast({
     `Starting season forecast for league ${league_id}, week ${current_week}, year ${year}`
   )
 
-  // Load league context (validates league exists)
-  await load_simulation_context({
+  // Load league context (validates league exists, supplies the playoff format)
+  const { playoff_format } = await load_simulation_context({
     league_id,
     year
   })
@@ -129,7 +123,8 @@ export async function simulate_season_forecast({
       league_id,
       year,
       teams,
-      team_stats_by_tid
+      team_stats_by_tid,
+      playoff_format
     })
   }
 
@@ -262,7 +257,7 @@ export async function simulate_season_forecast({
     }
 
     // Determine playoff seedings
-    const playoff_result = determine_playoffs({ standings })
+    const playoff_result = determine_playoffs({ standings, playoff_format })
 
     // Record results
     for (const tid of playoff_result.playoff_tids) {
@@ -306,17 +301,11 @@ export async function simulate_season_forecast({
 /**
  * Determine playoff seedings from standings.
  */
-function determine_playoffs({ standings }) {
-  // Seed the whole league on one ladder -- head-to-head record, then all-play
-  // wins, then points for. Independent of how many divisions exist, so the
-  // field is six teams whether the league runs one division or four.
-  const seeded_tids = Object.values(standings)
-    .sort(compare_playoff_seed)
-    .map((t) => t.tid)
-
-  const bye_tids = seeded_tids.slice(0, BYE_COUNT)
-  const wildcard_tids = seeded_tids.slice(BYE_COUNT, PLAYOFF_TEAM_COUNT)
-  const playoff_tids = [...bye_tids, ...wildcard_tids]
+function determine_playoffs({ standings, playoff_format }) {
+  const { playoff_tids, bye_tids, wildcard_tids } = get_playoff_seeding({
+    teams: Object.values(standings),
+    ...playoff_format
+  })
 
   return { playoff_tids, bye_tids, wildcard_tids }
 }
@@ -359,7 +348,8 @@ async function build_post_season_forecast({
   league_id,
   year,
   teams,
-  team_stats_by_tid
+  team_stats_by_tid,
+  playoff_format
 }) {
   // Load playoff data
   const playoffs = await db('playoffs').where({ lid: league_id, year })
@@ -368,13 +358,13 @@ async function build_post_season_forecast({
   for (const team of teams) {
     const stats = team_stats_by_tid[team.uid]
     const is_playoff_team = playoffs.some((p) => p.tid === team.uid)
-    const is_division_winner = stats?.regular_season_finish <= 2
+    const has_bye = stats?.regular_season_finish <= playoff_format.bye_count
 
     result[team.uid] = {
       tid: team.uid,
       playoff_odds: is_playoff_team ? 1.0 : 0.0,
-      division_odds: is_division_winner ? 1.0 : 0.0,
-      bye_odds: is_division_winner ? 1.0 : 0.0,
+      division_odds: has_bye ? 1.0 : 0.0,
+      bye_odds: has_bye ? 1.0 : 0.0,
       championship_odds: 0 // Would need playoff simulation
     }
   }

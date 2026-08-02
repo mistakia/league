@@ -31,7 +31,14 @@ export async function load_simulation_context({ league_id, year }) {
 
   return {
     league,
-    scoring_format_id: season.scoring_format_id
+    scoring_format_id: season.scoring_format_id,
+    // Read off the season row rather than the league join, so a forecast for a
+    // past year uses that year's playoff format.
+    playoff_format: {
+      playoff_team_count: season.playoff_team_count,
+      bye_count: season.bye_count,
+      division_winners_qualify: season.division_winners_qualify
+    }
   }
 }
 

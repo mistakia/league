@@ -114,9 +114,8 @@ Standings.propTypes = {
 }
 
 function Overall({ standings, year, is_current_year, is_regular_season }) {
-  // One league-wide seed order: the top two receive a bye, seeds three through
-  // six play the wildcard round, and the rest are eliminated. Divisions do not
-  // enter into it, so this reads the same at any division count.
+  // Seed order comes from the league's own playoff settings, so the dividers
+  // land wherever that league's bye and field boundaries fall.
   const overallRows = []
   let key = 0
   let seed = 0
@@ -128,10 +127,10 @@ function Overall({ standings, year, is_current_year, is_regular_season }) {
     )
     key++
     seed++
-    if (seed === 2) {
+    if (seed === standings.bye_count) {
       overallRows.push(<Divider key={key} title='Bye Teams' />)
       key++
-    } else if (seed === 6) {
+    } else if (seed === standings.playoff_team_count) {
       overallRows.push(<Divider key={key} title='Wildcard Teams' />)
       key++
     }

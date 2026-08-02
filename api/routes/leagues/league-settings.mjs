@@ -226,7 +226,18 @@ export const league_scoring_format_fields = [
   'exclude_quarterback_kneels'
 ]
 
-export const season_fields = ['mqb', 'mrb', 'mwr', 'mte', 'mdst', 'mk', 'faab']
+export const season_fields = [
+  'mqb',
+  'mrb',
+  'mwr',
+  'mte',
+  'mdst',
+  'mk',
+  'faab',
+  'playoff_team_count',
+  'bye_count',
+  'division_winners_qualify'
+]
 
 // All updatable league settings fields
 export const league_settings_fields = [
@@ -258,6 +269,8 @@ export const integer_fields = [
   'mdst',
   'mk',
   'faab',
+  'playoff_team_count',
+  'bye_count',
   'cap',
   'passing_attempts',
   'passing_completions',
@@ -307,6 +320,7 @@ export const positive_integer_fields = [
   'mdst',
   'mk',
   'faab',
+  'playoff_team_count',
   'cap',
   'min_bid',
   'punt_return_touchdowns',
