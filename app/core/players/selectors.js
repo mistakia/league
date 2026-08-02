@@ -200,6 +200,17 @@ export function getFilteredPlayers(state) {
         return true
       }
 
+      // A potential free agent is a rostered player his team is paying more
+      // than he will cost to replace -- so a cut candidate, and therefore
+      // someone who may reach the market.
+      //
+      // The comparison used to be against 0.85 of the adjusted market salary.
+      // c9d1f8425 (2022-07-25) introduced that multiplier in the same change
+      // that switched the comparison from market_salary to market_salary_adj,
+      // with no comment and nothing in the commit message, and nothing has
+      // explained it since. It widened the set by 15% for no stated reason.
+      // There is no measurement to preserve here, so it is gone rather than
+      // named: the honest predicate is that the contract exceeds the price.
       if (
         availability.includes('POTENTIAL FREE AGENT') &&
         player_map.get('tid')
@@ -214,7 +225,7 @@ export function getFilteredPlayers(state) {
         if (
           !practice_squad_slots.includes(slot) &&
           !isRestrictedOrFranchised &&
-          salary - market_salary_adj * 0.85 > 0
+          salary - market_salary_adj > 0
         ) {
           return true
         }
