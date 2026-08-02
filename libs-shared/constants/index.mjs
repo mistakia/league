@@ -76,6 +76,7 @@ export {
 export {
   roster_slot_types,
   starting_lineup_slots,
+  starting_lineup_slot_league_keys,
   active_roster_slots,
   practice_squad_slots,
   practice_squad_protected_slots,

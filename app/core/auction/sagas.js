@@ -13,7 +13,12 @@ import {
 import { auction_actions } from './actions'
 import { send } from '@core/ws'
 import { get_eligible_slots } from '@libs-shared'
-import { fantasy_positions, player_id_regex, team_id_regex } from '@constants'
+import {
+  fantasy_positions,
+  player_id_regex,
+  team_id_regex,
+  starting_lineup_slot_league_keys
+} from '@constants'
 import { beep } from '@core/audio'
 
 export function* optimize() {
@@ -76,10 +81,10 @@ export function* optimize() {
     }
   }
 
-  const starter_limit = Object.keys(league)
-    .filter((k) => k.startsWith('s'))
-    .map((k) => league[k])
-    .reduce((a, b) => a + b)
+  const starter_limit = starting_lineup_slot_league_keys.reduce(
+    (sum, key) => sum + (league[key] || 0),
+    0
+  )
 
   // if lineup incomplete, optimize with available players
   if (starter_pids.length < starter_limit) {

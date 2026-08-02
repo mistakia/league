@@ -100,6 +100,8 @@ export const projection_data_source_ids = [
 
 export const default_points_added = -999
 
-export const team_id_regex = /^([A-Z]{1,3})$/gi
-export const player_id_regex =
-  /^([A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2})$/gi
+// Matched against the keys of a solver result to tell chosen players apart from
+// the solver's own bookkeeping keys. Player ids are NAME-NAME-DDMMYY (16 chars);
+// team ids are the 2-3 letter nfl abbreviation used as the pid of a DST.
+export const team_id_regex = /^[A-Z]{1,3}$/i
+export const player_id_regex = /^[A-Z]{4}-[A-Z]{4}-[0-9]{6}$/i

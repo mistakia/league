@@ -38,6 +38,23 @@ export const active_roster_slots = [
   roster_slot_types.BENCH
 ]
 
+// League-config keys holding the number of starters at each starting slot.
+// Enumerated rather than derived by prefix: the league object also carries
+// unrelated s-prefixed fields (salary_attribution_rule, sleeper_id,
+// scoring_format_id) that must not be summed into a starter count.
+export const starting_lineup_slot_league_keys = [
+  'sqb',
+  'srb',
+  'swr',
+  'ste',
+  'swrte',
+  'srbwr',
+  'srbwrte',
+  'sqbrbwrte',
+  'sk',
+  'sdst'
+]
+
 export const practice_squad_slots = [
   roster_slot_types.PS,
   roster_slot_types.PSP,
