@@ -28,7 +28,8 @@ import {
   get_game_progress,
   calculate_live_projection,
   optimizeStandingsLineup,
-  get_playoff_seeding
+  get_playoff_seeding,
+  compare_playoff_seed
 } from '@libs-shared'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
 import {
@@ -2958,11 +2959,32 @@ export function get_overall_standings(state) {
   const league = get_current_league(state)
   const divisionTeams = teams.groupBy((x) => x.getIn(['div'], 0))
 
+  const flat_teams = teams
+    .toList()
+    .toJS()
+    .map((team) => ({ tid: team.uid, div: team.div, ...team.stats }))
+
+  // get_playoff_seeding THROWS on a missing playoff format, which is right on
+  // the server but wrong here: this runs inside mapStateToProps, so a throw
+  // blanks the standings page and the league-home dashboard outright. A league
+  // whose format has not loaded yet is an ordinary transient state, so degrade
+  // to record-ordered standings with no playoff bands rather than crashing.
+  if (!Number.isInteger(league.playoff_team_count)) {
+    return {
+      teams,
+      divisionTeams,
+      overall: new List(
+        [...flat_teams]
+          .sort(compare_playoff_seed)
+          .map((team) => teams.get(team.tid))
+      ),
+      bye_count: 0,
+      playoff_team_count: 0
+    }
+  }
+
   const { seeded_tids, bye_tids, playoff_tids } = get_playoff_seeding({
-    teams: teams
-      .toList()
-      .toJS()
-      .map((team) => ({ tid: team.uid, div: team.div, ...team.stats })),
+    teams: flat_teams,
     playoff_team_count: league.playoff_team_count,
     bye_count: league.bye_count,
     bye_candidate_pool: league.bye_candidate_pool,

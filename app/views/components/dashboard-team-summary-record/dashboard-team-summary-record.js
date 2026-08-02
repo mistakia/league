@@ -36,19 +36,18 @@ export default function DashboardTeamSummaryRecord({
 
     leagueStandings.push(item)
 
-    if (index === 1) {
+    // Dividers come from the league's own playoff format, not from a fixed
+    // 6/2 shape. There is no "Division Leaders" band any more -- divisions
+    // decide bye eligibility, not a block of seeds.
+    const seed = index + 1
+
+    if (seed === standings.bye_count) {
       leagueStandings.push(
         <tr key='bye'>
           <td colSpan='3'>Bye Teams</td>
         </tr>
       )
-    } else if (index === 3) {
-      leagueStandings.push(
-        <tr key='division'>
-          <td colSpan='3'>Division Leaders</td>
-        </tr>
-      )
-    } else if (index === 5) {
+    } else if (seed === standings.playoff_team_count) {
       leagueStandings.push(
         <tr key='wildcard'>
           <td colSpan='3'>Wildcard Teams</td>
@@ -58,6 +57,9 @@ export default function DashboardTeamSummaryRecord({
 
     if (t.div === team.div) divStandings.push(item)
   }
+
+  // With a single division the divisional table is a copy of the overall one.
+  const has_divisions = standings.teams.groupBy((t) => t.get('div')).size > 1
 
   return (
     <Accordion TransitionProps={{ unmountOnExit: true }}>
@@ -77,16 +79,18 @@ export default function DashboardTeamSummaryRecord({
         </Grid>
       </AccordionSummary>
       <AccordionDetails style={{ flexWrap: 'wrap' }}>
-        <table>
-          <thead>
-            <tr>
-              <td>Division</td>
-              <td>Rec</td>
-              <td>PF</td>
-            </tr>
-          </thead>
-          <tbody>{divStandings}</tbody>
-        </table>
+        {has_divisions && (
+          <table>
+            <thead>
+              <tr>
+                <td>Division</td>
+                <td>Rec</td>
+                <td>PF</td>
+              </tr>
+            </thead>
+            <tbody>{divStandings}</tbody>
+          </table>
+        )}
         <table>
           <thead>
             <tr>

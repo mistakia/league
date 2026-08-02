@@ -33,6 +33,15 @@ export const League = new Record({
   faab: null,
   cap: null,
 
+  // Playoff format, from the seasons row. These MUST be declared here or
+  // Immutable's Record silently drops them from the constructor payload and
+  // get_playoff_seeding throws on undefined in the standings selector.
+  playoff_team_count: null,
+  bye_count: null,
+  bye_candidate_pool: null,
+  bye_selection_method: null,
+  has_division_winner_berths: null,
+
   passing_attempts: null,
   passing_completions: null,
   passing_yards: null,
@@ -157,6 +166,12 @@ export function createLeague({
   faab,
   cap,
 
+  playoff_team_count,
+  bye_count,
+  bye_candidate_pool,
+  bye_selection_method,
+  has_division_winner_berths,
+
   passing_attempts,
   passing_completions,
   passing_yards,
@@ -279,6 +294,12 @@ export function createLeague({
 
     faab,
     cap,
+
+    playoff_team_count,
+    bye_count,
+    bye_candidate_pool,
+    bye_selection_method,
+    has_division_winner_berths,
 
     passing_attempts,
     passing_completions,
