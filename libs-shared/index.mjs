@@ -10,11 +10,6 @@ export { default as weightProjections } from './weight-projections.mjs'
 export { default as calculateBaselines } from './calculate-baselines.mjs'
 export { default as calculatePoints } from './calculate-points.mjs'
 export { default as calculateValues } from './calculate-values.mjs'
-export {
-  default as calibrate_projected_points,
-  projection_calibration_trust_floor
-} from './calibrate-projected-points.mjs'
-export { default as fit_linear_regression } from './fit-linear-regression.mjs'
 export { default as get_eligible_slots } from './get-eligible-slots.mjs'
 export { default as Roster } from './roster.mjs'
 export { default as calculateDstStatsFromPlays } from './calculate-dst-stats-from-plays.mjs'

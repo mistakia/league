@@ -14,13 +14,23 @@
 // Real auctions do not spend the cap in proportion to surplus, because teams
 // must still fill every roster spot: a large share of the cap goes to players at
 // or below replacement, who have zero surplus by construction. surplus_cap_share
-// is the fraction that does reach above-replacement players. It is FITTED
-// against observed salaries by scripts/fit-surplus-cap-share.mjs, not tuned.
+// is the fraction that does reach above-replacement players.
 //
-// Fitted 2026-08-02 by least squares of observed contract value on pts_added
-// across the hosted leagues, against the calibrated projected board. Mirrors the
-// league_formats.surplus_cap_share column default; used for the synthetic lid=0
-// league, which has no row.
+// BEING RETIRED. The value was fitted by least squares of observed contract
+// value on pts_added against the CALIBRATED board, and it was largely
+// compensating for that board's broken denominator: the calibrated pass put only
+// ~0.61 of a realized season's total points added on the board, so the $/point
+// rate came out high and a sub-1 share pulled it back down. Drawing the board
+// from projection dispersion puts the denominator back on a realized season's
+// scale (~0.97 over 2020-2025), which is what makes spending the whole
+// discretionary cap the right arithmetic rather than an overshoot.
+//
+// Note league_total_salary_cap is ALREADY discretionary -- it is
+// num_teams * cap minus the minimum bid on every roster spot -- so retiring this
+// means the multiplier becomes 1, not that minimum salaries are ignored.
+//
+// The fitter (scripts/fit-surplus-cap-share.mjs) is gone, so this cannot be
+// refit; it is frozen until the column is dropped with the pricing rewire.
 export const DEFAULT_SURPLUS_CAP_SHARE = 0.63
 
 // Default 1 preserves the old arithmetic for any caller that does not supply a

@@ -82,7 +82,6 @@ export * as gambet from './gambet.mjs'
 export * as cache from './cache.mjs'
 export * as betrivers from './betrivers.mjs'
 export { default as get_league_format } from './get-league-format.mjs'
-export { default as get_projection_calibration } from './get-projection-calibration.mjs'
 export {
   default as get_game_team_implied_totals,
   parse_game_team_total_market_id
