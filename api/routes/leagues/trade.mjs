@@ -166,7 +166,9 @@ export const get_trade = async (req, res) => {
     const trades = await db('trades').where({ uid: tradeId })
     const trade = trades[0]
     if (!trade) {
-      res.status(400).send({ error: `could not find tradeid: ${tradeId}` })
+      return res
+        .status(400)
+        .send({ error: `could not find tradeid: ${tradeId}` })
     }
 
     const release_rows = await db('trade_releases').where({ tradeid: tradeId })
@@ -496,7 +498,7 @@ router.post(
       // verify trade exists
       const trade = trades[0]
       if (!trade) {
-        res
+        return res
           .status(400)
           .send({ error: `no valid trade with tradeid: ${tradeId}` })
       }
@@ -1448,6 +1450,25 @@ router.post(
         return res
           .status(400)
           .send({ error: `no valid trade with tradeid: ${tradeId}` })
+      }
+
+      // Veto only stamps a timestamp; it does not reverse an executed trade.
+      // Allowing it on a closed trade would leave the league with rosters,
+      // transactions and pick ownership already changed by the accept, and a
+      // trade marked both accepted and vetoed.
+      const [trade] = trades
+      if (trade.accepted) {
+        return res.status(400).send({
+          error: 'trade has already been accepted and can not be vetoed'
+        })
+      }
+      if (trade.vetoed) {
+        return res.status(400).send({ error: 'trade has already been vetoed' })
+      }
+      if (trade.cancelled || trade.rejected) {
+        return res
+          .status(400)
+          .send({ error: 'trade is no longer open and can not be vetoed' })
       }
 
       await db('trades')

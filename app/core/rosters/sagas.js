@@ -661,20 +661,20 @@ export function* watchPostTagFulfilled() {
   yield takeLatest(roster_actions.POST_TAG_FULFILLED, tagNotification)
 }
 
-export function* watchTradeSetProposingTeamPlayers() {
-  yield takeLatest(trade_actions.TRADE_SET_PROPOSING_TEAM_PLAYERS, projectTrade)
-}
-
-export function* watchTradeSetAcceptingTeamPlayers() {
-  yield takeLatest(trade_actions.TRADE_SET_ACCEPTING_TEAM_PLAYERS, projectTrade)
-}
-
-export function* watchTradeSelectTeam() {
-  yield takeLatest(trade_actions.TRADE_SELECT_TEAM, projectTrade)
-}
-
-export function* watchSelectTrade() {
-  yield takeLatest(trade_actions.SELECT_TRADE, projectTrade)
+// Every change to which players end up on which roster invalidates the trade
+// lineup projection. Picks are deliberately absent: they carry draft value, not
+// lineup points, and that is recomputed synchronously by the analysis selector.
+export function* watchTradeRosterChanges() {
+  yield takeLatest(
+    [
+      trade_actions.TRADE_SET_PROPOSING_TEAM_PLAYERS,
+      trade_actions.TRADE_SET_ACCEPTING_TEAM_PLAYERS,
+      trade_actions.TRADE_SET_RELEASE_PLAYERS,
+      trade_actions.TRADE_SELECT_TEAM,
+      trade_actions.SELECT_TRADE
+    ],
+    projectTrade
+  )
 }
 
 export function* watchAddTag() {
@@ -814,10 +814,7 @@ export const roster_sagas = [
   fork(watchRemovePlayerRoster),
   fork(watchUpdatePlayerRoster),
 
-  fork(watchTradeSetProposingTeamPlayers),
-  fork(watchTradeSetAcceptingTeamPlayers),
-  fork(watchTradeSelectTeam),
-  fork(watchSelectTrade),
+  fork(watchTradeRosterChanges),
 
   fork(watchAddRestrictedFreeAgencyTag),
   fork(watchRemoveRestrictedFreeAgencyTag),
