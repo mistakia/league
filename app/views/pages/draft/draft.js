@@ -16,7 +16,11 @@ import Position from '@components/position'
 
 import 'react-virtualized-compat/styles.css'
 import './draft.styl'
-import { current_season, fantasy_positions } from '@constants'
+import {
+  current_season,
+  default_points_added,
+  fantasy_positions
+} from '@constants'
 
 dayjs.extend(relativeTime)
 
@@ -129,8 +133,8 @@ export default function DraftPage({
 
   const sorted = players.sort(
     (a, b) =>
-      b.getIn(['pts_added', '0'], current_season.default_points_added) -
-      a.getIn(['pts_added', '0'], current_season.default_points_added)
+      b.getIn(['pts_added', '0'], default_points_added) -
+      a.getIn(['pts_added', '0'], default_points_added)
   )
   const allRow = ({ index, key, ...params }) => {
     const player_map = sorted.get(index)
