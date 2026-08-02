@@ -25,16 +25,43 @@ export default function RestrictedFreeAgencyPage({
   year,
   is_pending
 }) {
-  const { lid } = useParams()
+  const { lid, season_year } = useParams()
   const navigate = useNavigate()
+
+  // The URL owns the season, so a link to one is shareable and the back button
+  // steps through the selections rather than leaving the page. A bare path is
+  // left alone rather than rewritten to the current year, which keeps such a
+  // link evergreen.
+  useEffect(() => {
+    if (!season_year) return
+
+    const requested_year = Number(season_year)
+    if (
+      isNaN(requested_year) ||
+      requested_year > current_season.year ||
+      requested_year < FIRST_RESTRICTED_FREE_AGENCY_YEAR
+    ) {
+      return navigate(`/leagues/${lid}/restricted-free-agency`, {
+        replace: true
+      })
+    }
+
+    if (requested_year !== year) {
+      select_restricted_free_agency_year(requested_year)
+    }
+  }, [lid, season_year, year, select_restricted_free_agency_year, navigate])
 
   useEffect(() => {
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
 
+    // Hold until the store has caught up to the URL, or a linked season fetches
+    // the current one first and its own a moment later.
+    if (season_year && Number(season_year) !== year) return
+
     load_restricted_free_agency_auctions({ leagueId: lid, year })
-  }, [lid, year, load_restricted_free_agency_auctions, navigate])
+  }, [lid, year, season_year, load_restricted_free_agency_auctions, navigate])
 
   const years = []
   for (
@@ -46,7 +73,7 @@ export default function RestrictedFreeAgencyPage({
   }
 
   const handle_year_change = (event) =>
-    select_restricted_free_agency_year(event.target.value)
+    navigate(`/leagues/${lid}/restricted-free-agency/${event.target.value}`)
 
   const auction_items = auctions.map((auction, index) => (
     <RestrictedFreeAgencyAuction key={index} auction={auction} />

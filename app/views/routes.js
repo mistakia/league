@@ -99,6 +99,10 @@ const Routes = ({ app }) => {
           path='/leagues/:lid/restricted-free-agency'
           element={<RestrictedFreeAgencyPage />}
         />
+        <Route
+          path='/leagues/:lid/restricted-free-agency/:season_year'
+          element={<RestrictedFreeAgencyPage />}
+        />
         <Route path='/leagues/:lid/settings' element={<LeagueSettingsPage />} />
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />
       </Route>
