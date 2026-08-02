@@ -157,10 +157,10 @@ const generate_roster_asset_lineage = async ({
       realized_pts_added_net_in_practice_squad_slot:
         snap.realized_pts_added_net_in_practice_squad_slot ?? null,
       projected_pts_added_remaining_at_termination: null,
-      composite_market_value_at_acquisition:
-        snap.composite_market_value_at_acquisition ?? null,
-      composite_market_value_at_termination:
-        snap.composite_market_value_at_termination ?? null,
+      keeptradecut_value_at_acquisition:
+        snap.keeptradecut_value_at_acquisition ?? null,
+      keeptradecut_value_at_termination:
+        snap.keeptradecut_value_at_termination ?? null,
       terminated_by: draft.terminated_by || TERMINATED_BY.STILL_HELD,
       is_rookie_tag: draft.is_rookie_tag === true,
       protected_for_year: draft.protected_for_year ?? null,

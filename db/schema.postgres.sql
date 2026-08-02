@@ -25868,8 +25868,8 @@ CREATE TABLE public.roster_asset_holding (
     realized_pts_added_net_in_started_slot numeric(6,1),
     realized_pts_added_net_in_practice_squad_slot numeric(6,1),
     projected_pts_added_remaining_at_termination numeric(6,1),
-    composite_market_value_at_acquisition numeric(8,1),
-    composite_market_value_at_termination numeric(8,1),
+    keeptradecut_value_at_acquisition numeric(8,1),
+    keeptradecut_value_at_termination numeric(8,1),
     extension_count_at_acquisition smallint,
     franchise_tag_consecutive_count_at_acquisition smallint,
     is_rookie_tag boolean DEFAULT false NOT NULL,
@@ -25922,6 +25922,20 @@ COMMENT ON COLUMN public.roster_asset_holding.initial_slot_type IS 'Enum mirrori
 --
 
 COMMENT ON COLUMN public.roster_asset_holding.ps_slot_subtype IS 'Enum derived from PS sub-families: 1=drafted_ps (PSD+PSDP), 2=signed_ps (PS+PSP). NULL if not in PS family.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.keeptradecut_value_at_acquisition; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.keeptradecut_value_at_acquisition IS 'KeepTradeCut superflex value at period_start. Players resolve against keeptradecut_valuations; picks against the KTCPICK tier series via ktc_pick_at. Single-source by design -- not the composite_market_value_daily blend.';
+
+
+--
+-- Name: COLUMN roster_asset_holding.keeptradecut_value_at_termination; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_holding.keeptradecut_value_at_termination IS 'KeepTradeCut superflex value at period_end; NULL while the holding is open.';
 
 
 --
@@ -26771,7 +26785,7 @@ CREATE VIEW public.view_trade_asset_flow AS
     tgt.pick_year,
     tgt.pick_round,
     tgt.pick_original_owner_tid,
-    src.composite_market_value_at_termination AS market_value_at_trade,
+    src.keeptradecut_value_at_termination AS market_value_at_trade,
     src.salary_paid AS salary_paid_at_trade,
     src.realized_pts_added_net_through_termination AS pts_added_before_trade,
     tgt.terminated_by AS post_trade_terminated_by,
@@ -26786,7 +26800,7 @@ CREATE VIEW public.view_trade_asset_flow AS
 -- Name: VIEW view_trade_asset_flow; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON VIEW public.view_trade_asset_flow IS 'One row per trade leg: which team gave up which asset to whom, and what that asset was worth when it moved. market_value_at_trade is the source holding''s termination snapshot (its value at the moment it left). Join target_holding_id to view_roster_asset_lineage_walk.originating_holding_id to follow what the asset later became.';
+COMMENT ON VIEW public.view_trade_asset_flow IS 'One row per trade leg: which team gave up which asset to whom, and what that asset was worth when it moved. market_value_at_trade is the source holding''s KTC value at the moment it left. Join target_holding_id to view_roster_asset_lineage_walk.originating_holding_id to follow what the asset later became.';
 
 
 --

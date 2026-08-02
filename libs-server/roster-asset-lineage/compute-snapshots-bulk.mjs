@@ -280,18 +280,18 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     realized_pts_added_net_in_started_slot: 0,
     realized_pts_added_net_in_practice_squad_slot: 0,
     projected_pts_added_at_acquisition: null,
-    composite_market_value_at_acquisition: null,
-    composite_market_value_at_termination: null
+    keeptradecut_value_at_acquisition: null,
+    keeptradecut_value_at_termination: null
   }
 
   if (draft.asset_type === ASSET_TYPE.PLAYER && draft.player_id) {
-    result.composite_market_value_at_acquisition = ktc_at(
+    result.keeptradecut_value_at_acquisition = ktc_at(
       idx,
       draft.player_id,
       start_unix
     )
     if (end_unix)
-      result.composite_market_value_at_termination = ktc_at(
+      result.keeptradecut_value_at_termination = ktc_at(
         idx,
         draft.player_id,
         end_unix
@@ -382,7 +382,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     // and returns null when neither path yields data.
     const nt = idx.num_teams.get(draft.league_format_id)
     if (nt && draft.pick_year != null && draft.pick_round != null) {
-      result.composite_market_value_at_acquisition = ktc_pick_at({
+      result.keeptradecut_value_at_acquisition = ktc_pick_at({
         pick_year: draft.pick_year,
         pick_round: draft.pick_round,
         pick_overall_position: draft.pick_draft_overall_position,
@@ -391,7 +391,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
         idx: idx.pick_ktc
       })
       if (end_unix) {
-        result.composite_market_value_at_termination = ktc_pick_at({
+        result.keeptradecut_value_at_termination = ktc_pick_at({
           pick_year: draft.pick_year,
           pick_round: draft.pick_round,
           pick_overall_position: draft.pick_draft_overall_position,

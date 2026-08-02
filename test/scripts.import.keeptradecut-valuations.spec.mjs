@@ -362,10 +362,10 @@ describe('SCRIPTS import-keeptradecut valuations', function () {
         // The bug's signature: silently falling through to the earliest
         // observation (100) for a target well after it, instead of the
         // latest-at-or-before value (300).
-        expect(snapshot.composite_market_value_at_acquisition).to.not.equal(
+        expect(snapshot.keeptradecut_value_at_acquisition).to.not.equal(
           observations[0].value
         )
-        expect(snapshot.composite_market_value_at_acquisition).to.equal(300)
+        expect(snapshot.keeptradecut_value_at_acquisition).to.equal(300)
       } finally {
         await db('keeptradecut_valuations').where({ pid: LOADER_PID }).del()
       }
