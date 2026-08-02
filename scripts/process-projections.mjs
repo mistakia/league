@@ -11,6 +11,7 @@ import {
   calculateValues,
   calculatePrices,
   calculateBaselines,
+  calibrate_projected_points,
   calculatePlayerValuesRestOfSeason,
   named_scoring_formats,
   named_league_formats
@@ -32,6 +33,7 @@ import {
   report_job,
   simulation,
   emit_signal,
+  get_projection_calibration,
   record_league_format_projection_value_history
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
@@ -217,14 +219,24 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     if (seas_type === 'REG') {
       // calculate ros projection
       const ros = create_empty_projected_fantasy_stats()
+      // A stat no source has an opinion on is null for every week, and summing
+      // nulls into the zero-initialized accumulator would re-fabricate the
+      // consensus weightProjections just stopped inventing. Track which stats
+      // any week actually spoke to and null the rest back out.
+      const ros_has_opinion = {}
       let proj_wks = 0
       for (const [week, projection] of Object.entries(player_row.projection)) {
         if (week && week !== '0' && week >= current_season.week) {
           proj_wks += 1
           for (const [key, value] of Object.entries(projection)) {
+            if (value === null || value === undefined) continue
             ros[key] += value
+            ros_has_opinion[key] = true
           }
         }
+      }
+      for (const key of Object.keys(ros)) {
+        if (!ros_has_opinion[key]) ros[key] = null
       }
 
       player_row.proj_wks = proj_wks
@@ -302,9 +314,27 @@ const process_league_format = async ({
     scoring_format_id: league_format.scoring_format_id
   })
 
+  // Calibration is fitted per scoring format and per period, and is applied to
+  // the board the value pipeline consumes -- NOT to projections_index. The API
+  // keeps serving the raw vendor consensus.
+  const season_calibration = await get_projection_calibration({
+    scoring_format_id: league_format.scoring_format_id,
+    period: 'season'
+  })
+  const week_calibration = await get_projection_calibration({
+    scoring_format_id: league_format.scoring_format_id,
+    period: 'week'
+  })
+
   const baselines = {}
   let week = first_projection_week_to_recompute({ year })
   for (; week <= current_season.nflFinalWeek; week++) {
+    calibrate_projected_points({
+      players: player_rows,
+      calibration: week === 0 ? season_calibration : week_calibration,
+      week
+    })
+
     const baseline = calculateBaselines({
       players: player_rows,
       league: league_format,
@@ -315,8 +345,7 @@ const process_league_format = async ({
     const total_pts_added = calculateValues({
       players: player_rows,
       baselines: baseline,
-      week,
-      league: league_format
+      week
     })
 
     // Auction-pricing only. DFS contests (pricing_model='dfs_fixed') publish
@@ -326,6 +355,7 @@ const process_league_format = async ({
     if (pricing_model === 'auction') {
       calculatePrices({
         cap: league_total_salary_cap,
+        surplus_cap_share: league_format.surplus_cap_share,
         total_pts_added,
         players: player_rows,
         week
@@ -442,8 +472,23 @@ const process_league = async ({ year, lid }) => {
 
   week = first_projection_week_to_recompute({ year })
 
+  const season_calibration = await get_projection_calibration({
+    scoring_format_id: league.scoring_format_id,
+    period: 'season'
+  })
+  const week_calibration = await get_projection_calibration({
+    scoring_format_id: league.scoring_format_id,
+    period: 'week'
+  })
+
   const baselines = {}
   for (; week <= current_season.nflFinalWeek; week++) {
+    calibrate_projected_points({
+      players: player_rows,
+      calibration: week === 0 ? season_calibration : week_calibration,
+      week
+    })
+
     // baselines
     const baseline = calculateBaselines({
       players: player_rows,
@@ -457,11 +502,11 @@ const process_league = async ({ year, lid }) => {
     const total_pts_added = calculateValues({
       players: player_rows,
       baselines: baseline,
-      week,
-      league
+      week
     })
     calculatePrices({
       cap: league_total_salary_cap,
+      surplus_cap_share: league.surplus_cap_share,
       total_pts_added,
       players: player_rows,
       week

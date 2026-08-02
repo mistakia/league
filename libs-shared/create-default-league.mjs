@@ -2,6 +2,7 @@ import {
   DEFAULT_SCORING_FORMAT_ID,
   DEFAULT_LEAGUE_FORMAT_ID
 } from './default-format-ids.mjs'
+import { DEFAULT_SURPLUS_CAP_SHARE } from './calculate-prices.mjs'
 
 // Default league params for the synthetic lid=0 league and as the seed
 // payload for new-league creation. Format identities default to the named
@@ -73,6 +74,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     b_K: 9.7,
     b_DST: 7.2,
     processed_at: null,
+    surplus_cap_share: DEFAULT_SURPLUS_CAP_SHARE,
     scoring_format_id: DEFAULT_SCORING_FORMAT_ID,
     league_format_id: DEFAULT_LEAGUE_FORMAT_ID
   }

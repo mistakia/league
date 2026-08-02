@@ -144,7 +144,13 @@ const calculate_points_added = async ({
       baselines: baseline,
       week
     })
-    calculatePrices({ cap: leagueTotalCap, total_pts_added, players, week })
+    calculatePrices({
+      cap: leagueTotalCap,
+      surplus_cap_share: league.surplus_cap_share,
+      total_pts_added,
+      players,
+      week
+    })
   }
 
   const points_by_position = {}
@@ -182,6 +188,7 @@ const calculate_points_added = async ({
 
   calculatePrices({
     cap: leagueTotalCap,
+    surplus_cap_share: league.surplus_cap_share,
     total_pts_added,
     players,
     week: 'earned'

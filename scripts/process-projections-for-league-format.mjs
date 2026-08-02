@@ -7,6 +7,7 @@ import {
   calculateBaselines,
   calculateValues,
   calculatePrices,
+  calibrate_projected_points,
   calculatePlayerValuesRestOfSeason,
   getRosterSize,
   groupBy
@@ -16,6 +17,7 @@ import {
   is_main,
   batch_insert,
   get_league_format,
+  get_projection_calibration,
   record_league_format_projection_value_history
 } from '#libs-server'
 
@@ -54,6 +56,15 @@ const process_league_format_year = async ({
   const league_total_salary_cap =
     num_teams * cap - num_teams * league_roster_size * min_bid
 
+  const season_calibration = await get_projection_calibration({
+    scoring_format_id: league_format.scoring_format_id,
+    period: 'season'
+  })
+  const week_calibration = await get_projection_calibration({
+    scoring_format_id: league_format.scoring_format_id,
+    period: 'week'
+  })
+
   const baselines = {}
   let week = 0
 
@@ -67,6 +78,12 @@ const process_league_format_year = async ({
     : current_season.nflFinalWeek
 
   for (; week <= final_week; week++) {
+    calibrate_projected_points({
+      players: player_rows,
+      calibration: week === 0 ? season_calibration : week_calibration,
+      week
+    })
+
     const baseline = calculateBaselines({
       players: player_rows,
       league: league_format,
@@ -77,13 +94,13 @@ const process_league_format_year = async ({
     const total_pts_added = calculateValues({
       players: player_rows,
       baselines: baseline,
-      week,
-      league: league_format
+      week
     })
 
     if (pricing_model === 'auction') {
       calculatePrices({
         cap: league_total_salary_cap,
+        surplus_cap_share: league_format.surplus_cap_share,
         total_pts_added,
         players: player_rows,
         week

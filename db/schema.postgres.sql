@@ -20,6 +20,7 @@ SET row_security = off;
 
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_league_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_format_projection_calibration DROP CONSTRAINT IF EXISTS scoring_format_projection_calibration_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.scoring_format_player_seasonlogs DROP CONSTRAINT IF EXISTS scoring_format_player_seasonlogs_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.scoring_format_player_projection_points DROP CONSTRAINT IF EXISTS scoring_format_player_projection_points_scoring_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.scoring_format_player_gamelogs DROP CONSTRAINT IF EXISTS scoring_format_player_gamelogs_scoring_format_id_fkey;
@@ -477,6 +478,7 @@ ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTR
 ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRAINT IF EXISTS selection_combination_definitions_pkey;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRAINT IF EXISTS selection_combination_definitions_combination_name_key;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
+ALTER TABLE IF EXISTS ONLY public.scoring_format_projection_calibration DROP CONSTRAINT IF EXISTS scoring_format_projection_calibration_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_pkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_pkey;
@@ -705,6 +707,7 @@ DROP TABLE IF EXISTS public.selection_combination_odds_history;
 DROP SEQUENCE IF EXISTS public.selection_combination_definitions_combination_id_seq;
 DROP TABLE IF EXISTS public.selection_combination_definitions;
 DROP TABLE IF EXISTS public.seasons;
+DROP TABLE IF EXISTS public.scoring_format_projection_calibration;
 DROP TABLE IF EXISTS public.scoring_format_player_seasonlogs;
 DROP TABLE IF EXISTS public.scoring_format_player_projection_points;
 DROP TABLE IF EXISTS public.scoring_format_player_gamelogs;
@@ -4129,6 +4132,7 @@ CREATE TABLE public.league_formats (
     id text NOT NULL,
     pricing_model text DEFAULT 'auction'::text NOT NULL,
     scoring_format_id text NOT NULL,
+    surplus_cap_share numeric(4,3) DEFAULT 0.630 NOT NULL,
     CONSTRAINT league_formats_pricing_model_check CHECK ((pricing_model = ANY (ARRAY['auction'::text, 'dfs_fixed'::text])))
 );
 
@@ -4222,6 +4226,13 @@ COMMENT ON COLUMN public.league_formats.pts_base_season_dst IS 'dst pts/season b
 --
 
 COMMENT ON COLUMN public.league_formats.format_category IS 'Denormalized resolution of (superflex × scoring axis) into the 6-bucket format_category enum. Populated by the cmv_classify_league_format trigger on insert/update; one-time backfill ran with the DDL.';
+
+
+--
+-- Name: COLUMN league_formats.surplus_cap_share; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_formats.surplus_cap_share IS 'Fraction of the league salary cap that reaches above-replacement players, fitted against observed salaries by scripts/fit-surplus-cap-share.mjs. The remainder is what auctions spend filling roster spots at or below replacement. Separates the price scale from the baseline so correcting one cannot break the other.';
 
 
 --
@@ -26184,6 +26195,40 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
 
 
 --
+-- Name: scoring_format_projection_calibration; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.scoring_format_projection_calibration (
+    scoring_format_id text NOT NULL,
+    period text NOT NULL,
+    "position" text NOT NULL,
+    n integer NOT NULL,
+    slope numeric(6,4) NOT NULL,
+    intercept numeric(8,3) NOT NULL,
+    r numeric(5,4) NOT NULL,
+    mean_projected numeric(8,3) NOT NULL,
+    mean_realized numeric(8,3) NOT NULL,
+    fit_years integer NOT NULL,
+    fitted_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT scoring_format_projection_calibration_period_check CHECK ((period = ANY (ARRAY['season'::text, 'week'::text])))
+);
+
+
+--
+-- Name: TABLE scoring_format_projection_calibration; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.scoring_format_projection_calibration IS 'Fitted realized ~ intercept + slope x projected, per scoring format, period and position. r is published as a trust metric: below the floor in libs-shared/calibrate-projected-points.mjs the position produces no spread at all.';
+
+
+--
+-- Name: COLUMN scoring_format_projection_calibration.r; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.scoring_format_projection_calibration.r IS 'Correlation within the fitted (rosterable-depth) population, so it is range-restricted by construction and lower than a whole-board r. That is the intended reading: it answers whether the projection can order the players anyone would actually roster.';
+
+
+--
 -- Name: seasons; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -29222,6 +29267,14 @@ ALTER TABLE ONLY public.roster_asset_transformation
 
 ALTER TABLE ONLY public.rosters_players
     ADD CONSTRAINT rosters_players_pkey PRIMARY KEY (rid, pid);
+
+
+--
+-- Name: scoring_format_projection_calibration scoring_format_projection_calibration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scoring_format_projection_calibration
+    ADD CONSTRAINT scoring_format_projection_calibration_pkey PRIMARY KEY (scoring_format_id, period, "position");
 
 
 --
@@ -57112,6 +57165,14 @@ ALTER TABLE ONLY public.scoring_format_player_seasonlogs
 
 
 --
+-- Name: scoring_format_projection_calibration scoring_format_projection_calibration_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.scoring_format_projection_calibration
+    ADD CONSTRAINT scoring_format_projection_calibration_scoring_format_id_fkey FOREIGN KEY (scoring_format_id) REFERENCES public.league_scoring_formats(id) ON UPDATE CASCADE;
+
+
+--
 -- Name: seasons seasons_league_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -59145,6 +59206,13 @@ GRANT SELECT ON TABLE public.scoring_format_player_projection_points TO league_r
 --
 
 GRANT SELECT ON TABLE public.scoring_format_player_seasonlogs TO league_reader;
+
+
+--
+-- Name: TABLE scoring_format_projection_calibration; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.scoring_format_projection_calibration TO league_reader;
 
 
 --
