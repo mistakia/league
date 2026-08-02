@@ -37,7 +37,9 @@ import {
   get_app,
   get_players_state,
   get_player_maps,
+  get_current_trade,
   get_current_trade_players,
+  get_current_roster_players_by_team_id,
   get_proposing_team_traded_roster_players,
   get_accepting_team_traded_roster_players,
   getActivePlayersByRosterForCurrentLeague,
@@ -314,11 +316,36 @@ export function* projectTrade() {
     league,
     use_baseline_when_missing: true
   })
+
+  // Recompute the pre-trade lineups here rather than reading the league-wide
+  // projections: those are written once at init and can predate the full player
+  // load, which made "before" and "after" incomparable.
+  const trade = yield select(get_current_trade)
+  const proposingTeamCurrentPlayers = yield select((state) =>
+    get_current_roster_players_by_team_id(state, { tid: trade.propose_tid })
+  )
+  const proposingTeamCurrentLineups = yield call(worker.workerOptimizeLineup, {
+    players: proposingTeamCurrentPlayers.map((p) => p.toJS()),
+    league,
+    use_baseline_when_missing: true
+  })
+
+  const acceptingTeamCurrentPlayers = yield select((state) =>
+    get_current_roster_players_by_team_id(state, { tid: trade.accept_tid })
+  )
+  const acceptingTeamCurrentLineups = yield call(worker.workerOptimizeLineup, {
+    players: acceptingTeamCurrentPlayers.map((p) => p.toJS()),
+    league,
+    use_baseline_when_missing: true
+  })
+
   worker.terminate()
   yield put(
     trade_actions.set_projected_lineups({
       proposingTeamLineups,
-      acceptingTeamLineups
+      acceptingTeamLineups,
+      proposingTeamCurrentLineups,
+      acceptingTeamCurrentLineups
     })
   )
 

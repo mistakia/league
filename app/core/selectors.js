@@ -2965,6 +2965,8 @@ export function get_overall_standings(state) {
       .map((team) => ({ tid: team.uid, div: team.div, ...team.stats })),
     playoff_team_count: league.playoff_team_count,
     bye_count: league.bye_count,
+    bye_candidate_pool: league.bye_candidate_pool,
+    bye_selection_method: league.bye_selection_method,
     has_division_winner_berths: league.has_division_winner_berths
   })
 
@@ -3486,6 +3488,23 @@ export function get_accepting_team_traded_roster_players(state) {
   })
 }
 
+// The pre-trade counterpart of the *_traded_roster_players selectors above.
+// Trade analysis must derive its before and after lineups from the same player
+// data in the same pass -- reusing the league-wide projections written by
+// project_lineups makes the comparison depend on whether that saga happened to
+// run before or after the full player set finished loading.
+export function get_current_roster_players_by_team_id(state, { tid }) {
+  const roster = getRosterByTeamId(state, { tid })
+
+  return calculateTradedRosterPlayers({
+    state,
+    roster,
+    add: new List(),
+    release: new List(),
+    remove: new List()
+  })
+}
+
 function getTeamTradeSummary(
   draft_pick_values,
   { lineups, playerMaps, picks }
@@ -3521,10 +3540,7 @@ function getTeamTradeSummary(
     value_adj: playerMaps.reduce(
       (sum, pMap) =>
         sum +
-        Math.max(
-          pMap.getIn(['salary_adjusted_pts_added', pts_added_type], 0),
-          0
-        ),
+        Math.max(pMap.getIn(['salary_adj_pts_added', pts_added_type], 0), 0),
       0
     ),
     salary: playerMaps.reduce((sum, pMap) => sum + pMap.get('value', 0), 0)
@@ -3572,12 +3588,34 @@ export const get_current_trade_analysis = createSelector(
       .valueSeq()
       .toArray()
 
-    const proposingTeamProjectedLineups = trade_state.proposingTeamLineups
-      ? trade_state.proposingTeamLineups.valueSeq().toArray()
-      : []
-    const acceptingTeamProjectedLineups = trade_state.acceptingTeamLineups
-      ? trade_state.acceptingTeamLineups.valueSeq().toArray()
-      : []
+    // Until projectTrade has run there are no trade-scoped lineups. Fall back to
+    // the league-wide projections so "after" means "the roster as it would be"
+    // rather than zero, which would otherwise render as a bogus -100% delta.
+    const get_trade_lineups = (trade_lineups, fallback) => {
+      if (!trade_lineups || trade_lineups.size === 0) return fallback
+      return trade_lineups.valueSeq().toArray()
+    }
+
+    const proposingTeamProjectedLineups = get_trade_lineups(
+      trade_state.proposingTeamLineups,
+      proposingTeamLineups
+    )
+    const acceptingTeamProjectedLineups = get_trade_lineups(
+      trade_state.acceptingTeamLineups,
+      acceptingTeamLineups
+    )
+
+    // projectTrade recomputes the pre-trade lineups in the same pass as the
+    // post-trade ones; prefer those so before and after always come from the
+    // same player data.
+    const proposingTeamCurrentLineups = get_trade_lineups(
+      trade_state.proposingTeamCurrentLineups,
+      proposingTeamLineups
+    )
+    const acceptingTeamCurrentLineups = get_trade_lineups(
+      trade_state.acceptingTeamCurrentLineups,
+      acceptingTeamLineups
+    )
 
     // Inline the traded picks calculation
     const getTradedPicks = (teamPicks, add, remove) => {
@@ -3617,12 +3655,15 @@ export const get_current_trade_analysis = createSelector(
 
     // Inline traded roster players calculation
     const getTradedRosterPlayers = (roster, add, remove, release) => {
-      const remove_pids = remove.map((pid) => pid)
-      const release_pids = release.map((pid) => pid)
+      // roster.all is a plain array, so add/remove/release must be arrays too --
+      // Array.prototype.concat does not spread an Immutable List, it appends it
+      // as a single element, which silently drops every incoming player.
+      const remove_pids = remove.toArray()
+      const release_pids = release.toArray()
       const filtered = roster.all.filter(
         ({ pid }) => !remove_pids.includes(pid) && !release_pids.includes(pid)
       )
-      const added = add.map((pid) => {
+      const added = add.toArray().map((pid) => {
         const player_map = player_maps.get(pid, Map())
         return { pid, slot: player_map.get('slot') }
       })
@@ -3663,7 +3704,7 @@ export const get_current_trade_analysis = createSelector(
     const proposingTeam = {
       team: proposingTeamRecord,
       before: getTeamTradeSummary(draft_pick_values, {
-        lineups: proposingTeamLineups,
+        lineups: proposingTeamCurrentLineups,
         playerMaps: proposingTeamPlayers,
         picks: proposingTeamRecord.picks
       }),
@@ -3677,7 +3718,7 @@ export const get_current_trade_analysis = createSelector(
     const acceptingTeam = {
       team: acceptingTeamRecord,
       before: getTeamTradeSummary(draft_pick_values, {
-        lineups: acceptingTeamLineups,
+        lineups: acceptingTeamCurrentLineups,
         playerMaps: acceptingTeamPlayers,
         picks: acceptingTeamRecord.picks
       }),

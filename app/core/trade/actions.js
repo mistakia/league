@@ -25,11 +25,18 @@ export const trade_actions = {
   }),
 
   TRADE_SET_PROJECTED_LINEUPS: 'TRADE_SET_PROJECTED_LINEUPS',
-  set_projected_lineups: ({ proposingTeamLineups, acceptingTeamLineups }) => ({
+  set_projected_lineups: ({
+    proposingTeamLineups,
+    acceptingTeamLineups,
+    proposingTeamCurrentLineups,
+    acceptingTeamCurrentLineups
+  }) => ({
     type: trade_actions.TRADE_SET_PROJECTED_LINEUPS,
     payload: {
       proposingTeamLineups,
-      acceptingTeamLineups
+      acceptingTeamLineups,
+      proposingTeamCurrentLineups,
+      acceptingTeamCurrentLineups
     }
   }),
 

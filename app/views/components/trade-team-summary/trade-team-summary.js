@@ -10,11 +10,19 @@ import TableRow from '@mui/material/TableRow'
 import './trade-team-summary.styl'
 
 function Percentage(type, analysis) {
-  if (!analysis.after[type] || !analysis.before[type]) return '-'
-  const delta = analysis.after[type] - analysis.before[type]
+  const before = analysis.before[type]
+  const after = analysis.after[type]
+
+  // Only a non-finite before/after makes a percentage undefined. Zero is a real
+  // value, so guard on finiteness rather than truthiness -- the old truthy
+  // check rendered '-' for any team whose before or after total was legitimately 0.
+  if (!Number.isFinite(before) || !Number.isFinite(after)) return '-'
+  if (before === 0) return '-'
+
+  const delta = after - before
   const is_positive = delta >= 0
   const sign = is_positive ? '+' : '-'
-  const delta_pct = ((delta / analysis.before[type]) * 100 || 0).toFixed(1)
+  const delta_pct = (delta / before) * 100
   const class_names = ['trade__percentage']
   if (is_positive) {
     class_names.push('positive')
@@ -28,7 +36,26 @@ function Percentage(type, analysis) {
 
   return (
     <div className={class_names.join(' ')}>
-      {`${sign}${Math.abs(delta_pct)}%`}
+      {`${sign}${Math.abs(delta_pct).toFixed(1)}%`}
+    </div>
+  )
+}
+
+// A legitimately-zero metric must render as 0, not '-'. Only a missing or
+// non-numeric value is unknown.
+function Metric(value, decimals = 1) {
+  if (!Number.isFinite(value)) return '-'
+  return value.toFixed(decimals)
+}
+
+function SignedDelta(after, before) {
+  if (!Number.isFinite(after) || !Number.isFinite(before)) return '-'
+  const delta = after - before
+  const class_names = ['trade__percentage', 'metric']
+  class_names.push(delta >= 0 ? 'positive' : 'negative')
+  return (
+    <div className={class_names.join(' ')}>
+      {`${delta >= 0 ? '+' : '-'}${Math.abs(delta)}`}
     </div>
   )
 }
@@ -61,7 +88,7 @@ export default class TradeTeamSummary extends React.Component {
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>
-                    {analysis.after.points || analysis.before.points || '-'}
+                    {Metric(analysis.after.points, 0)}
                   </div>
                 </TableCell>
                 <TableCell>{pct_points}</TableCell>
@@ -71,11 +98,7 @@ export default class TradeTeamSummary extends React.Component {
                   Overall Value
                 </TableCell>
                 <TableCell align='right'>
-                  <div className='metric'>
-                    {analysis.after.value
-                      ? analysis.after.value.toFixed(1)
-                      : '-'}
-                  </div>
+                  <div className='metric'>{Metric(analysis.after.value)}</div>
                 </TableCell>
                 <TableCell>{pct_value}</TableCell>
               </TableRow>
@@ -85,9 +108,7 @@ export default class TradeTeamSummary extends React.Component {
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>
-                    {analysis.after.player_value
-                      ? analysis.after.player_value.toFixed(1)
-                      : '-'}
+                    {Metric(analysis.after.player_value)}
                   </div>
                 </TableCell>
                 <TableCell>{pct_player_value}</TableCell>
@@ -98,9 +119,7 @@ export default class TradeTeamSummary extends React.Component {
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>
-                    {analysis.after.value_adj
-                      ? analysis.after.value_adj.toFixed(1)
-                      : '-'}
+                    {Metric(analysis.after.value_adj)}
                   </div>
                 </TableCell>
                 <TableCell>{pct_value_adj}</TableCell>
@@ -111,9 +130,7 @@ export default class TradeTeamSummary extends React.Component {
                 </TableCell>
                 <TableCell align='right'>
                   <div className='metric'>
-                    {analysis.after.draft_value
-                      ? analysis.after.draft_value.toFixed(1)
-                      : '-'}
+                    {Metric(analysis.after.draft_value)}
                   </div>
                 </TableCell>
                 <TableCell>{pct_draft_value}</TableCell>
@@ -123,12 +140,12 @@ export default class TradeTeamSummary extends React.Component {
                   Team Salary
                 </TableCell>
                 <TableCell align='right'>
-                  <div className='metric'>{analysis.after.salary || '-'}</div>
+                  <div className='metric'>
+                    {Metric(analysis.after.salary, 0)}
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <div className='trade__percentage metric'>
-                    {analysis.after.salary - analysis.before.salary || '-'}
-                  </div>
+                  {SignedDelta(analysis.after.salary, analysis.before.salary)}
                 </TableCell>
               </TableRow>
             </TableBody>

@@ -14,6 +14,8 @@ const initialState = new Record({
   proposingTeamPicks: new List(),
   proposingTeamLineups: new Map(),
   acceptingTeamLineups: new Map(),
+  proposingTeamCurrentLineups: new Map(),
+  acceptingTeamCurrentLineups: new Map(),
   proposingTeamSlots: new Map(), // Map of pid -> slot for players proposing team receives
   acceptingTeamSlots: new Map(), // Map of pid -> slot for players accepting team receives
   validationErrors: new Map() // Map of team -> slot type -> error message
@@ -31,7 +33,13 @@ export function trade_reducer(state = initialState(), { payload, type }) {
     case trade_actions.TRADE_SET_PROJECTED_LINEUPS:
       return state.merge({
         proposingTeamLineups: new Map(payload.proposingTeamLineups),
-        acceptingTeamLineups: new Map(payload.acceptingTeamLineups)
+        acceptingTeamLineups: new Map(payload.acceptingTeamLineups),
+        proposingTeamCurrentLineups: new Map(
+          payload.proposingTeamCurrentLineups
+        ),
+        acceptingTeamCurrentLineups: new Map(
+          payload.acceptingTeamCurrentLineups
+        )
       })
 
     case trade_actions.TRADE_SET_RELEASE_PLAYERS:
