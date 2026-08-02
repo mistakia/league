@@ -64,7 +64,12 @@ if [ -n "$dirty" ]; then
     "  git worktree add \"\$WT\" origin/master" \
     "  ln -s \"\$PWD/node_modules\" \"\$WT/node_modules\"" \
     "  cd \"\$WT\" && yarn build && yarn deploy:dist && yarn deploy:sourcemaps" \
-    "  cd - && rm -f \"\$WT/node_modules\" && git worktree remove \"\$WT\""
+    "  cd - && rm -f \"\$WT/node_modules\" && git worktree remove \"\$WT\"" \
+    "" \
+    "For a BACKEND+frontend deploy from the worktree, run 'yarn deploy:all' there" \
+    "instead -- but init the submodule first, or this gate refuses again on (3):" \
+    "" \
+    "  git -C \"\$WT\" submodule update --init private"
 fi
 
 # (1) unpushed / behind
