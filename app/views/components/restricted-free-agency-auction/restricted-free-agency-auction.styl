@@ -14,9 +14,21 @@
   justify-content space-between
   padding 10px 16px
 
+// PlayerName renders a fragment whose second element carries the status and tag
+// labels. In a block parent that element starts its own line, so a tagged
+// player put his PUP/Q chip on a row of its own under the position badge.
 .restricted-free-agency-auction__player
+  align-items center
+  display flex
   font-weight 600
+  gap 6px
   min-width 0
+
+  .player__name
+    flex 0 1 auto
+
+  .player__name-label
+    flex 0 0 auto
 
 .restricted-free-agency-auction__meta
   align-items center
@@ -140,7 +152,7 @@
   display flex
   flex 0 0 auto
 
-  .player__name
+  .player__name, .player__name-label
     flex 0 0 auto
 
 .restricted-free-agency-auction__releases-label

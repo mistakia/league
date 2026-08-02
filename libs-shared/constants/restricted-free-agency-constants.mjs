@@ -34,7 +34,14 @@ export const restricted_free_agency_bid_outcome_values = Object.values(
 
 export const restricted_free_agency_bid_outcome_display_names = {
   [restricted_free_agency_bid_outcomes.WON]: 'Won',
-  [restricted_free_agency_bid_outcomes.MATCHED]: 'Matched',
+  // NOT 'Matched'. The original team does not match an amount here: any bid it
+  // submits wins outright (`original_team_bid || bids[0]` in
+  // `scripts/process-restricted-free-agency-bids.mjs`), so it can retain the
+  // player for LESS than a competing bid. Derrick Henry 2024 is the visible
+  // case -- the original team kept him at $48 over bids of $51 and $50, and a
+  // chip reading 'Matched' on the $51 row asserts an amount match that never
+  // happened.
+  [restricted_free_agency_bid_outcomes.MATCHED]: 'First Refusal',
   [restricted_free_agency_bid_outcomes.OUTBID]: 'Outbid',
   [restricted_free_agency_bid_outcomes.LOST_TIEBREAK]: 'Lost Tiebreak',
   [restricted_free_agency_bid_outcomes.ROSTER_LIMIT_VIOLATION]:
@@ -46,7 +53,7 @@ export const restricted_free_agency_bid_outcome_display_names = {
 export const restricted_free_agency_bid_outcome_descriptions = {
   [restricted_free_agency_bid_outcomes.WON]: 'This bid signed the player.',
   [restricted_free_agency_bid_outcomes.MATCHED]:
-    'The original team matched, exercising its right of first refusal.',
+    'The original team kept the player by exercising its right of first refusal, which beats every competing bid regardless of amount.',
   [restricted_free_agency_bid_outcomes.OUTBID]: 'A higher bid won the player.',
   [restricted_free_agency_bid_outcomes.LOST_TIEBREAK]:
     'Tied the winning bid and lost on waiver order.',

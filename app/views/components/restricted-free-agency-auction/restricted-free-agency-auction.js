@@ -97,7 +97,7 @@ export default function RestrictedFreeAgencyAuction({ auction }) {
                   key={release_index}
                   className='restricted-free-agency-auction__release'
                 >
-                  <PlayerName pid={pid} />
+                  <PlayerName pid={pid} hidePosition />
                 </div>
               ))}
             </>
