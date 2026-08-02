@@ -2,6 +2,7 @@
 import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
+import dayjs from 'dayjs'
 
 import server from '#api'
 import knex from '#db'
@@ -87,7 +88,7 @@ describe('API /teams - restricted free agency', function () {
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(bid)
       res.body.year.should.equal(current_season.year)
-      res.body.player_tid.should.equal(teamId)
+      res.body.original_team_id.should.equal(teamId)
       res.body.uid.should.be.a('number')
       res.body.uid.should.be.above(0)
       res.body.release.should.be.an('array')
@@ -104,10 +105,10 @@ describe('API /teams - restricted free agency', function () {
       query1[0].bid.should.equal(bid)
       query1[0].year.should.equal(current_season.year)
       query1[0].tid.should.equal(teamId)
-      query1[0].player_tid.should.equal(teamId)
+
       query1[0].lid.should.equal(leagueId)
       expect(query1[0].succ).to.equal(null)
-      expect(query1[0].reason).to.equal(null)
+      expect(query1[0].outcome).to.equal(null)
       expect(query1[0].submitted).to.equal(Math.round(Date.now() / 1000))
       expect(query1[0].processed).to.equal(null)
       expect(query1[0].cancelled).to.equal(null)
@@ -178,7 +179,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.year.should.equal(current_season.year)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
-      res2.body.player_tid.should.equal(playerTid)
+      res2.body.original_team_id.should.equal(playerTid)
       res2.body.release.length.should.equal(0)
     })
 
@@ -262,7 +263,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.pid.should.equal(tagPlayer.pid)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
-      res2.body.player_tid.should.equal(teamId)
+      res2.body.original_team_id.should.equal(teamId)
       res2.body.release.length.should.equal(1)
       res2.body.release[0].should.equal(releasePlayer.pid)
     })
@@ -551,12 +552,15 @@ describe('API /teams - restricted free agency', function () {
       res2.body.nominated.should.be.a('number')
       res2.body.nominated.should.be.closeTo(Math.round(Date.now() / 1000), 5)
 
-      const query = await knex('restricted_free_agency_bids')
-        .where({ pid: player.pid })
+      const query = await knex('restricted_free_agency_nominations')
+        .where({ player_id: player.pid })
         .first()
 
-      query.nominated.should.be.a('number')
-      query.nominated.should.be.closeTo(Math.round(Date.now() / 1000), 5)
+      expect(query.nominated_at).to.not.equal(null)
+      expect(dayjs(query.nominated_at).unix()).to.be.closeTo(
+        Math.round(Date.now() / 1000),
+        5
+      )
     })
 
     it('remove a nomination', async () => {
@@ -616,11 +620,11 @@ describe('API /teams - restricted free agency', function () {
         'Restricted free agent nomination successfully cancelled'
       )
 
-      const query = await knex('restricted_free_agency_bids')
-        .where({ pid: player.pid })
+      const query = await knex('restricted_free_agency_nominations')
+        .where({ player_id: player.pid })
         .first()
 
-      expect(query.nominated).to.equal(null)
+      expect(query.nominated_at).to.equal(null)
     })
 
     it('error - nominate non-existent RFA bid', async () => {
@@ -1303,9 +1307,13 @@ describe('API /teams - restricted free agency', function () {
       res1.should.have.status(200)
 
       // Simulate announcing the bid
-      await knex('restricted_free_agency_bids')
-        .where({ pid: player.pid })
-        .update({ announced: Math.floor(Date.now() / 1000) })
+      await knex('restricted_free_agency_nominations')
+        .where({ player_id: player.pid })
+        .update({
+          announced_at: knex.raw('to_timestamp(?)', [
+            Math.floor(Date.now() / 1000)
+          ])
+        })
 
       // Attempt to delete the announced bid
       const request = chai_request

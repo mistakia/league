@@ -7,7 +7,12 @@ import timezone from 'dayjs/plugin/timezone.js'
 
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
-import { current_season, transaction_types, player_tag_types } from '#constants'
+import {
+  current_season,
+  transaction_types,
+  player_tag_types,
+  restricted_free_agency_bid_outcomes
+} from '#constants'
 import { Roster } from '#libs-shared'
 import {
   getLeague,
@@ -21,6 +26,7 @@ import {
   addPlayer,
   fillRoster
 } from './utils/index.mjs'
+import { insert_restricted_free_agency_bid } from './utils/insert-restricted-free-agency-bid.mjs'
 import run from '#scripts/process-restricted-free-agency-bids.mjs'
 
 // Initialize dayjs plugins
@@ -103,17 +109,15 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Set announcement time to be more than 26 hours ago to meet timing requirements
       const announcement_time = current_time - 60 * 60 * 30 // 30 hours ago
 
-      await knex('restricted_free_agency_bids').insert({
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: user_id,
         bid: value,
         tid: team_id,
-        year: current_season.year,
-        player_tid: team_id,
         lid: leagueId,
-        submitted: announcement_time,
-        announced: announcement_time,
-        nominated: announcement_time - 60 * 60 // 1 hour before announcement
+        original_team_id: team_id,
+        announced_at: announcement_time,
+        nominated_at: announcement_time - 60 * 60 // 1 hour before announcement
       })
 
       let error
@@ -132,7 +136,9 @@ describe('SCRIPTS - restricted free agency bids', function () {
       expect(restricted_free_agency_bids.length).to.equal(1)
       expect(restricted_free_agency_bids[0].succ).to.equal(true)
       expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
-      expect(restricted_free_agency_bids[0].reason).to.equal(null)
+      expect(restricted_free_agency_bids[0].outcome).to.equal(
+        restricted_free_agency_bid_outcomes.WON
+      )
 
       // verify roster
       await checkRoster({
@@ -176,27 +182,33 @@ describe('SCRIPTS - restricted free agency bids', function () {
       })
 
       const processed = Math.round(Date.now() / 1000)
-      const [bid_row] = await knex('restricted_free_agency_bids')
-        .insert({
-          pid: player.pid,
-          userid: user_id,
-          bid: value,
-          tid: team_id,
-          year: current_season.year,
-          player_tid: team_id,
-          lid: leagueId,
-          submitted: processed,
-          announced: processed
-        })
-        .returning('*')
+      const bid_uid = await insert_restricted_free_agency_bid({
+        pid: player.pid,
+        userid: user_id,
+        bid: value,
+        tid: team_id,
+        lid: leagueId,
+        original_team_id: team_id,
+        announced_at: processed
+      })
+      const bid_row = await knex('restricted_free_agency_bids')
+        .where('uid', bid_uid)
+        .first()
 
-      await processRestrictedFreeAgencyBid({ ...bid_row, processed })
+      await processRestrictedFreeAgencyBid({
+        ...bid_row,
+        original_team_id: team_id,
+        processed
+      })
 
       const bid_after = await knex('restricted_free_agency_bids')
         .where('uid', bid_row.uid)
         .first()
       expect(bid_after.succ).to.equal(true)
       expect(bid_after.processed).to.equal(processed)
+      expect(bid_after.outcome).to.equal(
+        restricted_free_agency_bid_outcomes.WON
+      )
 
       const tag_transactions = await knex('transactions').where({
         lid: leagueId,
@@ -264,23 +276,19 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Set announcement time to be more than 26 hours ago to meet timing requirements
       const announcement_time = current_time - 60 * 60 * 30 // 30 hours ago
 
-      const query1 = await knex('restricted_free_agency_bids')
-        .insert({
-          pid: player1.pid,
-          userid: user_id,
-          bid,
-          tid: team_id,
-          year: current_season.year,
-          player_tid: team_id,
-          lid: leagueId,
-          submitted: announcement_time,
-          announced: announcement_time,
-          nominated: announcement_time - 60 * 60 // 1 hour before announcement
-        })
-        .returning('uid')
+      const bid_uid = await insert_restricted_free_agency_bid({
+        pid: player1.pid,
+        userid: user_id,
+        bid,
+        tid: team_id,
+        lid: leagueId,
+        original_team_id: team_id,
+        announced_at: announcement_time,
+        nominated_at: announcement_time - 60 * 60 // 1 hour before announcement
+      })
 
       await knex('restricted_free_agency_releases').insert({
-        restricted_free_agency_bid_id: query1[0].uid,
+        restricted_free_agency_bid_id: bid_uid,
         pid: player4.pid
       })
 
@@ -307,7 +315,9 @@ describe('SCRIPTS - restricted free agency bids', function () {
       expect(restricted_free_agency_bids.length).to.equal(1)
       expect(restricted_free_agency_bids[0].succ).to.equal(true)
       expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
-      expect(restricted_free_agency_bids[0].reason).to.equal(null)
+      expect(restricted_free_agency_bids[0].outcome).to.equal(
+        restricted_free_agency_bid_outcomes.WON
+      )
 
       // verify roster
       await checkRoster({
@@ -402,17 +412,14 @@ describe('SCRIPTS - restricted free agency bids', function () {
         tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
 
-      const timestamp = Math.round(Date.now() / 1000)
-      await knex('restricted_free_agency_bids').insert({
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: user_id,
         bid: value,
         tid: team_id,
-        year: current_season.year,
-        player_tid: team_id,
         lid: leagueId,
-        submitted: timestamp
-        // No announced timestamp, so it shouldn't be processed
+        original_team_id: team_id
+        // No announcement on the nomination, so it shouldn't be processed
       })
 
       let error
@@ -431,7 +438,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       expect(restricted_free_agency_bids.length).to.equal(1)
       expect(restricted_free_agency_bids[0].succ).to.equal(null)
       expect(restricted_free_agency_bids[0].processed).to.equal(null)
-      expect(restricted_free_agency_bids[0].reason).to.equal(null)
+      expect(restricted_free_agency_bids[0].outcome).to.equal(null)
     })
 
     it('bid not processed if not enough time elapsed', async () => {
@@ -452,17 +459,15 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Set announcement time to just 30 minutes ago (not enough time elapsed)
       const announcement_time = timestamp - 60 * 30
 
-      await knex('restricted_free_agency_bids').insert({
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: user_id,
         bid: value,
         tid: team_id,
-        year: current_season.year,
-        player_tid: team_id,
         lid: leagueId,
-        submitted: announcement_time,
-        announced: announcement_time,
-        nominated: announcement_time - 60 * 60
+        original_team_id: team_id,
+        announced_at: announcement_time,
+        nominated_at: announcement_time - 60 * 60
       })
 
       let error
@@ -481,7 +486,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       expect(restricted_free_agency_bids.length).to.equal(1)
       expect(restricted_free_agency_bids[0].succ).to.equal(null)
       expect(restricted_free_agency_bids[0].processed).to.equal(null)
-      expect(restricted_free_agency_bids[0].reason).to.equal(null)
+      expect(restricted_free_agency_bids[0].outcome).to.equal(null)
     })
 
     it('competing bid not processed before the nomination window is due', async () => {
@@ -503,33 +508,27 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // announced 30 minutes ago, so the window's processing time is hours away
       const announcement_time = timestamp - 60 * 30
 
-      await knex('restricted_free_agency_bids').insert({
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: original_user_id,
         bid: 10,
         tid: original_team_id,
-        year: current_season.year,
-        player_tid: original_team_id,
         lid: leagueId,
-        submitted: announcement_time,
-        announced: announcement_time,
-        nominated: announcement_time - 60 * 60
+        original_team_id,
+        announced_at: announcement_time,
+        nominated_at: announcement_time - 60 * 60
       })
 
-      // A competing bid is never announced — `announced` stays null for its
-      // whole life. It must still be gated on the player's nomination window
-      // rather than treated as due the moment it is submitted.
-      await knex('restricted_free_agency_bids').insert({
+      // A competing bid shares the player's nomination and has no announcement
+      // of its own to carry. It must still be gated on that window rather than
+      // treated as due the moment it is submitted.
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: competing_user_id,
         bid: 25,
         tid: competing_team_id,
-        year: current_season.year,
-        player_tid: original_team_id,
         lid: leagueId,
-        submitted: timestamp,
-        announced: null,
-        nominated: null
+        original_team_id
       })
 
       let error
@@ -550,7 +549,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       for (const bid_row of restricted_free_agency_bids) {
         expect(bid_row.succ).to.equal(null)
         expect(bid_row.processed).to.equal(null)
-        expect(bid_row.reason).to.equal(null)
+        expect(bid_row.outcome).to.equal(null)
       }
 
       // the player is still on the original team's roster
@@ -599,46 +598,36 @@ describe('SCRIPTS - restricted free agency bids', function () {
       const announcement_time = current_time - 60 * 60 * 30 // 30 hours ago
 
       // Original team bid
-      await knex('restricted_free_agency_bids').insert({
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: user_id1,
         bid: value1,
         tid: team_id1,
-        year: current_season.year,
-        player_tid: team_id1,
         lid: leagueId,
-        submitted: announcement_time,
-        announced: announcement_time,
-        nominated: announcement_time - 60 * 60
+        original_team_id: team_id1,
+        announced_at: announcement_time,
+        nominated_at: announcement_time - 60 * 60
       })
 
-      // Competing team bids with same value. These carry no announcement of
-      // their own — only the nomination is ever announced — so they exercise
-      // the resolution of the processing window through the player.
-      await knex('restricted_free_agency_bids').insert({
+      // Competing team bids with the same value. They share the player's
+      // nomination rather than carrying an announcement of their own, so they
+      // exercise the resolution of the processing window through the player.
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: user_id2,
         bid: value2,
         tid: team_id2,
-        year: current_season.year,
-        player_tid: team_id1,
         lid: leagueId,
-        submitted: announcement_time,
-        announced: null,
-        nominated: null
+        original_team_id: team_id1
       })
 
-      await knex('restricted_free_agency_bids').insert({
+      await insert_restricted_free_agency_bid({
         pid: player.pid,
         userid: user_id3,
         bid: value2,
         tid: team_id3,
-        year: current_season.year,
-        player_tid: team_id1,
         lid: leagueId,
-        submitted: announcement_time,
-        announced: null,
-        nominated: null
+        original_team_id: team_id1
       })
 
       let error
@@ -672,6 +661,20 @@ describe('SCRIPTS - restricted free agency bids', function () {
       expect(restricted_free_agency_bids[2].tid).to.equal(team_id3)
       expect(restricted_free_agency_bids[2].succ).to.equal(false)
       expect(restricted_free_agency_bids[2].processed).to.not.equal(null)
+
+      // The losses are told apart, which the retired `reason` column could not
+      // do: team 3 matched the winning amount and lost the waiver-order
+      // tiebreak, while team 1 was simply outbid. Both used to read
+      // 'player no longer a restricted free agent'.
+      expect(restricted_free_agency_bids[2].outcome).to.equal(
+        restricted_free_agency_bid_outcomes.LOST_TIEBREAK
+      )
+      expect(restricted_free_agency_bids[0].outcome).to.equal(
+        restricted_free_agency_bid_outcomes.OUTBID
+      )
+      expect(restricted_free_agency_bids[1].outcome).to.equal(
+        restricted_free_agency_bid_outcomes.WON
+      )
 
       // Check that player is now on team 2
       await checkRoster({

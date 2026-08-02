@@ -173,37 +173,40 @@ const announce_restricted_free_agent = async ({
     )}) belongs to ${nominating_team.name} (${nominating_team.abbrv})`
   )
 
-  const restricted_free_agency_bid = await db('restricted_free_agency_bids')
+  // The nomination is the auction, so the pending-announcement question is asked
+  // of it rather than of the nominating team's bid. Announcement describes the
+  // player's window, and hanging it off one bid row is what let every competing
+  // bid carry a null that read as "due immediately".
+  const nomination = await db('restricted_free_agency_nominations')
     .where({
-      tid: nominating_team.uid,
-      lid,
-      year: current_season.year
+      league_id: lid,
+      season_year: current_season.year,
+      original_team_id: nominating_team.uid
     })
-    .whereNull('cancelled')
-    .whereNull('processed')
-    .whereNull('announced')
-    .whereNotNull('nominated')
+    .whereNotNull('nominated_at')
+    .whereNull('announced_at')
+    .whereNull('processed_at')
     .first()
 
   let message
   let metadata
 
-  if (restricted_free_agency_bid) {
+  if (nomination) {
     const player_row = await db('player')
-      .where({ pid: restricted_free_agency_bid.pid })
+      .where({ pid: nomination.player_id })
       .first()
 
     if (!player_row) {
       throw new Error(
-        `Player with pid ${restricted_free_agency_bid.pid} for team ${nominating_team.uid} not found`
+        `Player with pid ${nomination.player_id} for team ${nominating_team.uid} not found`
       )
     }
 
     message = `${nominating_team.name} (${nominating_team.abbrv}) has announced ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a restricted free agent`
     metadata = {
       tid: nominating_team.uid,
-      pid: restricted_free_agency_bid.pid,
-      bid_uid: restricted_free_agency_bid.uid,
+      pid: nomination.player_id,
+      nomination_id: nomination.nomination_id,
       window_index: target_window_index
     }
   } else {
@@ -239,10 +242,12 @@ const announce_restricted_free_agent = async ({
     return
   }
 
-  if (restricted_free_agency_bid) {
-    await db('restricted_free_agency_bids')
-      .where({ uid: restricted_free_agency_bid.uid })
-      .update({ announced: announcement_timestamp })
+  if (nomination) {
+    await db('restricted_free_agency_nominations')
+      .where({ nomination_id: nomination.nomination_id })
+      .update({
+        announced_at: db.raw('to_timestamp(?)', [announcement_timestamp])
+      })
 
     await sendNotifications({
       league,

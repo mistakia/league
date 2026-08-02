@@ -9,6 +9,7 @@ import {
   verifyUserTeam,
   verify_reserve_status
 } from '#libs-server'
+import { select_restricted_free_agency_bid_with_nomination } from '#libs-server/restricted-free-agency-bids-query.mjs'
 import { require_auth } from '#api/routes/leagues/middleware.mjs'
 
 const router = express.Router({ mergeParams: true })
@@ -95,13 +96,27 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
+    // `original_team_id` and the window timestamps live on the nomination, not
+    // on the bid, so they are projected through the join under the names the
+    // client reads.
     const restrictedFreeAgencyBids = await db('restricted_free_agency_bids')
+      .select(
+        'restricted_free_agency_bids.*',
+        'restricted_free_agency_nominations.original_team_id',
+        'restricted_free_agency_nominations.nominated_at',
+        'restricted_free_agency_nominations.announced_at'
+      )
+      .leftJoin(
+        'restricted_free_agency_nominations',
+        'restricted_free_agency_nominations.nomination_id',
+        'restricted_free_agency_bids.nomination_id'
+      )
       .where({
-        tid: teamId,
-        year: current_season.year
+        'restricted_free_agency_bids.tid': teamId,
+        'restricted_free_agency_bids.year': current_season.year
       })
-      .whereNull('processed')
-      .whereNull('cancelled')
+      .whereNull('restricted_free_agency_bids.processed')
+      .whereNull('restricted_free_agency_bids.cancelled')
 
     res.send(restrictedFreeAgencyBids)
   } catch (error) {
@@ -476,6 +491,22 @@ router.post('/?', async (req, res) => {
       }
     }
 
+    // The auction is the nomination, so a bid attaches to one rather than
+    // carrying its own copy of who holds the player's rights. Both the original
+    // team's tag and a competing team's offer reach this path, and whichever
+    // arrives first establishes the row.
+    const nomination_rows = await db('restricted_free_agency_nominations')
+      .insert({
+        league_id: leagueId,
+        player_id: pid,
+        season_year: current_season.year,
+        original_team_id: playerTid
+      })
+      .onConflict(['league_id', 'player_id', 'season_year'])
+      .merge({ original_team_id: playerTid })
+      .returning('nomination_id')
+    const { nomination_id } = nomination_rows[0]
+
     // insert into restrictedFreeAgencyBids
     const data = {
       tid,
@@ -485,7 +516,7 @@ router.post('/?', async (req, res) => {
       submitted: Math.round(Date.now() / 1000),
       year: current_season.year,
       bid,
-      player_tid: playerTid
+      nomination_id
     }
 
     const query = await db('restricted_free_agency_bids')
@@ -504,6 +535,9 @@ router.post('/?', async (req, res) => {
 
     data.release = release
     data.remove = remove
+    // Derived from the nomination rather than stored on the bid; the client
+    // needs it to tell an original-team tag from a competing offer.
+    data.original_team_id = playerTid
 
     res.send(data)
   } catch (error) {
@@ -632,13 +666,15 @@ router.delete('/?', async (req, res) => {
     }
 
     // verify restricted free agency bid exists
-    const query1 = await db('restricted_free_agency_bids')
+    const query1 = await select_restricted_free_agency_bid_with_nomination({
+      db
+    })
       .where({
-        pid,
-        tid,
-        year: current_season.year
+        'restricted_free_agency_bids.pid': pid,
+        'restricted_free_agency_bids.tid': tid,
+        'restricted_free_agency_bids.year': current_season.year
       })
-      .whereNull('cancelled')
+      .whereNull('restricted_free_agency_bids.cancelled')
 
     if (!query1.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -651,8 +687,8 @@ router.delete('/?', async (req, res) => {
     }
 
     const is_current_manager_bid =
-      restrictedFreeAgencyBid.player_tid === restrictedFreeAgencyBid.tid
-    if (is_current_manager_bid && restrictedFreeAgencyBid.announced) {
+      restrictedFreeAgencyBid.original_team_id === restrictedFreeAgencyBid.tid
+    if (is_current_manager_bid && restrictedFreeAgencyBid.announced_at) {
       return res
         .status(400)
         .send({ error: 'restricted free agent has already been announced' })
@@ -812,13 +848,15 @@ router.put('/?', async (req, res) => {
     }
 
     // verify restricted free agency bid exists
-    const query1 = await db('restricted_free_agency_bids')
+    const query1 = await select_restricted_free_agency_bid_with_nomination({
+      db
+    })
       .where({
-        pid,
-        tid,
-        year: current_season.year
+        'restricted_free_agency_bids.pid': pid,
+        'restricted_free_agency_bids.tid': tid,
+        'restricted_free_agency_bids.year': current_season.year
       })
-      .whereNull('cancelled')
+      .whereNull('restricted_free_agency_bids.cancelled')
 
     if (!query1.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -870,7 +908,7 @@ router.put('/?', async (req, res) => {
     }
 
     // if competing bid, make sure there is roster space
-    if (restrictedFreeAgencyBid.player_tid !== teamId) {
+    if (restrictedFreeAgencyBid.original_team_id !== teamId) {
       if (!roster.has_bench_space_for_position(player_row.primary_position)) {
         return res.status(400).send({ error: 'exceeds roster limits' })
       }
@@ -881,7 +919,8 @@ router.put('/?', async (req, res) => {
         pid,
         pos: player_row.primary_position,
         value: bid,
-        restricted_free_agency_original_team: restrictedFreeAgencyBid.player_tid
+        restricted_free_agency_original_team:
+          restrictedFreeAgencyBid.original_team_id
       })
     } else {
       // update value to bid
@@ -919,7 +958,7 @@ router.put('/?', async (req, res) => {
      *   return res.stauts(400).send({ error: 'exceeds cap space' })
      * }
      */
-    if (restrictedFreeAgencyBid.player_tid === teamId) {
+    if (restrictedFreeAgencyBid.original_team_id === teamId) {
       await db('rosters_players')
         .update({ tag: player_tag_types.RESTRICTED_FREE_AGENCY })
         .where({
@@ -1052,15 +1091,16 @@ router.post('/nominate/?', async (req, res) => {
     }
 
     // Check if the restricted free agency bid exists and belongs to the original manager
-    const restricted_free_agency_bid = await db('restricted_free_agency_bids')
-      .where({
-        pid,
-        tid,
-        player_tid: tid,
-        year: current_season.year
-      })
-      .whereNull('cancelled')
-      .first()
+    const restricted_free_agency_bid =
+      await select_restricted_free_agency_bid_with_nomination({ db })
+        .where({
+          'restricted_free_agency_bids.pid': pid,
+          'restricted_free_agency_bids.tid': tid,
+          'restricted_free_agency_bids.year': current_season.year,
+          'restricted_free_agency_nominations.original_team_id': tid
+        })
+        .whereNull('restricted_free_agency_bids.cancelled')
+        .first()
 
     if (!restricted_free_agency_bid) {
       return res
@@ -1072,28 +1112,32 @@ router.post('/nominate/?', async (req, res) => {
       return res.status(400).send({ error: 'bid has already been processed' })
     }
 
-    if (restricted_free_agency_bid.announced) {
+    if (restricted_free_agency_bid.announced_at) {
       return res.status(400).send({ error: 'bid has already been announced' })
     }
 
-    // clear any other unannounced nominations for this team
-    await db('restricted_free_agency_bids')
+    // Clear any other unannounced nomination for this team. Nomination is a
+    // property of the auction, so this now scopes by league and season as well
+    // -- reading it off bid rows had no such filter and would have cleared a
+    // team's nomination in an unrelated league.
+    await db('restricted_free_agency_nominations')
       .where({
-        tid,
-        player_tid: tid
+        league_id: leagueId,
+        season_year: current_season.year,
+        original_team_id: tid
       })
-      .whereNull('announced')
-      .whereNotNull('nominated')
-      .whereNull('processed')
-      .whereNull('cancelled')
-      .update({ nominated: null })
+      .whereNull('announced_at')
+      .whereNull('processed_at')
+      .whereNotNull('nominated_at')
+      .update({ nominated_at: null })
 
     const nominated_timestamp = Math.round(Date.now() / 1000)
 
-    // Update the restricted free agency bid to mark it as announced
-    await db('restricted_free_agency_bids')
-      .where('uid', restricted_free_agency_bid.uid)
-      .update({ nominated: nominated_timestamp })
+    await db('restricted_free_agency_nominations')
+      .where('nomination_id', restricted_free_agency_bid.nomination_id)
+      .update({
+        nominated_at: db.raw('to_timestamp(?)', [nominated_timestamp])
+      })
 
     res.send({ nominated: nominated_timestamp })
   } catch (error) {
@@ -1189,15 +1233,16 @@ router.delete('/nominate/?', async (req, res) => {
     }
 
     // Check if the restricted free agency bid exists and belongs to the original manager
-    const restricted_free_agency_bid = await db('restricted_free_agency_bids')
-      .where({
-        pid,
-        tid,
-        player_tid: tid,
-        year: current_season.year
-      })
-      .whereNull('cancelled')
-      .first()
+    const restricted_free_agency_bid =
+      await select_restricted_free_agency_bid_with_nomination({ db })
+        .where({
+          'restricted_free_agency_bids.pid': pid,
+          'restricted_free_agency_bids.tid': tid,
+          'restricted_free_agency_bids.year': current_season.year,
+          'restricted_free_agency_nominations.original_team_id': tid
+        })
+        .whereNull('restricted_free_agency_bids.cancelled')
+        .first()
 
     if (!restricted_free_agency_bid) {
       return res
@@ -1213,14 +1258,14 @@ router.delete('/nominate/?', async (req, res) => {
       return res.status(400).send({ error: 'bid has already been processed' })
     }
 
-    if (restricted_free_agency_bid.announced) {
+    if (restricted_free_agency_bid.announced_at) {
       return res.status(400).send({ error: 'bid has already been announced' })
     }
 
     // Cancel the nomination
-    await db('restricted_free_agency_bids')
-      .where('uid', restricted_free_agency_bid.uid)
-      .update({ nominated: null })
+    await db('restricted_free_agency_nominations')
+      .where('nomination_id', restricted_free_agency_bid.nomination_id)
+      .update({ nominated_at: null })
 
     res.send({
       message: 'Restricted free agent nomination successfully cancelled'

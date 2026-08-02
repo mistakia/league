@@ -25717,7 +25717,7 @@ CREATE TABLE public.restricted_free_agency_bids (
     bid integer,
     tid integer NOT NULL,
     year smallint,
-    player_tid integer NOT NULL,
+    player_tid integer,
     lid integer NOT NULL,
     succ boolean,
     reason text,

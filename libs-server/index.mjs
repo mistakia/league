@@ -23,6 +23,7 @@ export { default as get_super_priority_status } from './get-super-priority-statu
 export { default as process_super_priority } from './process-super-priority.mjs'
 export { default as processRestrictedFreeAgencyBid } from './process-restricted-free-agency-bid.mjs'
 export { default as classify_restricted_free_agency_bid_outcome } from './classify-restricted-free-agency-bid-outcome.mjs'
+export { default as get_restricted_free_agency_nominations } from './get-restricted-free-agency-nominations.mjs'
 export { default as getRoster } from './get-roster.mjs'
 export { default as get_player_projections } from './get-projections.mjs'
 export { default as getLeague } from './get-league.mjs'

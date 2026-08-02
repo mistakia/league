@@ -3,9 +3,11 @@ import {
   current_season,
   roster_slot_types,
   player_tag_types,
-  transaction_types
+  transaction_types,
+  restricted_free_agency_bid_outcomes
 } from '#constants'
 import db from '#db'
+import { restricted_free_agency_bid_error } from './restricted-free-agency-bid-error.mjs'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 import processRelease from './process-release.mjs'
@@ -22,20 +24,26 @@ export default async function ({
   tid,
   lid,
   userid,
-  player_tid,
+  original_team_id,
   uid,
   processed
 }) {
   // check player is on original team roster
-  const isOriginalTeam = player_tid === tid
-  const originalTeamRoster = await getRoster({ tid: player_tid })
+  const isOriginalTeam = original_team_id === tid
+  const originalTeamRoster = await getRoster({ tid: original_team_id })
   const playerRosterRow = originalTeamRoster.players.find((p) => p.pid === pid)
   if (!playerRosterRow) {
-    throw new Error('player no longer on original team roster')
+    throw restricted_free_agency_bid_error({
+      outcome: restricted_free_agency_bid_outcomes.PLAYER_INELIGIBLE,
+      message: 'player no longer on original team roster'
+    })
   }
 
   if (playerRosterRow.tag !== player_tag_types.RESTRICTED_FREE_AGENCY) {
-    throw new Error('player no longer a restricted free agent')
+    throw restricted_free_agency_bid_error({
+      outcome: restricted_free_agency_bid_outcomes.PLAYER_INELIGIBLE,
+      message: 'player no longer a restricted free agent'
+    })
   }
 
   const pos = playerRosterRow.pos
@@ -84,7 +92,10 @@ export default async function ({
   }
 
   if (!isValid()) {
-    throw new Error('exceeds roster limits')
+    throw restricted_free_agency_bid_error({
+      outcome: restricted_free_agency_bid_outcomes.ROSTER_LIMIT_VIOLATION,
+      message: 'exceeds roster limits'
+    })
   }
 
   if (!isOriginalTeam) {
@@ -109,7 +120,7 @@ export default async function ({
 
     // add conditional pick to original team
     await create_conditional_pick({
-      tid: player_tid,
+      tid: original_team_id,
       league
     })
   }
@@ -143,11 +154,31 @@ export default async function ({
   // that window. It threw on HOU__2026-08-02 with both rows present and correct
   // by the time anyone looked. Committing the pair atomically closes it: a
   // reader that sees the transaction is guaranteed to see the signing.
+  //
+  // The nomination's resolution joins the same transaction. `winning_bid_id` and
+  // `processed_at` are what the auction history reads to decide an auction is
+  // complete, so a nomination resolved outside this boundary would let the
+  // history surface an auction whose winning bid is not yet marked.
   await db.transaction(async (trx) => {
     await trx('transactions').insert(addTransaction)
     await trx('restricted_free_agency_bids')
-      .update({ succ: true, reason: null, processed })
+      .update({
+        succ: true,
+        outcome: restricted_free_agency_bid_outcomes.WON,
+        outcome_detail: null,
+        processed
+      })
       .where('uid', uid)
+    await trx('restricted_free_agency_nominations')
+      .update({
+        winning_bid_id: uid,
+        processed_at: trx.raw('to_timestamp(?)', [processed])
+      })
+      .where({
+        league_id: lid,
+        player_id: pid,
+        season_year: current_season.year
+      })
   })
 
   const pids = [pid]

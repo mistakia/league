@@ -16,12 +16,15 @@ import {
 } from '#libs-shared'
 import {
   get_top_restricted_free_agency_bids,
+  get_restricted_free_agency_nominations,
+  classify_restricted_free_agency_bid_outcome,
   processRestrictedFreeAgencyBid,
   is_main,
   resetWaiverOrder,
   report_job,
   throw_if_shortfall
 } from '#libs-server'
+import { resolve_restricted_free_agency_bid_error_outcome } from '#libs-server/restricted-free-agency-bid-error.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -61,36 +64,48 @@ async function sort_bids_by_waiver_order(bids) {
 }
 
 /**
- * Announcement timestamp per player, drawn from the player's NOMINATION.
+ * Settle every bid that lost an auction, recording WHY each one lost.
  *
- * `announced` is written by announce-restricted-free-agent.mjs onto the
- * nominating team's own bid, and only that bid — every competing bid on the
- * same player carries `announced = null` for its whole life. So the
- * announcement is a property of the PLAYER's window, not of an individual bid
- * row, and eligibility has to be resolved through this map rather than off
- * `bid.announced`. Reading it per bid made a competing bid's `null` coerce to
- * epoch 0, which placed it in a window tens of thousands of indexes in the
- * past and made it due immediately on submission.
+ * This replaces a single blanket UPDATE that stamped
+ * `player no longer a restricted free agent` onto all of them. That sentence is
+ * true of every ordinary loss and separates none of them, so six seasons of
+ * history recorded no usable reason at all: 262 of 280 losing bids carry it.
+ * Classifying per bid costs one statement each on a set that has never exceeded
+ * a handful per auction.
  *
- * @param {number} lid - League id
- * @returns {Promise<Object>} pid -> announcement timestamp
+ * @param {Object} params
+ * @param {Object} params.winning_bid - The bid that signed the player
+ * @param {number} params.lid - League id
+ * @param {number} params.original_team_id - Team holding the player's rights
+ * @param {number} params.timestamp - Processing timestamp
  */
-async function get_announcement_timestamps_by_pid(lid) {
-  const announced_rows = await db('restricted_free_agency_bids')
-    .select('pid', 'announced')
-    .where({ lid, year: current_season.year })
-    .whereNotNull('announced')
+async function settle_losing_bids({
+  winning_bid,
+  lid,
+  original_team_id,
+  timestamp
+}) {
+  const losing_bids = await db('restricted_free_agency_bids')
+    .where({
+      pid: winning_bid.pid,
+      lid,
+      year: current_season.year
+    })
+    .whereNull('cancelled')
+    .whereNull('processed')
+    .whereNot('uid', winning_bid.uid)
 
-  const announced_by_pid = {}
-  for (const row of announced_rows) {
-    const announced = Number(row.announced)
-    const existing = announced_by_pid[row.pid]
-    if (existing === undefined || announced < existing) {
-      announced_by_pid[row.pid] = announced
-    }
+  for (const losing_bid of losing_bids) {
+    const outcome = classify_restricted_free_agency_bid_outcome({
+      winning_bid,
+      losing_bid,
+      original_team_id
+    })
+
+    await db('restricted_free_agency_bids')
+      .update({ succ: 0, outcome, processed: timestamp })
+      .where('uid', losing_bid.uid)
   }
-
-  return announced_by_pid
 }
 
 /**
@@ -152,7 +167,23 @@ const run = async ({ dry_run = false } = {}) => {
     .groupBy('seasons.lid', 'seasons.year', 'leagues.name')
     .whereNull('restricted_free_agency_bids.processed')
     .whereNull('restricted_free_agency_bids.cancelled')
-    .whereNotNull('restricted_free_agency_bids.announced')
+    // The announcement lives on the player's nomination, never on a competing
+    // bid, so this must reach through the nomination rather than testing a
+    // column that is null on all but one bid per auction.
+    .whereExists(function () {
+      this.select('*')
+        .from('restricted_free_agency_nominations')
+        .whereRaw(
+          'restricted_free_agency_nominations.league_id = restricted_free_agency_bids.lid'
+        )
+        .whereRaw(
+          'restricted_free_agency_nominations.player_id = restricted_free_agency_bids.pid'
+        )
+        .whereRaw(
+          'restricted_free_agency_nominations.season_year = restricted_free_agency_bids.year'
+        )
+        .whereNotNull('restricted_free_agency_nominations.announced_at')
+    })
     .distinct()
 
   log(`Found ${active_leagues.length} active leagues with unprocessed bids`)
@@ -184,7 +215,9 @@ const run = async ({ dry_run = false } = {}) => {
       continue
     }
 
-    const announced_by_pid = await get_announcement_timestamps_by_pid(lid)
+    const nominations_by_pid = await get_restricted_free_agency_nominations({
+      lid
+    })
 
     // A bid is due once the processing time of its PLAYER's nomination window
     // has arrived — competing bids carry no announcement of their own
@@ -194,7 +227,7 @@ const run = async ({ dry_run = false } = {}) => {
     for (const bid of restricted_free_agency_bids) {
       const processing_due = get_bid_processing_due({
         league,
-        announced: announced_by_pid[bid.pid]
+        announced: nominations_by_pid[bid.pid]?.announced
       })
 
       if (timestamp >= processing_due) {
@@ -241,7 +274,9 @@ const run = async ({ dry_run = false } = {}) => {
       }
 
       if (restricted_free_agency_bids.length > 1) {
-        if (restricted_free_agency_bids.find((t) => t.player_tid === t.tid)) {
+        if (
+          restricted_free_agency_bids.find((t) => t.original_team_id === t.tid)
+        ) {
           log(
             `DRY RUN: Original team has a matching bid, they would retain the player`
           )
@@ -290,9 +325,10 @@ const run = async ({ dry_run = false } = {}) => {
     while (restricted_free_agency_bids.length) {
       let error
       const original_team_bid = restricted_free_agency_bids.find(
-        (t) => t.player_tid === t.tid
+        (t) => t.original_team_id === t.tid
       )
       let winning_bid = original_team_bid || restricted_free_agency_bids[0]
+      const { original_team_id } = winning_bid
 
       try {
         if (original_team_bid || restricted_free_agency_bids.length === 1) {
@@ -303,26 +339,13 @@ const run = async ({ dry_run = false } = {}) => {
               ...winning_bid,
               processed: timestamp
             })
-          }
 
-          const { pid } = winning_bid
-
-          if (!dry_run) {
-            // Mark all other bids for this player as unsuccessful
-            await db('restricted_free_agency_bids')
-              .update({
-                succ: 0,
-                reason: 'player no longer a restricted free agent',
-                processed: timestamp
-              })
-              .where({
-                pid,
-                lid,
-                year: current_season.year
-              })
-              .whereNull('cancelled')
-              .whereNull('processed')
-              .whereNot('uid', winning_bid.uid)
+            await settle_losing_bids({
+              winning_bid,
+              lid,
+              original_team_id,
+              timestamp
+            })
           }
         } else {
           // multiple bids tied with no original team
@@ -344,24 +367,15 @@ const run = async ({ dry_run = false } = {}) => {
             })
             // Reset waiver order for the winning team
             await resetWaiverOrder({ leagueId: lid, teamId: winning_bid.tid })
-          }
 
-          // Update all other bids as unsuccessful
-          if (!dry_run) {
-            await db('restricted_free_agency_bids')
-              .update({
-                succ: 0,
-                reason: 'player no longer a restricted free agent',
-                processed: timestamp
-              })
-              .where({
-                pid: winning_bid.pid,
-                lid,
-                year: current_season.year
-              })
-              .whereNull('cancelled')
-              .whereNull('processed')
-              .whereNot('uid', winning_bid.uid)
+            // Every remaining bid tied this one and lost on waiver order, which
+            // the classifier reads off the equal amounts.
+            await settle_losing_bids({
+              winning_bid,
+              lid,
+              original_team_id,
+              timestamp
+            })
           }
         }
       } catch (err) {
@@ -377,11 +391,17 @@ const run = async ({ dry_run = false } = {}) => {
       // throw raised AFTER that commit (sendNotifications, say) must not
       // rewrite succ back to 0, which would leave a tag transaction with no
       // successful signing — the precise state this change exists to prevent.
+      //
+      // The outcome code travels ON the error, attached where it is thrown, so
+      // this never has to match on the message text -- the habit that made the
+      // retired `reason` column a record of exception wording rather than of
+      // auction results.
       if (!dry_run && error) {
         await db('restricted_free_agency_bids')
           .update({
             succ: false,
-            reason: error.message,
+            outcome: resolve_restricted_free_agency_bid_error_outcome(error),
+            outcome_detail: error.message,
             processed: timestamp
           })
           .where('uid', winning_bid.uid)
@@ -397,7 +417,7 @@ const run = async ({ dry_run = false } = {}) => {
           timestamp >=
           get_bid_processing_due({
             league,
-            announced: announced_by_pid[bid.pid]
+            announced: nominations_by_pid[bid.pid]?.announced
           })
       )
     }
@@ -423,9 +443,9 @@ const run = async ({ dry_run = false } = {}) => {
       .where('seasons.restricted_free_agency_period_end', '>=', timestamp)
       .where(function () {
         // bid meets the time-since-announcement requirement
-        // The announcement belongs to the player's NOMINATION, so it is read
-        // through a subquery rather than off rfab — a competing bid's own
-        // `announced` is always null and would drop the row from the oracle.
+        // The announcement belongs to the player's NOMINATION, which now has a
+        // row of its own — a competing bid never carried one and reading it off
+        // rfab would drop the row from the oracle.
         // Epoch approximation of the calendar-aware boundary, with an hour of
         // slack so a DST transition inside a bid window cannot manufacture a
         // false shortfall. Costs an hour of detection latency, never a miss.
@@ -433,12 +453,12 @@ const run = async ({ dry_run = false } = {}) => {
         // row — correct, since an unannounced player is never due.
         this.whereRaw(
           `? - (
-            select min(nomination.announced)
-            from restricted_free_agency_bids as nomination
-            where nomination.pid = rfab.pid
-              and nomination.lid = rfab.lid
-              and nomination.year = rfab.year
-              and nomination.announced is not null
+            select extract(epoch from nomination.announced_at)
+            from restricted_free_agency_nominations as nomination
+            where nomination.player_id = rfab.pid
+              and nomination.league_id = rfab.lid
+              and nomination.season_year = rfab.year
+              and nomination.announced_at is not null
           ) >= (COALESCE(seasons.restricted_free_agency_window_hours, ?) - COALESCE(seasons.restricted_free_agency_processing_lead_hours, ?)) * 3600 + 3600`,
           [
             timestamp,

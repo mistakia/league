@@ -630,10 +630,21 @@ const build_event_stream = async ({ lid }) => {
   // keyed on (winning_tid, pid, year): at most one successful cross-team
   // RFA win per (tid, pid, year) exists by league rule.
   const cross_team_rfa_wins = await db('restricted_free_agency_bids')
-    .where({ lid, succ: true })
-    .whereNotNull('processed')
-    .whereRaw('tid != player_tid')
-    .select('tid', 'pid', 'year')
+    .join(
+      'restricted_free_agency_nominations',
+      'restricted_free_agency_nominations.nomination_id',
+      'restricted_free_agency_bids.nomination_id'
+    )
+    .where({ 'restricted_free_agency_bids.lid': lid, succ: true })
+    .whereNotNull('restricted_free_agency_bids.processed')
+    .whereRaw(
+      'restricted_free_agency_bids.tid != restricted_free_agency_nominations.original_team_id'
+    )
+    .select(
+      'restricted_free_agency_bids.tid',
+      'restricted_free_agency_bids.pid',
+      'restricted_free_agency_bids.year'
+    )
   const cross_team_rfa_key_set = new Set(
     cross_team_rfa_wins.map((r) => `${r.tid}__${r.pid}__${r.year}`)
   )
@@ -759,17 +770,29 @@ const build_event_stream = async ({ lid }) => {
 
   // 3. RFA cross-team wins.
   const rfa = await db('restricted_free_agency_bids')
-    .select('pid', 'tid', 'player_tid', 'processed', 'year', 'bid')
-    .where({ lid, succ: true })
-    .whereNotNull('processed')
+    .join(
+      'restricted_free_agency_nominations',
+      'restricted_free_agency_nominations.nomination_id',
+      'restricted_free_agency_bids.nomination_id'
+    )
+    .select(
+      'restricted_free_agency_bids.pid',
+      'restricted_free_agency_bids.tid',
+      'restricted_free_agency_nominations.original_team_id',
+      'restricted_free_agency_bids.processed',
+      'restricted_free_agency_bids.year',
+      'restricted_free_agency_bids.bid'
+    )
+    .where({ 'restricted_free_agency_bids.lid': lid, succ: true })
+    .whereNotNull('restricted_free_agency_bids.processed')
   for (const r of rfa) {
-    if (r.tid === r.player_tid) continue
+    if (r.tid === r.original_team_id) continue
     events.push({
       sort_ts: r.processed,
       sort_priority: 2,
       kind: 'rfa_cross_team_win',
       player_id: r.pid,
-      from_tid: r.player_tid,
+      from_tid: r.original_team_id,
       to_tid: r.tid,
       bid: r.bid,
       occurred_at: new Date(r.processed * 1000),

@@ -13,6 +13,7 @@ import {
   transaction_types
 } from '#constants'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
+import { insert_restricted_free_agency_bid } from './utils/insert-restricted-free-agency-bid.mjs'
 
 process.env.NODE_ENV = 'test'
 
@@ -45,21 +46,18 @@ const insert_bid = async ({
   succ = null,
   player_tid = team_id,
   tid = team_id
-}) => {
-  await knex('restricted_free_agency_bids').insert({
+}) =>
+  insert_restricted_free_agency_bid({
     pid,
-    userid: user_id,
-    bid,
-    tid,
-    player_tid,
     lid: league_id,
-    year: current_season.year,
-    submitted: Math.round(Date.now() / 1000),
+    tid,
+    bid,
+    userid: user_id,
+    original_team_id: player_tid,
     processed,
     cancelled,
     succ
   })
-}
 
 const get_roster_player = async (pid) => {
   const roster = await getRoster({ tid: team_id, week: 0 })

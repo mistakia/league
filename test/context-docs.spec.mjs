@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import server from '#api'
 import knex from '#db'
 import league_fixture from '#db/fixtures/league.mjs'
+import { insert_restricted_free_agency_bid } from './utils/insert-restricted-free-agency-bid.mjs'
 import {
   current_season,
   roster_slot_types,
@@ -142,13 +143,12 @@ const seed_full_league = async () => {
       year
     }
   ])
-  await knex('restricted_free_agency_bids').insert({
+  await insert_restricted_free_agency_bid({
     pid: rfa_player.pid,
     tid: 1,
-    player_tid: 1,
     lid: 1,
     userid: 1,
-    submitted: Math.round(Date.now() / 1000),
+    original_team_id: 1,
     year,
     bid: 10
   })

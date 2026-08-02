@@ -27,4 +27,28 @@ export const build_active_restricted_free_agency_bids_query = ({
     .whereNull('cancelled')
     .whereNull('processed')
 
+// Load a single bid together with the auction facts that are no longer stored
+// on it. `original_team_id`, `nominated_at` and `announced_at` belong to the
+// player's nomination, so every route that used to read them off the bid row
+// reaches them through this join.
+//
+// Projected under names distinct from the bid's own columns, which is what lets
+// a caller test `announced_at` without ambiguity now that the bid has no
+// `announced` of its own.
+export const select_restricted_free_agency_bid_with_nomination = ({ db }) =>
+  db('restricted_free_agency_bids')
+    .select(
+      'restricted_free_agency_bids.*',
+      'restricted_free_agency_nominations.nomination_id',
+      'restricted_free_agency_nominations.original_team_id',
+      'restricted_free_agency_nominations.nominated_at',
+      'restricted_free_agency_nominations.announced_at',
+      'restricted_free_agency_nominations.processed_at'
+    )
+    .leftJoin(
+      'restricted_free_agency_nominations',
+      'restricted_free_agency_nominations.nomination_id',
+      'restricted_free_agency_bids.nomination_id'
+    )
+
 export default build_active_restricted_free_agency_bids_query

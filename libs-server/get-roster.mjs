@@ -77,7 +77,17 @@ export default async function ({
     const bids = await build_active_restricted_free_agency_bids_query({
       db,
       tid
-    }).where('player_tid', tid)
+    })
+      .join(
+        'restricted_free_agency_nominations',
+        'restricted_free_agency_nominations.nomination_id',
+        'restricted_free_agency_bids.nomination_id'
+      )
+      .where('restricted_free_agency_nominations.original_team_id', tid)
+      .select(
+        'restricted_free_agency_bids.*',
+        'restricted_free_agency_nominations.original_team_id'
+      )
 
     if (bids.length) {
       // Get conditional releases for all restricted free agency bids
@@ -95,7 +105,8 @@ export default async function ({
           roster_player.tag === player_tag_types.RESTRICTED_FREE_AGENCY
         ) {
           roster_player.bid = bid.bid
-          roster_player.restricted_free_agency_original_team = bid.player_tid
+          roster_player.restricted_free_agency_original_team =
+            bid.original_team_id
 
           // Add conditional releases for this bid
           const releases = restricted_free_agency_releases.filter(
@@ -114,28 +125,39 @@ export default async function ({
       (p) => p.tag === player_tag_types.RESTRICTED_FREE_AGENCY
     )
     if (restricted_free_agency_tagged_players.length) {
-      const restricted_free_agency_bids = await db(
-        'restricted_free_agency_bids'
-      )
-        .select('pid', 'processed', 'nominated', 'announced', 'player_tid')
+      // Tag state is a property of the AUCTION, so it is read off the
+      // nomination. Reading `announced` off a bid row was only ever correct for
+      // the nominating team's own bid; every competing bid carried a null.
+      const nominations = await db('restricted_free_agency_nominations')
+        .select(
+          'player_id',
+          'original_team_id',
+          'nominated_at',
+          'announced_at',
+          'processed_at'
+        )
         .where({
-          player_tid: tid,
-          year: current_season.year
+          original_team_id: tid,
+          season_year: current_season.year
         })
         .whereIn(
-          'pid',
+          'player_id',
           restricted_free_agency_tagged_players.map((p) => p.pid)
         )
-        .whereNull('cancelled')
 
       for (const roster_player of restricted_free_agency_tagged_players) {
-        const bid = restricted_free_agency_bids.find(
-          (b) => b.pid === roster_player.pid
+        const nomination = nominations.find(
+          (n) => n.player_id === roster_player.pid
         )
-        if (bid) {
-          roster_player.restricted_free_agency_tag_processed = bid.processed
-          roster_player.restricted_free_agency_tag_announced = bid.announced
-          roster_player.restricted_free_agency_original_team = bid.player_tid
+        if (nomination) {
+          roster_player.restricted_free_agency_tag_processed =
+            nomination.processed_at
+          roster_player.restricted_free_agency_tag_nominated =
+            nomination.nominated_at
+          roster_player.restricted_free_agency_tag_announced =
+            nomination.announced_at
+          roster_player.restricted_free_agency_original_team =
+            nomination.original_team_id
         }
       }
     }

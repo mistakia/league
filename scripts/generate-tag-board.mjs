@@ -156,9 +156,26 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
     // through a rendered page that could be shown, shared or mis-scoped. The
     // board reports THAT a nomination exists, never what it is worth.
     viewer_rfa_bids = await db('restricted_free_agency_bids')
-      .select('tid', 'pid', 'submitted', 'announced')
-      .where({ lid, year, tid: viewer_tid })
-      .whereNull('cancelled')
+      .leftJoin(
+        'restricted_free_agency_nominations',
+        'restricted_free_agency_nominations.nomination_id',
+        'restricted_free_agency_bids.nomination_id'
+      )
+      .select(
+        'restricted_free_agency_bids.tid',
+        'restricted_free_agency_bids.pid',
+        'restricted_free_agency_bids.submitted',
+        // The announcement belongs to the player's nomination, so a competing
+        // offer reports the auction's announcement rather than a null of its
+        // own.
+        'restricted_free_agency_nominations.announced_at as announced'
+      )
+      .where({
+        'restricted_free_agency_bids.lid': lid,
+        'restricted_free_agency_bids.year': year,
+        'restricted_free_agency_bids.tid': viewer_tid
+      })
+      .whereNull('restricted_free_agency_bids.cancelled')
   }
 
   return {
