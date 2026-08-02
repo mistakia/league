@@ -9,7 +9,8 @@ import {
   MERGE_COLUMNS_DAILY,
   merge_columns_for_branch,
   create_valuation_accumulator,
-  parse_keeptradecut_date
+  parse_keeptradecut_date,
+  resolve_known_keeptradecut_player
 } from '#scripts/import-keeptradecut.mjs'
 import compute_snapshots_bulk, {
   ktc_at
@@ -136,6 +137,71 @@ describe('SCRIPTS import-keeptradecut valuations', function () {
       skipped.should.equal(1)
       rows.should.have.length(1)
       rows[0].observed_at.should.eql(OBSERVED_AT)
+    })
+  })
+
+  // The dynasty-rankings page and the rankings POST endpoint are separate
+  // fetches of separately-computed top-500 lists, so a player can be in the
+  // POST payload and absent from the page. Reading `.position` off that absent
+  // record threw a TypeError and killed the whole 2026-08-02 run mid-import.
+  // Resolving the vendor id against what we already know is what lets those
+  // players import instead of taking the process down.
+  describe('resolve_known_keeptradecut_player', function () {
+    const KNOWN_PICK_KTC_ID = 9990002
+    const KNOWN_PLAYER_KTC_ID = 9990003
+    const KNOWN_PLAYER_PID = 'TEST-KTCR-000001'
+
+    before(async () => {
+      await db('keeptradecut_pick')
+        .where('ktc_player_id', KNOWN_PICK_KTC_ID)
+        .del()
+      await db('player').where('pid', KNOWN_PLAYER_PID).del()
+
+      const now = new Date()
+      await db('keeptradecut_pick').insert({
+        pid: `KTCPICK-${KNOWN_PICK_KTC_ID}`,
+        ktc_player_id: KNOWN_PICK_KTC_ID,
+        ktc_player_name: '2027 Mid 1st',
+        season_year: 2027,
+        round: 1,
+        slot: 2,
+        created_at: now,
+        updated_at: now
+      })
+
+      await db('player').insert({
+        pid: KNOWN_PLAYER_PID,
+        formatted_name: 'ktc resolver fixture',
+        first_name: 'Ktc',
+        last_name: 'Fixture',
+        short_name: 'K.Fixture',
+        primary_position: 'WR',
+        secondary_position: 'WR',
+        keeptradecut_player_id: KNOWN_PLAYER_KTC_ID
+      })
+    })
+
+    it('resolves a known draft pick as RDP', async () => {
+      const resolved =
+        await resolve_known_keeptradecut_player(KNOWN_PICK_KTC_ID)
+      expect(resolved).to.deep.equal({
+        pid: `KTCPICK-${KNOWN_PICK_KTC_ID}`,
+        is_rdp: true
+      })
+    })
+
+    it('resolves a known player by vendor id', async () => {
+      const resolved =
+        await resolve_known_keeptradecut_player(KNOWN_PLAYER_KTC_ID)
+      expect(resolved).to.deep.equal({ pid: KNOWN_PLAYER_PID, is_rdp: false })
+    })
+
+    // Without a page record there is no name, position or draft year to match
+    // on, so an unseen vendor id carries nothing importable. Returning null
+    // (rather than throwing) is what keeps one such id from ending the run.
+    it('returns null for a vendor id it has never seen', async () => {
+      const resolved = await resolve_known_keeptradecut_player(9990999)
+      expect(resolved).to.equal(null)
     })
   })
 

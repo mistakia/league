@@ -257,7 +257,9 @@ export const build_liquidity_inserts = ({
 // already resolved this vendor id before, none of that is required to import
 // the value history the POST payload carries, so the import proceeds instead of
 // dropping the player.
-const resolve_known_keeptradecut_player = async (keeptradecut_player_id) => {
+export const resolve_known_keeptradecut_player = async (
+  keeptradecut_player_id
+) => {
   const pick_row = await db('keeptradecut_pick')
     .where('ktc_player_id', keeptradecut_player_id)
     .first()
