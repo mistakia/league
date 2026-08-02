@@ -481,8 +481,8 @@ export function players_reducer(state = initialState, { payload, type }) {
         restricted_free_agency_conditional_releases: []
       }
       if (
-        !payload.data.player_tid ||
-        payload.data.player_tid === payload.data.tid
+        !payload.data.original_team_id ||
+        payload.data.original_team_id === payload.data.tid
       ) {
         data.tag = player_tag_types.REGULAR
       }

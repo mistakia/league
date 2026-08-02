@@ -320,7 +320,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
         }
 
         const winning_tid = restricted_free_agency_signing.tid
-        const losing_tid = restricted_free_agency_signing.player_tid
+        const losing_tid = restricted_free_agency_signing.original_team_id
         if (winning_tid !== losing_tid) {
           // remove player from losing team
           delete get_team({

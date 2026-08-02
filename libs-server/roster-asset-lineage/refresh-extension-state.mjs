@@ -14,9 +14,11 @@ import { LAST_RESET_EVENT } from './constants.mjs'
 
 // Reset semantics:
 //   ROSTER_RELEASE  -> reset on tid recorded in transactions (the releasing team).
-//   RESTRICTED_FREE_AGENCY_TAG -> reset only on the losing team (player_tid),
+//   RESTRICTED_FREE_AGENCY_TAG -> reset only on the losing team (the
+//                                  nomination's original_team_id),
 //                                  and only when the win was cross-team
-//                                  (tid != player_tid). The new team starts fresh.
+//                                  (tid != original_team_id). The new team
+//                                  starts fresh.
 //   TRADE                       -> NOT a reset event. Extensions carry through
 //                                  trades per league rule; the receiving team
 //                                  inherits the player's accumulated count.
@@ -35,9 +37,19 @@ const refresh_extension_state = async ({ lid, affected_keys = null }) => {
 
   // Cross-team RFA wins: source of TRADED_AWAY-style reset on the losing team.
   const rfa_wins = await db('restricted_free_agency_bids')
-    .select('pid', 'tid', 'player_tid', 'processed')
-    .where({ lid, succ: true })
-    .whereNotNull('processed')
+    .join(
+      'restricted_free_agency_nominations',
+      'restricted_free_agency_nominations.nomination_id',
+      'restricted_free_agency_bids.nomination_id'
+    )
+    .select(
+      'restricted_free_agency_bids.pid',
+      'restricted_free_agency_bids.tid',
+      'restricted_free_agency_nominations.original_team_id',
+      'restricted_free_agency_bids.processed'
+    )
+    .where({ 'restricted_free_agency_bids.lid': lid, succ: true })
+    .whereNotNull('restricted_free_agency_bids.processed')
 
   // Build a unified reset stream keyed by ts so chronological ordering with
   // extension/tag accumulation matches reality.
@@ -54,10 +66,10 @@ const refresh_extension_state = async ({ lid, affected_keys = null }) => {
     }
   }
   for (const r of rfa_wins) {
-    if (r.tid === r.player_tid) continue
+    if (r.tid === r.original_team_id) continue
     reset_events.push({
       ts: r.processed,
-      tid: r.player_tid,
+      tid: r.original_team_id,
       pid: r.pid,
       event: LAST_RESET_EVENT.RFA_WIN
     })
