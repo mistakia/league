@@ -15,7 +15,7 @@ class DataViewQueue {
 
   async add_request({ ws, request_id, params, user_id, ignore_cache = false }) {
     log('Adding request', { request_id, user_id })
-    const cache_key = `/data-views/${get_data_view_hash(params)}`
+    const cache_key = `/data-views/${get_data_view_hash({ ...params, user_id: user_id || null })}`
     const cached_value = await redis_cache.get(cache_key)
 
     if (cached_value && !ignore_cache) {
@@ -159,7 +159,10 @@ class DataViewQueue {
         await get_data_view_results({
           timeout,
           ...params,
-          calculate_total_count
+          calculate_total_count,
+          // After the spread: `params` is the client's table state and must not
+          // be able to name its own viewer.
+          user_id: user_id || null
         })
 
       if (data_view_results && data_view_results.length) {

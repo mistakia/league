@@ -224,6 +224,18 @@ The three saved-view read routes are deliberately asymmetric, and the asymmetry 
 
 That combination only holds while the list route cannot enumerate ids. Do not add a filter parameter back to it. Note these routes mount before the blanket auth guard in `api/index.mjs`, so each one must self-enforce.
 
+### Viewer-Scoped Columns
+
+Most columns answer the same thing for everyone. A few cannot: `player_league_roster_tag` and `player_league_roster_status` carry a league's restricted free agency tags, which are private to the team holding them until the nomination is announced. Those columns declare `is_viewer_scoped: true` and read the caller's identity from `data_view_options.viewer_user_id`.
+
+Identity enters at one point per transport and is never client-supplied — `req.auth.userId` on the HTTP search and export routes, the socket's own `user_id` on the websocket — and reaches the engine as `get_data_view_results({ user_id })`. The websocket applies it _after_ spreading the client's `params`, so a crafted request cannot name its own viewer.
+
+The result cache is what makes this delicate. `/data-views/<hash>` is one key namespace shared by the search route, the export route and the socket, and `get_data_view_hash` has always keyed on the table state alone. A viewer-dependent answer cached under a viewer-independent key would serve the first requester's rows to everyone, so the hash now folds the viewer in — but **only** when the table state names a column in `viewer_scoped_column_ids` (`libs-server/data-views/viewer-scoped-columns.mjs`). Every other view keeps the key it has always had, so nothing was invalidated and ordinary views lose no hit rate.
+
+Two rules for adding another one. `get_data_view_hash` takes `user_id` as a **required** argument and throws on `undefined` — a caller that could silently omit it would write an authenticated result under the anonymous key, which is the leak this design exists to prevent, so pass an explicit `null` for anonymous. And add the column id to `viewer_scoped_column_ids` alongside the flag: `test/data-views.viewer-scoped-columns.spec.mjs` asserts the set and the flagged definitions match exactly, so the two cannot drift.
+
+Note what a gated column must emit for a hidden value. `player_league_roster_tag` renders a hidden restricted free agency tag as `regular`, not as `NULL` — `NULL` already means "not rostered", so a third outcome would identify the tagged player exactly as well as the tag itself. The gate applies to `main_select`, `main_group_by` and `main_where` together; a `WHERE` that bypassed it would let a caller enumerate hidden tags by filtering for them.
+
 ### Column Configuration Patterns
 
 ```javascript

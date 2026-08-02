@@ -964,13 +964,19 @@ router.post('/search/?', async (req, res) => {
   try {
     const { where, columns, sort, offset, prefix_columns, row_axes } = req.body
 
+    // This route sits ahead of the blanket auth guard and stays open to
+    // anonymous callers; the viewer is read only so a viewer-scoped column can
+    // tell whose private roster state it may disclose.
+    const user_id = req.auth ? req.auth.userId : null
+
     const cache_key = `/data-views/${get_data_view_hash({
       where,
       columns,
       sort,
       offset,
       prefix_columns,
-      row_axes
+      row_axes,
+      user_id
     })}`
     const cached_result = await redis_cache.get(cache_key)
 
@@ -991,7 +997,8 @@ router.post('/search/?', async (req, res) => {
         sort,
         offset,
         prefix_columns,
-        row_axes
+        row_axes,
+        user_id
       })
 
     if (data_view_results && data_view_results.length) {
@@ -1111,6 +1118,10 @@ router.post('/debug/?', async (req, res) => {
     if (limit_override) {
       table_state = { ...table_state, limit: limit_override }
     }
+
+    // Admin-only route, but the viewer still has to travel with the request or
+    // the generated SQL would not be the SQL this admin's own search produces.
+    table_state = { ...table_state, user_id: req.auth.userId }
 
     const generate_started_at = Date.now()
     const { query, data_view_metadata } =
@@ -1261,6 +1272,8 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
 
     const { table_state } = view
 
+    const user_id = req.auth ? req.auth.userId : null
+
     // Generate cache key
     const cache_key = `/data-views/${get_data_view_hash({
       where: table_state.where,
@@ -1268,7 +1281,8 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       sort: table_state.sort,
       offset: table_state.offset,
       prefix_columns: table_state.prefix_columns,
-      row_axes: table_state.row_axes
+      row_axes: table_state.row_axes,
+      user_id
     })}`
 
     let data_view_results
@@ -1291,7 +1305,8 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         offset: table_state.offset,
         prefix_columns: table_state.prefix_columns,
         row_axes: table_state.row_axes,
-        limit
+        limit,
+        user_id
       })
       data_view_results = result.data_view_results
       data_view_metadata = result.data_view_metadata

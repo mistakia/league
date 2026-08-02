@@ -1557,7 +1557,12 @@ export const get_data_view_results_query = async ({
   sort = [],
   offset = 0,
   limit = 500,
-  row_grain = ['player']
+  row_grain = ['player'],
+  // Server-resolved identity of the caller, never client-supplied. Reaches a
+  // column definition as `data_view_options.viewer_user_id`, which is how a
+  // viewer-scoped column (see `data-views/viewer-scoped-columns.mjs`) decides
+  // what it may disclose. Null for an anonymous caller.
+  user_id = null
 } = {}) => {
   const validator_result = validators.table_state_validator({
     row_axes,
@@ -1650,7 +1655,8 @@ export const get_data_view_results_query = async ({
     from_table_column_id: from_table_config.column_id,
     year_coalesce_args: [],
     matchup_opponent_types: new Set(),
-    year_range: []
+    year_range: [],
+    viewer_user_id: user_id
   }
 
   // year_range is mutated below once the split branch computes it -- every
@@ -2296,7 +2302,8 @@ export default async function ({
   limit = 500,
   timeout = null,
   calculate_total_count = true,
-  row_grain = ['player']
+  row_grain = ['player'],
+  user_id = null
 } = {}) {
   const { query, data_view_metadata } = await get_data_view_results_query({
     row_axes,
@@ -2306,7 +2313,8 @@ export default async function ({
     sort,
     offset,
     limit,
-    row_grain
+    row_grain,
+    user_id
   })
 
   const data_view_query_string = query.toString()

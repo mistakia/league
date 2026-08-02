@@ -22,7 +22,7 @@ export default {
   player_league_roster_status:
     "The player's current roster status in the fantasy league (e.g., free agent, active roster, practice squad, injured reserve)",
   player_league_roster_tag:
-    "The contract tag the player's roster spot carries in the fantasy league: regular, franchise, rookie, or restricted_free_agency. Null for a player who is not rostered",
+    "The contract tag the player's roster spot carries in the fantasy league: regular, franchise, rookie, or restricted_free_agency. Null for a player who is not rostered. A restricted free agency tag reads as regular until its nomination is announced, unless you manage the team holding it",
   player_league_fantasy_team:
     "The fantasy franchise that currently holds the player's contract. Null for a free agent. This is the fantasy team, not the NFL team — see player_nfl_team for that",
   player_league_salary: "The player's current salary in the fantasy league",
