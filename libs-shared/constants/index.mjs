@@ -113,6 +113,16 @@ export {
   player_id_regex
 } from './source-constants.mjs'
 
+// Restricted free agency constants
+export {
+  restricted_free_agency_bid_outcomes,
+  restricted_free_agency_bid_outcome_values,
+  restricted_free_agency_bid_outcome_display_names,
+  restricted_free_agency_bid_outcome_descriptions,
+  is_winning_restricted_free_agency_bid_outcome,
+  is_valid_restricted_free_agency_bid_outcome
+} from './restricted-free-agency-constants.mjs'
+
 // Error constants
 export { roster_validation_errors } from './error-constants.mjs'
 
