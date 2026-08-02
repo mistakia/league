@@ -252,6 +252,39 @@ describe('playoff format and division schedule', function () {
       expect(result.playoff_tids).to.eql([1, 2, 11, 12])
     })
 
+    // Regression: calculate-standings must not throw for a league/year with no
+    // seasons row. getLeague LEFT JOINs seasons, so every format field comes
+    // back null -- and league 1 already has teams rows for 2027 with no 2027
+    // seasons row, so process-matchups would abort on it.
+    it('orders standings on the ladder when no playoff format is set', function () {
+      const teams = twelve.map((t) => ({ ...t }))
+      const league = {
+        playoff_team_count: null,
+        bye_count: null,
+        bye_candidate_pool: null,
+        bye_selection_method: null,
+        at_large_selection_method: null,
+        has_division_winner_berths: null
+      }
+
+      const has_playoff_format = Number.isInteger(league.playoff_team_count)
+      expect(has_playoff_format).to.equal(false)
+
+      const seeded_tids = [...teams]
+        .sort(compare_playoff_seed)
+        .map((team) => team.tid)
+
+      // Identical to what the configured defaults produce.
+      const with_defaults = get_playoff_seeding({
+        teams,
+        playoff_team_count: 6,
+        bye_count: 2
+      }).seeded_tids
+
+      expect(seeded_tids).to.eql(with_defaults)
+      expect(seeded_tids.length).to.equal(12)
+    })
+
     it('throws when the division winner pool cannot fill the byes', function () {
       const single_division = Array.from({ length: 10 }, (unused, i) =>
         team(i + 1, 1, { wins: 12 - i, losses: i })

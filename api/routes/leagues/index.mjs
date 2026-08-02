@@ -242,6 +242,18 @@ router.put('/:leagueId', async (req, res) => {
           .status(400)
           .send({ error: 'bye_count must not exceed playoff_team_count' })
       }
+
+      // The wildcard round pairs off the non-bye teams, so an odd remainder is
+      // an unrepresentable bracket. Rejecting it here is what keeps the derived
+      // championship_team_count in simulate-playoff-forecast honest -- left
+      // unchecked it silently truncates and the simulation fails later with a
+      // count mismatch that names neither field.
+      if ((playoff_team_count - bye_count) % 2 !== 0) {
+        return res.status(400).send({
+          error:
+            'playoff_team_count minus bye_count must be even so the wildcard round can pair off'
+        })
+      }
     }
 
     if (league_fields.includes(field)) {

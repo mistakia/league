@@ -3,6 +3,7 @@ import { current_season, create_empty_fantasy_team_stats } from '#constants'
 import calculatePoints from './calculate-points.mjs'
 import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
 import get_playoff_seeding from './get-playoff-seeding.mjs'
+import compare_playoff_seed from './compare-playoff-seed.mjs'
 
 const log = debug('calculate-standings')
 debug.enable('calculate-standings')
@@ -274,19 +275,35 @@ const calculateStandings = ({
   //
   // The playoff format comes from the league's season settings, not from this
   // module. division_finish above remains a reported standing either way.
-  const { seeded_tids } = get_playoff_seeding({
-    teams: Object.values(teamStats).map((p) => ({
-      tid: p.tid,
-      div: p.div,
-      ...p.stats
-    })),
-    playoff_team_count: league.playoff_team_count,
-    bye_count: league.bye_count,
-    bye_candidate_pool: league.bye_candidate_pool,
-    bye_selection_method: league.bye_selection_method,
-    at_large_selection_method: league.at_large_selection_method,
-    has_division_winner_berths: league.has_division_winner_berths
-  })
+  const flat_teams = Object.values(teamStats).map((p) => ({
+    tid: p.tid,
+    div: p.div,
+    ...p.stats
+  }))
+
+  // A league/year with no `seasons` row yields nulls here, because getLeague
+  // LEFT JOINs seasons -- and get_playoff_seeding throws on a null field size.
+  // Standings must still compute: this function needed no league config at all
+  // before the format became configurable, and throwing would abort
+  // process-matchups for a year whose season row has not been created yet.
+  // league 1 already has `teams` rows for 2027 and no 2027 `seasons` row.
+  //
+  // Ordering on compare_playoff_seed alone is exactly what the configured
+  // defaults produce, so the fallback is the default format rather than an
+  // invented one.
+  const has_playoff_format = Number.isInteger(league.playoff_team_count)
+
+  const seeded_tids = has_playoff_format
+    ? get_playoff_seeding({
+        teams: flat_teams,
+        playoff_team_count: league.playoff_team_count,
+        bye_count: league.bye_count,
+        bye_candidate_pool: league.bye_candidate_pool,
+        bye_selection_method: league.bye_selection_method,
+        at_large_selection_method: league.at_large_selection_method,
+        has_division_winner_berths: league.has_division_winner_berths
+      }).seeded_tids
+    : [...flat_teams].sort(compare_playoff_seed).map((team) => team.tid)
 
   for (let i = 0; i < seeded_tids.length; i++) {
     teamStats[seeded_tids[i]].stats.regular_season_finish = i + 1

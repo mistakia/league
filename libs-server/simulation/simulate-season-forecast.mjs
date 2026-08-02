@@ -358,7 +358,12 @@ async function build_post_season_forecast({
   for (const team of teams) {
     const stats = team_stats_by_tid[team.uid]
     const is_playoff_team = playoffs.some((p) => p.tid === team.uid)
-    const has_bye = stats?.regular_season_finish <= playoff_format.bye_count
+    // Number.isInteger first: the optional chain guards undefined, not null,
+    // and a null finish coerces to 0 <= bye_count, awarding a bye to every team
+    // with no recorded finish.
+    const has_bye =
+      Number.isInteger(stats?.regular_season_finish) &&
+      stats.regular_season_finish <= playoff_format.bye_count
 
     result[team.uid] = {
       tid: team.uid,

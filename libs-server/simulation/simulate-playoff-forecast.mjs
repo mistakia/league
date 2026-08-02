@@ -38,6 +38,11 @@ export async function simulate_wildcard_forecast({
 
   const { playoff_format } = await load_simulation_context({ league_id, year })
   const { playoff_team_count, bye_count } = playoff_format
+  // One winner per wildcard pairing. The championship round is the byes plus
+  // these, which is what championship_team_count asserts further down.
+  const wildcard_survivor_count = Math.floor(
+    (playoff_team_count - bye_count) / 2
+  )
 
   // Get playoff teams
   const team_stats = await db('league_team_seasonlogs')
@@ -54,8 +59,16 @@ export async function simulate_wildcard_forecast({
     .filter((t) => t.regular_season_finish <= bye_count)
     .map((t) => t.tid)
 
+  // Seeds after the byes, up to the field size. Hardcoding 3..6 silently
+  // dropped teams from the whole simulation at any other format: at 4/0 seeds
+  // 1-2 vanished, at 8/2 seeds 7-8 did, each keeping playoff_odds 1.0 and
+  // championship_odds 0 forever with no throw and no log.
   const wildcard_tids = team_stats
-    .filter((t) => [3, 4, 5, 6].includes(t.regular_season_finish))
+    .filter(
+      (t) =>
+        t.regular_season_finish > bye_count &&
+        t.regular_season_finish <= playoff_team_count
+    )
     .map((t) => t.tid)
 
   const all_playoff_tids = [...bye_tids, ...wildcard_tids]
@@ -103,7 +116,9 @@ export async function simulate_wildcard_forecast({
     const wildcard_results = wildcard_tids
       .map((tid) => ({ tid, score: week15_points?.get(tid) || 0 }))
       .sort((a, b) => b.score - a.score)
-    const wildcard_winners = wildcard_results.slice(0, 2).map((r) => r.tid)
+    const wildcard_winners = wildcard_results
+      .slice(0, wildcard_survivor_count)
+      .map((r) => r.tid)
 
     // Championship teams
     const championship_teams = [...bye_tids, ...wildcard_winners]
@@ -197,13 +212,17 @@ export async function simulate_wildcard_forecast({
       const wildcard_results = wildcard_tids
         .map((tid) => ({ tid, score: week15_points?.get(tid) || 0 }))
         .sort((a, b) => b.score - a.score)
-      wildcard_winners = wildcard_results.slice(0, 2).map((r) => r.tid)
+      wildcard_winners = wildcard_results
+        .slice(0, wildcard_survivor_count)
+        .map((r) => r.tid)
     } else {
       // Determine wildcard winners from simulated week 15 scores
       const wildcard_results = wildcard_tids
         .map((tid) => ({ tid, score: wildcard_raw_scores.get(tid)[sim] }))
         .sort((a, b) => b.score - a.score)
-      wildcard_winners = wildcard_results.slice(0, 2).map((r) => r.tid)
+      wildcard_winners = wildcard_results
+        .slice(0, wildcard_survivor_count)
+        .map((r) => r.tid)
     }
 
     // Championship round: bye teams + wildcard winners
@@ -286,9 +305,11 @@ export async function simulate_championship_forecast({
 
   const { playoff_format } = await load_simulation_context({ league_id, year })
   const { bye_count } = playoff_format
+  const wildcard_survivor_count = Math.floor(
+    (playoff_format.playoff_team_count - bye_count) / 2
+  )
   // Byes plus the wildcard survivors, which is one winner per wildcard pairing.
-  const championship_team_count =
-    bye_count + Math.floor((playoff_format.playoff_team_count - bye_count) / 2)
+  const championship_team_count = bye_count + wildcard_survivor_count
 
   if (championship_tids.length !== championship_team_count) {
     throw new Error(
@@ -320,7 +341,12 @@ export async function simulate_championship_forecast({
   for (const team of all_teams) {
     const team_stats = team_stats_by_tid[team.uid]
     // Top two seeds receive the bye; divisions confer no berth.
-    const has_bye = team_stats?.regular_season_finish <= bye_count
+    // Number.isInteger first: the optional chain guards undefined, not null,
+    // and a null regular_season_finish coerces to 0 <= bye_count, awarding a
+    // bye to every team with no recorded finish.
+    const has_bye =
+      Number.isInteger(team_stats?.regular_season_finish) &&
+      team_stats.regular_season_finish <= bye_count
 
     result[team.uid] = {
       tid: team.uid,
