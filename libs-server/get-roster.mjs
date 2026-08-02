@@ -1,6 +1,7 @@
 import { uniqBy } from '#libs-shared'
 import { current_season, transaction_types, player_tag_types } from '#constants'
 import db from '#db'
+import { build_active_restricted_free_agency_bids_query } from './restricted-free-agency-bids-query.mjs'
 
 // A rostered player's salary is `transactions.value` -- `rosters_players` carries no
 // value column -- so the transaction is the only source of the salary that `Roster`
@@ -71,10 +72,12 @@ export default async function ({
       }
     }
 
-    const bids = await db('restricted_free_agency_bids')
-      .where('tid', tid)
-      .where('year', current_season.year)
-      .whereNull('cancelled')
+    // Own-player bids only, and only live ones -- this `bid` becomes the player's
+    // cap charge through `getExtensionAmount`, so a settled bid must not reach it.
+    const bids = await build_active_restricted_free_agency_bids_query({
+      db,
+      tid
+    }).where('player_tid', tid)
 
     if (bids.length) {
       // Get conditional releases for all restricted free agency bids
@@ -87,7 +90,10 @@ export default async function ({
 
       for (const roster_player of roster_row.players) {
         const bid = bids.find((b) => b.pid === roster_player.pid)
-        if (bid) {
+        if (
+          bid &&
+          roster_player.tag === player_tag_types.RESTRICTED_FREE_AGENCY
+        ) {
           roster_player.bid = bid.bid
           roster_player.restricted_free_agency_original_team = bid.player_tid
 

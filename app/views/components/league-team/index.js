@@ -52,7 +52,13 @@ const map_state_to_props = createSelector(
       const tag = p.get('tag')
       const isRestrictedFreeAgent =
         tag === player_tag_types.RESTRICTED_FREE_AGENCY
-      const bid = p.get('bid', 0)
+      // An ABSENT bid is "no bid" and must fall back to the prior salary; a $0 bid
+      // is a real bid. Defaulting to 0 conflated the two and priced an unbid
+      // restricted free agent at $0 through `getExtensionAmount`'s `??` branch.
+      // Immutable's default only fires when the key is absent and reducers clear
+      // this field to an explicit null, so coalesce rather than rely on it.
+      const bid = p.get('bid') ?? undefined
+      const has_bid = bid !== undefined
       const extensions = p.get('extensions', 0)
       const pos = p.get('primary_position')
       const slot = p.get('slot')
@@ -67,9 +73,9 @@ const map_state_to_props = createSelector(
         bid
       })
       const savings =
-        !is_restricted_free_agency_period || bid || !isRestrictedFreeAgent
+        !is_restricted_free_agency_period || has_bid || !isRestrictedFreeAgent
           ? market_salary -
-            (is_before_extension_deadline ? extendedSalary : bid || value)
+            (is_before_extension_deadline ? extendedSalary : (bid ?? value))
           : null
 
       let rookie_tag_savings = null

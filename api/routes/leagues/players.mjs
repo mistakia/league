@@ -155,7 +155,9 @@ router.get('/?', async (req, res) => {
         )
         players = players.map((p) => ({
           ...p,
-          bid: bidMap.get(p.pid) || undefined,
+          // `??`, not `||` -- a $0 bid is a real bid, and coalescing on falsiness
+          // strips it from the payload so the client reads the player as unbid.
+          bid: bidMap.get(p.pid) ?? undefined,
           restricted_free_agency_conditional_releases: releases_map.get(p.pid)
         }))
       }

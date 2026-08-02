@@ -1,5 +1,6 @@
 import db from '#db'
 import { current_season, player_tag_types } from '#constants'
+import { build_active_restricted_free_agency_bids_query } from './restricted-free-agency-bids-query.mjs'
 
 export default async function ({
   lid,
@@ -92,12 +93,10 @@ export default async function ({
 
     if (query1.length) {
       const tid = query1[0].uid
-      const bids = await db('restricted_free_agency_bids')
-        .where('tid', tid)
-        .where('player_tid', tid)
-        .where('year', current_season.year)
-        .whereNull('cancelled')
-        .whereNull('processed')
+      const bids = await build_active_restricted_free_agency_bids_query({
+        db,
+        tid
+      }).where('player_tid', tid)
 
       if (bids.length) {
         // Get conditional releases for all restricted free agency bids

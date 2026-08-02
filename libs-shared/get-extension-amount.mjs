@@ -13,6 +13,13 @@ const getFranchiseAmount = ({ pos, league }) => {
 
     case 'TE':
       return league.fte || 0
+
+    // A position with no franchise amount prices at $0, matching what each branch
+    // above already does for an unconfigured league. Falling out of the switch
+    // returned `undefined`, which reaches the cap arithmetic as NaN rather than as
+    // a wrong-but-visible number.
+    default:
+      return 0
   }
 }
 

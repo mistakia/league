@@ -33,7 +33,12 @@ export default class PlayerRosterTotal extends React.Component {
     players.forEach((player_map) => {
       const extensions = player_map.get('extensions', 0)
       const value = player_map.get('value', 0)
-      const bid = player_map.get('bid', 0)
+      // An ABSENT bid is "no bid" and must fall back to the prior salary; a $0 bid
+      // is a real bid. Defaulting to 0 conflated the two and priced an unbid
+      // restricted free agent at $0 through `getExtensionAmount`'s `??` branch.
+      // Immutable's default only fires when the key is absent and reducers clear
+      // this field to an explicit null, so coalesce rather than rely on it.
+      const bid = player_map.get('bid') ?? undefined
       const tag = player_map.get('tag')
       const isRestrictedFreeAgent =
         tag === player_tag_types.RESTRICTED_FREE_AGENCY
@@ -55,7 +60,7 @@ export default class PlayerRosterTotal extends React.Component {
       )
       const savings = hasProjections
         ? projectedSalary -
-          (is_before_extension_deadline ? extendedSalary : bid || value)
+          (is_before_extension_deadline ? extendedSalary : (bid ?? value))
         : 0
 
       const salary = is_before_extension_deadline
@@ -64,7 +69,7 @@ export default class PlayerRosterTotal extends React.Component {
             isRestrictedFreeAgent &&
             is_team_manager &&
             !is_restricted_free_agent_tag_processed
-          ? bid
+          ? (bid ?? value)
           : value
       baseSalaryTotal = baseSalaryTotal + salary
       extendedSalaryTotal = extendedSalaryTotal + extendedSalary
