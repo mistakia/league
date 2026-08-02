@@ -34,7 +34,10 @@ const map_state_to_props = createSelector(
       auction_info.pts_added.total - auction_info.pts_added.rostered
     const rate = league_available_salary_space / remaining_pts_added
     const player_pts_added = player_map.getIn(['pts_added', '0'], 0)
-    const market_salary_adjusted = Math.max(
+    // The LIVE auction price: what the player costs given the cap space and
+    // value still on the board right now. Distinct from the persisted
+    // market_salary_adj, which is the same question answered at cron time.
+    const auction_adjusted_salary = Math.max(
       Math.round(player_pts_added * rate) || 0,
       0
     )
@@ -51,7 +54,7 @@ const map_state_to_props = createSelector(
     return {
       player_map,
       player_seasonlogs,
-      market_salary_adjusted,
+      auction_adjusted_salary,
       is_logged_in: Boolean(app.userId),
       is_hosted_league: Boolean(league.hosted),
       is_before_live_auction_end

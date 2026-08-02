@@ -96,7 +96,7 @@ export default function ({ week, is_logged_in }) {
         COLUMN_GROUPS.SEASON_PROJECTION,
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
-      header_label: 'Adjusted',
+      header_label: 'Inflation Adj',
       player_value_path: 'season_projected_inflation_adjusted_market_salary',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER

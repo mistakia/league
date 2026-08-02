@@ -55,7 +55,7 @@ export default function SelectedPlayer({
   player_map,
   player_seasonlogs = new List(),
   is_logged_in,
-  market_salary_adjusted,
+  auction_adjusted_salary,
   is_before_live_auction_end,
   deselect,
   load_all_players,
@@ -340,7 +340,7 @@ export default function SelectedPlayer({
                   is_hosted_league &&
                   is_before_live_auction_end && (
                     <div className='selected__player-header-item'>
-                      <label>Adjusted</label>${market_salary_adjusted}
+                      <label>Auction</label>${auction_adjusted_salary}
                     </div>
                   )}
                 <div className='selected__player-header-item'>
@@ -480,7 +480,7 @@ SelectedPlayer.propTypes = {
   player_map: ImmutablePropTypes.map,
   player_seasonlogs: ImmutablePropTypes.list,
   is_logged_in: PropTypes.bool,
-  market_salary_adjusted: PropTypes.number,
+  auction_adjusted_salary: PropTypes.number,
   is_before_live_auction_end: PropTypes.bool,
   load_all_players: PropTypes.func,
   load_player_seasonlogs: PropTypes.func,

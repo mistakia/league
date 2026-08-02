@@ -18,7 +18,7 @@ const getHeadshotWidth = () => {
 
 export default function AuctionNominatedPlayer({
   player_map,
-  market_salary_adjusted
+  auction_adjusted_salary
 }) {
   const [headshot_width, set_headshot_width] = useState(getHeadshotWidth())
   const update = () => set_headshot_width(getHeadshotWidth())
@@ -44,7 +44,7 @@ export default function AuctionNominatedPlayer({
           <label>Market</label>${player_map.getIn(['market_salary', '0'], 0)}
         </div>
         <div className='selected__player-header-item'>
-          <label>Adjusted</label>${market_salary_adjusted}
+          <label>Auction</label>${auction_adjusted_salary}
         </div>
         <div className='selected__player-header-item'>
           <label>Bye</label>
@@ -61,5 +61,5 @@ export default function AuctionNominatedPlayer({
 
 AuctionNominatedPlayer.propTypes = {
   player_map: ImmutablePropTypes.map,
-  market_salary_adjusted: PropTypes.number
+  auction_adjusted_salary: PropTypes.number
 }

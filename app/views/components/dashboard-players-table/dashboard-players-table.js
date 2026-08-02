@@ -247,7 +247,7 @@ export default function DashboardPlayersTable({
                 <div className='table__cell'>
                   <PlayerRosterHeader
                     tooltip='Market Salary adjusted for player availability and salary space'
-                    title='Market Adjusted'
+                    title='Inflation Adjusted'
                   />
                 </div>
               )} */}

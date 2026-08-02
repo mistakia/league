@@ -187,8 +187,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
     },
     market_salary_adj: {
       category: 'management',
-      column_header: 'Adjusted',
-      csv_header: 'Projected Adjusted Market Salary',
+      column_header: 'Inflation Adj',
+      csv_header: 'Projected Inflation Adjusted Market Salary',
       player_value_path: 'market_salary_adj'
     },
 
