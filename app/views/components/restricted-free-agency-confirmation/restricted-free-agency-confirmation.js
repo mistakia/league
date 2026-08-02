@@ -30,10 +30,9 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 
     const { team, player_map } = props
 
-    // Immutable's notSetValue only applies when the key is ABSENT — a key
-    // present with an explicit null still returns null, and
-    // DELETE_RESTRICTED_FREE_AGENCY_TAG_FULFILLED writes exactly that. So
-    // `get(key, [])` is not a guarantee and release_ids must be coalesced.
+    // Coalesce rather than relying on Immutable's notSetValue, which only
+    // applies when the key is ABSENT — a key present with an explicit null
+    // still returns null, so `get(key, [])` would not guarantee an array.
     this.state = {
       release_ids:
         player_map.get('restricted_free_agency_conditional_releases') || [],
@@ -145,7 +144,11 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 
   handleBid = (event) => {
     const { value } = event.target
-    const error = isNaN(value) || value % 1 !== 0 || value < 0
+    // An empty field must be an error, not a silent $0. Every term below is
+    // false for '' — isNaN('') is false and '' % 1 is 0 — so without the
+    // explicit check a cleared field submits Number('') as a $0 bid with both
+    // bound warnings suppressed.
+    const error = value === '' || isNaN(value) || value % 1 !== 0 || value < 0
     this.setState({ bid: value, error })
   }
 
@@ -290,9 +293,13 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     const min_bid = this.get_min_bid()
 
     const numeric_bid = Number(this.state.bid)
-    const has_numeric_bid = this.state.bid !== '' && !isNaN(numeric_bid)
-    const bid_exceeds_max = has_numeric_bid && numeric_bid > max_bid
-    const bid_below_min = has_numeric_bid && numeric_bid < min_bid
+    const has_valid_bid = !this.state.error && !isNaN(numeric_bid)
+    const bid_exceeds_max = has_valid_bid && numeric_bid > max_bid
+    // Only a bid the floor applies to: `get_min_bid` returns 0 when there is no
+    // market salary (a competing bid, or no projection row), and quoting a
+    // null salary back at the manager renders "market salary of $.".
+    const bid_below_min =
+      has_valid_bid && market_salary !== null && numeric_bid < min_bid
 
     const max_bid_parts = [`$${available_cap} cap space`]
     if (cutlist_total_salary) {
