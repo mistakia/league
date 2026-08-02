@@ -69,7 +69,10 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
     const pids = roster.active.map((p) => p.pid)
     const players = data.filter((d) => pids.includes(d.pid))
 
-    // move current starters to bench
+    // Move every current starter to the bench BEFORE refilling. The refill used
+    // to be nested inside this loop, so bench-and-refill ran once per distinct
+    // slot type -- seven times for a league with QB/RB/WR/TE/RBWRTE/QBRBWRTE/DST
+    // -- and each pass pushed another set of entries into `starters`.
     for (const slot of Array.from(new Set(eligibleSlots))) {
       const slotStarters = roster.getPlayersBySlot(roster_slot_types[slot])
       for (const p of slotStarters) {
@@ -81,24 +84,31 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
           pos: player.primary_position
         })
       }
+    }
 
-      // set starting lineup with best players on roster
-      for (const player of players) {
-        const eligibleSlots = get_eligible_slots({
-          pos: player.primary_position,
-          league
-        })
-        for (const slot of eligibleSlots) {
-          if (roster.hasOpenSlot(roster_slot_types[slot])) {
-            roster.removePlayer(player.pid)
-            roster.addPlayer({
-              slot: roster_slot_types[slot],
-              pid: player.pid,
-              pos: player.primary_position
-            })
-            starters.push({ slot: roster_slot_types[slot], ...player })
-            continue
-          }
+    // set starting lineup with best players on roster
+    for (const player of players) {
+      const playerEligibleSlots = get_eligible_slots({
+        pos: player.primary_position,
+        league
+      })
+      for (const slot of playerEligibleSlots) {
+        if (roster.hasOpenSlot(roster_slot_types[slot])) {
+          roster.removePlayer(player.pid)
+          roster.addPlayer({
+            slot: roster_slot_types[slot],
+            pid: player.pid,
+            pos: player.primary_position
+          })
+          starters.push({ slot: roster_slot_types[slot], ...player })
+          // break, not continue. get_eligible_slots repeats a slot name once
+          // per configured slot (srb: 2 yields RB, RB), so continuing re-seated
+          // the same player in the next open slot and pushed a duplicate for
+          // every one of them. That inflated `starters` to 174 entries over 90
+          // league-wide slots for league 1, and the surplus entries dragged
+          // getWorseStarterForPosition down onto deep bench players -- a 33.6
+          // point QB baseline against a real replacement level near 313.
+          break
         }
       }
     }
