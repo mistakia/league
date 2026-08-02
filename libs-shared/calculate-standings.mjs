@@ -2,6 +2,7 @@ import debug from 'debug'
 import { current_season, create_empty_fantasy_team_stats } from '#constants'
 import calculatePoints from './calculate-points.mjs'
 import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
+import compare_playoff_seed from './compare-playoff-seed.mjs'
 
 const log = debug('calculate-standings')
 debug.enable('calculate-standings')
@@ -270,62 +271,17 @@ const calculateStandings = ({
   }
 
   // calculate regular season finish
-
-  const number_of_divisions = Object.keys(divisions).length
-  const bye_teams = []
-  const division_wildcard_teams = []
-
-  if (number_of_divisions === 4) {
-    const all_division_winners = Object.values(teamStats)
-      .filter((p) => p.stats.division_finish === 1)
-      .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
-
-    bye_teams.push(all_division_winners[0], all_division_winners[1])
-    division_wildcard_teams.push(
-      all_division_winners[2],
-      all_division_winners[3]
-    )
-  } else if (number_of_divisions === 2) {
-    for (const div in divisions) {
-      const sorted_division_leaders = Object.values(teamStats)
-        .filter((p) => p.stats.division_finish < 3 && p.div === Number(div))
-        .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
-
-      bye_teams.push(sorted_division_leaders[0])
-      division_wildcard_teams.push(sorted_division_leaders[1])
-    }
-  } else {
-    throw new Error(`Unsupported number of divisions: ${number_of_divisions}`)
-  }
-
-  const sorted_bye_team_ids = bye_teams
-    .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
+  //
+  // Seeds run on head-to-head record, then all-play wins, then points for --
+  // the same ladder at every league size. Division standing is not an input,
+  // so this holds identically for a single division and for four divisions of
+  // three; division_finish above remains a reported standing, nothing more.
+  const seeded_team_ids = Object.values(teamStats)
+    .sort((a, b) => compare_playoff_seed(a.stats, b.stats))
     .map((p) => p.tid)
 
-  for (let i = 0; i < sorted_bye_team_ids.length; i++) {
-    const tid = sorted_bye_team_ids[i]
-    teamStats[tid].stats.regular_season_finish = i + 1
-  }
-
-  const sorted_division_wildcard_team_ids = division_wildcard_teams
-    .sort((a, b) => b.stats.all_play_wins - a.stats.all_play_wins)
-    .map((p) => p.tid)
-
-  for (let i = 0; i < sorted_division_wildcard_team_ids.length; i++) {
-    const tid = sorted_division_wildcard_team_ids[i]
-    teamStats[tid].stats.regular_season_finish = i + 3
-  }
-
-  // remaining teams are sorted by points for
-  const division_finish_threshold = number_of_divisions === 4 ? 1 : 2
-  const remaining_teams = Object.values(teamStats)
-    .filter((p) => p.stats.division_finish > division_finish_threshold)
-    .sort((a, b) => b.stats.points_for - a.stats.points_for)
-    .map((p) => p.tid)
-
-  for (let i = 0; i < remaining_teams.length; i++) {
-    const tid = remaining_teams[i]
-    teamStats[tid].stats.regular_season_finish = i + 5
+  for (let i = 0; i < seeded_team_ids.length; i++) {
+    teamStats[seeded_team_ids[i]].stats.regular_season_finish = i + 1
   }
 
   return teamStats

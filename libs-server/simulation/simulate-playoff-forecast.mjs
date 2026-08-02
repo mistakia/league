@@ -307,15 +307,14 @@ export async function simulate_championship_forecast({
   const result = {}
   for (const team of all_teams) {
     const team_stats = team_stats_by_tid[team.uid]
-    const is_division_winner = [1, 2].includes(
-      team_stats?.regular_season_finish
-    )
+    // Top two seeds receive the bye; divisions confer no berth.
+    const has_bye = [1, 2].includes(team_stats?.regular_season_finish)
 
     result[team.uid] = {
       tid: team.uid,
       playoff_odds: all_playoff_tids.includes(team.uid) ? 1.0 : 0.0,
-      division_odds: is_division_winner ? 1.0 : 0.0,
-      bye_odds: is_division_winner ? 1.0 : 0.0,
+      division_odds: has_bye ? 1.0 : 0.0,
+      bye_odds: has_bye ? 1.0 : 0.0,
       championship_wins: 0
     }
   }

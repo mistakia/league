@@ -60,10 +60,42 @@ const getIntraSched = (div1, div2, divOffset = 1) => {
   return weeks
 }
 
-// teams should be an array of objects with a uid and div property, it can be of length 10 or 12
-// num_divisions should be 2 or 4
+// Round-robin pairing by the circle method: one team is fixed and the rest
+// rotate, producing n-1 weeks in which every team plays every other exactly
+// once. Repeated back to back it yields a double round robin, which is what a
+// single-division league is truncated from.
+const get_round_robin_sched = (teams) => {
+  const rotation = [...teams]
+  const weeks = []
+
+  for (let week_num = 0; week_num < rotation.length - 1; week_num++) {
+    const week = []
+
+    for (let i = 0; i < rotation.length / 2; i++) {
+      const team_a = rotation[i]
+      const team_b = rotation[rotation.length - 1 - i]
+
+      // alternate home and away by week so the split stays even
+      week.push(
+        week_num % 2 === 0
+          ? { home: team_a, away: team_b }
+          : { home: team_b, away: team_a }
+      )
+    }
+
+    weeks.push(week)
+    rotation.splice(1, 0, rotation.pop())
+  }
+
+  return weeks
+}
+
+// teams should be an array of objects with a uid and div property
+// num_divisions is derived from the teams' div values and must be 1, 2 or 4
 // teams in the same division should play each other exactly twice
 // teams in different divisions should play each other either once or twice
+// in a single division every team plays every other at least once, and the
+// remaining weeks repeat opponents in round-robin order
 // should return an array of 14 arrays of matchup objects with home and away properties
 // each week there should be teams.length / 2 matchups
 
@@ -109,7 +141,14 @@ const generate_fantasy_league_schedule = (teams, random_seed) => {
   const divKeys = Object.keys(divisions)
   let schedule = []
 
-  if (num_divisions === 2) {
+  if (num_divisions === 1) {
+    // Repeat the round robin until the season is covered, then truncate. Every
+    // team meets every other once before any opponent is repeated.
+    const round_robin = get_round_robin_sched(divisions[divKeys[0]])
+    while (schedule.length < num_weeks) {
+      schedule.push(round_robin[schedule.length % round_robin.length])
+    }
+  } else if (num_divisions === 2) {
     const div1 = divisions[divKeys[0]]
     const div2 = divisions[divKeys[1]]
 
@@ -183,6 +222,8 @@ const generate_fantasy_league_schedule = (teams, random_seed) => {
       week.push(...interDiv6.shift())
       schedule.push(week)
     }
+  } else {
+    throw new Error(`Unsupported number of divisions: ${num_divisions}`)
   }
 
   // Final shuffle to avoid consecutive duplicate weeks

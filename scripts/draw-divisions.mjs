@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { sum } from '#libs-shared'
+import { sum, get_division_count } from '#libs-shared'
 import { current_season } from '#constants'
 import { chunk_mutating } from '#libs-shared/chunk.mjs'
 import { is_main, report_job } from '#libs-server'
@@ -17,15 +17,24 @@ const initialize_cli = () => {
 const log = debug('draw-divisions')
 debug.enable('draw-divisions')
 
-const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
-  if (!num_divisions) {
-    throw new Error('missing num_divisions')
-  }
-
+const run = async ({ lid, print = true, dry_run = false }) => {
   log(`Drawing divisions for leagueId: ${lid}`)
   const teams = await db('teams').where({ lid, year: current_season.year })
   if (!teams.length) {
     log(`No teams found for leagueId: ${lid}`)
+    return
+  }
+
+  const num_divisions = get_division_count(teams.length)
+  log(`${teams.length} teams -> ${num_divisions} division(s)`)
+
+  if (num_divisions === 1) {
+    // No draw to run: every team is in the one division.
+    if (!dry_run) {
+      await db('teams')
+        .update({ div: 1 })
+        .where({ lid, year: current_season.year })
+    }
     return
   }
 
@@ -134,8 +143,7 @@ const main = async () => {
     await run({
       lid,
       print: argv.print,
-      dry_run: argv.dry,
-      num_divisions: argv.num_divisions
+      dry_run: argv.dry
     })
   } catch (err) {
     error = err

@@ -39,9 +39,9 @@ const make_league = () => ({
   pts_per_rec_td: 6
 })
 
-// calculateStandings's playoff-finish step requires 2 or 4 divisions and at
-// least 2 teams per division. Use 4 teams across 2 divisions; assertions
-// target the detector behavior on team 1 only.
+// calculateStandings seeds on head-to-head record regardless of division
+// count, so any division layout works here. Assertions target the detector
+// behavior on team 1 only.
 const teams = [
   { uid: 1, div: 1 },
   { uid: 2, div: 1 },
