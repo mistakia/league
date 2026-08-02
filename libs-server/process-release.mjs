@@ -14,6 +14,7 @@ import getLastTransaction from './get-last-transaction.mjs'
 import sendNotifications from './send-notifications.mjs'
 import getLeague from './get-league.mjs'
 import get_super_priority_status from './get-super-priority-status.mjs'
+import { verify_assets_not_trade_protected } from './get-trade-veto-window.mjs'
 
 // Helper function to check for super priority on release
 async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
@@ -156,6 +157,10 @@ export default async function ({
   if (!roster.has(release_pid)) {
     throw new Error('player not on roster')
   }
+
+  // a player moved by a recently accepted trade is frozen until that trade's
+  // veto window closes, so a veto never has to unwind a third team's move
+  await verify_assets_not_trade_protected({ league, pids: [release_pid] })
 
   // verify player is not protected
   if (

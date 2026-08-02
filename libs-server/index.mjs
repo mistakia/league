@@ -45,6 +45,12 @@ export { default as getPlayerExtensions } from './get-player-extensions.mjs'
 export { default as verifyUserTeam } from './verify-user-team.mjs'
 export { default as verify_reserve_status } from './verify-reserve-status.mjs'
 export { default as verifyRestrictedFreeAgency } from './verify-restricted-free-agency.mjs'
+export {
+  get_trade_protected_assets,
+  verify_assets_not_trade_protected,
+  get_trade_veto_deadline,
+  is_trade_within_veto_window
+} from './get-trade-veto-window.mjs'
 export { default as validate_franchise_tag } from './validate-franchise-tag.mjs'
 export { default as getJobs } from './get-jobs.mjs'
 export { default as getLastTransaction } from './get-last-transaction.mjs'

@@ -9,7 +9,8 @@ import {
   getRoster,
   getLeague,
   verifyRestrictedFreeAgency,
-  verifyUserTeam
+  verifyUserTeam,
+  verify_assets_not_trade_protected
 } from '#libs-server'
 import trade, { get_trade } from './trade.mjs'
 
@@ -563,6 +564,18 @@ router.post(
       const deadline = dayjs.unix(league.tddate)
       if (now.isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
+      }
+
+      // assets moved by a recently accepted trade are frozen until that trade's
+      // veto window closes and can not be traded again in the meantime
+      try {
+        await verify_assets_not_trade_protected({
+          league,
+          pids: trade_pids,
+          pickids: proposingTeamPicks.concat(acceptingTeamPicks)
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
       }
 
       const proposingTeamRosterRow = await getRoster({ tid: propose_tid })

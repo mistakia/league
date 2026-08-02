@@ -14,7 +14,10 @@ import {
   sendNotifications,
   verifyRestrictedFreeAgency,
   isPlayerLocked,
-  verifyUserTeam
+  verifyUserTeam,
+  is_trade_within_veto_window,
+  get_trade_veto_deadline,
+  verify_assets_not_trade_protected
 } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
@@ -630,6 +633,20 @@ router.post(
         return res.status(400).send({ error: error.message })
       }
 
+      // assets moved by a recently accepted trade are frozen until that trade's
+      // veto window closes and can not be traded again in the meantime
+      try {
+        await verify_assets_not_trade_protected({
+          league,
+          pids: all_pids,
+          pickids: (await db('trades_picks').where({ tradeid: tradeId })).map(
+            ({ pickid }) => pickid
+          )
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
+
       const sub = db('transactions')
         .select(db.raw('max(uid) as uid'))
         .whereIn('pid', all_pids)
@@ -701,17 +718,33 @@ router.post(
         }
       }
 
-      // Get extension counts before removing players
+      // Get extension counts before removing players. Capture the slot each
+      // player currently occupies at the same time: once the trade is accepted
+      // that information is gone from the roster, and a veto needs it to put
+      // the player back where they were rather than on the bench.
+      const origin_slots = {}
       const proposingPlayerExtensions = {}
       for (const pid of proposingTeamPlayers) {
         const player = proposingTeamRoster.get(pid)
         proposingPlayerExtensions[pid] = player?.extensions || 0
+        if (player) origin_slots[pid] = player.slot
       }
 
       const acceptingPlayerExtensions = {}
       for (const pid of acceptingTeamPlayers) {
         const player = acceptingTeamRoster.get(pid)
         acceptingPlayerExtensions[pid] = player?.extensions || 0
+        if (player) origin_slots[pid] = player.slot
+      }
+
+      const release_origin_slots = {}
+      for (const pid of acceptingTeamReleasePlayers) {
+        const player = acceptingTeamRoster.get(pid)
+        if (player) release_origin_slots[pid] = player.slot
+      }
+      for (const pid of proposingTeamReleasePlayerIds) {
+        const player = proposingTeamRoster.get(pid)
+        if (player) release_origin_slots[pid] = player.slot
       }
 
       acceptingTeamReleasePlayers.forEach((p) =>
@@ -814,7 +847,8 @@ router.post(
           release_inserts.push({
             tradeid: tradeId,
             pid,
-            tid: trade.accept_tid
+            tid: trade.accept_tid,
+            origin_slot: release_origin_slots[pid]
           })
         }
         if (release_inserts.length) {
@@ -838,6 +872,22 @@ router.post(
               })
               .update({ slot })
           }
+        }
+
+        // Record where each traded player came from so a veto can reverse the
+        // move exactly. Written per pid across both sides of the trade.
+        for (const [pid, origin_slot] of Object.entries(origin_slots)) {
+          await trx('trades_slots')
+            .where({ trade_uid: tradeId, pid })
+            .update({ origin_slot })
+        }
+
+        // Proposing-team release rows were written at propose time, before the
+        // roster was read, so their origin slot is only known now.
+        for (const pid of proposingTeamReleasePlayerIds) {
+          await trx('trade_releases')
+            .where({ tradeid: tradeId, pid })
+            .update({ origin_slot: release_origin_slots[pid] })
         }
 
         const sub_query = trx('transactions')
@@ -1452,16 +1502,7 @@ router.post(
           .send({ error: `no valid trade with tradeid: ${tradeId}` })
       }
 
-      // Veto only stamps a timestamp; it does not reverse an executed trade.
-      // Allowing it on a closed trade would leave the league with rosters,
-      // transactions and pick ownership already changed by the accept, and a
-      // trade marked both accepted and vetoed.
       const [trade] = trades
-      if (trade.accepted) {
-        return res.status(400).send({
-          error: 'trade has already been accepted and can not be vetoed'
-        })
-      }
       if (trade.vetoed) {
         return res.status(400).send({ error: 'trade has already been vetoed' })
       }
@@ -1471,11 +1512,200 @@ router.post(
           .send({ error: 'trade is no longer open and can not be vetoed' })
       }
 
-      await db('trades')
-        .where({ uid: tradeId, lid: leagueId })
-        .update({ vetoed: Math.round(Date.now() / 1000) })
+      const vetoed_at = Math.round(Date.now() / 1000)
 
-      const message = `The commissioner has vetoed trade #${tradeId}.`
+      // A trade that was never accepted moved nothing, so vetoing it is just a
+      // status change. Only an accepted trade needs reversing.
+      if (!trade.accepted) {
+        await db('trades')
+          .where({ uid: tradeId, lid: leagueId })
+          .update({ vetoed: vetoed_at })
+
+        await sendNotifications({
+          league,
+          notifyLeague: true,
+          message: `The commissioner has vetoed trade #${tradeId}.`
+        })
+
+        return next()
+      }
+
+      // Reversal is only well defined while the trade's assets are still frozen
+      // by its veto window. Once the window closes they can move again, and
+      // putting them back could require unwinding another team's decisions.
+      if (!is_trade_within_veto_window({ trade, league })) {
+        const deadline = get_trade_veto_deadline({ trade, league })
+        return res.status(400).send({
+          error: deadline
+            ? 'veto window has closed; this trade can no longer be reversed'
+            : 'veto is disabled for this league'
+        })
+      }
+
+      const trades_players_rows = await db('trades_players').where({
+        tradeid: tradeId
+      })
+      const release_rows = await db('trade_releases').where({
+        tradeid: tradeId
+      })
+      const pick_rows = await db('trades_picks').where({ tradeid: tradeId })
+      const slot_rows = await db('trades_slots').where({ trade_uid: tradeId })
+
+      const origin_slot_by_pid = new Map(
+        slot_rows.map((row) => [row.pid, row.origin_slot])
+      )
+
+      // Reversing a trade after a traded player has been locked into a scored
+      // lineup would retroactively change results that already counted.
+      for (const row of trades_players_rows) {
+        if (await isPlayerLocked(row.pid)) {
+          return res.status(400).send({
+            error: `player ${row.pid} is locked and the trade can no longer be reversed`
+          })
+        }
+      }
+
+      const all_pids = trades_players_rows
+        .map(({ pid }) => pid)
+        .concat(release_rows.map(({ pid }) => pid))
+
+      const player_rows = await db('player')
+        .whereIn('pid', all_pids)
+        .select('pid', 'primary_position')
+      const pos_by_pid = new Map(
+        player_rows.map((p) => [p.pid, p.primary_position])
+      )
+
+      // Value is carried on the TRADE transactions written at acceptance, so
+      // the reversing rows can restore each player's salary exactly.
+      const trade_transaction_rows = await db('transactions')
+        .join(
+          'trades_transactions',
+          'transactions.uid',
+          'trades_transactions.transactionid'
+        )
+        .where('trades_transactions.tradeid', tradeId)
+        .select('transactions.pid', 'transactions.value')
+      const value_by_pid = new Map(
+        trade_transaction_rows.map((t) => [t.pid, t.value])
+      )
+
+      const proposing_roster_row = await getRoster({ tid: trade.propose_tid })
+      const accepting_roster_row = await getRoster({ tid: trade.accept_tid })
+      const proposing_roster = new Roster({
+        roster: proposing_roster_row,
+        league
+      })
+      const accepting_roster = new Roster({
+        roster: accepting_roster_row,
+        league
+      })
+
+      const roster_for_tid = (tid) =>
+        tid === trade.propose_tid ? proposing_roster : accepting_roster
+      const other_tid = (tid) =>
+        tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
+
+      // Move every traded player off the roster that received them and back
+      // onto the roster that sent them, in the slot they left. Roster.addPlayer
+      // throws when a limit would be broken -- the freeze stops the traded
+      // assets from moving, but the receiving team may have signed someone into
+      // the space this trade opened up, so a reversal can still not fit.
+      try {
+        // Two phases: every traded player comes off its current roster before
+        // any goes back on. Interleaving them would transiently push a roster
+        // over its limit on a balanced trade, where each side is only made
+        // whole by the departure of the player it is sending back.
+        for (const row of trades_players_rows) {
+          roster_for_tid(other_tid(row.tid)).removePlayer(row.pid)
+        }
+
+        for (const row of trades_players_rows) {
+          roster_for_tid(row.tid).addPlayer({
+            slot: origin_slot_by_pid.get(row.pid) ?? roster_slot_types.BENCH,
+            pid: row.pid,
+            pos: pos_by_pid.get(row.pid),
+            value: value_by_pid.get(row.pid) ?? 0
+          })
+        }
+
+        // Players released to make room for the trade go back on the roster
+        // that cut them. The freeze keeps them unsigned for the whole window.
+        for (const row of release_rows) {
+          roster_for_tid(row.tid).addPlayer({
+            slot: row.origin_slot ?? roster_slot_types.BENCH,
+            pid: row.pid,
+            pos: pos_by_pid.get(row.pid),
+            value: value_by_pid.get(row.pid) ?? 0
+          })
+        }
+      } catch (error) {
+        return res.status(400).send({
+          error: `trade can not be reversed: ${error.message}`
+        })
+      }
+
+      await db.transaction(async (trx) => {
+        await trx('trades')
+          .where({ uid: tradeId, lid: leagueId })
+          .update({ vetoed: vetoed_at })
+
+        // Append compensating transactions rather than deleting the originals:
+        // the ledger is the history, and it should read "moved, then moved
+        // back" instead of silently losing the fact the trade ever executed.
+        const reversal_transactions = trades_players_rows.map((row) => ({
+          userid: req.auth.userId,
+          tid: row.tid,
+          lid: leagueId,
+          pid: row.pid,
+          type: transaction_types.TRADE_REVERSAL,
+          value: value_by_pid.get(row.pid) ?? 0,
+          week: current_season.week,
+          year: current_season.year,
+          timestamp: vetoed_at
+        }))
+
+        for (const row of release_rows) {
+          reversal_transactions.push({
+            userid: req.auth.userId,
+            tid: row.tid,
+            lid: leagueId,
+            pid: row.pid,
+            type: transaction_types.TRADE_REVERSAL,
+            value: value_by_pid.get(row.pid) ?? 0,
+            week: current_season.week,
+            year: current_season.year,
+            timestamp: vetoed_at
+          })
+        }
+
+        if (reversal_transactions.length) {
+          const transaction_ids = await trx('transactions')
+            .insert(reversal_transactions)
+            .returning('uid')
+          await trx('trades_transactions').insert(
+            transaction_ids.map((t) => ({
+              transactionid: t.uid,
+              tradeid: trade.uid
+            }))
+          )
+        }
+
+        await trx('rosters_players').del().where({ rid: proposing_roster.uid })
+        await trx('rosters_players').insert(proposing_roster.rosters_players)
+
+        await trx('rosters_players').del().where({ rid: accepting_roster.uid })
+        await trx('rosters_players').insert(accepting_roster.rosters_players)
+
+        // Return traded picks to the team that gave them up.
+        for (const pick of pick_rows) {
+          await trx('draft')
+            .update({ tid: pick.tid })
+            .where({ uid: pick.pickid })
+        }
+      })
+
+      const message = `The commissioner has vetoed trade #${tradeId}. All players and picks have been returned.`
 
       await sendNotifications({
         league,

@@ -11,6 +11,7 @@ import processRelease from './process-release.mjs'
 import getLeague from './get-league.mjs'
 import create_conditional_pick from './create-conditional-pick.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
+import { verify_assets_not_trade_protected } from './get-trade-veto-window.mjs'
 
 export default async function ({ pid, release = [], lid, tid, userid }) {
   let should_immediate_release_poached_player = false
@@ -46,6 +47,11 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   const player_rows = await db('player').whereIn('pid', pids)
   const poach_player_row = player_rows.find((p) => p.pid === pid)
   const league = await getLeague({ lid })
+
+  // a player moved by a recently accepted trade is frozen until that trade's
+  // veto window closes, so a veto never has to unwind a third team's move
+  await verify_assets_not_trade_protected({ league, pids })
+
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
   const releasePlayers = []

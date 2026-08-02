@@ -43,7 +43,9 @@ export const transaction_types = {
   PRACTICE_PROTECTED: 17,
   RESERVE_LONG_TERM: 18,
 
-  SUPER_PRIORITY: 19
+  SUPER_PRIORITY: 19,
+
+  TRADE_REVERSAL: 20
 }
 
 export const transaction_type_display_names = {
@@ -71,7 +73,8 @@ export const transaction_type_display_names = {
   16: 'Reserve (COV)',
   17: 'Protected (PS)',
   18: 'Reserve (IR LT)',
-  19: 'Super Priority'
+  19: 'Super Priority',
+  20: 'Trade Vetoed'
 }
 
 export const player_tag_types = {

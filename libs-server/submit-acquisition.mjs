@@ -14,6 +14,7 @@ import isPlayerOnWaivers from './is-player-on-waivers.mjs'
 import processRelease from './process-release.mjs'
 import isPlayerLocked from './is-player-locked.mjs'
 import getLeague from './get-league.mjs'
+import { verify_assets_not_trade_protected } from './get-trade-veto-window.mjs'
 
 export default async function ({
   leagueId,
@@ -53,6 +54,10 @@ export default async function ({
   if (!league) {
     throw new Error('invalid leagueId')
   }
+
+  // a player moved by a recently accepted trade is frozen until that trade's
+  // veto window closes, so a veto never has to unwind a third team's move
+  await verify_assets_not_trade_protected({ league, pids })
 
   const teams = await db('teams')
     .where({ uid: teamId, lid: leagueId, year: current_season.year })
