@@ -15,6 +15,7 @@ import { transactions_actions } from '@core/transactions'
 import { waiver_actions } from '@core/waivers'
 import { matchups_actions } from '@core/matchups'
 import { roster_actions } from '@core/rosters'
+import { restricted_free_agency_actions } from '@core/restricted-free-agency'
 
 export function* initTeams() {
   const { leagueId } = yield select(get_app)
@@ -30,6 +31,24 @@ export function* load_teams() {
   }
 
   if (!leagueId) return
+
+  yield call(api_get_teams, { leagueId, year })
+}
+
+// A page rendering a historical season has to ask for that season's teams
+// explicitly. `load_teams` takes its year from the app, and the store is keyed
+// by year, so a lookup for any other season falls through to an empty Team
+// record and every team on the page renders blank.
+export function* load_teams_for_year({ payload }) {
+  const { leagueId } = yield select(get_app)
+  const { year } = payload
+
+  if (!leagueId || !year) return
+
+  const request_history = yield select(get_request_history)
+  if (request_history.has(`GET_TEAMS_${leagueId}_${year}`)) {
+    return
+  }
 
   yield call(api_get_teams, { leagueId, year })
 }
@@ -142,6 +161,13 @@ export function* watch_select_year() {
   yield takeLatest(app_actions.SELECT_YEAR, load_teams)
 }
 
+export function* watch_load_restricted_free_agency_auctions() {
+  yield takeLatest(
+    restricted_free_agency_actions.LOAD_RESTRICTED_FREE_AGENCY_AUCTIONS,
+    load_teams_for_year
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -163,5 +189,6 @@ export const team_sagas = [
   fork(watchLoadMatchups),
   fork(watchLoadRosters),
   fork(watchLoadTeams),
-  fork(watch_select_year)
+  fork(watch_select_year),
+  fork(watch_load_restricted_free_agency_auctions)
 ]

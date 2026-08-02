@@ -65,25 +65,44 @@ export default function RestrictedFreeAgencyAuction({ auction }) {
           <TeamName tid={bid.get('tid')} year={season_year} />
           {bid.get('tid') === original_team_id && (
             <span className='restricted-free-agency-auction__original-team'>
-              Original Team
+              Original
             </span>
           )}
         </div>
         <div className='restricted-free-agency-auction__bid-amount'>
           ${bid.get('bid')}
         </div>
-        <BidOutcome
-          outcome={bid.get('outcome')}
-          outcome_detail={bid.get('outcome_detail')}
-        />
-        {Boolean(releases && releases.size) && (
-          <div className='restricted-free-agency-auction__releases'>
-            Conditional release:{' '}
-            {releases.map((pid, release_index) => (
-              <PlayerName key={release_index} pid={pid} />
-            ))}
-          </div>
-        )}
+        <div className='restricted-free-agency-auction__bid-outcome'>
+          <BidOutcome
+            outcome={bid.get('outcome')}
+            outcome_detail={bid.get('outcome_detail')}
+          />
+        </div>
+        {/* Rendered even when empty so every row occupies the same four grid
+            columns and the card keeps one alignment down its whole height. */}
+        <div className='restricted-free-agency-auction__releases'>
+          {Boolean(releases && releases.size) && (
+            <>
+              <span
+                className='restricted-free-agency-auction__releases-label'
+                title='Players this team would have released to make room for the bid'
+              >
+                Releases
+              </span>
+              {/* PlayerName renders a fragment of two siblings, so each release
+                  needs a wrapper of its own or the flex row can break a player
+                  apart from its own trailing label. */}
+              {releases.map((pid, release_index) => (
+                <div
+                  key={release_index}
+                  className='restricted-free-agency-auction__release'
+                >
+                  <PlayerName pid={pid} />
+                </div>
+              ))}
+            </>
+          )}
+        </div>
       </div>
     )
   })
@@ -95,20 +114,31 @@ export default function RestrictedFreeAgencyAuction({ auction }) {
           <PlayerName pid={auction.get('pid')} />
         </div>
         <div className='restricted-free-agency-auction__meta'>
-          <div>
-            Original team:{' '}
+          <div className='restricted-free-agency-auction__meta-item'>
+            <span className='restricted-free-agency-auction__meta-label'>
+              Original team
+            </span>
             <TeamName tid={original_team_id} year={season_year} />
           </div>
           {winning_bid ? (
-            <div>
-              Signed by{' '}
-              <TeamName tid={winning_bid.get('tid')} year={season_year} /> for $
-              {winning_bid.get('bid')}
+            <div className='restricted-free-agency-auction__meta-item'>
+              <span className='restricted-free-agency-auction__meta-label'>
+                Signed by
+              </span>
+              <TeamName tid={winning_bid.get('tid')} year={season_year} />
+              <span className='restricted-free-agency-auction__meta-amount'>
+                ${winning_bid.get('bid')}
+              </span>
             </div>
           ) : (
             // A resolved auction with no winning bid is a real outcome, not a
             // rendering gap: every bid failed and the player went unsigned.
-            <div>No winning bid</div>
+            <div className='restricted-free-agency-auction__meta-item'>
+              <span className='restricted-free-agency-auction__meta-label'>
+                Outcome
+              </span>
+              Unsigned
+            </div>
           )}
           {Boolean(processed_at) && (
             <div className='restricted-free-agency-auction__date'>

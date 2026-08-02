@@ -1,7 +1,12 @@
-.restricted-free-agency-container
-  padding 16px
+// Narrower than the 1200px `.league-container` default, in line with the
+// transactions and waivers pages: a card carries four short columns and reading
+// them across a 1200px line is what left the middle of every row empty.
+.league-container.restricted-free-agency-container
+  max-width 1000px
+  padding 16px 16px 24px
 
 .restricted-free-agency__filter
+  align-items center
   display flex
   gap 12px
   margin-bottom 16px
@@ -10,3 +15,7 @@
   color #757575
   padding 32px 0
   text-align center
+
+@media (max-width 599px)
+  .league-container.restricted-free-agency-container
+    padding 12px 8px 24px
