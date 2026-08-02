@@ -45,9 +45,9 @@ describe('LIBS-SHARED weightProjections', function () {
   it('averages a genuine zero rather than dropping it', function () {
     const result = weightProjections({
       projections: [
-        build_projection(3, { rushing_touchdowns: 0 }),
-        build_projection(6, { rushing_touchdowns: 0 }),
-        build_projection(28, { rushing_touchdowns: 9 })
+        build_projection(3, { rushing_yards: 400, rushing_touchdowns: 0 }),
+        build_projection(6, { rushing_yards: 380, rushing_touchdowns: 0 }),
+        build_projection(28, { rushing_yards: 420, rushing_touchdowns: 9 })
       ],
       week: 0
     })
@@ -59,14 +59,50 @@ describe('LIBS-SHARED weightProjections', function () {
   it('reports zero when every source genuinely projects zero', function () {
     const result = weightProjections({
       projections: [
-        build_projection(3, { receiving_touchdowns: 0 }),
-        build_projection(6, { receiving_touchdowns: 0 })
+        build_projection(3, { receiving_yards: 300, receiving_touchdowns: 0 }),
+        build_projection(6, { receiving_yards: 320, receiving_touchdowns: 0 })
       ],
       week: 0
     })
 
     // Distinct from the absent case above: this IS a consensus.
     expect(result.receiving_touchdowns).to.equal(0)
+  })
+
+  it('ignores an all-zero placeholder row', function () {
+    const result = weightProjections({
+      projections: [
+        build_projection(3, { passing_yards: 3900, passing_touchdowns: 26 }),
+        build_projection(6, { passing_yards: 3700, passing_touchdowns: 25 }),
+        // NFL (source 4) carried exactly one 2026 QB row and every stat in it
+        // was 0.0. Averaging it in dropped Josh Allen from QB1 to QB10.
+        build_projection(4, { passing_yards: 0, passing_touchdowns: 0 })
+      ],
+      week: 0
+    })
+
+    expect(result.passing_yards).to.equal(3800)
+    expect(result.passing_touchdowns).to.equal(25.5)
+  })
+
+  it('keeps a zero that sits alongside a real projection', function () {
+    const result = weightProjections({
+      projections: [
+        build_projection(3, {
+          passing_yards: 4000,
+          rushing_touchdowns: 0
+        }),
+        build_projection(6, {
+          passing_yards: 3800,
+          rushing_touchdowns: 4
+        })
+      ],
+      week: 0
+    })
+
+    // Source 3 has an opinion about this quarterback and it is that he will not
+    // run one in. That is not a placeholder.
+    expect(result.rushing_touchdowns).to.equal(2)
   })
 
   it('honors source weights', function () {

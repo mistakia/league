@@ -8,6 +8,16 @@ const removeFalsy = (obj) => {
   return newObj
 }
 
+const has_any_projected_value = (projection) => {
+  for (const stat of all_projected_fantasy_stats) {
+    const value = projection[stat]
+    if (value !== null && value !== undefined && Number(value) !== 0) {
+      return true
+    }
+  }
+  return false
+}
+
 const weightProjections = ({ projections, weights = [], userId, week }) => {
   const data = {}
   for (const r of all_projected_fantasy_stats) {
@@ -32,6 +42,21 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
   )
 
   for (const projection of sourceProjections) {
+    // An ALL-ZERO row is a placeholder, not a forecast that the player will do
+    // nothing. Sources store one when they carry the player but have no numbers
+    // for him -- NFL (source 4) had exactly one 2026 QB row and every stat in it
+    // was 0.0, for Josh Allen. Counting that as an opinion pulled his consensus
+    // from ~3700 passing yards to 3185 and dropped him from QB1 to QB10.
+    //
+    // This is the same absent-versus-zero distinction as below, one level up: a
+    // source that projects 0 rushing touchdowns ALONGSIDE 4000 passing yards has
+    // an opinion and is kept, while a source that projects zero of everything
+    // has none. The old truthiness guard hid these rows by accident; excluding
+    // them is what makes discarding that guard safe.
+    if (!has_any_projected_value(projection)) {
+      continue
+    }
+
     const { sourceid } = projection
     const source = weights.find((w) => w.uid === sourceid)
     const weight = source && source.weight !== null ? source.weight : 1
