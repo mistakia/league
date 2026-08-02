@@ -98,6 +98,7 @@ import {
   get_waivers_actions,
   get_waiver_report_actions
 } from '@core/waivers/actions'
+import { get_restricted_free_agency_auctions_actions } from '@core/restricted-free-agency/actions'
 import { notification_actions } from '@core/notifications/actions'
 import { get_scoreboard_actions } from '@core/scoreboard/actions'
 import { post_error_actions } from '@core/errors/actions'
@@ -446,6 +447,11 @@ export const api_get_waiver_report = fetch.bind(
   null,
   api.get_waiver_report,
   get_waiver_report_actions
+)
+export const api_get_restricted_free_agency_auctions = fetch.bind(
+  null,
+  api.get_restricted_free_agency_auctions,
+  get_restricted_free_agency_auctions_actions
 )
 
 export const api_get_schedule = fetch.bind(

@@ -16,6 +16,7 @@ import { context_menu_reducer } from './context-menu'
 import { confirmation_reducer } from './confirmations'
 import { poaches_reducer } from './poaches'
 import { waivers_reducer } from './waivers'
+import { restricted_free_agency_reducer } from './restricted-free-agency'
 import { schedule_reducer } from './schedule'
 import { notification_reducer } from './notifications'
 import { status_reducer } from './status'
@@ -54,6 +55,7 @@ const rootReducer = (router, dynamic_reducers = {}) =>
     stats: stats_reducer,
     poaches: poaches_reducer,
     waivers: waivers_reducer,
+    restricted_free_agency: restricted_free_agency_reducer,
     schedule: schedule_reducer,
     status: status_reducer,
     scoreboard: scoreboard_reducer,

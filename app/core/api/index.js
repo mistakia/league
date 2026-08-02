@@ -61,6 +61,7 @@ export {
   api_get_status,
   api_get_waivers,
   api_get_waiver_report,
+  api_get_restricted_free_agency_auctions,
   api_get_scoreboard,
   api_get_players_gamelogs,
   api_get_cutlist,

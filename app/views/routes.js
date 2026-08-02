@@ -31,6 +31,9 @@ const StatsPage = lazy(() => import('@pages/stats'))
 const SchedulePage = lazy(() => import('@pages/schedule'))
 const RostersPage = lazy(() => import('@pages/rosters'))
 const WaiversPage = lazy(() => import('@pages/waivers'))
+const RestrictedFreeAgencyPage = lazy(
+  () => import('@pages/restricted-free-agency')
+)
 const TeamPage = lazy(() => import('@pages/team'))
 const LeagueSettingsPage = lazy(() => import('@pages/league-settings'))
 const MatchupPage = lazy(() => import('@pages/matchup'))
@@ -92,6 +95,10 @@ const Routes = ({ app }) => {
         <Route path='/leagues/:lid/schedule' element={<SchedulePage />} />
         <Route path='/leagues/:lid/rosters' element={<RostersPage />} />
         <Route path='/leagues/:lid/waivers' element={<WaiversPage />} />
+        <Route
+          path='/leagues/:lid/restricted-free-agency'
+          element={<RestrictedFreeAgencyPage />}
+        />
         <Route path='/leagues/:lid/settings' element={<LeagueSettingsPage />} />
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />
       </Route>

@@ -171,6 +171,11 @@ export default function AppMenu({
                         <NavLink to={`/leagues/${leagueId}/waivers`}>
                           Waivers
                         </NavLink>
+                        <NavLink
+                          to={`/leagues/${leagueId}/restricted-free-agency`}
+                        >
+                          Restricted Free Agency
+                        </NavLink>
                       </>
                     )}
                   </>

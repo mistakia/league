@@ -271,6 +271,12 @@ export const api = {
     }/waivers/report?${queryString.stringify(params)}`
     return { url }
   },
+  get_restricted_free_agency_auctions(params) {
+    const url = `${API_URL}/leagues/${
+      params.leagueId
+    }/restricted-free-agency?${queryString.stringify(params)}`
+    return { url }
+  },
   post_poach(data) {
     const url = `${API_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }
