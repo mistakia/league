@@ -106,8 +106,17 @@ export const ktc_pick_at = ({
   target_unix,
   idx
 }) => {
-  const slot = slot_from_position(pick_overall_position, num_teams)
-  if (slot == null || pick_year == null || pick_round == null) return null
+  if (pick_year == null || pick_round == null) return null
+  // A pick for a future draft has no assigned overall position yet -- the order
+  // is set by standings that have not happened. Those are the picks most often
+  // traded, so bailing here priced every future pick at NULL and silently
+  // dropped one whole side of any trade involving one. KTC itself quotes an
+  // unassigned future pick at the middle tier, so that is the honest default.
+  const slot =
+    pick_overall_position == null
+      ? PICK_SLOT.MID
+      : slot_from_position(pick_overall_position, num_teams)
+  if (slot == null) return null
 
   // 1) Exact lookup
   const exact_pid = idx.pick_pid_by_yrs.get(

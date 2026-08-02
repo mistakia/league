@@ -21,7 +21,8 @@ const expect = chai.expect
 // scoped to this file only.
 const PID_2023_R1_EARLY = 'TEST-KTCPICK-000001'
 const PID_2023_R1_EARLY_NOT_SF = 'TEST-KTCPICK-000002'
-const PICK_PIDS = [PID_2023_R1_EARLY, PID_2023_R1_EARLY_NOT_SF]
+const PID_2027_R1_MID = 'TEST-KTCPICK-000003'
+const PICK_PIDS = [PID_2023_R1_EARLY, PID_2023_R1_EARLY_NOT_SF, PID_2027_R1_MID]
 
 const seed_pick = ({ pid, ktc_player_id, season_year, round, slot }) =>
   db('keeptradecut_pick').insert({
@@ -279,6 +280,65 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
           pick_overall_position: 1,
           num_teams: 12,
           target_unix,
+          idx
+        })
+      ).to.equal(null)
+    })
+  })
+
+  describe('ktc_pick_at future picks', function () {
+    before(async () => {
+      await cleanup()
+      // A future-class pick series. Future picks are quoted by tier only --
+      // there is no overall position until the standings that set the order
+      // have happened.
+      await seed_pick({
+        pid: PID_2027_R1_MID,
+        ktc_player_id: 900021,
+        season_year: 2027,
+        round: 1,
+        slot: PICK_SLOT.MID
+      })
+      await seed_valuations({
+        pid: PID_2027_R1_MID,
+        is_superflex: true,
+        observations: [
+          { observed_at: new Date('2026-01-10T00:00:00Z'), value: 5600 }
+        ]
+      })
+    })
+    after(cleanup)
+
+    it('prices a future pick with no assigned position at the mid tier', async () => {
+      const idx = await load_pick_ktc_indexes({ is_superflex: true })
+      const value = ktc_pick_at({
+        pick_year: 2027,
+        pick_round: 1,
+        pick_overall_position: null,
+        num_teams: 10,
+        target_unix: Math.floor(
+          new Date('2026-07-29T00:00:00Z').getTime() / 1000
+        ),
+        idx
+      })
+      // Regression signature: slot_from_position returns null for a null
+      // position, and ktc_pick_at used to bail on that -- so every future pick
+      // priced as NULL and one whole side of any trade involving one silently
+      // vanished from the lineage snapshot.
+      value.should.equal(5600)
+    })
+
+    it('still returns null when the position is known but num_teams is not', async () => {
+      const idx = await load_pick_ktc_indexes({ is_superflex: true })
+      expect(
+        ktc_pick_at({
+          pick_year: 2027,
+          pick_round: 1,
+          pick_overall_position: 5,
+          num_teams: null,
+          target_unix: Math.floor(
+            new Date('2026-07-29T00:00:00Z').getTime() / 1000
+          ),
           idx
         })
       ).to.equal(null)
