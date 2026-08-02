@@ -29,7 +29,8 @@ export const external_data_sources = {
   FANTASYLIFE_DWAIN_MCFARLAND: 26,
   FANTASYLIFE: 27,
   SLEEPER: 28,
-  CHARTING: 29
+  CHARTING: 29,
+  XO_DST_MARKET: 30
 }
 
 export const external_data_source_keys = {}
@@ -68,7 +69,8 @@ export const external_data_source_display_names = {
   26: 'Fantasy Life (Dwain McFarland)',
   27: 'Fantasy Life',
   28: 'Sleeper',
-  29: 'Charting Data'
+  29: 'Charting Data',
+  30: 'DST Market Model'
 }
 
 // The ordered set of sources that populate player stat projections in
@@ -95,7 +97,8 @@ export const projection_data_source_ids = [
   external_data_sources['4FOR4'],
   external_data_sources.FANTASYLIFE,
   external_data_sources.FANTASYLIFE_DWAIN_MCFARLAND,
-  external_data_sources.SLEEPER
+  external_data_sources.SLEEPER,
+  external_data_sources.XO_DST_MARKET
 ]
 
 export const default_points_added = -999
