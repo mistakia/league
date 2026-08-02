@@ -23,7 +23,8 @@ export default async function ({
   lid,
   userid,
   player_tid,
-  uid
+  uid,
+  processed
 }) {
   // check player is on original team roster
   const isOriginalTeam = player_tid === tid
@@ -130,7 +131,24 @@ export default async function ({
     year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
-  await db('transactions').insert(addTransaction)
+  // The tag transaction and the bid's success marking must commit together.
+  // calculate-team-daily-ktc-value reads `transactions` first and
+  // restricted_free_agency_bids second, and treats a tag with no matching
+  // successful bid as impossible — so any window in which the transaction is
+  // visible and the signing is not makes that job throw. The window is not
+  // theoretical: the RFA processing deadline lands at 04:00 ET (a 17:00
+  // announcement plus restricted_free_agency_window_hours=12 minus
+  // restricted_free_agency_processing_lead_hours=1), which is the exact minute
+  // the valuation job's cron fires, so the two collide on every announcement in
+  // that window. It threw on HOU__2026-08-02 with both rows present and correct
+  // by the time anyone looked. Committing the pair atomically closes it: a
+  // reader that sees the transaction is guaranteed to see the signing.
+  await db.transaction(async (trx) => {
+    await trx('transactions').insert(addTransaction)
+    await trx('restricted_free_agency_bids')
+      .update({ succ: true, reason: null, processed })
+      .where('uid', uid)
+  })
 
   const pids = [pid]
   release_pids.forEach((release_pid) => pids.push(release_pid))

@@ -9,7 +9,11 @@ import knex from '#db'
 import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types, player_tag_types } from '#constants'
 import { Roster } from '#libs-shared'
-import { getLeague, getRoster } from '#libs-server'
+import {
+  getLeague,
+  getRoster,
+  processRestrictedFreeAgencyBid
+} from '#libs-server'
 import {
   selectPlayer,
   checkLastTransaction,
@@ -146,6 +150,60 @@ describe('SCRIPTS - restricted free agency bids', function () {
         value,
         type: transaction_types.RESTRICTED_FREE_AGENCY_TAG
       })
+    })
+
+    it('marks the winning bid successful alongside the tag transaction', async () => {
+      // calculate-team-daily-ktc-value reads `transactions` and then
+      // restricted_free_agency_bids, and treats a RESTRICTED_FREE_AGENCY_TAG
+      // with no matching successful bid as impossible. While the bid was marked
+      // by the CALLER, there was a window in which exactly that state was
+      // visible to a concurrent reader — and the RFA processing deadline lands
+      // on the same 04:00 ET minute as the valuation job's cron, so the two
+      // collided and the job threw on HOU__2026-08-02 with both rows present
+      // and correct by the time anyone looked. This asserts the helper itself
+      // leaves both rows written, which is what lets them share one commit.
+      const player = await selectPlayer()
+      const team_id = 1
+      const value = 10
+      const user_id = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId: team_id,
+        userId: user_id,
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
+      })
+
+      const processed = Math.round(Date.now() / 1000)
+      const [bid_row] = await knex('restricted_free_agency_bids')
+        .insert({
+          pid: player.pid,
+          userid: user_id,
+          bid: value,
+          tid: team_id,
+          year: current_season.year,
+          player_tid: team_id,
+          lid: leagueId,
+          submitted: processed,
+          announced: processed
+        })
+        .returning('*')
+
+      await processRestrictedFreeAgencyBid({ ...bid_row, processed })
+
+      const bid_after = await knex('restricted_free_agency_bids')
+        .where('uid', bid_row.uid)
+        .first()
+      expect(bid_after.succ).to.equal(true)
+      expect(bid_after.processed).to.equal(processed)
+
+      const tag_transactions = await knex('transactions').where({
+        lid: leagueId,
+        pid: player.pid,
+        type: transaction_types.RESTRICTED_FREE_AGENCY_TAG
+      })
+      expect(tag_transactions.length).to.equal(1)
     })
 
     it('process single bid with cutlist and conditional release', async () => {

@@ -299,7 +299,10 @@ const run = async ({ dry_run = false } = {}) => {
           log('Processing restricted free agency bid', winning_bid)
 
           if (!dry_run) {
-            await processRestrictedFreeAgencyBid(winning_bid)
+            await processRestrictedFreeAgencyBid({
+              ...winning_bid,
+              processed: timestamp
+            })
           }
 
           const { pid } = winning_bid
@@ -335,7 +338,10 @@ const run = async ({ dry_run = false } = {}) => {
           log('Processing winning restricted free agency bid', winning_bid)
 
           if (!dry_run) {
-            await processRestrictedFreeAgencyBid(winning_bid)
+            await processRestrictedFreeAgencyBid({
+              ...winning_bid,
+              processed: timestamp
+            })
             // Reset waiver order for the winning team
             await resetWaiverOrder({ leagueId: lid, teamId: winning_bid.tid })
           }
@@ -364,14 +370,22 @@ const run = async ({ dry_run = false } = {}) => {
       }
 
       // save restricted free agency bid outcome
-      if (!dry_run) {
+      //
+      // The SUCCESS half now commits inside processRestrictedFreeAgencyBid,
+      // atomically with the tag transaction, so only the failure half is left
+      // here. `whereNull('processed')` is what keeps the two from fighting: a
+      // throw raised AFTER that commit (sendNotifications, say) must not
+      // rewrite succ back to 0, which would leave a tag transaction with no
+      // successful signing — the precise state this change exists to prevent.
+      if (!dry_run && error) {
         await db('restricted_free_agency_bids')
           .update({
-            succ: error ? 0 : 1,
-            reason: error ? error.message : null,
+            succ: false,
+            reason: error.message,
             processed: timestamp
           })
           .where('uid', winning_bid.uid)
+          .whereNull('processed')
       }
 
       // Get next bids to process for this league
