@@ -19,6 +19,12 @@ export default async function (knex, league_params = {}) {
   await knex('waiver_releases').del()
   await knex('restricted_free_agency_bids').del()
   await knex('restricted_free_agency_releases').del()
+  // The nomination holds the auction's state for a whole (league, player,
+  // season), so a leftover row outlives the bids that used to carry that state
+  // per row. Omitting it here leaked an announced nomination across spec files
+  // and made a later nominate return 400 -- on CI only, because it depends on
+  // which spec claimed the player first.
+  await knex('restricted_free_agency_nominations').del()
   await knex('poaches').del()
   await knex('poach_releases').del()
   await knex('draft').del()

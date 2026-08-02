@@ -31,13 +31,6 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
   beforeEach(async function () {
     this.timeout(60 * 1000)
     await league(knex)
-
-    // The league fixture does not clear these, and every case here asserts on
-    // the whole response, so auctions would accumulate across cases and each
-    // assertion would read a previous test's rows.
-    await knex('restricted_free_agency_releases').del()
-    await knex('restricted_free_agency_bids').del()
-    await knex('restricted_free_agency_nominations').del()
   })
 
   const resolve_auction = async ({ pid, original_team_id, winning_bid_id }) => {
