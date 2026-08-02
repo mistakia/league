@@ -20,8 +20,14 @@
 ## violation class exceeds its recorded baseline.
 45 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-drive-seq-coherence.mjs >> /var/log/league/audit-drive-seq-coherence.log 2>&1
 
-## Every day at 4:00AM
-0 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs >> /var/log/league/league-calculate-team-daily-ktc-value.log 2>&1
+## Every day at 5:15AM
+## Must run AFTER import-keeptradecut.mjs (4:30AM, league-imports.cron), which is
+## the sole producer of the keeptradecut_valuations rows this reads. It ran at
+## 4:00AM until 2026-08-02, so it never saw the current day's values; that was
+## survivable only because a missing valuation was silently coerced to zero.
+## The script now reports a day whose coverage collapses, so the ordering is
+## load-bearing rather than cosmetic.
+15 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs >> /var/log/league/league-calculate-team-daily-ktc-value.log 2>&1
 
 ## Every day at 4:30AM
 30 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all >> /var/log/league/league-generate-league-team-player-seasonlogs.log 2>&1

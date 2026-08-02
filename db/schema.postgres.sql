@@ -4397,7 +4397,7 @@ CREATE TABLE public.league_team_daily_values (
     date date NOT NULL,
     "timestamp" bigint NOT NULL,
     ktc_value integer,
-    ktc_share numeric(5,5)
+    ktc_share numeric(6,5)
 );
 
 
