@@ -27,7 +27,8 @@ import {
   get_default_trade_slot,
   get_game_progress,
   calculate_live_projection,
-  optimizeStandingsLineup
+  optimizeStandingsLineup,
+  compare_playoff_seed
 } from '@libs-shared'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
 import {
@@ -2948,59 +2949,28 @@ export const get_draft_pick_trade_counts = createSelector(
 )
 
 // gets the overall standings for the current league and year
+//
+// Seeding runs one league-wide ladder -- head-to-head record, then all-play
+// wins, then points for -- matching libs-shared/compare-playoff-seed.mjs.
+// Division standing is not an input, so this is correct for a single division
+// and for four alike.
 export function get_overall_standings(state) {
   const teams = get_teams_for_current_league_and_year(state)
   const divisionTeams = teams.groupBy((x) => x.getIn(['div'], 0))
-  let divisionLeaders = new List()
-  for (const teams of divisionTeams.values()) {
-    const sorted = teams.sort(
-      (a, b) =>
-        b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
-        b.getIn(['stats', 'ties'], 0) - a.getIn(['stats', 'ties'], 0) ||
-        b.getIn(['stats', 'points_for'], 0) -
-          a.getIn(['stats', 'points_for'], 0)
-    )
 
-    // top two teams
-    divisionLeaders = divisionLeaders.push(sorted.toList().get(0, new Map()))
-    divisionLeaders = divisionLeaders.push(sorted.toList().get(1, new Map()))
-  }
-
-  let sortedDivisionLeaders = divisionLeaders.sort(
-    (a, b) =>
-      b.getIn(['stats', 'all_play_wins'], 0) -
-        a.getIn(['stats', 'all_play_wins'], 0) ||
-      b.getIn(['stats', 'all_play_ties'], 0) -
-        a.getIn(['stats', 'all_play_ties'], 0) ||
-      b.getIn(['stats', 'points_for'], 0) - a.getIn(['stats', 'points_for'], 0)
-  )
-
-  // TODO cleanup
-  // if the 2nd ranked team in sortedDivisionLeaders is from the same division as the first, swap it with the 3rd ranked team
-  const team_1 = sortedDivisionLeaders.get(0)
-  const team_2 = sortedDivisionLeaders.get(1)
-  if (team_1 && team_2 && team_1.get('div') === team_2.get('div')) {
-    sortedDivisionLeaders = sortedDivisionLeaders.set(
-      1,
-      sortedDivisionLeaders.get(2)
-    )
-    sortedDivisionLeaders = sortedDivisionLeaders.set(2, team_2)
-  }
-
-  const playoffTeamTids = divisionLeaders.map((p) => p.uid)
-  const wildcardTeams = teams
-    .filter((t) => !playoffTeamTids.includes(t.uid))
+  const overall = teams
     .toList()
-  const sortedWildcardTeams = wildcardTeams.sort(
-    (a, b) =>
-      b.getIn(['stats', 'points_for'], 0) - a.getIn(['stats', 'points_for'], 0)
-  )
+    .sort((a, b) =>
+      compare_playoff_seed(
+        a.get('stats', new Map()).toJS(),
+        b.get('stats', new Map()).toJS()
+      )
+    )
 
   return {
     teams,
     divisionTeams,
-    divisionLeaders: sortedDivisionLeaders,
-    wildcardTeams: sortedWildcardTeams
+    overall
   }
 }
 

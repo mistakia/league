@@ -9,8 +9,7 @@ const map_state_to_props = createSelector(
   get_app,
   get_overall_standings,
   (app, standings) => {
-    const overall = standings.divisionLeaders.concat(standings.wildcardTeams)
-    return { standings, overall }
+    return { standings, overall: standings.overall }
   }
 )
 

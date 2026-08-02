@@ -114,32 +114,24 @@ Standings.propTypes = {
 }
 
 function Overall({ standings, year, is_current_year, is_regular_season }) {
+  // One league-wide seed order: the top two receive a bye, seeds three through
+  // six play the wildcard round, and the rest are eliminated. Divisions do not
+  // enter into it, so this reads the same at any division count.
   const overallRows = []
   let key = 0
-  for (const team of standings.divisionLeaders.values()) {
+  let seed = 0
+  for (const team of standings.overall.values()) {
     overallRows.push(
       <StandingsTeam
         {...{ key, team, year, is_current_year, is_regular_season }}
       />
     )
     key++
-    if (key === 2) {
+    seed++
+    if (seed === 2) {
       overallRows.push(<Divider key={key} title='Bye Teams' />)
       key++
-    } else if (key === 5) {
-      overallRows.push(<Divider key={key} title='Division Leaders' />)
-      key++
-    }
-  }
-
-  for (const team of standings.wildcardTeams.values()) {
-    overallRows.push(
-      <StandingsTeam
-        {...{ key, team, year, is_current_year, is_regular_season }}
-      />
-    )
-    key++
-    if (key === 8) {
+    } else if (seed === 6) {
       overallRows.push(<Divider key={key} title='Wildcard Teams' />)
       key++
     }
@@ -205,8 +197,13 @@ export default function StandingsPage({
   const is_regular_season =
     current_season.week <= current_season.regularSeasonFinalWeek
 
+  // A single-division league has no division tables to draw -- the Overall
+  // table above already lists every team.
   const divisions = []
-  for (const [div, teams] of division_teams_sorted.entries()) {
+  const has_divisions = division_teams_sorted.size > 1
+  for (const [div, teams] of has_divisions
+    ? division_teams_sorted.entries()
+    : []) {
     const division_name = league[`division_${div}_name`]
       ? league[`division_${div}_name`]
       : `Division ${div}`

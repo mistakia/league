@@ -91,7 +91,10 @@ const get_round_robin_sched = (teams) => {
 }
 
 // teams should be an array of objects with a uid and div property
-// num_divisions is derived from the teams' div values and must be 1, 2 or 4
+// num_divisions is derived from the teams' div values and must be 1, 2 or 4.
+// get_division_count faithfully implements the constitutional rule and so can
+// return 3, 5 or 6 for a 9-, 15- or 18-team league; no schedule construction
+// exists for those, and this throws rather than emitting a partial season.
 // teams in the same division should play each other exactly twice
 // teams in different divisions should play each other either once or twice
 // in a single division every team plays every other at least once, and the
