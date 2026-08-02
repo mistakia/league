@@ -825,7 +825,65 @@ const check_oracle = async ({ seas_type }) => {
     return `process-projections freshness oracle failed: ${details}`
   }
 
-  return null
+  return check_lineup_starter_identity_oracle()
+}
+
+// Output oracle for project_lineups. The freshness oracle above proves
+// process_league() COMPLETED; it says nothing about what that run produced, and
+// the difference is not academic. Between 2026-07-20 and 2026-08-02 the pid
+// re-key left player_id_regex matching zero of 28,166 players, so optimizeLineup
+// returned correct point totals with an empty starter list and this script wrote
+// 85 starter rows an hour where it had written 1,513. It reported success 1,073
+// times out of 1,073 while doing it, because nothing asserted on the output.
+//
+// The invariant: a team-week whose lineup carries points must have chosen at
+// least one real player to earn them. `total` comes from the solver objective
+// and the starter rows come from the filtered result keys, so any future break
+// in the identity filter separates the two again and lands here. Teams that have
+// never rostered two non-DST players are excluded -- an abandoned team can
+// legitimately optimize to a lineup of nothing but a defense.
+const check_lineup_starter_identity_oracle = async () => {
+  const { rows } = await db.raw(
+    `
+    with rostered_teams as (
+      select r.lid, r.tid
+      from rosters r
+      join rosters_players rp on rp.rid = r.uid
+      join player p on p.pid = rp.pid
+      where r.year = ? and p.primary_position <> 'DST'
+      group by r.lid, r.tid
+      having count(distinct rp.pid) >= 2
+    ),
+    player_starters as (
+      select s.lid, s.tid, s.week
+      from league_team_lineup_starters s
+      join player p on p.pid = s.pid
+      where s.year = ? and p.primary_position <> 'DST'
+      group by s.lid, s.tid, s.week
+    )
+    select l.lid, l.tid, count(*)::int as weeks
+    from league_team_lineups l
+    join leagues lg on lg.uid = l.lid
+    join rostered_teams rt on rt.lid = l.lid and rt.tid = l.tid
+    left join player_starters ps
+      on ps.lid = l.lid and ps.tid = l.tid and ps.week = l.week
+    where l.year = ?
+      and lg.hosted = true
+      and lg.archived_at is null
+      and l.total > 0
+      and ps.week is null
+    group by l.lid, l.tid
+    order by l.lid, l.tid
+    `,
+    [current_season.year, current_season.year, current_season.year]
+  )
+
+  if (!rows.length) return null
+
+  const details = rows
+    .map((r) => `lid=${r.lid} tid=${r.tid} weeks=${r.weeks}`)
+    .join('; ')
+  return `project-lineups starter-identity oracle failed: ${rows.length} team(s) have scoring lineups with no real-player starters: ${details}`
 }
 
 // The dedup keys MUST be `<kind>:<source>`. The pipeline_success recovery arm

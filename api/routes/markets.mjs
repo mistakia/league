@@ -556,7 +556,7 @@ router.get('/:source_market_id/history', async (req, res) => {
  *         schema:
  *           type: string
  *           pattern: '^[a-zA-Z0-9-]+$'
- *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
+ *         description: Player ID in format FFFF-LLLL-NNNNNN (NNNNNN is an immutable serial; a team defense uses its bare nfl abbreviation, e.g. NE)
  *         example: "PATR-MAHO-005785"
  *       - $ref: '#/components/parameters/week'
  *       - $ref: '#/components/parameters/year'

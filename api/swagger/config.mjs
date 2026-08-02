@@ -64,9 +64,12 @@ const options = {
         },
         PlayerId: {
           type: 'string',
-          description: 'Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD',
+          description:
+            'Player ID in format FFFF-LLLL-NNNNNN, where NNNNNN is an immutable ' +
+            'serial and the name prefix is a frozen snapshot. A team defense is ' +
+            'identified by its bare nfl team abbreviation, e.g. NE.',
           example: 'PATR-MAHO-005785',
-          pattern: '^[A-Z]{4}-[A-Z]{4}-\\d{4}-\\d{4}-\\d{2}-\\d{2}$'
+          pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
         },
         // Common property schemas
         UnixTimestamp: {

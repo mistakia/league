@@ -279,12 +279,33 @@ export function* project_lineups() {
   )
   const worker = new Worker()
   for (const [teamId, players] of rosters.entrySeq()) {
-    lineups[teamId] = {}
-    lineups[teamId] = yield call(worker.workerOptimizeLineup, {
-      players: players.toJS(),
+    const roster_players = players.toJS()
+
+    // Two passes, matching scripts/project-lineups.mjs. optimizeLineup reports
+    // its objective as `total` OR as `baseline_total` -- never both -- so a
+    // single baseline pass produces a lineup object with no `total`, and
+    // calculatePlayerLineupContribution below reads exactly that key to price a
+    // starter against the lineup without them. It fell through to its `0`
+    // default, making every active starter's contribution the negated optimum.
+    // The API serves the same three-key shape, so this keeps a client-projected
+    // lineup interchangeable with a loaded one.
+    const baseline_lineups = yield call(worker.workerOptimizeLineup, {
+      players: roster_players,
       league,
       use_baseline_when_missing: true
     })
+    const roster_lineups = yield call(worker.workerOptimizeLineup, {
+      players: roster_players,
+      league
+    })
+
+    lineups[teamId] = {}
+    for (const week of Object.keys(roster_lineups)) {
+      lineups[teamId][week] = {
+        ...roster_lineups[week],
+        baseline_total: baseline_lineups[week].baseline_total
+      }
+    }
   }
   worker.terminate()
 

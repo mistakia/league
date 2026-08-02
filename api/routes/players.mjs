@@ -246,14 +246,15 @@ router.post('/?', async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+ *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
  *           example: "PATR-MAHO-005785"
  *         description: |
- *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
- *           - FFFF: First 4 characters of first name
- *           - LLLL: First 4 characters of last name
- *           - YYYY: Draft year
- *           - YYYY-MM-DD: Date of birth
+ *           Player ID in the format: FFFF-LLLL-NNNNNN
+ *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
+ *           - LLLL: First 4 characters of last name (likewise)
+ *           - NNNNNN: Immutable zero-padded serial -- this is the identity
+ *
+ *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.
  *     responses:
  *       200:
  *         description: Player details successfully retrieved
@@ -387,14 +388,15 @@ router.get('/:pid', async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+ *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
  *           example: "PATR-MAHO-005785"
  *         description: |
- *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
- *           - FFFF: First 4 characters of first name
- *           - LLLL: First 4 characters of last name
- *           - YYYY: Draft year
- *           - YYYY-MM-DD: Date of birth
+ *           Player ID in the format: FFFF-LLLL-NNNNNN
+ *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
+ *           - LLLL: First 4 characters of last name (likewise)
+ *           - NNNNNN: Immutable zero-padded serial -- this is the identity
+ *
+ *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.
  *     responses:
  *       200:
  *         description: Practice reports successfully retrieved
@@ -570,14 +572,15 @@ router.get('/:pid/practices/?', async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+ *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
  *           example: "PATR-MAHO-005785"
  *         description: |
- *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
- *           - FFFF: First 4 characters of first name
- *           - LLLL: First 4 characters of last name
- *           - YYYY: Draft year
- *           - YYYY-MM-DD: Date of birth
+ *           Player ID in the format: FFFF-LLLL-NNNNNN
+ *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
+ *           - LLLL: First 4 characters of last name (likewise)
+ *           - NNNNNN: Immutable zero-padded serial -- this is the identity
+ *
+ *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.
  *       - name: leagueId
  *         in: query
  *         schema:
@@ -827,14 +830,15 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *           pattern: '^[A-Z]{4}-[A-Z]{4}-[0-9]{4}-[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+ *           pattern: '^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$'
  *           example: "PATR-MAHO-005785"
  *         description: |
- *           Player ID in the format: FFFF-LLLL-YYYY-YYYY-MM-DD
- *           - FFFF: First 4 characters of first name
- *           - LLLL: First 4 characters of last name
- *           - YYYY: Draft year
- *           - YYYY-MM-DD: Date of birth
+ *           Player ID in the format: FFFF-LLLL-NNNNNN
+ *           - FFFF: First 4 characters of first name (a frozen snapshot, never recomputed)
+ *           - LLLL: First 4 characters of last name (likewise)
+ *           - NNNNNN: Immutable zero-padded serial -- this is the identity
+ *
+ *           A team defense (DST) is identified by its bare nfl team abbreviation, e.g. `NE`.
  *     responses:
  *       200:
  *         description: Player betting markets successfully retrieved

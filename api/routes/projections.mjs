@@ -154,7 +154,7 @@ router.get('/?', async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
+ *         description: Player ID in format FFFF-LLLL-NNNNNN (NNNNNN is an immutable serial; a team defense uses its bare nfl abbreviation, e.g. NE)
  *         example: "PATR-MAHO-005785"
  *     responses:
  *       200:
@@ -252,7 +252,7 @@ router.get('/:pid/?', async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
+ *         description: Player ID in format FFFF-LLLL-NNNNNN (NNNNNN is an immutable serial; a team defense uses its bare nfl abbreviation, e.g. NE)
  *         example: "PATR-MAHO-005785"
  *     requestBody:
  *       required: true
@@ -473,7 +473,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: string
- *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
+ *         description: Player ID in format FFFF-LLLL-NNNNNN (NNNNNN is an immutable serial; a team defense uses its bare nfl abbreviation, e.g. NE)
  *         example: "PATR-MAHO-005785"
  *     requestBody:
  *       required: true

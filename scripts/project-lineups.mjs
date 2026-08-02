@@ -57,9 +57,13 @@ const project_lineups = async (lid) => {
       use_baseline_when_missing: true
     })
 
+    // optimizeLineup keys its result by week, so Object.entries hands back a
+    // string. Every `week` column these three tables carry is smallint, so cast
+    // once here rather than leaning on pg to parse the bound parameter.
     for (const [week, lineup] of Object.entries(lineups)) {
+      const week_number = Number(week)
       team_lineup_inserts.push({
-        week,
+        week: week_number,
         tid,
         lid,
         year,
@@ -69,7 +73,7 @@ const project_lineups = async (lid) => {
       for (const pid of lineup.starter_pids) {
         team_lineup_starter_inserts.push({
           pid,
-          week,
+          week: week_number,
           lid,
           year,
           tid
@@ -165,7 +169,7 @@ const project_lineups = async (lid) => {
       for (const week in playerData.weeks) {
         const { start, sp, bp } = playerData.weeks[week]
         team_lineup_contribution_week_inserts.push({
-          week,
+          week: Number(week),
           tid,
           lid,
           pid,

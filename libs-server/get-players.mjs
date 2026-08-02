@@ -489,13 +489,22 @@ export default async function ({
     !pids.length &&
     (teamId || leagueId)
   ) {
+    // Both tables accumulate a row per season -- project-lineups deletes and
+    // reinserts only the current year -- so without a year predicate the loop
+    // below assigns whichever season the scan happens to return last. That is
+    // not a tie the newest row wins: the current year's rows are rewritten
+    // hourly into freed early pages while a retired season's sit untouched at
+    // the end of the heap, so the STALEST season wins and keeps winning. Team 1
+    // rendered its 2025 aggregate (starts=1) over a correct 2026 row (starts=16)
+    // for exactly this reason.
     const params = leagueId ? { lid: leagueId } : { tid: teamId }
+    const contribution_params = { ...params, year: current_season.year }
     const contributions = await db('league_team_lineup_contributions').where(
-      params
+      contribution_params
     )
     const contribution_weeks = await db(
       'league_team_lineup_contribution_weeks'
-    ).where(params)
+    ).where(contribution_params)
 
     for (const player_contribution of contributions) {
       const { pid, starts, sp, bp } = player_contribution
