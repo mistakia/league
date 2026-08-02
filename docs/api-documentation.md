@@ -50,6 +50,7 @@ For interactive API exploration, visit `/api/docs` which provides a Swagger UI i
 - `GET /leagues/{lid}` - Get league details
 - `GET /leagues/{lid}/teams` - Get league teams
 - `GET /leagues/{lid}/players` - Get league players
+- `GET /leagues/{lid}/restricted-free-agency` - Completed restricted free agency auctions for a season (`?year=`), each with all of its bids, the winner, and an outcome code per losing bid. Resolved auctions are fully disclosed; a live auction is absent because the filter is the nomination's processing timestamp rather than a permission check.
 
 ### Fantasy Teams
 
