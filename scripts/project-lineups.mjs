@@ -33,6 +33,22 @@ const project_lineups = async (lid) => {
   const baseline_pids = [...new Set(baselines.map((p) => p.pid))]
   const baseline_players = await getPlayers({ pids: baseline_pids })
 
+  // Replacement-level points per week/position, from the 'starter' baseline --
+  // used to score optimizeLineup's phantom slot when a roster cannot fill a
+  // starting position, so it lands at replacement level instead of zero.
+  const baseline_points = {}
+  for (const baseline of baselines) {
+    if (baseline.type !== 'starter') continue
+    const baseline_player = baseline_players.find((p) => p.pid === baseline.pid)
+    const points =
+      (baseline_player &&
+        baseline_player.points[baseline.week] &&
+        baseline_player.points[baseline.week].total) ||
+      0
+    baseline_points[baseline.week] = baseline_points[baseline.week] || {}
+    baseline_points[baseline.week][baseline.pos] = points
+  }
+
   for (const team of teams) {
     const tid = team.uid
     const rosterRows = await getRoster({ tid })
@@ -54,7 +70,8 @@ const project_lineups = async (lid) => {
     const baseline_lineups = optimizeLineup({
       players: eligible_players,
       league,
-      use_baseline_when_missing: true
+      use_baseline_when_missing: true,
+      baseline_points
     })
 
     // optimizeLineup keys its result by week, so Object.entries hands back a

@@ -11,7 +11,8 @@ import getOptimizerPositionConstraints from './get-optimizer-position-constraint
 export default function optimizeLineup({
   players,
   league,
-  use_baseline_when_missing
+  use_baseline_when_missing,
+  baseline_points = {}
 }) {
   const results = {}
   const player_positions = players
@@ -54,7 +55,7 @@ export default function optimizeLineup({
     if (use_baseline_when_missing) {
       for (const p of fantasy_positions) {
         const pos_pid = `pid_${p}`
-        const points = Math.round(league[`b_${p}`]) || 0
+        const points = Math.round((baseline_points[week] || {})[p] || 0)
         addPlayer({ pid: pos_pid, player_pos: p, points })
       }
     }

@@ -988,6 +988,31 @@ export function getBaselines(state) {
   })
 }
 
+// Replacement-level points per week/position, sourced from the league's
+// 'starter' baseline player -- fed to optimizeLineup's use_baseline_when_missing
+// phantom slot so it scores at replacement level instead of zero.
+export const get_lineup_baseline_points = createSelector(
+  getBaselines,
+  (baselines) => {
+    const result = {}
+    for (const [week, positions] of baselines.entrySeq()) {
+      if (!Map.isMap(positions)) continue
+      const points_by_position = {}
+      for (const [position, types] of positions.entrySeq()) {
+        if (!Map.isMap(types)) continue
+        const player_map = types.get('starter')
+        if (!player_map) continue
+        points_by_position[position] = player_map.getIn(
+          ['points', week, 'total'],
+          0
+        )
+      }
+      result[week] = points_by_position
+    }
+    return result
+  }
+)
+
 export const get_restricted_free_agency_players = createSelector(
   get_player_maps,
   (playerMaps) =>

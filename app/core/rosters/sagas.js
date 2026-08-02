@@ -49,7 +49,8 @@ import {
   getPoachPlayersForCurrentTeam,
   get_waiver_players_for_current_team,
   get_current_league,
-  get_team_by_id_for_current_year
+  get_team_by_id_for_current_year,
+  get_lineup_baseline_points
 } from '@core/selectors'
 import {
   current_season,
@@ -272,6 +273,7 @@ export function* project_lineups() {
 
   const league = yield select(get_current_league)
   const rosters = yield select(getActivePlayersByRosterForCurrentLeague)
+  const baseline_points = yield select(get_lineup_baseline_points)
   const lineups = {}
 
   const { default: Worker } = yield call(
@@ -292,7 +294,8 @@ export function* project_lineups() {
     const baseline_lineups = yield call(worker.workerOptimizeLineup, {
       players: roster_players,
       league,
-      use_baseline_when_missing: true
+      use_baseline_when_missing: true,
+      baseline_points
     })
     const roster_lineups = yield call(worker.workerOptimizeLineup, {
       players: roster_players,
@@ -316,6 +319,7 @@ export function* project_lineups() {
 export function* projectTrade() {
   // TODO - make sure player values and projections have been calculated
   const league = yield select(get_current_league)
+  const baseline_points = yield select(get_lineup_baseline_points)
   const { default: Worker } = yield call(
     () => import('workerize-loader?inline!../worker') // eslint-disable-line import/no-webpack-loader-syntax
   )
@@ -326,7 +330,8 @@ export function* projectTrade() {
   const proposingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: proposingTeamTradedPlayers.map((p) => p.toJS()),
     league,
-    use_baseline_when_missing: true
+    use_baseline_when_missing: true,
+    baseline_points
   })
 
   const acceptingTeamTradedPlayers = yield select(
@@ -335,7 +340,8 @@ export function* projectTrade() {
   const acceptingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: acceptingTeamTradedPlayers.map((p) => p.toJS()),
     league,
-    use_baseline_when_missing: true
+    use_baseline_when_missing: true,
+    baseline_points
   })
 
   // Recompute the pre-trade lineups here rather than reading the league-wide
@@ -348,7 +354,8 @@ export function* projectTrade() {
   const proposingTeamCurrentLineups = yield call(worker.workerOptimizeLineup, {
     players: proposingTeamCurrentPlayers.map((p) => p.toJS()),
     league,
-    use_baseline_when_missing: true
+    use_baseline_when_missing: true,
+    baseline_points
   })
 
   const acceptingTeamCurrentPlayers = yield select((state) =>
@@ -357,7 +364,8 @@ export function* projectTrade() {
   const acceptingTeamCurrentLineups = yield call(worker.workerOptimizeLineup, {
     players: acceptingTeamCurrentPlayers.map((p) => p.toJS()),
     league,
-    use_baseline_when_missing: true
+    use_baseline_when_missing: true,
+    baseline_points
   })
 
   worker.terminate()
