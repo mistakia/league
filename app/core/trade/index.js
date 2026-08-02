@@ -5,7 +5,8 @@ export {
   get_trades_actions,
   post_trade_accept_actions,
   post_trade_cancel_actions,
-  post_trade_reject_actions
+  post_trade_reject_actions,
+  post_trade_veto_actions
 } from './actions'
 export { trade_sagas } from './sagas'
 export { create_trade } from './trade'

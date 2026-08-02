@@ -18,8 +18,16 @@ const initialState = new Record({
   acceptingTeamCurrentLineups: new Map(),
   proposingTeamSlots: new Map(), // Map of pid -> slot for players proposing team receives
   acceptingTeamSlots: new Map(), // Map of pid -> slot for players accepting team receives
-  validationErrors: new Map() // Map of team -> slot type -> error message
+  validationErrors: new Map(), // Map of team -> slot type -> error message
+  vetoError: null // the server's reason for refusing the last veto
 })
+
+// The failed action carries `err.toString()`, which prefixes the server's
+// message with the Error class name.
+const read_error_message = (error) =>
+  typeof error === 'string'
+    ? error.replace(/^Error:\s*/, '')
+    : 'Veto request failed'
 
 export function trade_reducer(state = initialState(), { payload, type }) {
   switch (type) {
@@ -70,10 +78,19 @@ export function trade_reducer(state = initialState(), { payload, type }) {
     case trade_actions.POST_TRADE_ACCEPT_FULFILLED:
     case trade_actions.POST_TRADE_CANCEL_FULFILLED:
     case trade_actions.POST_TRADE_PROPOSE_FULFILLED:
+    case trade_actions.POST_TRADE_REJECT_FULFILLED:
+    case trade_actions.POST_TRADE_VETO_FULFILLED:
       return state.merge({
         selectedTradeId: payload.data.uid,
-        items: state.items.set(payload.data.uid, create_trade(payload.data))
+        items: state.items.set(payload.data.uid, create_trade(payload.data)),
+        vetoError: null
       })
+
+    case trade_actions.POST_TRADE_VETO_PENDING:
+      return state.merge({ vetoError: null })
+
+    case trade_actions.POST_TRADE_VETO_FAILED:
+      return state.merge({ vetoError: read_error_message(payload.error) })
 
     case trade_actions.GET_TRADES_FULFILLED:
       return state.withMutations((state) => {
@@ -92,7 +109,8 @@ export function trade_reducer(state = initialState(), { payload, type }) {
         proposingTeamPicks: new List(),
         proposingTeamSlots: new Map(),
         acceptingTeamSlots: new Map(),
-        validationErrors: new Map()
+        validationErrors: new Map(),
+        vetoError: null
       })
 
     case trade_actions.TRADE_SET_PROPOSING_TEAM_SLOT:

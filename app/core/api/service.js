@@ -154,10 +154,9 @@ export const api = {
     const url = `${API_URL}/teams/${teamId}/transactions/reserve?leagueId=${leagueId}`
     return { url }
   },
-  get_trades(params) {
-    const url = `${API_URL}/leagues/${
-      params.leagueId
-    }/trades?${queryString.stringify(params)}`
+  get_trades({ leagueId, teamId, vetoable }) {
+    const query = queryString.stringify({ teamId, vetoable })
+    const url = `${API_URL}/leagues/${leagueId}/trades?${query}`
     return { url }
   },
   post_propose_trade(data) {
@@ -175,6 +174,10 @@ export const api = {
   post_reject_trade(data) {
     const url = `${API_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/reject`
     return { url, ...POST(data) }
+  },
+  post_veto_trade({ leagueId, tradeId }) {
+    const url = `${API_URL}/leagues/${leagueId}/trades/${tradeId}/veto`
+    return { url, ...POST({}) }
   },
   get_league({ leagueId }) {
     const url = `${API_URL}/leagues/${leagueId}`

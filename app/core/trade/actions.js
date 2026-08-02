@@ -6,6 +6,7 @@ export const trade_actions = {
   ...create_api_action_types('POST_TRADE_CANCEL'),
   ...create_api_action_types('POST_TRADE_ACCEPT'),
   ...create_api_action_types('POST_TRADE_REJECT'),
+  ...create_api_action_types('POST_TRADE_VETO'),
   ...create_api_action_types('GET_TRADES'),
 
   SELECT_TRADE: 'SELECT_TRADE',
@@ -45,6 +46,13 @@ export const trade_actions = {
     type: trade_actions.LOAD_TRADES
   }),
 
+  // Commissioner-only: the league's still-reversible trades, which are not
+  // otherwise visible to a commissioner who is not party to them.
+  LOAD_VETOABLE_TRADES: 'LOAD_VETOABLE_TRADES',
+  load_vetoable: () => ({
+    type: trade_actions.LOAD_VETOABLE_TRADES
+  }),
+
   PROPOSE_TRADE: 'PROPOSE_TRADE',
   propose: () => ({
     type: trade_actions.PROPOSE_TRADE
@@ -63,6 +71,11 @@ export const trade_actions = {
   REJECT_TRADE: 'REJECT_TRADE',
   reject: () => ({
     type: trade_actions.REJECT_TRADE
+  }),
+
+  VETO_TRADE: 'VETO_TRADE',
+  veto: () => ({
+    type: trade_actions.VETO_TRADE
   }),
 
   TRADE_SET_RELEASE_PLAYERS: 'TRADE_SET_RELEASE_PLAYERS',
@@ -143,3 +156,4 @@ export const get_trades_actions = create_api_actions('GET_TRADES')
 export const post_trade_accept_actions = create_api_actions('POST_TRADE_ACCEPT')
 export const post_trade_cancel_actions = create_api_actions('POST_TRADE_CANCEL')
 export const post_trade_reject_actions = create_api_actions('POST_TRADE_REJECT')
+export const post_trade_veto_actions = create_api_actions('POST_TRADE_VETO')

@@ -133,9 +133,19 @@ const router = express.Router({ mergeParams: true })
  *         schema:
  *           type: integer
  *         description: |
- *           Team ID to filter trades for. If not provided, returns all league trades.
- *           Shows trades where this team is either proposing or accepting.
+ *           Team ID to filter trades for. Shows trades where this team is either
+ *           proposing or accepting. If not provided, returns all league trades,
+ *           which only the league commissioner may request.
  *         example: 13
+ *       - name: vetoable
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *         description: |
+ *           Restrict to trades the commissioner can still veto — accepted, not
+ *           already vetoed, and inside the league's veto window. Commissioner only.
+ *         example: true
  *     responses:
  *       200:
  *         description: Trade proposals retrieved successfully
@@ -178,12 +188,48 @@ const router = express.Router({ mergeParams: true })
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { teamId } = req.query
-    const trades = await db('trades')
+    const { leagueId } = req.params
+    const { teamId, vetoable } = req.query
+    const want_vetoable = vetoable === 'true' || vetoable === '1'
+
+    // Without a teamId this returns every team's trades, which is only the
+    // commissioner's business -- they are the one who can act on them.
+    let league = null
+    if (!teamId || want_vetoable) {
+      league = await getLeague({ lid: leagueId })
+      if (!league || league.commishid !== req.auth?.userId) {
+        return res
+          .status(401)
+          .send({ error: 'only the commissioner can view league-wide trades' })
+      }
+    }
+
+    const query = db('trades')
+      .where('lid', leagueId)
       .where('year', current_season.year)
-      .where(function () {
+
+    if (teamId) {
+      query.where(function () {
         this.where('propose_tid', teamId).orWhere('accept_tid', teamId)
       })
+    }
+
+    // Vetoable means accepted, not already vetoed, and still inside the
+    // league's veto window -- the same three conditions the veto route
+    // enforces, so nothing listed here is refused for being out of window.
+    if (want_vetoable) {
+      const window_hours = Number(league.trade_veto_window_hours)
+      if (!Number.isFinite(window_hours) || window_hours <= 0) {
+        return res.send([])
+      }
+      const opened_after = Math.round(Date.now() / 1000) - window_hours * 3600
+      query
+        .whereNotNull('accepted')
+        .whereNull('vetoed')
+        .where('accepted', '>', opened_after)
+    }
+
+    const trades = await query
     const tradeids = trades.map((t) => t.uid)
 
     const trade_releases_rows = await db('trade_releases').whereIn(

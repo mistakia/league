@@ -33,6 +33,7 @@ export {
   api_post_matchups,
   api_get_sources,
   api_post_reject_trade,
+  api_post_veto_trade,
   api_put_roster,
   api_post_activate,
   api_post_deactivate,

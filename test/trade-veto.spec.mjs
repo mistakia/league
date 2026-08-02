@@ -347,4 +347,65 @@ describe('API /trades - veto', function () {
     const rows = await knex('rosters_players').where({ pid: proposing_row.pid })
     rows[0].tid.should.equal(1)
   })
+
+  it('lists a vetoable trade for the commissioner', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    const res = await chai_request
+      .execute(server)
+      .get('/api/leagues/1/trades?vetoable=true')
+      .set('Authorization', `Bearer ${user1}`)
+    res.should.have.status(200)
+
+    res.body.length.should.equal(1)
+    res.body[0].uid.should.equal(tradeid)
+    // the commissioner is not party to every trade they rule on, so the list
+    // has to carry the assets rather than just the trade row
+    res.body[0].proposingTeamPlayers.length.should.equal(1)
+  })
+
+  it('omits an already vetoed trade from the vetoable list', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    await chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    const res = await chai_request
+      .execute(server)
+      .get('/api/leagues/1/trades?vetoable=true')
+      .set('Authorization', `Bearer ${user1}`)
+    res.should.have.status(200)
+    res.body.length.should.equal(0)
+  })
+
+  it('omits a trade whose veto window has closed', async () => {
+    await propose_and_accept_one_for_one()
+
+    MockDate.set(Date.now() + 25 * 60 * 60 * 1000)
+
+    const res = await chai_request
+      .execute(server)
+      .get('/api/leagues/1/trades?vetoable=true')
+      .set('Authorization', `Bearer ${user1}`)
+    res.should.have.status(200)
+    res.body.length.should.equal(0)
+  })
+
+  it('refuses a league-wide trade list to a non-commissioner', async () => {
+    await propose_and_accept_one_for_one()
+
+    const vetoable_res = await chai_request
+      .execute(server)
+      .get('/api/leagues/1/trades?vetoable=true')
+      .set('Authorization', `Bearer ${user2}`)
+    vetoable_res.should.have.status(401)
+
+    const unscoped_res = await chai_request
+      .execute(server)
+      .get('/api/leagues/1/trades')
+      .set('Authorization', `Bearer ${user2}`)
+    unscoped_res.should.have.status(401)
+  })
 })

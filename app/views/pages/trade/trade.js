@@ -33,7 +33,8 @@ import {
   get_accepting_team_players,
   get_accepting_team,
   get_proposing_team,
-  get_proposing_team_roster
+  get_proposing_team_roster,
+  get_is_commish
 } from '@core/selectors'
 import { trade_actions } from '@core/trade'
 import { player_actions } from '@core/players'
@@ -184,6 +185,7 @@ export default function TradePage() {
   const accepting_team_players = useSelector(get_accepting_team_players)
   const analysis = useSelector(get_current_trade_analysis)
   const players_map = useSelector((state) => state.get('players').get('items'))
+  const is_commish = useSelector(get_is_commish)
 
   const is_proposer = trade.propose_tid === app.teamId
   const is_proposed = Boolean(trade.uid)
@@ -194,6 +196,12 @@ export default function TradePage() {
     dispatch(trade_actions.load())
     dispatch(player_actions.load_league_players())
   }, [dispatch])
+
+  useEffect(() => {
+    if (is_commish) {
+      dispatch(trade_actions.load_vetoable())
+    }
+  }, [dispatch, is_commish])
 
   const handle_release_change = useCallback(
     (event, value) => {
@@ -249,12 +257,17 @@ export default function TradePage() {
     </Alert>
   )
 
+  // A settled trade always shows its action strip. `is_valid` measures whether
+  // the viewing team could still take the trade on, which is meaningless once
+  // it has been decided -- and gating on it hid the commissioner's veto button.
+  const is_settled = is_proposed && !is_open
+  const show_action =
+    is_settled || (is_valid && current_season.week < current_season.finalWeek)
+
   const action_section = (
     <Grid item xs={12}>
       <div className='trade__action'>
-        {is_valid && current_season.week < current_season.finalWeek && (
-          <TradeAction />
-        )}
+        {show_action && <TradeAction />}
         {is_open && !is_valid && invalid_notice}
       </div>
     </Grid>

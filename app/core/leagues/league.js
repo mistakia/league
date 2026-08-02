@@ -132,6 +132,8 @@ export const League = new Record({
   restricted_free_agency_window_hours: null,
   restricted_free_agency_processing_lead_hours: null,
 
+  trade_veto_window_hours: null,
+
   isLoading: false,
   isLoaded: false
 })
@@ -263,6 +265,8 @@ export function createLeague({
   restricted_free_agency_window_hours,
   restricted_free_agency_processing_lead_hours,
 
+  trade_veto_window_hours,
+
   isLoaded,
   isLoading
 }) {
@@ -392,6 +396,8 @@ export function createLeague({
 
     restricted_free_agency_window_hours,
     restricted_free_agency_processing_lead_hours,
+
+    trade_veto_window_hours,
 
     isLoading,
     isLoaded

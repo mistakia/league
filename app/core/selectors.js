@@ -3335,6 +3335,26 @@ export function get_current_trade(state) {
   }
 }
 
+export const get_is_commish = createSelector(
+  get_app,
+  get_current_league,
+  (app, league) => Boolean(app.userId) && league.commishid === app.userId
+)
+
+/**
+ * Trades that veto could still apply to, ignoring the clock. Whether each one
+ * is actually inside its window is left to the caller, which holds a ticking
+ * `now` — a memoized selector reading Date.now() would freeze the countdown.
+ */
+export const get_veto_candidate_trades = createSelector(
+  get_trade,
+  (trade_state) =>
+    trade_state.items
+      .filter((trade) => Boolean(trade.accepted) && !trade.vetoed)
+      .toList()
+      .sort((a, b) => b.accepted - a.accepted)
+)
+
 export const get_current_trade_players = createSelector(
   get_current_trade,
   get_app,
