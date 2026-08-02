@@ -500,12 +500,17 @@ observations:
     [design] The player external-ID column set is hand-duplicated across four league files with no
     shared constant, so a new player DDL column silently misses registries; the data-view registry
     had drifted by nine before commit ff20ce9bc.
+  - >-
+    [bug] 2026-08-02 Every external-fantasy-leagues adapter declared `timeout: 30000` but had no
+    request timeout at all from 32019f35f (which removed node-fetch) until 61d0eed61 — native fetch
+    silently ignores a `timeout` option, so a hung vendor connection blocked until the caller gave
+    up rather than aborting at 30s.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-07-30T03:50:34.045Z'
+updated_at: '2026-08-02T02:10:03.115Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
