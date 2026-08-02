@@ -426,6 +426,83 @@ describe('SCRIPTS - restricted free agency bids', function () {
       expect(restricted_free_agency_bids[0].reason).to.equal(null)
     })
 
+    it('competing bid not processed before the nomination window is due', async () => {
+      const player = await selectPlayer()
+      const original_team_id = 1
+      const competing_team_id = 2
+      const original_user_id = 1
+      const competing_user_id = 2
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId: original_team_id,
+        userId: original_user_id,
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
+      })
+
+      const timestamp = Math.round(Date.now() / 1000)
+      // announced 30 minutes ago, so the window's processing time is hours away
+      const announcement_time = timestamp - 60 * 30
+
+      await knex('restricted_free_agency_bids').insert({
+        pid: player.pid,
+        userid: original_user_id,
+        bid: 10,
+        tid: original_team_id,
+        year: current_season.year,
+        player_tid: original_team_id,
+        lid: leagueId,
+        submitted: announcement_time,
+        announced: announcement_time,
+        nominated: announcement_time - 60 * 60
+      })
+
+      // A competing bid is never announced — `announced` stays null for its
+      // whole life. It must still be gated on the player's nomination window
+      // rather than treated as due the moment it is submitted.
+      await knex('restricted_free_agency_bids').insert({
+        pid: player.pid,
+        userid: competing_user_id,
+        bid: 25,
+        tid: competing_team_id,
+        year: current_season.year,
+        player_tid: original_team_id,
+        lid: leagueId,
+        submitted: timestamp,
+        announced: null,
+        nominated: null
+      })
+
+      let error
+      try {
+        await run({ dry_run: false })
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
+
+      const restricted_free_agency_bids = await knex(
+        'restricted_free_agency_bids'
+      ).orderBy('tid')
+
+      expect(restricted_free_agency_bids.length).to.equal(2)
+
+      for (const bid_row of restricted_free_agency_bids) {
+        expect(bid_row.succ).to.equal(null)
+        expect(bid_row.processed).to.equal(null)
+        expect(bid_row.reason).to.equal(null)
+      }
+
+      // the player is still on the original team's roster
+      await checkRoster({
+        teamId: original_team_id,
+        pid: player.pid,
+        leagueId
+      })
+    })
+
     it('exceeds roster size limit', async () => {
       // TODO
     })
@@ -477,7 +554,9 @@ describe('SCRIPTS - restricted free agency bids', function () {
         nominated: announcement_time - 60 * 60
       })
 
-      // Competing team bids with same value
+      // Competing team bids with same value. These carry no announcement of
+      // their own — only the nomination is ever announced — so they exercise
+      // the resolution of the processing window through the player.
       await knex('restricted_free_agency_bids').insert({
         pid: player.pid,
         userid: user_id2,
@@ -487,8 +566,8 @@ describe('SCRIPTS - restricted free agency bids', function () {
         player_tid: team_id1,
         lid: leagueId,
         submitted: announcement_time,
-        announced: announcement_time,
-        nominated: announcement_time - 60 * 60
+        announced: null,
+        nominated: null
       })
 
       await knex('restricted_free_agency_bids').insert({
@@ -500,8 +579,8 @@ describe('SCRIPTS - restricted free agency bids', function () {
         player_tid: team_id1,
         lid: leagueId,
         submitted: announcement_time,
-        announced: announcement_time,
-        nominated: announcement_time - 60 * 60
+        announced: null,
+        nominated: null
       })
 
       let error

@@ -61,7 +61,40 @@ async function sort_bids_by_waiver_order(bids) {
 }
 
 /**
- * When bids on the window a bid was announced in are due to be processed.
+ * Announcement timestamp per player, drawn from the player's NOMINATION.
+ *
+ * `announced` is written by announce-restricted-free-agent.mjs onto the
+ * nominating team's own bid, and only that bid — every competing bid on the
+ * same player carries `announced = null` for its whole life. So the
+ * announcement is a property of the PLAYER's window, not of an individual bid
+ * row, and eligibility has to be resolved through this map rather than off
+ * `bid.announced`. Reading it per bid made a competing bid's `null` coerce to
+ * epoch 0, which placed it in a window tens of thousands of indexes in the
+ * past and made it due immediately on submission.
+ *
+ * @param {number} lid - League id
+ * @returns {Promise<Object>} pid -> announcement timestamp
+ */
+async function get_announcement_timestamps_by_pid(lid) {
+  const announced_rows = await db('restricted_free_agency_bids')
+    .select('pid', 'announced')
+    .where({ lid, year: current_season.year })
+    .whereNotNull('announced')
+
+  const announced_by_pid = {}
+  for (const row of announced_rows) {
+    const announced = Number(row.announced)
+    const existing = announced_by_pid[row.pid]
+    if (existing === undefined || announced < existing) {
+      announced_by_pid[row.pid] = announced
+    }
+  }
+
+  return announced_by_pid
+}
+
+/**
+ * When bids on the window a player was announced in are due to be processed.
  *
  * Processing is defined relative to the NEXT announcement rather than as a
  * duration after this one, so it always strictly precedes the next window
@@ -69,10 +102,15 @@ async function sort_bids_by_waiver_order(bids) {
  *
  * @param {Object} params
  * @param {Object} params.league - League with window configuration
- * @param {number} params.announced - When the bid was announced
- * @returns {number} Timestamp at which the bid becomes processable
+ * @param {number} params.announced - When the player's nomination was announced
+ * @returns {number} Timestamp at which the bid becomes processable, or
+ *   Infinity when the player has no announcement and so has no window yet
  */
 function get_bid_processing_due({ league, announced }) {
+  if (!announced) {
+    return Infinity
+  }
+
   const window_index = get_restricted_free_agency_window_index({
     league,
     timestamp: Number(announced)
@@ -146,14 +184,17 @@ const run = async ({ dry_run = false } = {}) => {
       continue
     }
 
-    // A bid is due once its own window's processing time has arrived
+    const announced_by_pid = await get_announcement_timestamps_by_pid(lid)
+
+    // A bid is due once the processing time of its PLAYER's nomination window
+    // has arrived — competing bids carry no announcement of their own
     const eligible_bids = []
     const ineligible_bids = []
 
     for (const bid of restricted_free_agency_bids) {
       const processing_due = get_bid_processing_due({
         league,
-        announced: bid.announced
+        announced: announced_by_pid[bid.pid]
       })
 
       if (timestamp >= processing_due) {
@@ -167,14 +208,18 @@ const run = async ({ dry_run = false } = {}) => {
       const next_due = Math.min(
         ...ineligible_bids.map((bid) => bid.processing_due)
       )
-      log(
-        `No bids due for league ${lid}. Next processing time is ${dayjs
-          .unix(next_due)
-          .tz(league_timezone)
-          .format('YYYY-MM-DD HH:mm:ss [ET]')} (${Math.ceil(
-          (next_due - timestamp) / 3600
-        )} hours from now).`
-      )
+      if (Number.isFinite(next_due)) {
+        log(
+          `No bids due for league ${lid}. Next processing time is ${dayjs
+            .unix(next_due)
+            .tz(league_timezone)
+            .format('YYYY-MM-DD HH:mm:ss [ET]')} (${Math.ceil(
+            (next_due - timestamp) / 3600
+          )} hours from now).`
+        )
+      } else {
+        log(`No bids due for league ${lid}. No player has been announced yet.`)
+      }
       continue
     }
 
@@ -336,7 +381,10 @@ const run = async ({ dry_run = false } = {}) => {
       restricted_free_agency_bids = next_bids.filter(
         (bid) =>
           timestamp >=
-          get_bid_processing_due({ league, announced: bid.announced })
+          get_bid_processing_due({
+            league,
+            announced: announced_by_pid[bid.pid]
+          })
       )
     }
   }
@@ -355,18 +403,29 @@ const run = async ({ dry_run = false } = {}) => {
       .where('rfab.year', current_season.year)
       .whereNull('rfab.processed')
       .whereNull('rfab.cancelled')
-      .whereNotNull('rfab.announced')
       .whereNotNull('seasons.restricted_free_agency_period_start')
       .whereNotNull('seasons.restricted_free_agency_first_window_at')
       .where('seasons.restricted_free_agency_period_start', '<=', timestamp)
       .where('seasons.restricted_free_agency_period_end', '>=', timestamp)
       .where(function () {
         // bid meets the time-since-announcement requirement
+        // The announcement belongs to the player's NOMINATION, so it is read
+        // through a subquery rather than off rfab — a competing bid's own
+        // `announced` is always null and would drop the row from the oracle.
         // Epoch approximation of the calendar-aware boundary, with an hour of
         // slack so a DST transition inside a bid window cannot manufacture a
         // false shortfall. Costs an hour of detection latency, never a miss.
+        // A player with no nomination yields NULL here, which excludes the
+        // row — correct, since an unannounced player is never due.
         this.whereRaw(
-          '? - rfab.announced >= (COALESCE(seasons.restricted_free_agency_window_hours, ?) - COALESCE(seasons.restricted_free_agency_processing_lead_hours, ?)) * 3600 + 3600',
+          `? - (
+            select min(nomination.announced)
+            from restricted_free_agency_bids as nomination
+            where nomination.pid = rfab.pid
+              and nomination.lid = rfab.lid
+              and nomination.year = rfab.year
+              and nomination.announced is not null
+          ) >= (COALESCE(seasons.restricted_free_agency_window_hours, ?) - COALESCE(seasons.restricted_free_agency_processing_lead_hours, ?)) * 3600 + 3600`,
           [
             timestamp,
             league_default_rfa_window_hours,
