@@ -20,12 +20,9 @@ export default function isSantuaryPeriod(league) {
     }
   }
 
-  const regularSeasonStart = current_season.regular_season_start.add(
-    '1',
-    'week'
-  )
-  const santuaryEnd = regularSeasonStart.add('1', 'day')
-  if (current_season.now.isBetween(regularSeasonStart, santuaryEnd)) {
+  const protectionStart = current_season.practice_squad_protection_start
+  const santuaryEnd = protectionStart.add('1', 'day')
+  if (current_season.now.isBetween(protectionStart, santuaryEnd)) {
     return true
   }
 

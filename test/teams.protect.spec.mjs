@@ -133,5 +133,36 @@ describe('API /teams - protect', function () {
     it('during the off-season', async () => {
       // TODO
     })
+
+    it('before practice squad protection opens', async () => {
+      // regular season has started (isRegularSeason true) but before the
+      // first Tuesday of Week 1
+      MockDate.set(
+        current_season.regular_season_start.add('1', 'week').toISOString()
+      )
+
+      const player = await selectPlayer({ rookie: true })
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: roster_slot_types.PSD
+      })
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/protect')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          pid: player.pid,
+          leagueId: 1
+        })
+
+      await error(request, 'practice squad protection is not yet open')
+
+      MockDate.set(
+        current_season.regular_season_start.add('1', 'month').toISOString()
+      )
+    })
   })
 })

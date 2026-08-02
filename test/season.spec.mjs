@@ -155,6 +155,18 @@ describe('LIBS-SHARED Season', function () {
     expect(current_season.week).to.equal(17)
   })
 
+  it('practice_squad_protection_start', function () {
+    const { openingDay, practice_squad_protection_start } = current_season
+
+    // Article XIV: "Regular Season" begins 12:00 AM EST on the first Tuesday
+    // of Week 1 of the NFL Regular Season -- the Tuesday immediately
+    // preceding the (always-Thursday) opener, not `regular_season_start`
+    // (which anchors preseason waiver/roster mechanics two weeks earlier).
+    expect(practice_squad_protection_start.day()).to.equal(2)
+    expect(practice_squad_protection_start.isBefore(openingDay)).to.equal(true)
+    expect(openingDay.diff(practice_squad_protection_start, 'day')).to.equal(2)
+  })
+
   it('year', function () {
     const current_year = dayjs.unix(season_dates.offseason).year()
     const next_year = dayjs.unix(season_dates.end).year()

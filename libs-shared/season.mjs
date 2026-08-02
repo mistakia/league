@@ -123,6 +123,17 @@ export default class Season {
     return diff
   }
 
+  // Article XIV defines "Regular Season" as starting "12:00 AM EST on the
+  // first Tuesday of Week 1 of the NFL Regular Season" -- the Tuesday
+  // immediately preceding the (always-Thursday) opener. This is distinct from
+  // `regular_season_start`, which is deliberately two weeks earlier to anchor
+  // preseason roster/waiver mechanics and is not the constitutional trigger
+  // for practice-squad protection.
+  get practice_squad_protection_start() {
+    const days_since_tuesday = (this.openingDay.day() - 2 + 7) % 7
+    return this.openingDay.subtract(days_since_tuesday, 'day').startOf('day')
+  }
+
   // will detect seas_type and return week number for that seas_type
   // POST and REG seas_type starts at 1
   // PRE seas_type starts at 0

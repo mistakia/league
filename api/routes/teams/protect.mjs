@@ -135,6 +135,16 @@ router.post('/?', async (req, res) => {
         .send({ error: 'not permitted during the offseason' })
     }
 
+    if (
+      current_season.now.isBefore(
+        current_season.practice_squad_protection_start
+      )
+    ) {
+      return res
+        .status(400)
+        .send({ error: 'practice squad protection is not yet open' })
+    }
+
     // make sure player is on roster
     if (!roster.has(pid)) {
       return res.status(400).send({ error: 'invalid player' })
