@@ -1,4 +1,5 @@
 import { default_points_added, fantasy_positions } from '#constants'
+import { get_player_week_total } from './get-player-week-points.mjs'
 
 // pts_added is SURPLUS: points above the worst player who starts at the
 // position, derived from the same board the player is scored on by
@@ -31,7 +32,7 @@ const calculateValues = ({ players, baselines, week }) => {
       continue
     }
 
-    const player_week_points = (player.points[week] || {}).total || null
+    const player_week_points = get_player_week_total({ player, week })
     if (player_week_points && baselines[primary_position].starter) {
       player.pts_added[week] =
         player_week_points -

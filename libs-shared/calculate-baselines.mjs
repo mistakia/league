@@ -7,6 +7,10 @@ import {
 import sum from './sum.mjs'
 import get_eligible_slots from './get-eligible-slots.mjs'
 import getPlayerCountBySlot from './get-player-count-by-slot.mjs'
+import {
+  get_player_week_total,
+  compare_player_week_points_desc
+} from './get-player-week-points.mjs'
 
 // Replacement level for a position is the worst starter AT that position --
 // the marginal player a team would have to field there. Only players whose own
@@ -34,8 +38,21 @@ const getWorseStarterForPosition = ({
     const slotId = roster_slot_types[slot]
     for (const starter of groupedStarters[slotId]) {
       if (starter.primary_position !== position) continue
-      const starter_week_points = (starter.points[week] || {}).total || null
-      if (starter_week_points !== null && starter_week_points < minTotal) {
+      // Replacement level is the marginal player a team could FIELD, so a
+      // projection of zero does not qualify: it means a bye or an inactive, and
+      // a manager holding one picks somebody up rather than starting him. Week 9
+      // is the case that shows it -- Pittsburgh's defense is on bye and projects
+      // 0.00, and admitting it would set DST replacement to zero and hand every
+      // defense in the league its full projection as surplus.
+      //
+      // Distinct from the null the accessor returns, which means the player has
+      // no projection at all. Both are excluded here; only one of them is a
+      // number.
+      const starter_week_points = get_player_week_total({
+        player: starter,
+        week
+      })
+      if (starter_week_points > 0 && starter_week_points < minTotal) {
         minTotal = starter_week_points
         selectedPlayer = starter
       }
@@ -46,15 +63,19 @@ const getWorseStarterForPosition = ({
 }
 
 const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
-  const data = players.sort(
-    (a, b) => (b.points[week] || {}).total - (a.points[week] || {}).total
-  )
-
-  // group by position
-  const grouped = {}
-  for (const position of fantasy_positions) {
-    grouped[position] = data.filter((p) => p.primary_position === position)
-  }
+  // Rank only the players this week can rank. The pool deliberately holds
+  // players with no projection -- process-projections.mjs concatenates the
+  // league's rostered pids onto the projected ones -- and an unprojected player
+  // cannot be seated, cannot be a replacement level and cannot be the best
+  // available. Dropping him here is what keeps the comparator a total order;
+  // see get-player-week-points.mjs for what the NaN form did instead.
+  //
+  // Copied rather than sorted in place: `players` belongs to the caller, and
+  // process-projections reuses the same array for every week of the run, so
+  // sorting it here made each week start from the previous week's ordering.
+  const data = players
+    .filter((player) => get_player_week_total({ player, week }) !== null)
+    .sort(compare_player_week_points_desc(week))
 
   const rows = []
   for (let i = 0; i < league.num_teams; i++) {
@@ -73,9 +94,12 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   const starters = []
   const eligibleSlots = get_eligible_slots({ pos: 'ALL', league })
   for (const roster of rosters) {
-    // get players for roster
+    // The roster's own rankable players, in descending order. Named apart from
+    // the `players` parameter it used to shadow -- the bench refill below has
+    // to reach the FULL pool, and a shadowed name made that indistinguishable
+    // from reaching this one.
     const pids = roster.active.map((p) => p.pid)
-    const players = data.filter((d) => pids.includes(d.pid))
+    const roster_players = data.filter((d) => pids.includes(d.pid))
 
     // Move every current starter to the bench BEFORE refilling. The refill used
     // to be nested inside this loop, so bench-and-refill ran once per distinct
@@ -84,7 +108,11 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
     for (const slot of Array.from(new Set(eligibleSlots))) {
       const slotStarters = roster.getPlayersBySlot(roster_slot_types[slot])
       for (const p of slotStarters) {
-        const player = data.find((ps) => ps.pid === p.pid)
+        // Looked up in `players`, not in `data`. A rostered player with no
+        // projection for this week is absent from `data` by construction, and
+        // he still has to be benched -- resolving him against the ranked set
+        // would find nothing and throw on his position.
+        const player = players.find((ps) => ps.pid === p.pid)
         roster.removePlayer(p.pid)
         roster.addPlayer({
           slot: roster_slot_types.BENCH,
@@ -95,7 +123,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
     }
 
     // set starting lineup with best players on roster
-    for (const player of players) {
+    for (const player of roster_players) {
       const playerEligibleSlots = get_eligible_slots({
         pos: player.primary_position,
         league
@@ -185,9 +213,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   for (const slot of starting_lineup_slots) {
     groupedStarters[slot] = starters
       .filter((s) => s.slot === slot)
-      .sort(
-        (a, b) => (b.points[week] || {}).total - (a.points[week] || {}).total
-      )
+      .sort(compare_player_week_points_desc(week))
   }
 
   // group remaining players by position

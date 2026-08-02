@@ -1,4 +1,5 @@
 import { fantasy_positions } from '#constants'
+import { get_player_week_total } from './get-player-week-points.mjs'
 
 // The estimated dispersion of a player's REALIZED season around his projection,
 // in fantasy points. This is what the valuation draws from: a roster spot pays
@@ -123,8 +124,7 @@ export const calculate_projection_dispersion = ({ players, week }) => {
   for (const player of players) {
     const position = player.primary_position
     if (!fantasy_positions.includes(position)) continue
-    const week_points = player.points && player.points[week]
-    const total = week_points ? Number(week_points.total) : null
+    const total = get_player_week_total({ player, week })
     if (!(total > 0)) continue
     projection_by_pid[player.pid] = total
     position_by_pid[player.pid] = position

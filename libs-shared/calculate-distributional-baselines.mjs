@@ -1,6 +1,7 @@
 import { fantasy_positions, default_points_added } from '#constants'
 import get_eligible_slots from './get-eligible-slots.mjs'
 import calculate_projection_dispersion from './calculate-projection-dispersion.mjs'
+import { get_player_week_total } from './get-player-week-points.mjs'
 
 // Week `0` is the SEASON board -- the whole-season projection every other week
 // key sits beside. This module answers the season question only, and named
@@ -186,8 +187,7 @@ const calculate_distributional_baselines = ({
     const position = player.primary_position
     if (!fantasy_positions.includes(position)) continue
     if (!slots.some((slot) => slot_accepts(slot, position))) continue
-    const week_points = player.points && player.points[week]
-    const total = week_points ? Number(week_points.total) : null
+    const total = get_player_week_total({ player, week })
     if (!(total > 0)) continue
     pids.push(player.pid)
     positions.push(position)
