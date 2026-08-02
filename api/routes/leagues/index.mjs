@@ -9,6 +9,10 @@ import {
   find_or_create_league_format
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import {
+  BYE_CANDIDATE_POOLS,
+  BYE_SELECTION_METHODS
+} from '#libs-shared/get-playoff-seeding.mjs'
 import process_projections_for_scoring_format from '#scripts/process-projections-for-scoring-format.mjs'
 import process_projections_for_league_format from '#scripts/process-projections-for-league-format.mjs'
 import {
@@ -192,6 +196,26 @@ router.put('/:leagueId', async (req, res) => {
     // invalid pair reach Postgres and surface as a 500 rather than a 400.
     // playoff_team_count is checked for a positive value here too: zero passes
     // the CHECK but throws in get_playoff_seeding on the next standings run.
+    // These two are text columns with a CHECK naming their allowed values, so
+    // an unknown value is a 500 from Postgres unless it is caught here.
+    if (
+      field === 'bye_candidate_pool' &&
+      !BYE_CANDIDATE_POOLS.includes(value)
+    ) {
+      return res.status(400).send({
+        error: `bye_candidate_pool must be one of ${BYE_CANDIDATE_POOLS.join(', ')}`
+      })
+    }
+
+    if (
+      field === 'bye_selection_method' &&
+      !BYE_SELECTION_METHODS.includes(value)
+    ) {
+      return res.status(400).send({
+        error: `bye_selection_method must be one of ${BYE_SELECTION_METHODS.join(', ')}`
+      })
+    }
+
     if (field === 'playoff_team_count' || field === 'bye_count') {
       const playoff_team_count =
         field === 'playoff_team_count' ? value : league.playoff_team_count

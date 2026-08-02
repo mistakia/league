@@ -30,7 +30,12 @@ export { default as getExtensionAmount } from './get-extension-amount.mjs'
 export { default as is_before_extension_deadline } from './is-before-extension-deadline.mjs'
 export { default as calculateStandings } from './calculate-standings.mjs'
 export { default as compare_playoff_seed } from './compare-playoff-seed.mjs'
-export { default as get_playoff_seeding } from './get-playoff-seeding.mjs'
+export { default as compare_all_play_seed } from './compare-all-play-seed.mjs'
+export {
+  default as get_playoff_seeding,
+  BYE_CANDIDATE_POOLS,
+  BYE_SELECTION_METHODS
+} from './get-playoff-seeding.mjs'
 export { default as optimizeStandingsLineup } from './optimize-standings-lineup.mjs'
 export { default as getPlayerCountBySlot } from './get-player-count-by-slot.mjs'
 export { default as getActiveRosterLimit } from './get-active-roster-limit.mjs'

@@ -37,6 +37,8 @@ export async function load_simulation_context({ league_id, year }) {
     playoff_format: {
       playoff_team_count: season.playoff_team_count,
       bye_count: season.bye_count,
+      bye_candidate_pool: season.bye_candidate_pool,
+      bye_selection_method: season.bye_selection_method,
       has_division_winner_berths: season.has_division_winner_berths
     }
   }

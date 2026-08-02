@@ -282,6 +282,8 @@ const calculateStandings = ({
     })),
     playoff_team_count: league.playoff_team_count,
     bye_count: league.bye_count,
+    bye_candidate_pool: league.bye_candidate_pool,
+    bye_selection_method: league.bye_selection_method,
     has_division_winner_berths: league.has_division_winner_berths
   })
 

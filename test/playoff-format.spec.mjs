@@ -2,7 +2,11 @@
 
 import * as chai from 'chai'
 
-import { get_playoff_seeding, compare_playoff_seed } from '#libs-shared'
+import {
+  get_playoff_seeding,
+  compare_playoff_seed,
+  compare_all_play_seed
+} from '#libs-shared'
 import { current_season } from '#constants'
 import generate_fantasy_league_schedule from '#libs-server/generate-fantasy-league-schedule.mjs'
 
@@ -34,6 +38,8 @@ describe('playoff format and division schedule', function () {
       losses: 0,
       ties: 0,
       all_play_wins: 0,
+      all_play_losses: 0,
+      all_play_ties: 0,
       points_for: 0,
       ...overrides
     })
@@ -42,6 +48,18 @@ describe('playoff format and division schedule', function () {
     // strength so the expected seed order is simply 1..12.
     const twelve = Array.from({ length: 12 }, (unused, i) =>
       team(i + 1, (i % 4) + 1, { wins: 12 - i, losses: i })
+    )
+
+    // All-play records that run OPPOSITE to head-to-head: tid 12 is the best
+    // all-play team and tid 1 the worst. Any test whose expectation differs
+    // between the two ladders is therefore unambiguous about which one ran.
+    const all_play_inverted = twelve.map((t) =>
+      team(t.tid, t.div, {
+        wins: t.wins,
+        losses: t.losses,
+        all_play_wins: 10 * t.tid,
+        all_play_losses: 126 - 10 * t.tid
+      })
     )
 
     it('honors the configured field size and bye count', function () {
@@ -80,17 +98,82 @@ describe('playoff format and division schedule', function () {
       expect(result.playoff_tids).to.eql([1, 2, 3, 4, 5, 6])
     })
 
-    it('lifts division winners into the field when configured to', function () {
+    // The ten-team shape: no divisions, so every team is bye-eligible and the
+    // byes are the best All Play records in the league.
+    it('selects byes on all play across the whole league', function () {
+      const ten = Array.from({ length: 10 }, (unused, i) =>
+        team(i + 1, 1, {
+          wins: 12 - i,
+          losses: i,
+          all_play_wins: 10 * (i + 1),
+          all_play_losses: 110 - 10 * (i + 1)
+        })
+      )
+
       const result = get_playoff_seeding({
-        teams: twelve,
+        teams: ten,
         playoff_team_count: 6,
         bye_count: 2,
-        has_division_winner_berths: true
+        bye_candidate_pool: 'league',
+        bye_selection_method: 'all_play'
       })
 
-      // Divisions are (tid % 4): winners are the best of each, tids 1-4.
-      // Seeds 5 and 6 then go to the next best overall, tids 5 and 6.
-      expect(result.playoff_tids).to.eql([1, 2, 3, 4, 5, 6])
+      // All play runs opposite to head-to-head here, so the byes are the two
+      // WORST head-to-head teams. Nothing but the all-play ladder produces this.
+      expect(result.bye_tids).to.eql([10, 9])
+      // The rest of the field is still ordered on the standings ladder.
+      expect(result.wildcard_tids).to.eql([1, 2, 3, 4])
+      expect(result.playoff_tids).to.eql([10, 9, 1, 2, 3, 4])
+    })
+
+    // The twelve-team shape: four divisions, and only division winners are
+    // bye-eligible, ranked among themselves on All Play.
+    it('restricts byes to division winners ranked on all play', function () {
+      const result = get_playoff_seeding({
+        teams: all_play_inverted,
+        playoff_team_count: 6,
+        bye_count: 2,
+        bye_candidate_pool: 'division_winners',
+        bye_selection_method: 'all_play'
+      })
+
+      // Division winners are tids 1-4 (best head-to-head in each division).
+      // Among those four, all play ranks tid 4 first and tid 3 second -- so a
+      // team with the fourth-best record in the league takes the top bye, and
+      // tids 9-12, who lead the league on all play, get no bye at all because
+      // they did not win a division.
+      expect(result.bye_tids).to.eql([4, 3])
+      expect(result.wildcard_tids).to.eql([1, 2, 5, 6])
+    })
+
+    it('does not let the bye ladder reorder the rest of the field', function () {
+      const result = get_playoff_seeding({
+        teams: all_play_inverted,
+        playoff_team_count: 6,
+        bye_count: 2,
+        bye_candidate_pool: 'league',
+        bye_selection_method: 'all_play'
+      })
+
+      expect(result.bye_tids).to.eql([12, 11])
+      // Seeds 3 through 6 are the best remaining on head-to-head, not on all
+      // play -- the two ladders are applied to different steps.
+      expect(result.wildcard_tids).to.eql([1, 2, 3, 4])
+    })
+
+    it('throws when the division winner pool cannot fill the byes', function () {
+      const single_division = Array.from({ length: 10 }, (unused, i) =>
+        team(i + 1, 1, { wins: 12 - i, losses: i })
+      )
+
+      expect(() =>
+        get_playoff_seeding({
+          teams: single_division,
+          playoff_team_count: 6,
+          bye_count: 2,
+          bye_candidate_pool: 'division_winners'
+        })
+      ).to.throw(/candidate/)
     })
 
     it('guarantees a losing division winner a berth when configured to', function () {
@@ -120,6 +203,28 @@ describe('playoff format and division schedule', function () {
       expect(with_guarantee.playoff_tids).to.eql([1, 4])
     })
 
+    it('guarantees a berth without promoting the seed', function () {
+      const teams = [
+        team(1, 1, { wins: 12, losses: 2 }),
+        team(2, 1, { wins: 11, losses: 3 }),
+        team(3, 1, { wins: 10, losses: 4 }),
+        team(4, 1, { wins: 9, losses: 5 }),
+        team(5, 2, { wins: 4, losses: 10 }),
+        team(6, 2, { wins: 3, losses: 11 })
+      ]
+
+      const result = get_playoff_seeding({
+        teams,
+        playoff_team_count: 4,
+        bye_count: 0,
+        has_division_winner_berths: true
+      })
+
+      // tid 5 wins division 2 on a losing record and displaces tid 4, but it
+      // seeds LAST in the field rather than being lifted to the front.
+      expect(result.playoff_tids).to.eql([1, 2, 3, 5])
+    })
+
     it('rejects a missing or nonsensical playoff configuration', function () {
       expect(() =>
         get_playoff_seeding({ teams: twelve, bye_count: 2 })
@@ -132,6 +237,82 @@ describe('playoff format and division schedule', function () {
           bye_count: 7
         })
       ).to.throw(/bye_count/)
+
+      expect(() =>
+        get_playoff_seeding({
+          teams: twelve,
+          playoff_team_count: 6,
+          bye_count: 2,
+          bye_candidate_pool: 'best_mascot'
+        })
+      ).to.throw(/bye_candidate_pool/)
+
+      expect(() =>
+        get_playoff_seeding({
+          teams: twelve,
+          playoff_team_count: 6,
+          bye_count: 2,
+          bye_selection_method: 'coin_flip'
+        })
+      ).to.throw(/bye_selection_method/)
+    })
+
+    it('caps the field at the teams that exist rather than throwing', function () {
+      // A league mid-setup has fewer teams than its configured field size.
+      // Standings still have to compute.
+      const four = twelve.slice(0, 4)
+      const result = get_playoff_seeding({
+        teams: four,
+        playoff_team_count: 6,
+        bye_count: 2
+      })
+
+      expect(result.playoff_tids).to.eql([1, 2, 3, 4])
+      expect(result.bye_tids).to.eql([1, 2])
+    })
+  })
+
+  describe('compare_all_play_seed', function () {
+    const team = (overrides) => ({
+      all_play_wins: 0,
+      all_play_losses: 0,
+      all_play_ties: 0,
+      points_for: 0,
+      ...overrides
+    })
+
+    it('orders on all play win percentage, not raw wins', function () {
+      // Fewer wins over far fewer games is the better percentage.
+      const better = team({ all_play_wins: 30, all_play_losses: 10 })
+      const worse = team({ all_play_wins: 60, all_play_losses: 66 })
+      expect(compare_all_play_seed(better, worse)).to.be.below(0)
+    })
+
+    it('counts a tie as half a win', function () {
+      const a = team({ all_play_wins: 5, all_play_losses: 3, all_play_ties: 2 })
+      const b = team({ all_play_wins: 6, all_play_losses: 4 })
+      // Both are .600; the tie is broken on points for below.
+      expect(compare_all_play_seed(a, b)).to.equal(0)
+    })
+
+    it('breaks an all play tie on points for', function () {
+      const a = team({
+        all_play_wins: 70,
+        all_play_losses: 56,
+        points_for: 900
+      })
+      const b = team({
+        all_play_wins: 70,
+        all_play_losses: 56,
+        points_for: 100
+      })
+      expect(compare_all_play_seed(a, b)).to.be.below(0)
+    })
+
+    it('treats a team with no all play record as zero rather than NaN', function () {
+      const none = team({})
+      const some = team({ all_play_wins: 1, all_play_losses: 1 })
+      expect(compare_all_play_seed(some, none)).to.be.below(0)
     })
   })
 
