@@ -11,7 +11,7 @@ import calculate_distributional_baselines, {
 //
 // It exists because the season board and a weekly board answer different
 // questions and are computed differently, and three scripts need the same
-// dispatch -- process-projections.mjs (the 30-minute cron),
+// dispatch -- process-projections.mjs (the hourly cron),
 // process-projections-for-league-format.mjs (the past-season backfill) and the
 // SPA's own client-side recompute. Putting the branch here means the season
 // board cannot drift between them.

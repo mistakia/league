@@ -23,7 +23,7 @@ import calculate_projection_dispersion from './calculate-projection-dispersion.m
 // players, 90 slots) costs about 9 seconds. process-projections covers 23 league
 // formats plus each hosted league, and loops weeks 0 through the final week --
 // 19 weeks in the offseason. Applied to every week that is roughly 70 minutes
-// per run against a 30-minute cron. Season only is under 4 minutes.
+// per run against an hourly cron. Season only is under 4 minutes.
 //
 // Every measurement behind this rebuild was made on week 0. Applying it to the
 // weekly boards would ship an unmeasured change, so the weekly path keeps its
