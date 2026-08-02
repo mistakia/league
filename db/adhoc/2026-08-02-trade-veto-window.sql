@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-02 against league_production
 --
 -- Make a vetoed trade cleanly reversible by bounding the period in which it can
 -- be vetoed and freezing the traded assets for that period.

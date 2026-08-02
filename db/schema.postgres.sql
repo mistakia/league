@@ -26249,6 +26249,41 @@ CREATE TABLE public.seasons (
 
 
 --
+-- Name: COLUMN seasons.playoff_team_count; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.playoff_team_count IS 'Number of teams that qualify for the post-season.';
+
+
+--
+-- Name: COLUMN seasons.bye_count; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.bye_count IS 'How many of the top seeds skip the first playoff round.';
+
+
+--
+-- Name: COLUMN seasons.bye_candidate_pool; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.bye_candidate_pool IS 'Which teams are eligible for a bye: the whole league, or one winner per division.';
+
+
+--
+-- Name: COLUMN seasons.bye_selection_method; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.bye_selection_method IS 'Ladder that ranks the bye candidates: head-to-head record, or All Play win percentage.';
+
+
+--
+-- Name: COLUMN seasons.has_division_winner_berths; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.has_division_winner_berths IS 'When true, every division winner is guaranteed a place in the playoff field (a berth, not a seed); when false, berths are won on record alone.';
+
+
+--
 -- Name: selection_combination_definitions; Type: TABLE; Schema: public; Owner: -
 --
 

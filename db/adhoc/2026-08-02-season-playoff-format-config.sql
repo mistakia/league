@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-02 against league_production
 --
 -- Make the playoff format per-league configuration instead of constants baked
 -- into shared code.
