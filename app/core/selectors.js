@@ -2965,7 +2965,7 @@ export function get_overall_standings(state) {
       .map((team) => ({ tid: team.uid, div: team.div, ...team.stats })),
     playoff_team_count: league.playoff_team_count,
     bye_count: league.bye_count,
-    division_winners_qualify: league.division_winners_qualify
+    has_division_winner_berths: league.has_division_winner_berths
   })
 
   const overall = new List(seeded_tids.map((tid) => teams.get(tid)))

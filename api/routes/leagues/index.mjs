@@ -186,6 +186,30 @@ router.put('/:leagueId', async (req, res) => {
       }
     }
 
+    // The playoff field size and the bye count constrain each other, and the
+    // relation is enforced in the database by the seasons_bye_count_within_
+    // playoff_field CHECK. Validating only the field types would let an
+    // invalid pair reach Postgres and surface as a 500 rather than a 400.
+    // playoff_team_count is checked for a positive value here too: zero passes
+    // the CHECK but throws in get_playoff_seeding on the next standings run.
+    if (field === 'playoff_team_count' || field === 'bye_count') {
+      const playoff_team_count =
+        field === 'playoff_team_count' ? value : league.playoff_team_count
+      const bye_count = field === 'bye_count' ? value : league.bye_count
+
+      if (playoff_team_count < 1) {
+        return res
+          .status(400)
+          .send({ error: 'playoff_team_count must be at least 1' })
+      }
+
+      if (bye_count > playoff_team_count) {
+        return res
+          .status(400)
+          .send({ error: 'bye_count must not exceed playoff_team_count' })
+      }
+    }
+
     if (league_fields.includes(field)) {
       await db('leagues')
         .update({ [field]: value })

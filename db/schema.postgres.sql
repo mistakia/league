@@ -26234,7 +26234,7 @@ CREATE TABLE public.seasons (
     restricted_free_agency_processing_lead_hours smallint DEFAULT 3 NOT NULL,
     playoff_team_count smallint DEFAULT 6 NOT NULL,
     bye_count smallint DEFAULT 2 NOT NULL,
-    division_winners_qualify boolean DEFAULT false NOT NULL,
+    has_division_winner_berths boolean DEFAULT false NOT NULL,
     CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
     CONSTRAINT rfa_window_divides_day CHECK ((restricted_free_agency_window_hours = ANY (ARRAY[1, 2, 3, 4, 6, 8, 12, 24]))),
     CONSTRAINT seasons_bye_count_within_playoff_field CHECK (((bye_count >= 0) AND (bye_count <= playoff_team_count)))

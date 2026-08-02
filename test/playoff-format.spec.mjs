@@ -69,12 +69,12 @@ describe('playoff format and division schedule', function () {
       expect(result.wildcard_tids).to.eql([1, 2, 3, 4])
     })
 
-    it('ignores divisions when division_winners_qualify is false', function () {
+    it('ignores divisions when has_division_winner_berths is false', function () {
       const result = get_playoff_seeding({
         teams: twelve,
         playoff_team_count: 6,
         bye_count: 2,
-        division_winners_qualify: false
+        has_division_winner_berths: false
       })
 
       expect(result.playoff_tids).to.eql([1, 2, 3, 4, 5, 6])
@@ -85,7 +85,7 @@ describe('playoff format and division schedule', function () {
         teams: twelve,
         playoff_team_count: 6,
         bye_count: 2,
-        division_winners_qualify: true
+        has_division_winner_berths: true
       })
 
       // Divisions are (tid % 4): winners are the best of each, tids 1-4.
@@ -114,7 +114,7 @@ describe('playoff format and division schedule', function () {
         teams,
         playoff_team_count: 2,
         bye_count: 0,
-        division_winners_qualify: true
+        has_division_winner_berths: true
       })
       // tid 4 has a losing record but wins division 2.
       expect(with_guarantee.playoff_tids).to.eql([1, 4])

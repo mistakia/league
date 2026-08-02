@@ -14,7 +14,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     num_teams: 12,
     playoff_team_count: 6,
     bye_count: 2,
-    division_winners_qualify: false,
+    has_division_winner_berths: false,
     sqb: 1,
     srb: 2,
     swr: 2,

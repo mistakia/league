@@ -18,7 +18,7 @@ const make_league = () => ({
   // playoff format -- calculateStandings reads these off the league/season row
   playoff_team_count: 6,
   bye_count: 2,
-  division_winners_qualify: false,
+  has_division_winner_berths: false,
   // starter slot counts -- required_starter_count = 7
   sqb: 1,
   srb: 2,

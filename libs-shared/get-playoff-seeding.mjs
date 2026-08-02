@@ -9,7 +9,7 @@ import compare_playoff_seed from './compare-playoff-seed.mjs'
  * particular league's rules.
  *
  * Seeds run on compare_playoff_seed -- head-to-head record, then all-play
- * wins, then points for. When division_winners_qualify is set, each division's
+ * wins, then points for. When has_division_winner_berths is set, each division's
  * best team by that ladder is lifted to the front of the order (in ladder order
  * among themselves) and the remaining berths fill in behind them; otherwise
  * divisions do not enter into seeding at all.
@@ -19,7 +19,7 @@ import compare_playoff_seed from './compare-playoff-seed.mjs'
  *   compare_playoff_seed reads
  * @param {number} params.playoff_team_count - size of the playoff field
  * @param {number} params.bye_count - how many top seeds skip the first round
- * @param {boolean} [params.division_winners_qualify] - guarantee division
+ * @param {boolean} [params.has_division_winner_berths] - guarantee division
  *   winners a berth
  * @returns {{ seeded_tids: Array, playoff_tids: Array, bye_tids: Array, wildcard_tids: Array }}
  */
@@ -27,7 +27,7 @@ const get_playoff_seeding = ({
   teams,
   playoff_team_count,
   bye_count,
-  division_winners_qualify = false
+  has_division_winner_berths = false
 }) => {
   if (!Number.isInteger(playoff_team_count) || playoff_team_count < 1) {
     throw new Error(
@@ -49,7 +49,7 @@ const get_playoff_seeding = ({
 
   let ordered = by_seed
 
-  if (division_winners_qualify) {
+  if (has_division_winner_berths) {
     // by_seed is already in ladder order, so the first team encountered in a
     // division is that division's winner and the winners emerge in ladder
     // order too.

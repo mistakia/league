@@ -16,7 +16,7 @@
 --
 -- Defaults reproduce the shape every hosted league runs today (6-team field,
 -- 2 byes), so applying this is a no-op for current behavior.
--- division_winners_qualify defaults to false, matching what the code did in
+-- has_division_winner_berths defaults to false, matching what the code did in
 -- practice: the previous implementation guaranteed division leaders berths only
 -- as an artifact of a 2-division assumption, and no league relied on it at any
 -- other division count.
@@ -24,7 +24,7 @@
 ALTER TABLE public.seasons
   ADD COLUMN playoff_team_count smallint DEFAULT 6 NOT NULL,
   ADD COLUMN bye_count smallint DEFAULT 2 NOT NULL,
-  ADD COLUMN division_winners_qualify boolean DEFAULT false NOT NULL;
+  ADD COLUMN has_division_winner_berths boolean DEFAULT false NOT NULL;
 
 ALTER TABLE public.seasons
   ADD CONSTRAINT seasons_bye_count_within_playoff_field
@@ -32,4 +32,4 @@ ALTER TABLE public.seasons
 
 COMMENT ON COLUMN public.seasons.playoff_team_count IS 'Number of teams that qualify for the post-season.';
 COMMENT ON COLUMN public.seasons.bye_count IS 'How many of the top seeds skip the first playoff round.';
-COMMENT ON COLUMN public.seasons.division_winners_qualify IS 'When true, each division winner is guaranteed a playoff berth ahead of better-recorded non-winners; when false, seeding ignores divisions entirely.';
+COMMENT ON COLUMN public.seasons.has_division_winner_berths IS 'When true, each division winner is guaranteed a playoff berth ahead of better-recorded non-winners; when false, seeding ignores divisions entirely.';

@@ -236,7 +236,7 @@ export const season_fields = [
   'faab',
   'playoff_team_count',
   'bye_count',
-  'division_winners_qualify'
+  'has_division_winner_berths'
 ]
 
 // All updatable league settings fields

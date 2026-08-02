@@ -282,7 +282,7 @@ const calculateStandings = ({
     })),
     playoff_team_count: league.playoff_team_count,
     bye_count: league.bye_count,
-    division_winners_qualify: league.division_winners_qualify
+    has_division_winner_berths: league.has_division_winner_berths
   })
 
   for (let i = 0; i < seeded_tids.length; i++) {
