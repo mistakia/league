@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-02 against league_production
 --
 -- The contract half of the distributional valuation rebuild: drop the fitted
 -- surplus_cap_share, and the week-0 `available` baseline rows the season board
@@ -82,5 +82,6 @@ ALTER TABLE public.league_formats
 ALTER TABLE public.scoring_format_player_projection_points
   DROP COLUMN points_sd;
 
+-- week is character varying on this table, not an integer.
 DELETE FROM public.league_baselines
-  WHERE week = 0 AND type = 'available';
+  WHERE week = '0' AND type = 'available';

@@ -4130,7 +4130,6 @@ CREATE TABLE public.league_formats (
     id text NOT NULL,
     pricing_model text DEFAULT 'auction'::text NOT NULL,
     scoring_format_id text NOT NULL,
-    surplus_cap_share numeric(4,3) DEFAULT 0.630 NOT NULL,
     CONSTRAINT league_formats_pricing_model_check CHECK ((pricing_model = ANY (ARRAY['auction'::text, 'dfs_fixed'::text])))
 );
 
@@ -4140,13 +4139,6 @@ CREATE TABLE public.league_formats (
 --
 
 COMMENT ON COLUMN public.league_formats.format_category IS 'Denormalized resolution of (superflex × scoring axis) into the 6-bucket format_category enum. Populated by the cmv_classify_league_format trigger on insert/update; one-time backfill ran with the DDL.';
-
-
---
--- Name: COLUMN league_formats.surplus_cap_share; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.surplus_cap_share IS 'Fraction of the league salary cap that reaches above-replacement players, fitted against observed salaries by scripts/fit-surplus-cap-share.mjs. The remainder is what auctions spend filling roster spots at or below replacement. Separates the price scale from the baseline so correcting one cannot break the other.';
 
 
 --
@@ -26116,16 +26108,8 @@ CREATE TABLE public.scoring_format_player_projection_points (
     week character varying(3) NOT NULL,
     year smallint NOT NULL,
     total numeric(5,2),
-    scoring_format_id text NOT NULL,
-    points_sd numeric(5,2)
+    scoring_format_id text NOT NULL
 );
-
-
---
--- Name: COLUMN scoring_format_player_projection_points.points_sd; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.scoring_format_player_projection_points.points_sd IS 'Estimated standard deviation of the player''s realized points for this scoring format, year and week. Derived from the sample standard deviation of the individual sources'' scored projections, rescaled by the measured per-position ratio of realized residual dispersion to cross-vendor dispersion (~4.2-4.6). Consumed by libs-shared/calculate-distributional-baselines.mjs, which draws seasons from it. Null when the week carried fewer than two sources for the player; the consumer substitutes the position median rather than reading null as certainty.';
 
 
 --
