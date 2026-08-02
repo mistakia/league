@@ -132,32 +132,48 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
   const playerCountBySlot = getPlayerCountBySlot({ league })
   const totalStarters = sum(Object.values(playerCountBySlot))
 
+  // Seat each free agent in the FIRST slot he is eligible for that is still
+  // open, scanning the dedicated slots across every roster before any flex.
+  //
+  // The old form scanned roster by roster and took the first open eligible slot
+  // on each, which let a player claim a flex on team 1 while his own dedicated
+  // slot sat empty on team 2 -- and then a player who could ONLY fill that flex
+  // had nowhere to go. On an empty-roster board that left a QB slot unfilled and
+  // three players unseated. get_eligible_slots returns dedicated slots before
+  // flex ones, so iterating slot-major rather than roster-major is the whole
+  // fix: every roster is offered a QB before any roster is offered a superflex.
+  //
+  // This is the same defect the season path solved with augmenting-path
+  // acceptance (calculate-distributional-baselines.mjs). Slot-major ordering is
+  // not equivalent to that in general, but it removes the case that actually
+  // fires here, where the pool is deep and only the flex slots contend.
   for (const player of availablePlayerPool) {
     if (starters.length >= totalStarters) {
       break
     }
 
+    const eligibleSlots = get_eligible_slots({
+      pos: player.primary_position,
+      league
+    })
+
     let added = false
-    for (const roster of rosters) {
-      const eligibleSlots = get_eligible_slots({
-        pos: player.primary_position,
-        league
-      })
-      for (const slot of eligibleSlots) {
-        if (roster.hasOpenSlot(roster_slot_types[slot])) {
-          if (!roster.availableSpace) {
-            const benchPlayer = roster.bench[0]
-            roster.removePlayer(benchPlayer.pid)
-          }
-          roster.addPlayer({
-            slot: roster_slot_types[slot],
-            pid: player.pid,
-            pos: player.primary_position
-          })
-          starters.push({ slot: roster_slot_types[slot], ...player })
-          added = true
-          break
+    for (const slot of eligibleSlots) {
+      for (const roster of rosters) {
+        if (!roster.hasOpenSlot(roster_slot_types[slot])) continue
+        if (!roster.availableSpace) {
+          const benchPlayer = roster.bench[0]
+          if (!benchPlayer) continue
+          roster.removePlayer(benchPlayer.pid)
         }
+        roster.addPlayer({
+          slot: roster_slot_types[slot],
+          pid: player.pid,
+          pos: player.primary_position
+        })
+        starters.push({ slot: roster_slot_types[slot], ...player })
+        added = true
+        break
       }
 
       if (added) break

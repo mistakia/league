@@ -365,7 +365,7 @@ export default async function ({
   if (scoring_format_id) {
     // include projected fantasy point values
     const leaguePointsProj = await db('scoring_format_player_projection_points')
-      .select('pid', 'week', 'total', 'points_sd')
+      .select('pid', 'week', 'total')
       .where({
         scoring_format_id,
         year: current_season.year

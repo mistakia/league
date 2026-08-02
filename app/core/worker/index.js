@@ -58,13 +58,6 @@ export function calculatePlayerValues(payload) {
           position: player.primary_position,
           league
         })
-        // Carry the server's points_sd across the recompute. Reweighting the
-        // sources moves the CONSENSUS; it does not change how much the sources
-        // disagree, which is what points_sd measures. Dropping it here would
-        // silently collapse the season board back to a point estimate for any
-        // user who has touched their source weights, while the server's board
-        // stayed distributional -- a divergence with no symptom.
-        points.points_sd = (player.points[week] || {}).points_sd
         player.points[week] = points
       } else {
         player.points[week] = player.points[week] || { total: 0 }

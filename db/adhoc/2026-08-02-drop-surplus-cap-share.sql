@@ -52,9 +52,35 @@
 -- The season pass no longer computes it. league_baselines is upserted and never
 -- deleted, so the rows the old pass wrote would otherwise sit there forever,
 -- stale from the moment of the deploy. This removes them.
+--
+--
+-- 3. scoring_format_player_projection_points.points_sd
+--
+-- Added earlier the same day to carry each player's estimated realized
+-- dispersion, derived from the spread between the individual projection sources
+-- and rescaled by a measured population ratio.
+--
+-- The column is dropped because the quantity it stored turned out not to be the
+-- quantity the model needs. Cross-vendor spread carries almost no
+-- cross-sectional signal about how far a season lands from its projection:
+-- splitting 2020-2025 by projection level first and then by vendor spread, a
+-- 6.8x change in spread moves realized residual dispersion by 1.22x at QB and
+-- less everywhere else. Dispersion is now derived from the projection itself,
+-- inside libs-shared/calculate-projection-dispersion.mjs.
+--
+-- It is also the more correct shape. Dispersion is a function of the board, so a
+-- board recomputed under different source weights -- which is what the SPA's
+-- client-side worker does -- has to carry the dispersion belonging to THAT
+-- board, not the one the cron persisted. A stored column cannot do that.
+--
+-- Nothing ever read it in production: the column was applied on 2026-08-02 and
+-- the code that populates it never deployed, so every row is NULL.
 
 ALTER TABLE public.league_formats
   DROP COLUMN surplus_cap_share;
+
+ALTER TABLE public.scoring_format_player_projection_points
+  DROP COLUMN points_sd;
 
 DELETE FROM public.league_baselines
   WHERE week = 0 AND type = 'available';

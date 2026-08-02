@@ -1,5 +1,6 @@
 import { fantasy_positions, default_points_added } from '#constants'
 import get_eligible_slots from './get-eligible-slots.mjs'
+import calculate_projection_dispersion from './calculate-projection-dispersion.mjs'
 
 // Week `0` is the SEASON board -- the whole-season projection every other week
 // key sits beside. This module answers the season question only, and named
@@ -151,20 +152,31 @@ export const fill_starting_slots = ({ values, positions, slots }) => {
   return baseline
 }
 
-// players: [{ pid, primary_position, points: { [week]: { total, points_sd } } }]
+// players: [{ pid, primary_position, points: { [week]: { total } } }]
 //
 // Returns expected replacement points per position, expected floored surplus
 // per player, and their total -- the denominator calculate-prices divides the
 // discretionary cap by.
+// `dispersion_by_pid` is an override for specs, alongside `draws` and `random`.
+// Production never passes it -- the model derives dispersion from the board it
+// is pricing.
 const calculate_distributional_baselines = ({
   players,
   league,
   week,
   draws = 1000,
-  random = default_random
+  random = default_random,
+  dispersion_by_pid: dispersion_override = null
 }) => {
   const slots = build_league_starting_slots({ league })
   const normal = make_normal_source(random)
+
+  // Dispersion is derived from this board, not read off a persisted column, so
+  // a reweighted board carries the dispersion that belongs to it. See
+  // calculate-projection-dispersion.mjs.
+  const dispersion_by_pid =
+    dispersion_override ??
+    calculate_projection_dispersion({ players, week }).dispersion_by_pid
 
   const pids = []
   const positions = []
@@ -180,7 +192,7 @@ const calculate_distributional_baselines = ({
     pids.push(player.pid)
     positions.push(position)
     means.push(total)
-    dispersions.push(Math.max(Number(week_points.points_sd) || 0, 0))
+    dispersions.push(Math.max(dispersion_by_pid[player.pid] || 0, 0))
   }
 
   const baseline_totals = {}

@@ -33,10 +33,10 @@ const make_player = ({ pid, position, total, week = 1 }) => ({
   points: { [week]: { total } }
 })
 
-// A board whose two superflex slots end up holding QB2 (240) and RB3 (90). RB3
-// is the worst occupant of a slot that QB, RB, WR and TE are all eligible for,
-// which is what makes him the cross-position baseline candidate for every one
-// of those positions.
+// Ten starting slots against twelve players. The fill seats both quarterbacks
+// in the dedicated QB slots and puts RB3 (90) and WR3 (70) in the two superflex
+// slots -- slots that QB, RB, WR and TE are all eligible for, which is what
+// makes those two the cross-position baseline candidates for every position.
 const cross_position_board = () => [
   make_player({ pid: 'QB1', position: 'QB', total: 300 }),
   make_player({ pid: 'QB2', position: 'QB', total: 240 }),
@@ -67,10 +67,11 @@ describe('LIBS-SHARED calculate-baselines', function () {
     expect(baselines.QB.starter.pid).to.equal('QB2')
     expect(baselines.QB.starter.points[1].total).to.equal(240)
 
-    // Same slot, same defect, at WR -- where it cost 80 points of replacement
-    // level rather than 150.
-    expect(baselines.WR.starter.pid).to.equal('WR2')
-    expect(baselines.WR.starter.points[1].total).to.equal(170)
+    // Same slot, same defect, at TE -- which seats nobody in the superflex at
+    // all, so the old form handed it a wide receiver's 70 in place of TE2's 140.
+    expect(baselines.TE.starter.primary_position).to.equal('TE')
+    expect(baselines.TE.starter.pid).to.equal('TE2')
+    expect(baselines.TE.starter.points[1].total).to.equal(140)
   })
 
   it('reads each position independently of the flex occupants', () => {
@@ -85,6 +86,29 @@ describe('LIBS-SHARED calculate-baselines', function () {
     }
   })
 
+  // The free-agent fill used to scan roster by roster and take the first open
+  // eligible slot on each, so QB2 claimed team 1's SUPERFLEX while team 2's
+  // dedicated QB slot sat empty -- and the players who could only fill a flex
+  // then had nowhere to go. Three of the twelve went unseated and a starting
+  // slot stayed open on a board with a surplus at every position.
+  it('fills every dedicated slot before any flex', () => {
+    const baselines = calculateBaselines({
+      players: cross_position_board(),
+      league: two_team_league,
+      week: 1
+    })
+
+    // Both quarterbacks start, so QB replacement is the second one rather than
+    // whoever happened to be left over.
+    expect(baselines.QB.starter.pid).to.equal('QB2')
+    expect(baselines.QB.available).to.equal(undefined)
+
+    // And the two superflex slots are taken by the best players who could not
+    // claim a dedicated slot.
+    expect(baselines.RB.starter.pid).to.equal('RB3')
+    expect(baselines.WR.starter.pid).to.equal('WR3')
+  })
+
   it('names the best unrostered player as the available baseline', () => {
     const baselines = calculateBaselines({
       players: cross_position_board(),
@@ -92,10 +116,10 @@ describe('LIBS-SHARED calculate-baselines', function () {
       week: 1
     })
 
-    // Nobody is rostered here, so the fill seats what it can and `available` is
-    // the best of each position left over. RB has none left, which is a
-    // legitimate answer and not a zero.
-    expect(baselines.WR.available.pid).to.equal('WR3')
+    // Nobody is rostered here, so the fill seats the ten starting slots and
+    // `available` is the best of each position left over. QB and RB have none
+    // left, which is a legitimate answer and not a zero.
+    expect(baselines.WR.available.pid).to.equal('WR4')
     expect(baselines.TE.available.pid).to.equal('TE3')
     expect(baselines.RB.available).to.equal(undefined)
   })
@@ -111,8 +135,8 @@ describe('LIBS-SHARED calculate-projection-values', function () {
 
     expect(baselines.QB.starter.pid).to.equal('QB2')
     expect(baselines.QB.starter.points).to.equal(240)
-    expect(baselines.WR.available.pid).to.equal('WR3')
-    expect(baselines.WR.available.points).to.equal(70)
+    expect(baselines.WR.available.pid).to.equal('WR4')
+    expect(baselines.WR.available.points).to.equal(60)
   })
 
   it('leaves the available baseline null on the season board', () => {
