@@ -242,6 +242,33 @@ export const build_liquidity_inserts = ({
   return rows
 }
 
+// The dynasty-rankings PAGE and the dynasty-rankings POST endpoint are two
+// independent fetches of two independently-computed top-500 lists, and nothing
+// makes their membership agree. A player present in the POST payload but absent
+// from the page therefore yields `players_index[item.playerID] === undefined`,
+// which is how `.position` came to be read off undefined and killed the whole
+// run mid-import. Re-fetched hours later both lists were exactly 500 entries
+// and in full agreement, so this is transient churn at the boundary of the
+// list — not a vendor schema change, and not something a one-time repair fixes.
+//
+// A page record is needed only for the fields the POST payload does not carry:
+// position (the RDP test), name/team/draft-year (the fallback player match),
+// slug (the --full per-player scrape) and the liquidity triple. When we have
+// already resolved this vendor id before, none of that is required to import
+// the value history the POST payload carries, so the import proceeds instead of
+// dropping the player.
+const resolve_known_keeptradecut_player = async (keeptradecut_player_id) => {
+  const pick_row = await db('keeptradecut_pick')
+    .where('ktc_player_id', keeptradecut_player_id)
+    .first()
+  if (pick_row) return { pid: pick_row.pid, is_rdp: true }
+
+  const player_row = await find_player_row({ keeptradecut_player_id })
+  if (player_row) return { pid: player_row.pid, is_rdp: false }
+
+  return null
+}
+
 const get_keeptradecut_config = async () => {
   const config_row = await db('config')
     .where('key', 'keeptradecut_config')
@@ -310,13 +337,30 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   const liquidity_observed_at = dayjs().startOf('day').toDate()
 
   let value_less_entries_skipped = 0
+  let unresolvable_missing_page_records = 0
 
   for (const item of data) {
     const keeptradecut_player = players_index[item.playerID]
-    const is_rdp = keeptradecut_player.position === 'RDP'
     let pid
+    let is_rdp
 
-    if (is_rdp) {
+    if (!keeptradecut_player) {
+      const resolved = await resolve_known_keeptradecut_player(item.playerID)
+      if (!resolved) {
+        unresolvable_missing_page_records++
+        log(
+          `playerID ${item.playerID} absent from dynasty-rankings page and unknown locally; nothing to resolve it against, skipping`
+        )
+        continue
+      }
+
+      pid = resolved.pid
+      is_rdp = resolved.is_rdp
+      log(
+        `playerID ${item.playerID} absent from dynasty-rankings page; resolved to ${pid} and importing values from the rankings payload`
+      )
+    } else if (keeptradecut_player.position === 'RDP') {
+      is_rdp = true
       const meta = parse_ktc_pick_name(keeptradecut_player.playerName)
       if (!meta) {
         log(
@@ -348,6 +392,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           ])
       }
     } else {
+      is_rdp = false
       let player_row
       try {
         player_row = await find_player_row({
@@ -381,10 +426,18 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       pid = player_row.pid
     }
 
-    const merge_columns = merge_columns_for_branch({ full, is_rdp })
+    // The --full per-player scrape is keyed on the page record's slug, so a
+    // player missing from the page cannot take that path. Fall back to the
+    // rankings payload's own value history for that player: fewer columns
+    // (no ranks), but the values are imported rather than dropped.
+    const scrape_player_page = full && Boolean(keeptradecut_player)
+    const merge_columns = merge_columns_for_branch({
+      full: scrape_player_page,
+      is_rdp
+    })
     const accumulator = create_valuation_accumulator({ pid, merge_columns })
 
-    if (full) {
+    if (scrape_player_page) {
       const slug = keeptradecut_player.slug
       const html = await fetch_with_retry({
         url: `https://keeptradecut.com/dynasty-rankings/players/${slug}`,
@@ -514,7 +567,11 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
     // Liquidity is a same-day snapshot, not a history: KTC exposes only the current
     // value on the dynasty-rankings payload, so there is nothing to backfill.
-    if (liquidity_collected && !is_rdp) {
+    // The liquidity triple lives only on the page record, so a player absent
+    // from the page has no liquidity to write. Skipping is the correct handling
+    // rather than a shortcut: a stored zero must mean "KTC reported zero",
+    // never "we did not collect it".
+    if (liquidity_collected && !is_rdp && keeptradecut_player) {
       const liquidity_inserts = build_liquidity_inserts({
         pid,
         keeptradecut_player,
@@ -561,7 +618,13 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
     log(`Inserted ${inserts.length} values for playerID ${item.playerID}`)
 
-    if (full) await wait(4000)
+    if (scrape_player_page) await wait(4000)
+  }
+
+  if (unresolvable_missing_page_records) {
+    log(
+      `${unresolvable_missing_page_records} playerID(s) were absent from the dynasty-rankings page and unknown locally; no values imported for them`
+    )
   }
 
   const shortfalls = []
