@@ -4433,7 +4433,7 @@ CREATE TABLE public.league_team_forecast (
 
 CREATE TABLE public.league_team_lineup_contribution_weeks (
     pid character varying(25),
-    week character varying(3) NOT NULL,
+    week smallint NOT NULL,
     year smallint,
     tid integer NOT NULL,
     lid integer NOT NULL,
@@ -4464,7 +4464,7 @@ CREATE TABLE public.league_team_lineup_contributions (
 
 CREATE TABLE public.league_team_lineup_starters (
     pid character varying(25),
-    week character varying(3) NOT NULL,
+    week smallint NOT NULL,
     year smallint,
     tid integer NOT NULL,
     lid integer NOT NULL
@@ -26188,6 +26188,7 @@ CREATE TABLE public.seasons (
     at_large_selection_method text DEFAULT 'head_to_head'::text NOT NULL,
     has_division_winner_berths boolean DEFAULT false NOT NULL,
     trade_veto_window_hours smallint DEFAULT 24 NOT NULL,
+    draft_pick_interval smallint DEFAULT 1,
     CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
     CONSTRAINT rfa_window_divides_day CHECK ((restricted_free_agency_window_hours = ANY (ARRAY[1, 2, 3, 4, 6, 8, 12, 24]))),
     CONSTRAINT seasons_at_large_selection_method_known CHECK ((at_large_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text, 'points_for'::text]))),

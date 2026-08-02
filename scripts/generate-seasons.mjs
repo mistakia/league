@@ -40,6 +40,7 @@ const generate_seasons = async () => {
         restricted_free_agency_period_end: null,
         draft_start: null,
         draft_type: null,
+        draft_pick_interval: null,
         draft_hour_min: null,
         draft_hour_max: null,
         free_agency_live_auction_start: null,

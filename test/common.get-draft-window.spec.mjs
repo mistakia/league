@@ -344,6 +344,7 @@ describe('LIBS-SHARED getDraftWindow', function () {
     const season_row = {
       draft_start: draft_start_timestamp,
       draft_type: 'hour',
+      draft_pick_interval: 1,
       draft_hour_min: 9,
       draft_hour_max: 22
     }
@@ -352,9 +353,17 @@ describe('LIBS-SHARED getDraftWindow', function () {
       expect(get_draft_window_config(season_row)).to.deep.equal({
         draft_start_timestamp,
         cadence_unit: 'hour',
+        cadence_interval: 1,
         daily_window_start_hour: 9,
         daily_window_end_hour: 22
       })
+    })
+
+    it('passes draft_pick_interval through as cadence_interval', () => {
+      expect(
+        get_draft_window_config({ ...season_row, draft_pick_interval: 4 })
+          .cadence_interval
+      ).to.equal(4)
     })
 
     it('produces the 2026 windows when spread into getDraftWindow', () => {

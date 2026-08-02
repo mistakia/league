@@ -6,6 +6,7 @@ import { app_actions } from '@core/app'
 const initialState = new Record({
   draft_start: null,
   draft_type: null,
+  draft_pick_interval: null,
   draft_hour_min: null,
   draft_hour_max: null,
   isPending: false,
@@ -31,6 +32,7 @@ export function draft_reducer(state = initialState(), { payload, type }) {
       return state.merge({
         draft_start: league.draft_start,
         draft_type: league.draft_type,
+        draft_pick_interval: league.draft_pick_interval,
         draft_hour_min: league.draft_hour_min,
         draft_hour_max: league.draft_hour_max
       })

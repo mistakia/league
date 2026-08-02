@@ -91,6 +91,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
 
     draft_start: league_params.draft_start,
     draft_type: league_params.draft_type,
+    draft_pick_interval: league_params.draft_pick_interval,
     draft_hour_min: league_params.draft_hour_min,
     draft_hour_max: league_params.draft_hour_max,
 
