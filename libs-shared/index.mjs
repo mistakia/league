@@ -31,6 +31,7 @@ export { default as is_before_extension_deadline } from './is-before-extension-d
 export { default as calculateStandings } from './calculate-standings.mjs'
 export { default as compare_playoff_seed } from './compare-playoff-seed.mjs'
 export { default as compare_all_play_seed } from './compare-all-play-seed.mjs'
+export { default as compare_division_winner } from './compare-division-winner.mjs'
 export {
   default as get_playoff_seeding,
   BYE_CANDIDATE_POOLS,

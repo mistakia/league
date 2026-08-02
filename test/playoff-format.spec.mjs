@@ -5,7 +5,8 @@ import * as chai from 'chai'
 import {
   get_playoff_seeding,
   compare_playoff_seed,
-  compare_all_play_seed
+  compare_all_play_seed,
+  compare_division_winner
 } from '#libs-shared'
 import { current_season } from '#constants'
 import generate_fantasy_league_schedule from '#libs-server/generate-fantasy-league-schedule.mjs'
@@ -161,6 +162,41 @@ describe('playoff format and division schedule', function () {
       expect(result.wildcard_tids).to.eql([1, 2, 3, 4])
     })
 
+    it('decides the division title on points for, not all play', function () {
+      // Two teams tied at 9-5 in division 1. tid 1 has the better all play
+      // record; tid 2 has scored more. compare_division_winner takes points
+      // for first, so tid 2 wins the division and takes the bye -- the seeding
+      // ladder alone would have handed it to tid 1.
+      const teams = [
+        team(1, 1, {
+          wins: 9,
+          losses: 5,
+          points_for: 100,
+          all_play_wins: 116,
+          all_play_losses: 10
+        }),
+        team(2, 1, {
+          wins: 9,
+          losses: 5,
+          points_for: 900,
+          all_play_wins: 10,
+          all_play_losses: 116
+        }),
+        team(3, 2, { wins: 4, losses: 10, points_for: 50 }),
+        team(4, 2, { wins: 3, losses: 11, points_for: 40 })
+      ]
+
+      const result = get_playoff_seeding({
+        teams,
+        playoff_team_count: 2,
+        bye_count: 1,
+        bye_candidate_pool: 'division_winners',
+        bye_selection_method: 'all_play'
+      })
+
+      expect(result.bye_tids).to.eql([2])
+    })
+
     it('throws when the division winner pool cannot fill the byes', function () {
       const single_division = Array.from({ length: 10 }, (unused, i) =>
         team(i + 1, 1, { wins: 12 - i, losses: i })
@@ -269,6 +305,67 @@ describe('playoff format and division schedule', function () {
 
       expect(result.playoff_tids).to.eql([1, 2, 3, 4])
       expect(result.bye_tids).to.eql([1, 2])
+    })
+  })
+
+  describe('compare_division_winner', function () {
+    const team = (overrides) => ({
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      all_play_wins: 0,
+      all_play_losses: 0,
+      all_play_ties: 0,
+      points_for: 0,
+      ...overrides
+    })
+
+    it('orders on head-to-head record first', function () {
+      const better = team({ wins: 9, losses: 5, points_for: 100 })
+      const worse = team({ wins: 8, losses: 6, points_for: 9000 })
+      expect(compare_division_winner(better, worse)).to.be.below(0)
+    })
+
+    it('breaks a record tie on points for BEFORE all play', function () {
+      // This is the inverse of compare_playoff_seed's tail and is the whole
+      // point of a separate comparator: a division title is resolved on points
+      // scored before reaching for a league-wide metric.
+      const a = team({
+        wins: 8,
+        losses: 6,
+        points_for: 900,
+        all_play_wins: 10,
+        all_play_losses: 116
+      })
+      const b = team({
+        wins: 8,
+        losses: 6,
+        points_for: 100,
+        all_play_wins: 116,
+        all_play_losses: 10
+      })
+
+      expect(compare_division_winner(a, b)).to.be.below(0)
+      // The seeding ladder would rank them the other way round.
+      expect(compare_playoff_seed(a, b)).to.be.above(0)
+    })
+
+    it('falls through to all play when record and points for tie', function () {
+      const a = team({
+        wins: 8,
+        losses: 6,
+        points_for: 500,
+        all_play_wins: 90,
+        all_play_losses: 36
+      })
+      const b = team({
+        wins: 8,
+        losses: 6,
+        points_for: 500,
+        all_play_wins: 40,
+        all_play_losses: 86
+      })
+      expect(compare_division_winner(a, b)).to.be.below(0)
     })
   })
 
