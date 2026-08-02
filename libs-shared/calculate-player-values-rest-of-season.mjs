@@ -41,7 +41,6 @@ export default function ({ players, league, pricing_model = 'auction' }) {
   if (pricing_model === 'auction') {
     calculatePrices({
       cap: league_total_salary_cap,
-      surplus_cap_share: league.surplus_cap_share,
       total_pts_added,
       players,
       week: 'ros'

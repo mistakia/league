@@ -30,23 +30,19 @@ const project_lineups = async (lid) => {
   const team_lineup_contribution_inserts = []
   const team_lineup_contribution_week_inserts = []
   const baselines = await db('league_baselines').where({ lid, year })
-  const baseline_pids = [...new Set(baselines.map((p) => p.pid))]
-  const baseline_players = await getPlayers({ pids: baseline_pids })
 
   // Replacement-level points per week/position, from the 'starter' baseline --
   // used to score optimizeLineup's phantom slot when a roster cannot fill a
   // starting position, so it lands at replacement level instead of zero.
+  //
+  // Read straight off the row. This used to resolve the baseline's pid back to
+  // a player and read that player's points, which the season baseline made
+  // impossible: it is an expectation over drawn seasons and no player holds it.
   const baseline_points = {}
   for (const baseline of baselines) {
     if (baseline.type !== 'starter') continue
-    const baseline_player = baseline_players.find((p) => p.pid === baseline.pid)
-    const points =
-      (baseline_player &&
-        baseline_player.points[baseline.week] &&
-        baseline_player.points[baseline.week].total) ||
-      0
     baseline_points[baseline.week] = baseline_points[baseline.week] || {}
-    baseline_points[baseline.week][baseline.pos] = points
+    baseline_points[baseline.week][baseline.pos] = Number(baseline.points) || 0
   }
 
   for (const team of teams) {
@@ -158,12 +154,9 @@ const project_lineups = async (lid) => {
               b.pos === player_row.primary_position &&
               b.type === 'available'
           )
-          const baseline_player = baseline_players.find(
-            (b) => b.pid === baseline.pid
-          )
 
           // bench+ is difference between player output and best available
-          const diff = projectedPoints - baseline_player.points[week].total
+          const diff = projectedPoints - (Number(baseline?.points) || 0)
           if (diff > 0) {
             playerData.bp += diff
             weekData.bp = diff

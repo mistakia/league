@@ -146,12 +146,21 @@ export function players_reducer(state = initialState, { payload, type }) {
 
     case player_actions.SET_PLAYER_VALUES:
       return state.withMutations((state) => {
+        // A baseline entry is { pid, points }, not a bare pid. The season
+        // 'starter' baseline is an expectation over drawn seasons that no real
+        // player holds, so its pid is null and `points` is the only
+        // representation -- see libs-shared/calculate-distributional-baselines.
         for (const week in payload.baselines) {
           for (const position in payload.baselines[week]) {
             for (const baseline_type in payload.baselines[week][position]) {
+              const baseline = payload.baselines[week][position][baseline_type]
+              if (!baseline) continue
               state.setIn(
                 ['baselines', week, position, baseline_type],
-                payload.baselines[week][position][baseline_type].pid
+                new Map({
+                  pid: baseline.pid ?? null,
+                  points: baseline.points ?? null
+                })
               )
             }
           }
@@ -533,8 +542,11 @@ export function players_reducer(state = initialState, { payload, type }) {
     case player_actions.GET_BASELINES_FULFILLED:
       return state.withMutations((state) => {
         for (const baseline of payload.data) {
-          const { week, pos, type, pid } = baseline
-          state.setIn(['baselines', week, pos, type], pid)
+          const { week, pos, type, pid, points } = baseline
+          state.setIn(
+            ['baselines', week, pos, type],
+            new Map({ pid: pid ?? null, points: points ?? null })
+          )
         }
       })
 

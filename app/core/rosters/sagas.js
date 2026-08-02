@@ -7,7 +7,6 @@ import {
   put,
   putResolve
 } from 'redux-saga/effects'
-import { Map } from 'immutable'
 
 import { roster_actions } from './actions'
 import { trade_actions } from '@core/trade'
@@ -143,7 +142,6 @@ export function* calculatePlayerLineupContribution({ player_map }) {
   const currentRosterPlayers = yield select(get_current_players_for_league)
   const league = yield select(get_current_league)
   const baselines = (yield select(get_players_state)).get('baselines')
-  const playerItems = yield select(get_player_maps)
   const currentRoster = yield select(get_current_team_roster_record)
 
   const playerData = {
@@ -208,15 +206,16 @@ export function* calculatePlayerLineupContribution({ player_map }) {
       playerData.sp += diff
       weekData.sp = diff
     } else {
-      const baselinePlayerId = baselines.getIn([
-        week,
-        player_map.get('primary_position'),
-        'available'
-      ])
-      const baselinePlayer = playerItems.get(baselinePlayerId, new Map())
-      // bench+ is difference between player output and best available
-      const diff =
-        projectedPoints - baselinePlayer.getIn(['points', week, 'total'])
+      // bench+ is difference between player output and best available. The
+      // baseline row carries the points directly; resolving its pid back to a
+      // player to read the same number was the long way round.
+      const baseline_points = Number(
+        baselines.getIn(
+          [week, player_map.get('primary_position'), 'available', 'points'],
+          0
+        )
+      )
+      const diff = projectedPoints - baseline_points
       if (diff > 0) {
         playerData.bp += diff
         weekData.bp = diff

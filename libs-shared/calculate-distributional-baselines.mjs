@@ -1,5 +1,33 @@
-import { fantasy_positions } from '#constants'
+import { fantasy_positions, default_points_added } from '#constants'
 import get_eligible_slots from './get-eligible-slots.mjs'
+
+// Week `0` is the SEASON board -- the whole-season projection every other week
+// key sits beside. This module answers the season question only, and named
+// rather than written as a bare 0 at each call site because the boundary is a
+// deliberate scope decision rather than an index.
+//
+// WHY SEASON ONLY. Weeks 1+ keep the point-estimate path
+// (calculate-baselines.mjs plus calculate-values.mjs), for two reasons that
+// point the same way.
+//
+// It is a different question. The season board says what a player is worth for
+// the year, which is what market_salary means and what restricted free agency
+// tags, franchise schedules and rookie schedules price off. A weekly board says
+// what starting him this Sunday is worth over the week's replacement -- a
+// start/sit signal, deliberately signed, whose negative range is read directly
+// (see libs-server/tag-board/build-tag-board.mjs, which uses pts_added as a
+// continuous signal precisely because market_salary clips at zero).
+//
+// And it is not affordable. One 1000-draw pass over the real 2026 board (624
+// players, 90 slots) costs about 9 seconds. process-projections covers 23 league
+// formats plus each hosted league, and loops weeks 0 through the final week --
+// 19 weeks in the offseason. Applied to every week that is roughly 70 minutes
+// per run against a 30-minute cron. Season only is under 4 minutes.
+//
+// Every measurement behind this rebuild was made on week 0. Applying it to the
+// weekly boards would ship an unmeasured change, so the weekly path keeps its
+// known bias rather than trading it for an unknown one.
+export const season_projection_week = 0
 
 // Replacement level and surplus, both as expectations over drawn seasons.
 //
@@ -208,6 +236,37 @@ const calculate_distributional_baselines = ({
   }
 
   return { baselines, expected_surplus, total_pts_added, draws }
+}
+
+// Write the drawn expectation onto the player rows, in the shape the rest of the
+// pipeline already reads. The counterpart of calculate-values.mjs for the season
+// board: same output field, same sentinel, different question.
+//
+// Expected surplus is E[max(X - baseline, 0)] and so is floored at zero by
+// construction -- a player projected below replacement still has some chance of
+// clearing it, which is worth a small positive amount, and no chance of being
+// worth less than nothing because he would simply not be started. The weekly
+// path stays signed; this one cannot be.
+//
+// A player absent from expected_surplus was never in the drawn pool -- a kicker,
+// a position the league does not start, or a player with no projection for the
+// season -- and takes the same sentinel the weekly path gives him.
+export const assign_expected_surplus = ({
+  players,
+  expected_surplus,
+  week
+}) => {
+  for (const player of players) {
+    if (!player.pts_added) {
+      player.pts_added = {}
+    }
+
+    const surplus = expected_surplus[player.pid]
+    player.pts_added[week] =
+      surplus === undefined ? default_points_added : surplus
+  }
+
+  return players
 }
 
 export default calculate_distributional_baselines

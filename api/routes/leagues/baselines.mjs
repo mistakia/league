@@ -64,7 +64,14 @@ router.get('/?', async (req, res) => {
     }
 
     const baselines = await db('league_baselines').where({ lid: leagueId })
-    return res.send(baselines)
+    // pg returns numeric as a string. The client does arithmetic on `points`
+    // directly, so coerce here rather than at every read site.
+    return res.send(
+      baselines.map((baseline) => ({
+        ...baseline,
+        points: baseline.points === null ? null : Number(baseline.points)
+      }))
+    )
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })

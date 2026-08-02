@@ -974,25 +974,18 @@ export const get_selected_players_page_view = createSelector(
     players_page_views.get(selected_players_page_view)
 )
 
+// Baselines are stored as { pid, points } per week/position/type. This used to
+// resolve the pid to a player map so callers could read that player's points
+// back out; nothing needs the player any more, and the season 'starter'
+// baseline no longer HAS one -- it is an expectation over drawn seasons. Read
+// `points` directly.
 export function getBaselines(state) {
-  const result = state.getIn(['players', 'baselines'])
-  const playerMaps = get_player_maps(state)
-  return result.withMutations((b) => {
-    for (const [week, positions] of b.entrySeq()) {
-      // TODO document this
-      if (fantasy_positions.includes(week)) continue
-      for (const [position, baselines] of positions.entrySeq()) {
-        for (const [baseline, pid] of baselines.entrySeq()) {
-          b.setIn([week, position, baseline], playerMaps.get(pid))
-        }
-      }
-    }
-  })
+  return state.getIn(['players', 'baselines'])
 }
 
-// Replacement-level points per week/position, sourced from the league's
-// 'starter' baseline player -- fed to optimizeLineup's use_baseline_when_missing
-// phantom slot so it scores at replacement level instead of zero.
+// Replacement-level points per week/position, from the league's 'starter'
+// baseline -- fed to optimizeLineup's use_baseline_when_missing phantom slot so
+// it scores at replacement level instead of zero.
 export const get_lineup_baseline_points = createSelector(
   getBaselines,
   (baselines) => {
@@ -1002,12 +995,9 @@ export const get_lineup_baseline_points = createSelector(
       const points_by_position = {}
       for (const [position, types] of positions.entrySeq()) {
         if (!Map.isMap(types)) continue
-        const player_map = types.get('starter')
-        if (!player_map) continue
-        points_by_position[position] = player_map.getIn(
-          ['points', week, 'total'],
-          0
-        )
+        const points = types.getIn(['starter', 'points'])
+        if (points === null || points === undefined) continue
+        points_by_position[position] = Number(points)
       }
       result[week] = points_by_position
     }

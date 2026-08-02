@@ -2,8 +2,7 @@ import {
   calculateStatsFromPlays,
   calculatePercentiles,
   calculatePoints,
-  calculateBaselines,
-  calculateValues,
+  calculate_projection_values,
   calculatePrices,
   getRosterSize,
   getOptimizerPositionConstraints,
@@ -59,6 +58,13 @@ export function calculatePlayerValues(payload) {
           position: player.primary_position,
           league
         })
+        // Carry the server's points_sd across the recompute. Reweighting the
+        // sources moves the CONSENSUS; it does not change how much the sources
+        // disagree, which is what points_sd measures. Dropping it here would
+        // silently collapse the season board back to a point estimate for any
+        // user who has touched their source weights, while the server's board
+        // stayed distributional -- a divergence with no symptom.
+        points.points_sd = (player.points[week] || {}).points_sd
         player.points[week] = points
       } else {
         player.points[week] = player.points[week] || { total: 0 }
@@ -86,17 +92,14 @@ export function calculatePlayerValues(payload) {
 
   const baselinesByWeek = {}
   for (let week = 0; week <= finalWeek; week++) {
-    // calculate baseline
-    const baselines = calculateBaselines({ players, league, rosterRows, week })
+    const { total_pts_added, baselines } = calculate_projection_values({
+      players,
+      league,
+      rosterRows,
+      week
+    })
     baselinesByWeek[week] = baselines
 
-    // calculate values
-    const total_pts_added = calculateValues({
-      players,
-      baselines,
-      week,
-      league
-    })
     calculatePrices({ cap: leagueTotalCap, total_pts_added, players, week })
   }
 

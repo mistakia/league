@@ -6,7 +6,8 @@ import calculate_distributional_baselines, {
   fill_starting_slots
 } from '#libs-shared/calculate-distributional-baselines.mjs'
 import calculate_projection_dispersion, {
-  sample_standard_deviation
+  sample_standard_deviation,
+  realized_to_vendor_dispersion_ratio
 } from '#libs-shared/calculate-projection-dispersion.mjs'
 
 const expect = chai.expect
@@ -56,12 +57,13 @@ describe('LIBS-SHARED calculate-projection-dispersion', function () {
   })
 
   it('substitutes the position median when a player is under-covered', () => {
+    const rb_ratio = realized_to_vendor_dispersion_ratio.RB
     const { dispersion_by_pid, median_by_position } =
       calculate_projection_dispersion({
         source_totals_by_pid: {
-          covered_a: [100, 120], // sd 14.142
-          covered_b: [200, 210], // sd  7.071
-          covered_c: [300, 340], // sd 28.284
+          covered_a: [100, 120], // vendor sd 14.142
+          covered_b: [200, 210], // vendor sd  7.071
+          covered_c: [300, 340], // vendor sd 28.284
           thin: [150]
         },
         position_by_pid: {
@@ -72,21 +74,71 @@ describe('LIBS-SHARED calculate-projection-dispersion', function () {
         }
       })
 
-    expect(median_by_position.RB).to.be.closeTo(14.142, 0.001)
+    expect(median_by_position.RB).to.be.closeTo(14.142 * rb_ratio, 0.001)
     expect(dispersion_by_pid.thin).to.equal(median_by_position.RB)
-    expect(dispersion_by_pid.covered_b).to.be.closeTo(7.071, 0.001)
+    expect(dispersion_by_pid.covered_b).to.be.closeTo(7.071 * rb_ratio, 0.001)
   })
 
   it('takes the median from the player’s own position', () => {
     const { dispersion_by_pid } = calculate_projection_dispersion({
       source_totals_by_pid: {
-        qb_one: [300, 400], // QB sd 70.71
-        te_one: [100, 110], // TE sd  7.07
+        qb_one: [300, 400], // QB vendor sd 70.71
+        te_one: [100, 110], // TE vendor sd  7.07
         te_thin: [105]
       },
       position_by_pid: { qb_one: 'QB', te_one: 'TE', te_thin: 'TE' }
     })
-    expect(dispersion_by_pid.te_thin).to.be.closeTo(7.071, 0.001)
+    expect(dispersion_by_pid.te_thin).to.be.closeTo(
+      7.071 * realized_to_vendor_dispersion_ratio.TE,
+      0.001
+    )
+  })
+
+  // The output is the estimated dispersion of the REALIZED season, not the
+  // vendor spread. Sources cluster, so the two differ by a measured per-position
+  // factor and the model draws from the second. Pinned per position because a
+  // single shared scalar would silently erase the positional structure the
+  // measurement found.
+  it('rescales the vendor spread by the measured per-position ratio', () => {
+    const { dispersion_by_pid } = calculate_projection_dispersion({
+      source_totals_by_pid: {
+        qb: [100, 120],
+        rb: [100, 120],
+        wr: [100, 120],
+        te: [100, 120],
+        dst: [100, 120]
+      },
+      position_by_pid: {
+        qb: 'QB',
+        rb: 'RB',
+        wr: 'WR',
+        te: 'TE',
+        dst: 'DST'
+      }
+    })
+
+    const vendor_sd = sample_standard_deviation([100, 120])
+    for (const [pid, position] of [
+      ['qb', 'QB'],
+      ['rb', 'RB'],
+      ['wr', 'WR'],
+      ['te', 'TE'],
+      ['dst', 'DST']
+    ]) {
+      expect(dispersion_by_pid[pid]).to.be.closeTo(
+        vendor_sd * realized_to_vendor_dispersion_ratio[position],
+        0.001
+      )
+    }
+  })
+
+  // Every ratio must stay inside the band the measurement reported. A value
+  // drifting outside it means someone tuned the constant rather than re-measured
+  // it, which is the failure this guards.
+  it('keeps every measured ratio inside the reported 4.2-4.6 band', () => {
+    for (const ratio of Object.values(realized_to_vendor_dispersion_ratio)) {
+      expect(ratio).to.be.within(4.2, 4.6)
+    }
   })
 })
 

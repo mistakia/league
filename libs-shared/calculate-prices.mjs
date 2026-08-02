@@ -1,52 +1,38 @@
-// The $/point rate answers a DIFFERENT question than pts_added does. pts_added
-// is surplus over the worst starter; market_salary is what a player will
-// actually cost. This function used to answer only the first and call the answer
-// the second, by assuming the whole cap is exhausted in proportion to surplus:
+// market_salary is the dollar translation of pts_added: the discretionary cap
+// allocated across the board in proportion to value added.
 //
 //   rate = cap / total_pts_added
 //
-// That makes every baseline improvement break prices, because raising the
-// baseline shrinks the denominator and concentrates the same fixed pool onto
-// fewer players. Correcting the baseline alone moved the top RB from $59 to
-// $100 against a league whose observed ceiling is $60 -- which is what broke the
-// previous attempt at the baseline fix.
+// `cap` is ALREADY discretionary -- num_teams * cap minus the minimum bid on
+// every roster spot -- so the money teams must spend simply filling out a roster
+// is out of the pool before this function sees it.
 //
-// Real auctions do not spend the cap in proportion to surplus, because teams
-// must still fill every roster spot: a large share of the cap goes to players at
-// or below replacement, who have zero surplus by construction. surplus_cap_share
-// is the fraction that does reach above-replacement players.
+// There used to be a second multiplier here, surplus_cap_share, fitted by least
+// squares of observed contract value on pts_added and standing at 0.63. It is
+// gone, and its removal is not a retune. Two reasons.
 //
-// BEING RETIRED. The value was fitted by least squares of observed contract
-// value on pts_added against the CALIBRATED board, and it was largely
-// compensating for that board's broken denominator: the calibrated pass put only
-// ~0.61 of a realized season's total points added on the board, so the $/point
-// rate came out high and a sub-1 share pulled it back down. Drawing the board
-// from projection dispersion puts the denominator back on a realized season's
-// scale (~0.97 over 2020-2025), which is what makes spending the whole
-// discretionary cap the right arithmetic rather than an overshoot.
+// It was fitted against observed prices, which is the one thing a valuation must
+// never do -- a board that agrees with the market by construction can never tell
+// you the market is wrong. Worse, the price sample it was fitted to is auction
+// leftovers: 44-73 players a year against a 600-player board, systematically the
+// cheap residue after keepers.
 //
-// Note league_total_salary_cap is ALREADY discretionary -- it is
-// num_teams * cap minus the minimum bid on every roster spot -- so retiring this
-// means the multiplier becomes 1, not that minimum salaries are ignored.
+// And it was not measuring what it claimed. Measured against realized outcomes,
+// the share of paid salary reaching above-replacement players is 0.961 (range
+// 0.925-0.982 over 2020-2025), not 0.63. The gap was a broken denominator
+// elsewhere: the calibrated board put only ~0.61 of a realized season's total
+// points added on the board, so the $/point rate came out high and a sub-1 share
+// pulled it back down. Drawing the season board from projection dispersion puts
+// the denominator back on a realized season's scale, which is what makes
+// spending the whole discretionary cap the right arithmetic rather than an
+// overshoot.
 //
-// The fitter (scripts/fit-surplus-cap-share.mjs) is gone, so this cannot be
-// refit; it is frozen until the column is dropped with the pricing rewire.
-export const DEFAULT_SURPLUS_CAP_SHARE = 0.63
-
-// Default 1 preserves the old arithmetic for any caller that does not supply a
-// share, so an unfitted format prices exactly as it did before.
-const calculatePrices = ({
-  total_pts_added,
-  cap,
-  surplus_cap_share = 1,
-  players,
-  week
-}) => {
-  // pg returns numeric columns as strings, and the share reaches here straight
-  // off league_formats.
-  const share = Number(surplus_cap_share)
-  const pts_added_salary_rate =
-    (cap * (Number.isFinite(share) ? share : 1)) / total_pts_added
+// If a market-agreement objective is wanted, it belongs downstream of the board
+// as a separate lens, never inside it -- and the situational question ("what
+// will he actually cost given what is left in this league right now") is already
+// answered separately by market_salary_adj in scripts/process-projections.mjs.
+const calculatePrices = ({ total_pts_added, cap, players, week }) => {
+  const pts_added_salary_rate = cap / total_pts_added
 
   for (const player of players) {
     const market_salary =

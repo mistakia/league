@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { calculatePoints, groupBy } from '#libs-shared'
+import calculate_projection_dispersion from '#libs-shared/calculate-projection-dispersion.mjs'
 import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 
@@ -33,11 +34,19 @@ export const process_scoring_format_year = async ({
     .where({ id: scoring_format_id })
     .first()
 
-  const projections = await db('projections_index').where({
+  // Every source, not just the AVERAGE consensus. The consensus supplies
+  // `total`; the individual sources supply the DISAGREEMENT between them, which
+  // is the only forward-looking uncertainty estimate available at projection
+  // time and which weightProjections discards when it averages. The valuation
+  // needs both -- see the header of
+  // libs-shared/calculate-projection-dispersion.mjs.
+  const all_projections = await db('projections_index').where({
     season_year: year,
-    sourceid: external_data_sources.AVERAGE,
     season_type: 'REG'
   })
+  const projections = all_projections.filter(
+    (row) => row.sourceid === external_data_sources.AVERAGE
+  )
   const ros_projections = await db('ros_projections').where({
     season_year: year,
     sourceid: external_data_sources.AVERAGE
@@ -55,6 +64,51 @@ export const process_scoring_format_year = async ({
 
   const players = await db('player').whereIn('pid', pids)
   const players_by_pid = groupBy(players, 'pid')
+  const position_by_pid = {}
+  for (const player of players) {
+    position_by_pid[player.pid] = player.primary_position
+  }
+
+  // Dispersion is measured per WEEK, because the sources disagree by different
+  // amounts about a season than about a Sunday, and the source panel itself
+  // differs by week -- 2025 carried 11 sources in-season and 8 at week 0, while
+  // 2026 has 8 at week 0 and 3-4 for weeks 1+. Each week therefore gets its own
+  // pass, and the module's position-median fallback covers the players a thin
+  // week leaves under-covered.
+  const source_totals_by_week = {}
+  for (const row of all_projections) {
+    if (row.sourceid === external_data_sources.AVERAGE) continue
+    const position = position_by_pid[row.pid]
+    if (!position) continue
+    const { week, ...stats } = row
+    const { total } = calculatePoints({
+      stats,
+      position,
+      league: league_scoring_format,
+      use_projected_stats: true
+    })
+    if (!(total > 0)) continue
+    if (!source_totals_by_week[week]) source_totals_by_week[week] = {}
+    if (!source_totals_by_week[week][row.pid])
+      source_totals_by_week[week][row.pid] = []
+    source_totals_by_week[week][row.pid].push(total)
+  }
+
+  const dispersion_by_week = {}
+  for (const [week, source_totals_by_pid] of Object.entries(
+    source_totals_by_week
+  )) {
+    // Seed every consensus player for the week, including those no individual
+    // source covers at all -- without an entry the module cannot hand them the
+    // position median and they would silently draw as certainties.
+    for (const pid of pids) {
+      if (!source_totals_by_pid[pid]) source_totals_by_pid[pid] = []
+    }
+    dispersion_by_week[week] = calculate_projection_dispersion({
+      source_totals_by_pid,
+      position_by_pid
+    }).dispersion_by_pid
+  }
 
   const points_inserts = []
   for (const pid of pids) {
@@ -65,8 +119,8 @@ export const process_scoring_format_year = async ({
 
     for (const proj of projections_by_pid[pid] || []) {
       const { week, ...stats } = proj
-      // Only `total` is persisted. calculatePoints also returns a per-stat
-      // breakdown of point contributions, but nothing reads it -- see
+      // Only `total` and `points_sd` are persisted. calculatePoints also returns
+      // a per-stat breakdown of point contributions, but nothing reads it -- see
       // db/adhoc/2026-07-30-drop-dead-projection-contribution-columns.sql.
       const { total } = calculatePoints({
         stats,
@@ -74,12 +128,17 @@ export const process_scoring_format_year = async ({
         league: league_scoring_format,
         use_projected_stats: true
       })
+      const points_sd = (dispersion_by_week[week] || {})[pid]
       points_inserts.push({
         pid,
         year,
         scoring_format_id,
         week,
-        total
+        total,
+        // Null rather than 0 when the week has no dispersion for the player at
+        // all. Zero would assert certainty, which is the one reading the data
+        // does not support.
+        points_sd: points_sd > 0 ? points_sd : null
       })
     }
 
@@ -96,7 +155,12 @@ export const process_scoring_format_year = async ({
         year,
         scoring_format_id,
         week: 'ros',
-        total
+        total,
+        // ros_projections carries only the AVERAGE consensus -- no individual
+        // source publishes a rest-of-season line -- so there is no disagreement
+        // to measure. Explicit rather than omitted, so every row in the batch
+        // declares the same columns.
+        points_sd: null
       })
     }
   }

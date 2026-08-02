@@ -19,14 +19,9 @@ const map_state_to_props = createSelector(
         parseFloat(
           (
             player_map.getIn(['points', `${week}`, 'total'], 0) -
-            baselines.getIn([
-              `${week}`,
-              position,
-              'available',
-              'points',
-              `${week}`,
-              'total'
-            ])
+            Number(
+              baselines.getIn([`${week}`, position, 'available', 'points'], 0)
+            )
           ).toFixed(1)
         )
       )
@@ -34,14 +29,9 @@ const map_state_to_props = createSelector(
         parseFloat(
           (
             player_map.getIn(['points', `${week}`, 'total'], 0) -
-            baselines.getIn([
-              `${week}`,
-              position,
-              'starter',
-              'points',
-              `${week}`,
-              'total'
-            ])
+            Number(
+              baselines.getIn([`${week}`, position, 'starter', 'points'], 0)
+            )
           ).toFixed(1)
         )
       )

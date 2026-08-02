@@ -26,11 +26,9 @@ export default async function ({
   columns = [],
   pids = [],
   include_all_active_players = false,
-  include_baseline_players = false,
   year = current_season.year
 }) {
   const league_roster_player_ids = []
-  const baseline_player_ids = []
 
   const projectionLeagueId = leagueId || league_defaults.LEAGUE_ID
   const league = await getLeague({ lid: projectionLeagueId })
@@ -87,14 +85,6 @@ export default async function ({
 
     const playerSlots = await query
     playerSlots.forEach((s) => league_roster_player_ids.push(s.pid))
-  }
-
-  if (include_baseline_players && leagueId) {
-    const baselines = await db('league_baselines')
-      .select('pid')
-      .where({ lid: leagueId })
-      .groupBy('pid')
-    baselines.forEach((b) => baseline_player_ids.push(b.pid))
   }
 
   const query = db('player')
@@ -337,10 +327,6 @@ export default async function ({
       .groupBy(db.raw(scoring_format_player_seasonlogs_selects.join(',')))
   }
 
-  if (baseline_player_ids.length) {
-    query.orWhereIn('player.pid', baseline_player_ids)
-  }
-
   log(query.toString())
   const player_rows = await query
 
@@ -379,7 +365,7 @@ export default async function ({
   if (scoring_format_id) {
     // include projected fantasy point values
     const leaguePointsProj = await db('scoring_format_player_projection_points')
-      .select('pid', 'week', 'total')
+      .select('pid', 'week', 'total', 'points_sd')
       .where({
         scoring_format_id,
         year: current_season.year

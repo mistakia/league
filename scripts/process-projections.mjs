@@ -8,9 +8,8 @@ import {
   Roster,
   getRosterSize,
   weightProjections,
-  calculateValues,
   calculatePrices,
-  calculateBaselines,
+  calculate_projection_values,
   calculatePlayerValuesRestOfSeason,
   named_scoring_formats,
   named_league_formats
@@ -312,19 +311,13 @@ const process_league_format = async ({
     scoring_format_id: league_format.scoring_format_id
   })
 
-  const baselines = {}
+  // The baselines this loop computes are not persisted for a league FORMAT --
+  // only process_league writes league_baselines, and it computes its own.
   let week = first_projection_week_to_recompute({ year })
   for (; week <= current_season.nflFinalWeek; week++) {
-    const baseline = calculateBaselines({
+    const { total_pts_added } = calculate_projection_values({
       players: player_rows,
       league: league_format,
-      week
-    })
-    baselines[week] = baseline
-
-    const total_pts_added = calculateValues({
-      players: player_rows,
-      baselines: baseline,
       week
     })
 
@@ -335,7 +328,6 @@ const process_league_format = async ({
     if (pricing_model === 'auction') {
       calculatePrices({
         cap: league_total_salary_cap,
-        surplus_cap_share: league_format.surplus_cap_share,
         total_pts_added,
         players: player_rows,
         week
@@ -454,24 +446,17 @@ const process_league = async ({ year, lid }) => {
 
   const baselines = {}
   for (; week <= current_season.nflFinalWeek; week++) {
-    // baselines
-    const baseline = calculateBaselines({
-      players: player_rows,
-      league,
-      rosterRows,
-      week
-    })
-    baselines[week] = baseline
+    const { total_pts_added, baselines: week_baselines } =
+      calculate_projection_values({
+        players: player_rows,
+        league,
+        rosterRows,
+        week
+      })
+    baselines[week] = week_baselines
 
-    // calculate values
-    const total_pts_added = calculateValues({
-      players: player_rows,
-      baselines: baseline,
-      week
-    })
     calculatePrices({
       cap: league_total_salary_cap,
-      surplus_cap_share: league.surplus_cap_share,
       total_pts_added,
       players: player_rows,
       week
@@ -562,7 +547,10 @@ const process_league = async ({ year, lid }) => {
           week,
           year: current_season.year,
           pos: position,
+          // Null for the season 'starter' baseline, which is an expectation over
+          // drawn seasons rather than a player. `points` carries it there.
           pid: baseline.pid,
+          points: baseline.points,
           type
         })
       }

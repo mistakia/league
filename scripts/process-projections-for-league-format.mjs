@@ -4,8 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import {
-  calculateBaselines,
-  calculateValues,
+  calculate_projection_values,
   calculatePrices,
   calculatePlayerValuesRestOfSeason,
   getRosterSize,
@@ -54,7 +53,6 @@ const process_league_format_year = async ({
   const league_total_salary_cap =
     num_teams * cap - num_teams * league_roster_size * min_bid
 
-  const baselines = {}
   let week = 0
 
   const final_week_result = await db('nfl_games')
@@ -66,24 +64,18 @@ const process_league_format_year = async ({
     ? final_week_result.final_week
     : current_season.nflFinalWeek
 
+  // Baselines are not persisted for a league FORMAT -- only process_league
+  // writes league_baselines, and it computes its own.
   for (; week <= final_week; week++) {
-    const baseline = calculateBaselines({
+    const { total_pts_added } = calculate_projection_values({
       players: player_rows,
       league: league_format,
-      week
-    })
-    baselines[week] = baseline
-
-    const total_pts_added = calculateValues({
-      players: player_rows,
-      baselines: baseline,
       week
     })
 
     if (pricing_model === 'auction') {
       calculatePrices({
         cap: league_total_salary_cap,
-        surplus_cap_share: league_format.surplus_cap_share,
         total_pts_added,
         players: player_rows,
         week
