@@ -1,4 +1,8 @@
 import db from '#db'
+import {
+  get_trade_veto_deadline,
+  is_trade_within_veto_window
+} from '#libs-shared/get-trade-veto-window.mjs'
 
 /**
  * Assets moved by a recently accepted trade are frozen until that trade's veto
@@ -12,26 +16,13 @@ import db from '#db'
  * only drift.
  */
 
+// The window arithmetic itself is shared with the client, which renders a
+// countdown against the same deadline this module freezes assets until.
+export { get_trade_veto_deadline, is_trade_within_veto_window }
+
 const get_window_hours = (league) => {
   const hours = Number(league?.trade_veto_window_hours)
   return Number.isFinite(hours) && hours > 0 ? hours : 0
-}
-
-/**
- * @returns {number|null} unix timestamp the trade stops being vetoable, or null
- * if the league has veto disabled or the trade was never accepted.
- */
-export const get_trade_veto_deadline = ({ trade, league }) => {
-  const hours = get_window_hours(league)
-  if (!hours || !trade?.accepted) return null
-  return Number(trade.accepted) + hours * 3600
-}
-
-export const is_trade_within_veto_window = ({ trade, league, now }) => {
-  const deadline = get_trade_veto_deadline({ trade, league })
-  if (!deadline) return false
-  const at = now === undefined ? Math.round(Date.now() / 1000) : now
-  return at < deadline
 }
 
 /**
