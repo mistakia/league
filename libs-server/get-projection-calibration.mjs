@@ -14,7 +14,13 @@ export const get_projection_calibration = async ({
 }) => {
   const rows = await db('scoring_format_projection_calibration')
     .where({ scoring_format_id, period })
-    .select('position', 'slope', 'intercept', 'r', 'n')
+    .select(
+      'fantasy_position',
+      'fit_slope',
+      'intercept',
+      'correlation',
+      'sample_size'
+    )
 
   if (!rows.length) {
     return null
@@ -22,11 +28,11 @@ export const get_projection_calibration = async ({
 
   const calibration = {}
   for (const row of rows) {
-    calibration[row.position] = {
-      slope: Number(row.slope),
+    calibration[row.fantasy_position] = {
+      slope: Number(row.fit_slope),
       intercept: Number(row.intercept),
-      r: Number(row.r),
-      n: Number(row.n)
+      r: Number(row.correlation),
+      n: Number(row.sample_size)
     }
   }
 

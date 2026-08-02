@@ -228,11 +228,11 @@ export const fit_projection_calibration = async ({
       rows.push({
         scoring_format_id,
         period,
-        position,
-        n: fit.n,
-        slope: Number(fit.slope.toFixed(4)),
+        fantasy_position: position,
+        sample_size: fit.n,
+        fit_slope: Number(fit.slope.toFixed(4)),
         intercept: Number(fit.intercept.toFixed(3)),
-        r: Number(fit.r.toFixed(4)),
+        correlation: Number(fit.r.toFixed(4)),
         mean_projected: Number(fit.mean_projected.toFixed(3)),
         mean_realized: Number(fit.mean_realized.toFixed(3)),
         fit_years
@@ -265,9 +265,9 @@ const main = async () => {
       all_rows.push(...rows)
       for (const row of rows) {
         log(
-          `${row.scoring_format_id} ${row.period.padEnd(6)} ${row.position.padEnd(4)} ` +
-            `n=${String(row.n).padStart(5)} slope=${row.slope.toFixed(3).padStart(6)} ` +
-            `intercept=${row.intercept.toFixed(2).padStart(7)} r=${row.r.toFixed(3).padStart(6)}`
+          `${row.scoring_format_id} ${row.period.padEnd(6)} ${row.fantasy_position.padEnd(4)} ` +
+            `n=${String(row.sample_size).padStart(5)} slope=${row.fit_slope.toFixed(3).padStart(6)} ` +
+            `intercept=${row.intercept.toFixed(2).padStart(7)} r=${row.correlation.toFixed(3).padStart(6)}`
         )
       }
     } catch (err) {
@@ -278,7 +278,7 @@ const main = async () => {
   if (argv.save && all_rows.length) {
     await db('scoring_format_projection_calibration')
       .insert(all_rows)
-      .onConflict(['scoring_format_id', 'period', 'position'])
+      .onConflict(['scoring_format_id', 'period', 'fantasy_position'])
       .merge()
     log(`saved ${all_rows.length} calibration rows`)
   } else {

@@ -26105,11 +26105,11 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
 CREATE TABLE public.scoring_format_projection_calibration (
     scoring_format_id text NOT NULL,
     period text NOT NULL,
-    "position" text NOT NULL,
-    n integer NOT NULL,
-    slope numeric(6,4) NOT NULL,
+    fantasy_position text NOT NULL,
+    sample_size integer NOT NULL,
+    fit_slope numeric(6,4) NOT NULL,
     intercept numeric(8,3) NOT NULL,
-    r numeric(5,4) NOT NULL,
+    correlation numeric(5,4) NOT NULL,
     mean_projected numeric(8,3) NOT NULL,
     mean_realized numeric(8,3) NOT NULL,
     fit_years integer NOT NULL,
@@ -26126,10 +26126,10 @@ COMMENT ON TABLE public.scoring_format_projection_calibration IS 'Fitted realize
 
 
 --
--- Name: COLUMN scoring_format_projection_calibration.r; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN scoring_format_projection_calibration.correlation; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.scoring_format_projection_calibration.r IS 'Correlation within the fitted (rosterable-depth) population, so it is range-restricted by construction and lower than a whole-board r. That is the intended reading: it answers whether the projection can order the players anyone would actually roster.';
+COMMENT ON COLUMN public.scoring_format_projection_calibration.correlation IS 'Correlation within the fitted (rosterable-depth) population, so it is range-restricted by construction and lower than a whole-board figure. That is the intended reading: it answers whether the projection can order the players anyone would actually roster. Below the floor in libs-shared/calibrate-projected-points.mjs the position produces no spread at all.';
 
 
 --
@@ -29179,7 +29179,7 @@ ALTER TABLE ONLY public.rosters_players
 --
 
 ALTER TABLE ONLY public.scoring_format_projection_calibration
-    ADD CONSTRAINT scoring_format_projection_calibration_pkey PRIMARY KEY (scoring_format_id, period, "position");
+    ADD CONSTRAINT scoring_format_projection_calibration_pkey PRIMARY KEY (scoring_format_id, period, fantasy_position);
 
 
 --
