@@ -53,15 +53,17 @@ const teams = [
   { uid: 4, div: 2 }
 ]
 
-// optimizeStandingsLineup post-filters its result keys with player_id_regex
-// (4 letters - 4 letters - 4 digits - 4 digits - 2 digits - 2 digits); use
-// real-format pids so .starters.length reflects what the LP solver placed.
+// optimizeStandingsLineup post-filters its result keys with player_id_regex,
+// which is /^[A-Z]{4}-[A-Z]{4}-[0-9]{6}$/i -- four letters, four letters, then
+// a six-digit DDMMYY. Use real-format pids so .starters.length reflects what
+// the LP solver placed; a pid that does not match is dropped from the result
+// and the week reads as an incomplete lineup.
 const letters = (n) =>
   String.fromCharCode(
     ...Array.from({ length: 4 }, (_, k) => 65 + ((n + k) % 26))
   )
 const make_pid = (i) =>
-  `${letters(i)}-${letters(i + 5)}-2020-1990-01-${String((i % 28) + 1).padStart(2, '0')}`
+  `${letters(i)}-${letters(i + 5)}-${String((i % 28) + 1).padStart(2, '0')}0190`
 
 const make_gamelog = ({
   pid,
