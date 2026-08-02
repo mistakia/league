@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-02 against league_production
 --
 -- Drop the stored per-position replacement levels. The board is its own
 -- baseline now.

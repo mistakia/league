@@ -4116,18 +4116,6 @@ CREATE TABLE public.league_formats (
     reserve_short_term_limit smallint NOT NULL,
     cap integer NOT NULL,
     min_bid smallint DEFAULT '0'::smallint NOT NULL,
-    pts_base_week_qb numeric(3,1),
-    pts_base_week_rb numeric(3,1),
-    pts_base_week_wr numeric(3,1),
-    pts_base_week_te numeric(3,1),
-    pts_base_week_k numeric(3,1),
-    pts_base_week_dst numeric(3,1),
-    pts_base_season_qb numeric(3,1),
-    pts_base_season_rb numeric(3,1),
-    pts_base_season_wr numeric(3,1),
-    pts_base_season_te numeric(3,1),
-    pts_base_season_k numeric(3,1),
-    pts_base_season_dst numeric(3,1),
     format_category smallint,
     id text NOT NULL,
     pricing_model text DEFAULT 'auction'::text NOT NULL,
@@ -4135,90 +4123,6 @@ CREATE TABLE public.league_formats (
     surplus_cap_share numeric(4,3) DEFAULT 0.630 NOT NULL,
     CONSTRAINT league_formats_pricing_model_check CHECK ((pricing_model = ANY (ARRAY['auction'::text, 'dfs_fixed'::text])))
 );
-
-
---
--- Name: COLUMN league_formats.pts_base_week_qb; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_week_qb IS 'qb pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_rb; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_week_rb IS 'rb pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_wr; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_week_wr IS 'wr pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_te; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_week_te IS 'te pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_k; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_week_k IS 'k pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_dst; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_week_dst IS 'dst pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_qb; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_season_qb IS 'qb pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_rb; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_season_rb IS 'rb pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_wr; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_season_wr IS 'wr pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_te; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_season_te IS 'te pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_k; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_season_k IS 'k pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_dst; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.league_formats.pts_base_season_dst IS 'dst pts/season baseline';
 
 
 --
