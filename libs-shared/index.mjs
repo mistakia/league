@@ -31,7 +31,6 @@ export { default as is_before_extension_deadline } from './is-before-extension-d
 export { default as calculateStandings } from './calculate-standings.mjs'
 export { default as compare_playoff_seed } from './compare-playoff-seed.mjs'
 export { default as compare_all_play_seed } from './compare-all-play-seed.mjs'
-export { default as compare_division_winner } from './compare-division-winner.mjs'
 export { default as compare_at_large_berth } from './compare-at-large-berth.mjs'
 export {
   default as get_playoff_seeding,
@@ -103,6 +102,10 @@ export {
   get_restricted_free_agency_window_count,
   league_timezone
 } from './get-restricted-free-agency-window.mjs'
+export {
+  get_trade_veto_deadline,
+  is_trade_within_veto_window
+} from './get-trade-veto-window.mjs'
 export { default as get_blake2b_hash } from './get-blake2b-hash.mjs'
 export {
   named_scoring_formats,

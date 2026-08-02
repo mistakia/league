@@ -6,7 +6,7 @@ import {
   get_playoff_seeding,
   compare_playoff_seed,
   compare_all_play_seed,
-  compare_division_winner
+  compare_at_large_berth
 } from '#libs-shared'
 import { current_season } from '#constants'
 import generate_fantasy_league_schedule from '#libs-server/generate-fantasy-league-schedule.mjs'
@@ -162,11 +162,11 @@ describe('playoff format and division schedule', function () {
       expect(result.wildcard_tids).to.eql([1, 2, 3, 4])
     })
 
-    it('decides the division title on points for, not all play', function () {
+    it('decides a tied division title on all play, not points for', function () {
       // Two teams tied at 9-5 in division 1. tid 1 has the better all play
-      // record; tid 2 has scored more. compare_division_winner takes points
-      // for first, so tid 2 wins the division and takes the bye -- the seeding
-      // ladder alone would have handed it to tid 1.
+      // record; tid 2 has scored far more. The standings ladder decides a
+      // division title, and it breaks a head-to-head tie on all play before
+      // points for -- so tid 1 wins the division and takes the bye.
       const teams = [
         team(1, 1, {
           wins: 9,
@@ -194,7 +194,7 @@ describe('playoff format and division schedule', function () {
         bye_selection_method: 'all_play'
       })
 
-      expect(result.bye_tids).to.eql([2])
+      expect(result.bye_tids).to.eql([1])
     })
 
     // The full twelve-team shape: four division winners berthed, two of them on
@@ -363,11 +363,8 @@ describe('playoff format and division schedule', function () {
     })
   })
 
-  describe('compare_division_winner', function () {
+  describe('compare_at_large_berth', function () {
     const team = (overrides) => ({
-      wins: 0,
-      losses: 0,
-      ties: 0,
       all_play_wins: 0,
       all_play_losses: 0,
       all_play_ties: 0,
@@ -375,52 +372,24 @@ describe('playoff format and division schedule', function () {
       ...overrides
     })
 
-    it('orders on head-to-head record first', function () {
-      const better = team({ wins: 9, losses: 5, points_for: 100 })
-      const worse = team({ wins: 8, losses: 6, points_for: 9000 })
-      expect(compare_division_winner(better, worse)).to.be.below(0)
+    it('orders on points for, ignoring record entirely', function () {
+      const higher = team({ points_for: 1500, wins: 2, losses: 12 })
+      const lower = team({ points_for: 1400, wins: 12, losses: 2 })
+      expect(compare_at_large_berth(higher, lower)).to.be.below(0)
     })
 
-    it('breaks a record tie on points for BEFORE all play', function () {
-      // This is the inverse of compare_playoff_seed's tail and is the whole
-      // point of a separate comparator: a division title is resolved on points
-      // scored before reaching for a league-wide metric.
+    it('breaks a points for tie on all play', function () {
       const a = team({
-        wins: 8,
-        losses: 6,
-        points_for: 900,
-        all_play_wins: 10,
-        all_play_losses: 116
-      })
-      const b = team({
-        wins: 8,
-        losses: 6,
-        points_for: 100,
-        all_play_wins: 116,
-        all_play_losses: 10
-      })
-
-      expect(compare_division_winner(a, b)).to.be.below(0)
-      // The seeding ladder would rank them the other way round.
-      expect(compare_playoff_seed(a, b)).to.be.above(0)
-    })
-
-    it('falls through to all play when record and points for tie', function () {
-      const a = team({
-        wins: 8,
-        losses: 6,
-        points_for: 500,
+        points_for: 1500,
         all_play_wins: 90,
         all_play_losses: 36
       })
       const b = team({
-        wins: 8,
-        losses: 6,
-        points_for: 500,
+        points_for: 1500,
         all_play_wins: 40,
         all_play_losses: 86
       })
-      expect(compare_division_winner(a, b)).to.be.below(0)
+      expect(compare_at_large_berth(a, b)).to.be.below(0)
     })
   })
 
@@ -469,30 +438,69 @@ describe('playoff format and division schedule', function () {
   })
 
   describe('compare_playoff_seed', function () {
+    // all_play_losses matters: the ladder runs on All Play PERCENTAGE, so a
+    // fixture that sets only all_play_wins gives every team 1.000 and the term
+    // silently drops out.
     const team = (overrides) => ({
       wins: 0,
       losses: 0,
       ties: 0,
       all_play_wins: 0,
+      all_play_losses: 0,
+      all_play_ties: 0,
       points_for: 0,
       ...overrides
     })
 
     it('orders on head-to-head record first', function () {
-      const better = team({ wins: 9, losses: 5, all_play_wins: 40 })
-      const worse = team({ wins: 8, losses: 6, all_play_wins: 90 })
+      const better = team({
+        wins: 9,
+        losses: 5,
+        all_play_wins: 40,
+        all_play_losses: 86
+      })
+      const worse = team({
+        wins: 8,
+        losses: 6,
+        all_play_wins: 90,
+        all_play_losses: 36
+      })
       expect(compare_playoff_seed(better, worse)).to.be.below(0)
     })
 
-    it('breaks a record tie on all-play wins before points for', function () {
-      const a = team({ wins: 8, losses: 6, all_play_wins: 70, points_for: 100 })
-      const b = team({ wins: 8, losses: 6, all_play_wins: 60, points_for: 900 })
+    it('breaks a record tie on all play before points for', function () {
+      const a = team({
+        wins: 8,
+        losses: 6,
+        all_play_wins: 70,
+        all_play_losses: 56,
+        points_for: 100
+      })
+      const b = team({
+        wins: 8,
+        losses: 6,
+        all_play_wins: 60,
+        all_play_losses: 66,
+        points_for: 900
+      })
       expect(compare_playoff_seed(a, b)).to.be.below(0)
     })
 
-    it('breaks a full record and all-play tie on points for', function () {
-      const a = team({ wins: 8, losses: 6, all_play_wins: 70, points_for: 900 })
-      const b = team({ wins: 8, losses: 6, all_play_wins: 70, points_for: 100 })
+    it('breaks a full record and all play tie on points for', function () {
+      const a = team({
+        wins: 8,
+        losses: 6,
+        all_play_wins: 70,
+        all_play_losses: 56,
+        points_for: 900
+      })
+      const b = team({
+        wins: 8,
+        losses: 6,
+        all_play_wins: 70,
+        all_play_losses: 56,
+        points_for: 100
+      })
       expect(compare_playoff_seed(a, b)).to.be.below(0)
     })
 

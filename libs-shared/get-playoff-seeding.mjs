@@ -1,6 +1,5 @@
 import compare_playoff_seed from './compare-playoff-seed.mjs'
 import compare_all_play_seed from './compare-all-play-seed.mjs'
-import compare_division_winner from './compare-division-winner.mjs'
 import compare_at_large_berth from './compare-at-large-berth.mjs'
 
 export const BYE_CANDIDATE_POOLS = ['league', 'division_winners']
@@ -39,13 +38,13 @@ const at_large_comparators = {
  *      The whole field is then ordered on the standings ladder, so the
  *      guarantee admits a winner without promoting them past a better team.
  *
- * Four ladders are in play and they are deliberately different, because they
+ * Three ladders are in play and they are deliberately different, because they
  * answer different questions:
  *
- *   - winning a division: compare_division_winner (head-to-head first)
- *   - ranking the winners for a bye: bye_selection_method
+ *   - ordering the standings, and with it deciding a division title:
+ *     compare_playoff_seed -- head-to-head, then All Play, then points for
+ *   - ranking the bye candidates: bye_selection_method
  *   - taking an at-large berth: at_large_selection_method
- *   - ordering the standings: compare_playoff_seed
  *
  * @param {Object} params
  * @param {Array} params.teams - flat objects with tid, div, and the stat keys
@@ -106,21 +105,17 @@ const get_playoff_seeding = ({
   // simply capped at the teams that exist.
   const by_record = [...teams].sort(compare_playoff_seed)
 
-  // A division winner is its division's best team on compare_division_winner,
-  // which is NOT the seeding ladder -- it breaks a head-to-head tie on points
-  // for before All Play. Group first and sort within each division rather than
-  // reading winners off by_record, or the wrong tiebreaker decides the title.
-  const teams_by_division = new Map()
-  for (const team of teams) {
-    if (!teams_by_division.has(team.div)) {
-      teams_by_division.set(team.div, [])
+  // A division winner is its division's best team on the standings ladder, so
+  // the first team seen per division walking by_record is that division's
+  // winner, and the winners come out in ladder order.
+  const division_winners = []
+  const divisions_seen = new Set()
+  for (const team of by_record) {
+    if (!divisions_seen.has(team.div)) {
+      divisions_seen.add(team.div)
+      division_winners.push(team)
     }
-    teams_by_division.get(team.div).push(team)
   }
-
-  const division_winners = [...teams_by_division.values()].map(
-    (division_teams) => [...division_teams].sort(compare_division_winner)[0]
-  )
 
   const bye_candidates =
     bye_candidate_pool === 'division_winners' ? division_winners : by_record
