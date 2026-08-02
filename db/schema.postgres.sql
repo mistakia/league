@@ -68,6 +68,7 @@ DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
 DROP INDEX IF EXISTS public.user_data_view_favorites_user_id_idx;
 DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
+DROP INDEX IF EXISTS public.roster_asset_transformation_trade_uid_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_target_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_source_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_lid_occurred_idx;
@@ -678,6 +679,7 @@ DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
 DROP TABLE IF EXISTS public.waivers;
 DROP TABLE IF EXISTS public.waiver_releases;
+DROP VIEW IF EXISTS public.view_trade_asset_flow;
 DROP VIEW IF EXISTS public.view_roster_asset_lineage_walk;
 DROP TABLE IF EXISTS public.users_teams;
 DROP TABLE IF EXISTS public.users_sources;
@@ -25964,7 +25966,8 @@ CREATE TABLE public.roster_asset_transformation (
     source_share numeric(4,3),
     target_share numeric(4,3),
     audit_corrected boolean DEFAULT false NOT NULL,
-    correction_note text
+    correction_note text,
+    trade_uid integer
 );
 
 
@@ -25994,6 +25997,13 @@ COMMENT ON COLUMN public.roster_asset_transformation.source_share IS 'This sourc
 --
 
 COMMENT ON COLUMN public.roster_asset_transformation.target_share IS 'This target-row share in [0,1] of its basket; NULL for terminations with no target (release, auto_cap_release, expired_to_fa, failed_poach_sanctuary, nullified_decommission).';
+
+
+--
+-- Name: COLUMN roster_asset_transformation.trade_uid; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_transformation.trade_uid IS 'trades.uid for TRADE-type (transformation_type=1) edges; NULL for every other transformation type. Populated by the walker rather than joined on occurred_at, which is ambiguous when two trades are accepted in the same second.';
 
 
 --
@@ -26701,23 +26711,23 @@ CREATE TABLE public.users_teams (
 --
 
 CREATE VIEW public.view_roster_asset_lineage_walk AS
- WITH RECURSIVE walk AS (
-         SELECT h.holding_id AS originating_holding_id,
-            h.holding_id AS current_holding_id,
+ WITH RECURSIVE root AS (
+         SELECT h.holding_id,
+                CASE
+                    WHEN (h.salary_paid > 0) THEN 'salary'::text
+                    WHEN (EXISTS ( SELECT 1
+                       FROM public.roster_asset_transformation t
+                      WHERE ((t.target_holding_id = h.holding_id) AND (t.transformation_type = 15)))) THEN 'endowment'::text
+                    ELSE 'derived'::text
+                END AS root_kind
+           FROM public.roster_asset_holding h
+        ), walk AS (
+         SELECT r.holding_id AS originating_holding_id,
+            r.holding_id AS current_holding_id,
             1.0 AS cumulative_weight,
             0 AS depth,
-            'salary'::text AS root_kind
-           FROM public.roster_asset_holding h
-          WHERE (h.salary_paid > 0)
-        UNION ALL
-         SELECT h.holding_id,
-            h.holding_id,
-            1.0 AS "numeric",
-            0,
-            'endowment'::text AS text
-           FROM (public.roster_asset_holding h
-             JOIN public.roster_asset_transformation t ON ((t.target_holding_id = h.holding_id)))
-          WHERE (t.transformation_type = 15)
+            r.root_kind
+           FROM root r
         UNION ALL
          SELECT w.originating_holding_id,
             t.target_holding_id,
@@ -26740,7 +26750,43 @@ CREATE VIEW public.view_roster_asset_lineage_walk AS
 -- Name: VIEW view_roster_asset_lineage_walk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON VIEW public.view_roster_asset_lineage_walk IS 'Recursive walk anchored at salary-bearing holdings (root_kind=salary) and standings-endowed picks (root_kind=endowment). Composite edge weight along a path = product of target_share values along the chain (source_share is the same fraction one hop earlier; multiplying both double-counts). Depth capped at 20.';
+COMMENT ON VIEW public.view_roster_asset_lineage_walk IS 'Transitive closure of the lineage graph rooted at every holding. root_kind labels the ORIGIN holding: salary (salary-bearing), endowment (standings-allocated pick), or derived (minted by a trade, conversion, or other transformation). Filter root_kind IN (''salary'',''endowment'') for cost-attribution walks; leave unfiltered to walk forward from an arbitrary holding such as one acquired in a trade. Edge weight along a path = product of target_share (source_share is the same fraction one hop earlier; multiplying both double-counts). Depth capped at 20.';
+
+
+--
+-- Name: view_trade_asset_flow; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.view_trade_asset_flow AS
+ SELECT t.lid,
+    t.trade_uid,
+    t.transformation_id,
+    t.occurred_at,
+    t.source_holding_id,
+    t.target_holding_id,
+    src.tid AS from_tid,
+    tgt.tid AS to_tid,
+    tgt.asset_type,
+    tgt.player_id,
+    tgt.pick_year,
+    tgt.pick_round,
+    tgt.pick_original_owner_tid,
+    src.composite_market_value_at_termination AS market_value_at_trade,
+    src.salary_paid AS salary_paid_at_trade,
+    src.realized_pts_added_net_through_termination AS pts_added_before_trade,
+    tgt.terminated_by AS post_trade_terminated_by,
+    tgt.period_end AS post_trade_period_end
+   FROM ((public.roster_asset_transformation t
+     JOIN public.roster_asset_holding src ON ((src.holding_id = t.source_holding_id)))
+     JOIN public.roster_asset_holding tgt ON ((tgt.holding_id = t.target_holding_id)))
+  WHERE (t.transformation_type = 1);
+
+
+--
+-- Name: VIEW view_trade_asset_flow; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON VIEW public.view_trade_asset_flow IS 'One row per trade leg: which team gave up which asset to whom, and what that asset was worth when it moved. market_value_at_trade is the source holding''s termination snapshot (its value at the moment it left). Join target_holding_id to view_roster_asset_lineage_walk.originating_holding_id to follow what the asset later became.';
 
 
 --
@@ -44241,6 +44287,13 @@ CREATE INDEX roster_asset_transformation_target_idx ON public.roster_asset_trans
 
 
 --
+-- Name: roster_asset_transformation_trade_uid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX roster_asset_transformation_trade_uid_idx ON public.roster_asset_transformation USING btree (trade_uid) WHERE (trade_uid IS NOT NULL);
+
+
+--
 -- Name: trades_slots_trade_uid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -59353,6 +59406,13 @@ GRANT SELECT ON TABLE public.users_teams TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.view_roster_asset_lineage_walk TO league_reader;
+
+
+--
+-- Name: TABLE view_trade_asset_flow; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.view_trade_asset_flow TO league_reader;
 
 
 --

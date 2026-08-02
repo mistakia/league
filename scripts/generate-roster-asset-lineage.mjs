@@ -197,6 +197,7 @@ const generate_roster_asset_lineage = async ({
     transformation_id: t.transformation_id,
     lid: t.lid,
     transaction_id: t.transaction_id,
+    trade_uid: t.trade_uid ?? null,
     transformation_type: t.transformation_type,
     occurred_at: t.occurred_at,
     source_holding_id: t.source_draft_id

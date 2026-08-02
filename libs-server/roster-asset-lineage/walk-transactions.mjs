@@ -215,12 +215,14 @@ const walk_transactions = async ({ lid }) => {
     target_draft_id,
     source_share,
     target_share,
-    transaction_id = null
+    transaction_id = null,
+    trade_uid = null
   }) => {
     ctx.transformation_drafts.push({
       transformation_id,
       lid,
       transaction_id,
+      trade_uid,
       transformation_type,
       occurred_at,
       source_draft_id,
@@ -604,7 +606,8 @@ const apply_trade = ({
       target_draft_id: target_drafts[i],
       source_share: 1.0,
       target_share: 1.0,
-      transaction_id: null
+      transaction_id: null,
+      trade_uid: event.trade_uid ?? null
     })
   }
 }
@@ -905,6 +908,7 @@ const build_event_stream = async ({ lid }) => {
       kind: 'trade',
       occurred_at: new Date(trade.accepted * 1000),
       year: trade.year,
+      trade_uid: trade.uid,
       legs
     })
   }
