@@ -373,6 +373,26 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       pid = `KTCPICK-${item.playerID}`
       const now = dayjs().toDate()
       if (!dry) {
+        // The (year, round, slot) triple is this pid's identity, not an
+        // attribute of it: every keeptradecut_valuations row ever recorded
+        // under this pid is a quote for that specific pick. Merging the triple
+        // would let a vendor id reused for a later class silently relabel a
+        // retired class's whole price history -- and a retired class is
+        // unrecoverable, because KTC stops publishing it and nothing else has
+        // it. Rows are never deleted here, so those series are the only record
+        // that survives the class.
+        const existing = await db('keeptradecut_pick').where('pid', pid).first()
+        if (
+          existing &&
+          (existing.season_year !== meta.year ||
+            existing.round !== meta.round ||
+            existing.slot !== meta.slot)
+        ) {
+          log(
+            `keeptradecut pick id ${item.playerID} now reads "${keeptradecut_player.playerName}" (${meta.year} R${meta.round} slot ${meta.slot}) but is stored as ${existing.season_year} R${existing.round} slot ${existing.slot}; refusing to relabel its price history`
+          )
+          continue
+        }
         await db('keeptradecut_pick')
           .insert({
             pid,
@@ -385,13 +405,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
             updated_at: now
           })
           .onConflict('pid')
-          .merge([
-            'ktc_player_name',
-            'season_year',
-            'round',
-            'slot',
-            'updated_at'
-          ])
+          .merge(['ktc_player_name', 'updated_at'])
       }
     } else {
       is_rdp = false
