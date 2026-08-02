@@ -8,8 +8,29 @@ import SleeperAdapter from '#libs-server/external-fantasy-leagues/adapters/sleep
 import EspnAdapter from '#libs-server/external-fantasy-leagues/adapters/espn.mjs'
 import { schema_validator } from '#libs-server/external-fantasy-leagues/utils/schema-validator.mjs'
 
+// These two tests fetch from the live Sleeper and ESPN APIs, so they assert
+// against vendor contracts rather than against this repo. That makes them
+// useful (they catch upstream shape drift that no fixture can) and unfit to
+// gate CI: a slow or unreachable vendor blows the mocha budget and fails
+// master on a commit that had nothing to do with it -- signals #123521,
+// #123734 and #123790 were all this, on three unrelated commits.
+//
+// The adapters' canonical-format mapping is covered offline by
+// external-fantasy-leagues-sleeper-integration.spec.mjs and
+// external-fantasy-leagues-integration.spec.mjs, which drive the same code
+// paths from test/fixtures/external-fantasy-leagues. What is lost by skipping
+// here is only the live contract check, so run it deliberately:
+//
+//   EXTERNAL_LEAGUE_LIVE_TESTS=1 yarn test --reporter min \
+//     test/external-fantasy-leagues-canonical-format-adapters.spec.mjs
 describe('external fantasy leagues canonical format adapters (public leagues)', function () {
   this.timeout(45000)
+
+  before(function () {
+    if (!process.env.EXTERNAL_LEAGUE_LIVE_TESTS) {
+      this.skip()
+    }
+  })
 
   it('sleeper: fetches and standardizes league data', async () => {
     const result = await fetch_external_league_data({

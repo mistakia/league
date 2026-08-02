@@ -282,9 +282,10 @@ export default class AuthenticatedApiClient {
 
     const full_url = url.startsWith('http') ? url : `${this.base_url}${url}`
 
-    // Build request options
+    // Build request options. The per-attempt deadline is applied in
+    // _make_request_with_retries as an AbortSignal -- native fetch ignores a
+    // `timeout` option, which is what node-fetch honored before 32019f35f.
     const request_options = {
-      timeout: this.timeout,
       headers: {
         'User-Agent': 'fantasy-league-sync/2.0 (ffscrapr-compatible)',
         Accept: 'application/json',
@@ -323,7 +324,16 @@ export default class AuthenticatedApiClient {
 
     for (let attempt = 0; attempt < this.retry_config.max_attempts; attempt++) {
       try {
-        const response = await fetch(url, options)
+        // A fresh deadline per attempt -- an AbortSignal starts counting down
+        // when it is created, so one built outside the loop would already be
+        // aborted by the time a retry ran.
+        const deadline = AbortSignal.timeout(this.timeout)
+        const response = await fetch(url, {
+          ...options,
+          signal: options.signal
+            ? AbortSignal.any([options.signal, deadline])
+            : deadline
+        })
 
         if (!response.ok) {
           const error_data = await this._parse_error_response(response)
