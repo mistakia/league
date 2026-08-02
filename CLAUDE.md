@@ -71,7 +71,23 @@ The tunnel's local port comes from `config.databases.instances.league.tunnel.loc
 
 **Testing:**
 
-- Individual tests: `yarn test --reporter min test/auth.spec.mjs`
+Nearly every spec is an integration test against a real Postgres, so the suite needs a database before it will run at all. `compose.test.yaml` ships one:
+
+```bash
+yarn test:db:up     # throwaway Postgres 16 on :5433, waits until healthy
+yarn test:local     # starts the DB and runs the full suite against it
+yarn test:db:down   # stop and remove the container
+```
+
+**A bare `yarn test` with no database fails with `role "league_test" does not exist`.** That is a missing test DB, NOT a broken or unrunnable suite — start it with `yarn test:db:up` rather than concluding the tests cannot run here. `test/global.mjs` drops all tables and reloads `db/schema.postgres.sql` on every run, so schema edits are exercised by simply running the suite.
+
+To run one spec against an already-running DB:
+
+```bash
+LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=5433 TZ=America/New_York NODE_ENV=test TEST=all \
+  npx mocha --exit --reporter min --require test/global.mjs test/trade.spec.mjs
+```
+
 - Test patterns: `yarn test --reporter min test/common.*.spec.mjs`
 - Grep patterns: `yarn test --reporter min --grep "should login successfully"`
 
