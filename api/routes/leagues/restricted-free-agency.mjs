@@ -21,6 +21,12 @@ const router = express.Router({ mergeParams: true })
  *       nomination's processing timestamp, not a permission check, so an
  *       unresolved auction cannot appear in this response for any caller.
  *
+ *       Conditional releases are the exception to that disclosure. A losing
+ *       bid's releases never happened -- they name the players that team was
+ *       willing to cut, which is live strategy rather than history -- so they
+ *       are returned empty unless the bid won or belongs to the caller's own
+ *       team for that season.
+ *
  *       Cancelled bids are omitted: a withdrawn bid never settled and has no
  *       outcome to report.
  *     parameters:
@@ -124,9 +130,37 @@ router.get('/?', async (req, res) => {
       .whereNull('restricted_free_agency_bids.cancelled')
       .orderBy('restricted_free_agency_bids.bid', 'desc')
 
+    // Resolved per season: a manager who held a different team in 2021 sees
+    // that team's releases in the 2021 history, not their current team's.
+    const user_team_ids = new Set()
+    if (req.auth && req.auth.userId) {
+      const user_teams = await db('users_teams')
+        .select('users_teams.tid')
+        .join('teams', function () {
+          this.on('users_teams.tid', '=', 'teams.uid')
+          this.andOn('users_teams.year', '=', 'teams.year')
+        })
+        .where('users_teams.userid', req.auth.userId)
+        .where('users_teams.year', year)
+        .where('teams.lid', leagueId)
+      for (const user_team of user_teams) {
+        user_team_ids.add(user_team.tid)
+      }
+    }
+
+    const winning_bid_ids = new Set(
+      nominations.map((nomination) => nomination.winning_bid_id).filter(Boolean)
+    )
+
+    const visible_release_bid_ids = bids
+      .filter(
+        (bid) => winning_bid_ids.has(bid.uid) || user_team_ids.has(bid.tid)
+      )
+      .map((bid) => bid.uid)
+
     const releases = await db('restricted_free_agency_releases').whereIn(
       'restricted_free_agency_bid_id',
-      bids.map((b) => b.uid)
+      visible_release_bid_ids
     )
 
     const releases_by_bid_id = new Map()

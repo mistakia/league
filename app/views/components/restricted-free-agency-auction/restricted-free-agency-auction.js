@@ -79,13 +79,20 @@ export default function RestrictedFreeAgencyAuction({ auction }) {
           />
         </div>
         {/* Rendered even when empty so every row occupies the same four grid
-            columns and the card keeps one alignment down its whole height. */}
+            columns and the card keeps one alignment down its whole height. A
+            losing bid's releases are private strategy and the API withholds
+            them, so this column is empty for every bid but the winner and the
+            caller's own. */}
         <div className='restricted-free-agency-auction__releases'>
           {Boolean(releases && releases.size) && (
             <>
               <span
                 className='restricted-free-agency-auction__releases-label'
-                title='Players this team would have released to make room for the bid'
+                title={
+                  is_winner
+                    ? 'Players this team released to make room for the winning bid'
+                    : 'Players this team would have released to make room for the bid'
+                }
               >
                 Releases
               </span>

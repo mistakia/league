@@ -7,6 +7,7 @@ import server from '#api'
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
 import { current_season, restricted_free_agency_bid_outcomes } from '#constants'
+import { user1 } from './fixtures/token.mjs'
 import { selectPlayer } from './utils/index.mjs'
 import {
   insert_restricted_free_agency_bid,
@@ -156,6 +157,106 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
     expect(losing_bid.outcome).to.equal(
       restricted_free_agency_bid_outcomes.MATCHED
     )
+  })
+
+  const insert_release = async ({ bid_id, pid }) =>
+    knex('restricted_free_agency_releases').insert({
+      restricted_free_agency_bid_id: bid_id,
+      pid
+    })
+
+  // Three bids on one auction: the winner, the caller's own losing bid, and a
+  // rival's losing bid, each with a release of its own. Returned so a test can
+  // assert on all three from a single response.
+  const seed_auction_with_releases = async () => {
+    const player = await selectPlayer()
+    const exclude_pids = [player.pid]
+    const winner_release = await selectPlayer({ exclude_pids })
+    exclude_pids.push(winner_release.pid)
+    const own_release = await selectPlayer({ exclude_pids })
+    exclude_pids.push(own_release.pid)
+    const rival_release = await selectPlayer({ exclude_pids })
+
+    const original_team_id = 1
+    const processed = Math.round(Date.now() / 1000)
+
+    const winning_uid = await insert_restricted_free_agency_bid({
+      pid: player.pid,
+      lid: league_id,
+      tid: 2,
+      bid: 30,
+      original_team_id,
+      announced_at: processed - 3600,
+      processed,
+      succ: true,
+      outcome: restricted_free_agency_bid_outcomes.WON
+    })
+
+    // team 1 belongs to user1 in the league fixture
+    const own_uid = await insert_restricted_free_agency_bid({
+      pid: player.pid,
+      lid: league_id,
+      tid: original_team_id,
+      bid: 20,
+      original_team_id,
+      processed,
+      succ: false,
+      outcome: restricted_free_agency_bid_outcomes.OUTBID
+    })
+
+    const rival_uid = await insert_restricted_free_agency_bid({
+      pid: player.pid,
+      lid: league_id,
+      tid: 3,
+      bid: 12,
+      original_team_id,
+      processed,
+      succ: false,
+      outcome: restricted_free_agency_bid_outcomes.OUTBID
+    })
+
+    await insert_release({ bid_id: winning_uid, pid: winner_release.pid })
+    await insert_release({ bid_id: own_uid, pid: own_release.pid })
+    await insert_release({ bid_id: rival_uid, pid: rival_release.pid })
+
+    await resolve_auction({
+      pid: player.pid,
+      original_team_id,
+      winning_bid_id: winning_uid
+    })
+
+    return { winner_release, own_release, rival_release }
+  }
+
+  it('returns the winning bid releases and withholds every losing one', async () => {
+    // A losing bid's releases never happened -- they name the players that team
+    // was willing to cut, which is live strategy rather than history.
+    const { winner_release } = await seed_auction_with_releases()
+
+    const res = await chai_request
+      .execute(server)
+      .get(`/api/leagues/${league_id}/restricted-free-agency`)
+
+    res.should.have.status(200)
+    const bids = res.body[0].bids
+    expect(bids.find((b) => b.tid === 2).releases).to.eql([winner_release.pid])
+    expect(bids.find((b) => b.tid === 1).releases).to.eql([])
+    expect(bids.find((b) => b.tid === 3).releases).to.eql([])
+  })
+
+  it('returns the caller own losing bid releases', async () => {
+    const { winner_release, own_release } = await seed_auction_with_releases()
+
+    const res = await chai_request
+      .execute(server)
+      .get(`/api/leagues/${league_id}/restricted-free-agency`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    res.should.have.status(200)
+    const bids = res.body[0].bids
+    expect(bids.find((b) => b.tid === 2).releases).to.eql([winner_release.pid])
+    expect(bids.find((b) => b.tid === 1).releases).to.eql([own_release.pid])
+    expect(bids.find((b) => b.tid === 3).releases).to.eql([])
   })
 
   it('omits an auction that has not been processed', async () => {
