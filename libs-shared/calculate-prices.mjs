@@ -35,8 +35,19 @@ const calculatePrices = ({ total_pts_added, cap, players, week }) => {
   const pts_added_salary_rate = cap / total_pts_added
 
   for (const player of players) {
-    const market_salary =
-      Math.round(pts_added_salary_rate * player.pts_added[week]) || 0
+    // Floor here, once, rather than on the way out. A weekly pts_added is
+    // signed and the season path carries a -999 sentinel for anyone who was
+    // never priced, so the raw product is negative for a large share of the
+    // board -- and salary_diff below consumed that negative before anything
+    // floored it. That happens to be harmless today (a negative market_salary
+    // implies a negative pts_added, which drives salary_adj_pts_added negative
+    // under either ordering, and it is floored at zero too), but only by an
+    // algebraic coincidence of the current formula. Flooring at the definition
+    // makes the value mean the same thing everywhere it is read.
+    const market_salary = Math.max(
+      Math.round(pts_added_salary_rate * player.pts_added[week]) || 0,
+      0
+    )
     const salary_diff =
       typeof player.value === 'undefined' || player.value === null
         ? 0
@@ -54,7 +65,7 @@ const calculatePrices = ({ total_pts_added, cap, players, week }) => {
     if (!player.market_salary) {
       player.market_salary = {}
     }
-    player.market_salary[week] = Math.max(market_salary, 0)
+    player.market_salary[week] = market_salary
   }
 
   return players

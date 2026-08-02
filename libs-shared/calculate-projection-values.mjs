@@ -24,6 +24,18 @@ import calculate_distributional_baselines, {
 // starting slots, subtract the worst starter. Deliberately SIGNED: a weekly
 // pts_added is a start/sit signal and its negative range is read directly.
 //
+// The two paths also produce different SETS of baselines, and that is the point
+// rather than an omission. `available` -- the best player nobody has rostered --
+// is a roster-aware question, and calculateBaselines answers it as a by-product
+// of the same slot fill that gives it `starter`. The season board has no such
+// fill: replacement level there is an expectation over drawn seasons of the
+// league in a vacuum, so a season `available` would have had to come from a
+// SECOND, roster-aware pass answering a different question under the same week
+// key. It did, briefly, and nothing read it -- every consumer of `available`
+// iterates fantasy_weeks, which starts at 1 (selected-player-value's bench+
+// chart and the SPA's lineup-contribution saga). The season pass is now
+// distributional only.
+//
 // Returns the total positive pts_added (the denominator calculate-prices divides
 // the discretionary cap by) and the week's baselines in a shape ready to
 // persist. Writes pts_added onto the player rows as a side effect, which is how
@@ -34,28 +46,9 @@ const calculate_projection_values = ({
   rosterRows = [],
   week
 }) => {
-  // The 'available' baseline -- the best player nobody has -- is a roster-aware
-  // question and is unchanged by this rebuild, so it comes from the point-
-  // estimate pass at every week including the season board.
-  const point_estimate_baselines = calculateBaselines({
-    players,
-    league,
-    rosterRows,
-    week
-  })
-
   const baselines = {}
   for (const position of fantasy_positions) {
-    const available = point_estimate_baselines[position].available
-    baselines[position] = {
-      available: available
-        ? {
-            pid: available.pid,
-            points: (available.points[week] || {}).total ?? null
-          }
-        : null,
-      starter: null
-    }
+    baselines[position] = { available: null, starter: null }
   }
 
   if (week === season_projection_week) {
@@ -79,6 +72,13 @@ const calculate_projection_values = ({
     return { total_pts_added, baselines }
   }
 
+  const point_estimate_baselines = calculateBaselines({
+    players,
+    league,
+    rosterRows,
+    week
+  })
+
   const total_pts_added = calculateValues({
     players,
     baselines: point_estimate_baselines,
@@ -86,7 +86,13 @@ const calculate_projection_values = ({
   })
 
   for (const position of fantasy_positions) {
-    const starter = point_estimate_baselines[position].starter
+    const { available, starter } = point_estimate_baselines[position]
+    baselines[position].available = available
+      ? {
+          pid: available.pid,
+          points: (available.points[week] || {}).total ?? null
+        }
+      : null
     baselines[position].starter = starter
       ? { pid: starter.pid, points: (starter.points[week] || {}).total ?? null }
       : null

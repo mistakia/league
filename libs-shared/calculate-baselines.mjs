@@ -8,6 +8,18 @@ import sum from './sum.mjs'
 import get_eligible_slots from './get-eligible-slots.mjs'
 import getPlayerCountBySlot from './get-player-count-by-slot.mjs'
 
+// Replacement level for a position is the worst starter AT that position --
+// the marginal player a team would have to field there. Only players whose own
+// primary_position matches are candidates.
+//
+// This used to take the last entry of each eligible slot's list and compare
+// those, which let a player of a DIFFERENT position set the baseline: a WR
+// seated in the superflex slot is in one of QB's eligible slots, and if he
+// scores below every starting QB he became the QB baseline. Both flex slots
+// have this shape, so it reached every position except DST. The season board
+// keys its baseline on the seated player's own position already
+// (calculate-distributional-baselines.mjs), so this brings the weekly path onto
+// the same definition rather than inventing one.
 const getWorseStarterForPosition = ({
   position,
   groupedStarters,
@@ -20,16 +32,12 @@ const getWorseStarterForPosition = ({
   const eligibleSlots = get_eligible_slots({ pos: position, league })
   for (const slot of eligibleSlots) {
     const slotId = roster_slot_types[slot]
-    const players = groupedStarters[slotId]
-    const worst = players[players.length - 1]
-    if (worst) {
-      const worst_player_week_points = (worst.points[week] || {}).total || null
-      if (
-        worst_player_week_points !== null &&
-        worst_player_week_points < minTotal
-      ) {
-        minTotal = worst_player_week_points
-        selectedPlayer = worst
+    for (const starter of groupedStarters[slotId]) {
+      if (starter.primary_position !== position) continue
+      const starter_week_points = (starter.points[week] || {}).total || null
+      if (starter_week_points !== null && starter_week_points < minTotal) {
+        minTotal = starter_week_points
+        selectedPlayer = starter
       }
     }
   }
