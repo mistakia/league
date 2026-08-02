@@ -107,7 +107,7 @@ class PlayerRow extends Player {
           </div>
           {is_logged_in && (
             <div className='player__row-tag'>
-              <PlayerTag tag={player_map.get('tag')} />
+              <PlayerTag player_map={player_map} />
             </div>
           )}
           {is_logged_in && (

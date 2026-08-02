@@ -144,54 +144,42 @@ export default async function ({
     }
   }
 
-  if (current_season.week === 0) {
-    const restricted_free_agency_tagged_players = rosters
-      .filter((r) => r.week === 0)
-      .flatMap((r) =>
-        r.players.filter(
-          (p) => p.tag === player_tag_types.RESTRICTED_FREE_AGENCY
-        )
+  // Annotate every roster week, not just week 0. The client hides a restricted
+  // free agency tag from teams other than the one holding it until the
+  // nomination is announced, so `announced_at` has to travel with the tag for
+  // as long as the tag itself is on a roster — which is the whole season.
+  const restricted_free_agency_tagged_players = rosters.flatMap((r) =>
+    r.players.filter((p) => p.tag === player_tag_types.RESTRICTED_FREE_AGENCY)
+  )
+  if (restricted_free_agency_tagged_players.length) {
+    // Read off the nomination: the previous form selected bid rows and
+    // filtered `player_tid = tid` to isolate the original team's own tag,
+    // which is exactly the fact the nomination now owns.
+    const nominations = await db('restricted_free_agency_nominations')
+      .select(
+        'player_id',
+        'original_team_id',
+        'nominated_at',
+        'announced_at',
+        'processed_at'
       )
-    if (restricted_free_agency_tagged_players.length) {
-      // Read off the nomination: the previous form selected bid rows and
-      // filtered `player_tid = tid` to isolate the original team's own tag,
-      // which is exactly the fact the nomination now owns.
-      const nominations = await db('restricted_free_agency_nominations')
-        .select(
-          'player_id',
-          'original_team_id',
-          'nominated_at',
-          'announced_at',
-          'processed_at'
-        )
-        .where({
-          league_id: lid,
-          season_year: current_season.year
-        })
-        .whereIn(
-          'player_id',
-          restricted_free_agency_tagged_players.map((p) => p.pid)
-        )
+      .where({
+        league_id: lid,
+        season_year: year
+      })
+      .whereIn(
+        'player_id',
+        restricted_free_agency_tagged_players.map((p) => p.pid)
+      )
 
-      for (const roster of rosters) {
-        if (roster.week !== 0) continue
+    for (const player of restricted_free_agency_tagged_players) {
+      const nomination = nominations.find((n) => n.player_id === player.pid)
 
-        for (const player of roster.players) {
-          if (player.tag === player_tag_types.RESTRICTED_FREE_AGENCY) {
-            const nomination = nominations.find(
-              (n) => n.player_id === player.pid
-            )
-
-            if (nomination) {
-              player.restricted_free_agency_tag_processed =
-                nomination.processed_at
-              player.restricted_free_agency_tag_announced =
-                nomination.announced_at
-              player.restricted_free_agency_original_team =
-                nomination.original_team_id
-            }
-          }
-        }
+      if (nomination) {
+        player.restricted_free_agency_tag_processed = nomination.processed_at
+        player.restricted_free_agency_tag_announced = nomination.announced_at
+        player.restricted_free_agency_original_team =
+          nomination.original_team_id
       }
     }
   }

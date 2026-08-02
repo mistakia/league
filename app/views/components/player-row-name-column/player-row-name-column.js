@@ -64,7 +64,7 @@ export default function PlayerRowNameColumn({
         )}
         <NFLTeam team={nfl_team} />
       </div>
-      {is_logged_in && tag && <PlayerTag tag={tag} />}
+      {is_logged_in && tag && <PlayerTag player_map={player_map} />}
       {is_logged_in && (
         <div className='player__row-name-column-action actions'>
           {Boolean(is_league_hosted) && (

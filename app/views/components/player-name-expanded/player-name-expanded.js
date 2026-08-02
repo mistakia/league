@@ -160,7 +160,7 @@ class PlayerNameExpanded extends Player {
               slot === roster_slot_types.PSDP) && (
               <PlayerLabel label='P' description='Protected Practice Squad' />
             )}
-            <PlayerTag tag={player_map.get('tag')} />
+            <PlayerTag player_map={player_map} />
           </div>
           <div className='player__name-expanded-row'>
             <Position pos={player_map.get('primary_position')} />

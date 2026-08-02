@@ -127,10 +127,7 @@ export default function PlayerName({
           <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
         )}
         <PlayerStatus player_map={player_map} />
-        <PlayerTag
-          tag={player_map.get('tag')}
-          reserve_eligible={reserve_eligible}
-        />
+        <PlayerTag {...{ player_map, reserve_eligible }} />
       </div>
     </>
   )

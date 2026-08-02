@@ -120,7 +120,9 @@ export default function LeagueHomePage({
       )
   }
 
-  const restricted_free_agency_items = []
+  // Only announced restricted free agents and this team's own nominee are
+  // listed. A tag that has not been announced is private to the team holding
+  // it, so there is no league-wide roster of pending tags here.
   const active_free_agent_items = []
   const nominated_free_agent_items = []
   restricted_free_agency_players.forEach((player_map, index) => {
@@ -130,10 +132,9 @@ export default function LeagueHomePage({
     }
 
     const is_announced = player_map.get('restricted_free_agency_tag_announced')
-    const is_active = !is_processed && is_announced
     const is_nominated = player_map.get('restricted_free_agency_tag_nominated')
 
-    if (is_active) {
+    if (is_announced) {
       active_free_agent_items.push(
         <PlayerRoster
           key={index}
@@ -144,15 +145,6 @@ export default function LeagueHomePage({
       )
     } else if (is_nominated) {
       nominated_free_agent_items.push(
-        <PlayerRoster
-          key={index}
-          player_map={player_map}
-          isRestrictedFreeAgency
-          {...{ percentiles }}
-        />
-      )
-    } else {
-      restricted_free_agency_items.push(
         <PlayerRoster
           key={index}
           player_map={player_map}
@@ -258,17 +250,6 @@ export default function LeagueHomePage({
             />
           </Grid>
         )}
-        {is_before_restricted_free_agency_end &&
-          Boolean(restricted_free_agency_players.size) && (
-            <Grid item xs={12}>
-              <DashboardPlayersTable
-                title='Restricted Free Agents'
-                items={restricted_free_agency_items}
-                isRestrictedFreeAgency
-                {...{ percentiles }}
-              />
-            </Grid>
-          )}
         {is_before_restricted_free_agency_end && (
           <Grid item xs={12}>
             <RestrictedFreeAgencySchedule />
